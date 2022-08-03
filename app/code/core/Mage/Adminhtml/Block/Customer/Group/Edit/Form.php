@@ -64,6 +64,41 @@ class Mage_Adminhtml_Block_Customer_Group_Edit_Form extends Mage_Adminhtml_Block
             ]
         );
 
+        // show attribute set fields for all groups except not logged in
+        if (is_null($customerGroup->getId()) || (int)$customerGroup->getId() !== Mage_Customer_Model_Group::NOT_LOGGED_IN_ID) {
+
+            $setsCustomer = Mage::getResourceModel('eav/entity_attribute_set_collection')
+                          ->setEntityTypeFilter(Mage::getResourceModel('customer/customer')->getEntityType()->getId())
+                          ->setOrder('attribute_set_name', 'asc')
+                          ->load()
+                          ->toOptionArray();
+
+            $fieldset->addField('customer_attribute_set_id', 'select', array(
+                'name'  => 'customer_attribute_set',
+                'label' => Mage::helper('customer')->__('Customer Attribute Set'),
+                'title' => Mage::helper('customer')->__('Customer Attribute Set'),
+                'class' => 'required-entry',
+                'required' => true,
+                'values' => $setsCustomer
+            ));
+
+            $setsAddress = Mage::getResourceModel('eav/entity_attribute_set_collection')
+                         ->setEntityTypeFilter(Mage::getResourceModel('customer/address')->getEntityType()->getId())
+                         ->setOrder('attribute_set_name', 'asc')
+                         ->load()
+                         ->toOptionArray();
+
+            $fieldset->addField('customer_address_attribute_set_id', 'select', array(
+                'name'  => 'customer_address_attribute_set',
+                'label' => Mage::helper('customer')->__('Customer Address Attribute Set'),
+                'title' => Mage::helper('customer')->__('Customer Address Attribute Set'),
+                'class' => 'required-entry',
+                'required' => true,
+                'values' => $setsAddress
+            ));
+
+        }
+
         if (!is_null($customerGroup->getId())) {
             // If edit add id
             $form->addField(
