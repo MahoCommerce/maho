@@ -1,6 +1,6 @@
 {
-    "name": "openmage/magento-lts",
-    "description": "A fork of Magento-1 that is accepting bug fixes (backward compatible, drop in replacement for official Magento)",
+    "name": "mahocommerce/maho",
+    "description": "",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
@@ -50,38 +50,6 @@
     },
     "minimum-stability": "dev",
     "prefer-stable" : true,
-    "authors": [
-        {
-            "name": "Lee Saferite",
-            "email": "lee.saferite@openmage.org",
-            "role": "Maintainer"
-        },
-        {
-            "name": "Daniel Fahlke aka Flyingmana",
-            "email": "flyingmana@googlemail.com",
-            "role": "Maintainer"
-        },
-        {
-            "name": "David Robinson",
-            "email": "david.robinson@aoe.com",
-            "role": "Maintainer"
-        },
-        {
-            "name": "Tymoteusz Motylewski",
-            "role": "Maintainer"
-        },
-        {
-            "name": "Sven Reichel",
-            "email": "github-sr@hotmail.com",
-            "role": "Maintainer"
-        }
-    ],
-    "funding": [
-        {
-            "type": "open_collective",
-            "url": "https://opencollective.com/openmage"
-        }
-    ],
     "autoload-dev": {
         "psr-4": {
             "OpenMage\\Tests\\Unit\\": "dev/tests/unit"
@@ -93,8 +61,7 @@
         "magento-deploystrategy-dev": "symlink",
         "magento-deploystrategy-overwrite": {
             "openmage/dev-copyright": "copy",
-            "openmage/dev-translations": "copy",
-            "openmage/legacy-frontend-themes": "copy"
+            "openmage/dev-translations": "copy"
         },
         "magento-force": true,
         "patches": {
