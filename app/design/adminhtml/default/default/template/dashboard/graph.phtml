@@ -36,19 +36,21 @@
 </div>
 <?php */ ?>
 <div style="margin:20px;">
-    <p class="switcher a-right" style="padding:5px 10px;"><?php echo $this->__('Select Range') ?>:
-    <select name="period" id="order_<?php echo $this->getHtmlId() ?>_period" onchange="changeDiagramsPeriod(this);">
+    <p class="switcher a-right" style="padding:5px 10px;"><?= $this->__('Select Range') ?>:
+    <select name="period" id="order_<?= $this->getHtmlId() ?>_period" onchange="changeDiagramsPeriod(this);">
         <?php foreach ($this->helper('adminhtml/dashboard_data')->getDatePeriods() as $_value=>$_label): ?>
-            <?php if(in_array($_value, ['custom'])) continue; ?>
-            <option value="<?php echo $_value ?>" <?php if($this->getRequest()->getParam('period')==$_value): ?> selected="selected"<?php endif ?>><?php echo $_label ?></option>
+            <?php if(in_array($_value, ['custom'])) {
+                continue;
+            } ?>
+            <option value="<?= $_value ?>" <?php if($this->getRequest()->getParam('period')==$_value): ?> selected="selected"<?php endif ?>><?= $_label ?></option>
         <?php endforeach ?>
     </select></p><br/>
     <?php
     $_containerStyle = "width:{$this->getWidth()}px;height:{$this->getHeight()}px; margin:0 auto;";
-    ?>
+?>
     <?php if($this->getCount()): ?>
-    <p style="<?php echo $_containerStyle?>"><img src="<?php echo $this->getChartUrl(false) ?>" alt="chart" title="chart" /></p>
+    <p style="<?= $_containerStyle?>"><img src="<?= $this->getChartUrl(false) ?>" alt="chart" title="chart" /></p>
     <?php else: ?>
-    <p class="a-center" style="<?php echo $_containerStyle?>"><?php echo $this->__('No Data Found') ?></p>
+    <p class="a-center" style="<?= $_containerStyle?>"><?= $this->__('No Data Found') ?></p>
     <?php endif ?>
 </div>

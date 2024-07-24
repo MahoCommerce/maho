@@ -18,15 +18,15 @@
  * @see Mage_Payment_Block_Info
  */
 ?>
-<p class="subtitle"><strong><?php echo $this->escapeHtml($this->getMethod()->getTitle()) ?></strong></p>
+<p class="subtitle"><strong><?= $this->escapeHtml($this->getMethod()->getTitle()) ?></strong></p>
 
 <?php if ($_specificInfo = $this->getSpecificInformation()):?>
 <dl class="payment-info">
     <?php foreach ($_specificInfo as $_label => $_value):?>
-        <dt><?php echo $this->escapeHtml($_label)?></dt>
-        <dd><?php echo nl2br(implode("\n", $this->getValueAsArray($_value, true)))?></dd>
+        <dt><?= $this->escapeHtml($_label)?></dt>
+        <dd><?= nl2br(implode("\n", $this->getValueAsArray($_value, true)))?></dd>
     <?php endforeach ?>
 </dl>
 <?php endif ?>
 
-<?php echo $this->getChildHtml()?>
+<?= $this->getChildHtml()?>

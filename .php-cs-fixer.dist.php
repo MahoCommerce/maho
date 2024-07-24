@@ -21,6 +21,8 @@ return $config
         'constant_case' => true,
         // Equal sign in declare statement should be surrounded by spaces or not following configuration.
         'declare_equal_normalize' => true,
+        // Replaces short-echo <?= with long format <?php echo/<?php print syntax, or vice-versa.
+        'echo_tag_syntax' => ['format' => 'short'],
         // The keyword `elseif` should be used instead of `else if` so that all control keywords look like single words.
         'elseif' => true,
         // PHP code MUST use only UTF-8 without BOM (remove BOM).
@@ -98,12 +100,13 @@ return $config
         PhpCsFixer\Finder::create()
             ->in([
                 'app/code/core/Mage/',
+                'app/design/',
                 'lib/Mage/',
                 'lib/Magento/',
                 'lib/Varien/',
                 'shell/',
             ])
-            ->name('*.php')
+            ->name(['*.php', '*.phtml'])
             ->ignoreDotFiles(true)
             ->ignoreVCS(true)
     );

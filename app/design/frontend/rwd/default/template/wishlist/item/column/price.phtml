@@ -22,5 +22,5 @@ $options = $this->getChild('customer.wishlist.item.options')
     ->getConfiguredOptions();
 ?>
 <div class="cart-cell">
-    <?php echo $this->getPriceHtml($product, empty($options));?>
+    <?= $this->getPriceHtml($product, empty($options));?>
 </div>

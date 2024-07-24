@@ -34,6 +34,6 @@
  */
 ?>
 <?php $_tag = $this->hasTag() ? $this->getTag() : "div" ?>
-<<?php echo $_tag?> id="<?php echo $this->getId()?>" <?php echo $this->getParams()?>>
-<?php echo $this->getChildHtml()?>
-</<?php echo $_tag?>>
+<<?= $_tag?> id="<?= $this->getId()?>" <?= $this->getParams()?>>
+<?= $this->getChildHtml()?>
+</<?= $_tag?>>

@@ -250,18 +250,17 @@ class Mage_Core_Model_Translate_Inline
 
         ob_start();
         $magentoSkinUrl = Mage::getDesign()->getSkinUrl('lib/prototype/windows/themes/magento.css'); ?>
-<!-- script type="text/javascript" src="<?php echo $baseJsUrl ?>prototype/effects.js"></script -->
-<script type="text/javascript" src="<?php echo $baseJsUrl ?>prototype/window.js"></script>
-<link rel="stylesheet" type="text/css" href="<?php echo $baseJsUrl ?>prototype/windows/themes/default.css"/>
-<link rel="stylesheet" type="text/css" href="<?php echo $magentoSkinUrl; ?>"/>
+<!-- script type="text/javascript" src="<?= $baseJsUrl ?>prototype/effects.js"></script -->
+<script type="text/javascript" src="<?= $baseJsUrl ?>prototype/window.js"></script>
+<link rel="stylesheet" type="text/css" href="<?= $baseJsUrl ?>prototype/windows/themes/default.css"/>
+<link rel="stylesheet" type="text/css" href="<?= $magentoSkinUrl; ?>"/>
 
-<script type="text/javascript" src="<?php echo $baseJsUrl ?>mage/translate_inline.js"></script>
-<link rel="stylesheet" type="text/css" href="<?php echo $baseJsUrl ?>mage/translate_inline.css"/>
+<script type="text/javascript" src="<?= $baseJsUrl ?>mage/translate_inline.js"></script>
+<link rel="stylesheet" type="text/css" href="<?= $baseJsUrl ?>mage/translate_inline.css"/>
 
-<div id="translate-inline-trig"><img src="<?php echo $trigImg ?>" alt="[TR]"/></div>
+<div id="translate-inline-trig"><img src="<?= $trigImg ?>" alt="[TR]"/></div>
 <script type="text/javascript">
-    new TranslateInline('translate-inline-trig', '<?php echo $ajaxUrl ?>', '<?php
-        echo Mage::getDesign()->getArea() ?>');
+    new TranslateInline('translate-inline-trig', '<?= $ajaxUrl ?>', '<?= Mage::getDesign()->getArea() ?>');
 </script>
         <?php
         $html = ob_get_clean();

@@ -12,16 +12,16 @@
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
- ?>
+?>
 <script type="text/javascript">
     order.sidebarHide();
     Event.observe(window, 'load',  function() {
         if (window.productConfigure) {
             productConfigure.addListType('product_to_add', {
-                urlFetch: '<?php echo $this->getUrl('*/sales_order_create/configureProductToAdd') ?>'
+                urlFetch: '<?= $this->getUrl('*/sales_order_create/configureProductToAdd') ?>'
             });
             productConfigure.addListType('quote_items', {
-                urlFetch: '<?php echo $this->getUrl('*/sales_order_create/configureQuoteItems') ?>'
+                urlFetch: '<?= $this->getUrl('*/sales_order_create/configureQuoteItems') ?>'
             });
         }
     });
