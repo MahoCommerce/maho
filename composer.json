@@ -22,8 +22,6 @@
         "ext-simplexml": "*",
         "ext-soap": "*",
         "ext-zlib": "*",
-        "colinmollenhour/cache-backend-redis": "^1.14",
-        "colinmollenhour/magento-redis-session": "^3.2.0",
         "cweagans/composer-patches": "^1.7",
         "ezyang/htmlpurifier": "^4.17",
         "magento-hackathon/magento-composer-installer": "^3.1 || ^2.1 || ^4.0",
@@ -44,6 +42,10 @@
         "phpunit/phpunit": "^9.5",
         "squizlabs/php_codesniffer": "^3.7",
         "symplify/vendor-patches": "^11.1"
+    },
+    "suggest": {
+        "colinmollenhour/cache-backend-redis": "Redis support for Maho's backend cache",
+        "colinmollenhour/magento-redis-session": "Redis support for PHP sessions"
     },
     "minimum-stability": "dev",
     "prefer-stable" : true,
