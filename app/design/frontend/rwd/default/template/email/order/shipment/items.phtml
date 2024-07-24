@@ -1,0 +1,45 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     rwd_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+
+<?php $_shipment = $this->getShipment() ?>
+<?php $_order    = $this->getOrder() ?>
+
+<?php if ($_shipment && $_order): ?>
+
+    <?php $_items     = $_order->getAllItems() ?>
+    <?php $_itemCount = count($_items) ?>
+    <table class="items" cellpadding="0" cellspacing="0" border="0">
+        <thead>
+        <tr>
+            <th class="cell-name">
+                <?php if($_itemCount > 1): echo $this->__('Items in your order'); else: echo $this->__('Item in your order'); endif; ?>
+            </th>
+            <th class="cell-name align-center">
+                <?php echo $this->__('Sku'); ?>
+            </th>
+            <th class="cell-name align-right">
+                <?php echo $this->__('Qty'); ?>
+            </th>
+        </tr>
+        </thead>
+
+        <?php $i=0; foreach ($_shipment->getAllItems() as $_item): ?>
+        <?php if($_item->getOrderItem()->getParentItem()) continue; else $i++; ?>
+            <?php echo $this->getItemHtml($_item) ?>
+        <?php endforeach ?>
+
+    </table>
+<?php endif ?>

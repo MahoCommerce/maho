@@ -1,0 +1,52 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<div class="order-items order-details">
+<?php if($this->helper('giftmessage/message')->getIsMessagesAvailable('order', $this->getOrder())): ?>
+    <script type="text/javascript">
+    //<![CDATA[
+    function giftMessageToogle(giftMessageIdentifier)
+    {
+        var link = $('order-item-gift-message-link-'+giftMessageIdentifier);
+        var container = $('order-item-gift-message-'+giftMessageIdentifier);
+        var row = $('order-item-row-'+giftMessageIdentifier);
+
+
+        if(link.expanded) {
+            link.expanded = false;
+            link.removeClassName('expanded');
+            if(container.hasClassName('last')) {
+                row.addClassName('last');
+            }
+            container.hide();
+        } else {
+            link.expanded = true;
+            link.addClassName('expanded');
+            if(container.hasClassName('last')) {
+                row.removeClassName('last');
+            }
+            container.show();
+        }
+
+        return false;
+    }
+    //]]>
+    </script>
+<?php endif ?>
+    <?php echo $this->getChildHtml('creditmemo_items') ?>
+    <div class="buttons-set">
+        <p class="back-link"><a href="<?php echo $this->getBackUrl() ?>"><small>&laquo; </small><?php echo $this->getBackTitle() ?></a></p>
+    </div>
+</div>

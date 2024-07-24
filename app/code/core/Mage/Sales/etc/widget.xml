@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category   Mage
+ * @package    Mage_Sales
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<widgets>
+    <sales_widget_guestfrom type="sales/widget_guest_form" translate="name description" module="sales">
+        <name>Orders and Returns</name>
+        <description>Orders and Returns Search Form</description>
+        <is_email_compatible>1</is_email_compatible>
+        <parameters>
+            <title translate="label">
+                <visible>0</visible>
+                <label>Anchor Custom Title</label>
+                <type>text</type>
+            </title>
+            <template>
+                <required>1</required>
+                <visible>1</visible>
+                <label>Template</label>
+                <type>select</type>
+                <value>sales/widget/guest/form.phtml</value>
+                <values>
+                    <default_template translate="label">
+                        <label>Default Template</label>
+                        <value>sales/widget/guest/form.phtml</value>
+                    </default_template>
+                </values>
+            </template>
+        </parameters>
+        <supported_blocks>
+            <left_column>
+                <block_name>left</block_name>
+                <template>
+                    <default>default_template</default>
+                </template>
+            </left_column>
+            <right_column>
+                <block_name>right</block_name>
+                <template>
+                    <default>default_template</default>
+                </template>
+            </right_column>
+        </supported_blocks>
+    </sales_widget_guestfrom>
+</widgets>

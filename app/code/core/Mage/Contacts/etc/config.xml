@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category   Mage
+ * @package    Mage_Contacts
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <modules>
+        <Mage_Contacts>
+            <version>1.6.0.0</version>
+        </Mage_Contacts>
+    </modules>
+    <frontend>
+        <routers>
+            <contacts>
+                <use>standard</use>
+                <args>
+                    <module>Mage_Contacts</module>
+                    <frontName>contacts</frontName>
+                </args>
+            </contacts>
+        </routers>
+        <translate>
+            <modules>
+                <Mage_Contacts>
+                    <files>
+                        <default>Mage_Contacts.csv</default>
+                    </files>
+                </Mage_Contacts>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <contact>
+                    <file>contacts.xml</file>
+                </contact>
+            </updates>
+        </layout>
+    </frontend>
+    <global>
+        <resources>
+            <contacts_setup>
+                <setup>
+                    <module>Mage_Contacts</module>
+                </setup>
+            </contacts_setup>
+        </resources>
+        <template>
+            <email>
+                <contacts_email_email_template translate="label" module="contacts">
+                    <label>Contact Form</label>
+                    <file>contact_form.html</file>
+                    <type>text</type>
+                </contacts_email_email_template>
+                <contacts_auto_reply_email_template translate="label" module="contacts">
+                    <label>Contact Form Auto Reply</label>
+                    <file>contact_form_auto_reply.html</file>
+                    <type>html</type>
+                </contacts_auto_reply_email_template>
+            </email>
+        </template>
+    </global>
+    <adminhtml>
+        <translate>
+            <modules>
+                <Mage_Contacts>
+                    <files>
+                        <default>Mage_Contacts.csv</default>
+                    </files>
+                </Mage_Contacts>
+            </modules>
+        </translate>
+    </adminhtml>
+    <default>
+        <contacts>
+            <contacts>
+                <enabled>1</enabled>
+            </contacts>
+            <email>
+                <recipient_email><![CDATA[hello@example.com]]></recipient_email>
+                <sender_email_identity>custom2</sender_email_identity>
+                <email_template>contacts_email_email_template</email_template>
+            </email>
+        </contacts>
+    </default>
+</config>

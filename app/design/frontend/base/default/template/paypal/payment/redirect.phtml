@@ -1,0 +1,30 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<?php
+/**
+ * @see Mage_PayPal_Block_Express_Form
+ * @see Mage_PayPal_Block_Standard_Form
+ */
+?>
+<ul class="form-list" id="payment_form_<?php echo $this->getMethodCode() ?>" style="display:none;">
+    <li class="form-alt"><?php echo $this->getRedirectMessage() ?></li>
+    <?php if ($code = $this->getCreateBACode()): ?>
+        <li class="form-alt">
+            <label for="<?php echo $code ?>"><input type="checkbox" id="<?php echo $code ?>" value="1" name="payment[<?php echo $code ?>]" class="checkbox" />
+            <?php echo $this->__('Sign a billing agreement to streamline further purchases with PayPal.') ?></label>
+        </li>
+    <?php endif ?>
+</ul>

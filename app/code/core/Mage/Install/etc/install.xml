@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category   Mage
+ * @package    Mage_Install
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <wizard>
+        <steps>
+            <begin translate="code">
+                <code>License Agreement</code>
+                <controller>wizard</controller>
+                <action>begin</action>
+            </begin>
+            <locale translate="code">
+                <code>Localization</code>
+                <controller>wizard</controller>
+                <action>locale</action>
+            </locale>
+            <config translate="code">
+                <code>Configuration</code>
+                <controller>wizard</controller>
+                <action>config</action>
+            </config>
+            <administrator translate="code">
+                <code>Create Admin Account</code>
+                <controller>wizard</controller>
+                <action>administrator</action>
+            </administrator>
+            <end translate="code">
+                <code>You're All Set!</code>
+                <controller>wizard</controller>
+                <action>end</action>
+            </end>
+        </steps>
+    </wizard>
+    <check>
+        <filesystem>
+            <writeable>
+                <app_etc>
+                    <path>/app/etc</path>
+                    <existence>1</existence>
+                    <recursive>0</recursive>
+                </app_etc>
+                <var>
+                    <path>/var</path>
+                    <existence>1</existence>
+                    <recursive>1</recursive>
+                </var>
+                <media>
+                    <path>/media</path>
+                    <existence>1</existence>
+                    <recursive>1</recursive>
+                </media>
+            </writeable>
+        </filesystem>
+        <php>
+            <extensions>
+                <ctype/>
+                <curl/>
+                <dom/>
+                <gd/>
+                <hash/>
+                <iconv/>
+                <intl/>
+                <json/>
+                <libxml/>
+                <mbstring/>
+                <mcrypt/>
+                <mcrypt>
+                    <openssl/>
+                    <mcrypt/>
+                </mcrypt>
+                <pdo/>
+                <simplexml/>
+                <soap/>
+                <spl/>
+                <zlib/>
+            </extensions>
+        </php>
+    </check>
+</config>

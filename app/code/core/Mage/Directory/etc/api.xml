@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category   Mage
+ * @package    Mage_Directory
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <api>
+        <resources>
+            <directory_country translate="title" module="directory">
+                <model>directory/country_api</model>
+                <title>Country API</title>
+                <acl>directory/country</acl>
+                <methods>
+                    <list translate="title" module="directory">
+                        <title>List of countries</title>
+                        <method>items</method>
+                    </list>
+                </methods>
+            </directory_country>
+            <directory_region translate="title" module="directory">
+                <model>directory/region_api</model>
+                <title>Region API</title>
+                <acl>directory/region</acl>
+                <methods>
+                    <list translate="title" module="directory">
+                        <title>List of regions in specified country</title>
+                        <method>items</method>
+                    </list>
+                </methods>
+                <faults module="directory">
+                    <country_not_exists>
+                        <code>101</code>
+                        <message>Country not exists.</message>
+                    </country_not_exists>
+                </faults>
+            </directory_region>
+        </resources>
+        <resources_alias>
+            <country>directory_country</country>
+            <region>directory_region</region>
+        </resources_alias>
+        <v2>
+            <resources_function_prefix>
+                <country>directoryCountry</country>
+                <region>directoryRegion</region>
+            </resources_function_prefix>
+        </v2>
+        <acl>
+            <resources>
+                <directory translate="title" module="directory">
+                    <title>Directory</title>
+                    <sort_order>5</sort_order>
+                    <country translate="title" module="directory">
+                        <title>Country</title>
+                    </country>
+                    <region translate="title" module="directory">
+                        <title>Region</title>
+                    </region>
+                </directory>
+            </resources>
+        </acl>
+    </api>
+</config>

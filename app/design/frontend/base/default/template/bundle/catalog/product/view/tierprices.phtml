@@ -1,0 +1,30 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+
+<?php
+/**
+ * @see Mage_Catalog_Block_Product_View
+ */
+$_product = $this->getProduct();
+$_tierPrices = $this->getTierPrices();
+?>
+<?php if (count($_tierPrices) > 0): ?>
+    <ul class="tier-prices product-pricing">
+    <?php foreach($_tierPrices as $_price): ?>
+        <li><?php echo $this->__('Buy %1$s with %2$s discount each', $_price['price_qty'], '<strong class="benefit">'.($_price['price']*1).'%</strong>') ?></li>
+    <?php endforeach ?>
+    </ul>
+<?php endif ?>

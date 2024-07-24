@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category   Mage
+ * @package    Mage_CatalogSearch
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <menu>
+        <catalog>
+            <children>
+                <search translate="title" module="catalogsearch">
+                    <title>Search Terms</title>
+                    <action>adminhtml/catalog_search/</action>
+                    <sort_order>40</sort_order>
+                </search>
+            </children>
+        </catalog>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <catalog>
+                        <children>
+                            <search translate="title" module="catalogsearch">
+                                <title>Search Terms</title>
+                            </search>
+                        </children>
+                    </catalog>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

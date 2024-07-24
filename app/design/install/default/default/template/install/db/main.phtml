@@ -1,0 +1,69 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/**
+ * Install database configuration template
+ *
+ * @see Mage_Install_Block_Config
+ * @var $this Mage_Install_Block_Config
+ */
+?>
+<script type="text/javascript">
+//<![CDATA[
+var dbTypeIds = [];
+function showContent(select)
+{
+    dbTypeIds.each(function (name) {
+        $(name + '_conn_form').hide()
+    });
+    $(select.value + '_conn_form').show();
+}
+//]]>
+</script>
+
+<fieldset class="group-select">
+ <legend><?php echo $this->__('Connection') ?></legend>
+    <h4 class="legend"><?php echo $this->__('Database Connection') ?></h4>
+    <ul>
+        <?php $dbTypeOptions = $this->getDatabaseBlocks(); ?>
+        <?php if (count($dbTypeOptions) > 0): ?>
+        <li>
+            <div class="input-box">
+                <label for="prefix"><?php echo $this->__('Database Type') ?></label><br />
+                <select name="config[db_model]" onchange="showContent(this)">
+                    <?php foreach($dbTypeOptions as $block): ?>
+                        <option value="<?php echo $block->getIdPrefix()?>" <?php if($this->getFormData()->getDbModel() == $block->getIdPrefix()):?>selected="selected"<?php endif ?>><?php echo $block->getTitle()?></option>
+                    <?php endforeach ?>
+                </select>
+            </div>
+        </li>
+        <?php endif ?>
+
+        <?php foreach ($dbTypeOptions as $block): ?>
+            <script type="text/javascript">
+            //<![CDATA[
+                dbTypeIds[dbTypeIds.length] = "<?php echo $block->getIdPrefix(); ?>";
+            //]]>
+            </script>
+            <?php $block = $this->getDatabaseBlock($block->getIdPrefix()) ?>
+
+            <div id="<?php echo $block->getIdPrefix() ?>_conn_form" <?php if($this->getFormData()->getDbModel() != $block->getIdPrefix()):?>style="display:none;"<?php endif ?>>
+                <ul>
+                    <?php echo $block->toHtml(); ?>
+                </ul>
+            </div>
+        <?php endforeach ?>
+    </ul>
+</fieldset>

@@ -1,0 +1,44 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     rwd_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+
+<?php $_product = $this->getProduct(); ?>
+<?php $_wishlistSubmitUrl = $this->helper('wishlist')->isAllow() ? $this->helper('wishlist')->getAddUrlWithCustomParams($_product, [], false) : '' ?>
+<?php $_compareUrl = $this->helper('catalog/product_compare')->getAddUrlCustom($_product, false); ?>
+
+<?php if ($_wishlistSubmitUrl || $_compareUrl): ?>
+    <ul class="add-to-links">
+        <?php if ($_wishlistSubmitUrl) : ?>
+            <li>
+                <a href="<?php echo $_wishlistSubmitUrl ?>"
+                   onclick="productAddToCartForm.submitLight(this, this.href); return false;"
+                   class="link-wishlist">
+                    <?php echo $this->__('Add to Wishlist') ?>
+                </a>
+            </li>
+        <?php endif ?>
+        <?php if ($_compareUrl) : ?>
+            <?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])) ?>
+            <li>
+                <?php if ($_wishlistSubmitUrl): ?><span class="separator">|</span><?php endif ?>
+                <a href="#"
+                   class="link-compare"
+                   onclick="customFormSubmit('<?php echo $_compareUrl ?>', '<?php echo $_params ?>', 'post')">
+                    <?php echo $this->__('Add to Compare') ?>
+                </a>
+            </li>
+        <?php endif ?>
+    </ul>
+<?php endif ?>

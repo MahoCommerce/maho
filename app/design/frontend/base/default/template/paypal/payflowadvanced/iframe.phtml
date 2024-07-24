@@ -1,0 +1,38 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+/** @var $this Mage_Paypal_Block_Payflow_Advanced_Iframe */
+?>
+<div id="iframe-warning" class="warning-message">
+    <?php echo $this->__('Please do not refresh the page until you complete payment.') ?>
+</div>
+<iframe id="payflow-advanced-iframe" style="display:none;" scrolling="no" frameborder="0"
+        src="<?php echo $this->getFrameActionUrl() ?>" height="610" width="100%"></iframe>
+<script type="text/javascript">
+//<![CDATA[
+var headers = $$('#' + checkout.accordion.container.readAttribute('id') + ' .section');
+headers.each(function(header) {
+    header.removeClassName('allow');
+});
+$('payflow-advanced-iframe').observe('load', function(){
+    $('payflow-advanced-iframe').show();
+    $('iframe-warning').show();
+    checkout.loadWaiting = 'review';
+    checkout.setLoadWaiting(false);
+    if (checkout.accordion.currentSection == 'opc-review') {
+        $('checkout-review-submit').hide();
+    }
+});
+//]]>
+</script>

@@ -1,0 +1,51 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     rwd_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Checkout_Block_Cart_Coupon $this */
+?>
+<form id="discount-coupon-form" action="<?php echo $this->getFormActionUrl() ?>" method="post">
+    <div class="discount">
+        <h2><?php echo $this->__('Discount Codes') ?></h2>
+        <div class="discount-form">
+            <label for="coupon_code"><?php echo $this->__('Discount Codes') ?></label>
+            <input type="hidden" name="remove" id="remove-coupone" value="0" />
+            <div class="field-wrapper">
+                <input class="input-text" type="text" id="coupon_code" name="coupon_code" value="<?php echo $this->escapeHtml($this->getCouponCode()) ?>" />
+                <div class="button-wrapper">
+                    <button type="button" title="<?php echo Mage::helper('core')->quoteEscape($this->__('Apply')) ?>" class="button2" onclick="discountForm.submit(false)" value="<?php echo $this->__('Apply') ?>"><span><span><?php echo $this->__('Apply') ?></span></span></button>
+                    <?php if(strlen($this->getCouponCode())): ?>
+                        <button type="button" title="<?php echo Mage::helper('core')->quoteEscape($this->__('Cancel')) ?>" class="button2 cancel-coupon" onclick="discountForm.submit(true)" value="<?php echo $this->__('Cancel') ?>"><span><span><?php echo $this->__('Cancel') ?></span></span>
+                        </button>
+                    <?php endif ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+//<![CDATA[
+var discountForm = new VarienForm('discount-coupon-form');
+discountForm.submit = function (isRemove) {
+    if (isRemove) {
+        $('coupon_code').removeClassName('required-entry');
+        $('remove-coupone').value = "1";
+    } else {
+        $('coupon_code').addClassName('required-entry');
+        $('remove-coupone').value = "0";
+    }
+    return VarienForm.prototype.submit.bind(discountForm)();
+}
+//]]>
+</script>

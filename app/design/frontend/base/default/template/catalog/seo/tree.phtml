@@ -1,0 +1,34 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2018-2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<?php
+/**
+ * @see Mage_Catalog_Block_Seo_Sitemap_
+ */
+?>
+<?php $_items = $this->getCollection(); ?>
+<?php if($_items->getSize()): ?>
+    <ul class="sitemap">
+        <?php foreach ($_items as $_item): ?>
+            <?php if ($_item->getIsActive()): ?>
+                <li class="level-<?php echo $this->getLevel($_item) ?>" <?php echo $this->getLevel($_item)?'style="padding-left:' . $this->getLevel($_item, 2) . '0px;"':'' ?>><a href="<?php echo $this->getItemUrl($_item) ?>"><?php echo $_item->name ?></a></li>
+            <?php endif ?>
+        <?php endforeach ?>
+    </ul>
+<?php else: ?>
+    <p class="note-msg">
+        <?php echo $this->__('There are no %s available.', $this->getItemsTitle()); ?>
+    </p>
+<?php endif ?>

@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category   Mage
+ * @package    Mage_Review
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <menu>
+        <catalog>
+            <children>
+                <reviews_ratings translate="title" module="review">
+                    <title>Reviews and Ratings</title>
+                    <children>
+                        <reviews translate="title" module="review">
+                            <title>Customer Reviews</title>
+                            <children>
+                                <pending translate="title" module="review">
+                                    <title>Pending Reviews</title>
+                                    <action>adminhtml/catalog_product_review/pending</action>
+                                </pending>
+                                <all translate="title" module="review">
+                                    <title>All Reviews</title>
+                                    <action>adminhtml/catalog_product_review/index</action>
+                                </all>
+                            </children>
+                        </reviews>
+                        <ratings translate="title" module="review">
+                            <title>Manage Ratings</title>
+                            <action>adminhtml/rating/index</action>
+                        </ratings>
+                    </children>
+                    <sort_order>50</sort_order>
+                </reviews_ratings>
+            </children>
+        </catalog>
+        <report>
+            <children>
+                <review translate="title" module="reports">
+                    <title>Reviews</title>
+                    <sort_order>55</sort_order>
+                    <children>
+                        <customer translate="title" module="review">
+                            <title>Customers Reviews</title>
+                            <action>adminhtml/report_review/customer</action>
+                        </customer>
+                        <product translate="title" module="review">
+                            <title>Products Reviews</title>
+                            <action>adminhtml/report_review/product</action>
+                        </product>
+                    </children>
+                </review>
+            </children>
+        </report>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <catalog>
+                        <children>
+                            <reviews_ratings translate="title" module="review">
+                                <title>Reviews and Ratings</title>
+                                <children>
+                                    <reviews translate="title">
+                                        <title>Customer Reviews</title>
+                                        <children>
+                                            <all translate="title">
+                                                <title>All Reviews</title>
+                                            </all>
+                                            <pending translate="title">
+                                                <title>Pending Reviews</title>
+                                            </pending>
+                                        </children>
+                                    </reviews>
+                                 </children>
+                            </reviews_ratings>
+                        </children>
+                    </catalog>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

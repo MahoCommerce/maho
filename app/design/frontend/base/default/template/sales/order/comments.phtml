@@ -1,0 +1,32 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<?php
+/**
+ * @var $this Mage_Sales_Block_Order_Comments
+ * @see Mage_Sales_Block_Order_Comments
+ */
+?>
+<?php if ($this->hasComments()):?>
+    <div class="order-additional order-comments">
+        <h2 class="sub-title"><?php echo $this->getTitle() ?></h2>
+        <dl class="order-about">
+            <?php foreach ($this->getComments() as $_commentItem): ?>
+                <dt><?php echo $this->formatDate($_commentItem->getCreatedAtStoreDate(), 'medium', true) ?></dt>
+                <dd><?php echo $this->escapeHtml($_commentItem->getComment()) ?></dd>
+            <?php endforeach ?>
+        </dl>
+    </div>
+<?php endif ?>

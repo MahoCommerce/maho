@@ -1,0 +1,60 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/**
+ * @var $this Mage_Paypal_Block_Payflow_Link_Iframe
+ */
+?>
+<html>
+<head>
+<script type="text/javascript">
+//<![CDATA[
+    if (window.top == window.self) {
+        window.location = "<?php echo $this->getUrl('checkout/cart') ?>";
+    }
+    var window_top = window.top;
+<?php if ($this->getGotoSection()): ?>
+    var checkout_steps;
+
+    try{
+        checkout_steps = window.top.checkout.steps
+    }catch(e){
+        window_top.location="<?php echo $this->getUrl('checkout/cart') ?>";
+    }
+
+    for (var s = 0; s < checkout_steps.length; s++) {
+        if (checkout_steps[s] == '<?php echo $this->getGotoSection() ?>') {
+            break;
+        }
+        if (window_top.document.getElementById('opc-' + checkout_steps[s])) {
+            window_top.document.getElementById('opc-' + checkout_steps[s]).addClassName('allow');
+        }
+    }
+    window_top.checkout.gotoSection("<?php echo $this->getGotoSection() ?>");
+    window_top.document.getElementById('checkout-review-submit').show();
+    window_top.document.getElementById('iframe-warning').hide();
+    <?php if ($this->getErrorMsg()): ?>
+        alert('<?php echo $this->jsQuoteEscape($this->getErrorMsg()) ?>');
+    <?php endif ?>
+<?php elseif ($this->getGotoSuccessPage()) : ?>
+    window_top.location="<?php echo $this->getUrl('checkout/onepage/success') ?>";
+<?php else: ?>
+    window_top.location="<?php echo $this->getUrl('checkout/cart') ?>";
+<?php endif ?>
+//]]>
+</script>
+</head>
+<body></body>
+</html>

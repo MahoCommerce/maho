@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category   Mage
+ * @package    Mage_CatalogRule
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <menu>
+         <promo translate="title" module="catalogrule">
+            <title>Promotions</title>
+            <sort_order>50</sort_order>
+            <children>
+                <catalog translate="title" module="catalogrule">
+                    <title>Catalog Price Rules</title>
+                    <action>adminhtml/promo_catalog/</action>
+                    <depends><module>Mage_Catalog</module></depends>
+                </catalog>
+            </children>
+         </promo>
+     </menu>
+     <acl>
+        <resources>
+            <admin>
+                <children>
+                    <promo translate="title" module="catalogrule">
+                        <title>Promotions</title>
+                        <sort_order>50</sort_order>
+                        <children>
+                            <catalog translate="title">
+                                <title>Catalog Price Rules</title>
+                            </catalog>
+                        </children>
+                    </promo>
+                </children>
+            </admin>
+        </resources>
+     </acl>
+</config>

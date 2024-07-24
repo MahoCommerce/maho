@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category   Mage
+ * @package    Mage_CatalogInventory
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <api>
+        <resources>
+            <cataloginventory_stock_item translate="title" module="cataloginventory">
+                <model>cataloginventory/stock_item_api</model>
+                <title>Inventory API</title>
+                <acl>cataloginventory</acl>
+                <methods>
+                    <list translate="title" module="cataloginventory">
+                        <title>Retrieve stock data by product ids</title>
+                        <method>items</method>
+                        <acl>cataloginventory/info</acl>
+                    </list>
+                    <update translate="title" module="cataloginventory">
+                        <title>Update product stock data</title>
+                        <acl>cataloginventory/update</acl>
+                    </update>
+                    <multiUpdate translate="title" module="cataloginventory">
+                        <title>Multi update product stock data</title>
+                        <acl>cataloginventory/update</acl>
+                    </multiUpdate>
+                </methods>
+                <faults module="cataloginventory">
+                    <not_exists>
+                        <code>101</code>
+                        <message>Product not exists.</message>
+                    </not_exists>
+                    <not_updated>
+                        <code>102</code>
+                        <message>Product inventory not updated. Details in error message.</message>
+                    </not_updated>
+                    <multi_update_not_match>
+                        <code>103</code>
+                        <message>Quantity of product IDs and product data should match. Inventory was not updated.</message>
+                    </multi_update_not_match>
+                </faults>
+            </cataloginventory_stock_item>
+        </resources>
+        <resources_alias>
+            <product_stock>cataloginventory_stock_item</product_stock>
+        </resources_alias>
+        <v2>
+            <resources_function_prefix>
+                <product_stock>catalogInventoryStockItem</product_stock>
+            </resources_function_prefix>
+        </v2>
+        <acl>
+            <resources>
+                <cataloginventory translate="title" module="cataloginventory">
+                    <title>Catalog Inventory</title>
+                    <sort_order>4</sort_order>
+                    <update translate="title" module="cataloginventory">
+                        <title>Update</title>
+                    </update>
+                    <info translate="title" module="cataloginventory">
+                        <title>Retrieve stock data</title>
+                    </info>
+                </cataloginventory>
+            </resources>
+        </acl>
+    </api>
+</config>

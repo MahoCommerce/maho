@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category   Mage
+ * @package    Mage_Rule
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <modules>
+        <Mage_Rule>
+            <version>1.6.0.0</version>
+        </Mage_Rule>
+    </modules>
+    <global>
+        <models>
+            <rule>
+                <class>Mage_Rule_Model</class>
+                <resourceModel>rule_resource</resourceModel>
+            </rule>
+            <rule_resource>
+                <class>Mage_Rule_Model_Resource</class>
+            </rule_resource>
+        </models>
+        <blocks>
+            <rule>
+                <class>Mage_Rule_Block</class>
+            </rule>
+        </blocks>
+    </global>
+    <adminhtml>
+        <translate>
+            <modules>
+                <Mage_Rule>
+                    <files>
+                        <default>Mage_Rule.csv</default>
+                    </files>
+                </Mage_Rule>
+            </modules>
+        </translate>
+    </adminhtml>
+    <frontend>
+        <translate>
+            <modules>
+                <Mage_Rule>
+                    <files>
+                        <default>Mage_Rule.csv</default>
+                    </files>
+                </Mage_Rule>
+            </modules>
+        </translate>
+    </frontend>
+</config>

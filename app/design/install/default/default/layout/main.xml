@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+-->
+<layout>
+    <install_wizard>
+        <!-- Mage_Install -->
+        <block type="core/template" name="root" output="toHtml">
+            <action method="setTemplate"><template>page.phtml</template></action>
+            <block type="core/text_list" name="left" as="left"/>
+            <block type="core/text_list" name="content" as="content" />
+        </block>
+        <block type="install/db_main" name="database" as="database"/>
+    </install_wizard>
+    <install_wizard_config>
+        <reference name="database">
+            <action method="setTemplate"><template>install/db/main.phtml</template></action>
+            <action method="addDatabaseBlock"><type>mysql4</type><block>install/db_type_mysql4</block><template>install/db/mysql4.phtml</template></action>
+        </reference>
+    </install_wizard_config>
+</layout>

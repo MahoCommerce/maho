@@ -1,0 +1,32 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+
+<?php $_product = $this->getProduct(); ?>
+<?php $_options = Mage::helper('core')->decorateArray($this->getOptions()); ?>
+<?php if ($_product->isSaleable()):?>
+    <?php if (count($_options)): ?>
+        <dl>
+        <?php foreach ($_options as $_option): ?>
+            <?php if (!$_option->getSelections()): ?>
+                <?php continue; ?>
+            <?php endif ?>
+            <?php echo $this->getOptionHtml($_option) ?>
+        <?php endforeach ?>
+        </dl>
+    <?php else: ?>
+        <p><?php echo $this->__('No options of this product are available.') ?></p>
+    <?php endif ?>
+<?php endif ?>

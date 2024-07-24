@@ -1,0 +1,42 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<?php
+/**
+ * @see Mage_Checkout_Block_Agreements
+ */
+?>
+
+<?php if (!$this->getAgreements()) return; ?>
+<form action="" id="checkout-agreements" onsubmit="return false;">
+<ol class="checkout-agreements">
+<?php foreach ($this->getAgreements() as $_a): ?>
+    <li>
+        <?php if ($_a->getContent()):?>
+            <div class="agreement-content"<?php echo ($_a->getContentHeight() ? ' style="height:' . $_a->getContentHeight() . '"' : '')?>>
+                <?php if ($_a->getIsHtml()):?>
+                    <?php echo $_a->getContent() ?>
+                <?php else: ?>
+                    <?php echo nl2br($this->escapeHtml($_a->getContent())) ?>
+                <?php endif ?>
+            </div>
+        <?php endif ?>
+        <p class="agree">
+            <input type="checkbox" id="agreement-<?php echo $_a->getId()?>" name="agreement[<?php echo $_a->getId()?>]" value="1" title="<?php echo $this->escapeHtml($_a->getCheckboxText()) ?>" class="checkbox" /><label for="agreement-<?php echo $_a->getId()?>"><?php echo $_a->getIsHtml() ? $_a->getCheckboxText() : $this->escapeHtml($_a->getCheckboxText()) ?></label>
+        </p>
+    </li>
+<?php endforeach ?>
+</ol>
+</form>

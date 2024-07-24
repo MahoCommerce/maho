@@ -1,0 +1,49 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    Mage
+ * @package     Errors
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title><?php echo $this->pageTitle?></title>
+<base href="<?php echo $this->getSkinUrl()?>" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="description" content="" />
+<meta name="keywords" content="" />
+<meta name="robots" content="*" />
+<link rel="stylesheet" href="css/styles.css" type="text/css" />
+<link rel="icon" href="images/favicon.ico" type="image/x-icon" />
+</head>
+<body>
+    <div class="wrapper">
+        <div class="page">
+            <div class="header-container">
+                <div class="header">
+                    <a href="<?php echo $this->getBaseUrl()?>" title="OpenMage" class="logo"><img src="images/logo.svg" alt="OpenMage" height="35" /></a>
+                </div>
+            </div>
+            <div class="main-container">
+                <div class="main col1-layout">
+                    <?php require_once $contentTemplate; ?>
+                </div>
+            </div>
+            <div class="footer-container">
+                <div class="footer">
+                    <address class="copyright">Magento is a trademark of Magento Inc. Copyright &copy; 2020 Magento Inc.</address>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

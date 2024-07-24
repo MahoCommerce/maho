@@ -1,0 +1,50 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/**
+ * @see Mage_Paypal_Block_Iframe
+ */
+?>
+<div id="checkout-paypaliframe-load" class="authentication"></div>
+<script type="text/javascript">
+//<![CDATA[
+Review.prototype.save = function() {
+    if (checkout.loadWaiting!=false) return;
+    checkout.setLoadWaiting('review');
+    var params = Form.serialize(payment.form);
+    if (this.agreementsForm) {
+        params += '&'+Form.serialize(this.agreementsForm);
+    }
+    params.save = true;
+    var request = new Ajax.Request(
+        this.saveUrl,
+        {
+            method:'post',
+            parameters:params,
+            onComplete: function(transport) {
+                if (transport) {
+                    var response = transport.responseJSON || transport.responseText.evalJSON(true) || {};
+                    if (response.error_messages) {
+                        checkout.setLoadWaiting(false);
+                    }
+                }
+            },
+            onSuccess: this.onSave,
+            onFailure: checkout.ajaxFailure.bind(checkout)
+        }
+    );
+}
+//]]>
+</script>

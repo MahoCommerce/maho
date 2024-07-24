@@ -1,0 +1,34 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/**
+ * @see Mage_Paypal_Block_Payflow_Link_Iframe
+ */
+?>
+<html>
+<head></head>
+<body>
+    <form id="token_form" method="POST" action="<?php echo $this->getTransactionUrl() ?>">
+        <input type="hidden" name="SECURETOKEN" value="<?php echo $this->getSecureToken(); ?>" />
+        <input type="hidden" name="SECURETOKENID" value="<?php echo $this->getSecureTokenId(); ?>" />
+        <input type="hidden" name="MODE" value="<?php echo $this->isTestMode() ? 'TEST' : 'LIVE'; ?>" />
+    </form>
+    <script type="text/javascript">
+    //<![CDATA[
+        document.getElementById('token_form').submit();
+    //]]>
+    </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category   Mage
+ * @package    Mage_Checkout
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<jstranslator>
+    <!-- opcheckout.js -->
+    <validate-guest translate="message" module="checkout">
+        <message>Please choose to register or to checkout as a guest</message>
+    </validate-guest>
+    <validate-shipping-methods-not-available translate="message" module="checkout">
+        <message>Your order cannot be completed at this time as there is no shipping methods available for it. Please make necessary changes in your shipping address.</message>
+    </validate-shipping-methods-not-available>
+    <validate-shipping-methods-required translate="message" module="checkout">
+        <message>Please specify shipping method.</message>
+    </validate-shipping-methods-required>
+    <validate-payment-methods-not-available translate="message" module="checkout">
+        <message>Your order cannot be completed at this time as there is no payment methods available for it.</message>
+    </validate-payment-methods-not-available>
+    <validate-payment-methods-required translate="message" module="checkout">
+        <message>Please specify payment method.</message>
+    </validate-payment-methods-required>
+    <!-- end opcheckout.js -->
+</jstranslator>

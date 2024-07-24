@@ -1,0 +1,39 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<?php
+/**
+ * @deprecated  after 1.4.0.0-alpha3
+ */
+
+/**
+ * This template is for generic wrapper purposes, including ajax.updater loaded blocks
+ *
+ * Usage in layout xml files:
+ * <block type="core/template" template="page/html/wrapper.phtml">
+ *    <action method="setId"><id>some-custom-identificator</id></action>
+ *
+ *    <!-- optional -->
+ *    <action method="setTag"><tag>span</tag></action> <!-- div is used if not specified -->
+ *    <action method="setParams"><params>class="custom-class"</params></action>
+ *
+ *    <!-- insert wrapped blocks here -->
+ * </block>
+ */
+?>
+<?php $_tag = $this->hasTag() ? $this->getTag() : "div" ?>
+<<?php echo $_tag?> id="<?php echo $this->getId()?>" <?php echo $this->getParams()?>>
+<?php echo $this->getChildHtml()?>
+</<?php echo $_tag?>>

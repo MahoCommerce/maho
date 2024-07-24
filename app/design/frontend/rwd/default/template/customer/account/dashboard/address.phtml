@@ -1,0 +1,45 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     rwd_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<div class="box-account box-info">
+    <div class="box-head">
+        <h2><?php echo $this->__('Address Book') ?></h2>
+        <a href="<?php echo $this->getAddressBookUrl() ?>"><?php echo $this->__('Manage Addresses') ?></a>
+    </div>
+    <div class="col2-set">
+        <div class="col-1">
+            <div class="box">
+                <div class="box-title">
+                    <h3><?php echo $this->__('Default Billing Address') ?></h3>
+                    <a href="<?php echo $this->getPrimaryBillingAddressEditUrl() ?>"><?php echo $this->__('Edit Address') ?></a>
+                </div>
+                <div class="box-content">
+                    <address><?php echo $this->getPrimaryBillingAddressHtml() ?></address>
+                </div>
+            </div>
+        </div>
+        <div class="col-2">
+            <div class="box">
+                <div class="box-title">
+                    <h3><?php echo $this->__('Default Shipping Address') ?></h3>
+                    <a href="<?php echo $this->getPrimaryShippingAddressEditUrl() ?>"><?php echo $this->__('Edit Address') ?></a>
+                </div>
+                <div class="box-content">
+                    <address><?php echo $this->getPrimaryShippingAddressHtml() ?></address>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

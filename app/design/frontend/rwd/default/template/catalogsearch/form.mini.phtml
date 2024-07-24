@@ -1,0 +1,34 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     rwd_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+/* @var $this Mage_Core_Block_Template */
+/* @var $catalogSearchHelper Mage_CatalogSearch_Helper_Data */
+$catalogSearchHelper =  $this->helper('catalogsearch');
+?>
+
+<form id="search_mini_form" action="<?php echo $catalogSearchHelper->getResultUrl() ?>" method="get">
+    <div class="input-box">
+        <label for="search"><?php echo $this->__('Search:') ?></label>
+        <input id="search" type="search" name="<?php echo $catalogSearchHelper->getQueryParamName() ?>" value="<?php echo $catalogSearchHelper->getEscapedQueryText() ?>" class="input-text required-entry" maxlength="<?php echo $catalogSearchHelper->getMaxQueryLength();?>" placeholder="<?php echo $this->quoteEscape($this->__('Search entire store here...')) ?>" />
+        <button type="submit" title="<?php echo $this->quoteEscape($this->__('Search')) ?>" class="button search-button"><span><span><?php echo $this->__('Search') ?></span></span></button>
+    </div>
+
+    <div id="search_autocomplete" class="search-autocomplete"></div>
+    <script type="text/javascript">
+    //<![CDATA[
+        var searchForm = new Varien.searchForm('search_mini_form', 'search', '');
+        searchForm.initAutocomplete('<?php echo $catalogSearchHelper->getSuggestUrl() ?>', 'search_autocomplete');
+    //]]>
+    </script>
+</form>

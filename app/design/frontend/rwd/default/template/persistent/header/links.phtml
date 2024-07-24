@@ -1,0 +1,30 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     rwd_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<?php
+/**
+ * @see Mage_Page_Block_Template_Links
+ */
+?>
+<?php $_links = $this->getLinks(); ?>
+<?php if(count($_links)>0): ?>
+    <?php foreach($_links as $_link): ?>
+        <?php if ($_link instanceof Mage_Core_Block_Abstract):?>
+            <?php echo $_link->toHtml() ?>
+        <?php else: ?>
+            <a href="<?php echo $_link->getUrl() ?>" title="<?php echo $_link->getTitle() ?>" <?php echo $_link->getAParams() ?>><?php echo $_link->getLabel() ?></a>
+        <?php endif ?>
+    <?php endforeach ?>
+<?php endif ?>

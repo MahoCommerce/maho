@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category   Mage
+ * @package    Mage_Checkout
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright  Copyright (c) 2021-2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <menu>
+         <sales>
+            <children>
+                <checkoutagreement translate="title" module="checkout">
+                    <sort_order>100</sort_order>
+                    <title>Terms and Conditions</title>
+                    <action>adminhtml/checkout_agreement/</action>
+                </checkoutagreement>
+            </children>
+         </sales>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <sales>
+                        <children>
+                            <checkoutagreement translate="title" module="checkout">
+                                <title>Terms and Conditions</title>
+                                <sort_order>50</sort_order>
+                            </checkoutagreement>
+                        </children>
+                    </sales>
+                    <system>
+                        <children>
+                            <config>
+                                <children>
+                                    <checkout translate="title" module="checkout">
+                                        <title>Checkout</title>
+                                        <sort_order>70</sort_order>
+                                    </checkout>
+                                </children>
+                            </config>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

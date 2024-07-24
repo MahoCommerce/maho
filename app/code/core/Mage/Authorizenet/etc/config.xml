@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category   Mage
+ * @package    Mage_Authorizenet
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <modules>
+        <Mage_Authorizenet>
+            <version>1.5.0.0</version>
+        </Mage_Authorizenet>
+    </modules>
+    <global>
+        <models>
+            <authorizenet>
+                <class>Mage_Authorizenet_Model</class>
+           </authorizenet>
+        </models>
+        <helpers>
+            <authorizenet>
+                <class>Mage_Authorizenet_Helper</class>
+            </authorizenet>
+        </helpers>
+    </global>
+
+    <adminhtml>
+        <translate>
+            <modules>
+                <Mage_Authorizenet>
+                    <files>
+                        <default>Mage_Authorizenet.csv</default>
+                    </files>
+                </Mage_Authorizenet>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <authorizenet>
+                    <file>authorizenet.xml</file>
+                </authorizenet>
+            </updates>
+        </layout>
+    </adminhtml>
+
+    <frontend>
+        <translate>
+            <modules>
+                <Mage_Authorizenet>
+                    <files>
+                        <default>Mage_Authorizenet.csv</default>
+                    </files>
+                </Mage_Authorizenet>
+            </modules>
+        </translate>
+         <routers>
+            <authorizenet>
+                <use>standard</use>
+                <args>
+                    <module>Mage_Authorizenet</module>
+                    <frontName>authorizenet</frontName>
+                </args>
+            </authorizenet>
+        </routers>
+        <layout>
+            <updates>
+                <authorizenet>
+                    <file>authorizenet.xml</file>
+                </authorizenet>
+            </updates>
+        </layout>
+    </frontend>
+
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <Mage_Authorizenet before="Mage_Adminhtml">Mage_Authorizenet_Adminhtml</Mage_Authorizenet>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
+</config>

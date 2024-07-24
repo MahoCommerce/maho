@@ -1,0 +1,34 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     rwd_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<?php
+/**
+ * Currency switcher
+ *
+ * @see Mage_Directory_Block_Currency
+ */
+?>
+<?php if($this->getCurrencyCount()>1): ?>
+<div class="currency-switcher">
+    <label for="select-currency"><?php echo $this->__('Your Currency:') ?></label>
+    <select id="select-currency" name="currency" title="<?php echo Mage::helper('core')->quoteEscape($this->__('Your Currency')) ?>" onchange="setLocation(this.value)">
+        <?php foreach ($this->getCurrencies() as $_code => $_name): ?>
+        <option value="<?php echo $this->getSwitchCurrencyUrl($_code) ?>"<?php if($_code==$this->getCurrentCurrencyCode()): ?> selected="selected"<?php endif ?>>
+            <?php echo $_name ?> - <?php echo $_code ?>
+        </option>
+    <?php endforeach ?>
+    </select>
+</div>
+<?php endif ?>

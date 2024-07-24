@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category   Mage
+ * @package    Mage_Rating
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <modules>
+        <Mage_Rating>
+            <version>1.6.0.1</version>
+        </Mage_Rating>
+    </modules>
+    <global>
+        <models>
+            <rating>
+                <class>Mage_Rating_Model</class>
+                <resourceModel>rating_resource</resourceModel>
+            </rating>
+            <rating_resource>
+                <class>Mage_Rating_Model_Resource</class>
+                <entities>
+                    <rating>
+                        <table>rating</table>
+                    </rating>
+                    <rating_store>
+                        <table>rating_store</table>
+                    </rating_store>
+                    <rating_title>
+                        <table>rating_title</table>
+                    </rating_title>
+                    <rating_entity>
+                        <table>rating_entity</table>
+                    </rating_entity>
+                    <rating_option>
+                        <table>rating_option</table>
+                    </rating_option>
+                    <rating_option_vote>
+                        <table>rating_option_vote</table>
+                    </rating_option_vote>
+                    <rating_vote_aggregated>
+                        <table>rating_option_vote_aggregated</table>
+                    </rating_vote_aggregated>
+                </entities>
+            </rating_resource>
+        </models>
+        <resources>
+            <rating_setup>
+                <setup>
+                    <module>Mage_Rating</module>
+                </setup>
+            </rating_setup>
+        </resources>
+        <blocks>
+            <rating>
+                <class>Mage_Rating_Block</class>
+            </rating>
+        </blocks>
+    </global>
+    <frontend>
+        <translate>
+            <modules>
+                <Mage_Rating>
+                    <files>
+                        <default>Mage_Rating.csv</default>
+                    </files>
+                </Mage_Rating>
+            </modules>
+        </translate>
+    </frontend>
+    <adminhtml>
+        <translate>
+            <modules>
+                <Mage_Rating>
+                    <files>
+                        <default>Mage_Rating.csv</default>
+                    </files>
+                </Mage_Rating>
+            </modules>
+        </translate>
+        <events>
+            <catalog_product_delete_after_done>
+                <observers>
+                    <rating>
+                        <class>rating/observer</class>
+                        <method>processProductAfterDeleteEvent</method>
+                    </rating>
+                </observers>
+            </catalog_product_delete_after_done>
+        </events>
+    </adminhtml>
+</config>

@@ -1,0 +1,28 @@
+<?php
+/**
+ * OpenMage
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available at https://opensource.org/license/afl-3-0-php
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://www.openmage.org)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<div class="block block-banner">
+    <div class="block-content">
+        <?php if(strtolower(substr($this->getLinkUrl(),0,4))==='http'): ?>
+            <a href="<?php echo $this->getLinkUrl() ?>" title="<?php echo Mage::helper('core')->quoteEscape($this->__($this->getImgAlt())) ?>">
+        <?php elseif($this->getLinkUrl()): ?>
+            <a href="<?php echo $this->getUrl($this->getLinkUrl()) ?>" title="<?php echo Mage::helper('core')->quoteEscape($this->__($this->getImgAlt())) ?>">
+        <?php endif ?>
+            <img src="<?php echo $this->getSkinUrl($this->getImgSrc()) ?>"<?php if(!$this->getLinkUrl()): ?> title="<?php echo Mage::helper('core')->quoteEscape($this->__($this->getImgAlt())) ?>"<?php endif ?> alt="<?php echo Mage::helper('core')->quoteEscape($this->__($this->getImgAlt())) ?>" />
+        <?php if($this->getLinkUrl()): ?>
+        </a>
+        <?php endif ?>
+    </div>
+</div>
