@@ -6,7 +6,7 @@ jobs:
     permissions:
       contents: read
       deployments: write
-    name: Publish to phpdoc.mahocommerce.com on Cloudflare Pages
+    name: Publish to Cloudflare Pages
 
     steps:
       - name: Setup PHP
@@ -25,6 +25,6 @@ jobs:
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: YOUR_ACCOUNT_ID
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: maho-phpdoc
           directory: phpdoc
