@@ -1,3 +1,19 @@
+## About Maho
+
+TODO
+
+## A clear vision means a clear road ahead
+
+TODO
+
+### Where does Maho stands in the ecommerce platforms landscape
+
+We believe Maho has a clear space in the plethora of ecommerce platforms:
+- Magento2/MageOS: Ideal for large or enterprise on-premise projects
+- Maho: Perfect for on-premise medium-to-small projects seeking a modern, streamlined platform
+- OpenMage: Suited for more conservative projects that desire complete control
+- Shopify: Best for medium-to-small SaaS projects
+
 ## Origin, meaning, and pronunciation of Maho
 
 "Maho" ([pronounced as "mah-hoh"](https://www.ingles.com/pronunciacion/majo)) draws inspiration from various
@@ -23,3 +39,9 @@ distinctly powerful and forward-looking.
 
 **Maho is a new tree growing from time-tested roots – familiar in essence, yet branching out in exciting
 new directions.**
+
+## Code of Conduct
+
+We are committed to fostering a welcoming and inclusive community, thus we ask all participants to [review and
+abide by our Code of Conduct](https://github.com/MahoCommerce/maho?tab=coc-ov-file) in full.  
+Violations will be addressed promptly.
