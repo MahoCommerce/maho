@@ -328,7 +328,6 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
      * @param bool $shouldSave
      * @return bool|false|$this
      * @see self::closeAuthorization()
-     * @para, bool $shouldSave
      */
     public function closeCapture($shouldSave = true)
     {
