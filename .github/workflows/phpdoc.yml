@@ -1,0 +1,29 @@
+on: [push, workflow_call, workflow_dispatch]
+
+jobs:
+  phpdoc:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    name: Publish to phpdoc.mahocommerce.com on Cloudflare Pages
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          tools: phpdoc
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate phpDoc
+        run: phpdoc -c .github/phpdoc.xml
+
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: YOUR_ACCOUNT_ID
+          projectName: maho-phpdoc
+          directory: phpdoc
