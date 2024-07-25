@@ -15,8 +15,8 @@
                 <path>lib</path>
             </source>
             <ignore>
-                <path>vendor/**/*</path>
-                <path>dev/**/*</path>
+                <path>app/code/core/Mage/*/sql/**/*</path>
+                <path>app/code/core/Mage/*/data/**/*</path>
             </ignore>
             <extensions>
                 <extension>php</extension>

@@ -27,4 +27,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: maho-phpdoc
-          directory: phpdoc
+          directory: .github/phpdoc
+          wranglerVersion: '3'
