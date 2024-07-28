@@ -80,7 +80,7 @@
     },
     "scripts": {
         "post-create-project-cmd": [
-            "@php -r \"function copydir($src, $dst) {@mkdir($dst);foreach ($iterator = new \\RecursiveIteratorIterator(new \\RecursiveDirectoryIterator($src, \\RecursiveDirectoryIterator::SKIP_DOTS), \\RecursiveIteratorIterator::SELF_FIRST) as $item) {if ($item->isDir()) {@mkdir($dst . DIRECTORY_SEPARATOR . $iterator->getSubPathname());} else {copy($item, $dst . DIRECTORY_SEPARATOR . $iterator->getSubPathname());}}}copydir('vendor/mahocommerce/maho/skin', 'pub/');copydir('vendor/mahocommerce/maho/js', 'pub/');\""
+            "@php -r \"function copydir(\$src, \$dst) {@mkdir($dst);foreach ($iterator = new \\RecursiveIteratorIterator(new \\RecursiveDirectoryIterator($src, \\RecursiveDirectoryIterator::SKIP_DOTS), \\RecursiveIteratorIterator::SELF_FIRST) as $item) {if ($item->isDir()) {@mkdir($dst . DIRECTORY_SEPARATOR . $iterator->getSubPathname());} else {copy($item, $dst . DIRECTORY_SEPARATOR . $iterator->getSubPathname());}}}copydir('vendor/mahocommerce/maho/skin', 'pub/');copydir('vendor/mahocommerce/maho/js', 'pub/');\""
         ]
     }
 }
