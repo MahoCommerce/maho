@@ -271,7 +271,11 @@ HTML;
                 &&
                 ($this->_viewDir == Mage::getBaseDir('design') || str_starts_with(realpath($this->_viewDir), realpath(Mage::getBaseDir('design'))))
             ) {
-                include $this->_viewDir . DS . $fileName;
+                $fileToInclude = Mage::findFileInIncludePath($fileName);
+                if (!$fileToInclude) {
+                    $fileToInclude = Mage::findFileInIncludePath($this->_viewDir . DS . $fileName);
+                }
+                include $fileToInclude;
             } else {
                 $thisClass = get_class($this);
                 Mage::log('Not valid template file:' . $fileName . ' class: ' . $thisClass, Zend_Log::CRIT, null, true);

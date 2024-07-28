@@ -337,7 +337,10 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     public function loadBase()
     {
         $etcDir = $this->getOptions()->getEtcDir();
-        $files = glob($etcDir . DS . '*.xml');
+        $files = array_merge(
+            glob($etcDir . DS . '*.xml'),
+            glob(BP . '/vendor/*/*/app/etc/*.xml')
+        );
         $this->loadFile(current($files));
         while ($file = next($files)) {
             $merge = clone $this->_prototype;
@@ -806,7 +809,10 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     protected function _getDeclaredModuleFiles()
     {
         $etcDir = $this->getOptions()->getEtcDir();
-        $moduleFiles = glob($etcDir . DS . 'modules' . DS . '*.xml');
+        $moduleFiles = array_merge(
+            glob($etcDir . DS . 'modules' . DS . '*.xml'),
+            glob(BP . '/vendor/*/*/app/etc/modules/*.xml')
+        );
 
         if (!$moduleFiles) {
             return false;
@@ -1065,7 +1071,10 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                 }
 
                 foreach ($fileName as $configFile) {
-                    $configFile = $this->getModuleDir('etc', $modName) . DS . $configFile;
+                    $moduleDir = $this->getModuleDir('etc', $modName);
+                    $configFile = $moduleDir . DS . $configFile;
+                    $configFile = Mage::findFileInIncludePath($configFile);
+
                     if ($mergeModel->loadFile($configFile)) {
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_GLOBAL, $mergeModel);
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_FRONTEND, $mergeModel);
@@ -1077,6 +1086,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                 }
             }
         }
+
         return $mergeToObject;
     }
 
