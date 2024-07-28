@@ -1,6 +1,7 @@
 {
     "name": "mahocommerce/maho",
     "description": "",
+    "homepage": "https://mahocommerce.com",
     "license": [
         "OSL-3.0",
         "AFL-3.0"

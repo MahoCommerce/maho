@@ -40,6 +40,11 @@ distinctly powerful and forward-looking.
 **Maho is a new tree growing from time-tested roots – familiar in essence, yet branching out in exciting
 new directions.**
 
+## Get in touch
+
+- [Send us a good old email](mailto:info@mahocommerce.com)
+- [Chat on Maho's discord server](https://discord.gg/dWgcVUFTrS)
+
 ## Code of Conduct
 
 We are committed to fostering a welcoming and inclusive community, thus we ask all participants to [review and
