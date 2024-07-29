@@ -35,7 +35,6 @@
         "friendsofphp/php-cs-fixer": "^3.4",
         "macopedia/phpstan-magento1": "^1.0.5",
         "magento-ecg/coding-standard": "^4.5",
-        "openmage/dev-meta-package": "^1.0",
         "phpcompatibility/php-compatibility": "^9.3",
         "phpmd/phpmd": "^2.13",
         "phpstan/phpstan": "^1.11",
@@ -70,8 +69,7 @@
     "config": {
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,
-            "cweagans/composer-patches": true,
-            "magento-hackathon/magento-composer-installer": false
+            "cweagans/composer-patches": true
         },
         "platform": {
             "php": "8.2"

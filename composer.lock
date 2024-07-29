@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6afde57b3157fe1b359651251d557268",
+    "content-hash": "7349654684d74857bf92d4a47658af0a",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -1643,81 +1643,6 @@
             "time": "2023-07-05T15:24:16+00:00"
         },
         {
-            "name": "magento-hackathon/magento-composer-installer",
-            "version": "1.3.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Cotya/magento-composer-installer.git",
-                "reference": "5a4e95b44b5f5b845b7f982b14d932b372bc9645"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Cotya/magento-composer-installer/zipball/5a4e95b44b5f5b845b7f982b14d932b372bc9645",
-                "reference": "5a4e95b44b5f5b845b7f982b14d932b372bc9645",
-                "shasum": ""
-            },
-            "require-dev": {
-                "composer/composer": "*",
-                "phpunit/phpunit": "*"
-            },
-            "suggest": {
-                "magento-hackathon/composer-command-integrator": "*"
-            },
-            "type": "composer-installer",
-            "extra": {
-                "composer-command-registry": [
-                    "MagentoHackathon\\Composer\\Magento\\Command\\DeployCommand"
-                ],
-                "class": "MagentoHackathon\\Composer\\Magento\\Installer"
-            },
-            "autoload": {
-                "psr-0": {
-                    "MagentoHackathon\\Composer\\Magento": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "OSL-3.0"
-            ],
-            "authors": [
-                {
-                    "name": "Vinai Kopp",
-                    "email": "vinai@netzarbeiter.com"
-                },
-                {
-                    "name": "Daniel Fahlke aka Flyingmana",
-                    "email": "flyingmana@googlemail.com"
-                },
-                {
-                    "name": "Jörg Weller",
-                    "email": "weller@flagbit.de"
-                },
-                {
-                    "name": "Karl Spies",
-                    "email": "karl.spies@gmx.net"
-                },
-                {
-                    "name": "Tobias Vogt",
-                    "email": "tobi@webguys.de"
-                },
-                {
-                    "name": "David Fuhr",
-                    "email": "fuhr@flagbit.de"
-                }
-            ],
-            "description": "Composer installer for Magento modules",
-            "homepage": "https://github.com/magento-hackathon/magento-composer-installer",
-            "keywords": [
-                "composer-installer",
-                "magento"
-            ],
-            "support": {
-                "issues": "https://github.com/Cotya/magento-composer-installer/issues",
-                "source": "https://github.com/Cotya/magento-composer-installer/tree/1.3.2"
-            },
-            "time": "2013-12-10T10:35:46+00:00"
-        },
-        {
             "name": "myclabs/deep-copy",
             "version": "1.12.0",
             "source": {
@@ -1834,114 +1759,6 @@
                 "source": "https://github.com/nikic/PHP-Parser/tree/v5.1.0"
             },
             "time": "2024-07-01T20:03:41+00:00"
-        },
-        {
-            "name": "openmage/dev-copyright",
-            "version": "dev-main",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/OpenMage/dev-copyright.git",
-                "reference": "c963a65ec34e932f2fef0d80db087e059bb1fec8"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/OpenMage/dev-copyright/zipball/c963a65ec34e932f2fef0d80db087e059bb1fec8",
-                "reference": "c963a65ec34e932f2fef0d80db087e059bb1fec8",
-                "shasum": ""
-            },
-            "require": {
-                "magento-hackathon/magento-composer-installer": "*"
-            },
-            "default-branch": true,
-            "type": "magento-module",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "OSL-3.0"
-            ],
-            "authors": [
-                {
-                    "name": "Justin Beaty",
-                    "homepage": "https://github.com/justinbeaty"
-                }
-            ],
-            "description": "Updated copyright blocks.",
-            "support": {
-                "issues": "https://github.com/OpenMage/dev-copyright/issues",
-                "source": "https://github.com/OpenMage/dev-copyright/tree/main"
-            },
-            "time": "2023-04-04T07:37:16+00:00"
-        },
-        {
-            "name": "openmage/dev-meta-package",
-            "version": "1.0.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/OpenMage/dev-meta-package.git",
-                "reference": "34a240a5c5eab60dad41c19688a9a5e0e6c24474"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/OpenMage/dev-meta-package/zipball/34a240a5c5eab60dad41c19688a9a5e0e6c24474",
-                "reference": "34a240a5c5eab60dad41c19688a9a5e0e6c24474",
-                "shasum": ""
-            },
-            "require": {
-                "openmage/dev-copyright": "dev-main",
-                "openmage/dev-translations": "dev-main"
-            },
-            "type": "metapackage",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "OSL-3.0"
-            ],
-            "authors": [
-                {
-                    "name": "Sven Reichel",
-                    "email": "github-sr@hotmail.com"
-                }
-            ],
-            "description": "OpenMage tools that are only needed for development.",
-            "support": {
-                "issues": "https://github.com/OpenMage/dev-meta-package/issues",
-                "source": "https://github.com/OpenMage/dev-meta-package/tree/v1.0.3"
-            },
-            "time": "2023-04-04T07:39:43+00:00"
-        },
-        {
-            "name": "openmage/dev-translations",
-            "version": "dev-main",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/OpenMage/dev-translations.git",
-                "reference": "bdbecd2f51723056787ca1efb24db700d605c152"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/OpenMage/dev-translations/zipball/bdbecd2f51723056787ca1efb24db700d605c152",
-                "reference": "bdbecd2f51723056787ca1efb24db700d605c152",
-                "shasum": ""
-            },
-            "require": {
-                "magento-hackathon/magento-composer-installer": "*"
-            },
-            "default-branch": true,
-            "type": "magento-module",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "OSL-3.0"
-            ],
-            "authors": [
-                {
-                    "name": "Justin Beaty",
-                    "homepage": "https://github.com/justinbeaty"
-                }
-            ],
-            "description": "Finds missing and unused translations.",
-            "support": {
-                "issues": "https://github.com/OpenMage/dev-translations/issues",
-                "source": "https://github.com/OpenMage/dev-translations/tree/main"
-            },
-            "time": "2023-04-04T07:36:52+00:00"
         },
         {
             "name": "pdepend/pdepend",
