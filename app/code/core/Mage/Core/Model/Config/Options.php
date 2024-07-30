@@ -39,7 +39,7 @@ class Mage_Core_Model_Config_Options extends Varien_Object
      */
     protected function _construct()
     {
-        $root = Mage::getRoot();
+        $root = BP;
         $appRoot = $root . DS . 'app';
 
         $this->_data['base_dir']    = $root;

@@ -43,12 +43,12 @@
 /dev/tests/functional/generated
 /dev/tests/functional/vendor
 
-/media/*
-!/media/.htaccess
-!/media/custom_options/.htaccess
-!/media/customer/.htaccess
-!/media/dhl/logo.jpg
-!/media/downloadable/.htaccess
+/pub/media/*
+!/pub/media/.htaccess
+!/pub/media/custom_options/.htaccess
+!/pub/media/customer/.htaccess
+!/pub/media/dhl/logo.jpg
+!/pub/media/downloadable/.htaccess
 
 /var/*
 !/var/.htaccess

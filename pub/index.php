@@ -5,8 +5,13 @@ define('MAGENTO_ROOT', dirname(__DIR__));
 $maintenanceFile = 'maintenance.flag';
 $maintenanceIpFile = 'maintenance.ip';
 
-require MAGENTO_ROOT . '/vendor/mahocommerce/maho/app/bootstrap.php';
-require MAGENTO_ROOT . '/vendor/mahocommerce/maho/app/Mage.php';
+if (file_exists(MAGENTO_ROOT . DIRECTORY_SEPARATOR . 'app/bootstrap.php')) {
+    require MAGENTO_ROOT . '/app/bootstrap.php';
+    require MAGENTO_ROOT . '/app/Mage.php';
+} else {
+    require MAGENTO_ROOT . '/vendor/mahocommerce/maho/app/bootstrap.php';
+    require MAGENTO_ROOT . '/vendor/mahocommerce/maho/app/Mage.php';
+}
 
 #Varien_Profiler::enable();
 

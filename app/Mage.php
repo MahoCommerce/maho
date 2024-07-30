@@ -15,7 +15,13 @@
 
 define('DS', DIRECTORY_SEPARATOR);
 define('PS', PATH_SEPARATOR);
-define('BP', dirname(getcwd()));
+if (file_exists( __DIR__ . '/vendor/mahocommerce/maho')) {
+    define('BP', dirname(getcwd()));
+} elseif (str_contains(__DIR__, '/vendor/mahocommerce/maho')) {
+    define('BP', dirname(getcwd()));
+} else {
+    define('BP', dirname(__DIR__));
+}
 
 Mage::register('original_include_path', get_include_path());
 
@@ -43,7 +49,6 @@ include_once "Mage/Core/functions.php";
 include_once "Varien/Autoload.php";
 
 Varien_Autoload::register();
-
 require_once BP . DS . 'vendor' . DS . 'autoload.php';
 
 /* Support additional includes, such as composer's vendor/autoload.php files */
