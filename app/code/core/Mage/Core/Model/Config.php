@@ -337,19 +337,34 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     public function loadBase()
     {
         $etcDir = $this->getOptions()->getEtcDir();
-        $files = array_merge(
-            glob($etcDir . DS . '*.xml'),
-            glob(BP . '/vendor/*/*/app/etc/*.xml')
+
+        $coreFiles = glob(BP . '/vendor/mahocommerce/maho/app/etc/*.xml');
+        $modulesFiles = array_diff(
+            glob(BP . '/vendor/*/*/app/etc/*.xml'),
+            $coreFiles
         );
+        $localFiles = glob($etcDir . DS . '*.xml');
+
+        $files = [];
+        foreach (array_merge($localFiles, $modulesFiles, $coreFiles) as $file) {
+            $basename = basename($file);
+            if (!isset($files[$basename])) {
+                $files[$basename] = $file;
+            }
+        }
+        $files = array_reverse($files);
+
         $this->loadFile(current($files));
         while ($file = next($files)) {
             $merge = clone $this->_prototype;
             $merge->loadFile($file);
             $this->extend($merge);
         }
+
         if (in_array($etcDir . DS . 'local.xml', $files)) {
             $this->_isLocalConfigLoaded = true;
         }
+
         return $this;
     }
 
@@ -809,10 +824,22 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     protected function _getDeclaredModuleFiles()
     {
         $etcDir = $this->getOptions()->getEtcDir();
-        $moduleFiles = array_merge(
-            glob($etcDir . DS . 'modules' . DS . '*.xml'),
-            glob(BP . '/vendor/*/*/app/etc/modules/*.xml')
+
+        $coreFiles = glob(BP . '/vendor/mahocommerce/maho/app/etc/modules/*.xml');
+        $modulesFiles = array_diff(
+            glob(BP . '/vendor/*/*/app/etc/modules/*.xml'),
+            $coreFiles
         );
+        $localFiles = glob($etcDir . DS . 'modules' . DS . '*.xml');
+
+        $moduleFiles = [];
+        foreach (array_merge($localFiles, $modulesFiles, $coreFiles) as $file) {
+            $basename = basename($file);
+            if (!isset($moduleFiles[$basename])) {
+                $moduleFiles[$basename] = $file;
+            }
+        }
+        $moduleFiles = array_reverse($moduleFiles);
 
         if (!$moduleFiles) {
             return false;
