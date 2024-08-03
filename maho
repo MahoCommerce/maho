@@ -6,5 +6,8 @@ require __DIR__.'/vendor/autoload.php';
 use Symfony\Component\Console\Application;
 
 $application = new Application();
+$application->add(new \Maho\Commands\CacheEnable());
+$application->add(new \Maho\Commands\CacheDisable());
+$application->add(new \Maho\Commands\CacheFlush());
 $application->add(new \Maho\Commands\RunLegacyShellFile());
 $application->run();

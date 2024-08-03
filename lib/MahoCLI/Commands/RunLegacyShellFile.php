@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
     name: 'legacy:run-shell-file',
     description: 'Run legacy shell file'
 )]
-class RunLegacyShellFile extends Command
+class RunLegacyShellFile extends BaseMahoCommand
 {
     protected function configure(): void
     {
