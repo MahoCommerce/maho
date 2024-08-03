@@ -54,7 +54,7 @@ $paths = require BP . '/vendor/composer/include_paths.php';
 $paths[] = BP . '/app/code/local';
 $paths[] = BP . '/app/code/community';
 $paths[] = BP . '/app/code/core';
-$allModules = Mage::getAllInstallationsData()[1];
+$allModules = Mage::getComposerInstallationData()[1];
 foreach($allModules as $module) {
     if (str_contains($module, 'mahocommerce/maho')) {
         continue;
@@ -163,6 +163,11 @@ final class Mage
      * @static
      */
     private static $_currentEdition = self::EDITION_COMMUNITY;
+
+    /**
+     * @var array
+     */
+    private static $_composerInstallationData;
 
     /**
      * Gets the current Magento version string
@@ -1074,8 +1079,12 @@ final class Mage
         return $baseUrl;
     }
 
-    public static function getAllInstallationsData(): array
+    public static function getComposerInstallationData(): array
     {
+        if (self::$_composerInstallationData) {
+            return self::$_composerInstallationData;
+        }
+
         $packages = $packageDirectories = [];
         $installedVersions = \Composer\InstalledVersions::getAllRawData();
         foreach ($installedVersions as $datasets) {
@@ -1096,15 +1105,17 @@ final class Mage
         $packages = array_unique($packages);
         $packageDirectories = array_unique($packageDirectories);
 
-        return [
+        self::$_composerInstallationData = [
             $packages,
             $packageDirectories
         ];
+
+        return self::$_composerInstallationData;
     }
 
     public static function findFileInIncludePath(string $relativePath): string|false
     {
-        list($packages, $packageDirectories) = self::getAllInstallationsData();
+        list($packages, $packageDirectories) = self::getComposerInstallationData();
 
         $baseDir = Mage::getBaseDir();
         foreach ($packages as $package) {
@@ -1132,7 +1143,7 @@ final class Mage
 
     public static function listDirectories($path)
     {
-        list($packages, $packageDirectories) = self::getAllInstallationsData();
+        list($packages, $packageDirectories) = self::getComposerInstallationData();
 
         $baseDir = Mage::getBaseDir();
         foreach ($packages as $package) {

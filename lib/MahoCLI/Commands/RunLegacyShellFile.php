@@ -39,7 +39,7 @@ class RunLegacyShellFile extends Command
         return Command::SUCCESS;
     }
 
-    protected static function getAllInstallationsData(): array
+    protected static function getComposerInstallationData(): array
     {
         $packages = $packageDirectories = [];
         $installedVersions = \Composer\InstalledVersions::getAllRawData();
@@ -69,7 +69,7 @@ class RunLegacyShellFile extends Command
 
     protected static function findFileInIncludePath(string $relativePath): string|false
     {
-        list($packages, $packageDirectories) = self::getAllInstallationsData();
+        list($packages, $packageDirectories) = self::getComposerInstallationData();
         $rootPackage = \Composer\InstalledVersions::getRootPackage();
         $baseDir = str_replace('/composer/../../', '', $rootPackage['install_path']);
 
