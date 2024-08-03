@@ -10,6 +10,7 @@ $application->add(new \Maho\Commands\CacheEnable());
 $application->add(new \Maho\Commands\CacheDisable());
 $application->add(new \Maho\Commands\CacheFlush());
 $application->add(new \Maho\Commands\IndexList());
+$application->add(new \Maho\Commands\IndexReindex());
 $application->add(new \Maho\Commands\IndexReindexAll());
 $application->add(new \Maho\Commands\RunLegacyShellFile());
 $application->run();
