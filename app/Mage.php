@@ -36,13 +36,12 @@ if (true or !empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_
  * Set include path
  */
 $paths = [];
-$paths[] = BP . DS . 'app' . DS . 'code' . DS . 'local';
-$paths[] = BP . DS . 'app' . DS . 'code' . DS . 'community';
-$paths[] = BP . DS . 'app' . DS . 'code' . DS . 'core';
-$paths[] = BP . DS . 'vendor' . DS . 'mahocommerce' . DS . 'maho' . DS . 'app' . DS . 'code' . DS . 'core';
-$paths[] = BP . DS . 'lib';
-$paths[] = BP . DS . 'vendor' . DS . 'mahocommerce' . DS . 'maho' . DS . 'lib';
-
+$paths[] = BP . '/app/code/local';
+$paths[] = BP . '/app/code/community';
+$paths[] = BP . '/app/code/core';
+$paths[] = BP . '/vendor/mahocommerce/maho/app/code/core';
+$paths[] = BP . '/lib';
+$paths[] = BP . '/vendor/mahocommerce/maho/lib';
 $appPath = implode(PS, $paths);
 set_include_path($appPath . PS . Mage::registry('original_include_path'));
 include_once "Mage/Core/functions.php";
@@ -50,6 +49,31 @@ include_once "Varien/Autoload.php";
 
 Varien_Autoload::register();
 require_once BP . DS . 'vendor' . DS . 'autoload.php';
+
+$paths = require BP . '/vendor/composer/include_paths.php';
+$paths[] = BP . '/app/code/local';
+$paths[] = BP . '/app/code/community';
+$paths[] = BP . '/app/code/core';
+$allModules = Mage::getAllInstallationsData()[1];
+foreach($allModules as $module) {
+    if (str_contains($module, 'mahocommerce/maho')) {
+        continue;
+    }
+    $paths[] = "$module/app/code/local";
+    $paths[] = "$module/app/code/community";
+    $paths[] = "$module/app/code/core";
+}
+$paths[] = BP . '/vendor/mahocommerce/maho/app/code/core';
+$paths[] = BP . '/lib';
+foreach($allModules as $module) {
+    if (str_contains($module, 'mahocommerce/maho')) {
+        continue;
+    }
+    $paths[] = "$module/lib";
+}
+$paths[] = BP . '/vendor/mahocommerce/maho/lib';
+$appPath = implode(PS, $paths);
+set_include_path($appPath . PS . Mage::registry('original_include_path'));
 
 /* Support additional includes, such as composer's vendor/autoload.php files */
 foreach (glob(BP . DS . 'app' . DS . 'etc' . DS . 'includes' . DS . '*.php') as $path) {

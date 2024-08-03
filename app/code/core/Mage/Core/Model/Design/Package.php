@@ -436,7 +436,7 @@ class Mage_Core_Model_Design_Package
             $params['_package'] = self::BASE_PACKAGE;
             $params['_theme']   = self::DEFAULT_THEME;
         }
-        return $this->_renderFilename($file, $params);
+        return $this->validateFile($file, $params);
     }
 
     /**
