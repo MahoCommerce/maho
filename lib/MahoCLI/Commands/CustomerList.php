@@ -1,0 +1,46 @@
+<?php
+
+namespace Maho\Commands;
+
+use Mage;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Helper\Table;
+
+#[AsCommand(
+    name: 'customer:list',
+    description: 'List all customers'
+)]
+class CustomerList extends BaseMahoCommand
+{
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $this->initMaho();
+
+        $customerAttributes = ['entity_id', 'website_id', 'email', 'firstname', 'lastname'];
+        $customers = Mage::getResourceModel('customer/customer_collection');
+        $customers->addAttributeToSelect($customerAttributes);
+        if ($customers->getSize() == 0) {
+            $output->writeln('No customers found.');
+            return Command::SUCCESS;
+        }
+
+        $table = new Table($output);
+        $table->setHeaders($customerAttributes);
+
+        foreach ($customers as $customer) {
+            $table->addRow([
+                $customer->getEntityId(),
+                $customer->getWebsiteId(),
+                $customer->getEmail(),
+                $customer->getFirstname(),
+                $customer->getLastname()
+            ]);
+        }
+        $table->render();
+
+        return Command::SUCCESS;
+    }
+}
