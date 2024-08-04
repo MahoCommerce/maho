@@ -15,11 +15,17 @@
 
 define('DS', DIRECTORY_SEPARATOR);
 define('PS', PATH_SEPARATOR);
-define('BP', dirname(__DIR__));
+if (file_exists( __DIR__ . '/vendor/mahocommerce/maho')) {
+    define('BP', dirname(getcwd()));
+} elseif (str_contains(__DIR__, '/vendor/mahocommerce/maho')) {
+    define('BP', dirname(getcwd()));
+} else {
+    define('BP', dirname(__DIR__));
+}
 
 Mage::register('original_include_path', get_include_path());
 
-if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPER_MODE'])) {
+if (true or !empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPER_MODE'])) {
     Mage::setIsDeveloperMode(true);
     ini_set('display_errors', '1');
     ini_set('error_prepend_string', '<pre>');
@@ -30,28 +36,44 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
  * Set include path
  */
 $paths = [];
-$paths[] = BP . DS . 'app' . DS . 'code' . DS . 'local';
-$paths[] = BP . DS . 'app' . DS . 'code' . DS . 'community';
-$paths[] = BP . DS . 'app' . DS . 'code' . DS . 'core';
-$paths[] = BP . DS . 'lib';
-
+$paths[] = BP . '/app/code/local';
+$paths[] = BP . '/app/code/community';
+$paths[] = BP . '/app/code/core';
+$paths[] = BP . '/vendor/mahocommerce/maho/app/code/core';
+$paths[] = BP . '/lib';
+$paths[] = BP . '/vendor/mahocommerce/maho/lib';
 $appPath = implode(PS, $paths);
 set_include_path($appPath . PS . Mage::registry('original_include_path'));
 include_once "Mage/Core/functions.php";
 include_once "Varien/Autoload.php";
 
 Varien_Autoload::register();
+require_once BP . DS . 'vendor' . DS . 'autoload.php';
 
-/** AUTOLOADER PATCH **/
-$autoloaderPath = getenv('COMPOSER_VENDOR_PATH');
-if (!$autoloaderPath) {
-    $autoloaderPath = dirname(BP) . DS .  'vendor';
-    if (!is_dir($autoloaderPath)) {
-        $autoloaderPath = BP . DS . 'vendor';
+$paths = require BP . '/vendor/composer/include_paths.php';
+$paths[] = BP . '/app/code/local';
+$paths[] = BP . '/app/code/community';
+$paths[] = BP . '/app/code/core';
+$allModules = Mage::getComposerInstallationData()[1];
+foreach($allModules as $module) {
+    if (str_contains($module, 'mahocommerce/maho')) {
+        continue;
     }
+    $paths[] = "$module/app/code/local";
+    $paths[] = "$module/app/code/community";
+    $paths[] = "$module/app/code/core";
 }
-require_once $autoloaderPath . DS . 'autoload.php';
-/** AUTOLOADER PATCH **/
+$paths[] = BP . '/vendor/mahocommerce/maho/app/code/core';
+$paths[] = BP . '/lib';
+foreach($allModules as $module) {
+    if (str_contains($module, 'mahocommerce/maho')) {
+        continue;
+    }
+    $paths[] = "$module/lib";
+}
+$paths[] = BP . '/vendor/mahocommerce/maho/lib';
+$appPath = implode(PS, $paths);
+set_include_path($appPath . PS . Mage::registry('original_include_path'));
 
 /* Support additional includes, such as composer's vendor/autoload.php files */
 foreach (glob(BP . DS . 'app' . DS . 'etc' . DS . 'includes' . DS . '*.php') as $path) {
@@ -141,6 +163,11 @@ final class Mage
      * @static
      */
     private static $_currentEdition = self::EDITION_COMMUNITY;
+
+    /**
+     * @var array
+     */
+    private static $_composerInstallationData;
 
     /**
      * Gets the current Magento version string
@@ -303,7 +330,7 @@ final class Mage
 
         if ($appRoot === '') {
             // automagically find application root by __DIR__ constant of Mage.php
-            $appRoot = __DIR__;
+            $appRoot = dirname(getcwd());
         }
 
         $appRoot = realpath($appRoot);
@@ -1050,5 +1077,90 @@ final class Mage
         }
 
         return $baseUrl;
+    }
+
+    public static function getComposerInstallationData(): array
+    {
+        if (self::$_composerInstallationData) {
+            return self::$_composerInstallationData;
+        }
+
+        $packages = $packageDirectories = [];
+        $installedVersions = \Composer\InstalledVersions::getAllRawData();
+        foreach ($installedVersions as $datasets) {
+            array_shift($datasets['versions']);
+            foreach ($datasets['versions'] as $package => $version) {
+                if (!isset($version['install_path'])) {
+                    continue;
+                }
+
+                if (!in_array($version['type'], ['magento-source', 'magento-module'])) {
+                    continue;
+                }
+
+                $packages[] = $package;
+                $packageDirectories[] = realpath($version['install_path']);
+            }
+        }
+        $packages = array_unique($packages);
+        $packageDirectories = array_unique($packageDirectories);
+
+        self::$_composerInstallationData = [
+            $packages,
+            $packageDirectories
+        ];
+
+        return self::$_composerInstallationData;
+    }
+
+    public static function findFileInIncludePath(string $relativePath): string|false
+    {
+        list($packages, $packageDirectories) = self::getComposerInstallationData();
+
+        $baseDir = Mage::getBaseDir();
+        foreach ($packages as $package) {
+            $relativePath = str_replace($baseDir . DS . 'vendor' . DS . $package, '', $relativePath);
+        }
+        $relativePath = str_replace($baseDir, '', $relativePath);
+        $relativePath = ltrim($relativePath, '/');
+
+        // if file exists in the current folder, don't look elsewhere
+        $fullPath = Mage::getBaseDir() . DS . $relativePath;
+        if (file_exists($fullPath)) {
+            return $fullPath;
+        }
+
+        // search for the file in composer packages
+        foreach ($packageDirectories as $basePath) {
+            $fullPath = $basePath . DIRECTORY_SEPARATOR . $relativePath;
+            if (file_exists($fullPath)) {
+                return realpath($fullPath);
+            }
+        }
+
+        return false;
+    }
+
+    public static function listDirectories($path)
+    {
+        list($packages, $packageDirectories) = self::getComposerInstallationData();
+
+        $baseDir = Mage::getBaseDir();
+        foreach ($packages as $package) {
+            $path = str_replace($baseDir . DS . 'vendor' . DS . $package, '', $path);
+        }
+        $path = str_replace($baseDir, '', $path);
+        $path = ltrim($path, '/');
+
+        $results = [];
+        array_unshift($packageDirectories, MAGENTO_ROOT);
+        foreach ($packageDirectories as $packageDirectory) {
+            $tmpList = glob($packageDirectory . DS . $path . '/*' , GLOB_ONLYDIR);
+            foreach ($tmpList as $folder) {
+                $results[] = basename($folder);
+            }
+        }
+
+        return array_unique($results);
     }
 }

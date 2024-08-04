@@ -40,7 +40,7 @@ class Mage_Page_Block_Html_Topmenu_Renderer extends Mage_Page_Block_Html_Topmenu
             throw new Exception("Top-menu renderer isn't fully configured.");
         }
 
-        $includeFilePath = realpath(Mage::getBaseDir('design') . DS . $this->getTemplateFile());
+        $includeFilePath = $this->getTemplateFile();
         if (!str_contains($this->getTemplateFile(), '..')) {
             $this->_templateFile = $includeFilePath;
         } else {

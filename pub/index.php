@@ -1,27 +1,17 @@
 <?php
-/**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
- *
- * @category   Mage
- * @package    Mage
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://www.openmage.org)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
 
-define('MAGENTO_ROOT', getcwd());
+define('MAGENTO_ROOT', dirname(__DIR__));
 
-$mageFilename = MAGENTO_ROOT . '/app/Mage.php';
 $maintenanceFile = 'maintenance.flag';
 $maintenanceIpFile = 'maintenance.ip';
 
-
-require MAGENTO_ROOT . '/app/bootstrap.php';
-require_once $mageFilename;
+if (file_exists(MAGENTO_ROOT . DIRECTORY_SEPARATOR . 'app/bootstrap.php')) {
+    require MAGENTO_ROOT . '/app/bootstrap.php';
+    require MAGENTO_ROOT . '/app/Mage.php';
+} else {
+    require MAGENTO_ROOT . '/vendor/mahocommerce/maho/app/bootstrap.php';
+    require MAGENTO_ROOT . '/vendor/mahocommerce/maho/app/Mage.php';
+}
 
 #Varien_Profiler::enable();
 

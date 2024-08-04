@@ -43,8 +43,22 @@ class Mage_Core_Model_Design_Config extends Varien_Simplexml_Config
         $this->setCache(Mage::app()->getCache());
         if (!$this->loadCache()) {
             $this->loadString('<theme />');
-            $path = str_replace('/', DS, $this->_designRoot . '/*/*/*/etc/theme.xml');
-            $files = glob($path);
+            $files = array_merge(
+                glob($this->_designRoot . '/*/*/*/etc/theme.xml'),
+                glob(BP . '/vendor/mahocommerce/maho' . str_replace(BP, '', $this->_designRoot) . '/*/*/*/etc/theme.xml'),
+            );
+
+            $filesByIdentifier = [];
+            foreach ($files as $file) {
+                $id = str_replace(BP . '/vendor/mahocommerce/maho', '', $file);
+                $id = str_replace(BP, '', $id);
+                $id = ltrim($id, '/');
+                if (!isset($filesByIdentifier[$id])) {
+                    $filesByIdentifier[$id] = $file;
+                }
+            }
+
+            $files = array_values($filesByIdentifier);
             foreach ($files as $file) {
                 $config = new Varien_Simplexml_Config();
                 $config->loadFile($file);

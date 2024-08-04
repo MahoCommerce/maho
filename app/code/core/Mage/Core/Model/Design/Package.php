@@ -227,7 +227,7 @@ class Mage_Core_Model_Design_Package
      */
     public function designPackageExists($packageName, $area = self::DEFAULT_AREA)
     {
-        return is_dir(Mage::getBaseDir('design') . DS . $area . DS . $packageName);
+        return true;
     }
 
     /**
@@ -381,10 +381,8 @@ class Mage_Core_Model_Design_Package
     public function validateFile($file, array $params)
     {
         $fileName = $this->_renderFilename($file, $params);
-        $testFile = (empty($params['_relative']) ? '' : Mage::getBaseDir('design') . DS) . $fileName;
-        if (!file_exists($testFile)) {
-            return false;
-        }
+        $fileName = (empty($params['_relative']) ? '' : Mage::getBaseDir('design') . DS) . $fileName;
+        $fileName = Mage::findFileInIncludePath($fileName);
         return $fileName;
     }
 
@@ -438,7 +436,7 @@ class Mage_Core_Model_Design_Package
             $params['_package'] = self::BASE_PACKAGE;
             $params['_theme']   = self::DEFAULT_THEME;
         }
-        return $this->_renderFilename($file, $params);
+        return $this->validateFile($file, $params);
     }
 
     /**
@@ -545,6 +543,7 @@ class Mage_Core_Model_Design_Package
             );
         }
         $result = $this->getSkinBaseUrl($params) . (empty($file) ? '' : $file);
+
         Varien_Profiler::stop(__METHOD__);
         return $result;
     }
@@ -556,7 +555,7 @@ class Mage_Core_Model_Design_Package
     public function getPackageList()
     {
         $directory = Mage::getBaseDir('design') . DS . 'frontend';
-        return $this->_listDirectories($directory);
+        return Mage::listDirectories($directory);
     }
 
     /**
@@ -574,7 +573,7 @@ class Mage_Core_Model_Design_Package
             }
         } else {
             $directory = Mage::getBaseDir('design') . DS . 'frontend' . DS . $package;
-            $result = $this->_listDirectories($directory);
+            $result = Mage::listDirectories($directory);
         }
 
         return $result;
@@ -586,6 +585,7 @@ class Mage_Core_Model_Design_Package
      * @param string $path
      * @param string|bool $fullPath
      * @return array
+     * @deprecated
      */
     private function _listDirectories($path, $fullPath = false)
     {

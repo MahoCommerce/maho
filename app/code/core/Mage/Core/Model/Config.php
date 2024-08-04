@@ -337,16 +337,34 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     public function loadBase()
     {
         $etcDir = $this->getOptions()->getEtcDir();
-        $files = glob($etcDir . DS . '*.xml');
+
+        $coreFiles = glob(BP . '/vendor/mahocommerce/maho/app/etc/*.xml');
+        $modulesFiles = array_diff(
+            glob(BP . '/vendor/*/*/app/etc/*.xml'),
+            $coreFiles
+        );
+        $localFiles = glob($etcDir . DS . '*.xml');
+
+        $files = [];
+        foreach (array_merge($localFiles, $modulesFiles, $coreFiles) as $file) {
+            $basename = basename($file);
+            if (!isset($files[$basename])) {
+                $files[$basename] = $file;
+            }
+        }
+        $files = array_reverse($files);
+
         $this->loadFile(current($files));
         while ($file = next($files)) {
             $merge = clone $this->_prototype;
             $merge->loadFile($file);
             $this->extend($merge);
         }
+
         if (in_array($etcDir . DS . 'local.xml', $files)) {
             $this->_isLocalConfigLoaded = true;
         }
+
         return $this;
     }
 
@@ -806,7 +824,22 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     protected function _getDeclaredModuleFiles()
     {
         $etcDir = $this->getOptions()->getEtcDir();
-        $moduleFiles = glob($etcDir . DS . 'modules' . DS . '*.xml');
+
+        $coreFiles = glob(BP . '/vendor/mahocommerce/maho/app/etc/modules/*.xml');
+        $modulesFiles = array_diff(
+            glob(BP . '/vendor/*/*/app/etc/modules/*.xml'),
+            $coreFiles
+        );
+        $localFiles = glob($etcDir . DS . 'modules' . DS . '*.xml');
+
+        $moduleFiles = [];
+        foreach (array_merge($localFiles, $modulesFiles, $coreFiles) as $file) {
+            $basename = basename($file);
+            if (!isset($moduleFiles[$basename])) {
+                $moduleFiles[$basename] = $file;
+            }
+        }
+        $moduleFiles = array_reverse($moduleFiles);
 
         if (!$moduleFiles) {
             return false;
@@ -1065,7 +1098,10 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                 }
 
                 foreach ($fileName as $configFile) {
-                    $configFile = $this->getModuleDir('etc', $modName) . DS . $configFile;
+                    $moduleDir = $this->getModuleDir('etc', $modName);
+                    $configFile = $moduleDir . DS . $configFile;
+                    $configFile = Mage::findFileInIncludePath($configFile);
+
                     if ($mergeModel->loadFile($configFile)) {
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_GLOBAL, $mergeModel);
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_FRONTEND, $mergeModel);
@@ -1077,6 +1113,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                 }
             }
         }
+
         return $mergeToObject;
     }
 

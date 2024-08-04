@@ -25,11 +25,11 @@
         "ext-zlib": "*",
         "cweagans/composer-patches": "^1.7",
         "ezyang/htmlpurifier": "^4.17",
-        "magento-hackathon/magento-composer-installer": "^3.1 || ^2.1 || ^4.0",
         "pelago/emogrifier": "^7.0",
         "phpseclib/mcrypt_compat": "^2.0.3",
         "phpseclib/phpseclib": "^3.0.14",
-        "shardj/zf1-future": "1.24.0"
+        "shardj/zf1-future": "1.24.0",
+        "symfony/console": "^7.1"
     },
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
@@ -49,16 +49,17 @@
     },
     "minimum-stability": "dev",
     "prefer-stable" : true,
+    "autoload": {
+        "psr-4": {
+            "Maho\\": "lib/MahoCLI"
+        }
+    },
     "autoload-dev": {
         "psr-4": {
             "OpenMage\\Tests\\Unit\\": "dev/tests/unit"
         }
     },
     "extra": {
-        "magento-root-dir": ".",
-        "magento-deploystrategy": "copy",
-        "magento-deploystrategy-dev": "symlink",
-        "magento-force": true,
         "patches": {
             "shardj/zf1-future": {
                 "MAG-1.1.1": "https://raw.githubusercontent.com/OpenMage/composer-patches/74862e7a9fa29dd62c5c02d585d931ce9e3c5815/patches/MAG-1.1.1.patch",
@@ -73,7 +74,6 @@
     },
     "config": {
         "allow-plugins": {
-            "magento-hackathon/magento-composer-installer": true,
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "cweagans/composer-patches": true
         },
