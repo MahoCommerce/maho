@@ -1,5 +1,5 @@
 includes:
-    - vendor/macopedia/phpstan-magento1/extension.neon
+    - vendor/mahocommerce/maho-phpstan-plugin/extension.neon
     - phpstan.dist.baseline.neon
     - phar://phpstan.phar/conf/bleedingEdge.neon
 parameters:
@@ -63,6 +63,8 @@ parameters:
     checkFunctionNameCase: true
     checkInternalClassCaseSensitivity: true
     treatPhpDocTypesAsCertain: false
+    typeAliases:
+        Cm_RedisSession_Model_Session: 'Mage_Core_Model_Resource_Session'
 
 #    universalObjectCratesClasses:
 #        - Varien_Object

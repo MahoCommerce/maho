@@ -25,7 +25,7 @@ if (file_exists( __DIR__ . '/vendor/mahocommerce/maho')) {
 
 Mage::register('original_include_path', get_include_path());
 
-if (true or !empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPER_MODE'])) {
+if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPER_MODE'])) {
     Mage::setIsDeveloperMode(true);
     ini_set('display_errors', '1');
     ini_set('error_prepend_string', '<pre>');
@@ -1144,6 +1144,9 @@ final class Mage
     public static function listDirectories($path)
     {
         list($packages, $packageDirectories) = self::getComposerInstallationData();
+        if (!defined('MAGENTO_ROOT')) {
+            Mage::throwException('MAGENTO_ROOT constant is not defined.');
+        }
 
         $baseDir = Mage::getBaseDir();
         foreach ($packages as $package) {

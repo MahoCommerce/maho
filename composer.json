@@ -34,7 +34,7 @@
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
         "friendsofphp/php-cs-fixer": "^3.4",
-        "macopedia/phpstan-magento1": "^1.0.5",
+        "mahocommerce/maho-phpstan-plugin": "@dev",
         "magento-ecg/coding-standard": "^4.5",
         "phpcompatibility/php-compatibility": "^9.3",
         "phpmd/phpmd": "^2.13",
