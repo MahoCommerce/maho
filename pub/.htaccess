@@ -13,35 +13,7 @@
     DirectoryIndex index.php
 
 ############################################
-## php7 settings
-
-<IfModule mod_php7.c>
-
-############################################
-## adjust max execution time
-
-    php_value max_execution_time 18000
-
-############################################
-## disable automatic session start
-## before autoload was initialized
-
-    php_flag session.auto_start off
-
-############################################
-## enable resulting html compression
-
-    #php_flag zlib.output_compression on
-
-###########################################
-# disable user agent verification to not break multiple image upload
-
-    php_flag suhosin.session.cryptua off
-
-</IfModule>
-
-############################################
-## php8 settings
+## PHP settings
 
 <IfModule mod_php.c>
 
@@ -120,12 +92,6 @@
 
     Options +FollowSymLinks
     RewriteEngine on
-
-############################################
-## you can put here your magento root folder
-## path relative to web root
-
-    #RewriteBase /magento/
 
 ############################################
 ## Prevent serving "hidden" files like git repository
@@ -258,28 +224,3 @@
 ## http://developer.yahoo.com/performance/rules.html#etags
 
     #FileETag none
-
-###########################################
-## Deny access to cron.php
-    <Files cron.php>
-
-############################################
-## uncomment next lines to enable cron access with base HTTP authorization
-## http://httpd.apache.org/docs/2.2/howto/auth.html
-##
-## Warning: .htpasswd file should be placed somewhere not accessible from the web.
-## This is so that folks cannot download the password file.
-## For example, if your documents are served out of /usr/local/apache/htdocs
-## you might want to put the password file(s) in /usr/local/apache/.
-
-        #AuthName "Cron auth"
-        #AuthUserFile ../.htpasswd
-        #AuthType basic
-        #Require valid-user
-
-############################################
-
-        Order allow,deny
-        Deny from all
-
-    </Files>
