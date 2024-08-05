@@ -31,7 +31,7 @@ class RunLegacyShellFile extends BaseMahoCommand
         $commandOutput = [];
         exec("php $fileToRun", $commandOutput, $return_var);
 
-        $output->writeln($commandOutput);die();
+        $output->writeln($commandOutput);
         foreach ($output as $line) {
             $output->writeln($output);
         }
