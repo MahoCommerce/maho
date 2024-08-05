@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 
+define('MAHO_ROOT_DIR', __DIR__);
+
 require __DIR__.'/vendor/autoload.php';
 
 use Symfony\Component\Console\Application;
@@ -14,4 +16,5 @@ $application->add(new \Maho\Commands\IndexList());
 $application->add(new \Maho\Commands\IndexReindex());
 $application->add(new \Maho\Commands\IndexReindexAll());
 $application->add(new \Maho\Commands\RunLegacyShellFile());
+$application->add(new \Maho\Commands\Serve());
 $application->run();
