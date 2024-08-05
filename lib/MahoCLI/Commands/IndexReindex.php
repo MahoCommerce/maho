@@ -33,7 +33,7 @@ class IndexReindex extends BaseMahoCommand
 
         $output->write("Reindexing {$index->getIndexerCode()}... ");
         $index->reindexEverything();
-        $output->writeln("<info>done!</info>");
+        $output->writeln('<info>done!</info>');
 
         return Command::SUCCESS;
     }

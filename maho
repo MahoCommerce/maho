@@ -15,6 +15,8 @@ $application->add(new \Maho\Commands\CustomerList());
 $application->add(new \Maho\Commands\IndexList());
 $application->add(new \Maho\Commands\IndexReindex());
 $application->add(new \Maho\Commands\IndexReindexAll());
+$application->add(new \Maho\Commands\LogClean());
+$application->add(new \Maho\Commands\LogStatus());
 $application->add(new \Maho\Commands\RunLegacyShellFile());
 $application->add(new \Maho\Commands\Serve());
 $application->run();
