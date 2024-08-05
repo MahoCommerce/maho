@@ -580,35 +580,6 @@ class Mage_Core_Model_Design_Package
     }
 
     /**
-     * Directories lister utility method
-     *
-     * @param string $path
-     * @param string|bool $fullPath
-     * @return array
-     * @deprecated
-     */
-    private function _listDirectories($path, $fullPath = false)
-    {
-        $result = [];
-        $dir = opendir($path);
-        if ($dir) {
-            while ($entry = readdir($dir)) {
-                if (substr($entry, 0, 1) == '.' || !is_dir($path . DS . $entry)) {
-                    continue;
-                }
-                if ($fullPath) {
-                    $entry = $path . DS . $entry;
-                }
-                $result[] = $entry;
-            }
-            unset($entry);
-            closedir($dir);
-        }
-
-        return $result;
-    }
-
-    /**
      * Get regex rules from config and check user-agent against them
      *
      * Rules must be stored in config as a serialized array(['regexp']=>'...', ['value'] => '...')
