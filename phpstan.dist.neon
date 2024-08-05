@@ -8,12 +8,13 @@ parameters:
         - api.php
         - cron.php
         - get.php
-        - index.php
+        - pub/index.php
         - install.php
         - app/Mage.php
         - app/code/core/Mage
         - lib/Mage
         - lib/Magento
+        - lib/MahoCLI
         - lib/Varien
         - shell
     excludePaths:
@@ -23,7 +24,6 @@ parameters:
         - app/code/core/Mage/Api/Model/Acl/Assert/Ip.php
         - app/code/core/Mage/Api/Model/Acl/Assert/Time.php
         - app/code/core/Mage/Adminhtml/Block/Widget/Grid/Block.php
-        - app/code/core/Mage/Core/Model/Mysql4/Design/Theme/Collection.php
         - lib/Varien/Directory/Collection.php
         - lib/Varien/Directory/Factory.php
         - lib/Varien/File/Object.php
@@ -42,16 +42,9 @@ parameters:
         # Cannot declare class Varien_Date, because the name is already in use
         - app/code/core/Mage/Catalog/Model/Product/Option/Type/Date.php
 
-        # Cannot declare class XMLParser, because the name is already in use
-        - app/code/core/Mage/Centinel/Model/Api.php
-        - app/code/core/Mage/Centinel/Model/Api/Client.php
-
         # Class phpseclib\Net\SSH2 not found.
         - app/code/core/Mage/Paypal/Model/Report/Settlement.php
         - lib/Varien/Io/Sftp.php
-
-        # Class backup/db was not found while trying to analyse it
-        - app/code/core/Mage/Adminhtml/controllers/System/BackupController.php
 
         # Dataflow/Model/Convert/Iterator.php
         - app/code/core/Mage/Dataflow/Model/Convert/Iterator.php

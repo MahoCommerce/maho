@@ -1081,46 +1081,6 @@ parameters:
 			path: app/code/core/Mage/Bundle/Model/Sales/Order/Pdf/Items/Abstract.php
 
 		-
-			message: "#^Call to an undefined method Mage_Captcha_Model_Interface\\:\\:isRequired\\(\\)\\.$#"
-			count: 1
-			path: app/code/core/Mage/Captcha/Block/Captcha/Zend.php
-
-		-
-			message: "#^Call to an undefined method Mage_Captcha_Model_Interface\\:\\:isRequired\\(\\)\\.$#"
-			count: 9
-			path: app/code/core/Mage/Captcha/Model/Observer.php
-
-		-
-			message: "#^Call to an undefined method Mage_Captcha_Model_Interface\\:\\:logAttempt\\(\\)\\.$#"
-			count: 3
-			path: app/code/core/Mage/Captcha/Model/Observer.php
-
-		-
-			message: "#^Result of method Mage_Captcha_Model_Interface\\:\\:isCorrect\\(\\) \\(void\\) is used\\.$#"
-			count: 9
-			path: app/code/core/Mage/Captcha/Model/Observer.php
-
-		-
-			message: "#^Property Mage_Captcha_Model_Zend\\:\\:\\$_helper \\(Mage_Captcha_Helper_Data\\) in empty\\(\\) is not falsy\\.$#"
-			count: 1
-			path: app/code/core/Mage/Captcha/Model/Zend.php
-
-		-
-			message: "#^Return type \\(Mage_Customer_Model_Session\\) of method Mage_Captcha_Model_Zend\\:\\:getSession\\(\\) should be compatible with return type \\(Zend_Session_Namespace\\) of method Zend_Captcha_Word\\:\\:getSession\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Captcha/Model/Zend.php
-
-		-
-			message: "#^Call to an undefined method Mage_Captcha_Model_Interface\\:\\:getImgSrc\\(\\)\\.$#"
-			count: 1
-			path: app/code/core/Mage/Captcha/controllers/Adminhtml/RefreshController.php
-
-		-
-			message: "#^Call to an undefined method Mage_Captcha_Model_Interface\\:\\:getImgSrc\\(\\)\\.$#"
-			count: 1
-			path: app/code/core/Mage/Captcha/controllers/RefreshController.php
-
-		-
 			message: "#^Argument of an invalid type string supplied for foreach, only iterables are supported\\.$#"
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Breadcrumbs.php
