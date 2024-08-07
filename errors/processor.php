@@ -91,7 +91,7 @@ class Error_Processor
     public function __construct()
     {
         $this->_errorDir  = __DIR__ . '/';
-        $this->_reportDir = dirname($this->_errorDir) . '/var/report/';
+        $this->_reportDir = BP . '/var/report/';
 
         if (!empty($_SERVER['SCRIPT_NAME'])) {
             if (in_array(basename($_SERVER['SCRIPT_NAME'],'.php'), array('404','503','report'))) {
