@@ -18,7 +18,7 @@ define('PS', PATH_SEPARATOR);
 if (file_exists( __DIR__ . '/vendor/mahocommerce/maho')) {
     define('BP', dirname(getcwd()));
 } elseif (str_contains(__DIR__, '/vendor/mahocommerce/maho')) {
-    define('BP', dirname(getcwd()));
+    define('BP', str_replace('/vendor/mahocommerce/maho/app', '', __DIR__));
 } else {
     define('BP', dirname(__DIR__));
 }
