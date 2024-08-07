@@ -34,7 +34,7 @@ if (file_exists($maintenanceFile)) {
         $maintenanceBypass = in_array($currentIp, $allowedIps, true);
     }
     if (!$maintenanceBypass) {
-        include_once __DIR__ . '/errors/503.php';
+        include_once Mage::findFileInIncludePath('errors/503.php');
         exit;
     }
 

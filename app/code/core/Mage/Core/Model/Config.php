@@ -549,7 +549,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                 throw new Exception('Could not get lock on cache save operation.');
             } else {
                 Mage::log(sprintf('Failed to get cache save lock in %d seconds.', $waitTime), Zend_Log::NOTICE);
-                require Mage::getBaseDir() . DS . 'errors' . DS . '503.php';
+                require Mage::findFileInIncludePath('errors/503.php');
                 die();
             }
         }
