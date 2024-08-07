@@ -94,6 +94,14 @@ class Mage_Install_Model_Config extends Varien_Simplexml_Config
     {
         $paths = [];
         $items = (array) $this->getNode(self::XML_PATH_CHECK_WRITEABLE);
+
+        if (isset($items['app_etc'])) {
+            $app_etc = BP . $items['app_etc']->path;
+            if (!file_exists($app_etc)) {
+                @mkdir(BP . $items['app_etc']->path, 0744, true);
+            }
+        }
+
         foreach ($items as $nodeKey => $item) {
             $value = (array)$item;
             if (isset($this->_optionsMapping[self::XML_PATH_CHECK_WRITEABLE][$nodeKey])) {
