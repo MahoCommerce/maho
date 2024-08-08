@@ -21,7 +21,8 @@ class BaseMahoCommand extends Command
         Mage::app();
     }
 
-    function humanReadableSize(int $bytes): string {
+    public function humanReadableSize(int $bytes): string
+    {
         if ($bytes <= 0) {
             return 0;
         }
