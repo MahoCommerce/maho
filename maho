@@ -17,14 +17,19 @@ $application->add(new \Maho\Commands\AdminUserDisable());
 $application->add(new \Maho\Commands\CacheEnable());
 $application->add(new \Maho\Commands\CacheDisable());
 $application->add(new \Maho\Commands\CacheFlush());
-//$application->add(new \Maho\Commands\CustomerChangePassword());
+
 //$application->add(new \Maho\Commands\CustomerCreate());
+//$application->add(new \Maho\Commands\CustomerChangePassword());
+$application->add(new \Maho\Commands\CustomerDelete());
 $application->add(new \Maho\Commands\CustomerList());
+
 $application->add(new \Maho\Commands\IndexList());
 $application->add(new \Maho\Commands\IndexReindex());
 $application->add(new \Maho\Commands\IndexReindexAll());
+
 $application->add(new \Maho\Commands\LogClean());
 $application->add(new \Maho\Commands\LogStatus());
+
 $application->add(new \Maho\Commands\RunLegacyShellFile());
 $application->add(new \Maho\Commands\Serve());
 $application->run();

@@ -18,6 +18,7 @@ class BaseMahoCommand extends Command
             require "$cwd/vendor/mahocommerce/maho/app/Mage.php";
         }
 
+        Mage::register('isSecureArea', true);
         Mage::app();
     }
 
