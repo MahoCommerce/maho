@@ -8,9 +8,17 @@ require __DIR__.'/vendor/autoload.php';
 use Symfony\Component\Console\Application;
 
 $application = new Application('');
+
+$application->add(new \Maho\Commands\AdminUserList());
+$application->add(new \Maho\Commands\AdminUserChangepassword());
+$application->add(new \Maho\Commands\AdminUserEnable());
+$application->add(new \Maho\Commands\AdminUserDisable());
+
 $application->add(new \Maho\Commands\CacheEnable());
 $application->add(new \Maho\Commands\CacheDisable());
 $application->add(new \Maho\Commands\CacheFlush());
+//$application->add(new \Maho\Commands\CustomerChangePassword());
+//$application->add(new \Maho\Commands\CustomerCreate());
 $application->add(new \Maho\Commands\CustomerList());
 $application->add(new \Maho\Commands\IndexList());
 $application->add(new \Maho\Commands\IndexReindex());
