@@ -30,6 +30,12 @@ $application->add(new \Maho\Commands\IndexReindexAll());
 $application->add(new \Maho\Commands\LogClean());
 $application->add(new \Maho\Commands\LogStatus());
 
-$application->add(new \Maho\Commands\RunLegacyShellFile());
+$application->add(new \Maho\Commands\Install());
 $application->add(new \Maho\Commands\Serve());
+$application->add(new \Maho\Commands\RunLegacyShellFile());
+
+$application->add(new \Maho\Commands\SysCurrencies());
+$application->add(new \Maho\Commands\SysLocales());
+$application->add(new \Maho\Commands\SysTimezones());
+
 $application->run();
