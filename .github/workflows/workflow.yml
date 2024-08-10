@@ -92,17 +92,6 @@ jobs:
       needs.check.outputs.workflow > 0
     uses: ./.github/workflows/phpstan.yml
 
-  phpunit:
-    name: PHPUnit
-    needs: [check, composer]
-    if: |
-      needs.check.outputs.php > 0 ||
-      needs.check.outputs.phpunit > 0 ||
-      needs.check.outputs.phpunit-test > 0 ||
-      needs.check.outputs.composer > 0 ||
-      needs.check.outputs.workflow > 0
-    uses: ./.github/workflows/phpunit.yml
-
   # DOES NOT run by default
   # runs on schedule or when worklfow changed
   syntax_php:

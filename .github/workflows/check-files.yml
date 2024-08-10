@@ -27,12 +27,6 @@ on:
       phpstan:
         description: "Count changed PHPStan files"
         value: ${{ jobs.check.outputs.phpstan }}
-      phpunit-test:
-        description: "Count changed PhpUnit test files"
-        value: ${{ jobs.check.outputs.phpunit-test }}
-      phpunit:
-        description: "Count changed PhpUnit files"
-        value: ${{ jobs.check.outputs.phpunit }}
   # Allow manually triggering the workflow.
   workflow_dispatch:
 
@@ -49,8 +43,6 @@ jobs:
       phpcs: ${{ steps.changes-phpcs.outputs.phpcs }}
       php-cs-fixer: ${{ steps.changes-php-cs-fixer.outputs.php-cs-fixer }}
       phpstan: ${{ steps.changes-phpstan.outputs.phpstan }}
-      phpunit-test: ${{ steps.changes-phpunit-test.outputs.phpunit-test }}
-      phpunit: ${{ steps.changes-phpunit.outputs.phpunit }}
 
     steps:
       - name: Checkout code
@@ -83,8 +75,6 @@ jobs:
             **phpcs**
             **php-cs-fixer**
             **phpstan**
-            dev/tests/
-            dev/phpunit*
 
       - name: Check if composer files changed
         id: changes-composer
@@ -151,19 +141,3 @@ jobs:
           count="$(grep -oE "**phpstan**" <<< "${{ steps.changed-files-specific.outputs.all_modified_files }}" | wc -l)"
           echo "$count PHPStan file(s) changed"
           echo "phpstan=$count" >> $GITHUB_OUTPUT
-
-      - name: Check if PHPUnit test files changed
-        id: changes-phpunit-test
-        if: steps.changed-files-specific.outputs.any_modified == 'true'
-        run: |
-          count="$(grep -oE "dev/tests/" <<< "${{ steps.changed-files-specific.outputs.all_modified_files }}" | wc -l)"
-          echo "$count UnitTest test file(s) changed"
-          echo "phpunit-test=$count" >> $GITHUB_OUTPUT
-
-      - name: Check if PHPUnit files changed
-        id: changes-phpunit
-        if: steps.changed-files-specific.outputs.any_modified == 'true'
-        run: |
-          count="$(grep -oE "dev/phpunit*" <<< "${{ steps.changed-files-specific.outputs.all_modified_files }}" | wc -l)"
-          echo "$count PHPUnit file(s) changed"
-          echo "phpunit=$count" >> $GITHUB_OUTPUT
