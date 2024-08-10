@@ -103,8 +103,9 @@ return $config
                 'app/design/',
                 'lib/Mage/',
                 'lib/Magento/',
+                'lib/MahoCLI/',
                 'lib/Varien/',
-                'shell/',
+                'pub/',
             ])
             ->name(['*.php', '*.phtml'])
             ->ignoreDotFiles(true)

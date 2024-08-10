@@ -15,7 +15,7 @@
 
 define('DS', DIRECTORY_SEPARATOR);
 define('PS', PATH_SEPARATOR);
-if (file_exists( __DIR__ . '/vendor/mahocommerce/maho')) {
+if (file_exists(__DIR__ . '/vendor/mahocommerce/maho')) {
     define('BP', dirname(getcwd()));
 } elseif (str_contains(__DIR__, '/vendor/mahocommerce/maho')) {
     define('BP', str_replace('/vendor/mahocommerce/maho/app', '', __DIR__));
@@ -55,7 +55,7 @@ $paths[] = BP . '/app/code/local';
 $paths[] = BP . '/app/code/community';
 $paths[] = BP . '/app/code/core';
 $allModules = Mage::getComposerInstallationData()[1];
-foreach($allModules as $module) {
+foreach ($allModules as $module) {
     if (str_contains($module, 'mahocommerce/maho')) {
         continue;
     }
@@ -65,7 +65,7 @@ foreach($allModules as $module) {
 }
 $paths[] = BP . '/vendor/mahocommerce/maho/app/code/core';
 $paths[] = BP . '/lib';
-foreach($allModules as $module) {
+foreach ($allModules as $module) {
     if (str_contains($module, 'mahocommerce/maho')) {
         continue;
     }
@@ -1158,7 +1158,7 @@ final class Mage
         $results = [];
         array_unshift($packageDirectories, MAGENTO_ROOT);
         foreach ($packageDirectories as $packageDirectory) {
-            $tmpList = glob($packageDirectory . DS . $path . '/*' , GLOB_ONLYDIR);
+            $tmpList = glob($packageDirectory . DS . $path . '/*', GLOB_ONLYDIR);
             foreach ($tmpList as $folder) {
                 $results[] = basename($folder);
             }
