@@ -11,7 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'serve',
-    description: 'Run Maho with the built in server'
+    description: 'Run Maho with the built in web server'
 )]
 class Serve extends BaseMahoCommand
 {
