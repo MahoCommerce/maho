@@ -19,7 +19,7 @@ class CronList extends BaseMahoCommand
     {
         $this->initMaho();
         $table = new Table($output);
-        $table->setHeaders(['Event', 'Model::Method', 'Schedule']);
+        $table->setHeaders(['event', 'model::method', 'schedule']);
 
         $jobs = Mage::getConfig()->getNode('crontab/jobs')->asArray();
         ksort($jobs, SORT_NATURAL | SORT_FLAG_CASE);

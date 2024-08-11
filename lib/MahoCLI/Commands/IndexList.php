@@ -19,18 +19,12 @@ class IndexList extends BaseMahoCommand
     {
         $this->initMaho();
         $table = new Table($output);
-        $tableHeaders = null;
+        $table->setHeaders(['indexer_code', 'status', 'started_at', 'ended_at', 'mode']);
 
         $indexCollection = Mage::getResourceModel('index/process_collection');
         foreach ($indexCollection as $index) {
             $indexData = $index->debug();
             unset($indexData['process_id']);
-
-            if (!$tableHeaders) {
-                $tableHeaders = array_keys($indexData);
-                $table->setHeaders($tableHeaders);
-            }
-
             $table->addRow($indexData);
         }
         $table->render();

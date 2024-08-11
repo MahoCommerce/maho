@@ -27,6 +27,7 @@ $application->add(new \Maho\Commands\IndexList());
 $application->add(new \Maho\Commands\IndexReindex());
 $application->add(new \Maho\Commands\IndexReindexAll());
 
+$application->add(new \Maho\Commands\CronHistory());
 $application->add(new \Maho\Commands\CronList());
 $application->add(new \Maho\Commands\CronRun());
 
