@@ -21,7 +21,8 @@ class CronList extends BaseMahoCommand
         $table = new Table($output);
         $table->setHeaders(['event', 'model::method', 'schedule']);
 
-        $jobs = Mage::getConfig()->getNode('crontab/jobs')->asArray();
+        $jobs = Mage::getConfig()->getNode('crontab/jobs')->asArray() +
+                Mage::getConfig()->getNode('default/crontab/jobs')->asArray();
         ksort($jobs, SORT_NATURAL | SORT_FLAG_CASE);
         foreach ($jobs as $jobName => $jobConfiguration) {
             if (@$jobConfiguration['schedule']['config_path']) {
