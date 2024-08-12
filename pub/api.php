@@ -13,20 +13,18 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-$magentoRootDir = getcwd();
-$bootstrapFilename = $magentoRootDir . '/app/bootstrap.php';
-$mageFilename = $magentoRootDir . '/app/Mage.php';
+define('MAGENTO_ROOT', dirname(__DIR__));
 
-if (!file_exists($bootstrapFilename)) {
-    echo 'Bootstrap file not found';
-    exit;
+$maintenanceFile = 'maintenance.flag';
+$maintenanceIpFile = 'maintenance.ip';
+
+if (file_exists(MAGENTO_ROOT . DIRECTORY_SEPARATOR . 'app/bootstrap.php')) {
+    require MAGENTO_ROOT . '/app/bootstrap.php';
+    require MAGENTO_ROOT . '/app/Mage.php';
+} else {
+    require MAGENTO_ROOT . '/vendor/mahocommerce/maho/app/bootstrap.php';
+    require MAGENTO_ROOT . '/vendor/mahocommerce/maho/app/Mage.php';
 }
-if (!file_exists($mageFilename)) {
-    echo 'Mage file not found';
-    exit;
-}
-require $bootstrapFilename;
-require $mageFilename;
 
 if (!Mage::isInstalled()) {
     echo 'Application is not installed yet, please complete install wizard first.';
