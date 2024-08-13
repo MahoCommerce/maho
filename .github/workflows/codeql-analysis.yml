@@ -15,10 +15,10 @@ on:
   workflow_call:
   workflow_dispatch:
   push:
-    branches: [ "main", "next", "v19" ]
+    branches: [ "main" ]
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ "main", "next", "v19" ]
+    branches: [ "main" ]
     paths-ignore:
       - '**/*.md'
       - '**/*.txt'
