@@ -52,11 +52,6 @@
             "Maho\\": "lib/MahoCLI"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "OpenMage\\Tests\\Unit\\": "dev/tests/unit"
-        }
-    },
     "extra": {
         "patches": {
             "shardj/zf1-future": {

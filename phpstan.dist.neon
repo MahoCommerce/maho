@@ -4,8 +4,8 @@ includes:
     - phar://phpstan.phar/conf/bleedingEdge.neon
 parameters:
     magentoRootPath: %currentWorkingDirectory%
+    phpVersion: 80200
     paths:
-        - maho
         - app/Mage.php
         - app/code/core/Mage
         - pub/api.php
@@ -14,6 +14,7 @@ parameters:
         - lib/Magento
         - lib/MahoCLI
         - lib/Varien
+        - maho
     excludePaths:
         #incompatible interfaces
         - app/code/core/Mage/Admin/Model/Acl/Assert/Ip.php
