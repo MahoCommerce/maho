@@ -18,7 +18,7 @@
 <div class="content-header skip-header">
     <table cellspacing="0">
         <tr>
-            <td style="width:50%;"><h4><?= $this->getCartHeader(); ?></h4></td>
+            <td style="width:50%;"><h4><?= $this->getCartHeader() ?></h4></td>
         </tr>
     </table>
 </div>
@@ -27,7 +27,7 @@
 <?php if ($this->canDisplayContainer()) : ?>
 <?php
     $listType = $this->getJsObjectName();
-    ?>
+?>
 <script type="text/javascript">
 <?= $this->getJsObjectName() ?>cartControl = {
     reload: function (params) {
@@ -68,11 +68,11 @@
 };
 
 <?php
-    $params = [
-        'customer_id' => $this->getCustomer()->getId(),
-        'website_id' => $this->getWebsiteId()
-    ];
-    ?>
+$params = [
+    'customer_id' => $this->getCustomer()->getId(),
+    'website_id' => $this->getWebsiteId()
+];
+?>
 productConfigure.addListType(
     '<?= $listType ?>',
     {

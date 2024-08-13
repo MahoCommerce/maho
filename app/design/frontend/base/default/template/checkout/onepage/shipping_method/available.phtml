@@ -20,13 +20,11 @@
 <?php else: ?>
     <dl class="sp-methods">
     <?php $shippingCodePrice = []; ?>
-    <?php $_sole = count($_shippingRateGroups) == 1;
-    foreach ($_shippingRateGroups as $code => $_rates): ?>
+    <?php $_sole = count($_shippingRateGroups) == 1; foreach ($_shippingRateGroups as $code => $_rates): ?>
         <dt><?= $this->escapeHtml($this->getCarrierName($code)) ?></dt>
         <dd>
             <ul>
-            <?php $_sole = $_sole && count($_rates) == 1;
-        foreach ($_rates as $_rate): ?>
+            <?php $_sole = $_sole && count($_rates) == 1; foreach ($_rates as $_rate): ?>
                 <?php $shippingCodePrice[] = "'".$_rate->getCode()."':".(float)$_rate->getPrice(); ?>
                 <li>
                    <?php if ($_rate->getErrorMessage()): ?>
@@ -35,14 +33,12 @@
                         <?php if ($_sole) : ?>
                         <span class="no-display"><input name="shipping_method" type="radio" value="<?= $_rate->getCode() ?>" id="s_method_<?= $_rate->getCode() ?>" checked="checked" /></span>
                         <?php else: ?>
-                        <input name="shipping_method" type="radio" value="<?= $_rate->getCode() ?>" id="s_method_<?= $_rate->getCode() ?>"<?php if($_rate->getCode()===$this->getAddressShippingMethod()) {
-                            echo ' checked="checked"';
-                        } ?> class="radio"/>
+                        <input name="shipping_method" type="radio" value="<?= $_rate->getCode() ?>" id="s_method_<?= $_rate->getCode() ?>"<?php if($_rate->getCode()===$this->getAddressShippingMethod()) echo ' checked="checked"' ?> class="radio"/>
 
                         <?php if ($_rate->getCode() === $this->getAddressShippingMethod()): ?>
                         <script type="text/javascript">
                             //<![CDATA[
-                                lastPrice = <?= (float)$_rate->getPrice(); ?>;
+                                lastPrice = <?= (float)$_rate->getPrice() ?>;
                             //]]>
                         </script>
                         <?php endif ?>
@@ -51,9 +47,9 @@
                         <label for="s_method_<?= $_rate->getCode() ?>"><?= $this->escapeHtml($_rate->getMethodTitle()) ?>
                         <?php $_excl = $this->getShippingPrice($_rate->getPrice(), $this->helper('tax')->displayShippingPriceIncludingTax()); ?>
                         <?php $_incl = $this->getShippingPrice($_rate->getPrice(), true); ?>
-                        <?= $_excl; ?>
+                        <?= $_excl ?>
                         <?php if ($this->helper('tax')->displayShippingBothPrices() && $_incl != $_excl): ?>
-                            (<?= $this->__('Incl. Tax'); ?> <?= $_incl; ?>)
+                            (<?= $this->__('Incl. Tax') ?> <?= $_incl ?>)
                         <?php endif ?>
                         </label>
                    <?php endif ?>
@@ -66,7 +62,7 @@
 <script type="text/javascript">
 //<![CDATA[
     <?php if (!empty($shippingCodePrice)): ?>
-        var shippingCodePrice = {<?= implode(',', $shippingCodePrice); ?>};
+        var shippingCodePrice = {<?= implode(',',$shippingCodePrice) ?>};
     <?php endif ?>
 
     $$('input[type="radio"][name="shipping_method"]').each(function(el){

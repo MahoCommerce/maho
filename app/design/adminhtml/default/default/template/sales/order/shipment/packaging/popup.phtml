@@ -12,7 +12,7 @@
  * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://www.openmage.org)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
+ ?>
 <?php
 $shippingMethod = $this->getShipment()->getOrder()->getShippingMethod();
 $sizeSource = Mage::getModel('usa/shipping_carrier_usps_source_size')->toOptionArray();
@@ -25,7 +25,7 @@ document.observe("dom:loaded", function() {
     packaging.changeContainerType($$('select[name=package_container]')[0]);
     packaging.checkSizeAndGirthParameter(
         $$('select[name=package_container]')[0],
-        <?= $girthEnabled; ?>
+        <?= $girthEnabled ?>
     );
 });
 //]]>
@@ -105,10 +105,10 @@ document.observe("dom:loaded", function() {
                                 $customsValueDisplay = ' style="display: none;" ';
                                 $customsValueValidation = '';
                             }
-?>
+                        ?>
                         <td <?= $customsValueDisplay ?>>
                             <input type="text" class="customs-value input-text <?= $customsValueValidation ?>" name="package_customs_value" />
-                            <span class="customs-value-currency">[<?= $this->getCustomValueCurrencyCode(); ?>]</span>
+                            <span class="customs-value-currency">[<?= $this->getCustomValueCurrencyCode() ?>]</span>
                         </td>
                         <td>
                             <input type="text" class="options-weight input-text required-entry validate-greater-than-zero" name="container_weight" />
@@ -198,7 +198,7 @@ document.observe("dom:loaded", function() {
             <div id="packages_content"></div>
         </div>
         <div class="buttons-set a-right">
-            <button type="button" class="scalable disabled SavePackagesBtn" disabled="disabled" onclick="packaging.confirmPackaging();" title="<?= Mage::helper('sales')->__('Products should be added to package(s)')?>">
+            <button type="button" class="scalable disabled SavePackagesBtn" disabled="disabled" onclick="packaging.confirmPackaging();" title="<?= Mage::helper('sales')->__('Products should be added to package(s)') ?>">
                 <span><span><span><?= Mage::helper('sales')->__('OK') ?></span></span></span>
             </button>
             <button type="button" class="scalable" onclick="packaging.cancelPackaging();">

@@ -26,20 +26,15 @@
         </tr>
     </thead>
 
-    <?php $i=0;
-    foreach ($_creditmemo->getAllItems() as $_item): ?>
-    <?php if($_item->getOrderItem()->getParentItem()) {
-        continue;
-    } else {
-        $i++;
-    } ?>
+    <?php $i=0; foreach ($_creditmemo->getAllItems() as $_item): ?>
+    <?php if($_item->getOrderItem()->getParentItem()) continue; else $i++; ?>
     <tbody<?= $i%2 ? ' bgcolor="#F6F6F6"' : '' ?>>
         <?= $this->getItemHtml($_item) ?>
     </tbody>
     <?php endforeach ?>
 
     <tfoot>
-        <?= $this->getChildHtml('creditmemo_totals');?>
+        <?= $this->getChildHtml('creditmemo_totals') ?>
     </tfoot>
 </table>
 <?php endif ?>

@@ -31,7 +31,7 @@ $numColumns = count($this->getColumns());
         <div class="content-header">
             <table cellspacing="0">
                 <tr>
-                    <td style="width:50%;"><h2><?= $this->getGridHeader(); ?></h2></td>
+                    <td style="width:50%;"><h2><?= $this->getGridHeader() ?></h2></td>
                 </tr>
             </table>
         </div>
@@ -126,17 +126,15 @@ $numColumns = count($this->getColumns());
             <tr>
             <?php $report=$this->getReport($_item['start'], $_item['end']) ?>
             <?php $rows=count($report) ?>
-            <?php if ($rows > 0): ?>
-            <td rowspan="<?= $rows + ($this->getCountTotals() && $this->getSubtotalVisibility() ? 1 : 0) ?>"><?= $_index ?></td>
-                <?php $i=0;
-                foreach ($report as $_subIndex=>$_subItem): ?>
+            <?php if ($rows > 0 ): ?>
+            <td rowspan="<?= $rows + ($this->getCountTotals() && $this->getSubtotalVisibility()?1:0) ?>"><?= $_index ?></td>
+                <?php $i=0;foreach ($report as $_subIndex=>$_subItem): ?>
                     <?php if($i>0): ?>
                     <tr>
                     <?php endif ?>
                     <?php $i++; ?>
-                    <?php $j=0;
-                    foreach ($this->getColumns() as $_column): ?>
-                        <td class="<?= $_column->getCssProperty() ?> <?= ++$j==$numColumns ? 'last' : '' ?>">
+                    <?php $j=0;foreach ($this->getColumns() as $_column): ?>
+                        <td class="<?= $_column->getCssProperty() ?> <?= ++$j==$numColumns?'last':'' ?>">
                             <?= (($_html = $_column->getRowField($_subItem)) != '' ? $_html : '&nbsp;') ?>
                         </td>
                     <?php endforeach ?>
@@ -144,10 +142,9 @@ $numColumns = count($this->getColumns());
                 <?php endforeach ?>
                 <?php if($this->getCountTotals() && $rows > 0 && $this->getSubtotalVisibility()): ?>
                 <tr>
-                    <?php $j=0;
-                    foreach ($this->getColumns() as $_column): ?>
-                        <td class="<?= $_column->getCssProperty() ?> <?= ++$j==$numColumns ? 'last' : '' ?> subtotal">
-                            <?= ($j==1) ? $this->getSubtotalText() : $_column->getRowField($this->getTotals()) ?>
+                    <?php $j=0;foreach ($this->getColumns() as $_column): ?>
+                        <td class="<?= $_column->getCssProperty() ?> <?= ++$j==$numColumns?'last':'' ?> subtotal">
+                            <?= ($j==1)?$this->getSubtotalText():$_column->getRowField($this->getTotals()) ?>
                         </td>
                     <?php endforeach ?>
                 </tr>
@@ -167,9 +164,8 @@ $numColumns = count($this->getColumns());
         <?php if ($this->getCountTotals() && $this->getCollection()->getSize()): ?>
         <tfoot>
             <tr><th><?= $this->getTotalText() ?></th>
-            <?php $j=0;
-            foreach ($this->getColumns() as $_column): ?>
-                <th class="<?= $_column->getCssProperty() ?> <?= ++$j==$numColumns ? 'last' : '' ?>"><?= $_column->getRowField($this->getGrandTotals()) ?></th>
+            <?php $j=0;foreach ($this->getColumns() as $_column): ?>
+                <th class="<?= $_column->getCssProperty() ?> <?= ++$j==$numColumns?'last':'' ?>"><?= $_column->getRowField($this->getGrandTotals()) ?></th>
             <?php endforeach ?>
             </tr>
          </tfoot>
@@ -214,7 +210,7 @@ $numColumns = count($this->getColumns());
         }
         var formParam = new Array('period_date_from', 'period_date_to', 'report_period');
         var paramURL = '';
-        var switchURL = '<?= $this->getAbsoluteGridUrl(['_current' => false]); ?>'.replace(/(store|group|website)\/\d+\//,'');
+        var switchURL = '<?= $this->getAbsoluteGridUrl(['_current' => false]) ?>'.replace(/(store|group|website)\/\d+\//,'');
 
         for(var i=0;i<formParam.length;i++){
             if ($(formParam[i]).value && $(formParam[i]).name) {

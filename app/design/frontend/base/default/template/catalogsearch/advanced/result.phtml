@@ -19,10 +19,10 @@
 <?= $this->getMessagesBlock()->toHtml() ?>
 <?php if($this->getResultCount()): ?>
     <p class="advanced-search-amount">
-        <?= $this->helper('catalogsearch')->__('<strong>%d item(s)</strong> were found using the following search criteria', $this->getResultCount()); ?>
+        <?= $this->helper('catalogsearch')->__('<strong>%d item(s)</strong> were found using the following search criteria', $this->getResultCount()) ?>
     </p>
 <?php else: ?>
-    <p class="error-msg"><?= $this->helper('catalogsearch')->__('No items were found using the following search criteria.');?> <a href="<?= $this->getFormUrl(); ?>"><?= $this->helper('catalogsearch')->__('Modify your search'); ?></a></p>
+    <p class="error-msg"><?= $this->helper('catalogsearch')->__('No items were found using the following search criteria.');?> <a href="<?= $this->getFormUrl() ?>"><?= $this->helper('catalogsearch')->__('Modify your search') ?></a></p>
 <?php endif ?>
 
 <div class="advanced-search-summary">
@@ -31,15 +31,15 @@
             <?php if(@$searchCriterias[$side]): ?>
                 <ul>
                     <?php foreach($searchCriterias[$side] as $criteria): ?>
-                        <li><strong><?= $this->escapeHtml($this->helper('catalog')->__($criteria['name'])); ?>:</strong> <?= $this->escapeHtml($criteria['value']); ?></li>
+                        <li><strong><?= $this->escapeHtml($this->helper('catalog')->__($criteria['name'])) ?>:</strong> <?= $this->escapeHtml($criteria['value']) ?></li>
                     <?php endforeach ?>
                 </ul>
             <?php endif ?>
         <?php endforeach ?>
     <?php if($this->getResultCount()): ?>
         <p>
-            <?= $this->helper('catalogsearch')->__("Don't see what you're looking for?"); ?>
-            <a href="<?= $this->getFormUrl(); ?>"><?= $this->helper('catalogsearch')->__('Modify your search'); ?></a>
+            <?= $this->helper('catalogsearch')->__("Don't see what you're looking for?") ?>
+            <a href="<?= $this->getFormUrl() ?>"><?= $this->helper('catalogsearch')->__('Modify your search') ?></a>
         </p>
     <?php endif ?>
 </div>

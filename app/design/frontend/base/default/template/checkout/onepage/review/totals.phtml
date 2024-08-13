@@ -20,11 +20,11 @@
 <?php if ($this->getTotals()): ?>
 <tfoot>
     <?php $_colspan = $this->helper('tax')->displayCartBothPrices() ? 5 : 3; ?>
-    <?= $this->renderTotals(null, $_colspan); ?>
-    <?= $this->renderTotals('footer', $_colspan); ?>
+    <?= $this->renderTotals(null, $_colspan) ?>
+    <?= $this->renderTotals('footer', $_colspan) ?>
     <?php if ($this->needDisplayBaseGrandtotal()):?>
     <tr>
-        <td class="a-right" colspan="<?= $_colspan; ?>">
+        <td class="a-right" colspan="<?= $_colspan ?>">
             <small><?= $this->helper('sales')->__('Grand Total to be Charged') ?></small>
         </td>
         <td class="a-right">

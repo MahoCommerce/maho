@@ -18,12 +18,12 @@
 OptionTemplateFile = '<table class="border" cellpadding="0" cellspacing="0">'+
         '<tr class="headings">'+
             <?php if ($this->getCanReadPrice() !== false) : ?>
-            '<th class="type-price">' + <?= $this->helper('core')->jsonEncode(Mage::helper('catalog')->__('Price')); ?> + '</th>' +
-            '<th class="type-type">' + <?= $this->helper('core')->jsonEncode(Mage::helper('catalog')->__('Price Type')); ?> + '</th>' +
+            '<th class="type-price">' + <?= $this->helper('core')->jsonEncode(Mage::helper('catalog')->__('Price')) ?> + '</th>' +
+            '<th class="type-type">' + <?= $this->helper('core')->jsonEncode(Mage::helper('catalog')->__('Price Type')) ?> + '</th>' +
             <?php endif ?>
-            '<th class="type-sku">' + <?= $this->helper('core')->jsonEncode(Mage::helper('catalog')->__('SKU')); ?> + '</th>' +
-            '<th class="type-title">' + <?= $this->helper('core')->jsonEncode(Mage::helper('catalog')->__('Allowed File Extensions')); ?> + ' <span class="required">*</span>' + '</th>'+
-            '<th class="last">' + <?= $this->helper('core')->jsonEncode(Mage::helper('catalog')->__('Maximum Image Size')); ?> + '</th>' +
+            '<th class="type-sku">' + <?= $this->helper('core')->jsonEncode(Mage::helper('catalog')->__('SKU')) ?> + '</th>' +
+            '<th class="type-title">' + <?= $this->helper('core')->jsonEncode(Mage::helper('catalog')->__('Allowed File Extensions')) ?> + ' <span class="required">*</span>' + '</th>'+
+            '<th class="last">' + <?= $this->helper('core')->jsonEncode(Mage::helper('catalog')->__('Maximum Image Size')) ?> + '</th>' +
         '</tr>' +
         '<tr>' +
             <?php if ($this->getCanReadPrice() !== false) : ?>

@@ -13,7 +13,7 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
-<?php if($this->getRating() && $this->getRating()->getSize()): ?>
+<?php if( $this->getRating() && $this->getRating()->getSize()): ?>
     <div class="product-review-box">
         <table cellspacing="0" id="product-review-table">
             <thead>
@@ -32,9 +32,9 @@
                 <tr class="odd<?php if($_oddIterator == $this->getRating()->getSize()): $_oddIterator = 0; ?> last<?php endif ?>">
                     <td class="label"><?= $this->escapeHtml($_rating->getRatingCode()) ?></td>
                 <?php $_iterator = 1; ?>
-                <?php $_options = ($_rating->getRatingOptions()) ? $_rating->getRatingOptions() : $_rating->getOptions() ?>
+                <?php $_options = ( $_rating->getRatingOptions() ) ? $_rating->getRatingOptions() : $_rating->getOptions() ?>
                 <?php foreach ($_options as $_option): ?>
-                    <td<?php if($_iterator == 5): ?> class="last"<?php endif ?>><input type="radio" name="ratings[<?= ($_rating->getVoteId()) ? $_rating->getVoteId() : $_rating->getId() ?>]" id="<?= $this->escapeHtml($_rating->getRatingCode()) ?>_<?= $_option->getValue() ?>" value="<?= $_option->getId() ?>" <?php if($this->isSelected($_option, $_rating)): ?>checked="checked"<?php endif ?> /></td>
+                    <td<?php if($_iterator == 5): ?> class="last"<?php endif ?>><input type="radio" name="ratings[<?= ( $_rating->getVoteId() ) ? $_rating->getVoteId() : $_rating->getId() ?>]" id="<?= $this->escapeHtml($_rating->getRatingCode()) ?>_<?= $_option->getValue() ?>" value="<?= $_option->getId() ?>" <?php if( $this->isSelected($_option, $_rating)): ?>checked="checked"<?php endif ?> /></td>
                 <?php $_iterator++ ?>
                 <?php endforeach ?>
                 </tr>

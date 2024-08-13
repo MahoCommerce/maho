@@ -37,7 +37,7 @@
         <?= $_shipping->getStreet() ?><br />
         <?= $_shipping->getCity() ?>, <?= $_shipping->getRegion() ?> <?= $_shipping->getPostcode() ?><br />
         <strong>T</strong> | <?php echo $_shipping->getTelephone();
-    if($_shipping->getFax()): ?>
+        if($_shipping->getFax()): ?>
             <br /><strong>F</strong> | <?= $_shipping->getFax() ?>
         <?php endif ?>
         </address>
@@ -50,7 +50,7 @@
         <?= $_billing->getStreet() ?><br />
         <?= $_billing->getCity() ?>, <?= $_billing->getRegion() ?> <?= $_billing->getPostcode() ?><br />
         <strong>T</strong> | <?php echo $_billing->getTelephone();
-    if($_billing->getFax()): ?>
+        if($_billing->getFax()): ?>
             <br /><strong>F</strong> | <?= $_billing->getFax() ?>
         <?php endif ?>
         </address>

@@ -44,9 +44,8 @@
     </tfoot>
 <?php if($_tracks = $this->getShipment()->getAllTracks()): ?>
     <tbody>
-    <?php $i=0;
-    foreach ($_tracks as $_track):$i++ ?>
-        <tr class="<?= ($i%2==0) ? 'even' : 'odd' ?>">
+    <?php $i=0;foreach ($_tracks as $_track):$i++ ?>
+        <tr class="<?= ($i%2==0)?'even':'odd' ?>">
             <td><?= $this->escapeHtml($this->getCarrierTitle($_track->getCarrierCode())) ?></td>
             <td><?= $this->escapeHtml($_track->getTitle()) ?></td>
             <td>

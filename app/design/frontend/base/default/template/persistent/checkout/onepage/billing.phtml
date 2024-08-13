@@ -165,7 +165,7 @@
                         </div>
                     </div>
                 </li>
-                <?= $this->getChildHtml('persistent.remember.me'); ?>
+                <?= $this->getChildHtml('persistent.remember.me') ?>
                 <?php endif ?>
                 <?php if ($this->isCustomerLoggedIn() && $this->customerHasAddresses()):?>
                     <li class="control">
@@ -174,9 +174,9 @@
                 <?php else: ?>
                     <li class="no-display"><input type="hidden" name="billing[save_in_address_book]" value="1" /></li>
                 <?php endif ?>
-                <?= $this->getChildHtml('form.additional.info'); ?>
+                <?= $this->getChildHtml('form.additional.info') ?>
             </ul>
-            <?= $this->getChildHtml('persistent.remember.me.tooltip'); ?>
+            <?= $this->getChildHtml('persistent.remember.me.tooltip') ?>
         </fieldset>
      </li>
     <?php if ($this->canShip()): ?>

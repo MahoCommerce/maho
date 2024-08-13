@@ -22,7 +22,7 @@ $options = $this->getChild('customer.wishlist.item.options')
     ->getConfiguredOptions();
 ?>
 <div class="cart-cell">
-<?= $this->getPriceHtml($product, empty($options));?>
+<?= $this->getPriceHtml($product, empty($options)) ?>
 <div class="add-to-cart-alt">
 <?php if ($item->canHaveQty() && $item->getProduct()->isVisibleInSiteVisibility()): ?>
     <input type="text" class="input-text qty validate-not-negative-number" name="qty[<?= $item->getId() ?>]" value="<?= $this->getAddToCartQty($item) * 1 ?>" />
@@ -43,7 +43,7 @@ $options = $this->getChild('customer.wishlist.item.options')
 <?php endif ?>
 </div>
 <?php foreach($this->getSortedChildren() as $childName):?>
-    <?= $this->getChildHtml($childName, false);?>
+    <?= $this->getChildHtml($childName, false) ?>
 <?php endforeach ?>
 <?php if ($product->isVisibleInSiteVisibility()): ?>
     <p><a class="link-edit" href="<?= $this->getItemConfigureUrl($item) ?>"><?= $this->__('Edit') ?></a></p>

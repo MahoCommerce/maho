@@ -19,11 +19,11 @@
  */
 ?>
 <!DOCTYPE html>
-<html lang="<?= $this->getLang(); ?>">
+<html lang="<?= $this->getLang() ?>">
 <head>
 <?= $this->getChildHtml('head') ?>
 </head>
-<body class="page-print <?= $this->getBodyClass() ? $this->getBodyClass() : '' ?>">
+<body class="page-print <?= $this->getBodyClass()?$this->getBodyClass():'' ?>">
 <div>
     <div class="print-head">
         <img src="<?= $this->getPrintLogoUrl() ? $this->getPrintLogoUrl() : $this->getSkinUrl('images/logo.svg') ?>" class="logo" alt="" />

@@ -15,7 +15,7 @@
 ?>
 <div class="entry-edit"><div class="entry-edit-head"><h4><?= $this->helper('sales')->__('Customer\'s Current Activities') ?></h4></div></div>
 <div class="create-order-sidebar-container">
-<?= $this->getChildHtml('top_button'); ?>
+<?= $this->getChildHtml('top_button') ?>
 <?php foreach ($this->getChild() as $_child): ?>
     <?php $_alias = $_child->getBlockAlias(); ?>
     <?php if ($_alias != 'top_button' && $_alias != 'bottom_button'): ?>
@@ -26,7 +26,7 @@
         </div>
     <?php endif ?>
 <?php endforeach ?>
-<?= $this->getChildHtml('bottom_button'); ?>
+<?= $this->getChildHtml('bottom_button') ?>
 </div>
 <script>
 function addSidebarCompositeListType() {

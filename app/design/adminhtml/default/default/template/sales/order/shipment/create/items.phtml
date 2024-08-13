@@ -35,10 +35,8 @@
             </tr>
         </thead>
         <?php $_items = $this->getShipment()->getAllItems() ?>
-        <?php $_i=0;
-foreach ($_items as $_item): if ($_item->getOrderItem()->getIsVirtual() || $_item->getOrderItem()->getParentItem()): continue; endif;
-    $_i++ ?>
-        <tbody class="<?= $_i%2 ? 'odd' : 'even' ?>">
+        <?php $_i=0;foreach ($_items as $_item): if ($_item->getOrderItem()->getIsVirtual() || $_item->getOrderItem()->getParentItem()): continue; endif; $_i++ ?>
+        <tbody class="<?= $_i%2?'odd':'even' ?>">
             <?= $this->getItemHtml($_item) ?>
             <?= $this->getItemExtraInfoHtml($_item->getOrderItem()) ?>
         </tbody>
@@ -53,7 +51,7 @@ foreach ($_items as $_item): if ($_item->getOrderItem()->getIsVirtual() || $_ite
         <div id="order-history_form">
             <span class="field-row">
                 <label class="normal" for="shipment_comment_text"><?= Mage::helper('sales')->__('Shipment Comments') ?></label>
-                <textarea id="shipment_comment_text" name="shipment[comment_text]" rows="3" cols="5" style="height:6em; width:99%;"><?= $this->getShipment()->getCommentText(); ?></textarea>
+                <textarea id="shipment_comment_text" name="shipment[comment_text]" rows="3" cols="5" style="height:6em; width:99%;"><?= $this->getShipment()->getCommentText() ?></textarea>
             </span>
             <div class="clear"></div>
         </div>

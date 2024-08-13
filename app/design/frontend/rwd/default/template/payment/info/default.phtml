@@ -23,10 +23,10 @@
 <?php if ($_specificInfo = $this->getSpecificInformation()):?>
 <dl class="payment-info">
     <?php foreach ($_specificInfo as $_label => $_value):?>
-        <dt><?= $this->escapeHtml($_label)?></dt>
-        <dd><?= nl2br(implode("\n", $this->getValueAsArray($_value, true)))?></dd>
+        <dt><?= $this->escapeHtml($_label) ?></dt>
+        <dd><?= nl2br(implode("\n", $this->getValueAsArray($_value, true))) ?></dd>
     <?php endforeach ?>
 </dl>
 <?php endif ?>
 
-<?= $this->getChildHtml()?>
+<?= $this->getChildHtml() ?>

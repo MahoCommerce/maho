@@ -28,8 +28,8 @@
     </tr>
 </table>
 </div>
-<?php if(!$this->isSingleStoreMode()): ?>
-<?= $this->getChildHtml('store_switcher');?>
+<?php if( !$this->isSingleStoreMode() ): ?>
+<?= $this->getChildHtml('store_switcher') ?>
 <?php endif ?>
 <div>
     <?= $this->getGridHtml() ?>

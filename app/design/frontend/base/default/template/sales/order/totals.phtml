@@ -19,17 +19,17 @@
 ?>
 <?php foreach ($this->getTotals() as $_code => $_total): ?>
     <?php if ($_total->getBlockName()): ?>
-        <?= $this->getChildHtml($_total->getBlockName(), false); ?>
+        <?= $this->getChildHtml($_total->getBlockName(), false) ?>
     <?php else: ?>
-    <tr class="<?= $_code?>">
-        <td <?= $this->getLabelProperties()?>>
+    <tr class="<?= $_code ?>">
+        <td <?= $this->getLabelProperties() ?>>
             <?php if ($_total->getStrong()):?>
-            <strong><?= $this->escapeHtml($_total->getLabel());?></strong>
+            <strong><?= $this->escapeHtml($_total->getLabel()) ?></strong>
             <?php else: ?>
-            <?= $this->escapeHtml($_total->getLabel());?>
+            <?= $this->escapeHtml($_total->getLabel()) ?>
             <?php endif ?>
         </td>
-        <td <?= $this->getValueProperties()?>>
+        <td <?= $this->getValueProperties() ?>>
             <?php if ($_total->getStrong()):?>
             <strong><?= $this->formatValue($_total) ?></strong>
             <?php else: ?>

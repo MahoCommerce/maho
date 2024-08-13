@@ -27,7 +27,7 @@
             <?php if($_i++%10==0): ?>
                 <col width="1" />
             <?php endif ?>
-            <col width="<?= floor(100/$_total); ?>%" />
+            <col width="<?= floor(100/$_total) ?>%" />
         <?php endforeach ?>
         <?php if ($_total>2): ?>
             <thead>
@@ -50,7 +50,7 @@
                     <th>&nbsp;</th>
                 <?php endif ?>
                 <td>
-                    <a class="product-image" href="#" onclick="setPLocation('<?= $this->getProductUrl($_item) ?>', true)" title="<?= $this->stripTags($_item->getName(), null, true) ?>"><img src="<?= $this->helper('catalog/image')->init($_item, 'small_image')->resize(125, 125); ?>" width="125" height="125" alt="<?= $this->stripTags($_item->getName(), null, true) ?>" /></a>
+                    <a class="product-image" href="#" onclick="setPLocation('<?= $this->getProductUrl($_item) ?>', true)" title="<?= $this->stripTags($_item->getName(), null, true) ?>"><img src="<?= $this->helper('catalog/image')->init($_item, 'small_image')->resize(125, 125) ?>" width="125" height="125" alt="<?= $this->stripTags($_item->getName(), null, true) ?>" /></a>
                     <h2 class="product-name"><a href="#" onclick="setPLocation('<?= $this->getProductUrl($_item) ?>', true)" title="<?= $this->stripTags($_item->getName(), null, true) ?>"><?= $this->helper('catalog/output')->productAttribute($_item, $_item->getName(), 'name') ?></a></h2>
                     <?= $this->getReviewsSummaryHtml($_item, 'short') ?>
                     <?= $this->getPriceHtml($_item, true, '-compare-list-top') ?>
@@ -109,10 +109,10 @@
                                 <?= $this->getPriceHtml($_item, true, '-compare-list-' . $_attribute->getCode()) ?>
                                 <?php break;
                             case "small_image": ?>
-                                <img src="<?= $this->helper('catalog/image')->init($_item, 'small_image')->resize(125, 125); ?>" width="125" height="125" alt="<?= $this->escapeHtml($_item->getName()) ?>" title="<?= $this->escapeHtml($_item->getName()) ?>" />
+                                <img src="<?= $this->helper('catalog/image')->init($_item, 'small_image')->resize(125, 125) ?>" width="125" height="125" alt="<?= $this->escapeHtml($_item->getName()) ?>" title="<?= $this->escapeHtml($_item->getName()) ?>" />
                                 <?php break;
                             case "date":
-                                echo substr($this->getProductAttributeValue($_item, $_attribute), 0, 10);
+                                echo substr($this->getProductAttributeValue($_item, $_attribute),0,10);
                                 break;
                             default: ?>
                                 <div class="std">

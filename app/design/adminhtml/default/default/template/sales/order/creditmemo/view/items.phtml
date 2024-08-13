@@ -35,14 +35,9 @@
                 <th class="last"><span class="nobr"><?= $this->helper('sales')->__('Row Total') ?></span></th>
             </tr>
         </thead>
-        <?php $i=0;
-foreach ($_items as $_item): ?>
-            <?php if ($_item->getOrderItem()->getParentItem()) {
-                continue;
-            } else {
-                $i++;
-            } ?>
-            <tbody class="<?= $i%2 ? 'even' : 'odd' ?>">
+        <?php $i=0;foreach ($_items as $_item): ?>
+            <?php if ($_item->getOrderItem()->getParentItem()) continue; else $i++; ?>
+            <tbody class="<?= $i%2?'even':'odd' ?>">
                 <?= $this->getItemHtml($_item) ?>
                 <?= $this->getItemExtraInfoHtml($_item->getOrderItem()) ?>
             </tbody>

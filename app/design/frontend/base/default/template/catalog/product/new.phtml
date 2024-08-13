@@ -17,8 +17,7 @@
 <h2 class="subtitle"><?= $this->__('New Products') ?></h2>
 <?php $_columnCount = $this->getColumnCount(); ?>
 <?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])); ?>
-    <?php $i=0;
-    foreach ($_products->getItems() as $_product): ?>
+    <?php $i=0; foreach ($_products->getItems() as $_product): ?>
         <?php if ($i++%$_columnCount==0): ?>
         <ul class="products-grid">
         <?php endif ?>

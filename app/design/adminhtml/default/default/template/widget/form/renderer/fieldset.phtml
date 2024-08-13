@@ -15,7 +15,7 @@
 ?>
 <?php $_element = $this->getElement() ?>
 <?php if ($_element->getFieldsetContainerId()): ?>
-<div id="<?= $_element->getFieldsetContainerId(); ?>">
+<div id="<?= $_element->getFieldsetContainerId() ?>">
 <?php endif ?>
 <?php if ($_element->getLegend()): ?>
 <div class="entry-edit-head">
@@ -31,11 +31,11 @@
             <p class="comment"><?= $this->escapeHtml($_element->getComment()) ?></p>
         <?php endif ?>
         <?php if ($_element->hasHtmlContent()): ?>
-            <?= $_element->getHtmlContent(); ?>
+            <?= $_element->getHtmlContent() ?>
         <?php else: ?>
-        <table cellspacing="0" class="<?= $_element->hasTableClass() ? $_element->getTableClass() : 'form-list'?>">
+        <table cellspacing="0" class="<?= $_element->hasTableClass() ? $_element->getTableClass() : 'form-list' ?>">
             <tbody>
-                <?= $_element->getChildrenHtml(); ?>
+                <?= $_element->getChildrenHtml() ?>
             </tbody>
         </table>
         <?php endif ?>

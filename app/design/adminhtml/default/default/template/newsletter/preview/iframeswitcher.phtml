@@ -30,12 +30,12 @@
         <?php if (!Mage::app()->isSingleStoreMode()) :?>
         <p class="switcher">
             <?= $this->getChildHtml('store_switcher') ?>
-            <button class="button" onclick="preview();"><span><span><span><?= $this->__('Preview'); ?></span></span></span></button>
+            <button class="button" onclick="preview();"><span><span><span><?= $this->__('Preview') ?></span></span></span></button>
         </p>
         <?php endif ?>
     </div>
     <iframe name="preview_iframe" id="preview_iframe" frameborder="0"></iframe>
-    <?= $this->getChildHtml('preview_form'); ?>
+    <?= $this->getChildHtml('preview_form') ?>
 </div>
 <div id="loading-mask" style="display:none">
     <div class="backdrop"></div>

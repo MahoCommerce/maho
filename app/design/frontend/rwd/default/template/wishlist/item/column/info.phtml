@@ -22,15 +22,15 @@ $product = $item->getProduct();
 </h3>
 
 <div class="wishlist-sku">
-    <span><?= $this->__('SKU'); ?> <?= $this->escapeHtml($product->getSku()) ?></span>
+    <span><?= $this->__('SKU') ?> <?= $this->escapeHtml($product->getSku()) ?></span>
 </div>
 
-<textarea name="description[<?= $item->getWishlistItemId() ?>]" rows="3" cols="5" title="<?= Mage::helper('core')->quoteEscape($this->__('Comment')) ?>" placeholder="<?= $this->helper('wishlist')->defaultCommentString(); ?>"><?= ($this->escapeHtml($item->getDescription() ? $item->getDescription() : '')) ?></textarea>
+<textarea name="description[<?= $item->getWishlistItemId() ?>]" rows="3" cols="5" title="<?= Mage::helper('core')->quoteEscape($this->__('Comment')) ?>" placeholder="<?= $this->helper('wishlist')->defaultCommentString() ?>"><?= ($this->escapeHtml($item->getDescription() ? $item->getDescription() : '')) ?></textarea>
 
 <?php if($this->getSortedChildren()): ?>
     <div class="item-manage">
     <?php foreach($this->getSortedChildren() as $childName):?>
-        <?= $this->getChildHtml($childName, false);?>
+        <?= $this->getChildHtml($childName, false) ?>
     <?php endforeach ?>
     </div>
 <?php endif ?>

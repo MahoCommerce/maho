@@ -20,13 +20,13 @@
 
 <?php
     $cards = $this->getCards();
-$showCount = count($cards) > 1;
+    $showCount = count($cards) > 1;
 ?>
 
 <dl class="cards-list">
 <?php foreach ($cards as $key => $card): ?>
     <?php if ($showCount): ?>
-        <dt><?= sprintf($this->__('Credit Card %s'), $key + 1); ?></dt>
+        <dt><?= sprintf($this->__('Credit Card %s'), $key + 1) ?></dt>
     <?php endif ?>
 
     <dd <?php if ($showCount):?> class="offset"<?php endif ?>>
@@ -34,8 +34,8 @@ $showCount = count($cards) > 1;
         <tbody>
         <?php foreach ($card as $_label => $_value):?>
         <tr>
-            <th><?= $this->escapeHtml($_label)?>:</th>
-            <td><?= nl2br(implode("\n", $this->getValueAsArray($_value, true)))?></td>
+            <th><?= $this->escapeHtml($_label) ?>:</th>
+            <td><?= nl2br(implode("\n", $this->getValueAsArray($_value, true))) ?></td>
         </tr>
         <?php endforeach ?>
         </tbody>

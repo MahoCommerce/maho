@@ -19,9 +19,9 @@ function addProduct(closeAfter) {
     if(window.opener != null && !added) {
         if (window.opener.superProduct) {
             <?php if($this->isEdit()): ?>
-            window.opener.superProduct.updateProduct(<?= $this->getProductId() ?>, <?= $this->getAttributesJson(); ?>);
+            window.opener.superProduct.updateProduct(<?= $this->getProductId() ?>, <?= $this->getAttributesJson() ?>);
             <?php else: ?>
-            window.opener.superProduct.addNewProduct(<?= $this->getProductId() ?>, <?= $this->getAttributesJson(); ?>);
+            window.opener.superProduct.addNewProduct(<?= $this->getProductId() ?>, <?= $this->getAttributesJson() ?>);
             window.opener.superProduct.showNoticeMessage();
             <?php endif ?>
             added = true;

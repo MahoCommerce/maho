@@ -35,7 +35,7 @@ $_height = $this->getImagesHeight();
         <?php if($this->getFileWidth($file)): ?>
             <small><?= $this->getFileWidth($file) ?>x<?= $this->getFileHeight($file) ?> <?= $this->helper('cms')->__('px.') ?></small><br/>
         <?php endif ?>
-        <small><?= $this->getFileShortName($file); ?></small>
+        <small><?= $this->getFileShortName($file) ?></small>
     </div>
     <?php endforeach ?>
 <?php else: ?>

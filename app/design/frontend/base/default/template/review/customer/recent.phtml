@@ -13,7 +13,7 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
-<?php if($this->getCollection() && $this->count()): ?>
+<?php if( $this->getCollection() && $this->count()): ?>
 <div class="box-account box-reviews">
     <div class="box-head">
         <h2><?= $this->__('My Recent Reviews') ?></h2>
@@ -30,7 +30,7 @@
                     <div class="ratings">
                         <strong><?= $this->__('Rating:') ?></strong>
                         <div class="rating-box">
-                            <div class="rating" style="width:<?= ($_review->getSum() / $_review->getCount()) ?>%;"></div>
+                            <div class="rating" style="width:<?= ( $_review->getSum() / $_review->getCount() ) ?>%;"></div>
                         </div>
                     </div>
                 <?php endif ?>

@@ -42,15 +42,15 @@ $oneMethod = count($methods) <= 1;
         </dt>
         <?php if ($html = $this->getPaymentMethodFormHtml($_method)): ?>
             <dd id="dd_method_<?= $_code ?>">
-                <?= $html; ?>
+                <?= $html ?>
             </dd>
         <?php endif ?>
     <?php endforeach ?>
 <?php endif ?>
-<?= $this->getChildChildHtml('additional'); ?>
+<?= $this->getChildChildHtml('additional') ?>
 <script type="text/javascript">
 //<![CDATA[
-<?= $this->getChildChildHtml('scripts'); ?>
+<?= $this->getChildChildHtml('scripts') ?>
 payment.init();
 <?php if (is_string($oneMethod)): ?>
 payment.switchMethod('<?= $oneMethod ?>');

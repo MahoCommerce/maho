@@ -25,7 +25,7 @@
     <thead>
         <tr>
             <th><?= $this->escapeHtml($this->getFieldsetLabel()) ?></th>
-            <th class="paypal-selection-info"><a href="<?= $this->escapeHtml($this->getFieldsetHelpUrl()) ?>"><?= Mage::helper('paypal')->__('Help')?></a></th>
+            <th class="paypal-selection-info"><a href="<?= $this->escapeHtml($this->getFieldsetHelpUrl()) ?>"><?= Mage::helper('paypal')->__('Help') ?></a></th>
         </tr>
     </thead>
     <tbody>
@@ -36,21 +36,21 @@
                 <?php if ($this->hasInheritElement($element)): ?>
                     <div><?= $this->getInheritElementHtml($element) ?><?= $this->getInheritElementLabelHtml($element) ?></div>
                 <?php endif ?>
-                <label for="<?= $htmlId?>"><?= $this->getElementHtml($element) ?><strong><?= $this->getElementLabelTextHtml($element)?></strong>&nbsp;&ndash; <?= $this->escapeHtml($this->getElementComment($element))?></label>
+                <label for="<?= $htmlId?>"><?= $this->getElementHtml($element) ?><strong><?= $this->getElementLabelTextHtml($element) ?></strong>&nbsp;&ndash; <?= $this->escapeHtml($this->getElementComment($element)) ?></label>
             </td>
         <?php else: ?>
             <td>
                 <?php if ($this->hasInheritElement($element)): ?>
                     <div><?= $this->getInheritElementHtml($element) ?><?= $this->getInheritElementLabelHtml($element) ?></div>
                 <?php endif ?>
-                <label for="<?= $htmlId?>"><?= $this->getElementHtml($element) ?><strong><?= $this->getElementLabelTextHtml($element)?></strong>&nbsp;&ndash; <?= $this->getElementComment($element)?></label>
+                <label for="<?= $htmlId?>"><?= $this->getElementHtml($element) ?><strong><?= $this->getElementLabelTextHtml($element) ?></strong>&nbsp;&ndash; <?= $this->getElementComment($element) ?></label>
             </td>
             <td class="paypal-selection-info">
                 <?php if ($url = $this->getElementOriginalData($element, 'demo_url')):?>
-                    <a id="<?= $element->getHtmlId()?>_demo_url" href="<?= $this->escapeHtml($url) ?>"><?= Mage::helper('paypal')->__('View Demo')?></a> |
+                    <a id="<?= $element->getHtmlId()?>_demo_url" href="<?= $this->escapeHtml($url) ?>"><?= Mage::helper('paypal')->__('View Demo') ?></a> |
                 <?php endif ?>
                 <?php if ($url = $this->getElementOriginalData($element, 'more_url')):?>
-                    <a id="<?= $element->getHtmlId()?>_more_url" href="<?= $this->escapeHtml($url) ?>"><?= Mage::helper('paypal')->__('Learn More')?></a>
+                    <a id="<?= $element->getHtmlId()?>_more_url" href="<?= $this->escapeHtml($url) ?>"><?= Mage::helper('paypal')->__('Learn More') ?></a>
                 <?php endif ?>
             </td>
         <?php endif ?>
@@ -98,74 +98,65 @@ PaypalConfig.prototype = {
                 ec: $H({
                     switcher: 'express',
                     fieldset: 'express',
-                    backendConfig : $H(<?= $this->getElementBackendConfig(
-    $this->getElement('paypal_global_express')
-);
-?>)
+                    backendConfig : $H(<?php echo $this->getElementBackendConfig(
+                        $this->getElement('paypal_global_express'));
+                    ?>)
                 }),
                 wps: $H({
                     switcher: 'wps',
                     fieldset: 'wps',
-                    backendConfig : $H(<?= $this->getElementBackendConfig(
-    $this->getElement('paypal_global_wps')
-);
-?>)
+                    backendConfig : $H(<?php echo $this->getElementBackendConfig(
+                        $this->getElement('paypal_global_wps'));
+                    ?>)
                 }),
                 wpp: $H({
                     switcher: 'wpp',
                     fieldset: 'wpp',
-                    backendConfig : $H(<?= $this->getElementBackendConfig(
-    $this->getElement('paypal_global_wpp')
-);
-?>)
+                    backendConfig : $H(<?php echo $this->getElementBackendConfig(
+                        $this->getElement('paypal_global_wpp'));
+                    ?>)
                 }),
                 wpppe: $H({
                     switcher: 'wpp_pe',
                     fieldset: 'wpp_pe',
-                    backendConfig : $H(<?= $this->getElementBackendConfig(
-    $this->getElement('paypal_global_wpp_pe')
-);
-?>)
+                    backendConfig : $H(<?php echo $this->getElementBackendConfig(
+                        $this->getElement('paypal_global_wpp_pe'));
+                    ?>)
                 }),
                 wpppl: $H({
                     switcher: 'payflow_link',
                     fieldset: 'payflow_link',
-                    backendConfig : $H(<?= $this->getElementBackendConfig(
-    $this->getElement('paypal_global_payflow_link')
-);
-?>)
+                    backendConfig : $H(<?php echo $this->getElementBackendConfig(
+                        $this->getElement('paypal_global_payflow_link'));
+                    ?>)
                 }),
                 wpppa: $H({
                     switcher: 'payflow_advanced',
                     fieldset: 'payflow_advanced',
-                    backendConfig : $H(<?= $this->getElementBackendConfig(
-    $this->getElement('paypal_global_payflow_advanced')
-);
-?>)
+                    backendConfig : $H(<?php echo $this->getElementBackendConfig(
+                        $this->getElement('paypal_global_payflow_advanced'));
+                    ?>)
                 }),
                 ecpe: $H({
                     switcher: 'express_pe',
                     fieldset: 'express_pe',
-                    backendConfig : $H(<?= $this->getElementBackendConfig(
-    $this->getElement('paypal_global_express_pe')
-);
-?>)
+                    backendConfig : $H(<?php echo $this->getElementBackendConfig(
+                        $this->getElement('paypal_global_express_pe'));
+                    ?>)
                 }),
                 payflowpro: $H({
                     switcher: 'verisign',
                     fieldset: 'verisign',
-                    backendConfig : $H(<?= $this->getElementBackendConfig(
-    $this->getElement('paypal_global_verisign')
-);
-?>)
+                    backendConfig : $H(<?php echo $this->getElementBackendConfig(
+                        $this->getElement('paypal_global_verisign'));
+                    ?>)
                 }),
                 hosted_pro: $H({
                     switcher: 'hosted_pro',
                     fieldset: 'hosted_pro',
-                    backendConfig : $H(<?= $this->getElementBackendConfig(
-    $this->getElement('paypal_global_hosted_pro')
-);
-?>)
+                    backendConfig : $H(<?php echo $this->getElementBackendConfig(
+                        $this->getElement('paypal_global_hosted_pro'));
+                    ?>)
                 })
         });
         this.disabledMethods = [];

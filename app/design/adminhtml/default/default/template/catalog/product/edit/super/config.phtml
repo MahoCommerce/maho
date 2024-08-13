@@ -33,7 +33,7 @@
 </div>
 
 <div id="<?= $this->getHtmlId() ?>_simple_form" class="ignore-validate configurable-simple-product">
-<?= $this->getChildHtml('simple'); ?>
+<?= $this->getChildHtml('simple') ?>
 </div>
 <?php endif ?>
 <div class="entry-edit">
@@ -47,8 +47,8 @@
 
         <ul class="messages">
             <li class="notice-msg">
-                <ul><li><?= Mage::helper('catalog')->__('Price values for options should be specified in system base currency.')?></li></ul>
-                <ul><li><?= Mage::helper('catalog')->__('Attrribute names can be specified per store.')?></li></ul>
+                <ul><li><?= Mage::helper('catalog')->__('Price values for options should be specified in system base currency.') ?></li></ul>
+                <ul><li><?= Mage::helper('catalog')->__('Attrribute names can be specified per store.') ?></li></ul>
             </li>
         </ul>
         <ul id="<?= $this->getHtmlId() ?>_attributes" class="super-attributes">
@@ -63,7 +63,7 @@
         <label for="__id___label" class="bold"><?= Mage::helper('catalog')->__('Attribute Name:') ?></label>
         <input id="__id___label" type="text" <?php if ($this->isAttributesConfigurationReadonly()): ?> disabled="disabled" <?php endif ?> class="input-text attribute-label required-entry template no-display" value="'{{label}}'" readonly="label" />
         <input id="__id___label_use_default" type="checkbox" value="1" " checked="use_default" class="attribute-use-default-label">
-        <label for="__id___label_use_default"><?= Mage::helper('catalog')->__('Use default')?> ('{{store_label}}')</label>
+        <label for="__id___label_use_default"><?= Mage::helper('catalog')->__('Use default') ?> ('{{store_label}}')</label>
         <ul class="attribute-values">
         </ul>
     </div>
@@ -127,7 +127,7 @@
 </div>
 <?= $this->getGridHtml() ?>
 <script type="text/javascript">
-var superProduct = new Product.Configurable(<?= $this->getAttributesJson() ?>,<?= $this->getLinksJson() ?>,'<?= $this->getHtmlId() ?>_',<?= $this->getGridJsObject() ?>, <?=($this->isReadonly() ? 'true' : 'false'); ?>);
+var superProduct = new Product.Configurable(<?= $this->getAttributesJson() ?>,<?= $this->getLinksJson() ?>,'<?= $this->getHtmlId() ?>_',<?= $this->getGridJsObject() ?>, <?= ( $this->isReadonly() ? 'true' : 'false') ?>);
 superProduct.createEmptyUrl = '<?= $this->getNewEmptyProductUrl() ?>';
 superProduct.createNormalUrl = '<?= $this->getNewProductUrl() ?>';
 superProduct.createQuickUrl = '<?= $this->getQuickCreationUrl() ?>';

@@ -16,8 +16,8 @@
 <?= $this->helper('core/js')->includeScript('mage/adminhtml/giftmessage.js') ?>
 <?php if(!$this->getSaveMode()): ?>
 <form action="<?= $this->getSaveUrl() ?>" id="message-form" method="post" class="a-left">
-    <?= $this->getBlockHtml('formkey')?>
-    <?= $this->getFormHtml(); ?>
+    <?= $this->getBlockHtml('formkey') ?>
+    <?= $this->getFormHtml() ?>
     <?= $this->getSaveButtonHtml() ?>
     <?= $this->getCancelButtonHtml() ?>
     <?php if($this->getMessage()->getGiftMessageId()): ?>

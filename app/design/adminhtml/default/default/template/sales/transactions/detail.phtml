@@ -25,7 +25,7 @@
 <div class="entry-edit">
     <div class="entry-edit">
         <div class="entry-edit-head">
-            <h4 class="icon-head head-edit-form fieldset-legend"><?= $this->__('Transaction Data'); ?></h4>
+            <h4 class="icon-head head-edit-form fieldset-legend"><?= $this->__('Transaction Data') ?></h4>
         </div>
         <div id="log_details_fieldset" class="log-details">
             <table cellspacing="0" class="log-info table">
@@ -33,40 +33,40 @@
                 <col />
                 <tbody>
                     <tr>
-                        <th><?= $this->__('Transaction ID'); ?></th>
+                        <th><?= $this->__('Transaction ID') ?></th>
                         <td><?= $this->getTxnIdHtml() ?></td>
                     </tr>
                     <tr>
-                        <th><?= $this->__('Parent Transaction ID'); ?></th>
+                        <th><?= $this->__('Parent Transaction ID') ?></th>
                         <td>
                             <?php if ($this->getParentTxnIdHtml()): ?>
                                 <a href="<?= $this->getParentTxnIdUrlHtml() ?>">
-                                    <?= $this->getParentTxnIdHtml(); ?>
+                                    <?= $this->getParentTxnIdHtml() ?>
                                 </a>
                             <?php else: ?>
-                                <?= $this->__('N/A'); ?>
+                                <?= $this->__('N/A') ?>
                             <?php endif ?>
                         </td>
                     </tr>
                     <tr>
-                        <th><?= $this->__('Order ID'); ?></th>
+                        <th><?= $this->__('Order ID') ?></th>
                         <td>
-                            <a href="<?= $this->getOrderIdUrlHtml(); ?>">
+                            <a href="<?= $this->getOrderIdUrlHtml() ?>">
                                 <?= $this->getOrderIncrementIdHtml() ?>
                             </a>
                         </td>
                     </tr>
                     <tr>
-                        <th><?= $this->__('Transaction Type'); ?></th>
+                        <th><?= $this->__('Transaction Type') ?></th>
                         <td><?= $this->getTxnTypeHtml() ?></td>
                     </tr>
                     <tr>
-                        <th><?= $this->__('Is Closed'); ?></th>
-                        <td><?= $this->getIsClosedHtml(); ?></td>
+                        <th><?= $this->__('Is Closed') ?></th>
+                        <td><?= $this->getIsClosedHtml() ?></td>
                     </tr>
                     <tr>
-                        <th><?= $this->__('Created At'); ?></th>
-                        <td><?= $this->getCreatedAtHtml(); ?></td>
+                        <th><?= $this->__('Created At') ?></th>
+                        <td><?= $this->getCreatedAtHtml() ?></td>
                     </tr>
                 </tbody>
             </table>
@@ -77,7 +77,7 @@
 <div class="entry-edit">
     <div class="entry-edit">
         <div class="entry-edit-head">
-            <h4 class="icon-head head-edit-form fieldset-legend"><?= $this->__('Child Transactions'); ?></h4>
+            <h4 class="icon-head head-edit-form fieldset-legend"><?= $this->__('Child Transactions') ?></h4>
         </div>
         <div class="log-details-grid">
             <?= $this->getChildHtml('child_grid') ?>
@@ -88,7 +88,7 @@
 <div class="entry-edit">
     <div class="entry-edit">
         <div class="entry-edit-head">
-            <h4 class="icon-head head-edit-form fieldset-legend"><?= $this->__('Transaction Details'); ?></h4>
+            <h4 class="icon-head head-edit-form fieldset-legend"><?= $this->__('Transaction Details') ?></h4>
         </div>
         <div class="log-details-grid">
             <?= $this->getChildHtml('detail_grid') ?>

@@ -23,7 +23,7 @@
 <div class="billing-agreements">
     <?php $billingAgreements = $this->getBillingAgreements(); ?>
     <?php if (count($billingAgreements) > 0): ?>
-        <?= $this->getChildHtml('pager'); ?>
+        <?= $this->getChildHtml('pager') ?>
         <table id="billing-agreements" class="data-table">
             <col />
             <col width="1" />
@@ -33,11 +33,11 @@
             <col width="1" />
             <thead>
                 <tr>
-                    <th><span class="nobr"><?= $this->__('Reference ID'); ?></span></th>
-                    <th><?= $this->__('Status'); ?></th>
-                    <th><span class="nobr"><?= $this->__('Created At'); ?></span></th>
-                    <th><span class="nobr"><?= $this->__('Updated At'); ?></span></th>
-                    <th><span class="nobr"><?= $this->__('Payment Method'); ?></span></th>
+                    <th><span class="nobr"><?= $this->__('Reference ID') ?></span></th>
+                    <th><?= $this->__('Status') ?></th>
+                    <th><span class="nobr"><?= $this->__('Created At') ?></span></th>
+                    <th><span class="nobr"><?= $this->__('Updated At') ?></span></th>
+                    <th><span class="nobr"><?= $this->__('Payment Method') ?></span></th>
                     <th>&nbsp;</th>
                 </tr>
             </thead>
@@ -55,7 +55,7 @@
             </tbody>
         </table>
     <?php else: ?>
-        <p><?= $this->__('There are no billing agreements yet.')?></p>
+        <p><?= $this->__('There are no billing agreements yet.') ?></p>
     <?php endif ?>
 
     <?php $paymentMethods = $this->getWizardPaymentMethodOptions() ?>

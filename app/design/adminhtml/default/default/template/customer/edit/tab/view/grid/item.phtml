@@ -12,18 +12,18 @@
  * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://www.openmage.org)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
+ ?>
 <?php /* @var $this Mage_Adminhtml_Block_Customer_Edit_Tab_View_Grid_Renderer_Item */ ?>
 <?php
-$product = $this->getProduct();
-$options = $this->getOptionList();
+    $product = $this->getProduct();
+    $options = $this->getOptionList();
 ?>
 
 <?php if (!$options): ?>
-    <?= $this->escapeHtml($product->getName())?>
+    <?= $this->escapeHtml($product->getName()) ?>
 <?php else: ?>
 <div class="bundle-product-options">
-    <strong><?= $this->escapeHtml($product->getName())?></strong>
+    <strong><?= $this->escapeHtml($product->getName()) ?></strong>
     <dl>
         <?php foreach ($options as $option) : ?>
             <dt><?= $this->escapeHtml($option['label']) ?></dt>

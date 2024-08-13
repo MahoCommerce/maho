@@ -14,38 +14,37 @@
  */
 ?>
 <?php
-$columns = $this->getColumns();
+    $columns = $this->getColumns();
 ?>
 <table class="data-table" id="wishlist-table">
     <thead>
         <tr>
             <?php foreach ($columns as $column): ?>
-                <th><?= $column->getTitle();?></th>
+                <th><?= $column->getTitle() ?></th>
             <?php endforeach ?>
         </tr>
     </thead>
     <tbody>
         <?php if (count($this->getItems())): ?>
             <?php foreach ($this->getItems() as $item): ?>
-                <tr id="item_<?= $item->getId();?>">
+                <tr id="item_<?= $item->getId() ?>">
                     <?php foreach ($columns as $column): ?>
-                        <td><?php $column->setItem($item);
-                        echo $column->toHtml($item);?></td>
+                        <td><?php $column->setItem($item); echo $column->toHtml($item);?></td>
                     <?php endforeach ?>
                 </tr>
             <?php endforeach ?>
         <?php else: ?>
-            <td colspan="<?= count($columns);?>" class="wishlist-empty"><?= $this->__('This Wishlist has no Items');?></td>
+            <td colspan="<?= count($columns) ?>" class="wishlist-empty"><?= $this->__('This Wishlist has no Items') ?></td>
         <?php endif ?>
     </tbody>
 </table>
 <?php foreach ($columns as $column): ?>
-    <?= $column->getAdditionalHtml();?>
+    <?= $column->getAdditionalHtml() ?>
 <?php endforeach ?>
 <script type="text/javascript">
 //<![CDATA[
 <?php foreach ($columns as $column): ?>
-    <?= $column->getJs();?>
+    <?= $column->getJs() ?>
 <?php endforeach ?>
 //]]>
 </script>

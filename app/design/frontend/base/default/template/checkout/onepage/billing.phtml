@@ -180,12 +180,12 @@
                 <?php else: ?>
                     <li class="no-display"><input type="hidden" name="billing[save_in_address_book]" value="1" /></li>
                 <?php endif ?>
-                <?= $this->getChildHtml('form.additional.info'); ?>
+                <?= $this->getChildHtml('form.additional.info') ?>
             </ul>
         </fieldset>
     </li>
     <?php /* Extensions placeholder */ ?>
-    <?= $this->getChildHtml('checkout.onepage.billing.extra')?>
+    <?= $this->getChildHtml('checkout.onepage.billing.extra') ?>
     <?php if ($this->canShip()): ?>
         <li class="control">
             <input type="radio" name="billing[use_for_shipping]" id="billing:use_for_shipping_yes" value="1"<?php if ($this->isUseBillingAddressForShipping()) {?> checked="checked"<?php }?> title="<?= Mage::helper('core')->quoteEscape($this->__('Ship to this address')) ?>" onclick="$('shipping:same_as_billing').checked = true;" class="radio" /><label for="billing:use_for_shipping_yes"><?=  $this->__('Ship to this address') ?></label></li>

@@ -20,8 +20,8 @@
 ?>
 <div id="<?= $this->getHtmlId() ?>" class="uploader">
     <div class="buttons a-right">
-        <?= $this->getBrowseButtonHtml(); ?>
-        <?= $this->getUploadButtonHtml(); ?>
+        <?= $this->getBrowseButtonHtml() ?>
+        <?= $this->getUploadButtonHtml() ?>
     </div>
 </div>
 <div class="no-display" id="<?= $this->getElementId('template') ?>">
@@ -34,11 +34,11 @@
 </div>
 <script type="text/javascript">
     (function() {
-        var uploader = new Uploader(<?= $this->getJsonConfig(); ?>);
+        var uploader = new Uploader(<?= $this->getJsonConfig() ?>);
 
         if (varienGlobalEvents) {
             varienGlobalEvents.attachEventHandler('tabChangeBefore', uploader.onContainerHideBefore);
         }
     })();
 </script>
-<?= $this->getChildHtml('additional_scripts'); ?>
+<?= $this->getChildHtml('additional_scripts') ?>

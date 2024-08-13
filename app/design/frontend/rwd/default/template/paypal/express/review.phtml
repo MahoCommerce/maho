@@ -27,7 +27,7 @@
                     <h3><?= $this->__('Shipping Address') ?><span class="separator"><?php if ($this->getCanEditShippingAddress()):?> | </span><a href="<?= $this->getEditUrl() ?>"><?= $this->__('Edit') ?></a><?php endif ?></h3>
                 </div>
                 <div class="box-content">
-                    <address><?= $this->renderAddress($this->getShippingAddress())?></address>
+                    <address><?= $this->renderAddress($this->getShippingAddress()) ?></address>
                 </div>
             </div>
         </div>
@@ -49,8 +49,8 @@
                                         <?php foreach ($groups as $code => $rates):?>
                                             <optgroup label="<?= $this->escapeHtml($this->getCarrierName($code)) ?>" style="font-style:normal;">
                                                 <?php foreach ($rates as $rate):?>
-                                                    <option value="<?= $this->renderShippingRateValue($rate)?>"<?= ($currentRate === $rate) ? ' selected="selected"' : '' ;?>>
-                                                        <?= $this->renderShippingRateOption($rate)?>
+                                                    <option value="<?= $this->renderShippingRateValue($rate) ?>"<?= ($currentRate === $rate) ? ' selected="selected"' : ''  ?>>
+                                                        <?= $this->renderShippingRateOption($rate) ?>
                                                     </option>
                                                 <?php endforeach ?>
                                             </optgroup>
@@ -64,7 +64,7 @@
                                 <p><strong><?= $this->__('Sorry, no quotes are available for this order at this time.') ?></strong></p>
                             <?php endif ?>
                         <?php else: ?>
-                            <p><strong><?= $this->renderShippingRateOption($this->getCurrentShippingRate())?></strong></p>
+                            <p><strong><?= $this->renderShippingRateOption($this->getCurrentShippingRate()) ?></strong></p>
                         <?php endif ?>
                     </form>
                 </div>
@@ -96,7 +96,7 @@
     </div>
 </div>
 <form method="post" id="order_review_form" action="<?= $this->getPlaceOrderUrl() ?>">
-    <?= $this->getChildHtml('agreements'); ?>
+    <?= $this->getChildHtml('agreements') ?>
     <div class="buttons-set buttons-set-order" id="review-buttons-container">
         <button type="button" id="review_button" value="<?= $this->__('Place Order') ?>" class="button btn-checkout"><span><span><?= $this->__('Place Order') ?></span></span></button>
         <button type="button" id="review_submit" value="<?= $this->__('Place Order') ?>" class="button btn-checkout"><span><span><?= $this->__('Place Order') ?></span></span></button>
@@ -132,7 +132,7 @@
                         return;
                     }
                     if (response.success) {
-                        setLocation('<?= $this->getSuccessUrl()?>');
+                        setLocation('<?= $this->getSuccessUrl() ?>');
                         return;
                     } else {
                         var msg = response.error_messages;
@@ -146,7 +146,7 @@
                         }
                     }
                     $('review-please-wait').hide();
-                    alert('<?= $this->jsQuoteEscape($this->__('Unknown Error. Please try again later.')); ?>');
+                    alert('<?= $this->jsQuoteEscape($this->__('Unknown Error. Please try again later.')) ?>');
                     return;
                 },
                 onFailure: function(){

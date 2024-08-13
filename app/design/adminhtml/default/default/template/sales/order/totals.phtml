@@ -17,8 +17,8 @@
 <?php $this->setPriceDataObject($_source) ?>
 <?php if ($_source): ?>
 <table cellspacing="0" width="100%">
-    <?php echo $this->getChildHtml('main'); ?>
-    <?php echo $this->getChildHtml('footer'); ?>
+    <?= $this->getChildHtml('main') ?>
+    <?= $this->getChildHtml('footer') ?>
 </table>
 <?php endif */ ?>
 <table cellspacing="0" width="100%">
@@ -29,13 +29,13 @@
     <tfoot>
     <?php foreach ($this->getTotals('footer') as $_code => $_total): ?>
         <?php if ($_total->getBlockName()): ?>
-            <?= $this->getChildHtml($_total->getBlockName(), false); ?>
+            <?= $this->getChildHtml($_total->getBlockName(), false) ?>
         <?php else: ?>
-        <tr class="<?= $_code?>">
-            <td <?= $this->getLabelProperties()?> class="label">
-                <strong><?= $this->escapeHtml($_total->getLabel()); ?></strong>
+        <tr class="<?= $_code ?>">
+            <td <?= $this->getLabelProperties() ?> class="label">
+                <strong><?= $this->escapeHtml($_total->getLabel()) ?></strong>
             </td>
-            <td <?= $this->getValueProperties()?> class="emph">
+            <td <?= $this->getValueProperties() ?> class="emph">
                 <strong><?= $this->formatValue($_total) ?></strong>
             </td>
         </tr>
@@ -49,21 +49,21 @@
     <tbody>
     <?php foreach ($_totals as $_code => $_total): ?>
         <?php if ($_total->getBlockName()): ?>
-            <?= $this->getChildHtml($_total->getBlockName(), false); ?>
+            <?= $this->getChildHtml($_total->getBlockName(), false) ?>
         <?php else: ?>
-        <tr class="<?= $_code?>">
-            <td <?= $this->getLabelProperties()?> class="label">
+        <tr class="<?= $_code ?>">
+            <td <?= $this->getLabelProperties() ?> class="label">
                 <?php if ($_total->getStrong()):?>
-                <strong><?= $this->escapeHtml($_total->getLabel()); ?></strong>
+                <strong><?= $this->escapeHtml($_total->getLabel()) ?></strong>
                 <?php else: ?>
-                <?= $this->escapeHtml($_total->getLabel()); ?>
+                <?= $this->escapeHtml($_total->getLabel()) ?>
                 <?php endif ?>
             </td>
             <?php if ($_total->getStrong()):?>
-            <td <?= $this->getValueProperties()?> class="emph">
+            <td <?= $this->getValueProperties() ?> class="emph">
                 <strong><?= $this->formatValue($_total) ?></strong>
             <?php else: ?>
-            <td <?= $this->getValueProperties()?>>
+            <td <?= $this->getValueProperties() ?>>
                 <?= $this->formatValue($_total) ?>
             <?php endif ?>
             </td>

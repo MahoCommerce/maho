@@ -19,7 +19,7 @@
 <?= $this->getMessagesBlock()->toHtml() ?>
 <form action="<?= $this->getSendUrl() ?>" id="form-validate" method="post">
     <div class="fieldset">
-        <?= $this->getBlockHtml('formkey')?>
+        <?= $this->getBlockHtml('formkey') ?>
         <h2 class="legend"><?= $this->__('Sharing Information') ?></h2>
         <ul class="form-list">
             <li class="wide">
@@ -42,12 +42,12 @@
                 <label for="rss_url"><?= $this->__('Check this checkbox if you want to add a link to an rss feed to your wishlist.') ?></label>
             </li>
             <?php endif ?>
-            <?= $this->getChildHtml('wishlist.sharing.form.additional.info'); ?>
+            <?= $this->getChildHtml('wishlist.sharing.form.additional.info') ?>
         </ul>
     </div>
     <div class="buttons-set form-buttons">
         <p class="required"><?= $this->__('* Required Fields') ?></p>
-        <p class="back-link"><a href="<?= $this->getBackUrl(); ?>"><small>&laquo; </small><?= $this->__('Back')?></a></p>
+        <p class="back-link"><a href="<?= $this->getBackUrl() ?>"><small>&laquo; </small><?= $this->__('Back') ?></a></p>
         <button type="submit" title="<?= Mage::helper('core')->quoteEscape($this->__('Share Wishlist')) ?>" class="button"><?= $this->__('Share Wishlist') ?></button>
     </div>
 </form>

@@ -25,7 +25,7 @@ $rejectJs = "document.location.href='{$this->getRejectUrl()}';";
     <?= $this->getMessagesBlock()->toHtml() ?>
     <?php if (!$this->getHasException()): ?>
         <form action="<?= $this->getPostActionUrl() ?>" method="post" id="login-form">
-            <?= $this->getBlockHtml('formkey'); ?>
+            <?= $this->getBlockHtml('formkey') ?>
             <div class="col1-set">
                 <div class="col-1 registered-users">
                     <div class="content" style="margin: 0 auto; padding-bottom: 13px;">
@@ -48,7 +48,7 @@ $rejectJs = "document.location.href='{$this->getRejectUrl()}';";
                         <div class="buttons-set" style="margin-top: 20px; padding: 0;">
                             <button type="submit" class="button" title="<?= $this->__('Login') ?>" name="send" id="send2">
                                 <?= $this->__('Login') ?></button>
-                            <button type="submit" class="button" onclick="<?= $rejectJs; ?>"
+                            <button type="submit" class="button" onclick="<?= $rejectJs ?>"
                                     title="<?= $this->__('Reject') ?>" name="send">
                                 <?= $this->__('Reject') ?></button>
                         </div>

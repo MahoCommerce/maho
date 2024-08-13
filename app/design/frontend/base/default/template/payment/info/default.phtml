@@ -25,14 +25,14 @@
     <tbody>
     <?php foreach ($_specificInfo as $_label => $_value):?>
         <tr>
-            <th><strong><?= $this->escapeHtml($_label)?>:</strong></th>
+            <th><strong><?= $this->escapeHtml($_label) ?>:</strong></th>
         </tr>
         <tr>
-            <td><?= nl2br(implode("\n", $this->getValueAsArray($_value, true)))?></td>
+            <td><?= nl2br(implode("\n", $this->getValueAsArray($_value, true))) ?></td>
         </tr>
     <?php endforeach ?>
     </tbody>
 </table>
 <?php endif ?>
 
-<?= $this->getChildHtml()?>
+<?= $this->getChildHtml() ?>

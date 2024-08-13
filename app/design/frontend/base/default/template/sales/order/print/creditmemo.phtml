@@ -51,7 +51,7 @@
         </div>
     </div>
     <h3><?= $this->__('Items Refunded') ?></h3>
-    <table class="data-table" id="my-refund-table-<?= $_creditmemo->getId(); ?>">
+    <table class="data-table" id="my-refund-table-<?= $_creditmemo->getId() ?>">
       <col />
       <col width="1" />
       <col width="1" />
@@ -71,14 +71,12 @@
           </tr>
       </thead>
       <tfoot>
-        <?= $this->getTotalsHtml($_creditmemo);?>
+        <?= $this->getTotalsHtml($_creditmemo) ?>
       </tfoot>
     <?php $_items = $_creditmemo->getAllItems(); ?>
     <?php $_count = count($_items); ?>
     <?php foreach ($_items as $_item): ?>
-    <?php if ($_item->getOrderItem()->getParentItem()) {
-        continue;
-    } ?>
+    <?php if ($_item->getOrderItem()->getParentItem()) continue; ?>
     <tbody>
         <?= $this->getItemHtml($_item) ?>
     </tbody>

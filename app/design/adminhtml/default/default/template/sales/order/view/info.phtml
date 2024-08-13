@@ -52,7 +52,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
             </tr>
             <tr>
                 <td class="label"><label><?= Mage::helper('sales')->__('Purchased From') ?></label></td>
-                <td class="value"><strong><?= $this->getOrderStoreName(); ?></strong></td>
+                <td class="value"><strong><?= $this->getOrderStoreName() ?></strong></td>
             </tr>
             <?php if($_order->getRelationChildId()): ?>
             <tr>
@@ -73,8 +73,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
             <?php if($_order->getRemoteIp() && $this->shouldDisplayCustomerIp()): ?>
             <tr>
                 <td class="label"><label><?= Mage::helper('sales')->__('Placed from IP') ?></label></td>
-                <td class="value"><strong><?php echo $this->escapeHtml($_order->getRemoteIp());
-                echo ($_order->getXForwardedFor()) ? ' (' . $this->escapeHtml($_order->getXForwardedFor()) . ')' : ''; ?></strong></td>
+                <td class="value"><strong><?= $this->escapeHtml($_order->getRemoteIp()); echo ($_order->getXForwardedFor())?' (' . $this->escapeHtml($_order->getXForwardedFor()) . ')':'' ?></strong></td>
             </tr>
             <?php endif ?>
             <?php if($_order->getGlobalCurrencyCode() != $_order->getBaseCurrencyCode()): ?>
@@ -98,7 +97,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4 class="icon-head head-account"><?= Mage::helper('sales')->__('Account Information') ?></h4>
-            <div class="tools"><?= $this->getAccountEditLink()?></div>
+            <div class="tools"><?= $this->getAccountEditLink() ?></div>
         </div>
         <div class="fieldset">
             <div class="hor-scroll">
@@ -141,7 +140,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4 class="icon-head head-billing-address"><?= Mage::helper('sales')->__('Billing Address') ?></h4>
-            <div class="tools"><?= $this->getAddressEditLink($_order->getBillingAddress())?></div>
+            <div class="tools"><?= $this->getAddressEditLink($_order->getBillingAddress()) ?></div>
         </div>
         <fieldset>
             <address><?= $this->maliciousCodeFilter($_order->getBillingAddress()->getFormated(true)) ?></address>
@@ -154,7 +153,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4 class="icon-head head-shipping-address"><?= Mage::helper('sales')->__('Shipping Address') ?></h4>
-            <div class="tools"><?= $this->getAddressEditLink($_order->getShippingAddress())?></div>
+            <div class="tools"><?= $this->getAddressEditLink($_order->getShippingAddress()) ?></div>
         </div>
         <fieldset>
             <address><?= $this->maliciousCodeFilter($_order->getShippingAddress()->getFormated(true)) ?></address>

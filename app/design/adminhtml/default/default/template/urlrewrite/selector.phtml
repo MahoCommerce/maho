@@ -29,7 +29,7 @@
             <?php $url = Mage::helper('adminhtml')->getUrl('*/*/*')?>
             <select class="select" onchange="window.location = this.value;">
             <?php foreach ($this->getModes() as $mode => $label): ?>
-                <option <?= ($this->isMode($mode) ? 'selected="selected" ' : '') ?>value="<?= $url . $mode ?>"><?= $label ?></option>
+                <option <?= ($this->isMode($mode) ? 'selected="selected" ' :'' ) ?>value="<?= $url . $mode ?>"><?= $label ?></option>
             <?php endforeach ?>
             </select>
         </td>

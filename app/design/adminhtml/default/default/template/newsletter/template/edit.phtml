@@ -17,24 +17,24 @@
 <div class="content-header">
    <h3 class="icon-head head-newsletter"><?= $this->getHeaderText() ?></h3>
    <p class="content-buttons form-buttons">
-                <?= $this->getBackButtonHtml(); ?>
-                <?= $this->getResetButtonHtml(); ?>
+                <?= $this->getBackButtonHtml() ?>
+                <?= $this->getResetButtonHtml() ?>
                 <?php if(!$this->isTextType()): ?>
-                <?= $this->getToPlainButtonHtml(); ?>
-                <?= $this->getToHtmlButtonHtml(); ?>
+                <?= $this->getToPlainButtonHtml() ?>
+                <?= $this->getToHtmlButtonHtml() ?>
                 <?php endif ?>
-                <?= $this->getPreviewButtonHtml(); ?>
+                <?= $this->getPreviewButtonHtml() ?>
                 <?php if($this->getEditMode()): ?>
-                <?= $this->getDeleteButtonHtml(); ?>
+                <?= $this->getDeleteButtonHtml() ?>
                 <?php endif ?>
                 <?php if($this->getEditMode()): ?>
-                <?= $this->getSaveAsButtonHtml(); ?>
+                <?= $this->getSaveAsButtonHtml() ?>
                 <?php endif ?>
-                <?= $this->getSaveButtonHtml(); ?>
+                <?= $this->getSaveButtonHtml() ?>
     </p>
 </div>
 <form action="<?= $this->getSaveUrl() ?>" method="post" id="newsletter_template_edit_form">
-    <?= $this->getBlockHtml('formkey')?>
+    <?= $this->getBlockHtml('formkey') ?>
     <div class="no-display">
         <input type="hidden" id="change_flag_element" name="_change_type_flag" value="" />
         <input type="hidden" id="save_as_flag" name="_save_as_flag" value="<?= $this->getSaveAsFlag() ?>" />
@@ -42,9 +42,9 @@
     <?= $this->getForm() ?>
 </form>
 <form action="<?= $this->getPreviewUrl() ?>" method="post" id="newsletter_template_preview_form" target="_blank">
-    <?= $this->getBlockHtml('formkey')?>
+    <?= $this->getBlockHtml('formkey') ?>
     <div class="no-display">
-        <input type="hidden" id="preview_type" name="type" value="<?= $this->isTextType() ? 1 : 2 ?>" />
+        <input type="hidden" id="preview_type" name="type" value="<?= $this->isTextType()?1:2 ?>" />
         <input type="hidden" id="preview_text" name="text" value="" />
         <input type="hidden" id="preview_styles" name="styles" value="" />
         <input type="hidden" id="preview_id" name="id" value="" />

@@ -47,6 +47,6 @@ $options = $this->getChild('customer.wishlist.item.options')
     <p><a class="link-edit button button-secondary" href="<?= $this->getItemConfigureUrl($item) ?>"><?= $this->__('Edit') ?></a></p>
 <?php endif ?>
 <?php foreach($this->getSortedChildren() as $childName):?>
-    <?= $this->getChildHtml($childName, false);?>
+    <?= $this->getChildHtml($childName, false) ?>
 <?php endforeach ?>
 </div>

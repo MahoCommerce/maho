@@ -16,16 +16,16 @@
 
 <?php if ($_item = $this->getItem()): ?>
     <h5 class="title"><?= $_item->getName() ?></h5>
-    <div><strong><?= $this->helper('sales')->__('SKU') ?>:</strong> <?= implode('<br />', Mage::helper('catalog')->splitSku($this->escapeHtml($this->getSku()))); ?></div>
+    <div><strong><?= $this->helper('sales')->__('SKU') ?>:</strong> <?= implode('<br />', Mage::helper('catalog')->splitSku($this->escapeHtml($this->getSku()))) ?></div>
     <?php if ($this->getOrderOptions()): ?>
         <dl class="item-options">
         <?php foreach ($this->getOrderOptions() as $_option): ?>
             <dt><?= $this->escapeHtml($_option['label']) ?></dt>
             <dd>
             <?php if (isset($_option['custom_view']) && $_option['custom_view']): ?>
-                <?= $_option['value'];?>
+                <?= $_option['value'] ?>
             <?php else: ?>
-                <?= Mage::helper('core/string')->truncate($_option['value'], 55, '', $_remainder);?>
+                <?= Mage::helper('core/string')->truncate($_option['value'], 55, '', $_remainder) ?>
                 <?php if ($_remainder):?>
                     ... <span id="<?= $_id = 'id' . uniqid()?>"><?= $_remainder ?></span>
                     <script type="text/javascript">
@@ -41,9 +41,9 @@
     <?php endif ?>
     <?php if ($this->getLinks()): ?>
         <dl class="item-options">
-            <dt><?= $this->escapeHtml($this->getLinksTitle()); ?></dt>
+            <dt><?= $this->escapeHtml($this->getLinksTitle()) ?></dt>
             <?php foreach ($this->getLinks()->getPurchasedItems() as $_link): ?>
-                <dd><?= $this->escapeHtml($_link->getLinkTitle()); ?></dd>
+                <dd><?= $this->escapeHtml($_link->getLinkTitle()) ?></dd>
             <?php endforeach ?>
         </dl>
     <?php endif ?>

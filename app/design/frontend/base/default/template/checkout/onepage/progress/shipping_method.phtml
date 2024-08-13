@@ -26,12 +26,12 @@
     <?php $_excl = $this->getShippingPriceExclTax(); ?>
     <?php $_incl = $this->getShippingPriceInclTax(); ?>
     <?php if ($this->helper('tax')->displayShippingPriceIncludingTax()): ?>
-        <?= $_incl; ?>
+        <?= $_incl ?>
         <?php else: ?>
-        <?= $_excl; ?>
+        <?= $_excl ?>
         <?php endif ?>
     <?php if ($this->helper('tax')->displayShippingBothPrices() && $_incl != $_excl): ?>
-        (<?= $this->__('Incl. Tax'); ?> <?= $_incl; ?>)
+        (<?= $this->__('Incl. Tax') ?> <?= $_incl ?>)
         <?php endif ?>
 
     <?php else: ?>

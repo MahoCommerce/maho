@@ -146,7 +146,7 @@ if ($('option_panel_type_select')) {
 selectOptionType.bindRemoveButtons();
 
 Validation.addAllThese([
-    ['required-option-select-type-rows', <?= $this->helper('core')->jsonEncode(Mage::helper('catalog')->__('Please add rows to option.')); ?>, function(v, elm) {
+    ['required-option-select-type-rows', <?= $this->helper('core')->jsonEncode(Mage::helper('catalog')->__('Please add rows to option.')) ?>, function(v, elm) {
             var optionContainerElm = elm.up('div.grid');
             var selectTypesFlag = false;
             selectTypeElements = $$('#'+optionContainerElm.id+' .select-type-title');

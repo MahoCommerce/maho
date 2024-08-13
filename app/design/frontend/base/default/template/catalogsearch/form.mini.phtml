@@ -19,7 +19,7 @@ $catalogSearchHelper =  $this->helper('catalogsearch');
 <form id="search_mini_form" action="<?= $catalogSearchHelper->getResultUrl() ?>" method="get">
     <div class="form-search">
         <label for="search"><?= $this->__('Search:') ?></label>
-        <input id="search" type="text" name="<?= $catalogSearchHelper->getQueryParamName() ?>" value="<?= $catalogSearchHelper->getEscapedQueryText() ?>" class="input-text" maxlength="<?= $catalogSearchHelper->getMaxQueryLength();?>" />
+        <input id="search" type="text" name="<?= $catalogSearchHelper->getQueryParamName() ?>" value="<?= $catalogSearchHelper->getEscapedQueryText() ?>" class="input-text" maxlength="<?= $catalogSearchHelper->getMaxQueryLength() ?>" />
         <button type="submit" title="<?= Mage::helper('core')->quoteEscape($this->__('Search')) ?>" class="button"><?= $this->__('Search') ?></button>
         <div id="search_autocomplete" class="search-autocomplete"></div>
         <script type="text/javascript">

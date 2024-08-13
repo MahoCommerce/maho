@@ -14,7 +14,7 @@
  */
 ?>
 <form id="edit_form" method="post" action="<?= $this->getSaveUrl() ?>">
-    <?= $this->getBlockHtml('formkey')?>
+    <?= $this->getBlockHtml('formkey') ?>
     <?php  $_order = $this->getCreditmemo()->getOrder() ?>
     <?= $this->getChildHtml('order_info') ?>
 
@@ -33,7 +33,7 @@
                 <div><?= Mage::helper('sales')->__('Order was placed using %s', $_order->getOrderCurrencyCode()) ?></div>
                 <?php /*if ($this->getCreditmemo()->canRefund()): ?>
                 <input type="checkbox" name="creditmemo[do_refund]" id="creditmemo_do_refund" value="1" checked/>
-                <label for="creditmemo_do_refund" class="normal"><?php echo Mage::helper('sales')->__('Refund Amount') ?></label>
+                <label for="creditmemo_do_refund" class="normal"><?= Mage::helper('sales')->__('Refund Amount') ?></label>
                 <?php endif*/ ?>
             </fieldset>
         </div>
@@ -47,7 +47,7 @@
             </div>
             <fieldset>
                 <strong><?= $this->escapeHtml($_order->getShippingDescription()) ?></strong>
-                <?= $this->helper('sales')->__('Total Shipping Charges'); ?>:
+                <?= $this->helper('sales')->__('Total Shipping Charges') ?>:
 
                 <?php if ($this->helper('tax')->displaySalesPriceInclTax($this->getSource()->getStoreId())): ?>
                     <?php $_excl = $this->displayShippingPriceInclTax($_order); ?>
@@ -56,9 +56,9 @@
                 <?php endif ?>
                 <?php $_incl = $this->displayShippingPriceInclTax($_order); ?>
 
-                <?= $_excl; ?>
+                <?= $_excl ?>
                 <?php if ($this->helper('tax')->displaySalesBothPrices($this->getSource()->getStoreId()) && $_incl != $_excl): ?>
-                    (<?= $this->__('Incl. Tax'); ?> <?= $_incl; ?>)
+                    (<?= $this->__('Incl. Tax') ?> <?= $_incl ?>)
                 <?php endif ?>
             </fieldset>
         </div>

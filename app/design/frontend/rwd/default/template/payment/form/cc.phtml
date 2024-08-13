@@ -18,8 +18,8 @@
 <?php /*
     <li>
         <div class="input-box">
-            <label for="<?php echo $_code ?>_cc_owner" class="required"><em>*</em><?php echo $this->__('Name on Card') ?></label>
-            <input type="text" title="<?php echo $this->__('Name on Card') ?>" class="input-text required-entry" id="<?php echo $_code ?>_cc_owner" name="payment[cc_owner]" value="<?php echo $this->escapeHtml($this->getInfoData('cc_owner')) ?>" />
+            <label for="<?= $_code ?>_cc_owner" class="required"><em>*</em><?= $this->__('Name on Card') ?></label>
+            <input type="text" title="<?= $this->__('Name on Card') ?>" class="input-text required-entry" id="<?= $_code ?>_cc_owner" name="payment[cc_owner]" value="<?= $this->escapeHtml($this->getInfoData('cc_owner')) ?>" />
         </div>
     </li>
 */ ?>
@@ -28,7 +28,7 @@
         <label for="<?= $_code ?>_cc_type" class="required"><em>*</em><?= $this->__('Credit Card Type') ?></label>
         <div class="input-box">
             <select id="<?= $_code ?>_cc_type" name="payment[cc_type]" class="required-entry validate-cc-type-select" title="<?= Mage::helper('core')->quoteEscape($this->__('Credit Card Type')) ?>">
-                <option value=""><?= $this->__('--Please Select--')?></option>
+                <option value=""><?= $this->__('--Please Select--') ?></option>
             <?php $_ccType = $this->getInfoData('cc_type') ?>
             <?php foreach ($this->getCcAvailableTypes() as $_typeCode => $_typeName): ?>
                 <option value="<?= $_typeCode ?>"<?php if($_typeCode==$_ccType): ?> selected="selected"<?php endif ?>><?= $_typeName ?></option>
@@ -49,7 +49,7 @@
                 <select id="<?= $_code ?>_expiration" name="payment[cc_exp_month]" class="month validate-cc-exp required-entry">
                 <?php $_ccExpMonth = $this->getInfoData('cc_exp_month') ?>
                 <?php foreach ($this->getCcMonths() as $k=>$v): ?>
-                    <option value="<?= $k ? $k : '' ?>"<?php if($k==$_ccExpMonth): ?> selected="selected"<?php endif ?>><?= $v ?></option>
+                    <option value="<?= $k?$k:'' ?>"<?php if($k==$_ccExpMonth): ?> selected="selected"<?php endif ?>><?= $v ?></option>
                 <?php endforeach ?>
                 </select>
             </div>
@@ -57,7 +57,7 @@
                 <?php $_ccExpYear = $this->getInfoData('cc_exp_year') ?>
                 <select id="<?= $_code ?>_expiration_yr" name="payment[cc_exp_year]" class="year required-entry">
                 <?php foreach ($this->getCcYears() as $k=>$v): ?>
-                    <option value="<?= $k ? $k : '' ?>"<?php if($k==$_ccExpYear): ?> selected="selected"<?php endif ?>><?= $v ?></option>
+                    <option value="<?= $k?$k:'' ?>"<?php if($k==$_ccExpYear): ?> selected="selected"<?php endif ?>><?= $v ?></option>
                 <?php endforeach ?>
                 </select>
             </div>
@@ -93,14 +93,14 @@
                     <div class="v-fix">
                         <select id="<?= $_code ?>_start_month" name="payment[cc_ss_start_month]" class="validate-cc-ukss month">
                         <?php foreach ($this->getCcMonths() as $k=>$v): ?>
-                            <option value="<?= $k ? $k : '' ?>"<?php if($k==$this->getInfoData('cc_ss_start_month')): ?> selected="selected"<?php endif ?>><?= $v ?></option>
+                            <option value="<?= $k?$k:'' ?>"<?php if($k==$this->getInfoData('cc_ss_start_month')): ?> selected="selected"<?php endif ?>><?= $v ?></option>
                         <?php endforeach ?>
                         </select>
                     </div>
                     <div class="v-fix">
                         <select id="<?= $_code ?>_start_year" name="payment[cc_ss_start_year]" class="validate-cc-ukss year">
                         <?php foreach ($this->getSsStartYears() as $k=>$v): ?>
-                            <option value="<?= $k ? $k : '' ?>"<?php if($k==$this->getInfoData('cc_ss_start_year')): ?> selected="selected"<?php endif ?>><?= $v ?></option>
+                            <option value="<?= $k?$k:'' ?>"<?php if($k==$this->getInfoData('cc_ss_start_year')): ?> selected="selected"<?php endif ?>><?= $v ?></option>
                         <?php endforeach ?>
                         </select>
                     </div>

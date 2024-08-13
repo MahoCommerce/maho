@@ -32,7 +32,7 @@
     <?php $attributes = $this->getSelectionAttributes($_item) ?>
     <?php if ($_prevOptionId != $attributes['option_id']): ?>
     <tr>
-        <td class="bundle-item"><strong><em><?= $this->escapeHtml($attributes['option_label']); ?></em></strong></td>
+        <td class="bundle-item"><strong><em><?= $this->escapeHtml($attributes['option_label']) ?></em></strong></td>
         <td class="bundle-item">&nbsp;</td>
         <td class="bundle-item">&nbsp;</td>
     </tr>
@@ -49,7 +49,7 @@
     </td>
     <td class="bundle-item-parent align-right">
     <?php else: ?>
-    <td class="bundle-item bundle-details product-info"><div><?= $this->getValueHtml($_item)?></div></td>
+    <td class="bundle-item bundle-details product-info"><div><?= $this->getValueHtml($_item) ?></div></td>
     <td class="bundle-item bundle-details align-center">
         <?= $this->escapeHtml($_item->getSku()) ?>
     </td>

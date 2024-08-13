@@ -24,9 +24,7 @@
 <?php $isRegistrationAllowed = $this->helper('customer')->isRegistrationAllowed() ?>
 <?php $isAllowedGuestCheckout = $this->getQuote()->isAllowedGuestCheckout() ?>
 <?= $this->getChildHtml('login_before') ?>
-<div class="col2-set<?php if (!$isRegistrationAllowed && !$isAllowedGuestCheckout) {
-    echo ' login-only';
-} ?>">
+<div class="col2-set<?php if (!$isRegistrationAllowed && !$isAllowedGuestCheckout) echo ' login-only' ?>">
     <div class="col-1">
         <h3>
             <?php if ($isAllowedGuestCheckout && $isRegistrationAllowed): ?>
@@ -71,7 +69,7 @@
             <?php elseif ($this->helper('checkout')->isCustomerMustBeLogged()): ?>
                 <button id="onepage-guest-register-button" type="button" class="button" onclick="window.location='<?= $this->helper('checkout/url')->getRegistrationUrl();?>'"><span><span><?= $this->__('Register') ?></span></span></button>
             <?php else: ?>
-                <form action="<?= $this->getUrl('persistent/index/saveMethod'); ?>">
+                <form action="<?= $this->getUrl('persistent/index/saveMethod') ?>">
                     <button id="onepage-guest-register-button" type="submit" class="button"><span><span><?= $this->__('Register') ?></span></span></button>
                 </form>
             <?php endif ?>
@@ -82,7 +80,7 @@
         <?= $this->getMessagesBlock()->toHtml() ?>
         <form id="login-form" action="<?= $this->getPostAction() ?>" method="post">
         <div class="fieldset">
-            <?= $this->getBlockHtml('formkey'); ?>
+            <?= $this->getBlockHtml('formkey') ?>
             <p class="description"><?= $this->__('Sign in to speed up your checkout process') ?></p>
             <p class="required"><?= $this->__('* Required Fields') ?></p>
             <ul class="form-list">
@@ -101,10 +99,10 @@
                 <li>
                     <a href="<?= $this->getUrl('customer/account/forgotpassword') ?>" class="f-left"><?= $this->__('Forgot your password?') ?></a>
                 </li>
-                <?= $this->getChildHtml('form.additional.info'); ?>
-                <?= $this->getChildHtml('persistent.remember.me'); ?>
+                <?= $this->getChildHtml('form.additional.info') ?>
+                <?= $this->getChildHtml('persistent.remember.me') ?>
             </ul>
-            <?= $this->getChildHtml('persistent.remember.me.tooltip'); ?>
+            <?= $this->getChildHtml('persistent.remember.me.tooltip') ?>
             <input name="context" type="hidden" value="checkout" />
         </div>
         </form>
@@ -135,8 +133,8 @@
 </script>
 <?php
     $registerParam = $this->getRequest()->getParam('register');
-if ($registerParam || $registerParam === ''):
-    ?>
+    if ($registerParam || $registerParam === ''):
+?>
     <script type="text/javascript">
     //<![CDATA[
         document.observe("dom:loaded", function() {

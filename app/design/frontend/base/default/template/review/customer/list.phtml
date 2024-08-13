@@ -17,7 +17,7 @@
 <div class="page-title">
     <h1><?= $this->__('My Product Reviews') ?></h1>
 </div>
-<?php if($this->getCollection() && $this->count()): ?>
+<?php if( $this->getCollection() && $this->count()): ?>
     <?= $this->getToolbarHtml() ?>
         <table class="data-table" id="my-reviews-table">
             <col width="1" />
@@ -28,12 +28,12 @@
             <tbody>
                 <?php foreach ($this->getCollection() as $_review): ?>
                 <tr>
-                    <td><span class="nobr"><?= $this->dateFormat($_review->getReviewCreatedAt()); ?></span></td>
+                    <td><span class="nobr"><?= $this->dateFormat($_review->getReviewCreatedAt()) ?></span></td>
                     <td><h2 class="product-name"><a href="<?= $this->getProductLink() ?>id/<?= $_review->getEntityPkValue() ?>"><?= $this->escapeHtml($_review->getName()) ?></a></h2></td>
                     <td>
                     <?php if($_review->getSum()): ?>
                         <div class="rating-box">
-                            <div class="rating" style="width:<?= ($_review->getSum() / $_review->getCount()) ?>%;"></div>
+                            <div class="rating" style="width:<?= ( $_review->getSum() / $_review->getCount() ) ?>%;"></div>
                         </div>
                     <?php endif ?>
                     </td>

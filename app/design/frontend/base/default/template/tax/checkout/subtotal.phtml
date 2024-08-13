@@ -19,7 +19,7 @@
 ?>
 <?php if ($this->displayBoth()):?>
 <tr>
-    <td style="<?= $this->getStyle() ?>" class="a-right" colspan="<?= $this->getColspan(); ?>">
+    <td style="<?= $this->getStyle() ?>" class="a-right" colspan="<?= $this->getColspan() ?>">
         <?= $this->helper('tax')->__('Subtotal (Excl. Tax)') ?>
     </td>
     <td style="<?= $this->getStyle() ?>" class="a-right">
@@ -27,7 +27,7 @@
     </td>
 </tr>
 <tr>
-    <td style="<?= $this->getStyle() ?>" class="a-right" colspan="<?= $this->getColspan(); ?>">
+    <td style="<?= $this->getStyle() ?>" class="a-right" colspan="<?= $this->getColspan() ?>">
         <?= $this->helper('tax')->__('Subtotal (Incl. Tax)') ?>
     </td>
     <td style="<?= $this->getStyle() ?>" class="a-right">
@@ -36,7 +36,7 @@
 </tr>
 <?php else: ?>
 <tr>
-    <td style="<?= $this->getStyle() ?>" class="a-right" colspan="<?= $this->getColspan(); ?>">
+    <td style="<?= $this->getStyle() ?>" class="a-right" colspan="<?= $this->getColspan() ?>">
         <?= $this->getTotal()->getTitle() ?>
     </td>
     <td style="<?= $this->getStyle() ?>" class="a-right">

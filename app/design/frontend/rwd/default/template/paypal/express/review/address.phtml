@@ -117,7 +117,7 @@
                         </div>
                     </div>
                 </li>
-                <?= $this->getChildHtml('form.additional.info'); ?>
+                <?= $this->getChildHtml('form.additional.info') ?>
                 <?php if ($this->getShowAsShippingCheckbox()): ?>
                     <li class="control">
                         <div class="field">
@@ -165,7 +165,7 @@
 
     OrderReviewController.prototype._copyElementValue_parent = OrderReviewController.prototype._copyElementValue;
     OrderReviewController.prototype._copyElementValue = function (el) {
-        <?php // Note: We cannot call this._copyElementValue_parent because review.js is using each() to iterate without giving it context?>
+        <?php // Note: We cannot call this._copyElementValue_parent because review.js is using each() to iterate without giving it context ?>
         OrderReviewController.prototype._copyElementValue_parent(el);
 
         var newId = el.id.replace('shipping:','billing:');

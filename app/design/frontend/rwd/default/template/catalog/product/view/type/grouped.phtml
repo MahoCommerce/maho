@@ -37,9 +37,9 @@
             <tr>
                 <td class='image'>
                     <img class="thumbnail"
-                         src="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->constrainOnly(true)->resize(105, 80); ?>"
+                         src="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->constrainOnly(true)->resize(105, 80) ?>"
                          alt="<?= $this->escapeHtml($this->getImageLabel()) ?>"
-                         title="<?= $this->escapeHtml($this->getImageLabel()); ?>" />
+                         title="<?= $this->escapeHtml($this->getImageLabel()) ?>" />
                 </td>
                 <td class="name">
                     <p class="name-wrapper">
@@ -50,7 +50,7 @@
                         <?php if ($_item->isSaleable()) : ?>
                             <input id="super_group_<?= $_item->getId() ?>" type="text" pattern="\d*(\.\d+)?" name="super_group[<?= $_item->getId() ?>]" maxlength="12" value="<?= $_item->getQty() * 1 ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Qty')) ?>" class="input-text qty" />
                             <label for="super_group_<?= $_item->getId() ?>" class="qty-label">
-                                <?= $this->__('Quantity'); ?>
+                                <?= $this->__('Quantity') ?>
                             </label>
                         <?php else: ?>
                             <p class="availability out-of-stock"><span><?= $this->__('Out of stock') ?></span></p>

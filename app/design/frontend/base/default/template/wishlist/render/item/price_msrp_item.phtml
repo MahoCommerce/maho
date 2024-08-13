@@ -22,20 +22,20 @@
  */
 ?>
 <?php
-/** @var $_coreHelper Mage_Core_Helper_Data */
-$_coreHelper = $this->helper('core');
-/** @var $_catalogHelper Mage_Catalog_Helper_Data */
-$_catalogHelper = $this->helper('catalog');
+    /** @var $_coreHelper Mage_Core_Helper_Data */
+    $_coreHelper = $this->helper('core');
+    /** @var $_catalogHelper Mage_Catalog_Helper_Data */
+    $_catalogHelper = $this->helper('catalog');
 
-/** @var $_product Mage_Catalog_Model_Product */
-$_product = $this->getProduct();
-$_id = $_product->getId();
-$_msrpPrice = '';
+    /** @var $_product Mage_Catalog_Model_Product */
+    $_product = $this->getProduct();
+    $_id = $_product->getId();
+    $_msrpPrice = '';
 ?>
     <div class="price-box map-info">
     <?php $_price = $this->helper('tax')->getPrice($_product, $_product->getMsrp()) ?>
         <?php if($_product->getMsrp()): ?>
-            <?php $_msrpPrice = $_coreHelper->currency($_product->getMsrp(), true, true) ?>
+            <?php $_msrpPrice = $_coreHelper->currency($_product->getMsrp(),true,true) ?>
             <span class="old-price" ><?= $_msrpPrice ?></span>
         <?php endif ?>
 
@@ -43,7 +43,7 @@ $_msrpPrice = '';
             <?php $priceElementId = 'product-price-' . $_id . $this->getIdSuffix(); ?>
             <span id="<?= $priceElementId ?>" style="display:none"></span>
             <?php $popupId = 'msrp-popup-' . $_id . $_coreHelper->getRandomString(20); ?>
-            <a href="#" id="<?=($popupId);?>"><?= $this->__('Click for price'); ?></a>
+            <a href="#" id="<?php echo($popupId);?>"><?= $this->__('Click for price') ?></a>
             <script type="text/javascript">
                 Event.observe(window, 'load', function() {
                     var priceElement = $("<?= $priceElementId ?>"),
@@ -84,11 +84,11 @@ $_msrpPrice = '';
         <?php endif ?>
 
         <?php $helpLinkId = 'msrp-help-' . $_id . $_coreHelper->getRandomString(20); ?>
-        <a href="#" id="<?=($helpLinkId);?>"><?= $this->__("What's this?"); ?></a>
+        <a href="#" id="<?php echo($helpLinkId);?>"><?= $this->__("What's this?") ?></a>
         <script type="text/javascript">
             Catalog.Map.addHelpLink(
                 $('<?= $helpLinkId ?>'),
-                '<?= Mage::helper('core')->jsQuoteEscape($this->__("What's this?")); ?>'
+                '<?= Mage::helper('core')->jsQuoteEscape($this->__("What's this?")) ?>'
             );
         </script>
     </div>

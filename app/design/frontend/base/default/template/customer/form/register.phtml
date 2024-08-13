@@ -24,10 +24,10 @@
     <div class="page-title">
         <h1><?= $this->__('Create an Account') ?></h1>
     </div>
-    <?= $this->getChildHtml('form_fields_before')?>
+    <?= $this->getChildHtml('form_fields_before') ?>
     <?= $this->getMessagesBlock()->toHtml() ?>
     <?php /* Extensions placeholder */ ?>
-    <?= $this->getChildHtml('customer.form.register.extra')?>
+    <?= $this->getChildHtml('customer.form.register.extra') ?>
     <form action="<?= $this->getPostActionUrl() ?>" method="post" id="form-validate">
         <div class="fieldset">
             <input type="hidden" name="success_url" value="<?= $this->getSuccessUrl() ?>" />
@@ -51,7 +51,7 @@
                     </div>
                     <label for="is_subscribed"><?= $this->__('Sign Up for Newsletter') ?></label>
                     <?php /* Extensions placeholder */ ?>
-                    <?= $this->getChildHtml('customer.form.register.newsletter')?>
+                    <?= $this->getChildHtml('customer.form.register.newsletter') ?>
                 </li>
                 <?php endif ?>
             <?php $_dob = $this->getLayout()->createBlock('customer/widget_dob') ?>
@@ -169,7 +169,7 @@
                         </div>
                     </div>
                 </li>
-                <?= $this->getChildHtml('form.additional.info'); ?>
+                <?= $this->getChildHtml('form.additional.info') ?>
             </ul>
         </div>
         <div class="buttons-set">

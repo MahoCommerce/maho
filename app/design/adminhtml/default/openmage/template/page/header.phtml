@@ -31,9 +31,8 @@
                     </svg>
                 </a>
 			    <ul>
-                    <li><a href="<?= Mage::helper("adminhtml")->getUrl("adminhtml/system_account"); ?>"><span><?= $this->__("Logged in as %s", $this->escapeHtml($this->getUser()->getUsername())); ?></span></a></li>
-			    	<li><a href="<?= Mage::getBaseUrl();
-; ?>" target="_blank"><span><?= $this->__('View') . ': ' . $this->escapeHtml(Mage::app()->getStore()->getFrontendName()); ?></span></a></li>
+                    <li><a href="<?= Mage::helper("adminhtml")->getUrl("adminhtml/system_account") ?>"><span><?= $this->__("Logged in as %s", $this->escapeHtml($this->getUser()->getUsername())) ?></span></a></li>
+			    	<li><a href="<?= Mage::getBaseUrl() ?>" target="_blank"><span><?= $this->__('View') . ': ' . $this->escapeHtml(Mage::app()->getStore()->getFrontendName()) ?></span></a></li>
 			    	<li class="last"><a href="<?= $this->getLogoutLink() ?>"><span><?= $this->__('Log Out') ?></span></a></li>
 		        </ul>
 		    </li>

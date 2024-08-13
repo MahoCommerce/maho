@@ -60,7 +60,7 @@
     </div>
     <form action="<?= $this->getSendUrl() ?>" method="post" id="product_sendtofriend_form">
         <div class="fieldset">
-            <?= $this->getBlockHtml('formkey')?>
+            <?= $this->getBlockHtml('formkey') ?>
             <h2 class="legend"><?= $this->__('Sender:') ?></h2>
             <ul class="form-list" id="sender_options">
                 <li class="fields">
@@ -80,7 +80,7 @@
                 <li class="wide">
                     <label for="sender_message" class="required"><em>*</em><?= $this->__('Message:') ?></label>
                     <div class="input-box">
-                        <textarea name="sender[message]" class="input-text required-entry" id="sender_message" cols="3" rows="3"><?= $this->escapeHtml($this->getMessage())?></textarea>
+                        <textarea name="sender[message]" class="input-text required-entry" id="sender_message" cols="3" rows="3"><?= $this->escapeHtml($this->getMessage()) ?></textarea>
                     </div>
                 </li>
             </ul>

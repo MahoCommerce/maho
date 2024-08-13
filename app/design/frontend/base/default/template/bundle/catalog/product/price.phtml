@@ -74,16 +74,15 @@ if ($_product->getPriceType() == 1) {
                     </span>
                     <?php if ($_weeeTaxAmount && $_product->getPriceType() == 1 && $_weeeHelper->typeOfDisplay($_product, [2, 1, 4])): ?>
                         <span class="weee">(<small>
-                            <?php $_weeeSeparator = '';
-                        foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
+                            <?php $_weeeSeparator = ''; foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                                 <?php if ($_weeeHelper->typeOfDisplay($_product, [2, 4])): ?>
                                     <?php $amount = $_weeeTaxAttribute->getAmount()+$_weeeTaxAttribute->getTaxAmount(); ?>
                                 <?php else: ?>
                                     <?php $amount = $_weeeTaxAttribute->getAmount(); ?>
                                 <?php endif ?>
 
-                                <?= $_weeeSeparator; ?>
-                                <?= $_weeeTaxAttribute->getName(); ?>: <?= $_coreHelper->currency($amount, true, true); ?>
+                                <?= $_weeeSeparator ?>
+                                <?= $_weeeTaxAttribute->getName() ?>: <?= $_coreHelper->currency($amount, true, true) ?>
                                 <?php $_weeeSeparator = ' + '; ?>
                             <?php endforeach ?>
                         </small>)</span>
@@ -100,16 +99,15 @@ if ($_product->getPriceType() == 1) {
                 <?php endif ?>
                 <?php if ($_weeeTaxAmount && $_product->getPriceType() == 1 && $_weeeHelper->typeOfDisplay($_product, [2, 1, 4])): ?>
                     <span class="weee">(<small>
-                        <?php $_weeeSeparator = '';
-                    foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
+                        <?php $_weeeSeparator = ''; foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                             <?php if ($_weeeHelper->typeOfDisplay($_product, [2, 4])): ?>
                                 <?php $amount = $_weeeTaxAttribute->getAmount()+$_weeeTaxAttribute->getTaxAmount(); ?>
                             <?php else: ?>
                                 <?php $amount = $_weeeTaxAttribute->getAmount(); ?>
                             <?php endif ?>
 
-                            <?= $_weeeSeparator; ?>
-                            <?= $_weeeTaxAttribute->getName(); ?>: <?= $_coreHelper->currency($amount, true, true); ?>
+                            <?= $_weeeSeparator ?>
+                            <?= $_weeeTaxAttribute->getName() ?>: <?= $_coreHelper->currency($amount, true, true) ?>
                             <?php $_weeeSeparator = ' + '; ?>
                         <?php endforeach ?>
                     </small>)</span>
@@ -130,16 +128,15 @@ if ($_product->getPriceType() == 1) {
                     </span>
                     <?php if ($_weeeTaxAmount && $_product->getPriceType() == 1 && $_weeeHelper->typeOfDisplay($_product, [2, 1, 4])): ?>
                         <span class="weee">(<small>
-                            <?php $_weeeSeparator = '';
-                        foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
+                            <?php $_weeeSeparator = ''; foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                                 <?php if ($_weeeHelper->typeOfDisplay($_product, [2, 4])): ?>
                                     <?php $amount = $_weeeTaxAttribute->getAmount()+$_weeeTaxAttribute->getTaxAmount(); ?>
                                 <?php else: ?>
                                     <?php $amount = $_weeeTaxAttribute->getAmount(); ?>
                                 <?php endif ?>
 
-                                <?= $_weeeSeparator; ?>
-                                <?= $_weeeTaxAttribute->getName(); ?>: <?= $_coreHelper->currency($amount, true, true); ?>
+                                <?= $_weeeSeparator ?>
+                                <?= $_weeeTaxAttribute->getName() ?>: <?= $_coreHelper->currency($amount, true, true) ?>
                                 <?php $_weeeSeparator = ' + '; ?>
                             <?php endforeach ?>
                         </small>)</span>
@@ -156,16 +153,15 @@ if ($_product->getPriceType() == 1) {
                     <?php endif ?>
                     <?php if ($_weeeTaxAmount && $_product->getPriceType() == 1 && $_weeeHelper->typeOfDisplay($_product, [2, 1, 4])): ?>
                         <span class="weee">(<small>
-                            <?php $_weeeSeparator = '';
-                        foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
+                            <?php $_weeeSeparator = ''; foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                                 <?php if ($_taxHelper->displayPriceIncludingTax() || $_weeeHelper->typeOfDisplay($_product, [2, 4])): ?>
                                     <?php $amount = $_weeeTaxAttribute->getAmount()+$_weeeTaxAttribute->getTaxAmount(); ?>
                                 <?php else: ?>
                                     <?php $amount = $_weeeTaxAttribute->getAmount(); ?>
                                 <?php endif ?>
 
-                                <?= $_weeeSeparator; ?>
-                                <?= $_weeeTaxAttribute->getName(); ?>: <?= $_coreHelper->currency($amount, true, true); ?>
+                                <?= $_weeeSeparator ?>
+                                <?= $_weeeTaxAttribute->getName() ?>: <?= $_coreHelper->currency($amount, true, true) ?>
                                 <?php $_weeeSeparator = ' + '; ?>
                             <?php endforeach ?>
                         </small>)</span>
@@ -184,16 +180,15 @@ if ($_product->getPriceType() == 1) {
                         </span>
                         <?php if ($_weeeTaxAmount && $_product->getPriceType() == 1 && $_weeeHelper->typeOfDisplay($_product, [2, 1, 4])): ?>
                             <span class="weee">(<small>
-                                <?php $_weeeSeparator = '';
-                            foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
+                                <?php $_weeeSeparator = ''; foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                                     <?php if ($_weeeHelper->typeOfDisplay($_product, [2, 4])): ?>
                                         <?php $amount = $_weeeTaxAttribute->getAmount()+$_weeeTaxAttribute->getTaxAmount(); ?>
                                     <?php else: ?>
                                         <?php $amount = $_weeeTaxAttribute->getAmount(); ?>
                                     <?php endif ?>
 
-                                    <?= $_weeeSeparator; ?>
-                                    <?= $_weeeTaxAttribute->getName(); ?>: <?= $_coreHelper->currency($amount, true, true); ?>
+                                    <?= $_weeeSeparator ?>
+                                    <?= $_weeeTaxAttribute->getName() ?>: <?= $_coreHelper->currency($amount, true, true) ?>
                                     <?php $_weeeSeparator = ' + '; ?>
                                 <?php endforeach ?>
                             </small>)</span>
@@ -210,16 +205,15 @@ if ($_product->getPriceType() == 1) {
                     <?php endif ?>
                         <?php if ($_weeeTaxAmount && $_product->getPriceType() == 1 && $_weeeHelper->typeOfDisplay($_product, [2, 1, 4])): ?>
                             <span class="weee">(<small>
-                                <?php $_weeeSeparator = '';
-                            foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
+                                <?php $_weeeSeparator = ''; foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                                     <?php if ($_taxHelper->displayPriceIncludingTax() || $_weeeHelper->typeOfDisplay($_product, [2, 4])): ?>
                                         <?php $amount = $_weeeTaxAttribute->getAmount()+$_weeeTaxAttribute->getTaxAmount(); ?>
                                     <?php else: ?>
                                         <?php $amount = $_weeeTaxAttribute->getAmount(); ?>
                                     <?php endif ?>
 
-                                    <?= $_weeeSeparator; ?>
-                                    <?= $_weeeTaxAttribute->getName(); ?>: <?= $_coreHelper->currency($amount, true, true); ?>
+                                    <?= $_weeeSeparator ?>
+                                    <?= $_weeeTaxAttribute->getName() ?>: <?= $_coreHelper->currency($amount, true, true) ?>
                                     <?php $_weeeSeparator = ' + '; ?>
                                 <?php endforeach ?>
                             </small>)</span>
@@ -237,16 +231,15 @@ if ($_product->getPriceType() == 1) {
                     </span>
                     <?php if ($_weeeTaxAmount && $_product->getPriceType() == 1 && $_weeeHelper->typeOfDisplay($_product, [2, 1, 4])): ?>
                         <span class="weee">(<small>
-                            <?php $_weeeSeparator = '';
-                        foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
+                            <?php $_weeeSeparator = ''; foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                                 <?php if ($_weeeHelper->typeOfDisplay($_product, [2, 4])): ?>
                                     <?php $amount = $_weeeTaxAttribute->getAmount()+$_weeeTaxAttribute->getTaxAmount(); ?>
                                 <?php else: ?>
                                     <?php $amount = $_weeeTaxAttribute->getAmount(); ?>
                                 <?php endif ?>
 
-                                <?= $_weeeSeparator; ?>
-                                <?= $_weeeTaxAttribute->getName(); ?>: <?= $_coreHelper->currency($amount, true, true); ?>
+                                <?= $_weeeSeparator ?>
+                                <?= $_weeeTaxAttribute->getName() ?>: <?= $_coreHelper->currency($amount, true, true) ?>
                                 <?php $_weeeSeparator = ' + '; ?>
                             <?php endforeach ?>
                         </small>)</span>
@@ -259,16 +252,15 @@ if ($_product->getPriceType() == 1) {
                     <?= $_coreHelper->currency($_minimalPriceTax) ?>
                     <?php if ($_weeeTaxAmount && $_product->getPriceType() == 1 && $_weeeHelper->typeOfDisplay($_product, [2, 1, 4])): ?>
                         <span class="weee">(<small>
-                            <?php $_weeeSeparator = '';
-                        foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
+                            <?php $_weeeSeparator = ''; foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                                 <?php if ($_taxHelper->displayPriceIncludingTax()): ?>
                                     <?php $amount = $_weeeTaxAttribute->getAmount()+$_weeeTaxAttribute->getTaxAmount(); ?>
                                 <?php else: ?>
                                     <?php $amount = $_weeeTaxAttribute->getAmount(); ?>
                                 <?php endif ?>
 
-                                <?= $_weeeSeparator; ?>
-                                <?= $_weeeTaxAttribute->getName(); ?>: <?= $_coreHelper->currency($amount, true, true); ?>
+                                <?= $_weeeSeparator ?>
+                                <?= $_weeeTaxAttribute->getName() ?>: <?= $_coreHelper->currency($amount, true, true) ?>
                                 <?php $_weeeSeparator = ' + '; ?>
                             <?php endforeach ?>
                         </small>)</span>

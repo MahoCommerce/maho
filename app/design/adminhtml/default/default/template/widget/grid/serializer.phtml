@@ -25,20 +25,20 @@
     Event.observe(window, "load", function(){
         var serializeInput  = document.createElement('input');
         serializeInput.type = 'hidden';
-        serializeInput.name = '<?= $this->getInputElementName()?>';
-        serializeInput.id   = '<?= $_id?>';
+        serializeInput.name = '<?= $this->getInputElementName() ?>';
+        serializeInput.id   = '<?= $_id ?>';
         try {
-            document.getElementById('<?= $formId?>').appendChild(serializeInput);
-            new serializerController('<?= $_id?>', <?= $this->getDataAsJSON() ?>, <?= $this->getColumnInputNames(true) ?>, <?= $this->getGridBlock()->getJsObjectName() ?>, '<?= $this->getReloadParamName()?>');
+            document.getElementById('<?= $formId ?>').appendChild(serializeInput);
+            new serializerController('<?= $_id?>', <?= $this->getDataAsJSON() ?>, <?= $this->getColumnInputNames(true) ?>, <?= $this->getGridBlock()->getJsObjectName() ?>, '<?= $this->getReloadParamName() ?>');
         } catch(e) {
             //Error add serializer
         }
     });
 </script>
 <?php else: ?>
-<input type="hidden" name="<?= $this->getInputElementName()?>"  value="" id="<?= $_id?>" />
+<input type="hidden" name="<?= $this->getInputElementName() ?>"  value="" id="<?= $_id ?>" />
 <script type="text/javascript">
-    new serializerController('<?= $_id?>', <?= $this->getDataAsJSON() ?>, <?= $this->getColumnInputNames(true) ?>, <?= $this->getGridBlock()->getJsObjectName() ?>, '<?= $this->getReloadParamName()?>');
+    new serializerController('<?= $_id?>', <?= $this->getDataAsJSON() ?>, <?= $this->getColumnInputNames(true) ?>, <?= $this->getGridBlock()->getJsObjectName() ?>, '<?= $this->getReloadParamName() ?>');
 </script>
 <?php endif ?>
 

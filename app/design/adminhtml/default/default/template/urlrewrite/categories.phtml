@@ -119,7 +119,7 @@ Ext.onReady(function()
     });
 
     // render categories tree
-    var config = <?= $this->getTreeArray(null, true)?>;
+    var config = <?= $this->getTreeArray(null, true) ?>;
     tree = new Ext.tree.TreePanel.Enhanced('tree-div', {
         animate         : false,
         loader          : categoryLoader,

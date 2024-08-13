@@ -15,41 +15,41 @@
 ?>
 <?php /* @var $this Mage_Sales_Block_Order_Print_Shipment */?>
 <?php $order = $this->getOrder(); ?>
-<h1><?= $this->__('Order #%s', $this->getObjectData($order, 'real_order_id')); ?></h1>
+<h1><?= $this->__('Order #%s', $this->getObjectData($order, 'real_order_id')) ?></h1>
 <p class="order-date"><?= $this->__('Order Date: %s', $this->formatDate($this->getObjectData($order, 'created_at_store_date'), 'long')) ?></p>
 <?php if (!$this->getObjectData($order, 'is_virtual')): ?>
 <?php foreach ($this->getShipmentsCollection() as $shipment): ?>
-    <h2 class="h2"><?= $this->__('Shipment #%s', $this->getObjectData($shipment, 'increment_id')); ?></h2>
+    <h2 class="h2"><?= $this->__('Shipment #%s', $this->getObjectData($shipment, 'increment_id')) ?></h2>
     <div class="col2-set">
         <div class="col-1">
             <h3><?= $this->__('Shipping Address') ?></h3>
-            <address><?= $this->getShipmentAddressFormattedHtml($shipment); ?></address>
+            <address><?= $this->getShipmentAddressFormattedHtml($shipment) ?></address>
         </div>
         <div class="col-2">
             <h3><?= $this->__('Billing Address') ?></h3>
-            <address><?= $this->getBillingAddressFormattedHtml($order); ?></address>
+            <address><?= $this->getBillingAddressFormattedHtml($order) ?></address>
         </div>
     </div>
     <div class="col2-set">
         <div class="col-1">
             <h3><?= $this->__('Shipping Method') ?></h3>
-             <?= $this->escapeHtml($this->getObjectData($order, 'shipping_description')); ?>
+             <?= $this->escapeHtml($this->getObjectData($order, 'shipping_description')) ?>
              <?php $tracks = $this->getShipmentTracks($shipment);
-    if ($tracks): ?>
+                if ($tracks): ?>
                 <table class="data-table" id="my-shipment-tracking">
                     <col />
                     <col />
                     <thead>
                         <tr>
-                            <th><?= Mage::helper('sales')->__('Title')?></th>
-                            <th><?= Mage::helper('sales')->__('Number')?></th>
+                            <th><?= Mage::helper('sales')->__('Title') ?></th>
+                            <th><?= Mage::helper('sales')->__('Number') ?></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($tracks as $track): ?>
                             <tr>
-                                <td><?= $this->escapeHtml($this->getObjectData($track, 'title')); ?></td>
-                                <td><?= $this->escapeHtml($this->getObjectData($track, 'number')); ?></td>
+                                <td><?= $this->escapeHtml($this->getObjectData($track, 'title')) ?></td>
+                                <td><?= $this->escapeHtml($this->getObjectData($track, 'number')) ?></td>
                             </tr>
                         <?php endforeach ?>
                     </tbody>

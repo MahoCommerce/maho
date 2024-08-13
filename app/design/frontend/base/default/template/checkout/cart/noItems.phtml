@@ -18,8 +18,8 @@
 </div>
 <div class="cart-empty">
     <?= $this->getMessagesBlock()->toHtml() ?>
-    <?= $this->getChildHtml('checkout_cart_empty_widget'); ?>
+    <?= $this->getChildHtml('checkout_cart_empty_widget') ?>
     <p><?= $this->__('You have no items in your shopping cart.') ?></p>
     <p><?= $this->__('Click <a href="%s">here</a> to continue shopping.', Mage::helper('core')->quoteEscape($this->getContinueShoppingUrl())) ?></p>
-    <?= $this->getChildHtml('shopping.cart.table.after'); ?>
+    <?= $this->getChildHtml('shopping.cart.table.after') ?>
 </div>

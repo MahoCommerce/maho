@@ -19,8 +19,8 @@
 ?>
 <?php $_item = $this->getItem() ?>
 <tr>
-    <td class="a-center"><a href="<?= $this->getItemDeleteUrl($_item) ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Remove Item')) ?>" class="btn-remove2"><?= $this->__('Remove Item')?></a></td>
-    <td><a href="<?= $this->getItemUrl($_item) ?>" title="<?= $this->escapeHtml($this->getItemName($_item)) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($this->getItemProductForThumbnail($_item), 'thumbnail')->resize(75); ?>" width="75" alt="<?= $this->escapeHtml($this->getItemName($_item)) ?>" /></a></td>
+    <td class="a-center"><a href="<?= $this->getItemDeleteUrl($_item) ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Remove Item')) ?>" class="btn-remove2"><?= $this->__('Remove Item') ?></a></td>
+    <td><a href="<?= $this->getItemUrl($_item) ?>" title="<?= $this->escapeHtml($this->getItemName($_item)) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($this->getItemProductForThumbnail($_item), 'thumbnail')->resize(75) ?>" width="75" alt="<?= $this->escapeHtml($this->getItemName($_item)) ?>" /></a></td>
     <td>
         <h3 class="product-name"><a href="<?= $this->getItemUrl($_item) ?>"><?= $this->getItemName($_item) ?></a></h3>
         <?= $this->getItemDescription($_item) ?>
@@ -30,7 +30,7 @@
     </td>
     <?php if ($this->helper('wishlist')->isAllowInCart()) : ?>
     <td class="a-center">
-        <a href="<?= $this->helper('wishlist')->getMoveFromCartUrl($_item->getId()); ?>" class="link-wishlist"><?= $this->__('Move'); ?></a>
+        <a href="<?= $this->helper('wishlist')->getMoveFromCartUrl($_item->getId()) ?>" class="link-wishlist"><?= $this->__('Move') ?></a>
     </td>
     <?php endif ?>
     <?php if ($this->helper('tax')->displayCartPriceExclTax() || $this->helper('tax')->displayCartBothPrices()): ?>
@@ -40,7 +40,7 @@
     <?php endif ?>
     <?php if ($this->helper('tax')->displayCartPriceInclTax() || $this->helper('tax')->displayCartBothPrices()): ?>
     <td class="a-right">
-        <?= $this->helper('checkout')->formatPrice($this->helper('checkout')->getPriceInclTax($_item)); ?>
+        <?= $this->helper('checkout')->formatPrice($this->helper('checkout')->getPriceInclTax($_item)) ?>
     </td>
     <?php endif ?>
     <td class="a-center">
@@ -53,7 +53,7 @@
     <?php endif ?>
     <?php if ($this->helper('tax')->displayCartPriceInclTax() || $this->helper('tax')->displayCartBothPrices()): ?>
     <td class="a-right">
-        <?= $this->helper('checkout')->formatPrice($this->helper('checkout')->getSubtotalInclTax($_item)); ?>
+        <?= $this->helper('checkout')->formatPrice($this->helper('checkout')->getSubtotalInclTax($_item)) ?>
     </td>
     <?php endif ?>
 </tr>

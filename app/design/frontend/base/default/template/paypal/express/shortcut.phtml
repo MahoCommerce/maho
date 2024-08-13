@@ -22,16 +22,16 @@
 <?php $shortcutHtmlId = $this->getShortcutHtmlId() ?>
 <?php $bmlShortcutHtmlId = $this->getBmlShortcutHtmlId() ?>
 <?php if ($this->isOrPositionBefore()): ?>
-    <span class="paypal-or"><?= $this->__('-OR-'); ?></span>
+    <span class="paypal-or"><?= $this->__('-OR-') ?></span>
 <?php endif ?>
-<a data-action="checkout-form-submit" id="<?= $shortcutHtmlId ?>" href="<?= $this->getCheckoutUrl() ?>"><img src="<?= $this->getImageUrl() ?>" alt="<?= Mage::helper('paypal')->__('Checkout with PayPal'); ?>" title="<?= Mage::helper('paypal')->__('Checkout with PayPal'); ?>" /></a>
+<a data-action="checkout-form-submit" id="<?= $shortcutHtmlId ?>" href="<?= $this->getCheckoutUrl() ?>"><img src="<?= $this->getImageUrl() ?>" alt="<?= Mage::helper('paypal')->__('Checkout with PayPal') ?>" title="<?= Mage::helper('paypal')->__('Checkout with PayPal') ?>" /></a>
 <?php if ($this->getIsBmlEnabled()): ?>
-    <span class="paypal-or"><?= $this->__('-OR-'); ?></span>
+    <span class="paypal-or"><?= $this->__('-OR-') ?></span>
     </p>
 <li class="bml-checkout-type">
     <p class="paypal-logo">
     <span class="bml_button">
-        <a id="<?= $bmlShortcutHtmlId ?>" href="<?= $this->getBmlCheckoutUrl() ?>"><img src="<?= $this->getBmlImageUrl() ?>" alt="<?= Mage::helper('core')->quoteEscape(Mage::helper('paypal')->__('Checkout with PayPal Paypal Credit')); ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('paypal')->__('Checkout with PayPal Paypal Credit')); ?>" /></a>
+        <a id="<?= $bmlShortcutHtmlId ?>" href="<?= $this->getBmlCheckoutUrl() ?>"><img src="<?= $this->getBmlImageUrl() ?>" alt="<?= Mage::helper('core')->quoteEscape(Mage::helper('paypal')->__('Checkout with PayPal Paypal Credit')) ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('paypal')->__('Checkout with PayPal Paypal Credit')) ?>" /></a>
         <a href="<?= $this->getMarketMessageUrl() ?>"><img src="<?= $this->getMarketMessage() ?>" /></a>
     </span>
     </p>
@@ -42,7 +42,7 @@
 <?php if ($this->isOrPositionAfter()): ?>
 <li>
     <p class="paypal-logo">
-    <span class="paypal-or"><?= $this->__('-OR-'); ?></span>
+    <span class="paypal-or"><?= $this->__('-OR-') ?></span>
     </p>
 </li>
  <?php endif ?>

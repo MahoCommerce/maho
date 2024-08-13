@@ -27,7 +27,7 @@
         <strong><span><?= $this->__('My Orders') ?></span></strong>
     </div>
     <form method="post" action="<?= $this->getFormActionUrl() ?>" id="reorder-validate-detail">
-        <?= $this->getBlockHtml('formkey'); ?>
+        <?= $this->getBlockHtml('formkey') ?>
         <div class="block-content">
             <p class="block-subtitle"><?= $this->__('Last Ordered Items') ?></p>
             <ol id="cart-sidebar-reorder">
@@ -52,12 +52,12 @@
                 <?php if ($_showAddButtonFlag): ?>
                     <button type="submit" title="<?= Mage::helper('core')->quoteEscape($this->__('Add to Cart')) ?>" class="button btn-cart"><?= $this->__('Add to Cart') ?></button>
                 <?php endif ?>
-                <a href="<?= $this->getUrl('customer/account') ?>"><?= $this->__('View All'); ?></a>
+                <a href="<?= $this->getUrl('customer/account') ?>"><?= $this->__('View All') ?></a>
             </div>
         </div>
     </form>
 </div>
-<?= $this->getPagerHtml(); ?>
+<?= $this->getPagerHtml() ?>
 <script type="text/javascript">
 //<![CDATA[
     var reorderFormDetail = new VarienForm('reorder-validate-detail');

@@ -33,7 +33,7 @@
             </a>
         <?php else: ?>
             <span>
-                <?= $_item->getLabel(); ?>
+                <?= $_item->getLabel() ?>
                 <?php if ($this->shouldDisplayProductCount()): ?>
                     <span class="count">(<?= $_item->getCount() ?>)</span>
                 <?php endif ?>

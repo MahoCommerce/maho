@@ -51,14 +51,14 @@
                 </div>
 
                 <div class="price-info">
-                    <?= $this->getPriceHtml($_product); ?>
+                    <?= $this->getPriceHtml($_product) ?>
                     <?= $this->getChildHtml('bundle_prices') ?>
                     <?= $this->getTierPriceHtml() ?>
                 </div>
 
                 <div class="extra-info">
-                    <?= $this->getReviewsSummaryHtml($_product, 'default', false)?>
-                    <?= $this->getChildHtml('product_type_availability'); ?>
+                    <?= $this->getReviewsSummaryHtml($_product, 'default', false) ?>
+                    <?= $this->getChildHtml('product_type_availability') ?>
                 </div>
 
                 <?= $this->getChildHtml('alert_urls') ?>
@@ -72,7 +72,7 @@
 
 
 
-                <?= $this->getChildHtml('other');?>
+                <?= $this->getChildHtml('other') ?>
 
                 <?php if ($_product->isSaleable() && $this->hasOptions()):?>
                     <?= $this->getChildChildHtml('container1', '', true, true) ?>
@@ -88,7 +88,7 @@
                     <div class="add-to-box">
                         <?php if($_product->isSaleable()): ?>
                             <?= $this->getChildHtml('addtocart') ?>
-                            <?php if($this->helper('wishlist')->isAllow() || $_compareUrl=$this->helper('catalog/product_compare')->getAddUrl($_product)): ?>
+                            <?php if( $this->helper('wishlist')->isAllow() || $_compareUrl=$this->helper('catalog/product_compare')->getAddUrl($_product)): ?>
                                 <span class="or"><?= $this->__('OR') ?></span>
                             <?php endif ?>
                         <?php endif ?>

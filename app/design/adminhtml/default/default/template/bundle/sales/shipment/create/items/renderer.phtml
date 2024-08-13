@@ -21,7 +21,7 @@
 
 <?php $_item = $this->getItem() ?>
 <?php $items = $this->getChilds($_item); ?>
-<?php $_count = count($items) ?>
+<?php $_count = count ($items) ?>
 <?php $_index = 0 ?>
 
 <?php $_prevOptionId = '' ?>
@@ -38,23 +38,23 @@
         <?php $attributes = $this->getSelectionAttributes($_item) ?>
         <?php if ($_prevOptionId != $attributes['option_id']): ?>
         <tr>
-            <td><div class="option-label"><?= $this->escapeHtml($attributes['option_label']); ?></div></td>
+            <td><div class="option-label"><?= $this->escapeHtml($attributes['option_label']) ?></div></td>
             <td>&nbsp;</td>
             <td class="last">&nbsp;</td>
         </tr>
         <?php $_prevOptionId = $attributes['option_id'] ?>
         <?php endif ?>
     <?php endif ?>
-    <tr class="<?= (++$_index==$_count && !$_showlastRow) ? 'border' : '' ?>">
+    <tr class="<?= (++$_index==$_count && !$_showlastRow)?'border':'' ?>">
         <?php if (!$_item->getOrderItem()->getParentItem()): ?>
         <td><h5 class="title"><?= $this->escapeHtml($_item->getName()) ?></h5>
             <div>
                 <strong><?= $this->helper('sales')->__('SKU') ?>:</strong>
-                <?= implode('<br />', Mage::helper('catalog')->splitSku($this->escapeHtml($_item->getSku()))); ?>
+                <?= implode('<br />', Mage::helper('catalog')->splitSku($this->escapeHtml($_item->getSku()))) ?>
             </div>
         </td>
         <?php else: ?>
-        <td><div class="option-value"><?= $this->getValueHtml($_item)?></div></td>
+        <td><div class="option-value"><?= $this->getValueHtml($_item) ?></div></td>
         <?php endif ?>
         <td>
             <?php if ($this->isShipmentSeparately($_item)): ?>
@@ -81,9 +81,9 @@
                     <dt><?= $this->escapeHtml($option['label']) ?></dt>
                     <dd>
                     <?php if (isset($option['custom_view']) && $option['custom_view']): ?>
-                        <?= $option['value'];?>
+                        <?= $option['value'] ?>
                     <?php else: ?>
-                        <?= Mage::helper('core/string')->truncate($option['value'], 55, '', $_remainder);?>
+                        <?= Mage::helper('core/string')->truncate($option['value'], 55, '', $_remainder) ?>
                         <?php if ($_remainder):?>
                             ... <span id="<?= $_id = 'id' . uniqid()?>"><?= $_remainder ?></span>
                             <script type="text/javascript">

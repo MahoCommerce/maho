@@ -18,12 +18,12 @@ $item = $this->getItem();
 $product = $item->getProduct();
 ?>
 <h3 class="product-name"><a href="<?= $this->getProductUrl($item) ?>" title="<?= $this->escapeHtml($product->getName()) ?>"><?= $this->escapeHtml($product->getName()) ?></a></h3>
-<div class="description std"><div class="inner"><?= $this->escapeHtml($this->stripTags($product->getShortDescription()));?></div></div>
+<div class="description std"><div class="inner"><?= $this->escapeHtml($this->stripTags($product->getShortDescription())) ?></div></div>
 <textarea name="description[<?= $item->getWishlistItemId() ?>]" rows="3" cols="5" onfocus="focusComment(this)" onblur="focusComment(this)" title="<?= Mage::helper('core')->quoteEscape($this->__('Comment')) ?>"><?= ($this->escapeHtml($item->getDescription() ? $item->getDescription() : $this->helper('wishlist')->defaultCommentString())) ?></textarea>
 <?php if($this->getSortedChildren()): ?>
     <div class="item-manage">
     <?php foreach($this->getSortedChildren() as $childName):?>
-        <?= $this->getChildHtml($childName, false);?>
+        <?= $this->getChildHtml($childName, false) ?>
     <?php endforeach ?>
     </div>
 <?php endif ?>

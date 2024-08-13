@@ -25,8 +25,8 @@
         </tr>
     </table>
 </div>
-<?php if($form): ?>
-<?= $form->toHtml(); ?>
+<?php if( $form ): ?>
+<?= $form->toHtml() ?>
 <script type="text/javascript">
     var wigetForm = new varienForm('<?= $form->getForm()->getId() ?>');
 </script>

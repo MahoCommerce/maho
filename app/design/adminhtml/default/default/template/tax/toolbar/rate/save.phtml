@@ -18,16 +18,16 @@
         <tr>
             <td style="width:50%;"><h3 class="icon-head head-tax"><?= $header ?></h3></td>
             <td class="form-buttons">
-                <?= $this->getBackButtonHtml(); ?>
-                <?= $this->getResetButtonHtml(); ?>
-                <?= $this->getDeleteButtonHtml(); ?>
-                <?= $this->getSaveButtonHtml(); ?>
+                <?= $this->getBackButtonHtml() ?>
+                <?= $this->getResetButtonHtml() ?>
+                <?= $this->getDeleteButtonHtml() ?>
+                <?= $this->getSaveButtonHtml() ?>
             </td>
         </tr>
     </table>
 </div>
-<?php if($form): ?>
-<?= $form->toHtml(); ?>
+<?php if( $form ): ?>
+<?= $form->toHtml() ?>
 <script type="text/javascript">
     var wigetForm = new varienForm('<?= $form->getForm()->getId() ?>');
 </script>

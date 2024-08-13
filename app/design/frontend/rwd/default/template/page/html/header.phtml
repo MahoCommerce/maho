@@ -36,30 +36,30 @@
         </a>
 
         <?php // In order for the language switcher to display next to logo on smaller viewports, it will be moved here.
-              // See app.js for details?>
+              // See app.js for details ?>
         <div class="store-language-container"></div>
 
         <!-- Skip Links -->
         <div class="skip-links">
             <a href="#header-nav" class="skip-link skip-nav">
                 <span class="icon"></span>
-                <span class="label"><?= $this->__('Menu'); ?></span>
+                <span class="label"><?= $this->__('Menu') ?></span>
             </a>
 
-            <a href="#header-search" class="skip-link skip-search" title="<?= $this->__('Search'); ?>">
+            <a href="#header-search" class="skip-link skip-search" title="<?= $this->__('Search') ?>">
                 <span class="icon"></span>
-                <span class="label"><?= $this->__('Search'); ?></span>
+                <span class="label"><?= $this->__('Search') ?></span>
             </a>
 
             <div class="account-cart-wrapper">
-                <a href="<?= $this->helper('customer')->getAccountUrl(); ?>" data-target-element="#header-account" class="skip-link skip-account" title="<?= $this->__('Account'); ?>">
+                <a href="<?= $this->helper('customer')->getAccountUrl() ?>" data-target-element="#header-account" class="skip-link skip-account" title="<?= $this->__('Account') ?>">
                     <span class="icon"></span>
-                    <span class="label"><?= $this->__('Account'); ?></span>
+                    <span class="label"><?= $this->__('Account') ?></span>
                 </a>
 
                 <!-- Cart -->
                 <div class="header-minicart">
-                    <?= $this->getChildHtml('minicart_head'); ?>
+                    <?= $this->getChildHtml('minicart_head') ?>
                 </div>
             </div>
         </div>
@@ -82,4 +82,4 @@
 </header>
 
 
-<?= $this->getChildHtml('topContainer'); ?>
+<?= $this->getChildHtml('topContainer') ?>

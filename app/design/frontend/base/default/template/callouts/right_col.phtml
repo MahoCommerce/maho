@@ -15,7 +15,7 @@
 ?>
 <div class="block block-banner">
     <div class="block-content">
-        <?php if(strtolower(substr($this->getLinkUrl(), 0, 4))==='http'): ?>
+        <?php if(strtolower(substr($this->getLinkUrl(),0,4))==='http'): ?>
             <a href="<?= $this->getLinkUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__($this->getImgAlt())) ?>">
         <?php elseif($this->getLinkUrl()): ?>
             <a href="<?= $this->getUrl($this->getLinkUrl()) ?>" title="<?= Mage::helper('core')->quoteEscape($this->__($this->getImgAlt())) ?>">

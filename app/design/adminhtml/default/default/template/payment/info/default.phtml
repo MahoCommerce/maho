@@ -24,11 +24,11 @@
 <table>
 <?php foreach ($_specificInfo as $_label => $_value):?>
     <tr>
-        <td><?= $this->escapeHtml($_label)?>:</td>
-        <td><?= nl2br(implode("\n", $this->getValueAsArray($_value, true)))?></td>
+        <td><?= $this->escapeHtml($_label) ?>:</td>
+        <td><?= nl2br(implode("\n", $this->getValueAsArray($_value, true))) ?></td>
     </tr>
 <?php endforeach ?>
 </table>
 <?php endif ?>
 
-<?= $this->getChildHtml()?>
+<?= $this->getChildHtml() ?>

@@ -15,7 +15,7 @@
 ?>
 
 <?php if ($this->canDisplayGiftmessage()): ?>
-<div id="gift-message-form-data-<?= $this->getItem()->getId(); ?>" class="no-display">
+<div id="gift-message-form-data-<?= $this->getItem()->getId() ?>" class="no-display">
     <form id="<?= $this->getFieldId('form') ?>" action="<?= $this->getSaveUrl() ?>">
         <input type="hidden" id="<?= $this->getFieldId('type') ?>" name="<?= $this->getFieldName('type') ?>" value="order_item" />
         <input type="hidden" id="<?= $this->getFieldId('sender') ?>" name="<?= $this->getFieldName('sender') ?>" value="<?= $this->getSender() ?>" />
@@ -25,7 +25,7 @@
 
     <?php if ($this->getMessageText()): ?>
     <div class="gift-options-tooltip-content">
-        <div><strong><?= $this->helper('giftmessage')->__('Gift Message')?></strong>: </div>
+        <div><strong><?= $this->helper('giftmessage')->__('Gift Message') ?></strong>: </div>
         <div><?= $this->getMessageText() ?></div>
     </div>
     <?php endif ?>

@@ -41,7 +41,7 @@
                 <br/>
                 <?php endif ?>
                 <strong><?= $this->escapeHtml($_order->getShippingDescription()) ?></strong>
-                <?= $this->helper('sales')->__('Total Shipping Charges'); ?>:
+                <?= $this->helper('sales')->__('Total Shipping Charges') ?>:
 
                 <?php if ($this->helper('tax')->displayShippingPriceIncludingTax()): ?>
                     <?php $_excl = $this->displayShippingPriceInclTax($_order); ?>
@@ -50,14 +50,14 @@
                 <?php endif ?>
                 <?php $_incl = $this->displayShippingPriceInclTax($_order); ?>
 
-                <?= $_excl; ?>
+                <?= $_excl ?>
                 <?php if ($this->helper('tax')->displayShippingBothPrices() && $_incl != $_excl): ?>
-                    (<?= $this->__('Incl. Tax'); ?> <?= $_incl; ?>)
+                    (<?= $this->__('Incl. Tax') ?> <?= $_incl ?>)
                 <?php endif ?>
             </div>
             <?php if ($this->canCreateShippingLabel()): ?>
             <div style="text-align: center; margin: 10px 0;">
-                <?= $this->getCreateLabelButton()?>
+                <?= $this->getCreateLabelButton() ?>
                 <?php if ($this->getShipment()->getShippingLabel()): ?>
                     <?= $this->getPrintLabelButton() ?>
                 <?php endif ?>
@@ -77,10 +77,10 @@
                     packaging.sendCreateLabelRequest();
                 });
                 packaging.setLabelCreatedCallback(function(response){
-                    setLocation("<?= $this->getUrl(
-    '*/sales_order_shipment/view',
-    ['shipment_id' => $this->getShipment()->getId()]
-); ?>");
+                    setLocation("<?php echo $this->getUrl(
+                        '*/sales_order_shipment/view',
+                        ['shipment_id' => $this->getShipment()->getId()]
+                    ); ?>");
                 });
             }, 500);
         });

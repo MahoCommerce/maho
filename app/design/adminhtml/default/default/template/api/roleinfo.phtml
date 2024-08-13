@@ -18,7 +18,7 @@
 <div class="content-header">
     <table cellspacing="0">
         <tr>
-            <td style="width:50%;"><h3 class="icon-head head-permissions-role"><?= ($this->getRoleId() > 0) ? ($this->__('Edit Role') . " '{$this->escapeHtml($this->getRoleInfo()->getRoleName())}'") : $this->__('Add New Role') ?></h3></td>
+            <td style="width:50%;"><h3 class="icon-head head-permissions-role"><?= ($this->getRoleId() > 0 ) ? ($this->__('Edit Role') . " '{$this->escapeHtml($this->getRoleInfo()->getRoleName())}'") : $this->__('Add New Role') ?></h3></td>
             <td class="form-buttons">
             <?= $this->getBackButtonHtml() ?>
             <?= $this->getResetButtonHtml() ?>
@@ -29,7 +29,7 @@
     </table>
 </div>
 <form action="<?= $this->getUrl('*/*/saverole') ?>" method="post" id="role_edit_form">
-    <?= $this->getBlockHtml('formkey')?>
+    <?= $this->getBlockHtml('formkey') ?>
 </form>
 <script type="text/javascript">
     var roleForm = new varienForm('role_edit_form');

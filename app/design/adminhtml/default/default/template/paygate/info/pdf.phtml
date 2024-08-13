@@ -16,17 +16,17 @@
 
 <?php
     $cards = $this->getCards();
-$showCount = count($cards) > 1;
+    $showCount = count($cards) > 1;
 ?>
 
 <?= $this->escapeHtml($this->getMethod()->getTitle()) ?>{{pdf_row_separator}}
 <?php foreach ($cards as $key => $card): ?>
     <?php if ($showCount): ?>
-       <?= sprintf($this->__('Credit Card %s'), $key + 1); ?>
+       <?= sprintf($this->__('Credit Card %s'), $key + 1) ?>
        {{pdf_row_separator}}
     <?php endif ?>
 
     <?php foreach ($card as $_label => $_value):?>
-        <?= $_label ?>: <?= implode(' ', $this->getValueAsArray($_value))?>{{pdf_row_separator}}
+        <?= $_label ?>: <?= implode(' ', $this->getValueAsArray($_value)) ?>{{pdf_row_separator}}
      <?php endforeach ?>
 <?php endforeach ?>

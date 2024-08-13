@@ -33,7 +33,7 @@ if(empty($_cartQty)) {
 
     <p class="block-subtitle">
         <?= $this->__('Recently added item(s)') ?>
-        <a class="close skip-link-close" href="#" title="<?= $this->quoteEscape($this->__('Close')); ?>">&times;</a>
+        <a class="close skip-link-close" href="#" title="<?= $this->quoteEscape($this->__('Close')) ?>">&times;</a>
     </p>
 
     <?php $_items = $this->getRecentItems() ?>
@@ -50,7 +50,7 @@ if(empty($_cartQty)) {
             truncateOptions();
             $j('document').ready(function() {
                 var minicartOptions  = {
-                    formKey:           "<?= $this->getFormKey();?>"
+                    formKey:           "<?= $this->getFormKey() ?>"
                 }
                 var Mini = new Minicart(minicartOptions);
                 Mini.init();
@@ -63,7 +63,7 @@ if(empty($_cartQty)) {
         <div class="block-content">
             <p class="subtotal">
                 <?php if ($this->canApplyMsrp()): ?>
-                    <span class="map-cart-sidebar-total"><?= $this->__('ORDER TOTAL WILL BE DISPLAYED BEFORE YOU SUBMIT THE ORDER'); ?></span>
+                    <span class="map-cart-sidebar-total"><?= $this->__('ORDER TOTAL WILL BE DISPLAYED BEFORE YOU SUBMIT THE ORDER') ?></span>
                 <?php else: ?>
                     <span class="label"><?= $this->__('Cart Subtotal:') ?></span> <?= Mage::helper('checkout')->formatPrice($this->getSubtotal()) ?>
                     <?php if ($_subtotalInclTax = $this->getSubtotalInclTax()): ?>
@@ -85,8 +85,8 @@ if(empty($_cartQty)) {
                     </li>
                 </ul>
             <?php endif ?>
-            <a class="cart-link" href="<?= $this->getUrl('checkout/cart'); ?>">
-                <?= $this->__('View Shopping Cart'); ?>
+            <a class="cart-link" href="<?= $this->getUrl('checkout/cart') ?>">
+                <?= $this->__('View Shopping Cart') ?>
             </a>
         </div>
 

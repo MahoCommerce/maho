@@ -71,13 +71,13 @@ if(!window.toogleRequired) {
 if(window.shipping) {
 
 shipping.onSave = function(evt){
-    new Ajax.Updater('onepage-checkout-shipping-method-additional-load', '<?= $this->getAdditionalUrl(); ?>', {onSuccess: function() {
+    new Ajax.Updater('onepage-checkout-shipping-method-additional-load', '<?= $this->getAdditionalUrl() ?>', {onSuccess: function() {
           this.nextStep(evt);
     }.bind(this), evalScripts:true});
 }.bindAsEventListener(shipping);
 
 billing.onSave = function(evt){
-    new Ajax.Updater('onepage-checkout-shipping-method-additional-load', '<?= $this->getAdditionalUrl(); ?>', {onSuccess: function() {
+    new Ajax.Updater('onepage-checkout-shipping-method-additional-load', '<?= $this->getAdditionalUrl() ?>', {onSuccess: function() {
           this.nextStep(evt);
     }.bind(this), evalScripts:true});
 }.bindAsEventListener(billing);
@@ -90,7 +90,7 @@ billing.onSave = function(evt){
 <?php switch ($this->getType()): ?>
 <?php case 'onepage_checkout': ?>
     <div class="gift-messages">
-        <h3><?= $this->__('Do you have any gift items in your order?'); ?></h3>
+        <h3><?= $this->__('Do you have any gift items in your order?') ?></h3>
         <p class="control">
             <input type="checkbox" name="allow_gift_messages" id="allow_gift_messages" value="1" onclick="toogleVisibilityOnObjects(this, ['allow-gift-message-container']);"<?php if($this->getItemsHasMesssages() || $this->getEntityHasMessage()): ?> checked="checked"<?php endif ?> class="checkbox" />
             <label for="allow_gift_messages"><?= $this->__('Add gift options.') ?></label>
@@ -99,7 +99,7 @@ billing.onSave = function(evt){
     <div class="gift-messages-form" id="allow-gift-message-container">
         <div class="inner-box">
             <?php if ($this->isMessagesAvailable()): ?>
-                <h4><?= $this->__('Gift Options for the Entire Order.'); ?></h4>
+                <h4><?= $this->__('Gift Options for the Entire Order.') ?></h4>
                 <p>
                     <input type="checkbox" name="allow_gift_messages_for_order" id="allow_gift_messages_for_order" value="1" onclick="toogleVisibilityOnObjects(this, ['allow-gift-messages-for-order-container']);"<?php if($this->getEntityHasMessage()): ?> checked="checked"<?php endif ?> class="checkbox" />
                     <label for="allow_gift_messages_for_order"><?= $this->__('Add gift options for the Entire Order') ?></label>
@@ -137,7 +137,7 @@ billing.onSave = function(evt){
                 </div>
              <?php endif ?>
              <?php if($this->isItemsAvailable()): ?>
-                 <h4><?= $this->__('Gift Options for Individual Items'); ?></h4>
+                 <h4><?= $this->__('Gift Options for Individual Items') ?></h4>
                  <p>
                     <input type="checkbox" name="allow_gift_messages_for_items" id="allow_gift_messages_for_items" value="1" onclick="toogleVisibilityOnObjects(this, ['allow-gift-messages-for-items-container']);"<?php if($this->getItemsHasMesssages()): ?> checked="checked"<?php endif ?> class="checkbox" />
                     <label for="allow_gift_messages_for_items"><?= $this->__('Add gift options for Individual Items') ?></label>
@@ -150,7 +150,7 @@ billing.onSave = function(evt){
                  <li class="item">
                      <div class="product-img-box">
                          <p class="product-image">
-                             <img src="<?= $this->helper('catalog/image')->init($_product, 'thumbnail')->resize(75); ?>" width="75" height="75" alt="<?= $this->escapeHtml($_product->getName()) ?>" title="<?= $this->escapeHtml($_product->getName()) ?>" />
+                             <img src="<?= $this->helper('catalog/image')->init($_product, 'thumbnail')->resize(75) ?>" width="75" height="75" alt="<?= $this->escapeHtml($_product->getName()) ?>" title="<?= $this->escapeHtml($_product->getName()) ?>" />
                          </p>
                          <p class="number"><?= $this->__('Item %d of %d', $_index+1, $this->countItems()) ?></p>
                      </div>
@@ -207,7 +207,7 @@ billing.onSave = function(evt){
 <?php break ?>
 <?php case 'multishipping_adress': ?>
     <div class="gift-messages">
-        <h3><?= $this->__('Do you have any gift items in your order?'); ?></h3>
+        <h3><?= $this->__('Do you have any gift items in your order?') ?></h3>
         <p class="control">
             <input type="checkbox" name="allow_gift_messages_<?= $this->getEntity()->getId() ?>" id="allow_gift_messages_<?= $this->getEntity()->getId() ?>" value="1" onclick="toogleVisibilityOnObjects(this, ['allow-gift-message-container-<?= $this->getEntity()->getId() ?>']);"<?php if($this->getItemsHasMesssages() || $this->getEntityHasMessage()): ?> checked="checked"<?php endif ?> class="checkbox" />
             <label for="allow_gift_messages_<?= $this->getEntity()->getId() ?>"><?= $this->__('Add gift options') ?></label>
@@ -216,7 +216,7 @@ billing.onSave = function(evt){
     <div class="gift-messages-form" id="allow-gift-message-container-<?= $this->getEntity()->getId() ?>">
         <div class="inner-box">
             <?php if ($this->isMessagesAvailable()): ?>
-            <h4><?= $this->__('Gift Options for this address.'); ?></h4>
+            <h4><?= $this->__('Gift Options for this address.') ?></h4>
             <p>
                  <input type="checkbox" name="allow_gift_messages_for_order_<?= $this->getEntity()->getId() ?>" id="allow_gift_messages_for_order_<?= $this->getEntity()->getId() ?>" value="1" onclick="toogleVisibilityOnObjects(this, ['allow-gift-messages-for-order-container-<?= $this->getEntity()->getId() ?>']);"<?php if($this->getEntityHasMessage()): ?> checked="checked"<?php endif ?> class="checkbox" />
                  <label for="allow_gift_messages_for_order"><?= $this->__('Add gift options for the Entire Order') ?></label>
@@ -255,7 +255,7 @@ billing.onSave = function(evt){
             </div>
             <?php endif ?>
             <?php if($this->isItemsAvailable()): ?>
-            <h4><?= $this->__('Gift Options for Individual Items'); ?></h4>
+            <h4><?= $this->__('Gift Options for Individual Items') ?></h4>
             <p>
                 <input type="checkbox" name="allow_gift_messages_for_items_<?= $this->getEntity()->getId() ?>" id="allow_gift_messages_for_items_<?= $this->getEntity()->getId() ?>" value="1" onclick="toogleVisibilityOnObjects(this, ['allow-gift-messages-for-items-container-<?= $this->getEntity()->getId() ?>']);"<?php if($this->getItemsHasMesssages()): ?> checked="checked"<?php endif ?> class="checkbox" />
                 <label for="allow_gift_messages_for_items_<?= $this->getEntity()->getId() ?>"><?= $this->__('Add gift options for Individual Items') ?></label>
@@ -267,13 +267,13 @@ billing.onSave = function(evt){
              <?php $_product=$_item->getProduct() ?>
                  <li class="item">
                      <div class="product-img-box">
-                         <p class="product-image"><img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(75); ?>" width="75" height="75" alt="<?= $this->escapeHtml($_product->getName()) ?>" title="<?= $this->escapeHtml($_product->getName()) ?>" /></p>
+                         <p class="product-image"><img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(75) ?>" width="75" height="75" alt="<?= $this->escapeHtml($_product->getName()) ?>" title="<?= $this->escapeHtml($_product->getName()) ?>" /></p>
                          <p class="number"><?= $this->__('Item %d of %d', $_index+1, $this->countItems()) ?></p>
                      </div>
                      <div class="details">
                          <div class="f-fix">
                              <input type="hidden" name="giftmessage[<?= $_item->getId() ?>][type]" value="quote_address_item" />
-                             <input type="hidden" name="giftmessage[<?= $_item->getId() ?>][address]" value="<?= $this->getEntity()->getId()?>" />
+                             <input type="hidden" name="giftmessage[<?= $_item->getId() ?>][address]" value="<?= $this->getEntity()->getId() ?>" />
                              <h5 class="product-name"><?= $this->escapeHtml($_product->getName()) ?></h5>
                              <ul class="form-list">
                                  <li class="fields">

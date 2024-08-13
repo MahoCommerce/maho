@@ -47,18 +47,18 @@
         <?= $this->getPagerHtml() ?>
     </div>
 
-    <?php if($this->isExpanded()): ?>
+    <?php if( $this->isExpanded() ): ?>
     <div class="sorter">
-        <?php if($this->isEnabledViewSwitcher()): ?>
+        <?php if( $this->isEnabledViewSwitcher() ): ?>
         <p class="view-mode">
             <?php $_modes = $this->getModes(); ?>
             <?php if($_modes && count($_modes)>1): ?>
             <label><?= $this->__('View as') ?>:</label>
             <?php foreach ($this->getModes() as $_code => $_label): ?>
                 <?php if($this->isModeActive($_code)): ?>
-                    <strong title="<?= $_label ?>" class="<?= strtolower($_code); ?>"><?= $_label ?></strong>&nbsp;
+                    <strong title="<?= $_label ?>" class="<?= strtolower($_code) ?>"><?= $_label ?></strong>&nbsp;
                 <?php else: ?>
-                    <a href="<?= $this->getModeUrl($_code) ?>" title="<?= $_label ?>" class="<?= strtolower($_code); ?>"><?= $_label ?></a>&nbsp;
+                    <a href="<?= $this->getModeUrl($_code) ?>" title="<?= $_label ?>" class="<?= strtolower($_code) ?>"><?= $_label ?></a>&nbsp;
                 <?php endif ?>
             <?php endforeach ?>
             <?php endif ?>

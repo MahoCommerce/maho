@@ -20,7 +20,7 @@
             <td><h3><?= $this->getHeaderText() ?></h3></td>
             <td class="form-buttons">
                 <?= $this->getBackButtonHtml() ?>
-                <?= $this->getPreviewButtonHtml(); ?>
+                <?= $this->getPreviewButtonHtml() ?>
                 <?php if(!$this->getIsPreview()): ?>
                     <?= $this->getResetButtonHtml() ?>
                     <?= $this->getSaveButtonHtml() ?>
@@ -33,16 +33,16 @@
     </table>
 </div>
 <form action="<?= $this->getSaveUrl() ?>" method="post" id="queue_edit_form">
-    <?= $this->getBlockHtml('formkey')?>
+    <?= $this->getBlockHtml('formkey') ?>
     <div class="no-display">
         <input type="hidden" name="_resume" id="_resume_flag" value="" />
     </div>
     <?= $this->getChildHtml('form') ?>
 </form>
 <form action="<?= $this->getPreviewUrl() ?>" method="post" id="newsletter_queue_preview_form" target="_blank">
-    <?= $this->getBlockHtml('formkey')?>
+    <?= $this->getBlockHtml('formkey') ?>
     <div class="no-display">
-        <input type="hidden" id="preview_type" name="type" value="<?= $this->getIsTextType() ? 1 : 2 ?>" />
+        <input type="hidden" id="preview_type" name="type" value="<?= $this->getIsTextType()?1:2 ?>" />
         <input type="hidden" id="preview_text" name="text" value="" />
         <input type="hidden" id="preview_styles" name="styles" value="" />
         <input type="hidden" id="preview_id" name="id" value="" />

@@ -17,15 +17,15 @@
     <h1><?= $this->__('Newsletter Subscription') ?></h1>
 </div>
 <?= $this->getMessagesBlock()->toHtml() ?>
-<?= $this->getChildHtml('form_before')?>
+<?= $this->getChildHtml('form_before') ?>
 <form action="<?= $this->getAction() ?>" method="post" id="form-validate">
     <div class="fieldset">
-        <?= $this->getBlockHtml('formkey')?>
+        <?= $this->getBlockHtml('formkey') ?>
         <h2 class="legend"><?= $this->__('Newsletter Subscription') ?></h2>
         <ul class="form-list">
             <li class="control"><input type="checkbox" name="is_subscribed" id="subscription" value="1" title="<?= Mage::helper('core')->quoteEscape($this->__('General Subscription')) ?>"<?php if($this->getIsSubscribed()): ?> checked="checked"<?php endif ?> class="checkbox" /><label for="subscription"><?= $this->__('General Subscription') ?></label></li>
             <?php /* Extensions placeholder */ ?>
-            <?= $this->getChildHtml('customer.form.newsletter.extra')?>
+            <?= $this->getChildHtml('customer.form.newsletter.extra') ?>
         </ul>
     </div>
     <div class="buttons-set">
@@ -34,7 +34,7 @@
     </div>
 </form>
 <?php /* Extensions placeholder */ ?>
-<?= $this->getChildHtml('customer.form.newsletter.extra2')?>
+<?= $this->getChildHtml('customer.form.newsletter.extra2') ?>
 <script type="text/javascript">
 //<![CDATA[
     var dataForm = new VarienForm('form-validate', true);

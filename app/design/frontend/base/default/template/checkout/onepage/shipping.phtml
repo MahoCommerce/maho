@@ -58,9 +58,9 @@
             <?php endfor ?>
                     <?php if ($this->helper('customer/address')->isVatAttributeVisible()) : ?>
                     <li class="wide">
-                        <label for="shipping:vat_id"><?= $this->__('VAT Number'); ?></label>
+                        <label for="shipping:vat_id"><?= $this->__('VAT Number') ?></label>
                         <div class="input-box">
-                            <input type="text" id="shipping:vat_id" name="shipping[vat_id]" value="<?= $this->escapeHtml($this->getAddress()->getVatId()); ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('VAT Number')); ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('vat_id') ?>" />
+                            <input type="text" id="shipping:vat_id" name="shipping[vat_id]" value="<?= $this->escapeHtml($this->getAddress()->getVatId()) ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('VAT Number')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('vat_id') ?>" />
                         </div>
                     </li>
                     <?php endif ?>

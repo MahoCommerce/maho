@@ -38,9 +38,8 @@ $numColumns = count($this->getColumns());
     <?php if (($this->getCollection()->getSize()>0) && (!$this->getIsCollapsed())): ?>
     <?php foreach ($this->getCollection() as $_index=>$_item): ?>
         <tr title="<?= $this->getRowId($_item) ?>">
-        <?php $i=0;
-        foreach ($this->getColumns() as $_column): ?>
-            <td class="<?= $_column->getCssProperty() ?> <?= ++$i==$numColumns ? 'last' : '' ?>"><?= (($_html = $_column->getRowField($_item)) != '' ? $_html : '&nbsp;') ?></td>
+        <?php $i=0;foreach ($this->getColumns() as $_column): ?>
+            <td class="<?= $_column->getCssProperty() ?> <?= ++$i==$numColumns?'last':'' ?>"><?= (($_html = $_column->getRowField($_item)) != '' ? $_html : '&nbsp;') ?></td>
         <?php endforeach ?>
         </tr>
     <?php endforeach ?>

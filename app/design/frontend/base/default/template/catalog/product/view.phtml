@@ -47,7 +47,7 @@
                 <p class="email-friend"><a href="<?= $this->helper('catalog/product')->getEmailToFriendUrl($_product) ?>"><?= $this->__('Email to a Friend') ?></a></p>
             <?php endif ?>
 
-            <?= $this->getReviewsSummaryHtml($_product, false, true)?>
+            <?= $this->getReviewsSummaryHtml($_product, false, true) ?>
             <?= $this->getChildHtml('alert_urls') ?>
             <?= $this->getChildHtml('product_type_data') ?>
             <?= $this->getTierPriceHtml() ?>
@@ -57,7 +57,7 @@
                 <div class="add-to-box">
                     <?php if($_product->isSaleable()): ?>
                         <?= $this->getChildHtml('addtocart') ?>
-                        <?php if($this->helper('wishlist')->isAllow() || $_compareUrl=$this->helper('catalog/product_compare')->getAddUrl($_product)): ?>
+                        <?php if( $this->helper('wishlist')->isAllow() || $_compareUrl=$this->helper('catalog/product_compare')->getAddUrl($_product)): ?>
                             <span class="or"><?= $this->__('OR') ?></span>
                         <?php endif ?>
                     <?php endif ?>
@@ -77,7 +77,7 @@
                 </div>
             <?php endif ?>
 
-            <?= $this->getChildHtml('other');?>
+            <?= $this->getChildHtml('other') ?>
 
             <?php if ($_product->isSaleable() && $this->hasOptions()):?>
                 <?= $this->getChildChildHtml('container1', '', true, true) ?>
@@ -149,11 +149,11 @@
 
     <div class="product-collateral">
 <?php foreach ($this->getChildGroup('detailed_info', 'getChildHtml') as $alias => $html):?>
-        <div class="box-collateral <?= "box-{$alias}"?>">
+        <div class="box-collateral <?= "box-{$alias}" ?>">
             <?php if ($title = $this->getChildData($alias, 'title')):?>
-            <h2><?= $this->escapeHtml($title); ?></h2>
+            <h2><?= $this->escapeHtml($title) ?></h2>
             <?php endif ?>
-            <?= $html; ?>
+            <?= $html ?>
         </div>
 <?php endforeach ?>
         <?= $this->getChildHtml('upsell_products') ?>

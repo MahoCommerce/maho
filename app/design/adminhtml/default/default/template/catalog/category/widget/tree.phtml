@@ -22,9 +22,9 @@
 
 var tree<?= $this->getId() ?>;
 
-var useMassaction = <?= $this->getUseMassaction() ? 1 : 0; ?>;
+var useMassaction = <?= $this->getUseMassaction()?1:0 ?>;
 
-var isAnchorOnly = <?= $this->getIsAnchorOnly() ? 1 : 0; ?>;
+var isAnchorOnly = <?= $this->getIsAnchorOnly()?1:0 ?>;
 
 Ext.tree.TreePanel.Enhanced = function(el, config)
 {
@@ -171,7 +171,7 @@ Ext.onReady(function()
 
     if (useMassaction) {
         tree<?= $this->getId() ?>.on('check', function(node) {
-            $('<?= $_divId; ?>').fire('node:changed', {node:node});
+            $('<?= $_divId ?>').fire('node:changed', {node:node});
         }, tree<?= $this->getId() ?>);
     }
 

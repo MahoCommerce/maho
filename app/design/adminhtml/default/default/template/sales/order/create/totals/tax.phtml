@@ -24,29 +24,27 @@ $taxIter++; ?>
 <?php if ($this->helper('tax')->displayFullSummary()): ?>
     <?php $isTop = 1; ?>
     <?php foreach ($this->getTotal()->getFullInfo() as $info): ?>
-        <?php if (isset($info['hidden']) && $info['hidden']) {
-            continue;
-        } ?>
+        <?php if (isset($info['hidden']) && $info['hidden']) continue; ?>
         <?php $percent = $info['percent']; ?>
         <?php $amount = $info['amount']; ?>
         <?php $rates = $info['rates']; ?>
         <?php $isFirst = 1; ?>
 
         <?php foreach ($rates as $rate): ?>
-            <tr class="summary-details-<?= $taxIter; ?> summary-details<?php if ($isTop): echo ' summary-details-first'; endif; ?>"
+            <tr class="summary-details-<?= $taxIter ?> summary-details<?php if ($isTop): echo ' summary-details-first'; endif; ?>"
                 style="display:none;">
                 <td class="a-right" style="<?= $this->getTotal()->getStyle() ?>"
-                    colspan="<?= $this->getColspan(); ?>">
-                    <?= $this->escapeHtml($rate['title']); ?>
+                    colspan="<?= $this->getColspan() ?>">
+                    <?= $this->escapeHtml($rate['title']) ?>
                     <?php if (!is_null($rate['percent'])): ?>
-                        (<?= (float)$rate['percent']; ?>%)
+                        (<?= (float)$rate['percent'] ?>%)
                     <?php endif ?>
                     <br/>
                 </td>
                 <?php if ($isFirst): ?>
                     <td style="<?= $this->getTotal()->getStyle() ?>" class="a-right"
-                        rowspan="<?= count($rates); ?>">
-                        <?= $this->formatPrice($amount); ?>
+                        rowspan="<?= count($rates) ?>">
+                        <?= $this->formatPrice($amount) ?>
                     </td>
                 <?php endif ?>
             </tr>
@@ -55,23 +53,23 @@ $taxIter++; ?>
         <?php endforeach ?>
     <?php endforeach ?>
     <?php foreach ($_weees as $weeeTitle => $weeeAmount): ?>
-        <tr class="summary-details-<?= $taxIter; ?> summary-details<?php if ($isTop): echo ' summary-details-first'; endif; ?>"
+        <tr class="summary-details-<?= $taxIter ?> summary-details<?php if ($isTop): echo ' summary-details-first'; endif; ?>"
             style="display:none;">
             <td class="a-right" colspan="1">
-                <?= $this->escapeHtml($weeeTitle); ?>
+                <?= $this->escapeHtml($weeeTitle) ?>
                 <br/>
             </td>
             <td class="a-right" rowspan="1">
-                <?= $this->helper('checkout')->formatPrice($weeeAmount); ?>
+                <?= $this->helper('checkout')->formatPrice($weeeAmount) ?>
             </td>
         </tr>
     <?php endforeach ?>
 <?php endif ?>
 <?php $class = "{$this->getTotal()->getCode()} " . ($this->helper('tax')->displayFullSummary() ? 'summary-total' : ''); ?>
-<tr<?php if ($this->helper('tax')->displayFullSummary()): ?> onclick="expandDetails(this, '.summary-details-<?= $taxIter; ?>')"<?php endif ?>
-    class="<?= $class; ?>">
+<tr<?php if ($this->helper('tax')->displayFullSummary()): ?> onclick="expandDetails(this, '.summary-details-<?= $taxIter ?>')"<?php endif ?>
+    class="<?= $class ?>">
     <td style="<?= $this->getTotal()->getStyle() ?>" class="a-right"
-        colspan="<?= $this->getColspan(); ?>">
+        colspan="<?= $this->getColspan() ?>">
         <?php if ($this->helper('tax')->displayFullSummary()): ?>
             <div class="summary-collapse"><?= $this->getTotal()->getTitle() ?></div>
         <?php else: ?>

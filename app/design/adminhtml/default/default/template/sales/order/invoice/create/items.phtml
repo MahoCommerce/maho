@@ -46,14 +46,9 @@
         </tfoot>
         <?php endif ?>
         <?php $_items = $this->getInvoice()->getAllItems() ?>
-        <?php $_i=0;
-foreach ($_items as $_item): ?>
-        <?php if ($_item->getOrderItem()->getParentItem()) {
-            continue;
-        } else {
-            $_i++;
-        } ?>
-        <tbody class="<?= $_i%2 ? 'even' : 'odd' ?>">
+        <?php $_i=0;foreach ($_items as $_item): ?>
+        <?php if ($_item->getOrderItem()->getParentItem()) continue; else $_i++; ?>
+        <tbody class="<?= $_i%2?'even':'odd' ?>">
             <?= $this->getItemHtml($_item) ?>
             <?= $this->getItemExtraInfoHtml($_item->getOrderItem()) ?>
         </tbody>
@@ -72,7 +67,7 @@ foreach ($_items as $_item): ?>
         <div id="history_form" class="order-history-form">
             <span class="field-row">
                 <label class="normal" for="invoice_comment_text"><?= Mage::helper('sales')->__('Invoice Comments') ?></label>
-                <textarea id="invoice_comment_text" name="invoice[comment_text]" rows="3" cols="5" style="height:10em; width:98%;"><?= $this->getInvoice()->getCommentText(); ?></textarea>
+                <textarea id="invoice_comment_text" name="invoice[comment_text]" rows="3" cols="5" style="height:10em; width:98%;"><?= $this->getInvoice()->getCommentText() ?></textarea>
             </span>
             <div class="clear"></div>
         </div>

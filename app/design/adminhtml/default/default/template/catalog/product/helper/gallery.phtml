@@ -18,7 +18,7 @@
         <li class="notice-msg">
             <ul>
                 <li>
-                    <?= Mage::helper('catalog')->__('Image type and information need to be specified for each store view.'); ?>
+                    <?= Mage::helper('catalog')->__('Image type and information need to be specified for each store view.') ?>
                 </li>
             </ul>
         </li>
@@ -39,7 +39,7 @@
                 <th><?= Mage::helper('catalog')->__('Label') ?></th>
                 <th><?= Mage::helper('catalog')->__('Sort Order') ?></th>
                 <?php foreach ($this->getImageTypes() as $typeId => $type): ?>
-                    <th><?= $this->escapeHtml($type['label'], array('br')); ?></th>
+                    <th><?= $this->escapeHtml($type['label'], array('br')) ?></th>
                 <?php endforeach ?>
                 <th><?= Mage::helper('catalog')->__('Exclude') ?></th>
                 <th class="last"><?= Mage::helper('catalog')->__('Remove') ?></th>
@@ -49,33 +49,33 @@
             <tr id="<?= $this->getHtmlId() ?>_template" class="template no-display">
                 <td class="cell-image">
                     <div class="place-holder"
-                         onmouseover="<?= $this->getJsObjectName(); ?>.loadImage('__file__')">
+                         onmouseover="<?= $this->getJsObjectName() ?>.loadImage('__file__')">
                         <span><?= Mage::helper('catalog')->__('Roll Over for preview') ?></span></div>
                     <img src="<?= $this->getSkinUrl('images/spacer.gif') ?>" width="100" style="display:none;"
                          alt=""/></td>
                 <td class="cell-label"><input
                             type="text" <?php if ($this->getElement()->getReadonly()): ?> disabled="disabled"<?php endif ?>
                             class="input-text"
-                            onkeyup="<?= $this->getJsObjectName(); ?>.updateImage('__file__')"
-                            onchange="<?= $this->getJsObjectName(); ?>.updateImage('__file__')"/></td>
+                            onkeyup="<?= $this->getJsObjectName() ?>.updateImage('__file__')"
+                            onchange="<?= $this->getJsObjectName() ?>.updateImage('__file__')"/></td>
                 <td class="cell-position"><input
                             type="text" <?php if ($this->getElement()->getReadonly()): ?> disabled="disabled"<?php endif ?>
                             class="input-text validate-number"
-                            onkeyup="<?= $this->getJsObjectName(); ?>.updateImage('__file__')"
-                            onchange="<?= $this->getJsObjectName(); ?>.updateImage('__file__')"/></td>
+                            onkeyup="<?= $this->getJsObjectName() ?>.updateImage('__file__')"
+                            onchange="<?= $this->getJsObjectName() ?>.updateImage('__file__')"/></td>
                 <?php foreach ($this->getImageTypes() as $typeId => $type): ?>
                     <td class="cell-<?= $typeId ?> a-center">
                         <input <?php if ($this->getElement()->getAttributeReadonly($typeId)) : ?> disabled="disabled" <?php endif ?>
                                 type="radio" name="<?= $type['field'] ?>"
-                                onclick="<?= $this->getJsObjectName(); ?>.setProductImages('__file__')"
+                                onclick="<?= $this->getJsObjectName() ?>.setProductImages('__file__')"
                                 value="__file__"/></td>
                 <?php endforeach ?>
                 <td class="cell-disable a-center"><input
                             type="checkbox" <?php if ($this->getElement()->getReadonly()): ?> disabled="disabled"<?php endif ?>
-                            onclick="<?= $this->getJsObjectName(); ?>.updateImage('__file__')"/></td>
+                            onclick="<?= $this->getJsObjectName() ?>.updateImage('__file__')"/></td>
                 <td class="cell-remove a-center last"><input
                             type="checkbox" <?php if ($this->getElement()->getReadonly()): ?> disabled="disabled"<?php endif ?>
-                            onclick="<?= $this->getJsObjectName(); ?>.updateImage('__file__')"/></td>
+                            onclick="<?= $this->getJsObjectName() ?>.updateImage('__file__')"/></td>
             </tr>
             <?php if ($this->hasUseDefault()): ?>
                 <tr id="<?= $this->getHtmlId() ?>_default">
@@ -83,14 +83,14 @@
                     <td class="a-center">
                         <input id="use_default_label" class="default-checkbox" name="use_default[]" type="checkbox"
                             <?php if ($this->getElement()->getAttributeReadonly("label")): ?> disabled="disabled" <?php endif ?>
-                               onclick="<?= $this->getJsObjectName(); ?>.updateUseDefault(this)"
+                               onclick="<?= $this->getJsObjectName() ?>.updateUseDefault(this)"
                                <?php if ($this->getElement()->usedDefault("label")): ?>checked<?php endif ?>
                                value="label"/>
                     </td>
                     <td>
                         <input id="use_default_position" class="default-checkbox" name="use_default[]" type="checkbox"
                             <?php if ($this->getElement()->getAttributeReadonly("position")): ?> disabled="disabled" <?php endif ?>
-                               onclick="<?= $this->getJsObjectName(); ?>.updateUseDefault(this)"
+                               onclick="<?= $this->getJsObjectName() ?>.updateUseDefault(this)"
                                <?php if ($this->getElement()->usedDefault("position")): ?>checked<?php endif ?>
                                value="position"/>
                     </td>
@@ -99,7 +99,7 @@
                             <?php if ($this->getElement()->canDisplayUseDefault($_attribute)): ?>
                                 <input class="default-checkbox" name="use_default[]"
                                        type="checkbox" <?php if ($this->getElement()->getAttributeReadonly($_attribute->getAttributeCode())): ?> disabled="disabled" <?php endif ?>
-                                       onclick="<?= $this->getJsObjectName(); ?>.updateUseDefault()"
+                                       onclick="<?= $this->getJsObjectName() ?>.updateUseDefault()"
                                        <?php if ($this->getElement()->usedDefault($_attribute)): ?>checked<?php endif ?>
                                        value="<?= $_attribute->getAttributeCode() ?>"/>
                             <?php endif ?>
@@ -117,7 +117,7 @@
                     <td class="cell-<?= $typeId ?> a-center"><input
                                 type="radio" <?php if ($this->getElement()->getAttributeReadonly($typeId)) : ?> disabled="disabled" <?php endif ?>
                                 name="<?= $type['field'] ?>"
-                                onclick="<?= $this->getJsObjectName(); ?>.setProductImages('no_selection')"
+                                onclick="<?= $this->getJsObjectName() ?>.setProductImages('no_selection')"
                                 value="no_selection"/></td>
                 <?php endforeach ?>
                 <td class="cell-disable"><input type="hidden"/>&nbsp;</td>
@@ -128,7 +128,7 @@
                 <tfoot>
                 <tr>
                     <td colspan="100" class="last" style="padding:8px">
-                        <?= Mage::helper('catalog')->__('Maximum width and height dimension for upload image is %s.', Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_MAX_DIMENSION)); ?>
+                        <?= Mage::helper('catalog')->__('Maximum width and height dimension for upload image is %s.', Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_MAX_DIMENSION)) ?>
                         <?= $this->getUploaderHtml() ?>
                     </td>
                 </tr>
@@ -145,6 +145,6 @@
        value="<?= $this->escapeHtml($this->getImagesValuesJson()) ?>"/>
 <script type="text/javascript">
 //<![CDATA[
-var <?= $this->getJsObjectName(); ?> = new Product.Gallery('<?= $this->getHtmlId() ?>', <?= $this->getImageTypesJson() ?>);
+var <?= $this->getJsObjectName() ?> = new Product.Gallery('<?= $this->getHtmlId() ?>', <?= $this->getImageTypesJson() ?>);
 //]]>
 </script>

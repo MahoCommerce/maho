@@ -25,12 +25,12 @@ $_class   = $_element->getFieldsetHtmlClass();
     <td colspan="2" class="hidden"><?= trim($_element->getElementHtml()) ?></td>
     <?php else: ?>
     <td class="label<?= $_class ? " {$_class}-label" : ''?>"><?= trim($_element->getLabelHtml()) ?></td>
-    <td class="<?= $_element->hasValueClass() ? $_element->getValueClass() : 'value' ?><?= $_class ? " {$_class}-value" : ''?>">
+    <td class="<?= $_element->hasValueClass() ? $_element->getValueClass() : 'value' ?><?= $_class ? " {$_class}-value" : '' ?>">
         <div class="store-scope">
             <?= trim($_element->getElementHtml()) ?>
         </div>
         <?php if ($_note): ?>
-            <p class="note<?= $_class ? " {$_class}-note" : ''?>" id="note_<?= $_element->getId()?>"><span><?= $_note ?></span></p>
+            <p class="note<?= $_class ? " {$_class}-note" : ''?>" id="note_<?= $_element->getId() ?>"><span><?= $_note ?></span></p>
         <?php endif ?>
     </td>
     <?php endif ?>

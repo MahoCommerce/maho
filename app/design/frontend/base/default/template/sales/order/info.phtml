@@ -58,7 +58,7 @@
                 <?php if ($_order->getShippingDescription()): ?>
                     <?= $this->escapeHtml($_order->getShippingDescription()) ?>
                 <?php else: ?>
-                    <p><?= $this->helper('sales')->__('No shipping information available'); ?></p>
+                    <p><?= $this->helper('sales')->__('No shipping information available') ?></p>
                 <?php endif ?>
             </div>
         </div>

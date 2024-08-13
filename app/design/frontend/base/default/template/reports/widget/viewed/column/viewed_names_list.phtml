@@ -26,10 +26,10 @@
         </div>
         <div class="block-content">
             <?php $suffix = $this->getNameInLayout(); ?>
-            <ol id="widget-viewed-<?= $suffix; ?>">
+            <ol id="widget-viewed-<?= $suffix ?>">
             <?php foreach ($_products as $_product): ?>
                 <li class="item">
-                   <p class="product-name"><a href="<?= $_product->getProductUrl() ?>"><?= $this->helper('catalog/output')->productAttribute($_product, $_product->getName(), 'name') ?></a></p>
+                   <p class="product-name"><a href="<?= $_product->getProductUrl() ?>"><?= $this->helper('catalog/output')->productAttribute($_product, $_product->getName() , 'name') ?></a></p>
                 </li>
             <?php endforeach ?>
             </ol>

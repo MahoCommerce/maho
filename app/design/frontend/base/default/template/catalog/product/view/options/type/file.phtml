@@ -29,10 +29,10 @@
 
 <script type="text/javascript">
 //<![CDATA[
-    opFile<?= $_rand; ?> = {
+    opFile<?= $_rand ?> = {
         initializeFile: function(inputBox) {
-            this.inputFile = inputBox.select('input[name="<?= $_fileName; ?>"]')[0];
-            this.inputFileAction = inputBox.select('input[name="<?= $_fieldNameAction; ?>"]')[0];
+            this.inputFile = inputBox.select('input[name="<?= $_fileName ?>"]')[0];
+            this.inputFileAction = inputBox.select('input[name="<?= $_fieldNameAction ?>"]')[0];
             this.fileNameBox = inputBox.up('dd').select('.<?= $_fileNamed ?>')[0];
         },
 
@@ -68,34 +68,30 @@
 //]]>
 </script>
 
-<dt><label <?php if ($_option->getIsRequire()) {
-    echo ' class="required"';
-} ?>><?php if ($_option->getIsRequire()) {
-    echo '<em>*</em>';
-} ?><?=  $this->escapeHtml($_option->getTitle()) ?></label>
+<dt><label <?php if ($_option->getIsRequire()) echo ' class="required"' ?>><?php if ($_option->getIsRequire()) echo '<em>*</em>' ?><?=  $this->escapeHtml($_option->getTitle()) ?></label>
     <?= $this->getFormatedPrice() ?></dt>
-<dd<?php if ($_option->decoratedIsLast) {?> class="last"<?php }?>>
+<dd<?php if ($_option->decoratedIsLast){?> class="last"<?php }?>>
     <?php if ($_fileExists): ?>
-        <span class="<?= $_fileNamed ?>"><?= $this->escapeHtml($_fileInfo->getTitle()); ?></span>
-        <a href="javascript:void(0)" class="label" onclick="opFile<?= $_rand; ?>.toggleFileChange($(this).next('.input-box'))">
+        <span class="<?= $_fileNamed ?>"><?= $this->escapeHtml($_fileInfo->getTitle()) ?></span>
+        <a href="javascript:void(0)" class="label" onclick="opFile<?= $_rand ?>.toggleFileChange($(this).next('.input-box'))">
             <?= Mage::helper('catalog')->__('Change') ?>
         </a>&nbsp;
         <?php if (!$_option->getIsRequire()): ?>
-           <input type="checkbox" onclick="opFile<?= $_rand; ?>.toggleFileDelete($(this), $(this).next('.input-box'))" />
+           <input type="checkbox" onclick="opFile<?= $_rand ?>.toggleFileDelete($(this), $(this).next('.input-box'))" />
            <span class="label"><?= Mage::helper('catalog')->__('Delete') ?></span>
         <?php endif ?>
     <?php endif ?>
     <div class="input-box" <?= $_fileExists ? 'style="display:none"' : '' ?>>
-        <input type="file" name="<?= $_fileName; ?>" class="product-custom-option<?= $_option->getIsRequire() ? ' required-entry' : '' ?>" <?= $_fileExists ? 'disabled="disabled"' : '' ?> onchange="opConfig.reloadPrice()" />
-        <input type="hidden" name="<?= $_fieldNameAction; ?>" value="<?= $_fieldValueAction; ?>" />
+        <input type="file" name="<?= $_fileName ?>" class="product-custom-option<?= $_option->getIsRequire() ? ' required-entry' : '' ?>" <?= $_fileExists ? 'disabled="disabled"' : '' ?> onchange="opConfig.reloadPrice()" />
+        <input type="hidden" name="<?= $_fieldNameAction ?>" value="<?= $_fieldValueAction ?>" />
         <?php if ($_option->getFileExtension()): ?>
         <p class="no-margin"><?= Mage::helper('catalog')->__('Allowed file extensions to upload')?>: <strong><?= $_option->getFileExtension() ?></strong></p>
         <?php endif ?>
         <?php if ($_option->getImageSizeX() > 0): ?>
-        <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum image width')?>: <strong><?= $_option->getImageSizeX() ?> <?= Mage::helper('catalog')->__('px.')?></strong></p>
+        <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum image width')?>: <strong><?= $_option->getImageSizeX() ?> <?= Mage::helper('catalog')->__('px.') ?></strong></p>
         <?php endif ?>
         <?php if ($_option->getImageSizeY() > 0): ?>
-        <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum image height')?>: <strong><?= $_option->getImageSizeY() ?> <?= Mage::helper('catalog')->__('px.')?></strong></p>
+        <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum image height')?>: <strong><?= $_option->getImageSizeY() ?> <?= Mage::helper('catalog')->__('px.') ?></strong></p>
         <?php endif ?>
     </div>
 </dd>

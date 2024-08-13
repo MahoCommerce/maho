@@ -26,26 +26,21 @@
                     <tr>
                         <th class="cell-name">
                             <?php if($_itemCount > 1): ?>
-                                <?= $this->__('Items in your order'); ?>
+                                <?= $this->__('Items in your order') ?>
                             <?php else: ?>
-                                <?= $this->__('Item in your order'); ?>
+                                <?= $this->__('Item in your order') ?>
                             <?php endif ?>
                         </th>
                         <th class="cell-name align-center">
-                            <?= $this->__('Qty'); ?>
+                            <?= $this->__('Qty') ?>
                         </th>
                         <th class="cell-name align-right">
-                            <?= $this->__('Price'); ?>
+                            <?= $this->__('Price') ?>
                         </th>
                     </tr>
                 </thead>
-            <?php $i=0;
-foreach ($_order->getAllItems() as $_item): ?>
-            <?php if($_item->getParentItem()) {
-                continue;
-            } else {
-                $i++;
-            } ?>
+            <?php $i=0; foreach ($_order->getAllItems() as $_item): ?>
+            <?php if($_item->getParentItem()) continue; else $i++; ?>
                 <?= $this->getItemHtml($_item) ?>
             <?php endforeach ?>
             </table>
@@ -71,9 +66,9 @@ foreach ($_order->getAllItems() as $_item): ?>
 
                     <tr>
                         <td colspan="4" align="left" style="padding:3px 9px">
-                        <strong><?= $this->__('From:'); ?></strong> <?= $this->escapeHtml($_giftMessage->getSender()) ?>
-                        <br /><strong><?= $this->__('To:'); ?></strong> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?>
-                        <br /><strong><?= $this->__('Message:'); ?></strong><br /> <?= $this->escapeHtml($_giftMessage->getMessage()) ?>
+                        <strong><?= $this->__('From:') ?></strong> <?= $this->escapeHtml($_giftMessage->getSender()) ?>
+                        <br /><strong><?= $this->__('To:') ?></strong> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?>
+                        <br /><strong><?= $this->__('Message:') ?></strong><br /> <?= $this->escapeHtml($_giftMessage->getMessage()) ?>
                         </td>
                     </tr>
                 </tbody>

@@ -153,19 +153,19 @@
                                     <?php $item = new Varien_Object($item) ?>
                                     <tr title="#" id="" class="">
                                         <td class="name">
-                                            <?= $item->getName(); ?>
+                                            <?= $item->getName() ?>
                                         </td>
                                         <td class="a-center weight ">
-                                            <?= $item->getWeight(); ?>
+                                            <?= $item->getWeight() ?>
                                         </td>
                                         <?php if ($this->displayCustomsValue()): ?>
                                             <td class="a-right"><?= $this->displayCustomsPrice($item->getCustomsValue()) ?></td>
                                         <?php endif ?>
                                         <td class="a-right">
-                                            <?= $this->getQtyOrderedItem($item->getOrderItemId()); ?>
+                                            <?= $this->getQtyOrderedItem($item->getOrderItemId()) ?>
                                         </td>
                                         <td class="a-right last">
-                                            <?= $item->getQty()*1; ?>
+                                            <?= $item->getQty()*1 ?>
                                         </td>
                                     </tr>
                                 <?php endforeach ?>
@@ -178,7 +178,7 @@
         </div>
         <div class="buttons-set a-right">
             <?= $this->getPrintButton() ?>
-            <button type="button" class="scalable SavePackagesBtn save" onclick="hidePackedWindow();" title="<?= Mage::helper('sales')->__('Products should be added to package(s)')?>">
+            <button type="button" class="scalable SavePackagesBtn save" onclick="hidePackedWindow();" title="<?= Mage::helper('sales')->__('Products should be added to package(s)') ?>">
                 <span><span><span><?= Mage::helper('sales')->__('OK') ?></span></span></span>
             </button>
         </div>

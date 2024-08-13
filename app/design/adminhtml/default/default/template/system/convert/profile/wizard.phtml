@@ -182,23 +182,19 @@ Event.observe(window, 'load', function(){
                     <?php foreach ($this->getWebsiteCollection() as $_website): ?>
                         <?php $_websiteShow=false; ?>
                         <?php foreach ($this->getGroupCollection() as $_group): ?>
-                            <?php if ($_website->getId() != $_group->getWebsiteId()) {
-                                continue;
-                            } ?>
+                            <?php if ($_website->getId() != $_group->getWebsiteId()) continue; ?>
                             <?php $_groupShow=false; ?>
                             <?php foreach ($this->getStoreCollection() as $_store): ?>
-                                <?php if ($_group->getId() != $_store->getGroupId()) {
-                                    continue;
-                                } ?>
+                                <?php if ($_group->getId() != $_store->getGroupId()) continue; ?>
                                 <?php if (!$_websiteShow): ?>
                                     <?php $_websiteShow=true; ?>
                                     <optgroup label="<?= Mage::helper('core')->quoteEscape($_website->getName()) ?>"></optgroup>
                                 <?php endif ?>
                                 <?php if (!$_groupShow): ?>
                                     <?php $_groupShow=true; ?>
-                                    <optgroup label="&nbsp;&nbsp;&nbsp;&nbsp;<?= $this->escapeHtml($_group->getName()); ?>">
+                                    <optgroup label="&nbsp;&nbsp;&nbsp;&nbsp;<?= $this->escapeHtml($_group->getName()) ?>">
                                 <?php endif ?>
-                                <option value="<?= $_store->getId() ?>" <?= $this->getSelected('store_id', $_store->getId()) ?>>&nbsp;&nbsp;&nbsp;&nbsp;<?= $this->escapeHtml($_store->getName()); ?></option>
+                                <option value="<?= $_store->getId() ?>" <?= $this->getSelected('store_id', $_store->getId()) ?>>&nbsp;&nbsp;&nbsp;&nbsp;<?= $this->escapeHtml($_store->getName()) ?></option>
                             <?php endforeach ?>
                             <?php if ($_groupShow): ?>
                                 </optgroup>
@@ -377,8 +373,8 @@ Event.observe(window, 'load', function(){
                         <?= $this->__("In Database:") ?> <select name="gui_data[map][<?= $_entityType ?>][db][]" onchange="setMapFileField(this)">
                             <?php
                                 $fieldMappingInDatabase = $this->getAttributes($_entityType);
-            asort($fieldMappingInDatabase);
-            foreach ($fieldMappingInDatabase as $_value=>$_label): ?>
+                                asort($fieldMappingInDatabase);
+                                foreach ($fieldMappingInDatabase as $_value=>$_label): ?>
                                 <option value="<?= $_value ?>"><?= $_label ?></option>
                             <?php endforeach ?>
                         </select>

@@ -18,7 +18,7 @@
 <p class="switcher"><label for="store_switcher"><?= $this->__('Choose Store View:') ?></label>
 <select name="store_switcher" id="store_switcher" onchange="return switchStore(this);">
 <?php if ($this->hasDefaultOption()): ?>
-    <option value=""><?= $this->escapeHtml($this->getDefaultStoreName()); ?></option>
+    <option value=""><?= $this->escapeHtml($this->getDefaultStoreName()) ?></option>
 <?php endif ?>
     <?php foreach ($websites as $website): ?>
         <?php $showWebsite = false; ?>

@@ -18,7 +18,7 @@
 </div>
 <?php
     $_categories = $this->getRssCatalogFeeds();
-$_misc = $this->getRssMiscFeeds();
+    $_misc = $this->getRssMiscFeeds();
 ?>
 <?php if ($_categories || $_misc): ?>
 <?php if($_misc): ?>
@@ -34,7 +34,7 @@ $_misc = $this->getRssMiscFeeds();
         <?php foreach ($_misc as $_feed): ?>
         <tr>
             <td><?= $_feed->getLabel() ?></td>
-            <td><a href="<?= $_feed->getUrl() ?>" class="link-rss"><?= $this->__('Get Feed'); ?></a></td>
+            <td><a href="<?= $_feed->getUrl() ?>" class="link-rss"><?= $this->__('Get Feed') ?></a></td>
         </tr>
         <?php endforeach ?>
     </tbody>
@@ -56,12 +56,12 @@ $_misc = $this->getRssMiscFeeds();
         <?php foreach ($_categories as $_category): ?>
         <tr>
             <td><?= $_category->getLabel() ?></td>
-            <td><a href="<?= $_category->getUrl() ?>" class="link-rss"><?= $this->__('Get Feed'); ?></a></td>
+            <td><a href="<?= $_category->getUrl() ?>" class="link-rss"><?= $this->__('Get Feed') ?></a></td>
         </tr>
         <?php endforeach ?>
     </tbody>
 </table>
 <?php endif ?>
 <?php else: ?>
-    <p><?= $this->__('There are no Rss Feeds'); ?></p>
+    <p><?= $this->__('There are no Rss Feeds') ?></p>
 <?php endif ?>

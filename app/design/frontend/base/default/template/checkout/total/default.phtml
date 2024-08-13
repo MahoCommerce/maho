@@ -14,9 +14,9 @@
  */
 ?>
 <tr>
-    <td colspan="<?= $this->getColspan(); ?>" style="<?= $this->getTotal()->getStyle() ?>" class="a-right">
+    <td colspan="<?= $this->getColspan() ?>" style="<?= $this->getTotal()->getStyle() ?>" class="a-right">
         <?php if ($this->getRenderingArea() == $this->getTotal()->getArea()): ?><strong><?php endif ?>
-            <?= $this->escapeHtml($this->getTotal()->getTitle()); ?>
+            <?= $this->escapeHtml($this->getTotal()->getTitle()) ?>
         <?php if ($this->getRenderingArea() == $this->getTotal()->getArea()): ?></strong><?php endif ?>
     </td>
     <td style="<?= $this->getTotal()->getStyle() ?>" class="a-right">

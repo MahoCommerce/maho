@@ -22,20 +22,20 @@
 
 <?php
     $cards = $this->getCards();
-$showCount = count($cards) > 1;
+    $showCount = count($cards) > 1;
 ?>
 
     <?php foreach ($cards as $key => $card): ?>
         <?php if ($showCount): ?>
-            <span><?= sprintf($this->__('Credit Card %s'), $key + 1); ?></span>
+            <span><?= sprintf($this->__('Credit Card %s'), $key + 1) ?></span>
         <?php endif ?>
 
         <table class="info-table<?php if ($showCount):?> offset<?php endif ?>">
             <tbody>
             <?php foreach ($card as $_label => $_value):?>
             <tr>
-                <td><?= $this->escapeHtml($_label)?>:</td>
-                <td><?= nl2br(implode("\n", $this->getValueAsArray($_value, true)))?></td>
+                <td><?= $this->escapeHtml($_label) ?>:</td>
+                <td><?= nl2br(implode("\n", $this->getValueAsArray($_value, true))) ?></td>
             </tr>
             <?php endforeach ?>
             </tbody>

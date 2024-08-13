@@ -19,7 +19,7 @@
 <?php
     /** @var $myBlock Mage_Api2_Block_Adminhtml_Roles_Tab_Users */
     $myBlock = $this->getLayout()->getBlock('adminhtml.role.edit.tab.users');
-$name = $myBlock->getJsObjectName();
+    $name = $myBlock->getJsObjectName();
 ?>
     <?php if (is_object($myBlock) && $name && !$myBlock->isHidden()): ?>
     var checkBoxes = $H(<?= $myBlock->getUsers(true) ?>);

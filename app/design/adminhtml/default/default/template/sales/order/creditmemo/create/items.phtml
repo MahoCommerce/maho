@@ -53,14 +53,9 @@
             </tr>
         </tfoot>
         <?php endif ?>
-        <?php $i=0;
-    foreach ($_items as $_item): ?>
-            <?php if ($_item->getOrderItem()->getParentItem()) {
-                continue;
-            } else {
-                $i++;
-            } ?>
-            <tbody class="<?= $i%2 ? 'even' : 'odd' ?>">
+        <?php $i=0;foreach ($_items as $_item): ?>
+            <?php if ($_item->getOrderItem()->getParentItem()) continue; else $i++; ?>
+            <tbody class="<?= $i%2?'even':'odd' ?>">
                 <?= $this->getItemHtml($_item) ?>
                 <?= $this->getItemExtraInfoHtml($_item->getOrderItem()) ?>
             </tbody>
@@ -85,7 +80,7 @@
     <div class="entry-edit-head"><h4><?= Mage::helper('sales')->__('Credit Memo Comments') ?></h4></div>
     <fieldset id="history_form">
     <label class="normal" for="creditmemo_comment_text"><?= Mage::helper('sales')->__('Credit Memo Comments') ?></label><br/>
-    <textarea id="creditmemo_comment_text" name="creditmemo[comment_text]" rows="3" cols="5" style="width:98%;"><?= $this->getCreditmemo()->getCommentText(); ?></textarea>
+    <textarea id="creditmemo_comment_text" name="creditmemo[comment_text]" rows="3" cols="5" style="width:98%;"><?= $this->getCreditmemo()->getCommentText() ?></textarea>
     </fieldset>
 </div>
 <div class="box-right entry-edit">

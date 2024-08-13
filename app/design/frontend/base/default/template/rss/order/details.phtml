@@ -34,15 +34,14 @@ store name = $_order->getStore()->getGroup()->getName()
     </thead>
 
     <tbody>
-<?php $i=0;
-foreach ($_order->getAllItems() as $_item): $i++ ?>
-        <tr <?= $i%2 ? 'bgcolor="#eeeded"' : '' ?>>
+<?php $i=0; foreach ($_order->getAllItems() as $_item): $i++ ?>
+        <tr <?= $i%2?'bgcolor="#eeeded"':'' ?>>
             <td align="left" valign="top" style="padding:3px 9px"><strong><?= $this->escapeHtml($_item->getName()) ?></strong>
             <?php if($_item->getGiftMessageId() && $_giftMessage = $this->helper('giftmessage/message')->getGiftMessage($_item->getGiftMessageId())): ?>
             <br /><strong><?= $this->__('Gift Message') ?></strong>
-            <br /><?= $this->__('From:'); ?> <?= $this->escapeHtml($_giftMessage->getSender()) ?>
-            <br /><?= $this->__('To:'); ?> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?>
-            <br /><?= $this->__('Message:'); ?><br /> <?= $this->escapeHtml($_giftMessage->getMessage()) ?>
+            <br /><?= $this->__('From:') ?> <?= $this->escapeHtml($_giftMessage->getSender()) ?>
+            <br /><?= $this->__('To:') ?> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?>
+            <br /><?= $this->__('Message:') ?><br /> <?= $this->escapeHtml($_giftMessage->getMessage()) ?>
             <?php endif ?>
             </td>
             <td align="center" valign="top" style="padding:3px 9px"><?= $_item->getQtyOrdered()*1 ?></td>
@@ -56,9 +55,9 @@ foreach ($_order->getAllItems() as $_item): $i++ ?>
         <tr>
             <td colspan="3" align="left" style="padding:3px 9px">
             <strong><?= $this->__('Gift Message') ?></strong>
-            <br /><?= $this->__('From:'); ?> <?= $this->escapeHtml($_giftMessage->getSender()) ?>
-            <br /><?= $this->__('To:'); ?> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?>
-            <br /><?= $this->__('Message:'); ?><br /> <?= $this->escapeHtml($_giftMessage->getMessage()) ?>
+            <br /><?= $this->__('From:') ?> <?= $this->escapeHtml($_giftMessage->getSender()) ?>
+            <br /><?= $this->__('To:') ?> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?>
+            <br /><?= $this->__('Message:') ?><br /> <?= $this->escapeHtml($_giftMessage->getMessage()) ?>
             </td>
         </tr>
      <?php endif ?>
@@ -68,7 +67,7 @@ foreach ($_order->getAllItems() as $_item): $i++ ?>
         </tr>
         <?php if ($_order->getDiscountAmount() > 0): ?>
             <tr>
-                <td colspan="2" align="right" style="padding:3px 9px"><?= (($_order->getCouponCode()) ? $this->__('Discount (%s)', $this->escapeHtml($_order->getCouponCode())) : $this->__('Discount')) ?></td>
+                <td colspan="2" align="right" style="padding:3px 9px"><?= (($_order->getCouponCode())? $this->__('Discount (%s)', $this->escapeHtml($_order->getCouponCode())) : $this->__('Discount')) ?></td>
                 <td align="right" style="padding:3px 9px"><?= $_order->formatPrice(0.00 - $_order->getDiscountAmount()) ?></td>
             </tr>
         <?php endif ?>

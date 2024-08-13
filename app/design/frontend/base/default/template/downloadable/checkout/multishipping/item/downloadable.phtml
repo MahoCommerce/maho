@@ -37,9 +37,9 @@
     <!-- downloadable -->
     <?php if ($links = $this->getLinks()): ?>
     <dl class="item-options">
-        <dt><?= $this->escapeHtml($this->getLinksTitle()); ?></dt>
+        <dt><?= $this->escapeHtml($this->getLinksTitle()) ?></dt>
         <?php foreach ($links as $link): ?>
-            <dd><?= $this->escapeHtml($link->getTitle()); ?></dd>
+            <dd><?= $this->escapeHtml($link->getTitle()) ?></dd>
         <?php endforeach ?>
     </dl>
     <?php endif ?>

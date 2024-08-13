@@ -25,7 +25,7 @@
     <div class="page-title">
         <h1><?= $this->__('Create an Account') ?></h1>
     </div>
-    <?= $this->getChildHtml('form_fields_before')?>
+    <?= $this->getChildHtml('form_fields_before') ?>
     <?= $this->getMessagesBlock()->toHtml() ?>
     <form action="<?= $this->getPostActionUrl() ?>" method="post" id="form-validate">
         <div class="fieldset">
@@ -166,10 +166,10 @@
                         </div>
                     </div>
                 </li>
-                <?= $this->getChildHtml('form.additional.info'); ?>
-                <?= $this->getChildHtml('persistent.remember.me'); ?>
+                <?= $this->getChildHtml('form.additional.info') ?>
+                <?= $this->getChildHtml('persistent.remember.me') ?>
             </ul>
-            <?= $this->getChildHtml('persistent.remember.me.tooltip'); ?>
+            <?= $this->getChildHtml('persistent.remember.me.tooltip') ?>
         </div>
         <div class="buttons-set">
             <p class="required"><?= $this->__('* Required Fields') ?></p>

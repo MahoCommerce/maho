@@ -19,11 +19,11 @@
  */
 ?>
 <!DOCTYPE html>
-<html lang="<?= $this->getLang(); ?>">
+<html lang="<?= $this->getLang() ?>">
 <head>
     <?= $this->getChildHtml('head') ?>
 </head>
-<body class="page-empty <?= $this->getBodyClass() ? $this->getBodyClass() : '' ?>">
+<body class="page-empty <?= $this->getBodyClass()?$this->getBodyClass():'' ?>">
     <div>
         <?= $this->getChildHtml('after_body_start') ?>
         <?= $this->getChildHtml('global_messages') ?>

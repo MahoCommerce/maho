@@ -23,7 +23,7 @@
         <dl>
             <?php foreach ($options as $option) : ?>
                 <?php if ($option->getSelections()) : ?>
-                    <?= $this->getOptionHtml($option); ?>
+                    <?= $this->getOptionHtml($option) ?>
                 <?php endif ?>
             <?php endforeach ?>
         </dl>

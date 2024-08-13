@@ -17,7 +17,7 @@
 <?php if ($this->getIsAddress()):?>
 
 <?php foreach ($this->getRenderedInfo() as $row):?>
-<address><?= nl2br($this->escapeHtml($this->getObjectData($row, 'value')))?></address>
+<address><?= nl2br($this->escapeHtml($this->getObjectData($row, 'value'))) ?></address>
 <?php endforeach ?>
 
 <?php else: ?>
@@ -27,7 +27,7 @@
         <?php foreach ($this->getRenderedInfo() as $row):?>
         <?php $isAmount = $this->getObjectData($row, 'is_amount');?>
         <tr>
-            <th><?= $this->escapeHtml($this->getObjectData($row, 'label'))?>:</th>
+            <th><?= $this->escapeHtml($this->getObjectData($row, 'label')) ?>:</th>
             <td><?= $this->renderRowValue($row) ?></td>
         </tr>
         <?php endforeach ?>

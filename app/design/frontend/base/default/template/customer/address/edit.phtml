@@ -28,7 +28,7 @@
 <?= $this->getMessagesBlock()->toHtml() ?>
 <form action="<?= $this->getSaveUrl() ?>" method="post" id="form-validate">
     <div class="fieldset">
-    <?= $this->getBlockHtml('formkey')?>
+    <?= $this->getBlockHtml('formkey') ?>
     <input type="hidden" name="success_url" value="<?= $this->getSuccessUrl() ?>" />
     <input type="hidden" name="error_url" value="<?= $this->getErrorUrl() ?>" />
         <h2 class="legend"><?= $this->__('Contact Information') ?></h2>
@@ -120,9 +120,7 @@
                     </div>
                 </div>
             </li>
-            <li<?php if($this->canSetAsDefaultBilling()) {
-                echo ' class="control"';
-            } ?>>
+            <li<?php if($this->canSetAsDefaultBilling()) echo ' class="control"' ?>>
                 <?php if($this->isDefaultBilling()): ?>
                     <strong><?= $this->__('Default Billing Address') ?></strong>
                 <?php elseif($this->canSetAsDefaultBilling()): ?>
@@ -131,9 +129,7 @@
                     <input type="hidden" name="default_billing" value="1" />
                 <?php endif ?>
             </li>
-            <li<?php if($this->canSetAsDefaultShipping()) {
-                echo ' class="control"';
-            } ?>>
+            <li<?php if($this->canSetAsDefaultShipping()) echo ' class="control"' ?>>
                 <?php if($this->isDefaultShipping()): ?>
                     <strong><?= $this->__('Default Shipping Address') ?></strong>
                 <?php elseif($this->canSetAsDefaultShipping()): ?>

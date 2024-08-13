@@ -28,7 +28,7 @@
             <?php endif ?>
             <?php $addInfoBlock = $this->getProductAdditionalInformationBlock(); ?>
             <?php if ($addInfoBlock) :?>
-                <?= $addInfoBlock->setItem($_item->getOrderItem())->toHtml(); ?>
+                <?= $addInfoBlock->setItem($_item->getOrderItem())->toHtml() ?>
             <?php endif ?>
             <?= $this->escapeHtml($_item->getDescription()) ?>
         </td>

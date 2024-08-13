@@ -30,8 +30,8 @@
             <?= $this->getMessagesBlock()->toHtml() ?>
 
             <?php if (!$this->getHasException()) : ?>
-                <h2><?= $this->__('<strong>%s</strong> requests access to your account', $this->escapeHtml($this->getConsumer()->getName())); ?></h2>
-                <p><?= $this->__('After authorization application will have access to you account.'); ?></p>
+                <h2><?= $this->__('<strong>%s</strong> requests access to your account', $this->escapeHtml($this->getConsumer()->getName())) ?></h2>
+                <p><?= $this->__('After authorization application will have access to you account.') ?></p>
                 <form id="oauth_authorize_confirm" action="<?= $this->getConfirmUrl() ?>" method="get">
                     <input type="hidden" name="oauth_token" value="<?= $this->escapeHtml($this->getToken()) ?>">
                     <button type="submit" class="button" title="<?= $this->quoteEscape($this->__('Authorize')) ?>"><span><span><?= $this->__('Authorize') ?></span></span></button>

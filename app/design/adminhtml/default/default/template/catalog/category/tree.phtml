@@ -21,10 +21,10 @@
             <?= $this->getAddSubButtonHtml() ?>
         <?php endif ?>
     </div>
-    <?= $this->getStoreSwitcherHtml();?>
+    <?= $this->getStoreSwitcherHtml() ?>
     <div class="tree-actions">
         <?php if($this->getRoot()): ?>
-            <a href="#" onclick="tree.collapseTree(); return false;"><?= Mage::helper('catalog')->__('Collapse All'); ?></a> <span class="separator">|</span> <a href="#" onclick="tree.expandTree(); return false;"><?= Mage::helper('catalog')->__('Expand All'); ?></a>
+            <a href="#" onclick="tree.collapseTree(); return false;"><?= Mage::helper('catalog')->__('Collapse All') ?></a> <span class="separator">|</span> <a href="#" onclick="tree.expandTree(); return false;"><?= Mage::helper('catalog')->__('Expand All') ?></a>
         <?php endif ?>
     </div>
     <?php if ($this->getRoot()): ?>

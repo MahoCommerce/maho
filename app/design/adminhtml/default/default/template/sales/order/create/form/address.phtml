@@ -16,7 +16,7 @@
 if ($this->getIsShipping()):
     $_fieldsContainerId = 'order-shipping_address_fields';
     $_addressChoiceContainerId = 'order-shipping_address_choice';
-    ?>
+?>
     <script type="text/javascript">
     order.shippingAddressContainer = '<?= $_fieldsContainerId ?>';
     order.setAddresses(<?= $this->getAddressCollectionJson() ?>);
@@ -24,7 +24,7 @@ if ($this->getIsShipping()):
 <?php else:
     $_fieldsContainerId = 'order-billing_address_fields';
     $_addressChoiceContainerId = 'order-billing_address_choice';
-    ?>
+?>
     <script type="text/javascript">
     order.billingAddressContainer = '<?= $_fieldsContainerId ?>';
     </script>
@@ -42,11 +42,11 @@ if ($this->getIsShipping()):
         <select id="<?= $_id ?>"  name="<?= $this->getForm()->getHtmlNamePrefix() ?>[customer_address_id]" style="width:97.5%;" onchange="order.selectAddress(this, '<?= $_fieldsContainerId ?>')">
             <option value=""><?= Mage::helper('sales')->__('Add New Address') ?></option>
             <?php foreach ($this->getAddressCollection() as $_address): ?>
-            <?php //if ($this->getAddressAsString($_address) != $this->getAddressAsString($this->getAddress())):?>
+            <?php //if ($this->getAddressAsString($_address) != $this->getAddressAsString($this->getAddress())): ?>
                 <option value="<?= $_address->getId() ?>"<?php if ($_address->getId() == $this->getAddressId()): ?> selected="selected"<?php endif ?>>
                     <?= $this->getAddressAsString($_address) ?>
                 </option>
-            <?php //endif?>
+            <?php //endif ?>
             <?php endforeach ?>
 
         </select>

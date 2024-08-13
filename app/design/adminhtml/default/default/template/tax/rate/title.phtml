@@ -16,7 +16,7 @@
 <?php /* <table class="dynamic-grid" cellspacing="0" id="tax-rate-titles-table"> */ ?>
     <tr class="dynamic-grid">
     <?php foreach ($this->getStores() as $_store): ?>
-        <th><?= $this->escapeHtml($_store->getName()); ?></th>
+        <th><?= $this->escapeHtml($_store->getName()) ?></th>
     <?php endforeach ?>
     </tr>
     <tr class="dynamic-grid">
@@ -28,8 +28,8 @@
         <?php endforeach ?>
     </tr>
     <tr class="dynamic-grid">
-        <td colspan="<?= count($this->getStores()); ?>" class="tax-rate-titles-note-td">
-            <p><strong><?= $this->__('Note:'); ?></strong> <?= $this->__('Leave empty to use tax identifier'); ?></p>
+        <td colspan="<?= count($this->getStores()) ?>" class="tax-rate-titles-note-td">
+            <p><strong><?= $this->__('Note:') ?></strong> <?= $this->__('Leave empty to use tax identifier') ?></p>
         </td>
     </tr>
 <?php /* </table> */ ?>

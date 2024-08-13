@@ -16,9 +16,9 @@
 <?php  $_order = $this->getOrder() ?>
 <p class="order-links"><a href="<?= $this->getPrintAllInvoicesUrl($_order) ?>" onclick="this.target='_blank'" class="link-print"><?= $this->__('Print All Invoices') ?></a></p>
 <?php foreach ($_order->getInvoiceCollection() as $_invoice): ?>
-<h2 class="sub-title"><?= $this->__('Invoice #') ?><?= $_invoice->getIncrementId(); ?> <span class="separator">|</span> <a href="<?= $this->getPrintInvoiceUrl($_invoice) ?>" onclick="this.target='_blank'" class="link-print"><?= $this->__('Print Invoice') ?></a></h2>
+<h2 class="sub-title"><?= $this->__('Invoice #') ?><?= $_invoice->getIncrementId() ?> <span class="separator">|</span> <a href="<?= $this->getPrintInvoiceUrl($_invoice) ?>" onclick="this.target='_blank'" class="link-print"><?= $this->__('Print Invoice') ?></a></h2>
 <h3 class="table-caption"><?= $this->__('Items Invoiced') ?></h3>
-<table class="data-table" id="my-invoice-table-<?= $_invoice->getId(); ?>">
+<table class="data-table" id="my-invoice-table-<?= $_invoice->getId() ?>">
     <col />
     <col width="1" />
     <col width="1" />
@@ -34,18 +34,16 @@
         </tr>
     </thead>
     <tfoot>
-        <?= $this->getInvoiceTotalsHtml($_invoice)?>
+        <?= $this->getInvoiceTotalsHtml($_invoice) ?>
     </tfoot>
     <?php $_items = $_invoice->getAllItems(); ?>
     <?php $_count = count($_items) ?>
     <?php foreach ($_items as $_item): ?>
-    <?php if ($_item->getOrderItem()->getParentItem()) {
-        continue;
-    } ?>
+    <?php if ($_item->getOrderItem()->getParentItem()) continue; ?>
     <tbody>
         <?= $this->getItemHtml($_item) ?>
     </tbody>
     <?php endforeach ?>
 </table>
-<?= $this->getInvoiceCommentsHtml($_invoice)?>
+<?= $this->getInvoiceCommentsHtml($_invoice) ?>
 <?php endforeach ?>

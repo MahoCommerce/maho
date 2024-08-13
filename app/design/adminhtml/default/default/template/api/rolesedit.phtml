@@ -23,8 +23,8 @@
         <span class="field-row">
             <label for="all"><?= $this->__('Resource Access') ?></label>
             <select id="all" name="all" onchange="$('resources_container').toggle()" class="select">
-                <option value="0" <?=($this->getEverythingAllowed() ? '' : 'selected="selected"'); ?>><?= $this->__('Custom') ?></option>
-                <option value="1" <?=($this->getEverythingAllowed() ? 'selected="selected"' : ''); ?>><?= $this->__('All') ?></option>
+                <option value="0" <?= ($this->getEverythingAllowed()?'':'selected="selected"') ?>><?= $this->__('Custom') ?></option>
+                <option value="1" <?= ($this->getEverythingAllowed()?'selected="selected"':'') ?>><?= $this->__('All') ?></option>
             </select>
         </span>
 

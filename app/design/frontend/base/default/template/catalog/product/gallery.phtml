@@ -14,7 +14,7 @@
  */
 ?>
 <?php $_width=$this->getImageWidth() ?>
-<div class="product-image-popup" style="width:<?= $_width; ?>px;">
+<div class="product-image-popup" style="width:<?= $_width ?>px;">
     <div class="buttons-set"><a href="#" onclick="window.close(); return false;" class="button"><span><?= $this->__('Close Window') ?></span></a></div>
     <?php if($this->getPreviusImageUrl() || $this->getNextImageUrl()): ?>
         <div class="nav">
@@ -29,7 +29,7 @@
     <?php if($_imageTitle = $this->escapeHtml($this->getCurrentImage()->getLabel())): ?>
         <h1 class="image-label"><?= $_imageTitle ?></h1>
     <?php endif ?>
-    <img src="<?= $this->helper('catalog/image')->init($this->getProduct(), 'image', $this->getImageFile()); ?>"<?php if($_width): ?> width="<?= $_width ?>"<?php endif ?> alt="<?= $this->escapeHtml($this->getCurrentImage()->getLabel()) ?>" title="<?= $this->escapeHtml($this->getCurrentImage()->getLabel()) ?>" id="product-gallery-image" class="image" />
+    <img src="<?= $this->helper('catalog/image')->init($this->getProduct(), 'image', $this->getImageFile()) ?>"<?php if($_width): ?> width="<?= $_width ?>"<?php endif ?> alt="<?= $this->escapeHtml($this->getCurrentImage()->getLabel()) ?>" title="<?= $this->escapeHtml($this->getCurrentImage()->getLabel()) ?>" id="product-gallery-image" class="image" />
     <div class="buttons-set"><a href="#" onclick="window.close(); return false;" class="button"><span><?= $this->__('Close Window') ?></span></a></div>
     <?php if($this->getPreviusImageUrl() || $this->getNextImageUrl()): ?>
         <div class="nav">

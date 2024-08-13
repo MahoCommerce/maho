@@ -24,7 +24,7 @@
 
 <script type="text/javascript">
 //<![CDATA[
-enUS = <?= $enUS?>; // en_US locale reference
+enUS = <?= $enUS ?>; // en_US locale reference
 Calendar._DN = <?= $days['wide'] ?>; // full day names
 Calendar._SDN = <?= $days['abbreviated'] ?>; // short day names
 Calendar._FD = <?= $firstDay ?>; // First day of the week. "0" means display Sunday first, "1" means display Monday first, etc.
@@ -35,7 +35,7 @@ Calendar._pm = <?= $pm ?>;
 
 // tooltips
 Calendar._TT = {};
-Calendar._TT["INFO"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('About the calendar')); ?>";
+Calendar._TT["INFO"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('About the calendar')) ?>";
 
 Calendar._TT["ABOUT"] =
 "<?= Mage::helper('core')->jsQuoteEscape($this->__('DHTML Date/Time Selector')) ?>\n" +
@@ -53,33 +53,33 @@ Calendar._TT["ABOUT_TIME"] = "\n\n" +
 "<?= Mage::helper('core')->jsQuoteEscape($this->__('- or Shift-click to decrease it')) ?>\n" +
 "<?= Mage::helper('core')->jsQuoteEscape($this->__('- or click and drag for faster selection.')) ?>";
 
-Calendar._TT["PREV_YEAR"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Prev. year (hold for menu)')); ?>";
-Calendar._TT["PREV_MONTH"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Prev. month (hold for menu)')); ?>";
-Calendar._TT["GO_TODAY"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Go Today')); ?>";
-Calendar._TT["NEXT_MONTH"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Next month (hold for menu)')); ?>";
-Calendar._TT["NEXT_YEAR"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Next year (hold for menu)')); ?>";
-Calendar._TT["SEL_DATE"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Select date')); ?>";
-Calendar._TT["DRAG_TO_MOVE"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Drag to move')); ?>";
+Calendar._TT["PREV_YEAR"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Prev. year (hold for menu)')) ?>";
+Calendar._TT["PREV_MONTH"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Prev. month (hold for menu)')) ?>";
+Calendar._TT["GO_TODAY"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Go Today')) ?>";
+Calendar._TT["NEXT_MONTH"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Next month (hold for menu)')) ?>";
+Calendar._TT["NEXT_YEAR"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Next year (hold for menu)')) ?>";
+Calendar._TT["SEL_DATE"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Select date')) ?>";
+Calendar._TT["DRAG_TO_MOVE"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Drag to move')) ?>";
 Calendar._TT["PART_TODAY"] = ' (' + <?= $today ?> + ')';
 
 // the following is to inform that "%s" is to be the first day of week
-Calendar._TT["DAY_FIRST"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Display %s first', '%s')); ?>";
+Calendar._TT["DAY_FIRST"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Display %s first', '%s')) ?>";
 
 // This may be locale-dependent. It specifies the week-end days, as an array
 // of comma-separated numbers. The numbers are from 0 to 6: 0 means Sunday, 1
 // means Monday, etc.
 Calendar._TT["WEEKEND"] = <?= $weekendDays ?>;
 
-Calendar._TT["CLOSE"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Close')); ?>";
+Calendar._TT["CLOSE"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Close')) ?>";
 Calendar._TT["TODAY"] = <?= $today ?>;
-Calendar._TT["TIME_PART"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('(Shift-)Click or drag to change value')); ?>";
+Calendar._TT["TIME_PART"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('(Shift-)Click or drag to change value')) ?>";
 
 // date formats
 Calendar._TT["DEF_DATE_FORMAT"] = <?= $defaultFormat ?>;
 Calendar._TT["TT_DATE_FORMAT"] = <?= $toolTipFormat ?>;
 
 Calendar._TT["WK"] = <?= $week ?>;
-Calendar._TT["TIME"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Time:')); ?>";
+Calendar._TT["TIME"] = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Time:')) ?>";
 
 CalendarDateObject._LOCAL_TIMZEONE_OFFSET_SECONDS = <?= $this->getTimezoneOffsetSeconds() ?>;
 CalendarDateObject._SERVER_TIMZEONE_SECONDS = <?= $this->getStoreTimestamp() ?>;

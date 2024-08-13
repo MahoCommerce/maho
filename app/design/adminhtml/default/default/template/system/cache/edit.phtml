@@ -30,7 +30,7 @@
     </table>
 </div>
 <form action="<?= $this->getSaveUrl() ?>" method="post" id="config_edit_form" enctype="multipart/form-data">
-    <?= $this->getBlockHtml('formkey')?>
+    <?= $this->getBlockHtml('formkey') ?>
 
     <script type="text/javascript">
     function setCacheAction(id, button)
@@ -53,9 +53,7 @@
                 <tbody>
                     <?php foreach ($this->getCatalogData() as $_item): ?>
                     <?php /* disable reindex buttons. functionality moved to index management*/?>
-                    <?php if ($_item['buttons'][0]['name']!='clear_images_cache') {
-                        continue;
-                    }?>
+                    <?php if ($_item['buttons'][0]['name']!='clear_images_cache') continue;?>
                     <tr>
                         <td class="label"><label><?= $_item['label'] ?></label></td>
                         <td class="value">
@@ -64,8 +62,8 @@
                                 <?php if (isset($_button['warning']) && $_button['warning']): ?>
                                     <?php $clickAction = "if (confirm('".addslashes($_button['warning'])."')) {{$clickAction}}"; ?>
                                 <?php endif ?>
-                                <button <?php if (!isset($_button['disabled']) || !$_button['disabled']):?>onclick="<?= $clickAction; ?>"<?php endif ?> id="<?= $_button['name'] ?>" type="button" class="scalable <?php if (isset($_button['disabled']) && $_button['disabled']):?>disabled<?php endif ?>" style=""><span><span><span><?= $_button['action'] ?></span></span></span></button>
-                                <?php if (isset($_button['comment'])): ?> <br /> <small><?= $_button['comment']; ?></small> <?php endif ?>
+                                <button <?php if (!isset($_button['disabled']) || !$_button['disabled']):?>onclick="<?= $clickAction ?>"<?php endif ?> id="<?= $_button['name'] ?>" type="button" class="scalable <?php if (isset($_button['disabled']) && $_button['disabled']):?>disabled<?php endif ?>" style=""><span><span><span><?= $_button['action'] ?></span></span></span></button>
+                                <?php if (isset($_button['comment'])): ?> <br /> <small><?= $_button['comment'] ?></small> <?php endif ?>
                             <?php endforeach ?>
                         </td>
                         <td><small>&nbsp;</small></td>

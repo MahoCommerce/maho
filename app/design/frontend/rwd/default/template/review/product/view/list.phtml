@@ -20,7 +20,7 @@
         <div class="review-heading">
             <h2>
                 <?= $this->__('Customer Reviews') ?>
-                <span><?= count($_items); ?> item(s)</span>
+                <span><?= count($_items) ?> item(s)</span>
             </h2>
             <?= $this->getChildHtml('toolbar') ?>
         </div>
@@ -68,7 +68,7 @@
         <?php endforeach ?>
         </dl>
     <?php elseif($this->getParentBlock()): ?>
-        <?= $this->getParentBlock()->getReviewsSummaryHtml($this->getProduct(), 'short', true)?>
+        <?= $this->getParentBlock()->getReviewsSummaryHtml($this->getProduct(), 'short', true) ?>
     <?php endif ?>
     <?= $this->getChildHtml('review_form') ?>
 </div>

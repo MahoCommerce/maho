@@ -54,8 +54,8 @@
                         <dl id="payment-methods" class="sp-methods">
                         <?php
                             $_methods       = $this->getMethods();
-$_methodsCount  = count($_methods);
-?>
+                            $_methodsCount  = count($_methods);
+                        ?>
                         <?php foreach ($_methods as $_method): $_code = $_method->getCode() ?>
                             <dt>
                                 <?php if ($_methodsCount > 1): ?>
@@ -67,7 +67,7 @@ $_methodsCount  = count($_methods);
                             </dt>
                             <?php if($html = $this->getChildHtml('payment.method.'.$_code)) : ?>
                             <dd>
-                                <?= $html; ?>
+                                <?= $html ?>
                             </dd>
                             <?php endif ?>
                         <?php endforeach ?>
@@ -87,7 +87,7 @@ $_methodsCount  = count($_methods);
     <script type="text/javascript">
     //<![CDATA[
         var payment = new paymentForm('multishipping-billing-form');
-        var quoteBaseGrandTotal = <?= (float)$this->getQuoteBaseGrandTotal(); ?>;
+        var quoteBaseGrandTotal = <?= (float)$this->getQuoteBaseGrandTotal() ?>;
         function toggleToolTip(event){
             if($('payment-tool-tip')){
                 /*$('payment-tool-tip').setStyle({

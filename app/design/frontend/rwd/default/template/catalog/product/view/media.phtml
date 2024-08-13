@@ -22,8 +22,8 @@
 /* @var $this Mage_Catalog_Block_Product_View_Media */
 ?>
 <?php
-$_product = $this->getProduct();
-$_helper = $this->helper('catalog/output');
+    $_product = $this->getProduct();
+    $_helper = $this->helper('catalog/output');
 ?>
 <div class="product-image product-image-zoom">
     <div class="product-image-gallery">
@@ -31,15 +31,14 @@ $_helper = $this->helper('catalog/output');
              class="gallery-image visible"
              src="<?= $this->helper('catalog/image')->init($_product, 'image') ?>"
              alt="<?= $this->escapeHtml($this->getImageLabel()) ?>"
-             title="<?= $this->escapeHtml($this->getImageLabel()); ?>" />
+             title="<?= $this->escapeHtml($this->getImageLabel()) ?>" />
 
-        <?php $i=0;
-foreach ($this->getGalleryImages() as $_image): ?>
+        <?php $i=0; foreach ($this->getGalleryImages() as $_image): ?>
             <?php if ($this->isGalleryImageVisible($_image)): ?>
-            <img id="image-<?= $i; ?>"
+            <img id="image-<?= $i ?>"
                  class="gallery-image"
-                 src="<?= $this->getGalleryImageUrl($_image); ?>"
-                 data-zoom-image="<?=  $this->getGalleryImageUrl($_image); ?>" />
+                 src="<?= $this->getGalleryImageUrl($_image) ?>"
+                 data-zoom-image="<?=  $this->getGalleryImageUrl($_image) ?>" />
             <?php endif ?>
         <?php $i++; endforeach; ?>
     </div>
@@ -49,12 +48,11 @@ foreach ($this->getGalleryImages() as $_image): ?>
 <div class="more-views">
     <h2><?= $this->__('More Views') ?></h2>
     <ul class="product-image-thumbs">
-    <?php $i=0;
-    foreach ($this->getGalleryImages() as $_image): ?>
+    <?php $i=0; foreach ($this->getGalleryImages() as $_image): ?>
         <?php if ($this->isGalleryImageVisible($_image)): ?>
         <li>
-            <a class="thumb-link" href="#" title="<?= $this->escapeHtml($_image->getLabel()) ?>" data-image-index="<?= $i; ?>">
-                <img src="<?= $this->helper('catalog/image')->init($this->getProduct(), 'thumbnail', $_image->getFile())->resize(75); ?>"
+            <a class="thumb-link" href="#" title="<?= $this->escapeHtml($_image->getLabel()) ?>" data-image-index="<?= $i ?>">
+                <img src="<?= $this->helper('catalog/image')->init($this->getProduct(), 'thumbnail', $_image->getFile())->resize(75) ?>"
                      width="75" height="75" alt="<?= $this->escapeHtml($_image->getLabel()) ?>" />
             </a>
         </li>
@@ -64,4 +62,4 @@ foreach ($this->getGalleryImages() as $_image): ?>
 </div>
 <?php endif ?>
 
-<?= $this->getChildHtml('after'); ?>
+<?= $this->getChildHtml('after') ?>

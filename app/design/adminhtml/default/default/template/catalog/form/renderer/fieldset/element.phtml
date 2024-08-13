@@ -21,8 +21,8 @@
 <?php $_element = $this->getElement() ?>
 <?php $this->checkFieldDisable() ?>
 <?php
-$elementToggleCode = $_element->getToggleCode() ? $_element->getToggleCode()
-    : 'toggleValueElements(this, this.parentNode.parentNode)';
+    $elementToggleCode = $_element->getToggleCode() ? $_element->getToggleCode()
+        : 'toggleValueElements(this, this.parentNode.parentNode)';
 ?>
 
 <?php if ($_element->getType()=='hidden'): ?>
@@ -35,13 +35,13 @@ $elementToggleCode = $_element->getToggleCode() ? $_element->getToggleCode()
     <td class="value">
         <?= trim($this->getElementHtml()) ?>
         <?php if ($_element->getNote()) : ?>
-            <p class="note"><?= $this->__($_element->getNote()); ?></p>
+            <p class="note"><?= $this->__($_element->getNote()) ?></p>
         <?php endif ?>
     </td>
     <td class="scope-label"><span class="nobr"><?= $this->getScopeLabel() ?></span></td>
     <?php if ($this->canDisplayUseDefault()): ?>
     <td class="value use-default">
-        <input <?php if($_element->getReadonly()):?> disabled="disabled"<?php endif ?> type="checkbox" name="use_default[]" id="<?= $_element->getHtmlId() ?>_default"<?php if ($this->usedDefault()): ?> checked="checked"<?php endif ?> onclick="<?= $elementToggleCode; ?>" value="<?= $this->getAttributeCode() ?>"/>
+        <input <?php if($_element->getReadonly()):?> disabled="disabled"<?php endif ?> type="checkbox" name="use_default[]" id="<?= $_element->getHtmlId() ?>_default"<?php if ($this->usedDefault()): ?> checked="checked"<?php endif ?> onclick="<?= $elementToggleCode ?>" value="<?= $this->getAttributeCode() ?>"/>
         <label for="<?= $_element->getHtmlId() ?>_default" class="normal"><?= $this->__('Use Default Value') ?></label>
     </td>
     <?php endif ?>

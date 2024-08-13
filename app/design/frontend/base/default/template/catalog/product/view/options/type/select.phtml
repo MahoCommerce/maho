@@ -19,12 +19,8 @@
  */
 ?>
 <?php $_option = $this->getOption() ?>
-<dt><label<?php if ($_option->getIsRequire()) {
-    echo ' class="required"';
-} ?>><?php if ($_option->getIsRequire()) {
-    echo '<em>*</em>';
-} ?><?=  $this->escapeHtml($_option->getTitle()) ?></label></dt>
-<dd<?php if ($_option->decoratedIsLast) {?> class="last"<?php }?>>
+<dt><label<?php if ($_option->getIsRequire()) echo ' class="required"' ?>><?php if ($_option->getIsRequire()) echo '<em>*</em>' ?><?=  $this->escapeHtml($_option->getTitle()) ?></label></dt>
+<dd<?php if ($_option->decoratedIsLast){?> class="last"<?php }?>>
     <div class="input-box">
         <?= $this->getValuesHtml() ?>
         <?php if ($_option->getIsRequire()): ?>

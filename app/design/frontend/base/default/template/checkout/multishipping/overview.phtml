@@ -20,7 +20,7 @@
     </div>
     <?= $this->getMessagesBlock()->toHtml() ?>
     <form id="review-order-form" action="<?= $this->getPostActionUrl() ?>" method="post" onsubmit="return showLoader();">
-        <?= $this->getBlockHtml('formkey'); ?>
+        <?= $this->getBlockHtml('formkey') ?>
         <div class="col2-set">
             <h2 class="legend"><?= $this->__('Billing Information') ?></h2>
             <div class="col-1">
@@ -42,8 +42,8 @@
                         <h3><?= $this->__('Payment Method') ?> <span class="separator">|</span> <a href="<?= $this->getEditBillingUrl() ?>"><?= $this->__('Change') ?></a></h3>
                     </div>
                     <div class="box-content">
-                        <input type="hidden" name="payment[cc_number]" value="<?= $this->escapeHtml($this->getPayment()->getCcNumber())?>" />
-                        <input type="hidden" name="payment[cc_cid]" value="<?= $this->escapeHtml($this->getPayment()->getCcCid())?>" />
+                        <input type="hidden" name="payment[cc_number]" value="<?= $this->escapeHtml($this->getPayment()->getCcNumber()) ?>" />
+                        <input type="hidden" name="payment[cc_cid]" value="<?= $this->escapeHtml($this->getPayment()->getCcCid()) ?>" />
                         <?= $this->getPaymentHtml() ?>
                     </div>
                 </div>
@@ -75,9 +75,9 @@
                             <?= $this->escapeHtml($_rate->getCarrierTitle()) ?> - <?= $this->escapeHtml($_rate->getMethodTitle()) ?>
                             <?php $_excl = $this->getShippingPriceExclTax($_address); ?>
                             <?php $_incl = $this->getShippingPriceInclTax($_address); ?>
-                            <?= $_excl; ?>
+                            <?= $_excl ?>
                             <?php if ($this->helper('tax')->displayShippingBothPrices() && $_incl != $_excl): ?>
-                                (<?= $this->__('Incl. Tax'); ?> <?= $_incl; ?>)
+                                (<?= $this->__('Incl. Tax') ?> <?= $_incl ?>)
                             <?php endif ?>
                             </p>
                             <?php endif ?>
@@ -99,10 +99,10 @@
                         <?php endif ?>
                         <thead>
                             <tr>
-                                <th rowspan="<?= $mergedCells; ?>"><?= $this->__('Product Name') ?></th>
-                                <th colspan="<?= $mergedCells; ?>" class="a-center"><?= $this->__('Price') ?></th>
-                                <th rowspan="<?= $mergedCells; ?>"><?= $this->__('Qty') ?></th>
-                                <th colspan="<?= $mergedCells; ?>" class="a-center"><?= $this->__('Subtotal') ?></th>
+                                <th rowspan="<?= $mergedCells ?>"><?= $this->__('Product Name') ?></th>
+                                <th colspan="<?= $mergedCells ?>" class="a-center"><?= $this->__('Price') ?></th>
+                                <th rowspan="<?= $mergedCells ?>"><?= $this->__('Qty') ?></th>
+                                <th colspan="<?= $mergedCells ?>" class="a-center"><?= $this->__('Subtotal') ?></th>
                             </tr>
                             <?php if ($this->helper('tax')->displayCartBothPrices()): ?>
                             <tr>
@@ -114,11 +114,11 @@
                             <?php endif ?>
                         </thead>
                         <tfoot>
-                            <?= $this->renderTotals($this->getShippingAddressTotals($_address)); ?>
+                            <?= $this->renderTotals($this->getShippingAddressTotals($_address)) ?>
                         </tfoot>
                         <tbody>
                         <?php foreach ($this->getShippingAddressItems($_address) as $_item): ?>
-                            <?= $this->getRowItemHtml($_item); ?>
+                            <?= $this->getRowItemHtml($_item) ?>
                         <?php endforeach ?>
                         </tbody>
                     </table>
@@ -148,10 +148,10 @@
                     <?php endif ?>
                     <thead>
                         <tr>
-                            <th rowspan="<?= $mergedCells; ?>"><?= $this->__('Product Name') ?></th>
-                            <th colspan="<?= $mergedCells; ?>" class="a-center"><?= $this->__('Price') ?></th>
-                            <th rowspan="<?= $mergedCells; ?>"><?= $this->__('Qty') ?></th>
-                            <th colspan="<?= $mergedCells; ?>" class="a-center"><?= $this->__('Subtotal') ?></th>
+                            <th rowspan="<?= $mergedCells ?>"><?= $this->__('Product Name') ?></th>
+                            <th colspan="<?= $mergedCells ?>" class="a-center"><?= $this->__('Price') ?></th>
+                            <th rowspan="<?= $mergedCells ?>"><?= $this->__('Qty') ?></th>
+                            <th colspan="<?= $mergedCells ?>" class="a-center"><?= $this->__('Subtotal') ?></th>
                         </tr>
                         <?php if ($this->helper('tax')->displayCartBothPrices()): ?>
                         <tr>
@@ -163,11 +163,11 @@
                         <?php endif ?>
                     </thead>
                     <tfoot>
-                        <?= $this->renderTotals($this->getBillinAddressTotals()); ?>
+                        <?= $this->renderTotals($this->getBillinAddressTotals()) ?>
                     </tfoot>
                     <tbody>
                     <?php foreach ($this->getVirtualItems() as $_item): ?>
-                        <?= $this->getRowItemHtml($_item); ?>
+                        <?= $this->getRowItemHtml($_item) ?>
                     <?php endforeach ?>
                     </tbody>
                     </table>
@@ -175,7 +175,7 @@
         </div>
         <?php endif ?>
 
-           <?= $this->getChildHtml('items_after'); ?>
+           <?= $this->getChildHtml('items_after') ?>
 
             <div id="checkout-review-submit">
                 <?= $this->getChildHtml('agreements') ?>

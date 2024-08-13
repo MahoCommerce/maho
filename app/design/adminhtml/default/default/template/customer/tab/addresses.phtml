@@ -83,7 +83,7 @@
         // Set form template elements prefix
         $this->getForm()->setHtmlIdPrefix($_templatePrefix)
                 ->setFieldNameSuffix('address['.$_templatePrefix.']');
-?>
+    ?>
     <?= $this->getForm()->getHtml() ?>
     <?= $this->getCancelButtonHtml() ?>
     </div>
@@ -95,12 +95,12 @@
             <?php foreach ($addressCollection as $_address): ?>
             <div id="form_address_item_<?= $_address->getId() ?>" style="display:none">
             <?php
-                $this->getForm()->setValues($_address->getData())
-                        ->setHtmlIdPrefix("_item{$_address->getId()}")
-                        ->setFieldNameSuffix('address['.$_address->getId().']');
-                $this->addValuesToNamePrefixElement($_address->getPrefix())
-                    ->addValuesToNameSuffixElement($_address->getSuffix());
-                ?>
+                    $this->getForm()->setValues($_address->getData())
+                            ->setHtmlIdPrefix("_item{$_address->getId()}")
+                            ->setFieldNameSuffix('address['.$_address->getId().']');
+                    $this->addValuesToNamePrefixElement($_address->getPrefix())
+                        ->addValuesToNameSuffixElement($_address->getSuffix());
+            ?>
             <?= $this->getForm()->getHtml() ?>
             <input type="hidden" name="address[<?= $_address->getId() ?>][_deleted]" id="deleted_address_item_<?= $_address->getId() ?>" />
             </div>
@@ -124,8 +124,8 @@ addressesModel.prototype = {
         this.formContainer= $('address_form_container');
         this.baseItemId   = 'new_item';
 
-        this.defaultCountries = <?= $this->getDefaultCountriesJson(); ?>;
-        this.itemContentTemplate = new Template('<?= $this->helper('customer/address')->getFormat('js_template')?>');
+        this.defaultCountries = <?= $this->getDefaultCountriesJson() ?>;
+        this.itemContentTemplate = new Template('<?= $this->helper('customer/address')->getFormat('js_template') ?>');
 
         this.onNewAddressClick  = this.addNewAddress.bindAsEventListener(this);
         this.onItemMouseOver    = this.itemMouseOver.bindAsEventListener(this);
@@ -136,7 +136,7 @@ addressesModel.prototype = {
         this.loader = new varienLoader(true);
         this.regionsUrl = '<?= $this->getRegionsUrl() ?>';
         this.requiredStateForCountries = <?= $this->helper('directory')->getCountriesWithStatesRequired(true) ?>;
-        this.showAllRegions = <?= (string)$this->helper('directory')->getShowNonRequiredState() ? 1 : 0; ?>;
+        this.showAllRegions = <?= (string)$this->helper('directory')->getShowNonRequiredState() ? 1 : 0 ?>;
 
         this.reloadItemList(1);
 

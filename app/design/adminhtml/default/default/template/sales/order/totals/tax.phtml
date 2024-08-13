@@ -28,9 +28,7 @@ $taxIter++;
     <?php $isTop = 1; ?>
     <?php if (isset($_fullInfo[0]['rates'])): ?>
         <?php foreach ($_fullInfo as $info): ?>
-            <?php if (isset($info['hidden']) && $info['hidden']) {
-                continue;
-            } ?>
+            <?php if (isset($info['hidden']) && $info['hidden']) continue; ?>
             <?php
             $percent = $info['percent'];
             $amount = $info['amount'];
@@ -43,13 +41,13 @@ $taxIter++;
                 <tr class="summary-details<?php if ($isTop): echo ' summary-details-first'; endif; ?>"
                     style="display:none;">
                     <?php if (!is_null($rate['percent'])): ?>
-                        <td class="label"><?= $rate['title']; ?> (<?= (float)$rate['percent']; ?>%)<br/>
+                        <td class="label"><?= $rate['title'] ?> (<?= (float)$rate['percent'] ?>%)<br/>
                         </td>
                     <?php else: ?>
-                        <td class="label"><?= $rate['title']; ?><br/></td>
+                        <td class="label"><?= $rate['title'] ?><br/></td>
                     <?php endif ?>
                     <?php if ($isFirst): ?>
-                        <td rowspan="<?= count($rates); ?>"><?= $this->displayAmount($amount, $baseAmount); ?></td>
+                        <td rowspan="<?= count($rates) ?>"><?= $this->displayAmount($amount, $baseAmount) ?></td>
                     <?php endif ?>
                 </tr>
                 <?php
@@ -70,12 +68,12 @@ $taxIter++;
             <tr class="summary-details<?php if ($isTop): echo ' summary-details-first'; endif; ?>"
                 style="display:none;">
                 <?php if (!is_null($info['percent'])): ?>
-                    <td class="label"><?= $this->escapeHtml($info['title']); ?>
-                        (<?= (float)$info['percent']; ?>%)<br/></td>
+                    <td class="label"><?= $this->escapeHtml($info['title']) ?>
+                        (<?= (float)$info['percent'] ?>%)<br/></td>
                 <?php else: ?>
-                    <td class="label"><?= $this->escapeHtml($info['title']); ?><br/></td>
+                    <td class="label"><?= $this->escapeHtml($info['title']) ?><br/></td>
                 <?php endif ?>
-                <td><?= $this->displayAmount($amount, $baseAmount); ?></td>
+                <td><?= $this->displayAmount($amount, $baseAmount) ?></td>
             </tr>
             <?php
             $isFirst = 0;
@@ -84,14 +82,14 @@ $taxIter++;
         <?php endforeach ?>
     <?php endif ?>
     <?php foreach ($_weees as $weeeTitle => $weeeAmount): ?>
-        <tr class="summary-details-<?= $taxIter; ?> summary-details<?php if ($isTop): echo ' summary-details-first'; endif; ?>"
+        <tr class="summary-details-<?= $taxIter ?> summary-details<?php if ($isTop): echo ' summary-details-first'; endif; ?>"
             style="display:none;">
             <td class="a-right" colspan="1">
-                <?= $this->escapeHtml($weeeTitle); ?>
+                <?= $this->escapeHtml($weeeTitle) ?>
                 <br/>
             </td>
             <td class="a-right" rowspan="1">
-                <?= $this->helper('checkout')->formatPrice($weeeAmount); ?>
+                <?= $this->helper('checkout')->formatPrice($weeeAmount) ?>
             </td>
         </tr>
     <?php endforeach ?>
@@ -111,6 +109,6 @@ $taxIter++;
         </div>
     </td>
     <td>
-        <?= $this->displayAmount($_source->getTaxAmount(), $_source->getBaseTaxAmount()); ?>
+        <?= $this->displayAmount($_source->getTaxAmount(), $_source->getBaseTaxAmount()) ?>
     </td>
 </tr>

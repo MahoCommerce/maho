@@ -24,27 +24,23 @@
         <dl>
         <?php $_links = $this->getLinks(); ?>
         <?php $_isRequired = $this->getLinkSelectionRequired(); ?>
-            <dt><label<?php if ($_isRequired) {
-                echo ' class="required"';
-            } ?>><?php if ($_isRequired) {
-                echo '<em>*</em>';
-            } ?><?= $this->escapeHtml($this->getLinksTitle()); ?></label></dt>
+            <dt><label<?php if ($_isRequired) echo ' class="required"' ?>><?php if ($_isRequired) echo '<em>*</em>' ?><?= $this->escapeHtml($this->getLinksTitle()) ?></label></dt>
             <dd class="last">
                 <ul id="downloadable-links-list" class="options-list">
                 <?php foreach ($_links as $_link): ?>
                     <li>
                     <?php if ($_linksPurchasedSeparately): ?>
-                        <input type="checkbox" class="checkbox<?php if ($_isRequired):?> validate-one-required-by-name<?php endif ?> product-downloadable-link" name="links[]" id="links_<?= $_link->getId() ?>" value="<?= $_link->getId(); ?>" <?= $this->getLinkCheckedValue($_link); ?> price="<?= $this->getCurrencyPrice($_link->getPrice()); ?>"/>
+                        <input type="checkbox" class="checkbox<?php if ($_isRequired):?> validate-one-required-by-name<?php endif ?> product-downloadable-link" name="links[]" id="links_<?= $_link->getId() ?>" value="<?= $_link->getId() ?>" <?= $this->getLinkCheckedValue($_link) ?> price="<?= $this->getCurrencyPrice($_link->getPrice()) ?>"/>
                         <?php endif ?>
                         <span class="label">
                         <label for="links_<?= $_link->getId() ?>">
                         <?= $this->escapeHtml($_link->getTitle()) ?>
                         </label>
                         <?php if ($_link->getSampleFile() || $_link->getSampleUrl()): ?>
-                            &nbsp;(<a href="<?= $this->getLinkSamlpeUrl($_link) ?>" <?= $this->getIsOpenInNewWindow() ? 'onclick="this.target=\'_blank\'"' : ''; ?>><?= Mage::helper('downloadable')->__('sample') ?></a>)
+                            &nbsp;(<a href="<?= $this->getLinkSamlpeUrl($_link) ?>" <?= $this->getIsOpenInNewWindow()?'onclick="this.target=\'_blank\'"':'' ?>><?= Mage::helper('downloadable')->__('sample') ?></a>)
                         <?php endif ?>
                         <?php if ($_linksPurchasedSeparately): ?>
-                        <?= $this->getFormattedLinkPrice($_link); ?>
+                        <?= $this->getFormattedLinkPrice($_link) ?>
                         <?php endif ?>
                     </span>
                     <?php if ($_isRequired): ?>

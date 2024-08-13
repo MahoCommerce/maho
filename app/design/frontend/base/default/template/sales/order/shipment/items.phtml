@@ -21,10 +21,10 @@
     <a href="<?= $this->getPrintAllShipmentsUrl($_order) ?>" onclick="this.target='_blank'" class="link-print"><?= $this->__('Print All Shipments') ?></a>
 </p>
 <?php foreach ($_order->getShipmentsCollection() as $_shipment): ?>
-<h2 class="sub-title"><?= $this->__('Shipment #') ?><?= $_shipment->getIncrementId(); ?> <span class="separator">|</span> <a href="<?= $this->getPrintShipmentUrl($_shipment) ?>" onclick="this.target='_blank'" class="link-print"><?= $this->__('Print Shipment') ?></a></h2>
+<h2 class="sub-title"><?= $this->__('Shipment #') ?><?= $_shipment->getIncrementId() ?> <span class="separator">|</span> <a href="<?= $this->getPrintShipmentUrl($_shipment) ?>" onclick="this.target='_blank'" class="link-print"><?= $this->__('Print Shipment') ?></a></h2>
 <?php $tracks = $_shipment->getTracksCollection(); ?>
 <?php  if ($tracks->count()): ?>
-    <table class="data-table tracking-table" id="my-tracking-table-<?= $_shipment->getId(); ?>">
+    <table class="data-table tracking-table" id="my-tracking-table-<?= $_shipment->getId() ?>">
         <tbody>
             <tr>
                 <td colspan="2">
@@ -36,8 +36,8 @@
                 <td>&nbsp;
                 <?php
                 $i = 1;
-    $_size = $tracks->count();
-    foreach($tracks as $track): ?>
+                $_size = $tracks->count();
+                foreach($tracks as $track): ?>
                 <?php if($track->isCustom()): ?>
                     <?= $this->escapeHtml($track->getNumber()) ?>
                 <?php else: ?>
@@ -45,14 +45,14 @@
                 <?php endif ?>
                 <?php if($i!=$_size): ?>, <?php endif ?>
                 <?php $i++;
-    endforeach; ?>
+                endforeach; ?>
                 </td>
             </tr>
         </tbody>
     </table>
 <?php endif ?>
 <h3 class="table-caption"><?= $this->__('Items Shipped') ?></h3>
-<table class="data-table" id="my-shipment-table-<?= $_shipment->getId(); ?>">
+<table class="data-table" id="my-shipment-table-<?= $_shipment->getId() ?>">
     <col />
     <col width="1" />
     <col width="1" />
@@ -66,13 +66,11 @@
     <?php $_items = $_shipment->getAllItems(); ?>
     <?php $_count = count($_items) ?>
     <?php foreach ($_items as $_item): ?>
-    <?php if ($_item->getOrderItem()->getParentItem()) {
-        continue;
-    } ?>
+    <?php if ($_item->getOrderItem()->getParentItem()) continue; ?>
     <tbody>
         <?= $this->getItemHtml($_item) ?>
     </tbody>
     <?php endforeach ?>
 </table>
-<?= $this->getCommentsHtml($_shipment)?>
+<?= $this->getCommentsHtml($_shipment) ?>
 <?php endforeach ?>

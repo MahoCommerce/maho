@@ -22,10 +22,10 @@
         <div class="block-content">
             <?= $this->getPagerHtml() ?>
             <?php $suffix = $this->getNameInLayout(); ?>
-            <ol id="widget-new-products-<?= $suffix; ?>">
+            <ol id="widget-new-products-<?= $suffix ?>">
             <?php foreach ($_products->getItems() as $_product): ?>
                 <li class="item">
-                    <p class="product-name"><a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($_product->getName(), null, true) ?>)"><?= $this->helper('catalog/output')->productAttribute($_product, $_product->getName(), 'name') ?></a></p>
+                    <p class="product-name"><a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($_product->getName(), null, true) ?>)"><?= $this->helper('catalog/output')->productAttribute($_product, $_product->getName() , 'name') ?></a></p>
                 </li>
             <?php endforeach ?>
             </ol>

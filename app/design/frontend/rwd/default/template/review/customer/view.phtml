@@ -19,16 +19,16 @@
         <h1><?= $this->__('Review Details') ?></h1>
     </div>
     <div class="product-img-box">
-        <a href="<?= $this->getProductData()->getProductUrl() ?>" title="<?= $this->escapeHtml($this->getProductData()->getName()) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($this->getProductData(), 'small_image')->resize(325, 325); ?>" width="325" height="" alt="<?= $this->escapeHtml($this->getProductData()->getName()) ?>" /></a>
-        <?php if($this->getRating() && $this->getRating()->getSize()): ?>
+        <a href="<?= $this->getProductData()->getProductUrl() ?>" title="<?= $this->escapeHtml($this->getProductData()->getName()) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($this->getProductData(), 'small_image')->resize(325,325) ?>" width="325" height="" alt="<?= $this->escapeHtml($this->getProductData()->getName()) ?>" /></a>
+        <?php if( $this->getRating() && $this->getRating()->getSize()): ?>
             <p class="label"><?= $this->__('Average Customer Rating:') ?></p>
             <?= $this->getReviewsSummaryHtml($this->getProductData()) ?>
         <?php endif ?>
     </div>
     <div class="product-details">
         <h2 class="product-name"><?= $this->escapeHtml($this->getProductData()->getName()) ?></h2>
-        <?php if($this->getRating() && $this->getRating()->getSize()): ?>
-        <h3><?= ($this->isReviewOwner()) ? $this->__('Your Rating:') : $this->__('Rating:'); ?></h3>
+        <?php if( $this->getRating() && $this->getRating()->getSize()): ?>
+        <h3><?= ($this->isReviewOwner()) ? $this->__('Your Rating:') : $this->__('Rating:') ?></h3>
         <table class="ratings-table">
         <?php foreach ($this->getRating() as $_rating): ?>
         <?php if($_rating->getPercent()): ?>

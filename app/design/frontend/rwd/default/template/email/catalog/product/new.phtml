@@ -17,8 +17,7 @@
 <h2 class="subtitle products"><?= $this->__('New Products') ?></h2>
 <?php $_columnCount = $this->getColumnCount(); ?>
     <table class="products-grid">
-    <?php $i=0;
-    foreach ($_products->getItems() as $_product): ?>
+    <?php $i=0; foreach ($_products->getItems() as $_product): ?>
         <?php if ($i++%$_columnCount==0): ?>
         <tr>
         <?php endif ?>
@@ -26,7 +25,7 @@
                 <div class="product-wrapper">
                     <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->escapeHtml($_product->getName()) ?>" class="product-image">
                         <?php $_imgSize = 260; ?>
-                        <img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize); ?>" alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" />
+                        <img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize) ?>" alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" />
                     </a>
                     <h3 class="product-name"><a href="<?= $_product->getProductUrl() ?>" title="<?= $this->escapeHtml($_product->getName()) ?>"><?= $this->escapeHtml($_product->getName()) ?></a></h3>
                     <?= $this->getPriceHtml($_product, true, '-new') ?>

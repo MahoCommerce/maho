@@ -109,9 +109,7 @@
                 </div>
             </li>
         <?php foreach ($primaryTypes as $code=>$type): ?>
-            <li<?php if (!$address->isPrimary($type['address_type_id'])) {
-                echo ' class="control"';
-            } ?>>
+            <li<?php if (!$address->isPrimary($type['address_type_id'])) echo ' class="control"' ?>>
             <?php if ($address->isPrimary($type['address_type_id'])): ?>
                 <strong><?= $this->__("This is My Default %s Address", ucfirst($type['name'])) ?></strong>
             <?php else: ?>

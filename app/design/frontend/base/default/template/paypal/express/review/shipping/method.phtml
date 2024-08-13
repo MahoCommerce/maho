@@ -25,8 +25,8 @@
             <?php foreach ($groups as $code => $rates):?>
                 <optgroup label="<?= $this->escapeHtml($this->getCarrierName($code)) ?>" style="font-style:normal;">
                 <?php foreach ($rates as $rate):?>
-                    <option value="<?= $this->renderShippingRateValue($rate)?>"<?= ($currentRate === $rate) ? ' selected="selected"' : '' ;?>>
-                        <?= $this->renderShippingRateOption($rate)?>
+                    <option value="<?= $this->renderShippingRateValue($rate) ?>"<?= ($currentRate === $rate) ? ' selected="selected"' : ''  ?>>
+                        <?= $this->renderShippingRateOption($rate) ?>
                     </option>
                 <?php endforeach ?>
                 </optgroup>
@@ -36,7 +36,7 @@
             <p><strong><?= $this->__('Sorry, no quotes are available for this order at this time.') ?></strong></p>
         <?php endif ?>
 <?php else: ?>
-    <p><strong><?= $this->renderShippingRateOption($this->getCurrentShippingRate())?></strong></p>
+    <p><strong><?= $this->renderShippingRateOption($this->getCurrentShippingRate()) ?></strong></p>
 <?php endif ?>
 </fieldset>
 <div style="display:none" id="shipping_method_update"><p><?= $this->__('Please update order data to get shipping methods and rates') ?></p></div>

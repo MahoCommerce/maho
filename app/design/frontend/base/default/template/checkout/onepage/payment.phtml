@@ -15,7 +15,7 @@
 ?>
 <script type="text/javascript">
 //<![CDATA[
-    var quoteBaseGrandTotal = <?= (float)$this->getQuoteBaseGrandTotal(); ?>;
+    var quoteBaseGrandTotal = <?= (float)$this->getQuoteBaseGrandTotal() ?>;
     var checkQuoteBaseGrandTotal = quoteBaseGrandTotal;
     var quoteGrandTotalClean = quoteBaseGrandTotal;
     var payment = new Payment('co-payment-form', '<?= $this->getUrl('checkout/onepage/savePayment') ?>');

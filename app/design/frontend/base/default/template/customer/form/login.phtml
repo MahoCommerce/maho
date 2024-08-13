@@ -26,9 +26,9 @@
     </div>
     <?= $this->getMessagesBlock()->toHtml() ?>
     <?php /* Extensions placeholder */ ?>
-    <?= $this->getChildHtml('customer.form.login.extra')?>
+    <?= $this->getChildHtml('customer.form.login.extra') ?>
     <form action="<?= $this->getPostActionUrl() ?>" method="post" id="login-form">
-        <?= $this->getBlockHtml('formkey'); ?>
+        <?= $this->getBlockHtml('formkey') ?>
         <div class="col2-set">
             <div class="col-1 new-users">
                 <div class="content">
@@ -53,7 +53,7 @@
                                 <input type="password" name="login[password]" class="input-text required-entry validate-password min-pass-length-5" id="pass" title="<?= Mage::helper('core')->quoteEscape($this->__('Password')) ?>" autocomplete="off" />
                             </div>
                         </li>
-                        <?= $this->getChildHtml('form.additional.info'); ?>
+                        <?= $this->getChildHtml('form.additional.info') ?>
                     </ul>
                     <p class="required"><?= $this->__('* Required Fields') ?></p>
                 </div>

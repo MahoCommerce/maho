@@ -24,7 +24,7 @@
     <?php if (!$this->getIsReadonly()): ?>
     <div class="box-left">
         <form id="import_form" action="<?= $this->getUrl('*/*/importPost') ?>" method="post" enctype="multipart/form-data">
-            <?= $this->getBlockHtml('formkey')?>
+            <?= $this->getBlockHtml('formkey') ?>
             <div class="entry-edit-head">
                 <h4 class="icon-head head-edit-form fieldset-legend"><?= Mage::helper('tax')->__('Import Tax Rates') ?></h4>
             </div>
@@ -41,7 +41,7 @@
     <?php endif ?>
     <div class="<?php if ($this->getIsReadonly()): ?>box-left<?php else: ?>box-right<?php endif ?>">
         <form id="export_form" action="<?= $this->getUrl('*/*/exportPost') ?>" method="post" enctype="multipart/form-data">
-            <?= $this->getBlockHtml('formkey')?>
+            <?= $this->getBlockHtml('formkey') ?>
             <div class="entry-edit-head">
                 <h4 class="icon-head head-edit-form fieldset-legend"><?= Mage::helper('tax')->__('Export Tax Rates') ?></h4>
             </div>

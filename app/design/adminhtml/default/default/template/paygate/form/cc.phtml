@@ -24,7 +24,7 @@
         <?php if ($_isPartialAuthorization): ?>
                 <?= $this->getChildHtml('cards') ?>
                 <div class="release-amounts">
-                    <?= $this->getCancelButtonHtml()?>
+                    <?= $this->getCancelButtonHtml() ?>
                     <p class="note"><?= $this->__('To cancel pending authorizations and release amounts that have already been processed during this payment, click Cancel.') ?></p>
                 </div>
                 <?= $this->showNoticeMessage($this->__('Please enter another credit card number to complete your purchase.')) ?>

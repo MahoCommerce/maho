@@ -15,14 +15,14 @@
 ?>
 <div class="box-collateral box-tags">
     <h2><?= $this->__('Product Tags') ?></h2>
-    <?= $this->getChildHtml('list_before')?>
-    <?php if($this->getCount()): ?>
+    <?= $this->getChildHtml('list_before') ?>
+    <?php if( $this->getCount() ): ?>
     <h3><?= $this->__('Other people marked this product with these tags:') ?></h3>
-    <ul id="<?= $this->getUniqueHtmlId('product-tags_'); ?>" class="product-tags">
+    <ul id="<?= $this->getUniqueHtmlId('product-tags_') ?>" class="product-tags">
         <?= $this->renderTags('<li><a href="%1$s">%2$s</a> (%3$s)</li>') ?>
     </ul>
     <?php endif ?>
-    <form id="addTagForm" action="<?= $this->getFormAction(); ?>" method="get">
+    <form id="addTagForm" action="<?= $this->getFormAction() ?>" method="get">
         <div class="form-add">
             <label for="productTagName"><?= $this->__('Add Your Tags:') ?></label>
             <div class="input-box">

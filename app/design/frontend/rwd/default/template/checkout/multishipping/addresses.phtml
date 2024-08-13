@@ -58,10 +58,9 @@
             <?php foreach ($this->getItems() as $_index => $_item): ?>
                 <?php if ($_item->getQuoteItem()) :?>
                     <tr>
-                        <td><?= $this->getItemHtml($_item->getQuoteItem())?></td>
+                        <td><?= $this->getItemHtml($_item->getQuoteItem()) ?></td>
                         <td><input type="text" data-multiship-item-id="<?= $this->jsQuoteEscape($_item->getSku()) ?>" name="ship[<?= $_index ?>][<?= $_item->getQuoteItemId() ?>][qty]" value="<?= $this->escapeHtml($_item->getQty()) ?>" size="2" class="input-text qty" /></td>
-                        <td data-rwd-label="Send To"><?php if ($_item->getProduct()->getIsVirtual()): echo $this->__('Shipping selection is not applicable.');
-                        else: echo $this->getAddressesHtmlSelect($_item, $_index); endif; ?></td>
+                        <td data-rwd-label="Send To"><?php if ($_item->getProduct()->getIsVirtual()): echo $this->__('Shipping selection is not applicable.'); else: echo $this->getAddressesHtmlSelect($_item, $_index); endif; ?></td>
                         <td class="a-center"><a href="<?= $this->getItemDeleteUrl($_item) ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Remove Item')) ?>" class="btn-remove2"><?= $this->__('Remove Item') ?></a></td>
                     </tr>
                 <?php endif ?>

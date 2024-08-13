@@ -18,15 +18,15 @@
         <tr>
             <td style="width:50%;"><h3><?= $this->_getHeader() ?></h3></td>
             <td class="form-buttons">
-                <?= $this->getBackButtonHtml(); ?>
-                <?= $this->getResetButtonHtml(); ?>
-                <?= $this->getDeleteButtonHtml(); ?>
-                <?= $this->getSaveButtonHtml(); ?>
+                <?= $this->getBackButtonHtml() ?>
+                <?= $this->getResetButtonHtml() ?>
+                <?= $this->getDeleteButtonHtml() ?>
+                <?= $this->getSaveButtonHtml() ?>
             </td>
         </tr>
     </table>
 </div>
-<?= $this->_getRenameFormHtml(); ?>
+<?= $this->_getRenameFormHtml() ?>
 <script type="text/javascript">
     var renameForm = new varienForm('<?= $this->_getRenameFormId() ?>');
 </script>

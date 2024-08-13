@@ -38,40 +38,33 @@ NOTE: Regarding styles - if we leave it this way, we'll move it to boxes.css
  * @see Mage_Customer_Block_Widget_Dob
  */
 ?>
-<label for="<?= $this->getFieldId('month')?>"<?php if ($this->isRequired()) {
-    echo ' class="required"';
-} ?>><?php if ($this->isRequired()) {
-    echo '<em>*</em>';
-} ?><?= $this->__('Date of Birth') ?></label>
+<label for="<?= $this->getFieldId('month')?>"<?php if ($this->isRequired()) echo ' class="required"' ?>><?php if ($this->isRequired()) echo '<em>*</em>' ?><?= $this->__('Date of Birth') ?></label>
 <div class="input-box customer-dob">
 <?php
-    $this->setDateInput(
-    'd',
-    '<div class="dob-day">
+    $this->setDateInput('d',
+        '<div class="dob-day">
              <input type="text" id="' . $this->getFieldId('day') . '" name="' . $this->getFieldName('day') . '" value="' . $this->getDay() . '" title="' . $this->__('Day') . '" class="input-text validate-custom" ' . $this->getFieldParams() . ' />
              <label for="' . $this->getFieldId('day') . '">' . $this->__('DD') . '</label>
          </div>'
-);
+    );
 
-$this->setDateInput(
-    'm',
-    '<div class="dob-month">
+    $this->setDateInput('m',
+        '<div class="dob-month">
              <input type="text" id="' . $this->getFieldId('month') . '" name="' . $this->getFieldName('month') . '" value="' . $this->getMonth()  . '" title="' . $this->__('Month')  . '" class="input-text validate-custom" ' . $this->getFieldParams()  . ' />
              <label for="' . $this->getFieldId('month') . '">' . $this->__('MM')  . '</label>
          </div>'
-);
+    );
 
-$this->setDateInput(
-    'y',
-    '<div class="dob-year">
+    $this->setDateInput('y',
+        '<div class="dob-year">
              <input type="text" id="' . $this->getFieldId('year') . '" name="' . $this->getFieldName('year') . '" value="' . $this->getYear()  . '" title="' . $this->__('Year')  . '" class="input-text validate-custom" ' . $this->getFieldParams()  . ' />
              <label for="' . $this->getFieldId('year') . '">' . $this->__('YYYY')  . '</label>
          </div>'
-);
+    );
 ?>
     <?= $this->getSortedDateInputs() ?>
     <div class="dob-full" style="display:none;">
-        <input type="hidden" id="<?= $this->getFieldId('dob')?>" name="<?= $this->getFieldName('dob')?>" />
+        <input type="hidden" id="<?= $this->getFieldId('dob') ?>" name="<?= $this->getFieldName('dob') ?>" />
     </div>
 
     <div class="validation-advice" style="display:none;"></div>

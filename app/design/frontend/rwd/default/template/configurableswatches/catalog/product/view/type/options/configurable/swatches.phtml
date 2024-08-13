@@ -36,9 +36,7 @@ $_swatchArray = $_config->attributes->$_id;
         <span id="select_label_<?= $_attrCode ?>" class="select-label"></span>
     </label>
 </dt>
-<dd class="clearfix swatch-attr<?php if ($_attribute->decoratedIsLast) {
-    echo ' last';
-} ?>">
+<dd class="clearfix swatch-attr<?php if ($_attribute->decoratedIsLast) echo ' last'; ?>">
     <div class="input-box">
         <select name="super_attribute[<?= $_attribute->getAttributeId() ?>]" id="attribute<?= $_attribute->getAttributeId() ?>" class="required-entry super-attribute-select no-display swatch-select">
             <option><?= $this->__('Choose an Option...') ?></option>
@@ -58,14 +56,14 @@ $_swatchArray = $_config->attributes->$_id;
                     $_liClass .= ' wide-swatch';
                 }
                 ?>
-                <li class="option-<?= $_optionCode; ?><?= $_liClass; ?>" id="option<?= $_option->id; ?>">
-                    <a href="javascript:void(0)" name="<?= $_optionCode; ?>" id="swatch<?= $_option->id; ?>" class="<?= $_aClass ?>" title="<?= $_option->label; ?>"
+                <li class="option-<?= $_optionCode ?><?= $_liClass ?>" id="option<?= $_option->id ?>">
+                    <a href="javascript:void(0)" name="<?= $_optionCode ?>" id="swatch<?= $_option->id ?>" class="<?= $_aClass ?>" title="<?= $_option->label ?>"
                        style="height: <?= $_swatchOuterHeight ?>px; <?php if (!$_hasImage): ?>min-<?php endif ?>width: <?= $_swatchOuterWidth ?>px;">
                 <span class="swatch-label" style="height: <?= $_swatchInnerHeight ?>px; <?php if (!$_hasImage): ?>min-<?php endif ?>width: <?= $_swatchInnerWidth ?>px; line-height: <?= $_swatchInnerHeight ?>px;">
                 <?php if ($_hasImage): ?>
-                    <img src="<?= $_swatchUrl; ?>" alt="<?= $_option->label; ?>" width="<?= $_swatchInnerWidth ?>" height="<?= $_swatchInnerHeight ?>" />
+                    <img src="<?= $_swatchUrl ?>" alt="<?= $_option->label ?>" width="<?= $_swatchInnerWidth ?>" height="<?= $_swatchInnerHeight ?>" />
                 <?php else: ?>
-                    <?= $_option->label; ?>
+                    <?= $_option->label ?>
                 <?php endif ?>
                  </span>
                         <span class="x">X</span>

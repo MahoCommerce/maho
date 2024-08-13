@@ -30,7 +30,7 @@
             <span class="label"><?= $this->__($_filter->getName()) ?>:</span> <span class="value"><?= $this->stripTags($_filter->getLabel()) ?></span>
             <?php
                 $clearLinkUrl = $_filter->getClearLinkUrl();
-        if ($clearLinkUrl):
+                if ($clearLinkUrl):
             ?>
                 <a  class="btn-previous" href="<?= $_filter->getRemoveUrl() ?>" title="<?= $this->__('Previous') ?>"><?= $this->__('Previous') ?></a>
                 <a  class="btn-remove" title="<?= $this->escapeHtml($_filter->getFilter()->getClearLinkText()) ?>" href="<?= $clearLinkUrl ?>"><?= $this->escapeHtml($_filter->getFilter()->getClearLinkText()) ?></a>

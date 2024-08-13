@@ -55,7 +55,7 @@ $createDateStore    = $this->getStoreCreateDate();
             <?php endif ?>
             <tr>
                 <td><strong><?= $this->__('Account Created in:') ?></strong></td>
-                <td><?= $this->escapeHtml($this->getCreatedInStore()); ?></td>
+                <td><?= $this->escapeHtml($this->getCreatedInStore()) ?></td>
             </tr>
             <tr>
                 <td><strong><?= $this->__('Customer Group:') ?></strong></td>
@@ -68,4 +68,4 @@ $createDateStore    = $this->getStoreCreateDate();
         </address>
     </fieldset>
 </div>
-<?= $this->getChildHtml('', true, true); ?>
+<?= $this->getChildHtml('', true, true) ?>

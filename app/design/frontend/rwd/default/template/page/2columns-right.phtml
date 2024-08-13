@@ -19,11 +19,11 @@
  */
 ?>
 <!DOCTYPE html>
-<html lang="<?= $this->getLang(); ?>" id="top" class="no-js">
+<html lang="<?= $this->getLang() ?>" id="top" class="no-js">
 <head>
 <?= $this->getChildHtml('head') ?>
 </head>
-<body<?= $this->getBodyClass() ? ' class="'.$this->getBodyClass().'"' : '' ?>>
+<body<?= $this->getBodyClass()?' class="'.$this->getBodyClass().'"':'' ?>>
 <?= $this->getChildHtml('after_body_start') ?>
 <div class="wrapper">
     <?= $this->getChildHtml('global_notices') ?>

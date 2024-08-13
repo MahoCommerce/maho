@@ -51,7 +51,7 @@
         </div>
     </div>
     <h3><?= $this->__('Items Invoiced') ?></h3>
-    <table class="data-table" id="my-invoice-table-<?= $_invoice->getId(); ?>">
+    <table class="data-table" id="my-invoice-table-<?= $_invoice->getId() ?>">
         <col />
         <col width="1" />
         <col width="1" />
@@ -67,14 +67,12 @@
             </tr>
         </thead>
         <tfoot>
-            <?= $this->getInvoiceTotalsHtml($_invoice)?>
+            <?= $this->getInvoiceTotalsHtml($_invoice) ?>
         </tfoot>
         <?php $_items = $_invoice->getItemsCollection(); ?>
         <?php $_count = $_items->count(); ?>
         <?php foreach ($_items as $_item): ?>
-        <?php if ($_item->getOrderItem()->getParentItem()) {
-            continue;
-        } ?>
+        <?php if ($_item->getOrderItem()->getParentItem()) continue; ?>
         <tbody>
             <?= $this->getItemHtml($_item) ?>
         </tbody>

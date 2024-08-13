@@ -40,7 +40,7 @@
             <table class="dynamic-grid" cellspacing="0" id="attribute-labels-table">
                 <tr>
                 <?php foreach ($this->getStores() as $_store): ?>
-                    <th><?= $this->escapeHtml($_store->getName()); ?></th>
+                    <th><?= $this->escapeHtml($_store->getName()) ?></th>
                 <?php endforeach ?>
                 </tr>
                 <tr>
@@ -65,7 +65,7 @@
             <table class="dynamic-grid" cellspacing="0"  cellpadding="0">
                 <tr id="attribute-options-table">
                     <?php foreach ($this->getStores() as $_store): ?>
-                        <th><?= $this->escapeHtml($_store->getName()); ?></th>
+                        <th><?= $this->escapeHtml($_store->getName()) ?></th>
                     <?php endforeach ?>
                         <th><?= Mage::helper('catalog')->__('Position') ?></th>
                         <th class="nobr a-center"><?= Mage::helper('catalog')->__('Is Default') ?></th>
@@ -119,7 +119,7 @@ var attributeOption = {
     templateText : templateText,
     itemCount : 0,
     totalItems : 0,
-    isReadOnly: <?= (int)$this->getReadOnly(); ?>,
+    isReadOnly: <?= (int)$this->getReadOnly() ?>,
     add : function(data) {
         this.template = new Template(this.templateText, this.templateSyntax);
         var isNewOption = false;

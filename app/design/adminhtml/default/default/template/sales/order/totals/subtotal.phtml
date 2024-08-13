@@ -14,20 +14,20 @@
  */
 ?>
 <?php
-$_source  = $this->getSource();
-$_order   = $this->getOrder();
-$this->setPriceDataObject($_source);
+    $_source  = $this->getSource();
+    $_order   = $this->getOrder();
+    $this->setPriceDataObject($_source);
 ?>
 <?php if ($this->helper('tax')->displaySalesSubtotalBoth($_order->getStore())): ?>
     <tr>
         <td class="label">
-            <?= Mage::helper('tax')->__('Subtotal (Excl. Tax)')?>
+            <?= Mage::helper('tax')->__('Subtotal (Excl. Tax)') ?>
         </td>
         <td><?= $this->displaySubtotalExclTax() ?></td>
     </tr>
     <tr>
         <td class="label">
-            <?= Mage::helper('tax')->__('Subtotal (Incl. Tax)')?>
+            <?= Mage::helper('tax')->__('Subtotal (Incl. Tax)') ?>
         </td>
         <td><?= $this->displaySubtotalInclTax() ?></td>
     </tr>

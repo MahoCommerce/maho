@@ -30,8 +30,8 @@ function registerTaxRecalcs()
     Event.observe($('tax_class_id'), 'change', recalculateTax);
 }
 
-var priceFormat = <?= $this->helper('tax')->getPriceFormat($this->getStore()); ?>;
-var taxRates = <?= $this->helper('tax')->getAllRatesByProductClass($this->getStore()); ?>;
+var priceFormat = <?= $this->helper('tax')->getPriceFormat($this->getStore()) ?>;
+var taxRates = <?= $this->helper('tax')->getAllRatesByProductClass($this->getStore()) ?>;
 
 function recalculateTax()
 {

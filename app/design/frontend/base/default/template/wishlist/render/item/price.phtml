@@ -15,7 +15,7 @@
 /* @var $this Mage_Wishlist_Block_Customer_Wishlist_Render_Item_Price */
 ?>
 
-<?= $this->getCleanProductPriceHtml(); ?>
+<?= $this->getCleanProductPriceHtml() ?>
 
 <?php /* @var $product Mage_Catalog_Model_Product */ ?>
 <?php $product = $this->getProduct(); ?>
@@ -23,6 +23,6 @@
 <?php if ($product->canConfigure()): ?>
     <p class="configured-price">
         <span class="price-label"><?= Mage::helper('wishlist')->__('Configured Price:') ?></span>
-        <span class="price"><?= Mage::helper('core')->currency($finalPrice, true, false); ?></span>
+        <span class="price"><?= Mage::helper('core')->currency($finalPrice, true, false) ?></span>
     </p>
 <?php endif ?>

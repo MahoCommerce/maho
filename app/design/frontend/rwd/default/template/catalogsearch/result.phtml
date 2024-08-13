@@ -24,7 +24,7 @@
     <?php if ($messages = $this->getNoteMessages()):?>
     <p class="note-msg">
         <?php foreach ($messages as $message):?>
-            <?= $message?><br />
+            <?= $message ?><br />
         <?php endforeach ?>
     </p>
     <?php endif ?>
@@ -38,7 +38,7 @@
     <?= $this->getAdditionalHtml() ?>
     <?php if ($messages = $this->getNoteMessages()):?>
         <?php foreach ($messages as $message):?>
-        <br /><?= $message?>
+        <br /><?= $message ?>
         <?php endforeach ?>
     <?php endif ?>
 </p>

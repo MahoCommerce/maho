@@ -17,7 +17,7 @@
 <?php if($_processes):?>
 <div class="notification-global">
     <strong><?= $this->helper('adminhtml')->__('One or more of the Cache Types are invalidated:') ?></strong>
-    <?= implode(', ', $_processes)?>.
-    <?= $this->helper('index')->__('Click here to go to <a href="%s">Cache Management</a> and refresh cache types.', $this->getManageUrl());?>
+    <?= implode(', ', $_processes) ?>.
+    <?= $this->helper('index')->__('Click here to go to <a href="%s">Cache Management</a> and refresh cache types.', $this->getManageUrl()) ?>
 </div>
 <?php endif ?>

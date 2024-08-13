@@ -32,12 +32,12 @@ $_colspan = $_colspan > 1 ? 'colspan="' . $_colspan . '"' : '';
 <?php foreach ($this->_columns as $columnName => $column):?>
                 <th><?= $column['label'] ?></th>
 <?php endforeach ?>
-                <th <?= $_colspan?>></th>
+                <th <?= $_colspan ?>></th>
             </tr>
 
             <tr id="addRow<?= $_htmlId ?>">
                 <td colspan="<?= count($this->_columns) ?>"></td>
-                <td <?= $_colspan?>>
+                <td <?= $_colspan ?>>
                     <button style="" onclick="" class="scalable add" type="button" id="addToEndBtn<?= $_htmlId ?>">
                         <span><span><span><?= $this->_addButtonLabel ?></span></span></span>
                     </button>

@@ -15,7 +15,7 @@
 ?>
 
 <?= $this->getItem()->getName() ?>
-<div><strong><?= $this->helper('sales')->__('SKU') ?>:</strong> <?= implode('<br />', Mage::helper('catalog')->splitSku($this->escapeHtml($this->getItem()->getSku()))); ?></div>
+<div><strong><?= $this->helper('sales')->__('SKU') ?>:</strong> <?= implode('<br />', Mage::helper('catalog')->splitSku($this->escapeHtml($this->getItem()->getSku()))) ?></div>
 <?php if ($this->getOrderOptions()): ?>
     <ul class="item-options">
     <?php foreach ($this->getOrderOptions() as $option): ?>
@@ -25,7 +25,7 @@
             <?= $this->getValueHtml($item) ?><br />
             <?php endforeach ?>
         <?php else: ?>
-            <?= $this->escapeHtml($option['value']); ?>
+            <?= $this->escapeHtml($option['value']) ?>
         <?php endif ?>
         </li>
     <?php endforeach ?>

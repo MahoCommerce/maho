@@ -40,7 +40,7 @@
         </div>
         <fieldset>
             <strong><?= $this->escapeHtml($_order->getShippingDescription()) ?></strong>
-            <?= $this->helper('sales')->__('Total Shipping Charges'); ?>:
+            <?= $this->helper('sales')->__('Total Shipping Charges') ?>:
 
             <?php if ($this->helper('tax')->displayShippingPriceIncludingTax()): ?>
                 <?php $_excl = $this->displayShippingPriceInclTax($_order); ?>
@@ -49,9 +49,9 @@
             <?php endif ?>
             <?php $_incl = $this->displayShippingPriceInclTax($_order); ?>
 
-            <?= $_excl; ?>
+            <?= $_excl ?>
             <?php if ($this->helper('tax')->displayShippingBothPrices() && $_incl != $_excl): ?>
-                (<?= $this->__('Incl. Tax'); ?> <?= $_incl; ?>)
+                (<?= $this->__('Incl. Tax') ?> <?= $_incl ?>)
             <?php endif ?>
         </fieldset>
     </div>

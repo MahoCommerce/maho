@@ -32,8 +32,8 @@
     <?= $this->getChildHtml('head') ?>
 </head>
 
-<body id="html-body"<?= $this->getBodyClass() ? ' class="' . $this->getBodyClass() . '"' : ''; ?>>
-<?= $this->getChildHtml('notification_window'); ?>
+<body id="html-body"<?= $this->getBodyClass() ? ' class="' . $this->getBodyClass() . '"' : '' ?>>
+<?= $this->getChildHtml('notification_window') ?>
 <div class="wrapper">
     <?= $this->getChildHtml('global_notices') ?>
         <div class="header">
@@ -41,7 +41,7 @@
         <div class="clear"></div>
             <?= $this->getChildHtml('menu') ?>
         </div>
-        <?= $this->getChildHtml('notifications'); ?>
+        <?= $this->getChildHtml('notifications') ?>
         <div class="middle" id="anchor-content">
             <div id="page:main-container">
             <?php if($this->getChildHtml('left')): ?>

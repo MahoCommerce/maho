@@ -39,9 +39,9 @@
                                 <?php $_excl = $this->getShippingPrice($_rate->getPrice(), $this->helper('tax')->displayShippingPriceIncludingTax()); ?>
                                 <?php $_incl = $this->getShippingPrice($_rate->getPrice(), true); ?>
 
-                                <?= $_excl; ?>
+                                <?= $_excl ?>
                                 <?php if ($this->helper('tax')->displayShippingBothPrices() && $_incl != $_excl): ?>
-                                    (<?= $this->__('Incl. Tax'); ?> <?= $_incl; ?>)
+                                    (<?= $this->__('Incl. Tax') ?> <?= $_incl ?>)
                                 <?php endif ?>
                             </strong>
                         </label>
@@ -61,9 +61,9 @@
                 <?php $_excl = $this->getShippingPrice($_rate->getPrice(), $this->helper('tax')->displayShippingPriceIncludingTax()); ?>
                 <?php $_incl = $this->getShippingPrice($_rate->getPrice(), true); ?>
 
-                <?= $_excl; ?>
+                <?= $_excl ?>
                 <?php if ($this->helper('tax')->displayShippingBothPrices() && $_incl != $_excl): ?>
-                    (<?= $this->__('Incl. Tax'); ?> <?= $_incl; ?>)
+                    (<?= $this->__('Incl. Tax') ?> <?= $_incl ?>)
                 <?php endif ?>
             </strong>
             <!--input type="text" class="input-text" style="width:70px"/-->

@@ -36,17 +36,17 @@
                 <?php switch($this->getAttributeInputType($_attribute)):
                     case 'number': ?>
                     <div class="input-range">
-                        <input type="text" name="<?= $_code ?>[from]" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute, 'from')) ?>" id="<?= $_code ?>" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>" class="input-text validate-number" maxlength="<?= $maxQueryLength;?>" />
+                        <input type="text" name="<?= $_code ?>[from]" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute, 'from')) ?>" id="<?= $_code ?>" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>" class="input-text validate-number" maxlength="<?= $maxQueryLength ?>" />
                         <span class="separator">-</span>
-                        <input type="text" name="<?= $_code ?>[to]" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute, 'to')) ?>" id="<?= $_code ?>_to" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>" class="input-text validate-number" maxlength="<?= $maxQueryLength;?>" />
+                        <input type="text" name="<?= $_code ?>[to]" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute, 'to')) ?>" id="<?= $_code ?>_to" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>" class="input-text validate-number" maxlength="<?= $maxQueryLength ?>" />
                     </div>
                     <?php break;
                     case 'price': ?>
                     <div class="input-range">
-                        <input name="<?= $_code ?>[from]" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute, 'from')) ?>" id="<?= $_code ?>" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>"  class="input-text validate-number" type="text" maxlength="<?= $maxQueryLength;?>" />
+                        <input name="<?= $_code ?>[from]" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute, 'from')) ?>" id="<?= $_code ?>" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>"  class="input-text validate-number" type="text" maxlength="<?= $maxQueryLength ?>" />
                         <span class="separator">-</span>
-                        <input name="<?= $_code ?>[to]" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute, 'to')) ?>" id="<?= $_code ?>_to" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>"  class="input-text validate-number" type="text" maxlength="<?= $maxQueryLength;?>" />
-                        <small>(<?= $this->getCurrency($_attribute); ?>)</small>
+                        <input name="<?= $_code ?>[to]" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute, 'to')) ?>" id="<?= $_code ?>_to" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>"  class="input-text validate-number" type="text" maxlength="<?= $maxQueryLength ?>" />
+                        <small>(<?= $this->getCurrency($_attribute) ?>)</small>
                     </div>
                     <?php break;
                     case 'select': ?>
@@ -66,7 +66,7 @@
                     <?php break;
                     default: ?>
                     <div class="input-box">
-                        <input type="text" name="<?= $_code ?>" id="<?= $_code ?>" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute)) ?>" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>"  class="input-text <?= $this->getAttributeValidationClass($_attribute) ?>" maxlength="<?= $maxQueryLength;?>" />
+                        <input type="text" name="<?= $_code ?>" id="<?= $_code ?>" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute)) ?>" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>"  class="input-text <?= $this->getAttributeValidationClass($_attribute) ?>" maxlength="<?= $maxQueryLength ?>" />
                     </div>
                 <?php endswitch; ?>
             </li>

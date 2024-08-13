@@ -150,7 +150,7 @@ var tierPriceControl = {
     }
 };
 <?php foreach ($this->getValues() as $_item): ?>
-tierPriceControl.addItem('<?= $_item['website_id'] ?>', '<?= $_item['cust_group'] ?>', '<?= $_item['price_qty']*1 ?>', '<?= sprintf('%.2f', $_item['price']) ?>', <?= (int)!empty($_item['readonly'])?>);
+tierPriceControl.addItem('<?= $_item['website_id'] ?>', '<?= $_item['cust_group'] ?>', '<?= $_item['price_qty']*1 ?>', '<?= sprintf('%.2f', $_item['price']) ?>', <?= (int)!empty($_item['readonly']) ?>);
 <?php endforeach ?>
 <?php if ($_readonly): ?>
 $('<?= $_htmlId ?>_container').up('table').select('button')
