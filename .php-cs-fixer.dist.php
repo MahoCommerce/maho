@@ -100,14 +100,13 @@ return $config
         PhpCsFixer\Finder::create()
             ->in([
                 'app/code/core/Mage/',
-                'app/design/',
                 'lib/Mage/',
                 'lib/Magento/',
                 'lib/MahoCLI/',
                 'lib/Varien/',
                 'pub/',
             ])
-            ->name(['*.php', '*.phtml'])
+            ->name(['*.php'])
             ->ignoreDotFiles(true)
             ->ignoreVCS(true)
     );
