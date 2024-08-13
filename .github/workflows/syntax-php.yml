@@ -1,8 +1,8 @@
 name: PHP Syntax
 
 on:
-  schedule:
-    - cron: '0 0 * * 1'
+  push:
+  pull_request:
   workflow_call:
   workflow_dispatch:
 
