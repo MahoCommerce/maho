@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <ruleset name="OpenMage" namespace="OpenMage\CS\Standard">
+    <config name="testVersion" value="8.2-"/>
     <file>maho</file>
     <file>pub/api.php</file>
     <file>pub/index.php</file>
