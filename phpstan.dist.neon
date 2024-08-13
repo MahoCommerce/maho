@@ -5,18 +5,15 @@ includes:
 parameters:
     magentoRootPath: %currentWorkingDirectory%
     paths:
-        - api.php
-        - cron.php
-        - get.php
-        - pub/index.php
-        - install.php
+        - maho
         - app/Mage.php
         - app/code/core/Mage
+        - pub/api.php
+        - pub/index.php
         - lib/Mage
         - lib/Magento
         - lib/MahoCLI
         - lib/Varien
-        - shell
     excludePaths:
         #incompatible interfaces
         - app/code/core/Mage/Admin/Model/Acl/Assert/Ip.php
