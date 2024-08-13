@@ -54,7 +54,7 @@ $paths = require BP . '/vendor/composer/include_paths.php';
 $paths[] = BP . '/app/code/local';
 $paths[] = BP . '/app/code/community';
 $paths[] = BP . '/app/code/core';
-$allModules = Mage::getComposerInstallationData()[1];
+$allModules = mahoGetComposerInstallationData()[1];
 foreach ($allModules as $module) {
     if (str_contains($module, 'mahocommerce/maho')) {
         continue;
@@ -163,11 +163,6 @@ final class Mage
      * @static
      */
     private static $_currentEdition = self::EDITION_COMMUNITY;
-
-    /**
-     * @var array
-     */
-    private static $_composerInstallationData;
 
     /**
      * Gets the current Magento version string

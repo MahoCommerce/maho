@@ -2,7 +2,9 @@
 
 namespace Maho\Commands;
 
+use Exception;
 use Mage;
+use Mage_Install_Model_Installer_Console;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

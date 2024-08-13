@@ -67,6 +67,7 @@ class CronRun extends BaseMahoCommand
             return Command::FAILURE;
         }
 
+        /** @var Mage_Cron_Model_Schedule $schedule */
         $schedule = Mage::getModel('cron/schedule')->getCollection()
             ->addFieldToFilter('status', Mage_Cron_Model_Schedule::STATUS_PENDING)
             ->addFieldToFilter('job_code', $jobCode)

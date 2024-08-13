@@ -5,6 +5,7 @@ namespace Maho\Commands;
 use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
@@ -18,6 +19,8 @@ class AdminUserEnable extends BaseMahoCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initMaho();
+
+        /** @var QuestionHelper $questionHelper */
         $questionHelper = $this->getHelper('question');
 
         $question = new Question('username: ', '');
