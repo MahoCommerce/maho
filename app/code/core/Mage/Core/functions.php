@@ -301,3 +301,89 @@ function is_dir_writeable($dir)
     }
     return false;
 }
+
+function mahoGetComposerInstallationData(): array
+{
+    static $composerInstallationData = null;
+    if ($composerInstallationData !== null) {
+        return $composerInstallationData;
+    }
+
+    $packages = $packageDirectories = [];
+    $installedVersions = \Composer\InstalledVersions::getAllRawData();
+
+    foreach ($installedVersions as $datasets) {
+        array_shift($datasets['versions']);
+        foreach ($datasets['versions'] as $package => $version) {
+            if (!isset($version['install_path'])) {
+                continue;
+            }
+            if (!in_array($version['type'], ['magento-source', 'magento-module'])) {
+                continue;
+            }
+            $packages[] = $package;
+            $packageDirectories[] = realpath($version['install_path']);
+        }
+    }
+
+    $packages = array_unique($packages);
+    $packageDirectories = array_unique($packageDirectories);
+
+    $composerInstallationData = [
+        $packages,
+        $packageDirectories
+    ];
+
+    return $composerInstallationData;
+}
+
+function mahoFindFileInIncludePath(string $relativePath): string|false
+{
+    list($packages, $packageDirectories) = mahoGetComposerInstallationData();
+    foreach ($packages as $package) {
+        $relativePath = str_replace(BP . DS . 'vendor' . DS . $package, '', $relativePath);
+    }
+    $relativePath = str_replace(BP, '', $relativePath);
+    $relativePath = ltrim($relativePath, '/');
+
+    // if file exists in the current folder, don't look elsewhere
+    $fullPath = BP . DS . $relativePath;
+    if (file_exists($fullPath)) {
+        return $fullPath;
+    }
+
+    // search for the file in composer packages
+    foreach ($packageDirectories as $basePath) {
+        $fullPath = $basePath . DIRECTORY_SEPARATOR . $relativePath;
+        if (file_exists($fullPath)) {
+            return realpath($fullPath);
+        }
+    }
+
+    return false;
+}
+
+function mahoListDirectories($path)
+{
+    list($packages, $packageDirectories) = mahoGetComposerInstallationData();
+    if (!defined('MAGENTO_ROOT')) {
+        Mage::throwException('MAGENTO_ROOT constant is not defined.');
+    }
+
+    foreach ($packages as $package) {
+        $path = str_replace(BP . DS . 'vendor' . DS . $package, '', $path);
+    }
+    $path = str_replace(BP, '', $path);
+    $path = ltrim($path, '/');
+
+    $results = [];
+    array_unshift($packageDirectories, MAGENTO_ROOT);
+    foreach ($packageDirectories as $packageDirectory) {
+        $tmpList = glob($packageDirectory . DS . $path . '/*', GLOB_ONLYDIR);
+        foreach ($tmpList as $folder) {
+            $results[] = basename($folder);
+        }
+    }
+
+    return array_unique($results);
+}

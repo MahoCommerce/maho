@@ -159,7 +159,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         } catch (Throwable $e) {
             session_abort();
             if (Mage::registry(self::REGISTRY_CONCURRENCY_ERROR)) {
-                require_once Mage::findFileInIncludePath('errors/503.php');
+                require_once mahoFindFileInIncludePath('errors/503.php');
                 die();
             } else {
                 Mage::printException($e);

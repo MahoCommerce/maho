@@ -466,7 +466,7 @@ class Mage_Core_Model_Resource_Setup
         $modName    = (string)$this->_moduleConfig[0]->getName();
 
         $filesDir   = Mage::getModuleDir('sql', $modName) . DS . $this->_resourceName;
-        $filesDir   = Mage::findFileInIncludePath($filesDir);
+        $filesDir   = mahoFindFileInIncludePath($filesDir);
         if (!is_dir($filesDir) || !is_readable($filesDir)) {
             return [];
         }
@@ -511,7 +511,7 @@ class Mage_Core_Model_Resource_Setup
         $files      = [];
 
         $filesDir   = Mage::getModuleDir('data', $modName) . DS . $this->_resourceName;
-        $filesDir   = Mage::findFileInIncludePath($filesDir);
+        $filesDir   = mahoFindFileInIncludePath($filesDir);
         if (is_dir($filesDir) && is_readable($filesDir)) {
             $regExp     = sprintf('#^%s-(.*)\.php$#i', $actionType);
             $handlerDir = dir($filesDir);

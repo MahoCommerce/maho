@@ -549,7 +549,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                 throw new Exception('Could not get lock on cache save operation.');
             } else {
                 Mage::log(sprintf('Failed to get cache save lock in %d seconds.', $waitTime), Zend_Log::NOTICE);
-                require Mage::findFileInIncludePath('errors/503.php');
+                require mahoFindFileInIncludePath('errors/503.php');
                 die();
             }
         }
@@ -1100,7 +1100,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                 foreach ($fileName as $configFile) {
                     $moduleDir = $this->getModuleDir('etc', $modName);
                     $configFile = $moduleDir . DS . $configFile;
-                    $configFile = Mage::findFileInIncludePath($configFile);
+                    $configFile = mahoFindFileInIncludePath($configFile);
 
                     if ($mergeModel->loadFile($configFile)) {
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_GLOBAL, $mergeModel);

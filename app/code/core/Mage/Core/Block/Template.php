@@ -271,9 +271,9 @@ HTML;
                 &&
                 ($this->_viewDir == Mage::getBaseDir('design') || str_starts_with(realpath($this->_viewDir), realpath(Mage::getBaseDir('design'))))
             ) {
-                $fileToInclude = Mage::findFileInIncludePath($fileName);
+                $fileToInclude = mahoFindFileInIncludePath($fileName);
                 if (!$fileToInclude) {
-                    $fileToInclude = Mage::findFileInIncludePath($this->_viewDir . DS . $fileName);
+                    $fileToInclude = mahoFindFileInIncludePath($this->_viewDir . DS . $fileName);
                 }
                 include $fileToInclude;
             } else {
