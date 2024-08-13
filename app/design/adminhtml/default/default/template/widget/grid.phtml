@@ -179,9 +179,10 @@ $numColumns = count($this->getColumns());
                     <?php $i = 0;
                 foreach ($this->getSubTotalColumns() as $_column): ?>
                         <td class="<?= $_column->getCssProperty() ?> <?= ++$i == $numColumns ? 'last' : '' ?>">
-                            <?=($_column->hasSubtotalsLabel() ? $_column->getSubtotalsLabel() :
+                            <?=(
+                    $_column->hasSubtotalsLabel() ? $_column->getSubtotalsLabel() :
                             $_column->getRowField($this->getSubTotalItem($_item))
-                            );
+                );
                     ?>
                         </td>
                     <?php endforeach ?>

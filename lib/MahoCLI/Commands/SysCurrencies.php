@@ -18,7 +18,7 @@ class SysCurrencies extends BaseMahoCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initMaho();
-        
+
         $currencies = Mage::app()->getLocale()->getOptionCurrencies();
 
         $table = new Table($output);

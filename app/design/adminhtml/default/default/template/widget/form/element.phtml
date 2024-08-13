@@ -24,7 +24,7 @@
         <?php endforeach ?>
     </fieldset>
       <?php break;
-    // no break
+        // no break
     case 'column': ?>
       <?php break;
     case 'hidden': ?>
@@ -40,7 +40,7 @@
         </select>
     </span>
       <?php break;
-    // no break
+        // no break
     case 'text':
     case 'button':
     case 'password': ?>
@@ -49,14 +49,14 @@
         <input type="<?= $element->getType() ?>" name="<?= $element->getName() ?>" id="<?= $element->getHtmlId() ?>" value="<?= $element->getValue() ?>" class="input-text <?= $element->getClass() ?>" title="<?= $element->getTitle() ?>" <?= ($element->getOnClick() ? 'onClick="'.$element->getOnClick().'"' : '') ?>/>
     </span>
       <?php break;
-    // no break
+        // no break
     case 'radio': ?>
     <span class="form_row">
         <?php if($element->getLabel()): ?><label for="<?= $element->getHtmlId() ?>"><?= $element->getLabel() ?>:</label><?php endif ?>
         <input type="<?= $element->getType() ?>" name="<?= $element->getName() ?>" id="<?= $element->getHtmlId() ?>" value="<?= $element->getValue() ?>" class="input-text <?= $element->getClass() ?>" title="<?= $element->getTitle() ?>"/>
     </span>
       <?php break;
-    // no break
+        // no break
     case 'hidden': ?>
         <input type="<?= $element->getType() ?>" name="<?= $element->getName() ?>" id="<?= $element->getHtmlId() ?>" value="<?= $element->getValue() ?>">
       <?php break;
@@ -68,7 +68,7 @@
     <?php endforeach ?>
     </span>
       <?php break;
-    // no break
+        // no break
     case 'wysiwyg': ?>
     <span class="form_row">
       <label for="<?= $element->getHtmlId() ?>"><?= $element->getLabel() ?>:</label>

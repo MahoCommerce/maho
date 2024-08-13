@@ -18,7 +18,7 @@ class SysTimezones extends BaseMahoCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initMaho();
-        
+
         $timezones = Mage::app()->getLocale()->getOptionTimezones();
 
         $table = new Table($output);
