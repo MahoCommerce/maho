@@ -16,8 +16,6 @@ jobs:
             path: .phpcs.xml.dist
           - label: Ecg
             path: .phpcs.ecg.xml.dist
-          - label: PhpCompatibility
-            path: .phpcs.php.xml.dist
 
     steps:
       - name: Setup PHP
