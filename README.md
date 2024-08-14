@@ -2,6 +2,7 @@
   <img src="https://poser.pugx.org/mahocommerce/maho/license.svg" alt="" />
   <img src="https://img.shields.io/badge/PHP-8.2+-8993be.svg" alt="" />
   <img src="https://github.com/MahoCommerce/maho/actions/workflows/security-php.yml/badge.svg" alt="" />
+  <img src="https://github.com/MahoCommerce/maho/actions/workflows/codeql-analysis.yml/badge.svg" alt="" />
 </p>
 <p align="center">
   <img src="https://mahocommerce.com/assets/maho-logo.svg" alt="" width=400 />
