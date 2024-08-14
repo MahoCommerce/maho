@@ -1,6 +1,6 @@
 <?php
 
-namespace Maho\Commands;
+namespace MahoCLI\Commands;
 
 use Mage;
 use Symfony\Component\Console\Command\Command;

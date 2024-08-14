@@ -3,43 +3,50 @@
 
 define('MAHO_ROOT_DIR', __DIR__);
 
-require __DIR__.'/vendor/autoload.php';
+require __DIR__ . '/vendor/autoload.php';
 
+use MahoCLI\CommandDiscoverer;
 use Symfony\Component\Console\Application;
 
 $application = new Application('');
 
-$application->add(new \Maho\Commands\AdminUserList());
-$application->add(new \Maho\Commands\AdminUserChangepassword());
-$application->add(new \Maho\Commands\AdminUserEnable());
-$application->add(new \Maho\Commands\AdminUserDisable());
+$application->add(new \MahoCLI\Commands\AdminUserList());
+$application->add(new \MahoCLI\Commands\AdminUserChangepassword());
+$application->add(new \MahoCLI\Commands\AdminUserEnable());
+$application->add(new \MahoCLI\Commands\AdminUserDisable());
 
-$application->add(new \Maho\Commands\CacheEnable());
-$application->add(new \Maho\Commands\CacheDisable());
-$application->add(new \Maho\Commands\CacheFlush());
+$application->add(new \MahoCLI\Commands\CacheEnable());
+$application->add(new \MahoCLI\Commands\CacheDisable());
+$application->add(new \MahoCLI\Commands\CacheFlush());
 
-//$application->add(new \Maho\Commands\CustomerCreate());
-//$application->add(new \Maho\Commands\CustomerChangePassword());
-$application->add(new \Maho\Commands\CustomerDelete());
-$application->add(new \Maho\Commands\CustomerList());
+//$application->add(new \MahoCLI\Commands\CustomerCreate());
+//$application->add(new \MahoCLI\Commands\CustomerChangePassword());
+$application->add(new \MahoCLI\Commands\CustomerDelete());
+$application->add(new \MahoCLI\Commands\CustomerList());
 
-$application->add(new \Maho\Commands\IndexList());
-$application->add(new \Maho\Commands\IndexReindex());
-$application->add(new \Maho\Commands\IndexReindexAll());
+$application->add(new \MahoCLI\Commands\IndexList());
+$application->add(new \MahoCLI\Commands\IndexReindex());
+$application->add(new \MahoCLI\Commands\IndexReindexAll());
 
-$application->add(new \Maho\Commands\CronHistory());
-$application->add(new \Maho\Commands\CronList());
-$application->add(new \Maho\Commands\CronRun());
+$application->add(new \MahoCLI\Commands\CronHistory());
+$application->add(new \MahoCLI\Commands\CronList());
+$application->add(new \MahoCLI\Commands\CronRun());
 
-$application->add(new \Maho\Commands\LogClean());
-$application->add(new \Maho\Commands\LogStatus());
+$application->add(new \MahoCLI\Commands\LogClean());
+$application->add(new \MahoCLI\Commands\LogStatus());
 
-$application->add(new \Maho\Commands\Install());
-$application->add(new \Maho\Commands\Serve());
-$application->add(new \Maho\Commands\LegacyRenameMysql4Classes());
+$application->add(new \MahoCLI\Commands\Install());
+$application->add(new \MahoCLI\Commands\Serve());
+$application->add(new \MahoCLI\Commands\LegacyRenameMysql4Classes());
 
-$application->add(new \Maho\Commands\SysCurrencies());
-$application->add(new \Maho\Commands\SysLocales());
-$application->add(new \Maho\Commands\SysTimezones());
+$application->add(new \MahoCLI\Commands\SysCurrencies());
+$application->add(new \MahoCLI\Commands\SysLocales());
+$application->add(new \MahoCLI\Commands\SysTimezones());
+
+$discoverer = new CommandDiscoverer();
+$commands = $discoverer->discover(__DIR__ . '/vendor/*/*');
+foreach ($commands as $command) {
+    $application->add($command);
+}
 
 $application->run();

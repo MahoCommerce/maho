@@ -1,6 +1,6 @@
 <?php
 
-namespace Maho\Commands;
+namespace MahoCLI\Commands;
 
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
