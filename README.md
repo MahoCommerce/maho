@@ -1,4 +1,9 @@
 <p align="center">
+  <img src="https://poser.pugx.org/mahocommerce/maho/license.svg" alt="" />
+  <img src="https://img.shields.io/badge/PHP-8.2+-8993be.svg" alt="" />
+  <img src="https://github.com/MahoCommerce/maho/actions/workflows/security-php.yml/badge.svg" alt="" />
+</p>
+<p align="center">
   <img src="https://mahocommerce.com/assets/maho-logo.svg" alt="" width=400 />
   <br>
   <strong>open on-premise ecommerce platform</strong><br>
@@ -15,10 +20,6 @@ new features, modern developer-friendly architecture, zero hassles and zero bagg
 
 We will try to make Maho as backward compatible as possible, but we won't let the ghosts of the
 past to stop the innovation we need to bring to developers and store owners.
-
-## A clear vision means a clear road ahead
-
-TODO
 
 ### Where does Maho stands in the ecommerce platforms landscape
 
