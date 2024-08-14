@@ -1,6 +1,20 @@
-## About Maho
+<p align="center">
+  <img src="https://mahocommerce.com/assets/maho-logo.svg" alt="" width=400 />
+  <br>
+  <strong>open on-premise ecommerce platform</strong><br>
+  <i>#StrongRoots #ForwardThinking #FamiliarYetDifferent</i>
+</p>
 
-TODO
+**Maho** is a free and **open source ecommerce platform**, created in 2024 by
+[a former maintainer of OpenMage](https://fabrizioballiano.com).
+Based on the M1 platform, Maho grants **hyper stability** and a **vast ecosystem of 
+modules and extensions**.
+
+**Maho's primary goals** are to propel this wonderful platform into the future, with **high performance,
+new features, modern developer-friendly architecture, zero hassles and zero baggage**.
+
+We will try to make Maho as backward compatible as possible, but we won't let the ghosts of the
+past to stop the innovation we need to bring to developers and store owners.
 
 ## A clear vision means a clear road ahead
 
