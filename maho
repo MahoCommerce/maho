@@ -44,7 +44,7 @@ $application->add(new \MahoCLI\Commands\SysLocales());
 $application->add(new \MahoCLI\Commands\SysTimezones());
 
 $discoverer = new CommandDiscoverer();
-$commands = $discoverer->discover(__DIR__ . '/vendor/*/*');
+$commands = $discoverer->discover(__DIR__ . '/vendor/*/*') + $discoverer->discover(__DIR__);
 foreach ($commands as $command) {
     $application->add($command);
 }

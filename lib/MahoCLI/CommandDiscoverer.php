@@ -18,6 +18,10 @@ class CommandDiscoverer
         $files = glob("{$this->baseDir}/lib/MahoCLI/Commands/*.php");
 
         foreach ($files as $file) {
+            if (str_contains($file, "vendor/mahocommerce/maho")) {
+                continue;
+            }
+
             $className = $this->getFullyQualifiedClassName($file);
             if (is_subclass_of($className, Command::class)) {
                 $commands[] = new $className();
