@@ -416,14 +416,14 @@ class Varien_Simplexml_Config
 
     /**
      * Imports XML file
-     *
-     * @param string $filePath
-     * @return bool
      */
-    public function loadFile($filePath)
+    public function loadFile(string $filePath): bool
     {
-        $filePath = mahoFindFileInIncludePath($filePath);
+        if (!strlen($filePath)) {
+            return false;
+        }
 
+        $filePath = mahoFindFileInIncludePath($filePath);
         if (!is_readable($filePath)) {
             //throw new Exception('Can not read xml file '.$filePath);
             return false;
