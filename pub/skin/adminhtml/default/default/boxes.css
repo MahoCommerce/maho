@@ -753,7 +753,7 @@ div.autocomplete ul li { padding:.5em .7em; min-height:32px; cursor:pointer; tex
 *******************************************************************************/
 #page-login                             { background:#f8f8f8; text-align:center; }
 .login-container                        { position: relative; width:581px; margin:170px auto; padding-left:32px; }
-.login-container::before                { content: "";position: absolute;width: 150px;height: 35px;top: 60px;left: -55px;background: url(images/logo_gray.svg) 0 0 no-repeat;background-size: contain;transform: rotate(-90deg); }
+.login-container::before                { content: "";position: absolute;width: 150px;height: 35px;top: 60px;left: -55px;background: url(images/logo.svg) 0 0 no-repeat;background-size: contain;transform: rotate(-90deg); }
 .login-form                             { padding:27px 57px 35px 57px; background:url(images/login_box_bg.jpg) no-repeat; text-align:left; }
 .login-form .input-left                 { float:left; }
 .login-form .input-right                { float:right; }
