@@ -416,8 +416,11 @@ class Varien_Simplexml_Config
 
     /**
      * Imports XML file
+     *
+     * @param string $filePath
+     * @return bool
      */
-    public function loadFile(string $filePath): bool
+    public function loadFile($filePath)
     {
         if (!strlen($filePath)) {
             return false;
