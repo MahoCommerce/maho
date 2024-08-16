@@ -325,8 +325,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
     public function getPlaceholder()
     {
         if (!$this->_placeholder) {
-            $attr = $this->_getModel()->getDestinationSubdir();
-            $this->_placeholder = 'images/catalog/product/placeholder/' . $attr . '.jpg';
+            $this->_placeholder = 'images/catalog/product/placeholder.svg';
         }
         return $this->_placeholder;
     }
@@ -338,6 +337,10 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
      */
     public function __toString()
     {
+        if (str_ends_with($this->getImageFile(), '.svg')) {
+            return $this->getImageFile();
+        }
+
         try {
             $model = $this->_getModel();
 

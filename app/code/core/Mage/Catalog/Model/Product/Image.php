@@ -353,7 +353,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
             } else {
                 // replace file with skin or default skin placeholder
                 $skinBaseDir     = Mage::getDesign()->getSkinBaseDir();
-                $skinPlaceholder = "/images/catalog/product/placeholder/{$this->getDestinationSubdir()}.jpg";
+                $skinPlaceholder = "/images/catalog/product/placeholder.svg";
                 $file = $skinPlaceholder;
                 if (file_exists($skinBaseDir . $file)) {
                     $baseDir = $skinBaseDir;
@@ -374,6 +374,18 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         }
 
         $this->_baseFile = $baseFile;
+
+        // If the image is an SVG then we don't need to resize it
+        if (str_ends_with($this->_baseFile, '.svg')) {
+            $this->_newFile = str_replace([
+                Mage::getBaseDir('skin'),
+                '//'
+            ], [
+                Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_SKIN),
+                '/'
+            ], $this->_baseFile);
+            return $this;
+        }
 
         // build new filename (most important params)
         $path = [
@@ -397,7 +409,6 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
                 'quality' . $this->_quality
         ];
 
-        // if has watermark add watermark params to hash
         if ($this->getWatermarkFile()) {
             $miscParams[] = $this->getWatermarkFile();
             $miscParams[] = $this->getWatermarkImageOpacity();
