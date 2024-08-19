@@ -22,6 +22,10 @@ class CommandDiscoverer
                 continue;
             }
 
+            if (str_ends_with($file, 'BaseMahoCommand.php')) {
+                continue;
+            }
+
             $className = $this->getFullyQualifiedClassName($file);
             if (is_subclass_of($className, Command::class)) {
                 $commands[] = new $className();

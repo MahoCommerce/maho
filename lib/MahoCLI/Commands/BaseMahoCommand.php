@@ -5,7 +5,7 @@ namespace MahoCLI\Commands;
 use Mage;
 use Symfony\Component\Console\Command\Command;
 
-class BaseMahoCommand extends Command
+abstract class BaseMahoCommand extends Command
 {
     protected function initMaho(): void
     {
