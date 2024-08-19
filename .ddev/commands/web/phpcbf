@@ -1,7 +1,0 @@
-#!/bin/bash
-
-## Description: run PHPCodeBeautifier
-## Usage: phpcbf
-## Example: ddev phpcbf <path-to-files>
-
-php vendor/bin/phpcbf -s -p --report=full,source,summary "$@"

@@ -1,7 +1,0 @@
-#!/bin/bash
-
-## Description: run PHPCodeSniffer
-## Usage: phpcs
-## Example: ddev phpcs <path-to-files>
-
-php vendor/bin/phpcs -s -p --report=full,summary "$@"

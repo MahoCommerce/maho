@@ -5,17 +5,13 @@
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
-
-# Local History for Visual Studio Code
 .history/
-
-# Built Visual Studio Code Extensions
 *.vsix
 
 # PhpStorm
 .idea
 
-# Openmage config
+# Maho config
 /app/etc/local.xml
 
 # CM Redis
@@ -51,11 +47,3 @@
 
 phpstan*.neon
 !phpstan.dist.*.neon
-
-# dev scripts loaded via composer
-/shell/update-copyright.php
-/shell/translations.php
-
-# DDEV
-.ddev/config.yaml
-.ddev/.sampleData
