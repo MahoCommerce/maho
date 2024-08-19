@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "be847f6fbc378e17b3edc171d3584f7b",
+    "content-hash": "63177e75a2e61da1f7dad30d1fba8464",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -114,6 +114,77 @@
                 "source": "https://github.com/ezyang/htmlpurifier/tree/v4.17.0"
             },
             "time": "2023-11-17T15:01:25+00:00"
+        },
+        {
+            "name": "mahocommerce/maho-composer-plugin",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
+                "reference": "12a714b33a561fd662dcdff737ca655bb698eef4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/12a714b33a561fd662dcdff737ca655bb698eef4",
+                "reference": "12a714b33a561fd662dcdff737ca655bb698eef4",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^2.0"
+            },
+            "default-branch": true,
+            "type": "composer-plugin",
+            "extra": {
+                "class": "Maho\\MahoComposerPlugin"
+            },
+            "autoload": {
+                "psr-4": {
+                    "Maho\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "support": {
+                "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
+                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/main"
+            },
+            "time": "2024-08-19T19:09:39+00:00"
+        },
+        {
+            "name": "mklkj/tinymce-i18n",
+            "version": "24.7.29",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mklkj/tinymce-i18n.git",
+                "reference": "aa81730cb3f626d360e6f07b24fe3a8e9db5a919"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mklkj/tinymce-i18n/zipball/aa81730cb3f626d360e6f07b24fe3a8e9db5a919",
+                "reference": "aa81730cb3f626d360e6f07b24fe3a8e9db5a919",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "TinyMCE Community"
+                }
+            ],
+            "description": "Languages for TinyMCE 4, 5 and 6",
+            "homepage": "https://github.com/mklkj/tinymce-i18n",
+            "keywords": [
+                "i18n",
+                "languages",
+                "tinymce"
+            ],
+            "support": {
+                "issues": "https://github.com/mklkj/tinymce-i18n/issues",
+                "source": "https://github.com/mklkj/tinymce-i18n/tree/24.7.29"
+            },
+            "time": "2024-07-29T13:05:35+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
@@ -1456,6 +1527,65 @@
                 }
             ],
             "time": "2024-07-22T10:25:37+00:00"
+        },
+        {
+            "name": "tinymce/tinymce",
+            "version": "6.8.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tinymce/tinymce-dist.git",
+                "reference": "4d6a5af329af6992bef810fc73d4bb70b8253a6a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/4d6a5af329af6992bef810fc73d4bb70b8253a6a",
+                "reference": "4d6a5af329af6992bef810fc73d4bb70b8253a6a",
+                "shasum": ""
+            },
+            "type": "component",
+            "extra": {
+                "component": {
+                    "scripts": [
+                        "tinymce.js",
+                        "plugins/*/plugin.js",
+                        "themes/*/theme.js",
+                        "models/*/model.js",
+                        "icons/*/icons.js"
+                    ],
+                    "files": [
+                        "tinymce.min.js",
+                        "plugins/*/plugin.min.js",
+                        "themes/*/theme.min.js",
+                        "models/*/model.min.js",
+                        "skins/**",
+                        "icons/*/icons.min.js"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT-only"
+            ],
+            "description": "Web based JavaScript HTML WYSIWYG editor control.",
+            "homepage": "https://www.tiny.cloud/",
+            "keywords": [
+                "contenteditable",
+                "editing",
+                "html",
+                "javascript",
+                "rich editor",
+                "rich text",
+                "rich text editor",
+                "richtext",
+                "rte",
+                "text",
+                "tinymce",
+                "wysiwyg"
+            ],
+            "support": {
+                "source": "https://github.com/tinymce/tinymce-dist/tree/6.8.4"
+            },
+            "time": "2024-06-19T09:28:48+00:00"
         }
     ],
     "packages-dev": [
@@ -3547,6 +3677,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "mahocommerce/maho-composer-plugin": 20,
         "mahocommerce/maho-phpstan-plugin": 20
     },
     "prefer-stable": true,

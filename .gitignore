@@ -23,26 +23,8 @@
 /app/etc/modules/Cm_RedisSession.xml
 /lib/Credis
 
-# Add a base setup for running unit Tests with code coverage and send them to SonarCloud
-# https://github.com/OpenMage/magento-lts/pull/1836
-/dev/testfield
-/dev/tests/clover.xml
-/dev/tests/crap4j.xml
-/dev/tests/junit.xml
-
-# Add Gitpod online IDE config
-# https://github.com/OpenMage/magento-lts/pull/1836
-/dev/gitpod/docker-magento
-/dev/gitpod/.env
-
-# Add development environment setup files and README
-# https://github.com/OpenMage/magento-lts/pull/1012
-/dev/openmage/docker-magento
-/dev/openmage/.env
-/dev/openmage/Caddyfile
-/dev/tests/functional/generated
-/dev/tests/functional/vendor
-
+# pub
+/pub/js/tinymce
 /pub/media/*
 !/pub/media/.htaccess
 !/pub/media/custom_options/.htaccess
@@ -56,16 +38,11 @@
 # composer
 /vendor
 
-# scss-cache
-/skin/*/*/*/scss/.sass-cache
-
 # .phar (n98-magerun, ...)
 *.phar
 
-# PHP-CS-Fixer cache
+# PHP-CS-Fixer
 .php-cs-fixer.cache
-
-# Ignore custom config files
 .php-cs-fixer*
 !.php-cs-fixer.dist.*
 

@@ -25,11 +25,14 @@
         "ext-zlib": "*",
         "cweagans/composer-patches": "^1.7",
         "ezyang/htmlpurifier": "^4.17",
+        "mahocommerce/maho-composer-plugin": "dev-main",
+        "mklkj/tinymce-i18n": "*",
         "pelago/emogrifier": "^7.0",
         "phpseclib/mcrypt_compat": "^2.0.3",
         "phpseclib/phpseclib": "^3.0.14",
         "shardj/zf1-future": "1.24.0",
-        "symfony/console": "^7.1"
+        "symfony/console": "^7.1",
+        "tinymce/tinymce": "^6.8"
     },
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
@@ -67,7 +70,8 @@
     "config": {
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,
-            "cweagans/composer-patches": true
+            "cweagans/composer-patches": true,
+            "mahocommerce/maho-composer-plugin": true
         },
         "platform": {
             "php": "8.2"
