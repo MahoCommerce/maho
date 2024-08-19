@@ -91,6 +91,7 @@ tinyMceWysiwygSetup.prototype =
             branding: false,
             promotion: false,
             convert_urls: false,
+            convert_unsafe_embeds: true,
             relative_urls: true,
             skin: this.config.skin,
             min_height: 460,
