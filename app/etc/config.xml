@@ -25,7 +25,7 @@
                     <host>localhost</host>
                     <username/>
                     <password/>
-                    <dbname>openmage_lts</dbname>
+                    <dbname>maho</dbname>
                     <model>mysql4</model>
                     <initStatements>SET NAMES utf8</initStatements>
                     <type>pdo_mysql</type>

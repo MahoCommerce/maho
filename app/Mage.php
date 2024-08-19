@@ -171,71 +171,7 @@ final class Mage
      */
     public static function getVersion()
     {
-        $i = self::getVersionInfo();
-        return trim("{$i['major']}.{$i['minor']}.{$i['revision']}" . ($i['patch'] != '' ? ".{$i['patch']}" : "")
-                        . "-{$i['stability']}{$i['number']}", '.-');
-    }
-
-    /**
-     * Gets the detailed Magento version information
-     *
-     * @return array
-     * @deprecated
-     */
-    public static function getVersionInfo()
-    {
-        return [
-            'major'     => '1',
-            'minor'     => '9',
-            'revision'  => '4',
-            'patch'     => '5',
-            'stability' => '',
-            'number'    => '',
-        ];
-    }
-
-    /**
-     * Gets the current OpenMage version string
-     * @link https://openmage.github.io/supported-versions.html
-     * @link https://semver.org/
-     */
-    public static function getOpenMageVersion(): string
-    {
-        $info = self::getOpenMageVersionInfo();
-        $versionString = "{$info['major']}.{$info['minor']}.{$info['patch']}";
-
-        if ($info['stability'] && $info['number']) {
-            return "{$versionString}-{$info['stability']}.{$info['number']}";
-        }
-        if ($info['stability']) {
-            return "{$versionString}-{$info['stability']}";
-        }
-        if ($info['number']) {
-            return "{$versionString}-{$info['number']}";
-        }
-
-        return $versionString;
-    }
-
-    /**
-     * Gets the detailed OpenMage version information
-     * @link https://openmage.github.io/supported-versions.html
-     * @link https://semver.org/
-     */
-    public static function getOpenMageVersionInfo(): array
-    {
-        return [
-            'major'     => '21',
-            'minor'     => '0',
-            'patch'     => '0',
-            'stability' => 'beta2', // beta,alpha,rc
-            'number'    => '', // 1,2,3,0.3.7,x.7.z.92 @see https://semver.org/#spec-item-9
-        ];
-    }
-
-    public static function getOpenMageMajorVersion(): int
-    {
-        return 21;
+        return '1.9.4.5';
     }
 
     /**
@@ -247,6 +183,11 @@ final class Mage
     public static function getEdition()
     {
         return self::$_currentEdition;
+    }
+
+    public static function getMahoVersion(): string
+    {
+        return '24.08';
     }
 
     /**

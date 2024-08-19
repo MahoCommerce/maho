@@ -118,36 +118,17 @@ class Mage_Adminhtml_Block_Page_Footer extends Mage_Adminhtml_Block_Template
     /**
      * @param string $url
      * @return $this
-     * @deprecated see setOpenMageProjectUrl()
      */
-    public function setConnectWithMagentoUrl(string $url)
+    public function setMahoProjectUrl(string $url)
     {
-        return $this->setOpenMageProjectUrl($url);
-    }
-
-    /**
-     * @return string
-     * @deprecated see getOpenMageProjectUrl()
-     */
-    public function getConnectWithMagentoUrl(): string
-    {
-        return $this->getOpenMageProjectUrl();
-    }
-
-    /**
-     * @param string $url
-     * @return $this
-     */
-    public function setOpenMageProjectUrl(string $url)
-    {
-        return $this->setData('openmage_project_url', $url);
+        return $this->setData('maho_project_url', $url);
     }
 
     /**
      * @return string
      */
-    public function getOpenMageProjectUrl(): string
+    public function getMahoProjectUrl(): string
     {
-        return (string) $this->_getData('openmage_project_url');
+        return (string) $this->_getData('maho_project_url');
     }
 }

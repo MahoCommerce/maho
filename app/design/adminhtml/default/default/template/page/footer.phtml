@@ -19,10 +19,10 @@
     <?= $this->__('Interface Locale: %s', $this->getLanguageSelect()) ?>
 </p>
 <p class="legality">
-    <a href="<?= $this->getOpenMageProjectUrl() ?>" target="_blank"><?= $this->__('OpenMage Project') ?></a> |
+    <a href="<?= $this->getMahoProjectUrl() ?>" target="_blank">Maho</a> |
     <a href="<?= $this->getReportIssuesUrl() ?>" target="_blank"><?= $this->__('Report Issues') ?></a>
 </p>
-<?= $this->__('OpenMage %s', Mage::getOpenMageVersion()) ?>
+Maho <?= Mage::getMahoVersion() ?>
 <script type="text/javascript">
     function setInterfaceLanguage(evt) {
         var elem = Event.element(evt);
