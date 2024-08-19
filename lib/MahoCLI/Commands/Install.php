@@ -40,14 +40,9 @@ class Install extends BaseMahoCommand
         // Web access options
         $this->addOption('admin_frontname', null, InputOption::VALUE_OPTIONAL, 'Admin panel path, "admin" by default', 'admin');
         $this->addOption('url', null, InputOption::VALUE_REQUIRED, 'URL the store is supposed to be available at');
-        $this->addOption('skip_url_validation', null, InputOption::VALUE_OPTIONAL, 'Skip validating base URL during installation or not. No by default', false);
-        $this->addOption('use_rewrites', null, InputOption::VALUE_OPTIONAL, 'Use Web Server (Apache) Rewrites. Ensure that mod_rewrite is enabled in Apache configuration', false);
         $this->addOption('use_secure', null, InputOption::VALUE_OPTIONAL, 'Use Secure URLs (SSL). Enable this option only if you have SSL available.', false);
         $this->addOption('secure_base_url', null, InputOption::VALUE_OPTIONAL, 'Secure Base URL. Provide a complete base URL for SSL connection. For example: https://mydomain.com/');
         $this->addOption('use_secure_admin', null, InputOption::VALUE_OPTIONAL, 'Run admin interface with SSL', false);
-
-        // Backend interface options
-        $this->addOption('enable_charts', null, InputOption::VALUE_OPTIONAL, 'Enables Charts on the backend\'s dashboard', false);
 
         // Admin user personal information
         $this->addOption('admin_lastname', null, InputOption::VALUE_REQUIRED, 'Admin user last name');

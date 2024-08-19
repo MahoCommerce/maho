@@ -62,11 +62,6 @@ class Mage_Install_Block_Config extends Mage_Install_Block_Abstract
         return Mage::getSingleton('install/session')->getSkipUrlValidation();
     }
 
-    public function getSkipBaseUrlValidation()
-    {
-        return Mage::getSingleton('install/session')->getSkipBaseUrlValidation();
-    }
-
     public function getSessionSaveOptions()
     {
         return [

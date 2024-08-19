@@ -220,9 +220,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
             $data = array_merge($config, $connectionConfig[$config['db_model']]);
 
             Mage::getSingleton('install/session')
-                ->setConfigData($data)
-                ->setSkipUrlValidation($this->getRequest()->getPost('skip_url_validation'))
-                ->setSkipBaseUrlValidation($this->getRequest()->getPost('skip_base_url_validation'));
+                ->setConfigData($data);
             try {
                 $this->_getInstaller()->installConfig($data);
                 $this->_redirect('*/*/installDb');

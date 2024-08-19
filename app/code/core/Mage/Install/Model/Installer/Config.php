@@ -65,9 +65,6 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
             if (strpos($data['unsecure_base_url'], 'http') !== 0) {
                 $data['unsecure_base_url'] = 'http://' . $data['unsecure_base_url'];
             }
-            if (!$this->_getInstaller()->getDataModel()->getSkipBaseUrlValidation()) {
-                $this->_checkUrl($data['unsecure_base_url']);
-            }
         }
         if (isset($data['secure_base_url'])) {
             $data['secure_base_url'] .= substr($data['secure_base_url'], -1) != '/' ? '/' : '';
@@ -144,6 +141,7 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
      * @return $this
      * @throws Mage_Core_Exception
      * @throws Zend_Http_Client_Exception
+     * @deprecated
      */
     protected function _checkUrl($url, $secure = false)
     {
