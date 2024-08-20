@@ -377,13 +377,11 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
         // If the image is an SVG then we don't need to resize it
         if (str_ends_with($this->_baseFile, '.svg')) {
-            $this->_newFile = str_replace([
-                Mage::getBaseDir('skin'),
-                '//'
-            ], [
+            $this->_newFile = str_replace(
+                Mage::getBaseDir('skin') . '/',
                 Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_SKIN),
-                '/'
-            ], $this->_baseFile);
+                $this->_baseFile
+            );
             return $this;
         }
 

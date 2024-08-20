@@ -350,6 +350,10 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
                 $model->setBaseFile($this->getProduct()->getData($model->getDestinationSubdir()));
             }
 
+            if (str_ends_with($model->getBaseFile(), '.svg')) {
+                return $model->getNewFile();
+            }
+
             if ($model->isCached()) {
                 return $model->getUrl();
             } else {

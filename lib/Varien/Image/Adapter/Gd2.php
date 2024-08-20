@@ -414,18 +414,6 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
 
     public function rotate($angle)
     {
-        /*
-                $isAlpha = false;
-                $backgroundColor = $this->_getTransparency($this->_imageHandler, $this->_fileType, $isAlpha);
-                list($r, $g, $b) = $this->_backgroundColor;
-                if ($isAlpha) {
-                    $backgroundColor = imagecolorallocatealpha($this->_imageHandler, 0, 0, 0, 127);
-                }
-                elseif (false === $backgroundColor) {
-                    $backgroundColor = imagecolorallocate($this->_imageHandler, $r, $g, $b);
-                }
-                $this->_imageHandler = imagerotate($this->_imageHandler, $angle, $backgroundColor);
-        //*/
         $this->_imageHandler = imagerotate($this->_imageHandler, $angle, $this->imageBackgroundColor);
         $this->refreshImageDimensions();
     }
