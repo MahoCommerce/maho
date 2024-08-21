@@ -24,20 +24,12 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
+          extensions: mbstring #optional, setup extensions
+          ini-values: post_max_size=256M, short_open_tag=On #optional, setup php.ini configuration
+          coverage: none #optional, setup coverage driver
 
-      - name: Get list of modified PHP files
-        id: modified_files
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            MODIFIED_FILES=$(git diff --name-only --diff-filter=AMR ${{ github.base_ref }}..${{ github.head_ref }} | grep -E '\.php$|\.phtml$' || true)
-          else
-            MODIFIED_FILES=$(find . -type f \( -name "*.php" -o -name "*.phtml" \) || true)
-          fi
-          echo "files=$MODIFIED_FILES" >> $GITHUB_ENV
+      - name: Check .php files
+        run: '! find . -not \( -path ./.phpstorm.meta.php -prune \) -type f -name "*.php" -exec php -d error_reporting=32767 -l {} \; 2>&1 1> /dev/null | grep "^"'
 
-      - name: Check .php and .phtml files
-        if: env.files != ''
-        run: |
-          for file in ${{ env.files }}; do
-            php -d error_reporting=32767 -l "$file"
-          done
+      - name: Check .phtml files
+        run: '! find app/design -type f -name "*.phtml" -exec php -d error_reporting=32767 -l {} \; 2>&1 1> /dev/null | grep "^"'
