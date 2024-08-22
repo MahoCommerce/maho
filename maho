@@ -11,6 +11,7 @@ use Symfony\Component\Console\Application;
 $application = new Application('');
 
 $application->add(new \MahoCLI\Commands\AdminUserList());
+$application->add(new \MahoCLI\Commands\AdminUserCreate());
 $application->add(new \MahoCLI\Commands\AdminUserChangepassword());
 $application->add(new \MahoCLI\Commands\AdminUserEnable());
 $application->add(new \MahoCLI\Commands\AdminUserDisable());
