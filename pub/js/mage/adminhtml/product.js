@@ -432,11 +432,13 @@ Product.Configurable.prototype = {
             Event.observe(li.down('.attribute-use-default-label'), 'change', this.onLabelUpdate);
         }.bind(this));
         if (!this.readonly) {
-            // Creation of sortable for attributes sorting
-            Sortable.create(this.container, {
-                handle: 'attribute-name-container',
-                onUpdate: this.updatePositions.bind(this)
+            sortable(this.container, {
+                handle: '.attribute-name-container',
+                items: ':not(.disabled)',
+                forcePlaceholderSize: true
             });
+
+            this.container.addEventListener('sortupdate', this.updatePositions.bind(this));
         }
         this.updateSaveInput();
     },
