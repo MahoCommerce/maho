@@ -221,7 +221,7 @@ Object.extend(Validation, {
             advice.style.display = 'block';
         } else {
             if(!advice._adviceAbsolutize) {
-                new Effect.Appear(advice, {duration : 1 });
+                advice.show();
             } else {
                 Position.absolutize(advice);
                 advice.show();
@@ -237,11 +237,7 @@ Object.extend(Validation, {
     },
     hideAdvice : function(elm, advice){
         if (advice != null) {
-            if(typeof Effect == 'undefined') {
-                advice.hide();
-            } else {
-                new Effect.Fade(advice, {duration : 1, afterFinishInternal : function() {advice.hide();}});
-            }
+            advice.hide();
         }
     },
     updateCallback : function(elm, status) {
