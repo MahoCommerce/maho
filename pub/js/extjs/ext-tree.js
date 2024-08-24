@@ -1190,6 +1190,12 @@ Ext.lib.Anim = function(){
                 }
             }
             var anim = createAnim(cb, scope);
+            anim.effect = new Effect.Morph(Ext.id(el), {
+                duration: duration,
+                afterFinish: anim.proxyCallback,
+                transition: easings[easing] || Effect.Transitions.linear,
+                style: o
+            });
             return anim;
         }
     };
