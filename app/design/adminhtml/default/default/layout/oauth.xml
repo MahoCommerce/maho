@@ -66,7 +66,7 @@
             </action>
         </reference>
         <reference name="head">
-            <action method="removeItem"><type>js</type><name>prototype/window.js</name></action>
+            <action method="removeItem"><type>js</type><name>maho-dialog.js</name></action>
             <action method="removeItem"><type>js</type><name>varien/js.js</name></action>
             <action method="removeItem"><type>js</type><name>mage/adminhtml/hash.js</name></action>
             <action method="removeItem"><type>js</type><name>mage/adminhtml/events.js</name></action>
@@ -87,6 +87,7 @@
 
             <action method="removeItem"><type>js</type><name>calendar/calendar.js</name></action>
             <action method="removeItem"><type>js</type><name>calendar/calendar-setup.js</name></action>
+            <action method="removeItem"><type>js</type><name>maho-effects.js</name></action>
             <action method="removeItem"><type>js</type><name>extjs/ext-tree.min.js</name></action>
             <action method="removeItem"><type>js</type><name>extjs/fix-defer.js</name></action>
             <action method="removeItem"><type>js</type><name>extjs/ext-tree-checkbox.js</name></action>
