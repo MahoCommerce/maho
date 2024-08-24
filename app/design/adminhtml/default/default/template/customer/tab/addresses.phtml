@@ -325,8 +325,6 @@ addressesModel.prototype = {
             $('form_'+item.id).changeRelation = item;
             $('form_'+item.id).addressItem = item;
             Element.show($('form_'+item.id));
-            //new Effect.Appear($('form_'+item.id), {duration : 0.3 });
-            //$('form_'+item.id).focus();
             this.addFieldChangeObserver($('form_'+item.id));
             var regionIdElement = $('_item' + item.id.replace(/address_item_/, '').replace(new RegExp(this.baseItemId), '') + 'region_id');
             var regionElement = $('_item' + item.id.replace(/address_item_/, '').replace(new RegExp(this.baseItemId), '') + 'region');
