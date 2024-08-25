@@ -51,7 +51,7 @@ var widgetTools = {
             id:'widget_window',
             onClose: this.closeDialog.bind(this)
         });
-        new Ajax.Updater('modal_dialog_message', widgetUrl, {evalScripts: true});
+        new Ajax.Updater(document.querySelector('#' + this.dialogWindow.id + ' .dialog-content'), widgetUrl, {evalScripts: true});
     },
     closeDialog: function(window) {
         if (!window) {

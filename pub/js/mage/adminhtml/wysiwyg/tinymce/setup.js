@@ -95,6 +95,14 @@ tinyMceWysiwygSetup.prototype =
             relative_urls: true,
             skin: this.config.skin,
             min_height: 460,
+            init_instance_callback: function (editor) {
+                // hack for tinymce inside dialog HTML element
+                const dialogContainer = editor.editorContainer.closest('dialog')
+                if (dialogContainer) {
+                    const auxElements = document.querySelectorAll('body > .tox-tinymce-aux')
+                    if (auxElements.length) dialogContainer.append(auxElements[auxElements.length - 1])
+                }
+            },
             urlconverter_callback: (url, node, on_save, name) => {
                 // some callback here to convert urls
                 //url = this.decodeContent(url);

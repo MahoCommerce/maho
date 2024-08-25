@@ -42,6 +42,9 @@
             overflow-y: auto;
             padding: 20px;
         }
+        .dialog-content:has(.wrapper-popup) {
+            padding: 0;
+        }
         .dialog-buttons {
             display: flex;
             justify-content: flex-end;
@@ -72,18 +75,21 @@
     document.head.appendChild(style);
 
     function createDialog(options) {
+        const dialogCount = document.querySelectorAll('dialog').length;
         const dialog = document.createElement('dialog');
+        dialog.id = `dialog-${dialogCount + 1}`;
+        dialog.options = options;
         dialog.innerHTML = `
-            <div class="dialog-header popup-window" id="browser_window">
+            <div class="dialog-header">
                 <h2>${options.title || ''}</h2>
             </div>
-            <div class="dialog-content" id="modal_dialog_message">${options.content || ''}</div>
+            <div class="dialog-content">${options.content || ''}</div>
         `;
         if (options.ok || options.cancel) {
             dialog.innerHTML = dialog.innerHTML + `
             <div class="dialog-buttons">
-                ${options.cancel ? '<button id="dialog-cancel">Cancel</button>' : ''}
-                ${options.ok ? `<button id="dialog-ok">${options.okLabel || "OK"}</button>` : ''}
+                ${options.cancel ? `<button id="${dialog.id}-cancel">Cancel</button>` : ''}
+                ${options.ok ? `<button id="${dialog.id}-ok">${options.okLabel || "OK"}</button>` : ''}
             </div>
         `;
         }
@@ -99,24 +105,24 @@
 
         function closeDialog(action) {
             if (action === 'ok' && typeof options.ok === 'function') {
-                options.ok();
+                options.ok(dialog);
             } else if (action === 'cancel' && typeof options.cancel === 'function') {
-                options.cancel();
+                options.cancel(dialog);
             }
 
             dialog.close();
             dialog.remove();
 
             if (typeof options.onClose === 'function') {
-                options.onClose();
+                options.onClose(dialog);
             }
         }
 
         if (options.ok) {
-            dialog.querySelector('#dialog-ok').addEventListener('click', () => closeDialog('ok'));
+            dialog.querySelector(`#${dialog.id}-ok`).addEventListener('click', () => closeDialog('ok'));
         }
         if (options.cancel) {
-            dialog.querySelector('#dialog-cancel').addEventListener('click', () => closeDialog('cancel'));
+            dialog.querySelector(`#${dialog.id}-cancel`).addEventListener('click', () => closeDialog('cancel'));
         }
 
         dialog.addEventListener('close', () => {
@@ -127,7 +133,13 @@
 
         dialog.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
-                closeDialog('cancel');
+                event.preventDefault();
+                const openDialogs = document.querySelectorAll('dialog[open]');
+                if (openDialogs.length > 0) {
+                    const dialog = openDialogs[openDialogs.length - 1];
+                    dialog.close();
+                    dialog.remove;
+                }
             }
         });
 
@@ -147,11 +159,13 @@
         return createDialog({ ...options, content });
     };
 
+    Windows.focus = Dialog.focus = function() {};
     Windows.close = Dialog.close = function() {
-        const openDialog = document.querySelector('dialog[open]');
-        if (openDialog) {
-            openDialog.close();
-            openDialog.remove();
+        const openDialogs = document.querySelectorAll('dialog[open]');
+        if (openDialogs.length > 0) {
+            const dialog = openDialogs[openDialogs.length - 1];
+            dialog.close();
+            dialog.remove;
         }
     };
 })();
