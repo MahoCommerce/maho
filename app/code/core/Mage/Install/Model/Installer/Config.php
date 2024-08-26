@@ -71,12 +71,6 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
             if (strpos($data['secure_base_url'], 'http') !== 0) {
                 $data['secure_base_url'] = 'https://' . $data['secure_base_url'];
             }
-
-            if (!empty($data['use_secure'])
-                && !$this->_getInstaller()->getDataModel()->getSkipUrlValidation()
-            ) {
-                $this->_checkUrl($data['secure_base_url']);
-            }
         }
 
         $data['date']   = self::TMP_INSTALL_DATE_VALUE;
