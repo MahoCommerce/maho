@@ -85,6 +85,17 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
         foreach ($data as $index => $value) {
             $template = str_replace('{{' . $index . '}}', '<![CDATA[' . $value . ']]>', $template);
         }
+
+        $localXmlDir = dirname($this->_localConfigFile);
+        if (!file_exists($localXmlDir)) {
+            if (!mkdir($localXmlDir, 0777, true)) {
+                Mage::throwException("Error creating $localXmlDir folder.");
+            }
+        }
+        if (!is_writable($localXmlDir)) {
+            Mage::throwException("$localXmlDir is not writable.");
+        }
+
         file_put_contents($this->_localConfigFile, $template);
         chmod($this->_localConfigFile, 0777);
     }
