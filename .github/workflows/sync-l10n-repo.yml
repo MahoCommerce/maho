@@ -1,4 +1,4 @@
-name: Sync Locales
+name: Sync L10N Repo
 
 on:
   push:
@@ -25,13 +25,13 @@ jobs:
       - name: Checkout main repo
         uses: actions/checkout@v2
         with:
-          path: main-repo
+          path: maho
 
       - name: Checkout l10n repo
         uses: actions/checkout@v2
         with:
           repository: MahoCommerce/maho-l10n
-          path: l10n-repo
+          path: maho-l10n
           token: ${{ steps.generate_token.outputs.token }}
 
       - name: Set up Git
@@ -41,7 +41,7 @@ jobs:
 
       - name: Copy changed files
         run: |
-          cd main-repo
+          cd maho
           if [[ "${{ github.event_name }}" == "push" ]]; then
             changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^app/locale/en_US/')
           else
@@ -50,8 +50,8 @@ jobs:
           if [ -n "$changed_files" ]; then
             echo "Changed files: $changed_files"
             for file in $changed_files; do
-              mkdir -p "../l10n-repo/$(dirname $file)"
-              cp "$file" "../l10n-repo/$file"
+              mkdir -p "../maho-l10n/$(dirname $file)"
+              cp "$file" "../maho-l10n/$file"
             done
           else
             echo "No changes in app/locale/en_US/"
@@ -60,7 +60,7 @@ jobs:
 
       - name: Create Pull Request
         run: |
-          cd l10n-repo
+          cd maho-l10n
           git checkout -b update-locales
           git add .
           git commit -m "Update locales from main repo" || exit 0
