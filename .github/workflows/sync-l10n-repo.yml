@@ -21,6 +21,10 @@ jobs:
           private-key: ${{ secrets.SYNC_L10N_APP_PRIVATE_KEY }}
           owner: MahoCommerce
 
+      - name: Set date
+        id: date
+        run: echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
       - name: Checkout main repo
         uses: actions/checkout@v4
         with:
@@ -38,6 +42,14 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Prepare new branch
+        run: |
+          cd maho-l10n
+          git fetch origin
+          git checkout main
+          git pull origin main
+          git checkout -b tmp-${{ steps.date.outputs.DATE }}
 
       - name: Copy changed files
         run: |
@@ -61,10 +73,9 @@ jobs:
       - name: Create Pull Request
         run: |
           cd maho-l10n
-          git checkout -b update-locales
           git add .
-          git commit -m "Update locales from main repo" || exit 0
-          git push --set-upstream origin update-locales
-          gh pr create --title "Update locales from main repo" --body "This PR updates the locales from the main repository." --repo MahoCommerce/maho-l10n
+          git commit -m "Update locales from main repo - ${{ steps.date.outputs.DATE }}" || exit 0
+          git push -f origin tmp-${{ steps.date.outputs.DATE }}
+          gh pr create --title "Update locales from main repo - ${{ steps.date.outputs.DATE }}" --body "This PR updates the locales from the main repository." --repo MahoCommerce/maho-l10n || true
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
