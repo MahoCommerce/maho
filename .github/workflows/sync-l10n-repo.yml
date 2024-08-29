@@ -1,0 +1,70 @@
+name: Sync Locales
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/locale/en_US/**'
+  schedule:
+    - cron: '0 0 * * *'  # Run every day at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  sync-locales:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.SYNC_L10N_APP_ID }}
+          private-key: ${{ secrets.SYNC_L10N_APP_PRIVATE_KEY }}
+          owner: MahoCommerce
+
+      - name: Checkout main repo
+        uses: actions/checkout@v2
+        with:
+          path: main-repo
+
+      - name: Checkout l10n repo
+        uses: actions/checkout@v2
+        with:
+          repository: MahoCommerce/maho-l10n
+          path: l10n-repo
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Set up Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Copy changed files
+        run: |
+          cd main-repo
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^app/locale/en_US/')
+          else
+            changed_files=$(find app/locale/en_US/ -type f)
+          fi
+          if [ -n "$changed_files" ]; then
+            echo "Changed files: $changed_files"
+            for file in $changed_files; do
+              mkdir -p "../l10n-repo/$(dirname $file)"
+              cp "$file" "../l10n-repo/$file"
+            done
+          else
+            echo "No changes in app/locale/en_US/"
+            exit 0
+          fi
+
+      - name: Create Pull Request
+        run: |
+          cd l10n-repo
+          git checkout -b update-locales
+          git add .
+          git commit -m "Update locales from main repo" || exit 0
+          git push --set-upstream origin update-locales
+          gh pr create --title "Update locales from main repo" --body "This PR updates the locales from the main repository." --repo MahoCommerce/maho-l10n
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
