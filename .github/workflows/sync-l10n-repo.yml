@@ -8,7 +8,6 @@ on:
   schedule:
     - cron: '0 0 * * *'  # Run every day at midnight UTC
   workflow_dispatch:
-
 jobs:
   sync-locales:
     runs-on: ubuntu-latest
@@ -20,29 +19,24 @@ jobs:
           app-id: ${{ secrets.SYNC_L10N_APP_ID }}
           private-key: ${{ secrets.SYNC_L10N_APP_PRIVATE_KEY }}
           owner: MahoCommerce
-
       - name: Set date
         id: date
         run: echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-
       - name: Checkout main repo
         uses: actions/checkout@v4
         with:
           path: maho
           fetch-depth: 0
-
       - name: Checkout l10n repo
         uses: actions/checkout@v4
         with:
           repository: MahoCommerce/maho-l10n
           path: maho-l10n
           token: ${{ steps.generate_token.outputs.token }}
-
       - name: Set up Git
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
       - name: Prepare new branch
         run: |
           cd maho-l10n
@@ -50,7 +44,6 @@ jobs:
           git checkout main
           git pull origin main
           git checkout -b tmp-${{ steps.date.outputs.DATE }}
-
       - name: Copy changed files
         run: |
           cd maho
@@ -62,14 +55,15 @@ jobs:
           if [ -n "$changed_files" ]; then
             echo "Changed files: $changed_files"
             for file in $changed_files; do
-              mkdir -p "../maho-l10n/$(dirname $file)"
-              cp "$file" "../maho-l10n/$file"
+              # Remove 'app/locale/' prefix and create the new path
+              new_path="../maho-l10n/${file#app/locale/}"
+              mkdir -p "$(dirname "$new_path")"
+              cp "$file" "$new_path"
             done
           else
             echo "No changes in app/locale/en_US/"
             exit 0
           fi
-
       - name: Create Pull Request
         run: |
           cd maho-l10n
