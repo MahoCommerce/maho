@@ -37,16 +37,16 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
      */
     public function indexAction()
     {
-        $this->_title($this->__('System'))
-             ->_title($this->__('Web Services'))
-             ->_title($this->__('REST Roles'));
-
-        $this->loadLayout()->_setActiveMenu('system/services/roles');
-        $this->_addBreadcrumb($this->__('Web services'), $this->__('Web services'));
-        $this->_addBreadcrumb($this->__('REST Roles'), $this->__('REST Roles'));
-        $this->_addBreadcrumb($this->__('Roles'), $this->__('Roles'));
-
-        $this->renderLayout();
+        $this
+            ->_title($this->__('System'))
+            ->_title($this->__('Web Services'))
+            ->_title($this->__('REST Roles'))
+            ->loadLayout()
+            ->_setActiveMenu('system/api/rest_roles')
+            ->_addBreadcrumb($this->__('Web services'), $this->__('Web services'))
+            ->_addBreadcrumb($this->__('REST Roles'), $this->__('REST Roles'))
+            ->_addBreadcrumb($this->__('Roles'), $this->__('Roles'))
+            ->renderLayout();
     }
 
     /**
@@ -78,22 +78,18 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
      */
     public function newAction()
     {
-        $this->_title($this->__('System'))
-             ->_title($this->__('Web Services'))
-             ->_title($this->__('Rest Roles'));
-
-        $this->loadLayout()->_setActiveMenu('system/services/roles');
-        $this->_addBreadcrumb($this->__('Web services'), $this->__('Web services'));
-        $this->_addBreadcrumb($this->__('REST Roles'), $this->__('REST Roles'));
-        $this->_addBreadcrumb($this->__('Roles'), $this->__('Roles'));
-
-        $breadCrumb = $this->__('Add New Role');
-        $breadCrumbTitle = $this->__('Add New Role');
-        $this->_title($this->__('New Role'));
-
-        $this->_addBreadcrumb($breadCrumb, $breadCrumbTitle);
-
-        $this->renderLayout();
+        $this
+            ->_title($this->__('System'))
+            ->_title($this->__('Web Services'))
+            ->_title($this->__('Rest Roles'))
+            ->loadLayout()
+            ->_setActiveMenu('system/api/rest_roles')
+            ->_addBreadcrumb($this->__('Web services'), $this->__('Web services'))
+            ->_addBreadcrumb($this->__('REST Roles'), $this->__('REST Roles'))
+            ->_addBreadcrumb($this->__('Roles'), $this->__('Roles'))
+            ->_title($this->__('New Role'))
+            ->_addBreadcrumb($this->__('Add New Role'), $this->__('Add New Role'))
+            ->renderLayout();
     }
 
     /**
@@ -111,11 +107,12 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
             return;
         }
 
-        $this->loadLayout()->_setActiveMenu('system/services/roles');
-
-        $this->_title($this->__('System'))
-             ->_title($this->__('Web Services'))
-             ->_title($this->__('Rest Roles'));
+        $this
+            ->loadLayout()
+            ->_setActiveMenu('system/api/rest_roles')
+            ->_title($this->__('System'))
+            ->_title($this->__('Web Services'))
+            ->_title($this->__('Rest Roles'));
 
         $breadCrumb = $this->__('Edit Role');
         $breadCrumbTitle = $this->__('Edit Role');

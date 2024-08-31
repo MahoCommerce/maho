@@ -43,17 +43,16 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
      */
     public function indexAction()
     {
-        $this->_title($this->__('System'))
-             ->_title($this->__('Web Services'))
-             ->_title($this->__('REST Attributes'));
-
-        $this->loadLayout()->_setActiveMenu('system/services/attributes');
-
-        $this->_addBreadcrumb($this->__('Web services'), $this->__('Web services'))
+        $this
+            ->_title($this->__('System'))
+            ->_title($this->__('Web Services'))
+            ->_title($this->__('REST Attributes'))
+            ->loadLayout()
+            ->_setActiveMenu('system/api/rest_attributes')
+            ->_addBreadcrumb($this->__('Web services'), $this->__('Web services'))
             ->_addBreadcrumb($this->__('REST Attributes'), $this->__('REST Attributes'))
-            ->_addBreadcrumb($this->__('Attributes'), $this->__('Attributes'));
-
-        $this->renderLayout();
+            ->_addBreadcrumb($this->__('Attributes'), $this->__('Attributes'))
+            ->renderLayout();
     }
 
     /**
@@ -62,7 +61,7 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
     public function editAction()
     {
         $this->loadLayout()
-            ->_setActiveMenu('system/services/attributes');
+            ->_setActiveMenu('system/api/rest_attributes');
 
         $type = $this->getRequest()->getParam('type');
 

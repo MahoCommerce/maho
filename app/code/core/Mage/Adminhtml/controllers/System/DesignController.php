@@ -38,12 +38,12 @@ class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_A
 
     public function indexAction()
     {
-        $this->_title($this->__('System'))->_title($this->__('Design'));
-
-        $this->loadLayout();
-        $this->_setActiveMenu('system');
-        $this->_addContent($this->getLayout()->createBlock('adminhtml/system_design'));
-        $this->renderLayout();
+        $this
+            ->_title($this->__('System'))->_title($this->__('Design'))
+            ->loadLayout()
+            ->_setActiveMenu('system/design')
+            ->_addContent($this->getLayout()->createBlock('adminhtml/system_design'))
+            ->renderLayout();
     }
 
     public function gridAction()
@@ -58,10 +58,12 @@ class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_A
 
     public function editAction()
     {
-        $this->_title($this->__('System'))->_title($this->__('Design'));
+        $this
+            ->_title($this->__('System'))
+            ->_title($this->__('Design'))
+            ->loadLayout()
+            ->_setActiveMenu('system/design');
 
-        $this->loadLayout();
-        $this->_setActiveMenu('system');
         $this->getLayout()->getBlock('head')->setCanLoadExtJs(true);
 
         $id  = (int) $this->getRequest()->getParam('id');
