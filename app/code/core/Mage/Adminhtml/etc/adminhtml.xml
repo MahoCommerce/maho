@@ -121,7 +121,7 @@
                 <title>Allow everything</title>
             </all>
             <admin translate="title" module="adminhtml">
-                <title>OpenMage Admin</title>
+                <title>Maho Admin</title>
                 <children>
                     <dashboard translate="title">
                         <title>Dashboard</title>
