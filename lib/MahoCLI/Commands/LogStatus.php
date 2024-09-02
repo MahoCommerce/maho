@@ -20,10 +20,10 @@ class LogStatus extends BaseMahoCommand
         $this->initMaho();
         $table = new Table($output);
         $table->setHeaders([
-            "Table name",
-            "Row count",
-            "Data size",
-            "Index size"
+            'Table name',
+            'Row count',
+            'Data size',
+            'Index size'
         ]);
 
         $logResource = Mage::getModel('log/log')->getResource();

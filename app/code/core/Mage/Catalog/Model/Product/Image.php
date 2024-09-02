@@ -248,7 +248,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         $memoryLimit = trim(strtoupper(ini_get('memory_limit')));
 
         if (!isset($memoryLimit[0])) {
-            $memoryLimit = "128M";
+            $memoryLimit = '128M';
         }
 
         return ini_parse_quantity($memoryLimit);
@@ -353,7 +353,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
             } else {
                 // replace file with skin or default skin placeholder
                 $skinBaseDir     = Mage::getDesign()->getSkinBaseDir();
-                $skinPlaceholder = "/images/catalog/product/placeholder.svg";
+                $skinPlaceholder = '/images/catalog/product/placeholder.svg';
                 $file = $skinPlaceholder;
                 if (file_exists($skinBaseDir . $file)) {
                     $baseDir = $skinBaseDir;
@@ -575,7 +575,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     public function getUrl()
     {
         $baseDir = Mage::getBaseDir('media');
-        $path = str_replace($baseDir . DS, "", $this->_newFile);
+        $path = str_replace($baseDir . DS, '', $this->_newFile);
         return Mage::getBaseUrl('media') . str_replace(DS, '/', $path);
     }
 

@@ -59,7 +59,7 @@ class CronRun extends BaseMahoCommand
             return Command::FAILURE;
         }
         if (!preg_match(Mage_Cron_Model_Observer::REGEX_RUN_MODEL, (string)$runConfig['model'], $run)) {
-            $output->writeln("<error>Invalid model/method definition, expecting \"model/class::method\"</error>");
+            $output->writeln('<error>Invalid model/method definition, expecting "model/class::method"</error>');
             return Command::FAILURE;
         }
         if (!($model = Mage::getModel($run[1])) || !method_exists($model, $run[2])) {

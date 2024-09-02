@@ -38,7 +38,7 @@ class CustomerDelete extends BaseMahoCommand
             ->addAttributeToFilter('email', ['eq' => $email]);
 
         if ($customers->getSize() == 0) {
-            $output->writeln("<error>Customer not found.</error>");
+            $output->writeln('<error>Customer not found.</error>');
             return Command::FAILURE;
         }
 
@@ -51,7 +51,7 @@ class CustomerDelete extends BaseMahoCommand
         }
 
         $output->writeln('');
-        $output->writeln("<comment>More than one customer matches your search:</comment>");
+        $output->writeln('<comment>More than one customer matches your search:</comment>');
         $table = new Table($output);
         $table->setHeaders($customerAttributes);
 
@@ -70,18 +70,18 @@ class CustomerDelete extends BaseMahoCommand
         $customerId = $questionHelper->ask($input, $output, $question);
         $customerId = trim($customerId);
 
-        if ($customerId === "A") {
+        if ($customerId === 'A') {
             foreach ($customers as $customer) {
                 $customer->delete();
             }
-            $output->writeln("<info>Customers deleted.</info>");
+            $output->writeln('<info>Customers deleted.</info>');
             return Command::SUCCESS;
         }
 
         $customer = Mage::getModel('customer/customer')
             ->load($customerId);
         if (!$customer->getId()) {
-            $output->writeln("<error>Customer not found.</error>");
+            $output->writeln('<error>Customer not found.</error>');
             return Command::FAILURE;
         }
 

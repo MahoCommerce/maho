@@ -40,7 +40,7 @@ class Mage_Adminhtml_Block_Checkout_Formkey extends Mage_Adminhtml_Block_Templat
      */
     public function getSecurityAdminUrl()
     {
-        return Mage::helper("adminhtml")->getUrl('adminhtml/system_config/edit/section/admin');
+        return Mage::helper('adminhtml')->getUrl('adminhtml/system_config/edit/section/admin');
     }
 
     /**
@@ -48,6 +48,6 @@ class Mage_Adminhtml_Block_Checkout_Formkey extends Mage_Adminhtml_Block_Templat
      */
     public function getEnableCSRFUrl()
     {
-        return Mage::helper("adminhtml")->getUrl('adminhtml/system_config/edit/section/system');
+        return Mage::helper('adminhtml')->getUrl('adminhtml/system_config/edit/section/system');
     }
 }

@@ -21,7 +21,7 @@ class CacheEnable extends BaseMahoCommand
         $db = Mage::getSingleton('core/resource')->getConnection('core_write');
         $db->query('update core_cache_option set value=1');
 
-        $output->writeln("Caches enabled successfully!");
+        $output->writeln('Caches enabled successfully!');
         return Command::SUCCESS;
     }
 }

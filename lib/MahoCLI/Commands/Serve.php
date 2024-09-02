@@ -28,7 +28,7 @@ class Serve extends BaseMahoCommand
 
         $output->writeln("Serving Maho on http://{$host}:{$port}, press CTRL+C to exit...");
         passthru("php -t {$host}:{$port} -t {$docroot}");
-        $output->writeln("Process interrupted.");
+        $output->writeln('Process interrupted.');
 
         return Command::SUCCESS;
     }

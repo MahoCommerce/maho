@@ -46,7 +46,7 @@ class CustomerChangepassword extends BaseMahoCommand
             ->addAttributeToFilter('email', ['eq' => $email]);
 
         if ($customers->getSize() == 0) {
-            $output->writeln("<error>Customer not found.</error>");
+            $output->writeln('<error>Customer not found.</error>');
             return Command::FAILURE;
         }
 
@@ -60,7 +60,7 @@ class CustomerChangepassword extends BaseMahoCommand
         }
 
         $output->writeln('');
-        $output->writeln("<comment>More than one customer matches your search:</comment>");
+        $output->writeln('<comment>More than one customer matches your search:</comment>');
         $table = new Table($output);
         $table->setHeaders($customerAttributes);
 
@@ -82,7 +82,7 @@ class CustomerChangepassword extends BaseMahoCommand
         $customer = Mage::getModel('customer/customer')
             ->load($customerId);
         if (!$customer->getId()) {
-            $output->writeln("<error>Customer not found.</error>");
+            $output->writeln('<error>Customer not found.</error>');
             return Command::FAILURE;
         }
 

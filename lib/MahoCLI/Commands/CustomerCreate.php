@@ -64,7 +64,7 @@ class CustomerCreate extends BaseMahoCommand
         }
         $question = new ChoiceQuestion('Website: ', $websites);
         $website = $questionHelper->ask($input, $output, $question);
-        $website = explode(" - ", $website)[0];
+        $website = explode(' - ', $website)[0];
         $website = Mage::getModel('core/website')->load($website, 'code');
         if (!$website->getId()) {
             $output->writeln('<error>Website not found</error>');
