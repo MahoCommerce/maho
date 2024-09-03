@@ -151,16 +151,16 @@
         },
         {
             "name": "mklkj/tinymce-i18n",
-            "version": "24.8.26",
+            "version": "24.9.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mklkj/tinymce-i18n.git",
-                "reference": "3bf369aa4b85c1b162bd5a7bbbd52e84c8c18b42"
+                "reference": "2601ec394482faee8569837f62543b81f76a5d03"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mklkj/tinymce-i18n/zipball/3bf369aa4b85c1b162bd5a7bbbd52e84c8c18b42",
-                "reference": "3bf369aa4b85c1b162bd5a7bbbd52e84c8c18b42",
+                "url": "https://api.github.com/repos/mklkj/tinymce-i18n/zipball/2601ec394482faee8569837f62543b81f76a5d03",
+                "reference": "2601ec394482faee8569837f62543b81f76a5d03",
                 "shasum": ""
             },
             "type": "library",
@@ -182,9 +182,9 @@
             ],
             "support": {
                 "issues": "https://github.com/mklkj/tinymce-i18n/issues",
-                "source": "https://github.com/mklkj/tinymce-i18n/tree/24.8.26"
+                "source": "https://github.com/mklkj/tinymce-i18n/tree/24.9.2"
             },
-            "time": "2024-08-26T10:56:03+00:00"
+            "time": "2024-09-02T10:20:33+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
@@ -2241,16 +2241,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.12.0",
+            "version": "1.12.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "384af967d35b2162f69526c7276acadce534d0e1"
+                "reference": "d8ed7fffa66de1db0d2972267d8ed1d8fa0fe5a2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/384af967d35b2162f69526c7276acadce534d0e1",
-                "reference": "384af967d35b2162f69526c7276acadce534d0e1",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/d8ed7fffa66de1db0d2972267d8ed1d8fa0fe5a2",
+                "reference": "d8ed7fffa66de1db0d2972267d8ed1d8fa0fe5a2",
                 "shasum": ""
             },
             "require": {
@@ -2295,7 +2295,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-08-27T09:18:05+00:00"
+            "time": "2024-09-03T19:55:22+00:00"
         },
         {
             "name": "psr/event-dispatcher",
