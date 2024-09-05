@@ -65,6 +65,3 @@ parameters:
     treatPhpDocTypesAsCertain: false
     typeAliases:
         Cm_RedisSession_Model_Session: 'Mage_Core_Model_Resource_Session'
-
-#    universalObjectCratesClasses:
-#        - Varien_Object
