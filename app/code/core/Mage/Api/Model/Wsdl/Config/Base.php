@@ -44,7 +44,7 @@ class Mage_Api_Model_Wsdl_Config_Base extends Varien_Simplexml_Config
         // set up default WSDL template variables
         $this->_wsdlVariables = new Varien_Object(
             [
-                'name' => 'OpenMage',
+                'name' => 'Maho',
                 'url'  => Mage::helper('api')->getServiceUrl('*/*/*', ['_query' => $queryParams], true)
             ]
         );

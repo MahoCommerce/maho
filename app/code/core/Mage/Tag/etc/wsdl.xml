@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns:typens="urn:OpenMage" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+<definitions xmlns:typens="urn:Maho" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
     xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns="http://schemas.xmlsoap.org/wsdl/"
-    name="OpenMage" targetNamespace="urn:OpenMage">
+    name="Maho" targetNamespace="urn:Maho">
     <types>
-        <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:OpenMage">
+        <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:Maho">
             <complexType name="catalogProductTagListEntity">
                 <all>
                     <element name="tag_id" type="xsd:string" minOccurs="1" />
@@ -124,10 +124,10 @@
         <operation name="catalogProductTagList">
             <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
             <input>
-                <soap:body namespace="urn:OpenMage" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+                <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
             </input>
             <output>
-                <soap:body namespace="urn:OpenMage" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+                <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
             </output>
         </operation>
     </binding>
@@ -136,10 +136,10 @@
         <operation name="catalogProductTagInfo">
             <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
             <input>
-                <soap:body namespace="urn:OpenMage" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+                <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
             </input>
             <output>
-                <soap:body namespace="urn:OpenMage" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+                <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
             </output>
         </operation>
     </binding>
@@ -148,10 +148,10 @@
         <operation name="catalogProductTagAdd">
             <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
             <input>
-                <soap:body namespace="urn:OpenMage" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+                <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
             </input>
             <output>
-                <soap:body namespace="urn:OpenMage" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+                <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
             </output>
         </operation>
     </binding>
@@ -160,10 +160,10 @@
         <operation name="catalogProductTagUpdate">
             <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
             <input>
-                <soap:body namespace="urn:OpenMage" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+                <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
             </input>
             <output>
-                <soap:body namespace="urn:OpenMage" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+                <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
             </output>
         </operation>
     </binding>
@@ -172,15 +172,15 @@
         <operation name="catalogProductTagRemove">
             <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
             <input>
-                <soap:body namespace="urn:OpenMage" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+                <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
             </input>
             <output>
-                <soap:body namespace="urn:OpenMage" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+                <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
             </output>
         </operation>
     </binding>
 
-    <service name="OpenMageService">
+    <service name="MahoService">
         <port name="{{var wsdl.handler}}Port" binding="typens:{{var wsdl.handler}}Binding">
             <soap:address location="{{var wsdl.url}}" />
         </port>
