@@ -389,3 +389,38 @@ function mahoListDirectories($path)
 
     return array_unique($results);
 }
+
+function mahoErrorReport(array $reportData = [], int $httpResponseCode = 503): void
+{
+    $reportIdMessage = '';
+    if ($reportData) {
+        $reportId   = abs((int)(microtime(true) * random_int(100, 1000)));
+        $reportIdMessage = "<p>Error log record number: {$reportId}</p>";
+        $reportDir = Mage::getBaseDir('var') . '/report';
+        if (!file_exists($reportDir)) {
+            @mkdir($reportDir, 0750, true);
+        }
+
+        $reportFile = "{$reportDir}/$reportId";
+        $reportData = array_map('strip_tags', $reportData);
+        @file_put_contents($reportFile, serialize($reportData));
+        @chmod($reportFile, 0640);
+    }
+
+    $description = match ($httpResponseCode) {
+        404 => 'Not Found',
+        503 => 'Service Unavailable',
+        default => '',
+    };
+    header("HTTP/1.1 {$httpResponseCode} {$description}", true, $httpResponseCode);
+
+    echo <<<EOF
+<html>
+<body>
+    <h1>There has been an error processing your request</h1>
+    {$reportIdMessage}
+</body>
+</html>
+EOF;
+
+}

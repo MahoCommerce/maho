@@ -484,11 +484,8 @@
                 <public_files_valid_paths>
                     <protected>
                         <app>/app/*/*</app>
-                        <dev>/dev/*/*</dev>
-                        <errors>/errors/*/*</errors>
                         <js>/js/*/*</js>
                         <lib>/lib/*/*</lib>
-                        <shell>/shell/*/*</shell>
                         <skin>/skin/*/*</skin>
                     </protected>
                 </public_files_valid_paths>
