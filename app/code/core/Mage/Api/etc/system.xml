@@ -17,7 +17,7 @@
 <config>
    <sections>
         <api translate="label" module="api">
-            <label>Magento Core API</label>
+            <label>Maho Core API</label>
             <tab>service</tab>
             <sort_order>101</sort_order>
             <show_in_default>1</show_in_default>
