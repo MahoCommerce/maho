@@ -413,14 +413,5 @@ function mahoErrorReport(array $reportData = [], int $httpResponseCode = 503): v
         default => '',
     };
     header("HTTP/1.1 {$httpResponseCode} {$description}", true, $httpResponseCode);
-
-    echo <<<EOF
-<html>
-<body>
-    <h1>There has been an error processing your request</h1>
-    {$reportIdMessage}
-</body>
-</html>
-EOF;
-
+    echo "<html><body><h1>There has been an error processing your request</h1>{$reportIdMessage}</body></html>";
 }
