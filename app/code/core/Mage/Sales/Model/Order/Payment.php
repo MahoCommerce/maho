@@ -225,7 +225,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
 
     /**
      * Whether can void
-     * @var string
+     * @var bool|null
      */
     protected $_canVoidLookup = null;
 
