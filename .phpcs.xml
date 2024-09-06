@@ -2,14 +2,15 @@
 <ruleset name="OpenMage" namespace="OpenMage\CS\Standard">
     <config name="testVersion" value="8.2-"/>
     <file>maho</file>
-    <file>pub/api.php</file>
-    <file>pub/index.php</file>
+    <file>app/bootstrap.php</file>
     <file>app/Mage.php</file>
     <file>app/code/core/Mage/</file>
     <file>lib/Mage/</file>
     <file>lib/Magento/</file>
     <file>lib/MahoCLI/</file>
     <file>lib/Varien/</file>
+    <file>public/api.php</file>
+    <file>public/index.php</file>
     <!-- file contains include/include_once/... -->
     <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
         <!-- controllers -->

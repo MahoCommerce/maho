@@ -6,15 +6,15 @@ parameters:
     magentoRootPath: %currentWorkingDirectory%
     phpVersion: 80200
     paths:
+        - app/bootstrap.php
         - app/Mage.php
         - app/code/core/Mage
-        - pub/api.php
-        - pub/index.php
         - lib/Mage
         - lib/Magento
         - lib/MahoCLI
         - lib/Varien
         - maho
+        - public
     excludePaths:
         #incompatible interfaces
         - app/code/core/Mage/Admin/Model/Acl/Assert/Ip.php

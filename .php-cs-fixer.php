@@ -115,7 +115,7 @@ return $config
                 'lib/Magento/',
                 'lib/MahoCLI/',
                 'lib/Varien/',
-                'pub/',
+                'public/',
             ])
             ->name(['*.php'])
             ->ignoreDotFiles(true)
