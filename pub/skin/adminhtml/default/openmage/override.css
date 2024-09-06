@@ -595,15 +595,14 @@ input[type=radio] {
   padding: 30px 15px;
   font-size: 12px;
   color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5em;
 }
 .footer a {
   color: white;
   text-decoration: underline;
-}
-.footer .bug-report {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 ul.tabs-horiz {

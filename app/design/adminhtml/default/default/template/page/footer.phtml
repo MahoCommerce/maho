@@ -15,14 +15,11 @@
 
 /** @var Mage_Adminhtml_Block_Page_Footer $this */
 ?>
-<p class="bug-report">
-    <?= $this->__('Interface Locale: %s', $this->getLanguageSelect()) ?>
-</p>
-<p class="legality">
-    <a href="<?= $this->getMahoProjectUrl() ?>" target="_blank">Maho</a> |
-    <a href="<?= $this->getReportIssuesUrl() ?>" target="_blank"><?= $this->__('Report Issues') ?></a>
-</p>
-Maho <?= Mage::getMahoVersion() ?>
+
+<a href="<?= $this->getMahoProjectUrl() ?>" target="_blank">Powered by Maho <?= Mage::getMahoVersion() ?></a>
+<span>|</span>
+<?= $this->__('Interface Locale: %s', $this->getLanguageSelect()) ?>
+
 <script type="text/javascript">
     function setInterfaceLanguage(evt) {
         var elem = Event.element(evt);
