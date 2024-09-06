@@ -16,75 +16,95 @@
  240 = blue,
  300 = purple
 */
-.form-button {
-  background-image: none;
-  background-color: #71798e;
-  padding: 0 13px;
-  color: #fff;
-  border: 0;
-  cursor: pointer;
-  display: inline-block;
-  font-family: Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 26px;
-  box-sizing: border-box;
-  margin: 0;
-  vertical-align: middle;
+html {
+  text-rendering: optimizeLegibility;
+
+  --font-family-sans: "Inter", -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  
+  --color-brand: #d7df22;
+  --input-highlight: #2374ff;
+  --emphasis-color: #c40000;
+  --accient-color: #ddcf00;
+
+  --link-color: #1b4da3;
+  --body-color: #32333c;
+
+  --button-primary-bg: var(--input-highlight);
+  --button-primary-color: #fff;
 }
 
 @font-face {
-  font-family: "Open Sans";
-  src: url("fonts/opensans/OpenSans-Light.ttf") format("truetype"), url("fonts/opensans/OpenSans-Light.woff") format("woff"), url("fonts/opensans/OpenSans-Light.woff2") format("woff2");
-  /* Modern Browsers */
-  font-weight: 300;
+  font-family: Inter;
   font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./fonts/InterVariable.woff2') format('woff2');
 }
 @font-face {
-  font-family: "Open Sans";
-  src: url("fonts/opensans/OpenSans-Regular.ttf") format("truetype"), url("fonts/opensans/OpenSans-Regular.woff") format("woff"), url("fonts/opensans/OpenSans-Regular.woff2") format("woff2");
-  /* Modern Browsers */
-  font-weight: 400;
-  font-style: normal;
+  font-family: Inter;
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./fonts/InterVariable-Italic.woff2') format('woff2');
 }
-@font-face {
-  font-family: "Open Sans";
-  src: url("fonts/opensans/OpenSans-Bold.ttf") format("truetype"), url("fonts/opensans/OpenSans-Bold.woff") format("woff"), url("fonts/opensans/OpenSans-Bold.woff2") format("woff2");
-  /* Modern Browsers */
-  font-weight: 700;
-  font-style: normal;
-}
-@font-face {
-  font-family: "Open Sans";
-  src: url("fonts/opensans/OpenSans-SemiBold.ttf") format("truetype"), url("fonts/opensans/OpenSans-SemiBold.woff") format("woff"), url("fonts/opensans/OpenSans-SemiBold.woff2") format("woff2");
-  /* Modern Browsers */
+
+
+.form-button {
+  background: var(--body-color);
+  color: #fff;
+  
+  border: 1px solid var(--body-color);
+  /* outline-color: darken($color_action, 10);
+  outline-style: solid;
+  outline-width: 2px; */
+  /* outline-offset: 2px; */
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 12px;
   font-weight: 600;
-  font-style: normal;
+  box-sizing: border-box;
+  vertical-align: middle;  
 }
+
 * {
   margin: 0;
   padding: 0;
 }
 
 body {
-  background: #e6e6e6;
-  color: #2f2f2f;
-  font: 400 12px/1.33 Open Sans, sans-serif;
-  background: #ebedef;
+  color: var(--body-color);
+  font: 400 14px/1.33 var(--font-family-sans);
   font-size: 13px;
   overflow-x: hidden;
 }
 body#page-login {
-  background-color: #eee;
+  background-color: var(--body-color);
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  height: calc(100vh - 120px);
+}
+body#page-login:after {
+  display: block;
+  position: fixed;
+  content: "";
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.25);
+  width: 100%;
+  height: 100%;
+  z-index: -1;
 }
 
 a {
   display: inline;
-  color: #269de7;
-  text-decoration: none;
+  color: var(--link-color);
+  text-decoration: underline;
 }
 a:visited {
-  color: #269de7;
+  color: var(--link-color);
 }
 a:focus {
   color: #3378a3;
@@ -107,13 +127,13 @@ a.error span {
 }
 
 h2 {
-  margin-bottom: .5em;
+  margin-bottom: 0.5em;
   line-height: 1.4em;
   font-size: 1.7em;
 }
 
 p {
-  margin-bottom: .5em;
+  margin-bottom: 0.5em;
 }
 
 form {
@@ -128,45 +148,67 @@ input {
   vertical-align: middle;
 }
 input.input-text {
-  background: #fff;
-  font: 12px Arial, sans-serif, Helvetica;
-  border-width: 1px;
-  border-style: solid;
-  border-color: #aaa;
-  padding: 2px 2px 3px;
-  line-height: 18px;
-  font-family: Open Sans, Helvetica Neue;
+  font-weight: 400;
+  font-family: var(--font-family-sans);
+  font-size: 14px;
+  display: inline-block;
+  padding: 6px 8px !important;
+  margin: 0;
+  background-color: #fff;
+  color: #000;
+  border: 1px solid #c8c8c8;
+  border-radius: 4px;
+  box-sizing: border-box;
+  box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
 }
+
+input,
+textarea,
+select,
+.field-100 textarea,
+.field-100 input.input-text {
+  transition: border-color 100ms ease-in;
+}
+input.input-text:hover {
+  border-color: gray !important;
+}
+input.input-text:focus {
+  border-color: var(--input-highlight) !important;
+}
+
+input[type=text].disabled {
+  background: #fafafa;
+  color: gray;
+}
+input[type=text]:disabled {
+  background: #fafafa;
+  color: gray;
+}
+
 input.input-text:hover {
   outline: 2px solid rgba(117, 146, 163, 0.1);
 }
 input.input-text:focus {
   box-shadow: 0 0 0 2px rgba(117, 146, 163, 0.25);
 }
-input.input-text:disabled {
-  outline: none;
-  opacity: 0.5;
-}
 
 .form-button {
-  background-color: #0090FF;
+  
 }
 
 #page-login {
-  background: #f8f8f8;
   text-align: center;
 }
 
 .login-container {
   width: 345px;
-  background: url(images/logo.svg) top center no-repeat;
-  background-size: 70%;
-  padding-top: 100px;
-  margin: 50px auto 0 auto;
+  padding-left: 200px;
+  /* background: url(images/logo.svg) left center no-repeat; */
+  margin: 120px 0 0 calc(50vw - 372px);
 }
 .login-container .legal {
   margin: 0;
-  font-size: .95em;
+  font-size: 0.95em;
   background: none;
   padding: 0;
   border-style: none;
@@ -174,22 +216,30 @@ input.input-text:disabled {
   bottom: 30px;
   left: 0;
   width: 100%;
-  color: white;
+  color: hsl(0, 0%, 100%);
   text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
 .login-form {
+  background: url(images/logo.svg) left center no-repeat #fff;
+  background-size: 160px;
+  background-position: 40px 20px;
   text-align: left;
-  background: white;
   border: none;
-  padding: 40px 50px;
-  box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5);
+  padding: 80px 40px 20px;
+  box-shadow: 0 30px 150px rgba(0, 0, 0, 0.5);
+
+  border: 1px solid lightgrey;
+  border-radius: 6px;
 }
 .login-form .input-box {
   margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 .login-form .input-box input.input-text {
-  width: calc(100% - 18px) !important;
+  width: 100% !important;
   padding: 8px;
 }
 .login-form h2 {
@@ -197,7 +247,7 @@ input.input-text:disabled {
   font-weight: normal;
 }
 .login-form label {
-  font-weight: bold;
+  font-weight: 500;
 }
 .login-form .form-buttons {
   clear: both;
@@ -216,9 +266,9 @@ input.input-text:disabled {
 .login-form .form-buttons .left {
   line-height: 32px;
 }
-.login-form input[type="submit"] {
+/* .login-form input[type=submit] {
   height: 32px;
-}
+} */
 
 .left {
   float: left;
@@ -250,6 +300,4 @@ ul.messages ul {
 
 .no-display {
   display: none;
-}
-
-/*# sourceMappingURL=login.css.map */
+}/*# sourceMappingURL=login.css.map */
