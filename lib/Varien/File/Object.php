@@ -15,14 +15,10 @@
 
 /**
  * File Object
- * *
+ *
  * @category   Varien
  * @package    Varien_File
  */
-
-require_once('Varien/Object.php');
-require_once('Varien/Directory/IFactory.php');
-
 class Varien_File_Object extends SplFileObject implements IFactory
 {
     protected $_filename;

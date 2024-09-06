@@ -15,14 +15,10 @@
 
 /**
  * Directory Factory
- * *
+ *
  * @category   Varien
  * @package    Varien_Directory
  */
-
-require_once('Varien/Directory/Collection.php');
-require_once('Varien/File/Object.php');
-
 class Varien_Directory_Factory
 {
     /**

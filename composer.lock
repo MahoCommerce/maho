@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "eb24fbf3c2b045471070a773cf4ed634",
+    "content-hash": "8e7d4c06cac80c365f308426f8582a41",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -2167,43 +2167,6 @@
                 }
             ],
             "time": "2024-08-30T23:09:38+00:00"
-        },
-        {
-            "name": "magento-ecg/coding-standard",
-            "version": "4.5.4",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/magento-ecg/coding-standard.git",
-                "reference": "1db1da45447682108c63ea94ce07119a002a6504"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/magento-ecg/coding-standard/zipball/1db1da45447682108c63ea94ce07119a002a6504",
-                "reference": "1db1da45447682108c63ea94ce07119a002a6504",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^7.1 || ^8.0"
-            },
-            "type": "phpcodesniffer-standard",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Magento Expert Consulting Group",
-                    "homepage": "http://magentocommerce.com/consulting",
-                    "role": "Maintainer"
-                }
-            ],
-            "description": "A set of PHP_CodeSniffer rules and sniffs.",
-            "homepage": "https://github.com/magento-ecg/coding-standard",
-            "support": {
-                "issues": "https://github.com/magento-ecg/coding-standard/issues",
-                "source": "https://github.com/magento-ecg/coding-standard/tree/v4.5.2"
-            },
-            "time": "2023-07-05T15:24:16+00:00"
         },
         {
             "name": "mahocommerce/maho-phpstan-plugin",

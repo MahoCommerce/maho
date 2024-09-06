@@ -38,11 +38,11 @@ class Unserialize_Reader_Arr
      */
     protected $_reader = null;
 
-    const READING_LENGTH = 1;
-    const FINISHED_LENGTH = 2;
-    const READING_KEY = 3;
-    const READING_VALUE = 4;
-    const FINISHED_ARR = 5;
+    public const READING_LENGTH = 1;
+    public const FINISHED_LENGTH = 2;
+    public const READING_KEY = 3;
+    public const READING_VALUE = 4;
+    public const FINISHED_ARR = 5;
 
     /**
      * @param $char

@@ -18,7 +18,6 @@
  */
 class Unserialize_Reader_ArrValue
 {
-
     /**
      * @var
      */
@@ -34,8 +33,8 @@ class Unserialize_Reader_ArrValue
      */
     protected $_reader;
 
-    const NOT_STARTED = 1;
-    const READING_VALUE = 2;
+    public const NOT_STARTED = 1;
+    public const READING_VALUE = 2;
 
     public function __construct($key)
     {

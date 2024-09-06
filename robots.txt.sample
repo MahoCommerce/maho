@@ -43,10 +43,8 @@ Disallow: */contacts/
 Disallow: */customer/
 Disallow: */customize/
 Disallow: */newsletter/
-Disallow: */poll/
 Disallow: */review/
 Disallow: */sales/
-Disallow: */sendfriend/
 Disallow: */tag/
 Disallow: */wishlist/
 

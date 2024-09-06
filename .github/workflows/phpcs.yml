@@ -15,9 +15,7 @@ jobs:
       matrix:
         rules:
           - label: Default
-            path: .phpcs.xml.dist
-          - label: Ecg
-            path: .phpcs.ecg.xml.dist
+            path: .phpcs.xml
 
     steps:
       - name: Setup PHP
@@ -44,4 +42,3 @@ jobs:
 
       - name: PHPCodeSniffer
         run: php vendor/bin/phpcs -s --report=full --standard=${{ matrix.rules.path }}
-        continue-on-error: ${{ matrix.rules.path == '.phpcs.ecg.xml.dist' }}

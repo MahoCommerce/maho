@@ -33,9 +33,9 @@ class Unserialize_Reader_Str
      */
     protected $_value;
 
-    const READING_LENGTH = 1;
-    const FINISHED_LENGTH = 2;
-    const READING_VALUE = 3;
+    public const READING_LENGTH = 1;
+    public const FINISHED_LENGTH = 2;
+    public const READING_VALUE = 3;
 
     /**
      * @param string $char
