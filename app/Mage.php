@@ -664,7 +664,7 @@ final class Mage
             header('Location: ' . self::getBaseUrl());
             die;
         } catch (Mage_Core_Model_Store_Exception $e) {
-            require_once(mahoFindFileInIncludePath('errors/404.php'));
+            mahoErrorReport([], 404);
             die;
         } catch (Exception $e) {
             self::printException($e);
@@ -707,7 +707,7 @@ final class Mage
             header('Location: ' . self::getBaseUrl());
             die();
         } catch (Mage_Core_Model_Store_Exception $e) {
-            require_once(mahoFindFileInIncludePath('errors/404.php'));
+            mahoErrorReport([], 404);
             die();
         } catch (Exception $e) {
             if (self::isInstalled()) {
@@ -952,14 +952,7 @@ final class Mage
                 $reportData['script_name'] = $_SERVER['SCRIPT_NAME'];
             }
 
-            // attempt to specify store as a skin
-            try {
-                $storeCode = self::app()->getStore()->getCode();
-                $reportData['skin'] = $storeCode;
-            } catch (Exception $e) {
-            }
-
-            require_once(mahoFindFileInIncludePath('errors/report.php'));
+            mahoErrorReport($reportData);
         }
 
         die();

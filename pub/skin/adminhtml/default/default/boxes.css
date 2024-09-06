@@ -629,10 +629,6 @@ div.autocomplete ul { margin:0; padding:0; }
 div.autocomplete ul li.selected { background-color:#dcebf0; }
 div.autocomplete ul li { padding:.5em .7em; min-height:32px; cursor:pointer; text-align:left; color:#2f2f2f; line-height:1.3em; }
 
-/* Footer */
-.footer .bug-report                     { float:left; width:35%; text-align:left; }
-.footer .legality                       { float:right; width:35%; min-height:19px; padding-left:22px; text-align:right; }
-
 /* COLUMNS
 ********************************************************************************************/
 
