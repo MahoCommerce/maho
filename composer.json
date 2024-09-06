@@ -38,8 +38,7 @@
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
         "friendsofphp/php-cs-fixer": "^3.4",
         "mahocommerce/maho-phpstan-plugin": "@dev",
-        "magento-ecg/coding-standard": "^4.5",
-        "phpstan/phpstan": "^1.11",
+        "phpstan/phpstan": "^1.12",
         "squizlabs/php_codesniffer": "^3.7",
         "symplify/vendor-patches": "^11.1"
     },
