@@ -28,7 +28,7 @@ class Unserialize_Reader_Bool
      */
     protected $_value;
 
-    const READING_VALUE = 1;
+    public const READING_VALUE = 1;
 
     /**
      * @param string $char

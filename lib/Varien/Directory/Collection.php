@@ -15,15 +15,10 @@
 
 /**
  * Varien Directory Collection
- * *
+ *
  * @category   Varien
  * @package    Varien_Directory
  */
-
-require_once('Varien/Data/Collection.php');
-require_once('Varien/Directory/Factory.php');
-require_once('Varien/Directory/IFactory.php');
-
 class Varien_Directory_Collection extends Varien_Data_Collection implements IFactory
 {
     protected $_path = '';

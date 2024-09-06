@@ -15,11 +15,7 @@
 
 /**
  * Csv parse
- *
  */
-
-require_once 'Varien/File/Csv.php';
-
 class Varien_File_Csv_Multy extends Varien_File_Csv
 {
     /**

@@ -13,7 +13,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-require_once 'Varien/Exception.php';
 class Varien_Db_Exception extends Varien_Exception
 {
 }

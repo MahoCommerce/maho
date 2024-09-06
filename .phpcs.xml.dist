@@ -26,16 +26,6 @@
         <exclude-pattern>*/core/Mage/Downloadable/controllers/Adminhtml/Downloadable/Product/EditController.php*</exclude-pattern>
         <exclude-pattern>*/core/Mage/Downloadable/controllers/Product/EditController.php*</exclude-pattern>
         <exclude-pattern>*/core/Mage/Downloadable/controllers/FileController.php*</exclude-pattern>
-        <!-- others (@todo check) -->
-        <exclude-pattern>*/lib/Varien/Db/Tree/Exception.php*</exclude-pattern>
-        <exclude-pattern>*/lib/Varien/Db/Tree/Node.php*</exclude-pattern>
-        <exclude-pattern>*/lib/Varien/Db/Exception.php*</exclude-pattern>
-        <exclude-pattern>*/lib/Varien/Db/Tree.php*</exclude-pattern>
-        <exclude-pattern>*/lib/Varien/Directory/Collection.php*</exclude-pattern>
-        <exclude-pattern>*/lib/Varien/Directory/Factory.php*</exclude-pattern>
-        <exclude-pattern>*/lib/Varien/File/CsvMulty.php*</exclude-pattern>
-        <exclude-pattern>*/lib/Varien/File/Object.php*</exclude-pattern>
-        <exclude-pattern>*/lib/Varien/Io/Sftp.php*</exclude-pattern>
     </rule>
     <rule ref="PSR2">
         <exclude name="Generic.Files.LineLength.TooLong"/>
