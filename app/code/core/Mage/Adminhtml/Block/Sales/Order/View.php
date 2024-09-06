@@ -166,7 +166,7 @@ class Mage_Adminhtml_Block_Sales_Order_View extends Mage_Adminhtml_Block_Widget_
 
         if ($this->_isAllowedAction('creditmemo') && $order->canCreditmemo()) {
             $onClick = Mage::helper('core/js')->getSetLocationJs($this->getCreditmemoUrl());
-            if ($order->getPayment()->getMethodInstance()->isGateway()) {
+            if ($order->getPayment() && $order->getPayment()->getMethodInstance()->isGateway()) {
                 $onClick = Mage::helper('core/js')->getConfirmSetLocationJs(
                     $this->getCreditmemoUrl(),
                     Mage::helper('sales')->__('This will create an offline refund. To create an online refund, open an invoice and create credit memo for it. Do you wish to proceed?')
