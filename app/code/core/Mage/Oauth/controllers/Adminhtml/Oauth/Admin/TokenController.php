@@ -42,8 +42,10 @@ class Mage_Oauth_Adminhtml_Oauth_Admin_TokenController extends Mage_Adminhtml_Co
      */
     public function indexAction()
     {
-        $this->loadLayout();
-        $this->renderLayout();
+        $this
+            ->loadLayout()
+            ->_setActiveMenu('system/api/oauth_admin_token')
+            ->renderLayout();
     }
 
     /**

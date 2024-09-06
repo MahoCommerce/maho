@@ -295,9 +295,8 @@ class Mage_Core_Model_Translate
      */
     protected function _getModuleFilePath($module, $fileName)
     {
-        //$file = Mage::getConfig()->getModuleDir('locale', $module);
-        $file = Mage::getBaseDir('locale');
-        $file .= DS . $this->getLocale() . DS . $fileName;
+        $file = "app/locale/{$this->getLocale()}/{$fileName}";
+        $file = mahoFindFileInIncludePath($file);
         return $file;
     }
 

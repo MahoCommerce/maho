@@ -47,7 +47,7 @@ if (file_exists($maintenanceFile)) {
         $maintenanceBypass = in_array($currentIp, $allowedIps, true);
     }
     if (!$maintenanceBypass) {
-        include_once mahoFindFileInIncludePath('errors/503.php');
+        mahoErrorReport();
         exit;
     }
 

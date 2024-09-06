@@ -66,7 +66,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         'Mage_PaypalUk' => 41,
         'Mage_Contacts' => 42,
         'Mage_GiftMessage' => 43,
-        'Mage_Sendfriend' => 44,
         'Mage_Sitemap' => 45,
         'Mage_Rss' => 46,
         'Mage_ProductAlert' => 47,
@@ -549,7 +548,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                 throw new Exception('Could not get lock on cache save operation.');
             } else {
                 Mage::log(sprintf('Failed to get cache save lock in %d seconds.', $waitTime), Zend_Log::NOTICE);
-                require mahoFindFileInIncludePath('errors/503.php');
+                mahoErrorReport();
                 die();
             }
         }
@@ -741,7 +740,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Get node value from cached section data
      *
      * @param array $path
-     * @return false|Varien_Simplexml_Element
+     * @return false|Mage_Core_Model_Config_Element
      */
     public function getSectionNode($path)
     {
@@ -758,7 +757,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Returns node found by the $path and scope info
      *
      * @inheritDoc
-     * @return Mage_Core_Model_Config_Element|Varien_Simplexml_Element|false
+     * @return Mage_Core_Model_Config_Element
      */
     public function getNode($path = null, $scope = '', $scopeCode = null)
     {
@@ -1186,7 +1185,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Get module config node
      *
      * @param string $moduleName
-     * @return Mage_Core_Model_Config_Element|SimpleXMLElement
+     * @return Mage_Core_Model_Config_Element
      */
     public function getModuleConfig($moduleName = '')
     {
@@ -1808,7 +1807,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     protected function _makeEventsLowerCase($area, Varien_Simplexml_Config $mergeModel)
     {
-        $events = $mergeModel->getNode($area . "/" . Mage_Core_Model_App_Area::PART_EVENTS);
+        $events = $mergeModel->getNode($area . '/' . Mage_Core_Model_App_Area::PART_EVENTS);
         if ($events !== false) {
             $children = clone $events->children();
             /** @var Mage_Core_Model_Config_Element $event */

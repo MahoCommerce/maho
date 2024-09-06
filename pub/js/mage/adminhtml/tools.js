@@ -175,23 +175,6 @@ function submitAndReloadArea(area, url) {
     }
 }
 
-/********** MESSAGES ***********/
-/*
-Event.observe(window, 'load', function() {
-    $$('.messages .error-msg').each(function(el) {
-        new Effect.Highlight(el, {startcolor:'#E13422', endcolor:'#fdf9f8', duration:1});
-    });
-    $$('.messages .warning-msg').each(function(el) {
-        new Effect.Highlight(el, {startcolor:'#E13422', endcolor:'#fdf9f8', duration:1});
-    });
-    $$('.messages .notice-msg').each(function(el) {
-        new Effect.Highlight(el, {startcolor:'#E5B82C', endcolor:'#fbf7e9', duration:1});
-    });
-    $$('.messages .success-msg').each(function(el) {
-        new Effect.Highlight(el, {startcolor:'#507477', endcolor:'#f2fafb', duration:1});
-    });
-});
-*/
 function syncOnchangeValue(baseElem, distElem){
     var compare = {baseElem:baseElem, distElem:distElem};
     Event.observe(baseElem, 'change', function(){

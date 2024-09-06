@@ -92,7 +92,7 @@ function mageFindClassFile($class)
  * @param string $errstr
  * @param string $errfile
  * @param int $errline
- * @return bool|void
+ * @return bool|null
  */
 function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
 {
@@ -122,46 +122,46 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
 
     switch ($errno) {
         case E_ERROR:
-            $errorMessage .= "Error";
+            $errorMessage .= 'Error';
             break;
         case E_WARNING:
-            $errorMessage .= "Warning";
+            $errorMessage .= 'Warning';
             break;
         case E_PARSE:
-            $errorMessage .= "Parse Error";
+            $errorMessage .= 'Parse Error';
             break;
         case E_NOTICE:
-            $errorMessage .= "Notice";
+            $errorMessage .= 'Notice';
             break;
         case E_CORE_ERROR:
-            $errorMessage .= "Core Error";
+            $errorMessage .= 'Core Error';
             break;
         case E_CORE_WARNING:
-            $errorMessage .= "Core Warning";
+            $errorMessage .= 'Core Warning';
             break;
         case E_COMPILE_ERROR:
-            $errorMessage .= "Compile Error";
+            $errorMessage .= 'Compile Error';
             break;
         case E_COMPILE_WARNING:
-            $errorMessage .= "Compile Warning";
+            $errorMessage .= 'Compile Warning';
             break;
         case E_USER_ERROR:
-            $errorMessage .= "User Error";
+            $errorMessage .= 'User Error';
             break;
         case E_USER_WARNING:
-            $errorMessage .= "User Warning";
+            $errorMessage .= 'User Warning';
             break;
         case E_USER_NOTICE:
-            $errorMessage .= "User Notice";
+            $errorMessage .= 'User Notice';
             break;
         case E_STRICT:
-            $errorMessage .= "Strict Notice";
+            $errorMessage .= 'Strict Notice';
             break;
         case E_RECOVERABLE_ERROR:
-            $errorMessage .= "Recoverable Error";
+            $errorMessage .= 'Recoverable Error';
             break;
         case E_DEPRECATED:
-            $errorMessage .= "Deprecated functionality";
+            $errorMessage .= 'Deprecated functionality';
             break;
         default:
             $errorMessage .= "Unknown error ($errno)";
@@ -173,6 +173,7 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
         throw new Exception($errorMessage);
     } else {
         Mage::log($errorMessage, Zend_Log::ERR);
+        return null;
     }
 }
 
@@ -180,7 +181,7 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
  * @param bool $return
  * @param bool $html
  * @param bool $showFirst
- * @return string|void
+ * @return string|null
  *
  * @SuppressWarnings(PHPMD.ErrorControlOperator)
  */
@@ -189,7 +190,7 @@ function mageDebugBacktrace($return = false, $html = true, $showFirst = false)
     $d = debug_backtrace();
     $out = '';
     if ($html) {
-        $out .= "<pre>";
+        $out .= '<pre>';
     }
     foreach ($d as $i => $r) {
         if (!$showFirst && $i == 0) {
@@ -199,12 +200,13 @@ function mageDebugBacktrace($return = false, $html = true, $showFirst = false)
         @$out .= "[$i] {$r['file']}:{$r['line']}\n";
     }
     if ($html) {
-        $out .= "</pre>";
+        $out .= '</pre>';
     }
     if ($return) {
         return $out;
     } else {
         echo $out;
+        return null;
     }
 }
 
@@ -245,7 +247,7 @@ function mageDelTree($path)
  * @param string $escape
  * @return array
  */
-function mageParseCsv($string, $delimiter = ",", $enclosure = '"', $escape = '\\')
+function mageParseCsv($string, $delimiter = ',', $enclosure = '"', $escape = '\\')
 {
     $elements = explode($delimiter, $string);
     for ($i = 0; $i < count($elements); $i++) {
@@ -318,7 +320,7 @@ function mahoGetComposerInstallationData(): array
             if (!isset($version['install_path'])) {
                 continue;
             }
-            if (!in_array($version['type'], ['magento-source', 'magento-module'])) {
+            if (!in_array($version['type'], ['maho-source', 'maho-module', 'magento-module'])) {
                 continue;
             }
             $packages[] = $package;
@@ -386,4 +388,30 @@ function mahoListDirectories($path)
     }
 
     return array_unique($results);
+}
+
+function mahoErrorReport(array $reportData = [], int $httpResponseCode = 503): void
+{
+    $reportIdMessage = '';
+    if ($reportData) {
+        $reportId   = abs((int)(microtime(true) * random_int(100, 1000)));
+        $reportIdMessage = "<p>Error log record number: {$reportId}</p>";
+        $reportDir = Mage::getBaseDir('var') . '/report';
+        if (!file_exists($reportDir)) {
+            @mkdir($reportDir, 0750, true);
+        }
+
+        $reportFile = "{$reportDir}/$reportId";
+        $reportData = array_map('strip_tags', $reportData);
+        @file_put_contents($reportFile, serialize($reportData));
+        @chmod($reportFile, 0640);
+    }
+
+    $description = match ($httpResponseCode) {
+        404 => 'Not Found',
+        503 => 'Service Unavailable',
+        default => '',
+    };
+    header("HTTP/1.1 {$httpResponseCode} {$description}", true, $httpResponseCode);
+    echo "<html><body><h1>There has been an error processing your request</h1>{$reportIdMessage}</body></html>";
 }

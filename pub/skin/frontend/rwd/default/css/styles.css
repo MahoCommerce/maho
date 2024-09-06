@@ -9132,6 +9132,7 @@ div.paypal-logo span > img {
   top: 15px !important;
   width: 100% !important;
   z-index: 200;
+  display: none;
 }
 .search-autocomplete ul {
   -webkit-border-radius: 2px;

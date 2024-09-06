@@ -38,7 +38,7 @@
                             <config>
                                 <children>
                                     <api translate="title" module="api">
-                                        <title>Magento Core API</title>
+                                        <title>Maho Core API</title>
                                     </api>
                                 </children>
                             </config>

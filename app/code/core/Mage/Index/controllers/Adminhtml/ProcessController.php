@@ -63,15 +63,17 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
         /** @var Mage_Index_Model_Process $process */
         $process = $this->_initProcess();
         if ($process) {
-            $this->_title($process->getIndexCode());
-
-            $this->_title($this->__('System'))
-                 ->_title($this->__('Index Management'))
-                 ->_title($this->__($process->getIndexer()->getName()));
+            $this
+                ->_title($process->getIndexCode())
+                ->_title($this->__('System'))
+                ->_title($this->__('Index Management'))
+                ->_title($this->__($process->getIndexer()->getName()));
 
             Mage::register('current_index_process', $process);
-            $this->loadLayout();
-            $this->renderLayout();
+            $this
+                ->loadLayout()
+                ->_setActiveMenu('system/index')
+                ->renderLayout();
         } else {
             $this->_getSession()->addError(
                 Mage::helper('index')->__('Cannot initialize the indexer process.')

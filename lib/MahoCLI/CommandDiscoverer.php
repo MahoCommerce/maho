@@ -18,7 +18,7 @@ class CommandDiscoverer
         $files = glob("{$this->baseDir}/lib/MahoCLI/Commands/*.php");
 
         foreach ($files as $file) {
-            if (str_contains($file, "vendor/mahocommerce/maho")) {
+            if (str_contains($file, 'vendor/mahocommerce/maho')) {
                 continue;
             }
 

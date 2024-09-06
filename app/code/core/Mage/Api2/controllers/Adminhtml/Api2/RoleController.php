@@ -37,16 +37,16 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
      */
     public function indexAction()
     {
-        $this->_title($this->__('System'))
-             ->_title($this->__('Web Services'))
-             ->_title($this->__('REST Roles'));
-
-        $this->loadLayout()->_setActiveMenu('system/services/roles');
-        $this->_addBreadcrumb($this->__('Web services'), $this->__('Web services'));
-        $this->_addBreadcrumb($this->__('REST Roles'), $this->__('REST Roles'));
-        $this->_addBreadcrumb($this->__('Roles'), $this->__('Roles'));
-
-        $this->renderLayout();
+        $this
+            ->_title($this->__('System'))
+            ->_title($this->__('Web Services'))
+            ->_title($this->__('REST Roles'))
+            ->loadLayout()
+            ->_setActiveMenu('system/api/rest_roles')
+            ->_addBreadcrumb($this->__('Web services'), $this->__('Web services'))
+            ->_addBreadcrumb($this->__('REST Roles'), $this->__('REST Roles'))
+            ->_addBreadcrumb($this->__('Roles'), $this->__('Roles'))
+            ->renderLayout();
     }
 
     /**
@@ -78,22 +78,18 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
      */
     public function newAction()
     {
-        $this->_title($this->__('System'))
-             ->_title($this->__('Web Services'))
-             ->_title($this->__('Rest Roles'));
-
-        $this->loadLayout()->_setActiveMenu('system/services/roles');
-        $this->_addBreadcrumb($this->__('Web services'), $this->__('Web services'));
-        $this->_addBreadcrumb($this->__('REST Roles'), $this->__('REST Roles'));
-        $this->_addBreadcrumb($this->__('Roles'), $this->__('Roles'));
-
-        $breadCrumb = $this->__('Add New Role');
-        $breadCrumbTitle = $this->__('Add New Role');
-        $this->_title($this->__('New Role'));
-
-        $this->_addBreadcrumb($breadCrumb, $breadCrumbTitle);
-
-        $this->renderLayout();
+        $this
+            ->_title($this->__('System'))
+            ->_title($this->__('Web Services'))
+            ->_title($this->__('Rest Roles'))
+            ->loadLayout()
+            ->_setActiveMenu('system/api/rest_roles')
+            ->_addBreadcrumb($this->__('Web services'), $this->__('Web services'))
+            ->_addBreadcrumb($this->__('REST Roles'), $this->__('REST Roles'))
+            ->_addBreadcrumb($this->__('Roles'), $this->__('Roles'))
+            ->_title($this->__('New Role'))
+            ->_addBreadcrumb($this->__('Add New Role'), $this->__('Add New Role'))
+            ->renderLayout();
     }
 
     /**
@@ -111,11 +107,12 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
             return;
         }
 
-        $this->loadLayout()->_setActiveMenu('system/services/roles');
-
-        $this->_title($this->__('System'))
-             ->_title($this->__('Web Services'))
-             ->_title($this->__('Rest Roles'));
+        $this
+            ->loadLayout()
+            ->_setActiveMenu('system/api/rest_roles')
+            ->_title($this->__('System'))
+            ->_title($this->__('Web Services'))
+            ->_title($this->__('Rest Roles'));
 
         $breadCrumb = $this->__('Edit Role');
         $breadCrumbTitle = $this->__('Edit Role');
@@ -272,7 +269,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
 
         try {
             /** @var Mage_Api2_Model_Acl_Global_Role $model */
-            $model = Mage::getModel("api2/acl_global_role");
+            $model = Mage::getModel('api2/acl_global_role');
             $model->load($id)->delete();
             $this->_getSession()->addSuccess($this->__('Role has been deleted.'));
         } catch (Mage_Core_Exception $e) {
@@ -281,7 +278,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
             $this->_getSession()->addException($e, $this->__('An error occurred while deleting the role.'));
         }
 
-        $this->_redirect("*/*/");
+        $this->_redirect('*/*/');
     }
 
     /**
@@ -316,7 +313,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
      */
     protected function _getUsers($id)
     {
-        if ($this->getRequest()->getParam('in_role_users') != "") {
+        if ($this->getRequest()->getParam('in_role_users') != '') {
             return $this->getRequest()->getParam('in_role_users');
         }
 

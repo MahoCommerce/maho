@@ -12,7 +12,7 @@ use Symfony\Component\Console\Question\Question;
 
 #[AsCommand(
     name: 'admin:user:change-password',
-    description: 'List all admin users'
+    description: 'Change password of an admin users'
 )]
 class AdminUserChangepassword extends BaseMahoCommand
 {

@@ -34,6 +34,9 @@
 
     <adminhtml_catalog_product_new>
         <update handle="editor"/>
+        <reference name="head">
+            <action method="addItem"><type>js</type><name>html5sortable.min.js</name><params/></action>
+        </reference>
         <reference name="content">
             <block type="adminhtml/catalog_product_edit" name="product_edit"></block>
         </reference>
@@ -48,6 +51,9 @@
 
     <adminhtml_catalog_product_edit>
         <update handle="editor"/>
+        <reference name="head">
+            <action method="addItem"><type>js</type><name>html5sortable.min.js</name><params/></action>
+        </reference>
         <reference name="content">
             <block type="adminhtml/catalog_product_edit" name="product_edit"></block>
         </reference>

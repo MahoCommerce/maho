@@ -19,7 +19,7 @@
  * @category   Varien
  * @package    Varien_Data
  *
- * @method array getOptions()
+ * @method array<int, string>|string getOptions()
  */
 class Varien_Data_Form_Element_Select extends Varien_Data_Form_Element_Abstract
 {

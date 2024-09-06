@@ -1,0 +1,75 @@
+name: Sync L10N Repo
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/locale/en_US/**'
+  schedule:
+    - cron: '0 0 * * *'  # Run every day at midnight UTC
+  workflow_dispatch:
+jobs:
+  sync-locales:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.SYNC_L10N_APP_ID }}
+          private-key: ${{ secrets.SYNC_L10N_APP_PRIVATE_KEY }}
+          owner: MahoCommerce
+      - name: Set date
+        id: date
+        run: echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+        with:
+          path: maho
+          fetch-depth: 0
+      - name: Checkout l10n repo
+        uses: actions/checkout@v4
+        with:
+          repository: MahoCommerce/maho-l10n
+          path: maho-l10n
+          token: ${{ steps.generate_token.outputs.token }}
+      - name: Set up Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+      - name: Prepare new branch
+        run: |
+          cd maho-l10n
+          git fetch origin
+          git checkout main
+          git pull origin main
+          git checkout -b tmp-${{ steps.date.outputs.DATE }}
+      - name: Copy changed files
+        run: |
+          cd maho
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            changed_files=$(git diff --name-only origin/main HEAD | grep '^app/locale/en_US/')
+          else
+            changed_files=$(find app/locale/en_US/ -type f)
+          fi
+          if [ -n "$changed_files" ]; then
+            echo "Changed files: $changed_files"
+            for file in $changed_files; do
+              # Remove 'app/locale/' prefix and create the new path
+              new_path="../maho-l10n/${file#app/locale/}"
+              mkdir -p "$(dirname "$new_path")"
+              cp "$file" "$new_path"
+            done
+          else
+            echo "No changes in app/locale/en_US/"
+            exit 0
+          fi
+      - name: Create Pull Request
+        run: |
+          cd maho-l10n
+          git add .
+          git commit -m "Update locales from main repo - ${{ steps.date.outputs.DATE }}" || exit 0
+          git push -f origin tmp-${{ steps.date.outputs.DATE }}
+          gh pr create --title "Update locales from main repo - ${{ steps.date.outputs.DATE }}" --body "This PR updates the locales from the main repository." --repo MahoCommerce/maho-l10n || true
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}

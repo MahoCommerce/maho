@@ -14,8 +14,7 @@
  */
 
 /**
- * Review/Rating module upgrade. Both modules tables must be installed.
- * @see app/etc/modules/Mage_All.xml - Review comes after Rating
+ * Review/Rating module upgrade. Both module tables must be installed.
  */
 
 $this->startSetup();

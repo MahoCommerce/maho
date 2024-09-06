@@ -1134,7 +1134,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         }
 
         $adapter->streamWriteCsv(
-            Mage::helper("core")->getEscapedCSVData($row)
+            Mage::helper('core')->getEscapedCSVData($row)
         );
     }
 
@@ -1180,7 +1180,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
 
         if ($this->getCountTotals()) {
             $io->streamWriteCsv(
-                Mage::helper("core")->getEscapedCSVData($this->_getExportTotals())
+                Mage::helper('core')->getEscapedCSVData($this->_getExportTotals())
             );
         }
 

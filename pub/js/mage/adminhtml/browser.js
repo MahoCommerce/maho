@@ -34,7 +34,7 @@ MediabrowserUtility = {
             id:           'browser_window',
             onClose: this.closeDialog.bind(this)
         }, options || {}));
-        new Ajax.Updater('modal_dialog_message', url, {evalScripts: true});
+        new Ajax.Updater(document.querySelector('#' + this.dialogWindow.id + ' .dialog-content'), url, {evalScripts: true});
     },
     closeDialog: function(window) {
         if (!window) {
