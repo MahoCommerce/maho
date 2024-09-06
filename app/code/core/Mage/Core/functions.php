@@ -320,7 +320,7 @@ function mahoGetComposerInstallationData(): array
             if (!isset($version['install_path'])) {
                 continue;
             }
-            if (!in_array($version['type'], ['magento-source', 'magento-module'])) {
+            if (!in_array($version['type'], ['maho-source', 'maho-module', 'magento-module'])) {
                 continue;
             }
             $packages[] = $package;
