@@ -66,7 +66,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         'Mage_PaypalUk' => 41,
         'Mage_Contacts' => 42,
         'Mage_GiftMessage' => 43,
-        'Mage_Sendfriend' => 44,
         'Mage_Sitemap' => 45,
         'Mage_Rss' => 46,
         'Mage_ProductAlert' => 47,
