@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a461fc6dbc6aa6f2984edd3c2efc4772",
+    "content-hash": "52c6b6007b8a3ffdb8cdc3b47785b59a",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -3650,6 +3650,8 @@
         "ext-ctype": "*",
         "ext-curl": "*",
         "ext-dom": "*",
+        "ext-fileinfo": "*",
+        "ext-filter": "*",
         "ext-gd": "*",
         "ext-hash": "*",
         "ext-iconv": "*",
@@ -3663,6 +3665,7 @@
         "ext-session": "*",
         "ext-simplexml": "*",
         "ext-soap": "*",
+        "ext-spl": "*",
         "ext-zlib": "*"
     },
     "platform-dev": [],
