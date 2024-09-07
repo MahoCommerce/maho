@@ -12,13 +12,13 @@
 # Maho stuff
 /app/etc/local.xml
 
-/pub/js/tinymce
-/pub/media/*
-!/pub/media/.htaccess
-!/pub/media/custom_options/.htaccess
-!/pub/media/customer/.htaccess
-!/pub/media/dhl/logo.jpg
-!/pub/media/downloadable/.htaccess
+/public/js/tinymce
+/public/media/*
+!/public/media/.htaccess
+!/public/media/custom_options/.htaccess
+!/public/media/customer/.htaccess
+!/public/media/dhl/logo.jpg
+!/public/media/downloadable/.htaccess
 
 /var/*
 !/var/.htaccess
