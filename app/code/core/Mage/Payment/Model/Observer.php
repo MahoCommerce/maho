@@ -32,14 +32,7 @@ class Mage_Payment_Model_Observer
         /** @var Mage_Sales_Model_Order $order */
         $order = $observer->getEvent()->getOrder();
 
-        if (($payment = $order->getPayment())
-            && ((
-                    Mage::helper('payment')->getMethodModelClassName($payment->getMethod()) !== null
-                    && $payment->getMethodInstance()->getCode() !== 'free'
-                )
-                || ($payment->getMethod() !== 'free')
-            )
-        ) {
+        if ($order->getPayment() && $order->getPayment()->getMethodInstance()->getCode() != 'free') {
             return $this;
         }
 
