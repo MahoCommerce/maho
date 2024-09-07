@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8e7d4c06cac80c365f308426f8582a41",
+    "content-hash": "0136b5d93d9e637d7eb217200ccc9b3e",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -121,12 +121,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
-                "reference": "12a714b33a561fd662dcdff737ca655bb698eef4"
+                "reference": "e9c4efd7e5bc97cdd5817acb15a1d1e5c76a80d2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/12a714b33a561fd662dcdff737ca655bb698eef4",
-                "reference": "12a714b33a561fd662dcdff737ca655bb698eef4",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/e9c4efd7e5bc97cdd5817acb15a1d1e5c76a80d2",
+                "reference": "e9c4efd7e5bc97cdd5817acb15a1d1e5c76a80d2",
                 "shasum": ""
             },
             "require": {
@@ -145,9 +145,9 @@
             "notification-url": "https://packagist.org/downloads/",
             "support": {
                 "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
-                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v1.1.0"
+                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/main"
             },
-            "time": "2024-08-19T19:09:39+00:00"
+            "time": "2024-09-06T19:29:18+00:00"
         },
         {
             "name": "mklkj/tinymce-i18n",
@@ -3657,7 +3657,9 @@
         "ext-json": "*",
         "ext-libxml": "*",
         "ext-mbstring": "*",
+        "ext-openssl": "*",
         "ext-pdo": "*",
+        "ext-session": "*",
         "ext-simplexml": "*",
         "ext-soap": "*",
         "ext-zlib": "*"
