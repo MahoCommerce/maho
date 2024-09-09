@@ -40,6 +40,7 @@ class Mage_Sales_Model_Order_Invoice_Comment extends Mage_Sales_Model_Abstract
      */
     protected $_invoice;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order_invoice_comment');
@@ -71,6 +72,7 @@ class Mage_Sales_Model_Order_Invoice_Comment extends Mage_Sales_Model_Abstract
      *
      * @return Mage_Core_Model_Store
      */
+    #[\Override]
     public function getStore()
     {
         if ($this->getInvoice()) {
@@ -84,6 +86,7 @@ class Mage_Sales_Model_Order_Invoice_Comment extends Mage_Sales_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();

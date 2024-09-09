@@ -21,6 +21,7 @@
  */
 class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Groupprice extends Mage_Catalog_Model_Resource_Product_Attribute_Backend_Groupprice_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_attribute_group_price', 'value_id');
@@ -32,6 +33,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Groupprice extends M
      * @param array $columns
      * @return array
      */
+    #[\Override]
     protected function _loadPriceDataColumns($columns)
     {
         $columns               = parent::_loadPriceDataColumns($columns);

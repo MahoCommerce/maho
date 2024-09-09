@@ -48,6 +48,7 @@ class Mage_CatalogInventory_Block_Adminhtml_Form_Field_Minsaleqty extends Mage_A
     /**
      * Prepare to render
      */
+    #[\Override]
     protected function _prepareToRender()
     {
         $this->addColumn('customer_group_id', [
@@ -65,6 +66,7 @@ class Mage_CatalogInventory_Block_Adminhtml_Form_Field_Minsaleqty extends Mage_A
     /**
      * Prepare existing row data object
      */
+    #[\Override]
     protected function _prepareArrayRow(Varien_Object $row)
     {
         $row->setData(

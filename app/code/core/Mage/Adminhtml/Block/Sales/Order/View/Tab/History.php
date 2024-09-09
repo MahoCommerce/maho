@@ -21,6 +21,7 @@
  */
 class Mage_Adminhtml_Block_Sales_Order_View_Tab_History extends Mage_Adminhtml_Block_Template implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -203,6 +204,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_History extends Mage_Adminhtml_B
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('sales')->__('Comments History');
@@ -213,6 +215,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_History extends Mage_Adminhtml_B
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('sales')->__('Comments History');
@@ -253,6 +256,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_History extends Mage_Adminhtml_B
      *
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -263,6 +267,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_History extends Mage_Adminhtml_B
      *
      * @return bool
      */
+    #[\Override]
     public function isHidden()
     {
         return false;

@@ -47,6 +47,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     /**
      * Init model
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sitemap/sitemap');
@@ -56,6 +57,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
      * @inheritDoc
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _beforeSave()
     {
         $io = new Varien_Io_File();

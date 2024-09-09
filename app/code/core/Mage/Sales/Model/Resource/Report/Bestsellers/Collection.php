@@ -111,6 +111,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
      *
      * @return $this
      */
+    #[\Override]
     protected function _initSelect()
     {
         $select = $this->getSelect();
@@ -162,6 +163,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     public function getSelectCountSql()
     {
         $this->_renderFilters();
@@ -202,6 +204,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeLoad()
     {
         parent::_beforeLoad();

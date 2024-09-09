@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
      *
      * @return string
      */
+    #[\Override]
     protected function _getFormat()
     {
         $format = $this->getColumn()->getFormat();
@@ -62,6 +63,7 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
      *
      * @return string
      */
+    #[\Override]
     public function render(Varien_Object $row)
     {
         if ($data = $row->getData($this->getColumn()->getIndex())) {

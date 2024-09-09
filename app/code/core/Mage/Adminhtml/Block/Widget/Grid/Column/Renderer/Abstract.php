@@ -29,6 +29,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
      * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
      * @return $this
      */
+    #[\Override]
     public function setColumn($column)
     {
         $this->_column = $column;
@@ -38,6 +39,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
     /**
      * @return Mage_Adminhtml_Block_Widget_Grid_Column
      */
+    #[\Override]
     public function getColumn()
     {
         return $this->_column;
@@ -48,6 +50,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
      *
      * @return  string
      */
+    #[\Override]
     public function render(Varien_Object $row)
     {
         if ($this->getColumn()->getEditable()) {

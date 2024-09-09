@@ -25,6 +25,7 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Shipment extends Mage_Bundle_Model
      * Draw item line
      *
      */
+    #[\Override]
     public function draw()
     {
         $item   = $this->getItem();

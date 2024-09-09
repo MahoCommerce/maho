@@ -60,6 +60,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      *
      * @return string
      */
+    #[\Override]
     protected function _getDefaultBackendModel()
     {
         switch ($this->getAttributeCode()) {
@@ -84,6 +85,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      *
      * @return string
      */
+    #[\Override]
     protected function _getDefaultFrontendModel()
     {
         return parent::_getDefaultFrontendModel();
@@ -94,6 +96,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      *
      * @return string
      */
+    #[\Override]
     protected function _getDefaultSourceModel()
     {
         if ($this->getAttributeCode() == 'store_id') {
@@ -137,6 +140,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      * @inheritDoc
      * @throws Mage_Eav_Exception
      */
+    #[\Override]
     protected function _beforeSave()
     {
         /**
@@ -206,6 +210,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave()
     {
         $this->_getResource()->saveInSetIncluding($this);

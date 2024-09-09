@@ -28,6 +28,7 @@ class Mage_Adminhtml_Block_Sales_Reorder_Renderer_Action extends Mage_Adminhtml_
      */
     protected $_actions = [];
 
+    #[\Override]
     public function render(Varien_Object $row)
     {
         $this->_actions = [];

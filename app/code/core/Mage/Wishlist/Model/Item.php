@@ -103,6 +103,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
      */
     protected $_flagOptionsSaved = null;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_cacheTag = 'wishlist_item';
@@ -164,6 +165,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
      *
      * @return bool
      */
+    #[\Override]
     protected function _hasModelChanged()
     {
         if (!$this->hasDataChanges()) {
@@ -199,6 +201,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
      * Save model plus its options
      * Ensures saving options in case when resource model was not changed
      */
+    #[\Override]
     public function save()
     {
         $hasDataChanges = $this->hasDataChanges();
@@ -218,6 +221,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave()
     {
         $this->_saveItemOptions();
@@ -247,6 +251,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();
@@ -308,6 +313,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
      * @throws Mage_Core_Exception
      * @return Mage_Catalog_Model_Product
      */
+    #[\Override]
     public function getProduct()
     {
         $product = $this->_getData('product');
@@ -640,6 +646,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
      * @param   string $code
      * @return  Mage_Wishlist_Model_Item_Option|null
      */
+    #[\Override]
     public function getOptionByCode($code)
     {
         if (isset($this->_optionsByCode[$code]) && !$this->_optionsByCode[$code]->isDeleted()) {
@@ -684,6 +691,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
      *
      * @return Varien_Object
      */
+    #[\Override]
     public function getFileDownloadParams()
     {
         $params = new Varien_Object();

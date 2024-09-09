@@ -70,6 +70,7 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
      * @param   Varien_Object $filterBlock
      * @return  Mage_Catalog_Model_Layer_Filter_Attribute
      */
+    #[\Override]
     public function apply(Zend_Controller_Request_Abstract $request, $filterBlock)
     {
         $filter = $request->getParam($this->_requestVar);
@@ -105,6 +106,7 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
      *
      * @return array
      */
+    #[\Override]
     protected function _getItemsData()
     {
         $attribute = $this->getAttributeModel();

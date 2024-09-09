@@ -28,6 +28,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
      */
     protected static $_entityAttributes     = [];
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('eav/attribute', 'attribute_id');
@@ -36,6 +37,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
     /**
      * @return $this
      */
+    #[\Override]
     protected function _initUniqueFields()
     {
         $this->_uniqueFields = [[
@@ -139,6 +141,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
      * @param Mage_Catalog_Model_Resource_Eav_Attribute $object
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         $frontendLabel = $object->getFrontendLabel();
@@ -166,6 +169,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
      * @param Mage_Eav_Model_Entity_Attribute $object
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
         $this->_saveStoreLabels($object)
@@ -486,6 +490,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {
         /** @var Mage_Eav_Model_Entity_Type $entityType */

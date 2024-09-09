@@ -36,6 +36,7 @@ class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $this->getLayout()->getBlock('head')->setTitle(Mage::helper('customer')->__('Create New Customer Account'));
@@ -102,6 +103,7 @@ class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
      *
      * @return int
      */
+    #[\Override]
     public function getCountryId()
     {
         $countryId = $this->getFormData()->getCountryId();

@@ -25,6 +25,7 @@ class Mage_Cms_Model_Resource_Block_Collection extends Mage_Core_Model_Resource_
      * Define resource model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('cms/block');
@@ -36,6 +37,7 @@ class Mage_Cms_Model_Resource_Block_Collection extends Mage_Core_Model_Resource_
      *
      * @return array
      */
+    #[\Override]
     public function toOptionArray()
     {
         return $this->_toOptionArray('block_id', 'title');
@@ -73,6 +75,7 @@ class Mage_Cms_Model_Resource_Block_Collection extends Mage_Core_Model_Resource_
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     public function getSelectCountSql()
     {
         $countSelect = parent::getSelectCountSql();
@@ -85,6 +88,7 @@ class Mage_Cms_Model_Resource_Block_Collection extends Mage_Core_Model_Resource_
     /**
      * Join store relation table if there is store filter
      */
+    #[\Override]
     protected function _renderFiltersBefore()
     {
         if ($this->getFilter('store')) {

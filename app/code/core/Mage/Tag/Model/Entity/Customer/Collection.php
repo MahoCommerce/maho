@@ -62,6 +62,7 @@ class Mage_Tag_Model_Entity_Customer_Collection extends Mage_Customer_Model_Enti
      * @param bool $logQuery
      * @return $this|Mage_Eav_Model_Entity_Collection_Abstract
      */
+    #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {
         parent::load($printQuery, $logQuery);

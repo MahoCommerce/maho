@@ -197,6 +197,7 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
      *
      * @return $this
      */
+    #[\Override]
     protected function _initWebsites()
     {
         foreach (Mage::app()->getWebsites() as $website) {
@@ -525,6 +526,7 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
      *
      * @return string
      */
+    #[\Override]
     public function export()
     {
         $this->_prepareExport();
@@ -544,6 +546,7 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
      *
      * @return array
      */
+    #[\Override]
     public function exportFile()
     {
         $this->_prepareExport();
@@ -1052,6 +1055,7 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
      *
      * @return Mage_Eav_Model_Resource_Entity_Attribute_Collection
      */
+    #[\Override]
     public function filterAttributeCollection(Mage_Eav_Model_Resource_Entity_Attribute_Collection $collection)
     {
         $validTypes = array_keys($this->_productTypeModels);
@@ -1078,6 +1082,7 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
      *
      * @return Mage_Catalog_Model_Resource_Product_Attribute_Collection
      */
+    #[\Override]
     public function getAttributeCollection()
     {
         return Mage::getResourceModel('catalog/product_attribute_collection');
@@ -1088,6 +1093,7 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
      *
      * @return string
      */
+    #[\Override]
     public function getEntityTypeCode()
     {
         return 'catalog_product';

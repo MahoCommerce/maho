@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_View_Items extends Mage_Adminh
      *
      * @return Mage_Sales_Model_Order
      */
+    #[\Override]
     public function getOrder()
     {
         return $this->getCreditmemo()->getOrder();
@@ -36,6 +37,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_View_Items extends Mage_Adminh
      *
      * @return Mage_Sales_Model_Order_Creditmemo
      */
+    #[\Override]
     public function getSource()
     {
         return $this->getCreditmemo();
@@ -58,6 +60,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_View_Items extends Mage_Adminh
      *
      * @return Mage_Sales_Model_Order_Creditmemo
      */
+    #[\Override]
     public function getCreditmemo()
     {
         return Mage::registry('current_creditmemo');

@@ -25,6 +25,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
      * Additional initialization
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->setUsedModuleName('Mage_Sales');
@@ -38,6 +39,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
      *
      * @return Mage_Adminhtml_Model_Session_Quote
      */
+    #[\Override]
     protected function _getSession()
     {
         return Mage::getSingleton('adminhtml/session_quote');
@@ -531,6 +533,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _isAllowed()
     {
         return Mage::getSingleton('admin/session')->isAllowed($this->_getAclResourse());

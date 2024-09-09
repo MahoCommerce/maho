@@ -74,6 +74,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_Edit_Form extends Mage_Adminh
     /**
      * Instantiate a recurring payment profile to use it as a helper
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_profile = Mage::getSingleton('sales/recurring_profile');
@@ -85,6 +86,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_Edit_Form extends Mage_Adminh
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         // TODO: implement $this->_isReadonly setting

@@ -33,6 +33,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
      * @param bool $defaultValues
      * @return array
      */
+    #[\Override]
     public function getAllOptions($withEmpty = true, $defaultValues = false)
     {
         $storeId = $this->getAttribute()->getStoreId();
@@ -71,6 +72,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
      * @param string|int $value
      * @return string|array|false
      */
+    #[\Override]
     public function getOptionText($value)
     {
         $isMultiple = false;
@@ -107,6 +109,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
      *
      * @return $this
      */
+    #[\Override]
     public function addValueSortToCollection($collection, $dir = Varien_Db_Select::SQL_ASC)
     {
         $valueTable1    = $this->getAttribute()->getAttributeCode() . '_t1';
@@ -143,6 +146,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
      *
      * @return array
      */
+    #[\Override]
     public function getFlatColums()
     {
         $columns = [];
@@ -198,6 +202,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
      *
      * @return array
      */
+    #[\Override]
     public function getFlatIndexes()
     {
         $indexes = [];
@@ -227,6 +232,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
      * @param int $store
      * @return Varien_Db_Select|null
      */
+    #[\Override]
     public function getFlatUpdateSelect($store)
     {
         return Mage::getResourceModel('eav/entity_attribute_option')

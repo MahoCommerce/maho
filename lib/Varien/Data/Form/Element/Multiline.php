@@ -36,6 +36,7 @@ class Varien_Data_Form_Element_Multiline extends Varien_Data_Form_Element_Abstra
     /**
      * @return array
      */
+    #[\Override]
     public function getHtmlAttributes()
     {
         return ['type', 'title', 'class', 'style', 'onclick', 'onchange', 'disabled', 'maxlength'];
@@ -45,6 +46,7 @@ class Varien_Data_Form_Element_Multiline extends Varien_Data_Form_Element_Abstra
      * @param int $suffix
      * @return string
      */
+    #[\Override]
     public function getLabelHtml($suffix = 0)
     {
         return parent::getLabelHtml($suffix);
@@ -55,6 +57,7 @@ class Varien_Data_Form_Element_Multiline extends Varien_Data_Form_Element_Abstra
      *
      * @return string
      */
+    #[\Override]
     public function getElementHtml()
     {
         $html = '';
@@ -80,6 +83,7 @@ class Varien_Data_Form_Element_Multiline extends Varien_Data_Form_Element_Abstra
     /**
      * @return string
      */
+    #[\Override]
     public function getDefaultHtml()
     {
         $html = '';

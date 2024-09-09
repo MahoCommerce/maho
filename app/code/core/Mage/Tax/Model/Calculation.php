@@ -120,6 +120,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
      */
     protected $_taxHelper;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('tax/calculation');

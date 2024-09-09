@@ -158,6 +158,7 @@ abstract class Varien_Convert_Action_Abstract implements Varien_Convert_Action_I
      *
      * @return Varien_Convert_Action_Abstract
      */
+    #[\Override]
     public function run()
     {
         if ($method = $this->getParam('method')) {

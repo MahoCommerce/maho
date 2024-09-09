@@ -325,6 +325,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
      *
      * @return Magento_Db_Adapter_Pdo_Mysql
      */
+    #[\Override]
     protected function _getReadAdapter()
     {
         if ($this->hasConnection('write')) {
@@ -343,6 +344,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
      *
      * @return Magento_Db_Adapter_Pdo_Mysql
      */
+    #[\Override]
     protected function _getWriteAdapter()
     {
         return $this->_getConnection('write');

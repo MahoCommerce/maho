@@ -21,6 +21,7 @@ class Magento_Profiler_Output_Html extends Magento_Profiler_OutputAbstract
     /**
      * Display profiling results
      */
+    #[\Override]
     public function display()
     {
         $out  = '<table border="1" cellspacing="0" cellpadding="2">';
@@ -48,6 +49,7 @@ class Magento_Profiler_Output_Html extends Magento_Profiler_OutputAbstract
      * @param string $timerId
      * @return string
      */
+    #[\Override]
     protected function _renderTimerId($timerId)
     {
         $nestingSep = preg_quote(Magento_Profiler::NESTING_SEPARATOR, '/');

@@ -34,6 +34,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Price extends Varien_Data
      * @return string
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     public function getAfterElementHtml()
     {
         $html = parent::getAfterElementHtml();
@@ -76,6 +77,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Price extends Varien_Data
      * @param null $index deprecated
      * @return string|null
      */
+    #[\Override]
     public function getEscapedValue($index = null)
     {
         $value = $this->getValue();

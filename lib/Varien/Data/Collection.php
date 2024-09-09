@@ -737,6 +737,7 @@ class Varien_Data_Collection implements IteratorAggregate, Countable
      * Implementation of IteratorAggregate::getIterator()
      */
     #[ReturnTypeWillChange]
+    #[\Override]
     public function getIterator()
     {
         $this->load();
@@ -749,6 +750,7 @@ class Varien_Data_Collection implements IteratorAggregate, Countable
      * @return int
      */
     #[ReturnTypeWillChange]
+    #[\Override]
     public function count()
     {
         $this->load();

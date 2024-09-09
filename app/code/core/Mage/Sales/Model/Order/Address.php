@@ -88,6 +88,7 @@ class Mage_Sales_Model_Order_Address extends Mage_Customer_Model_Address_Abstrac
     /**
      * Initialize resource
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order_address');
@@ -98,6 +99,7 @@ class Mage_Sales_Model_Order_Address extends Mage_Customer_Model_Address_Abstrac
      *
      * @return $this
      */
+    #[\Override]
     protected function _initOldFieldsMap()
     {
         return $this;
@@ -132,6 +134,7 @@ class Mage_Sales_Model_Order_Address extends Mage_Customer_Model_Address_Abstrac
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();

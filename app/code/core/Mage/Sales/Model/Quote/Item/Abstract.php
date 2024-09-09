@@ -203,6 +203,7 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
      *
      * @return Mage_Catalog_Model_Product
      */
+    #[\Override]
     public function getProduct()
     {
         $product = $this->_getData('product');
@@ -230,6 +231,7 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
      *
      * @return null|Varien_Object
      */
+    #[\Override]
     public function getFileDownloadParams()
     {
         return null;
@@ -240,6 +242,7 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
      *
      * @return  $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();

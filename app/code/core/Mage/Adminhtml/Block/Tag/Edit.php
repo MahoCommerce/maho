@@ -47,6 +47,7 @@ class Mage_Adminhtml_Block_Tag_Edit extends Mage_Adminhtml_Block_Widget_Form_Con
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         parent::_prepareLayout();
@@ -63,6 +64,7 @@ class Mage_Adminhtml_Block_Tag_Edit extends Mage_Adminhtml_Block_Widget_Form_Con
      *
      * @return string
      */
+    #[\Override]
     public function getHeaderText()
     {
         if (Mage::registry('current_tag')->getId()) {
@@ -89,6 +91,7 @@ class Mage_Adminhtml_Block_Tag_Edit extends Mage_Adminhtml_Block_Widget_Form_Con
      *
      * @return string
      */
+    #[\Override]
     public function getDeleteUrl()
     {
         return $this->getUrl(
@@ -138,6 +141,7 @@ class Mage_Adminhtml_Block_Tag_Edit extends Mage_Adminhtml_Block_Widget_Form_Con
      *
      * @return string
      */
+    #[\Override]
     public function getSaveUrl()
     {
         return $this->getUrl('*/*/save', ['_current' => true]);
@@ -166,6 +170,7 @@ class Mage_Adminhtml_Block_Tag_Edit extends Mage_Adminhtml_Block_Widget_Form_Con
      *
      * @return string
      */
+    #[\Override]
     public function getBackUrl()
     {
         return $this->getUrl('*/*/' . $this->getRequest()->getParam('ret', 'index'));

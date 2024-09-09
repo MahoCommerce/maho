@@ -108,6 +108,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      * @param Mage_Sales_Model_Quote|null $quote
      * @return bool
      */
+    #[\Override]
     public function isAvailable($quote = null)
     {
         $storeId = Mage::app()->getStore($this->getStore())->getId();
@@ -124,6 +125,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      * @see Mage_Sales_Model_Payment::place()
      * @return string
      */
+    #[\Override]
     public function getConfigPaymentAction()
     {
         switch ($this->getConfigData('payment_action')) {
@@ -141,6 +143,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return $this
      */
+    #[\Override]
     public function authorize(Varien_Object $payment, $amount)
     {
         $request = $this->_buildPlaceRequest($payment, $amount);
@@ -182,6 +185,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return $this
      */
+    #[\Override]
     public function capture(Varien_Object $payment, $amount)
     {
         if ($payment->getReferenceTransactionId()) {
@@ -224,6 +228,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return $this
      */
+    #[\Override]
     public function void(Varien_Object $payment)
     {
         $request = $this->_buildBasicRequest($payment);
@@ -246,6 +251,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      *
      * @return  bool
      */
+    #[\Override]
     public function canVoid(Varien_Object $payment)
     {
         if ($payment instanceof Mage_Sales_Model_Order_Invoice
@@ -265,6 +271,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      *
      * @return $this|false
      */
+    #[\Override]
     public function cancel(Varien_Object $payment)
     {
         if (!$payment->getOrder()->getInvoiceCollection()->count()) {
@@ -280,6 +287,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return $this
      */
+    #[\Override]
     public function refund(Varien_Object $payment, $amount)
     {
         $request = $this->_buildBasicRequest($payment);
@@ -303,6 +311,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      * @param string $transactionId
      * @return array
      */
+    #[\Override]
     public function fetchTransactionInfo(Mage_Payment_Model_Info $payment, $transactionId)
     {
         $request = $this->_buildBasicRequest($payment);

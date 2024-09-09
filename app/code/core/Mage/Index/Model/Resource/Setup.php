@@ -26,6 +26,7 @@ class Mage_Index_Model_Resource_Setup extends Mage_Core_Model_Resource_Setup
      *
      * @return void
      */
+    #[\Override]
     public function applyUpdates()
     {
         parent::applyUpdates();

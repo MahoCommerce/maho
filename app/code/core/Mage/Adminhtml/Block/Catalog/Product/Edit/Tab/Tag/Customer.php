@@ -30,6 +30,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Tag_Customer extends Mage_Ad
         $this->setUseAjax(true);
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         if (Mage::helper('catalog')->isModuleEnabled('Mage_Tag')) {
@@ -44,11 +45,13 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Tag_Customer extends Mage_Ad
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _afterLoadCollection()
     {
         return parent::_afterLoadCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('firstname', [
@@ -79,11 +82,13 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Tag_Customer extends Mage_Ad
         return parent::_prepareColumns();
     }
 
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/customer/edit', ['id' => $row->getEntityId()]);
     }
 
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/catalog_product/tagCustomerGrid', [

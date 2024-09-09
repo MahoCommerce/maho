@@ -102,6 +102,7 @@ class Mage_Adminhtml_Block_Report_Filter_Form extends Mage_Adminhtml_Block_Widge
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareForm()
     {
         $actionUrl = $this->getUrl('*/*/sales');
@@ -175,6 +176,7 @@ class Mage_Adminhtml_Block_Report_Filter_Form extends Mage_Adminhtml_Block_Widge
      *
      * @return Mage_Adminhtml_Block_Widget_Form
      */
+    #[\Override]
     protected function _initFormValues()
     {
         $data = $this->getFilterData()->getData();
@@ -192,6 +194,7 @@ class Mage_Adminhtml_Block_Report_Filter_Form extends Mage_Adminhtml_Block_Widge
      *
      * @return Mage_Adminhtml_Block_Widget_Form
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         $result = parent::_beforeToHtml();

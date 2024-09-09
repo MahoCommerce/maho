@@ -32,6 +32,7 @@ class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
      *
      * @return Mage_Wishlist_Model_Wishlist|false
      */
+    #[\Override]
     protected function _getWishlist()
     {
         $code     = (string)$this->getRequest()->getParam('code');

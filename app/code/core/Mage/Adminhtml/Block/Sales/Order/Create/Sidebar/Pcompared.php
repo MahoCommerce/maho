@@ -21,6 +21,7 @@
  */
 class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Pcompared extends Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -41,6 +42,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Pcompared extends Mage_Adm
      *
      * @return mixed
      */
+    #[\Override]
     public function getItemCollection()
     {
         $productCollection = $this->getData('item_collection');
@@ -84,6 +86,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Pcompared extends Mage_Adm
      *
      * @return bool
      */
+    #[\Override]
     public function canRemoveItems()
     {
         return false;
@@ -95,6 +98,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Pcompared extends Mage_Adm
      * @param Mage_Catalog_Model_Product $item
      * @return int
      */
+    #[\Override]
     public function getIdentifierId($item)
     {
         return $item->getId();
@@ -106,6 +110,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Pcompared extends Mage_Adm
      * @param   mixed $item
      * @return  int
      */
+    #[\Override]
     public function getProductId($item)
     {
         return $item->getId();

@@ -111,6 +111,7 @@ class Mage_SalesRule_Model_Resource_Report_Collection extends Mage_Sales_Model_R
      *
      * @return $this
      */
+    #[\Override]
     protected function _initSelect()
     {
         $this->getSelect()->from($this->getResource()->getMainTable(), $this->_getSelectedColumns());
@@ -173,6 +174,7 @@ class Mage_SalesRule_Model_Resource_Report_Collection extends Mage_Sales_Model_R
      *
      * @return Mage_Sales_Model_Resource_Report_Collection_Abstract
      */
+    #[\Override]
     protected function _applyCustomFilter()
     {
         $this->_applyRulesFilter();

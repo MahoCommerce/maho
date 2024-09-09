@@ -48,6 +48,7 @@ class Mage_ImportExport_Model_Export_Adapter_Csv extends Mage_ImportExport_Model
     /**
      * Close file handler on shutdown
      */
+    #[\Override]
     public function destruct()
     {
         if (is_resource($this->_fileHandler)) {
@@ -60,6 +61,7 @@ class Mage_ImportExport_Model_Export_Adapter_Csv extends Mage_ImportExport_Model
      *
      * @return Mage_ImportExport_Model_Export_Adapter_Abstract
      */
+    #[\Override]
     protected function _init()
     {
         $this->_fileHandler = fopen($this->_destination, 'w');
@@ -71,6 +73,7 @@ class Mage_ImportExport_Model_Export_Adapter_Csv extends Mage_ImportExport_Model
      *
      * @return string
      */
+    #[\Override]
     public function getContentType()
     {
         return 'text/csv';
@@ -81,6 +84,7 @@ class Mage_ImportExport_Model_Export_Adapter_Csv extends Mage_ImportExport_Model
      *
      * @return string
      */
+    #[\Override]
     public function getFileExtension()
     {
         return 'csv';
@@ -92,6 +96,7 @@ class Mage_ImportExport_Model_Export_Adapter_Csv extends Mage_ImportExport_Model
      * @throws Exception
      * @return Mage_ImportExport_Model_Export_Adapter_Abstract
      */
+    #[\Override]
     public function writeRow(array $rowData)
     {
         if ($this->_headerCols === null) {

@@ -27,6 +27,7 @@ class Varien_Data_Form_Filter_Datetime extends Varien_Data_Form_Filter_Date
      * @param string $value
      * @return string
      */
+    #[\Override]
     public function inputFilter($value)
     {
         if ($value === null || $value === '') {
@@ -53,6 +54,7 @@ class Varien_Data_Form_Filter_Datetime extends Varien_Data_Form_Filter_Date
      * @param string $value
      * @return string
      */
+    #[\Override]
     public function outputFilter($value)
     {
         if ($value === null || $value === '') {

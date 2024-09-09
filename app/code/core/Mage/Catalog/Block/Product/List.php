@@ -131,6 +131,7 @@ class Mage_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_Abstrac
      * Need use as _prepareLayout - but problem in declaring collection from
      * another block (was problem with search result)
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         $toolbar = $this->getToolbarBlock();
@@ -271,6 +272,7 @@ class Mage_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_Abstrac
      *
      * @return array
      */
+    #[\Override]
     public function getCacheTags()
     {
         return array_merge(

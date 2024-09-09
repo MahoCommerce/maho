@@ -107,6 +107,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeDelete(Varien_Object $object)
     {
         parent::_beforeDelete($object);
@@ -162,6 +163,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave(Varien_Object $object)
     {
         parent::_beforeSave($object);
@@ -201,6 +203,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      * @param Mage_Catalog_Model_Category $object
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave(Varien_Object $object)
     {
         /**

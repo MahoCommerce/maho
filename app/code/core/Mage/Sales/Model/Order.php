@@ -498,6 +498,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      */
     protected $_historyEntityName = self::HISTORY_ENTITY_NAME;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order');
@@ -509,6 +510,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     *
     * @return Varien_Object
     */
+    #[\Override]
     protected function _initOldFieldsMap()
     {
         // pre 1.6 fields names, old => new
@@ -526,6 +528,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      * @param string $key data key
      * @return $this
      */
+    #[\Override]
     public function unsetData($key = null)
     {
         parent::unsetData($key);
@@ -610,6 +613,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      *
      * @return Mage_Core_Model_Store
      */
+    #[\Override]
     public function getStore()
     {
         $storeId = $this->getStoreId();
@@ -2116,6 +2120,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      * @param int|string|null $index
      * @return float|mixed
      */
+    #[\Override]
     public function getData($key = '', $index = null)
     {
         if ($key == 'total_due') {
@@ -2318,6 +2323,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      *
      * @return Mage_Core_Model_Abstract
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();
@@ -2417,6 +2423,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave()
     {
         if ($this->_addresses !== null) {
@@ -2543,6 +2550,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      * Protect order delete from not admin scope
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         $this->_protectFromNonAdmin();

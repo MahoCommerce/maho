@@ -35,6 +35,7 @@ class Mage_Index_Model_Resource_Process_Collection extends Mage_Core_Model_Resou
      * Initialize resource
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('index/process');

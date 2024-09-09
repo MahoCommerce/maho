@@ -96,6 +96,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_View extends Mage_Adminhtml_Bl
      *
      * @return string
      */
+    #[\Override]
     public function getHeaderText()
     {
         if ($this->getCreditmemo()->getEmailSent()) {
@@ -121,6 +122,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_View extends Mage_Adminhtml_Bl
      *
      * @return string
      */
+    #[\Override]
     public function getBackUrl()
     {
         return $this->getUrl(

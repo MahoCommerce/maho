@@ -38,6 +38,7 @@ class Varien_Data_Form_Element_Link extends Varien_Data_Form_Element_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function getElementHtml()
     {
         $html = $this->getBeforeElementHtml();
@@ -51,6 +52,7 @@ class Varien_Data_Form_Element_Link extends Varien_Data_Form_Element_Abstract
      *
      * @return array
      */
+    #[\Override]
     public function getHtmlAttributes()
     {
         return ['charset', 'coords', 'href', 'hreflang', 'rel', 'rev', 'name',

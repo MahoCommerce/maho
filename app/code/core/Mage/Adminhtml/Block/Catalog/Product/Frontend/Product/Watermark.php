@@ -23,6 +23,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Frontend_Product_Watermark extends Ma
 {
     public const XML_PATH_IMAGE_TYPES = 'global/catalog/product/media/image_types';
 
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         $html = $this->_getHeaderHtml($element);

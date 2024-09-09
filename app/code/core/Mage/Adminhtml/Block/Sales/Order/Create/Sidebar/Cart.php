@@ -28,6 +28,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Cart extends Mage_Adminhtm
      */
     protected $_sidebarStorageAction = 'add_cart_item';
 
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -48,6 +49,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Cart extends Mage_Adminhtm
      *
      * @return mixed
      */
+    #[\Override]
     public function getItemCollection()
     {
         $collection = $this->getData('item_collection');
@@ -61,6 +63,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Cart extends Mage_Adminhtm
     /**
      * @return bool
      */
+    #[\Override]
     public function canDisplayItemQty()
     {
         return true;
@@ -72,6 +75,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Cart extends Mage_Adminhtm
      * @param Varien_Object $item
      * @return int
      */
+    #[\Override]
     public function getIdentifierId($item)
     {
         return $item->getId();
@@ -83,6 +87,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Cart extends Mage_Adminhtm
      * @param   Mage_Sales_Model_Quote_Item $item
      * @return  int
      */
+    #[\Override]
     public function getProductId($item)
     {
         return $item->getProduct()->getId();
@@ -91,6 +96,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Cart extends Mage_Adminhtm
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $deleteAllConfirmString = Mage::helper('core')->jsQuoteEscape(

@@ -33,6 +33,7 @@ class Mage_Catalog_Model_Api2_Product_Rest_Customer_V1 extends Mage_Catalog_Mode
      *
      * @return int
      */
+    #[\Override]
     protected function _getCustomerGroupId()
     {
         return $this->_getCustomer()->getGroupId();
@@ -45,6 +46,7 @@ class Mage_Catalog_Model_Api2_Product_Rest_Customer_V1 extends Mage_Catalog_Mode
      * @param bool $withTax
      * @return float
      */
+    #[\Override]
     protected function _applyTaxToPrice($price, $withTax = true)
     {
         $customer = $this->_getCustomer();

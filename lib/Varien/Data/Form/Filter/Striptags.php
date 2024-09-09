@@ -27,6 +27,7 @@ class Varien_Data_Form_Filter_Striptags implements Varien_Data_Form_Filter_Inter
      * @param string $value
      * @return string
      */
+    #[\Override]
     public function inputFilter($value)
     {
         return strip_tags($value);
@@ -38,6 +39,7 @@ class Varien_Data_Form_Filter_Striptags implements Varien_Data_Form_Filter_Inter
      * @param string $value
      * @return string
      */
+    #[\Override]
     public function outputFilter($value)
     {
         return $value;

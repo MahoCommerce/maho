@@ -23,6 +23,7 @@
  */
 class Varien_Convert_Validator_Dryrun extends Varien_Convert_Validator_Abstract
 {
+    #[\Override]
     public function validate()
     {
         if ($this->getVar('dry_run') || $this->getProfile()->getDryRun()) {

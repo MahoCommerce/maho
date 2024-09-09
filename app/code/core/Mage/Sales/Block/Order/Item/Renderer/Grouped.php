@@ -28,6 +28,7 @@ class Mage_Sales_Block_Order_Item_Renderer_Grouped extends Mage_Sales_Block_Orde
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         if ($this->getItem()->getOrderItem()) {

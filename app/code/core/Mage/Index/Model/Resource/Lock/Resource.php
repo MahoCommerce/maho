@@ -34,6 +34,7 @@ class Mage_Index_Model_Resource_Lock_Resource extends Mage_Core_Model_Resource
      *
      * @return Varien_Db_Adapter_Interface|false
      */
+    #[\Override]
     public function getConnection($name, $extendConfigWith = '')
     {
         $index = $name . $extendConfigWith;
@@ -101,6 +102,7 @@ class Mage_Index_Model_Resource_Lock_Resource extends Mage_Core_Model_Resource
      *
      * @return Varien_Db_Adapter_Interface|false
      */
+    #[\Override]
     protected function _getDefaultConnection($requiredConnectionName, $extendConfigWith = '')
     {
         if (str_contains($requiredConnectionName, 'read')) {

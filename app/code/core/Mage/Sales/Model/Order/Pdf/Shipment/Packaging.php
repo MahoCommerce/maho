@@ -27,6 +27,7 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
      * @param  Mage_Sales_Model_Order_Shipment $shipment
      * @return Zend_Pdf
      */
+    #[\Override]
     public function getPdf($shipment = null)
     {
         $this->_beforeGetPdf();

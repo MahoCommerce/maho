@@ -97,6 +97,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
     /**
      * Object initialization
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('log/visitor');

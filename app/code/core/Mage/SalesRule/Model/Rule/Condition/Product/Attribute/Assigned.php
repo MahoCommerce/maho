@@ -86,6 +86,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
      * Retrieves unary operators of the attribute assignment state
      * @return array
      */
+    #[\Override]
     public function getOperatorSelectOptions()
     {
         if (is_null($this->_cachedOperatorSelectOptionsCache)) {
@@ -105,6 +106,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
      * Retrieve an operator name
      * @return string
      */
+    #[\Override]
     public function getOperatorName()
     {
         return $this->getOperator() && array_key_exists($this->getOperator(), $this->_operatorSelectOptionsHash)
@@ -117,6 +119,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
      *
      * @return bool
      */
+    #[\Override]
     public function validate(Varien_Object $object)
     {
         $product    = $this->_getProduct($object);
@@ -132,6 +135,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
      * Generate a condition html
      * @return string
      */
+    #[\Override]
     public function asHtml()
     {
         return $this->_getHelper()->__(

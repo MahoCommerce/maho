@@ -26,6 +26,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
      *
      * @return Mage_Adminhtml_Controller_Action
      */
+    #[\Override]
     public function preDispatch()
     {
         $this->_setForcedFormKeyActions(['delete', 'save']);
@@ -284,6 +285,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _isAllowed()
     {
         /** @var Mage_Admin_Model_Session $session */

@@ -23,6 +23,7 @@ class Mage_Core_Model_Resource_Email_Queue extends Mage_Core_Model_Resource_Db_A
      * Initialize email queue resource model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/email_queue', 'message_id');
@@ -34,6 +35,7 @@ class Mage_Core_Model_Resource_Email_Queue extends Mage_Core_Model_Resource_Db_A
      * @param Mage_Core_Model_Email_Queue $object
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {
         $object->setRecipients($this->getRecipients($object->getId()));
@@ -47,6 +49,7 @@ class Mage_Core_Model_Resource_Email_Queue extends Mage_Core_Model_Resource_Db_A
      * @param Mage_Core_Model_Email_Queue $object
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if ($object->isObjectNew()) {

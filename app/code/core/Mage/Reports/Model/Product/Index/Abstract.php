@@ -45,6 +45,7 @@ abstract class Mage_Reports_Model_Product_Index_Abstract extends Mage_Core_Model
      * @see Mage_Core_Model_Abstract::save()
      * @return Mage_Reports_Model_Product_Index_Abstract
      */
+    #[\Override]
     public function save()
     {
         if (!$this->hasVisitorId()) {

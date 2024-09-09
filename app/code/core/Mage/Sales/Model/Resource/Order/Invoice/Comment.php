@@ -26,6 +26,7 @@ class Mage_Sales_Model_Resource_Order_Invoice_Comment extends Mage_Sales_Model_R
      */
     protected $_eventPrefix    = 'sales_order_invoice_comment_resource';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/invoice_comment', 'entity_id');

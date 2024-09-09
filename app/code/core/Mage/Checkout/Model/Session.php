@@ -135,6 +135,7 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * Unset all data associated with object
      */
+    #[\Override]
     public function unsetAll()
     {
         parent::unsetAll();
@@ -463,6 +464,7 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * @return Mage_Core_Model_Session_Abstract|void
      */
+    #[\Override]
     public function clear()
     {
         Mage::dispatchEvent('checkout_quote_destroy', ['quote' => $this->getQuote()]);

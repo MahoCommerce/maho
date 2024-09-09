@@ -24,6 +24,7 @@ class Mage_Catalog_Model_Product_Attribute_Source_Layout extends Mage_Eav_Model_
     /**
      * @return array
      */
+    #[\Override]
     public function getAllOptions()
     {
         if (!$this->_options) {

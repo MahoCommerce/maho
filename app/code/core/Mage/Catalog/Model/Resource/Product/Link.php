@@ -28,6 +28,7 @@ class Mage_Catalog_Model_Resource_Product_Link extends Mage_Core_Model_Resource_
      */
     protected $_attributesTable;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_link', 'link_id');

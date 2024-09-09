@@ -39,6 +39,7 @@ class Mage_Adminhtml_Block_Catalog_Search_Grid extends Mage_Adminhtml_Block_Widg
      * @inheritDoc
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getModel('catalogsearch/query')
@@ -53,6 +54,7 @@ class Mage_Adminhtml_Block_Catalog_Search_Grid extends Mage_Adminhtml_Block_Widg
      * @inheritDoc
      * @throws Exception
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('query_id', [
@@ -141,6 +143,7 @@ class Mage_Adminhtml_Block_Catalog_Search_Grid extends Mage_Adminhtml_Block_Widg
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareMassaction()
     {
         $this->setMassactionIdField('query_id');
@@ -160,6 +163,7 @@ class Mage_Adminhtml_Block_Catalog_Search_Grid extends Mage_Adminhtml_Block_Widg
      * @param Mage_CatalogSearch_Model_Query $row
      * @return string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);

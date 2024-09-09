@@ -27,6 +27,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Composite_Error extends Mage_Core_Blo
      *
      * @return string
      */
+    #[\Override]
     public function _toHtml()
     {
         $message = Mage::registry('composite_configure_result_error_message');

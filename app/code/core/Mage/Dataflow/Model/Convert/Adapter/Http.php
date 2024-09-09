@@ -21,6 +21,7 @@
  */
 class Mage_Dataflow_Model_Convert_Adapter_Http extends Mage_Dataflow_Model_Convert_Adapter_Abstract
 {
+    #[\Override]
     public function load()
     {
         if (!$_FILES) {
@@ -35,6 +36,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Http extends Mage_Dataflow_Model_Conve
         return $this;
     }
 
+    #[\Override]
     public function save()
     {
         if ($this->getVars()) {

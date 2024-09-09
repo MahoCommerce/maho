@@ -41,6 +41,7 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
      * @return Mage_Wishlist_Model_Wishlist
      * @throws Exception
      */
+    #[\Override]
     protected function _getWishlist()
     {
         if (is_null($this->_wishlist)) {
@@ -100,6 +101,7 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
      * @throws Mage_Core_Exception
      * @throws Exception
      */
+    #[\Override]
     protected function _toHtml()
     {
         /** @var Mage_Rss_Model_Rss $rssObj */
@@ -185,6 +187,7 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
      * @param array $additional
      * @return string
      */
+    #[\Override]
     public function getProductUrl($product, $additional = [])
     {
         $additional['_rss'] = true;
@@ -198,6 +201,7 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
      * @param string $block Block Type
      * @param string $template Template
      */
+    #[\Override]
     public function addPriceBlockType($type, $block = '', $template = '')
     {
         if ($type) {

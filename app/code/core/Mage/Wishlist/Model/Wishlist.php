@@ -70,6 +70,7 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
     /**
      * Initialize resource model
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('wishlist/wishlist');
@@ -156,6 +157,7 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();
@@ -168,6 +170,7 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterSave()
     {
         parent::_afterSave();
@@ -597,6 +600,7 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     public function save()
     {
         $this->_hasDataChanges = true;

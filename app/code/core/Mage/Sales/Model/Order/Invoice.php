@@ -196,6 +196,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
     /**
      * Initialize invoice resource model
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order_invoice');
@@ -206,6 +207,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _initOldFieldsMap()
     {
         return $this;
@@ -245,6 +247,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
      *
      * @return Mage_Core_Model_Store
      */
+    #[\Override]
     public function getStore()
     {
         return $this->getOrder()->getStore();
@@ -954,6 +957,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
      * @return Mage_Sales_Model_Abstract
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         $this->_protectFromNonAdmin();
@@ -982,6 +986,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();
@@ -999,6 +1004,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave()
     {
         if ($this->_items !== null) {

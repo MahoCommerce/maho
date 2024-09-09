@@ -31,6 +31,7 @@ class Mage_Adminhtml_Block_Sales_Order_Status_Grid extends Mage_Adminhtml_Block_
         $this->setDefaultDir('DESC');
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('sales/order_status_collection');
@@ -40,6 +41,7 @@ class Mage_Adminhtml_Block_Sales_Order_Status_Grid extends Mage_Adminhtml_Block_
         return $this;
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('label', [
@@ -118,11 +120,13 @@ class Mage_Adminhtml_Block_Sales_Order_Status_Grid extends Mage_Adminhtml_Block_
     /**
      * No pegination for this grid
      */
+    #[\Override]
     protected function _preparePage()
     {
         return $this;
     }
 
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/sales_order_status/edit', ['status' => $row->getStatus()]);

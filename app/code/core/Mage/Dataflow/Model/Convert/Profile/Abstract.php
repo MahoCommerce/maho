@@ -105,6 +105,7 @@ abstract class Mage_Dataflow_Model_Convert_Profile_Abstract implements Mage_Data
         return $this;
     }
 
+    #[\Override]
     public function run()
     {
         if (!$this->_actions) {

@@ -45,6 +45,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
      * Resource model initialization
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('eav/entity_attribute');
@@ -372,6 +373,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
      *
      * @return Mage_Core_Model_Resource_Db_Collection_Abstract
      */
+    #[\Override]
     protected function _afterLoadData()
     {
         $this->_addSetInfo();

@@ -25,6 +25,7 @@ class Mage_Api_Model_Resource_Acl_Role_Collection extends Mage_Core_Model_Resour
      * Resource collection initialization
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('api/role');

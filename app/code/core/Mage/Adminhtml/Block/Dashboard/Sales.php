@@ -21,12 +21,14 @@
  */
 class Mage_Adminhtml_Block_Dashboard_Sales extends Mage_Adminhtml_Block_Dashboard_Bar
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
         $this->setTemplate('dashboard/salebar.phtml');
     }
 
+    #[\Override]
     protected function _prepareLayout()
     {
         if (!Mage::helper('core')->isModuleEnabled('Mage_Reports')) {

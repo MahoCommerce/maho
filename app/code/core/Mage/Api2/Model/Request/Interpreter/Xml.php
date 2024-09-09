@@ -42,6 +42,7 @@ class Mage_Api2_Model_Request_Interpreter_Xml implements Mage_Api2_Model_Request
      * @return array
      * @throws Exception|Mage_Api2_Exception
      */
+    #[\Override]
     public function interpret($body)
     {
         if (!is_string($body)) {

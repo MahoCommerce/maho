@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Heading extends Mage_Adminht
      *
      * @return string
      */
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         return sprintf(

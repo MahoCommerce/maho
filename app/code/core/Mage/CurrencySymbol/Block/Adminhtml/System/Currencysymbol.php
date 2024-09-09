@@ -33,6 +33,7 @@ class Mage_CurrencySymbol_Block_Adminhtml_System_Currencysymbol extends Mage_Adm
      *
      * @return Mage_Core_Block_Abstract
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         return parent::_prepareLayout();

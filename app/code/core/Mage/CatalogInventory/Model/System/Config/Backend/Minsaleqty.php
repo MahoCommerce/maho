@@ -25,6 +25,7 @@ class Mage_CatalogInventory_Model_System_Config_Backend_Minsaleqty extends Mage_
      * Process data after load
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad()
     {
         $value = $this->getValue();
@@ -37,6 +38,7 @@ class Mage_CatalogInventory_Model_System_Config_Backend_Minsaleqty extends Mage_
      * Prepare data before save
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         $value = $this->getValue();

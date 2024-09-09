@@ -33,11 +33,13 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid extends Mage_Adminh
         $this->setEmptyText(Mage::helper('customer')->__('No Newsletter Found'));
     }
 
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/newsletter', ['_current' => true]);
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('newsletter/queue_collection')
@@ -49,6 +51,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid extends Mage_Adminh
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('queue_id', [

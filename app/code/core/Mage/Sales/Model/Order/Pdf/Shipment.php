@@ -68,6 +68,7 @@ class Mage_Sales_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_Abs
      * @param  Mage_Sales_Model_Order_Shipment[] $shipments
      * @return Zend_Pdf
      */
+    #[\Override]
     public function getPdf($shipments = [])
     {
         $this->_beforeGetPdf();
@@ -123,6 +124,7 @@ class Mage_Sales_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_Abs
      *
      * @return Zend_Pdf_Page
      */
+    #[\Override]
     public function newPage(array $settings = [])
     {
         /* Add new table head */

@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Messages extends Mage_Adminhtml_Bloc
         return Mage::registry('sales_order');
     }
 
+    #[\Override]
     public function _prepareLayout()
     {
         /**

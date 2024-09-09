@@ -25,6 +25,7 @@ class Mage_Paypal_Model_Resource_Report_Settlement_Row_Collection extends Mage_C
      * Resource initializing
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('paypal/report_settlement_row');
@@ -35,6 +36,7 @@ class Mage_Paypal_Model_Resource_Report_Settlement_Row_Collection extends Mage_C
      *
      * @return $this
      */
+    #[\Override]
     protected function _initSelect()
     {
         parent::_initSelect();

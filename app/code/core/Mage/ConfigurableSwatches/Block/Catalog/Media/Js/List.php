@@ -27,6 +27,7 @@ class Mage_ConfigurableSwatches_Block_Catalog_Media_Js_List extends Mage_Configu
      *
      * @return array
      */
+    #[\Override]
     public function getProducts()
     {
         return $this->getProductCollection();
@@ -37,6 +38,7 @@ class Mage_ConfigurableSwatches_Block_Catalog_Media_Js_List extends Mage_Configu
      *
      * @return string
      */
+    #[\Override]
     public function getImageType()
     {
         $type = parent::getImageType();
@@ -53,6 +55,7 @@ class Mage_ConfigurableSwatches_Block_Catalog_Media_Js_List extends Mage_Configu
      *
      * @return array
      */
+    #[\Override]
     protected function _getImageSizes()
     {
         return ['small_image'];
@@ -64,6 +67,7 @@ class Mage_ConfigurableSwatches_Block_Catalog_Media_Js_List extends Mage_Configu
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         if (!Mage::getStoreConfigFlag(Mage_ConfigurableSwatches_Helper_Data::CONFIG_PATH_LIST_SWATCH_ATTRIBUTE)) {

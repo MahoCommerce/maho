@@ -29,6 +29,7 @@ class Mage_Adminhtml_Block_Report_Product_Ordered_Grid extends Mage_Adminhtml_Bl
     /**
      * @return $this
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         parent::_prepareCollection();
@@ -39,6 +40,7 @@ class Mage_Adminhtml_Block_Report_Product_Ordered_Grid extends Mage_Adminhtml_Bl
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('name', [

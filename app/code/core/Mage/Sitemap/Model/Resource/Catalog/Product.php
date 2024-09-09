@@ -21,6 +21,7 @@
  */
 class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Resource_Catalog_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product', 'entity_id');
@@ -32,6 +33,7 @@ class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Res
      * @param int $storeId
      * @return array|false
      */
+    #[\Override]
     public function getCollection($storeId)
     {
         $store = Mage::app()->getStore($storeId);
@@ -88,6 +90,7 @@ class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Res
      * @param Varien_Object $entity
      * @return string
      */
+    #[\Override]
     protected function _getEntityUrl($row, $entity)
     {
         return !empty($row['request_path']) ? $row['request_path'] : 'catalog/product/view/id/' . $entity->getId();
@@ -99,6 +102,7 @@ class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Res
      * @param string $attributeCode
      * @return Mage_Sitemap_Model_Resource_Catalog_Abstract
      */
+    #[\Override]
     protected function _loadAttribute($attributeCode)
     {
         $attribute = Mage::getSingleton('catalog/product')->getResource()->getAttribute($attributeCode);

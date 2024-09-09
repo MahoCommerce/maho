@@ -91,6 +91,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      * Initialize email template model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/email_template');
@@ -242,6 +243,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      * Return template id
      * return int|null
      */
+    #[\Override]
     public function getId()
     {
         return $this->getTemplateId();
@@ -252,6 +254,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      * @param int $value
      * @return $this
      */
+    #[\Override]
     public function setId($value)
     {
         return $this->setTemplateId($value);
@@ -275,6 +278,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      *
      * @return int|string
      */
+    #[\Override]
     public function getType()
     {
         return $this->getTemplateType();
@@ -648,6 +652,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      *
      * {@inheritDoc}
      */
+    #[\Override]
     protected function _beforeSave()
     {
         $code = $this->getTemplateCode();

@@ -63,6 +63,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Source_Abstract implements Mage_E
      * @param  string|int $value
      * @return string|bool
      */
+    #[\Override]
     public function getOptionText($value)
     {
         $options = $this->getAllOptions();

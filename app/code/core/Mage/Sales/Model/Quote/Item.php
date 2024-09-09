@@ -218,6 +218,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      */
     protected $_errorInfos = null;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/quote_item');
@@ -230,6 +231,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _initOldFieldsMap()
     {
         return $this;
@@ -240,6 +242,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();
@@ -269,6 +272,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @return Mage_Sales_Model_Quote
      */
+    #[\Override]
     public function getQuote()
     {
         if (is_null($this->_quote)) {
@@ -576,6 +580,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @return array
      */
+    #[\Override]
     public function toArray(array $arrAttributes = [])
     {
         $data = parent::toArray($arrAttributes);
@@ -711,6 +716,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      * @param   string $code
      * @return  Mage_Sales_Model_Quote_Item_Option|null
      */
+    #[\Override]
     public function getOptionByCode($code)
     {
         if (isset($this->_optionsByCode[$code]) && !$this->_optionsByCode[$code]->isDeleted()) {
@@ -725,6 +731,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @return bool
      */
+    #[\Override]
     protected function _hasModelChanged()
     {
         if (!$this->hasDataChanges()) {
@@ -760,6 +767,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      * Save model plus its options
      * Ensures saving options in case when resource model was not changed
      */
+    #[\Override]
     public function save()
     {
         $hasDataChanges = $this->hasDataChanges();
@@ -779,6 +787,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave()
     {
         $this->_saveItemOptions();
@@ -790,6 +799,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @return $this
      */
+    #[\Override]
     public function __clone()
     {
         parent::__clone();

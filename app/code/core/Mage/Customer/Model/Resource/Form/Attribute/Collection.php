@@ -35,6 +35,7 @@ class Mage_Customer_Model_Resource_Form_Attribute_Collection extends Mage_Eav_Mo
      */
     protected $_entityTypeCode = 'customer';
 
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -49,6 +50,7 @@ class Mage_Customer_Model_Resource_Form_Attribute_Collection extends Mage_Eav_Mo
      *
      * @return string|null
      */
+    #[\Override]
     protected function _getEavWebsiteTable()
     {
         return $this->getTable('customer/eav_attribute_website');

@@ -57,6 +57,7 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
         ]
     ];
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('tag/indexer_summary');
@@ -67,6 +68,7 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function getName()
     {
         return Mage::helper('tag')->__('Tag Aggregation Data');
@@ -77,6 +79,7 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function getDescription()
     {
         return Mage::helper('tag')->__('Rebuild Tag aggregation data');
@@ -99,6 +102,7 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
     /**
      * Register data required by process in event object
      */
+    #[\Override]
     protected function _registerEvent(Mage_Index_Model_Event $event)
     {
         if ($event->getEntity() == Mage_Catalog_Model_Product::ENTITY) {
@@ -211,6 +215,7 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
     /**
      * Process event
      */
+    #[\Override]
     protected function _processEvent(Mage_Index_Model_Event $event)
     {
         $this->callEventHandler($event);

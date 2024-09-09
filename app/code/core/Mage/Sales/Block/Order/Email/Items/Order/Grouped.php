@@ -28,6 +28,7 @@ class Mage_Sales_Block_Order_Email_Items_Order_Grouped extends Mage_Sales_Block_
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         if ($this->getItem()->getOrderItem()) {

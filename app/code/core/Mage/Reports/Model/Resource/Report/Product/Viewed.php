@@ -25,6 +25,7 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model
     public const AGGREGATION_MONTHLY = 'reports/viewed_aggregated_monthly';
     public const AGGREGATION_YEARLY  = 'reports/viewed_aggregated_yearly';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init(self::AGGREGATION_DAILY, 'id');

@@ -30,6 +30,7 @@ class Mage_ImportExport_Adminhtml_ExportController extends Mage_Adminhtml_Contro
     /**
      * Custom constructor.
      */
+    #[\Override]
     protected function _construct()
     {
         // Define module dependent translate

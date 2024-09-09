@@ -91,6 +91,7 @@ class Mage_Adminhtml_Model_Config extends Varien_Simplexml_Config
      * @param array|null $tags
      * @return $this|Mage_Adminhtml_Model_Config
      */
+    #[\Override]
     public function saveCache($tags = null)
     {
         if ($this->getCacheSaved()) {
@@ -108,6 +109,7 @@ class Mage_Adminhtml_Model_Config extends Varien_Simplexml_Config
     /**
      * @return bool
      */
+    #[\Override]
     public function loadCache()
     {
         $xmlString = $this->_loadCache($this->getCacheId());

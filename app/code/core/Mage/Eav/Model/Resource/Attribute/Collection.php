@@ -101,6 +101,7 @@ abstract class Mage_Eav_Model_Resource_Attribute_Collection extends Mage_Eav_Mod
      *
      * @return $this
      */
+    #[\Override]
     protected function _initSelect()
     {
         $select         = $this->getSelect();
@@ -186,6 +187,7 @@ abstract class Mage_Eav_Model_Resource_Attribute_Collection extends Mage_Eav_Mod
      * @param  int $type
      * @return $this
      */
+    #[\Override]
     public function setEntityTypeFilter($type)
     {
         return $this;

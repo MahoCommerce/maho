@@ -28,6 +28,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Grid extends Mage_Adminhtml_Block_Widget_Gri
         $this->setSaveParametersInSession(true);
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $rateCollection = Mage::getModel('tax/calculation_rate')->getCollection()
@@ -37,6 +38,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Grid extends Mage_Adminhtml_Block_Widget_Gri
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _setCollectionOrder($column)
     {
         $collection = $this->getCollection();
@@ -51,6 +53,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Grid extends Mage_Adminhtml_Block_Widget_Gri
         return $this;
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('code', [
@@ -106,6 +109,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Grid extends Mage_Adminhtml_Block_Widget_Gri
      * @param Mage_Tax_Model_Calculation_Rate $row
      * @return string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/edit', ['rate' => $row->getTaxCalculationRateId()]);

@@ -31,6 +31,7 @@ class Mage_Api2_Model_Auth_User_Admin extends Mage_Api2_Model_Auth_User_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function getLabel()
     {
         return Mage::helper('api2')->__('Admin');
@@ -42,6 +43,7 @@ class Mage_Api2_Model_Auth_User_Admin extends Mage_Api2_Model_Auth_User_Abstract
      * @return int
      * @throws Exception
      */
+    #[\Override]
     public function getRole()
     {
         if (!$this->_role) {
@@ -70,6 +72,7 @@ class Mage_Api2_Model_Auth_User_Admin extends Mage_Api2_Model_Auth_User_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function getType()
     {
         return self::USER_TYPE;

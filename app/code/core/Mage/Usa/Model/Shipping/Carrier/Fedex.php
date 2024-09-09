@@ -161,6 +161,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      *
      * @return Mage_Shipping_Model_Rate_Result|bool|null
      */
+    #[\Override]
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
         if (!$this->getConfigFlag($this->_activeFlag)) {
@@ -1252,6 +1253,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      *
      * @return array
      */
+    #[\Override]
     public function getAllowedMethods()
     {
         $allowed = explode(',', $this->getConfigData('allowed_methods'));
@@ -1480,6 +1482,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      *
      * @return Varien_Object
      */
+    #[\Override]
     protected function _doShipmentRequest(Varien_Object $request)
     {
         $this->_prepareShipmentRequest($request);
@@ -1528,6 +1531,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      * @param array $data
      * @return bool
      */
+    #[\Override]
     public function rollBack($data)
     {
         $requestData = $this->_getAuthDetails();
@@ -1545,6 +1549,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      *
      * @return array|bool
      */
+    #[\Override]
     public function getContainerTypes(?Varien_Object $params = null)
     {
         if ($params == null) {
@@ -1601,6 +1606,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      *
      * @return array
      */
+    #[\Override]
     public function getDeliveryConfirmationTypes(?Varien_Object $params = null)
     {
         return $this->getCode('delivery_confirmation_types');

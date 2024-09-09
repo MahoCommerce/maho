@@ -57,6 +57,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Crosssell extends Mage_Admin
      * @param object $column
      * @return $this
      */
+    #[\Override]
     protected function _addColumnFilterToCollection($column)
     {
         // Set custom filter for in product flag
@@ -79,6 +80,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Crosssell extends Mage_Admin
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         /** @var Mage_Catalog_Model_Resource_Product_Link_Product_Collection $collection */
@@ -113,6 +115,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Crosssell extends Mage_Admin
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         if (!$this->isReadonly()) {
@@ -208,6 +211,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Crosssell extends Mage_Admin
      *
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->_getData('grid_url') ?: $this->getUrl('*/*/crosssellGrid', ['_current' => true]);

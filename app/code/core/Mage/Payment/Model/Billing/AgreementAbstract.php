@@ -102,6 +102,7 @@ abstract class Mage_Payment_Model_Billing_AgreementAbstract extends Mage_Core_Mo
      * @throws Mage_Core_Exception
      * @return Mage_Core_Model_Abstract
      */
+    #[\Override]
     protected function _beforeSave()
     {
         if ($this->isValid()) {

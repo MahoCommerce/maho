@@ -90,6 +90,7 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
 
     protected $_quote;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/quote_payment');
@@ -166,6 +167,7 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave()
     {
         if ($this->getQuote()) {
@@ -213,6 +215,7 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
      *
      * @return Mage_Payment_Model_Method_Abstract
      */
+    #[\Override]
     public function getMethodInstance()
     {
         $method = parent::getMethodInstance();

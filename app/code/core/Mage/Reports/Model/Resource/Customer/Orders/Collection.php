@@ -21,6 +21,7 @@
  */
 class Mage_Reports_Model_Resource_Customer_Orders_Collection extends Mage_Reports_Model_Resource_Order_Collection
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -49,6 +50,7 @@ class Mage_Reports_Model_Resource_Customer_Orders_Collection extends Mage_Report
      * @param string $to
      * @return $this
      */
+    #[\Override]
     public function setDateRange($from, $to)
     {
         $this->_reset()
@@ -62,6 +64,7 @@ class Mage_Reports_Model_Resource_Customer_Orders_Collection extends Mage_Report
      * @param array $storeIds
      * @return $this
      */
+    #[\Override]
     public function setStoreIds($storeIds)
     {
         if ($storeIds) {

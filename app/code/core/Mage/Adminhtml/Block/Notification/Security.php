@@ -76,6 +76,7 @@ class Mage_Adminhtml_Block_Notification_Security extends Mage_Adminhtml_Block_Te
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         if (!$this->_canShowNotification()) {

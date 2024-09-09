@@ -123,6 +123,7 @@ abstract class Mage_Uploader_Block_Abstract extends Mage_Adminhtml_Block_Widget
      *
      * @return Mage_Core_Block_Abstract
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $this->setChild(

@@ -29,6 +29,7 @@ class Mage_Adminhtml_Block_Dashboard_Bar extends Mage_Adminhtml_Block_Dashboard_
      */
     protected $_currency;
 
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

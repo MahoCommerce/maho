@@ -50,6 +50,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle extends Mage_A
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $this->setChild(
@@ -119,6 +120,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle extends Mage_A
     /**
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('bundle')->__('Bundle Items');
@@ -127,6 +129,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle extends Mage_A
     /**
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('bundle')->__('Bundle Items');
@@ -135,6 +138,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle extends Mage_A
     /**
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -143,6 +147,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle extends Mage_A
     /**
      * @return bool
      */
+    #[\Override]
     public function isHidden()
     {
         return false;

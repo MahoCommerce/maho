@@ -21,6 +21,7 @@
  */
 class Mage_ProductAlert_Model_Resource_Price extends Mage_ProductAlert_Model_Resource_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('productalert/price', 'alert_price_id');
@@ -32,6 +33,7 @@ class Mage_ProductAlert_Model_Resource_Price extends Mage_ProductAlert_Model_Res
      * @param Mage_ProductAlert_Model_Price $object
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if (is_null($object->getId()) && $object->getCustomerId()

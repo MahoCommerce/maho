@@ -50,6 +50,7 @@ class Mage_Core_Model_Url_Validator extends Zend_Validate_Abstract
      * @param string $value
      * @return bool
      */
+    #[\Override]
     public function isValid($value)
     {
         $this->_setValue($value);

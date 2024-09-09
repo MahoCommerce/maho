@@ -40,6 +40,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
      * @param int $args[timeout] Connection timeout [=10]
      * @throws Exception
      */
+    #[\Override]
     public function open(array $args = [])
     {
         if (!isset($args['timeout'])) {
@@ -61,6 +62,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
      * Close a connection
      *
      */
+    #[\Override]
     public function close()
     {
         return $this->_connection->disconnect();
@@ -76,6 +78,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
      * false is returned and some part of the hierarchy might be created.
      * No rollback is performed.
      */
+    #[\Override]
     public function mkdir($dir, $mode = 0777, $recursive = true)
     {
         if ($recursive) {
@@ -97,6 +100,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
      * Delete a directory
      *
      */
+    #[\Override]
     public function rmdir($dir, $recursive = false)
     {
         if ($recursive) {
@@ -131,6 +135,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
      * Get current working directory
      *
      */
+    #[\Override]
     public function pwd()
     {
         return $this->_connection->pwd();
@@ -140,6 +145,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
      * Change current working directory
      *
      */
+    #[\Override]
     public function cd($dir)
     {
         return $this->_connection->chdir($dir);
@@ -149,6 +155,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
      * Read a file
      *
      */
+    #[\Override]
     public function read($filename, $dest = null)
     {
         if (is_null($dest)) {
@@ -161,6 +168,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
      * Write a file
      * @param $src Must be a local file name
      */
+    #[\Override]
     public function write($filename, $src, $mode = null)
     {
         return $this->_connection->put($filename, $src);
@@ -170,6 +178,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
      * Delete a file
      *
      */
+    #[\Override]
     public function rm($filename)
     {
         return $this->_connection->delete($filename);
@@ -179,6 +188,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
      * Rename or move a directory or a file
      *
      */
+    #[\Override]
     public function mv($src, $dest)
     {
         return $this->_connection->rename($src, $dest);
@@ -188,6 +198,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
      * Chamge mode of a directory or a file
      *
      */
+    #[\Override]
     public function chmod($filename, $mode)
     {
         return $this->_connection->chmod($mode, $filename);
@@ -197,6 +208,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
      * Get list of cwd subdirectories and files
      *
      */
+    #[\Override]
     public function ls($grep = null)
     {
         $list = $this->_connection->nlist();

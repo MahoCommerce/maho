@@ -27,6 +27,7 @@ class Mage_Adminhtml_Block_Dashboard_Tab_Products_Viewed extends Mage_Adminhtml_
         $this->setId('productsReviewedGrid');
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         if ($this->getParam('website')) {
@@ -49,6 +50,7 @@ class Mage_Adminhtml_Block_Dashboard_Tab_Products_Viewed extends Mage_Adminhtml_
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('name', [
@@ -80,6 +82,7 @@ class Mage_Adminhtml_Block_Dashboard_Tab_Products_Viewed extends Mage_Adminhtml_
         return parent::_prepareColumns();
     }
 
+    #[\Override]
     public function getRowUrl($row)
     {
         $params = ['id' => $row->getId()];

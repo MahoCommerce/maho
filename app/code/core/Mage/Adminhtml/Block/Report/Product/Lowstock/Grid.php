@@ -28,6 +28,7 @@ class Mage_Adminhtml_Block_Report_Product_Lowstock_Grid extends Mage_Adminhtml_B
         $this->setUseAjax(false);
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         if ($this->getRequest()->getParam('website')) {
@@ -60,6 +61,7 @@ class Mage_Adminhtml_Block_Report_Product_Lowstock_Grid extends Mage_Adminhtml_B
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('name', [

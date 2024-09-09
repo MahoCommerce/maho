@@ -143,6 +143,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
      *
      * @return  $this
      */
+    #[\Override]
     public function collect(Mage_Sales_Model_Quote_Address $address)
     {
         parent::collect($address);
@@ -1562,6 +1563,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
      *
      * @return  $this
      */
+    #[\Override]
     public function fetch(Mage_Sales_Model_Quote_Address $address)
     {
         $applied = $address->getAppliedTaxes();
@@ -1629,6 +1631,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
      * @param   Mage_Core_Model_Store $store
      * @return  array
      */
+    #[\Override]
     public function processConfigArray($config, $store)
     {
         $calculationSequence = $this->_helper->getCalculationSequence($store);
@@ -1648,6 +1651,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
      *
      * @return string
      */
+    #[\Override]
     public function getLabel()
     {
         return Mage::helper('tax')->__('Tax');

@@ -29,6 +29,7 @@ class Mage_Reports_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource
      * @param mixed $matchFields
      * @return string
      */
+    #[\Override]
     public function mergeVisitorProductIndex($mainTable, $data, $matchFields)
     {
         return $this->_getWriteAdapter()->insertOnDuplicate($mainTable, $data, array_keys($data));
@@ -43,6 +44,7 @@ class Mage_Reports_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource
      * @param string $aggregationTable
      * @return Mage_Core_Model_Resource_Helper_Mysql4
      */
+    #[\Override]
     public function updateReportRatingPos($type, $column, $mainTable, $aggregationTable)
     {
         $adapter         = $this->_getWriteAdapter();

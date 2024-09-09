@@ -21,6 +21,7 @@
  */
 class Mage_Sales_Block_Order_View extends Mage_Core_Block_Template
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -30,6 +31,7 @@ class Mage_Sales_Block_Order_View extends Mage_Core_Block_Template
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         /** @var Mage_Page_Block_Html_Head $headBlock */

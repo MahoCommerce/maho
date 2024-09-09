@@ -36,21 +36,25 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Websites ex
         return $group->getStores();
     }
 
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('catalog')->__('Websites');
     }
 
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('catalog')->__('Websites');
     }
 
+    #[\Override]
     public function canShowTab()
     {
         return true;
     }
 
+    #[\Override]
     public function isHidden()
     {
         return false;

@@ -27,6 +27,7 @@ abstract class Mage_Catalog_Model_Attribute_Backend_Urlkey_Abstract extends Mage
      * @param Varien_Object $object
      * @return $this
      */
+    #[\Override]
     public function beforeSave($object)
     {
         $attributeName = $this->getAttribute()->getName();
@@ -52,6 +53,7 @@ abstract class Mage_Catalog_Model_Attribute_Backend_Urlkey_Abstract extends Mage
      *
      * @return $this
      */
+    #[\Override]
     public function afterSave($object)
     {
         /**

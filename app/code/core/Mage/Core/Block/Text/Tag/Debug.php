@@ -21,6 +21,7 @@
  */
 class Mage_Core_Block_Text_Tag_Debug extends Mage_Core_Block_Text_Tag
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

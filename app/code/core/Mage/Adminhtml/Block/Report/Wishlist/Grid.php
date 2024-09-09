@@ -29,6 +29,7 @@ class Mage_Adminhtml_Block_Report_Wishlist_Grid extends Mage_Adminhtml_Block_Wid
         $this->setDefaultDir('desc');
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('reports/wishlist_product_collection')
@@ -43,6 +44,7 @@ class Mage_Adminhtml_Block_Report_Wishlist_Grid extends Mage_Adminhtml_Block_Wid
         return $this;
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('entity_id', [

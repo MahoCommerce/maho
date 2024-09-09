@@ -29,6 +29,7 @@ class Mage_Customer_Model_Resource_Attribute extends Mage_Eav_Model_Resource_Att
      *
      * @return string|null
      */
+    #[\Override]
     protected function _getEavWebsiteTable()
     {
         return $this->getTable('customer/eav_attribute_website');
@@ -41,6 +42,7 @@ class Mage_Customer_Model_Resource_Attribute extends Mage_Eav_Model_Resource_Att
      *
      * @return string|null
      */
+    #[\Override]
     protected function _getFormAttributeTable()
     {
         return $this->getTable('customer/form_attribute');

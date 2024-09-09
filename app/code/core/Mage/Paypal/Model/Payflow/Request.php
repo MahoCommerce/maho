@@ -29,6 +29,7 @@ class Mage_Paypal_Model_Payflow_Request extends Varien_Object
      * @param   array $args
      * @return  mixed
      */
+    #[\Override]
     public function __call($method, $args)
     {
         $key = $this->_underscore(substr($method, 3));

@@ -21,6 +21,7 @@
  */
 class Mage_Checkout_Model_Resource_Cart extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/quote', 'entity_id');

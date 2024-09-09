@@ -25,6 +25,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Grid extends Mage_Adminhtml_Bl
      * Internal constructor
      *
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -38,6 +39,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Grid extends Mage_Adminhtml_Bl
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         /** @var Mage_Widget_Model_Resource_Widget_Instance_Collection $collection */
@@ -51,6 +53,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Grid extends Mage_Adminhtml_Bl
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('instance_id', [
@@ -134,6 +137,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Grid extends Mage_Adminhtml_Bl
      * @param Mage_Widget_Model_Widget_Instance $row
      * @return string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/edit', ['instance_id' => $row->getId()]);

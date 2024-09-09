@@ -33,6 +33,7 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Edit_Tabs extends Mage_Adminht
      * @inheritDoc
      * @throws Exception
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         $new = !Mage::registry('current_convert_profile')->getId();

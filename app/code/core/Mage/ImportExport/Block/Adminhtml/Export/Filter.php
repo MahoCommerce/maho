@@ -317,6 +317,7 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
      *
      * @return Mage_Adminhtml_Block_Widget_Grid
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         parent::_prepareColumns();
@@ -424,6 +425,7 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
      * @param Mage_Catalog_Model_Resource_Eav_Attribute $row
      * @return string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return '';

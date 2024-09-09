@@ -34,6 +34,7 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
      * @param string $handler
      * @return $this
      */
+    #[\Override]
     public function setHandler($handler)
     {
         $this->setData('handler', $handler);
@@ -45,6 +46,7 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
      *
      * @return string
      */
+    #[\Override]
     public function getHandler()
     {
         return $this->getData('handler');
@@ -55,6 +57,7 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
      *
      * @return $this
      */
+    #[\Override]
     public function setController(Mage_Api_Controller_Action $controller)
     {
         $this->setData('controller', $controller);
@@ -66,6 +69,7 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
      *
      * @return Mage_Api_Controller_Action|Varien_Object
      */
+    #[\Override]
     public function getController()
     {
         $controller = $this->getData('controller');
@@ -85,6 +89,7 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
      *
      * @return $this
      */
+    #[\Override]
     public function run()
     {
         $apiConfigCharset = Mage::getStoreConfig('api/config/charset');
@@ -106,6 +111,7 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
      * @param string $message
      * @return never
      */
+    #[\Override]
     public function fault($code, $message)
     {
         throw new Zend_XmlRpc_Server_Exception($message, $code);

@@ -38,6 +38,7 @@ class Mage_Wishlist_Model_Resource_Item_Option_Collection extends Mage_Core_Mode
     /**
      * Define resource model for collection
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('wishlist/item_option');
@@ -48,6 +49,7 @@ class Mage_Wishlist_Model_Resource_Item_Option_Collection extends Mage_Core_Mode
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad()
     {
         parent::_afterLoad();

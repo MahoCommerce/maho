@@ -26,6 +26,7 @@ class Mage_Sales_Model_Resource_Order_Creditmemo_Comment extends Mage_Sales_Mode
      */
     protected $_eventPrefix    = 'sales_order_creditmemo_comment_resource';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/creditmemo_comment', 'entity_id');

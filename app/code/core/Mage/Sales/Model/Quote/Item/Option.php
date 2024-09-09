@@ -41,6 +41,7 @@ class Mage_Sales_Model_Quote_Item_Option extends Mage_Core_Model_Abstract implem
     protected $_item;
     protected $_product;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/quote_item_option');
@@ -51,6 +52,7 @@ class Mage_Sales_Model_Quote_Item_Option extends Mage_Core_Model_Abstract implem
      *
      * @return bool
      */
+    #[\Override]
     protected function _hasModelChanged()
     {
         if (!$this->hasDataChanges()) {
@@ -115,6 +117,7 @@ class Mage_Sales_Model_Quote_Item_Option extends Mage_Core_Model_Abstract implem
      *
      * @return mixed
      */
+    #[\Override]
     public function getValue()
     {
         return $this->_getData('value');
@@ -125,6 +128,7 @@ class Mage_Sales_Model_Quote_Item_Option extends Mage_Core_Model_Abstract implem
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave()
     {
         if ($this->getItem()) {

@@ -54,6 +54,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * @param Mage_Catalog_Model_Product $product
      * @return string|float|int
      */
+    #[\Override]
     public function getPrice($product)
     {
         if ($product->getPriceType() == self::PRICE_TYPE_FIXED) {
@@ -112,6 +113,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * @return float
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     public function getFinalPrice($qty, $product)
     {
         if (is_null($qty) && !is_null($product->getCalculatedFinalPrice())) {
@@ -140,6 +142,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * @return float
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     public function getChildFinalPrice($product, $productQty, $childProduct, $childProductQty)
     {
         return $this->getSelectionFinalTotalPrice($product, $childProduct, $productQty, $childProductQty, false);
@@ -617,6 +620,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * @return float
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     protected function _applyGroupPrice($product, $finalPrice)
     {
         $result = $finalPrice;
@@ -638,6 +642,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * @return float|null
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     public function getGroupPrice($product)
     {
         $groupPrices = $product->getData('group_price');
@@ -677,6 +682,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * @return  float
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     protected function _applyTierPrice($product, $qty, $finalPrice)
     {
         if (is_null($qty)) {
@@ -702,6 +708,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * @return float|array
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     public function getTierPrice($qty, $product)
     {
         $allGroups = Mage_Customer_Model_Group::CUST_GROUP_ALL;
@@ -795,6 +802,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * @return float
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     public static function calculatePrice(
         $basePrice,
         $specialPrice,
@@ -954,6 +962,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * @return float
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     public static function calculateSpecialPrice(
         $finalPrice,
         $specialPrice,
@@ -976,6 +985,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      *
      * @return false
      */
+    #[\Override]
     public function isGroupPriceFixed()
     {
         return false;

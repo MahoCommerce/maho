@@ -38,6 +38,7 @@ class Mage_Api2_Model_Acl_Global_Rule_ResourcePermission implements Mage_Api2_Mo
      *
      * @return array
      */
+    #[\Override]
     public function getResourcesPermissions()
     {
         if ($this->_resourcesPermissions === null) {
@@ -96,6 +97,7 @@ class Mage_Api2_Model_Acl_Global_Rule_ResourcePermission implements Mage_Api2_Mo
      * @param Mage_Api2_Model_Acl_Global_Role $role
      * @return $this
      */
+    #[\Override]
     public function setFilterValue($role)
     {
         if ($role && $role->getId()) {

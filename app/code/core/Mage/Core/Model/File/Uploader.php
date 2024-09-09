@@ -41,6 +41,7 @@ class Mage_Core_Model_File_Uploader extends Varien_File_Uploader
      * @param  array $result
      * @return $this
      */
+    #[\Override]
     protected function _afterSave($result)
     {
         if (empty($result['path']) || empty($result['file'])) {
@@ -82,6 +83,7 @@ class Mage_Core_Model_File_Uploader extends Varien_File_Uploader
      * @param string $extension
      * @return bool
      */
+    #[\Override]
     public function checkAllowedExtension($extension)
     {
         //validate with protected file types
@@ -104,6 +106,7 @@ class Mage_Core_Model_File_Uploader extends Varien_File_Uploader
      * @return array|bool
      * @throws Exception
      */
+    #[\Override]
     public function save($destinationFolder, $newFileName = null)
     {
         $fileName = $newFileName ?? $this->_file['name'];

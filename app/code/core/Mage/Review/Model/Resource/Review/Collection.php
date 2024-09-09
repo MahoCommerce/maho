@@ -68,6 +68,7 @@ class Mage_Review_Model_Resource_Review_Collection extends Mage_Core_Model_Resou
      * Define module
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('review/review');
@@ -83,6 +84,7 @@ class Mage_Review_Model_Resource_Review_Collection extends Mage_Core_Model_Resou
      *
      * @return Mage_Review_Model_Resource_Review_Collection
      */
+    #[\Override]
     protected function _initSelect()
     {
         parent::_initSelect();
@@ -259,6 +261,7 @@ class Mage_Review_Model_Resource_Review_Collection extends Mage_Core_Model_Resou
      * @param bool $logQuery
      * @return $this
      */
+    #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {
         if ($this->isLoaded()) {

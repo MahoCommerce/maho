@@ -33,6 +33,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tabs extends Mage_Adminhtml_Block_Widge
      * @return Mage_Adminhtml_Block_Widget_Tabs
      * @throws Exception
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         /** @var Mage_Adminhtml_Block_Customer_Edit_Tab_Account $block */

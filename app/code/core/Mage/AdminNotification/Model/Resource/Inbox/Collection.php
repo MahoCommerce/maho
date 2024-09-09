@@ -25,6 +25,7 @@ class Mage_AdminNotification_Model_Resource_Inbox_Collection extends Mage_Core_M
      * Resource collection initialization
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('adminnotification/inbox');

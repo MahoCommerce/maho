@@ -26,6 +26,7 @@ class Mage_CatalogInventory_Model_System_Config_Backend_Minqty extends Mage_Core
     *
     * @return $this
     */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();

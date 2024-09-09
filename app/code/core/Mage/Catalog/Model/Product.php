@@ -341,6 +341,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Initialize resources
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product');
@@ -352,6 +353,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return Varien_Object
      */
+    #[\Override]
     protected function _initOldFieldsMap()
     {
         return $this;
@@ -375,6 +377,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return Mage_Catalog_Model_Resource_Product_Collection
      */
+    #[\Override]
     public function getResourceCollection()
     {
         if (empty($this->_resourceCollectionName)) {
@@ -717,6 +720,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _beforeSave()
     {
         $this->cleanCache();
@@ -797,6 +801,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave()
     {
         $this->getLinkInstance()->saveProductRelations($this);
@@ -817,6 +822,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         $this->_protectFromNonAdmin();
@@ -828,6 +834,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Init indexing process after product delete commit
      */
+    #[\Override]
     protected function _afterDeleteCommit()
     {
         parent::_afterDeleteCommit();
@@ -844,6 +851,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad()
     {
         parent::_afterLoad();
@@ -1719,6 +1727,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      * @param array $arrAttributes Attribute array
      * @return array
      */
+    #[\Override]
     public function toArray(array $arrAttributes = [])
     {
         $data = parent::toArray($arrAttributes);
@@ -1764,6 +1773,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     public function delete()
     {
         parent::delete();
@@ -2100,6 +2110,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      * @param mixed $data
      * @return Varien_Object
      */
+    #[\Override]
     public function setOrigData($key = null, $data = null)
     {
         if (Mage::app()->getStore()->isAdmin()) {
@@ -2141,6 +2152,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return Mage_Core_Model_Abstract
      */
+    #[\Override]
     public function cleanModelCache()
     {
         $tags = $this->getCacheIdTagsWithCategories();
@@ -2237,6 +2249,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _clearReferences()
     {
         $this->_clearOptionReferences();
@@ -2248,6 +2261,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _clearData()
     {
         foreach ($this->_data as $data) {
@@ -2325,6 +2339,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     public function afterCommitCallback()
     {
         parent::afterCommitCallback();

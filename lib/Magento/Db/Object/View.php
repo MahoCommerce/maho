@@ -50,6 +50,7 @@ class Magento_Db_Object_View extends Magento_Db_Object implements Magento_Db_Obj
      *
      * @return array
      */
+    #[\Override]
     public function describe()
     {
         return $this->_adapter->describeTable($this->_objectName, $this->_schemaName);
@@ -60,6 +61,7 @@ class Magento_Db_Object_View extends Magento_Db_Object implements Magento_Db_Obj
      *
      * @return bool
      */
+    #[\Override]
     public function isExists()
     {
         return $this->_adapter->isTableExists($this->_objectName, $this->_schemaName);

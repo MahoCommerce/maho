@@ -47,6 +47,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
      * @inheritDoc
      * @throws Exception
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel($this->_getCollectionClass());
@@ -58,6 +59,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
      * @inheritDoc
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('real_order_id', [
@@ -157,6 +159,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
     /**
      * @return $this
      */
+    #[\Override]
     protected function _prepareMassaction()
     {
         $this->setMassactionIdField('entity_id');
@@ -216,6 +219,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
      * @param Mage_Sales_Model_Order $row
      * @return false|string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         if (Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/view')) {
@@ -227,6 +231,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
     /**
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/grid', ['_current' => true]);

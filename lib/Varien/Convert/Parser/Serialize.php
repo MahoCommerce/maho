@@ -21,12 +21,14 @@
  */
 class Varien_Convert_Parser_Serialize extends Varien_Convert_Parser_Abstract
 {
+    #[\Override]
     public function parse()
     {
         $this->setData(unserialize($this->getData()));
         return $this;
     }
 
+    #[\Override]
     public function unparse()
     {
         $this->setData(serialize($this->getData()));

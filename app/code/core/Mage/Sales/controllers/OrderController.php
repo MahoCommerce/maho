@@ -26,6 +26,7 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
      *
      * Check customer authentication for some actions
      */
+    #[\Override]
     public function preDispatch()
     {
         parent::preDispatch();

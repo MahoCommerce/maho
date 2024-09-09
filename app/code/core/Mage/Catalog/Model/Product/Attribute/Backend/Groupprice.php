@@ -36,6 +36,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice extends Mage_Catal
      *
      * @return string
      */
+    #[\Override]
     protected function _getDuplicateErrorMessage()
     {
         return Mage::helper('catalog')->__('Duplicate website group price customer group.');

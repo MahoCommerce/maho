@@ -28,6 +28,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminht
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         $onclick = "submitAndReloadArea($('invoice_item_container'),'" . $this->getUpdateUrl() . "')";
@@ -84,6 +85,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminht
      *
      * @return Mage_Sales_Model_Order
      */
+    #[\Override]
     public function getOrder()
     {
         return $this->getInvoice()->getOrder();
@@ -94,6 +96,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminht
      *
      * @return Mage_Sales_Model_Order_Invoice
      */
+    #[\Override]
     public function getSource()
     {
         return $this->getInvoice();
@@ -104,6 +107,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminht
      *
      * @return Mage_Sales_Model_Order_Invoice
      */
+    #[\Override]
     public function getInvoice()
     {
         return Mage::registry('current_invoice');
@@ -137,6 +141,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminht
         return $totalbarData;
     }
 
+    #[\Override]
     public function formatPrice($price)
     {
         return $this->getInvoice()->getOrder()->formatPrice($price);
@@ -157,6 +162,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminht
      *
      * @return bool
      */
+    #[\Override]
     public function canCreateShipment()
     {
         foreach ($this->getInvoice()->getAllItems() as $item) {
@@ -167,6 +173,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminht
         return false;
     }
 
+    #[\Override]
     public function canEditQty()
     {
         if ($this->getInvoice()->getOrder()->getPayment()->canCapture()) {
@@ -188,6 +195,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminht
      * Check if invoice can be captured
      * @return bool
      */
+    #[\Override]
     public function canCapture()
     {
         return $this->getInvoice()->canCapture();

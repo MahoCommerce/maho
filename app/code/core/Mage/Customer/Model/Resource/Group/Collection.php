@@ -21,6 +21,7 @@
  */
 class Mage_Customer_Model_Resource_Group_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('customer/group');
@@ -85,6 +86,7 @@ class Mage_Customer_Model_Resource_Group_Collection extends Mage_Core_Model_Reso
      *
      * @return array
      */
+    #[\Override]
     public function toOptionArray()
     {
         return parent::_toOptionArray('customer_group_id', 'customer_group_code');
@@ -95,6 +97,7 @@ class Mage_Customer_Model_Resource_Group_Collection extends Mage_Core_Model_Reso
      *
      * @return array
      */
+    #[\Override]
     public function toOptionHash()
     {
         return parent::_toOptionHash('customer_group_id', 'customer_group_code');

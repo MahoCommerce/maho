@@ -161,6 +161,7 @@ class Mage_Reports_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     public function getSelectCountSql()
     {
         if ($this->_selectCountSqlType == self::SELECT_COUNT_SQL_TYPE_CART) {
@@ -323,6 +324,7 @@ class Mage_Reports_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      * @param string $dir
      * @return $this
      */
+    #[\Override]
     public function setOrder($attribute, $dir = self::SORT_ORDER_DESC)
     {
         if (in_array($attribute, ['carts', 'orders', 'ordered_qty'])) {

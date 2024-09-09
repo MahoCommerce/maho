@@ -34,6 +34,7 @@ class Mage_Adminhtml_Block_Customer_Group_Grid extends Mage_Adminhtml_Block_Widg
      * Init customer groups collection
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('customer/group_collection')
@@ -46,6 +47,7 @@ class Mage_Adminhtml_Block_Customer_Group_Grid extends Mage_Adminhtml_Block_Widg
     /**
      * Configuration of grid
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('time', [
@@ -69,6 +71,7 @@ class Mage_Adminhtml_Block_Customer_Group_Grid extends Mage_Adminhtml_Block_Widg
         return parent::_prepareColumns();
     }
 
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);

@@ -33,6 +33,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
      * @param string|null $sessionName
      * @return $this
      */
+    #[\Override]
     public function start($sessionName = null)
     {
         $this->_currentSessId = md5(time() . uniqid('', true) . $sessionName);
@@ -45,6 +46,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
      * @param string|null $sessionName
      * @return $this
      */
+    #[\Override]
     public function init($namespace, $sessionName = null)
     {
         if (is_null($this->_currentSessId)) {
@@ -56,6 +58,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * @return string
      */
+    #[\Override]
     public function getSessionId()
     {
         return $this->_currentSessId;
@@ -65,6 +68,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
      * @param string|null $sessId
      * @return $this
      */
+    #[\Override]
     public function setSessionId($sessId = null)
     {
         if (!is_null($sessId)) {
@@ -76,6 +80,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * @return void
      */
+    #[\Override]
     public function revalidateCookie()
     {
         // In api we don't use cookies
@@ -84,6 +89,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * @return bool
      */
+    #[\Override]
     public function clear()
     {
         if ($sessId = $this->getSessionId()) {

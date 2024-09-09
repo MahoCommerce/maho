@@ -35,6 +35,7 @@ class Mage_ConfigurableSwatches_Model_Resource_Catalog_Product_Type_Configurable
      * @throws Exception
      * @return $this
      */
+    #[\Override]
     public function _loadEntities($printQuery = false, $logQuery = false)
     {
         if ($this->_pageSize) {

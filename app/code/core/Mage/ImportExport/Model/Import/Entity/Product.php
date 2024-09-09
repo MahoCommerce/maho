@@ -468,6 +468,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      * @throws Exception
      * @return bool Result of operation.
      */
+    #[\Override]
     protected function _importData()
     {
         if (Mage_ImportExport_Model_Import::BEHAVIOR_DELETE == $this->getBehavior()) {
@@ -671,6 +672,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      *
      * @return array
      */
+    #[\Override]
     protected function _prepareRowForDb(array $rowData)
     {
         $rowData = parent::_prepareRowForDb($rowData);
@@ -1997,6 +1999,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      * @abstract
      * @return string
      */
+    #[\Override]
     public function getEntityTypeCode()
     {
         return 'catalog_product';
@@ -2064,6 +2067,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      * @param int $rowNum
      * @return bool
      */
+    #[\Override]
     public function validateRow(array $rowData, $rowNum)
     {
         static $sku = null; // SKU is remembered through all product rows

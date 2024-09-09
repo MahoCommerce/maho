@@ -22,6 +22,7 @@ class Mage_Rule_Model_Renderer_Conditions implements Varien_Data_Form_Element_Re
     /**
      * @return string
      */
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         if ($element->getRule() && $element->getRule()->getConditions()) {

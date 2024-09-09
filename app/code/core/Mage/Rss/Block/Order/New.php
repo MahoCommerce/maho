@@ -28,6 +28,7 @@ class Mage_Rss_Block_Order_New extends Mage_Core_Block_Template
      */
     public const CACHE_TAG = 'block_html_rss_order_new';
 
+    #[\Override]
     protected function _construct()
     {
         $this->setCacheTags([self::CACHE_TAG]);
@@ -42,6 +43,7 @@ class Mage_Rss_Block_Order_New extends Mage_Core_Block_Template
      * @return string
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _toHtml()
     {
         $order = Mage::getModel('sales/order');

@@ -196,6 +196,7 @@ class Mage_Core_Model_File_Validator_AvailablePath extends Zend_Validate_Abstrac
      * @param string $value     File/dir path
      * @return bool
      */
+    #[\Override]
     public function isValid($value)
     {
         $value = trim($value);

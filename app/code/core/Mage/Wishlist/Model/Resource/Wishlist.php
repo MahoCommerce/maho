@@ -38,6 +38,7 @@ class Mage_Wishlist_Model_Resource_Wishlist extends Mage_Core_Model_Resource_Db_
     /**
      * Set main entity table name and primary key field name
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('wishlist/wishlist', 'wishlist_id');
@@ -51,6 +52,7 @@ class Mage_Wishlist_Model_Resource_Wishlist extends Mage_Core_Model_Resource_Db_
      * @param mixed $object
      * @return Zend_Db_Select
      */
+    #[\Override]
     protected function _getLoadSelect($field, $value, $object)
     {
         $select = parent::_getLoadSelect($field, $value, $object);

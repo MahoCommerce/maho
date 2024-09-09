@@ -49,6 +49,7 @@ class Mage_SalesRule_Model_Coupon extends Mage_Core_Model_Abstract
      */
     protected $_rule;
 
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -60,6 +61,7 @@ class Mage_SalesRule_Model_Coupon extends Mage_Core_Model_Abstract
      *
      * @return Mage_Core_Model_Abstract
      */
+    #[\Override]
     protected function _beforeSave()
     {
         if (!$this->getRuleId() && $this->_rule instanceof Mage_SalesRule_Model_Rule) {

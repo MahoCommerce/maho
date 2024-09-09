@@ -157,6 +157,7 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
      * @param string $savePath ignored
      * @param string $sessName ignored
      */
+    #[\Override]
     public function open($savePath, $sessName): bool
     {
         return true;
@@ -165,6 +166,7 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
     /**
      * Close session
      */
+    #[\Override]
     public function close(): bool
     {
         $this->gc($this->getLifeTime());
@@ -178,6 +180,7 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
      * @param string $sessId
      * @return string
      */
+    #[\Override]
     public function read($sessId): string|false
     {
         $select = $this->_read->select()
@@ -198,6 +201,7 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
      * @param string $sessId
      * @param string $sessData
      */
+    #[\Override]
     public function write($sessId, $sessData): bool
     {
         $bindValues = [
@@ -230,6 +234,7 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
      *
      * @param string $sessId
      */
+    #[\Override]
     public function destroy($sessId): bool
     {
         $where = ['session_id = ?' => $sessId];
@@ -243,6 +248,7 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
      * @param int $sessMaxLifeTime ignored
      * @return int|false
      */
+    #[\Override]
     public function gc($sessMaxLifeTime): int|false
     {
         if ($this->_automaticCleaningFactor > 0) {

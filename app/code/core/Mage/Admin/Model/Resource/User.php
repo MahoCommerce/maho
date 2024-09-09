@@ -21,6 +21,7 @@
  */
 class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('admin/user', 'user_id');
@@ -29,6 +30,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     /**
      * @return $this
      */
+    #[\Override]
     protected function _initUniqueFields()
     {
         $this->_uniqueFields = [
@@ -140,6 +142,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
      * @param Mage_Admin_Model_User $user
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $user)
     {
         if ($user->isObjectNew()) {
@@ -155,6 +158,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $user)
     {
         $this->_unserializeExtraData($user);
@@ -166,6 +170,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $user)
     {
         return parent::_afterLoad($this->_unserializeExtraData($user));
@@ -177,6 +182,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
      * @return $this
      * @throws Exception
      */
+    #[\Override]
     public function delete(Mage_Core_Model_Abstract $user)
     {
         $this->_beforeDelete($user);

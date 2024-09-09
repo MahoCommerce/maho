@@ -137,6 +137,7 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _isAllowed()
     {
         $action = strtolower($this->getRequest()->getActionName());

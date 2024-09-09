@@ -56,6 +56,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
      * @param string $filename
      * @throws Varien_Exception
      */
+    #[\Override]
     public function open($filename)
     {
         $this->_fileName = $filename;
@@ -124,6 +125,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
         return $memoryValue > 0 ? $memoryValue : 0;
     }
 
+    #[\Override]
     public function save($destination = null, $newName = null)
     {
         $fileName = (!isset($destination)) ? $this->_fileName : $destination;
@@ -207,6 +209,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
         call_user_func_array($this->_getCallback('output'), $functionParameters);
     }
 
+    #[\Override]
     public function display()
     {
         header('Content-type: ' . $this->getMimeTypeWithOutFileType());
@@ -326,6 +329,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
      * @param int $frameWidth
      * @param int $frameHeight
      */
+    #[\Override]
     public function resize($frameWidth = null, $frameHeight = null)
     {
         if (empty($frameWidth) && empty($frameHeight)) {
@@ -412,12 +416,14 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
         $this->_resized = true;
     }
 
+    #[\Override]
     public function rotate($angle)
     {
         $this->_imageHandler = imagerotate($this->_imageHandler, $angle, $this->imageBackgroundColor);
         $this->refreshImageDimensions();
     }
 
+    #[\Override]
     public function watermark($watermarkImage, $positionX = 0, $positionY = 0, $watermarkImageOpacity = 30, $repeat = false)
     {
         list($watermarkSrcWidth, $watermarkSrcHeight, $watermarkFileType, ) = getimagesize($watermarkImage);
@@ -584,6 +590,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
         $this->refreshImageDimensions();
     }
 
+    #[\Override]
     public function crop($top = 0, $left = 0, $right = 0, $bottom = 0)
     {
         if ($left == 0 && $top == 0 && $right == 0 && $bottom == 0) {
@@ -616,6 +623,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
         $this->refreshImageDimensions();
     }
 
+    #[\Override]
     public function checkDependencies()
     {
         foreach ($this->_requiredExtensions as $value) {

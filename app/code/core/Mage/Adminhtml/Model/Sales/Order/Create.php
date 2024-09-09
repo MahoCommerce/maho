@@ -199,6 +199,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
      *
      * @return $this
      */
+    #[\Override]
     public function saveQuote()
     {
         if (!$this->getQuote()->getId()) {
@@ -228,6 +229,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
      *
      * @return Mage_Sales_Model_Quote
      */
+    #[\Override]
     public function getQuote()
     {
         if (!$this->_quote) {
@@ -241,6 +243,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
      *
      * @return $this
      */
+    #[\Override]
     public function setQuote(Mage_Sales_Model_Quote $quote)
     {
         $this->_quote = $quote;
@@ -751,6 +754,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
      * @param   float|array|Varien_Object $config
      * @return  Mage_Adminhtml_Model_Sales_Order_Create
      */
+    #[\Override]
     public function addProduct($product, $config = 1)
     {
         if (!is_array($config) && !($config instanceof Varien_Object)) {

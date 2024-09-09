@@ -31,6 +31,7 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
      */
     protected $_eventObject    = 'order_collection';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order');
@@ -61,6 +62,7 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     public function getSelectCountSql()
     {
         $countSelect = parent::getSelectCountSql();
@@ -76,6 +78,7 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
      * @param int $offset
      * @return Varien_Db_Select
      */
+    #[\Override]
     protected function _getAllIdsSelect($limit = null, $offset = null)
     {
         $idsSelect = parent::_getAllIdsSelect($limit, $offset);

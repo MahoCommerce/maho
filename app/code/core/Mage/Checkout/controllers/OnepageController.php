@@ -42,6 +42,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
      *
      * @return $this|void
      */
+    #[\Override]
     public function preDispatch()
     {
         parent::preDispatch();

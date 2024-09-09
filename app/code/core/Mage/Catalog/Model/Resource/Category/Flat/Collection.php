@@ -60,6 +60,7 @@ class Mage_Catalog_Model_Resource_Category_Flat_Collection extends Mage_Core_Mod
      *  Collection initialization
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/category_flat');
@@ -69,6 +70,7 @@ class Mage_Catalog_Model_Resource_Category_Flat_Collection extends Mage_Core_Mod
     /**
      * @return $this
      */
+    #[\Override]
     protected function _initSelect()
     {
         $this->getSelect()->from(
@@ -242,6 +244,7 @@ class Mage_Catalog_Model_Resource_Category_Flat_Collection extends Mage_Core_Mod
      *
      * @inheritDoc
      */
+    #[\Override]
     public function getResource()
     {
         return parent::getResource();

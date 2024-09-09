@@ -21,6 +21,7 @@
  */
 class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -32,6 +33,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main extends Mage_Adm
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('widget')->__('Frontend Properties');
@@ -42,6 +44,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main extends Mage_Adm
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('widget')->__('Frontend Properties');
@@ -52,6 +55,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main extends Mage_Adm
      *
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         return $this->getWidgetInstance()->isCompleteToCreate();
@@ -62,6 +66,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main extends Mage_Adm
      *
      * @return false
      */
+    #[\Override]
     public function isHidden()
     {
         return false;
@@ -82,6 +87,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main extends Mage_Adm
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareForm()
     {
         $widgetInstance = $this->getWidgetInstance();
@@ -192,6 +198,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main extends Mage_Adm
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _initFormValues()
     {
         $this->getForm()->addValues($this->getWidgetInstance()->getData());

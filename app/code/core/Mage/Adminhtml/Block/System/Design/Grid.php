@@ -37,6 +37,7 @@ class Mage_Adminhtml_Block_System_Design_Grid extends Mage_Adminhtml_Block_Widge
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $storeId = (int) $this->getRequest()->getParam('store', 0);
@@ -53,6 +54,7 @@ class Mage_Adminhtml_Block_System_Design_Grid extends Mage_Adminhtml_Block_Widge
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         if (!Mage::app()->isSingleStoreMode()) {
@@ -94,6 +96,7 @@ class Mage_Adminhtml_Block_System_Design_Grid extends Mage_Adminhtml_Block_Widge
      * @param Varien_Object $row
      * @return string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
@@ -104,6 +107,7 @@ class Mage_Adminhtml_Block_System_Design_Grid extends Mage_Adminhtml_Block_Widge
      *
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/grid', ['_current' => true]);

@@ -89,6 +89,7 @@ class Mage_Adminhtml_Block_Promo_Widget_Chooser extends Mage_Adminhtml_Block_Wid
      *
      * @return Mage_Adminhtml_Block_Widget_Grid
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getModel('salesrule/rule')->getResourceCollection();
@@ -106,6 +107,7 @@ class Mage_Adminhtml_Block_Promo_Widget_Chooser extends Mage_Adminhtml_Block_Wid
      *
      * @return Mage_Adminhtml_Block_Widget_Grid
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('rule_id', [
@@ -163,6 +165,7 @@ class Mage_Adminhtml_Block_Promo_Widget_Chooser extends Mage_Adminhtml_Block_Wid
      *
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/promo_quote/chooser', ['_current' => true]);

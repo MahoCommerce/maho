@@ -43,6 +43,7 @@ class Varien_Http_Client extends Zend_Http_Client
         return $this;
     }
 
+    #[\Override]
     public function request($method = null)
     {
         $this->_trySetCurlAdapter();
@@ -67,6 +68,7 @@ class Varien_Http_Client extends Zend_Http_Client
      *
      * @return string
      */
+    #[\Override]
     protected function _prepareBody()
     {
         $body = parent::_prepareBody();

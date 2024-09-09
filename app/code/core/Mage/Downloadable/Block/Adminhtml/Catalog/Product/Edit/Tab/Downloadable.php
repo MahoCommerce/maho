@@ -65,6 +65,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable ex
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('downloadable')->__('Downloadable Information');
@@ -75,6 +76,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable ex
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('downloadable')->__('Downloadable Information');
@@ -85,6 +87,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable ex
      *
      * @return true
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -95,6 +98,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable ex
      *
      * @return false
      */
+    #[\Override]
     public function isHidden()
     {
         return false;
@@ -105,6 +109,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable ex
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _toHtml()
     {
         /** @var Mage_Adminhtml_Block_Widget_Accordion $accordion */

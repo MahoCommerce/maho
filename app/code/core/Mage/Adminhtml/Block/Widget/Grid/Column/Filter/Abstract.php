@@ -34,6 +34,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract extends Mage_Admin
      * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
      * @return $this
      */
+    #[\Override]
     public function setColumn($column)
     {
         $this->_column = $column;
@@ -45,6 +46,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract extends Mage_Admin
      *
      * @return Mage_Adminhtml_Block_Widget_Grid_Column
      */
+    #[\Override]
     public function getColumn()
     {
         return $this->_column;
@@ -110,6 +112,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract extends Mage_Admin
      *
      * @return string
      */
+    #[\Override]
     public function getHtml()
     {
         return '';

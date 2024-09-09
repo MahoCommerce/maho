@@ -405,6 +405,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
      * @param Varien_Data_Tree_Node $newParent
      * @param Varien_Data_Tree_Node $prevNode
      */
+    #[\Override]
     public function move($category, $newParent, $prevNode = null)
     {
         $this->_beforeMove($category, $newParent, $prevNode);

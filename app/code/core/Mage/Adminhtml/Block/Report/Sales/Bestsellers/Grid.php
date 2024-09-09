@@ -29,11 +29,13 @@ class Mage_Adminhtml_Block_Report_Sales_Bestsellers_Grid extends Mage_Adminhtml_
         $this->setCountTotals(true);
     }
 
+    #[\Override]
     public function getResourceCollectionName()
     {
         return 'sales/report_bestsellers_collection';
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('period', [

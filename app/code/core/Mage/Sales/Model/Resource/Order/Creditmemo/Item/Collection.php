@@ -31,6 +31,7 @@ class Mage_Sales_Model_Resource_Order_Creditmemo_Item_Collection extends Mage_Sa
      */
     protected $_eventObject    = 'order_creditmemo_item_collection';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order_creditmemo_item');

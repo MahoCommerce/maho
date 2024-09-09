@@ -28,6 +28,7 @@ class Mage_Widget_Model_Resource_Widget_Instance_Collection extends Mage_Core_Mo
      */
     protected $_map = ['fields' => ['type' => 'instance_type']];
 
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

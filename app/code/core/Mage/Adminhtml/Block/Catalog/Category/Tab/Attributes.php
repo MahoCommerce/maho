@@ -44,6 +44,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
     /**
      * Load Wysiwyg on demand and Prepare layout
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         parent::_prepareLayout();
@@ -58,6 +59,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareForm()
     {
         $group      = $this->getGroup();
@@ -157,6 +159,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
      *
      * @return array
      */
+    #[\Override]
     protected function _getAdditionalElementTypes()
     {
         return [

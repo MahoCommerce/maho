@@ -27,6 +27,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         if ($head = $this->getLayout()->getBlock('head')) {
@@ -39,6 +40,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
      * @return string
      * @throws Exception
      */
+    #[\Override]
     public function getHtml()
     {
         $htmlId = $this->_getHtmlId() . microtime(true);
@@ -104,6 +106,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
         return $html;
     }
 
+    #[\Override]
     public function getEscapedValue($index = null)
     {
         $value = $this->getValue($index);
@@ -128,6 +131,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
         return $value;
     }
 
+    #[\Override]
     public function getCondition()
     {
         return $this->getValue();

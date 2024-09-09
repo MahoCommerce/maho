@@ -69,6 +69,7 @@ class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
      *
      * @return void
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -318,6 +319,7 @@ HTML;
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         if (!$this->getTemplate()) {
@@ -369,6 +371,7 @@ HTML;
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function getCacheKeyInfo()
     {
         return [

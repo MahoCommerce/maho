@@ -103,6 +103,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl extends Mage_Usa_Model_Shipping_Carrie
      *
      * @return bool|Mage_Shipping_Model_Rate_Result|null
      */
+    #[\Override]
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
         if (!$this->getConfigFlag($this->_activeFlag)) {
@@ -1211,6 +1212,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl extends Mage_Usa_Model_Shipping_Carrie
      *
      * @return array
      */
+    #[\Override]
     public function getAllowedMethods()
     {
         $allowed = explode(',', $this->getConfigData('allowed_methods'));
@@ -1226,6 +1228,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl extends Mage_Usa_Model_Shipping_Carrie
      *
      * @return bool
      */
+    #[\Override]
     public function isStateProvinceRequired()
     {
         return true;
@@ -1300,6 +1303,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl extends Mage_Usa_Model_Shipping_Carrie
      *
      * @return Varien_Object
      */
+    #[\Override]
     protected function _doShipmentRequest(Varien_Object $request)
     {
         $this->_prepareShipmentRequest($request);
@@ -1315,6 +1319,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl extends Mage_Usa_Model_Shipping_Carrie
      *
      * @return array|bool
      */
+    #[\Override]
     public function getContainerTypes(?Varien_Object $params = null)
     {
         return $this->getCode('shipment_type');

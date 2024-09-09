@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Options extends Mage_Admi
      *
      * @return string
      */
+    #[\Override]
     public function render(Varien_Object $row)
     {
         $options = $this->getColumn()->getOptions();

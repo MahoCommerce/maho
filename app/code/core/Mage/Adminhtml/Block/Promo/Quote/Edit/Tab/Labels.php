@@ -24,6 +24,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Labels extends Mage_Adminhtml_Bl
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('salesrule')->__('Labels');
@@ -34,6 +35,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Labels extends Mage_Adminhtml_Bl
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('salesrule')->__('Labels');
@@ -44,6 +46,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Labels extends Mage_Adminhtml_Bl
      *
      * @return true
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -54,6 +57,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Labels extends Mage_Adminhtml_Bl
      *
      * @return false
      */
+    #[\Override]
     public function isHidden()
     {
         return false;
@@ -62,6 +66,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Labels extends Mage_Adminhtml_Bl
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareForm()
     {
         $rule = Mage::registry('current_promo_quote_rule');

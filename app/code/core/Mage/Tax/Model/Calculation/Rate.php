@@ -64,6 +64,7 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
     /**
      * Varien model constructor
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('tax/calculation_rate');
@@ -74,6 +75,7 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         if ($this->getCode() === '' || $this->getTaxCountryId() === '' || $this->getRate() === ''
@@ -132,6 +134,7 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave()
     {
         $this->saveTitles();
@@ -145,6 +148,7 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
      * @return Mage_Core_Model_Abstract
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         if ($this->_isInRule()) {
@@ -159,6 +163,7 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterDelete()
     {
         Mage::dispatchEvent('tax_settings_change_after');

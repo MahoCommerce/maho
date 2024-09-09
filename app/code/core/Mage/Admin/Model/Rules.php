@@ -50,6 +50,7 @@ class Mage_Admin_Model_Rules extends Mage_Core_Model_Abstract
      */
     public const RULE_PERMISSION_DENIED = 'deny';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('admin/rules');
@@ -69,6 +70,7 @@ class Mage_Admin_Model_Rules extends Mage_Core_Model_Abstract
      * Initialize and retrieve permissions collection
      * @return Object
      */
+    #[\Override]
     public function getCollection()
     {
         return Mage::getResourceModel('admin/permissions_collection');

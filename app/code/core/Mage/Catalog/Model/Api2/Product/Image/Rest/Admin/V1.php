@@ -28,6 +28,7 @@ class Mage_Catalog_Model_Api2_Product_Image_Rest_Admin_V1 extends Mage_Catalog_M
      * @return string|void
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     protected function _create(array $data)
     {
         /** @var Mage_Catalog_Model_Api2_Product_Image_Validator_Image $validator */
@@ -117,6 +118,7 @@ class Mage_Catalog_Model_Api2_Product_Image_Rest_Admin_V1 extends Mage_Catalog_M
      * @throws Mage_Api2_Exception
      * @return array
      */
+    #[\Override]
     protected function _retrieve()
     {
         $result = [];
@@ -142,6 +144,7 @@ class Mage_Catalog_Model_Api2_Product_Image_Rest_Admin_V1 extends Mage_Catalog_M
      *
      * @throws Mage_Api2_Exception
      */
+    #[\Override]
     protected function _update(array $data)
     {
         $imageId = (int)$this->getRequest()->getParam('image');
@@ -171,6 +174,7 @@ class Mage_Catalog_Model_Api2_Product_Image_Rest_Admin_V1 extends Mage_Catalog_M
      *
      * @throws Mage_Api2_Exception
      */
+    #[\Override]
     protected function _delete()
     {
         $imageId = (int)$this->getRequest()->getParam('image');
@@ -192,6 +196,7 @@ class Mage_Catalog_Model_Api2_Product_Image_Rest_Admin_V1 extends Mage_Catalog_M
      *
      * @return array
      */
+    #[\Override]
     protected function _retrieveCollection()
     {
         $images = [];

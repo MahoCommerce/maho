@@ -38,6 +38,7 @@ class Mage_Adminhtml_TaxController extends Mage_Adminhtml_Controller_Action
      *
      * @return true
      */
+    #[\Override]
     protected function _isAllowed()
     {
         return true;

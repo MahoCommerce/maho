@@ -28,6 +28,7 @@ class Mage_Catalog_Model_Product_Attribute_Tierprice_Api_V2 extends Mage_Catalog
      *  @param      array $tierPrices
      *  @return     array|null
      */
+    #[\Override]
     public function prepareTierPrices($product, $tierPrices = null)
     {
         if (!is_array($tierPrices)) {

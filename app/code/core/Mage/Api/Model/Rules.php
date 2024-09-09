@@ -34,6 +34,7 @@
  */
 class Mage_Api_Model_Rules extends Mage_Core_Model_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('api/rules');
@@ -51,6 +52,7 @@ class Mage_Api_Model_Rules extends Mage_Core_Model_Abstract
     /**
      * @return Mage_Api_Model_Resource_Permissions_Collection
      */
+    #[\Override]
     public function getCollection()
     {
         return Mage::getResourceModel('api/permissions_collection');

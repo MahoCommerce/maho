@@ -43,6 +43,7 @@ class Mage_Sales_Model_Order_Shipment_Comment extends Mage_Sales_Model_Abstract
      */
     protected $_shipment;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order_shipment_comment');
@@ -74,6 +75,7 @@ class Mage_Sales_Model_Order_Shipment_Comment extends Mage_Sales_Model_Abstract
      *
      * @return Mage_Core_Model_Store
      */
+    #[\Override]
     public function getStore()
     {
         if ($this->getShipment()) {
@@ -87,6 +89,7 @@ class Mage_Sales_Model_Order_Shipment_Comment extends Mage_Sales_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();

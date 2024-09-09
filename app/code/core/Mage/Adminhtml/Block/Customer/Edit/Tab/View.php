@@ -206,6 +206,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View extends Mage_Adminhtml_Block_T
     /**
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('customer')->__('Customer View');
@@ -214,6 +215,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View extends Mage_Adminhtml_Block_T
     /**
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('customer')->__('Customer View');
@@ -222,6 +224,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View extends Mage_Adminhtml_Block_T
     /**
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         if (Mage::registry('current_customer')->getId()) {
@@ -233,6 +236,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View extends Mage_Adminhtml_Block_T
     /**
      * @return bool
      */
+    #[\Override]
     public function isHidden()
     {
         if (Mage::registry('current_customer')->getId()) {

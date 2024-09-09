@@ -57,6 +57,7 @@ class Mage_Paypal_Model_Payment_Transaction extends Mage_Core_Model_Abstract
     /**
      * Initialize resource model
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('paypal/payment_transaction');
@@ -192,6 +193,7 @@ class Mage_Paypal_Model_Payment_Transaction extends Mage_Core_Model_Abstract
      * Verify data required for saving
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         if (!$this->getId()) {

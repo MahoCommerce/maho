@@ -21,6 +21,7 @@
  */
 class Mage_Tax_Model_Resource_Calculation_Rate extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('tax/tax_calculation_rate', 'tax_calculation_rate_id');
@@ -31,6 +32,7 @@ class Mage_Tax_Model_Resource_Calculation_Rate extends Mage_Core_Model_Resource_
      *
      * @return $this
      */
+    #[\Override]
     protected function _initUniqueFields()
     {
         $this->_uniqueFields = [[

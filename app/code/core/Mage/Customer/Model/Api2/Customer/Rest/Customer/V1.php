@@ -42,6 +42,7 @@ class Mage_Customer_Model_Api2_Customer_Rest_Customer_V1 extends Mage_Customer_M
      * @throws Mage_Api2_Exception
      * @return array|void
      */
+    #[\Override]
     protected function _retrieve()
     {
         if ($this->_isOwner($this->getRequest()->getParam('id'))) {
@@ -52,6 +53,7 @@ class Mage_Customer_Model_Api2_Customer_Rest_Customer_V1 extends Mage_Customer_M
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _getCollectionForRetrieve()
     {
         return parent::_getCollectionForRetrieve()->addAttributeToFilter('entity_id', $this->getApiUser()->getUserId());
@@ -62,6 +64,7 @@ class Mage_Customer_Model_Api2_Customer_Rest_Customer_V1 extends Mage_Customer_M
      *
      * @throws Mage_Api2_Exception
      */
+    #[\Override]
     protected function _update(array $data)
     {
         if ($this->_isOwner($this->getRequest()->getParam('id'))) {

@@ -21,6 +21,7 @@
  */
 class Mage_Checkout_Block_Onepage_Review extends Mage_Checkout_Block_Onepage_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->getCheckout()->setStepData('review', [

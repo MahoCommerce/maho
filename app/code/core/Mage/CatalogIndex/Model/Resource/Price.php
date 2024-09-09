@@ -36,6 +36,7 @@ class Mage_CatalogIndex_Model_Resource_Price extends Mage_CatalogIndex_Model_Res
      */
     protected $_taxRates           = null;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalogindex/price', 'index_id');

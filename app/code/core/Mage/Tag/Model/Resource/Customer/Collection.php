@@ -47,6 +47,7 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
      *
      * @return $this
      */
+    #[\Override]
     public function _initSelect()
     {
         parent::_initSelect();
@@ -248,6 +249,7 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     public function getSelectCountSql()
     {
         $countSelect = parent::getSelectCountSql();
@@ -357,6 +359,7 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
      *
      * @inheritDoc
      */
+    #[\Override]
     public function addFieldToFilter($attribute, $condition = null)
     {
         if ($attribute == 'name') {
@@ -373,6 +376,7 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
      *
      * @return $this
      */
+    #[\Override]
     protected function _renderOrders()
     {
         if (!$this->_isOrdersRendered) {

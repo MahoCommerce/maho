@@ -21,6 +21,7 @@
  */
 class Mage_Reports_Model_Resource_Product_Index_Viewed extends Mage_Reports_Model_Resource_Product_Index_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('reports/viewed_product_index', 'index_id');

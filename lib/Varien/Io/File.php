@@ -305,6 +305,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @return boolean
      */
+    #[\Override]
     public function open(array $args = [])
     {
         if (!empty($args['path']) && $this->_allowCreateFolders) {
@@ -323,6 +324,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      * @access public
      * @return $this
      */
+    #[\Override]
     public function setAllowCreateFolders($flag)
     {
         $this->_allowCreateFolders = $flag;
@@ -334,6 +336,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @return boolean
      */
+    #[\Override]
     public function close()
     {
         return true;
@@ -349,6 +352,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function mkdir($dir, $mode = 0777, $recursive = true)
     {
         if ($this->_cwd) {
@@ -373,6 +377,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function rmdir($dir, $recursive = false)
     {
         if ($this->_cwd) {
@@ -419,6 +424,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function pwd()
     {
         return $this->_cwd;
@@ -433,6 +439,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function cd($dir)
     {
         if (is_dir($dir)) {
@@ -456,6 +463,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function read($filename, $dest = null)
     {
         if (!is_null($dest)) {
@@ -482,6 +490,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      * @return int|boolean
      * @throws Exception
      */
+    #[\Override]
     public function write($filename, $src, $mode = null)
     {
         if (str_contains($filename, chr(0))
@@ -694,6 +703,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function rm($filename)
     {
         if ($this->_cwd) {
@@ -715,6 +725,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function mv($src, $dest)
     {
         if ($this->_cwd) {
@@ -757,6 +768,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function chmod($filename, $mode)
     {
         if ($this->_cwd) {
@@ -783,6 +795,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      * @access public
      * @return array
      */
+    #[\Override]
     public function ls($grep = null)
     {
         $ignoredDirectories = ['.', '..'];
@@ -926,6 +939,7 @@ class Varien_Io_File extends Varien_Io_Abstract
         return $owner['name'] . ' / ' . $groupinfo;
     }
 
+    #[\Override]
     public function dirsep()
     {
         return DIRECTORY_SEPARATOR;

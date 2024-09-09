@@ -49,6 +49,7 @@ class Mage_Adminhtml_Block_Promo_Widget_Chooser_Daterange extends Mage_Adminhtml
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         if (empty($this->_targetElementId)) {

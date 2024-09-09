@@ -21,6 +21,7 @@
  */
 class Mage_Adminhtml_Block_System_Email_Template_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
+    #[\Override]
     protected function _construct()
     {
         $this->setEmptyText(Mage::helper('adminhtml')->__('No Templates Found'));
@@ -29,6 +30,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Grid extends Mage_Adminhtml_Blo
         $this->setSaveParametersInSession(true);
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceSingleton('core/email_template_collection');
@@ -38,6 +40,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Grid extends Mage_Adminhtml_Blo
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn(
@@ -115,6 +118,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Grid extends Mage_Adminhtml_Blo
         return $this;
     }
 
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);

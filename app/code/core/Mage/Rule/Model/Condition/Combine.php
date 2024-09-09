@@ -40,6 +40,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
      *
      * @return string
      */
+    #[\Override]
     public function prepareConditionSql()
     {
         $wheres = [];
@@ -157,6 +158,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
     /**
      * @return $this|Mage_Rule_Model_Condition_Abstract
      */
+    #[\Override]
     public function loadValueOptions()
     {
         $this->setValueOption([
@@ -190,6 +192,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
     /**
      * @return string
      */
+    #[\Override]
     public function getValueElementType()
     {
         return 'select';
@@ -212,6 +215,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
      *
      * @return array
      */
+    #[\Override]
     public function asArray(array $arrAttributes = [])
     {
         $out = parent::asArray();
@@ -229,6 +233,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
      * @param string $itemKey
      * @return string
      */
+    #[\Override]
     public function asXml($containerKey = 'conditions', $itemKey = 'condition')
     {
         $xml = '<aggregator>' . $this->getAggregator() . '</aggregator>'
@@ -246,6 +251,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
      * @param string $key
      * @return $this
      */
+    #[\Override]
     public function loadArray($arr, $key = 'conditions')
     {
         $this->setAggregator($arr['aggregator'] ?? $arr['attribute'] ?? null)
@@ -271,6 +277,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
      * @param string|SimpleXMLElement $xml
      * @return $this
      */
+    #[\Override]
     public function loadXml($xml)
     {
         if (is_string($xml)) {
@@ -287,6 +294,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
     /**
      * @return string
      */
+    #[\Override]
     public function asHtml()
     {
         $html = $this->getTypeElement()->getHtml() .
@@ -312,6 +320,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
     /**
      * @return string
      */
+    #[\Override]
     public function asHtmlRecursive()
     {
         $html = $this->asHtml() . '<ul id="' . $this->getPrefix() . '__' . $this->getId() . '__children" class="rule-param-children">';
@@ -326,6 +335,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
      * @param string $format
      * @return string
      */
+    #[\Override]
     public function asString($format = '')
     {
         return Mage::helper('rule')->__('If %s of these conditions are %s:', $this->getAggregatorName(), $this->getValueName());
@@ -335,6 +345,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
      * @param int $level
      * @return string
      */
+    #[\Override]
     public function asStringRecursive($level = 0)
     {
         $str = parent::asStringRecursive($level);
@@ -347,6 +358,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
     /**
      * @return bool
      */
+    #[\Override]
     public function validate(Varien_Object $object)
     {
         if (!$this->getConditions()) {

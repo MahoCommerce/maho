@@ -126,6 +126,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Invoice information page
      */
+    #[\Override]
     public function viewAction()
     {
         $invoice = $this->_initInvoice();
@@ -472,6 +473,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Create pdf for current invoice
      */
+    #[\Override]
     public function printAction()
     {
         $this->_initInvoice();

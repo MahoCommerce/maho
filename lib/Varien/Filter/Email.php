@@ -15,6 +15,7 @@
 
 class Varien_Filter_Email implements Zend_Filter_Interface
 {
+    #[\Override]
     public function filter($value)
     {
         $atIndex = 0;

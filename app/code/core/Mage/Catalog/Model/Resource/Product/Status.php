@@ -28,6 +28,7 @@ class Mage_Catalog_Model_Resource_Product_Status extends Mage_Core_Model_Resourc
      */
     protected $_productAttributes  = [];
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_enabled_index', 'product_id');

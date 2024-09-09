@@ -31,6 +31,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      * @param array $values All product option values, i.e. array (option_id => mixed, option_id => mixed...)
      * @return Mage_Catalog_Model_Product_Option_Type_Default
      */
+    #[\Override]
     public function validateUserValue($values)
     {
         parent::validateUserValue($values);
@@ -92,6 +93,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      * @throws Mage_Core_Exception
      * @return mixed Prepared option value
      */
+    #[\Override]
     public function prepareForCart()
     {
         if ($this->getIsValid() && $this->getUserValue() !== null) {
@@ -148,6 +150,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      * @param string $optionValue Prepared for cart option value
      * @return string
      */
+    #[\Override]
     public function getFormattedOptionValue($optionValue)
     {
         if ($this->_formattedOptionValue === null) {
@@ -177,6 +180,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      * @param string $optionValue Prepared for cart option value
      * @return string
      */
+    #[\Override]
     public function getPrintableOptionValue($optionValue)
     {
         return $this->getFormattedOptionValue($optionValue);
@@ -188,6 +192,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      * @param string $optionValue Prepared for cart option value
      * @return string
      */
+    #[\Override]
     public function getEditableOptionValue($optionValue)
     {
         return $this->getFormattedOptionValue($optionValue);
@@ -200,6 +205,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      * @param array $productOptionValues Values for product option
      * @return string|null
      */
+    #[\Override]
     public function parseOptionValue($optionValue, $productOptionValues)
     {
         $timestamp = strtotime($optionValue);
@@ -217,6 +223,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      * @param string $optionValue
      * @return mixed
      */
+    #[\Override]
     public function prepareOptionValueForRequest($optionValue)
     {
         $confItem = $this->getConfigurationItem();

@@ -134,6 +134,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option extends
     /**
      * @return Mage_Adminhtml_Block_Widget
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $this->setChild(

@@ -28,6 +28,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Number extends Mage_Admin
      *
      * @return mixed|string
      */
+    #[\Override]
     protected function _getValue(Varien_Object $row)
     {
         $data = parent::_getValue($row);
@@ -47,6 +48,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Number extends Mage_Admin
      *
      * @return string
      */
+    #[\Override]
     public function renderCss()
     {
         return parent::renderCss() . ' a-right';

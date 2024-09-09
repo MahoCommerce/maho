@@ -24,6 +24,7 @@ class Mage_Catalog_Model_Category_Attribute_Source_Mode extends Mage_Eav_Model_E
     /**
      * @return array
      */
+    #[\Override]
     public function getAllOptions()
     {
         if (!$this->_options) {

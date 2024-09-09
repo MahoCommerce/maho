@@ -28,6 +28,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Startdate_Specialprice extend
      * @param Varien_Object $object
      * @return string|bool
      */
+    #[\Override]
     protected function _getValueForSave($object)
     {
         $attributeName  = $this->getAttribute()->getName();
@@ -49,6 +50,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Startdate_Specialprice extend
      * @param Varien_Object $object
      * @return Mage_Catalog_Model_Product_Attribute_Backend_Startdate
      */
+    #[\Override]
     public function beforeSave($object)
     {
         $startDate = $this->_getValueForSave($object);

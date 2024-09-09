@@ -32,6 +32,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
      * Additional initialization
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->setUsedModuleName('Mage_Sales');
@@ -643,6 +644,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _isAllowed()
     {
         $action = strtolower($this->getRequest()->getActionName());
@@ -766,6 +768,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
      *
      * @return Mage_Adminhtml_Controller_Action
      */
+    #[\Override]
     public function preDispatch()
     {
         $this->_setForcedFormKeyActions('cancel', 'massCancel');

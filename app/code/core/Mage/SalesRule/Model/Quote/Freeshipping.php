@@ -39,6 +39,7 @@ class Mage_SalesRule_Model_Quote_Freeshipping extends Mage_Sales_Model_Quote_Add
      *
      * @return  Mage_SalesRule_Model_Quote_Freeshipping
      */
+    #[\Override]
     public function collect(Mage_Sales_Model_Quote_Address $address)
     {
         parent::collect($address);
@@ -92,6 +93,7 @@ class Mage_SalesRule_Model_Quote_Freeshipping extends Mage_Sales_Model_Quote_Add
      *
      * @return  Mage_SalesRule_Model_Quote_Freeshipping
      */
+    #[\Override]
     public function fetch(Mage_Sales_Model_Quote_Address $address)
     {
         return $this;

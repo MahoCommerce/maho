@@ -38,6 +38,7 @@ class Mage_Adminhtml_Block_Api_Role_Grid_User extends Mage_Adminhtml_Block_Widge
      * @return $this
      * @throws Exception
      */
+    #[\Override]
     protected function _addColumnFilterToCollection($column)
     {
         if ($column->getId() === 'in_role_users') {
@@ -60,6 +61,7 @@ class Mage_Adminhtml_Block_Api_Role_Grid_User extends Mage_Adminhtml_Block_Widge
      * @inheritDoc
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $roleId = $this->getRequest()->getParam('rid');
@@ -73,6 +75,7 @@ class Mage_Adminhtml_Block_Api_Role_Grid_User extends Mage_Adminhtml_Block_Widge
      * @inheritDoc
      * @throws Exception
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('in_role_users', [
@@ -132,6 +135,7 @@ class Mage_Adminhtml_Block_Api_Role_Grid_User extends Mage_Adminhtml_Block_Widge
      * @return string
      * @throws Exception
      */
+    #[\Override]
     public function getGridUrl()
     {
         $roleId = $this->getRequest()->getParam('rid');

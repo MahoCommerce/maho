@@ -23,6 +23,7 @@ class Mage_Sales_Model_Entity_Quote_Address_Attribute_Backend_Region extends Mag
      * @param Varien_Object|Mage_Sales_Model_Quote_Address $object
      * @return $this
      */
+    #[\Override]
     public function beforeSave($object)
     {
         if (is_numeric($object->getRegion())) {

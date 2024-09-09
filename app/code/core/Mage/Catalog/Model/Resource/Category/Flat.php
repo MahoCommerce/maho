@@ -121,6 +121,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
         parent::__construct();
     }
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/category_flat', 'entity_id');
@@ -156,6 +157,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      *
      * @return string
      */
+    #[\Override]
     public function getMainTable()
     {
         return $this->getMainStoreTable($this->getStoreId());
@@ -1490,6 +1492,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      * @throws Exception
      * @return $this
      */
+    #[\Override]
     public function reindexAll()
     {
         $this->_createTables();

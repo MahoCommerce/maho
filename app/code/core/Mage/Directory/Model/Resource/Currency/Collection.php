@@ -39,6 +39,7 @@ class Mage_Directory_Model_Resource_Currency_Collection extends Mage_Core_Model_
     /**
      * Define resource model and tables
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('directory/currency');
@@ -103,6 +104,7 @@ class Mage_Directory_Model_Resource_Currency_Collection extends Mage_Core_Model_
      *
      * @return array
      */
+    #[\Override]
     public function toOptionArray()
     {
         return $this->_toOptionArray('currency_code', 'currency_name');

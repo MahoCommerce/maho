@@ -90,6 +90,7 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension extends Zend_Validate
      * @param string $value         Extension of file
      * @return bool
      */
+    #[\Override]
     public function isValid($value)
     {
         $value = strtolower(trim($value));

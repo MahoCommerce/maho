@@ -23,6 +23,7 @@
  */
 class Mage_Tax_Model_Resource_Class_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
+    #[\Override]
     public function _construct()
     {
         $this->_init('tax/class');
@@ -44,6 +45,7 @@ class Mage_Tax_Model_Resource_Class_Collection extends Mage_Core_Model_Resource_
      *
      * @return array
      */
+    #[\Override]
     public function toOptionArray()
     {
         return $this->_toOptionArray('class_id', 'class_name');
@@ -54,6 +56,7 @@ class Mage_Tax_Model_Resource_Class_Collection extends Mage_Core_Model_Resource_
      *
      * @return array
      */
+    #[\Override]
     public function toOptionHash()
     {
         return $this->_toOptionHash('class_id', 'class_name');

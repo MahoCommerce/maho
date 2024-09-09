@@ -22,6 +22,7 @@ class Mage_Index_Block_Adminhtml_Process_Edit_Tab_Main extends Mage_Adminhtml_Bl
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareForm()
     {
         $model = Mage::registry('current_index_process');
@@ -64,6 +65,7 @@ class Mage_Index_Block_Adminhtml_Process_Edit_Tab_Main extends Mage_Adminhtml_Bl
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('index')->__('Process Information');
@@ -74,6 +76,7 @@ class Mage_Index_Block_Adminhtml_Process_Edit_Tab_Main extends Mage_Adminhtml_Bl
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('index')->__('Process Information');
@@ -84,6 +87,7 @@ class Mage_Index_Block_Adminhtml_Process_Edit_Tab_Main extends Mage_Adminhtml_Bl
      *
      * @return true
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -94,6 +98,7 @@ class Mage_Index_Block_Adminhtml_Process_Edit_Tab_Main extends Mage_Adminhtml_Bl
      *
      * @return false
      */
+    #[\Override]
     public function isHidden()
     {
         return false;

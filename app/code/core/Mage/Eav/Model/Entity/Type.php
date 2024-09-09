@@ -71,6 +71,7 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
      */
     protected $_sets;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('eav/entity_type');

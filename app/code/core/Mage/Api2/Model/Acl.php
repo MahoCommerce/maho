@@ -163,6 +163,7 @@ class Mage_Api2_Model_Acl extends Zend_Acl
      * @param Zend_Acl_Role_Interface|string|array $parents
      * @return Zend_Acl Provides a fluent interface
      */
+    #[\Override]
     public function addRole($roleId, $parents = null)
     {
         if (!is_numeric($roleId)) {

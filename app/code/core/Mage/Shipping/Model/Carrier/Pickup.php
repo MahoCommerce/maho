@@ -25,6 +25,7 @@ class Mage_Shipping_Model_Carrier_Pickup extends Mage_Shipping_Model_Carrier_Abs
     /**
      * @return Mage_Shipping_Model_Rate_Result|false
      */
+    #[\Override]
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
         if (!$this->getConfigFlag('active')) {
@@ -56,6 +57,7 @@ class Mage_Shipping_Model_Carrier_Pickup extends Mage_Shipping_Model_Carrier_Abs
      *
      * @return array
      */
+    #[\Override]
     public function getAllowedMethods()
     {
         return ['pickup' => Mage::helper('shipping')->__('Store Pickup')];

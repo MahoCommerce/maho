@@ -24,6 +24,7 @@ class Mage_Eav_Model_Resource_Form_Element_Collection extends Mage_Core_Model_Re
     /**
      * Initialize collection model
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('eav/form_element');
@@ -108,6 +109,7 @@ class Mage_Eav_Model_Resource_Form_Element_Collection extends Mage_Core_Model_Re
      *
      * @inheritDoc
      */
+    #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {
         if (!$this->isLoaded()) {

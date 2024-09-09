@@ -25,6 +25,7 @@
  */
 class Mage_Customer_Block_Widget_Taxvat extends Mage_Customer_Block_Widget_Abstract
 {
+    #[\Override]
     public function _construct()
     {
         parent::_construct();

@@ -46,11 +46,13 @@ abstract class Varien_Io_Abstract implements Varien_Io_Interface
      *
      * @return bool
      */
+    #[\Override]
     public function open(array $args = [])
     {
         return false;
     }
 
+    #[\Override]
     public function dirsep()
     {
         return '/';

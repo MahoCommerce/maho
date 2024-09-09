@@ -22,6 +22,7 @@ class Mage_Rule_Model_Renderer_Actions implements Varien_Data_Form_Element_Rende
     /**
      * @return string
      */
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         if ($element->getRule() && $element->getRule()->getActions()) {

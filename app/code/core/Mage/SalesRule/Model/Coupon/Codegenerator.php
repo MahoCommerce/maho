@@ -31,6 +31,7 @@ class Mage_SalesRule_Model_Coupon_Codegenerator extends Varien_Object implements
      *
      * @return string
      */
+    #[\Override]
     public function generateCode()
     {
         $alphabet = ($this->getAlphabet() ? $this->getAlphabet() : 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
@@ -51,6 +52,7 @@ class Mage_SalesRule_Model_Coupon_Codegenerator extends Varien_Object implements
      *
      * @return string
      */
+    #[\Override]
     public function getDelimiter()
     {
         return ($this->getData('delimiter') ? $this->getData('delimiter') : '-');

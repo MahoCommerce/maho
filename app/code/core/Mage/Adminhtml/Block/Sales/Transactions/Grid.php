@@ -41,6 +41,7 @@ class Mage_Adminhtml_Block_Sales_Transactions_Grid extends Mage_Adminhtml_Block_
      *
      * @return Mage_Adminhtml_Block_Widget_Grid
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = $this->getCollection() ?: Mage::getResourceModel('sales/order_payment_transaction_collection');
@@ -57,6 +58,7 @@ class Mage_Adminhtml_Block_Sales_Transactions_Grid extends Mage_Adminhtml_Block_
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('transaction_id', [
@@ -128,6 +130,7 @@ class Mage_Adminhtml_Block_Sales_Transactions_Grid extends Mage_Adminhtml_Block_
      *
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/grid', ['_current' => true]);
@@ -138,6 +141,7 @@ class Mage_Adminhtml_Block_Sales_Transactions_Grid extends Mage_Adminhtml_Block_
      *
      * @return string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/view', ['txn_id' => $row->getId()]);

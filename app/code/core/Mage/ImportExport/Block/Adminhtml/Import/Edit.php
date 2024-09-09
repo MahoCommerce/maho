@@ -35,6 +35,7 @@ class Mage_ImportExport_Block_Adminhtml_Import_Edit extends Mage_Adminhtml_Block
     /**
      * Internal constructor
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -49,6 +50,7 @@ class Mage_ImportExport_Block_Adminhtml_Import_Edit extends Mage_Adminhtml_Block
      *
      * @return string
      */
+    #[\Override]
     public function getHeaderText()
     {
         return Mage::helper('importexport')->__('Import');

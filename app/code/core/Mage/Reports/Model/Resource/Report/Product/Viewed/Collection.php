@@ -110,6 +110,7 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed_Collection extends Mage_
      *
      * @return $this
      */
+    #[\Override]
     protected function _initSelect()
     {
         $select = $this->getSelect();
@@ -161,6 +162,7 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed_Collection extends Mage_
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     public function getSelectCountSql()
     {
         $this->_renderFilters();
@@ -201,6 +203,7 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed_Collection extends Mage_
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeLoad()
     {
         parent::_beforeLoad();

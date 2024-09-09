@@ -54,6 +54,7 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
     /**
      * Instantiate config
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

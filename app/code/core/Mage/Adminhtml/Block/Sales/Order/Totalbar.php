@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Sales_Order_Totalbar extends Mage_Adminhtml_Block_Sal
     /**
      * Retrieve required options from parent
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         if (!$this->getParentBlock()) {

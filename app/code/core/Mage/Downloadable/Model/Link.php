@@ -72,6 +72,7 @@ class Mage_Downloadable_Model_Link extends Mage_Core_Model_Abstract
     public const LINK_SHAREABLE_NO     = 0;
     public const LINK_SHAREABLE_CONFIG = 2;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('downloadable/link');
@@ -91,6 +92,7 @@ class Mage_Downloadable_Model_Link extends Mage_Core_Model_Abstract
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave()
     {
         $this->getResource()->saveItemTitleAndPrice($this);

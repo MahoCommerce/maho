@@ -33,6 +33,7 @@ class Mage_Uploader_Model_Config_Browsebutton extends Mage_Uploader_Model_Config
     /**
      * Set params for browse button
      */
+    #[\Override]
     protected function _construct()
     {
         $this->setIsDirectory(false);

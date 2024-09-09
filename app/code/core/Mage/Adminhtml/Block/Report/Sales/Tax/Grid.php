@@ -30,6 +30,7 @@ class Mage_Adminhtml_Block_Report_Sales_Tax_Grid extends Mage_Adminhtml_Block_Re
         $this->setCountSubTotals(true);
     }
 
+    #[\Override]
     public function getResourceCollectionName()
     {
         return ($this->getFilterData()->getData('report_type') == 'updated_at_order')
@@ -37,6 +38,7 @@ class Mage_Adminhtml_Block_Report_Sales_Tax_Grid extends Mage_Adminhtml_Block_Re
             : 'tax/report_collection';
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('period', [
@@ -102,6 +104,7 @@ class Mage_Adminhtml_Block_Report_Sales_Tax_Grid extends Mage_Adminhtml_Block_Re
      *
      *@return $this
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $filterData = $this->getFilterData();

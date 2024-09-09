@@ -47,6 +47,7 @@ class Mage_Shipping_Model_Resource_Carrier_Tablerate_Collection extends Mage_Cor
      * Define resource model and item
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('shipping/carrier_tablerate');
@@ -60,6 +61,7 @@ class Mage_Shipping_Model_Resource_Carrier_Tablerate_Collection extends Mage_Cor
      *
      * @return $this
      */
+    #[\Override]
     public function _initSelect()
     {
         parent::_initSelect();

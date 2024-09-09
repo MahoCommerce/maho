@@ -29,6 +29,7 @@ class Mage_Adminhtml_Block_Report_Sales_Sales_Grid extends Mage_Adminhtml_Block_
         $this->setCountTotals(true);
     }
 
+    #[\Override]
     public function getResourceCollectionName()
     {
         return ($this->getFilterData()->getData('report_type') == 'updated_at_order')
@@ -36,6 +37,7 @@ class Mage_Adminhtml_Block_Report_Sales_Sales_Grid extends Mage_Adminhtml_Block_
             : 'sales/report_order_collection';
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('period', [

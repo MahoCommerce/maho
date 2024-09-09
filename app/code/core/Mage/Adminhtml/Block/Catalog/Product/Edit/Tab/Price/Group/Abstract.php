@@ -57,6 +57,7 @@ abstract class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Price_Group_Abstrac
      *
      * @return string
      */
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         $this->setElement($element);

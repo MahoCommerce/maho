@@ -63,6 +63,7 @@ class Varien_Filter_Template_Simple extends Varien_Object implements Zend_Filter
      * @param string $value
      * @return string
      */
+    #[\Override]
     public function filter($value)
     {
         return preg_replace_callback(

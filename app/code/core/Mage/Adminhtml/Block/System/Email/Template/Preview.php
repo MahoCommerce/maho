@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Preview extends Mage_Adminhtml_
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         // Start store emulation process

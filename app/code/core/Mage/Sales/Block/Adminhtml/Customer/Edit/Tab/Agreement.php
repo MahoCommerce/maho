@@ -48,6 +48,7 @@ class Mage_Sales_Block_Adminhtml_Customer_Edit_Tab_Agreement extends Mage_Sales_
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return $this->__('Billing Agreements');
@@ -58,6 +59,7 @@ class Mage_Sales_Block_Adminhtml_Customer_Edit_Tab_Agreement extends Mage_Sales_
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return $this->__('Billing Agreements');
@@ -68,6 +70,7 @@ class Mage_Sales_Block_Adminhtml_Customer_Edit_Tab_Agreement extends Mage_Sales_
      *
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         $customer = Mage::registry('current_customer');
@@ -79,6 +82,7 @@ class Mage_Sales_Block_Adminhtml_Customer_Edit_Tab_Agreement extends Mage_Sales_
      *
      * @return bool
      */
+    #[\Override]
     public function isHidden()
     {
         return false;
@@ -87,6 +91,7 @@ class Mage_Sales_Block_Adminhtml_Customer_Edit_Tab_Agreement extends Mage_Sales_
     /**
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/sales_billing_agreement/customerGrid', ['_current' => true]);
@@ -107,6 +112,7 @@ class Mage_Sales_Block_Adminhtml_Customer_Edit_Tab_Agreement extends Mage_Sales_
      *
      * @return Mage_Adminhtml_Block_Widget_Grid
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('sales/billing_agreement_collection')
@@ -121,6 +127,7 @@ class Mage_Sales_Block_Adminhtml_Customer_Edit_Tab_Agreement extends Mage_Sales_
      *
      * @return Mage_Adminhtml_Block_Widget_Grid
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $result = parent::_prepareColumns();

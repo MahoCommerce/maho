@@ -111,6 +111,7 @@ class Mage_Catalog_Helper_Product_Flat extends Mage_Catalog_Helper_Flat_Abstract
      *
      * @return bool
      */
+    #[\Override]
     public function isEnabled($store = null)
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_USE_PRODUCT_FLAT);
@@ -122,6 +123,7 @@ class Mage_Catalog_Helper_Product_Flat extends Mage_Catalog_Helper_Flat_Abstract
      * @param null|bool|int|Mage_Core_Model_Store $store Store(id) for which the value is checked
      * @return bool
      */
+    #[\Override]
     public function isBuilt($store = null)
     {
         if ($store !== null) {

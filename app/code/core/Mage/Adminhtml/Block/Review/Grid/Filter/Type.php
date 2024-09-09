@@ -24,6 +24,7 @@ class Mage_Adminhtml_Block_Review_Grid_Filter_Type extends Mage_Adminhtml_Block_
     /**
      * @return array
      */
+    #[\Override]
     protected function _getOptions()
     {
         return [
@@ -37,6 +38,7 @@ class Mage_Adminhtml_Block_Review_Grid_Filter_Type extends Mage_Adminhtml_Block_
     /**
      * @return int
      */
+    #[\Override]
     public function getCondition()
     {
         if ($this->getValue() == 1) {

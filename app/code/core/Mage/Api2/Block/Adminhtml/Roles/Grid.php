@@ -36,6 +36,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Grid extends Mage_Adminhtml_Block_Widget_G
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         /** @var Mage_Api2_Model_Resource_Acl_Global_Role_Collection $collection */
@@ -50,6 +51,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Grid extends Mage_Adminhtml_Block_Widget_G
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('entity_id', [
@@ -85,6 +87,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Grid extends Mage_Adminhtml_Block_Widget_G
      *
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/grid', ['_current' => true]);
@@ -96,6 +99,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Grid extends Mage_Adminhtml_Block_Widget_G
      * @param Mage_Api2_Model_Acl_Global_Role $row
      * @return string|null
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         /** @var Mage_Admin_Model_Session $session */

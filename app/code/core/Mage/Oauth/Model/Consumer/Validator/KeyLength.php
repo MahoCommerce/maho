@@ -113,6 +113,7 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Zend_Validate_String
      * @param  string $value
      * @return bool
      */
+    #[\Override]
     public function isValid($value)
     {
         $result = parent::isValid($value);

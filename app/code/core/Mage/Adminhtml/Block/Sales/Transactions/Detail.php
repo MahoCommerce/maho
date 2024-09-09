@@ -61,6 +61,7 @@ class Mage_Adminhtml_Block_Sales_Transactions_Detail extends Mage_Adminhtml_Bloc
      *
      * @return string
      */
+    #[\Override]
     public function getHeaderText()
     {
         return Mage::helper('sales')->__(
@@ -77,6 +78,7 @@ class Mage_Adminhtml_Block_Sales_Transactions_Detail extends Mage_Adminhtml_Bloc
     /**
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         $this->setTxnIdHtml(Mage::helper('adminhtml/sales')->escapeHtmlWithLinks(

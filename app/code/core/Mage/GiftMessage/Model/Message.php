@@ -49,6 +49,7 @@ class Mage_GiftMessage_Model_Message extends Mage_Core_Model_Abstract
         'quote_address_item' => 'sales/quote_address_item'
     ];
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('giftmessage/message');

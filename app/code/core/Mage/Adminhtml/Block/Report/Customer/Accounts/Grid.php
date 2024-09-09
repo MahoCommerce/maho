@@ -30,6 +30,7 @@ class Mage_Adminhtml_Block_Report_Customer_Accounts_Grid extends Mage_Adminhtml_
     /**
      * @return $this
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         parent::_prepareCollection();
@@ -40,6 +41,7 @@ class Mage_Adminhtml_Block_Report_Customer_Accounts_Grid extends Mage_Adminhtml_
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('accounts', [

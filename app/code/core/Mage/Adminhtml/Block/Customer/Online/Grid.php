@@ -39,6 +39,7 @@ class Mage_Adminhtml_Block_Customer_Online_Grid extends Mage_Adminhtml_Block_Wid
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         /** @var Mage_Log_Model_Resource_Visitor_Online_Collection $collection */
@@ -58,6 +59,7 @@ class Mage_Adminhtml_Block_Customer_Online_Grid extends Mage_Adminhtml_Block_Wid
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('customer_id', [
@@ -148,6 +150,7 @@ class Mage_Adminhtml_Block_Customer_Online_Grid extends Mage_Adminhtml_Block_Wid
      * @param Mage_Core_Model_Abstract $row
      * @return string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return (Mage::getSingleton('admin/session')->isAllowed('customer/manage') && $row->getCustomerId())

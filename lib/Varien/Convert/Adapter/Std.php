@@ -21,6 +21,7 @@
  */
 class Varien_Convert_Adapter_Std extends Varien_Convert_Adapter_Abstract
 {
+    #[\Override]
     public function load()
     {
         $data = '';
@@ -32,6 +33,7 @@ class Varien_Convert_Adapter_Std extends Varien_Convert_Adapter_Abstract
         return $this;
     }
 
+    #[\Override]
     public function save()
     {
         echo $this->getData();

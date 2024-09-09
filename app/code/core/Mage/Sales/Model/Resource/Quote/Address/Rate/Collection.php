@@ -28,6 +28,7 @@ class Mage_Sales_Model_Resource_Quote_Address_Rate_Collection extends Mage_Core_
      */
     protected $_allowFixedOnly   = false;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/quote_address_rate');
@@ -68,6 +69,7 @@ class Mage_Sales_Model_Resource_Quote_Address_Rate_Collection extends Mage_Core_
      * @inheritDoc
      * @throws Exception
      */
+    #[\Override]
     public function addItem(Varien_Object $rate)
     {
         if ($this->_allowFixedOnly && (!$rate->getCarrierInstance() || !$rate->getCarrierInstance()->isFixed())) {

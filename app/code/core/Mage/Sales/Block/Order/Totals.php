@@ -35,6 +35,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         $this->_initTotals();

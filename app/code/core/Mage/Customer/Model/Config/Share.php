@@ -73,6 +73,7 @@ class Mage_Customer_Model_Config_Share extends Mage_Core_Model_Config_Data
      * @return $this
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     public function _beforeSave()
     {
         $value = $this->getValue();

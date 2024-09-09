@@ -35,6 +35,7 @@ class Mage_Adminhtml_Block_Checkout_Agreement_Edit extends Mage_Adminhtml_Block_
     /**
      * @return string
      */
+    #[\Override]
     public function getHeaderText()
     {
         if (Mage::registry('checkout_agreement')->getId()) {

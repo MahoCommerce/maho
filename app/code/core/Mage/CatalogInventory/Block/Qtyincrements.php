@@ -69,6 +69,7 @@ class Mage_CatalogInventory_Block_Qtyincrements extends Mage_Core_Block_Template
      *
      * @return array
      */
+    #[\Override]
     public function getCacheTags()
     {
         return array_merge(parent::getCacheTags(), $this->_getProduct()->getCacheIdTags());

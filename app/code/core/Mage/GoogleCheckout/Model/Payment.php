@@ -30,6 +30,7 @@ class Mage_GoogleCheckout_Model_Payment extends Mage_Payment_Model_Method_Abstra
      *
      * @return bool
      */
+    #[\Override]
     public function canEdit()
     {
         return false;
@@ -51,6 +52,7 @@ class Mage_GoogleCheckout_Model_Payment extends Mage_Payment_Model_Method_Abstra
      * @param float $amount
      * @return void
      */
+    #[\Override]
     public function authorize(Varien_Object $payment, $amount)
     {
         Mage::throwException(Mage::helper('payment')->__('Google Checkout has been deprecated.'));
@@ -63,6 +65,7 @@ class Mage_GoogleCheckout_Model_Payment extends Mage_Payment_Model_Method_Abstra
      * @throws Exception
      * @return void
      */
+    #[\Override]
     public function capture(Varien_Object $payment, $amount)
     {
         Mage::throwException(Mage::helper('payment')->__('Google Checkout has been deprecated.'));
@@ -75,6 +78,7 @@ class Mage_GoogleCheckout_Model_Payment extends Mage_Payment_Model_Method_Abstra
      * @throws Exception
      * @return void
      */
+    #[\Override]
     public function refund(Varien_Object $payment, $amount)
     {
         Mage::throwException(Mage::helper('payment')->__('Google Checkout has been deprecated.'));
@@ -84,6 +88,7 @@ class Mage_GoogleCheckout_Model_Payment extends Mage_Payment_Model_Method_Abstra
      * @throws Exception
      * @return void
      */
+    #[\Override]
     public function void(Varien_Object $payment)
     {
         Mage::throwException(Mage::helper('payment')->__('Google Checkout has been deprecated.'));
@@ -95,6 +100,7 @@ class Mage_GoogleCheckout_Model_Payment extends Mage_Payment_Model_Method_Abstra
      * @throws Exception
      * @return void
      */
+    #[\Override]
     public function cancel(Varien_Object $payment)
     {
         Mage::throwException(Mage::helper('payment')->__('Google Checkout has been deprecated.'));
@@ -106,6 +112,7 @@ class Mage_GoogleCheckout_Model_Payment extends Mage_Payment_Model_Method_Abstra
      * @param string $field
      * @param int|string|null|Mage_Core_Model_Store $storeId
      */
+    #[\Override]
     public function getConfigData($field, $storeId = null)
     {
         return null;
@@ -116,6 +123,7 @@ class Mage_GoogleCheckout_Model_Payment extends Mage_Payment_Model_Method_Abstra
      *
      * @return  bool
      */
+    #[\Override]
     public function canVoid(Varien_Object $payment)
     {
         return false;

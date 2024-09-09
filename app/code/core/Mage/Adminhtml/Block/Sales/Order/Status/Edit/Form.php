@@ -32,6 +32,7 @@ class Mage_Adminhtml_Block_Sales_Order_Status_Edit_Form extends Mage_Adminhtml_B
      *
      * @return Mage_Adminhtml_Block_Widget_Form
      */
+    #[\Override]
     protected function _prepareForm()
     {
         parent::_prepareForm();

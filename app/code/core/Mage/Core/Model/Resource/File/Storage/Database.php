@@ -24,6 +24,7 @@ class Mage_Core_Model_Resource_File_Storage_Database extends Mage_Core_Model_Res
     /**
      * Define table name and id field for resource
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/file_storage', 'file_id');

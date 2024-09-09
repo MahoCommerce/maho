@@ -80,6 +80,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection extends Mag
     /**
      * Initialize collection items factory class
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order_payment_transaction');
@@ -183,6 +184,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection extends Mag
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeLoad()
     {
         parent::_beforeLoad();
@@ -230,6 +232,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection extends Mag
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterLoad()
     {
         foreach ($this->_items as $item) {

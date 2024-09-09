@@ -58,6 +58,7 @@ class Mage_Catalog_Model_Product_Indexer_Flat extends Mage_Index_Model_Indexer_A
      *
      * @return bool
      */
+    #[\Override]
     public function isVisible()
     {
         /** @var Mage_Catalog_Helper_Product_Flat $productFlatHelper */
@@ -70,6 +71,7 @@ class Mage_Catalog_Model_Product_Indexer_Flat extends Mage_Index_Model_Indexer_A
      *
      * @return string
      */
+    #[\Override]
     public function getName()
     {
         return Mage::helper('catalog')->__('Product Flat Data');
@@ -80,6 +82,7 @@ class Mage_Catalog_Model_Product_Indexer_Flat extends Mage_Index_Model_Indexer_A
      *
      * @return string
      */
+    #[\Override]
     public function getDescription()
     {
         return Mage::helper('catalog')->__('Reorganize EAV product structure to flat structure');
@@ -102,6 +105,7 @@ class Mage_Catalog_Model_Product_Indexer_Flat extends Mage_Index_Model_Indexer_A
      *
      * @return bool
      */
+    #[\Override]
     public function matchEvent(Mage_Index_Model_Event $event)
     {
         /** @var Mage_Catalog_Helper_Product_Flat $productFlatHelper */
@@ -176,6 +180,7 @@ class Mage_Catalog_Model_Product_Indexer_Flat extends Mage_Index_Model_Indexer_A
     /**
      * Register data required by process in event object
      */
+    #[\Override]
     protected function _registerEvent(Mage_Index_Model_Event $event)
     {
         $event->addNewData(self::EVENT_MATCH_RESULT_KEY, true);
@@ -283,6 +288,7 @@ class Mage_Catalog_Model_Product_Indexer_Flat extends Mage_Index_Model_Indexer_A
     /**
      * Process event
      */
+    #[\Override]
     protected function _processEvent(Mage_Index_Model_Event $event)
     {
         $data = $event->getNewData();
@@ -332,6 +338,7 @@ class Mage_Catalog_Model_Product_Indexer_Flat extends Mage_Index_Model_Indexer_A
      * Rebuild all index data
      *
      */
+    #[\Override]
     public function reindexAll()
     {
         $this->_getIndexer()->reindexAll();

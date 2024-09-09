@@ -26,6 +26,7 @@ class Mage_Core_Controller_Varien_Router_Default extends Mage_Core_Controller_Va
      *
      * @return bool
      */
+    #[\Override]
     public function match(Zend_Controller_Request_Http $request)
     {
         $noRoute        = explode('/', $this->_getNoRouteConfig());

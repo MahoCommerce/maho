@@ -38,6 +38,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_View_Tab_Orders extends Mage_
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('sales/order_grid_collection')
@@ -54,6 +55,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_View_Tab_Orders extends Mage_
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('real_order_id', [
@@ -144,6 +146,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_View_Tab_Orders extends Mage_
      * @param Varien_Object $row
      * @return string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/sales_order/view', ['order_id' => $row->getId()]);
@@ -154,6 +157,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_View_Tab_Orders extends Mage_
      *
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getTabUrl();
@@ -184,6 +188,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_View_Tab_Orders extends Mage_
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('sales')->__('Related Orders');
@@ -194,6 +199,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_View_Tab_Orders extends Mage_
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return $this->getTabLabel();
@@ -202,6 +208,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_View_Tab_Orders extends Mage_
     /**
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -210,6 +217,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_View_Tab_Orders extends Mage_
     /**
      * @return bool
      */
+    #[\Override]
     public function isHidden()
     {
         return false;

@@ -52,6 +52,7 @@ class Mage_Catalog_Helper_Category_Flat extends Mage_Catalog_Helper_Flat_Abstrac
      *
      * @return bool
      */
+    #[\Override]
     public function isEnabled($skipAdminCheck = false)
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_IS_ENABLED_FLAT_CATALOG_CATEGORY);
@@ -63,6 +64,7 @@ class Mage_Catalog_Helper_Category_Flat extends Mage_Catalog_Helper_Flat_Abstrac
      * @param null|bool|int|Mage_Core_Model_Store $store Store(id) for which the value is checked
      * @return bool
      */
+    #[\Override]
     public function isBuilt($store = null)
     {
         return Mage::getResourceSingleton('catalog/category_flat')->isBuilt($store);

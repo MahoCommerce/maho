@@ -150,6 +150,7 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
      */
     protected $_values = [];
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_option');
@@ -382,6 +383,7 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
      *
      * @return Mage_Core_Model_Abstract
      */
+    #[\Override]
     protected function _afterSave()
     {
         $this->getValueInstance()->unsetValues();
@@ -538,6 +540,7 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _clearData()
     {
         $this->_data = [];
@@ -550,6 +553,7 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _clearReferences()
     {
         if (!empty($this->_values)) {

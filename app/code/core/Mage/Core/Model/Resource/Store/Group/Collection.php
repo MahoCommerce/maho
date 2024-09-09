@@ -33,6 +33,7 @@ class Mage_Core_Model_Resource_Store_Group_Collection extends Mage_Core_Model_Re
      * Define resource model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->setFlag('load_default_store_group', false);
@@ -84,6 +85,7 @@ class Mage_Core_Model_Resource_Store_Group_Collection extends Mage_Core_Model_Re
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function _beforeLoad()
     {
         if (!$this->getLoadDefault()) {
@@ -98,6 +100,7 @@ class Mage_Core_Model_Resource_Store_Group_Collection extends Mage_Core_Model_Re
      *
      * @return array
      */
+    #[\Override]
     public function toOptionArray()
     {
         return $this->_toOptionArray('group_id', 'name');

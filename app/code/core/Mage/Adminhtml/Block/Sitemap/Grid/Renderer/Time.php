@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Sitemap_Grid_Renderer_Time extends Mage_Adminhtml_Blo
      *
      * @return string
      */
+    #[\Override]
     public function render(Varien_Object $row)
     {
         return date(

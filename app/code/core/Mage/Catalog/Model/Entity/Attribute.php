@@ -68,6 +68,7 @@ class Mage_Catalog_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribut
      *
      * @return Mage_Core_Model_Abstract
      */
+    #[\Override]
     protected function _beforeSave()
     {
         if ($this->_getResource()->isUsedBySuperProducts($this)) {
@@ -82,6 +83,7 @@ class Mage_Catalog_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribut
      *
      * @return Mage_Core_Model_Abstract
      */
+    #[\Override]
     protected function _afterSave()
     {
         /**

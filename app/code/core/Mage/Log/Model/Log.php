@@ -40,6 +40,7 @@ class Mage_Log_Model_Log extends Mage_Core_Model_Abstract
      * Init Resource Model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('log/log');

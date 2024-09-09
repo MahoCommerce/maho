@@ -38,6 +38,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Helper_Pricestep extends Varien_Data
      *
      * @return string
      */
+    #[\Override]
     public function getElementHtml()
     {
         $elementDisabled = $this->getDisabled() == 'disabled';

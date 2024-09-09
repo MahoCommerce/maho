@@ -26,6 +26,7 @@ class Mage_Catalog_Model_Api2_Product_Category_Rest_Admin_V1 extends Mage_Catalo
      *
      * @return string
      */
+    #[\Override]
     protected function _create(array $data)
     {
         /** @var Mage_Api2_Model_Resource_Validator_Fields $validator */
@@ -74,6 +75,7 @@ class Mage_Catalog_Model_Api2_Product_Category_Rest_Admin_V1 extends Mage_Catalo
      *
      * @return bool
      */
+    #[\Override]
     protected function _delete()
     {
         $product = $this->_getProduct();
@@ -110,6 +112,7 @@ class Mage_Catalog_Model_Api2_Product_Category_Rest_Admin_V1 extends Mage_Catalo
      *
      * @return array
      */
+    #[\Override]
     protected function _getCategoryIds()
     {
         return $this->_getProduct()->getCategoryIds();
@@ -121,6 +124,7 @@ class Mage_Catalog_Model_Api2_Product_Category_Rest_Admin_V1 extends Mage_Catalo
      * @param Mage_Core_Model_Abstract $resource
      * @return string URL
      */
+    #[\Override]
     protected function _getLocation($resource)
     {
         /** @var Mage_Api2_Model_Route_ApiType $apiTypeRoute */

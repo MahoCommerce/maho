@@ -37,6 +37,7 @@ class Mage_AdminNotification_Model_Feed extends Mage_Core_Model_Abstract
      * Init model
      *
      */
+    #[\Override]
     protected function _construct()
     {
     }

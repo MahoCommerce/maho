@@ -44,6 +44,7 @@ class Mage_Newsletter_Model_Resource_Problem_Collection extends Mage_Core_Model_
      * Define resource model and model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('newsletter/problem');
@@ -128,6 +129,7 @@ class Mage_Newsletter_Model_Resource_Problem_Collection extends Mage_Core_Model_
      * @param bool $logQuery
      * @return $this
      */
+    #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {
         parent::load($printQuery, $logQuery);

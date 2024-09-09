@@ -24,6 +24,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Checkbox extends Mage_Admin
     /**
      * @return string
      */
+    #[\Override]
     public function getHtml()
     {
         return '<span class="head-massaction">' . parent::getHtml() . '</span>';
@@ -32,6 +33,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Checkbox extends Mage_Admin
     /**
      * @return array[]
      */
+    #[\Override]
     protected function _getOptions()
     {
         return [
@@ -53,6 +55,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Checkbox extends Mage_Admin
     /**
      * @return array|null
      */
+    #[\Override]
     public function getCondition()
     {
         if ($this->getValue()) {

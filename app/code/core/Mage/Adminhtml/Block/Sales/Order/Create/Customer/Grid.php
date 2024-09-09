@@ -30,6 +30,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Customer_Grid extends Mage_Adminht
         $this->setDefaultSort('entity_id');
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('customer/customer_collection')
@@ -48,6 +49,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Customer_Grid extends Mage_Adminht
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('entity_id', [
@@ -100,16 +102,19 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Customer_Grid extends Mage_Adminht
     /**
      * @deprecated since 1.1.7
      */
+    #[\Override]
     public function getRowId($row)
     {
         return $row->getId();
     }
 
+    #[\Override]
     public function getRowUrl($row)
     {
         return $row->getId();
     }
 
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/loadBlock', ['block' => 'customer_grid']);

@@ -66,6 +66,7 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
      * Initialize resource model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('newsletter/template');
@@ -111,6 +112,7 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave()
     {
         $this->validate();
@@ -148,6 +150,7 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
      *
      * @return int|string
      */
+    #[\Override]
     public function getType()
     {
         return $this->getTemplateType();

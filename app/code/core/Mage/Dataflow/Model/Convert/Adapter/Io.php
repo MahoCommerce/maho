@@ -26,6 +26,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
     /**
      * @return Varien_Io_Abstract|false
      */
+    #[\Override]
     public function getResource($forWrite = false)
     {
         if (!$this->_resource) {
@@ -101,6 +102,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
      *
      * @return $this
      */
+    #[\Override]
     public function load()
     {
         if (!$this->getResource()) {
@@ -129,6 +131,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
      *
      * @return $this
      */
+    #[\Override]
     public function save()
     {
         if (!$this->getResource(true)) {

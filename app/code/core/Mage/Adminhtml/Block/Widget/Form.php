@@ -32,6 +32,7 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
      * Class constructor
      *
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -47,6 +48,7 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
      *
      * @return Mage_Core_Block_Abstract
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         Varien_Data_Form::setElementRenderer(
@@ -125,6 +127,7 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         $this->_prepareForm();

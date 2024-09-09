@@ -28,6 +28,7 @@ class Mage_Adminhtml_Block_Rating_Grid extends Mage_Adminhtml_Block_Widget_Grid
         $this->setSaveParametersInSession(true);
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getModel('rating/rating')
@@ -42,6 +43,7 @@ class Mage_Adminhtml_Block_Rating_Grid extends Mage_Adminhtml_Block_Widget_Grid
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('rating_id', [
@@ -66,6 +68,7 @@ class Mage_Adminhtml_Block_Rating_Grid extends Mage_Adminhtml_Block_Widget_Grid
         return parent::_prepareColumns();
     }
 
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);

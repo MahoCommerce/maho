@@ -26,6 +26,7 @@ class Mage_Payment_Block_Form_Container extends Mage_Core_Block_Template
     /**
      * Prepare children blocks
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         /** @var Mage_Payment_Helper_Data $helper */

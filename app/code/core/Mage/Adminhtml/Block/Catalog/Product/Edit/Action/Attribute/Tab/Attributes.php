@@ -21,6 +21,7 @@
  */
 class Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Attributes extends Mage_Adminhtml_Block_Catalog_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -30,6 +31,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Attributes 
     /**
      * @return $this
      */
+    #[\Override]
     protected function _prepareForm()
     {
         $this->setFormExcludedFieldList([
@@ -68,6 +70,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Attributes 
      *
      * @return array
      */
+    #[\Override]
     protected function _getAdditionalElementTypes()
     {
         return [
@@ -84,6 +87,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Attributes 
      * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
+    #[\Override]
     protected function _getAdditionalElementHtml($element)
     {
         // Add name attribute to checkboxes that correspond to multiselect elements
@@ -99,6 +103,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Attributes 
     /**
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('catalog')->__('Attributes');
@@ -107,6 +112,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Attributes 
     /**
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('catalog')->__('Attributes');
@@ -115,6 +121,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Attributes 
     /**
      * @return true
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -123,6 +130,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Attributes 
     /**
      * @return false
      */
+    #[\Override]
     public function isHidden()
     {
         return false;

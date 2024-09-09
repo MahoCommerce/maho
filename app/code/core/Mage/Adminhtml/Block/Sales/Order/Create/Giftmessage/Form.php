@@ -124,6 +124,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Giftmessage_Form extends Mage_Admi
      * @return $this
      * @throws Exception
      */
+    #[\Override]
     public function _prepareForm()
     {
         $form = new Varien_Data_Form();

@@ -191,6 +191,7 @@ class Mage_Core_Model_Input_Filter implements Zend_Filter_Interface
      * @param array $data
      * @return array    Return filtered data
      */
+    #[\Override]
     public function filter($data)
     {
         return $this->_filter($data);

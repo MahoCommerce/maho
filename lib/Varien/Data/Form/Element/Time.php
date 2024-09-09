@@ -34,6 +34,7 @@ class Varien_Data_Form_Element_Time extends Varien_Data_Form_Element_Abstract
     /**
      * @return string
      */
+    #[\Override]
     public function getName()
     {
         $name = parent::getName();
@@ -46,6 +47,7 @@ class Varien_Data_Form_Element_Time extends Varien_Data_Form_Element_Abstract
     /**
      * @return string
      */
+    #[\Override]
     public function getElementHtml()
     {
         $this->addClass('select');

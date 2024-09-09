@@ -21,6 +21,7 @@
  */
 class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/store', 'store_id');
@@ -31,6 +32,7 @@ class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstrac
      *
      * @return $this
      */
+    #[\Override]
     protected function _initUniqueFields()
     {
         $this->_uniqueFields = [[
@@ -46,6 +48,7 @@ class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstrac
      * @param Mage_Core_Model_Store $model
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $model)
     {
         if (!preg_match('/^[a-z]+[a-z0-9_\-]*$/', $model->getCode())) {
@@ -63,6 +66,7 @@ class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstrac
      * @param Mage_Core_Model_Store $object
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
         parent::_afterSave($object);
@@ -78,6 +82,7 @@ class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstrac
      * @param Mage_Core_Model_Store $model
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterDelete(Mage_Core_Model_Abstract $model)
     {
         $where = [
@@ -149,6 +154,7 @@ class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstrac
      * @param Mage_Core_Model_Abstract $object
      * @return Varien_Db_Select
      */
+    #[\Override]
     protected function _getLoadSelect($field, $value, $object)
     {
         $select = parent::_getLoadSelect($field, $value, $object);

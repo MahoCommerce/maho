@@ -21,6 +21,7 @@
  */
 class Mage_Core_Model_Resource_Layout extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/layout_update', 'layout_update_id');

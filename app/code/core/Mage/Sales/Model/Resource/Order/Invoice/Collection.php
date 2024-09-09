@@ -38,6 +38,7 @@ class Mage_Sales_Model_Resource_Order_Invoice_Collection extends Mage_Sales_Mode
      */
     protected $_orderField     = 'order_id';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order_invoice');
@@ -47,6 +48,7 @@ class Mage_Sales_Model_Resource_Order_Invoice_Collection extends Mage_Sales_Mode
      * Used to emulate after load functionality for each item without loading them
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad()
     {
         $this->walk('afterLoad');

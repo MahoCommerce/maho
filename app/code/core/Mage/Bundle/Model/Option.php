@@ -49,6 +49,7 @@ class Mage_Bundle_Model_Option extends Mage_Core_Model_Abstract
      */
     protected $_defaultSelection = null;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('bundle/option');

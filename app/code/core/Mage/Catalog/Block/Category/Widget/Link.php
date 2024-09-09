@@ -24,6 +24,7 @@ class Mage_Catalog_Block_Category_Widget_Link extends Mage_Catalog_Block_Widget_
     /**
      * Initialize entity model
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

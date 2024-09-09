@@ -19,26 +19,31 @@
  */
 class Mage_Adminhtml_Block_Permissions_Tab_Roleinfo extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('adminhtml')->__('Role Info');
     }
 
+    #[\Override]
     public function getTabTitle()
     {
         return $this->getTabLabel();
     }
 
+    #[\Override]
     public function canShowTab()
     {
         return true;
     }
 
+    #[\Override]
     public function isHidden()
     {
         return false;
     }
 
+    #[\Override]
     public function _beforeToHtml()
     {
         $this->_initForm();

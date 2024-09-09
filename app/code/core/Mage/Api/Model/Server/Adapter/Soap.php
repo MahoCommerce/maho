@@ -38,6 +38,7 @@ class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_A
     /**
      * Internal constructor
      */
+    #[\Override]
     protected function _construct()
     {
         $this->wsdlConfig = $this->_getWsdlConfig();
@@ -68,6 +69,7 @@ class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_A
      * @param string $handler
      * @return $this
      */
+    #[\Override]
     public function setHandler($handler)
     {
         $this->setData('handler', $handler);
@@ -79,6 +81,7 @@ class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_A
      *
      * @return string
      */
+    #[\Override]
     public function getHandler()
     {
         return $this->getData('handler');
@@ -89,6 +92,7 @@ class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_A
      *
      * @return $this
      */
+    #[\Override]
     public function setController(Mage_Api_Controller_Action $controller)
     {
         $this->setData('controller', $controller);
@@ -100,6 +104,7 @@ class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_A
      *
      * @return Varien_Object
      */
+    #[\Override]
     public function getController()
     {
         $controller = $this->getData('controller');
@@ -120,6 +125,7 @@ class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_A
      * @return $this
      * @throws SoapFault
      */
+    #[\Override]
     public function run()
     {
         $apiConfigCharset = Mage::getStoreConfig('api/config/charset');
@@ -175,6 +181,7 @@ class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_A
      * @param int $code
      * @param string $message
      */
+    #[\Override]
     public function fault($code, $message)
     {
         if ($this->_extensionLoaded()) {

@@ -25,6 +25,7 @@ class Mage_SalesRule_Model_Resource_Rule_Customer_Collection extends Mage_Core_M
      * Collection constructor
      *
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

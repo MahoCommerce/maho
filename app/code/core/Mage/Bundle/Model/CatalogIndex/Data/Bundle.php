@@ -39,6 +39,7 @@ class Mage_Bundle_Model_CatalogIndex_Data_Bundle extends Mage_CatalogIndex_Model
      *
      * @return string
      */
+    #[\Override]
     public function getTypeCode()
     {
         return Mage_Catalog_Model_Product_Type::TYPE_BUNDLE;
@@ -49,6 +50,7 @@ class Mage_Bundle_Model_CatalogIndex_Data_Bundle extends Mage_CatalogIndex_Model
      *
      * @return array
      */
+    #[\Override]
     protected function _getLinkSettings()
     {
         return [

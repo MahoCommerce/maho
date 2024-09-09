@@ -43,6 +43,7 @@ class Mage_Adminhtml_Block_Sales_Order_Status extends Mage_Adminhtml_Block_Widge
      *
      * @return string
      */
+    #[\Override]
     public function getCreateUrl()
     {
         return $this->getUrl('*/sales_order_status/new');

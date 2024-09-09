@@ -24,6 +24,7 @@
  */
 class Mage_Adminhtml_Block_Widget extends Mage_Adminhtml_Block_Template
 {
+    #[\Override]
     public function getId()
     {
         if ($this->getData('id') === null) {

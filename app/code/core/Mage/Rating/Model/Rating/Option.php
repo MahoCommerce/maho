@@ -42,6 +42,7 @@
  */
 class Mage_Rating_Model_Rating_Option extends Mage_Core_Model_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('rating/rating_option');
@@ -61,6 +62,7 @@ class Mage_Rating_Model_Rating_Option extends Mage_Core_Model_Abstract
      * @param int $id
      * @return $this
      */
+    #[\Override]
     public function setId($id)
     {
         $this->setOptionId($id);

@@ -24,6 +24,7 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
     /**
      * @return $this
      */
+    #[\Override]
     protected function _construct()
     {
         return $this;
@@ -32,6 +33,7 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
     /**
      * @return Varien_Db_Adapter_Interface|false
      */
+    #[\Override]
     protected function _getReadAdapter()
     {
         return false;
@@ -40,6 +42,7 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
     /**
      * @return Varien_Db_Adapter_Interface|false
      */
+    #[\Override]
     protected function _getWriteAdapter()
     {
         return false;

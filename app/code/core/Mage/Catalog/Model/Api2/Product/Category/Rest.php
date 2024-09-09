@@ -24,6 +24,7 @@ abstract class Mage_Catalog_Model_Api2_Product_Category_Rest extends Mage_Catalo
     /**
      * Product category assign is not available
      */
+    #[\Override]
     protected function _create(array $data)
     {
         $this->_critical(self::RESOURCE_METHOD_NOT_ALLOWED);
@@ -32,6 +33,7 @@ abstract class Mage_Catalog_Model_Api2_Product_Category_Rest extends Mage_Catalo
     /**
      * Product category update is not available
      */
+    #[\Override]
     protected function _update(array $data)
     {
         $this->_critical(self::RESOURCE_METHOD_NOT_ALLOWED);
@@ -42,6 +44,7 @@ abstract class Mage_Catalog_Model_Api2_Product_Category_Rest extends Mage_Catalo
      *
      * @return array
      */
+    #[\Override]
     protected function _retrieveCollection()
     {
         $return = [];
@@ -55,6 +58,7 @@ abstract class Mage_Catalog_Model_Api2_Product_Category_Rest extends Mage_Catalo
     /**
      * Only admin have permissions for product category unassign
      */
+    #[\Override]
     protected function _delete()
     {
         $this->_critical(self::RESOURCE_METHOD_NOT_ALLOWED);
@@ -66,6 +70,7 @@ abstract class Mage_Catalog_Model_Api2_Product_Category_Rest extends Mage_Catalo
      * @param int $categoryId
      * @return Mage_Catalog_Model_Category
      */
+    #[\Override]
     protected function _getCategoryById($categoryId)
     {
         /** @var Mage_Catalog_Model_Category $category */

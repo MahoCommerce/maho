@@ -33,6 +33,7 @@ class Mage_Customer_Model_Resource_Attribute_Collection extends Mage_Eav_Model_R
      *
      * @return string
      */
+    #[\Override]
     protected function _getEntityTypeCode()
     {
         return $this->_entityTypeCode;
@@ -46,6 +47,7 @@ class Mage_Customer_Model_Resource_Attribute_Collection extends Mage_Eav_Model_R
      *
      * @return string|null
      */
+    #[\Override]
     protected function _getEavWebsiteTable()
     {
         return $this->getTable('customer/eav_attribute_website');

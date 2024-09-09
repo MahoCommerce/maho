@@ -253,6 +253,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      * @return $this
      * @throws Varien_Convert_Exception
      */
+    #[\Override]
     public function load()
     {
         if (!($entityType = $this->getVar('entity_type'))
@@ -333,6 +334,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      * @return $this
      * @throws Varien_Convert_Exception
      */
+    #[\Override]
     public function save()
     {
         $collection = $this->getData();

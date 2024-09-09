@@ -26,6 +26,7 @@ class Mage_CatalogInventory_Block_Stockqty_Type_Configurable extends Mage_Catalo
      *
      * @return array
      */
+    #[\Override]
     protected function _getChildProducts()
     {
         /** @var Mage_Catalog_Model_Product_Type_Configurable $productType */

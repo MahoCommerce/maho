@@ -47,6 +47,7 @@ class Mage_Payment_Model_Method_Free extends Mage_Payment_Model_Method_Abstract
      * @param Mage_Sales_Model_Quote|null $quote
      * @return bool
      */
+    #[\Override]
     public function isAvailable($quote = null)
     {
         return parent::isAvailable($quote) && !empty($quote)
@@ -58,6 +59,7 @@ class Mage_Payment_Model_Method_Free extends Mage_Payment_Model_Method_Abstract
      *
      * @return string|null
      */
+    #[\Override]
     public function getConfigPaymentAction()
     {
         return $this->getConfigData('order_status') == 'pending' ? null : parent::getConfigPaymentAction();

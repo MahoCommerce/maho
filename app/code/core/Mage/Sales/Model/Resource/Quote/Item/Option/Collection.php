@@ -39,6 +39,7 @@ class Mage_Sales_Model_Resource_Quote_Item_Option_Collection extends Mage_Core_M
      * Define resource model for collection
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/quote_item_option');
@@ -49,6 +50,7 @@ class Mage_Sales_Model_Resource_Quote_Item_Option_Collection extends Mage_Core_M
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad()
     {
         parent::_afterLoad();

@@ -21,6 +21,7 @@
  */
 class Mage_GiftMessage_Model_Resource_Message_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('giftmessage/message');

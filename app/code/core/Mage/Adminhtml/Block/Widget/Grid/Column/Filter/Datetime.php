@@ -25,6 +25,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
     //full day is 86400, we need 23 hours:59 minutes:59 seconds = 86399
     public const END_OF_DAY_IN_SECONDS = 86399;
 
+    #[\Override]
     public function getValue($index = null)
     {
         if ($index) {
@@ -57,6 +58,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
      * @param string $locale
      * @return Zend_Date|null
      */
+    #[\Override]
     protected function _convertDate($date, $locale)
     {
         if ($this->getColumn()->getFilterTime()) {
@@ -92,6 +94,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
      *
      * @return string
      */
+    #[\Override]
     public function getHtml()
     {
         $htmlId = $this->_getHtmlId() . microtime(true);
@@ -146,6 +149,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
      * @param string $index
      * @return string
      */
+    #[\Override]
     public function getEscapedValue($index = null)
     {
         if ($this->getColumn()->getFilterTime()) {

@@ -32,6 +32,7 @@ class Mage_Cms_Model_Resource_Page_Collection extends Mage_Core_Model_Resource_D
      * Define resource model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('cms/page');
@@ -44,6 +45,7 @@ class Mage_Cms_Model_Resource_Page_Collection extends Mage_Core_Model_Resource_D
      *
      * @return array
      */
+    #[\Override]
     public function toOptionArray()
     {
         return $this->_toOptionArray('identifier', 'title');
@@ -92,6 +94,7 @@ class Mage_Cms_Model_Resource_Page_Collection extends Mage_Core_Model_Resource_D
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterLoad()
     {
         if ($this->_previewFlag) {
@@ -155,6 +158,7 @@ class Mage_Cms_Model_Resource_Page_Collection extends Mage_Core_Model_Resource_D
     /**
      * Join store relation table if there is store filter
      */
+    #[\Override]
     protected function _renderFiltersBefore()
     {
         if ($this->getFilter('store')) {
@@ -178,6 +182,7 @@ class Mage_Cms_Model_Resource_Page_Collection extends Mage_Core_Model_Resource_D
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     public function getSelectCountSql()
     {
         $countSelect = parent::getSelectCountSql();

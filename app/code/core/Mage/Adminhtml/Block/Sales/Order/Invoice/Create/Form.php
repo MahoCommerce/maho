@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Form extends Mage_Adminhtm
      *
      * @return Mage_Sales_Model_Order
      */
+    #[\Override]
     public function getOrder()
     {
         return $this->getInvoice()->getOrder();
@@ -51,6 +52,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Form extends Mage_Adminhtm
         return Mage::registry('current_invoice');
     }
 
+    #[\Override]
     protected function _prepareLayout()
     {
         /*  $infoBlock = $this->getLayout()->createBlock('adminhtml/sales_order_view_info')

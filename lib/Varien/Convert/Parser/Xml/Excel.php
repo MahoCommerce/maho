@@ -28,6 +28,7 @@ class Varien_Convert_Parser_Xml_Excel extends Varien_Convert_Parser_Abstract
      */
     protected $_xmlElement;
 
+    #[\Override]
     public function parse()
     {
         $this->validateDataString();
@@ -83,6 +84,7 @@ class Varien_Convert_Parser_Xml_Excel extends Varien_Convert_Parser_Abstract
         return $this;
     }
 
+    #[\Override]
     public function unparse()
     {
         if ($wsName = $this->getVar('single_sheet')) {

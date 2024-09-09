@@ -21,6 +21,7 @@
  */
 class Mage_Newsletter_Model_Resource_Problem extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('newsletter/problem', 'problem_id');

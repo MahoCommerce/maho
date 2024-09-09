@@ -73,6 +73,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      * Init resource model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalogsearch/fulltext', 'product_id');

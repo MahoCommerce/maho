@@ -44,6 +44,7 @@ class Mage_CatalogIndex_Model_Indexer_Price extends Mage_CatalogIndex_Model_Inde
     protected $_customerGroups = [];
     protected $_processChildrenForConfigurable = false;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalogindex/indexer_price');
@@ -53,6 +54,7 @@ class Mage_CatalogIndex_Model_Indexer_Price extends Mage_CatalogIndex_Model_Inde
     /**
      * @return array
      */
+    #[\Override]
     public function createIndexData(Mage_Catalog_Model_Product $object, ?Mage_Eav_Model_Entity_Attribute_Abstract $attribute = null)
     {
         $data = [];
@@ -81,6 +83,7 @@ class Mage_CatalogIndex_Model_Indexer_Price extends Mage_CatalogIndex_Model_Inde
     /**
      * @return bool
      */
+    #[\Override]
     protected function _isAttributeIndexable(Mage_Eav_Model_Entity_Attribute_Abstract $attribute)
     {
         if ($attribute->getFrontendInput() != 'price') {
@@ -99,6 +102,7 @@ class Mage_CatalogIndex_Model_Indexer_Price extends Mage_CatalogIndex_Model_Inde
     /**
      * @return string
      */
+    #[\Override]
     protected function _getIndexableAttributeConditions()
     {
         return "frontend_input = 'price' AND attribute_code <> 'price'";

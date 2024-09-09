@@ -151,6 +151,7 @@ class Mage_Core_Model_Url extends Varien_Object
     /**
      * Initialize object
      */
+    #[\Override]
     protected function _construct()
     {
         $this->setStore(null);

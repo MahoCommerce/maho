@@ -21,6 +21,7 @@
  */
 class Mage_Dataflow_Model_Convert_Adapter_Http_Curl extends Mage_Dataflow_Model_Convert_Adapter_Abstract
 {
+    #[\Override]
     public function load()
     {
         // we expect <var name="uri">http://...</var>
@@ -51,6 +52,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Http_Curl extends Mage_Dataflow_Model_
         return $this;
     }
 
+    #[\Override]
     public function save()
     {
         // no save implemented

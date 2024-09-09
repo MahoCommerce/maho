@@ -23,6 +23,7 @@ class Mage_Adminhtml_Block_Widget_Form_Renderer_Element extends Mage_Adminhtml_B
 {
     protected $_element;
 
+    #[\Override]
     protected function _construct()
     {
         $this->setTemplate('widget/form/renderer/element.phtml');
@@ -33,6 +34,7 @@ class Mage_Adminhtml_Block_Widget_Form_Renderer_Element extends Mage_Adminhtml_B
         return $this->_element;
     }
 
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         $this->_element = $element;

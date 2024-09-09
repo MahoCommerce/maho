@@ -39,6 +39,7 @@ class Mage_Paypal_Block_Standard_Form extends Mage_Payment_Block_Form
      *
      * @return void
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_config = Mage::getModel('paypal/config')->setMethod($this->getMethodCode());
@@ -63,6 +64,7 @@ class Mage_Paypal_Block_Standard_Form extends Mage_Payment_Block_Form
      * Payment method code getter
      * @return string
      */
+    #[\Override]
     public function getMethodCode()
     {
         return $this->_methodCode;

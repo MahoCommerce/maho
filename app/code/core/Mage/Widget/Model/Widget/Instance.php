@@ -66,6 +66,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
     /**
      * Internal Constructor
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_cacheTag = 'widget_instance';
@@ -95,6 +96,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
      *
      * @return Varien_Object
      */
+    #[\Override]
     protected function _initOldFieldsMap()
     {
         $this->_oldFieldsMap = [
@@ -108,6 +110,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave()
     {
         $pageGroupIds = [];
@@ -545,6 +548,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
     /**
      * Invalidate related cache if instance contain layout updates
      */
+    #[\Override]
     protected function _afterSave()
     {
         if ($this->dataHasChangedFor('page_groups') || $this->dataHasChangedFor('widget_parameters')) {
@@ -556,6 +560,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
     /**
      * Invalidate related cache if instance contain layout updates
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         if ($this->getPageGroups()) {

@@ -30,6 +30,7 @@ class Mage_Catalog_Model_Product_Condition extends Varien_Object implements Mage
      * @param Mage_Catalog_Model_Resource_Product_Collection $collection
      * @return $this
      */
+    #[\Override]
     public function applyToCollection($collection)
     {
         if ($this->getTable() && $this->getPkFieldName()) {
@@ -46,6 +47,7 @@ class Mage_Catalog_Model_Product_Condition extends Varien_Object implements Mage
      * @param Magento_Db_Adapter_Pdo_Mysql $dbAdapter
      * @return string|Varien_Db_Select
      */
+    #[\Override]
     public function getIdsSelect($dbAdapter)
     {
         if ($this->getTable() && $this->getPkFieldName()) {

@@ -55,6 +55,7 @@ class Mage_Index_Model_Lock_Storage_Db implements Mage_Index_Model_Lock_Storage_
      * @param string $lockName
      * @return bool
      */
+    #[\Override]
     public function setLock($lockName)
     {
         $lockName = $this->_prepareLockName($lockName);
@@ -67,6 +68,7 @@ class Mage_Index_Model_Lock_Storage_Db implements Mage_Index_Model_Lock_Storage_
      * @param string $lockName
      * @return int|null
      */
+    #[\Override]
     public function releaseLock($lockName)
     {
         $lockName = $this->_prepareLockName($lockName);
@@ -79,6 +81,7 @@ class Mage_Index_Model_Lock_Storage_Db implements Mage_Index_Model_Lock_Storage_
      * @param string $lockName
      * @return bool
      */
+    #[\Override]
     public function isLockExists($lockName)
     {
         $lockName = $this->_prepareLockName($lockName);

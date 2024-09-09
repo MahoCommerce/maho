@@ -45,6 +45,7 @@ class Mage_Adminhtml_Block_Sales_Creditmemo_Grid extends Mage_Adminhtml_Block_Wi
      * @inheritDoc
      * @throws Exception
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel($this->_getCollectionClass());
@@ -56,6 +57,7 @@ class Mage_Adminhtml_Block_Sales_Creditmemo_Grid extends Mage_Adminhtml_Block_Wi
      * @inheritDoc
      * @throws Exception
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('increment_id', [
@@ -132,6 +134,7 @@ class Mage_Adminhtml_Block_Sales_Creditmemo_Grid extends Mage_Adminhtml_Block_Wi
     /**
      * @return $this
      */
+    #[\Override]
     protected function _prepareMassaction()
     {
         $this->setMassactionIdField('entity_id');
@@ -150,6 +153,7 @@ class Mage_Adminhtml_Block_Sales_Creditmemo_Grid extends Mage_Adminhtml_Block_Wi
      * @param Mage_Sales_Model_Order_Creditmemo $row
      * @return false|string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         if (!Mage::getSingleton('admin/session')->isAllowed('sales/order/creditmemo')) {
@@ -167,6 +171,7 @@ class Mage_Adminhtml_Block_Sales_Creditmemo_Grid extends Mage_Adminhtml_Block_Wi
     /**
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/*', ['_current' => true]);

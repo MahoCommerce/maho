@@ -23,6 +23,7 @@ class Varien_Filter_FormElementName extends Zend_Filter_Alnum
      * @param  string $value
      * @return string
      */
+    #[\Override]
     public function filter($value)
     {
         $whiteSpace = $this->allowWhiteSpace ? '\s' : '';

@@ -27,6 +27,7 @@
  */
 class Mage_Core_Block_Text_Tag extends Mage_Core_Block_Text
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -65,6 +66,7 @@ class Mage_Core_Block_Text_Tag extends Mage_Core_Block_Text
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _toHtml()
     {
         $this->setText('<' . $this->getTagName() . ' ');

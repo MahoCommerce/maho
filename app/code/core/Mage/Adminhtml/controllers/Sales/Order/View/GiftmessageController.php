@@ -30,6 +30,7 @@ class Mage_Adminhtml_Sales_Order_View_GiftmessageController extends Mage_Adminht
     /**
      * Additional initialization
      */
+    #[\Override]
     protected function _construct()
     {
         $this->setUsedModuleName('Mage_Sales');

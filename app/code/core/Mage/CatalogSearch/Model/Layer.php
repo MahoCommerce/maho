@@ -26,6 +26,7 @@ class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
      *
      * @return Mage_CatalogSearch_Model_Resource_Fulltext_Collection
      */
+    #[\Override]
     public function getProductCollection()
     {
         if (isset($this->_productCollections[$this->getCurrentCategory()->getId()])) {
@@ -44,6 +45,7 @@ class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
      * @param Mage_CatalogSearch_Model_Resource_Fulltext_Collection $collection
      * @return Mage_Catalog_Model_Layer
      */
+    #[\Override]
     public function prepareProductCollection($collection)
     {
         $collection
@@ -64,6 +66,7 @@ class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
      *
      * @return string
      */
+    #[\Override]
     public function getStateKey()
     {
         if ($this->_stateKey === null) {
@@ -78,6 +81,7 @@ class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
      *
      * @return  array
      */
+    #[\Override]
     public function getStateTags(array $additionalTags = [])
     {
         $additionalTags = parent::getStateTags($additionalTags);
@@ -91,6 +95,7 @@ class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
      * @param   Mage_Catalog_Model_Resource_Product_Attribute_Collection $collection
      * @return  Mage_Catalog_Model_Resource_Product_Attribute_Collection
      */
+    #[\Override]
     protected function _prepareAttributeCollection($collection)
     {
         $collection->addIsFilterableInSearchFilter()
@@ -102,6 +107,7 @@ class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
      * Filter which attributes are included in getFilterableAttributes
      *
      */
+    #[\Override]
     protected function _filterFilterableAttributes(Mage_Catalog_Model_Resource_Eav_Attribute  $attribute): bool
     {
         return $attribute->getIsVisible() && $attribute->getIsFilterableInSearch() > 0;
@@ -113,6 +119,7 @@ class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
      * @param   Mage_Eav_Model_Entity_Attribute $attribute
      * @return  Mage_Eav_Model_Entity_Attribute
      */
+    #[\Override]
     protected function _prepareAttribute($attribute)
     {
         $attribute = parent::_prepareAttribute($attribute);

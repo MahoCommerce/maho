@@ -22,6 +22,7 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
     /**
      * Fetch default path
      */
+    #[\Override]
     public function fetchDefault()
     {
         // set defaults
@@ -37,6 +38,7 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
      * Get router default request path
      * @return string
      */
+    #[\Override]
     protected function _getDefaultPath()
     {
         return (string)Mage::getConfig()->getNode('default/web/default/admin');
@@ -47,6 +49,7 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
      *
      * @return bool
      */
+    #[\Override]
     protected function _beforeModuleMatch()
     {
         return true;
@@ -57,6 +60,7 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
      *
      * @return bool
      */
+    #[\Override]
     protected function _afterModuleMatch()
     {
         if (!Mage::isInstalled()) {
@@ -74,6 +78,7 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
      *
      * @return bool
      */
+    #[\Override]
     protected function _noRouteShouldBeApplied()
     {
         return true;
@@ -85,6 +90,7 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
      * @param string $path
      * @return bool
      */
+    #[\Override]
     protected function _shouldBeSecure($path)
     {
         return substr((string)Mage::getConfig()->getNode('default/web/unsecure/base_url'), 0, 5) === 'https'
@@ -98,6 +104,7 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
      * @param Mage_Core_Controller_Request_Http $request
      * @return string
      */
+    #[\Override]
     protected function _getCurrentSecureUrl($request)
     {
         return Mage::app()->getStore(Mage_Core_Model_App::ADMIN_STORE_ID)
@@ -110,6 +117,7 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
      * @param string $configArea
      * @param bool $useRouterName
      */
+    #[\Override]
     public function collectRoutes($configArea, $useRouterName)
     {
         if ((string)Mage::getConfig()->getNode(Mage_Adminhtml_Helper_Data::XML_PATH_USE_CUSTOM_ADMIN_PATH)) {
@@ -127,6 +135,7 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
      *
      * @inheritDoc
      */
+    #[\Override]
     public function addModule($frontName, $moduleName, $routeName)
     {
         $configRouterFrontName = (string)Mage::getConfig()->getNode(
@@ -145,6 +154,7 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
      * @param Mage_Core_Controller_Varien_Action $controllerInstance
      * @return true
      */
+    #[\Override]
     protected function _validateControllerInstance($controllerInstance)
     {
         return true;

@@ -51,6 +51,7 @@
  */
 class Mage_Bundle_Model_Selection extends Mage_Core_Model_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('bundle/selection');
@@ -61,6 +62,7 @@ class Mage_Bundle_Model_Selection extends Mage_Core_Model_Abstract
      * @inheritDoc
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     protected function _afterSave()
     {
         $storeId = Mage::registry('product')->getStoreId();

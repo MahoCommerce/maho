@@ -302,6 +302,7 @@ class Magento_Db_Sql_Trigger
      *
      * @return string
      */
+    #[\Override]
     public function __toString()
     {
         return $this->assemble();

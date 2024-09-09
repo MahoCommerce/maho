@@ -53,6 +53,7 @@ class Mage_Core_Model_Input_Filter_MaliciousCode implements Zend_Filter_Interfac
      * @param string|array|null $value
      * @return string|array
      */
+    #[\Override]
     public function filter($value)
     {
         if ($value === null) {

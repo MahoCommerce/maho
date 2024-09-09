@@ -51,6 +51,7 @@ class Mage_Sales_Model_Order_Total_Config_Base extends Mage_Sales_Model_Config_O
      * @return Mage_Sales_Model_Order_Total_Abstract
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _initModelInstance($class, $totalCode, $totalConfig)
     {
         $model = Mage::getModel($class);

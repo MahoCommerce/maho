@@ -72,6 +72,7 @@ class Mage_Adminhtml_Model_LayoutUpdate_Validator extends Zend_Validate_Abstract
      *
      * @return array
      */
+    #[\Override]
     public function getMessages()
     {
         return $this->_validator->getMessages();
@@ -89,6 +90,7 @@ class Mage_Adminhtml_Model_LayoutUpdate_Validator extends Zend_Validate_Abstract
      * @param Varien_Simplexml_Element|string $value
      * @return bool
      */
+    #[\Override]
     public function isValid($value)
     {
         return $this->_validator->isValid($value);

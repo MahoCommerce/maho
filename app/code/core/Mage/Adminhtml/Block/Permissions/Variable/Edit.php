@@ -35,6 +35,7 @@ class Mage_Adminhtml_Block_Permissions_Variable_Edit extends Mage_Adminhtml_Bloc
     /**
      * @return string
      */
+    #[\Override]
     public function getHeaderText()
     {
         if (Mage::registry('permissions_variable')->getId()) {

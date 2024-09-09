@@ -27,6 +27,7 @@ class Mage_Paypal_Block_Payflow_Link_Review extends Mage_Paypal_Block_Express_Re
      *
      * @return Mage_Paypal_Block_Express_Review
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         return parent::_beforeToHtml();

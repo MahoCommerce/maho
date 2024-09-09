@@ -41,6 +41,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
      * @see Mage_Admin_Model_Observer::actionPreDispatchAdmin() method for explanation
      * @return $this
      */
+    #[\Override]
     public function preDispatch()
     {
         Mage::app()->getRequest()->setInternallyForwarded();
@@ -294,6 +295,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
      *
      * @return true
      */
+    #[\Override]
     protected function _isAllowed()
     {
         return true;

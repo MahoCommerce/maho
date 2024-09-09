@@ -197,6 +197,7 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
      *
      * @return Mage_Dataflow_Model_Convert_Action_Abstract
      */
+    #[\Override]
     public function run(array $args = [])
     {
         if ($method = $this->getParam('method')) {

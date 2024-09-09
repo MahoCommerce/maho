@@ -40,6 +40,7 @@ class Mage_Shipping_Model_Carrier_Freeshipping extends Mage_Shipping_Model_Carri
      *
      * @return Mage_Shipping_Model_Rate_Result|false
      */
+    #[\Override]
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
         if (!$this->getConfigFlag('active')) {
@@ -76,6 +77,7 @@ class Mage_Shipping_Model_Carrier_Freeshipping extends Mage_Shipping_Model_Carri
      *
      * @param Mage_Shipping_Model_Rate_Request $request
      */
+    #[\Override]
     protected function _updateFreeMethodQuote($request)
     {
         $freeShipping = false;
@@ -100,6 +102,7 @@ class Mage_Shipping_Model_Carrier_Freeshipping extends Mage_Shipping_Model_Carri
      *
      * @return array
      */
+    #[\Override]
     public function getAllowedMethods()
     {
         return ['freeshipping' => $this->getConfigData('name')];

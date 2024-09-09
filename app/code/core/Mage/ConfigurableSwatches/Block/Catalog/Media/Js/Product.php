@@ -24,6 +24,7 @@ class Mage_ConfigurableSwatches_Block_Catalog_Media_Js_Product extends Mage_Conf
      *
      * @return array
      */
+    #[\Override]
     public function getProducts()
     {
         $product = Mage::registry('product');
@@ -40,6 +41,7 @@ class Mage_ConfigurableSwatches_Block_Catalog_Media_Js_Product extends Mage_Conf
      *
      * @return string
      */
+    #[\Override]
     public function getImageType()
     {
         $type = parent::getImageType();
@@ -56,6 +58,7 @@ class Mage_ConfigurableSwatches_Block_Catalog_Media_Js_Product extends Mage_Conf
      *
      * @return array
      */
+    #[\Override]
     protected function _getImageSizes()
     {
         return ['image'];

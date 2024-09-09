@@ -29,6 +29,7 @@ class Mage_Adminhtml_Block_Report_Sales_Invoiced_Grid extends Mage_Adminhtml_Blo
         $this->setCountTotals(true);
     }
 
+    #[\Override]
     public function getResourceCollectionName()
     {
         return ($this->getFilterData()->getData('report_type') == 'created_at_invoice')
@@ -36,6 +37,7 @@ class Mage_Adminhtml_Block_Report_Sales_Invoiced_Grid extends Mage_Adminhtml_Blo
             : 'sales/report_invoiced_collection_order';
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('period', [

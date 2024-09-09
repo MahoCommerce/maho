@@ -30,6 +30,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Toolbar_Main extends Ma
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $this->setChild(
@@ -63,6 +64,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Toolbar_Main extends Ma
     /**
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         Mage::dispatchEvent('adminhtml_catalog_product_attribute_set_toolbar_main_html_before', ['block' => $this]);

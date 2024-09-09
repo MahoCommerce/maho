@@ -32,6 +32,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
      * @param Mage_Catalog_Model_Product $object
      * @return $this
      */
+    #[\Override]
     public function afterLoad($object)
     {
         $attrCode = $this->getAttribute()->getAttributeCode();
@@ -73,6 +74,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
      * @throws Mage_Core_Exception
      * @return bool
      */
+    #[\Override]
     public function validate($object)
     {
         if ($this->getAttribute()->getIsRequired()) {
@@ -98,6 +100,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
      * @return $this|Mage_Eav_Model_Entity_Attribute_Backend_Abstract|void
      * @throws Zend_Json_Exception
      */
+    #[\Override]
     public function beforeSave($object)
     {
         $attrCode = $this->getAttribute()->getAttributeCode();
@@ -197,6 +200,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
      * @param Mage_Catalog_Model_Product $object
      * @return Mage_Eav_Model_Entity_Attribute_Backend_Abstract|void
      */
+    #[\Override]
     public function afterSave($object)
     {
         if ($object->getIsDuplicate() == true) {

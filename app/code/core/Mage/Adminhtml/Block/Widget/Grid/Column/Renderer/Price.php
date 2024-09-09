@@ -32,6 +32,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Price extends Mage_Adminh
      *
      * @return  string
      */
+    #[\Override]
     public function render(Varien_Object $row)
     {
         if ($data = $row->getData($this->getColumn()->getIndex())) {
@@ -88,6 +89,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Price extends Mage_Adminh
      *
      * @return string
      */
+    #[\Override]
     public function renderCss()
     {
         return parent::renderCss() . ' a-right';

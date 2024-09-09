@@ -27,6 +27,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Payment extends Mage_Ad
      * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
+    #[\Override]
     protected function _getFrontendClass($element)
     {
         return parent::_getFrontendClass($element) . ' with-button '
@@ -78,6 +79,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Payment extends Mage_Ad
      * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
+    #[\Override]
     protected function _getHeaderTitleHtml($element)
     {
         $html = '<div class="config-heading" ><div class="heading"><strong>' . $element->getLegend();
@@ -116,6 +118,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Payment extends Mage_Ad
      * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
+    #[\Override]
     protected function _getHeaderCommentHtml($element)
     {
         return '';
@@ -127,6 +130,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Payment extends Mage_Ad
      * @param Varien_Data_Form_Element_Abstract $element
      * @return bool
      */
+    #[\Override]
     protected function _getCollapseState($element)
     {
         return false;

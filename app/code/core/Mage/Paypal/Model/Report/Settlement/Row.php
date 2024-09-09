@@ -70,6 +70,7 @@ class Mage_Paypal_Model_Report_Settlement_Row extends Mage_Core_Model_Abstract
      */
     protected $_castedAmounts = [];
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('paypal/report_settlement_row');
@@ -146,6 +147,7 @@ class Mage_Paypal_Model_Report_Settlement_Row extends Mage_Core_Model_Abstract
      * @param mixed $index
      * @return mixed
      */
+    #[\Override]
     public function getData($key = '', $index = null)
     {
         $this->_castAmount('fee_amount', 'fee_debit_or_credit');

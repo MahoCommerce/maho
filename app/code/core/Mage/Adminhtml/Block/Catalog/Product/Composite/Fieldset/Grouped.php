@@ -25,6 +25,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Composite_Fieldset_Grouped extends Ma
      * Redefine default price block
      * Set current customer to tax calculation
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -44,6 +45,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Composite_Fieldset_Grouped extends Ma
      * @return Mage_Catalog_Model_Product
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     public function getProduct()
     {
         if (!$this->hasData('product')) {
@@ -63,6 +65,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Composite_Fieldset_Grouped extends Ma
      * @return array
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     public function getAssociatedProducts()
     {
         $product = $this->getProduct();
@@ -84,6 +87,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Composite_Fieldset_Grouped extends Ma
      * @return Mage_Catalog_Block_Product_View_Type_Grouped
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     public function setPreconfiguredValue()
     {
         $configValues = $this->getProduct()->getPreconfiguredValues()->getSuperGroup();
@@ -104,6 +108,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Composite_Fieldset_Grouped extends Ma
      * @param Mage_Catalog_Model_Product $product
      * @return bool
      */
+    #[\Override]
     public function getCanShowProductPrice($product)
     {
         return true;

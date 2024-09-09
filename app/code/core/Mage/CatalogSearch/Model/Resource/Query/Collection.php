@@ -32,6 +32,7 @@ class Mage_CatalogSearch_Model_Resource_Query_Collection extends Mage_Core_Model
      * Init model for collection
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalogsearch/query');

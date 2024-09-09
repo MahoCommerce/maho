@@ -55,6 +55,7 @@ class Mage_Sales_Model_Order_Shipment_Track extends Mage_Sales_Model_Abstract
     /**
      * Initialize resource model
      */
+    #[\Override]
     public function _construct()
     {
         $this->_init('sales/order_shipment_track');
@@ -66,6 +67,7 @@ class Mage_Sales_Model_Order_Shipment_Track extends Mage_Sales_Model_Abstract
      *
      * @resturn Varien_Object
      */
+    #[\Override]
     protected function _initOldFieldsMap()
     {
         $this->_oldFieldsMap = [
@@ -155,6 +157,7 @@ class Mage_Sales_Model_Order_Shipment_Track extends Mage_Sales_Model_Abstract
      *
      * @return Mage_Core_Model_Store
      */
+    #[\Override]
     public function getStore()
     {
         if ($this->getShipment()) {
@@ -178,6 +181,7 @@ class Mage_Sales_Model_Order_Shipment_Track extends Mage_Sales_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();

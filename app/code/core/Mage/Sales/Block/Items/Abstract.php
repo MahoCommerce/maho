@@ -34,6 +34,7 @@ class Mage_Sales_Block_Items_Abstract extends Mage_Core_Block_Template
     /**
      * Initialize default item renderer
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

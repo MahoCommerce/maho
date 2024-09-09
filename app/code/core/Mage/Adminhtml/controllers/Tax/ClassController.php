@@ -79,6 +79,7 @@ class Mage_Adminhtml_Tax_ClassController extends Mage_Adminhtml_Controller_Actio
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _isAllowed()
     {
         return Mage::getSingleton('admin/session')->isAllowed('sales/tax/classes_product')

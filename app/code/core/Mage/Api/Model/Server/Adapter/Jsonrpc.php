@@ -27,6 +27,7 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mag
      * @param string $handler
      * @return $this
      */
+    #[\Override]
     public function setHandler($handler)
     {
         $this->setData('handler', $handler);
@@ -38,6 +39,7 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mag
      *
      * @return string
      */
+    #[\Override]
     public function getHandler()
     {
         return $this->getData('handler');
@@ -48,6 +50,7 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mag
      *
      * @return $this
      */
+    #[\Override]
     public function setController(Mage_Api_Controller_Action $controller)
     {
         $this->setData('controller', $controller);
@@ -59,6 +62,7 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mag
      *
      * @return Mage_Api_Controller_Action|Varien_Object
      */
+    #[\Override]
     public function getController()
     {
         $controller = $this->getData('controller');
@@ -78,6 +82,7 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mag
      *
      * @return $this
      */
+    #[\Override]
     public function run()
     {
         $this->_jsonRpc = new Zend_Json_Server();
@@ -118,6 +123,7 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mag
      * @param int $code
      * @param string $message
      */
+    #[\Override]
     public function fault($code, $message)
     {
         throw new Zend_Json_Exception($message, $code);

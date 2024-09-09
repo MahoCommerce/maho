@@ -19,6 +19,7 @@
  */
 class Mage_Install_Controller_Action extends Mage_Core_Controller_Varien_Action
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

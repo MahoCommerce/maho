@@ -31,6 +31,7 @@ class Mage_Adminhtml_SalesController extends Mage_Adminhtml_Controller_Action
      * Additional initialization
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->setUsedModuleName('Mage_Sales');

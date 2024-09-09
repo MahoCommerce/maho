@@ -21,6 +21,7 @@
  */
 class Mage_Reports_Model_Resource_Tag_Product_Collection extends Mage_Tag_Model_Resource_Product_Collection
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -90,6 +91,7 @@ class Mage_Reports_Model_Resource_Tag_Product_Collection extends Mage_Tag_Model_
      *
      * @return $this
      */
+    #[\Override]
     public function addGroupByTag()
     {
         $this->getSelect()
@@ -120,6 +122,7 @@ class Mage_Reports_Model_Resource_Tag_Product_Collection extends Mage_Tag_Model_
      * @param string $dir
      * @return $this
      */
+    #[\Override]
     public function setOrder($attribute, $dir = self::SORT_ORDER_DESC)
     {
         if ($attribute == 'utaged' || $attribute == 'taged' || $attribute == 'tag_name') {
@@ -136,6 +139,7 @@ class Mage_Reports_Model_Resource_Tag_Product_Collection extends Mage_Tag_Model_
      *
      * @return $this
      */
+    #[\Override]
     protected function _joinFields()
     {
         $this->addAttributeToSelect('name');

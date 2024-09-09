@@ -21,6 +21,7 @@
  */
 class Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tabs extends Mage_Adminhtml_Block_Widget_Tabs
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

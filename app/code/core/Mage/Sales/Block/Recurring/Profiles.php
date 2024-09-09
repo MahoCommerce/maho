@@ -117,6 +117,7 @@ class Mage_Sales_Block_Recurring_Profiles extends Mage_Core_Block_Template
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         $this->setBackUrl($this->getUrl('customer/account/'));

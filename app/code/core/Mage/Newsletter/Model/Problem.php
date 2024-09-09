@@ -46,6 +46,7 @@ class Mage_Newsletter_Model_Problem extends Mage_Core_Model_Abstract
     /**
      * Initialize Newsletter Problem Model
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('newsletter/problem');

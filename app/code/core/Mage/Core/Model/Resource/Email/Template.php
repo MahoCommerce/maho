@@ -21,6 +21,7 @@
  */
 class Mage_Core_Model_Resource_Email_Template extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/email_template', 'template_id');
@@ -80,6 +81,7 @@ class Mage_Core_Model_Resource_Email_Template extends Mage_Core_Model_Resource_D
      * @param Mage_Core_Model_Email_Template $object
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if ($object->isObjectNew()) {

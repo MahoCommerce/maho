@@ -110,6 +110,7 @@ class Varien_Data_Form extends Varien_Data_Form_Abstract
      * @return Varien_Data_Form
      * @throws Exception
      */
+    #[\Override]
     public function addElement(Varien_Data_Form_Element_Abstract $element, $after = false)
     {
         $this->checkElementId($element->getId());
@@ -248,6 +249,7 @@ class Varien_Data_Form extends Varien_Data_Form_Abstract
      * @param string $elementId
      * @return $this|Varien_Data_Form_Abstract
      */
+    #[\Override]
     public function removeField($elementId)
     {
         if ($this->_elementIdExists($elementId)) {

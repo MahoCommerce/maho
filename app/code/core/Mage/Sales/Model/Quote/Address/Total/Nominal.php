@@ -28,6 +28,7 @@ class Mage_Sales_Model_Quote_Address_Total_Nominal extends Mage_Sales_Model_Quot
      *
      * @return Mage_Sales_Model_Quote_Address_Total_Nominal
      */
+    #[\Override]
     public function collect(Mage_Sales_Model_Quote_Address $address)
     {
         $collector = Mage::getSingleton(
@@ -75,6 +76,7 @@ class Mage_Sales_Model_Quote_Address_Total_Nominal extends Mage_Sales_Model_Quot
      *
      * @return $this
      */
+    #[\Override]
     public function fetch(Mage_Sales_Model_Quote_Address $address)
     {
         $items = $address->getAllNominalItems();

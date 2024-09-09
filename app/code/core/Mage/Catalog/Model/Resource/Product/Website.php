@@ -21,6 +21,7 @@
  */
 class Mage_Catalog_Model_Resource_Product_Website extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_website', 'product_id');

@@ -44,6 +44,7 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
      */
     protected $_filters;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('api/roles');
@@ -170,6 +171,7 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         $this->filter();

@@ -30,6 +30,7 @@
  */
 class Mage_Eav_Model_Entity_Attribute_Option extends Mage_Core_Model_Abstract
 {
+    #[\Override]
     public function _construct()
     {
         $this->_init('eav/entity_attribute_option');

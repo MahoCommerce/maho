@@ -93,6 +93,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Form_Address extends Mage_Adminhtm
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareForm()
     {
         $fieldset = $this->_form->addFieldset('main', [
@@ -191,6 +192,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Form_Address extends Mage_Adminhtm
      *
      * @return Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract
      */
+    #[\Override]
     protected function _addAdditionalFormElementData(Varien_Data_Form_Element_Abstract $element)
     {
         if ($element->getId() === 'region_id') {

@@ -26,6 +26,7 @@ class Mage_Checkout_Block_Onepage_Payment_Info extends Mage_Payment_Block_Info_C
      *
      * @return Mage_Payment_Model_Info|false
      */
+    #[\Override]
     public function getPaymentInfo()
     {
         $info = Mage::getSingleton('checkout/session')->getQuote()->getPayment();
@@ -38,6 +39,7 @@ class Mage_Checkout_Block_Onepage_Payment_Info extends Mage_Payment_Block_Info_C
     /**
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         $html = '';

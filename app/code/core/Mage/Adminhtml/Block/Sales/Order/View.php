@@ -216,6 +216,7 @@ class Mage_Adminhtml_Block_Sales_Order_View extends Mage_Adminhtml_Block_Widget_
     /**
      * @return string
      */
+    #[\Override]
     public function getHeaderText()
     {
         if ($_extOrderId = $this->getOrder()->getExtOrderId()) {
@@ -240,6 +241,7 @@ class Mage_Adminhtml_Block_Sales_Order_View extends Mage_Adminhtml_Block_Widget_
      * @param array $params2
      * @return string
      */
+    #[\Override]
     public function getUrl($params = '', $params2 = [])
     {
         $params2['order_id'] = $this->getOrderId();
@@ -348,6 +350,7 @@ class Mage_Adminhtml_Block_Sales_Order_View extends Mage_Adminhtml_Block_Widget_
      *
      * @return string
      */
+    #[\Override]
     public function getBackUrl()
     {
         if ($this->getOrder()->getBackUrl()) {
@@ -371,6 +374,7 @@ class Mage_Adminhtml_Block_Sales_Order_View extends Mage_Adminhtml_Block_Widget_
      *
      * @return string
      */
+    #[\Override]
     public function getHeaderHtml()
     {
         return '<h3 class="' . $this->getHeaderCssClass() . '">' . $this->escapeHtml($this->getHeaderText()) . '</h3>';

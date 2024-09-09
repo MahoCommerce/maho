@@ -52,6 +52,7 @@ class Mage_Catalog_Block_Navigation extends Mage_Core_Block_Template
     /**
      * Set cache data
      */
+    #[\Override]
     protected function _construct()
     {
         $this->addData(['cache_lifetime' => false]);
@@ -66,6 +67,7 @@ class Mage_Catalog_Block_Navigation extends Mage_Core_Block_Template
      *
      * @return array
      */
+    #[\Override]
     public function getCacheKeyInfo()
     {
         $shortCacheId = [

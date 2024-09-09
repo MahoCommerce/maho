@@ -26,6 +26,7 @@ class Mage_CatalogInventory_Block_Stockqty_Default extends Mage_CatalogInventory
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         if (!$this->isMsgVisible()) {
@@ -39,6 +40,7 @@ class Mage_CatalogInventory_Block_Stockqty_Default extends Mage_CatalogInventory
      *
      * @return array
      */
+    #[\Override]
     public function getCacheTags()
     {
         return array_merge(parent::getCacheTags(), $this->_getProduct()->getCacheIdTags());

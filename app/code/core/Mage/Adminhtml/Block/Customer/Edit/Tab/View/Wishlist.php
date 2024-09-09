@@ -36,6 +36,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Wishlist extends Mage_Adminhtm
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getModel('wishlist/item')->getCollection()
@@ -54,6 +55,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Wishlist extends Mage_Adminhtm
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('product_id', [
@@ -99,6 +101,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Wishlist extends Mage_Adminhtm
      *
      * @return bool
      */
+    #[\Override]
     public function getHeadersVisibility()
     {
         return ($this->getCollection()->getSize() > 0);
@@ -110,6 +113,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Wishlist extends Mage_Adminhtm
      * @param Mage_Wishlist_Model_Item $row
      * @return string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/catalog_product/edit', ['id' => $row->getProductId()]);

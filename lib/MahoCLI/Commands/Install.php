@@ -17,6 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class Install extends BaseMahoCommand
 {
+    #[\Override]
     protected function configure(): void
     {
         // License
@@ -57,6 +58,7 @@ class Install extends BaseMahoCommand
         $this->addOption('encryption_key', null, InputOption::VALUE_OPTIONAL, 'Will be automatically generated and displayed on success, if not specified');
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initMaho();

@@ -21,11 +21,13 @@
  */
 class Mage_Adminhtml_Block_Newsletter_Subscriber_Grid_Filter_Checkbox extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
+    #[\Override]
     public function getCondition()
     {
         return [];
     }
 
+    #[\Override]
     public function getHtml()
     {
         return '<input type="checkbox" onclick="subscriberController.checkCheckboxes(this)"/>';

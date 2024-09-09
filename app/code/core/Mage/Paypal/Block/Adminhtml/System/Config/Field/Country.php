@@ -41,6 +41,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Field_Country extends Mage_Admin
      * @return string
      * @throws Exception
      */
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         $country = $this->getRequest()->getParam(self::REQUEST_PARAM_COUNTRY);
@@ -74,6 +75,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Field_Country extends Mage_Admin
      *
      * @return string
      */
+    #[\Override]
     protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element)
     {
         $configDataModel = Mage::getSingleton('adminhtml/config_data');

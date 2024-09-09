@@ -25,6 +25,7 @@ class Mage_Sales_Model_Resource_Recurring_Profile extends Mage_Sales_Model_Resou
      * Initialize main table and column
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/recurring_profile', 'profile_id');
@@ -46,6 +47,7 @@ class Mage_Sales_Model_Resource_Recurring_Profile extends Mage_Sales_Model_Resou
      * @param string $field
      * @param mixed $defaultValue
      */
+    #[\Override]
     protected function _unserializeField(Varien_Object $object, $field, $defaultValue = null)
     {
         if ($field != 'additional_info') {

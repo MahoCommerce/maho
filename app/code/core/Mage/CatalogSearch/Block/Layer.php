@@ -24,6 +24,7 @@ class Mage_CatalogSearch_Block_Layer extends Mage_Catalog_Block_Layer_View
     /**
      * Internal constructor
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -37,6 +38,7 @@ class Mage_CatalogSearch_Block_Layer extends Mage_Catalog_Block_Layer_View
      *
      * @return string
      */
+    #[\Override]
     protected function _getAttributeFilterBlockName()
     {
         return 'catalogsearch/layer_filter_attribute';
@@ -45,6 +47,7 @@ class Mage_CatalogSearch_Block_Layer extends Mage_Catalog_Block_Layer_View
     /**
      * Initialize blocks names
      */
+    #[\Override]
     protected function _initBlocks()
     {
         parent::_initBlocks();
@@ -57,6 +60,7 @@ class Mage_CatalogSearch_Block_Layer extends Mage_Catalog_Block_Layer_View
      *
      * @return Mage_Catalog_Model_Layer
      */
+    #[\Override]
     public function getLayer()
     {
         return Mage::getSingleton('catalogsearch/layer');
@@ -67,6 +71,7 @@ class Mage_CatalogSearch_Block_Layer extends Mage_Catalog_Block_Layer_View
      *
      * @return bool
      */
+    #[\Override]
     public function canShowBlock()
     {
         $_isLNAllowedByEngine = Mage::helper('catalogsearch')->getEngine()->isLeyeredNavigationAllowed();

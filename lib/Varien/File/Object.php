@@ -45,6 +45,7 @@ class Varien_File_Object extends SplFileObject implements IFactory
      * @param   array &$files - array of files
      * @return  none
      */
+    #[\Override]
     public function getFilesName(&$files)
     {
         $this->getFileName($files);
@@ -55,6 +56,7 @@ class Varien_File_Object extends SplFileObject implements IFactory
      * @param   array &$files - array of files
      * @return  none
      */
+    #[\Override]
     public function getFileName(&$files = null)
     {
         if ($this->_isCorrect) {
@@ -70,6 +72,7 @@ class Varien_File_Object extends SplFileObject implements IFactory
      * @param   array &$paths - array of paths
      * @return  none
      */
+    #[\Override]
     public function getFilesPaths(&$paths)
     {
         if ($this->_isCorrect) {
@@ -97,6 +100,7 @@ class Varien_File_Object extends SplFileObject implements IFactory
      * @param   bool $useFilter - use or not filter
      * @return  none
      */
+    #[\Override]
     public function useFilter($useFilter)
     {
         if ($useFilter) {
@@ -112,6 +116,7 @@ class Varien_File_Object extends SplFileObject implements IFactory
      * @param   array &$objs - array of gile objects
      * @return  none
      */
+    #[\Override]
     public function getFilesObj(&$objs)
     {
         if ($this->_isCorrect) {
@@ -124,6 +129,7 @@ class Varien_File_Object extends SplFileObject implements IFactory
      * @param   array &$dirs - array of dirs
      * @return  none
      */
+    #[\Override]
     public function getDirsName(&$dirs)
     {
         return Varien_Directory_Collection::getLastDir($this->_path);
@@ -163,6 +169,7 @@ class Varien_File_Object extends SplFileObject implements IFactory
      *
      * @return  string - extension of file
      */
+    #[\Override]
     public function getExtension()
     {
         return self::getExt($this->_filename);
@@ -248,6 +255,7 @@ class Varien_File_Object extends SplFileObject implements IFactory
      * @param   array &$arr -export array
      * @return  none
      */
+    #[\Override]
     public function toArray(&$arr)
     {
         if ($this->_isCorrect) {
@@ -263,6 +271,7 @@ class Varien_File_Object extends SplFileObject implements IFactory
      * @param   string $rootName - nothing
      * @return  none
      */
+    #[\Override]
     public function toXml(&$xml, $recursionLevel = 0, $addOpenTag = true, $rootName = 'Struct')
     {
         if ($this->_isCorrect) {

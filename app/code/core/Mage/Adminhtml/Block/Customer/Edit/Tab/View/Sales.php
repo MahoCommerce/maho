@@ -44,6 +44,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales extends Mage_Adminhtml_B
         $this->setId('customer_view_sales_grid');
     }
 
+    #[\Override]
     public function _beforeToHtml()
     {
         $this->_currency = Mage::getModel('directory/currency')

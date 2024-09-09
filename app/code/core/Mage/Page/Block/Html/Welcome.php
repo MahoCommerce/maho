@@ -38,6 +38,7 @@ class Mage_Page_Block_Html_Welcome extends Mage_Core_Block_Template
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         if (empty($this->_data['welcome'])) {
@@ -56,6 +57,7 @@ class Mage_Page_Block_Html_Welcome extends Mage_Core_Block_Template
      *
      * @return array
      */
+    #[\Override]
     public function getCacheTags()
     {
         if ($this->_getSession()->isLoggedIn()) {

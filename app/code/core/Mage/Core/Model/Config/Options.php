@@ -37,6 +37,7 @@ class Mage_Core_Model_Config_Options extends Varien_Object
     /**
      * Initialize default values of the options
      */
+    #[\Override]
     protected function _construct()
     {
         $root = BP;

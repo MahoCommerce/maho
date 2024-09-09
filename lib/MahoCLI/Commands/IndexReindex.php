@@ -15,11 +15,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class IndexReindex extends BaseMahoCommand
 {
+    #[\Override]
     protected function configure(): void
     {
         $this->addArgument('index_code', InputArgument::REQUIRED, 'The code of the index, eg: catalog_product_price');
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initMaho();

@@ -28,6 +28,7 @@ class Mage_Sales_Model_Api2_Order_Comment_Rest_Customer_V1 extends Mage_Sales_Mo
      * @throws Mage_Api2_Exception
      * @return Mage_Sales_Model_Order
      */
+    #[\Override]
     protected function _loadOrderById($id)
     {
         $order = parent::_loadOrderById($id);
@@ -44,6 +45,7 @@ class Mage_Sales_Model_Api2_Order_Comment_Rest_Customer_V1 extends Mage_Sales_Mo
      *
      * @return Mage_Sales_Model_Resource_Order_Status_History_Collection
      */
+    #[\Override]
     protected function _getCollectionForRetrieve()
     {
         $collection = parent::_getCollectionForRetrieve();

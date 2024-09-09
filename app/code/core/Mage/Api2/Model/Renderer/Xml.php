@@ -66,6 +66,7 @@ class Mage_Api2_Model_Renderer_Xml implements Mage_Api2_Model_Renderer_Interface
      * @param mixed $data
      * @return string
      */
+    #[\Override]
     public function render($data)
     {
         /** @var Mage_Api2_Model_Renderer_Xml_Writer $writer */
@@ -143,6 +144,7 @@ class Mage_Api2_Model_Renderer_Xml implements Mage_Api2_Model_Renderer_Interface
      *
      * @return string
      */
+    #[\Override]
     public function getMimeType()
     {
         return self::MIME_TYPE;

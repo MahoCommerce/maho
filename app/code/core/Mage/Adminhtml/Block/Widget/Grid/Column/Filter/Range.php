@@ -21,6 +21,7 @@
  */
 class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Range extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
+    #[\Override]
     public function getHtml()
     {
         $html = '<div class="range"><div class="range-line"><span class="label">' . Mage::helper('adminhtml')->__('From') . '</span> <input type="text" name="' . $this->_getHtmlName() . '[from]" id="' . $this->_getHtmlId() . '_from" value="' . $this->getEscapedValue('from') . '" class="input-text no-changes"/></div>';
@@ -40,6 +41,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Range extends Mage_Adminhtm
         return null;
     }
 
+    #[\Override]
     public function getCondition()
     {
         $value = $this->getValue();

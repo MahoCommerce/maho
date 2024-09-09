@@ -194,6 +194,7 @@ abstract class Mage_Core_Model_Abstract extends Varien_Object
      *
      * @return string
      */
+    #[\Override]
     public function getIdFieldName()
     {
         if (!($fieldName = parent::getIdFieldName())) {
@@ -208,6 +209,7 @@ abstract class Mage_Core_Model_Abstract extends Varien_Object
      *
      * @return int|string|null
      */
+    #[\Override]
     public function getId()
     {
         $fieldName = $this->getIdFieldName();
@@ -224,6 +226,7 @@ abstract class Mage_Core_Model_Abstract extends Varien_Object
      * @param   mixed $id
      * @return  $this
      */
+    #[\Override]
     public function setId($id)
     {
         if ($this->getIdFieldName()) {

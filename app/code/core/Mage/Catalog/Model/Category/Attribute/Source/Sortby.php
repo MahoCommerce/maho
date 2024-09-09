@@ -36,6 +36,7 @@ class Mage_Catalog_Model_Category_Attribute_Source_Sortby extends Mage_Eav_Model
      *
      * @return array
      */
+    #[\Override]
     public function getAllOptions()
     {
         if (is_null($this->_options)) {

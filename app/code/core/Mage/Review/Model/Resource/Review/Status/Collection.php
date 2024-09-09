@@ -32,6 +32,7 @@ class Mage_Review_Model_Resource_Review_Status_Collection extends Mage_Core_Mode
      * Collection model initialization
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('review/review_status');
@@ -42,6 +43,7 @@ class Mage_Review_Model_Resource_Review_Status_Collection extends Mage_Core_Mode
      *
      * @return array
      */
+    #[\Override]
     public function toOptionArray()
     {
         return parent::_toOptionArray('status_id', 'status_code');

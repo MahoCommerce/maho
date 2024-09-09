@@ -49,6 +49,7 @@ class Mage_Catalog_Model_Layer_Filter_Category extends Mage_Catalog_Model_Layer_
      *
      * @return mixed
      */
+    #[\Override]
     public function getResetValue()
     {
         if ($this->_appliedCategory) {
@@ -69,6 +70,7 @@ class Mage_Catalog_Model_Layer_Filter_Category extends Mage_Catalog_Model_Layer_
      *
      * @return  Mage_Catalog_Model_Layer_Filter_Category
      */
+    #[\Override]
     public function apply(Zend_Controller_Request_Abstract $request, $filterBlock)
     {
         $filter = (int) $request->getParam($this->getRequestVar());
@@ -111,6 +113,7 @@ class Mage_Catalog_Model_Layer_Filter_Category extends Mage_Catalog_Model_Layer_
      *
      * @return string
      */
+    #[\Override]
     public function getName()
     {
         return Mage::helper('catalog')->__('Category');
@@ -138,6 +141,7 @@ class Mage_Catalog_Model_Layer_Filter_Category extends Mage_Catalog_Model_Layer_
      *
      * @return array
      */
+    #[\Override]
     protected function _getItemsData()
     {
         $key = $this->getLayer()->getStateKey() . '_SUBCATEGORIES';

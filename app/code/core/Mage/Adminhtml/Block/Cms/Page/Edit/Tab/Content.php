@@ -24,6 +24,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Content extends Mage_Adminhtml_Bloc
     /**
      * Load Wysiwyg on demand and Prepare layout
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         parent::_prepareLayout();
@@ -36,6 +37,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Content extends Mage_Adminhtml_Bloc
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareForm()
     {
         /** @var Mage_Cms_Model_Page $model */
@@ -93,6 +95,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Content extends Mage_Adminhtml_Bloc
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('cms')->__('Content');
@@ -103,6 +106,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Content extends Mage_Adminhtml_Bloc
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('cms')->__('Content');
@@ -113,6 +117,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Content extends Mage_Adminhtml_Bloc
      *
      * @return true
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -123,6 +128,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Content extends Mage_Adminhtml_Bloc
      *
      * @return false
      */
+    #[\Override]
     public function isHidden()
     {
         return false;

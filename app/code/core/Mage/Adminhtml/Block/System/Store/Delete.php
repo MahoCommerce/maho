@@ -50,6 +50,7 @@ class Mage_Adminhtml_Block_System_Store_Delete extends Mage_Adminhtml_Block_Widg
      *
      * @return string
      */
+    #[\Override]
     public function getHeaderText()
     {
         return Mage::helper('adminhtml')->__(

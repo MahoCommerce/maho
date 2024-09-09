@@ -42,6 +42,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      */
     protected $_customerGroups;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('bundle/price_index', 'entity_id');

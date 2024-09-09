@@ -24,6 +24,7 @@ class Mage_Tax_Model_Resource_Sales_Order_Tax_Item_Collection extends Mage_Core_
     /**
      * Initialize resource
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('tax/sales_order_tax_item');

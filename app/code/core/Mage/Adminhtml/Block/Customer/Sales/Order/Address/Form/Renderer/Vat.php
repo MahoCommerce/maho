@@ -31,6 +31,7 @@ class Mage_Adminhtml_Block_Customer_Sales_Order_Address_Form_Renderer_Vat extend
     /**
      * Set custom template for 'VAT number'
      */
+    #[\Override]
     protected function _construct()
     {
         $this->setTemplate('customer/sales/order/create/address/form/renderer/vat.phtml');

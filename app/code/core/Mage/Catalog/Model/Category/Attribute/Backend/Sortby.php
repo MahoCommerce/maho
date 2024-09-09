@@ -27,6 +27,7 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Sortby extends Mage_Eav_Mode
      * @param Varien_Object $object
      * @return bool
      */
+    #[\Override]
     public function validate($object)
     {
         $attributeCode = $this->getAttribute()->getName();
@@ -83,6 +84,7 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Sortby extends Mage_Eav_Mode
      * @param Varien_Object $object
      * @return $this
      */
+    #[\Override]
     public function beforeSave($object)
     {
         $attributeCode = $this->getAttribute()->getName();
@@ -103,6 +105,7 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Sortby extends Mage_Eav_Mode
      * @param Varien_Object $object
      * @return $this|Mage_Eav_Model_Entity_Attribute_Backend_Abstract
      */
+    #[\Override]
     public function afterLoad($object)
     {
         $attributeCode = $this->getAttribute()->getName();

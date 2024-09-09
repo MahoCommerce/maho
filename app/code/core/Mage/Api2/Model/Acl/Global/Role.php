@@ -52,6 +52,7 @@ class Mage_Api2_Model_Acl_Global_Role extends Mage_Core_Model_Abstract
      */
     protected $_permissionModel;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('api2/acl_global_role');
@@ -62,6 +63,7 @@ class Mage_Api2_Model_Acl_Global_Role extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         if ($this->isObjectNew() && $this->getCreatedAt() === null) {
@@ -90,6 +92,7 @@ class Mage_Api2_Model_Acl_Global_Role extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         if (self::isSystemRole($this)) {

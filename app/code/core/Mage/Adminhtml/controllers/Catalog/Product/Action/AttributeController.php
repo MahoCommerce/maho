@@ -27,6 +27,7 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
      */
     public const ADMIN_RESOURCE = 'catalog/update_attributes';
 
+    #[\Override]
     protected function _construct()
     {
         // Define module dependent translate
@@ -215,6 +216,7 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
      *
      * @return Mage_Adminhtml_Helper_Catalog_Product_Edit_Action_Attribute
      */
+    #[\Override]
     protected function _getHelper()
     {
         return Mage::helper('adminhtml/catalog_product_edit_action_attribute');

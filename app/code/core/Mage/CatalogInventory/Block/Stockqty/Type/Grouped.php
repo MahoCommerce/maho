@@ -26,6 +26,7 @@ class Mage_CatalogInventory_Block_Stockqty_Type_Grouped extends Mage_CatalogInve
      *
      * @return array
      */
+    #[\Override]
     protected function _getChildProducts()
     {
         /** @var Mage_Catalog_Model_Product_Type_Grouped $productType */

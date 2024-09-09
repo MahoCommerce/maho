@@ -31,6 +31,7 @@ class Mage_Adminhtml_Block_Permissions_Role_Grid_User extends Mage_Adminhtml_Blo
         $this->setUseAjax(true);
     }
 
+    #[\Override]
     protected function _addColumnFilterToCollection($column)
     {
         if ($column->getId() == 'in_role_users') {
@@ -51,6 +52,7 @@ class Mage_Adminhtml_Block_Permissions_Role_Grid_User extends Mage_Adminhtml_Blo
         return $this;
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $roleId = $this->getRequest()->getParam('rid');
@@ -60,6 +62,7 @@ class Mage_Adminhtml_Block_Permissions_Role_Grid_User extends Mage_Adminhtml_Blo
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('in_role_users', [
@@ -133,6 +136,7 @@ class Mage_Adminhtml_Block_Permissions_Role_Grid_User extends Mage_Adminhtml_Blo
         return parent::_prepareColumns();
     }
 
+    #[\Override]
     public function getGridUrl()
     {
         $roleId = $this->getRequest()->getParam('rid');

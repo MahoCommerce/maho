@@ -332,6 +332,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      * Initialize resources
      *
      */
+    #[\Override]
     protected function _construct()
     {
         if ($this->isEnabledFlat()) {
@@ -357,6 +358,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _init($model, $entityModel = null)
     {
         if ($this->isEnabledFlat()) {
@@ -371,6 +373,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareStaticFields()
     {
         if ($this->isEnabledFlat()) {
@@ -385,6 +388,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @return Varien_Object
      */
+    #[\Override]
     public function getNewEmptyItem()
     {
         $object = parent::getNewEmptyItem();
@@ -399,6 +403,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @inheritDoc
      */
+    #[\Override]
     public function setEntity($entity)
     {
         if ($this->isEnabledFlat() && ($entity instanceof Mage_Core_Model_Resource_Db_Abstract)) {
@@ -414,6 +419,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      * @param mixed $store
      * @return $this
      */
+    #[\Override]
     public function setStore($store)
     {
         parent::setStore($store);
@@ -430,6 +436,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @return $this
      */
+    #[\Override]
     protected function _initSelect()
     {
         if ($this->isEnabledFlat()) {
@@ -453,6 +460,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @inheritDoc
      */
+    #[\Override]
     public function _loadAttributes($printQuery = false, $logQuery = false)
     {
         if ($this->isEnabledFlat()) {
@@ -467,6 +475,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @inheritDoc
      */
+    #[\Override]
     public function addAttributeToSelect($attribute, $joinType = false)
     {
         if ($this->isEnabledFlat()) {
@@ -501,6 +510,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeLoad()
     {
         Mage::dispatchEvent('catalog_product_collection_load_before', ['collection' => $this]);
@@ -514,6 +524,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad()
     {
         if ($this->_addUrlRewrite) {
@@ -861,6 +872,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     public function getSelectCountSql()
     {
         return $this->_getSelectCountSql();
@@ -948,6 +960,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @inheritDoc
      */
+    #[\Override]
     public function getAllIds($limit = null, $offset = null)
     {
         $idsSelect = $this->_getClearSelect();
@@ -1353,6 +1366,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function addAttributeToFilter($attribute, $condition = null, $joinType = 'inner')
     {
         if ($this->isEnabledFlat()) {
@@ -1509,6 +1523,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @inheritDoc
      */
+    #[\Override]
     public function addAttributeToSort($attribute, $dir = self::SORT_ORDER_ASC)
     {
         if ($attribute == 'position') {
@@ -2045,6 +2060,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      *
      * @inheritDoc
      */
+    #[\Override]
     public function clear()
     {
         foreach ($this->_items as $i => $item) {
@@ -2071,6 +2087,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      * @param string $dir
      * @return $this
      */
+    #[\Override]
     public function setOrder($attribute, $dir = 'desc')
     {
         if ($attribute == 'price') {

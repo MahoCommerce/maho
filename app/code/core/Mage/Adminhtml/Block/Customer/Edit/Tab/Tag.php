@@ -33,6 +33,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Tag extends Mage_Adminhtml_Block_Wi
         $this->setFilterVisibility(false);
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $tagId = Mage::registry('tagId');
@@ -52,6 +53,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Tag extends Mage_Adminhtml_Block_Wi
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterLoadCollection()
     {
         $this->getCollection()->addProductName();
@@ -62,6 +64,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Tag extends Mage_Adminhtml_Block_Wi
      * @inheritDoc
      * @throws Exception
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('name', [
@@ -99,6 +102,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Tag extends Mage_Adminhtml_Block_Wi
         return parent::_prepareColumns();
     }
 
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/tag/edit', [
@@ -110,6 +114,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Tag extends Mage_Adminhtml_Block_Wi
     /**
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/customer/tagGrid', [

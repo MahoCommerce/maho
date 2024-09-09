@@ -60,6 +60,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      * Load core Url rewrite model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/url_rewrite', 'url_rewrite_id');

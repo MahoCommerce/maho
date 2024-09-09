@@ -35,6 +35,7 @@ class Mage_Paypal_Model_Resource_Payment_Transaction extends Mage_Core_Model_Res
      * Initialize main table and the primary key field name
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('paypal/payment_transaction', 'transaction_id');
@@ -43,6 +44,7 @@ class Mage_Paypal_Model_Resource_Payment_Transaction extends Mage_Core_Model_Res
     /**
      * @see Mage_Core_Model_Resource_Abstract::_unserializeField()
      */
+    #[\Override]
     protected function _unserializeField(Varien_Object $object, $field, $defaultValue = null)
     {
         $value = $object->getData($field);
@@ -80,6 +82,7 @@ class Mage_Paypal_Model_Resource_Payment_Transaction extends Mage_Core_Model_Res
      * @param Mage_Paypal_Model_Payment_Transaction $transaction
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $transaction)
     {
         $txnId       = $transaction->getData('txn_id');

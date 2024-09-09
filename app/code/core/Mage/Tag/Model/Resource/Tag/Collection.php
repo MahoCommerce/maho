@@ -50,6 +50,7 @@ class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db
      * Define resource model and model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('tag/tag');
@@ -62,6 +63,7 @@ class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db
      * @param bool $logQuery
      * @return $this
      */
+    #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {
         if ($this->isLoaded()) {
@@ -251,6 +253,7 @@ class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db
      * @param array $condition
      * @return $this
      */
+    #[\Override]
     public function addFieldToFilter($field, $condition = null)
     {
         if ($this->getFlag('relation') && $field == 'popularity') {
@@ -273,6 +276,7 @@ class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     public function getSelectCountSql()
     {
         $select = parent::getSelectCountSql();

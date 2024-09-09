@@ -105,6 +105,7 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
      * @param Mage_Core_Controller_Request_Http $request
      * @inheritDoc
      */
+    #[\Override]
     public function match(Zend_Controller_Request_Http $request)
     {
         //checking before even try to find out that current module
@@ -394,6 +395,7 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
      * @param string $routeName
      * @return false|string
      */
+    #[\Override]
     public function getFrontNameByRoute($routeName)
     {
         return $this->_routes[$routeName] ?? false;
@@ -403,6 +405,7 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
      * @param string $frontName
      * @return false|int|string
      */
+    #[\Override]
     public function getRouteByFrontName($frontName)
     {
         return array_search($frontName, $this->_routes);

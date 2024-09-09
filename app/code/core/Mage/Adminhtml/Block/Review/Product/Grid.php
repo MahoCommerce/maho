@@ -32,6 +32,7 @@ class Mage_Adminhtml_Block_Review_Product_Grid extends Mage_Adminhtml_Block_Cata
     /**
      * @return $this
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('entity_id', [
@@ -103,6 +104,7 @@ class Mage_Adminhtml_Block_Review_Product_Grid extends Mage_Adminhtml_Block_Cata
     /**
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/productGrid', ['_current' => true]);
@@ -112,6 +114,7 @@ class Mage_Adminhtml_Block_Review_Product_Grid extends Mage_Adminhtml_Block_Cata
      * @param Varien_Object $row
      * @return string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/jsonProductInfo', ['id' => $row->getId()]);
@@ -120,6 +123,7 @@ class Mage_Adminhtml_Block_Review_Product_Grid extends Mage_Adminhtml_Block_Cata
     /**
      * @return $this
      */
+    #[\Override]
     protected function _prepareMassaction()
     {
         return $this;

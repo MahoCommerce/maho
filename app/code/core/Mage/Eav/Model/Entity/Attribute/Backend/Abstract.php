@@ -90,6 +90,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      *
      * @return string
      */
+    #[\Override]
     public function getType()
     {
         return $this->getAttribute()->getBackendType();
@@ -100,6 +101,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      *
      * @return bool
      */
+    #[\Override]
     public function isStatic()
     {
         return $this->getAttribute()->isStatic();
@@ -110,6 +112,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      *
      * @return string
      */
+    #[\Override]
     public function getTable()
     {
         if (empty($this->_table)) {
@@ -132,6 +135,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      *
      * @return string
      */
+    #[\Override]
     public function getEntityIdField()
     {
         if (empty($this->_entityIdField)) {
@@ -151,6 +155,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @param int $valueId
      * @return $this
      */
+    #[\Override]
     public function setValueId($valueId)
     {
         $this->_valueId = $valueId;
@@ -164,6 +169,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @param int $valueId
      * @return $this
      */
+    #[\Override]
     public function setEntityValueId($entity, $valueId)
     {
         if (!$entity || !$entity->getId()) {
@@ -179,6 +185,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      *
      * @return int
      */
+    #[\Override]
     public function getValueId()
     {
         return $this->_valueId;
@@ -190,6 +197,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @param Varien_Object $entity
      * @return int
      */
+    #[\Override]
     public function getEntityValueId($entity)
     {
         if (!$entity || !$entity->getId() || !array_key_exists($entity->getId(), $this->_valueIds)) {
@@ -267,6 +275,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @param Varien_Object $object
      * @return $this
      */
+    #[\Override]
     public function afterLoad($object)
     {
         return $this;
@@ -278,6 +287,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @param Varien_Object $object
      * @return $this
      */
+    #[\Override]
     public function beforeSave($object)
     {
         $attrCode = $this->getAttribute()->getAttributeCode();
@@ -294,6 +304,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @param Varien_Object $object
      * @return $this
      */
+    #[\Override]
     public function afterSave($object)
     {
         return $this;
@@ -305,6 +316,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @param Varien_Object $object
      * @return $this
      */
+    #[\Override]
     public function beforeDelete($object)
     {
         return $this;
@@ -315,6 +327,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @param Varien_Object $object
      * @return $this
      */
+    #[\Override]
     public function afterDelete($object)
     {
         return $this;

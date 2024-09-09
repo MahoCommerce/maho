@@ -24,6 +24,7 @@ class Mage_Uploader_Block_Single extends Mage_Uploader_Block_Abstract
      *
      * @return Mage_Core_Block_Abstract
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         parent::_prepareLayout();

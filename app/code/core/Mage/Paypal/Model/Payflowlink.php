@@ -112,6 +112,7 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      *
      * @return  bool
      */
+    #[\Override]
     public function validate()
     {
         return true;
@@ -123,6 +124,7 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * @param Mage_Sales_Model_Quote|null $quote
      * @return bool
      */
+    #[\Override]
     public function isAvailable($quote = null)
     {
         $storeId = Mage::app()->getStore($this->getStore())->getId();
@@ -154,6 +156,7 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * @param Varien_Object $stateObject
      * @return $this
      */
+    #[\Override]
     public function initialize($paymentAction, $stateObject)
     {
         switch ($paymentAction) {
@@ -438,6 +441,7 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      *
      * @return Mage_Paypal_Model_Payflow_Request
      */
+    #[\Override]
     protected function _buildBasicRequest(Varien_Object $payment)
     {
         $request = Mage::getModel('paypal/payflow_request');

@@ -129,6 +129,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
      *
      * @return Mage_Shipping_Model_Rate_Result|bool|null
      */
+    #[\Override]
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
         if (!$this->getConfigFlag($this->_activeFlag)) {
@@ -1325,6 +1326,7 @@ XMLAuth;
      *
      * @return array
      */
+    #[\Override]
     public function getAllowedMethods()
     {
         $allowedMethods = explode(',', (string)$this->getConfigData('allowed_methods'));
@@ -1595,6 +1597,7 @@ XMLAuth;
         return $result;
     }
 
+    #[\Override]
     protected function _doShipmentRequest(Varien_Object $request): Varien_Object
     {
         // this "if" will be removed after XML APIs will be shut down
@@ -2010,6 +2013,7 @@ XMLAuth;
      *
      * @return array|bool
      */
+    #[\Override]
     public function getContainerTypes(?Varien_Object $params = null)
     {
         if ($params == null) {
@@ -2093,6 +2097,7 @@ XMLAuth;
      *
      * @return array
      */
+    #[\Override]
     public function getDeliveryConfirmationTypes(?Varien_Object $params = null)
     {
         $countryRecipient           = $params != null ? $params->getCountryRecipient() : null;
@@ -2121,6 +2126,7 @@ XMLAuth;
      *
      * @return array
      */
+    #[\Override]
     public function getCustomizableContainerTypes()
     {
         $result = [];

@@ -32,6 +32,7 @@ class Mage_Api2_Block_Adminhtml_Attribute_Buttons extends Mage_Adminhtml_Block_T
      *
      * @return Mage_Core_Block_Abstract
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $buttons = [

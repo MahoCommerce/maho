@@ -33,6 +33,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Store extends Mage_Admi
      *
      * @return string
      */
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         return $this->toHtml();

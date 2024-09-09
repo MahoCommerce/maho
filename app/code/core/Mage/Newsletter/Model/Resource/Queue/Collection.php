@@ -39,6 +39,7 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
      * Initializes collection
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_map['fields']['queue_id'] = 'main_table.queue_id';
@@ -93,6 +94,7 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
      *
      * @inheritDoc
      */
+    #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {
         if ($this->_addSubscribersFlag && !$this->isLoaded()) {
@@ -118,6 +120,7 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
      *
      * @inheritDoc
      */
+    #[\Override]
     public function addFieldToFilter($field, $condition = null)
     {
         if (in_array($field, ['subscribers_total', 'subscribers_sent'])) {
@@ -209,6 +212,7 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
      *
      * @return array
      */
+    #[\Override]
     public function toOptionArray()
     {
         return $this->_toOptionArray('queue_id', 'template_subject');

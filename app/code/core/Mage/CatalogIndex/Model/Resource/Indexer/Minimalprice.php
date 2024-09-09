@@ -21,6 +21,7 @@
  */
 class Mage_CatalogIndex_Model_Resource_Indexer_Minimalprice extends Mage_CatalogIndex_Model_Resource_Indexer_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalogindex/minimal_price', 'index_id');
@@ -54,6 +55,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer_Minimalprice extends Mage_Catalog
      * @param int $storeId
      * @param int $attributeId
      */
+    #[\Override]
     public function cleanup($productId, $storeId = null, $attributeId = null)
     {
         $conditions[] = $this->_getWriteAdapter()->quoteInto("{$this->_entityIdFieldName} = ?", $productId);

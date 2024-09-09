@@ -105,6 +105,7 @@ class Mage_Checkout_Block_Total_Nominal extends Mage_Checkout_Block_Total_Defaul
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         $total = $this->getTotal();

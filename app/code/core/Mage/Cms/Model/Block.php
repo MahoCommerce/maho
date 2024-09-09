@@ -44,6 +44,7 @@ class Mage_Cms_Model_Block extends Mage_Core_Model_Abstract
     public const CACHE_TAG     = 'cms_block';
     protected $_cacheTag = 'cms_block';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('cms/block');
@@ -55,6 +56,7 @@ class Mage_Cms_Model_Block extends Mage_Core_Model_Abstract
      * @throws Mage_Core_Exception
      * @return Mage_Core_Model_Abstract
      */
+    #[\Override]
     protected function _beforeSave()
     {
         $needle = 'block_id="' . $this->getBlockId() . '"';

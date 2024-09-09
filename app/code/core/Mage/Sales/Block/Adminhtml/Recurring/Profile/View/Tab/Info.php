@@ -28,6 +28,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_View_Tab_Info extends Mage_Ad
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('sales')->__('Profile Information');
@@ -38,6 +39,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_View_Tab_Info extends Mage_Ad
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return $this->getLabel();
@@ -46,6 +48,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_View_Tab_Info extends Mage_Ad
     /**
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -54,6 +57,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_View_Tab_Info extends Mage_Ad
     /**
      * @return bool
      */
+    #[\Override]
     public function isHidden()
     {
         return false;

@@ -29,6 +29,7 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
      * @return $this
      * @throws Throwable
      */
+    #[\Override]
     public function parse()
     {
         // fixed for multibyte characters
@@ -151,6 +152,7 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
      *
      * @return $this
      */
+    #[\Override]
     public function unparse()
     {
         $batchExport = $this->getBatchExportModel()

@@ -24,6 +24,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups_Backend_Freemethod extends Mage_Usa_Mo
     /**
      * Set source model to get allowed values
      */
+    #[\Override]
     protected function _setSourceModelData()
     {
         $this->_sourceModel = 'usa/shipping_carrier_ups_source_freemethod';
@@ -32,6 +33,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups_Backend_Freemethod extends Mage_Usa_Mo
     /**
      * Set field name to display in error block
      */
+    #[\Override]
     protected function _setNameErrorField()
     {
         $this->_nameErrorField = 'Ups Free Method';

@@ -118,6 +118,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
      *
      * @return  Mage_Tax_Model_Sales_Total_Quote_Subtotal
      */
+    #[\Override]
     public function collect(Mage_Sales_Model_Quote_Address $address)
     {
         $this->_store = $address->getQuote()->getStore();

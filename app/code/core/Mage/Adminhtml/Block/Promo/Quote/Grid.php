@@ -40,6 +40,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Grid extends Mage_Adminhtml_Block_Widget_
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         /** @var Mage_SalesRule_Model_Resource_Rule_Collection $collection  */
@@ -58,6 +59,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Grid extends Mage_Adminhtml_Block_Widget_
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('rule_id', [
@@ -144,6 +146,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Grid extends Mage_Adminhtml_Block_Widget_
      *
      * @return string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getRuleId()]);

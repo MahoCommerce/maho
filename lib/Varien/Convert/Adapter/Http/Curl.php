@@ -22,6 +22,7 @@
 class Varien_Convert_Adapter_Http_Curl extends Varien_Convert_Adapter_Abstract
 {
     // load method
+    #[\Override]
     public function load()
     {
         // we expect <var name="uri">http://...</var>
@@ -52,6 +53,7 @@ class Varien_Convert_Adapter_Http_Curl extends Varien_Convert_Adapter_Abstract
         return $this;
     }
 
+    #[\Override]
     public function save()
     {
         // no save implemented

@@ -50,6 +50,7 @@ class Mage_Oauth_Model_Consumer extends Mage_Core_Model_Abstract
      */
     public const SECRET_LENGTH = 32;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('oauth/consumer');
@@ -60,6 +61,7 @@ class Mage_Oauth_Model_Consumer extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         if (!$this->getId()) {

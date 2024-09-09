@@ -21,6 +21,7 @@
  */
 class Varien_Convert_Parser_Csv extends Varien_Convert_Parser_Abstract
 {
+    #[\Override]
     public function parse()
     {
         $fDel = $this->getVar('delimiter', ',');
@@ -110,6 +111,7 @@ class Varien_Convert_Parser_Csv extends Varien_Convert_Parser_Abstract
         return $this;
     }
 
+    #[\Override]
     public function unparse()
     {
         $csv = '';

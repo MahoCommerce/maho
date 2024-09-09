@@ -34,6 +34,7 @@ class Magento_Db_Object_Trigger extends Magento_Db_Object implements Magento_Db_
     /**
      * @return bool
      */
+    #[\Override]
     public function isExists()
     {
         if (!isset($this->_data['triggers'][$this->_schemaName])) {
@@ -47,6 +48,7 @@ class Magento_Db_Object_Trigger extends Magento_Db_Object implements Magento_Db_
         return false;
     }
 
+    #[\Override]
     public function describe()
     {
         $columns = [

@@ -31,11 +31,13 @@ class Mage_Adminhtml_Block_Newsletter_Template_Grid extends Mage_Adminhtml_Block
         $this->setUseAjax(true);
     }
 
+    #[\Override]
     protected function _construct()
     {
         $this->setEmptyText(Mage::helper('newsletter')->__('No Templates Found'));
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceSingleton('newsletter/template_collection')
@@ -46,6 +48,7 @@ class Mage_Adminhtml_Block_Newsletter_Template_Grid extends Mage_Adminhtml_Block
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn(
@@ -126,6 +129,7 @@ class Mage_Adminhtml_Block_Newsletter_Template_Grid extends Mage_Adminhtml_Block
         return $this;
     }
 
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);

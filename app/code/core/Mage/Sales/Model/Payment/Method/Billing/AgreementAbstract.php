@@ -44,6 +44,7 @@ abstract class Mage_Sales_Model_Payment_Method_Billing_AgreementAbstract extends
      * @param Mage_Sales_Model_Quote $quote
      * @return bool
      */
+    #[\Override]
     public function isAvailable($quote = null)
     {
         if (is_null($this->_isAvailable)) {
@@ -69,6 +70,7 @@ abstract class Mage_Sales_Model_Payment_Method_Billing_AgreementAbstract extends
      * @return Mage_Payment_Model_Method_Abstract
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     public function assignData($data)
     {
         $result = parent::assignData($data);

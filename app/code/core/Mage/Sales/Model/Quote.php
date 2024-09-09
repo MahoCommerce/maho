@@ -235,6 +235,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     /**
      * Init resource model
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/quote');
@@ -246,6 +247,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      *
      * @return Varien_Object
      */
+    #[\Override]
     protected function _initOldFieldsMap()
     {
         return $this;
@@ -308,6 +310,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      * @inheritDoc
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _beforeSave()
     {
         /**
@@ -367,6 +370,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterSave()
     {
         parent::_afterSave();
@@ -2002,6 +2006,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterLoad()
     {
         // collect totals and save me, if required
@@ -2061,6 +2066,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     public function save()
     {
         if ($this->_preventSaving) {

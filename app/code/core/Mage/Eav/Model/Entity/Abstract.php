@@ -176,6 +176,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
         return $this;
     }
 
+    #[\Override]
     protected function _construct()
     {
     }
@@ -185,6 +186,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @return Magento_Db_Adapter_Pdo_Mysql
      */
+    #[\Override]
     protected function _getReadAdapter()
     {
         if (is_string($this->_read)) {
@@ -198,6 +200,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @return Magento_Db_Adapter_Pdo_Mysql
      */
+    #[\Override]
     protected function _getWriteAdapter()
     {
         if (is_string($this->_write)) {

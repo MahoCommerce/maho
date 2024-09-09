@@ -49,6 +49,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
      * Do not recreate rule group website for row refresh
      * @param string $timestamp
      */
+    #[\Override]
     protected function _prepareGroupWebsite($timestamp)
     {
     }
@@ -58,6 +59,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     protected function _prepareTemporarySelect(Mage_Core_Model_Website $website)
     {
         $select = parent::_prepareTemporarySelect($website);
@@ -67,6 +69,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
     /**
      * Remove old index data
      */
+    #[\Override]
     protected function _removeOldIndexData(Mage_Core_Model_Website $website)
     {
         $this->_connection->query(
@@ -85,6 +88,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
      *
      * @return int
      */
+    #[\Override]
     protected function _getProduct()
     {
         return $this->_productId;

@@ -33,6 +33,7 @@ class Mage_SalesRule_Model_Quote_Nominal_Discount extends Mage_SalesRule_Model_Q
      *
      * @return array
      */
+    #[\Override]
     public function fetch(Mage_Sales_Model_Quote_Address $address)
     {
         return Mage_Sales_Model_Quote_Address_Total_Abstract::fetch($address);
@@ -43,6 +44,7 @@ class Mage_SalesRule_Model_Quote_Nominal_Discount extends Mage_SalesRule_Model_Q
      *
      * @return array
      */
+    #[\Override]
     protected function _getAddressItems(Mage_Sales_Model_Quote_Address $address)
     {
         return $address->getAllNominalItems();

@@ -21,6 +21,7 @@
  */
 class Mage_Adminhtml_Model_Newsletter_Renderer_Text implements Varien_Data_Form_Element_Renderer_Interface
 {
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         $html = '<tr><td class="label">' . "\n";

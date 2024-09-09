@@ -185,6 +185,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     public function getSelect()
     {
         if ($this->_select && $this->_fieldsToSelectChanged) {
@@ -479,6 +480,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
      *
      * @return array
      */
+    #[\Override]
     public function getAllIds()
     {
         $idsSelect = clone $this->getSelect();
@@ -494,6 +496,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
     /**
      * @return array
      */
+    #[\Override]
     public function getData()
     {
         if ($this->_data === null) {
@@ -569,6 +572,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeLoad()
     {
         parent::_beforeLoad();
@@ -613,6 +617,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad()
     {
         parent::_afterLoad();
@@ -650,6 +655,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
      *
      * @return bool
      */
+    #[\Override]
     protected function _canUseCache()
     {
         return Mage::app()->useCache('collections') && !empty($this->_cacheConf);
@@ -661,6 +667,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
      * @param Zend_Db_Select $select
      * @return string | false
      */
+    #[\Override]
     protected function _loadCache($select)
     {
         return Mage::app()->loadCache($this->_getSelectCacheId($select));
@@ -673,6 +680,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
      * @param Zend_Db_Select $select
      * @return $this
      */
+    #[\Override]
     protected function _saveCache($data, $select)
     {
         Mage::app()->saveCache(serialize($data), $this->_getSelectCacheId($select), $this->_getCacheTags());
@@ -684,6 +692,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Da
      *
      * @return array
      */
+    #[\Override]
     protected function _getCacheTags()
     {
         $tags = parent::_getCacheTags();

@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Edit_Tab_Main extends Mage_
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareForm()
     {
         parent::_prepareForm();
@@ -252,6 +253,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Edit_Tab_Main extends Mage_
      *
      * @return array
      */
+    #[\Override]
     protected function _getAdditionalElementTypes()
     {
         return [

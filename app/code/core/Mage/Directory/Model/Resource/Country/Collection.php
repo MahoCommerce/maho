@@ -23,6 +23,7 @@
  */
 class Mage_Directory_Model_Resource_Country_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('directory/country');
@@ -61,6 +62,7 @@ class Mage_Directory_Model_Resource_Country_Collection extends Mage_Core_Model_R
      * @param string $countryId
      * @return Mage_Directory_Model_Resource_Country|Mage_Directory_Model_Country
      */
+    #[\Override]
     public function getItemById($countryId)
     {
         foreach ($this->_items as $country) {
@@ -133,6 +135,7 @@ class Mage_Directory_Model_Resource_Country_Collection extends Mage_Core_Model_R
      * @param string $emptyLabel
      * @return array
      */
+    #[\Override]
     public function toOptionArray($emptyLabel = ' ')
     {
         $options = $this->_toOptionArray('country_id', 'name', ['title' => 'iso2_code']);

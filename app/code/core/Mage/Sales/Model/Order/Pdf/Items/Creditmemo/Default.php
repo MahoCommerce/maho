@@ -24,6 +24,7 @@ class Mage_Sales_Model_Order_Pdf_Items_Creditmemo_Default extends Mage_Sales_Mod
     /**
      * Draw process
      */
+    #[\Override]
     public function draw()
     {
         $order  = $this->getOrder();

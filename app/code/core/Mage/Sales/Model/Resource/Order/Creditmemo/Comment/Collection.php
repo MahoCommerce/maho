@@ -31,6 +31,7 @@ class Mage_Sales_Model_Resource_Order_Creditmemo_Comment_Collection extends Mage
      */
     protected $_eventObject    = 'order_creditmemo_comment_collection';
 
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

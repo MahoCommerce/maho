@@ -36,6 +36,7 @@ class Mage_Sales_Block_Adminhtml_Customer_Edit_Tab_Recurring_Profile extends Mag
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return $this->__('Recurring Profiles (beta)');
@@ -46,6 +47,7 @@ class Mage_Sales_Block_Adminhtml_Customer_Edit_Tab_Recurring_Profile extends Mag
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return $this->__('Recurring Profiles (beta)');
@@ -56,6 +58,7 @@ class Mage_Sales_Block_Adminhtml_Customer_Edit_Tab_Recurring_Profile extends Mag
      *
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         $customer = Mage::registry('current_customer');
@@ -67,6 +70,7 @@ class Mage_Sales_Block_Adminhtml_Customer_Edit_Tab_Recurring_Profile extends Mag
      *
      * @return bool
      */
+    #[\Override]
     public function isHidden()
     {
         return false;
@@ -77,6 +81,7 @@ class Mage_Sales_Block_Adminhtml_Customer_Edit_Tab_Recurring_Profile extends Mag
      *
      * @return Mage_Adminhtml_Block_Widget_Grid
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('sales/recurring_profile_collection')
@@ -103,6 +108,7 @@ class Mage_Sales_Block_Adminhtml_Customer_Edit_Tab_Recurring_Profile extends Mag
      *
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/sales_recurring_profile/customerGrid', ['_current' => true]);

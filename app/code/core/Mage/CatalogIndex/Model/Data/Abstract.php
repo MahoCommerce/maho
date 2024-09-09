@@ -58,6 +58,7 @@ class Mage_CatalogIndex_Model_Data_Abstract extends Mage_Core_Model_Abstract
      * Initialize abstract resource model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalogindex/data_abstract');

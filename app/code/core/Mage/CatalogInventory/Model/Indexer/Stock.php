@@ -75,6 +75,7 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
         Mage_CatalogInventory_Helper_Data::XML_PATH_SHOW_OUT_OF_STOCK
     ];
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('cataloginventory/indexer_stock');
@@ -85,6 +86,7 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
      *
      * @return string
      */
+    #[\Override]
     public function getName()
     {
         return Mage::helper('cataloginventory')->__('Stock Status');
@@ -95,6 +97,7 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
      *
      * @return string
      */
+    #[\Override]
     public function getDescription()
     {
         return Mage::helper('cataloginventory')->__('Index Product Stock Status');
@@ -106,6 +109,7 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
      *
      * @return bool
      */
+    #[\Override]
     public function matchEvent(Mage_Index_Model_Event $event)
     {
         $data = $event->getNewData();
@@ -149,6 +153,7 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
     /**
      * Register data required by process in event object
      */
+    #[\Override]
     protected function _registerEvent(Mage_Index_Model_Event $event)
     {
         $event->addNewData(self::EVENT_MATCH_RESULT_KEY, true);
@@ -307,6 +312,7 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
     /**
      * Process event
      */
+    #[\Override]
     protected function _processEvent(Mage_Index_Model_Event $event)
     {
         $data = $event->getNewData();

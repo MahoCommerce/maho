@@ -41,6 +41,7 @@ class Mage_Api2_Model_Acl_Filter_Attribute extends Mage_Core_Model_Abstract
      */
     protected $_permissionModel;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('api2/acl_filter_attribute');

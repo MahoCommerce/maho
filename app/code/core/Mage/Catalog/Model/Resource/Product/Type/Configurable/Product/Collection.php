@@ -31,6 +31,7 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Product_Collection e
     /**
      * Assign link table name
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -41,6 +42,7 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Product_Collection e
      * Init select
      * @return $this
      */
+    #[\Override]
     protected function _initSelect()
     {
         parent::_initSelect();
@@ -71,6 +73,7 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Product_Collection e
      *
      * @return bool
      */
+    #[\Override]
     public function isEnabledFlat()
     {
         return false;

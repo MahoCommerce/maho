@@ -102,6 +102,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Resources extends Mage_Adminhtml_Block
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('api2')->__('Role API Resources');
@@ -112,6 +113,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Resources extends Mage_Adminhtml_Block
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return $this->getTabLabel();
@@ -122,6 +124,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Resources extends Mage_Adminhtml_Block
      *
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -132,6 +135,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Resources extends Mage_Adminhtml_Block
      *
      * @return bool
      */
+    #[\Override]
     public function isHidden()
     {
         return false;

@@ -21,6 +21,7 @@
  */
 class Mage_Dataflow_Model_Session_Parser_Csv extends Mage_Dataflow_Model_Convert_Parser_Abstract
 {
+    #[\Override]
     public function parse()
     {
         $fDel = $this->getVar('delimiter', ',');
@@ -80,6 +81,7 @@ class Mage_Dataflow_Model_Session_Parser_Csv extends Mage_Dataflow_Model_Convert
         return $this;
     }
 
+    #[\Override]
     public function unparse()
     {
         $csv = '';

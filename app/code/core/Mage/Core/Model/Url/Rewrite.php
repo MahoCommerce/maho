@@ -58,6 +58,7 @@ class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Ma
      */
     protected $_cacheTag = false;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/url_rewrite');
@@ -68,6 +69,7 @@ class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Ma
      *
      * @return  Mage_Core_Model_Url_Rewrite
      */
+    #[\Override]
     protected function _afterSave()
     {
         if ($this->hasCategoryId()) {
@@ -86,6 +88,7 @@ class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Ma
      * @param   mixed $path
      * @return  Mage_Core_Model_Url_Rewrite
      */
+    #[\Override]
     public function loadByRequestPath($path)
     {
         $this->setId(null);

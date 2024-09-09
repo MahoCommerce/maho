@@ -53,6 +53,7 @@ class Magento_Profiler_Output_Csvfile extends Magento_Profiler_OutputAbstract
     /**
      * Display profiling results
      */
+    #[\Override]
     public function display()
     {
         $fileHandle = fopen($this->_filename, 'w');

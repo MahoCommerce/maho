@@ -45,6 +45,7 @@ class Mage_Core_Model_Security_HtmlEscapedString implements Stringable
     /**
      * Get escaped html entities
      */
+    #[\Override]
     public function __toString(): string
     {
         return (string) Mage::helper('core')->escapeHtml(

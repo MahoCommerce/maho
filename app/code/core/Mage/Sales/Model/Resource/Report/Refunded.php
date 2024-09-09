@@ -24,6 +24,7 @@ class Mage_Sales_Model_Resource_Report_Refunded extends Mage_Sales_Model_Resourc
     /**
      * Model initialization
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_setResource('sales');

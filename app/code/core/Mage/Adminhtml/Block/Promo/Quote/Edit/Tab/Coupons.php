@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Coupons extends Mage_Adminhtml_B
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('salesrule')->__('Manage Coupon Codes');
@@ -36,6 +37,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Coupons extends Mage_Adminhtml_B
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('salesrule')->__('Manage Coupon Codes');
@@ -46,6 +48,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Coupons extends Mage_Adminhtml_B
      *
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         return $this->_isEditing();
@@ -56,6 +59,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Coupons extends Mage_Adminhtml_B
      *
      * @return bool
      */
+    #[\Override]
     public function isHidden()
     {
         return !$this->_isEditing();

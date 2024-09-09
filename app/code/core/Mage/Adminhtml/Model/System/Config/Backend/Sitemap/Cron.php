@@ -24,6 +24,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Sitemap_Cron extends Mage_Core_
     public const CRON_STRING_PATH = 'crontab/jobs/sitemap_generate/schedule/cron_expr';
     public const CRON_MODEL_PATH = 'crontab/jobs/sitemap_generate/run/model';
 
+    #[\Override]
     protected function _afterSave()
     {
         $time = $this->getData('groups/generate/fields/time/value');

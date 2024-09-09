@@ -25,6 +25,7 @@ class Mage_Catalog_Model_Resource_Product_Action extends Mage_Catalog_Model_Reso
      * Intialize connection
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $resource = Mage::getSingleton('core/resource');

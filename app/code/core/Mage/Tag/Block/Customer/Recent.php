@@ -26,6 +26,7 @@ class Mage_Tag_Block_Customer_Recent extends Mage_Core_Block_Template
      */
     protected $_collection;
 
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -88,6 +89,7 @@ class Mage_Tag_Block_Customer_Recent extends Mage_Core_Block_Template
     /**
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         if ($this->_collection->getSize() > 0) {

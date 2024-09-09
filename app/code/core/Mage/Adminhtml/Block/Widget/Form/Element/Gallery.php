@@ -28,6 +28,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Gallery extends Mage_Adminhtml_Bl
         $this->setTemplate('widget/form/element/gallery.phtml');
     }
 
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         $this->setElement($element);
@@ -50,6 +51,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Gallery extends Mage_Adminhtml_Bl
         return $this->getElement()->getValue();
     }
 
+    #[\Override]
     protected function _prepareLayout()
     {
         $this->setChild(

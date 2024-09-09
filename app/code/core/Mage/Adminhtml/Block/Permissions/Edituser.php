@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Permissions_Edituser extends Mage_Adminhtml_Block_Wid
         $this->setDestElementId('user_edit_form');
     }
 
+    #[\Override]
     protected function _beforeToHtml()
     {
         $this->addTab('account', [

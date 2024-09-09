@@ -26,6 +26,7 @@ class Mage_SalesRule_Model_Rule_Condition_Address extends Mage_Rule_Model_Condit
     /**
      * @return $this|Mage_Rule_Model_Condition_Abstract
      */
+    #[\Override]
     public function loadAttributeOptions()
     {
         $attributes = [
@@ -48,6 +49,7 @@ class Mage_SalesRule_Model_Rule_Condition_Address extends Mage_Rule_Model_Condit
     /**
      * @return Varien_Data_Form_Element_Abstract
      */
+    #[\Override]
     public function getAttributeElement()
     {
         $element = parent::getAttributeElement();
@@ -58,6 +60,7 @@ class Mage_SalesRule_Model_Rule_Condition_Address extends Mage_Rule_Model_Condit
     /**
      * @return string
      */
+    #[\Override]
     public function getInputType()
     {
         switch ($this->getAttribute()) {
@@ -78,6 +81,7 @@ class Mage_SalesRule_Model_Rule_Condition_Address extends Mage_Rule_Model_Condit
     /**
      * @return string
      */
+    #[\Override]
     public function getValueElementType()
     {
         switch ($this->getAttribute()) {
@@ -93,6 +97,7 @@ class Mage_SalesRule_Model_Rule_Condition_Address extends Mage_Rule_Model_Condit
     /**
      * @return array|mixed
      */
+    #[\Override]
     public function getValueSelectOptions()
     {
         if (!$this->hasData('value_select_options')) {
@@ -131,6 +136,7 @@ class Mage_SalesRule_Model_Rule_Condition_Address extends Mage_Rule_Model_Condit
      * @param Mage_Sales_Model_Quote_Address $object
      * @inheritDoc
      */
+    #[\Override]
     public function validate(Varien_Object $object)
     {
         $address = $object;

@@ -123,6 +123,7 @@ abstract class Mage_ConfigurableSwatches_Block_Catalog_Media_Js_Abstract extends
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         if (!Mage::helper('configurableswatches')->isEnabled()) { // functionality disabled

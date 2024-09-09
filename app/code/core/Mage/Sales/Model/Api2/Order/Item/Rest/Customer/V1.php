@@ -28,6 +28,7 @@ class Mage_Sales_Model_Api2_Order_Item_Rest_Customer_V1 extends Mage_Sales_Model
      * @throws Mage_Api2_Exception
      * @return Mage_Sales_Model_Order
      */
+    #[\Override]
     protected function _loadOrderById($id)
     {
         /** @var Mage_Sales_Model_Order $order */

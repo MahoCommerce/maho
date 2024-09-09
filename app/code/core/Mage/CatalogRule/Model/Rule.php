@@ -138,6 +138,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     /**
      * Init resource model and id field
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -150,6 +151,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return Mage_CatalogRule_Model_Rule_Condition_Combine
      */
+    #[\Override]
     public function getConditionsInstance()
     {
         return Mage::getModel('catalogrule/rule_condition_combine');
@@ -160,6 +162,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return Mage_CatalogRule_Model_Rule_Action_Collection
      */
+    #[\Override]
     public function getActionsInstance()
     {
         return Mage::getModel('catalogrule/rule_action_collection');
@@ -443,6 +446,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function toString($format = '')
     {
         return '';
@@ -464,6 +468,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return array
      */
+    #[\Override]
     public function toArray(array $arrAttributes = [])
     {
         return parent::toArray($arrAttributes);

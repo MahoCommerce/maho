@@ -50,6 +50,7 @@ class Varien_Data_Form_Element_Fieldset extends Varien_Data_Form_Element_Abstrac
     /**
      * @return string
      */
+    #[\Override]
     public function getElementHtml()
     {
         $html = '<fieldset id="' . $this->getHtmlId() . '"' . $this->serialize(['class']) . '>' . "\n";
@@ -93,6 +94,7 @@ class Varien_Data_Form_Element_Fieldset extends Varien_Data_Form_Element_Abstrac
     /**
      * @return string
      */
+    #[\Override]
     public function getDefaultHtml()
     {
         $html = '<div><h4 class="icon-head head-edit-form fieldset-legend">' . $this->getLegend() . '</h4>' . "\n";
@@ -107,6 +109,7 @@ class Varien_Data_Form_Element_Fieldset extends Varien_Data_Form_Element_Abstrac
      * @param boolean $after
      * @return Varien_Data_Form_Element_Abstract
      */
+    #[\Override]
     public function addField($elementId, $type, $config, $after = false)
     {
         $element = parent::addField($elementId, $type, $config, $after);

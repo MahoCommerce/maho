@@ -43,6 +43,7 @@ class Mage_Core_Model_Flag extends Mage_Core_Model_Abstract
      * Set flag_code if it is specified in arguments
      *
      */
+    #[\Override]
     protected function _construct()
     {
         if ($this->hasData('flag_code')) {
@@ -54,6 +55,7 @@ class Mage_Core_Model_Flag extends Mage_Core_Model_Abstract
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave()
     {
         if (is_null($this->_flagCode)) {

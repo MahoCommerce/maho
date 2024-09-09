@@ -22,6 +22,7 @@ class Mage_Rule_Block_Actions implements Varien_Data_Form_Element_Renderer_Inter
     /**
      * @return string
      */
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         if ($element->getRule() && $element->getRule()->getActions()) {

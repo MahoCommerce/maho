@@ -47,6 +47,7 @@ abstract class Mage_Sales_Model_Quote_Address_Total_Nominal_RecurringAbstract ex
      *
      * @return Mage_Sales_Model_Quote_Address_Total_Nominal_RecurringAbstract
      */
+    #[\Override]
     public function collect(Mage_Sales_Model_Quote_Address $address)
     {
         parent::collect($address);
@@ -71,6 +72,7 @@ abstract class Mage_Sales_Model_Quote_Address_Total_Nominal_RecurringAbstract ex
      *
      * @return array
      */
+    #[\Override]
     public function fetch(Mage_Sales_Model_Quote_Address $address)
     {
         return Mage_Sales_Model_Quote_Address_Total_Abstract::fetch($address);
@@ -81,6 +83,7 @@ abstract class Mage_Sales_Model_Quote_Address_Total_Nominal_RecurringAbstract ex
      *
      * @return array
      */
+    #[\Override]
     protected function _getAddressItems(Mage_Sales_Model_Quote_Address $address)
     {
         return $address->getAllNominalItems();

@@ -44,6 +44,7 @@ class Mage_Api2_Block_Adminhtml_Permissions_User_Edit_Tab_Roles extends Mage_Adm
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         /** @var Mage_Api2_Model_Resource_Acl_Global_Role_Collection $collection */
@@ -60,6 +61,7 @@ class Mage_Api2_Block_Adminhtml_Permissions_User_Edit_Tab_Roles extends Mage_Adm
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('assigned_user_role', [
@@ -86,6 +88,7 @@ class Mage_Api2_Block_Adminhtml_Permissions_User_Edit_Tab_Roles extends Mage_Adm
      * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
      * @return $this
      */
+    #[\Override]
     protected function _addColumnFilterToCollection($column)
     {
         if ($column->getId() == 'assigned_user_role') {
@@ -135,6 +138,7 @@ class Mage_Api2_Block_Adminhtml_Permissions_User_Edit_Tab_Roles extends Mage_Adm
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return $this->__('REST Role');
@@ -145,6 +149,7 @@ class Mage_Api2_Block_Adminhtml_Permissions_User_Edit_Tab_Roles extends Mage_Adm
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return $this->__('REST Role');
@@ -155,6 +160,7 @@ class Mage_Api2_Block_Adminhtml_Permissions_User_Edit_Tab_Roles extends Mage_Adm
      *
      * @return true
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -165,6 +171,7 @@ class Mage_Api2_Block_Adminhtml_Permissions_User_Edit_Tab_Roles extends Mage_Adm
      *
      * @return false
      */
+    #[\Override]
     public function isHidden()
     {
         return false;
@@ -175,6 +182,7 @@ class Mage_Api2_Block_Adminhtml_Permissions_User_Edit_Tab_Roles extends Mage_Adm
      *
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl(

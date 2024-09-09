@@ -25,6 +25,7 @@ class Mage_Dataflow_Model_Resource_Profile_History_Collection extends Mage_Core_
      * Define resource model and model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('dataflow/profile_history');

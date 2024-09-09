@@ -27,6 +27,7 @@ class Mage_Api_Model_Acl_Assert_Ip implements Zend_Acl_Assert_Interface
      * @param string|null $privilege
      * @return bool|null
      */
+    #[\Override]
     public function assert(
         Mage_Api_Model_Acl $acl,
         ?Mage_Api_Model_Acl_Role $role = null,

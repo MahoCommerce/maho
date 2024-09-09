@@ -22,6 +22,7 @@ class Mage_SalesRule_Model_Rule_Action_Product extends Mage_Rule_Model_Action_Ab
     /**
      * @return $this|Mage_Rule_Model_Action_Abstract
      */
+    #[\Override]
     public function loadAttributeOptions()
     {
         $this->setAttributeOption([
@@ -33,6 +34,7 @@ class Mage_SalesRule_Model_Rule_Action_Product extends Mage_Rule_Model_Action_Ab
     /**
      * @return $this|Mage_Rule_Model_Action_Abstract
      */
+    #[\Override]
     public function loadOperatorOptions()
     {
         $this->setOperatorOption([
@@ -47,6 +49,7 @@ class Mage_SalesRule_Model_Rule_Action_Product extends Mage_Rule_Model_Action_Ab
     /**
      * @return string
      */
+    #[\Override]
     public function asHtml()
     {
         $html = $this->getTypeElement()->getHtml() . Mage::helper('salesrule')->__("Update product's %s %s: %s", $this->getAttributeElement()->getHtml(), $this->getOperatorElement()->getHtml(), $this->getValueElement()->getHtml());

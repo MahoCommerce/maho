@@ -48,6 +48,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Tierprice extends Mage_Catalo
      * @param array $objectArray
      * @return array
      */
+    #[\Override]
     protected function _getAdditionalUniqueFields($objectArray)
     {
         $uniqueFields = parent::_getAdditionalUniqueFields($objectArray);
@@ -60,6 +61,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Tierprice extends Mage_Catalo
      *
      * @return string
      */
+    #[\Override]
     protected function _getDuplicateErrorMessage()
     {
         return Mage::helper('catalog')->__('Duplicate website tier price customer group and quantity.');
@@ -71,6 +73,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Tierprice extends Mage_Catalo
      * @param Mage_Catalog_Model_Product_Type_Price $priceObject
      * @return bool
      */
+    #[\Override]
     protected function _isPriceFixed($priceObject)
     {
         return $priceObject->isTierPriceFixed();

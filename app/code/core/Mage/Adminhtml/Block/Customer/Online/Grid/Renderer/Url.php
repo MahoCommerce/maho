@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Customer_Online_Grid_Renderer_Url extends Mage_Adminh
      *
      * @return  string
      */
+    #[\Override]
     public function render(Varien_Object $row)
     {
         $value = $row->getData($this->getColumn()->getIndex());

@@ -39,6 +39,7 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute extends Ma
      * Inititalize connection and define tables
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_super_attribute', 'product_super_attribute_id');

@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Form extends Mage_Adminhtml_Block_Wi
         $this->setTitle(Mage::helper('salesrule')->__('Rule Information'));
     }
 
+    #[\Override]
     protected function _prepareForm()
     {
         $form = new Varien_Data_Form(['id' => 'edit_form', 'action' => $this->getData('action'), 'method' => 'post']);

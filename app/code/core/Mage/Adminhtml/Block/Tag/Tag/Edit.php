@@ -82,6 +82,7 @@ class Mage_Adminhtml_Block_Tag_Tag_Edit extends Mage_Adminhtml_Block_Widget_Form
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         parent::_prepareLayout();
@@ -94,6 +95,7 @@ class Mage_Adminhtml_Block_Tag_Tag_Edit extends Mage_Adminhtml_Block_Widget_Form
      *
      * @return string
      */
+    #[\Override]
     public function getFormHtml()
     {
         $html = parent::getFormHtml();
@@ -103,6 +105,7 @@ class Mage_Adminhtml_Block_Tag_Tag_Edit extends Mage_Adminhtml_Block_Widget_Form
     /**
      * @return string
      */
+    #[\Override]
     public function getHeaderText()
     {
         if (Mage::registry('tag_tag')->getId()) {

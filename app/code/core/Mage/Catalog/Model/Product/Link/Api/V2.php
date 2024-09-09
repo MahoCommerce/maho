@@ -32,6 +32,7 @@ class Mage_Catalog_Model_Product_Link_Api_V2 extends Mage_Catalog_Model_Product_
      * @return bool
      * @throws Mage_Api_Exception
      */
+    #[\Override]
     public function assign($type, $productId, $linkedProductId, $data = [], $identifierType = null)
     {
         $typeId = $this->_getTypeId($type);
@@ -90,6 +91,7 @@ class Mage_Catalog_Model_Product_Link_Api_V2 extends Mage_Catalog_Model_Product_
      * @return bool
      * @throws Mage_Api_Exception
      */
+    #[\Override]
     public function update($type, $productId, $linkedProductId, $data = [], $identifierType = null)
     {
         $typeId = $this->_getTypeId($type);

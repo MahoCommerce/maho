@@ -35,6 +35,7 @@ class Mage_Admin_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstra
      */
     protected $_ruleTable;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('admin/role', 'role_id');
@@ -48,6 +49,7 @@ class Mage_Admin_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstra
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $role)
     {
         if ($role->getId() == '') {
@@ -83,6 +85,7 @@ class Mage_Admin_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstra
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $role)
     {
         $this->_updateRoleUsersAcl($role);
@@ -98,6 +101,7 @@ class Mage_Admin_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstra
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterDelete(Mage_Core_Model_Abstract $role)
     {
         $adapter = $this->_getWriteAdapter();

@@ -21,6 +21,7 @@
  */
 class Mage_Reports_Model_Resource_Review_Collection extends Mage_Review_Model_Resource_Review_Collection
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('review/review');
@@ -54,6 +55,7 @@ class Mage_Reports_Model_Resource_Review_Collection extends Mage_Review_Model_Re
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     public function getSelectCountSql()
     {
         $countSelect = clone $this->_select;
@@ -73,6 +75,7 @@ class Mage_Reports_Model_Resource_Review_Collection extends Mage_Review_Model_Re
      * @param string $dir
      * @return $this
      */
+    #[\Override]
     public function setOrder($attribute, $dir = self::SORT_ORDER_DESC)
     {
         if (in_array($attribute, ['nickname', 'title', 'detail', 'created_at'])) {

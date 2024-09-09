@@ -39,6 +39,7 @@ class Mage_Core_Model_Variable extends Mage_Core_Model_Abstract
     /**
      * Internal Constructor
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

@@ -117,6 +117,7 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
     protected $_address;
     protected $_quote;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/quote_address_item');
@@ -125,6 +126,7 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
     /**
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();
@@ -161,6 +163,7 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
      *
      * @return Mage_Sales_Model_Quote
      */
+    #[\Override]
     public function getQuote()
     {
         return $this->_quote;
@@ -197,6 +200,7 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
      * @param string $code
      * @return Mage_Catalog_Model_Product_Configuration_Item_Option_Interface|null
      */
+    #[\Override]
     public function getOptionBycode($code)
     {
         if ($this->getQuoteItem()) {

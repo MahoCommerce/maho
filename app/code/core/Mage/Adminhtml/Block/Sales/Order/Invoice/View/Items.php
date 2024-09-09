@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_View_Items extends Mage_Adminhtml
      *
      * @return Mage_Sales_Model_Order
      */
+    #[\Override]
     public function getOrder()
     {
         return $this->getInvoice()->getOrder();
@@ -36,6 +37,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_View_Items extends Mage_Adminhtml
      *
      * @return Mage_Sales_Model_Order_Invoice
      */
+    #[\Override]
     public function getSource()
     {
         return $this->getInvoice();
@@ -46,6 +48,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_View_Items extends Mage_Adminhtml
      *
      * @return Mage_Sales_Model_Order_Invoice
      */
+    #[\Override]
     public function getInvoice()
     {
         return Mage::registry('current_invoice');
@@ -65,6 +68,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_View_Items extends Mage_Adminhtml
      * @param float $price
      * @return string
      */
+    #[\Override]
     public function formatPrice($price)
     {
         return $this->getInvoice()->getOrder()->formatPrice($price);

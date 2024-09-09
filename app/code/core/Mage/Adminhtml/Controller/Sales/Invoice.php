@@ -30,6 +30,7 @@ class Mage_Adminhtml_Controller_Sales_Invoice extends Mage_Adminhtml_Controller_
     /**
      * Additional initialization
      */
+    #[\Override]
     protected function _construct()
     {
         $this->setUsedModuleName('Mage_Sales');

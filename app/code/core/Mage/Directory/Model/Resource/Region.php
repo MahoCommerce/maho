@@ -32,6 +32,7 @@ class Mage_Directory_Model_Resource_Region extends Mage_Core_Model_Resource_Db_A
      * Define main and locale region name tables
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('directory/country_region', 'region_id');
@@ -47,6 +48,7 @@ class Mage_Directory_Model_Resource_Region extends Mage_Core_Model_Resource_Db_A
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     protected function _getLoadSelect($field, $value, $object)
     {
         $select  = parent::_getLoadSelect($field, $value, $object);

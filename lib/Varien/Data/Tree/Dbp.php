@@ -133,6 +133,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
      * @param int $recursionLevel
      * @return Varien_Data_Tree_Dbp
      */
+    #[\Override]
     public function load($parentNode = null, $recursionLevel = 0)
     {
         if (!$this->_loaded) {
@@ -227,6 +228,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
      * @param int|string $nodeId
      * @return Varien_Data_Tree_Node
      */
+    #[\Override]
     public function loadNode($nodeId)
     {
         $select = clone $this->_select;
@@ -249,6 +251,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
      * @param array $result
      * @return array
      */
+    #[\Override]
     public function getChildren($node, $recursive = true, $result = [])
     {
         if (is_numeric($node)) {

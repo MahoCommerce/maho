@@ -386,6 +386,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         if (!$this->_isAvailable()) {

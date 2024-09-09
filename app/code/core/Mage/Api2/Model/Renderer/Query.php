@@ -32,6 +32,7 @@ class Mage_Api2_Model_Renderer_Query implements Mage_Api2_Model_Renderer_Interfa
      * @param array|object $data
      * @return string
      */
+    #[\Override]
     public function render($data)
     {
         return http_build_query($data);
@@ -42,6 +43,7 @@ class Mage_Api2_Model_Renderer_Query implements Mage_Api2_Model_Renderer_Interfa
      *
      * @return string
      */
+    #[\Override]
     public function getMimeType()
     {
         return self::MIME_TYPE;

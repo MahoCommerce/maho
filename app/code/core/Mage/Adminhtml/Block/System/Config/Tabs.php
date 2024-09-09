@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_System_Config_Tabs extends Mage_Adminhtml_Block_Widge
      */
     protected $_tabs;
 
+    #[\Override]
     protected function _construct()
     {
         $this->setId('system_config_tabs');

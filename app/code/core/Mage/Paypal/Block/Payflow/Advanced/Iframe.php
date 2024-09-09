@@ -24,6 +24,7 @@ class Mage_Paypal_Block_Payflow_Advanced_Iframe extends Mage_Paypal_Block_Payflo
     /**
      * Set payment method code
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -34,6 +35,7 @@ class Mage_Paypal_Block_Payflow_Advanced_Iframe extends Mage_Paypal_Block_Payflo
      * Get frame action URL
      * @return string
      */
+    #[\Override]
     public function getFrameActionUrl()
     {
         return $this->getTransactionUrl() . '?SECURETOKEN=' . $this->getSecureToken() . '&SECURETOKENID='
@@ -45,6 +47,7 @@ class Mage_Paypal_Block_Payflow_Advanced_Iframe extends Mage_Paypal_Block_Payflo
      *
      * @return bool
      */
+    #[\Override]
     public function isTestMode()
     {
         $mode = Mage::helper('payment')

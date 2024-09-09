@@ -249,6 +249,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
      * @throws Exception
      * @return bool Result of operation.
      */
+    #[\Override]
     protected function _importData()
     {
         if (Mage_ImportExport_Model_Import::BEHAVIOR_DELETE == $this->getBehavior()) {
@@ -533,6 +534,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
      * @abstract
      * @return string
      */
+    #[\Override]
     public function getEntityTypeCode()
     {
         return 'customer';
@@ -569,6 +571,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
      * @param string $attrCode
      * @return bool
      */
+    #[\Override]
     public function isAttributeParticular($attrCode)
     {
         return parent::isAttributeParticular($attrCode) || $this->_addressEntity->isAttributeParticular($attrCode);
@@ -580,6 +583,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
      * @param int $rowNum
      * @return bool
      */
+    #[\Override]
     public function validateRow(array $rowData, $rowNum)
     {
         static $email   = null; // e-mail is remembered through all customer rows

@@ -52,6 +52,7 @@ class Mage_SalesRule_Model_Coupon_Massgenerator extends Mage_Core_Model_Abstract
     /**
      * Initialize resource
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('salesrule/coupon');
@@ -62,6 +63,7 @@ class Mage_SalesRule_Model_Coupon_Massgenerator extends Mage_Core_Model_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function generateCode()
     {
         $format  = $this->getFormat();
@@ -95,6 +97,7 @@ class Mage_SalesRule_Model_Coupon_Massgenerator extends Mage_Core_Model_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function getDelimiter()
     {
         if ($this->getData('delimiter')) {

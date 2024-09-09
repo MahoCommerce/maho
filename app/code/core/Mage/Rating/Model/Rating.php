@@ -61,6 +61,7 @@ class Mage_Rating_Model_Rating extends Mage_Core_Model_Abstract
     /**
      * Define resource model
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('rating/rating');

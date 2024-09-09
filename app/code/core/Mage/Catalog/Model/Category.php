@@ -164,6 +164,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     /**
      * Initialize resource mode
      */
+    #[\Override]
     protected function _construct()
     {
         // If Flat Data enabled then use it but only on frontend
@@ -773,6 +774,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         $this->_protectFromNonAdmin();
@@ -975,6 +977,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     public function afterCommitCallback()
     {
         parent::afterCommitCallback();

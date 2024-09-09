@@ -49,6 +49,7 @@ class Mage_Cms_Block_Page extends Mage_Core_Block_Abstract
      * @inheritDoc
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $page = $this->getPage();
@@ -112,6 +113,7 @@ class Mage_Cms_Block_Page extends Mage_Core_Block_Abstract
      * @throws Mage_Core_Model_Store_Exception
      * @throws Exception
      */
+    #[\Override]
     protected function _toHtml()
     {
         /** @var Mage_Cms_Helper_Data $helper */

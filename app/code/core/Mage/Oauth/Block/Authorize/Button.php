@@ -26,6 +26,7 @@ class Mage_Oauth_Block_Authorize_Button extends Mage_Oauth_Block_Authorize_Butto
      *
      * @return string
      */
+    #[\Override]
     public function getConfirmUrlPath()
     {
         return 'oauth/authorize/confirm';
@@ -36,6 +37,7 @@ class Mage_Oauth_Block_Authorize_Button extends Mage_Oauth_Block_Authorize_Butto
      *
      * @return string
      */
+    #[\Override]
     public function getRejectUrlPath()
     {
         return 'oauth/authorize/reject';

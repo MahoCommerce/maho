@@ -24,6 +24,7 @@ class Mage_Downloadable_CustomerController extends Mage_Core_Controller_Front_Ac
     /**
      * Check customer authentication
      */
+    #[\Override]
     public function preDispatch()
     {
         parent::preDispatch();

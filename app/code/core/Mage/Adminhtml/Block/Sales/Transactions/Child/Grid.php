@@ -46,6 +46,7 @@ class Mage_Adminhtml_Block_Sales_Transactions_Child_Grid extends Mage_Adminhtml_
      *
      * @return Mage_Adminhtml_Block_Widget_Grid
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('sales/order_payment_transaction_collection');
@@ -58,6 +59,7 @@ class Mage_Adminhtml_Block_Sales_Transactions_Child_Grid extends Mage_Adminhtml_
      * Remove some columns and make other not sortable
      *
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $result = parent::_prepareColumns();

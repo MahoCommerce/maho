@@ -27,6 +27,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         /** @var Mage_Page_Block_Html_Head $head */
@@ -43,6 +44,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareForm()
     {
         $form = new Varien_Data_Form();

@@ -148,6 +148,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
      */
     protected $_processIndexEvents = true;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('cataloginventory/stock_item');
@@ -159,6 +160,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
      *
      * @resturn Varien_Object
      */
+    #[\Override]
     protected function _initOldFieldsMap()
     {
         // pre 1.6 fields names, old => new
@@ -743,6 +745,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         // see if quantity is defined for this item type
@@ -924,6 +927,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     public function afterCommitCallback()
     {
         parent::afterCommitCallback();

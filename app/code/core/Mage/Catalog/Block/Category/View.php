@@ -25,6 +25,7 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
      * @return $this|Mage_Core_Block_Template
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         parent::_prepareLayout();
@@ -173,6 +174,7 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
      *
      * @return array
      */
+    #[\Override]
     public function getCacheTags()
     {
         return array_merge(parent::getCacheTags(), $this->getCurrentCategory()->getCacheIdTags());

@@ -31,6 +31,7 @@ class Mage_Adminhtml_Block_System_Store_Delete_Form extends Mage_Adminhtml_Block
         $this->setTitle(Mage::helper('cms')->__('Block Information'));
     }
 
+    #[\Override]
     protected function _prepareForm()
     {
         $dataObject = $this->getDataObject();

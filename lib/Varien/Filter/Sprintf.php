@@ -28,6 +28,7 @@ class Varien_Filter_Sprintf implements Zend_Filter_Interface
         $this->_thousandsSep = $thousandsSep;
     }
 
+    #[\Override]
     public function filter($value)
     {
         if (!is_null($this->_decimals)) {

@@ -82,6 +82,7 @@ class Mage_Catalog_Block_Product_List_Upsell extends Mage_Catalog_Block_Product_
     /**
      * @return Mage_Catalog_Block_Product_Abstract
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         $this->_prepareData();
@@ -130,6 +131,7 @@ class Mage_Catalog_Block_Product_List_Upsell extends Mage_Catalog_Block_Product_
     /**
      * @return int
      */
+    #[\Override]
     public function getColumnCount()
     {
         return $this->_columnCount;
@@ -184,6 +186,7 @@ class Mage_Catalog_Block_Product_List_Upsell extends Mage_Catalog_Block_Product_
      *
      * @return array
      */
+    #[\Override]
     public function getCacheTags()
     {
         return array_merge(parent::getCacheTags(), $this->getItemsTags($this->getItems()));

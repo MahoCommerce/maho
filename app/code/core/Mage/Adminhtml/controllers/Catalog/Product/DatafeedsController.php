@@ -28,6 +28,7 @@ class Mage_Adminhtml_Catalog_DatafeedsController extends Mage_Adminhtml_Controll
      *
      * @return true
      */
+    #[\Override]
     protected function _isAllowed()
     {
         return true;

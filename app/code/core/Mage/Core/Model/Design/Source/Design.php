@@ -50,6 +50,7 @@ class Mage_Core_Model_Design_Source_Design extends Mage_Eav_Model_Entity_Attribu
      * @param bool $withEmpty add empty (please select) values to result
      * @return array
      */
+    #[\Override]
     public function getAllOptions($withEmpty = true)
     {
         if (is_null($this->_options)) {
@@ -87,6 +88,7 @@ class Mage_Core_Model_Design_Source_Design extends Mage_Eav_Model_Entity_Attribu
      * @param string|int $value
      * @return string
      */
+    #[\Override]
     public function getOptionText($value)
     {
         $options = $this->getAllOptions(false);

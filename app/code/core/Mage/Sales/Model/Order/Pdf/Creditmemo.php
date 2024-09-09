@@ -96,6 +96,7 @@ class Mage_Sales_Model_Order_Pdf_Creditmemo extends Mage_Sales_Model_Order_Pdf_A
      * @param  Mage_Sales_Model_Order_Creditmemo[] $creditmemos
      * @return Zend_Pdf
      */
+    #[\Override]
     public function getPdf($creditmemos = [])
     {
         $this->_beforeGetPdf();
@@ -154,6 +155,7 @@ class Mage_Sales_Model_Order_Pdf_Creditmemo extends Mage_Sales_Model_Order_Pdf_A
      *
      * @return Zend_Pdf_Page
      */
+    #[\Override]
     public function newPage(array $settings = [])
     {
         $page = parent::newPage($settings);

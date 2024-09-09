@@ -103,6 +103,7 @@ class Mage_Core_Model_Store_Group extends Mage_Core_Model_Abstract
      * init model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/store_group');
@@ -331,6 +332,7 @@ class Mage_Core_Model_Store_Group extends Mage_Core_Model_Abstract
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         $this->_protectFromNonAdmin();

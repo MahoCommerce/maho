@@ -40,6 +40,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer_Abstract extends Mage_Core_Model_
      * should be defined because abstract
      *
      */
+    #[\Override]
     protected function _construct()
     {
     }

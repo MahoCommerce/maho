@@ -114,6 +114,7 @@ class Varien_Filter_Template implements Zend_Filter_Interface
      * @param string $value
      * @return string
      */
+    #[\Override]
     public function filter($value)
     {
         if ($value === null) {

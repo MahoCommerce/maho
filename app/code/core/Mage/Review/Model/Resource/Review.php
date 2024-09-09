@@ -73,6 +73,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Define main table. Define other tables name
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('review/review', 'review_id');
@@ -92,6 +93,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
      * @param Mage_Core_Model_Abstract $object
      * @return Zend_Db_Select
      */
+    #[\Override]
     protected function _getLoadSelect($field, $value, $object)
     {
         $select = parent::_getLoadSelect($field, $value, $object);
@@ -107,6 +109,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if (!$object->getId()) {
@@ -128,6 +131,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
      * @return $this
      * @throws Zend_Db_Adapter_Exception
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
         $adapter = $this->_getWriteAdapter();
@@ -192,6 +196,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
      * @return $this
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {
         $adapter = $this->_getReadAdapter();
@@ -212,6 +217,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeDelete(Mage_Core_Model_Abstract $object)
     {
         // prepare rating ids, that depend on review

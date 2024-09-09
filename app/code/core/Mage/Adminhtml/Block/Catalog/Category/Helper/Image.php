@@ -21,6 +21,7 @@
  */
 class Mage_Adminhtml_Block_Catalog_Category_Helper_Image extends Varien_Data_Form_Element_Image
 {
+    #[\Override]
     protected function _getUrl()
     {
         $url = false;

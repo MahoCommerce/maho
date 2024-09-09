@@ -26,6 +26,7 @@ class Mage_Catalog_Model_Product_Attribute_Source_Boolean extends Mage_Eav_Model
      *
      * @return array
      */
+    #[\Override]
     public function getAllOptions()
     {
         if (!$this->_options) {

@@ -29,6 +29,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('widget')->__('Widget Options');
@@ -39,6 +40,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('widget')->__('Widget Options');
@@ -49,6 +51,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
      *
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         return $this->getWidgetInstance()->isCompleteToCreate();
@@ -59,6 +62,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
      *
      * @return false
      */
+    #[\Override]
     public function isHidden()
     {
         return false;
@@ -80,6 +84,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _preparelayout()
     {
         $this->setWidgetType($this->getWidgetInstance()->getType())
@@ -93,6 +98,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
      * @param Varien_Object $parameter
      * @return Varien_Data_Form_Element_Abstract|false
      */
+    #[\Override]
     protected function _addField($parameter)
     {
         if ($parameter->getKey() != 'template') {

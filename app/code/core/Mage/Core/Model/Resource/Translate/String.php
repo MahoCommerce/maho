@@ -21,6 +21,7 @@
  */
 class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/translate', 'key_id');
@@ -30,6 +31,7 @@ class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource
      * @param Mage_Core_Model_Translate_String $object
      * @inheritDoc
      */
+    #[\Override]
     public function load(Mage_Core_Model_Abstract $object, $value, $field = null)
     {
         if (is_string($value)) {
@@ -53,6 +55,7 @@ class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource
      * @param Mage_Core_Model_Abstract $object
      * @return Varien_Db_Select
      */
+    #[\Override]
     protected function _getLoadSelect($field, $value, $object)
     {
         $select = parent::_getLoadSelect($field, $value, $object);
@@ -66,6 +69,7 @@ class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource
      * @param Mage_Core_Model_Translate_String $object
      * @inheritDoc
      */
+    #[\Override]
     public function _afterLoad(Mage_Core_Model_Abstract $object)
     {
         $adapter = $this->_getReadAdapter();
@@ -81,6 +85,7 @@ class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource
      * @param Mage_Core_Model_Translate_String $object
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         $adapter = $this->_getWriteAdapter();
@@ -102,6 +107,7 @@ class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource
      * @param Mage_Core_Model_Translate_String $object
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
         $adapter = $this->_getWriteAdapter();

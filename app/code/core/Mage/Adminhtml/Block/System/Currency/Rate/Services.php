@@ -25,6 +25,7 @@ class Mage_Adminhtml_Block_System_Currency_Rate_Services extends Mage_Adminhtml_
      * Set import services template
      *
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -36,6 +37,7 @@ class Mage_Adminhtml_Block_System_Currency_Rate_Services extends Mage_Adminhtml_
      *
      * @return Mage_Core_Block_Abstract
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $this->setChild(

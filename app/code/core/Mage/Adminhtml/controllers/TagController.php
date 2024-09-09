@@ -327,6 +327,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _isAllowed()
     {
         $action = strtolower($this->getRequest()->getActionName());

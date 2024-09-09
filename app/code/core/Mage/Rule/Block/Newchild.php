@@ -22,6 +22,7 @@ class Mage_Rule_Block_Newchild extends Mage_Core_Block_Abstract implements Varie
     /**
      * @return string
      */
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         $element->addClass('element-value-changer');

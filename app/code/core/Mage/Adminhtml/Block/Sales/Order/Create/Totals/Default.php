@@ -23,6 +23,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Totals_Default extends Mage_Adminh
 {
     protected $_template = 'sales/order/create/totals/default.phtml';
 
+    #[\Override]
     protected function _construct()
     {
         $this->setTemplate($this->_template);
@@ -33,6 +34,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Totals_Default extends Mage_Adminh
      *
      * @return Mage_Adminhtml_Model_Session_Quote
      */
+    #[\Override]
     protected function _getSession()
     {
         return Mage::getSingleton('adminhtml/session_quote');
@@ -43,11 +45,13 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Totals_Default extends Mage_Adminh
      *
      * @return Mage_Core_Model_Store
      */
+    #[\Override]
     public function getStore()
     {
         return $this->_getSession()->getStore();
     }
 
+    #[\Override]
     public function formatPrice($value)
     {
         return $this->getStore()->formatPrice($value);

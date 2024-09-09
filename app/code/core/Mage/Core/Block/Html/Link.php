@@ -21,6 +21,7 @@
  */
 class Mage_Core_Block_Html_Link extends Mage_Core_Block_Template
 {
+    #[\Override]
     protected function _construct()
     {
         $this->setTemplate('core/link.phtml');
@@ -65,6 +66,7 @@ class Mage_Core_Block_Html_Link extends Mage_Core_Block_Template
      * @param   string $quote
      * @return  string
      */
+    #[\Override]
     public function serialize($attributes = [], $valueSeparator = '=', $fieldSeparator = ' ', $quote = '"')
     {
         $res  = '';

@@ -29,6 +29,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_ApiWizard extends Mage_Adminhtml
     /**
      * Set template to itself
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         parent::_prepareLayout();
@@ -43,6 +44,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_ApiWizard extends Mage_Adminhtml
      *
      * @return string
      */
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         $element->unsScope()->unsCanUseWebsiteValue()->unsCanUseDefaultValue();
@@ -54,6 +56,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_ApiWizard extends Mage_Adminhtml
      *
      * @return string
      */
+    #[\Override]
     protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element)
     {
         $originalData = $element->getOriginalData();

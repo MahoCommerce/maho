@@ -88,6 +88,7 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
      */
     protected $_isStatusChanged = false;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('newsletter/subscriber');
@@ -98,6 +99,7 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
      *
      * @return int
      */
+    #[\Override]
     public function getId()
     {
         return $this->getSubscriberId();
@@ -109,6 +111,7 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
      * @param int $value
      * @return $this
      */
+    #[\Override]
     public function setId($value)
     {
         return $this->setSubscriberId($value);

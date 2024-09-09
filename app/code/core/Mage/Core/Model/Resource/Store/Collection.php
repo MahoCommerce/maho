@@ -33,6 +33,7 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
      *  Define resource model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->setFlag('load_default_store', false);
@@ -125,6 +126,7 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
      *
      * @return array
      */
+    #[\Override]
     public function toOptionArray()
     {
         return $this->_toOptionArray('store_id', 'name');
@@ -135,6 +137,7 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
      *
      * @return array
      */
+    #[\Override]
     public function toOptionHash()
     {
         return $this->_toOptionHash('store_id', 'name');
@@ -143,6 +146,7 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {
         if (!$this->getLoadDefault()) {

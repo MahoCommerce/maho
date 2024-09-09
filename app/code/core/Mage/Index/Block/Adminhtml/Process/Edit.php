@@ -45,6 +45,7 @@ class Mage_Index_Block_Adminhtml_Process_Edit extends Mage_Adminhtml_Block_Widge
      *
      * @return string
      */
+    #[\Override]
     public function getBackUrl()
     {
         return $this->getUrl('adminhtml/process/list');
@@ -67,6 +68,7 @@ class Mage_Index_Block_Adminhtml_Process_Edit extends Mage_Adminhtml_Block_Widge
      *
      * @return string
      */
+    #[\Override]
     public function getHeaderText()
     {
         $process = Mage::registry('current_index_process');

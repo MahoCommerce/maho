@@ -21,6 +21,7 @@
  */
 class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Image extends Varien_Data_Form_Element_Image
 {
+    #[\Override]
     protected function _getUrl()
     {
         $url = false;
@@ -30,6 +31,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Image extends Varien_Data
         return $url;
     }
 
+    #[\Override]
     protected function _getDeleteCheckbox()
     {
         $html = '';

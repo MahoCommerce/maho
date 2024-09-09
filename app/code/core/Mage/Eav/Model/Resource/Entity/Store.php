@@ -21,6 +21,7 @@
  */
 class Mage_Eav_Model_Resource_Entity_Store extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('eav/entity_store', 'entity_store_id');

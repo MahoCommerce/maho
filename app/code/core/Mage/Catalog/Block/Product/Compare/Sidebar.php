@@ -32,6 +32,7 @@ class Mage_Catalog_Block_Product_Compare_Sidebar extends Mage_Catalog_Block_Prod
      * Initialize block
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->setId('compare');
@@ -97,6 +98,7 @@ class Mage_Catalog_Block_Product_Compare_Sidebar extends Mage_Catalog_Block_Prod
      *
      * @return array
      */
+    #[\Override]
     public function getCacheTags()
     {
         $compareItem = Mage::getModel('catalog/product_compare_item');

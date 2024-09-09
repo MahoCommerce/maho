@@ -36,6 +36,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      *
      * @return string
      */
+    #[\Override]
     protected function _getDefaultAttributeModel()
     {
         return 'catalog/resource_eav_attribute';
@@ -58,6 +59,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute
      * @return bool
      */
+    #[\Override]
     protected function _isApplicableAttribute($object, $attribute)
     {
         $applyTo = $attribute->getApplyTo();
@@ -72,6 +74,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param array $args array of arguments
      * @return bool
      */
+    #[\Override]
     protected function _isCallableAttributeInstance($instance, $method, $args)
     {
         if ($instance instanceof Mage_Eav_Model_Entity_Attribute_Backend_Abstract
@@ -94,6 +97,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param string $table
      * @return Varien_Db_Select
      */
+    #[\Override]
     protected function _getLoadAttributesSelect($object, $table)
     {
         /**
@@ -139,6 +143,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param string $type
      * @return Varien_Db_Select
      */
+    #[\Override]
     protected function _addLoadAttributesSelectFields($select, $table, $type)
     {
         /** @var Mage_Catalog_Model_Resource_Helper_Mysql4 $helper */
@@ -154,6 +159,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     protected function _prepareLoadSelect(array $selects)
     {
         $select = parent::_prepareLoadSelect($selects);
@@ -168,6 +174,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param array $valueRow
      * @return Mage_Catalog_Model_Resource_Abstract
      */
+    #[\Override]
     protected function _setAttributeValue($object, $valueRow)
     {
         $attribute = $this->getAttribute($valueRow['attribute_id']);
@@ -270,6 +277,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param mixed $value
      * @return Mage_Catalog_Model_Resource_Abstract
      */
+    #[\Override]
     protected function _insertAttribute($object, $attribute, $value)
     {
         /**
@@ -315,6 +323,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param mixed $value
      * @return Mage_Catalog_Model_Resource_Abstract
      */
+    #[\Override]
     protected function _updateAttribute($object, $attribute, $valueId, $value)
     {
         return $this->_saveAttributeValue($object, $attribute, $value);
@@ -378,6 +387,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param array $info
      * @return Mage_Catalog_Model_Resource_Abstract
      */
+    #[\Override]
     protected function _deleteAttributes($object, $table, $info)
     {
         $adapter            = $this->_getWriteAdapter();
@@ -446,6 +456,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param Varien_Object $object
      * @return Varien_Object
      */
+    #[\Override]
     protected function _getOrigObject($object)
     {
         $className  = get_class($object);
@@ -513,6 +524,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param mixed $value
      * @return bool
      */
+    #[\Override]
     protected function _isAttributeValueEmpty(Mage_Eav_Model_Entity_Attribute_Abstract $attribute, $value)
     {
         return $value === false;
@@ -526,6 +538,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param mixed $value New value of the attribute.
      * @return bool
      */
+    #[\Override]
     protected function _canUpdateAttribute(
         Mage_Eav_Model_Entity_Attribute_Abstract $attribute,
         $value,
@@ -550,6 +563,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param mixed $value
      * @return mixed
      */
+    #[\Override]
     protected function _prepareValueForSave($value, Mage_Eav_Model_Entity_Attribute_Abstract $attribute)
     {
         $type = $attribute->getBackendType();
@@ -752,6 +766,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      *
      * @inheritDoc
      */
+    #[\Override]
     public function load($object, $entityId, $attributes = [])
     {
         $this->_attributes = [];

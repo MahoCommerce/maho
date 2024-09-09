@@ -34,6 +34,7 @@ class Mage_Adminhtml_Block_Widget_Button extends Mage_Adminhtml_Block_Widget
         return $this->getData('on_click');
     }
 
+    #[\Override]
     protected function _toHtml()
     {
         return $this->getBeforeHtml() . '<button '

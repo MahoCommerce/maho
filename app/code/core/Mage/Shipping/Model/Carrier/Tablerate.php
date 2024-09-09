@@ -60,6 +60,7 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
      *
      * @return false|Mage_Shipping_Model_Rate_Result
      */
+    #[\Override]
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
         if (!$this->getConfigFlag('active')) {
@@ -252,6 +253,7 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
      *
      * @return array
      */
+    #[\Override]
     public function getAllowedMethods()
     {
         return ['bestway' => $this->getConfigData('name')];

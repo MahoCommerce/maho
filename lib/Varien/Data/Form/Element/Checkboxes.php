@@ -40,6 +40,7 @@ class Varien_Data_Form_Element_Checkboxes extends Varien_Data_Form_Element_Abstr
      *
      * @return array
      */
+    #[\Override]
     public function getHtmlAttributes()
     {
         return ['type', 'name', 'class', 'style', 'checked', 'onclick', 'onchange', 'disabled'];
@@ -89,6 +90,7 @@ class Varien_Data_Form_Element_Checkboxes extends Varien_Data_Form_Element_Abstr
      *
      * @return string
      */
+    #[\Override]
     public function getElementHtml()
     {
         $values = $this->_prepareValues();

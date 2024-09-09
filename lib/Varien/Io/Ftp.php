@@ -69,6 +69,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      * @return boolean
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function open(array $args = [])
     {
         if (empty($args['host'])) {
@@ -141,6 +142,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function close()
     {
         return @ftp_close($this->_conn);
@@ -157,6 +159,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function mkdir($dir, $mode = 0777, $recursive = true)
     {
         return @ftp_mkdir($this->_conn, $dir);
@@ -170,6 +173,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function rmdir($dir, $recursive = false)
     {
         return @ftp_rmdir($this->_conn, $dir);
@@ -182,6 +186,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function pwd()
     {
         return @ftp_pwd($this->_conn);
@@ -195,6 +200,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function cd($dir)
     {
         return @ftp_chdir($this->_conn, $dir);
@@ -207,6 +213,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      * @param string|resource|null $dest destination file name, stream, or if null will return file contents
      * @return bool|string
      */
+    #[\Override]
     public function read($filename, $dest = null)
     {
         if (is_string($dest)) {
@@ -242,6 +249,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function write($filename, $src, $mode = null)
     {
         if (is_string($src) && is_readable($src)) {
@@ -274,6 +282,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function rm($filename)
     {
         return @ftp_delete($this->_conn, $filename);
@@ -288,6 +297,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function mv($src, $dest)
     {
         return @ftp_rename($this->_conn, $src, $dest);
@@ -302,6 +312,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function chmod($filename, $mode)
     {
         return @ftp_chmod($this->_conn, $mode, $filename);
@@ -310,6 +321,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
     /**
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function ls($grep = null)
     {
         $ls = @ftp_nlist($this->_conn, '.');

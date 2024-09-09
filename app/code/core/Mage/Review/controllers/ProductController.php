@@ -31,6 +31,7 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
     /**
      * @return $this|Mage_Core_Controller_Front_Action|void
      */
+    #[\Override]
     public function preDispatch()
     {
         parent::preDispatch();

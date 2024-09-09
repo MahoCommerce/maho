@@ -254,6 +254,7 @@ class Mage_Reports_Model_Resource_Report_Collection_Abstract extends Mage_Core_M
      *
      * @inheritDoc
      */
+    #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {
         if ($this->isLoaded()) {

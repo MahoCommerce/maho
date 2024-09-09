@@ -35,6 +35,7 @@ class Mage_Sales_Model_Resource_Order_Payment extends Mage_Sales_Model_Resource_
      */
     protected $_eventPrefix          = 'sales_order_payment_resource';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order_payment', 'entity_id');
@@ -46,6 +47,7 @@ class Mage_Sales_Model_Resource_Order_Payment extends Mage_Sales_Model_Resource_
      * @param string $field
      * @param mixed $defaultValue
      */
+    #[\Override]
     protected function _unserializeField(Varien_Object $object, $field, $defaultValue = null)
     {
         $value = $object->getData($field);

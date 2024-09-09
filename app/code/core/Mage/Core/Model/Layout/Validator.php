@@ -136,6 +136,7 @@ class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
      * @param Varien_Simplexml_Element|string $value
      * @return bool
      */
+    #[\Override]
     public function isValid($value)
     {
         if (is_string($value)) {

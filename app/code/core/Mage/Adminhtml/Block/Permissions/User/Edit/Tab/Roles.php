@@ -30,6 +30,7 @@ class Mage_Adminhtml_Block_Permissions_User_Edit_Tab_Roles extends Mage_Adminhtm
         $this->setUseAjax(true);
     }
 
+    #[\Override]
     protected function _addColumnFilterToCollection($column)
     {
         if ($column->getId() == 'assigned_user_role') {
@@ -50,6 +51,7 @@ class Mage_Adminhtml_Block_Permissions_User_Edit_Tab_Roles extends Mage_Adminhtm
         return $this;
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('admin/role_collection');
@@ -58,6 +60,7 @@ class Mage_Adminhtml_Block_Permissions_User_Edit_Tab_Roles extends Mage_Adminhtm
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('assigned_user_role', [
@@ -85,6 +88,7 @@ class Mage_Adminhtml_Block_Permissions_User_Edit_Tab_Roles extends Mage_Adminhtm
         return parent::_prepareColumns();
     }
 
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/rolesGrid', ['user_id' => Mage::registry('permissions_user')->getUserId()]);

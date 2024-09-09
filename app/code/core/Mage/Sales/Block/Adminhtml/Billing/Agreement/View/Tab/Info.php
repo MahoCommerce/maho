@@ -31,6 +31,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Info extends Mage_Ad
     /**
      * Set custom template
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -42,6 +43,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Info extends Mage_Ad
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return $this->__('General Information');
@@ -52,6 +54,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Info extends Mage_Ad
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return $this->__('General Information');
@@ -62,6 +65,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Info extends Mage_Ad
      *
      * @return true
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -72,6 +76,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Info extends Mage_Ad
      *
      * @return false
      */
+    #[\Override]
     public function isHidden()
     {
         return false;
@@ -92,6 +97,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Info extends Mage_Ad
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         $agreement = $this->_getBillingAgreement();

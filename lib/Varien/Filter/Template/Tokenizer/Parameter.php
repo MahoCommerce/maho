@@ -27,6 +27,7 @@ class Varien_Filter_Template_Tokenizer_Parameter extends Varien_Filter_Template_
      *
      * @return array
      */
+    #[\Override]
     public function tokenize()
     {
         $parameters = [];

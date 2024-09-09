@@ -21,6 +21,7 @@
  */
 class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Settings extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -32,6 +33,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Settings extends Mage
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('widget')->__('Settings');
@@ -42,6 +44,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Settings extends Mage
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('widget')->__('Settings');
@@ -52,6 +55,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Settings extends Mage
      *
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         return !(bool)$this->getWidgetInstance()->isCompleteToCreate();
@@ -62,6 +66,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Settings extends Mage
      *
      * @return false
      */
+    #[\Override]
     public function isHidden()
     {
         return false;
@@ -82,6 +87,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Settings extends Mage
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareForm()
     {
         $widgetInstance = $this->getWidgetInstance();

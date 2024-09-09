@@ -34,6 +34,7 @@ class Mage_Catalog_Block_Product_New extends Mage_Catalog_Block_Product_Abstract
     /**
      * Initialize block's cache
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -53,6 +54,7 @@ class Mage_Catalog_Block_Product_New extends Mage_Catalog_Block_Product_Abstract
      *
      * @return array
      */
+    #[\Override]
     public function getCacheKeyInfo()
     {
         return [
@@ -114,6 +116,7 @@ class Mage_Catalog_Block_Product_New extends Mage_Catalog_Block_Product_Abstract
      *
      * @return Mage_Core_Block_Abstract
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         $this->setProductCollection($this->_getProductCollection());

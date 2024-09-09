@@ -41,6 +41,7 @@ class Mage_Sales_Model_Resource_Order_Shipment_Collection extends Mage_Sales_Mod
      */
     protected $_orderField     = 'order_id';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order_shipment');
@@ -51,6 +52,7 @@ class Mage_Sales_Model_Resource_Order_Shipment_Collection extends Mage_Sales_Mod
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad()
     {
         $this->walk('afterLoad');

@@ -27,6 +27,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Info extends Mage_Adminhtml_Block_Widg
     /**
      * Prepare form object
      */
+    #[\Override]
     protected function _prepareForm()
     {
         $form = new Varien_Data_Form();
@@ -94,6 +95,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Info extends Mage_Adminhtml_Block_Widg
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('api2')->__('Role Info');
@@ -104,6 +106,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Info extends Mage_Adminhtml_Block_Widg
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return $this->getTabLabel();
@@ -114,6 +117,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Info extends Mage_Adminhtml_Block_Widg
      *
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -124,6 +128,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Info extends Mage_Adminhtml_Block_Widg
      *
      * @return bool
      */
+    #[\Override]
     public function isHidden()
     {
         return false;

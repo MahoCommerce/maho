@@ -37,6 +37,7 @@
  */
 class Mage_Checkout_Model_Agreement extends Mage_Core_Model_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('checkout/agreement');

@@ -26,6 +26,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizedTokensController extends Mage_Adminht
      *
      * @return $this
      */
+    #[\Override]
     public function preDispatch()
     {
         $this->_title($this->__('System'))
@@ -147,6 +148,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizedTokensController extends Mage_Adminht
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _isAllowed()
     {
         /** @var Mage_Admin_Model_Session $session */

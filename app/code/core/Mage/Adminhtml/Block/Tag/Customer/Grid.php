@@ -37,6 +37,7 @@ class Mage_Adminhtml_Block_Tag_Customer_Grid extends Mage_Adminhtml_Block_Widget
      *
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/customer', ['_current' => true]);
@@ -45,6 +46,7 @@ class Mage_Adminhtml_Block_Tag_Customer_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $tagId = Mage::registry('current_tag')->getId();
@@ -63,6 +65,7 @@ class Mage_Adminhtml_Block_Tag_Customer_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterLoadCollection()
     {
         $this->getCollection()->addProductName();
@@ -72,6 +75,7 @@ class Mage_Adminhtml_Block_Tag_Customer_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('customer_id', [
@@ -119,6 +123,7 @@ class Mage_Adminhtml_Block_Tag_Customer_Grid extends Mage_Adminhtml_Block_Widget
      * @param Varien_Object $row
      * @return string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/customer/edit', ['id' => $row->getId()]);

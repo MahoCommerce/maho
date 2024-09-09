@@ -150,6 +150,7 @@ class Mage_Paypal_Model_Api_Standard extends Mage_Paypal_Model_Api_Abstract
      * Merchant account email getter
      * @return string
      */
+    #[\Override]
     public function getBusinessAccount()
     {
         return $this->_getDataOrConfig('business_account');
@@ -159,6 +160,7 @@ class Mage_Paypal_Model_Api_Standard extends Mage_Paypal_Model_Api_Abstract
      * Payment action getter
      * @return string
      */
+    #[\Override]
     public function getPaymentAction()
     {
         return strtolower(parent::getPaymentAction());
@@ -181,6 +183,7 @@ class Mage_Paypal_Model_Api_Standard extends Mage_Paypal_Model_Api_Abstract
      * @param int $i
      * @return bool
      */
+    #[\Override]
     protected function _exportLineItems(array &$request, $i = 1)
     {
         if (!$this->_cart) {

@@ -65,6 +65,7 @@ class Mage_Catalog_Block_Product_List_Related extends Mage_Catalog_Block_Product
     /**
      * @return Mage_Catalog_Block_Product_Abstract
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         $this->_prepareData();
@@ -84,6 +85,7 @@ class Mage_Catalog_Block_Product_List_Related extends Mage_Catalog_Block_Product
      *
      * @return array
      */
+    #[\Override]
     public function getCacheTags()
     {
         return array_merge(parent::getCacheTags(), $this->getItemsTags($this->getItems()));

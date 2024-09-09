@@ -34,6 +34,7 @@ class Mage_Sales_Model_Resource_Quote_Payment extends Mage_Sales_Model_Resource_
      * Main table and field initialization
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/quote_payment', 'payment_id');
@@ -44,6 +45,7 @@ class Mage_Sales_Model_Resource_Quote_Payment extends Mage_Sales_Model_Resource_
      * @param mixed $defaultValue
      * @see Mage_Core_Model_Resource_Abstract::_unserializeField()
      */
+    #[\Override]
     protected function _unserializeField(Varien_Object $object, $field, $defaultValue = null)
     {
         $value = $object->getData($field);

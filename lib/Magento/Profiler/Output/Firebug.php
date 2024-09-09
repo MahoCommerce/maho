@@ -58,6 +58,7 @@ class Magento_Profiler_Output_Firebug extends Magento_Profiler_OutputAbstract
     /**
      * Display profiling results and flush output buffer
      */
+    #[\Override]
     public function display()
     {
         $firebugMessage = new Zend_Wildfire_Plugin_FirePhp_TableMessage($this->_renderCaption());
@@ -93,6 +94,7 @@ class Magento_Profiler_Output_Firebug extends Magento_Profiler_OutputAbstract
      * @param string $timerId
      * @return string
      */
+    #[\Override]
     protected function _renderTimerId($timerId)
     {
         $nestingSep = preg_quote(Magento_Profiler::NESTING_SEPARATOR, '/');

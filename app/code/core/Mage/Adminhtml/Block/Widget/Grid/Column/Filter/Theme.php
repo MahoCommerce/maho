@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Theme extends Mage_Adminhtm
      *
      * @return string
      */
+    #[\Override]
     public function getHtml()
     {
         $options = $this->getOptions();
@@ -93,6 +94,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Theme extends Mage_Adminhtm
      *
      * @return mixed
      */
+    #[\Override]
     public function getCondition()
     {
         if (is_null($this->getValue())) {

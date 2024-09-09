@@ -29,6 +29,7 @@ class Mage_CatalogIndex_Model_Resource_Data_Grouped extends Mage_CatalogIndex_Mo
      * @param int $store
      * @return array
      */
+    #[\Override]
     public function getMinimalPrice($products, $priceAttributes, $store)
     {
         $result = [];
@@ -108,6 +109,7 @@ class Mage_CatalogIndex_Model_Resource_Data_Grouped extends Mage_CatalogIndex_Mo
      * @param int $id
      * @param array $additionalWheres
      */
+    #[\Override]
     protected function _prepareLinkFetchSelect($store, $table, $idField, $whereField, $id, $additionalWheres = [])
     {
         $this->_addAttributeFilter($this->_getLinkSelect(), 'required_options', 'l', $idField, $store, 0);

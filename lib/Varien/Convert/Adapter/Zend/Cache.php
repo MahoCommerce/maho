@@ -21,6 +21,7 @@
  */
 class Varien_Convert_Adapter_Zend_Cache extends Varien_Convert_Adapter_Abstract
 {
+    #[\Override]
     public function getResource()
     {
         if (!$this->_resource) {
@@ -29,12 +30,14 @@ class Varien_Convert_Adapter_Zend_Cache extends Varien_Convert_Adapter_Abstract
         return $this->_resource;
     }
 
+    #[\Override]
     public function load()
     {
         $this->setData($this->getResource()->load($this->getVar('id')));
         return $this;
     }
 
+    #[\Override]
     public function save()
     {
         $this->getResource()->save($this->getData(), $this->getVar('id'));

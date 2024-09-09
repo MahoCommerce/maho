@@ -59,6 +59,7 @@ class Mage_Catalog_Block_Layer_View extends Mage_Core_Block_Template
     /**
      * Internal constructor
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -95,6 +96,7 @@ class Mage_Catalog_Block_Layer_View extends Mage_Core_Block_Template
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $stateBlock = $this->getLayout()->createBlock($this->_stateBlockName)

@@ -44,6 +44,7 @@ class Mage_AdminNotification_Model_Inbox extends Mage_Core_Model_Abstract
     public const SEVERITY_MINOR    = 3;
     public const SEVERITY_NOTICE   = 4;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('adminnotification/inbox');

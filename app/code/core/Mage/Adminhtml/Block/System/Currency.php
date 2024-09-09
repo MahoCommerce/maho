@@ -21,11 +21,13 @@
  */
 class Mage_Adminhtml_Block_System_Currency extends Mage_Adminhtml_Block_Template
 {
+    #[\Override]
     protected function _construct()
     {
         $this->setTemplate('system/currency/rates.phtml');
     }
 
+    #[\Override]
     protected function _prepareLayout()
     {
         $this->setChild(

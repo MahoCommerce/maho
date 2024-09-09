@@ -239,6 +239,7 @@ class Mage_Reports_Model_Resource_Customer_Collection extends Mage_Customer_Mode
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad()
     {
         $this->_addOrdersStatistics();
@@ -262,6 +263,7 @@ class Mage_Reports_Model_Resource_Customer_Collection extends Mage_Customer_Mode
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     public function getSelectCountSql()
     {
         $countSelect = clone $this->getSelect();

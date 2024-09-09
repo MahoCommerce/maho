@@ -79,6 +79,7 @@ class Mage_Api_Model_Server_Wsi_Handler extends Mage_Api_Model_Server_Handler_Ab
      * @param string $apiKey
      * @return stdClass
      */
+    #[\Override]
     public function login($username, $apiKey = null)
     {
         if (is_object($username)) {
@@ -167,6 +168,7 @@ class Mage_Api_Model_Server_Wsi_Handler extends Mage_Api_Model_Server_Handler_Ab
      * @param stdClass $request
      * @return stdClass
      */
+    #[\Override]
     public function endSession($request)
     {
         $stdObject = new stdClass();

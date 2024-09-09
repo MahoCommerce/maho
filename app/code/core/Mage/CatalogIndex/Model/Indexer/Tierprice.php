@@ -54,6 +54,7 @@ class Mage_CatalogIndex_Model_Indexer_Tierprice extends Mage_CatalogIndex_Model_
 
     protected $_processChildren = false;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalogindex/indexer_price');
@@ -66,6 +67,7 @@ class Mage_CatalogIndex_Model_Indexer_Tierprice extends Mage_CatalogIndex_Model_
     /**
      * @return array
      */
+    #[\Override]
     public function createIndexData(Mage_Catalog_Model_Product $object, ?Mage_Eav_Model_Entity_Attribute_Abstract $attribute = null)
     {
         $data = [];
@@ -105,6 +107,7 @@ class Mage_CatalogIndex_Model_Indexer_Tierprice extends Mage_CatalogIndex_Model_
     /**
      * @return bool
      */
+    #[\Override]
     protected function _isAttributeIndexable(Mage_Eav_Model_Entity_Attribute_Abstract $attribute)
     {
         if ($attribute->getAttributeCode() != 'tier_price') {
@@ -117,6 +120,7 @@ class Mage_CatalogIndex_Model_Indexer_Tierprice extends Mage_CatalogIndex_Model_
     /**
      * @return array
      */
+    #[\Override]
     protected function _getIndexableAttributeConditions()
     {
         $conditions = [];

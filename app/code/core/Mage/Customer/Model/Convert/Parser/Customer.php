@@ -214,6 +214,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
      * @return $this
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     public function unparse()
     {
         $systemFields = [];
@@ -443,6 +444,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
     /**
      * @deprecated not used anymore
      */
+    #[\Override]
     public function parse()
     {
         $data = $this->getData();

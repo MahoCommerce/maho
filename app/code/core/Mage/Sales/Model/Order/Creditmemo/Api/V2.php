@@ -28,6 +28,7 @@ class Mage_Sales_Model_Order_Creditmemo_Api_V2 extends Mage_Sales_Model_Order_Cr
      * @param null|object $filters
      * @return array
      */
+    #[\Override]
     protected function _prepareListFilter($filters = null)
     {
         $preparedFilters = [];
@@ -59,6 +60,7 @@ class Mage_Sales_Model_Order_Creditmemo_Api_V2 extends Mage_Sales_Model_Order_Cr
      * @param null|object $data
      * @return array
      */
+    #[\Override]
     protected function _prepareCreateData($data)
     {
         // convert data object to array, if it's null turn it into empty array

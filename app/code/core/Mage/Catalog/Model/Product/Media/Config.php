@@ -68,6 +68,7 @@ class Mage_Catalog_Model_Product_Media_Config implements Mage_Media_Model_Image_
     /**
      * @return string
      */
+    #[\Override]
     public function getBaseMediaPath()
     {
         return Mage::getBaseDir('media') . DS . 'catalog' . DS . 'product';
@@ -76,6 +77,7 @@ class Mage_Catalog_Model_Product_Media_Config implements Mage_Media_Model_Image_
     /**
      * @return string
      */
+    #[\Override]
     public function getBaseMediaUrl()
     {
         return Mage::getBaseUrl('media') . 'catalog/product';
@@ -101,6 +103,7 @@ class Mage_Catalog_Model_Product_Media_Config implements Mage_Media_Model_Image_
      * @param string $file
      * @return string
      */
+    #[\Override]
     public function getMediaUrl($file)
     {
         $file = $this->_prepareFileForUrl($file);
@@ -116,6 +119,7 @@ class Mage_Catalog_Model_Product_Media_Config implements Mage_Media_Model_Image_
      * @param string $file
      * @return string
      */
+    #[\Override]
     public function getMediaPath($file)
     {
         $file = $this->_prepareFileForPath($file);

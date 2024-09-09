@@ -32,6 +32,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
     /**
      * @return bool
      */
+    #[\Override]
     public function isCustomizedView()
     {
         return true;
@@ -43,6 +44,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * @param array $optionInfo
      * @return string
      */
+    #[\Override]
     public function getCustomizedView($optionInfo)
     {
         try {
@@ -110,6 +112,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * @return $this
      * @throws Mage_Core_Exception|Zend_Validate_Exception
      */
+    #[\Override]
     public function validateUserValue($values)
     {
         Mage::getSingleton('checkout/session')->setUseNotice(false);
@@ -417,6 +420,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * @return mixed Prepared option value
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     public function prepareForCart()
     {
         $option = $this->getOption();
@@ -462,6 +466,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * @param string $optionValue Prepared for cart option value
      * @return string
      */
+    #[\Override]
     public function getFormattedOptionValue($optionValue)
     {
         if ($this->_formattedOptionValue === null) {
@@ -543,6 +548,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * @param string $optionValue Prepared for cart option value
      * @return string
      */
+    #[\Override]
     public function getPrintableOptionValue($optionValue)
     {
         $value = $this->getFormattedOptionValue($optionValue);
@@ -555,6 +561,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * @param string $optionValue Prepared for cart option value
      * @return string
      */
+    #[\Override]
     public function getEditableOptionValue($optionValue)
     {
         try {
@@ -576,6 +583,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * @param array $productOptionValues Values for product option
      * @return string|null
      */
+    #[\Override]
     public function parseOptionValue($optionValue, $productOptionValues)
     {
         // search quote item option Id in option value
@@ -598,6 +606,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * @param string $optionValue
      * @return mixed
      */
+    #[\Override]
     public function prepareOptionValueForRequest($optionValue)
     {
         try {

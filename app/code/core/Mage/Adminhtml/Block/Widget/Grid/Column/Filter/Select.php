@@ -61,6 +61,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Select extends Mage_Adminht
     /**
      * @return string
      */
+    #[\Override]
     public function getHtml()
     {
         $html = '<select name="' . $this->_getHtmlName() . '" id="' . $this->_getHtmlId() . '" class="no-changes">';
@@ -83,6 +84,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Select extends Mage_Adminht
     /**
      * @return array|null
      */
+    #[\Override]
     public function getCondition()
     {
         if (is_null($this->getValue())) {

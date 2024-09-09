@@ -28,6 +28,7 @@ class Mage_Catalog_Model_Product_Option_Type_Text extends Mage_Catalog_Model_Pro
      * @param array $values All product option values, i.e. array (option_id => mixed, option_id => mixed...)
      * @return Mage_Catalog_Model_Product_Option_Type_Default
      */
+    #[\Override]
     public function validateUserValue($values)
     {
         parent::validateUserValue($values);
@@ -57,6 +58,7 @@ class Mage_Catalog_Model_Product_Option_Type_Text extends Mage_Catalog_Model_Pro
      *
      * @return string|null Prepared option value
      */
+    #[\Override]
     public function prepareForCart()
     {
         if ($this->getIsValid() && strlen($this->getUserValue()) > 0) {
@@ -72,6 +74,7 @@ class Mage_Catalog_Model_Product_Option_Type_Text extends Mage_Catalog_Model_Pro
      * @param string $value Prepared for cart option value
      * @return string
      */
+    #[\Override]
     public function getFormattedOptionValue($value)
     {
         return Mage::helper('core')->escapeHtml($value);

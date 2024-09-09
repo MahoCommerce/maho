@@ -32,6 +32,7 @@
  */
 class Mage_Core_Model_Design extends Mage_Core_Model_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/design');

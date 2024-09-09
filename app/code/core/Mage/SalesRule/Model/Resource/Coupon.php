@@ -21,6 +21,7 @@
  */
 class Mage_SalesRule_Model_Resource_Coupon extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('salesrule/coupon', 'coupon_id');
@@ -35,6 +36,7 @@ class Mage_SalesRule_Model_Resource_Coupon extends Mage_Core_Model_Resource_Db_A
      *
      * @return Mage_Core_Model_Resource_Db_Abstract
      */
+    #[\Override]
     public function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if (!$object->getExpirationDate()) {

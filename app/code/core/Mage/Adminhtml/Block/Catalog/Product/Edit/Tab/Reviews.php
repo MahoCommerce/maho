@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Reviews extends Mage_Adminht
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareMassaction()
     {
         return $this;
@@ -36,6 +37,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Reviews extends Mage_Adminht
      *
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/reviews', ['_current' => true]);

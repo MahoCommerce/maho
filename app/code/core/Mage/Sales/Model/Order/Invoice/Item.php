@@ -99,6 +99,7 @@ class Mage_Sales_Model_Order_Invoice_Item extends Mage_Core_Model_Abstract
      */
     protected $_orderItem = null;
 
+    #[\Override]
     public function _construct()
     {
         $this->_init('sales/order_invoice_item');
@@ -110,6 +111,7 @@ class Mage_Sales_Model_Order_Invoice_Item extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _initOldFieldsMap()
     {
         // pre 1.6 fields names, old => new
@@ -296,6 +298,7 @@ class Mage_Sales_Model_Order_Invoice_Item extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();
@@ -312,6 +315,7 @@ class Mage_Sales_Model_Order_Invoice_Item extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterSave()
     {
         if (!$this->_orderItem == null) {

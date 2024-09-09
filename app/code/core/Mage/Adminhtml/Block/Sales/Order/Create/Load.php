@@ -21,6 +21,7 @@
  */
 class Mage_Adminhtml_Block_Sales_Order_Create_Load extends Mage_Core_Block_Template
 {
+    #[\Override]
     protected function _toHtml()
     {
         $result = [];

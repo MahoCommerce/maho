@@ -25,6 +25,7 @@ class Mage_Eav_Model_Resource_Form_Type_Collection extends Mage_Core_Model_Resou
      * Initialize collection model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('eav/form_type');
@@ -35,6 +36,7 @@ class Mage_Eav_Model_Resource_Form_Type_Collection extends Mage_Core_Model_Resou
      *
      * @return array
      */
+    #[\Override]
     public function toOptionArray()
     {
         return $this->_toOptionArray('type_id', 'label');

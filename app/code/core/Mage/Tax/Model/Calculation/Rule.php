@@ -78,6 +78,7 @@ class Mage_Tax_Model_Calculation_Rule extends Mage_Core_Model_Abstract
     /**
      * Varien model constructor
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('tax/calculation_rule');
@@ -89,6 +90,7 @@ class Mage_Tax_Model_Calculation_Rule extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterSave()
     {
         parent::_afterSave();
@@ -103,6 +105,7 @@ class Mage_Tax_Model_Calculation_Rule extends Mage_Core_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterDelete()
     {
         Mage::dispatchEvent('tax_settings_change_after');

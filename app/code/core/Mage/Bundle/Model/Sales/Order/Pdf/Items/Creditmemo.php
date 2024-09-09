@@ -25,6 +25,7 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Creditmemo extends Mage_Bundle_Mod
      * Draw item line
      *
      */
+    #[\Override]
     public function draw()
     {
         $order  = $this->getOrder();

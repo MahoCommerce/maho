@@ -45,6 +45,7 @@ class Mage_Api2_Model_Acl_Filter_Attribute_ResourcePermission implements Mage_Ap
      *
      * @return array
      */
+    #[\Override]
     public function getResourcesPermissions()
     {
         if ($this->_resourcesPermissions === null) {
@@ -146,6 +147,7 @@ class Mage_Api2_Model_Acl_Filter_Attribute_ResourcePermission implements Mage_Ap
      * @param string $userType
      * @return $this
      */
+    #[\Override]
     public function setFilterValue($userType)
     {
         if (!array_key_exists($userType, Mage_Api2_Model_Auth_User::getUserTypes())) {

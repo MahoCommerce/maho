@@ -29,6 +29,7 @@ class Mage_Adminhtml_Block_System_Store_Grid extends Mage_Adminhtml_Block_Widget
         $this->setSaveParametersInSession(true);
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getModel('core/website')
@@ -39,6 +40,7 @@ class Mage_Adminhtml_Block_System_Store_Grid extends Mage_Adminhtml_Block_Widget
         return $this;
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('website_title', [

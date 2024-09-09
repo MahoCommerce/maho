@@ -25,6 +25,7 @@ class Mage_Adminhtml_Block_System_Store_Grid_Render_Store extends Mage_Adminhtml
     /**
      * @return string|null
      */
+    #[\Override]
     public function render(Varien_Object $row)
     {
         if (!$row->getData($this->getColumn()->getIndex())) {

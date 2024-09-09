@@ -25,6 +25,7 @@ class Mage_Api_Model_Resource_Roles_Collection extends Mage_Core_Model_Resource_
      * Resource collection initialization
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('api/role');
@@ -35,6 +36,7 @@ class Mage_Api_Model_Resource_Roles_Collection extends Mage_Core_Model_Resource_
      *
      * @return $this
      */
+    #[\Override]
     protected function _initSelect()
     {
         parent::_initSelect();
@@ -47,6 +49,7 @@ class Mage_Api_Model_Resource_Roles_Collection extends Mage_Core_Model_Resource_
      *
      * @return array
      */
+    #[\Override]
     public function toOptionArray()
     {
         return $this->_toOptionArray('role_id', 'role_name');

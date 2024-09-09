@@ -53,6 +53,7 @@ class Mage_Newsletter_Model_Resource_Subscriber extends Mage_Core_Model_Resource
      * Get tablename from config
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('newsletter/subscriber', 'subscriber_id');

@@ -13,6 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class LegacyRenameMysql4Classes extends BaseMahoCommand
 {
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $todo = [

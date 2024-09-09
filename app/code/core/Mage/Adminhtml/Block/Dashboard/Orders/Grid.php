@@ -27,6 +27,7 @@ class Mage_Adminhtml_Block_Dashboard_Orders_Grid extends Mage_Adminhtml_Block_Da
         $this->setId('lastOrdersGrid');
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         if (!Mage::helper('core')->isModuleEnabled('Mage_Reports')) {
@@ -61,6 +62,7 @@ class Mage_Adminhtml_Block_Dashboard_Orders_Grid extends Mage_Adminhtml_Block_Da
     /**
      * Prepares page sizes for dashboard grid with las 5 orders
      */
+    #[\Override]
     protected function _preparePage()
     {
         $this->getCollection()->setPageSize($this->getParam($this->getVarNameLimit(), $this->_defaultLimit));
@@ -70,6 +72,7 @@ class Mage_Adminhtml_Block_Dashboard_Orders_Grid extends Mage_Adminhtml_Block_Da
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('customer', [
@@ -108,6 +111,7 @@ class Mage_Adminhtml_Block_Dashboard_Orders_Grid extends Mage_Adminhtml_Block_Da
      * @param Varien_Object $row
      * @return string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/sales_order/view', ['order_id' => $row->getId()]);

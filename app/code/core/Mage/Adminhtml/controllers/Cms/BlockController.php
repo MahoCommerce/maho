@@ -32,6 +32,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
      *
      * @return Mage_Adminhtml_Controller_Action
      */
+    #[\Override]
     public function preDispatch()
     {
         $this->_setForcedFormKeyActions('delete');

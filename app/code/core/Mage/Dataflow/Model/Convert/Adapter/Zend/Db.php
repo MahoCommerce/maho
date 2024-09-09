@@ -21,6 +21,7 @@
  */
 class Mage_Dataflow_Model_Convert_Adapter_Zend_Db extends Mage_Dataflow_Model_Convert_Adapter_Abstract
 {
+    #[\Override]
     public function getResource()
     {
         if (!$this->_resource) {
@@ -29,11 +30,13 @@ class Mage_Dataflow_Model_Convert_Adapter_Zend_Db extends Mage_Dataflow_Model_Co
         return $this->_resource;
     }
 
+    #[\Override]
     public function load()
     {
         return $this;
     }
 
+    #[\Override]
     public function save()
     {
         return $this;

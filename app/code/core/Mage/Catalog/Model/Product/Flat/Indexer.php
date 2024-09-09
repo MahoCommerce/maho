@@ -54,6 +54,7 @@ class Mage_Catalog_Model_Product_Flat_Indexer extends Mage_Core_Model_Abstract
      * Standart model resource initialization
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_flat_indexer');

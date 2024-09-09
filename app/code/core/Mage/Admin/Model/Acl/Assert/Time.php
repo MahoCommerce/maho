@@ -27,6 +27,7 @@ class Mage_Admin_Model_Acl_Assert_Time implements Zend_Acl_Assert_Interface
      * @param string|null $privilege
      * @return bool|null
      */
+    #[\Override]
     public function assert(
         Mage_Admin_Model_Acl $acl,
         ?Mage_Admin_Model_Acl_Role $role = null,

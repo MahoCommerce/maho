@@ -46,6 +46,7 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_Create extends Mage_Adminhtml_Bl
     /**
      * @return string
      */
+    #[\Override]
     public function getHeaderText()
     {
         return Mage::helper('sales')->__(
@@ -57,6 +58,7 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_Create extends Mage_Adminhtml_Bl
     /**
      * @return string
      */
+    #[\Override]
     public function getBackUrl()
     {
         return $this->getUrl('*/sales_order/view', ['order_id' => $this->getShipment()->getOrderId()]);

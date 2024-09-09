@@ -52,6 +52,7 @@ class Mage_Index_Block_Adminhtml_Process_Grid extends Mage_Adminhtml_Block_Widge
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('index/process_collection');
@@ -66,6 +67,7 @@ class Mage_Index_Block_Adminhtml_Process_Grid extends Mage_Adminhtml_Block_Widge
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoadCollection()
     {
         /** @var Mage_Index_Model_Process $item */
@@ -89,6 +91,7 @@ class Mage_Index_Block_Adminhtml_Process_Grid extends Mage_Adminhtml_Block_Widge
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $baseUrl = $this->getUrl();
@@ -246,6 +249,7 @@ class Mage_Index_Block_Adminhtml_Process_Grid extends Mage_Adminhtml_Block_Widge
      *
      * @return string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/edit', ['process' => $row->getId()]);
@@ -256,6 +260,7 @@ class Mage_Index_Block_Adminhtml_Process_Grid extends Mage_Adminhtml_Block_Widge
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareMassaction()
     {
         $this->setMassactionIdField('process_id');

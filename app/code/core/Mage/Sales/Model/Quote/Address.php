@@ -297,6 +297,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     /**
      * Initialize resource
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/quote_address');
@@ -307,6 +308,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
      *
      * @return $this
      */
+    #[\Override]
     protected function _initOldFieldsMap()
     {
         return $this;
@@ -317,6 +319,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();
@@ -393,6 +396,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterSave()
     {
         parent::_afterSave();
@@ -486,6 +490,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
      *
      * @return  array
      */
+    #[\Override]
     public function toArray(array $arrAttributes = [])
     {
         $arr = parent::toArray($arrAttributes);

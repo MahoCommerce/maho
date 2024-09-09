@@ -32,6 +32,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav extends Mage_Catalog_Model
      * Define main index table
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_index_eav', 'entity_id');
@@ -160,6 +161,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav extends Mage_Catalog_Model
      *
      * @return $this
      */
+    #[\Override]
     public function reindexAll()
     {
         $this->useIdxTable(true);
@@ -177,6 +179,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav extends Mage_Catalog_Model
      * @param string $table
      * @return string
      */
+    #[\Override]
     public function getIdxTable($table = null)
     {
         if ($this->useIdxTable()) {

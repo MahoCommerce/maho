@@ -26,6 +26,7 @@ class Mage_Paypal_Model_System_Config_Backend_Cert extends Mage_Core_Model_Confi
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         $value = $this->getValue();
@@ -56,6 +57,7 @@ class Mage_Paypal_Model_System_Config_Backend_Cert extends Mage_Core_Model_Confi
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterDelete()
     {
         Mage::getModel('paypal/cert')->loadByWebsite($this->getScopeId())->delete();

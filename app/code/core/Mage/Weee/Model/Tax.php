@@ -65,6 +65,7 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
     /**
      * Initialize resource
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('weee/tax', 'weee/tax');

@@ -23,6 +23,7 @@ class Mage_Adminhtml_Helper_Dashboard_Order extends Mage_Adminhtml_Helper_Dashbo
 {
     protected $_moduleName = 'Mage_Adminhtml';
 
+    #[\Override]
     protected function _initCollection()
     {
         $isFilter = $this->getParam('store') || $this->getParam('website') || $this->getParam('group');

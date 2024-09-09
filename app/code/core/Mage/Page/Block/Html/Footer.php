@@ -26,6 +26,7 @@ class Mage_Page_Block_Html_Footer extends Mage_Core_Block_Template
      */
     protected $_copyright;
 
+    #[\Override]
     protected function _construct()
     {
         $this->addData(['cache_lifetime' => false]);
@@ -40,6 +41,7 @@ class Mage_Page_Block_Html_Footer extends Mage_Core_Block_Template
      *
      * @return array
      */
+    #[\Override]
     public function getCacheKeyInfo()
     {
         return [
@@ -82,6 +84,7 @@ class Mage_Page_Block_Html_Footer extends Mage_Core_Block_Template
      * @param bool $sorted
      * @return  string
      */
+    #[\Override]
     public function getChildHtml($name = '', $useCache = true, $sorted = true)
     {
         return parent::getChildHtml($name, $useCache, $sorted);

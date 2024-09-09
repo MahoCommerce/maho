@@ -189,6 +189,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param string $currencyCode
      * @return bool
      */
+    #[\Override]
     public function canUseForCurrency($currencyCode)
     {
         if (!in_array($currencyCode, $this->getAcceptedCurrencyCodes())) {
@@ -217,6 +218,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      *
      * @return bool
      */
+    #[\Override]
     public function canCapture()
     {
         if ($this->_isGatewayActionsLocked($this->getInfoInstance())) {
@@ -243,6 +245,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      *
      * @return bool
      */
+    #[\Override]
     public function canRefund()
     {
         if ($this->_isGatewayActionsLocked($this->getInfoInstance())
@@ -267,6 +270,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      *
      * @return  bool
      */
+    #[\Override]
     public function canVoid(Varien_Object $payment)
     {
         if ($this->_isGatewayActionsLocked($this->getInfoInstance())) {
@@ -315,6 +319,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param  float $amount
      * @return $this
      */
+    #[\Override]
     public function authorize(Varien_Object $payment, $amount)
     {
         if ($amount <= 0) {
@@ -341,6 +346,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param float $amount
      * @return $this
      */
+    #[\Override]
     public function capture(Varien_Object $payment, $amount)
     {
         if ($amount <= 0) {
@@ -364,6 +370,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param  Mage_Payment_Model_Info $payment
      * @return $this
      */
+    #[\Override]
     public function void(Varien_Object $payment)
     {
         $cardsStorage = $this->getCardsStorage($payment);
@@ -398,6 +405,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param  Mage_Payment_Model_Info $payment
      * @return $this
      */
+    #[\Override]
     public function cancel(Varien_Object $payment)
     {
         return $this->void($payment);
@@ -410,6 +418,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @return $this
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     public function refund(Varien_Object $payment, $requestedAmount)
     {
         $cardsStorage = $this->getCardsStorage($payment);
@@ -1029,6 +1038,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return Mage_Payment_Model_Method_Abstract
      */
+    #[\Override]
     public function processInvoice($invoice, $payment)
     {
         $invoice->setTransactionId(1);
@@ -1041,6 +1051,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return Mage_Payment_Model_Method_Abstract
      */
+    #[\Override]
     public function processCreditmemo($creditmemo, $payment)
     {
         $creditmemo->setTransactionId(1);
@@ -1055,6 +1066,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param string $transactionId
      * @return array
      */
+    #[\Override]
     public function fetchTransactionInfo(Mage_Payment_Model_Info $payment, $transactionId)
     {
         $data = parent::fetchTransactionInfo($payment, $transactionId);

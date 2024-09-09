@@ -28,6 +28,7 @@ class Mage_Reports_Model_Resource_Product_Ordered_Collection extends Mage_Report
      * @param string $to
      * @return $this
      */
+    #[\Override]
     protected function _joinFields($from = '', $to = '')
     {
         $this->addAttributeToSelect('*')

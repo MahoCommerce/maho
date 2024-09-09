@@ -26,6 +26,7 @@ class Mage_Authorizenet_Helper_Admin extends Mage_Authorizenet_Helper_Data
      * @param array $params
      * @return string
      */
+    #[\Override]
     public function getSuccessOrderUrl($params)
     {
         $url = parent::getSuccessOrderUrl($params);
@@ -49,6 +50,7 @@ class Mage_Authorizenet_Helper_Admin extends Mage_Authorizenet_Helper_Data
      * @param string $controller
      * @return array
      */
+    #[\Override]
     public function getSaveOrderUrlParams($controller)
     {
         $route = parent::getSaveOrderUrlParams($controller);

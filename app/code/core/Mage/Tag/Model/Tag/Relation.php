@@ -54,6 +54,7 @@ class Mage_Tag_Model_Tag_Relation extends Mage_Core_Model_Abstract
      */
     public const ENTITY = 'tag_relation';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('tag/tag_relation');
@@ -64,6 +65,7 @@ class Mage_Tag_Model_Tag_Relation extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     public function afterCommitCallback()
     {
         parent::afterCommitCallback();

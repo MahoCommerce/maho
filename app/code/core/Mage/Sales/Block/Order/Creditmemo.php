@@ -21,6 +21,7 @@
  */
 class Mage_Sales_Block_Order_Creditmemo extends Mage_Sales_Block_Order_Creditmemo_Items
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -30,6 +31,7 @@ class Mage_Sales_Block_Order_Creditmemo extends Mage_Sales_Block_Order_Creditmem
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         /** @var Mage_Page_Block_Html_Head $headBlock */
@@ -61,6 +63,7 @@ class Mage_Sales_Block_Order_Creditmemo extends Mage_Sales_Block_Order_Creditmem
      *
      * @return Mage_Sales_Model_Order
      */
+    #[\Override]
     public function getOrder()
     {
         return Mage::registry('current_order');
@@ -123,6 +126,7 @@ class Mage_Sales_Block_Order_Creditmemo extends Mage_Sales_Block_Order_Creditmem
      * @param Mage_Sales_Model_Order_Creditmemo $creditmemo
      * @return string
      */
+    #[\Override]
     public function getPrintCreditmemoUrl($creditmemo)
     {
         return Mage::getUrl('*/*/printCreditmemo', ['creditmemo_id' => $creditmemo->getId()]);
@@ -132,6 +136,7 @@ class Mage_Sales_Block_Order_Creditmemo extends Mage_Sales_Block_Order_Creditmem
      * @param Mage_Sales_Model_Order $order
      * @return string
      */
+    #[\Override]
     public function getPrintAllCreditmemosUrl($order)
     {
         return Mage::getUrl('*/*/printCreditmemo', ['order_id' => $order->getId()]);

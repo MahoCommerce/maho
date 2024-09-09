@@ -87,6 +87,7 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
     public const STATUS_SENT = 3;
     public const STATUS_PAUSE = 4;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('newsletter/queue');
@@ -347,6 +348,7 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
      *
      * @return int|string
      */
+    #[\Override]
     public function getType()
     {
         return $this->getNewsletterType();

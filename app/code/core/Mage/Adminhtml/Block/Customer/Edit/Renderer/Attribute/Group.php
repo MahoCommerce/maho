@@ -24,6 +24,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Renderer_Attribute_Group extends Mage_A
     /**
      * Override parent constructor just for setting custom template
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

@@ -102,6 +102,7 @@ class Mage_Checkout_Model_Cart extends Varien_Object implements Mage_Checkout_Mo
      *
      * @return Mage_Sales_Model_Quote
      */
+    #[\Override]
     public function getQuote()
     {
         if (!$this->hasData('quote')) {
@@ -115,6 +116,7 @@ class Mage_Checkout_Model_Cart extends Varien_Object implements Mage_Checkout_Mo
      *
      * @return $this
      */
+    #[\Override]
     public function setQuote(Mage_Sales_Model_Quote $quote)
     {
         $this->setData('quote', $quote);
@@ -226,6 +228,7 @@ class Mage_Checkout_Model_Cart extends Varien_Object implements Mage_Checkout_Mo
      * @param   mixed $requestInfo
      * @return  Mage_Checkout_Model_Cart
      */
+    #[\Override]
     public function addProduct($productInfo, $requestInfo = null)
     {
         $product = $this->_getProduct($productInfo);
@@ -458,6 +461,7 @@ class Mage_Checkout_Model_Cart extends Varien_Object implements Mage_Checkout_Mo
     /**
      * Save cart (implement interface method)
      */
+    #[\Override]
     public function saveQuote()
     {
         $this->save();

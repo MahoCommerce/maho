@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Sales_Order_Totals extends Mage_Adminhtml_Block_Sales
      *
      * @return Mage_Sales_Block_Order_Totals
      */
+    #[\Override]
     protected function _initTotals()
     {
         parent::_initTotals();

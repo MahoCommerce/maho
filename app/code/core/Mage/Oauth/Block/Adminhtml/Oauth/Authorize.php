@@ -26,6 +26,7 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Authorize extends Mage_Oauth_Block_Author
      *
      * @return string
      */
+    #[\Override]
     public function getFormKey()
     {
         return Mage::getSingleton('core/session')->getFormKey();
@@ -36,6 +37,7 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Authorize extends Mage_Oauth_Block_Author
      *
      * @return string
      */
+    #[\Override]
     public function getPostActionUrl()
     {
         return $this->getUrl('*/*/*');
@@ -46,6 +48,7 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Authorize extends Mage_Oauth_Block_Author
      *
      * @return string
      */
+    #[\Override]
     public function getIdentityLabel()
     {
         return $this->__('User Name');
@@ -56,6 +59,7 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Authorize extends Mage_Oauth_Block_Author
      *
      * @return string
      */
+    #[\Override]
     public function getFormTitle()
     {
         return $this->__('Log in as admin');
@@ -66,6 +70,7 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Authorize extends Mage_Oauth_Block_Author
      *
      * @return string
      */
+    #[\Override]
     public function getRejectUrlPath()
     {
         return 'adminhtml/oauth_authorize/reject';

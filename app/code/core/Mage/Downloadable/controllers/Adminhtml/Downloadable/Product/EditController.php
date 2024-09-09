@@ -23,6 +23,7 @@ require_once 'Mage/Adminhtml/controllers/Catalog/ProductController.php';
  */
 class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Mage_Adminhtml_Catalog_ProductController
 {
+    #[\Override]
     protected function _construct()
     {
         $this->setUsedModuleName('Mage_Downloadable');

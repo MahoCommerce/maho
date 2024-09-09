@@ -42,6 +42,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Wid
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         /** @var Mage_Admin_Model_Resource_User_Collection $collection */
@@ -65,6 +66,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Wid
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('filter_in_role_users', [
@@ -100,6 +102,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Wid
      *
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/usersGrid', ['_current' => true]);
@@ -111,6 +114,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Wid
      * @param Mage_Api2_Model_Acl_Global_Role $row
      * @return string|null
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return null;
@@ -121,6 +125,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Wid
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('api2')->__('Role Users');
@@ -131,6 +136,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Wid
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return $this->getTabLabel();
@@ -141,6 +147,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Wid
      *
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         return !$this->isHidden();
@@ -151,6 +158,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Wid
      *
      * @return bool
      */
+    #[\Override]
     public function isHidden()
     {
         return $this->getRole() && Mage_Api2_Model_Acl_Global_Role::isSystemRole($this->getRole());
@@ -161,6 +169,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Wid
      *
      * @return string
      */
+    #[\Override]
     public function _toHtml()
     {
         if (!$this->isHidden()) {
@@ -173,6 +182,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Wid
      * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
      * @return $this
      */
+    #[\Override]
     protected function _addColumnFilterToCollection($column)
     {
         if ($column->getId() == 'filter_in_role_users') {

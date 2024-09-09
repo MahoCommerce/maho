@@ -52,6 +52,7 @@ class Mage_Catalog_Helper_Product_Url_Rewrite implements Mage_Catalog_Helper_Pro
      * @param int $storeId
      * @return Varien_Db_Select
      */
+    #[\Override]
     public function getTableSelect(array $productIds, $categoryId, $storeId)
     {
         return $this->_connection->select()
@@ -69,6 +70,7 @@ class Mage_Catalog_Helper_Product_Url_Rewrite implements Mage_Catalog_Helper_Pro
      * @param int $storeId
      * @return Mage_Catalog_Helper_Product_Url_Rewrite_Interface
      */
+    #[\Override]
     public function joinTableToSelect(Varien_Db_Select $select, $storeId)
     {
         $select->joinLeft(

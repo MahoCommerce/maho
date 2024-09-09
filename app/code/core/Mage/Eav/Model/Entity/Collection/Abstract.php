@@ -246,6 +246,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      *
      * @inheritDoc
      */
+    #[\Override]
     public function addItem(Varien_Object $object)
     {
         if (get_class($object) !== $this->_itemObjectClass) {
@@ -324,6 +325,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      *
      * @inheritDoc
      */
+    #[\Override]
     public function addFieldToFilter($attribute, $condition = null)
     {
         return $this->addAttributeToFilter($attribute, $condition);
@@ -854,6 +856,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * @throws Mage_Core_Exception
      * @throws Mage_Eav_Exception
      */
+    #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {
         if ($this->isLoaded()) {
@@ -915,6 +918,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * @param int $offset
      * @return array
      */
+    #[\Override]
     public function getAllIds($limit = null, $offset = null)
     {
         return $this->getConnection()->fetchCol($this->_getAllIdsSelect($limit, $offset), $this->_bindParams);
@@ -1417,6 +1421,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      *
      * @inheritDoc
      */
+    #[\Override]
     public function setOrder($attribute, $dir = self::SORT_ORDER_ASC)
     {
         if (is_array($attribute)) {
@@ -1434,6 +1439,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * @param array $arrAttributes
      * @return array
      */
+    #[\Override]
     public function toArray($arrAttributes = [])
     {
         $arr = [];
@@ -1448,6 +1454,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      *
      * @return $this
      */
+    #[\Override]
     protected function _renderOrders()
     {
         if (!$this->_isOrdersRendered) {
@@ -1464,6 +1471,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad()
     {
         return $this;
@@ -1474,6 +1482,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      *
      * @return $this
      */
+    #[\Override]
     protected function _reset()
     {
         parent::_reset();

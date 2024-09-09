@@ -86,6 +86,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
      */
     protected static $_labels                   = null;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/attribute');
@@ -97,6 +98,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
      * @throws Mage_Core_Exception
      * @return Mage_Core_Model_Abstract
      */
+    #[\Override]
     protected function _beforeSave()
     {
         $this->setData('modulePrefix', self::MODULE_NAME);
@@ -128,6 +130,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave()
     {
         /**
@@ -143,6 +146,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         if ($this->_getResource()->isUsedBySuperProducts($this)) {
@@ -161,6 +165,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterDeleteCommit()
     {
         parent::_afterDeleteCommit();
@@ -176,6 +181,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
      *
      * @return int
      */
+    #[\Override]
     public function getIsGlobal()
     {
         return $this->_getData('is_global');
@@ -231,6 +237,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
      *
      * @return array
      */
+    #[\Override]
     public function getApplyTo()
     {
         if ($this->getData('apply_to')) {
@@ -330,6 +337,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
      *
      * @return string
      */
+    #[\Override]
     public function _getDefaultSourceModel()
     {
         return 'eav/entity_attribute_source_table';
@@ -387,6 +395,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
      *
      * @return $this
      */
+    #[\Override]
     public function afterCommitCallback()
     {
         parent::afterCommitCallback();

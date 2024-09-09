@@ -34,6 +34,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Found extends Mage_SalesRule_M
      *
      * @return $this
      */
+    #[\Override]
     public function loadValueOptions()
     {
         $this->setValueOption([
@@ -46,6 +47,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Found extends Mage_SalesRule_M
     /**
      * @return string
      */
+    #[\Override]
     public function asHtml()
     {
         $html = $this->getTypeElement()->getHtml() . Mage::helper('salesrule')->__('If an item is %s in the cart with %s of these conditions true:', $this->getValueElement()->getHtml(), $this->getAggregatorElement()->getHtml());
@@ -61,6 +63,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Found extends Mage_SalesRule_M
      * @param Varien_Object $object Quote
      * @return bool
      */
+    #[\Override]
     public function validate(Varien_Object $object)
     {
         $all = $this->getAggregator() === 'all';

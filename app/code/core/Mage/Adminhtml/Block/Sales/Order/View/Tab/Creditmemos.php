@@ -38,6 +38,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Creditmemos extends Mage_Adminht
         return 'sales/order_creditmemo_grid_collection';
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel($this->_getCollectionClass())
@@ -57,6 +58,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Creditmemos extends Mage_Adminht
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('increment_id', [
@@ -103,6 +105,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Creditmemos extends Mage_Adminht
         return Mage::registry('current_order');
     }
 
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl(
@@ -114,26 +117,31 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Creditmemos extends Mage_Adminht
         );
     }
 
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/creditmemos', ['_current' => true]);
     }
 
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('sales')->__('Credit Memos');
     }
 
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('sales')->__('Credit Memos');
     }
 
+    #[\Override]
     public function canShowTab()
     {
         return Mage::getSingleton('admin/session')->isAllowed('sales/creditmemo');
     }
 
+    #[\Override]
     public function isHidden()
     {
         return false;

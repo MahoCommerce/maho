@@ -19,6 +19,7 @@
  */
 class Mage_Adminhtml_Block_Tree extends Mage_Adminhtml_Block_Template
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

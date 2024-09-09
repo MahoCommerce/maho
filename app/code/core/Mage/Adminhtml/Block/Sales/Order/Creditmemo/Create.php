@@ -46,6 +46,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create extends Mage_Adminhtml_
     /**
      * @return string
      */
+    #[\Override]
     public function getHeaderText()
     {
         if ($this->getCreditmemo()->getInvoice()) {
@@ -66,6 +67,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create extends Mage_Adminhtml_
     /**
      * @return string
      */
+    #[\Override]
     public function getBackUrl()
     {
         return $this->getUrl('*/sales_order/view', ['order_id' => $this->getCreditmemo()->getOrderId()]);

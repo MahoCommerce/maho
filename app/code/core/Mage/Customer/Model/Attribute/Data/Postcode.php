@@ -29,6 +29,7 @@ class Mage_Customer_Model_Attribute_Data_Postcode extends Mage_Eav_Model_Attribu
      * @param array|string $value
      * @return bool|array
      */
+    #[\Override]
     public function validateValue($value)
     {
         $countryId      = $this->getExtractedData('country_id');

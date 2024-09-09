@@ -40,6 +40,7 @@ class Mage_Sales_Model_Order_Creditmemo_Comment extends Mage_Sales_Model_Abstrac
      */
     protected $_creditmemo;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order_creditmemo_comment');
@@ -71,6 +72,7 @@ class Mage_Sales_Model_Order_Creditmemo_Comment extends Mage_Sales_Model_Abstrac
      *
      * @return Mage_Core_Model_Store
      */
+    #[\Override]
     public function getStore()
     {
         if ($this->getCreditmemo()) {
@@ -84,6 +86,7 @@ class Mage_Sales_Model_Order_Creditmemo_Comment extends Mage_Sales_Model_Abstrac
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();

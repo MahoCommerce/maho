@@ -142,6 +142,7 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
      * init model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/website');
@@ -150,6 +151,7 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function load($id, $field = null)
     {
         if (!is_numeric($id) && is_null($field)) {
@@ -474,6 +476,7 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         $this->_protectFromNonAdmin();
@@ -485,6 +488,7 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterDelete()
     {
         Mage::app()->clearWebsiteCache($this->getId());

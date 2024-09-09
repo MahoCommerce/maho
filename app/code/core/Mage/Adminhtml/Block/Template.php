@@ -24,6 +24,7 @@ class Mage_Adminhtml_Block_Template extends Mage_Core_Block_Template
     /**
      * @return string
      */
+    #[\Override]
     protected function _getUrlModelClass()
     {
         return 'adminhtml/url';
@@ -34,6 +35,7 @@ class Mage_Adminhtml_Block_Template extends Mage_Core_Block_Template
      *
      * @return string
      */
+    #[\Override]
     public function getFormKey()
     {
         return Mage::getSingleton('core/session')->getFormKey();
@@ -61,6 +63,7 @@ class Mage_Adminhtml_Block_Template extends Mage_Core_Block_Template
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         Mage::dispatchEvent('adminhtml_block_html_before', ['block' => $this]);

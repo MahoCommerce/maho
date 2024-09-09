@@ -32,6 +32,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main_Layout extends M
     /**
      * Internal constructor
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -43,6 +44,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main_Layout extends M
      *
      * @return string
      */
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         $this->setElement($element);

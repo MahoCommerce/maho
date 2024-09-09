@@ -25,6 +25,7 @@ class Mage_Core_Model_Resource_Design_Collection extends Mage_Core_Model_Resourc
      * Core Design resource collection
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/design');

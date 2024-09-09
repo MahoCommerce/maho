@@ -230,6 +230,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Initialize customer model
      */
+    #[\Override]
     public function _construct()
     {
         $this->_init('customer/customer');
@@ -297,6 +298,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      * @return $this
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();
@@ -1388,6 +1390,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Prepare customer for delete
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         $this->_protectFromNonAdmin();

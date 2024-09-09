@@ -49,6 +49,7 @@ class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Ad
     /**
      * @return $this
      */
+    #[\Override]
     public function load()
     {
         try {
@@ -69,6 +70,7 @@ class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Ad
     /**
      * @return $this
      */
+    #[\Override]
     public function save()
     {
         foreach ($this->getData() as $i => $row) {

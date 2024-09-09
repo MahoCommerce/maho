@@ -159,6 +159,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
     /**
      * Load product collection Id(s)
      */
+    #[\Override]
     public function load()
     {
         $attrFilterArray = [];
@@ -429,6 +430,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
      * @param string $entityType
      * @return Mage_Catalog_Model_Resource_Product_Collection
      */
+    #[\Override]
     protected function _getCollectionForLoad($entityType)
     {
         return parent::_getCollectionForLoad($entityType)
@@ -476,6 +478,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
     /**
      * @return $this|Mage_Eav_Model_Convert_Adapter_Entity
      */
+    #[\Override]
     public function save()
     {
         $stores = [];

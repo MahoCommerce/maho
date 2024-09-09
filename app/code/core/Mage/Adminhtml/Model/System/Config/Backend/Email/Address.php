@@ -21,6 +21,7 @@
  */
 class Mage_Adminhtml_Model_System_Config_Backend_Email_Address extends Mage_Core_Model_Config_Data
 {
+    #[\Override]
     protected function _beforeSave()
     {
         $value = $this->getValue();

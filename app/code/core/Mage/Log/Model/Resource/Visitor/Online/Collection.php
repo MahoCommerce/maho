@@ -32,6 +32,7 @@ class Mage_Log_Model_Resource_Visitor_Online_Collection extends Mage_Core_Model_
      * Initialize collection model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('log/visitor_online');
@@ -118,6 +119,7 @@ class Mage_Log_Model_Resource_Visitor_Online_Collection extends Mage_Core_Model_
      * @see self::_getConditionSql for $condition
      *
      */
+    #[\Override]
     public function addFieldToFilter($field, $condition = null)
     {
         if (isset($this->_fields[$field])) {

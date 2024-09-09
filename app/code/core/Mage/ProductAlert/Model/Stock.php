@@ -40,6 +40,7 @@
  */
 class Mage_ProductAlert_Model_Stock extends Mage_Core_Model_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('productalert/stock');

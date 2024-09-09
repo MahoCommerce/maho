@@ -29,6 +29,7 @@ class Mage_Review_Block_Product_View extends Mage_Catalog_Block_Product_View
      * @inheritDoc
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _toHtml()
     {
         $this->getProduct()->setShortDescription(null);
@@ -45,6 +46,7 @@ class Mage_Review_Block_Product_View extends Mage_Catalog_Block_Product_View
      * @return string
      * @throws Mage_Core_Model_Store_Exception|Mage_Core_Exception
      */
+    #[\Override]
     public function getReviewsSummaryHtml(Mage_Catalog_Model_Product $product, $templateType = false, $displayIfNoReviews = false)
     {
         /** @var Mage_Core_Block_Template $reviewContBlock */
@@ -81,6 +83,7 @@ class Mage_Review_Block_Product_View extends Mage_Catalog_Block_Product_View
      *
      * @return false
      */
+    #[\Override]
     public function hasOptions()
     {
         return false;

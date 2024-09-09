@@ -43,6 +43,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
      *
      * @return $this|void
      */
+    #[\Override]
     public function preDispatch()
     {
         parent::preDispatch();
@@ -77,6 +78,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
      * @param int $wishlistId
      * @return Mage_Wishlist_Model_Wishlist|false
      */
+    #[\Override]
     protected function _getWishlist($wishlistId = null)
     {
         $wishlist = Mage::registry('wishlist');

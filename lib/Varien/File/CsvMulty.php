@@ -26,6 +26,7 @@ class Varien_File_Csv_Multy extends Varien_File_Csv
      * @param   int $valueIndex
      * @return  array
      */
+    #[\Override]
     public function getDataPairs($file, $keyIndex = 0, $valueIndex = 1)
     {
         $data = [];

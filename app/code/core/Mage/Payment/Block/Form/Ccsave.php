@@ -19,6 +19,7 @@
  */
 class Mage_Payment_Block_Form_Ccsave extends Mage_Payment_Block_Form_Cc
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

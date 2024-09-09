@@ -34,6 +34,7 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Grid_Abstract extends Mage_Adm
      *
      * @return Mage_Eav_Block_Adminhtml_Attribute_Grid_Abstract
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         parent::_prepareColumns();
@@ -83,6 +84,7 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Grid_Abstract extends Mage_Adm
      * @param Mage_Catalog_Model_Resource_Eav_Attribute $row
      * @return string
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/edit', ['attribute_id' => $row->getAttributeId()]);

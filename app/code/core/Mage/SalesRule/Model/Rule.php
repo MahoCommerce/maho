@@ -162,6 +162,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     /**
      * Set resource model and Id field name
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -184,6 +185,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterLoad()
     {
         $this->setCouponCode($this->getPrimaryCoupon()->getCode());
@@ -198,6 +200,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterSave()
     {
         $couponCode = trim((string)$this->getCouponCode());
@@ -226,6 +229,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     public function loadPost(array $data)
     {
         parent::loadPost($data);
@@ -242,6 +246,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return Mage_SalesRule_Model_Rule_Condition_Combine
      */
+    #[\Override]
     public function getConditionsInstance()
     {
         return Mage::getModel('salesrule/rule_condition_combine');
@@ -252,6 +257,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return Mage_SalesRule_Model_Rule_Condition_Product_Combine
      */
+    #[\Override]
     public function getActionsInstance()
     {
         return Mage::getModel('salesrule/rule_condition_product_combine');
@@ -511,6 +517,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function toString($format = '')
     {
         return '';
@@ -532,6 +539,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return array
      */
+    #[\Override]
     public function toArray(array $arrAttributes = [])
     {
         return parent::toArray($arrAttributes);

@@ -69,6 +69,7 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
     public const STATUS_PENDING        = 2;
     public const STATUS_NOT_APPROVED   = 3;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('review/review');
@@ -166,6 +167,7 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
      *
      * @return Mage_Core_Model_Abstract
      */
+    #[\Override]
     protected function _afterDeleteCommit()
     {
         $this->getResource()->afterDeleteCommit($this);
@@ -208,6 +210,7 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
      * @return Mage_Core_Model_Abstract
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         $this->_protectFromNonAdmin();

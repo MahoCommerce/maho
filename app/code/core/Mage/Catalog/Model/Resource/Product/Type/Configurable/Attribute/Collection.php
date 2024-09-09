@@ -44,6 +44,7 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute_Collection
      */
     protected $_product;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_type_configurable_attribute');
@@ -100,6 +101,7 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute_Collection
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad()
     {
         parent::_afterLoad();

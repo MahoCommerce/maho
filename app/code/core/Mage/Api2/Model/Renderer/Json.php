@@ -32,6 +32,7 @@ class Mage_Api2_Model_Renderer_Json implements Mage_Api2_Model_Renderer_Interfac
      * @param array|object $data
      * @return string
      */
+    #[\Override]
     public function render($data)
     {
         return Zend_Json::encode($data);
@@ -42,6 +43,7 @@ class Mage_Api2_Model_Renderer_Json implements Mage_Api2_Model_Renderer_Interfac
      *
      * @return string
      */
+    #[\Override]
     public function getMimeType()
     {
         return self::MIME_TYPE;

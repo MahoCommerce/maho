@@ -21,6 +21,7 @@
  */
 class Mage_Core_Model_Resource_Store_Group extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/store_group', 'group_id');
@@ -32,6 +33,7 @@ class Mage_Core_Model_Resource_Store_Group extends Mage_Core_Model_Resource_Db_A
      * @param Mage_Core_Model_Store_Group $model
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $model)
     {
         $this->_updateStoreWebsite($model->getId(), $model->getWebsiteId());

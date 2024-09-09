@@ -52,6 +52,7 @@ class Mage_Paypal_Block_Iframe extends Mage_Payment_Block_Form
      * Set info template for payment step
      *
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -123,6 +124,7 @@ class Mage_Paypal_Block_Iframe extends Mage_Payment_Block_Form
      *
      * @return Mage_Core_Block_Abstract
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         if ($this->_getOrder()->getId() &&
@@ -145,6 +147,7 @@ class Mage_Paypal_Block_Iframe extends Mage_Payment_Block_Form
      * @return string
      * @throws Exception
      */
+    #[\Override]
     protected function _toHtml()
     {
         if ($this->_isAfterPaymentSave()) {

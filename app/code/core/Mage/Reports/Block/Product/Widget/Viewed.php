@@ -21,6 +21,7 @@
  */
 class Mage_Reports_Block_Product_Widget_Viewed extends Mage_Reports_Block_Product_Viewed implements Mage_Widget_Block_Interface
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

@@ -56,6 +56,7 @@ class Varien_Data_Form_Filter_Date implements Varien_Data_Form_Filter_Interface
      * @param string $value
      * @return string
      */
+    #[\Override]
     public function inputFilter($value)
     {
         if ($value === null || $value === '') {
@@ -82,6 +83,7 @@ class Varien_Data_Form_Filter_Date implements Varien_Data_Form_Filter_Interface
      * @param string $value
      * @return string
      */
+    #[\Override]
     public function outputFilter($value)
     {
         if ($value === null || $value === '') {

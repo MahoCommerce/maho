@@ -21,6 +21,7 @@
  */
 class Mage_Newsletter_Model_Resource_Template extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('newsletter/template', 'template_id');
@@ -105,6 +106,7 @@ class Mage_Newsletter_Model_Resource_Template extends Mage_Core_Model_Resource_D
      * @param Mage_Newsletter_Model_Template $object
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if ($this->checkCodeUsage($object)) {

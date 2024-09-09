@@ -24,6 +24,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main extends Mage_Admin
     /**
      * Initialize template
      */
+    #[\Override]
     protected function _construct()
     {
         $this->setTemplate('catalog/product/attribute/set/main.phtml');
@@ -34,6 +35,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main extends Mage_Admin
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $setId = $this->_getSetId();
@@ -408,6 +410,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main extends Mage_Admin
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         Mage::dispatchEvent('adminhtml_catalog_product_attribute_set_main_html_before', ['block' => $this]);

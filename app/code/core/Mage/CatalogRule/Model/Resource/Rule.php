@@ -79,6 +79,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     /**
      * Initialize main table and table id field
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalogrule/rule', 'rule_id');
@@ -90,6 +91,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {
         $object->setData('customer_group_ids', (array)$this->getCustomerGroupIds($object->getId()));
@@ -105,6 +107,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
         if ($object->hasWebsiteIds()) {

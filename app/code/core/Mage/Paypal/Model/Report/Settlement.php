@@ -152,6 +152,7 @@ class Mage_Paypal_Model_Report_Settlement extends Mage_Core_Model_Abstract
         ]
     ];
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('paypal/report_settlement');
@@ -162,6 +163,7 @@ class Mage_Paypal_Model_Report_Settlement extends Mage_Core_Model_Abstract
      *
      * @return Mage_Core_Model_Abstract
      */
+    #[\Override]
     protected function _beforeSave()
     {
         $this->_dataSaveAllowed = true;

@@ -14,6 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class CacheDisable extends BaseMahoCommand
 {
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initMaho();

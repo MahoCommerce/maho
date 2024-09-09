@@ -40,6 +40,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Nominal_Tax extends Mage_Tax_Model_Sales_
      *
      * @return array
      */
+    #[\Override]
     public function fetch(Mage_Sales_Model_Quote_Address $address)
     {
         return Mage_Sales_Model_Quote_Address_Total_Abstract::fetch($address);
@@ -50,6 +51,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Nominal_Tax extends Mage_Tax_Model_Sales_
      *
      * @return array
      */
+    #[\Override]
     protected function _getAddressItems(Mage_Sales_Model_Quote_Address $address)
     {
         return $address->getAllNominalItems();

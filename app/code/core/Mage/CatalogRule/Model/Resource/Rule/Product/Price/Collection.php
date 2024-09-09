@@ -19,6 +19,7 @@
  */
 class Mage_CatalogRule_Model_Resource_Rule_Product_Price_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

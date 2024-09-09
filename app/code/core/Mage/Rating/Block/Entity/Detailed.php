@@ -33,6 +33,7 @@ class Mage_Rating_Block_Entity_Detailed extends Mage_Core_Block_Template
      * @return string
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     protected function _toHtml()
     {
         $entityId = Mage::app()->getRequest()->getParam('id');

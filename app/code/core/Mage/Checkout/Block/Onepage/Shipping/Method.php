@@ -21,6 +21,7 @@
  */
 class Mage_Checkout_Block_Onepage_Shipping_Method extends Mage_Checkout_Block_Onepage_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->getCheckout()->setStepData('shipping_method', [
@@ -35,6 +36,7 @@ class Mage_Checkout_Block_Onepage_Shipping_Method extends Mage_Checkout_Block_On
      *
      * @return bool
      */
+    #[\Override]
     public function isShow()
     {
         return !$this->getQuote()->isVirtual();

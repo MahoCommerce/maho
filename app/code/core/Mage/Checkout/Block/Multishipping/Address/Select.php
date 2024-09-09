@@ -24,6 +24,7 @@ class Mage_Checkout_Block_Multishipping_Address_Select extends Mage_Checkout_Blo
     /**
      * @return Mage_Checkout_Block_Multishipping_Abstract
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         if ($headBlock = $this->getLayout()->getBlock('head')) {

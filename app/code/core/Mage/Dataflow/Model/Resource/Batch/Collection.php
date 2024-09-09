@@ -25,6 +25,7 @@ class Mage_Dataflow_Model_Resource_Batch_Collection extends Mage_Core_Model_Reso
      * Init model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('dataflow/batch');

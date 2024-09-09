@@ -40,6 +40,7 @@ class Mage_Catalog_Model_Product_Link extends Mage_Core_Model_Abstract
     /**
      * Initialize resource
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_link');

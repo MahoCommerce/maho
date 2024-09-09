@@ -92,6 +92,7 @@ class Mage_Uploader_Model_Config_Uploader extends Mage_Uploader_Model_Config_Abs
     /**
      * Set default values for uploader
      */
+    #[\Override]
     protected function _construct()
     {
         // Fix error where setting post_max_size or upload_max_filesize to 0

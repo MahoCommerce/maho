@@ -29,6 +29,7 @@ class Mage_Adminhtml_Block_Rating_Edit_Tabs extends Mage_Adminhtml_Block_Widget_
         $this->setTitle(Mage::helper('rating')->__('Rating Information'));
     }
 
+    #[\Override]
     protected function _beforeToHtml()
     {
         $this->addTab('form_section', [

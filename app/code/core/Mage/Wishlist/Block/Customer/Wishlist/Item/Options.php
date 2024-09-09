@@ -97,6 +97,7 @@ class Mage_Wishlist_Block_Customer_Wishlist_Item_Options extends Mage_Wishlist_B
      *
      * @return string
      */
+    #[\Override]
     public function getTemplate()
     {
         $template = parent::getTemplate();
@@ -121,6 +122,7 @@ class Mage_Wishlist_Block_Customer_Wishlist_Item_Options extends Mage_Wishlist_B
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         $this->setOptionList($this->getConfiguredOptions());

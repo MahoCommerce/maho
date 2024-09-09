@@ -52,6 +52,7 @@ class Varien_Data_Tree_Node_Collection implements ArrayAccess, IteratorAggregate
     /**
     * Implementation of IteratorAggregate::getIterator()
     */
+    #[\Override]
     public function getIterator(): \Traversable
     {
         return new ArrayIterator($this->_nodes);
@@ -62,6 +63,7 @@ class Varien_Data_Tree_Node_Collection implements ArrayAccess, IteratorAggregate
      * @param string $key
      * @param string $value
      */
+    #[\Override]
     public function offsetSet($key, $value): void
     {
         $this->_nodes[$key] = $value;
@@ -73,6 +75,7 @@ class Varien_Data_Tree_Node_Collection implements ArrayAccess, IteratorAggregate
      * @return mixed|Varien_Data_Tree_Node
      */
     #[\ReturnTypeWillChange]
+    #[\Override]
     public function offsetGet($key)
     {
         return $this->_nodes[$key];
@@ -82,6 +85,7 @@ class Varien_Data_Tree_Node_Collection implements ArrayAccess, IteratorAggregate
      * Implementation of ArrayAccess:offsetUnset()
      * @param string $key
      */
+    #[\Override]
     public function offsetUnset($key): void
     {
         unset($this->_nodes[$key]);
@@ -91,6 +95,7 @@ class Varien_Data_Tree_Node_Collection implements ArrayAccess, IteratorAggregate
      * Implementation of ArrayAccess:offsetExists()
      * @param string $key
      */
+    #[\Override]
     public function offsetExists($key): bool
     {
         return isset($this->_nodes[$key]);
@@ -130,6 +135,7 @@ class Varien_Data_Tree_Node_Collection implements ArrayAccess, IteratorAggregate
     /**
      * Implementation of Countable:count()
      */
+    #[\Override]
     public function count(): int
     {
         return count($this->_nodes);

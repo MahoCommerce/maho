@@ -27,6 +27,7 @@ class Varien_Data_Form_Filter_Escapehtml implements Varien_Data_Form_Filter_Inte
      * @param string $value
      * @return string
      */
+    #[\Override]
     public function inputFilter($value)
     {
         return $value;
@@ -38,6 +39,7 @@ class Varien_Data_Form_Filter_Escapehtml implements Varien_Data_Form_Filter_Inte
      * @param string $value
      * @return string
      */
+    #[\Override]
     public function outputFilter($value)
     {
         return htmlspecialchars($value);

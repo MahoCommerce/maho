@@ -89,6 +89,7 @@ class Mage_Adminhtml_Block_Cms_Page_Widget_Chooser extends Mage_Adminhtml_Block_
      *
      * @return Mage_Adminhtml_Block_Widget_Grid
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         /** @var Mage_Cms_Model_Resource_Page_Collection $collection */
@@ -104,6 +105,7 @@ class Mage_Adminhtml_Block_Cms_Page_Widget_Chooser extends Mage_Adminhtml_Block_
      *
      * @return Mage_Adminhtml_Block_Widget_Grid
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('chooser_id', [
@@ -144,6 +146,7 @@ class Mage_Adminhtml_Block_Cms_Page_Widget_Chooser extends Mage_Adminhtml_Block_
         return parent::_prepareColumns();
     }
 
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/cms_page_widget/chooser', ['_current' => true]);

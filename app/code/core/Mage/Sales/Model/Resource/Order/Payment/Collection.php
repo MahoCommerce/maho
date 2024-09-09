@@ -34,6 +34,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Collection extends Mage_Sales_Mode
      */
     protected $_eventObject    = 'order_payment_collection';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order_payment');
@@ -44,6 +45,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Collection extends Mage_Sales_Mode
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterLoad()
     {
         foreach ($this->_items as $item) {

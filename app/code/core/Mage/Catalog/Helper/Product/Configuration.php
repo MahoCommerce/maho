@@ -144,6 +144,7 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
      *
      * @return array
      */
+    #[\Override]
     public function getOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)
     {
         $typeId = $item->getProduct()->getTypeId();

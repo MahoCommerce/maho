@@ -64,6 +64,7 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
     /**
      * Init model
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/billing_agreement');
@@ -74,6 +75,7 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
      *
      * @inheritdoc
      */
+    #[\Override]
     protected function _beforeSave()
     {
         $date = Mage::getModel('core/date')->gmtDate();
@@ -90,6 +92,7 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
      *
      * @return Mage_Core_Model_Abstract
      */
+    #[\Override]
     protected function _afterSave()
     {
         if (!empty($this->_relatedOrders)) {
@@ -119,6 +122,7 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
      *
      * @return string
      */
+    #[\Override]
     public function initToken()
     {
         $this->getPaymentMethodInstance()
@@ -132,6 +136,7 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
      *
      * @return $this
      */
+    #[\Override]
     public function verifyToken()
     {
         $this->getPaymentMethodInstance()
@@ -156,6 +161,7 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
      *
      * @return $this
      */
+    #[\Override]
     public function place()
     {
         $this->verifyToken();
@@ -177,6 +183,7 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
      *
      * @return $this
      */
+    #[\Override]
     public function cancel()
     {
         $this->setStatus(self::STATUS_CANCELED);
@@ -212,6 +219,7 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
      *
      * @return bool
      */
+    #[\Override]
     public function isValid()
     {
         $result = parent::isValid();

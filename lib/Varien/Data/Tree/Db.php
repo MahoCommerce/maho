@@ -125,6 +125,7 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
      * @param   int $recursionLevel recursion level
      * @return  $this
      */
+    #[\Override]
     public function load($parentNode = null, $recursionLevel = 100)
     {
         if (is_null($parentNode)) {
@@ -159,6 +160,7 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
      * @param int $nodeId
      * @return Varien_Data_Tree_Node
      */
+    #[\Override]
     public function loadNode($nodeId)
     {
         $select = clone $this->_select;
@@ -176,6 +178,7 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
      * @return Varien_Data_Tree_Node
      * @throws Zend_Db_Adapter_Exception
      */
+    #[\Override]
     public function appendChild($data, $parentNode, $prevNode = null)
     {
         $orderSelect = $this->_conn->select();
@@ -200,6 +203,7 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
      * @param Varien_Data_Tree_Node $parentNode
      * @param Varien_Data_Tree_Node $prevNode
      */
+    #[\Override]
     public function moveNodeTo($node, $parentNode, $prevNode = null)
     {
         $data = [];
@@ -294,6 +298,7 @@ class Varien_Data_Tree_Db extends Varien_Data_Tree
      * @return $this|Varien_Data_Tree
      * @throws Exception
      */
+    #[\Override]
     public function removeNode($node)
     {
         // For reorder old node branch

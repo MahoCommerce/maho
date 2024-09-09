@@ -79,6 +79,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tabs extends Mage_Adminhtml_Block_Wi
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $categoryAttributes = $this->getCategory()->getAttributes();

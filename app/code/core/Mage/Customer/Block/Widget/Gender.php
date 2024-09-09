@@ -24,6 +24,7 @@ class Mage_Customer_Block_Widget_Gender extends Mage_Customer_Block_Widget_Abstr
     /**
      * Initialize block
      */
+    #[\Override]
     public function _construct()
     {
         parent::_construct();

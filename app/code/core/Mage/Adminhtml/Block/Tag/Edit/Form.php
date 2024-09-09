@@ -33,6 +33,7 @@ class Mage_Adminhtml_Block_Tag_Edit_Form extends Mage_Adminhtml_Block_Widget_For
      *
      * @return Mage_Adminhtml_Block_Widget_Form
      */
+    #[\Override]
     protected function _prepareForm()
     {
         $model = Mage::registry('tag_tag');

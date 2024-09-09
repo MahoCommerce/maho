@@ -33,6 +33,7 @@ class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         parent::_prepareLayout();
@@ -129,6 +130,7 @@ class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
     /**
      * @return int
      */
+    #[\Override]
     public function getCountryId()
     {
         if ($countryId = $this->getAddress()->getCountryId()) {

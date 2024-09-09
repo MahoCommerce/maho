@@ -29,6 +29,7 @@ class Mage_Adminhtml_Block_Dashboard_Diagrams extends Mage_Adminhtml_Block_Widge
         $this->setTemplate('widget/tabshoriz.phtml');
     }
 
+    #[\Override]
     protected function _prepareLayout()
     {
         $this->addTab('orders', [

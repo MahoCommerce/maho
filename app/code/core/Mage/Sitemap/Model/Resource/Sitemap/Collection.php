@@ -25,6 +25,7 @@ class Mage_Sitemap_Model_Resource_Sitemap_Collection extends Mage_Core_Model_Res
      * Init collection
      *
      */
+    #[\Override]
     public function _construct()
     {
         $this->_init('sitemap/sitemap');

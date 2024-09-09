@@ -96,6 +96,7 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
      *
      * @return string
      */
+    #[\Override]
     protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element)
     {
         $this->setElement($element);
@@ -179,6 +180,7 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         if (!$this->_isPreparedToRender) {

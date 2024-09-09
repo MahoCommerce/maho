@@ -37,6 +37,7 @@ class Mage_Adminhtml_Block_Customer_Form_Element_File extends Varien_Data_Form_E
      *
      * @return string
      */
+    #[\Override]
     public function getElementHtml()
     {
         $this->addClass('input-file');
@@ -184,6 +185,7 @@ class Mage_Adminhtml_Block_Customer_Form_Element_File extends Varien_Data_Form_E
      * @param string|null $index
      * @return false|string
      */
+    #[\Override]
     public function getEscapedValue($index = null)
     {
         $value = $this->getValue();

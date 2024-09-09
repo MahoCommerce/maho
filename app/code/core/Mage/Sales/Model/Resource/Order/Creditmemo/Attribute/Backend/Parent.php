@@ -27,6 +27,7 @@ class Mage_Sales_Model_Resource_Order_Creditmemo_Attribute_Backend_Parent extend
      * @param Varien_Object|Mage_Sales_Model_Order_Creditmemo $object
      * @return $this
      */
+    #[\Override]
     public function afterSave($object)
     {
         parent::afterSave($object);

@@ -25,6 +25,7 @@ class Mage_Core_Model_Resource_Url_Rewrite_Collection extends Mage_Core_Model_Re
      * Define resource model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/url_rewrite');

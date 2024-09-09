@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Rating_Edit_Tab_Form extends Mage_Adminhtml_Block_Wid
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareForm()
     {
         $form = new Varien_Data_Form();
@@ -123,6 +124,7 @@ class Mage_Adminhtml_Block_Rating_Edit_Tab_Form extends Mage_Adminhtml_Block_Wid
         }
     }
 
+    #[\Override]
     protected function _toHtml()
     {
         return $this->_getWarningHtml() . parent::_toHtml();

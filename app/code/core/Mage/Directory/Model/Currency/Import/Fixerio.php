@@ -63,6 +63,7 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
     /**
      * @inheritdoc
      */
+    #[\Override]
     protected function _convert($currencyFrom, $currencyTo)
     {
         return 1;
@@ -73,6 +74,7 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
      *
      * @return array
      */
+    #[\Override]
     public function fetchRates()
     {
         $data = [];

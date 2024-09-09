@@ -27,6 +27,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
      * @param int $orderId
      * @return bool
      */
+    #[\Override]
     protected function _loadValidOrder($orderId = null)
     {
         return Mage::helper('sales/guest')->loadValidOrder();
@@ -38,6 +39,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
      * @param   Mage_Sales_Model_Order $order
      * @return  bool
      */
+    #[\Override]
     protected function _canViewOrder($order)
     {
         $currentOrder = Mage::registry('current_order');
@@ -47,6 +49,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
         return false;
     }
 
+    #[\Override]
     protected function _viewAction()
     {
         if (!$this->_loadValidOrder()) {
@@ -72,6 +75,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
         $this->renderLayout();
     }
 
+    #[\Override]
     public function printInvoiceAction()
     {
         if (!$this->_loadValidOrder()) {
@@ -97,6 +101,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
         }
     }
 
+    #[\Override]
     public function printShipmentAction()
     {
         if (!$this->_loadValidOrder()) {
@@ -121,6 +126,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
         }
     }
 
+    #[\Override]
     public function printCreditmemoAction()
     {
         if (!$this->_loadValidOrder()) {

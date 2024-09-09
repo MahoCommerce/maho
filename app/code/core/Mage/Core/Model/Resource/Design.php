@@ -21,6 +21,7 @@
  */
 class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/design_change', 'design_change_id');
@@ -30,6 +31,7 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
      * @param Mage_Core_Model_Design $object
      * @inheritDoc
      */
+    #[\Override]
     public function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         $dateFrom = $object->getDateFrom();

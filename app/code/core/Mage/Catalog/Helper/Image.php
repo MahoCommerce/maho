@@ -335,6 +335,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function __toString()
     {
         if ($this->getImageFile() && str_ends_with($this->getImageFile(), '.svg')) {

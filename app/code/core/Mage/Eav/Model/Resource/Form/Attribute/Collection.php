@@ -52,6 +52,7 @@ class Mage_Eav_Model_Resource_Form_Attribute_Collection extends Mage_Core_Model_
     /**
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _construct()
     {
         if (empty($this->_moduleName)) {
@@ -153,6 +154,7 @@ class Mage_Eav_Model_Resource_Form_Attribute_Collection extends Mage_Core_Model_
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeLoad()
     {
         $select     = $this->getSelect();

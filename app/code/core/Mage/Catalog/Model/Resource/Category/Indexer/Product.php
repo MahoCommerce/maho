@@ -63,6 +63,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
      */
     protected $_storesInfo;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/category_product_index', 'category_id');
@@ -791,6 +792,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
      *
      * @return $this
      */
+    #[\Override]
     public function reindexAll()
     {
         $this->useIdxTable(true);
@@ -1167,6 +1169,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
      * @param string $table
      * @return string
      */
+    #[\Override]
     public function getIdxTable($table = null)
     {
         if ($this->useIdxTable()) {

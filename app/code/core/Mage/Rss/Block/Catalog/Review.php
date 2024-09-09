@@ -31,6 +31,7 @@ class Mage_Rss_Block_Catalog_Review extends Mage_Rss_Block_Abstract
     /**
      * Initialize cache
      */
+    #[\Override]
     protected function _construct()
     {
         $this->setCacheTags([self::CACHE_TAG]);
@@ -46,6 +47,7 @@ class Mage_Rss_Block_Catalog_Review extends Mage_Rss_Block_Abstract
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         $newUrl = Mage::getUrl('rss/catalog/review');

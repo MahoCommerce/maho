@@ -35,6 +35,7 @@ class Varien_Data_Form_Element_Text extends Varien_Data_Form_Element_Abstract
     /**
      * @return string
      */
+    #[\Override]
     public function getHtml()
     {
         $this->addClass('input-text');
@@ -44,6 +45,7 @@ class Varien_Data_Form_Element_Text extends Varien_Data_Form_Element_Abstract
     /**
      * @return array
      */
+    #[\Override]
     public function getHtmlAttributes()
     {
         return ['type', 'title', 'class', 'style', 'onclick', 'onchange', 'onkeyup', 'disabled', 'readonly', 'maxlength', 'tabindex'];

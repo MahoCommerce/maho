@@ -38,6 +38,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Invoices extends Mage_Adminhtml_
         return 'sales/order_invoice_grid_collection';
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel($this->_getCollectionClass())
@@ -58,6 +59,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Invoices extends Mage_Adminhtml_
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('increment_id', [
@@ -104,6 +106,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Invoices extends Mage_Adminhtml_
         return Mage::registry('current_order');
     }
 
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl(
@@ -115,26 +118,31 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Invoices extends Mage_Adminhtml_
         );
     }
 
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/invoices', ['_current' => true]);
     }
 
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('sales')->__('Invoices');
     }
 
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('sales')->__('Invoices');
     }
 
+    #[\Override]
     public function canShowTab()
     {
         return Mage::getSingleton('admin/session')->isAllowed('sales/invoice');
     }
 
+    #[\Override]
     public function isHidden()
     {
         return false;

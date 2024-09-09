@@ -125,6 +125,7 @@ class Varien_Http_Adapter_Curl implements Zend_Http_Client_Adapter_Interface
      * @param array $config
      * @return Varien_Http_Adapter_Curl
      */
+    #[\Override]
     public function setConfig($config = [])
     {
         $this->_config = $config;
@@ -140,6 +141,7 @@ class Varien_Http_Adapter_Curl implements Zend_Http_Client_Adapter_Interface
      * @param boolean $secure
      * @return Varien_Http_Adapter_Curl
      */
+    #[\Override]
     public function connect($host, $port = 80, $secure = false)
     {
         return $this->_applyConfig();
@@ -155,6 +157,7 @@ class Varien_Http_Adapter_Curl implements Zend_Http_Client_Adapter_Interface
      * @param string        $body
      * @return string Request as text
      */
+    #[\Override]
     public function write($method, $url, $http_ver = '1.1', $headers = [], $body = '')
     {
         if ($url instanceof Zend_Uri_Http) {
@@ -189,6 +192,7 @@ class Varien_Http_Adapter_Curl implements Zend_Http_Client_Adapter_Interface
      *
      * @return string|bool
      */
+    #[\Override]
     public function read()
     {
         $response = curl_exec($this->_getResource());
@@ -211,6 +215,7 @@ class Varien_Http_Adapter_Curl implements Zend_Http_Client_Adapter_Interface
      *
      * @return Varien_Http_Adapter_Curl
      */
+    #[\Override]
     public function close()
     {
         curl_close($this->_getResource());

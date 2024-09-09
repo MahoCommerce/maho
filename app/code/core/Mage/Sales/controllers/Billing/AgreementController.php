@@ -39,6 +39,7 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
      *
      * Check customer authentication
      */
+    #[\Override]
     public function preDispatch()
     {
         parent::preDispatch();

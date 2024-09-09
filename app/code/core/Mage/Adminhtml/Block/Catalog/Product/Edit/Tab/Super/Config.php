@@ -81,6 +81,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config extends Mage_Ad
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $this->setChild(
@@ -316,6 +317,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config extends Mage_Ad
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('catalog')->__('Associated Products');
@@ -326,6 +328,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config extends Mage_Ad
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('catalog')->__('Associated Products');
@@ -336,6 +339,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config extends Mage_Ad
      *
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -346,6 +350,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config extends Mage_Ad
      *
      * @return bool
      */
+    #[\Override]
     public function isHidden()
     {
         return false;

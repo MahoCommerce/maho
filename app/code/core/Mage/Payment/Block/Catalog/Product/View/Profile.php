@@ -75,6 +75,7 @@ class Mage_Payment_Block_Catalog_Product_View_Profile extends Mage_Core_Block_Te
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $product = Mage::registry('current_product');
@@ -89,6 +90,7 @@ class Mage_Payment_Block_Catalog_Product_View_Profile extends Mage_Core_Block_Te
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         if (!$this->_profile) {

@@ -63,6 +63,7 @@ class Mage_Log_Model_Resource_Customer extends Mage_Core_Model_Resource_Db_Abstr
      */
     protected $_quoteTable;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('log/customer', 'log_id');
@@ -83,6 +84,7 @@ class Mage_Log_Model_Resource_Customer extends Mage_Core_Model_Resource_Db_Abstr
      * @param Mage_Log_Model_Customer $object
      * @return Varien_Db_Select
      */
+    #[\Override]
     protected function _getLoadSelect($field, $value, $object)
     {
         $select = parent::_getLoadSelect($field, $value, $object);

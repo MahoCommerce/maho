@@ -70,6 +70,7 @@ class Mage_ConfigurableSwatches_Model_Resource_Catalog_Product_Attribute_Super_C
      *
      * @return int
      */
+    #[\Override]
     public function getStoreId()
     {
         return (int)$this->_storeId;
@@ -80,6 +81,7 @@ class Mage_ConfigurableSwatches_Model_Resource_Catalog_Product_Attribute_Super_C
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad()
     {
         Mage_Core_Model_Resource_Db_Collection_Abstract::_afterLoad();

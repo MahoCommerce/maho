@@ -15,6 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class IndexList extends BaseMahoCommand
 {
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initMaho();

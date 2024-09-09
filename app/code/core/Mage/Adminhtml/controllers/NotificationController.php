@@ -148,6 +148,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _isAllowed()
     {
         $action = strtolower($this->getRequest()->getActionName());

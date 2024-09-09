@@ -24,6 +24,7 @@ class Mage_Api2_Model_Resource_Acl_Filter_Attribute_Collection extends Mage_Core
     /**
      * Initialize collection model
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('api2/acl_filter_attribute');

@@ -19,6 +19,7 @@
  */
 class Mage_Adminhtml_Block_Api_Tab_Roleinfo extends Mage_Adminhtml_Block_Widget_Form
 {
+    #[\Override]
     public function _beforeToHtml()
     {
         $this->_initForm();

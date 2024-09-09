@@ -29,6 +29,7 @@ class Mage_Uploader_Model_Config_Misc extends Mage_Uploader_Model_Config_Abstrac
     /**
      * Prepare misc params
      */
+    #[\Override]
     protected function _construct()
     {
         $this

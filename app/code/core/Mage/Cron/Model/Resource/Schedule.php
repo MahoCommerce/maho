@@ -25,6 +25,7 @@ class Mage_Cron_Model_Resource_Schedule extends Mage_Core_Model_Resource_Db_Abst
      * Initialize resource
      *
      */
+    #[\Override]
     public function _construct()
     {
         $this->_init('cron/schedule', 'schedule_id');

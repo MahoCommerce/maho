@@ -57,6 +57,7 @@ abstract class Mage_Rule_Model_Resource_Rule_Collection_Abstract extends Mage_Co
      *
      * @return Mage_Rule_Model_Resource_Rule_Collection_Abstract
      */
+    #[\Override]
     protected function _afterLoad()
     {
         parent::_afterLoad();
@@ -119,6 +120,7 @@ abstract class Mage_Rule_Model_Resource_Rule_Collection_Abstract extends Mage_Co
      *
      * @return Mage_Rule_Model_Resource_Rule_Collection_Abstract
      */
+    #[\Override]
     public function addFieldToFilter($field, $condition = null)
     {
         if ($field == 'website_ids') {

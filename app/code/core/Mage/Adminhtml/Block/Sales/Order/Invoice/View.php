@@ -117,6 +117,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_View extends Mage_Adminhtml_Block
     /**
      * @return string
      */
+    #[\Override]
     public function getHeaderText()
     {
         if ($this->getInvoice()->getEmailSent()) {
@@ -140,6 +141,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_View extends Mage_Adminhtml_Block
     /**
      * @return string
      */
+    #[\Override]
     public function getBackUrl()
     {
         return $this->getUrl(

@@ -71,6 +71,7 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
     /**
      * Initialize resource
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/category_indexer_product');
@@ -81,6 +82,7 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
      *
      * @return string
      */
+    #[\Override]
     public function getName()
     {
         return Mage::helper('catalog')->__('Category Products');
@@ -91,6 +93,7 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
      *
      * @return string
      */
+    #[\Override]
     public function getDescription()
     {
         return Mage::helper('catalog')->__('Indexed category/products association');
@@ -102,6 +105,7 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
      *
      * @return bool
      */
+    #[\Override]
     public function matchEvent(Mage_Index_Model_Event $event)
     {
         $data      = $event->getNewData();
@@ -141,6 +145,7 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
      *
      * @return Mage_Catalog_Model_Category_Indexer_Product
      */
+    #[\Override]
     protected function _registerEvent(Mage_Index_Model_Event $event)
     {
         $event->addNewData(self::EVENT_MATCH_RESULT_KEY, true);
@@ -235,6 +240,7 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
     /**
      * Process event data and save to index
      */
+    #[\Override]
     protected function _processEvent(Mage_Index_Model_Event $event)
     {
         $data = $event->getNewData();

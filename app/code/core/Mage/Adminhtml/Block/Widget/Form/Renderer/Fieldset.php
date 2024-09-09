@@ -23,6 +23,7 @@ class Mage_Adminhtml_Block_Widget_Form_Renderer_Fieldset extends Mage_Adminhtml_
 {
     protected $_element;
 
+    #[\Override]
     protected function _construct()
     {
         $this->setTemplate('widget/form/renderer/fieldset.phtml');
@@ -33,6 +34,7 @@ class Mage_Adminhtml_Block_Widget_Form_Renderer_Fieldset extends Mage_Adminhtml_
         return $this->_element;
     }
 
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         $this->_element = $element;

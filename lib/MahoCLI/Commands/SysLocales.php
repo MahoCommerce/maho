@@ -15,6 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class SysLocales extends BaseMahoCommand
 {
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initMaho();

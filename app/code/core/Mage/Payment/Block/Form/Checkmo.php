@@ -19,6 +19,7 @@
  */
 class Mage_Payment_Block_Form_Checkmo extends Mage_Payment_Block_Form
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

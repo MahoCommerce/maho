@@ -56,6 +56,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid extends Ma
      * @return $this
      * @throws Exception
      */
+    #[\Override]
     protected function _addColumnFilterToCollection($column)
     {
         // Set custom filter for in product flag
@@ -108,6 +109,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid extends Ma
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $allowProductTypes = [];
@@ -176,6 +178,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid extends Ma
      * @inheritDoc
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $product = $this->_getProduct();
@@ -320,6 +323,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid extends Ma
         return $result;
     }
 
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/superConfig', ['_current' => true]);
@@ -369,6 +373,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid extends Ma
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoadCollection()
     {
         parent::_afterLoadCollection();

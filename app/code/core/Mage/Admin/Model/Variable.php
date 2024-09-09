@@ -31,6 +31,7 @@ class Mage_Admin_Model_Variable extends Mage_Core_Model_Abstract
     /**
      * Initialize variable model
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('admin/variable');

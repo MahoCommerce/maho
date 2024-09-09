@@ -33,6 +33,7 @@ class Mage_Wishlist_Model_Item_Option extends Mage_Core_Model_Abstract implement
     protected $_item;
     protected $_product;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('wishlist/item_option');
@@ -43,6 +44,7 @@ class Mage_Wishlist_Model_Item_Option extends Mage_Core_Model_Abstract implement
      *
      * @return bool
      */
+    #[\Override]
     protected function _hasModelChanged()
     {
         if (!$this->hasDataChanges()) {
@@ -107,6 +109,7 @@ class Mage_Wishlist_Model_Item_Option extends Mage_Core_Model_Abstract implement
      *
      * @return mixed
      */
+    #[\Override]
     public function getValue()
     {
         return $this->_getData('value');
@@ -117,6 +120,7 @@ class Mage_Wishlist_Model_Item_Option extends Mage_Core_Model_Abstract implement
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave()
     {
         if ($this->getItem()) {

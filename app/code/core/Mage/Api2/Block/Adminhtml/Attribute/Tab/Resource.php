@@ -88,6 +88,7 @@ class Mage_Api2_Block_Adminhtml_Attribute_Tab_Resource extends Mage_Adminhtml_Bl
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return $this->__('ACL Attribute Rules');
@@ -98,6 +99,7 @@ class Mage_Api2_Block_Adminhtml_Attribute_Tab_Resource extends Mage_Adminhtml_Bl
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return $this->getTabLabel();
@@ -108,6 +110,7 @@ class Mage_Api2_Block_Adminhtml_Attribute_Tab_Resource extends Mage_Adminhtml_Bl
      *
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -118,6 +121,7 @@ class Mage_Api2_Block_Adminhtml_Attribute_Tab_Resource extends Mage_Adminhtml_Bl
      *
      * @return bool
      */
+    #[\Override]
     public function isHidden()
     {
         return false;

@@ -41,6 +41,7 @@ class Mage_Adminhtml_Block_Notification_Window extends Mage_Adminhtml_Block_Noti
     /**
      * Initialize block window
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

@@ -37,6 +37,7 @@ class Mage_Adminhtml_Block_Cache_Grid extends Mage_Adminhtml_Block_Widget_Grid
     /**
      * Prepare grid collection
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = new Varien_Data_Collection();
@@ -50,6 +51,7 @@ class Mage_Adminhtml_Block_Cache_Grid extends Mage_Adminhtml_Block_Widget_Grid
     /**
      * Add name and description to collection elements
      */
+    #[\Override]
     protected function _afterLoadCollection()
     {
         foreach ($this->_collection as $item) {
@@ -60,6 +62,7 @@ class Mage_Adminhtml_Block_Cache_Grid extends Mage_Adminhtml_Block_Widget_Grid
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $baseUrl = $this->getUrl();
@@ -124,6 +127,7 @@ class Mage_Adminhtml_Block_Cache_Grid extends Mage_Adminhtml_Block_Widget_Grid
      *
      * @return false
      */
+    #[\Override]
     public function getRowUrl($row)
     {
         return false;
@@ -134,6 +138,7 @@ class Mage_Adminhtml_Block_Cache_Grid extends Mage_Adminhtml_Block_Widget_Grid
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareMassaction()
     {
         $this->setMassactionIdField('id');

@@ -42,6 +42,7 @@ class Mage_Reports_Model_Product_Index_Viewed extends Mage_Reports_Model_Product
      * Initialize resource model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('reports/product_index_viewed');
@@ -52,6 +53,7 @@ class Mage_Reports_Model_Product_Index_Viewed extends Mage_Reports_Model_Product
      *
      * @return array
      */
+    #[\Override]
     public function getExcludeProductIds()
     {
         $productIds = [];

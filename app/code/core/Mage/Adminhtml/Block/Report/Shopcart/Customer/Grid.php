@@ -36,6 +36,7 @@ class Mage_Adminhtml_Block_Report_Shopcart_Customer_Grid extends Mage_Adminhtml_
      * @inheritDoc
      * @throws Exception
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         //TODO: add full name logic
@@ -50,6 +51,7 @@ class Mage_Adminhtml_Block_Report_Shopcart_Customer_Grid extends Mage_Adminhtml_
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterLoadCollection()
     {
         $this->getCollection()->addCartInfo();
@@ -60,6 +62,7 @@ class Mage_Adminhtml_Block_Report_Shopcart_Customer_Grid extends Mage_Adminhtml_
      * @inheritDoc
      * @throws Exception
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('entity_id', [

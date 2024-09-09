@@ -33,6 +33,7 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
      *
      * @return Varien_Object
      */
+    #[\Override]
     public function getType()
     {
         return $this->_type;
@@ -43,6 +44,7 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
      *
      * @return $this
      */
+    #[\Override]
     public function setType(Varien_Object $type)
     {
         $this->_type = $type;
@@ -74,6 +76,7 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
      * @return string
      * @throws Exception
      */
+    #[\Override]
     public function render(Mage_Customer_Model_Address_Abstract $address, $format = null)
     {
         switch ($this->getType()->getCode()) {

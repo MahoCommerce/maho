@@ -41,6 +41,7 @@ class Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type extends Mage_Eav_Mod
      *
      * @return array
      */
+    #[\Override]
     public function getAllOptions()
     {
         if (!$this->_options) {

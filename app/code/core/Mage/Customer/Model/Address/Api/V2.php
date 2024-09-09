@@ -28,6 +28,7 @@ class Mage_Customer_Model_Address_Api_V2 extends Mage_Customer_Model_Address_Api
      * @param array $addressData
      * @return int
      */
+    #[\Override]
     public function create($customerId, $addressData)
     {
         $customer = Mage::getModel('customer/customer')
@@ -77,6 +78,7 @@ class Mage_Customer_Model_Address_Api_V2 extends Mage_Customer_Model_Address_Api
      * @param int $addressId
      * @return array
      */
+    #[\Override]
     public function info($addressId)
     {
         $address = Mage::getModel('customer/address')
@@ -111,6 +113,7 @@ class Mage_Customer_Model_Address_Api_V2 extends Mage_Customer_Model_Address_Api
      * @param array $addressData
      * @return bool
      */
+    #[\Override]
     public function update($addressId, $addressData)
     {
         $address = Mage::getModel('customer/address')
@@ -154,6 +157,7 @@ class Mage_Customer_Model_Address_Api_V2 extends Mage_Customer_Model_Address_Api
      * @param int $addressId
      * @return bool
      */
+    #[\Override]
     public function delete($addressId)
     {
         $address = Mage::getModel('customer/address')

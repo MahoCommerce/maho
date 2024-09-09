@@ -71,6 +71,7 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
     /**
      * Initialize resource model
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('oauth/token');
@@ -81,6 +82,7 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterSave()
     {
         parent::_afterSave();
@@ -196,6 +198,7 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
      * @param string $format
      * @return string
      */
+    #[\Override]
     public function toString($format = '')
     {
         return http_build_query(['oauth_token' => $this->getToken(), 'oauth_token_secret' => $this->getSecret()]);
@@ -206,6 +209,7 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
      *
      * @return Mage_Oauth_Model_Token
      */
+    #[\Override]
     protected function _beforeSave()
     {
         $this->validate();

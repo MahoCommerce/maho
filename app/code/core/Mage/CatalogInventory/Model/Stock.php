@@ -39,6 +39,7 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
 
     public const DEFAULT_STOCK_ID          = 1;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('cataloginventory/stock');
@@ -49,6 +50,7 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
      *
      * @return int
      */
+    #[\Override]
     public function getId()
     {
         return self::DEFAULT_STOCK_ID;

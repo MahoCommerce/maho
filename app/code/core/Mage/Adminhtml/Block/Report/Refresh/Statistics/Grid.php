@@ -51,6 +51,7 @@ class Mage_Adminhtml_Block_Report_Refresh_Statistics_Grid extends Mage_Adminhtml
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = new Varien_Data_Collection();
@@ -120,6 +121,7 @@ class Mage_Adminhtml_Block_Report_Refresh_Statistics_Grid extends Mage_Adminhtml
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('report', [
@@ -151,6 +153,7 @@ class Mage_Adminhtml_Block_Report_Refresh_Statistics_Grid extends Mage_Adminhtml
     /**
      * @return $this
      */
+    #[\Override]
     protected function _prepareMassaction()
     {
         $this->setMassactionIdField('id');

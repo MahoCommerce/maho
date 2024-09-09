@@ -24,6 +24,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
     protected $_currencyList = null;
     protected $_currencyModel = null;
 
+    #[\Override]
     public function getHtml()
     {
         $html  = '<div class="range">';
@@ -103,6 +104,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         return null;
     }
 
+    #[\Override]
     public function getCondition()
     {
         $value = $this->getValue();

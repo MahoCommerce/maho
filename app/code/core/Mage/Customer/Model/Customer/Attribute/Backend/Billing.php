@@ -25,6 +25,7 @@ class Mage_Customer_Model_Customer_Attribute_Backend_Billing extends Mage_Eav_Mo
      * @param Mage_Customer_Model_Customer $object
      * @return $this
      */
+    #[\Override]
     public function beforeSave($object)
     {
         $defaultBilling = $object->getDefaultBilling();
@@ -38,6 +39,7 @@ class Mage_Customer_Model_Customer_Attribute_Backend_Billing extends Mage_Eav_Mo
      * @param Mage_Customer_Model_Customer $object
      * @return $this
      */
+    #[\Override]
     public function afterSave($object)
     {
         if ($defaultBilling = $object->getDefaultBilling()) {

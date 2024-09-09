@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Renderer_Adminpass extends Mage_Adminht
      *
      * @return string
      */
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         $html  = '<tr id="' . $element->getHtmlId() . '_container">';

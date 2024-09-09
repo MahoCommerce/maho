@@ -24,6 +24,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Massaction_Item_Additional_Default extend
     /**
      * @return $this
      */
+    #[\Override]
     public function createFromConfiguration(array $configuration)
     {
         $form = new Varien_Data_Form();

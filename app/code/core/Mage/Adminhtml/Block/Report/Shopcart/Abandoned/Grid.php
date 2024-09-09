@@ -27,6 +27,7 @@ class Mage_Adminhtml_Block_Report_Shopcart_Abandoned_Grid extends Mage_Adminhtml
         $this->setId('gridAbandoned');
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         /** @var Mage_Reports_Model_Resource_Quote_Collection $collection */
@@ -48,6 +49,7 @@ class Mage_Adminhtml_Block_Report_Shopcart_Abandoned_Grid extends Mage_Adminhtml
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _addColumnFilterToCollection($column)
     {
         $field = ($column->getFilterIndex()) ? $column->getFilterIndex() : $column->getIndex();
@@ -61,6 +63,7 @@ class Mage_Adminhtml_Block_Report_Shopcart_Abandoned_Grid extends Mage_Adminhtml
         return $this;
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('customer_name', [
@@ -154,6 +157,7 @@ class Mage_Adminhtml_Block_Report_Shopcart_Abandoned_Grid extends Mage_Adminhtml
         return parent::_prepareColumns();
     }
 
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/customer/edit', ['id' => $row->getCustomerId(), 'active_tab' => 'cart']);

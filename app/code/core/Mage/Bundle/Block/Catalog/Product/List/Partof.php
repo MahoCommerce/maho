@@ -60,6 +60,7 @@ class Mage_Bundle_Block_Catalog_Product_List_Partof extends Mage_Catalog_Block_P
     /**
      * @return Mage_Catalog_Block_Product_Abstract
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         $this->_prepareData();
@@ -108,6 +109,7 @@ class Mage_Bundle_Block_Catalog_Product_List_Partof extends Mage_Catalog_Block_P
     /**
      * @return int
      */
+    #[\Override]
     public function getColumnCount()
     {
         return $this->_columnCount;
@@ -134,6 +136,7 @@ class Mage_Bundle_Block_Catalog_Product_List_Partof extends Mage_Catalog_Block_P
      *
      * @return Mage_Catalog_Model_Product
      */
+    #[\Override]
     public function getProduct()
     {
         if (!$this->_product) {

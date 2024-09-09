@@ -21,6 +21,7 @@
  */
 class Mage_Eav_Model_Resource_Form_Element extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('eav/form_element', 'element_id');
@@ -38,6 +39,7 @@ class Mage_Eav_Model_Resource_Form_Element extends Mage_Core_Model_Resource_Db_A
      * @param Mage_Eav_Model_Form_Element $object
      * @return Varien_Db_Select
      */
+    #[\Override]
     protected function _getLoadSelect($field, $value, $object)
     {
         $select = parent::_getLoadSelect($field, $value, $object);

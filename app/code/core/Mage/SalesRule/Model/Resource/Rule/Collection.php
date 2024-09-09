@@ -42,6 +42,7 @@ class Mage_SalesRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Reso
     /**
      * Set resource model and determine field mapping
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('salesrule/rule');
@@ -166,6 +167,7 @@ class Mage_SalesRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Reso
      *
      * @return $this
      */
+    #[\Override]
     public function _initSelect()
     {
         parent::_initSelect();

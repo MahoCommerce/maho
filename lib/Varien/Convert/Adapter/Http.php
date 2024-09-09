@@ -21,6 +21,7 @@
  */
 class Varien_Convert_Adapter_Http extends Varien_Convert_Adapter_Abstract
 {
+    #[\Override]
     public function load()
     {
         if (!$_FILES) {
@@ -37,6 +38,7 @@ File to upload: <input type="file" name="io_file"/> <input type="submit" value="
         return $this;
     }
 
+    #[\Override]
     public function save()
     {
         if ($this->getVars()) {

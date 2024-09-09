@@ -21,6 +21,7 @@
  */
 class Varien_Convert_Adapter_Io extends Varien_Convert_Adapter_Abstract
 {
+    #[\Override]
     public function getResource()
     {
         if (!$this->_resource) {
@@ -36,6 +37,7 @@ class Varien_Convert_Adapter_Io extends Varien_Convert_Adapter_Abstract
         return $this->_resource;
     }
 
+    #[\Override]
     public function load()
     {
         $data = $this->getResource()->read($this->getVar('filename'));
@@ -49,6 +51,7 @@ class Varien_Convert_Adapter_Io extends Varien_Convert_Adapter_Abstract
         return $this;
     }
 
+    #[\Override]
     public function save()
     {
         $data = $this->getData();

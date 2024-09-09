@@ -21,6 +21,7 @@
  */
 class Mage_CatalogInventory_Model_Resource_Stock_Status extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('cataloginventory/stock_status', 'product_id');

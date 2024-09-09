@@ -49,6 +49,7 @@ class Mage_Adminhtml_Block_Report_Product_Viewed_Grid extends Mage_Adminhtml_Blo
      *
      * @return Mage_Adminhtml_Block_Widget_Grid
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('period', [
@@ -104,6 +105,7 @@ class Mage_Adminhtml_Block_Report_Product_Viewed_Grid extends Mage_Adminhtml_Blo
      * @param Varien_Object $filterData
      * @return Mage_Adminhtml_Block_Report_Grid_Abstract
      */
+    #[\Override]
     protected function _addOrderStatusFilter($collection, $filterData)
     {
         return $this;

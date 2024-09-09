@@ -27,6 +27,7 @@ class Mage_Bundle_Adminhtml_Bundle_SelectionController extends Mage_Adminhtml_Co
      */
     public const ADMIN_RESOURCE = 'catalog/products';
 
+    #[\Override]
     protected function _construct()
     {
         $this->setUsedModuleName('Mage_Bundle');

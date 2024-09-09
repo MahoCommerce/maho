@@ -111,6 +111,7 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
      * @throws Mage_Core_Exception
      * @return bool
      */
+    #[\Override]
     public function validate($object)
     {
         $attribute = $this->getAttribute();
@@ -211,6 +212,7 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
      * @param Mage_Catalog_Model_Product $object
      * @return Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract
      */
+    #[\Override]
     public function afterLoad($object)
     {
         $storeId   = $object->getStoreId();
@@ -250,6 +252,7 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
      * @param Mage_Catalog_Model_Product $object
      * @return Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract
      */
+    #[\Override]
     public function afterSave($object)
     {
         $websiteId  = Mage::app()->getStore($object->getStoreId())->getWebsiteId();

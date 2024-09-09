@@ -76,6 +76,7 @@ class Mage_Payment_Block_Info_Cc extends Mage_Payment_Block_Info
      * @param Varien_Object|array $transport
      * @return Varien_Object
      */
+    #[\Override]
     protected function _prepareSpecificInformation($transport = null)
     {
         if ($this->_paymentSpecificInformation !== null) {

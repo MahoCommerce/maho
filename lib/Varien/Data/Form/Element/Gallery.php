@@ -34,6 +34,7 @@ class Varien_Data_Form_Element_Gallery extends Varien_Data_Form_Element_Abstract
     /**
      * @return string
      */
+    #[\Override]
     public function getElementHtml()
     {
         $gallery = $this->getValue();
@@ -173,6 +174,7 @@ EndSCRIPT;
     /**
      * @return string
      */
+    #[\Override]
     public function getName()
     {
         return $this->getData('name');

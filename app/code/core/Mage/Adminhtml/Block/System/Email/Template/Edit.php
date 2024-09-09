@@ -30,6 +30,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit extends Mage_Adminhtml_Blo
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $this->setChild(

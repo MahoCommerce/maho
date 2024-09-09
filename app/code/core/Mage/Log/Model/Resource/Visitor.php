@@ -37,6 +37,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
         $this->_urlLoggingCondition = $data['log_condition'] ?? Mage::helper('log');
     }
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('log/visitor', 'visitor_id');
@@ -47,6 +48,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
      *
      * @return array
      */
+    #[\Override]
     protected function _prepareDataForSave(Mage_Core_Model_Abstract $visitor)
     {
         return [
@@ -85,6 +87,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $visitor)
     {
         if (!$this->_urlLoggingCondition->isLogEnabled()) {
@@ -101,6 +104,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $visitor)
     {
         if ($this->_urlLoggingCondition->isLogDisabled()) {
@@ -132,6 +136,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {
         parent::_afterLoad($object);

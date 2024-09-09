@@ -36,6 +36,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock extends Mage_Catalog_Mo
      */
     protected $_defaultIndexer   = 'cataloginventory/indexer_stock_default';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('cataloginventory/stock_status', 'product_id');
@@ -215,6 +216,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock extends Mage_Catalog_Mo
      *
      * @return $this
      */
+    #[\Override]
     public function reindexAll()
     {
         $this->useIdxTable(true);
@@ -300,6 +302,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock extends Mage_Catalog_Mo
      * @param string $table
      * @return string
      */
+    #[\Override]
     public function getIdxTable($table = null)
     {
         if ($this->useIdxTable()) {

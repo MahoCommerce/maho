@@ -25,6 +25,7 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
      * Initialize table nad PK name
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/quote', 'entity_id');
@@ -38,6 +39,7 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
      * @param Mage_Core_Model_Abstract|Mage_Sales_Model_Quote $object
      * @return Varien_Db_Select
      */
+    #[\Override]
     protected function _getLoadSelect($field, $value, $object)
     {
         $select   = parent::_getLoadSelect($field, $value, $object);

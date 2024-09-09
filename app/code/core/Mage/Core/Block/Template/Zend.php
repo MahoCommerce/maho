@@ -29,6 +29,7 @@ class Mage_Core_Block_Template_Zend extends Mage_Core_Block_Template
     /**
      * Class constructor. Base html block
      */
+    #[\Override]
     public function _construct()
     {
         parent::_construct();
@@ -41,6 +42,7 @@ class Mage_Core_Block_Template_Zend extends Mage_Core_Block_Template
      * @return $this|Mage_Core_Block_Template
      * @throws Zend_View_Exception
      */
+    #[\Override]
     public function assign($key, $value = null)
     {
         if (is_array($key) && is_null($value)) {
@@ -57,6 +59,7 @@ class Mage_Core_Block_Template_Zend extends Mage_Core_Block_Template
      * @param string $dir
      * @return $this
      */
+    #[\Override]
     public function setScriptPath($dir)
     {
         $this->_view->setScriptPath($dir . DS);
@@ -67,6 +70,7 @@ class Mage_Core_Block_Template_Zend extends Mage_Core_Block_Template
      * @param string $fileName
      * @return string
      */
+    #[\Override]
     public function fetchView($fileName)
     {
         return $this->_view->render($fileName);

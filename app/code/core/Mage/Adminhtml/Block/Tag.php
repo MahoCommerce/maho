@@ -27,6 +27,7 @@ class Mage_Adminhtml_Block_Tag extends Mage_Adminhtml_Block_Template
         $this->setTemplate('tag/index.phtml');
     }
 
+    #[\Override]
     public function _beforeToHtml()
     {
         $this->assign('createUrl', $this->getUrl('*/tag/new'));

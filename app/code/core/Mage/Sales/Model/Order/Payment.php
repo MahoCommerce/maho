@@ -253,6 +253,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
      */
     protected $_transactionAdditionalInfo = [];
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order_payment');
@@ -1605,6 +1606,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();

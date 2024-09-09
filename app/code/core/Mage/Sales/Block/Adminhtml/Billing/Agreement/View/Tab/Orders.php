@@ -36,6 +36,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Orders extends Mage_
      *
      * @return Mage_Adminhtml_Block_Widget_Grid
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('sales/order_grid_collection');
@@ -49,6 +50,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Orders extends Mage_
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return $this->__('Related Orders');
@@ -59,6 +61,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Orders extends Mage_
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return $this->__('Related Orders');
@@ -69,6 +72,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Orders extends Mage_
      *
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -79,6 +83,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Orders extends Mage_
      *
      * @return bool
      */
+    #[\Override]
     public function isHidden()
     {
         return false;
@@ -89,6 +94,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Orders extends Mage_
      *
      * @return string
      */
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/ordersGrid', ['_current' => true]);
@@ -99,6 +105,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Orders extends Mage_
      *
      * @return bool
      */
+    #[\Override]
     public function getExportTypes()
     {
         return false;
@@ -109,6 +116,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Orders extends Mage_
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareMassaction()
     {
         return $this;

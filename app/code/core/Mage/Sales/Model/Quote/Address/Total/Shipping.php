@@ -29,6 +29,7 @@ class Mage_Sales_Model_Quote_Address_Total_Shipping extends Mage_Sales_Model_Quo
      *
      * @return  Mage_Sales_Model_Quote_Address_Total_Shipping
      */
+    #[\Override]
     public function collect(Mage_Sales_Model_Quote_Address $address)
     {
         parent::collect($address);
@@ -167,6 +168,7 @@ class Mage_Sales_Model_Quote_Address_Total_Shipping extends Mage_Sales_Model_Quo
      *
      * @return  Mage_Sales_Model_Quote_Address_Total_Shipping
      */
+    #[\Override]
     public function fetch(Mage_Sales_Model_Quote_Address $address)
     {
         $amount = $address->getShippingAmount();
@@ -189,6 +191,7 @@ class Mage_Sales_Model_Quote_Address_Total_Shipping extends Mage_Sales_Model_Quo
      *
      * @return string
      */
+    #[\Override]
     public function getLabel()
     {
         return Mage::helper('sales')->__('Shipping');

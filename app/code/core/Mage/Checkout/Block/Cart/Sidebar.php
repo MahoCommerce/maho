@@ -194,6 +194,7 @@ class Mage_Checkout_Block_Cart_Sidebar extends Mage_Checkout_Block_Cart_Minicart
      *
      * @return array
      */
+    #[\Override]
     public function getItems()
     {
         if ($this->getCustomQuote()) {
@@ -208,6 +209,7 @@ class Mage_Checkout_Block_Cart_Sidebar extends Mage_Checkout_Block_Cart_Minicart
      *
      * @return array
      */
+    #[\Override]
     public function getTotalsCache()
     {
         if (empty($this->_totals)) {
@@ -222,6 +224,7 @@ class Mage_Checkout_Block_Cart_Sidebar extends Mage_Checkout_Block_Cart_Minicart
      *
      * @return array
      */
+    #[\Override]
     public function getCacheKeyInfo()
     {
         $cacheKeyInfo = parent::getCacheKeyInfo();
@@ -274,6 +277,7 @@ class Mage_Checkout_Block_Cart_Sidebar extends Mage_Checkout_Block_Cart_Minicart
      *
      * @return array
      */
+    #[\Override]
     public function getCacheTags()
     {
         $quoteTags = $this->getQuote()->getCacheIdTags();
@@ -297,6 +301,7 @@ class Mage_Checkout_Block_Cart_Sidebar extends Mage_Checkout_Block_Cart_Minicart
      * @param   string $html
      * @return  string
      */
+    #[\Override]
     protected function _afterToHtml($html)
     {
         $html = parent::_afterToHtml($html);

@@ -80,6 +80,7 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
      * Initialize all indexers and resource model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_loadIndexers();

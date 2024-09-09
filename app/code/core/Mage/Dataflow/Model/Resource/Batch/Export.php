@@ -21,6 +21,7 @@
  */
 class Mage_Dataflow_Model_Resource_Batch_Export extends Mage_Dataflow_Model_Resource_Batch_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('dataflow/batch_export', 'batch_export_id');

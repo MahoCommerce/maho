@@ -40,6 +40,7 @@ class Mage_Sales_Model_Resource_Order_Item_Collection extends Mage_Sales_Model_R
      */
     protected $_orderField     = 'order_id';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order_item');
@@ -50,6 +51,7 @@ class Mage_Sales_Model_Resource_Order_Item_Collection extends Mage_Sales_Model_R
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad()
     {
         parent::_afterLoad();

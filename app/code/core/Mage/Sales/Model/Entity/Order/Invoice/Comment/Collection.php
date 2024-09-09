@@ -21,6 +21,7 @@
  */
 class Mage_Sales_Model_Entity_Order_Invoice_Comment_Collection extends Mage_Eav_Model_Entity_Collection_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order_invoice_comment');

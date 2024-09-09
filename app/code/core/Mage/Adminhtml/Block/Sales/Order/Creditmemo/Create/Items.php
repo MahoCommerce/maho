@@ -27,6 +27,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Items extends Mage_Admi
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $onclick = "submitAndReloadArea($('creditmemo_item_container'),'" . $this->getUpdateUrl() . "')";
@@ -77,6 +78,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Items extends Mage_Admi
      *
      * @return Mage_Sales_Model_Order
      */
+    #[\Override]
     public function getOrder()
     {
         return $this->getCreditmemo()->getOrder();
@@ -87,6 +89,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Items extends Mage_Admi
      *
      * @return Mage_Sales_Model_Order_Creditmemo
      */
+    #[\Override]
     public function getSource()
     {
         return $this->getCreditmemo();
@@ -125,11 +128,13 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Items extends Mage_Admi
      *
      * @return Mage_Sales_Model_Order_Creditmemo
      */
+    #[\Override]
     public function getCreditmemo()
     {
         return Mage::registry('current_creditmemo');
     }
 
+    #[\Override]
     public function canEditQty()
     {
         if ($this->getCreditmemo()->getOrder()->getPayment()->canRefund()) {
@@ -151,6 +156,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Items extends Mage_Admi
         ]);
     }
 
+    #[\Override]
     public function canReturnToStock()
     {
         $canReturnToStock = Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_CAN_SUBTRACT);

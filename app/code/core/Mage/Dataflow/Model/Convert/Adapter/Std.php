@@ -21,6 +21,7 @@
  */
 class Mage_Dataflow_Model_Convert_Adapter_Std extends Mage_Dataflow_Model_Convert_Adapter_Abstract
 {
+    #[\Override]
     public function load()
     {
         $data = '';
@@ -32,6 +33,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Std extends Mage_Dataflow_Model_Conver
         return $this;
     }
 
+    #[\Override]
     public function save()
     {
         echo $this->getData();

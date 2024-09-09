@@ -22,6 +22,7 @@
  */
 class Mage_Rule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('rule/rule', 'rule_id');

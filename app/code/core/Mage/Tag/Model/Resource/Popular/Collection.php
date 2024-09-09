@@ -25,6 +25,7 @@ class Mage_Tag_Model_Resource_Popular_Collection extends Mage_Core_Model_Resourc
      * Defines resource model and model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('tag/tag');
@@ -74,6 +75,7 @@ class Mage_Tag_Model_Resource_Popular_Collection extends Mage_Core_Model_Resourc
      * @param bool $logQuery
      * @return $this
      */
+    #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {
         if ($this->isLoaded()) {
@@ -100,6 +102,7 @@ class Mage_Tag_Model_Resource_Popular_Collection extends Mage_Core_Model_Resourc
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     public function getSelectCountSql()
     {
         $this->_renderFilters();

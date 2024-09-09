@@ -21,11 +21,13 @@
  */
 class Varien_Convert_Adapter_Soap extends Varien_Convert_Adapter_Abstract
 {
+    #[\Override]
     public function load()
     {
         return $this;
     }
 
+    #[\Override]
     public function save()
     {
         return $this;

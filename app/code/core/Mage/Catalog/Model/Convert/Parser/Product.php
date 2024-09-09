@@ -255,6 +255,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
     /**
      * @deprecated not used anymore
      */
+    #[\Override]
     public function parse()
     {
         $data            = $this->getData();
@@ -400,6 +401,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
      *
      * @return $this
      */
+    #[\Override]
     public function unparse()
     {
         $entityIds = $this->getData();

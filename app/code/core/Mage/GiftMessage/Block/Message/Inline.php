@@ -27,6 +27,7 @@ class Mage_GiftMessage_Block_Message_Inline extends Mage_Core_Block_Template
     protected $_type   = null;
     protected $_giftMessage = null;
 
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

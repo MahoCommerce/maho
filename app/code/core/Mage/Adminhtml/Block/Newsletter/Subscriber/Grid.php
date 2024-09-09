@@ -41,6 +41,7 @@ class Mage_Adminhtml_Block_Newsletter_Subscriber_Grid extends Mage_Adminhtml_Blo
      * @return Mage_Adminhtml_Block_Widget_Grid
      * @throws Exception
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceSingleton('newsletter/subscriber_collection');
@@ -64,6 +65,7 @@ class Mage_Adminhtml_Block_Newsletter_Subscriber_Grid extends Mage_Adminhtml_Blo
      * @inheritDoc
      * @throws Exception
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('subscriber_id', [
@@ -190,6 +192,7 @@ class Mage_Adminhtml_Block_Newsletter_Subscriber_Grid extends Mage_Adminhtml_Blo
     /**
      * @return $this
      */
+    #[\Override]
     protected function _prepareMassaction()
     {
         $this->setMassactionIdField('subscriber_id');

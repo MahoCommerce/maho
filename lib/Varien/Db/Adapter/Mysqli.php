@@ -26,6 +26,7 @@ class Varien_Db_Adapter_Mysqli extends Zend_Db_Adapter_Mysqli
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     protected function _connect()
     {
         if ($this->_connection) {
@@ -277,6 +278,7 @@ class Varien_Db_Adapter_Mysqli extends Zend_Db_Adapter_Mysqli
      *
      * @return Varien_Db_Select
      */
+    #[\Override]
     public function select()
     {
         return new Varien_Db_Select($this);

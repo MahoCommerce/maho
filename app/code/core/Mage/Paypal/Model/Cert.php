@@ -26,6 +26,7 @@ class Mage_Paypal_Model_Cert extends Mage_Core_Model_Abstract
      */
     public const BASEPATH_PAYPAL_CERT  = 'cert/paypal';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('paypal/cert');
@@ -114,6 +115,7 @@ class Mage_Paypal_Model_Cert extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterDelete()
     {
         $this->_removeOutdatedCertFile();

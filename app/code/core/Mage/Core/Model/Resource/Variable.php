@@ -21,6 +21,7 @@
  */
 class Mage_Core_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/variable', 'variable_id');
@@ -63,6 +64,7 @@ class Mage_Core_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abst
      * @param Mage_Core_Model_Variable $object
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
         parent::_afterSave($object);
@@ -98,6 +100,7 @@ class Mage_Core_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abst
      * @param Mage_Core_Model_Variable $object
      * @inheritDoc
      */
+    #[\Override]
     protected function _getLoadSelect($field, $value, $object)
     {
         $select = parent::_getLoadSelect($field, $value, $object);

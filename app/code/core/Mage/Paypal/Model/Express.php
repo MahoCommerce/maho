@@ -123,6 +123,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      *
      * @return bool
      */
+    #[\Override]
     public function canUseCheckout()
     {
         if (Mage::getStoreConfigFlag('payment/hosted_pro/active')
@@ -139,6 +140,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @param string $currencyCode
      * @return bool
      */
+    #[\Override]
     public function canUseForCurrency($currencyCode)
     {
         return $this->_pro->getConfig()->isCurrencyCodeSupported($currencyCode);
@@ -150,6 +152,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @see Mage_Sales_Model_Payment::place()
      * @return string
      */
+    #[\Override]
     public function getConfigPaymentAction()
     {
         return $this->_pro->getConfig()->getPaymentAction();
@@ -160,6 +163,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @param Mage_Sales_Model_Quote|null $quote
      * @return bool
      */
+    #[\Override]
     public function isAvailable($quote = null)
     {
         if (parent::isAvailable($quote) && $this->_pro->getConfig()->isMethodAvailable()) {
@@ -175,6 +179,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @param int $storeId
      * @return mixed
      */
+    #[\Override]
     public function getConfigData($field, $storeId = null)
     {
         return $this->_pro->getConfig()->$field;
@@ -187,6 +192,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @param float $amount
      * @return $this
      */
+    #[\Override]
     public function order(Varien_Object $payment, $amount)
     {
         $paypalTransactionData = Mage::getSingleton('checkout/session')->getPaypalTransactionData();
@@ -257,6 +263,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @param float $amount
      * @return $this
      */
+    #[\Override]
     public function authorize(Varien_Object $payment, $amount)
     {
         return $this->_placeOrder($payment, $amount);
@@ -268,6 +275,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return $this
      */
+    #[\Override]
     public function void(Varien_Object $payment)
     {
         //Switching to order transaction if needed
@@ -294,6 +302,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @param float $amount
      * @return $this
      */
+    #[\Override]
     public function capture(Varien_Object $payment, $amount)
     {
         $authorizationTransaction = $payment->getAuthorizationTransaction();
@@ -389,6 +398,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @param float $amount
      * @return $this
      */
+    #[\Override]
     public function refund(Varien_Object $payment, $amount)
     {
         $this->_pro->refund($payment, $amount);
@@ -401,6 +411,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return $this
      */
+    #[\Override]
     public function cancel(Varien_Object $payment)
     {
         $this->void($payment);
@@ -414,6 +425,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return bool
      */
+    #[\Override]
     public function canReviewPayment(Mage_Payment_Model_Info $payment)
     {
         return parent::canReviewPayment($payment) && $this->_pro->canReviewPayment($payment);
@@ -425,6 +437,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return bool
      */
+    #[\Override]
     public function acceptPayment(Mage_Payment_Model_Info $payment)
     {
         parent::acceptPayment($payment);
@@ -437,6 +450,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return bool
      */
+    #[\Override]
     public function denyPayment(Mage_Payment_Model_Info $payment)
     {
         parent::denyPayment($payment);
@@ -461,6 +475,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @param string $transactionId
      * @return array
      */
+    #[\Override]
     public function fetchTransactionInfo(Mage_Payment_Model_Info $payment, $transactionId)
     {
         return $this->_pro->fetchTransactionInfo($payment, $transactionId);
@@ -469,6 +484,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
     /**
      * Validate RP data
      */
+    #[\Override]
     public function validateRecurringProfile(Mage_Payment_Model_Recurring_Profile $profile)
     {
         return $this->_pro->validateRecurringProfile($profile);
@@ -477,6 +493,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
     /**
      * Submit RP to the gateway
      */
+    #[\Override]
     public function submitRecurringProfile(
         Mage_Payment_Model_Recurring_Profile $profile,
         Mage_Payment_Model_Info $paymentInfo
@@ -492,6 +509,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      *
      * @param string $referenceId
      */
+    #[\Override]
     public function getRecurringProfileDetails($referenceId, Varien_Object $result)
     {
         return $this->_pro->getRecurringProfileDetails($referenceId, $result);
@@ -500,6 +518,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
     /**
      * Whether can get recurring profile details
      */
+    #[\Override]
     public function canGetRecurringProfileDetails()
     {
         return true;
@@ -508,6 +527,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
     /**
      * Update RP data
      */
+    #[\Override]
     public function updateRecurringProfile(Mage_Payment_Model_Recurring_Profile $profile)
     {
         return $this->_pro->updateRecurringProfile($profile);
@@ -516,6 +536,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
     /**
      * Manage status
      */
+    #[\Override]
     public function updateRecurringProfileStatus(Mage_Payment_Model_Recurring_Profile $profile)
     {
         return $this->_pro->updateRecurringProfileStatus($profile);
@@ -524,6 +545,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function assignData($data)
     {
         $result = parent::assignData($data);
@@ -596,6 +618,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      *
      * @return  bool
      */
+    #[\Override]
     public function canVoid(Varien_Object $payment)
     {
         if ($payment instanceof Mage_Sales_Model_Order_Invoice
@@ -622,6 +645,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      *
      * @return bool
      */
+    #[\Override]
     public function canCapture()
     {
         $payment = $this->getInfoInstance();

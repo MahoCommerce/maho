@@ -43,6 +43,7 @@ class Mage_Directory_Model_Currency_Import_Webservicex extends Mage_Directory_Mo
      * @param int $retry
      * @return float|null
      */
+    #[\Override]
     protected function _convert($currencyFrom, $currencyTo, $retry = 0)
     {
         $url = str_replace('{{CURRENCY_FROM}}', $currencyFrom, $this->_url);

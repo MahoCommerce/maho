@@ -45,6 +45,7 @@ class Mage_Adminhtml_Block_Urlrewrite extends Mage_Adminhtml_Block_Widget_Grid_C
      * @see Mage_Adminhtml_Block_Urlrewrite_Selector
      * @return string
      */
+    #[\Override]
     public function getCreateUrl()
     {
         $modes = array_keys(Mage::getBlockSingleton('adminhtml/urlrewrite_selector')->getModes());

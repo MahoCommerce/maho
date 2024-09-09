@@ -31,6 +31,7 @@ class Mage_Sales_Model_Resource_Order_Invoice_Comment_Collection extends Mage_Sa
      */
     protected $_eventObject    = 'order_invoice_comment_collection';
 
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();

@@ -85,6 +85,7 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
     /**
      * Initialize resource
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('index/process');

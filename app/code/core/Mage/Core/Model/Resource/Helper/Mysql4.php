@@ -335,6 +335,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      *
      * @see escapeLikeValue()
      */
+    #[\Override]
     public function addLikeEscape($value, $options = [])
     {
         $value = $this->escapeLikeValue($value, $options);

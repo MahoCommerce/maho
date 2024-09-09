@@ -21,6 +21,7 @@
  */
 class Varien_Convert_Mapper_Column extends Varien_Convert_Mapper_Abstract
 {
+    #[\Override]
     public function map()
     {
         $data = $this->getData();

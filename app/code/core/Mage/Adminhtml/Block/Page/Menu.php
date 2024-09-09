@@ -37,6 +37,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      * Initialize template and cache settings
      *
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -50,6 +51,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      *
      * @return int
      */
+    #[\Override]
     public function getCacheLifetime()
     {
         return 86400;
@@ -60,6 +62,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      *
      * @return array
      */
+    #[\Override]
     public function getCacheKeyInfo()
     {
         $cacheKeyInfo = [
@@ -231,6 +234,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      * @param   string $html
      * @return  string
      */
+    #[\Override]
     protected function _afterToHtml($html)
     {
         $html = preg_replace_callback('#' . Mage_Adminhtml_Model_Url::SECRET_KEY_PARAM_NAME . '/\$([^\/].*)/([^\$].*)\$#', [$this, '_callbackSecretKey'], $html);

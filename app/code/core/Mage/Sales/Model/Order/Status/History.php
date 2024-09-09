@@ -48,6 +48,7 @@ class Mage_Sales_Model_Order_Status_History extends Mage_Sales_Model_Abstract
     protected $_eventPrefix = 'sales_order_status_history';
     protected $_eventObject = 'status_history';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order_status_history');
@@ -127,6 +128,7 @@ class Mage_Sales_Model_Order_Status_History extends Mage_Sales_Model_Abstract
      * @return Mage_Core_Model_Store
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     public function getStore()
     {
         if ($this->getOrder()) {
@@ -140,6 +142,7 @@ class Mage_Sales_Model_Order_Status_History extends Mage_Sales_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();

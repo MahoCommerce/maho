@@ -43,6 +43,7 @@
  */
 class Mage_Downloadable_Model_Link_Purchased extends Mage_Core_Model_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('downloadable/link_purchased');
@@ -54,6 +55,7 @@ class Mage_Downloadable_Model_Link_Purchased extends Mage_Core_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     public function _beforeSave()
     {
         if ($this->getOrderId() == null) {

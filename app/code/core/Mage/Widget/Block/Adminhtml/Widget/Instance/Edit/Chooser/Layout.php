@@ -68,6 +68,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Layout extends Ma
      *
      * @return string
      */
+    #[\Override]
     public function getArea()
     {
         if (!$this->_getData('area')) {
@@ -107,6 +108,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Layout extends Ma
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         $selectBlock = $this->getLayout()->createBlock('core/html_select')

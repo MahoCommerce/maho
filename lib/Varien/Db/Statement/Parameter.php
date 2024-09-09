@@ -216,6 +216,7 @@ class Varien_Db_Statement_Parameter
      *
      * @return string
      */
+    #[\Override]
     public function __toString()
     {
         return (string) $this->_value;

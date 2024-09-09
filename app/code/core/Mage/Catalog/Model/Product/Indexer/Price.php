@@ -76,6 +76,7 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
         Mage_CatalogInventory_Model_Stock_Item::XML_PATH_MANAGE_STOCK
     ];
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_indexer_price');
@@ -86,6 +87,7 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
      *
      * @return string
      */
+    #[\Override]
     public function getName()
     {
         return Mage::helper('catalog')->__('Product Prices');
@@ -96,6 +98,7 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
      *
      * @return string
      */
+    #[\Override]
     public function getDescription()
     {
         return Mage::helper('catalog')->__('Index product prices');
@@ -126,6 +129,7 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
      *
      * @return bool
      */
+    #[\Override]
     public function matchEvent(Mage_Index_Model_Event $event)
     {
         $data       = $event->getNewData();
@@ -219,6 +223,7 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
     /**
      * Register data required by process in event object
      */
+    #[\Override]
     protected function _registerEvent(Mage_Index_Model_Event $event)
     {
         $event->addNewData(self::EVENT_MATCH_RESULT_KEY, true);
@@ -258,6 +263,7 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
     /**
      * Process event
      */
+    #[\Override]
     protected function _processEvent(Mage_Index_Model_Event $event)
     {
         $data = $event->getNewData();

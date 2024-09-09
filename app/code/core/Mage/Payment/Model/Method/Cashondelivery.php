@@ -51,6 +51,7 @@ class Mage_Payment_Model_Method_Cashondelivery extends Mage_Payment_Model_Method
      *
      * {@inheritDoc}
      */
+    #[\Override]
     public function isApplicableToQuote($quote, $checksBitMask)
     {
         if ($quote->getIsVirtual()) {

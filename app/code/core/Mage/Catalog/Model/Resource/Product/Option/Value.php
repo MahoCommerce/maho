@@ -21,6 +21,7 @@
  */
 class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_option_type_value', 'option_type_id');
@@ -32,6 +33,7 @@ class Mage_Catalog_Model_Resource_Product_Option_Value extends Mage_Core_Model_R
      *
      * @return Mage_Core_Model_Resource_Db_Abstract
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
         $this->_saveValuePrices($object);

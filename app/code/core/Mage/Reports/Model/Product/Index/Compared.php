@@ -38,6 +38,7 @@ class Mage_Reports_Model_Product_Index_Compared extends Mage_Reports_Model_Produ
      */
     protected $_countCacheKey   = 'product_index_compared_count';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('reports/product_index_compared');
@@ -48,6 +49,7 @@ class Mage_Reports_Model_Product_Index_Compared extends Mage_Reports_Model_Produ
      *
      * @return array
      */
+    #[\Override]
     public function getExcludeProductIds()
     {
         $productIds = [];

@@ -83,6 +83,7 @@ class Mage_Dataflow_Model_Convert_Mapper_Column extends Mage_Dataflow_Model_Conv
         return Varien_Object_Cache::singleton()->load($this->_batchImport);
     }
 
+    #[\Override]
     public function map()
     {
         $batchModel  = $this->getBatchModel();

@@ -41,6 +41,7 @@ class Mage_Paypal_Model_Standard extends Mage_Payment_Model_Method_Abstract
      * @param string $currencyCode
      * @return bool
      */
+    #[\Override]
     public function canUseForCurrency($currencyCode)
     {
         return $this->getConfig()->isCurrencyCodeSupported($currencyCode);
@@ -140,6 +141,7 @@ class Mage_Paypal_Model_Standard extends Mage_Payment_Model_Method_Abstract
      * @param string $paymentAction
      * @param Varien_Object $stateObject
      */
+    #[\Override]
     public function initialize($paymentAction, $stateObject)
     {
         $state = Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
@@ -171,6 +173,7 @@ class Mage_Paypal_Model_Standard extends Mage_Payment_Model_Method_Abstract
      * @param Mage_Sales_Model_Quote|null $quote
      * @return bool
      */
+    #[\Override]
     public function isAvailable($quote = null)
     {
         if (parent::isAvailable($quote) && $this->getConfig()->isMethodAvailable()) {
@@ -186,6 +189,7 @@ class Mage_Paypal_Model_Standard extends Mage_Payment_Model_Method_Abstract
      * @param int $storeId
      * @return mixed
      */
+    #[\Override]
     public function getConfigData($field, $storeId = null)
     {
         return $this->getConfig()->$field;

@@ -61,11 +61,13 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
      */
     protected $_customerTablePermanentAttributes = ['email', 'website'];
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('dataflow/profile');
     }
 
+    #[\Override]
     protected function _afterLoad()
     {
         $guiData = '';
@@ -82,6 +84,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
         return parent::_afterLoad();
     }
 
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();
@@ -136,6 +139,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
         return $this;
     }
 
+    #[\Override]
     protected function _afterSave()
     {
         if ($this->getGuiData() && is_string($this->getGuiData())) {

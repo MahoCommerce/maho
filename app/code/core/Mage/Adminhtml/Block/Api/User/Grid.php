@@ -30,6 +30,7 @@ class Mage_Adminhtml_Block_Api_User_Grid extends Mage_Adminhtml_Block_Widget_Gri
         $this->setUseAjax(true);
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('api/user_collection');
@@ -37,6 +38,7 @@ class Mage_Adminhtml_Block_Api_User_Grid extends Mage_Adminhtml_Block_Widget_Gri
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('user_id', [
@@ -79,11 +81,13 @@ class Mage_Adminhtml_Block_Api_User_Grid extends Mage_Adminhtml_Block_Widget_Gri
         return parent::_prepareColumns();
     }
 
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/edit', ['user_id' => $row->getId()]);
     }
 
+    #[\Override]
     public function getGridUrl()
     {
         //$uid = $this->getRequest()->getParam('user_id');

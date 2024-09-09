@@ -53,6 +53,7 @@ class Mage_Sales_Block_Order_Creditmemo_Totals extends Mage_Sales_Block_Order_To
      *
      * @return Mage_Sales_Model_Order
      */
+    #[\Override]
     public function getSource()
     {
         return $this->getCreditmemo();
@@ -63,6 +64,7 @@ class Mage_Sales_Block_Order_Creditmemo_Totals extends Mage_Sales_Block_Order_To
      *
      * @return Mage_Sales_Block_Order_Totals
      */
+    #[\Override]
     protected function _initTotals()
     {
         parent::_initTotals();

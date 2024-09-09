@@ -21,6 +21,7 @@
  */
 class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Radio extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Select
 {
+    #[\Override]
     protected function _getOptions()
     {
         return [
@@ -39,6 +40,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Radio extends Mage_Adminhtm
         ];
     }
 
+    #[\Override]
     public function getCondition()
     {
         if ($this->getValue()) {

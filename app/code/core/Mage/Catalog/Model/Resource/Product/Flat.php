@@ -39,6 +39,7 @@ class Mage_Catalog_Model_Resource_Product_Flat extends Mage_Core_Model_Resource_
      * Init connection and resource table
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_flat', 'entity_id');
@@ -207,6 +208,7 @@ class Mage_Catalog_Model_Resource_Product_Flat extends Mage_Core_Model_Resource_
      *
      * @return string
      */
+    #[\Override]
     public function getMainTable()
     {
         return $this->getFlatTableName($this->getStoreId());

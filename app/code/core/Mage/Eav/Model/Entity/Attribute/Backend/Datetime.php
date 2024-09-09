@@ -29,6 +29,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Datetime extends Mage_Eav_Model_En
      * @throws Mage_Eav_Exception
      * @return $this
      */
+    #[\Override]
     public function beforeSave($object)
     {
         $attributeName = $this->getAttribute()->getName();

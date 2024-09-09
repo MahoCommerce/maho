@@ -29,6 +29,7 @@ class Mage_Adminhtml_Block_Dashboard_Searches_Last extends Mage_Adminhtml_Block_
         $this->setId('lastSearchGrid');
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         if (!Mage::helper('core')->isModuleEnabled('Mage_CatalogSearch')) {
@@ -53,6 +54,7 @@ class Mage_Adminhtml_Block_Dashboard_Searches_Last extends Mage_Adminhtml_Block_
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('search_query', [
@@ -82,6 +84,7 @@ class Mage_Adminhtml_Block_Dashboard_Searches_Last extends Mage_Adminhtml_Block_
         return parent::_prepareColumns();
     }
 
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/catalog_search/edit', ['id' => $row->getId()]);

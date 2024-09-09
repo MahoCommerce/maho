@@ -46,6 +46,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Form_Account extends Mage_Adminhtm
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareForm()
     {
         /** @var Mage_Customer_Model_Customer $customerModel */
@@ -94,6 +95,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Form_Account extends Mage_Adminhtm
      *
      * @return $this
      */
+    #[\Override]
     protected function _addAdditionalFormElementData(Varien_Data_Form_Element_Abstract $element)
     {
         switch ($element->getId()) {
@@ -121,6 +123,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Form_Account extends Mage_Adminhtm
      *
      * @return array
      */
+    #[\Override]
     public function getFormValues()
     {
         $data = $this->getCustomer()->getData();

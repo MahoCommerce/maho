@@ -28,6 +28,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Hint extends Mage_Admin
      *
      * @return string
      */
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         $elementOriginalData = $element->getOriginalData();

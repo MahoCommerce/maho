@@ -31,6 +31,7 @@ class Mage_Api2_Model_Auth_User_Customer extends Mage_Api2_Model_Auth_User_Abstr
      *
      * @return string
      */
+    #[\Override]
     public function getLabel()
     {
         return Mage::helper('api2')->__('Customer');
@@ -41,6 +42,7 @@ class Mage_Api2_Model_Auth_User_Customer extends Mage_Api2_Model_Auth_User_Abstr
      *
      * @return string
      */
+    #[\Override]
     public function getType()
     {
         return self::USER_TYPE;
@@ -51,6 +53,7 @@ class Mage_Api2_Model_Auth_User_Customer extends Mage_Api2_Model_Auth_User_Abstr
      *
      * @return int
      */
+    #[\Override]
     public function getRole()
     {
         if (!$this->_role) {

@@ -62,6 +62,7 @@ class Mage_Directory_Model_Currency_Filter implements Zend_Filter_Interface
      * @param   double $value
      * @return  string
      */
+    #[\Override]
     public function filter($value)
     {
         $value = Mage::app()->getLocale()->getNumber($value);

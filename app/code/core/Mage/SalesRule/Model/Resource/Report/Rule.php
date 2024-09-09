@@ -21,6 +21,7 @@
  */
 class Mage_SalesRule_Model_Resource_Report_Rule extends Mage_Reports_Model_Resource_Report_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_setResource('salesrule');

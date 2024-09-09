@@ -221,6 +221,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     /**
      * Init resource model
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order_item');
@@ -232,6 +233,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      *
      * @return Varien_Object
      */
+    #[\Override]
     protected function _initOldFieldsMap()
     {
         // pre 1.6 fields names, old => new
@@ -246,6 +248,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();

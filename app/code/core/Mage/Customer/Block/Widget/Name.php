@@ -24,6 +24,7 @@
  */
 class Mage_Customer_Block_Widget_Name extends Mage_Customer_Block_Widget_Abstract
 {
+    #[\Override]
     public function _construct()
     {
         parent::_construct();
@@ -170,6 +171,7 @@ class Mage_Customer_Block_Widget_Name extends Mage_Customer_Block_Widget_Abstrac
      * @param string $attributeCode
      * @return Mage_Customer_Model_Attribute|false
      */
+    #[\Override]
     protected function _getAttribute($attributeCode)
     {
         if ($this->getForceUseCustomerAttributes() || $this->getObject() instanceof Mage_Customer_Model_Customer) {

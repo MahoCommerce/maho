@@ -70,6 +70,7 @@ class Mage_Dataflow_Model_Batch extends Mage_Core_Model_Abstract
      * Init model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('dataflow/batch');
@@ -114,6 +115,7 @@ class Mage_Dataflow_Model_Batch extends Mage_Core_Model_Abstract
         return $this->_ioAdapter;
     }
 
+    #[\Override]
     protected function _beforeSave()
     {
         if (is_null($this->getData('created_at'))) {
@@ -122,6 +124,7 @@ class Mage_Dataflow_Model_Batch extends Mage_Core_Model_Abstract
         return $this;
     }
 
+    #[\Override]
     protected function _afterDelete()
     {
         $this->getIoAdapter()->clear();

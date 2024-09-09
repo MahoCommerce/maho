@@ -76,6 +76,7 @@ class Mage_Adminhtml_Permissions_OrphanedResourceController extends Mage_Adminht
     /**
      * @inheritdoc
      */
+    #[\Override]
     public function preDispatch()
     {
         $this->_setForcedFormKeyActions('massDelete');

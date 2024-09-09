@@ -24,6 +24,7 @@ class Mage_Downloadable_Model_Resource_Sample_Collection extends Mage_Core_Model
     /**
      * Init resource model
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('downloadable/sample');

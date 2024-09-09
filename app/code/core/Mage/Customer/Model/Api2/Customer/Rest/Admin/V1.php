@@ -28,6 +28,7 @@ class Mage_Customer_Model_Api2_Customer_Rest_Admin_V1 extends Mage_Customer_Mode
      * @throws Mage_Api2_Exception
      * @return array
      */
+    #[\Override]
     protected function _retrieve()
     {
         /** @var Mage_Log_Model_Customer $log */

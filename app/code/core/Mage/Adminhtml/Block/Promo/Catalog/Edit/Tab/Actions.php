@@ -24,6 +24,7 @@ class Mage_Adminhtml_Block_Promo_Catalog_Edit_Tab_Actions extends Mage_Adminhtml
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('catalogrule')->__('Actions');
@@ -34,6 +35,7 @@ class Mage_Adminhtml_Block_Promo_Catalog_Edit_Tab_Actions extends Mage_Adminhtml
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('catalogrule')->__('Actions');
@@ -44,6 +46,7 @@ class Mage_Adminhtml_Block_Promo_Catalog_Edit_Tab_Actions extends Mage_Adminhtml
      *
      * @return true
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -54,6 +57,7 @@ class Mage_Adminhtml_Block_Promo_Catalog_Edit_Tab_Actions extends Mage_Adminhtml
      *
      * @return false
      */
+    #[\Override]
     public function isHidden()
     {
         return false;
@@ -62,6 +66,7 @@ class Mage_Adminhtml_Block_Promo_Catalog_Edit_Tab_Actions extends Mage_Adminhtml
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareForm()
     {
         $model = Mage::registry('current_promo_catalog_rule');

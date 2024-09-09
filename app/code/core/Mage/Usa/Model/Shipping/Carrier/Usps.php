@@ -119,6 +119,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      *
      * @return Mage_Shipping_Model_Rate_Result|bool|null
      */
+    #[\Override]
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
         if (!$this->getConfigFlag($this->_activeFlag)) {
@@ -272,6 +273,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      * @inheritdoc
      * Starting from 23.02.2018 USPS doesn't allow to create free shipping labels via their API.
      */
+    #[\Override]
     public function isShippingLabelsAvailable()
     {
         return false;
@@ -1049,6 +1051,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      *
      * @return array
      */
+    #[\Override]
     public function getAllowedMethods()
     {
         $allowed = explode(',', $this->getConfigData('allowed_methods'));
@@ -1730,6 +1733,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      * @deprecated This method must not be used anymore. Starting from 23.02.2018 USPS eliminates API usage for
      * free shipping labels generating.
      */
+    #[\Override]
     protected function _doShipmentRequest(Varien_Object $request)
     {
         $this->_prepareShipmentRequest($request);
@@ -1805,6 +1809,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      *
      * @return array|bool
      */
+    #[\Override]
     public function getContainerTypes(?Varien_Object $params = null)
     {
         if (is_null($params)) {
@@ -1838,6 +1843,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      *
      * @return array
      */
+    #[\Override]
     public function getDeliveryConfirmationTypes(?Varien_Object $params = null)
     {
         if ($params == null) {
@@ -1857,6 +1863,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      * @param null|string $countyDest
      * @return bool
      */
+    #[\Override]
     public function isGirthAllowed($countyDest = null)
     {
         return $this->_isUSCountry($countyDest) ? false : true;
@@ -1867,6 +1874,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      *
      * @return array
      */
+    #[\Override]
     public function getContentTypes(Varien_Object $params)
     {
         $countryShipper     = $params->getCountryShipper();

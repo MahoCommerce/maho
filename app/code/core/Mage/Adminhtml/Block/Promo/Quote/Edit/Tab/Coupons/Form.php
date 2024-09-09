@@ -26,6 +26,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Coupons_Form extends Mage_Adminh
      *
      * @return Mage_Adminhtml_Block_Widget_Form
      */
+    #[\Override]
     protected function _prepareForm()
     {
         $form = new Varien_Data_Form();

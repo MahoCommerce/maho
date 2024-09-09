@@ -455,6 +455,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
      *
      * @return string
      */
+    #[\Override]
     public function getHtmlId()
     {
         return $this->_htmlId;
@@ -502,6 +503,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
      * @return void
      * @throws Exception
      */
+    #[\Override]
     protected function _prepareData()
     {
         /** @var Mage_Adminhtml_Helper_Dashboard_Data $helper */

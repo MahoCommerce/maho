@@ -65,6 +65,7 @@ class Mage_Catalog_Model_Product_Indexer_Eav extends Mage_Index_Model_Indexer_Ab
      *
      * @return string
      */
+    #[\Override]
     public function getName()
     {
         return Mage::helper('catalog')->__('Product Attributes');
@@ -75,11 +76,13 @@ class Mage_Catalog_Model_Product_Indexer_Eav extends Mage_Index_Model_Indexer_Ab
      *
      * @return string
      */
+    #[\Override]
     public function getDescription()
     {
         return Mage::helper('catalog')->__('Index product attributes for layered navigation building');
     }
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_indexer_eav');
@@ -88,6 +91,7 @@ class Mage_Catalog_Model_Product_Indexer_Eav extends Mage_Index_Model_Indexer_Ab
     /**
      * Register data required by process in event object
      */
+    #[\Override]
     protected function _registerEvent(Mage_Index_Model_Event $event)
     {
         $entity = $event->getEntity();
@@ -271,6 +275,7 @@ class Mage_Catalog_Model_Product_Indexer_Eav extends Mage_Index_Model_Indexer_Ab
     /**
      * Process event
      */
+    #[\Override]
     protected function _processEvent(Mage_Index_Model_Event $event)
     {
         $data = $event->getNewData();

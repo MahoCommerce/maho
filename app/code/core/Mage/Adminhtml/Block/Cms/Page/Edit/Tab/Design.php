@@ -31,6 +31,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Design extends Mage_Adminhtml_Block
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareForm()
     {
         /*
@@ -135,6 +136,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Design extends Mage_Adminhtml_Block
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('cms')->__('Design');
@@ -145,6 +147,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Design extends Mage_Adminhtml_Block
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('cms')->__('Design');
@@ -155,6 +158,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Design extends Mage_Adminhtml_Block
      *
      * @return true
      */
+    #[\Override]
     public function canShowTab()
     {
         return true;
@@ -165,6 +169,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Design extends Mage_Adminhtml_Block
      *
      * @return false
      */
+    #[\Override]
     public function isHidden()
     {
         return false;

@@ -47,6 +47,7 @@ class Mage_Sales_Model_Resource_Order_Invoice extends Mage_Sales_Model_Resource_
      */
     protected $_entityTypeForIncrementId     = 'invoice';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/invoice', 'entity_id');
@@ -57,6 +58,7 @@ class Mage_Sales_Model_Resource_Order_Invoice extends Mage_Sales_Model_Resource_
      *
      * @return $this
      */
+    #[\Override]
     protected function _initVirtualGridColumns()
     {
         parent::_initVirtualGridColumns();

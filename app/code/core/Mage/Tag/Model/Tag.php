@@ -75,6 +75,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
      */
     protected $_addBasePopularity = false;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('tag/tag');
@@ -85,6 +86,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     public function afterCommitCallback()
     {
         parent::afterCommitCallback();
@@ -340,6 +342,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
      * @return Mage_Core_Model_Abstract
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         $this->_protectFromNonAdmin();
@@ -462,6 +465,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
      *
      * @return Mage_Core_Model_Abstract
      */
+    #[\Override]
     protected function _afterSave()
     {
         if ($this->hasData('tag_assigned_products')) {

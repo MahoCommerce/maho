@@ -24,6 +24,7 @@ class Mage_Sales_Model_Resource_Order_Creditmemo_Item extends Mage_Sales_Model_R
     /** @var string */
     protected $_eventPrefix    = 'sales_order_creditmemo_item_resource';
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/creditmemo_item', 'entity_id');

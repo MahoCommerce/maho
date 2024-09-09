@@ -24,6 +24,7 @@ class Mage_Tax_Model_Class_Source_Customer extends Mage_Eav_Model_Entity_Attribu
     /**
      * @return array
      */
+    #[\Override]
     public function getAllOptions()
     {
         if (!$this->_options) {
