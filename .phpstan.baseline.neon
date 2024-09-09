@@ -4731,11 +4731,6 @@ parameters:
 			path: app/code/core/Mage/Wishlist/controllers/IndexController.php
 
 		-
-			message: "#^Comparison operation \"\\>\\=\" between int\\<0, max\\> and 0 is always true\\.$#"
-			count: 1
-			path: lib/Mage/Archive.php
-
-		-
 			message: "#^Negated boolean expression is always true\\.$#"
 			count: 1
 			path: lib/Mage/Cache/Backend/File.php
@@ -4749,11 +4744,6 @@ parameters:
 			message: "#^Property Mage_HTTP_Client_Socket\\:\\:\\$_redirectCount is never read, only written\\.$#"
 			count: 1
 			path: lib/Mage/HTTP/Client/Socket.php
-
-		-
-			message: "#^Empty array passed to foreach\\.$#"
-			count: 1
-			path: lib/Mage/System/Ftp.php
 
 		-
 			message: "#^Argument of an invalid type Zend_Db_Statement_Interface supplied for foreach, only iterables are supported\\.$#"
