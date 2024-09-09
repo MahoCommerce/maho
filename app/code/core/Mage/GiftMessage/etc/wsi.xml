@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<wsdl:definitions xmlns:typens="urn:OpenMage"
+<wsdl:definitions xmlns:typens="urn:Maho"
              xmlns:xsd="http://www.w3.org/2001/XMLSchema"
              xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
              xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
              xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-             name="OpenMage"
-             targetNamespace="urn:OpenMage">
+             name="Maho"
+             targetNamespace="urn:Maho">
     <wsdl:types>
-        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:OpenMage">
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:Maho">
             <xsd:complexType name="giftMessageEntity">
                 <xsd:sequence>
                     <xsd:element name="from" type="xsd:string" minOccurs="0" />
