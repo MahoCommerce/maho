@@ -109,8 +109,6 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
 
     /**
      * Is insta-login?
-     *
-     * @return bool
      */
     public function getIsInstaLogin(): bool
     {

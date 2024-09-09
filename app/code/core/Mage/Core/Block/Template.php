@@ -208,8 +208,6 @@ class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
 
     /**
      * Retrieve block cache status
-     *
-     * @return  string
      */
     private function _getCacheHintStatusColor(): string
     {

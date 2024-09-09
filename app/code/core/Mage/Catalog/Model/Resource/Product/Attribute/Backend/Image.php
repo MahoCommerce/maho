@@ -21,9 +21,6 @@
  */
 class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Image extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
-    /**
-     * @return array
-     */
     public function getAllowedExtensions(): array
     {
         return Varien_Io_File::ALLOWED_IMAGES_EXTENSIONS;

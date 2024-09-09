@@ -90,7 +90,6 @@ class Varien_Data_Tree_Node_Collection implements ArrayAccess, IteratorAggregate
     /**
      * Implementation of ArrayAccess:offsetExists()
      * @param string $key
-     * @return bool
      */
     public function offsetExists($key): bool
     {
@@ -130,8 +129,6 @@ class Varien_Data_Tree_Node_Collection implements ArrayAccess, IteratorAggregate
 
     /**
      * Implementation of Countable:count()
-     *
-     * @return int
      */
     public function count(): int
     {

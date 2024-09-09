@@ -993,9 +993,6 @@ XML;
         return $data;
     }
 
-    /**
-     * @return bool
-     */
     public function isFormKeyEnabled(): bool
     {
         return Mage::getStoreConfigFlag(Mage_Core_Controller_Front_Action::XML_CSRF_USE_FLAG_CONFIG_PATH);
@@ -1029,7 +1026,6 @@ XML;
 
     /**
      * Save the client rate limit hit to the cache
-     * @return void
      */
     public function recordRateLimitHit(): void
     {

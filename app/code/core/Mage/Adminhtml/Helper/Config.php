@@ -29,7 +29,6 @@ class Mage_Adminhtml_Helper_Config extends Mage_Core_Helper_Abstract
      * Return information array of input types
      *
      * @param string $inputType
-     * @return array
      */
     public function getInputTypes(?string $inputType = null): array
     {
@@ -49,8 +48,6 @@ class Mage_Adminhtml_Helper_Config extends Mage_Core_Helper_Abstract
 
     /**
      * Return default backend model by input type
-     *
-     * @return string|null
      */
     public function getBackendModelByInputType(string $inputType): ?string
     {
@@ -63,8 +60,6 @@ class Mage_Adminhtml_Helper_Config extends Mage_Core_Helper_Abstract
 
     /**
      * Get field backend model by field config node
-     *
-     * @return string|null
      */
     public function getBackendModelByFieldConfig(Varien_Simplexml_Element $fieldConfig): ?string
     {

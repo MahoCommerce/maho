@@ -93,7 +93,6 @@ class Varien_Data_Form_Element_Collection implements ArrayAccess, IteratorAggreg
      * Implementation of ArrayAccess:offsetExists()
      *
      * @param mixed $key
-     * @return bool
      */
     public function offsetExists($key): bool
     {
@@ -168,8 +167,6 @@ class Varien_Data_Form_Element_Collection implements ArrayAccess, IteratorAggreg
 
     /**
      * Count elements in collection
-     *
-     * @return int
      */
     public function count(): int
     {

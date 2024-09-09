@@ -38,7 +38,6 @@ class Mage_GoogleAnalytics_Model_Observer
 
     /**
      * Process items added or removed from cart for GA4 block to render event on cart view
-     * @return void
      */
     public function processItemsAddedOrRemovedFromCart(Varien_Event_Observer $observer): void
     {

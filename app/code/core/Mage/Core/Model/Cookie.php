@@ -165,8 +165,6 @@ class Mage_Core_Model_Cookie
 
     /**
      * Retrieve use SameSite
-     *
-     * @return string
      */
     public function getSameSite(): string
     {

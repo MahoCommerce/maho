@@ -156,7 +156,6 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
      *
      * @param string $savePath ignored
      * @param string $sessName ignored
-     * @return bool
      */
     public function open($savePath, $sessName): bool
     {
@@ -165,8 +164,6 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
 
     /**
      * Close session
-     *
-     * @return bool
      */
     public function close(): bool
     {
@@ -200,7 +197,6 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
      *
      * @param string $sessId
      * @param string $sessData
-     * @return bool
      */
     public function write($sessId, $sessData): bool
     {
@@ -233,7 +229,6 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
      * Destroy session
      *
      * @param string $sessId
-     * @return bool
      */
     public function destroy($sessId): bool
     {

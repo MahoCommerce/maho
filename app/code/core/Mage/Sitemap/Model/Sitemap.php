@@ -228,7 +228,6 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
      * @param null|string $lastmod
      * @param null|string $changefreq
      * @param null|string $priority
-     * @return string
      */
     protected function getSitemapRow(string $url, $lastmod = null, $changefreq = null, $priority = null): string
     {

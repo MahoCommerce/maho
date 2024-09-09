@@ -353,7 +353,6 @@ final class Mage
 
     /**
      * @param null|string|bool|int|Mage_Core_Model_Store $store
-     * @return float
      */
     public static function getStoreConfigAsFloat(string $path, $store = null): float
     {
@@ -362,7 +361,6 @@ final class Mage
 
     /**
      * @param null|string|bool|int|Mage_Core_Model_Store $store
-     * @return int
      */
     public static function getStoreConfigAsInt(string $path, $store = null): int
     {

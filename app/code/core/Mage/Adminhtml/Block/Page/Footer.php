@@ -89,7 +89,6 @@ class Mage_Adminhtml_Block_Page_Footer extends Mage_Adminhtml_Block_Template
     }
 
     /**
-     * @return string
      * @deprecated see getReportIssuesUrl()
      */
     public function getBugreportUrl(): string
@@ -105,9 +104,6 @@ class Mage_Adminhtml_Block_Page_Footer extends Mage_Adminhtml_Block_Template
         return $this->setData('report_issues_url', $url);
     }
 
-    /**
-     * @return string
-     */
     public function getReportIssuesUrl(): string
     {
         return (string) $this->_getData('report_issues_url');
@@ -121,9 +117,6 @@ class Mage_Adminhtml_Block_Page_Footer extends Mage_Adminhtml_Block_Template
         return $this->setData('maho_project_url', $url);
     }
 
-    /**
-     * @return string
-     */
     public function getMahoProjectUrl(): string
     {
         return (string) $this->_getData('maho_project_url');

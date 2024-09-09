@@ -785,7 +785,6 @@ class Varien_Object implements ArrayAccess
      *
      * @link http://www.php.net/manual/en/arrayaccess.offsetexists.php
      * @param string $offset
-     * @return bool
      */
     public function offsetExists($offset): bool
     {

@@ -1334,9 +1334,6 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         return $this->getSubtotal() + $this->getDiscountAmount();
     }
 
-    /**
-     * @return string
-     */
     public function getCouponCode(): string
     {
         return (string)$this->_getData('coupon_code');

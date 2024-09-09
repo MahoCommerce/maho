@@ -132,8 +132,6 @@ class Mage_Core_Helper_EnvironmentConfigLoader extends Mage_Core_Helper_Abstract
 
     /**
      * Build configuration path.
-     *
-     * @return string
      */
     protected function buildPath(string $section, string $group, string $field): string
     {
@@ -142,8 +140,6 @@ class Mage_Core_Helper_EnvironmentConfigLoader extends Mage_Core_Helper_Abstract
 
     /**
      * Build configuration node path.
-     *
-     * @return string
      */
     protected function buildNodePath(string $scope, string $path): string
     {

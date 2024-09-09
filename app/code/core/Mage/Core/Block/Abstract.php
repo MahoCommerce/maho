@@ -1196,7 +1196,6 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
      * Wrapper for escapeHtml() function with keeping original value
      *
      * @param string[]|null $allowedTags
-     * @return Mage_Core_Model_Security_HtmlEscapedString
      * @see Mage_Core_Model_Security_HtmlEscapedString::getUnescapedValue()
      */
     public function escapeHtmlAsObject(string $data, ?array $allowedTags = null): Mage_Core_Model_Security_HtmlEscapedString

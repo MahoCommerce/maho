@@ -277,7 +277,6 @@ class Mage_Index_Model_Indexer
      *
      * @param   string $entityType
      * @param   string $eventType
-     * @return  Mage_Index_Model_Indexer
      * @throws Exception|Throwable
      */
     public function processEntityAction(Varien_Object $entity, $entityType, $eventType): Mage_Index_Model_Indexer

@@ -94,7 +94,6 @@ class Mage_Admin_Model_Resource_Rules extends Mage_Core_Model_Resource_Db_Abstra
     /**
      * Delete orphaned resources
      *
-     * @return int
      * @throws Mage_Core_Exception
      */
     public function deleteOrphanedResources(array $orphanedIds): int

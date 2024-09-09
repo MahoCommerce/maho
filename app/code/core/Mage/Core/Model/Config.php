@@ -441,8 +441,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
     /**
      * Load environment variables and override config
-     *
-     * @return self
      */
     public function loadEnv(): Mage_Core_Model_Config
     {

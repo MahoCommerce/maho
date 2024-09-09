@@ -44,8 +44,6 @@ class Mage_Core_Model_Security_HtmlEscapedString implements Stringable
 
     /**
      * Get escaped html entities
-     *
-     * @return string
      */
     public function __toString(): string
     {
@@ -57,8 +55,6 @@ class Mage_Core_Model_Security_HtmlEscapedString implements Stringable
 
     /**
      * Get un-escaped html entities
-     *
-     * @return string
      */
     public function getUnescapedValue(): string
     {
