@@ -1177,8 +1177,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
     /**
      * Map request to shipment
-     *
-     * @return null
      */
     protected function _mapRequestToShipment(Varien_Object $request)
     {

@@ -1136,11 +1136,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Product/List/Toolbar.php
 
 		-
-			message: "#^Property Mage_Catalog_Block_Product_New\\:\\:\\$_productsCount \\(null\\) does not accept int\\.$#"
-			count: 2
-			path: app/code/core/Mage/Catalog/Block/Product/New.php
-
-		-
 			message: "#^Method Mage_Catalog_Block_Product_View_Options_Type_Date\\:\\:_getValueWithLeadingZeros\\(\\) should return string but returns int\\.$#"
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/View/Options/Type/Date.php
@@ -1249,16 +1244,6 @@ parameters:
 			message: "#^Argument of an invalid type string supplied for foreach, only iterables are supported\\.$#"
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Admin/V1.php
-
-		-
-			message: "#^Return type \\(int\\) of method Mage_Catalog_Model_Api2_Product_Rest_Customer_V1\\:\\:_getCustomerGroupId\\(\\) should be compatible with return type \\(null\\) of method Mage_Catalog_Model_Api2_Product_Rest\\:\\:_getCustomerGroupId\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Customer/V1.php
-
-		-
-			message: "#^Return type \\(int\\) of method Mage_Catalog_Model_Api2_Product_Rest_Guest_V1\\:\\:_getCustomerGroupId\\(\\) should be compatible with return type \\(null\\) of method Mage_Catalog_Model_Api2_Product_Rest\\:\\:_getCustomerGroupId\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Guest/V1.php
 
 		-
 			message: "#^Call to an undefined method Mage_Core_Model_Abstract\\:\\:toOptionArray\\(\\)\\.$#"
@@ -1864,11 +1849,6 @@ parameters:
 			message: "#^Call to function is_numeric\\(\\) with int will always evaluate to true\\.$#"
 			count: 1
 			path: app/code/core/Mage/CatalogInventory/Model/Stock/Item.php
-
-		-
-			message: "#^Return type \\(int\\) of method Mage_CatalogRule_Model_Action_Index_Refresh_Row\\:\\:_getProduct\\(\\) should be compatible with return type \\(null\\) of method Mage_CatalogRule_Model_Action_Index_Refresh\\:\\:_getProduct\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/CatalogRule/Model/Action/Index/Refresh/Row.php
 
 		-
 			message: "#^Variable \\$gId might not be defined\\.$#"
@@ -4426,21 +4406,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
 
 		-
-			message: "#^Method Mage_Usa_Model_Shipping_Carrier_Dhl\\:\\:_mapRequestToShipment\\(\\) should return null but return statement is missing\\.$#"
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
-			message: "#^Method Mage_Usa_Model_Shipping_Carrier_Dhl\\:\\:_parseXmlTrackingResponse\\(\\) should return null but return statement is missing\\.$#"
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
-			message: "#^Method Mage_Usa_Model_Shipping_Carrier_Dhl\\:\\:setTrackingReqeust\\(\\) should return null but return statement is missing\\.$#"
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
 			message: "#^Property Mage_Usa_Model_Shipping_Carrier_Dhl\\:\\:\\$_request \\(Mage_Shipping_Model_Rate_Request\\|null\\) does not accept Varien_Object\\.$#"
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
@@ -4503,11 +4468,6 @@ parameters:
 		-
 			message: "#^Invalid array key type strin\\.$#"
 			count: 3
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
-
-		-
-			message: "#^Method Mage_Usa_Model_Shipping_Carrier_Dhl_International\\:\\:_mapRequestToShipment\\(\\) should return null but return statement is missing\\.$#"
-			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
 
 		-

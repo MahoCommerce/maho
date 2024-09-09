@@ -953,8 +953,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl extends Mage_Usa_Model_Shipping_Carrie
 
     /**
      * Set tracking request
-     *
-     * @return null
      */
     protected function setTrackingReqeust()
     {
@@ -1026,7 +1024,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl extends Mage_Usa_Model_Shipping_Carrie
      *
      * @param array $trackings
      * @param string $response
-     * @return null
      */
     protected function _parseXmlTrackingResponse($trackings, $response)
     {
@@ -1264,8 +1261,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl extends Mage_Usa_Model_Shipping_Carrie
 
     /**
      * Map request to shipment
-     *
-     * @return null
      */
     protected function _mapRequestToShipment(Varien_Object $request)
     {

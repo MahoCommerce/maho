@@ -138,7 +138,6 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Whether GA Debug Mode is enabled (only for development IP)
      *
-     * @param null $store
      * @return bool
      */
     public function isDebugModeEnabled($store = null)
@@ -160,7 +159,6 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Whether GA IP Anonymization is enabled
      *
-     * @param null $store
      * @return bool
      */
     public function isUserIdEnabled($store = null)

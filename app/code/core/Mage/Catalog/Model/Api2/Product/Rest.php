@@ -373,8 +373,6 @@ abstract class Mage_Catalog_Model_Api2_Product_Rest extends Mage_Catalog_Model_A
 
     /**
      * Default implementation. May be different for customer/guest/admin role.
-     *
-     * @return null
      */
     protected function _getCustomerGroupId()
     {
