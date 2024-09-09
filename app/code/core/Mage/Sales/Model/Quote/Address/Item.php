@@ -137,7 +137,6 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
     /**
      * Declare address model
      *
-     * @param   Mage_Sales_Model_Quote_Address $address
      * @return  $this
      */
     public function setAddress(Mage_Sales_Model_Quote_Address $address)
@@ -170,7 +169,6 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
     /**
      * Import item to quote
      *
-     * @param Mage_Sales_Model_Quote_Item $quoteItem
      * @return $this
      */
     public function importQuoteItem(Mage_Sales_Model_Quote_Item $quoteItem)

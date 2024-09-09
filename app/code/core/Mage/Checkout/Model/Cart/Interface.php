@@ -43,7 +43,6 @@ interface Mage_Checkout_Model_Cart_Interface
      * Associate quote with the cart
      *
      * @abstract
-     * @param Mage_Sales_Model_Quote $quote
      * @return Mage_Checkout_Model_Cart_Interface
      */
     public function setQuote(Mage_Sales_Model_Quote $quote);

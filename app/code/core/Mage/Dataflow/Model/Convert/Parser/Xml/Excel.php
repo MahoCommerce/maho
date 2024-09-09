@@ -309,7 +309,6 @@ class Mage_Dataflow_Model_Convert_Parser_Xml_Excel extends Mage_Dataflow_Model_C
     /**
      * Prepare and return XML string for MS Excel XML from array
      *
-     * @param array $fields
      * @return string
      */
     protected function _getXmlString(array $fields = [])

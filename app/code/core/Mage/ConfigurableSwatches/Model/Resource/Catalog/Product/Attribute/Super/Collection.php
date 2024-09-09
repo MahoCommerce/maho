@@ -25,7 +25,6 @@ class Mage_ConfigurableSwatches_Model_Resource_Catalog_Product_Attribute_Super_C
     /**
      * Filter parent products to these IDs
      *
-     * @param array $parentProductIds
      * @return $this
      */
     public function addParentProductsFilter(array $parentProductIds)

@@ -114,7 +114,6 @@ class Mage_Index_Model_Indexer
     /**
      * Function returns array of indexer's process with order by sort_order field
      *
-     * @param array $codes
      * @return array
      */
     public function getProcessesCollectionByCodes(array $codes)
@@ -230,7 +229,6 @@ class Mage_Index_Model_Indexer
     /**
      * Index one event by all processes
      *
-     * @param   Mage_Index_Model_Event $event
      * @return  Mage_Index_Model_Indexer
      */
     public function indexEvent(Mage_Index_Model_Event $event)
@@ -242,7 +240,6 @@ class Mage_Index_Model_Indexer
     /**
      * Register event in each indexing process process
      *
-     * @param Mage_Index_Model_Event $event
      * @return $this
      */
     public function registerEvent(Mage_Index_Model_Event $event)
@@ -254,7 +251,6 @@ class Mage_Index_Model_Indexer
     /**
      * Create new event log and register event in all processes
      *
-     * @param   Varien_Object $entity
      * @param   string $entityType
      * @param   string $eventType
      * @param   bool $doSave
@@ -279,7 +275,6 @@ class Mage_Index_Model_Indexer
      * Create new event log and register event in all processes.
      * Initiate events indexing procedure.
      *
-     * @param   Varien_Object $entity
      * @param   string $entityType
      * @param   string $eventType
      * @return  Mage_Index_Model_Indexer

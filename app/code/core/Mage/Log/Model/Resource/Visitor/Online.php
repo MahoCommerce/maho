@@ -29,7 +29,6 @@ class Mage_Log_Model_Resource_Visitor_Online extends Mage_Core_Model_Resource_Db
     /**
      * Prepare online visitors for collection
      *
-     * @param Mage_Log_Model_Visitor_Online $object
      * @return $this
      */
     public function prepare(Mage_Log_Model_Visitor_Online $object)

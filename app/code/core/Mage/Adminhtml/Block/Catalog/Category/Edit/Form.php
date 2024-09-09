@@ -202,7 +202,6 @@ class Mage_Adminhtml_Block_Catalog_Category_Edit_Form extends Mage_Adminhtml_Blo
     /**
      * Return URL for refresh input element 'path' in form
      *
-     * @param array $args
      * @return string
      */
     public function getRefreshPathUrl(array $args = [])

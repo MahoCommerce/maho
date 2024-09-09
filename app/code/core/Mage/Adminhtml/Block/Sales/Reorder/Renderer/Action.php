@@ -50,7 +50,6 @@ class Mage_Adminhtml_Block_Sales_Reorder_Renderer_Action extends Mage_Adminhtml_
     /**
      * Render options array as a HTML string
      *
-     * @param array $actions
      * @return string
      */
     protected function _actionsToHtml(array $actions = [])

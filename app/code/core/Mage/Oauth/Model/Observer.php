@@ -33,8 +33,6 @@ class Mage_Oauth_Model_Observer
 
     /**
      * Redirect customer to callback page after login
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function afterCustomerLogin(Varien_Event_Observer $observer)
     {
@@ -51,8 +49,6 @@ class Mage_Oauth_Model_Observer
 
     /**
      * Redirect admin to authorize controller after login success
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function afterAdminLogin(Varien_Event_Observer $observer)
     {
@@ -69,8 +65,6 @@ class Mage_Oauth_Model_Observer
 
     /**
      * Redirect admin to authorize controller after login fail
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function afterAdminLoginFailed(Varien_Event_Observer $observer)
     {

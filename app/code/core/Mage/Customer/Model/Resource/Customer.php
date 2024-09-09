@@ -101,7 +101,6 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
     /**
      * Save customer addresses and set default addresses in attributes backend
      *
-     * @param Varien_Object $customer
      * @return Mage_Eav_Model_Entity_Abstract
      */
     protected function _afterSave(Varien_Object $customer)
@@ -113,7 +112,6 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
     /**
      * Save/delete customer address
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @return $this
      */
     protected function _saveAddresses(Mage_Customer_Model_Customer $customer)
@@ -187,7 +185,6 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
      *
      * @throws Mage_Core_Exception
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @param string $email
      * @param bool $testOnly
      * @return $this
@@ -223,7 +220,6 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
     /**
      * Change customer password
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @param string $newPassword
      * @return $this
      */
@@ -297,7 +293,6 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
     /**
      * Custom setter of increment ID if its needed
      *
-     * @param Varien_Object $object
      * @return $this
      */
     public function setNewIncrementId(Varien_Object $object)
@@ -313,7 +308,6 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
      *
      * Stores new reset password link token and its creation time
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @param string $newResetPasswordLinkToken
      * @return $this
      */
@@ -334,7 +328,6 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
      *
      * Stores new reset password link customer Id
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @param string $newResetPasswordLinkCustomerId
      * @return $this
      * @throws Exception

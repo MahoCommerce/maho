@@ -29,7 +29,6 @@ class Mage_Core_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Load variable by code
      *
-     * @param Mage_Core_Model_Variable $object
      * @param string $code
      * @return $this
      */
@@ -109,7 +108,6 @@ class Mage_Core_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Add variable store and default value to select
      *
-     * @param Zend_Db_Select $select
      * @param int $storeId
      * @return $this
      */

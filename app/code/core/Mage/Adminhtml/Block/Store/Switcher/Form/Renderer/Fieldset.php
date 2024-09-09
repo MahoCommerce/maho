@@ -46,7 +46,6 @@ class Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset extends Mage_Ad
     /**
      * Render element
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     public function render(Varien_Data_Form_Element_Abstract $element)

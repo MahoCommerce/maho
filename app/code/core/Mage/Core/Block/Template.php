@@ -360,7 +360,6 @@ HTML;
     /**
      * Get data from specified object
      *
-     * @param Varien_Object $object
      * @param string $key
      * @return mixed
      */

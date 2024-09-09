@@ -90,7 +90,6 @@ class Mage_Core_Model_Resource_File_Storage_Directory_Database extends Mage_Core
     /**
      * Load entity by path
      *
-     * @param  Mage_Core_Model_File_Storage_Directory_Database $object
      * @param  string $path
      * @return $this
      */

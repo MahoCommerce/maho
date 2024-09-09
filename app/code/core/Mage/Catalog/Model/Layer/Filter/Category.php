@@ -67,7 +67,6 @@ class Mage_Catalog_Model_Layer_Filter_Category extends Mage_Catalog_Model_Layer_
     /**
      * Apply category filter to layer
      *
-     * @param   Zend_Controller_Request_Abstract $request
      * @param   null $filterBlock
      * @return  Mage_Catalog_Model_Layer_Filter_Category
      */

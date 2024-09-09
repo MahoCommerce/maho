@@ -100,9 +100,7 @@ class Varien_Data_Form_Abstract extends Varien_Object
     /**
      * Add form element
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @param bool|string|null $after
-     *
      * @return $this
      */
     public function addElement(Varien_Data_Form_Element_Abstract $element, $after = null)
@@ -184,7 +182,6 @@ class Varien_Data_Form_Abstract extends Varien_Object
     }
 
     /**
-     * @param array $arrAttributes
      * @return array
      */
     public function __toArray(array $arrAttributes = [])

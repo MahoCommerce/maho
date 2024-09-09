@@ -67,7 +67,6 @@ class Mage_Adminhtml_Block_Widget_Grid_Massaction_Item extends Mage_Adminhtml_Bl
     }
 
     /**
-     * @param array $config
      * @return Mage_Adminhtml_Block_Widget_Grid_Massaction_Item_Additional_Default
      */
     protected function _createFromConfig(array $config)

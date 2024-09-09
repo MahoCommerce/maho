@@ -44,7 +44,6 @@ class Mage_Log_Model_Adminhtml_System_Config_Source_Loglevel
 
     /**
      * Mage_Log_Model_Adminhtml_System_Config_Source_Loglevel constructor.
-     * @param array $data
      */
     public function __construct(array $data = [])
     {

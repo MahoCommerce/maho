@@ -274,7 +274,6 @@ class Mage_Catalog_Model_Url
     /**
      * Refresh category rewrite
      *
-     * @param Varien_Object|Mage_Catalog_Model_Category $category
      * @param string $parentPath
      * @param bool $refreshProducts
      * @return $this
@@ -354,8 +353,6 @@ class Mage_Catalog_Model_Url
     /**
      * Refresh product rewrite
      *
-     * @param Varien_Object|Mage_Catalog_Model_Product $product
-     * @param Varien_Object|Mage_Catalog_Model_Category $category
      * @return $this
      */
     protected function _refreshProductRewrite(Varien_Object $product, Varien_Object $category)
@@ -429,7 +426,6 @@ class Mage_Catalog_Model_Url
     /**
      * Refresh products for catwgory
      *
-     * @param Varien_Object|Mage_Catalog_Model_Category $category
      * @return $this
      */
     protected function _refreshCategoryProductRewrites(Varien_Object $category)

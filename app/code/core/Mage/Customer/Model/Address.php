@@ -79,7 +79,6 @@ class Mage_Customer_Model_Address extends Mage_Customer_Model_Address_Abstract
     /**
      * Specify address customer
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @return $this
      */
     public function setCustomer(Mage_Customer_Model_Customer $customer)

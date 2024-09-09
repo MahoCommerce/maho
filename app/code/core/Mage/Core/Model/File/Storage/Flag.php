@@ -53,7 +53,6 @@ class Mage_Core_Model_File_Storage_Flag extends Mage_Core_Model_Flag
     /**
      * Pass error to flag
      *
-     * @param Exception $e
      * @return $this
      */
     public function passError(Exception $e)

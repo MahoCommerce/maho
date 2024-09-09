@@ -163,7 +163,6 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
     /**
      * Subtract ordered qty for product
      *
-     * @param   Varien_Object $item
      * @return  Mage_CatalogInventory_Model_Stock
      */
     public function registerItemSale(Varien_Object $item)

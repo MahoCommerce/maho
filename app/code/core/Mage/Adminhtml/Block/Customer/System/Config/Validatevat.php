@@ -38,7 +38,6 @@ class Mage_Adminhtml_Block_Customer_System_Config_Validatevat extends Mage_Admin
     /**
      * Unset some non-related element parameters
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     public function render(Varien_Data_Form_Element_Abstract $element)
@@ -50,7 +49,6 @@ class Mage_Adminhtml_Block_Customer_System_Config_Validatevat extends Mage_Admin
     /**
      * Get the button and scripts contents
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element)

@@ -27,7 +27,6 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
 
     /**
      * Purifier Constructor Call
-     * @param HTMLPurifier|null $purifier
      */
     public function __construct(
         ?HTMLPurifier $purifier = null

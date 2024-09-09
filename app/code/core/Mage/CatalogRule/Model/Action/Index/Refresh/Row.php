@@ -36,8 +36,6 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
      *  - 'resource' Mage_Core_Model_Resource_Db_Abstract
      *  - 'app' Mage_Core_Model_App
      *  - 'value' int|Mage_Catalog_Model_Product
-     *
-     * @param array $args
      */
     public function __construct(array $args)
     {
@@ -58,7 +56,6 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
     /**
      * Prepare temporary data
      *
-     * @param Mage_Core_Model_Website $website
      * @return Varien_Db_Select
      */
     protected function _prepareTemporarySelect(Mage_Core_Model_Website $website)
@@ -69,8 +66,6 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
 
     /**
      * Remove old index data
-     *
-     * @param Mage_Core_Model_Website $website
      */
     protected function _removeOldIndexData(Mage_Core_Model_Website $website)
     {

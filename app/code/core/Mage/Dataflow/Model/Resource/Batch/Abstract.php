@@ -24,7 +24,6 @@ abstract class Mage_Dataflow_Model_Resource_Batch_Abstract extends Mage_Core_Mod
     /**
      * Retrieve Id collection
      *
-     * @param Mage_Dataflow_Model_Batch_Abstract $object
      * @return array
      */
     public function getIdCollection(Mage_Dataflow_Model_Batch_Abstract $object)
@@ -44,7 +43,6 @@ abstract class Mage_Dataflow_Model_Resource_Batch_Abstract extends Mage_Core_Mod
     /**
      * Delete current Batch collection
      *
-     * @param Mage_Dataflow_Model_Batch_Abstract $object
      * @return Mage_Dataflow_Model_Resource_Batch_Abstract
      */
     public function deleteCollection(Mage_Dataflow_Model_Batch_Abstract $object)

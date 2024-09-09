@@ -160,7 +160,6 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
     /**
      * Add root category id filter to store collection
      *
-     * @param array $categories
      * @return $this
      */
     public function loadByCategoryIds(array $categories)

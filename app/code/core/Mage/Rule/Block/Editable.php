@@ -20,7 +20,6 @@
 class Mage_Rule_Block_Editable extends Mage_Core_Block_Abstract implements Varien_Data_Form_Element_Renderer_Interface
 {
     /**
-     * @param Varien_Data_Form_Element_Abstract $element
      * @see Varien_Data_Form_Element_Renderer_Interface::render()
      * @return string
      */

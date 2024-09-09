@@ -46,7 +46,6 @@ class Mage_CatalogRule_Model_Rule_Product_Price extends Mage_Core_Model_Abstract
     /**
      * Apply price rule price to price index table
      *
-     * @param Varien_Db_Select $select
      * @param array|string $indexTable
      * @param string $entityId
      * @param string $customerGroupId

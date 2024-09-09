@@ -61,7 +61,6 @@ class Mage_Sales_Model_Order_Shipment_Item extends Mage_Core_Model_Abstract
     /**
      * Declare Shipment instance
      *
-     * @param   Mage_Sales_Model_Order_Shipment $shipment
      * @return  $this
      */
     public function setShipment(Mage_Sales_Model_Order_Shipment $shipment)
@@ -83,7 +82,6 @@ class Mage_Sales_Model_Order_Shipment_Item extends Mage_Core_Model_Abstract
     /**
      * Declare order item instance
      *
-     * @param   Mage_Sales_Model_Order_Item $item
      * @return  $this
      */
     public function setOrderItem(Mage_Sales_Model_Order_Item $item)

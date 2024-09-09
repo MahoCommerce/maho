@@ -41,8 +41,6 @@ class Magento_Profiler_Output_Firebug extends Magento_Profiler_OutputAbstract
 
     /**
      * Request setter
-     *
-     * @param Zend_Controller_Request_Abstract $request
      */
     public function setRequest(Zend_Controller_Request_Abstract $request)
     {
@@ -51,8 +49,6 @@ class Magento_Profiler_Output_Firebug extends Magento_Profiler_OutputAbstract
 
     /**
      * Response setter
-     *
-     * @param Zend_Controller_Response_Abstract $response
      */
     public function setResponse(Zend_Controller_Response_Abstract $response)
     {

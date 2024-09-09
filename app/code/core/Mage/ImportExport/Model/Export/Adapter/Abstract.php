@@ -146,7 +146,6 @@ abstract class Mage_ImportExport_Model_Export_Adapter_Abstract
     /**
      * Set column names.
      *
-     * @param array $headerCols
      * @throws Exception
      * @return Mage_ImportExport_Model_Export_Adapter_Abstract
      */
@@ -176,7 +175,6 @@ abstract class Mage_ImportExport_Model_Export_Adapter_Abstract
     /**
      * Write row data to source file.
      *
-     * @param array $rowData
      * @return Mage_ImportExport_Model_Export_Adapter_Abstract
      */
     abstract public function writeRow(array $rowData);

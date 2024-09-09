@@ -42,7 +42,6 @@ class Mage_Adminhtml_Helper_Catalog_Product_Composite extends Mage_Core_Helper_A
      * when single configuration submitted
      *
      * @param Mage_Adminhtml_Controller_Action $controller
-     * @param Varien_Object $updateResult
      * @return $this
      */
     public function renderUpdateResult($controller, Varien_Object $updateResult)
@@ -86,7 +85,6 @@ class Mage_Adminhtml_Helper_Catalog_Product_Composite extends Mage_Core_Helper_A
      *  - 'error' = true, and 'message' to show
      *
      * @param Mage_Adminhtml_Controller_Action $controller
-     * @param Varien_Object $configureResult
      * @return $this
      */
     public function renderConfigureResult($controller, Varien_Object $configureResult)

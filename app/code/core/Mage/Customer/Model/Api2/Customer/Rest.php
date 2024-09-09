@@ -24,7 +24,6 @@ abstract class Mage_Customer_Model_Api2_Customer_Rest extends Mage_Customer_Mode
     /**
      * Create customer
      *
-     * @param array $data
      * @return string
      */
     protected function _create(array $data)
@@ -82,7 +81,6 @@ abstract class Mage_Customer_Model_Api2_Customer_Rest extends Mage_Customer_Mode
     /**
      * Update customer
      *
-     * @param array $data
      * @throws Mage_Api2_Exception
      */
     protected function _update(array $data)

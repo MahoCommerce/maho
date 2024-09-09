@@ -333,7 +333,6 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     /**
      * Save category attribute
      *
-     * @param Varien_Object|Mage_Catalog_Model_Category $category
      * @param string $attributeCode
      * @param bool $ignoreDefault
      * @return $this
@@ -488,7 +487,6 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     /**
      * Save product attribute
      *
-     * @param Varien_Object|Mage_Catalog_Model_Product $product
      * @param string $attributeCode
      * @param bool $ignoreDefault
      * @return $this
@@ -631,7 +629,6 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     /**
      * Prepare category parentId
      *
-     * @param Varien_Object|Mage_Catalog_Model_Category $category
      * @return $this
      */
     protected function _prepareCategoryParentId(Varien_Object $category)
@@ -812,7 +809,6 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     /**
      * Retrieve category childs data objects
      *
-     * @param Varien_Object $category
      * @return Varien_Object
      */
     public function loadCategoryChilds(Varien_Object $category)
@@ -882,7 +878,6 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     /**
      * Retrieve category parent path
      *
-     * @param Varien_Object $category
      * @return string
      */
     public function getCategoryParentPath(Varien_Object $category)
@@ -1027,7 +1022,6 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     /**
      * Retrieve Product data objects in category
      *
-     * @param Varien_Object $category
      * @param int $lastEntityId
      * @return array
      */
@@ -1238,7 +1232,6 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      * visibility   int; visibility for store
      * url_rewrite  string; rewrite URL for store
      *
-     * @param array $products
      * @return array
      */
     public function getRewriteByProductStore(array $products)

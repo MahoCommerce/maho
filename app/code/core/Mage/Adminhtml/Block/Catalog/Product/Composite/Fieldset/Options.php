@@ -34,7 +34,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Composite_Fieldset_Options extends Ma
     /**
      * Get option html block
      *
-     * @param Mage_Catalog_Model_Product_Option $option
      *
      * @return string
      */

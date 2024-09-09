@@ -95,7 +95,6 @@ class Mage_Newsletter_Model_Resource_Subscriber extends Mage_Core_Model_Resource
     /**
      * Load subscriber by customer
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @return array
      */
     public function loadByCustomer(Mage_Customer_Model_Customer $customer)
@@ -140,8 +139,6 @@ class Mage_Newsletter_Model_Resource_Subscriber extends Mage_Core_Model_Resource
     /**
      * Updates data when subscriber received
      *
-     * @param Mage_Newsletter_Model_Subscriber $subscriber
-     * @param Mage_Newsletter_Model_Queue $queue
      * @return $this
      */
     public function received(Mage_Newsletter_Model_Subscriber $subscriber, Mage_Newsletter_Model_Queue $queue)

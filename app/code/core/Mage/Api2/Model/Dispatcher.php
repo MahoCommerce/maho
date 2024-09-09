@@ -36,8 +36,6 @@ class Mage_Api2_Model_Dispatcher
     /**
      * Instantiate resource class, set parameters to the instance, run resource internal dispatch method
      *
-     * @param Mage_Api2_Model_Request $request
-     * @param Mage_Api2_Model_Response $response
      * @return $this
      * @throws Mage_Api2_Exception
      */
@@ -97,7 +95,6 @@ class Mage_Api2_Model_Dispatcher
     /**
      * Set API user object
      *
-     * @param Mage_Api2_Model_Auth_User_Abstract $apiUser
      * @return $this
      */
     public function setApiUser(Mage_Api2_Model_Auth_User_Abstract $apiUser)

@@ -35,7 +35,6 @@ class Mage_Wishlist_Model_Resource_Wishlist_Collection extends Mage_Core_Model_R
     /**
      * Filter collection by customer
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @return $this
      */
     public function filterByCustomer(Mage_Customer_Model_Customer $customer)
@@ -58,7 +57,6 @@ class Mage_Wishlist_Model_Resource_Wishlist_Collection extends Mage_Core_Model_R
     /**
      * Filter collection by customer ids
      *
-     * @param array $customerIds
      * @return $this
      */
     public function filterByCustomerIds(array $customerIds)

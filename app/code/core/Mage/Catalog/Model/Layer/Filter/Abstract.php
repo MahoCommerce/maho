@@ -80,7 +80,6 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends Varien_Object
     /**
      * Apply filter to collection
      *
-     * @param Zend_Controller_Request_Abstract $request
      * @param null $filterBlock deprecated
      * @return $this
      */

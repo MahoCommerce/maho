@@ -45,8 +45,6 @@ abstract class Mage_Api2_Model_Route_Abstract extends Zend_Controller_Router_Rou
 
     /**
      * Process construct param and call parent::__construct() with params
-     *
-     * @param array $arguments
      */
     public function __construct(array $arguments)
     {
@@ -63,7 +61,6 @@ abstract class Mage_Api2_Model_Route_Abstract extends Zend_Controller_Router_Rou
      * Retrieve argument value
      *
      * @param string $name argument name
-     * @param array $arguments
      * @return mixed
      */
     protected function _getArgumentValue($name, array $arguments)

@@ -35,8 +35,6 @@ class Mage_Core_Model_Factory
 
     /**
      * Initialize factory
-     *
-     * @param array $arguments
      */
     public function __construct(array $arguments = [])
     {
@@ -59,7 +57,6 @@ class Mage_Core_Model_Factory
      * Retrieve model object singleton
      *
      * @param string $modelClass
-     * @param array $arguments
      * @return Mage_Core_Model_Abstract
      */
     public function getSingleton($modelClass = '', array $arguments = [])

@@ -116,8 +116,6 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
 
     /**
      * Rule condition SQL builder setter
-     *
-     * @param Mage_Rule_Model_Resource_Rule_Condition_SqlBuilder $ruleHelper
      */
     public function setRuleResourceHelper(Mage_Rule_Model_Resource_Rule_Condition_SqlBuilder $ruleHelper)
     {
@@ -157,8 +155,6 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
 
     /**
      * Add special attributes
-     *
-     * @param array $attributes
      */
     protected function _addSpecialAttributes(array &$attributes)
     {
@@ -501,7 +497,6 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     /**
      * Validate product attribute value for condition
      *
-     * @param Varien_Object $object
      * @return bool
      */
     public function validate(Varien_Object $object)

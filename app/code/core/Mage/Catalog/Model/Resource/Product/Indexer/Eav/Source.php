@@ -256,7 +256,6 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source extends Mage_Catalo
     /**
      * Save a data to temporary source index table
      *
-     * @param array $data
      * @return $this
      */
     protected function _saveIndexData(array $data)

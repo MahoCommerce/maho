@@ -45,7 +45,6 @@ class Mage_Customer_Model_Resource_Group extends Mage_Core_Model_Resource_Db_Abs
     /**
      * Check if group uses as default
      *
-     * @param  Mage_Core_Model_Abstract $group
      * @throws Mage_Core_Exception
      * @return Mage_Core_Model_Resource_Db_Abstract
      */
@@ -61,7 +60,6 @@ class Mage_Customer_Model_Resource_Group extends Mage_Core_Model_Resource_Db_Abs
     /**
      * Method set default group id to the customers collection
      *
-     * @param Mage_Core_Model_Abstract $group
      * @return Mage_Core_Model_Resource_Db_Abstract
      */
     protected function _afterDelete(Mage_Core_Model_Abstract $group)

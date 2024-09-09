@@ -72,8 +72,6 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
 
     /**
      * Initialize tax helper
-     *
-     * @param array $args
      */
     public function __construct(array $args = [])
     {

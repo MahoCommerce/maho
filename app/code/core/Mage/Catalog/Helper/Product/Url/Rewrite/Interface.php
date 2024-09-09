@@ -24,7 +24,6 @@ interface Mage_Catalog_Helper_Product_Url_Rewrite_Interface
     /**
      * Prepare and return select
      *
-     * @param array $productIds
      * @param int $categoryId
      * @param int $storeId
      * @return Varien_Db_Select
@@ -34,7 +33,6 @@ interface Mage_Catalog_Helper_Product_Url_Rewrite_Interface
     /**
      * Prepare url rewrite left join statement for given select instance and store_id parameter.
      *
-     * @param Varien_Db_Select $select
      * @param int $storeId
      * @return Mage_Catalog_Helper_Product_Url_Rewrite_Interface
      */

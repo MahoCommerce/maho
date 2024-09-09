@@ -251,7 +251,6 @@ class Mage_Bundle_Model_Observer
     /**
      * Initialize product options renderer with bundle specific params
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function initOptionRenderer(Varien_Event_Observer $observer)
@@ -267,7 +266,6 @@ class Mage_Bundle_Model_Observer
      *
      * @deprecated since 1.4.0.0
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function catalogProductLoadAfter(Varien_Event_Observer $observer)
@@ -288,7 +286,6 @@ class Mage_Bundle_Model_Observer
      * @deprecated since 1.4.0.0
      * @see Mage_Bundle_Model_Resource_Indexer_Price
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function catalogIndexPlainReindexAfter(Varien_Event_Observer $observer)

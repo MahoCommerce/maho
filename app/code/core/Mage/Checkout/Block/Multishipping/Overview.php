@@ -327,7 +327,6 @@ class Mage_Checkout_Block_Multishipping_Overview extends Mage_Sales_Block_Items_
     /**
      * Return row-level item html
      *
-     * @param Varien_Object $item
      * @return string
      */
     public function getRowItemHtml(Varien_Object $item)

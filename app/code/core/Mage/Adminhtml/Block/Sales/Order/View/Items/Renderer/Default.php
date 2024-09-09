@@ -232,7 +232,6 @@ class Mage_Adminhtml_Block_Sales_Order_View_Items_Renderer_Default extends Mage_
     /**
      * Display item price including tax
      *
-     * @param Mage_Sales_Model_Order_Item|Varien_Object $item
      * @return string
      */
     public function displayPriceInclTax(Varien_Object $item)

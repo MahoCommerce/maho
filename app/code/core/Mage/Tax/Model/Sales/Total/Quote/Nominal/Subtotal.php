@@ -31,7 +31,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Nominal_Subtotal extends Mage_Tax_Model_S
     /**
      * Don't fetch anything
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return array
      */
     public function fetch(Mage_Sales_Model_Quote_Address $address)
@@ -42,7 +41,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Nominal_Subtotal extends Mage_Tax_Model_S
     /**
      * Get nominal items only
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return array
      */
     protected function _getAddressItems(Mage_Sales_Model_Quote_Address $address)

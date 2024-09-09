@@ -37,7 +37,6 @@ class Mage_Index_Model_Observer
     /**
      * Store after commit observer. Process store related indexes
      *
-     * @param Varien_Event_Observer $observer
      * @throws Throwable
      */
     public function processStoreSave(Varien_Event_Observer $observer)
@@ -53,7 +52,6 @@ class Mage_Index_Model_Observer
     /**
      * Store group after commit observer. Process store group related indexes
      *
-     * @param Varien_Event_Observer $observer
      * @throws Throwable
      */
     public function processStoreGroupSave(Varien_Event_Observer $observer)
@@ -69,7 +67,6 @@ class Mage_Index_Model_Observer
     /**
      * Website save after commit observer. Process website related indexes
      *
-     * @param Varien_Event_Observer $observer
      * @throws Throwable
      */
     public function processWebsiteSave(Varien_Event_Observer $observer)
@@ -85,7 +82,6 @@ class Mage_Index_Model_Observer
     /**
      * Store after commit observer. Process store related indexes
      *
-     * @param Varien_Event_Observer $observer
      * @throws Throwable
      */
     public function processStoreDelete(Varien_Event_Observer $observer)
@@ -101,7 +97,6 @@ class Mage_Index_Model_Observer
     /**
      * Store group after commit observer. Process store group related indexes
      *
-     * @param Varien_Event_Observer $observer
      * @throws Throwable
      */
     public function processStoreGroupDelete(Varien_Event_Observer $observer)
@@ -117,7 +112,6 @@ class Mage_Index_Model_Observer
     /**
      * Website save after commit observer. Process website related indexes
      *
-     * @param Varien_Event_Observer $observer
      * @throws Throwable
      */
     public function processWebsiteDelete(Varien_Event_Observer $observer)
@@ -133,7 +127,6 @@ class Mage_Index_Model_Observer
     /**
      * Config data after commit observer.
      *
-     * @param Varien_Event_Observer $observer
      * @throws Throwable
      */
     public function processConfigDataSave(Varien_Event_Observer $observer)

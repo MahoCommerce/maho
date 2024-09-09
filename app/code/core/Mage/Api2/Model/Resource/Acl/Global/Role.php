@@ -88,7 +88,6 @@ class Mage_Api2_Model_Resource_Acl_Global_Role extends Mage_Core_Model_Resource_
     /**
      * Get users
      *
-     * @param Mage_Api2_Model_Acl_Global_Role $role
      * @return array
      */
     public function getRoleUsers(Mage_Api2_Model_Acl_Global_Role $role)

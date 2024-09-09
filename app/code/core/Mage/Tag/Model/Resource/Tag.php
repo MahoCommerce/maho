@@ -331,7 +331,6 @@ class Mage_Tag_Model_Resource_Tag extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Decrementing tag products quantity as action for product delete
      *
-     * @param array $tagsId
      * @return int The number of affected rows
      */
     public function decrementProducts(array $tagsId)
@@ -409,7 +408,6 @@ class Mage_Tag_Model_Resource_Tag extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Fetch store ids in which tag visible
      *
-     * @param Mage_Core_Model_Abstract|Mage_Tag_Model_Tag $object
      * @return $this
      */
     protected function _afterLoad(Mage_Core_Model_Abstract $object)

@@ -111,7 +111,6 @@ class Mage_Adminhtml_Block_System_Store_Tree extends Mage_Adminhtml_Block_Widget
     /**
      * Render website
      *
-     * @param Mage_Core_Model_Website $website
      * @return string
      */
     public function renderWebsite(Mage_Core_Model_Website $website)
@@ -126,7 +125,6 @@ class Mage_Adminhtml_Block_System_Store_Tree extends Mage_Adminhtml_Block_Widget
     /**
      * Render store group
      *
-     * @param Mage_Core_Model_Store_Group $storeGroup
      * @return string
      */
     public function renderStoreGroup(Mage_Core_Model_Store_Group $storeGroup)
@@ -142,7 +140,6 @@ class Mage_Adminhtml_Block_System_Store_Tree extends Mage_Adminhtml_Block_Widget
     /**
      * Render store
      *
-     * @param Mage_Core_Model_Store $store
      * @return string
      */
     public function renderStore(Mage_Core_Model_Store $store)

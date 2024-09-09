@@ -83,7 +83,6 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
 
     /**
      * Mage_Log_Model_Visitor constructor.
-     * @param array $data
      */
     public function __construct(array $data = [])
     {

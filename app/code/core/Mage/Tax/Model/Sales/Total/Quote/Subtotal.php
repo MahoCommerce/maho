@@ -115,7 +115,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
      * and subtotal including/excluding tax.
      * Determine discount price if needed
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      *
      * @return  Mage_Tax_Model_Sales_Total_Quote_Subtotal
      */
@@ -717,7 +716,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
     /**
      * Recalculate row information for item based on children calculation
      *
-     * @param   Mage_Sales_Model_Quote_Item_Abstract $item
      *
      * @return  Mage_Tax_Model_Sales_Total_Quote_Subtotal
      */
@@ -789,7 +787,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
     /**
      * Add row total item amount to subtotal
      *
-     * @param   Mage_Sales_Model_Quote_Address $address
      * @param   Mage_Sales_Model_Quote_Item_Abstract $item
      * @return  Mage_Tax_Model_Sales_Total_Quote_Subtotal
      */
@@ -821,7 +818,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
      *
      * @deprecated after 1.4.1
      *
-     * @param   Mage_Sales_Model_Quote_Item_Abstract $item
      * @return  Mage_Tax_Model_Sales_Total_Quote_Subtotal
      */
     protected function _resetItemPriceInclTax(Mage_Sales_Model_Quote_Item_Abstract $item)
@@ -848,7 +844,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
      * @deprecated after 1.4.1
      *
      * @param   Mage_Sales_Model_Quote_Address $address
-     * @param   Mage_Sales_Model_Quote_Item_Abstract $item
      *
      * @return  Mage_Tax_Model_Sales_Total_Quote_Subtotal
      */

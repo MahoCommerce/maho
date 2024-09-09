@@ -35,7 +35,6 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Search_Grid_Renderer_Qty extends M
     /**
      * Render product qty field
      *
-     * @param   Varien_Object $row
      * @return  string
      */
     public function render(Varien_Object $row)

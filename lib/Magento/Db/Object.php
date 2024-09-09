@@ -44,7 +44,6 @@ abstract class Magento_Db_Object
     /**
      * Constructor
      * @param $objectName
-     * @param Varien_Db_Adapter_Interface $adapter
      * @param $schemaName
      */
     public function __construct(Varien_Db_Adapter_Interface $adapter, $objectName, $schemaName = null)

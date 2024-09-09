@@ -61,7 +61,6 @@ class Mage_Core_Model_Resource_Email_Queue extends Mage_Core_Model_Resource_Db_A
     /**
      * Check if email was added to queue for requested recipients
      *
-     * @param Mage_Core_Model_Email_Queue $queue
      *
      * @return bool
      */
@@ -140,10 +139,8 @@ class Mage_Core_Model_Resource_Email_Queue extends Mage_Core_Model_Resource_Db_A
      * Save message recipients
      *
      * @param int $messageId
-     * @param array $recipients
      *
      * @throws Exception
-     *
      * @return $this
      */
     public function saveRecipients($messageId, array $recipients)

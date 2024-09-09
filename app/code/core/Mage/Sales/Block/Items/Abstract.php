@@ -83,7 +83,6 @@ class Mage_Sales_Block_Items_Abstract extends Mage_Core_Block_Template
     /**
      * Prepare item before output
      *
-     * @param Mage_Core_Block_Abstract $renderer
      * @return $this
      */
     protected function _prepareItem(Mage_Core_Block_Abstract $renderer)
@@ -94,7 +93,6 @@ class Mage_Sales_Block_Items_Abstract extends Mage_Core_Block_Template
     /**
      * Return product type for quote/order item
      *
-     * @param Varien_Object $item
      * @return string
      */
     protected function _getItemType(Varien_Object $item)
@@ -112,7 +110,6 @@ class Mage_Sales_Block_Items_Abstract extends Mage_Core_Block_Template
     /**
      * Get item row html
      *
-     * @param   Varien_Object $item
      * @return  string
      */
     public function getItemHtml(Varien_Object $item)

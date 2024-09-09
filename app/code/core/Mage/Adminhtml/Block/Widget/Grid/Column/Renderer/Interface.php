@@ -40,8 +40,6 @@ interface Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Interface
 
     /**
      * Renders grid column
-     *
-     * @param Varien_Object $row
      */
     public function render(Varien_Object $row);
 }

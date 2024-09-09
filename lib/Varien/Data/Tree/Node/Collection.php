@@ -99,7 +99,6 @@ class Varien_Data_Tree_Node_Collection implements ArrayAccess, IteratorAggregate
 
     /**
      * Adds a node to this node
-     * @param Varien_Data_Tree_Node $node
      * @return Varien_Data_Tree_Node
      */
     public function add(Varien_Data_Tree_Node $node)

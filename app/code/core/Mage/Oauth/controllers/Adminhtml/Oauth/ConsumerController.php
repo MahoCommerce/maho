@@ -25,7 +25,6 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
      * Unset unused data from request
      * Skip getting "key" and "secret" because its generated from server side only
      *
-     * @param array $data
      * @return array
      */
     protected function _filter(array $data)

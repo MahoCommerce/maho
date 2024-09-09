@@ -31,7 +31,6 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Text extends Mage_Adminht
     /**
      * Renders grid column
      *
-     * @param Varien_Object $row
      * @return mixed
      */
     public function _getValue(Varien_Object $row)

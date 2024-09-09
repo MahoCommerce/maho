@@ -308,7 +308,6 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
 
     /**
      * Crops POST values
-     * @param array $reviewData
      * @return array
      */
     protected function _cropReviewData(array $reviewData)

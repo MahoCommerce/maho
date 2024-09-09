@@ -48,7 +48,6 @@ class Mage_Sales_Helper_Reorder extends Mage_Core_Helper_Data
     }
 
     /**
-     * @param Mage_Sales_Model_Order $order
      * @return bool
      */
     public function canReorder(Mage_Sales_Model_Order $order)

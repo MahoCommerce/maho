@@ -64,8 +64,6 @@ class Mage_CatalogInventory_Block_Adminhtml_Form_Field_Minsaleqty extends Mage_A
 
     /**
      * Prepare existing row data object
-     *
-     * @param Varien_Object $row
      */
     protected function _prepareArrayRow(Varien_Object $row)
     {

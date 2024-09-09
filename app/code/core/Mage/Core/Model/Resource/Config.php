@@ -29,7 +29,6 @@ class Mage_Core_Model_Resource_Config extends Mage_Core_Model_Resource_Db_Abstra
     /**
      * Load configuration values into xml config object
      *
-     * @param Mage_Core_Model_Config $xmlConfig
      * @param string $condition
      * @return $this
      */

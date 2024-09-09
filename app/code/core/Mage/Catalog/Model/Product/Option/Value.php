@@ -86,7 +86,6 @@ class Mage_Catalog_Model_Product_Option_Value extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param Mage_Catalog_Model_Product_Option $option
      * @return $this
      */
     public function setOption(Mage_Catalog_Model_Product_Option $option)
@@ -179,7 +178,6 @@ class Mage_Catalog_Model_Product_Option_Value extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param Mage_Catalog_Model_Product_Option $option
      * @return Mage_Catalog_Model_Resource_Product_Option_Value_Collection
      */
     public function getValuesCollection(Mage_Catalog_Model_Product_Option $option)

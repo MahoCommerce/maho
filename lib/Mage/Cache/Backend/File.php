@@ -73,9 +73,6 @@ class Mage_Cache_Backend_File extends Zend_Cache_Backend_File
      */
     protected $_isTagDirChecked;
 
-    /**
-     * @param  array $options
-     */
     public function __construct(array $options = [])
     {
         // Backwards compatibility ZF 1.11 and ZF 1.12

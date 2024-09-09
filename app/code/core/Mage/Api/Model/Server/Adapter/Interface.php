@@ -39,7 +39,6 @@ interface Mage_Api_Model_Server_Adapter_Interface
     /**
      * Set webservice api controller
      *
-     * @param Mage_Api_Controller_Action $controller
      * @return Mage_Api_Model_Server_Adapter_Interface
      */
     public function setController(Mage_Api_Controller_Action $controller);

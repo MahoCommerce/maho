@@ -82,7 +82,6 @@ class Mage_ProductAlert_Model_Observer
     /**
      * Process price emails
      *
-     * @param Mage_ProductAlert_Model_Email $email
      * @return $this
      */
     protected function _processPrice(Mage_ProductAlert_Model_Email $email)
@@ -167,7 +166,6 @@ class Mage_ProductAlert_Model_Observer
     /**
      * Process stock emails
      *
-     * @param Mage_ProductAlert_Model_Email $email
      * @return $this
      */
     protected function _processStock(Mage_ProductAlert_Model_Email $email)

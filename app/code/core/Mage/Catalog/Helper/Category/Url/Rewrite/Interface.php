@@ -24,7 +24,6 @@ interface Mage_Catalog_Helper_Category_Url_Rewrite_Interface
     /**
      * Join url rewrite table to eav collection
      *
-     * @param Mage_Eav_Model_Entity_Collection_Abstract $collection
      * @param int $storeId
      * @return Mage_Catalog_Helper_Category_Url_Rewrite
      */
@@ -33,7 +32,6 @@ interface Mage_Catalog_Helper_Category_Url_Rewrite_Interface
     /**
      * Join url rewrite table to flat collection
      *
-     * @param Mage_Catalog_Model_Resource_Category_Flat_Collection $collection
      * @param int $storeId
      * @return Mage_Catalog_Helper_Category_Url_Rewrite_Interface
      */
@@ -42,7 +40,6 @@ interface Mage_Catalog_Helper_Category_Url_Rewrite_Interface
     /**
      * Join url rewrite to select
      *
-     * @param Varien_Db_Select $select
      * @param int $storeId
      * @return Mage_Catalog_Helper_Category_Url_Rewrite
      */

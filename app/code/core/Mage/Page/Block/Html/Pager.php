@@ -200,9 +200,6 @@ class Mage_Page_Block_Html_Pager extends Mage_Core_Block_Template
         return $this->_limitVarName;
     }
 
-    /**
-     * @param array $limits
-     */
     public function setAvailableLimit(array $limits)
     {
         $this->_availableLimit = $limits;

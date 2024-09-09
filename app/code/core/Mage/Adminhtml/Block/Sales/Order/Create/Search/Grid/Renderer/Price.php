@@ -24,7 +24,6 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Search_Grid_Renderer_Price extends
     /**
      * Render minimal price for downloadable products
      *
-     * @param   Varien_Object $row
      * @return  string
      */
     public function render(Varien_Object $row)

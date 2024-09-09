@@ -48,7 +48,6 @@ class Mage_Sales_Model_Order_Creditmemo_Comment extends Mage_Sales_Model_Abstrac
     /**
      * Declare Creditmemo instance
      *
-     * @param   Mage_Sales_Model_Order_Creditmemo $creditmemo
      * @return  Mage_Sales_Model_Order_Creditmemo_Comment
      */
     public function setCreditmemo(Mage_Sales_Model_Order_Creditmemo $creditmemo)

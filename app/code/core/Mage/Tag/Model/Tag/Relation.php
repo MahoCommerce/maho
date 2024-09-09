@@ -138,7 +138,6 @@ class Mage_Tag_Model_Tag_Relation extends Mage_Core_Model_Abstract
     /**
      * Add TAG to PRODUCT relations
      *
-     * @param Mage_Tag_Model_Tag $model
      * @param array $productIds
      * @return $this
      */

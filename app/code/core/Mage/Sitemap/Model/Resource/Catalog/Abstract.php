@@ -44,8 +44,6 @@ abstract class Mage_Sitemap_Model_Resource_Catalog_Abstract extends Mage_Core_Mo
 
     /**
      * Initialize factory instance
-     *
-     * @param array $args
      */
     public function __construct(array $args = [])
     {
@@ -131,7 +129,6 @@ abstract class Mage_Sitemap_Model_Resource_Catalog_Abstract extends Mage_Core_Mo
     /**
      * Prepare catalog object
      *
-     * @param array $row
      * @return Varien_Object
      */
     protected function _prepareObject(array $row)

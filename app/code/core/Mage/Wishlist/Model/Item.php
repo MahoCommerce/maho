@@ -341,7 +341,6 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
      * Return false for disabled or unvisible products
      *
      * @throws Mage_Core_Exception
-     * @param Mage_Checkout_Model_Cart $cart
      * @param bool $delete  delete the item after successful add to cart
      * @return bool
      */

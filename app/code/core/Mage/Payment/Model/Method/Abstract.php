@@ -173,7 +173,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     /**
      * Check void availability
      *
-     * @param   Varien_Object $payment
      * @return  bool
      */
     public function canVoid(Varien_Object $payment)
@@ -245,7 +244,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     /**
      * Fetch transaction info
      *
-     * @param Mage_Payment_Model_Info $payment
      * @param string $transactionId
      * @return array
      */
@@ -406,9 +404,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     /**
      * Order payment abstract method
      *
-     * @param Varien_Object $payment
      * @param float $amount
-     *
      * @return $this
      */
     public function order(Varien_Object $payment, $amount)
@@ -422,9 +418,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     /**
      * Authorize payment abstract method
      *
-     * @param Varien_Object $payment
      * @param float $amount
-     *
      * @return $this
      */
     public function authorize(Varien_Object $payment, $amount)
@@ -438,9 +432,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     /**
      * Capture payment abstract method
      *
-     * @param Varien_Object $payment
      * @param float $amount
-     *
      * @return $this
      */
     public function capture(Varien_Object $payment, $amount)
@@ -482,9 +474,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     /**
      * Refund specified amount for payment
      *
-     * @param Varien_Object $payment
      * @param float $amount
-     *
      * @return $this
      */
     public function refund(Varien_Object $payment, $amount)
@@ -511,7 +501,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     /**
      * Cancel payment abstract method
      *
-     * @param Varien_Object $payment
      *
      * @return $this
      */
@@ -537,7 +526,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     /**
      * Void payment abstract method
      *
-     * @param Varien_Object $payment
      *
      * @return $this
      */
@@ -552,7 +540,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     /**
      * Whether this method can accept or deny payment
      *
-     * @param Mage_Payment_Model_Info $payment
      *
      * @return bool
      */
@@ -564,7 +551,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     /**
      * Attempt to accept a payment that us under review
      *
-     * @param Mage_Payment_Model_Info $payment
      * @return bool
      * @throws Mage_Core_Exception
      */
@@ -579,7 +565,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     /**
      * Attempt to deny a payment that us under review
      *
-     * @param Mage_Payment_Model_Info $payment
      * @return bool
      * @throws Mage_Core_Exception
      */

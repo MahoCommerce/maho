@@ -26,7 +26,6 @@ class Mage_Downloadable_Helper_Catalog_Product_Configuration extends Mage_Core_H
     /**
      * Retrieves item links options
      *
-     * @param Mage_Catalog_Model_Product_Configuration_Item_Interface $item
      * @return array
      */
     public function getLinks(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)
@@ -66,7 +65,6 @@ class Mage_Downloadable_Helper_Catalog_Product_Configuration extends Mage_Core_H
     /**
      * Retrieves product options
      *
-     * @param Mage_Catalog_Model_Product_Configuration_Item_Interface $item
      * @return array
      */
     public function getOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)

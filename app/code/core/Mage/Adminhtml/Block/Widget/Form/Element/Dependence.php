@@ -79,7 +79,6 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
     /**
      * Add misc configuration options to the javascript dependencies controller
      *
-     * @param array $options
      * @return $this
      */
     public function addConfigOptions(array $options)

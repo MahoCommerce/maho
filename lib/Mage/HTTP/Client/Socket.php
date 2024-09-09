@@ -46,12 +46,6 @@ class Mage_HTTP_Client_Socket implements Mage_HTTP_IClient
     private $_headers = [];
 
     /**
-     * Fields for POST method - hash
-     * @var array
-     */
-    private $_postFields = [];
-
-    /**
      * Request cookies
      * @var array
      */
@@ -80,12 +74,6 @@ class Mage_HTTP_Client_Socket implements Mage_HTTP_IClient
      * @var int
      */
     private $_timeout = 300;
-
-    /**
-     * TODO
-     * @var int
-     */
-    private $_redirectCount = 0;
 
     /**
      * Set request timeout, msec

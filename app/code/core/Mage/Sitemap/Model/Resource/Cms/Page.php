@@ -60,7 +60,6 @@ class Mage_Sitemap_Model_Resource_Cms_Page extends Mage_Core_Model_Resource_Db_A
     /**
      * Prepare page object
      *
-     * @param array $data
      * @return Varien_Object
      */
     protected function _prepareObject(array $data)

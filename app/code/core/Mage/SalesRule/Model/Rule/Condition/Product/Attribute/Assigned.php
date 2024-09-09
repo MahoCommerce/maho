@@ -59,7 +59,6 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
 
     /**
      * Retrieve a product instance and initialize if needed
-     * @param Varien_Object $object
      *
      * @return Mage_Catalog_Model_Product
      */
@@ -115,7 +114,6 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
 
     /**
      * Validate a product, check whether the attribute is assigned to the product
-     * @param Varien_Object $object
      *
      * @return bool
      */

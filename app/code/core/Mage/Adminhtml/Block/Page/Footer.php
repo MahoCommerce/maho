@@ -80,7 +80,6 @@ class Mage_Adminhtml_Block_Page_Footer extends Mage_Adminhtml_Block_Template
     }
 
     /**
-     * @param string $url
      * @return $this
      * @deprecated see setReportIssuesUrl()
      */
@@ -99,7 +98,6 @@ class Mage_Adminhtml_Block_Page_Footer extends Mage_Adminhtml_Block_Template
     }
 
     /**
-     * @param string $url
      * @return $this
      */
     public function setReportIssuesUrl(string $url)
@@ -116,7 +114,6 @@ class Mage_Adminhtml_Block_Page_Footer extends Mage_Adminhtml_Block_Template
     }
 
     /**
-     * @param string $url
      * @return $this
      */
     public function setMahoProjectUrl(string $url)

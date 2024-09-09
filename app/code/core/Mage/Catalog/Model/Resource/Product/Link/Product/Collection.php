@@ -59,7 +59,6 @@ class Mage_Catalog_Model_Resource_Product_Link_Product_Collection extends Mage_C
     /**
      * Declare link model and initialize type attributes join
      *
-     * @param Mage_Catalog_Model_Product_Link $linkModel
      * @return $this
      */
     public function setLinkModel(Mage_Catalog_Model_Product_Link $linkModel)
@@ -95,7 +94,6 @@ class Mage_Catalog_Model_Resource_Product_Link_Product_Collection extends Mage_C
     /**
      * Initialize collection parent product and add limitation join
      *
-     * @param Mage_Catalog_Model_Product $product
      * @return $this
      */
     public function setProduct(Mage_Catalog_Model_Product $product)

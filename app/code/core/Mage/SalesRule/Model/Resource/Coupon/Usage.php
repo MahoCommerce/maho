@@ -74,7 +74,6 @@ class Mage_SalesRule_Model_Resource_Coupon_Usage extends Mage_Core_Model_Resourc
      * Load an object by customer_id & coupon_id
      *
      *
-     * @param Varien_Object $object
      * @param int $customerId
      * @param int $couponId
      * @return $this

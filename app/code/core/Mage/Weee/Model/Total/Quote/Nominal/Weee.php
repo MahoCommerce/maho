@@ -38,7 +38,6 @@ class Mage_Weee_Model_Total_Quote_Nominal_Weee extends Mage_Weee_Model_Total_Quo
     /**
      * Get nominal items only
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return array
      */
     protected function _getAddressItems(Mage_Sales_Model_Quote_Address $address)

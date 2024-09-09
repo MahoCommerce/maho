@@ -27,7 +27,6 @@ class Mage_Bundle_Model_Resource_Option extends Mage_Core_Model_Resource_Db_Abst
     }
 
     /**
-     * @param Mage_Core_Model_Abstract|Mage_Bundle_Model_Option $object
      * @return $this
      */
     protected function _afterSave(Mage_Core_Model_Abstract $object)
@@ -65,7 +64,6 @@ class Mage_Bundle_Model_Resource_Option extends Mage_Core_Model_Resource_Db_Abst
     /**
      * After delete process
      *
-     * @param Mage_Core_Model_Abstract $object
      * @return $this
      */
     protected function _afterDelete(Mage_Core_Model_Abstract $object)

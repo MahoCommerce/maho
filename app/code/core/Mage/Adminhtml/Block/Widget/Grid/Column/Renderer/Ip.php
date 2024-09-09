@@ -24,9 +24,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Ip extends Mage_Adminhtml
     /**
      * Render the grid cell value
      *
-     * @param Varien_Object $row
      * @return string
-     *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     public function render(Varien_Object $row)

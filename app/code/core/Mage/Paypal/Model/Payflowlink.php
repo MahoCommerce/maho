@@ -199,7 +199,6 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
     /**
      * Fill response with data.
      *
-     * @param array $postData
      * @return $this
      */
     public function setResponseData(array $postData)
@@ -252,8 +251,6 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
 
     /**
      * Operate with order using information from silent post
-     *
-     * @param Mage_Sales_Model_Order $order
      */
     protected function _processOrder(Mage_Sales_Model_Order $order)
     {
@@ -368,7 +365,6 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
     /**
      * Build request for getting token
      *
-     * @param Mage_Sales_Model_Order_Payment $payment
      * @return Varien_Object
      */
     protected function _buildTokenRequest(Mage_Sales_Model_Order_Payment $payment)
@@ -438,11 +434,10 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
     }
 
     /**
-      * Return request object with basic information for gateway request
-      *
-      * @param Varien_Object $payment
-      * @return Mage_Paypal_Model_Payflow_Request
-      */
+     * Return request object with basic information for gateway request
+     *
+     * @return Mage_Paypal_Model_Payflow_Request
+     */
     protected function _buildBasicRequest(Varien_Object $payment)
     {
         $request = Mage::getModel('paypal/payflow_request');
@@ -568,7 +563,6 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * Initialize request
      *
      * @deprecated since 1.6.2.0
-     * @param Varien_Object $payment
      * @param mixed $amount
      * @return $this
      */
@@ -591,7 +585,6 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * Additional authorization logic for Account Verification
      *
      * @deprecated since 1.6.2.0
-     * @param Varien_Object $payment
      * @param mixed $amount
      * @param Mage_Paypal_Model_Payment_Transaction $transaction
      * @param string $txnId
@@ -606,7 +599,6 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * Operate with order or quote using information from silent post
      *
      * @deprecated since 1.6.2.0
-     * @param Varien_Object $document
      */
     protected function _process(Varien_Object $document)
     {

@@ -29,7 +29,6 @@ class Mage_Sales_Model_Quote_Address_Total extends Varien_Object
     /**
      * Merge numeric total values
      *
-     * @param Mage_Sales_Model_Quote_Address_Total $total
      * @return $this
      */
     public function merge(Mage_Sales_Model_Quote_Address_Total $total)

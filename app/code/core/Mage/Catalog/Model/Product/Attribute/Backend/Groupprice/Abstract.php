@@ -178,7 +178,6 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
     /**
      * Prepare group prices data for website
      *
-     * @param array $priceData
      * @param string $productTypeId
      * @param int $websiteId
      * @return array

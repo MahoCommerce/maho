@@ -225,7 +225,6 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     /**
      * Get sitemap row
      *
-     * @param string $url
      * @param null|string $lastmod
      * @param null|string $changefreq
      * @param null|string $priority

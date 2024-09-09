@@ -149,7 +149,6 @@ abstract class Mage_Checkout_Block_Cart_Abstract extends Mage_Core_Block_Templat
     /**
      * Get item row html
      *
-     * @param   Mage_Sales_Model_Quote_Item $item
      * @return  string
      */
     public function getItemHtml(Mage_Sales_Model_Quote_Item $item)

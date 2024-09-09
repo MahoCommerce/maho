@@ -58,7 +58,6 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
     /**
      * Draw header block
      *
-     * @param  Zend_Pdf_Page $page
      * @return $this
      */
     protected function _drawHeaderBlock(Zend_Pdf_Page $page)
@@ -77,7 +76,6 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
     /**
      * Draw packages block
      *
-     * @param  Zend_Pdf_Page $page
      * @return $this
      */
     protected function _drawPackageBlock(Zend_Pdf_Page $page)

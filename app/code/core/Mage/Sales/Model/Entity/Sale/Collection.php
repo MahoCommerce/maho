@@ -56,7 +56,6 @@ class Mage_Sales_Model_Entity_Sale_Collection extends Varien_Object implements I
     }
 
     /**
-     * @param Mage_Customer_Model_Customer $customer
      * @return $this
      */
     public function setCustomerFilter(Mage_Customer_Model_Customer $customer)

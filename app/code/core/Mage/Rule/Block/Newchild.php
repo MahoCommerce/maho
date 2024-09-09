@@ -20,7 +20,6 @@
 class Mage_Rule_Block_Newchild extends Mage_Core_Block_Abstract implements Varien_Data_Form_Element_Renderer_Interface
 {
     /**
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     public function render(Varien_Data_Form_Element_Abstract $element)

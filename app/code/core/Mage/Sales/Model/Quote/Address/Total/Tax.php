@@ -27,7 +27,6 @@ class Mage_Sales_Model_Quote_Address_Total_Tax extends Mage_Sales_Model_Quote_Ad
     }
 
     /**
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return $this
      */
     public function collect(Mage_Sales_Model_Quote_Address $address)
@@ -191,7 +190,6 @@ class Mage_Sales_Model_Quote_Address_Total_Tax extends Mage_Sales_Model_Quote_Ad
     }
 
     /**
-     * @param Mage_Sales_Model_Quote_Address $address
      * @param array $applied
      * @param float $amount
      * @param float $baseAmount
@@ -236,7 +234,6 @@ class Mage_Sales_Model_Quote_Address_Total_Tax extends Mage_Sales_Model_Quote_Ad
     }
 
     /**
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return $this
      */
     public function fetch(Mage_Sales_Model_Quote_Address $address)

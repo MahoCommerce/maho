@@ -257,7 +257,6 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Set Note messages
      *
-     * @param array $messages
      * @return $this
      */
     public function setNoteMessages(array $messages)

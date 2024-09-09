@@ -26,7 +26,6 @@ class Mage_Api2_Model_Auth_Adapter_Oauth extends Mage_Api2_Model_Auth_Adapter_Ab
      *
      * Returns stdClass object with two properties: type and id
      *
-     * @param Mage_Api2_Model_Request $request
      * @return stdClass
      */
     public function getUserParams(Mage_Api2_Model_Request $request)
@@ -54,7 +53,6 @@ class Mage_Api2_Model_Auth_Adapter_Oauth extends Mage_Api2_Model_Auth_Adapter_Ab
     /**
      * Check if request contains authentication info for adapter
      *
-     * @param Mage_Api2_Model_Request $request
      * @return bool
      */
     public function isApplicableToRequest(Mage_Api2_Model_Request $request)

@@ -55,25 +55,16 @@ class Varien_Data_Form extends Varien_Data_Form_Abstract
         $this->_allElements = new Varien_Data_Form_Element_Collection($this);
     }
 
-    /**
-     * @param Varien_Data_Form_Element_Renderer_Interface $renderer
-     */
     public static function setElementRenderer(Varien_Data_Form_Element_Renderer_Interface $renderer)
     {
         self::$_defaultElementRenderer = $renderer;
     }
 
-    /**
-     * @param Varien_Data_Form_Element_Renderer_Interface $renderer
-     */
     public static function setFieldsetRenderer(Varien_Data_Form_Element_Renderer_Interface $renderer)
     {
         self::$_defaultFieldsetRenderer = $renderer;
     }
 
-    /**
-     * @param Varien_Data_Form_Element_Renderer_Interface $renderer
-     */
     public static function setFieldsetElementRenderer(Varien_Data_Form_Element_Renderer_Interface $renderer)
     {
         self::$_defaultFieldsetElementRenderer = $renderer;
@@ -115,7 +106,6 @@ class Varien_Data_Form extends Varien_Data_Form_Abstract
     /**
      * Add form element
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @param string|false $after
      * @return Varien_Data_Form
      * @throws Exception

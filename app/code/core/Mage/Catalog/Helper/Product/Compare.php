@@ -83,7 +83,6 @@ class Mage_Catalog_Helper_Product_Compare extends Mage_Core_Helper_Url
 
     /**
      * Mage_Catalog_Helper_Product_Compare constructor.
-     * @param array $data
      */
     public function __construct(array $data = [])
     {

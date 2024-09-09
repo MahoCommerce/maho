@@ -38,7 +38,6 @@ class Mage_Core_Controller_Front_Router
     }
 
     /**
-     * @param Zend_Controller_Router_Interface $router
      * @return $this
      */
     public function addRoutes(Zend_Controller_Router_Interface $router)

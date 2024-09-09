@@ -38,8 +38,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf
 
     /**
      * Dhl International Label Creation Class constructor
-     *
-     * @param array $arguments
      */
     public function __construct(array $arguments)
     {

@@ -28,7 +28,6 @@ class Mage_Adminhtml_Helper_Addresses extends Mage_Core_Helper_Abstract
     /**
      * Check if number of street lines is non-zero
      *
-     * @param Mage_Customer_Model_Attribute $attribute
      * @return Mage_Customer_Model_Attribute
      */
     public function processStreetAttribute(Mage_Customer_Model_Attribute $attribute)

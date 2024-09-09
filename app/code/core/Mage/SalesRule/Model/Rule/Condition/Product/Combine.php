@@ -191,7 +191,6 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Combine extends Mage_Rule_Mode
 
     /**
      * Validate a condition with the checking of the child value
-     * @param Varien_Object $object
      *
      * @return bool
      */

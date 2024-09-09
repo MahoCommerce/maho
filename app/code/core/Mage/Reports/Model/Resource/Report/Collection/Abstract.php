@@ -80,7 +80,6 @@ class Mage_Reports_Model_Resource_Report_Collection_Abstract extends Mage_Core_M
     /**
      * Set array of columns that should be aggregated
      *
-     * @param array $columns
      * @return $this
      */
     public function setAggregatedColumns(array $columns)
@@ -158,7 +157,6 @@ class Mage_Reports_Model_Resource_Report_Collection_Abstract extends Mage_Core_M
     /**
      * Apply stores filter to select object
      *
-     * @param Zend_Db_Select $select
      * @return $this
      */
     protected function _applyStoresFilterToSelect(Zend_Db_Select $select)

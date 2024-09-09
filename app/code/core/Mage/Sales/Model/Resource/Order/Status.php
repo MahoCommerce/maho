@@ -76,7 +76,6 @@ class Mage_Sales_Model_Resource_Order_Status extends Mage_Core_Model_Resource_Db
     /**
      * Store labels getter
      *
-     * @param Mage_Core_Model_Abstract|Mage_Sales_Model_Order_Status $status
      * @return array
      */
     public function getStoreLabels(Mage_Core_Model_Abstract $status)

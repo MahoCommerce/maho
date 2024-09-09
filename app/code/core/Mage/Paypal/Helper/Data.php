@@ -43,7 +43,6 @@ class Mage_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Check whether customer should be asked confirmation whether to sign a billing agreement
      *
-     * @param Mage_Paypal_Model_Config $config
      * @param int $customerId
      * @return bool
      */
@@ -63,7 +62,6 @@ class Mage_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Return backend config for element like JSON
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return false|string
      */
     public function getElementBackendConfig(Varien_Data_Form_Element_Abstract $element)

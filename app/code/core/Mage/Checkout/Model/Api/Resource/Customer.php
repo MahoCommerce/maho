@@ -72,7 +72,6 @@ class Mage_Checkout_Model_Api_Resource_Customer extends Mage_Checkout_Model_Api_
     }
 
     /**
-     * @param Mage_Sales_Model_Quote $quote
      * @return bool
      */
     public function prepareCustomerForQuote(Mage_Sales_Model_Quote $quote)
@@ -97,7 +96,6 @@ class Mage_Checkout_Model_Api_Resource_Customer extends Mage_Checkout_Model_Api_
     /**
      * Prepare quote for guest checkout order submit
      *
-     * @param Mage_Sales_Model_Quote $quote
      * @return $this
      */
     protected function _prepareGuestQuote(Mage_Sales_Model_Quote $quote)
@@ -112,7 +110,6 @@ class Mage_Checkout_Model_Api_Resource_Customer extends Mage_Checkout_Model_Api_
     /**
      * Prepare quote for customer registration and customer order submit
      *
-     * @param Mage_Sales_Model_Quote $quote
      * @return $this
      */
     protected function _prepareNewCustomerQuote(Mage_Sales_Model_Quote $quote)
@@ -148,7 +145,6 @@ class Mage_Checkout_Model_Api_Resource_Customer extends Mage_Checkout_Model_Api_
     /**
      * Prepare quote for customer order submit
      *
-     * @param Mage_Sales_Model_Quote $quote
      * @return $this
      */
     protected function _prepareCustomerQuote(Mage_Sales_Model_Quote $quote)
@@ -186,7 +182,6 @@ class Mage_Checkout_Model_Api_Resource_Customer extends Mage_Checkout_Model_Api_
     /**
      * Involve new customer to system
      *
-     * @param Mage_Sales_Model_Quote $quote
      * @return $this
      */
     public function involveNewCustomer(Mage_Sales_Model_Quote $quote)

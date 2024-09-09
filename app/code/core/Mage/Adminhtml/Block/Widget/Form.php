@@ -100,7 +100,6 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
     /**
      * Set form object
      *
-     * @param Varien_Data_Form $form
      * @return $this
      */
     public function setForm(Varien_Data_Form $form)
@@ -216,8 +215,6 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
 
     /**
      * Add new element type
-     *
-     * @param Varien_Data_Form_Abstract $baseElement
      */
     protected function _addElementTypes(Varien_Data_Form_Abstract $baseElement)
     {

@@ -75,7 +75,6 @@ class Mage_Sales_Block_Billing_Agreement_View extends Mage_Core_Block_Template
     /**
      * Retrieve order item value by key
      *
-     * @param Mage_Sales_Model_Order $order
      * @param string $key
      * @return string
      */

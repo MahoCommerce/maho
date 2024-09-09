@@ -30,11 +30,6 @@
 class Mage_Checkout_Block_Onepage_Success extends Mage_Core_Block_Template
 {
     /**
-     * @deprecated after 1.4.0.1
-     */
-    private $_order;
-
-    /**
      * Check order print availability
      *
      * @return bool
@@ -68,7 +63,6 @@ class Mage_Checkout_Block_Onepage_Success extends Mage_Core_Block_Template
     /**
      * Getter for recurring profile view page
      *
-     * @param Varien_Object|Mage_Sales_Model_Recurring_Profile $profile
      * @return string
      */
     public function getProfileUrl(Varien_Object $profile)

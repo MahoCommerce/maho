@@ -74,7 +74,6 @@ class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Res
      *
      * @deprecated after 1.7.0.2
      *
-     * @param array $productRow
      * @return Varien_Object
      */
     protected function _prepareProduct(array $productRow)

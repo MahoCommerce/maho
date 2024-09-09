@@ -33,7 +33,6 @@ class Mage_CatalogSearch_Model_Resource_Query extends Mage_Core_Model_Resource_D
     /**
      * Custom load model by search query string
      *
-     * @param Mage_Core_Model_Abstract $object
      * @param string $value
      * @return $this
      */
@@ -68,7 +67,6 @@ class Mage_CatalogSearch_Model_Resource_Query extends Mage_Core_Model_Resource_D
     /**
      * Custom load model only by query text (skip synonym for)
      *
-     * @param Mage_Core_Model_Abstract $object
      * @param string $value
      * @return $this
      */
@@ -104,7 +102,6 @@ class Mage_CatalogSearch_Model_Resource_Query extends Mage_Core_Model_Resource_D
     }
 
     /**
-     * @param Mage_Core_Model_Abstract $object
      * @return $this
      */
     public function _beforeSave(Mage_Core_Model_Abstract $object)

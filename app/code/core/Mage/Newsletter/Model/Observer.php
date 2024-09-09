@@ -22,7 +22,6 @@
 class Mage_Newsletter_Model_Observer
 {
     /**
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function subscribeCustomer(Varien_Event_Observer $observer)
@@ -37,7 +36,6 @@ class Mage_Newsletter_Model_Observer
     /**
      * Customer delete handler
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function customerDeleted(Varien_Event_Observer $observer)

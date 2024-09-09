@@ -43,7 +43,6 @@ class Mage_Sales_Model_Resource_Order_Payment extends Mage_Sales_Model_Resource_
     /**
      * Unserialize Varien_Object field in an object
      *
-     * @param Varien_Object $object
      * @param string $field
      * @param mixed $defaultValue
      */

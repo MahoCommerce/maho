@@ -27,7 +27,6 @@ class Mage_CatalogInventory_Model_Api2_Stock_Item_Validator_Item extends Mage_Ap
      * getErrors() will return an array of errors that explain why the
      * validation failed.
      *
-     * @param array $data
      * @return bool
      */
     public function isValidSingleItemDataForMultiUpdate(array $data)

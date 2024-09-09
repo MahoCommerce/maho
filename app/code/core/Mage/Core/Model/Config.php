@@ -1803,7 +1803,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Makes all events to lower-case
      *
      * @param string $area
-     * @param Varien_Simplexml_Config $mergeModel
      */
     protected function _makeEventsLowerCase($area, Varien_Simplexml_Config $mergeModel)
     {
@@ -1829,7 +1828,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     /**
      * Checks is event name has upper-case letters
      *
-     * @param Mage_Core_Model_Config_Element $event
      * @return bool
      */
     protected function _isNodeNameHasUpperCase(Mage_Core_Model_Config_Element $event)

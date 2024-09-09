@@ -26,7 +26,6 @@ class Mage_Core_Exception extends Exception
     protected $_messages = [];
 
     /**
-     * @param Mage_Core_Model_Message_Abstract $message
      * @return $this
      */
     public function addMessage(Mage_Core_Model_Message_Abstract $message)

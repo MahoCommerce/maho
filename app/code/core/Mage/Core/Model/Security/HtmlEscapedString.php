@@ -34,7 +34,6 @@ class Mage_Core_Model_Security_HtmlEscapedString implements Stringable
     protected ?array $allowedTags;
 
     /**
-     * @param string $originalValue
      * @param string[]|null $allowedTags
      */
     public function __construct(string $originalValue, ?array $allowedTags = null)

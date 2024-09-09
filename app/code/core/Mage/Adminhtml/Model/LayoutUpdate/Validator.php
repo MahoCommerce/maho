@@ -152,8 +152,6 @@ class Mage_Adminhtml_Model_LayoutUpdate_Validator extends Zend_Validate_Abstract
     /**
      * Validate template path for preventing access to the directory above
      * If template path value has "../" @throws Exception
-     *
-     * @param array $templatePaths
      */
     protected function _validateTemplatePath(array $templatePaths)
     {

@@ -37,8 +37,6 @@ class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Templa
 
     /**
      * Initialize block instance
-     *
-     * @param array $args
      */
     public function __construct(array $args = [])
     {

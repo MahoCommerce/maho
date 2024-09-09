@@ -60,7 +60,6 @@ abstract class Mage_CatalogInventory_Model_Api2_Stock_Item_Rest extends Mage_Cat
     /**
      * Update specified stock item
      *
-     * @param array $data
      * @throws Mage_Api2_Exception
      */
     protected function _update(array $data)
@@ -92,8 +91,6 @@ abstract class Mage_CatalogInventory_Model_Api2_Stock_Item_Rest extends Mage_Cat
 
     /**
      * Update specified stock items
-     *
-     * @param array $data
      */
     protected function _multiUpdate(array $data)
     {

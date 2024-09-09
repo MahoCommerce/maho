@@ -24,7 +24,6 @@ class Mage_Eav_Model_Attribute_Data_Date extends Mage_Eav_Model_Attribute_Data_A
     /**
      * Extract data from request and return value
      *
-     * @param Zend_Controller_Request_Http $request
      * @return array|string|false
      */
     public function extractValue(Zend_Controller_Request_Http $request)

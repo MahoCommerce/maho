@@ -32,7 +32,6 @@ interface Mage_Widget_Block_Interface
      * Add data to the widget.
      * Retains previous data in the widget.
      *
-     * @param array $arr
      * @return Mage_Widget_Block_Interface
      */
     public function addData(array $arr);

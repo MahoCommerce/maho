@@ -29,7 +29,6 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Set extends Mage_Core_Model_Resou
     /**
      * Perform actions after object save
      *
-     * @param Mage_Core_Model_Abstract|Mage_Eav_Model_Entity_Attribute_Set $object
      * @inheritDoc
      */
     protected function _afterSave(Mage_Core_Model_Abstract $object)
@@ -88,7 +87,6 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Set extends Mage_Core_Model_Resou
     /**
      * Retrieve Set info by attributes
      *
-     * @param array $attributeIds
      * @param int|null $setId
      * @return array
      */

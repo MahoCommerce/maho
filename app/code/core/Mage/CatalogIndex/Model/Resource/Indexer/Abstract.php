@@ -56,7 +56,6 @@ class Mage_CatalogIndex_Model_Resource_Indexer_Abstract extends Mage_Core_Model_
     }
 
     /**
-     * @param array $data
      * @param int $storeId
      * @param int $productId
      */

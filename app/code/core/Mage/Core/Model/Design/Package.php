@@ -293,7 +293,6 @@ class Mage_Core_Model_Design_Package
     }
 
     /**
-     * @param array $params
      * @return $this
      */
     public function updateParamDefaults(array &$params)
@@ -317,7 +316,6 @@ class Mage_Core_Model_Design_Package
     }
 
     /**
-     * @param array $params
      * @return string
      */
     public function getBaseDir(array $params)
@@ -328,7 +326,6 @@ class Mage_Core_Model_Design_Package
     }
 
     /**
-     * @param array $params
      * @return string
      */
     public function getSkinBaseDir(array $params = [])
@@ -340,7 +337,6 @@ class Mage_Core_Model_Design_Package
     }
 
     /**
-     * @param array $params
      * @return string
      */
     public function getLocaleBaseDir(array $params = [])
@@ -353,7 +349,6 @@ class Mage_Core_Model_Design_Package
     }
 
     /**
-     * @param array $params
      * @return string
      */
     public function getSkinBaseUrl(array $params = [])
@@ -375,7 +370,6 @@ class Mage_Core_Model_Design_Package
      *
      * @see Mage_Core_Model_Config::getBaseDir
      * @param string $file
-     * @param array $params
      * @return string|false
      */
     public function validateFile($file, array $params)
@@ -390,7 +384,6 @@ class Mage_Core_Model_Design_Package
      * Get filename by specified theme parameters
      *
      * @param array $file
-     * @param array $params
      * @return string
      */
     protected function _renderFilename($file, array $params)
@@ -419,8 +412,6 @@ class Mage_Core_Model_Design_Package
      * If disabled, the lookup won't be performed to spare filesystem calls.
      *
      * @param string $file
-     * @param array $params
-     * @param array $fallbackScheme
      * @return string
      */
     protected function _fallback($file, array &$params, array $fallbackScheme = [[]])
@@ -445,7 +436,6 @@ class Mage_Core_Model_Design_Package
      * $params['_type'] is required
      *
      * @param string $file
-     * @param array $params
      * @return string
      * @throws Exception
      */
@@ -475,7 +465,6 @@ class Mage_Core_Model_Design_Package
 
     /**
      * @param string $file
-     * @param array $params
      * @return string
      */
     public function getLayoutFilename($file, array $params = [])
@@ -486,7 +475,6 @@ class Mage_Core_Model_Design_Package
 
     /**
      * @param string $file
-     * @param array $params
      * @return string
      */
     public function getTemplateFilename($file, array $params = [])
@@ -497,7 +485,6 @@ class Mage_Core_Model_Design_Package
 
     /**
      * @param string $file
-     * @param array $params
      * @return string
      */
     public function getLocaleFileName($file, array $params = [])
@@ -510,7 +497,6 @@ class Mage_Core_Model_Design_Package
      * Get skin file url
      *
      * @param string|null $file
-     * @param array $params
      * @return string
      * @throws Exception
      */
@@ -725,7 +711,6 @@ class Mage_Core_Model_Design_Package
      * Merges files into one and saves it into DB (if DB file storage is on)
      *
      * @see Mage_Core_Helper_Data::mergeFiles()
-     * @param array $srcFiles
      * @param string|bool $targetFile - file path to be written
      * @param bool $mustMerge
      * @param callable $beforeMergeCallback

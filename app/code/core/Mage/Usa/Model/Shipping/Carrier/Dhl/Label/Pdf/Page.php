@@ -61,7 +61,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page extends Zend_Pdf_Page
      * Calculate the width of given text in points taking into account current font and font-size
      *
      * @param string $text
-     * @param Zend_Pdf_Resource_Font $font
      * @param float $font_size
      * @return float
      */

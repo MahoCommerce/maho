@@ -86,7 +86,6 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     /**
      * Set messages collection
      *
-     * @param   Mage_Core_Model_Message_Collection $messages
      * @return  Mage_Core_Block_Messages
      */
     public function setMessages(Mage_Core_Model_Message_Collection $messages)
@@ -98,7 +97,6 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     /**
      * Add messages to display
      *
-     * @param Mage_Core_Model_Message_Collection $messages
      * @return $this
      */
     public function addMessages(Mage_Core_Model_Message_Collection $messages)
@@ -125,7 +123,6 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     /**
      * Adding new message to message collection
      *
-     * @param   Mage_Core_Model_Message_Abstract $message
      * @return  Mage_Core_Block_Messages
      */
     public function addMessage(Mage_Core_Model_Message_Abstract $message)

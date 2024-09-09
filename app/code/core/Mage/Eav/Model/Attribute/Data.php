@@ -39,8 +39,6 @@ class Mage_Eav_Model_Attribute_Data
      * Return attribute data model by attribute
      * Set entity to data model (need for work)
      *
-     * @param Mage_Eav_Model_Attribute $attribute
-     * @param Mage_Core_Model_Abstract $entity
      * @return Mage_Eav_Model_Attribute_Data_Abstract
      */
     public static function factory(Mage_Eav_Model_Attribute $attribute, Mage_Core_Model_Abstract $entity)

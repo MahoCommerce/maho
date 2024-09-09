@@ -28,7 +28,6 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
     /**
      * Retrieves product configuration options
      *
-     * @param Mage_Catalog_Model_Product_Configuration_Item_Interface $item
      * @return array
      */
     public function getCustomOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)
@@ -84,7 +83,6 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
     /**
      * Retrieves configuration options for configurable product
      *
-     * @param Mage_Catalog_Model_Product_Configuration_Item_Interface $item
      * @return array
      */
     public function getConfigurableOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)
@@ -103,7 +101,6 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
     /**
      * Retrieves configuration options for grouped product
      *
-     * @param Mage_Catalog_Model_Product_Configuration_Item_Interface $item
      * @return array
      */
     public function getGroupedOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)
@@ -145,7 +142,6 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
     /**
      * Retrieves product options list
      *
-     * @param Mage_Catalog_Model_Product_Configuration_Item_Interface $item
      * @return array
      */
     public function getOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)

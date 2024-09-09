@@ -94,7 +94,6 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
     /**
      * Get the grid and scripts contents
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element)
@@ -107,8 +106,6 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
 
     /**
      * Prepare existing row data object
-     *
-     * @param Varien_Object $row
      */
     protected function _prepareArrayRow(Varien_Object $row)
     {

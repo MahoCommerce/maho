@@ -28,9 +28,6 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
 
     /**
      * Add subscribers to queue
-     *
-     * @param Mage_Newsletter_Model_Queue $queue
-     * @param array $subscriberIds
      */
     public function addSubscribersToQueue(Mage_Newsletter_Model_Queue $queue, array $subscriberIds)
     {
@@ -69,8 +66,6 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
 
     /**
      * Removes subscriber from queue
-     *
-     * @param Mage_Newsletter_Model_Queue $queue
      */
     public function removeSubscribersFromQueue(Mage_Newsletter_Model_Queue $queue)
     {
@@ -93,7 +88,6 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
     /**
      * Links queue to store
      *
-     * @param Mage_Newsletter_Model_Queue $queue
      * @return $this
      */
     public function setStores(Mage_Newsletter_Model_Queue $queue)
@@ -143,7 +137,6 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
     /**
      * Returns queue linked stores
      *
-     * @param Mage_Newsletter_Model_Queue $queue
      * @return array
      */
     public function getStores(Mage_Newsletter_Model_Queue $queue)

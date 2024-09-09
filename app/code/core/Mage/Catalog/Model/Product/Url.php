@@ -51,8 +51,6 @@ class Mage_Catalog_Model_Product_Url extends Varien_Object
 
     /**
      * Initialize Url model
-     *
-     * @param array $args
      */
     public function __construct(array $args = [])
     {
@@ -103,7 +101,6 @@ class Mage_Catalog_Model_Product_Url extends Varien_Object
     /**
      * Retrieve URL in current store
      *
-     * @param Mage_Catalog_Model_Product $product
      * @param array $params the URL route params
      * @return string
      */
@@ -173,7 +170,6 @@ class Mage_Catalog_Model_Product_Url extends Varien_Object
     /**
      * Retrieve Product URL using UrlDataObject
      *
-     * @param Mage_Catalog_Model_Product $product
      * @param array $params
      * @return string
      */

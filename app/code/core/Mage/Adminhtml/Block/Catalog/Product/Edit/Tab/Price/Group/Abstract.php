@@ -55,7 +55,6 @@ abstract class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Price_Group_Abstrac
     /**
      * Render HTML
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     public function render(Varien_Data_Form_Element_Abstract $element)
@@ -67,7 +66,6 @@ abstract class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Price_Group_Abstrac
     /**
      * Set form element instance
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return $this
      */
     public function setElement(Varien_Data_Form_Element_Abstract $element)

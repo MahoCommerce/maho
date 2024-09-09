@@ -113,7 +113,6 @@ abstract class Varien_Convert_Action_Abstract implements Varien_Convert_Action_I
     /**
      * Set profile instance the action belongs to
      *
-     * @param Varien_Convert_Profile_Abstract $profile
      * @return Varien_Convert_Action_Abstract
      */
     public function setProfile(Varien_Convert_Profile_Abstract $profile)

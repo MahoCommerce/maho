@@ -45,9 +45,6 @@ class Mage_Core_Model_Design_Fallback
      */
     protected $_visited;
 
-    /**
-     * @param array $params
-     */
     public function __construct(array $params = [])
     {
         $this->_config = $params['config'] ?? Mage::getModel('core/design_config');

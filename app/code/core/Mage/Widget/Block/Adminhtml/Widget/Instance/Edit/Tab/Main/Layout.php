@@ -41,7 +41,6 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main_Layout extends M
     /**
      * Render given element (return html of element)
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     public function render(Varien_Data_Form_Element_Abstract $element)
@@ -53,7 +52,6 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main_Layout extends M
     /**
      * Setter
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return $this
      */
     public function setElement(Varien_Data_Form_Element_Abstract $element)

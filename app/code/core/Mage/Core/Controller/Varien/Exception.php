@@ -35,7 +35,6 @@ class Mage_Core_Controller_Varien_Exception extends Exception
      * @param string $actionName
      * @param string $controllerName
      * @param string $moduleName
-     * @param array $params
      * @return $this
      */
     public function prepareForward($actionName = null, $controllerName = null, $moduleName = null, array $params = [])

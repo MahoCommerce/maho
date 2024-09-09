@@ -46,7 +46,6 @@ abstract class Mage_Catalog_Model_Api2_Product_Website_Rest extends Mage_Catalog
     /**
      * Product website assign
      *
-     * @param array $data
      * @return string
      */
     protected function _create(array $data)
@@ -95,8 +94,6 @@ abstract class Mage_Catalog_Model_Api2_Product_Website_Rest extends Mage_Catalog
 
     /**
      * Product website assign
-     *
-     * @param array $data
      */
     protected function _multiCreate(array $data)
     {
@@ -175,8 +172,6 @@ abstract class Mage_Catalog_Model_Api2_Product_Website_Rest extends Mage_Catalog
 
     /**
      * Product websites update is not available
-     *
-     * @param array $data
      */
     protected function _update(array $data)
     {

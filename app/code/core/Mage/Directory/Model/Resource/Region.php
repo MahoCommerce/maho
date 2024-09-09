@@ -117,10 +117,8 @@ class Mage_Directory_Model_Resource_Region extends Mage_Core_Model_Resource_Db_A
     /**
      * Loads region by region code and country id
      *
-     * @param Mage_Directory_Model_Region $region
      * @param string $regionCode
      * @param string $countryId
-     *
      * @return $this
      */
     public function loadByCode(Mage_Directory_Model_Region $region, $regionCode, $countryId)
@@ -131,10 +129,8 @@ class Mage_Directory_Model_Resource_Region extends Mage_Core_Model_Resource_Db_A
     /**
      * Load data by country id and default region name
      *
-     * @param Mage_Directory_Model_Region $region
      * @param string $regionName
      * @param string $countryId
-     *
      * @return $this
      */
     public function loadByName(Mage_Directory_Model_Region $region, $regionName, $countryId)

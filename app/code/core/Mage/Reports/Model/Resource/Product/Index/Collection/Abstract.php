@@ -144,7 +144,6 @@ abstract class Mage_Reports_Model_Resource_Product_Index_Collection_Abstract ext
     /**
      * Set list of ids with expected order
      *
-     * @param array $ids
      * @return Mage_Reports_Model_Resource_Product_Index_Collection_Abstract
      */
     public function setSortIds(array $ids)

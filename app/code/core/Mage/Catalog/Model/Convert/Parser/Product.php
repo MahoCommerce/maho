@@ -209,7 +209,6 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
     /**
      * ReDefine Product Type Instance to Product
      *
-     * @param Mage_Catalog_Model_Product $product
      * @return $this
      */
     public function setProductTypeInstance(Mage_Catalog_Model_Product $product)

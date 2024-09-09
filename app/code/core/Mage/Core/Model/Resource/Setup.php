@@ -846,13 +846,11 @@ class Mage_Core_Model_Resource_Setup
     }
 
     /******************* CONFIG *****************/
-
     /**
      * Undefined
      *
      * @param string $path
      * @param string $label
-     * @param array $data
      * @param string $default
      * @return $this
      * @deprecated since 1.4.0.1

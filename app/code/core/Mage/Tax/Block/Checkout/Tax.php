@@ -35,8 +35,6 @@ class Mage_Tax_Block_Checkout_Tax extends Mage_Checkout_Block_Total_Default
 
     /**
      * Initialize factory instance
-     *
-     * @param array $args
      */
     public function __construct(array $args = [])
     {

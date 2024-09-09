@@ -92,8 +92,6 @@ abstract class Mage_ProductAlert_Block_Email_Abstract extends Mage_Core_Block_Te
 
     /**
      * Add product to collection
-     *
-     * @param Mage_Catalog_Model_Product $product
      */
     public function addProduct(Mage_Catalog_Model_Product $product)
     {
@@ -126,7 +124,6 @@ abstract class Mage_ProductAlert_Block_Email_Abstract extends Mage_Core_Block_Te
     /**
      * Get filtered product short description to be inserted into mail
      *
-     * @param Mage_Catalog_Model_Product $product
      * @return string|null
      */
     public function _getFilteredProductShortDescription(Mage_Catalog_Model_Product $product)

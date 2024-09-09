@@ -261,7 +261,6 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
     /**
      * Load subscriber info by customer
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @return $this
      */
     public function loadByCustomer(Mage_Customer_Model_Customer $customer)
@@ -482,7 +481,6 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
     /**
      * Mark receiving subscriber of queue newsletter
      *
-     * @param Mage_Newsletter_Model_Queue $queue
      * @return $this
      */
     public function received(Mage_Newsletter_Model_Queue $queue)

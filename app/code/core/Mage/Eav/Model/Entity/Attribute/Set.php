@@ -192,7 +192,6 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
      * Add set info to attributes
      *
      * @param string|Mage_Eav_Model_Entity_Type $entityType
-     * @param array $attributes
      * @param int $setId
      * @return $this
      */

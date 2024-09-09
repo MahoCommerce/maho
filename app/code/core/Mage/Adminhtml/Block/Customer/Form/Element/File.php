@@ -165,7 +165,6 @@ class Mage_Adminhtml_Block_Customer_Form_Element_File extends Varien_Data_Form_E
      * Return Element HTML
      *
      * @param string $element
-     * @param array $attributes
      * @param bool $closed
      * @return string
      */

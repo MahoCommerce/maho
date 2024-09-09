@@ -29,7 +29,6 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
     /**
      * Save options store data
      *
-     * @param Mage_Core_Model_Abstract $object
      * @return Mage_Core_Model_Resource_Db_Abstract
      */
     protected function _afterSave(Mage_Core_Model_Abstract $object)
@@ -43,7 +42,6 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
     /**
      * Save value prices
      *
-     * @param Mage_Core_Model_Abstract|Mage_Catalog_Model_Product_Option $object
      * @return $this
      */
     protected function _saveValuePrices(Mage_Core_Model_Abstract $object)
@@ -186,7 +184,6 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
     /**
      * Save titles
      *
-     * @param Mage_Core_Model_Abstract|Mage_Catalog_Model_Product_Option $object
      * @throws Zend_Db_Adapter_Exception
      */
     protected function _saveValueTitles(Mage_Core_Model_Abstract $object)
@@ -325,7 +322,6 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
     /**
      * Duplicate custom options for product
      *
-     * @param Mage_Catalog_Model_Product_Option $object
      * @param int $oldProductId
      * @param int $newProductId
      * @return Mage_Catalog_Model_Product_Option

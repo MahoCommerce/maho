@@ -29,7 +29,6 @@ class Mage_Catalog_Model_Resource_Product_Compare_Item extends Mage_Core_Model_R
     /**
      * Load object by product
      *
-     * @param Mage_Catalog_Model_Product_Compare_Item $object
      * @param mixed $product
      * @return bool
      */

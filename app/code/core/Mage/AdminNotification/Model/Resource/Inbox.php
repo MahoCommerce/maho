@@ -33,7 +33,6 @@ class Mage_AdminNotification_Model_Resource_Inbox extends Mage_Core_Model_Resour
     /**
      * Load latest notice
      *
-     * @param Mage_AdminNotification_Model_Inbox $object
      * @return $this
      */
     public function loadLatestNotice(Mage_AdminNotification_Model_Inbox $object)
@@ -59,7 +58,6 @@ class Mage_AdminNotification_Model_Resource_Inbox extends Mage_Core_Model_Resour
     /**
      * Get notifications grouped by severity
      *
-     * @param Mage_AdminNotification_Model_Inbox $object
      * @return array
      */
     public function getNoticeStatus(Mage_AdminNotification_Model_Inbox $object)
@@ -77,9 +75,6 @@ class Mage_AdminNotification_Model_Resource_Inbox extends Mage_Core_Model_Resour
 
     /**
      * Save notifications (if not exists)
-     *
-     * @param Mage_AdminNotification_Model_Inbox $object
-     * @param array $data
      */
     public function parse(Mage_AdminNotification_Model_Inbox $object, array $data)
     {

@@ -36,7 +36,6 @@ class Mage_Sales_Helper_Data extends Mage_Core_Helper_Data
     /**
      * Check quote amount
      *
-     * @param Mage_Sales_Model_Quote $quote
      * @param float $amount
      * @return $this
      */

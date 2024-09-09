@@ -101,7 +101,6 @@ class Varien_Simplexml_Config
     /**
      * Sets xml for this configuration
      *
-     * @param Varien_Simplexml_Element $node
      * @return $this
      */
     public function setXml(Varien_Simplexml_Element $node)
@@ -534,7 +533,6 @@ class Varien_Simplexml_Config
     }
 
     /**
-     * @param Varien_Simplexml_Config $config
      * @param boolean $overwrite
      * @return $this
      */

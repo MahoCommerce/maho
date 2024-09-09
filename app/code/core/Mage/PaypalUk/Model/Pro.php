@@ -47,7 +47,6 @@ class Mage_PaypalUk_Model_Pro extends Mage_Paypal_Model_Pro
     /**
      * Refund a capture transaction
      *
-     * @param Varien_Object $payment
      * @param float $amount
      */
     public function refund(Varien_Object $payment, $amount)
@@ -72,7 +71,6 @@ class Mage_PaypalUk_Model_Pro extends Mage_Paypal_Model_Pro
     /**
      * Get payflow transaction id from parent transaction
      *
-     * @param Varien_Object $payment
      * @return string
      */
     protected function _getParentTransactionId(Varien_Object $payment)
@@ -107,7 +105,6 @@ class Mage_PaypalUk_Model_Pro extends Mage_Paypal_Model_Pro
     /**
      * Fetch transaction details info method does not exists in PaypalUK
      *
-     * @param Mage_Payment_Model_Info $payment
      * @param string $transactionId
      * @throws Mage_Core_Exception
      * @return void

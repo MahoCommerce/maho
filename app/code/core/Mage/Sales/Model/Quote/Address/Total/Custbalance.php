@@ -20,7 +20,6 @@
 class Mage_Sales_Model_Quote_Address_Total_Custbalance extends Mage_Sales_Model_Quote_Address_Total_Abstract
 {
     /**
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return $this
      */
     public function collect(Mage_Sales_Model_Quote_Address $address)

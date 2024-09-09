@@ -37,7 +37,6 @@ class Mage_Cms_Controller_Router extends Mage_Core_Controller_Varien_Router_Abst
     /**
      * Validate and Match Cms Page and modify request
      *
-     * @param Zend_Controller_Request_Http $request
      * @return bool
      */
     public function match(Zend_Controller_Request_Http $request)

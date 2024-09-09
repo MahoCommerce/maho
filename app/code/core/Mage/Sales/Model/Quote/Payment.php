@@ -98,7 +98,6 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
     /**
      * Declare quote model instance
      *
-     * @param   Mage_Sales_Model_Quote $quote
      * @return  $this
      */
     public function setQuote(Mage_Sales_Model_Quote $quote)
@@ -125,7 +124,6 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
      * Method calls quote totals collect because payment method availability
      * can be related to quote totals
      *
-     * @param   array $data
      * @throws  Mage_Core_Exception
      * @return  $this
      */

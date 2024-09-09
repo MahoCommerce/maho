@@ -24,7 +24,6 @@ class Mage_Wishlist_Block_Customer_Wishlist_Item_Column_Cart extends Mage_Wishli
     /**
      * Returns qty to show visually to user
      *
-     * @param Mage_Wishlist_Model_Item $item
      * @return float
      */
     public function getAddToCartQty(Mage_Wishlist_Model_Item $item)

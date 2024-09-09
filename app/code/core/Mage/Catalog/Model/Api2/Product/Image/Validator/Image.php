@@ -25,7 +25,6 @@ class Mage_Catalog_Model_Api2_Product_Image_Validator_Image extends Mage_Api2_Mo
      * Validate data. In case of validation failure return false,
      * getErrors() could be used to retrieve list of validation error messages
      *
-     * @param array $data
      * @return bool
      */
     public function isValidData(array $data)

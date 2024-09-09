@@ -99,7 +99,6 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * Flag login as HTTP Basic Auth.
      *
-     * @param bool $isInstaLogin
      * @return $this
      */
     public function setIsInstaLogin(bool $isInstaLogin = true)

@@ -89,7 +89,6 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection extends Mag
     /**
      * Join order information
      *
-     * @param array $keys
      * @return $this
      */
     public function addOrderInformation(array $keys)
@@ -102,7 +101,6 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection extends Mag
     /**
      * Join payment information
      *
-     * @param array $keys
      * @return $this
      */
     public function addPaymentInformation(array $keys)

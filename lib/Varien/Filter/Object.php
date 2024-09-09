@@ -21,7 +21,6 @@ class Varien_Filter_Object extends Zend_Filter
     protected $_columnFilters = [];
 
     /**
-     * @param Zend_Filter_Interface $filter
      * @param string $column
      * @return $this
      */

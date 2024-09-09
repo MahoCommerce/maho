@@ -242,7 +242,6 @@ class Mage_SalesRule_Model_Observer
     /**
      * After save attribute if it is not used for promo rules already check rules for containing this attribute
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function catalogAttributeSaveAfter(Varien_Event_Observer $observer)
@@ -260,7 +259,6 @@ class Mage_SalesRule_Model_Observer
      * After delete attribute check rules that contains deleted attribute
      * If rules was found they will seted to inactive and added notice to admin session
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function catalogAttributeDeleteAfter(Varien_Event_Observer $observer)
@@ -277,7 +275,6 @@ class Mage_SalesRule_Model_Observer
     /**
      * Append sales rule product attributes to select by quote item collection
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function addProductAttributes(Varien_Event_Observer $observer)

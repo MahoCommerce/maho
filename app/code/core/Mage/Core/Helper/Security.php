@@ -26,10 +26,8 @@ class Mage_Core_Helper_Security
         ];
 
     /**
-     * @param Mage_Core_Block_Abstract $block
      * @param string                   $method
      * @param string[]                 $args
-     *
      * @throws Mage_Core_Exception
      */
     public function validateAgainstBlockMethodBlacklist(Mage_Core_Block_Abstract $block, $method, array $args)

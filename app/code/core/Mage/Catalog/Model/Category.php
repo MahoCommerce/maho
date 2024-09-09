@@ -728,7 +728,6 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     /**
      * Verify category ids
      *
-     * @param array $ids
      * @return array
      */
     public function verifyIds(array $ids)

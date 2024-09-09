@@ -24,7 +24,6 @@ abstract class Mage_Sales_Model_Order_Creditmemo_Total_Abstract extends Mage_Sal
     /**
      * Collect credit memo subtotal
      *
-     * @param Mage_Sales_Model_Order_Creditmemo $creditmemo
      * @return Mage_Sales_Model_Order_Creditmemo_Total_Abstract
      */
     public function collect(Mage_Sales_Model_Order_Creditmemo $creditmemo)

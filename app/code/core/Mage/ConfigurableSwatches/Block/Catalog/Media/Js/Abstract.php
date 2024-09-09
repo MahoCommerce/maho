@@ -38,7 +38,6 @@ abstract class Mage_ConfigurableSwatches_Block_Catalog_Media_Js_Abstract extends
     /**
      * json encode image fallback array
      *
-     * @param array $imageFallback
      * @return string
      */
     protected function _getJsImageFallbackString(array $imageFallback)

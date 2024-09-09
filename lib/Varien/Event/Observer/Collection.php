@@ -61,7 +61,6 @@ class Varien_Event_Observer_Collection
     /**
      * Adds an observer to the collection
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function addObserver(Varien_Event_Observer $observer)
@@ -85,7 +84,6 @@ class Varien_Event_Observer_Collection
     /**
      * Dispatches an event to all observers in the collection
      *
-     * @param Varien_Event $event
      * @return $this
      */
     public function dispatch(Varien_Event $event)

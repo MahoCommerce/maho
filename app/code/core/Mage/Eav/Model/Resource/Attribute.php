@@ -153,7 +153,6 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
     /**
      * Return scope values for attribute and website
      *
-     * @param Mage_Eav_Model_Attribute $object
      * @return array
      */
     public function getScopeValues(Mage_Eav_Model_Attribute $object)
@@ -180,7 +179,6 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
     /**
      * Return forms in which the attribute
      *
-     * @param Mage_Core_Model_Abstract $object
      * @return array
      */
     public function getUsedInForms(Mage_Core_Model_Abstract $object)

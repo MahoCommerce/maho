@@ -27,7 +27,6 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Longtext extends Mage_Adm
      * Text will be truncated as specified in string_limit, truncate or 250 by default
      * Also it can be html-escaped and nl2br()
      *
-     * @param Varien_Object $row
      * @return string
      */
     public function render(Varien_Object $row)

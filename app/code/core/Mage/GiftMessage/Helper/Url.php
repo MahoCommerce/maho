@@ -26,7 +26,6 @@ class Mage_GiftMessage_Helper_Url extends Mage_Core_Helper_Url
     /**
      * Retrieve gift message save url
      *
-     * @param Varien_Object $item
      * @param string $type
      * @param array $params
      * @return string

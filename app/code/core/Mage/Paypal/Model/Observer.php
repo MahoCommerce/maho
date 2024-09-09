@@ -56,7 +56,6 @@ class Mage_Paypal_Model_Observer
     /**
      * Save order into registry to use it in the overloaded controller.
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function saveOrderAfterSubmit(Varien_Event_Observer $observer)
@@ -71,7 +70,6 @@ class Mage_Paypal_Model_Observer
     /**
      * Set data for response of frontend saveOrder action
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function setResponseAfterSaveOrder(Varien_Event_Observer $observer)
@@ -109,8 +107,6 @@ class Mage_Paypal_Model_Observer
 
     /**
      * Load country dependent PayPal solutions system configuration
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function loadCountryDependentSolutionsConfig(Varien_Event_Observer $observer)
     {
@@ -137,8 +133,6 @@ class Mage_Paypal_Model_Observer
 
     /**
      * Update transaction with HTML representation of txn_id
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function observeHtmlTransactionId(Varien_Event_Observer $observer)
     {

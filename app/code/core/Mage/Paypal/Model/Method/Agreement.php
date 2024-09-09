@@ -86,7 +86,6 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
     /**
      * Init billing agreement
      *
-     * @param Mage_Payment_Model_Billing_AgreementAbstract $agreement
      * @return $this
      */
     public function initBillingAgreementToken(Mage_Payment_Model_Billing_AgreementAbstract $agreement)
@@ -106,7 +105,6 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
     /**
      * Retrieve billing agreement customer details by token
      *
-     * @param Mage_Payment_Model_Billing_AgreementAbstract $agreement
      * @return array
      */
     public function getBillingAgreementTokenInfo(Mage_Payment_Model_Billing_AgreementAbstract $agreement)
@@ -127,7 +125,6 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
     /**
      * Create billing agreement by token specified in request
      *
-     * @param Mage_Payment_Model_Billing_AgreementAbstract $agreement
      * @return $this
      */
     public function placeBillingAgreement(Mage_Payment_Model_Billing_AgreementAbstract $agreement)
@@ -142,7 +139,6 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
     /**
      * Update billing agreement status
      *
-     * @param Mage_Payment_Model_Billing_AgreementAbstract $agreement
      * @return $this
      */
     public function updateBillingAgreementStatus(Mage_Payment_Model_Billing_AgreementAbstract $agreement)
@@ -167,7 +163,6 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
     /**
      * Authorize payment
      *
-     * @param Varien_Object $payment
      * @param float $amount
      * @return $this
      */
@@ -266,7 +261,6 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
     /**
      * Fetch transaction details info
      *
-     * @param Mage_Payment_Model_Info $payment
      * @param string $transactionId
      * @return array
      */
@@ -278,7 +272,6 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
     /**
      * Place an order with authorization or capture action
      *
-     * @param Mage_Sales_Model_Order_Payment $payment
      * @param float $amount
      * @return $this
      */

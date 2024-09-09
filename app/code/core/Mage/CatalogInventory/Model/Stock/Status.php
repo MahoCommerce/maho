@@ -158,7 +158,6 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
     /**
      * Change Stock Item status process
      *
-     * @param Mage_CatalogInventory_Model_Stock_Item $item
      * @return $this
      */
     public function changeItemStatus(Mage_CatalogInventory_Model_Stock_Item $item)
@@ -180,7 +179,6 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
     /**
      * Assign Stock Status to Product
      *
-     * @param Mage_Catalog_Model_Product $product
      * @param int $stockId
      * @param int $stockStatus
      * @return $this
@@ -481,8 +479,6 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
     /**
      * Add stock status to prepare index select
      *
-     * @param Varien_Db_Select $select
-     * @param Mage_Core_Model_Website $website
      * @return $this
      */
     public function addStockStatusToSelect(Varien_Db_Select $select, Mage_Core_Model_Website $website)
@@ -494,7 +490,6 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
     /**
      * Add stock status limitation to catalog product price index select object
      *
-     * @param Varien_Db_Select $select
      * @param string|Zend_Db_Expr $entityField
      * @param string|Zend_Db_Expr $websiteField
      * @return $this

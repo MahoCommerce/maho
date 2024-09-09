@@ -62,7 +62,6 @@ class Mage_Page_Block_Html_Topmenu_Renderer extends Mage_Page_Block_Html_Topmenu
 
     /**
      * Fetches template. If template has return statement, than its value is used and direct output otherwise.
-     * @param Varien_Data_Tree_Node $menuTree
      * @param string $childrenWrapClass
      * @return string
      */

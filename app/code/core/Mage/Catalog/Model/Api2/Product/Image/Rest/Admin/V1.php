@@ -25,9 +25,7 @@ class Mage_Catalog_Model_Api2_Product_Image_Rest_Admin_V1 extends Mage_Catalog_M
      * Product image add
      *
      * @throws Mage_Api2_Exception
-     * @param array $data
      * @return string|void
-     *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     protected function _create(array $data)
@@ -142,7 +140,6 @@ class Mage_Catalog_Model_Api2_Product_Image_Rest_Admin_V1 extends Mage_Catalog_M
     /**
      * Update product image
      *
-     * @param array $data
      * @throws Mage_Api2_Exception
      */
     protected function _update(array $data)

@@ -96,7 +96,6 @@ class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_
      * Overwrote for check is flat catalog category is enabled and specific save
      * category, store, store_group
      *
-     * @param Event $event
      * @return bool
      */
     public function matchEvent(Event $event)
@@ -154,8 +153,6 @@ class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_
 
     /**
      * Register data required by process in event object
-     *
-     * @param Event $event
      */
     protected function _registerEvent(Event $event)
     {
@@ -182,7 +179,6 @@ class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_
     /**
      * Register data required by catalog category process in event object
      *
-     * @param Event $event
      * @return $this
      */
     protected function _registerCatalogCategoryEvent(Event $event)
@@ -210,7 +206,6 @@ class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_
     /**
      * Register core store delete process
      *
-     * @param Event $event
      * @return $this
      */
     protected function _registerCoreStoreEvent(Event $event)
@@ -225,8 +220,6 @@ class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_
 
     /**
      * Process event
-     *
-     * @param Event $event
      */
     protected function _processEvent(Event $event)
     {

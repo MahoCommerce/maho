@@ -261,7 +261,6 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
     /**
      * Declare order model object
      *
-     * @param   Mage_Sales_Model_Order $order
      * @return  $this
      */
     public function setOrder(Mage_Sales_Model_Order $order)
@@ -648,7 +647,6 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
     /**
      * Check order payment void availability
      *
-     * @param Varien_Object $document
      * @return bool
      * @throws Mage_Core_Exception
      */
@@ -668,7 +666,6 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
      * Void payment online
      *
      * @see self::_void()
-     * @param Varien_Object $document
      * @return $this
      */
     public function void(Varien_Object $document)
@@ -1341,7 +1338,6 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
     /**
      * Import details data of specified transaction
      *
-     * @param Mage_Sales_Model_Order_Payment_Transaction $transactionTo
      * @return $this
      */
     public function importTransactionInfo(Mage_Sales_Model_Order_Payment_Transaction $transactionTo)

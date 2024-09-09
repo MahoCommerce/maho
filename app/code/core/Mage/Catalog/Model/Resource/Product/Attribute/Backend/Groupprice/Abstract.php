@@ -113,7 +113,6 @@ abstract class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Groupprice_
     /**
      * Save tier price object
      *
-     * @param Varien_Object $priceObject
      * @return $this
      */
     public function savePriceData(Varien_Object $priceObject)

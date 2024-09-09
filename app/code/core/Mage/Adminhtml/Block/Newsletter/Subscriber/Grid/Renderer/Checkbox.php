@@ -24,7 +24,6 @@ class Mage_Adminhtml_Block_Newsletter_Subscriber_Grid_Renderer_Checkbox extends 
     /**
      * Renders grid column
      *
-     * @param   Varien_Object $row
      * @return  string
      */
     public function render(Varien_Object $row)

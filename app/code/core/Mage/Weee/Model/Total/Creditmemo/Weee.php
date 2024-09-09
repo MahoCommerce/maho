@@ -20,7 +20,6 @@
 class Mage_Weee_Model_Total_Creditmemo_Weee extends Mage_Sales_Model_Order_Creditmemo_Total_Abstract
 {
     /**
-     * @param Mage_Sales_Model_Order_Creditmemo $creditmemo
      * @return $this|Mage_Sales_Model_Order_Creditmemo_Total_Abstract
      */
     public function collect(Mage_Sales_Model_Order_Creditmemo $creditmemo)

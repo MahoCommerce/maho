@@ -70,7 +70,6 @@ class Mage_Sales_Block_Billing_Agreements extends Mage_Core_Block_Template
     /**
      * Retrieve item value by key
      *
-     * @param Mage_Sales_Model_Billing_Agreement $item
      * @param string $key
      * @return string
      */

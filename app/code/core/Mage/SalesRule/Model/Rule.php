@@ -223,7 +223,6 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      * Initialize rule model data from array.
      * Set store labels if applicable.
      *
-     * @param array $data
      *
      * @return $this
      */
@@ -273,8 +272,6 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Set code generator instance for auto generated coupons
-     *
-     * @param Mage_SalesRule_Model_Coupon_CodegeneratorInterface $codeGenerator
      */
     public static function setCouponCodeGenerator(Mage_SalesRule_Model_Coupon_CodegeneratorInterface $codeGenerator)
     {

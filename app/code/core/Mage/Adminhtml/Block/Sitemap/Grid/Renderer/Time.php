@@ -24,7 +24,6 @@ class Mage_Adminhtml_Block_Sitemap_Grid_Renderer_Time extends Mage_Adminhtml_Blo
     /**
      * Prepare link to display in grid
      *
-     * @param Varien_Object $row
      * @return string
      */
     public function render(Varien_Object $row)

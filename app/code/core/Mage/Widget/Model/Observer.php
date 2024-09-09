@@ -24,7 +24,6 @@ class Mage_Widget_Model_Observer
     /**
      * Add additional settings to wysiwyg config for Widgets Insertion Plugin
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function prepareWidgetsPluginConfig(Varien_Event_Observer $observer)

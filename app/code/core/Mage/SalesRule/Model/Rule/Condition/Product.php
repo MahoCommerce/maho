@@ -23,8 +23,6 @@ class Mage_SalesRule_Model_Rule_Condition_Product extends Mage_Rule_Model_Condit
 {
     /**
      * Add special attributes
-     *
-     * @param array $attributes
      */
     protected function _addSpecialAttributes(array &$attributes)
     {
@@ -37,7 +35,6 @@ class Mage_SalesRule_Model_Rule_Condition_Product extends Mage_Rule_Model_Condit
     /**
      * Validate Product Rule Condition
      *
-     * @param Varien_Object $object
      *
      * @return bool
      */

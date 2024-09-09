@@ -121,7 +121,6 @@ class Mage_Core_Model_Resource_File_Storage_Database extends Mage_Core_Model_Res
     /**
      * Load entity by filename
      *
-     * @param  Mage_Core_Model_File_Storage_Database $object
      * @param  string $filename
      * @param  string $path
      * @return $this

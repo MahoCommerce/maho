@@ -38,7 +38,6 @@ abstract class Mage_Api2_Model_Resource_Validator
     /**
      * Set an array of errors
      *
-     * @param array $data
      * @return Mage_Api2_Model_Resource_Validator
      */
     protected function _setErrors(array $data)

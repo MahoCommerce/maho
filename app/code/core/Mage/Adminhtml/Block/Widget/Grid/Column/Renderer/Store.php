@@ -61,7 +61,6 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Store extends Mage_Adminh
     /**
      * Render row store views
      *
-     * @param Varien_Object $row
      * @return string
      */
     public function render(Varien_Object $row)
@@ -111,7 +110,6 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Store extends Mage_Adminh
     /**
      * Render row store views for export
      *
-     * @param Varien_Object $row
      * @return string
      */
     public function renderExport(Varien_Object $row)

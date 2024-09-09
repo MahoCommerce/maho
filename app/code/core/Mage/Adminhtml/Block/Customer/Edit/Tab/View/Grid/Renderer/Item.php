@@ -106,7 +106,6 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Grid_Renderer_Item extends Mag
     /**
      * Renders item product name and its configuration
      *
-     * @param Varien_Object $item
      * @return string
      */
     public function render(Varien_Object $item)

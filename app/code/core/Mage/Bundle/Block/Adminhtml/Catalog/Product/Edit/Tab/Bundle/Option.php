@@ -98,7 +98,6 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option extends
     }
 
     /**
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     public function render(Varien_Data_Form_Element_Abstract $element)
@@ -108,7 +107,6 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option extends
     }
 
     /**
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return $this
      */
     public function setElement(Varien_Data_Form_Element_Abstract $element)

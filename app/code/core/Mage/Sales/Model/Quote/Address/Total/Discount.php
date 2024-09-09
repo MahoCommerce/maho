@@ -22,7 +22,6 @@
 class Mage_Sales_Model_Quote_Address_Total_Discount extends Mage_Sales_Model_Quote_Address_Total_Abstract
 {
     /**
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return $this
      * @throws Mage_Core_Model_Store_Exception
      */
@@ -131,7 +130,6 @@ class Mage_Sales_Model_Quote_Address_Total_Discount extends Mage_Sales_Model_Quo
     }
 
     /**
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return $this
      */
     public function fetch(Mage_Sales_Model_Quote_Address $address)

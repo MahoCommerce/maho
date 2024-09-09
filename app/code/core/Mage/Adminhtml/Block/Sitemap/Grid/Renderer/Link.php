@@ -24,7 +24,6 @@ class Mage_Adminhtml_Block_Sitemap_Grid_Renderer_Link extends Mage_Adminhtml_Blo
     /**
      * Prepare link to display in grid
      *
-     * @param Varien_Object $row
      * @return string
      * @throws Mage_Core_Model_Store_Exception|Mage_Core_Exception
      */

@@ -65,7 +65,6 @@ class Mage_Api_Model_Resource_Acl extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Load roles
      *
-     * @param Mage_Api_Model_Acl $acl
      * @param array[] $rolesArr
      * @return $this
      */
@@ -96,8 +95,6 @@ class Mage_Api_Model_Resource_Acl extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Load rules
      *
-     * @param Mage_Api_Model_Acl $acl
-     * @param array $rulesArr
      * @return $this
      */
     public function loadRules(Mage_Api_Model_Acl $acl, array $rulesArr)

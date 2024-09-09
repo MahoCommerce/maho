@@ -209,7 +209,6 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media extends Mage_C
      * Get select to retrieve media gallery images
      * for given product IDs.
      *
-     * @param array $productIds
      * @param int $storeId
      * @param int $attributeId
      * @return Varien_Db_Select
@@ -264,7 +263,6 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media extends Mage_C
     /**
      * Get media gallery set for given product IDs
      *
-     * @param array $productIds
      * @param int $storeId
      * @return array
      */

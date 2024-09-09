@@ -54,7 +54,6 @@ class Mage_Newsletter_Model_Problem extends Mage_Core_Model_Abstract
     /**
      * Add Subscriber Data
      *
-     * @param Mage_Newsletter_Model_Subscriber $subscriber
      * @return $this
      */
     public function addSubscriberData(Mage_Newsletter_Model_Subscriber $subscriber)
@@ -66,7 +65,6 @@ class Mage_Newsletter_Model_Problem extends Mage_Core_Model_Abstract
     /**
      * Add Queue Data
      *
-     * @param Mage_Newsletter_Model_Queue $queue
      * @return $this
      */
     public function addQueueData(Mage_Newsletter_Model_Queue $queue)
@@ -78,7 +76,6 @@ class Mage_Newsletter_Model_Problem extends Mage_Core_Model_Abstract
     /**
      * Add Error Data
      *
-     * @param Exception $e
      * @return $this
      */
     public function addErrorData(Exception $e)

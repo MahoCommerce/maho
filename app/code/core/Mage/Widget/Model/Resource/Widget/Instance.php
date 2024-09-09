@@ -175,7 +175,6 @@ class Mage_Widget_Model_Resource_Widget_Instance extends Mage_Core_Model_Resourc
      * Perform actions before object delete.
      * Collect page ids and layout update ids and set to object for further delete
      *
-     * @param Mage_Core_Model_Abstract $object
      * @return $this
      */
     protected function _beforeDelete(Mage_Core_Model_Abstract $object)

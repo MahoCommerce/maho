@@ -350,7 +350,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid extends Ma
     /**
      * Retrieve item row configurable attribute data
      *
-     * @param Varien_Object $item
      * @return array
      */
     protected function _retrieveRowData(Varien_Object $item)

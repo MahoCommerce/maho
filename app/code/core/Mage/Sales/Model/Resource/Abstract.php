@@ -24,7 +24,6 @@ abstract class Mage_Sales_Model_Resource_Abstract extends Mage_Core_Model_Resour
     /**
      * Prepare data for save
      *
-     * @param Mage_Core_Model_Abstract $object
      * @return array
      */
     protected function _prepareDataForSave(Mage_Core_Model_Abstract $object)

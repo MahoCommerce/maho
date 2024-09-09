@@ -24,7 +24,6 @@ class Mage_Catalog_Model_Api2_Product_Category_Rest_Admin_V1 extends Mage_Catalo
     /**
      * Product category assign
      *
-     * @param array $data
      * @return string
      */
     protected function _create(array $data)

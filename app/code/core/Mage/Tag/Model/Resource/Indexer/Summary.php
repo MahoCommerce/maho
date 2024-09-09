@@ -29,7 +29,6 @@ class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resourc
     /**
      * Process tag save
      *
-     * @param Mage_Index_Model_Event $event
      * @return $this
      */
     public function tagSave(Mage_Index_Model_Event $event)
@@ -44,7 +43,6 @@ class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resourc
     /**
      * Process tag relation save
      *
-     * @param Mage_Index_Model_Event $event
      * @return $this
      */
     public function tagRelationSave(Mage_Index_Model_Event $event)
@@ -60,7 +58,6 @@ class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resourc
      * Process product save.
      * Method is responsible for index support when product was saved.
      *
-     * @param Mage_Index_Model_Event $event
      * @return $this
      */
     public function catalogProductSave(Mage_Index_Model_Event $event)
@@ -81,7 +78,6 @@ class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resourc
      * Process product delete.
      * Method is responsible for index support when product was deleted
      *
-     * @param Mage_Index_Model_Event $event
      * @return $this
      */
     public function catalogProductDelete(Mage_Index_Model_Event $event)
@@ -96,7 +92,6 @@ class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resourc
     /**
      * Process product massaction
      *
-     * @param Mage_Index_Model_Event $event
      * @return $this
      */
     public function catalogProductMassAction(Mage_Index_Model_Event $event)

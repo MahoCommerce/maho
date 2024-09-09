@@ -157,7 +157,6 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
      * Send messages to subscribers for this queue
      *
      * @param   int     $count
-     * @param   array   $additionalVariables
      * @return $this
      */
     public function sendPerSubscriber($count = 20, array $additionalVariables = [])
@@ -249,7 +248,6 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
     /**
      * Add subscribers to queue.
      *
-     * @param array $subscriberIds
      * @return $this
      */
     public function addSubscribersToQueue(array $subscriberIds)
@@ -307,7 +305,6 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
     /**
      * Setter for stores of queue.
      *
-     * @param array $storesIds
      * @return $this
      */
     public function setStores(array $storesIds)

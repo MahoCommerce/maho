@@ -67,7 +67,6 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Serialized extends Mage_Eav_Model_
     /**
      * Try to unserialize the attribute value
      *
-     * @param Varien_Object $object
      * @return $this
      */
     protected function _unserialize(Varien_Object $object)

@@ -33,7 +33,6 @@ class Mage_Adminhtml_Block_System_Config_System_Storage_Media_Synchronize extend
     /**
      * Remove scope label
      *
-     * @param  Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     public function render(Varien_Data_Form_Element_Abstract $element)
@@ -45,7 +44,6 @@ class Mage_Adminhtml_Block_System_Config_System_Storage_Media_Synchronize extend
     /**
      * Return element html
      *
-     * @param  Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element)

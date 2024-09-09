@@ -92,7 +92,6 @@ class Mage_Oauth_Block_Customer_Token_List extends Mage_Customer_Block_Account_D
     /**
      * Get link for update revoke status
      *
-     * @param Mage_Oauth_Model_Token $model
      * @return string
      */
     public function getUpdateRevokeLink(Mage_Oauth_Model_Token $model)
@@ -106,7 +105,6 @@ class Mage_Oauth_Block_Customer_Token_List extends Mage_Customer_Block_Account_D
     /**
      * Get delete link
      *
-     * @param Mage_Oauth_Model_Token $model
      * @return string
      */
     public function getDeleteLink(Mage_Oauth_Model_Token $model)

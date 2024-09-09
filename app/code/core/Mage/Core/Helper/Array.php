@@ -26,8 +26,6 @@ class Mage_Core_Helper_Array extends Mage_Core_Helper_Abstract
      * PHP function array_merge_recursive merge array
      * with overwrite num keys
      *
-     * @param array $baseArray
-     * @param array $mergeArray
      * @return array
      */
     public function mergeRecursiveWithoutOverwriteNumKeys(array $baseArray, array $mergeArray)

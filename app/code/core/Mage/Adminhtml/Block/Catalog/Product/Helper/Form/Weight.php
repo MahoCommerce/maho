@@ -23,8 +23,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Weight extends Varien_Dat
 {
     /**
      * Validation classes for weight field which corresponds to DECIMAL(12,4) SQL type
-     *
-     * @param array $attributes
      */
     public function __construct(array $attributes = [])
     {

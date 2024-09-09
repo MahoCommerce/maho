@@ -47,7 +47,6 @@ class Mage_Reports_Model_Resource_Event_Collection extends Mage_Core_Model_Resou
     /**
      * Add store ids filter
      *
-     * @param array $storeIds
      * @return $this
      */
     public function addStoreFilter(array $storeIds)

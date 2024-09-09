@@ -27,7 +27,6 @@ class Mage_Sales_Model_Quote_Address_Total_Shipping extends Mage_Sales_Model_Quo
     /**
      * Collect totals information about shipping
      *
-     * @param   Mage_Sales_Model_Quote_Address $address
      * @return  Mage_Sales_Model_Quote_Address_Total_Shipping
      */
     public function collect(Mage_Sales_Model_Quote_Address $address)
@@ -166,7 +165,6 @@ class Mage_Sales_Model_Quote_Address_Total_Shipping extends Mage_Sales_Model_Quo
     /**
      * Add shipping totals information to address object
      *
-     * @param   Mage_Sales_Model_Quote_Address $address
      * @return  Mage_Sales_Model_Quote_Address_Total_Shipping
      */
     public function fetch(Mage_Sales_Model_Quote_Address $address)

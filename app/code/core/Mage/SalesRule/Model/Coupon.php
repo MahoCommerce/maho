@@ -71,7 +71,6 @@ class Mage_SalesRule_Model_Coupon extends Mage_Core_Model_Abstract
     /**
      * Set rule instance
      *
-     * @param  Mage_SalesRule_Model_Rule $rule
      * @return $this
      */
     public function setRule(Mage_SalesRule_Model_Rule $rule)

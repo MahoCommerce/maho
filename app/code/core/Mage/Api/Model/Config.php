@@ -154,7 +154,6 @@ class Mage_Api_Model_Config extends Varien_Simplexml_Config
     /**
      * Load Acl resources from config
      *
-     * @param Mage_Api_Model_Acl $acl
      * @param Mage_Core_Model_Config_Element $resource
      * @param string $parentName
      * @return $this

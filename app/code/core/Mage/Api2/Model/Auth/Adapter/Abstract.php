@@ -26,7 +26,6 @@ abstract class Mage_Api2_Model_Auth_Adapter_Abstract
      *
      * Returns stdClass object with two properties: type and id
      *
-     * @param Mage_Api2_Model_Request $request
      * @return stdClass
      */
     abstract public function getUserParams(Mage_Api2_Model_Request $request);
@@ -34,7 +33,6 @@ abstract class Mage_Api2_Model_Auth_Adapter_Abstract
     /**
      * Check if request contains authentication info for adapter
      *
-     * @param Mage_Api2_Model_Request $request
      * @return bool
      */
     abstract public function isApplicableToRequest(Mage_Api2_Model_Request $request);

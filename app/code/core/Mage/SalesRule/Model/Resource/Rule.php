@@ -50,7 +50,6 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
     /**
      * Add customer group ids and website ids to rule data after load
      *
-     * @param Mage_Core_Model_Abstract $object
      *
      * @return $this
      */
@@ -66,7 +65,6 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
     /**
      * Prepare sales rule's discount quantity
      *
-     * @param Mage_Core_Model_Abstract|Mage_SalesRule_Model_Rule $object
      *
      * @return $this
      */

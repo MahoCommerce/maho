@@ -20,7 +20,6 @@
 class Mage_Rule_Model_Renderer_Actions implements Varien_Data_Form_Element_Renderer_Interface
 {
     /**
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     public function render(Varien_Data_Form_Element_Abstract $element)

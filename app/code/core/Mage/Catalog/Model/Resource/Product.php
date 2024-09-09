@@ -233,7 +233,6 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
     /**
      * Save product category relations
      *
-     * @param Varien_Object|Mage_Catalog_Model_Product $object
      * @return $this
      */
     protected function _saveCategories(Varien_Object $object)
@@ -610,7 +609,6 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
     /**
      * Get SKU through product identifiers
      *
-     * @param  array $productIds
      * @return array
      */
     public function getProductsSku(array $productIds)

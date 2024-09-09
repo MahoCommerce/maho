@@ -346,7 +346,6 @@ class Varien_Data_Collection implements IteratorAggregate, Countable
     /**
      * Adding item to item array
      *
-     * @param   Varien_Object $item
      * @return  $this
      */
     public function addItem(Varien_Object $item)
@@ -379,7 +378,6 @@ class Varien_Data_Collection implements IteratorAggregate, Countable
     /**
      * Retrieve item id
      *
-     * @param Varien_Object $item
      * @return mixed
      */
     protected function _getItemId(Varien_Object $item)
@@ -434,7 +432,6 @@ class Varien_Data_Collection implements IteratorAggregate, Countable
      * Returns array with results of callback for each item
      *
      * @param string|callable $callback
-     * @param array $args
      * @return array
      */
     public function walk($callback, array $args = [])

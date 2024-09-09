@@ -26,7 +26,6 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Number extends Mage_Admin
     /**
      * Returns value of the row
      *
-     * @param Varien_Object $row
      * @return mixed|string
      */
     protected function _getValue(Varien_Object $row)

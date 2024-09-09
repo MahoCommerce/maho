@@ -79,7 +79,6 @@ class Mage_Sales_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
      *
      * @param int|string $entityTypeId
      * @param string $code
-     * @param array $attr
      * @return $this
      */
     public function addAttribute($entityTypeId, $code, array $attr)

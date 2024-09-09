@@ -46,7 +46,6 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mag
     /**
      * Set webservice api controller
      *
-     * @param Mage_Api_Controller_Action $controller
      * @return $this
      */
     public function setController(Mage_Api_Controller_Action $controller)

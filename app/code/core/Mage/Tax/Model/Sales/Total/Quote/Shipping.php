@@ -71,7 +71,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Shipping extends Mage_Sales_Model_Quote_A
     /**
      * Collect totals information about shipping
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return Mage_Tax_Model_Sales_Total_Quote_Shipping
      */
     public function collect(Mage_Sales_Model_Quote_Address $address)

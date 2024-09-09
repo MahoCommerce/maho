@@ -22,7 +22,6 @@
 class Mage_Sales_Block_Order_Item_Renderer_Default extends Mage_Core_Block_Template
 {
     /**
-     * @param Varien_Object $item
      * @return $this
      */
     public function setItem(Varien_Object $item)

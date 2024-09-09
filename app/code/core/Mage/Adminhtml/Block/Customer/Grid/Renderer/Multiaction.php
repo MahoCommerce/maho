@@ -24,7 +24,6 @@ class Mage_Adminhtml_Block_Customer_Grid_Renderer_Multiaction extends Mage_Admin
     /**
      * Renders column
      *
-     * @param  Varien_Object $row
      * @return string
      */
     public function render(Varien_Object $row)
@@ -55,7 +54,6 @@ class Mage_Adminhtml_Block_Customer_Grid_Renderer_Multiaction extends Mage_Admin
      * Render single action as link html
      *
      * @param  array $action
-     * @param  Varien_Object $row
      * @return string
      */
     protected function _toLinkHtml($action, Varien_Object $row)

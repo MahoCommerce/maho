@@ -97,7 +97,6 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract extends Mage
      * );
      *
      * @param string $itemId
-     * @param array $item
      * @return Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract
      */
     public function addItem($itemId, array $item)
@@ -355,7 +354,6 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract extends Mage
     }
 
     /**
-     * @param string $itemId
      * @return bool
      */
     protected function isConfirmMassAction(string $itemId): bool

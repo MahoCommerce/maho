@@ -31,7 +31,6 @@ class Mage_Api2_Model_Router
     /**
      * Set routes
      *
-     * @param array $routes
      * @return $this
      */
     public function setRoutes(array $routes)
@@ -55,7 +54,6 @@ class Mage_Api2_Model_Router
      * Route the Request, the only responsibility of the class
      * Find route that match current URL, set parameters of the route to Request object
      *
-     * @param Mage_Api2_Model_Request $request
      * @return Mage_Api2_Model_Request
      * @throws Mage_Api2_Exception
      */
@@ -86,7 +84,6 @@ class Mage_Api2_Model_Router
     /**
      * Set API type to request as a result of one pass route
      *
-     * @param Mage_Api2_Model_Request $request
      * @param bool $trimApiTypePath OPTIONAL If TRUE - /api/:api_type part of request path info will be trimmed
      * @return $this
      * @throws Mage_Api2_Exception

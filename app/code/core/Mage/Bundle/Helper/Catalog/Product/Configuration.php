@@ -43,7 +43,6 @@ class Mage_Bundle_Helper_Catalog_Product_Configuration extends Mage_Core_Helper_
     /**
      * Obtain final price of selection in a bundle product
      *
-     * @param Mage_Catalog_Model_Product_Configuration_Item_Interface $item
      * @param Mage_Catalog_Model_Product $selectionProduct
      * @return float
      */
@@ -68,7 +67,6 @@ class Mage_Bundle_Helper_Catalog_Product_Configuration extends Mage_Core_Helper_
      * Returns array of options objects.
      * Each option object will contain array of selections objects
      *
-     * @param Mage_Catalog_Model_Product_Configuration_Item_Interface $item
      * @return array
      */
     public function getBundleOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)
@@ -131,7 +129,6 @@ class Mage_Bundle_Helper_Catalog_Product_Configuration extends Mage_Core_Helper_
     /**
      * Retrieves product options list
      *
-     * @param Mage_Catalog_Model_Product_Configuration_Item_Interface $item
      * @return array
      */
     public function getOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)

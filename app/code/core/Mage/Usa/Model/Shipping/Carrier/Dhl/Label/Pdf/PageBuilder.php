@@ -74,7 +74,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
     /**
      * Set Page
      *
-     * @param Zend_Pdf_Page $page
      * @return $this
      */
     public function setPage(Zend_Pdf_Page $page)
@@ -250,7 +249,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
     /**
      * Add Sender Info
      *
-     * @param SimpleXMLElement $sender
      * @return $this
      * @throws InvalidArgumentException
      */
@@ -292,7 +290,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
     /**
      * Draw Sender Address
      *
-     * @param SimpleXMLElement $addressLines
      * @param string $phoneNumber
      * @return float
      */
@@ -346,7 +343,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
     /**
      * Add Receive Info
      *
-     * @param SimpleXMLElement $consignee
      * @return $this
      */
     public function addReceiveInfo(SimpleXMLElement $consignee)

@@ -27,8 +27,6 @@ class Mage_Catalog_Model_Api2_Product_Website_Validator_Admin_Website extends Ma
      * getErrors() will return an array of errors that explain why the
      * validation failed.
      *
-     * @param Mage_Catalog_Model_Product $product
-     * @param array $data
      * @return bool
      */
     public function isValidDataForWebsiteAssignmentToProduct(Mage_Catalog_Model_Product $product, array $data)
@@ -163,8 +161,6 @@ class Mage_Catalog_Model_Api2_Product_Website_Validator_Admin_Website extends Ma
      * getErrors() will return an array of errors that explain why the
      * validation failed.
      *
-     * @param Mage_Core_Model_Website $website
-     * @param Mage_Catalog_Model_Product $product
      * @return bool
      */
     public function isWebsiteAssignedToProduct(Mage_Core_Model_Website $website, Mage_Catalog_Model_Product $product)

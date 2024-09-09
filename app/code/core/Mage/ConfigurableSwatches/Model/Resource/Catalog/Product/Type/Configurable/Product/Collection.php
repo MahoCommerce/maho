@@ -21,8 +21,6 @@ class Mage_ConfigurableSwatches_Model_Resource_Catalog_Product_Type_Configurable
 {
     /**
      * Filter by parent product set
-     *
-     * @param array $productIds
      */
     public function addProductSetFilter(array $productIds)
     {

@@ -114,7 +114,6 @@ class Mage_Core_Model_File_Validator_AvailablePath extends Zend_Validate_Abstrac
     /**
      * Set protected paths masks
      *
-     * @param array $paths
      * @return $this
      */
     public function setProtectedPaths(array $paths)
@@ -152,7 +151,6 @@ class Mage_Core_Model_File_Validator_AvailablePath extends Zend_Validate_Abstrac
     /**
      * Set available paths masks
      *
-     * @param array $paths
      * @return $this
      */
     public function setAvailablePaths(array $paths)

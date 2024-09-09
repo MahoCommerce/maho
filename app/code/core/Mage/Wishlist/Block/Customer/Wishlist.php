@@ -124,7 +124,6 @@ class Mage_Wishlist_Block_Customer_Wishlist extends Mage_Wishlist_Block_Abstract
      * Returns html for showing item options
      *
      * @deprecated after 1.6.2.0
-     * @param Mage_Wishlist_Model_Item $item
      * @return string
      */
     public function getDetailsHtml(Mage_Wishlist_Model_Item $item)
@@ -163,7 +162,6 @@ class Mage_Wishlist_Block_Customer_Wishlist extends Mage_Wishlist_Block_Abstract
      * Returns qty to show visually to user
      *
      * @deprecated after 1.6.2.0
-     * @param Mage_Wishlist_Model_Item $item
      * @return float
      */
     public function getAddToCartQty(Mage_Wishlist_Model_Item $item)

@@ -66,9 +66,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      * - path        default empty
      * - file_mode   default FTP_BINARY
      *
-     * @param array $args
      * @return boolean
-     *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     public function open(array $args = [])

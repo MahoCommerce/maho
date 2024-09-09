@@ -67,7 +67,6 @@ class Mage_Sales_Model_Quote_Address_Rate extends Mage_Shipping_Model_Rate_Abstr
     }
 
     /**
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return $this
      */
     public function setAddress(Mage_Sales_Model_Quote_Address $address)
@@ -85,7 +84,6 @@ class Mage_Sales_Model_Quote_Address_Rate extends Mage_Shipping_Model_Rate_Abstr
     }
 
     /**
-     * @param Mage_Shipping_Model_Rate_Result_Abstract $rate
      * @return $this
      */
     public function importShippingRate(Mage_Shipping_Model_Rate_Result_Abstract $rate)

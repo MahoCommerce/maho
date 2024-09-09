@@ -50,7 +50,6 @@ class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
     /**
      * Set item for render
      *
-     * @param Mage_Sales_Model_Quote_Item_Abstract $item
      * @return  $this
      */
     public function setItem(Mage_Sales_Model_Quote_Item_Abstract $item)

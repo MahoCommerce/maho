@@ -231,7 +231,6 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
      *  [billing_agreement_id]  => string
      *  [method_code]           => string
      *
-     * @param Mage_Sales_Model_Order_Payment $payment
      * @return $this
      */
     public function importOrderPayment(Mage_Sales_Model_Order_Payment $payment)

@@ -284,7 +284,6 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Initialize rule model data from array
      *
-     * @param array $data
      *
      * @return Mage_Rule_Model_Abstract
      */
@@ -306,7 +305,6 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
      * Set conditions and actions recursively.
      * Convert dates into Zend_Date.
      *
-     * @param array $data
      *
      * @return array
      */
@@ -347,7 +345,6 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Validate rule conditions to determine if rule can run
      *
-     * @param Varien_Object $object
      *
      * @return bool
      */
@@ -359,7 +356,6 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Validate rule data
      *
-     * @param Varien_Object $object
      *
      * @return bool|array - return true if validation passed successfully. Array with errors description otherwise
      */
@@ -485,7 +481,6 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
      *
      * @deprecated since 1.7.0.0
      *
-     * @param array $arrAttributes
      *
      * @return array
      */

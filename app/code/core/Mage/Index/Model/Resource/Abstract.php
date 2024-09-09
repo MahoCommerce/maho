@@ -150,7 +150,6 @@ abstract class Mage_Index_Model_Resource_Abstract extends Mage_Core_Model_Resour
      *
      * @param Varien_Db_Select $select
      * @param string $destTable
-     * @param array $columns
      * @param bool $readToIndex data migration direction (true - read=>index, false - index=>read)
      * @return Mage_Index_Model_Resource_Abstract
      */

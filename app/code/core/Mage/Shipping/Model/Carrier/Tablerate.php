@@ -58,7 +58,6 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
     /**
      * Collect and get rates
      *
-     * @param Mage_Shipping_Model_Rate_Request $request
      * @return false|Mage_Shipping_Model_Rate_Result
      */
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
@@ -201,7 +200,6 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
     /**
      * Get Rate
      *
-     * @param Mage_Shipping_Model_Rate_Request $request
      * @return Mage_Core_Model_Abstract
      */
     public function getRate(Mage_Shipping_Model_Rate_Request $request)

@@ -32,8 +32,6 @@ class Varien_Event extends Varien_Object
      * Constructor
      *
      * Initializes observers collection
-     *
-     * @param array $data
      */
     public function __construct(array $data = [])
     {
@@ -54,7 +52,6 @@ class Varien_Event extends Varien_Object
     /**
      * Register an observer for the event
      *
-     * @param Varien_Event_Observer $observer
      * @return Varien_Event
      */
     public function addObserver(Varien_Event_Observer $observer)

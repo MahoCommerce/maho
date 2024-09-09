@@ -60,22 +60,17 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
 
     /**
      * Register indexer required data inside event object
-     *
-     * @param   Mage_Index_Model_Event $event
      */
     abstract protected function _registerEvent(Mage_Index_Model_Event $event);
 
     /**
      * Process event based on event state data
-     *
-     * @param   Mage_Index_Model_Event $event
      */
     abstract protected function _processEvent(Mage_Index_Model_Event $event);
 
     /**
      * Register data required by process in event object
      *
-     * @param Mage_Index_Model_Event $event
      * @return Mage_Index_Model_Indexer_Abstract
      */
     public function register(Mage_Index_Model_Event $event)
@@ -89,7 +84,6 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
     /**
      * Process event
      *
-     * @param   Mage_Index_Model_Event $event
      * @return  Mage_Index_Model_Indexer_Abstract
      */
     public function processEvent(Mage_Index_Model_Event $event)
@@ -103,7 +97,6 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
     /**
      * Check if event can be matched by process
      *
-     * @param Mage_Index_Model_Event $event
      * @return bool
      */
     public function matchEvent(Mage_Index_Model_Event $event)
@@ -142,7 +135,6 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
      * Try dynamically detect and call event handler from resource model.
      * Handler name will be generated from event entity and type code
      *
-     * @param   Mage_Index_Model_Event $event
      * @return  Mage_Index_Model_Indexer_Abstract
      */
     public function callEventHandler(Mage_Index_Model_Event $event)

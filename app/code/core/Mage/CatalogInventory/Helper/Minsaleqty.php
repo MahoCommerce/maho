@@ -107,7 +107,6 @@ class Mage_CatalogInventory_Helper_Minsaleqty
     /**
      * Encode value to be used in Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract
      *
-     * @param array $value
      * @return array
      */
     protected function _encodeArrayFieldValue(array $value)
@@ -126,7 +125,6 @@ class Mage_CatalogInventory_Helper_Minsaleqty
     /**
      * Decode value from used in Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract
      *
-     * @param array $value
      * @return array
      */
     protected function _decodeArrayFieldValue(array $value)

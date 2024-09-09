@@ -106,7 +106,6 @@ class Mage_Sales_Model_Order_Address extends Mage_Customer_Model_Address_Abstrac
     /**
      * Set order
      *
-     * @param Mage_Sales_Model_Order $order
      * @return $this
      */
     public function setOrder(Mage_Sales_Model_Order $order)

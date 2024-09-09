@@ -22,7 +22,6 @@
 class Mage_Sales_Model_Order_Creditmemo_Total_Shipping extends Mage_Sales_Model_Order_Creditmemo_Total_Abstract
 {
     /**
-     * @param Mage_Sales_Model_Order_Creditmemo $creditmemo
      * @return $this
      * @throws Mage_Core_Exception
      * @throws Mage_Core_Model_Store_Exception

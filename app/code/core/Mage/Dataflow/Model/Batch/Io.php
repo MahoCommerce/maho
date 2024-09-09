@@ -62,7 +62,6 @@ class Mage_Dataflow_Model_Batch_Io
     /**
      * Init model (required)
      *
-     * @param Mage_Dataflow_Model_Batch $object
      * @return $this
      */
     public function init(Mage_Dataflow_Model_Batch $object)

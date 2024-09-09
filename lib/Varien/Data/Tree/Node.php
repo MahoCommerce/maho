@@ -110,7 +110,6 @@ class Varien_Data_Tree_Node extends Varien_Object
     /**
      * Set node tree object
      *
-     * @param   Varien_Data_Tree $tree
      * @return  $this
      */
     public function setTree(Varien_Data_Tree $tree)

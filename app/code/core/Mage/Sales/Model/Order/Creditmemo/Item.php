@@ -119,7 +119,6 @@ class Mage_Sales_Model_Order_Creditmemo_Item extends Mage_Core_Model_Abstract
     /**
      * Declare creditmemo instance
      *
-     * @param   Mage_Sales_Model_Order_Creditmemo $creditmemo
      * @return  $this
      */
     public function setCreditmemo(Mage_Sales_Model_Order_Creditmemo $creditmemo)
@@ -156,7 +155,6 @@ class Mage_Sales_Model_Order_Creditmemo_Item extends Mage_Core_Model_Abstract
     /**
      * Declare order item instance
      *
-     * @param   Mage_Sales_Model_Order_Item $item
      * @return  $this
      */
     public function setOrderItem(Mage_Sales_Model_Order_Item $item)

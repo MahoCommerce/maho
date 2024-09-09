@@ -121,7 +121,6 @@ class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstrac
     /**
      * Change store group for store
      *
-     * @param Mage_Core_Model_Abstract|Mage_Core_Model_Store_Group $model
      * @return $this
      */
     protected function _changeGroup(Mage_Core_Model_Abstract $model)

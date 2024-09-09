@@ -25,9 +25,6 @@ class Mage_Rule_Model_Resource_Rule_Condition_SqlBuilder
      */
     protected $_adapter;
 
-    /**
-     * @param array $config
-     */
     public function __construct(array $config = [])
     {
         $this->_adapter = $config['adapter'] ?? Mage::getSingleton('core/resource')->getConnection(Mage_Core_Model_Resource::DEFAULT_READ_RESOURCE);

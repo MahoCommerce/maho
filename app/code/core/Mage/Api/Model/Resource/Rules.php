@@ -28,8 +28,6 @@ class Mage_Api_Model_Resource_Rules extends Mage_Core_Model_Resource_Db_Abstract
 
     /**
      * Save rule
-     *
-     * @param Mage_Api_Model_Rules $rule
      */
     public function saveRel(Mage_Api_Model_Rules $rule)
     {

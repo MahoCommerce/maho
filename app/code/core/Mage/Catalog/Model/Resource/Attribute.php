@@ -77,7 +77,6 @@ class Mage_Catalog_Model_Resource_Attribute extends Mage_Eav_Model_Resource_Enti
     /**
      * Delete entity
      *
-     * @param Mage_Core_Model_Abstract $object
      * @return $this
      */
     public function deleteEntity(Mage_Core_Model_Abstract $object)
@@ -122,7 +121,6 @@ class Mage_Catalog_Model_Resource_Attribute extends Mage_Eav_Model_Resource_Enti
     /**
      * Defines is Attribute used by super products
      *
-     * @param Mage_Core_Model_Abstract $object
      * @param int $attributeSet
      * @return int
      */

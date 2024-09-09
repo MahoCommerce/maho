@@ -94,9 +94,6 @@ class Mage_CatalogIndex_Model_Price extends Mage_Core_Model_Abstract
         return $this->_getResource()->applyFilterToCollection($collection, $attribute, $range, $index);
     }
 
-    /**
-     * @param Mage_Catalog_Model_Resource_Product_Collection $collection
-     */
     public function addMinimalPrices(Mage_Catalog_Model_Resource_Product_Collection $collection)
     {
         $minimalPrices = $this->_getResource()->getMinimalPrices($collection->getLoadedIds());

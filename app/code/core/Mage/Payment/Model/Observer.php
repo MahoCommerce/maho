@@ -101,8 +101,6 @@ class Mage_Payment_Model_Observer
 
     /**
      * Sets current instructions for bank transfer account
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function beforeOrderPaymentSave(Varien_Event_Observer $observer)
     {

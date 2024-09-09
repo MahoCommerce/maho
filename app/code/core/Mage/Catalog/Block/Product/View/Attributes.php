@@ -38,7 +38,6 @@ class Mage_Catalog_Block_Product_View_Attributes extends Mage_Core_Block_Templat
      * $excludeAttr is optional array of attribute codes to
      * exclude them from additional data array
      *
-     * @param array $excludeAttr
      * @return array
      */
     public function getAdditionalData(array $excludeAttr = [])

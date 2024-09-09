@@ -253,8 +253,6 @@ class Magento_Profiler
 
     /**
      * Register profiler output instance to display profiling result at the end of execution
-     *
-     * @param Magento_Profiler_OutputAbstract $output
      */
     public static function registerOutput(Magento_Profiler_OutputAbstract $output)
     {

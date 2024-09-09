@@ -48,7 +48,6 @@ class Mage_Index_Model_Resource_Process extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Register process end
      *
-     * @param Mage_Index_Model_Process $process
      * @return $this
      */
     public function endProcess(Mage_Index_Model_Process $process)
@@ -64,7 +63,6 @@ class Mage_Index_Model_Resource_Process extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Register process start
      *
-     * @param Mage_Index_Model_Process $process
      * @return $this
      */
     public function startProcess(Mage_Index_Model_Process $process)
@@ -80,7 +78,6 @@ class Mage_Index_Model_Resource_Process extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Register process fail
      *
-     * @param Mage_Index_Model_Process $process
      * @return $this
      */
     public function failProcess(Mage_Index_Model_Process $process)
@@ -125,7 +122,6 @@ class Mage_Index_Model_Resource_Process extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Update process start date
      *
-     * @param Mage_Index_Model_Process $process
      * @return $this
      */
     public function updateProcessStartDate(Mage_Index_Model_Process $process)
@@ -137,7 +133,6 @@ class Mage_Index_Model_Resource_Process extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Update process end date
      *
-     * @param Mage_Index_Model_Process $process
      * @return $this
      */
     public function updateProcessEndDate(Mage_Index_Model_Process $process)

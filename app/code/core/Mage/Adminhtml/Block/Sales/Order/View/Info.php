@@ -85,7 +85,6 @@ class Mage_Adminhtml_Block_Sales_Order_View_Info extends Mage_Adminhtml_Block_Sa
      * Find sort order for account data
      * Sort Order used as array key
      *
-     * @param array $data
      * @param int $sortOrder
      * @return int
      */

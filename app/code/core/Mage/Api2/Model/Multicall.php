@@ -36,7 +36,6 @@ class Mage_Api2_Model_Multicall
      *
      * @param string $parentResourceId
      * @param string $parentResourceName
-     * @param Mage_Api2_Model_Request $parentCallRequest
      * @return Mage_Api2_Model_Response
      */
     public function call($parentResourceId, $parentResourceName, Mage_Api2_Model_Request $parentCallRequest)
@@ -231,8 +230,6 @@ class Mage_Api2_Model_Multicall
 
     /**
      * Add internal call response to global response
-     *
-     * @param Mage_Api2_Model_Response $response
      */
     protected function _aggregateResponse(Mage_Api2_Model_Response $response)
     {
