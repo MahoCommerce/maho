@@ -122,7 +122,7 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getInfoBlock(Mage_Payment_Model_Info|false $info)
     {
-        $method = $info !== false ? $info->getMethod() : $this->__('No Data Found');
+        $method = $info === false ? $this->__('No Data Found') : $info->getMethod();
         if ($this->getMethodModelClassName($method) !== null) {
             $blockType = $info->getMethodInstance()->getInfoBlockType();
         } else {

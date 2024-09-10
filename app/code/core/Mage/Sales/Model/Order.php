@@ -844,10 +844,16 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
             return false;
         }
 
-        if (!($payment = $this->getPayment())
-            || Mage::helper('payment')->getMethodModelClassName($payment->getMethod()) === null
-            || !$payment->getMethodInstance()->canEdit()
-        ) {
+        $payment = $this->getPayment();
+        if (!$payment) {
+            return false;
+        }
+
+        if (Mage::helper('payment')->getMethodModelClassName($payment->getMethod()) === null) {
+            return false;
+        }
+
+        if (!$payment->getMethodInstance()->canEdit()) {
             return false;
         }
 
