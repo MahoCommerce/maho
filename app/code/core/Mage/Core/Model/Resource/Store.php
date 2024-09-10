@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,6 +17,7 @@
  */
 class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/store', 'store_id');
@@ -31,6 +28,7 @@ class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstrac
      *
      * @return $this
      */
+    #[\Override]
     protected function _initUniqueFields()
     {
         $this->_uniqueFields = [[
@@ -46,6 +44,7 @@ class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstrac
      * @param Mage_Core_Model_Store $model
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $model)
     {
         if (!preg_match('/^[a-z]+[a-z0-9_\-]*$/', $model->getCode())) {
@@ -63,6 +62,7 @@ class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstrac
      * @param Mage_Core_Model_Store $object
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
         parent::_afterSave($object);
@@ -78,6 +78,7 @@ class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstrac
      * @param Mage_Core_Model_Store $model
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterDelete(Mage_Core_Model_Abstract $model)
     {
         $where = [
@@ -121,7 +122,6 @@ class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstrac
     /**
      * Change store group for store
      *
-     * @param Mage_Core_Model_Abstract|Mage_Core_Model_Store_Group $model
      * @return $this
      */
     protected function _changeGroup(Mage_Core_Model_Abstract $model)
@@ -150,6 +150,7 @@ class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstrac
      * @param Mage_Core_Model_Abstract $object
      * @return Varien_Db_Select
      */
+    #[\Override]
     protected function _getLoadSelect($field, $value, $object)
     {
         $select = parent::_getLoadSelect($field, $value, $object);

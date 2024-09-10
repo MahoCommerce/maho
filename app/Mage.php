@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -352,9 +348,7 @@ final class Mage
     }
 
     /**
-     * @param string $path
      * @param null|string|bool|int|Mage_Core_Model_Store $store
-     * @return float
      */
     public static function getStoreConfigAsFloat(string $path, $store = null): float
     {
@@ -362,9 +356,7 @@ final class Mage
     }
 
     /**
-     * @param string $path
      * @param null|string|bool|int|Mage_Core_Model_Store $store
-     * @return int
      */
     public static function getStoreConfigAsInt(string $path, $store = null): int
     {
@@ -460,7 +452,6 @@ final class Mage
      * and multiple observers matching event name pattern
      *
      * @param string $name
-     * @param array $data
      * @return Mage_Core_Model_App
      */
     public static function dispatchEvent($name, array $data = [])
@@ -488,7 +479,6 @@ final class Mage
      * Retrieve model object singleton
      *
      * @param   string $modelClass
-     * @param   array $arguments
      * @return  Mage_Core_Model_Abstract|false
      */
     public static function getSingleton($modelClass = '', array $arguments = [])
@@ -518,7 +508,6 @@ final class Mage
      * @param string $class
      * @param Mage_Core_Controller_Request_Http $request
      * @param Mage_Core_Controller_Response_Http $response
-     * @param array $invokeArgs
      * @return Mage_Core_Controller_Front_Action
      */
     public static function getControllerInstance($class, $request, $response, array $invokeArgs = [])
@@ -530,7 +519,6 @@ final class Mage
      * Retrieve resource vodel object singleton
      *
      * @param   string $modelClass
-     * @param   array $arguments
      * @return  object
      */
     public static function getResourceSingleton($modelClass = '', array $arguments = [])
@@ -887,8 +875,6 @@ final class Mage
 
     /**
      * Write exception to log
-     *
-     * @param Throwable $e
      */
     public static function logException(Throwable $e)
     {
@@ -923,8 +909,6 @@ final class Mage
 
     /**
      * Display exception
-     *
-     * @param Throwable $e
      */
     public static function printException(Throwable $e, $extra = '')
     {

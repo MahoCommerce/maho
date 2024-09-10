@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Widget
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -29,6 +25,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
      *
      * @return string
      */
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('widget')->__('Widget Options');
@@ -39,6 +36,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
      *
      * @return string
      */
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('widget')->__('Widget Options');
@@ -49,6 +47,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
      *
      * @return bool
      */
+    #[\Override]
     public function canShowTab()
     {
         return $this->getWidgetInstance()->isCompleteToCreate();
@@ -59,6 +58,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
      *
      * @return false
      */
+    #[\Override]
     public function isHidden()
     {
         return false;
@@ -80,6 +80,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _preparelayout()
     {
         $this->setWidgetType($this->getWidgetInstance()->getType())
@@ -93,6 +94,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
      * @param Varien_Object $parameter
      * @return Varien_Data_Form_Element_Abstract|false
      */
+    #[\Override]
     protected function _addField($parameter)
     {
         if ($parameter->getKey() != 'template') {

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Weee
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -62,9 +58,9 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
     /**
      * Collect Weee taxes amount and prepare items prices for taxation and discount
      *
-     * @param   Mage_Sales_Model_Quote_Address $address
      * @return  $this
      */
+    #[\Override]
     public function collect(Mage_Sales_Model_Quote_Address $address)
     {
         Mage_Sales_Model_Quote_Address_Total_Abstract::collect($address);
@@ -107,7 +103,6 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
     /**
      * Calculate item fixed tax and prepare information for discount and recular taxation
      *
-     * @param   Mage_Sales_Model_Quote_Address $address
      * @param   Mage_Sales_Model_Quote_Item_Abstract $item
      * @return  $this
      */
@@ -334,9 +329,9 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
     /**
      * Recalculate parent item amounts based on children results
      *
-     * @param Mage_Sales_Model_Quote_Item_Abstract $item
      * @return $this
      */
+    #[\Override]
     protected function _recalculateParent(Mage_Sales_Model_Quote_Item_Abstract $item)
     {
         return $this;
@@ -367,9 +362,9 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
     /**
      * Fetch FPT data to address object for display in totals block
      *
-     * @param   Mage_Sales_Model_Quote_Address $address
      * @return  $this
      */
+    #[\Override]
     public function fetch(Mage_Sales_Model_Quote_Address $address)
     {
         return $this;
@@ -383,6 +378,7 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
      * @param   Mage_Core_Model_Store $store
      * @return  array
      */
+    #[\Override]
     public function processConfigArray($config, $store)
     {
         return $config;
@@ -392,7 +388,6 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
      * Process item fixed taxes
      *
      * @deprecated since 1.3.2.3
-     * @param   Mage_Sales_Model_Quote_Address $address
      * @param   Mage_Sales_Model_Quote_Item_Abstract $item
      * @param   bool $updateParent
      * @return  $this
@@ -638,6 +633,7 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
      *
      * TODO: fix
      */
+    #[\Override]
     public function getLabel()
     {
         return '';

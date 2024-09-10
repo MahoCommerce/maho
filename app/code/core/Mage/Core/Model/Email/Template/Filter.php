@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -355,6 +351,7 @@ class Mage_Core_Model_Email_Template_Filter extends Varien_Filter_Template
      * @return string
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     public function varDirective($construction)
     {
         if (count($this->_templateVars) == 0) {
@@ -544,6 +541,7 @@ class Mage_Core_Model_Email_Template_Filter extends Varien_Filter_Template
      * @param string $value
      * @return string
      */
+    #[\Override]
     public function filter($value)
     {
         try {
@@ -563,6 +561,7 @@ class Mage_Core_Model_Email_Template_Filter extends Varien_Filter_Template
      * @return string
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _getVariable($value, $default = '{no_value_defined}')
     {
         Mage::register('varProcessing', true);

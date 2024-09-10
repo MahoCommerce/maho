@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -45,6 +41,7 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
      *
      * @return Mage_Catalog_Model_Product
      */
+    #[\Override]
     public function getProduct()
     {
         $product = $this->_getData('product');
@@ -93,6 +90,7 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
      * @param Mage_Catalog_Model_Product $parent
      * @return array
      */
+    #[\Override]
     public function getTierPrices($product = null, $parent = null)
     {
         if (is_null($product)) {
@@ -170,6 +168,7 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
      * @param array $additional
      * @return string
      */
+    #[\Override]
     public function getAddToCartUrl($product, $additional = [])
     {
         return $this->getAddToCartUrlCustom($product, $additional);
@@ -180,6 +179,7 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         if (!$this->getProduct() || $this->getProduct()->getCanShowPrice() === false) {
@@ -205,6 +205,7 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
      *
      * @return array
      */
+    #[\Override]
     public function getCacheTags()
     {
         return array_merge(parent::getCacheTags(), $this->getProduct()->getCacheIdTags());
@@ -231,6 +232,7 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
      * @param bool $addFormKey
      * @return string
      */
+    #[\Override]
     public function getAddToCartUrlCustom($product, $additional = [], $addFormKey = true)
     {
         /** @var Mage_Checkout_Helper_Cart $helper */

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Log
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,7 +26,6 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
 
     /**
      * Mage_Log_Model_Resource_Visitor constructor.
-     * @param array $data
      */
     public function __construct(array $data = [])
     {
@@ -38,6 +33,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
         $this->_urlLoggingCondition = $data['log_condition'] ?? Mage::helper('log');
     }
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('log/visitor', 'visitor_id');
@@ -46,9 +42,9 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
     /**
      * Prepare data for save
      *
-     * @param Mage_Core_Model_Abstract|Mage_Log_Model_Visitor $visitor
      * @return array
      */
+    #[\Override]
     protected function _prepareDataForSave(Mage_Core_Model_Abstract $visitor)
     {
         return [
@@ -85,9 +81,9 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
     /**
      * Save url info before save
      *
-     * @param Mage_Core_Model_Abstract|Mage_Log_Model_Visitor $visitor
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $visitor)
     {
         if (!$this->_urlLoggingCondition->isLogEnabled()) {
@@ -102,9 +98,9 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
     /**
      * Actions after save
      *
-     * @param Mage_Core_Model_Abstract|Mage_Log_Model_Visitor $visitor
      * @return $this
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $visitor)
     {
         if ($this->_urlLoggingCondition->isLogDisabled()) {
@@ -134,9 +130,9 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
     /**
      * Perform actions after object load
      *
-     * @param Mage_Core_Model_Abstract|Mage_Log_Model_Visitor $object
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {
         parent::_afterLoad($object);

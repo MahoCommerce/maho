@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Eav
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -74,7 +70,6 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
     /**
      * Set attribute instance
      *
-     * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @return Mage_Eav_Model_Attribute_Data_Abstract
      */
     public function setAttribute(Mage_Eav_Model_Entity_Attribute_Abstract $attribute)
@@ -125,7 +120,6 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
     /**
      * Set entity instance
      *
-     * @param Mage_Core_Model_Abstract $entity
      * @return Mage_Eav_Model_Attribute_Data_Abstract
      */
     public function setEntity(Mage_Core_Model_Abstract $entity)
@@ -150,7 +144,6 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
     /**
      * Set array of full extracted data
      *
-     * @param array $data
      * @return Mage_Eav_Model_Attribute_Data_Abstract
      */
     public function setExtractedData(array $data)
@@ -471,7 +464,6 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
     /**
      * Return Original Attribute value from Request
      *
-     * @param Zend_Controller_Request_Http $request
      * @return mixed
      */
     protected function _getRequestValue(Zend_Controller_Request_Http $request)
@@ -502,7 +494,6 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
     /**
      * Extract data from request and return value
      *
-     * @param Zend_Controller_Request_Http $request
      * @return array|string
      */
     abstract public function extractValue(Zend_Controller_Request_Http $request);

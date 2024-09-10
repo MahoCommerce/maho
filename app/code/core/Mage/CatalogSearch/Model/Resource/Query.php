@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_CatalogSearch
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,6 +21,7 @@ class Mage_CatalogSearch_Model_Resource_Query extends Mage_Core_Model_Resource_D
      * Init resource data
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalogsearch/search_query', 'query_id');
@@ -33,7 +30,6 @@ class Mage_CatalogSearch_Model_Resource_Query extends Mage_Core_Model_Resource_D
     /**
      * Custom load model by search query string
      *
-     * @param Mage_Core_Model_Abstract $object
      * @param string $value
      * @return $this
      */
@@ -68,7 +64,6 @@ class Mage_CatalogSearch_Model_Resource_Query extends Mage_Core_Model_Resource_D
     /**
      * Custom load model only by query text (skip synonym for)
      *
-     * @param Mage_Core_Model_Abstract $object
      * @param string $value
      * @return $this
      */
@@ -93,6 +88,7 @@ class Mage_CatalogSearch_Model_Resource_Query extends Mage_Core_Model_Resource_D
      * @param null|string $field
      * @inheritDoc
      */
+    #[\Override]
     public function load(Mage_Core_Model_Abstract $object, $value, $field = null)
     {
         if (is_numeric($value)) {
@@ -104,9 +100,9 @@ class Mage_CatalogSearch_Model_Resource_Query extends Mage_Core_Model_Resource_D
     }
 
     /**
-     * @param Mage_Core_Model_Abstract $object
      * @return $this
      */
+    #[\Override]
     public function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         $object->setUpdatedAt($this->formatDate(Mage::getModel('core/date')->gmtTimestamp()));

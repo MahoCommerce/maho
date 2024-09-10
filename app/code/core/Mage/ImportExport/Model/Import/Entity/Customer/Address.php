@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_ImportExport
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -121,9 +117,6 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
      */
     protected $_regions = [];
 
-    /**
-     * @param Mage_ImportExport_Model_Import_Entity_Customer $customer
-     */
     public function __construct(Mage_ImportExport_Model_Import_Entity_Customer $customer)
     {
         parent::__construct();
@@ -143,6 +136,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
      *
      * @return bool
      */
+    #[\Override]
     protected function _importData()
     {
         /** @var Mage_Customer_Model_Customer $customer */
@@ -322,7 +316,6 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
     /**
      * Check address data availability in row data.
      *
-     * @param array $rowData
      * @return bool
      */
     protected function _isRowWithAddress(array $rowData)
@@ -338,7 +331,6 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
     /**
      * Save customer address attributes.
      *
-     * @param array $attributesData
      * @return $this
      */
     protected function _saveAddressAttributes(array $attributesData)
@@ -389,7 +381,6 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
     /**
      * Save customer default addresses.
      *
-     * @param array $defaults
      * @return $this
      */
     protected function _saveCustomerDefaults(array $defaults)
@@ -440,6 +431,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
      *
      * @return string
      */
+    #[\Override]
     public function getEntityTypeCode()
     {
         return 'customer_address';
@@ -451,6 +443,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
      * @param string $attrCode
      * @return bool
      */
+    #[\Override]
     public function isAttributeParticular($attrCode)
     {
         return isset($this->_attributes[$attrCode]) || in_array($attrCode, $this->_particularAttributes);
@@ -459,10 +452,10 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
     /**
      * Validate data row.
      *
-     * @param array $rowData
      * @param int $rowNum
      * @return bool
      */
+    #[\Override]
     public function validateRow(array $rowData, $rowNum)
     {
         $rowIsValid = true;

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_SalesRule
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -162,6 +158,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     /**
      * Set resource model and Id field name
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -184,6 +181,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterLoad()
     {
         $this->setCouponCode($this->getPrimaryCoupon()->getCode());
@@ -198,6 +196,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterSave()
     {
         $couponCode = trim((string)$this->getCouponCode());
@@ -223,10 +222,10 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      * Initialize rule model data from array.
      * Set store labels if applicable.
      *
-     * @param array $data
      *
      * @return $this
      */
+    #[\Override]
     public function loadPost(array $data)
     {
         parent::loadPost($data);
@@ -243,6 +242,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return Mage_SalesRule_Model_Rule_Condition_Combine
      */
+    #[\Override]
     public function getConditionsInstance()
     {
         return Mage::getModel('salesrule/rule_condition_combine');
@@ -253,6 +253,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return Mage_SalesRule_Model_Rule_Condition_Product_Combine
      */
+    #[\Override]
     public function getActionsInstance()
     {
         return Mage::getModel('salesrule/rule_condition_product_combine');
@@ -273,8 +274,6 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Set code generator instance for auto generated coupons
-     *
-     * @param Mage_SalesRule_Model_Coupon_CodegeneratorInterface $codeGenerator
      */
     public static function setCouponCodeGenerator(Mage_SalesRule_Model_Coupon_CodegeneratorInterface $codeGenerator)
     {
@@ -514,6 +513,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function toString($format = '')
     {
         return '';
@@ -535,6 +535,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return array
      */
+    #[\Override]
     public function toArray(array $arrAttributes = [])
     {
         return parent::toArray($arrAttributes);

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -144,7 +140,6 @@ abstract class Mage_Core_Model_Resource_Abstract
     /**
      * Serialize specified field in an object
      *
-     * @param Varien_Object $object
      * @param string $field
      * @param mixed $defaultValue
      * @param bool $unsetEmpty
@@ -172,7 +167,6 @@ abstract class Mage_Core_Model_Resource_Abstract
     /**
      * Unserialize Varien_Object field in an object
      *
-     * @param Varien_Object $object
      * @param string $field
      * @param mixed $defaultValue
      */
@@ -189,7 +183,6 @@ abstract class Mage_Core_Model_Resource_Abstract
     /**
      * Prepare data for passed table
      *
-     * @param Varien_Object $object
      * @param string $table
      * @return array
      */

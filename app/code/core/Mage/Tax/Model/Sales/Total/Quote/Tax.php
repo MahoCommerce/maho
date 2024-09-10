@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Tax
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -98,7 +94,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     /**
      * Round the total amounts in address
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return $this
      */
     protected function _roundTotals(Mage_Sales_Model_Quote_Address $address)
@@ -142,9 +137,9 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     /**
      * Collect tax totals for quote address
      *
-     * @param   Mage_Sales_Model_Quote_Address $address
      * @return  $this
      */
+    #[\Override]
     public function collect(Mage_Sales_Model_Quote_Address $address)
     {
         parent::collect($address);
@@ -273,7 +268,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
 
     /**
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      * @param float $rate
      * @param array $appliedRates
      * @param string $taxId
@@ -368,7 +362,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     /**
      * Tax calculation for shipping price
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      * @param Varien_Object $taxRateRequest
      * @return $this
      */
@@ -398,7 +391,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     /**
      * Calculate address tax amount based on one unit price and tax amount
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      * @param Varien_Object $taxRateRequest
      * @return $this
      */
@@ -676,7 +668,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     /**
      * Calculate address total tax based on row total
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      * @param Varien_Object $taxRateRequest
      * @return $this
      */
@@ -950,7 +941,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     /**
      * Calculate address total tax based on address subtotal
      *
-     * @param   Mage_Sales_Model_Quote_Address $address
      * @param   Varien_Object $taxRateRequest
      * @return  $this
      */
@@ -1495,7 +1485,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     /**
      * Recalculate parent item amounts base on children data
      *
-     * @param  Mage_Sales_Model_Quote_Item_Abstract $item
      * @return $this
      */
     protected function _recalculateParent(Mage_Sales_Model_Quote_Item_Abstract $item)
@@ -1514,7 +1503,6 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     /**
      * Collect applied tax rates information on address level
      *
-     * @param   Mage_Sales_Model_Quote_Address $address
      * @param   array $applied
      * @param   float $amount
      * @param   float $baseAmount
@@ -1569,9 +1557,9 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     /**
      * Add tax totals information to address object
      *
-     * @param   Mage_Sales_Model_Quote_Address $address
      * @return  $this
      */
+    #[\Override]
     public function fetch(Mage_Sales_Model_Quote_Address $address)
     {
         $applied = $address->getAppliedTaxes();
@@ -1639,6 +1627,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
      * @param   Mage_Core_Model_Store $store
      * @return  array
      */
+    #[\Override]
     public function processConfigArray($config, $store)
     {
         $calculationSequence = $this->_helper->getCalculationSequence($store);
@@ -1658,6 +1647,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
      *
      * @return string
      */
+    #[\Override]
     public function getLabel()
     {
         return Mage::helper('tax')->__('Tax');

@@ -20,12 +20,14 @@ class CronRun extends BaseMahoCommand
 {
     protected bool $isShellAvailable;
 
+    #[\Override]
     protected function configure(): void
     {
         $this->addArgument('mode', InputArgument::REQUIRED, '"default" or "always"');
         $this->setShellAvailable();
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initMaho();

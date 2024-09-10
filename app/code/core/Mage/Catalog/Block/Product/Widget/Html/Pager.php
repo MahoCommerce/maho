@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -71,6 +67,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
      *
      * @return int
      */
+    #[\Override]
     public function getCurrentPage()
     {
         if ($this->_currentPage === null) {
@@ -91,6 +88,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
      *
      * @return int
      */
+    #[\Override]
     public function getLimit()
     {
         if ($this->_limit > 0) {
@@ -111,6 +109,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
      * @param   Mage_Core_Model_Resource_Db_Collection_Abstract $collection
      * @return  Mage_Catalog_Block_Product_Widget_Html_Pager
      */
+    #[\Override]
     public function setCollection($collection)
     {
         $this->_collection = $collection;
@@ -131,6 +130,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
      *
      * @return int
      */
+    #[\Override]
     public function getFirstNum()
     {
         return $this->getLimit() * ($this->getCurrentPage() - 1) + 1;
@@ -141,6 +141,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
      *
      * @return int
      */
+    #[\Override]
     public function getLastNum()
     {
         $collection = $this->getCollection();
@@ -154,6 +155,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
      *
      * @return int
      */
+    #[\Override]
     public function getTotalNum()
     {
         return $this->getCollectionSize();
@@ -164,6 +166,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
      *
      * @return float|int
      */
+    #[\Override]
     public function getLastPageNum()
     {
         if ($this->_lastPage === null) {
@@ -180,6 +183,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
      *
      * @return bool
      */
+    #[\Override]
     public function isFirstPage()
     {
         return $this->getCurrentPage() == 1;
@@ -190,6 +194,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
      *
      * @return bool
      */
+    #[\Override]
     public function isLastPage()
     {
         return $this->getCurrentPage() >= $this->getLastPageNum();
@@ -200,6 +205,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
      *
      * @return array
      */
+    #[\Override]
     public function getPages()
     {
         $pages = [];
@@ -227,6 +233,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
      *
      * @return string
      */
+    #[\Override]
     public function getPreviousPageUrl()
     {
         return $this->getPageUrl($this->getCurrentPage() - 1);
@@ -237,6 +244,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
      *
      * @return string
      */
+    #[\Override]
     public function getNextPageUrl()
     {
         return $this->getPageUrl($this->getCurrentPage() + 1);
@@ -247,6 +255,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
      *
      * @return string
      */
+    #[\Override]
     public function getLastPageUrl()
     {
         return $this->getPageUrl($this->getLastPageNum());
@@ -257,6 +266,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
      *
      * @return $this
      */
+    #[\Override]
     protected function _initFrame()
     {
         if (!$this->isFrameInitialized()) {

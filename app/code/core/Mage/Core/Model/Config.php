@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -441,8 +437,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
     /**
      * Load environment variables and override config
-     *
-     * @return self
      */
     public function loadEnv(): Mage_Core_Model_Config
     {
@@ -519,6 +513,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *
      * @return Zend_Cache_Core
      */
+    #[\Override]
     public function getCache()
     {
         return Mage::app()->getCache();
@@ -574,6 +569,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @param   array $tags cache tags
      * @return  Mage_Core_Model_Config
      */
+    #[\Override]
     public function saveCache($tags = [])
     {
         if (!Mage::app()->useCache('config')) {
@@ -662,6 +658,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @param   string $id
      * @return  string
      */
+    #[\Override]
     protected function _loadCache($id)
     {
         return Mage::app()->loadCache($id);
@@ -676,6 +673,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @param   false|int $lifetime
      * @return  Mage_Core_Model_App
      */
+    #[\Override]
     protected function _saveCache($data, $id, $tags = [], $lifetime = false)
     {
         return Mage::app()->saveCache($data, $id, $tags, $lifetime);
@@ -687,6 +685,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @param   string $id
      * @return  Mage_Core_Model_App
      */
+    #[\Override]
     protected function _removeCache($id)
     {
         return Mage::app()->removeCache($id);
@@ -697,6 +696,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *
      * {@inheritDoc}
      */
+    #[\Override]
     public function removeCache()
     {
         Mage::app()->cleanCache([self::CACHE_TAG]);
@@ -759,6 +759,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @inheritDoc
      * @return Mage_Core_Model_Config_Element
      */
+    #[\Override]
     public function getNode($path = null, $scope = '', $scopeCode = null)
     {
         if ($scope !== '') {
@@ -801,6 +802,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @param bool $overwrite
      * @return Varien_Simplexml_Config
      */
+    #[\Override]
     public function setNode($path, $value, $overwrite = true)
     {
         if ($this->_useCache && ($path !== null)) {
@@ -1803,7 +1805,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Makes all events to lower-case
      *
      * @param string $area
-     * @param Varien_Simplexml_Config $mergeModel
      */
     protected function _makeEventsLowerCase($area, Varien_Simplexml_Config $mergeModel)
     {
@@ -1829,7 +1830,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     /**
      * Checks is event name has upper-case letters
      *
-     * @param Mage_Core_Model_Config_Element $event
      * @return bool
      */
     protected function _isNodeNameHasUpperCase(Mage_Core_Model_Config_Element $event)

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Varien
  * @package    Varien_Data
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -151,9 +147,9 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     /**
      * Get collection item identifier
      *
-     * @param Varien_Object $item
      * @return mixed
      */
+    #[\Override]
     protected function _getItemId(Varien_Object $item)
     {
         if ($field = $this->getIdFieldName()) {
@@ -205,6 +201,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
      *
      * @return int
      */
+    #[\Override]
     public function getSize()
     {
         if (is_null($this->_totalRecords)) {
@@ -301,6 +298,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
      * @param   string $direction
      * @return  $this
      */
+    #[\Override]
     public function setOrder($field, $direction = self::SORT_ORDER_DESC)
     {
         return $this->_setOrder($field, $direction);
@@ -362,6 +360,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
      *
      * @return  $this
      */
+    #[\Override]
     protected function _renderFilters()
     {
         if ($this->_isFiltersRendered) {
@@ -537,6 +536,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
      *
      * @return  $this
      */
+    #[\Override]
     protected function _renderOrders()
     {
         if (!$this->_isOrdersRendered) {
@@ -554,6 +554,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
      *
      * @return  $this
      */
+    #[\Override]
     protected function _renderLimit()
     {
         if ($this->_pageSize) {
@@ -570,6 +571,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
      *
      * @return  $this
      */
+    #[\Override]
     public function distinct($flag)
     {
         $this->_select->distinct($flag);
@@ -594,6 +596,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
      *
      * @return  $this
      */
+    #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {
         if ($this->isLoaded()) {
@@ -727,6 +730,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
      * @param bool $logQuery
      * @return Varien_Data_Collection|Varien_Data_Collection_Db
      */
+    #[\Override]
     public function loadData($printQuery = false, $logQuery = false)
     {
         return $this->load($printQuery, $logQuery);

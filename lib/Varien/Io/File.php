@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Varien
  * @package    Varien_Io
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2016-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2016-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -227,11 +223,9 @@ class Varien_Io_File extends Varien_Io_Abstract
     /**
      * Format line as CSV and write to file pointer
      *
-     * @param array $row
      * @param string $delimiter
      * @param string $enclosure
      * @return bool|int
-     *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     public function streamWriteCsv(array $row, $delimiter = ',', $enclosure = '"')
@@ -305,9 +299,9 @@ class Varien_Io_File extends Varien_Io_Abstract
      * Possible arguments:
      * - path     default current path
      *
-     * @param array $args
      * @return boolean
      */
+    #[\Override]
     public function open(array $args = [])
     {
         if (!empty($args['path']) && $this->_allowCreateFolders) {
@@ -326,6 +320,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      * @access public
      * @return $this
      */
+    #[\Override]
     public function setAllowCreateFolders($flag)
     {
         $this->_allowCreateFolders = $flag;
@@ -337,6 +332,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @return boolean
      */
+    #[\Override]
     public function close()
     {
         return true;
@@ -352,6 +348,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function mkdir($dir, $mode = 0777, $recursive = true)
     {
         if ($this->_cwd) {
@@ -376,6 +373,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function rmdir($dir, $recursive = false)
     {
         if ($this->_cwd) {
@@ -422,6 +420,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function pwd()
     {
         return $this->_cwd;
@@ -436,6 +435,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function cd($dir)
     {
         if (is_dir($dir)) {
@@ -459,6 +459,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function read($filename, $dest = null)
     {
         if (!is_null($dest)) {
@@ -485,6 +486,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      * @return int|boolean
      * @throws Exception
      */
+    #[\Override]
     public function write($filename, $src, $mode = null)
     {
         if (str_contains($filename, chr(0))
@@ -697,6 +699,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function rm($filename)
     {
         if ($this->_cwd) {
@@ -718,6 +721,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function mv($src, $dest)
     {
         if ($this->_cwd) {
@@ -760,6 +764,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function chmod($filename, $mode)
     {
         if ($this->_cwd) {
@@ -786,6 +791,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      * @access public
      * @return array
      */
+    #[\Override]
     public function ls($grep = null)
     {
         $ignoredDirectories = ['.', '..'];
@@ -929,6 +935,7 @@ class Varien_Io_File extends Varien_Io_Abstract
         return $owner['name'] . ' / ' . $groupinfo;
     }
 
+    #[\Override]
     public function dirsep()
     {
         return DIRECTORY_SEPARATOR;

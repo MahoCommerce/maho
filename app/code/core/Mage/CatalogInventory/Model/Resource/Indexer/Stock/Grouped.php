@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_CatalogInventory
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -27,6 +23,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Grouped extends Mage_Ca
      * @param int|array $entityIds
      * @return $this
      */
+    #[\Override]
     public function reindexEntity($entityIds)
     {
         $this->_updateIndex($entityIds);
@@ -40,6 +37,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Grouped extends Mage_Ca
      * @param bool $usePrimaryTable use primary or temporary index table
      * @return Varien_Db_Select
      */
+    #[\Override]
     protected function _getStockStatusSelect($entityIds = null, $usePrimaryTable = false)
     {
         $adapter  = $this->_getWriteAdapter();

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Wishlist
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -91,8 +87,6 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Set current customer
-     *
-     * @param Mage_Customer_Model_Customer $customer
      */
     public function setCustomer(Mage_Customer_Model_Customer $customer)
     {
@@ -329,7 +323,6 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
      * Retrieve url for adding product to wishlist with params
      *
      * @param Mage_Catalog_Model_Product|Mage_Wishlist_Model_Item $item
-     * @param array $params
      *
      * @return  string|bool
      */
@@ -554,7 +547,6 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
      * Retrieve url for adding product to wishlist with params with or without Form Key
      *
      * @param Mage_Catalog_Model_Product|Mage_Wishlist_Model_Item $item
-     * @param array $params
      * @param bool $addFormKey
      * @return string|bool
      */

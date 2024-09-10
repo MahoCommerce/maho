@@ -15,11 +15,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class Serve extends BaseMahoCommand
 {
+    #[\Override]
     protected function configure(): void
     {
         $this->addArgument('port', InputArgument::OPTIONAL, 'Default is 8000', 8000);
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $host = '127.0.0.1';

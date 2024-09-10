@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Magento
  * @package    Magento_Db
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -34,9 +30,7 @@ class Magento_Db_Adapter_Pdo_Mysql extends Varien_Db_Adapter_Pdo_Mysql
     /**
      * Batched insert of specified select
      *
-     * @param Varien_Db_Select $select
      * @param string $table
-     * @param array $fields
      * @param bool $mode
      * @param int $step
      * @return int
@@ -68,7 +62,6 @@ class Magento_Db_Adapter_Pdo_Mysql extends Varien_Db_Adapter_Pdo_Mysql
     /**
      * Retrieve bunch of queries for specified select splitted by specified step
      *
-     * @param Varien_Db_Select $select
      * @param string $entityIdField
      * @param int $step
      * @return array
@@ -100,6 +93,7 @@ class Magento_Db_Adapter_Pdo_Mysql extends Varien_Db_Adapter_Pdo_Mysql
      * @param string|float $value   Raw string
      * @return string|float         Quoted string
      */
+    #[\Override]
     protected function _quote($value)
     {
         if (is_float($value)) {
@@ -123,6 +117,7 @@ class Magento_Db_Adapter_Pdo_Mysql extends Varien_Db_Adapter_Pdo_Mysql
      * @param null|string|int $type  OPTIONAL The type of the given value e.g. Zend_Db::INT_TYPE, "INT"
      * @return string An SQL-safe quoted value (or string of separated values).
      */
+    #[\Override]
     public function quote($value, $type = null)
     {
         $this->_connect();

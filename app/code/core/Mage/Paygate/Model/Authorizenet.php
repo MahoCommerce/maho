@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Paygate
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -189,6 +185,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param string $currencyCode
      * @return bool
      */
+    #[\Override]
     public function canUseForCurrency($currencyCode)
     {
         if (!in_array($currencyCode, $this->getAcceptedCurrencyCodes())) {
@@ -217,6 +214,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      *
      * @return bool
      */
+    #[\Override]
     public function canCapture()
     {
         if ($this->_isGatewayActionsLocked($this->getInfoInstance())) {
@@ -243,6 +241,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      *
      * @return bool
      */
+    #[\Override]
     public function canRefund()
     {
         if ($this->_isGatewayActionsLocked($this->getInfoInstance())
@@ -265,9 +264,9 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Check void availability
      *
-     * @param   Varien_Object $payment
      * @return  bool
      */
+    #[\Override]
     public function canVoid(Varien_Object $payment)
     {
         if ($this->_isGatewayActionsLocked($this->getInfoInstance())) {
@@ -316,6 +315,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param  float $amount
      * @return $this
      */
+    #[\Override]
     public function authorize(Varien_Object $payment, $amount)
     {
         if ($amount <= 0) {
@@ -342,6 +342,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param float $amount
      * @return $this
      */
+    #[\Override]
     public function capture(Varien_Object $payment, $amount)
     {
         if ($amount <= 0) {
@@ -365,6 +366,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param  Mage_Payment_Model_Info $payment
      * @return $this
      */
+    #[\Override]
     public function void(Varien_Object $payment)
     {
         $cardsStorage = $this->getCardsStorage($payment);
@@ -399,6 +401,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param  Mage_Payment_Model_Info $payment
      * @return $this
      */
+    #[\Override]
     public function cancel(Varien_Object $payment)
     {
         return $this->void($payment);
@@ -407,11 +410,11 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Refund the amount with transaction id
      *
-     * @param Mage_Payment_Model_Info|Varien_Object $payment
      * @param float $requestedAmount
      * @return $this
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     public function refund(Varien_Object $payment, $requestedAmount)
     {
         $cardsStorage = $this->getCardsStorage($payment);
@@ -460,8 +463,6 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
 
     /**
      * Cancel partial authorizations and flush current split_tender_id record
-     *
-     * @param Mage_Payment_Model_Info $payment
      */
     public function cancelPartialAuthorization(Mage_Payment_Model_Info $payment)
     {
@@ -1033,6 +1034,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return Mage_Payment_Model_Method_Abstract
      */
+    #[\Override]
     public function processInvoice($invoice, $payment)
     {
         $invoice->setTransactionId(1);
@@ -1045,6 +1047,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return Mage_Payment_Model_Method_Abstract
      */
+    #[\Override]
     public function processCreditmemo($creditmemo, $payment)
     {
         $creditmemo->setTransactionId(1);
@@ -1056,10 +1059,10 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      *
      * Update transaction info if there is one placing transaction only
      *
-     * @param Mage_Payment_Model_Info $payment
      * @param string $transactionId
      * @return array
      */
+    #[\Override]
     public function fetchTransactionInfo(Mage_Payment_Model_Info $payment, $transactionId)
     {
         $data = parent::fetchTransactionInfo($payment, $transactionId);
@@ -1395,7 +1398,6 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * It sets card`s data into additional information of payment model
      *
      * @param Mage_Paygate_Model_Authorizenet_Result $response
-     * @param Mage_Sales_Model_Order_Payment $payment
      * @return Varien_Object
      */
     protected function _registerCard(Varien_Object $response, Mage_Sales_Model_Order_Payment $payment)
@@ -1446,11 +1448,8 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Add payment transaction
      *
-     * @param Mage_Sales_Model_Order_Payment $payment
      * @param string $transactionId
      * @param string $transactionType
-     * @param array $transactionDetails
-     * @param array $transactionAdditionalInfo
      * @return null|Mage_Sales_Model_Order_Payment_Transaction
      */
     protected function _addTransaction(
@@ -1470,7 +1469,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
             $payment->setTransactionAdditionalInfo($key, $value);
         }
         $transaction = $payment->addTransaction($transactionType, null, false, $message);
-        foreach ($transactionDetails as $key => $value) {
+        foreach (array_keys($transactionDetails) as $key) {
             $payment->unsetData($key);
         }
         $payment->unsLastTransId();
@@ -1538,7 +1537,6 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Generate checksum for object
      *
-     * @param Varien_Object $object
      * @param array $checkSumDataKeys
      * @return string
      */

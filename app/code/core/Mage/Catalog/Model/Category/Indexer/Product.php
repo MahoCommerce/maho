@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -71,6 +67,7 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
     /**
      * Initialize resource
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/category_indexer_product');
@@ -81,6 +78,7 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
      *
      * @return string
      */
+    #[\Override]
     public function getName()
     {
         return Mage::helper('catalog')->__('Category Products');
@@ -91,6 +89,7 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
      *
      * @return string
      */
+    #[\Override]
     public function getDescription()
     {
         return Mage::helper('catalog')->__('Indexed category/products association');
@@ -100,9 +99,9 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
      * Check if event can be matched by process.
      * Overwrote for specific config save, store and store groups save matching
      *
-     * @param Mage_Index_Model_Event $event
      * @return bool
      */
+    #[\Override]
     public function matchEvent(Mage_Index_Model_Event $event)
     {
         $data      = $event->getNewData();
@@ -140,9 +139,9 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
      * Register data required by process in event object
      * Check if category ids was changed
      *
-     * @param Mage_Index_Model_Event $event
      * @return Mage_Catalog_Model_Category_Indexer_Product
      */
+    #[\Override]
     protected function _registerEvent(Mage_Index_Model_Event $event)
     {
         $event->addNewData(self::EVENT_MATCH_RESULT_KEY, true);
@@ -171,8 +170,6 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
 
     /**
      * Register event data during product save process
-     *
-     * @param Mage_Index_Model_Event $event
      */
     protected function _registerProductEvent(Mage_Index_Model_Event $event)
     {
@@ -218,8 +215,6 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
 
     /**
      * Register event data during category save process
-     *
-     * @param Mage_Index_Model_Event $event
      */
     protected function _registerCategoryEvent(Mage_Index_Model_Event $event)
     {
@@ -240,9 +235,8 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
 
     /**
      * Process event data and save to index
-     *
-     * @param Mage_Index_Model_Event $event
      */
+    #[\Override]
     protected function _processEvent(Mage_Index_Model_Event $event)
     {
         $data = $event->getNewData();

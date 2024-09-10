@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_SalesRule
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -59,7 +55,6 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
 
     /**
      * Retrieve a product instance and initialize if needed
-     * @param Varien_Object $object
      *
      * @return Mage_Catalog_Model_Product
      */
@@ -87,6 +82,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
      * Retrieves unary operators of the attribute assignment state
      * @return array
      */
+    #[\Override]
     public function getOperatorSelectOptions()
     {
         if (is_null($this->_cachedOperatorSelectOptionsCache)) {
@@ -106,6 +102,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
      * Retrieve an operator name
      * @return string
      */
+    #[\Override]
     public function getOperatorName()
     {
         return $this->getOperator() && array_key_exists($this->getOperator(), $this->_operatorSelectOptionsHash)
@@ -115,10 +112,10 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
 
     /**
      * Validate a product, check whether the attribute is assigned to the product
-     * @param Varien_Object $object
      *
      * @return bool
      */
+    #[\Override]
     public function validate(Varien_Object $object)
     {
         $product    = $this->_getProduct($object);
@@ -134,6 +131,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
      * Generate a condition html
      * @return string
      */
+    #[\Override]
     public function asHtml()
     {
         return $this->_getHelper()->__(

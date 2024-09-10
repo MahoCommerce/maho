@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -197,7 +193,6 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
      * Join virtual grid columns to select
      *
      * @param string $mainTableAlias
-     * @param Zend_Db_Select $select
      * @param array $columnsToSelect
      * @return $this
      */
@@ -267,7 +262,6 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
     /**
      * Before save object attribute
      *
-     * @param Mage_Core_Model_Abstract $object
      * @param string $attribute
      * @return $this
      */
@@ -286,7 +280,6 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
     /**
      * After save object attribute
      *
-     * @param Mage_Core_Model_Abstract $object
      * @param string $attribute
      * @return $this
      */
@@ -305,7 +298,6 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
     /**
      * Perform actions after object save
      *
-     * @param Mage_Core_Model_Abstract $object
      * @param string|string[]|Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @return $this
      */
@@ -349,9 +341,9 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
     /**
      * Perform actions before object save
      *
-     * @param Mage_Core_Model_Abstract $object
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if ($this->_useIncrementId && !$object->getIncrementId()) {
@@ -400,9 +392,9 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
     /**
      * Save object data
      *
-     * @param Mage_Core_Model_Abstract $object
      * @return $this
      */
+    #[\Override]
     public function save(Mage_Core_Model_Abstract $object)
     {
         if (!$object->getForceObjectSave()) {

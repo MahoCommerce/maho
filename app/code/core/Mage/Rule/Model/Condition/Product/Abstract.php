@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Rule
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -61,6 +57,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      *
      * @return array
      */
+    #[\Override]
     public function getDefaultOperatorInputByType()
     {
         if ($this->_defaultOperatorInputByType === null) {
@@ -97,6 +94,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      *
      * @return string
      */
+    #[\Override]
     public function prepareConditionSql()
     {
         $alias     = 'cpf';
@@ -116,8 +114,6 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
 
     /**
      * Rule condition SQL builder setter
-     *
-     * @param Mage_Rule_Model_Resource_Rule_Condition_SqlBuilder $ruleHelper
      */
     public function setRuleResourceHelper(Mage_Rule_Model_Resource_Rule_Condition_SqlBuilder $ruleHelper)
     {
@@ -157,8 +153,6 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
 
     /**
      * Add special attributes
-     *
-     * @param array $attributes
      */
     protected function _addSpecialAttributes(array &$attributes)
     {
@@ -171,6 +165,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      *
      * @return $this
      */
+    #[\Override]
     public function loadAttributeOptions()
     {
         $productAttributes = Mage::getResourceSingleton('catalog/product')
@@ -272,6 +267,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      *
      * @return array
      */
+    #[\Override]
     public function getValueSelectOptions()
     {
         $this->_prepareValueOptions();
@@ -309,6 +305,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      *
      * @return Varien_Data_Form_Element_Abstract
      */
+    #[\Override]
     public function getAttributeElement()
     {
         $element = parent::getAttributeElement();
@@ -344,6 +341,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      *
      * @return string
      */
+    #[\Override]
     public function getInputType()
     {
         if ($this->getAttribute() === 'attribute_set_id') {
@@ -378,6 +376,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      *
      * @return string
      */
+    #[\Override]
     public function getValueElementType()
     {
         if ($this->getAttribute() === 'attribute_set_id') {
@@ -407,6 +406,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      *
      * @return Varien_Data_Form_Element_Abstract
      */
+    #[\Override]
     public function getValueElement()
     {
         $element = parent::getValueElement();
@@ -468,6 +468,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      *
      * @inheritDoc
      */
+    #[\Override]
     public function loadArray($arr)
     {
         $this->setAttribute($arr['attribute'] ?? false);
@@ -501,9 +502,9 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     /**
      * Validate product attribute value for condition
      *
-     * @param Varien_Object $object
      * @return bool
      */
+    #[\Override]
     public function validate(Varien_Object $object)
     {
         $attrCode = $this->getAttribute();
@@ -568,6 +569,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      *
      * @return string
      */
+    #[\Override]
     public function getOperatorForValidate()
     {
         return $this->correctOperator($this->getOperator(), $this->getInputType());

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -218,6 +214,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      */
     protected $_errorInfos = null;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/quote_item');
@@ -230,6 +227,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _initOldFieldsMap()
     {
         return $this;
@@ -240,6 +238,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();
@@ -253,7 +252,6 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     /**
      * Declare quote model object
      *
-     * @param   Mage_Sales_Model_Quote $quote
      * @return  $this
      */
     public function setQuote(Mage_Sales_Model_Quote $quote)
@@ -270,6 +268,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @return Mage_Sales_Model_Quote
      */
+    #[\Override]
     public function getQuote()
     {
         if (is_null($this->_quote)) {
@@ -575,9 +574,9 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     /**
      * Convert Quote Item to array
      *
-     * @param array $arrAttributes
      * @return array
      */
+    #[\Override]
     public function toArray(array $arrAttributes = [])
     {
         $data = parent::toArray($arrAttributes);
@@ -658,7 +657,6 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      * Exemple: cataloginventory decimal qty validation may change qty to int,
      * so need to change quote item qty option value.
      *
-     * @param Varien_Object|Mage_Sales_Model_Quote_Item_Option $option
      * @param int|float|null $value
      * @return $this
      */
@@ -714,6 +712,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      * @param   string $code
      * @return  Mage_Sales_Model_Quote_Item_Option|null
      */
+    #[\Override]
     public function getOptionByCode($code)
     {
         if (isset($this->_optionsByCode[$code]) && !$this->_optionsByCode[$code]->isDeleted()) {
@@ -728,6 +727,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @return bool
      */
+    #[\Override]
     protected function _hasModelChanged()
     {
         if (!$this->hasDataChanges()) {
@@ -763,6 +763,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      * Save model plus its options
      * Ensures saving options in case when resource model was not changed
      */
+    #[\Override]
     public function save()
     {
         $hasDataChanges = $this->hasDataChanges();
@@ -782,6 +783,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave()
     {
         $this->_saveItemOptions();
@@ -793,6 +795,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @return $this
      */
+    #[\Override]
     public function __clone()
     {
         parent::__clone();

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -34,6 +30,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
      * Initialize main table and the primary key field name
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/payment_transaction', 'transaction_id');
@@ -42,10 +39,10 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
     /**
      * Unserialize Varien_Object field in an object
      *
-     * @param Varien_Object $object
      * @param string $field
      * @param mixed $defaultValue
      */
+    #[\Override]
     protected function _unserializeField(Varien_Object $object, $field, $defaultValue = null)
     {
         $value = $object->getData($field);
@@ -66,8 +63,6 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
     /**
      * Update transactions in database using provided transaction as parent for them
      * have to repeat the business logic to avoid accidental injection of wrong transactions
-     *
-     * @param Mage_Sales_Model_Order_Payment_Transaction $transaction
      */
     public function injectAsParent(Mage_Sales_Model_Order_Payment_Transaction $transaction)
     {
@@ -106,7 +101,6 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
     /**
      * Load the transaction object by specified txn_id
      *
-     * @param Mage_Sales_Model_Order_Payment_Transaction $transaction
      * @param int $orderId
      * @param int $paymentId
      * @param string $txnId
@@ -148,6 +142,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
      * @inheritDoc
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $transaction)
     {
         $parentTxnId = $transaction->getData('parent_txn_id');

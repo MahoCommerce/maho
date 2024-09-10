@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Varien
  * @package    Varien_Data
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -52,6 +48,7 @@ class Varien_Data_Tree_Node_Collection implements ArrayAccess, IteratorAggregate
     /**
     * Implementation of IteratorAggregate::getIterator()
     */
+    #[\Override]
     public function getIterator(): \Traversable
     {
         return new ArrayIterator($this->_nodes);
@@ -62,6 +59,7 @@ class Varien_Data_Tree_Node_Collection implements ArrayAccess, IteratorAggregate
      * @param string $key
      * @param string $value
      */
+    #[\Override]
     public function offsetSet($key, $value): void
     {
         $this->_nodes[$key] = $value;
@@ -73,6 +71,7 @@ class Varien_Data_Tree_Node_Collection implements ArrayAccess, IteratorAggregate
      * @return mixed|Varien_Data_Tree_Node
      */
     #[\ReturnTypeWillChange]
+    #[\Override]
     public function offsetGet($key)
     {
         return $this->_nodes[$key];
@@ -82,6 +81,7 @@ class Varien_Data_Tree_Node_Collection implements ArrayAccess, IteratorAggregate
      * Implementation of ArrayAccess:offsetUnset()
      * @param string $key
      */
+    #[\Override]
     public function offsetUnset($key): void
     {
         unset($this->_nodes[$key]);
@@ -90,8 +90,8 @@ class Varien_Data_Tree_Node_Collection implements ArrayAccess, IteratorAggregate
     /**
      * Implementation of ArrayAccess:offsetExists()
      * @param string $key
-     * @return bool
      */
+    #[\Override]
     public function offsetExists($key): bool
     {
         return isset($this->_nodes[$key]);
@@ -99,7 +99,6 @@ class Varien_Data_Tree_Node_Collection implements ArrayAccess, IteratorAggregate
 
     /**
      * Adds a node to this node
-     * @param Varien_Data_Tree_Node $node
      * @return Varien_Data_Tree_Node
      */
     public function add(Varien_Data_Tree_Node $node)
@@ -131,9 +130,8 @@ class Varien_Data_Tree_Node_Collection implements ArrayAccess, IteratorAggregate
 
     /**
      * Implementation of Countable:count()
-     *
-     * @return int
      */
+    #[\Override]
     public function count(): int
     {
         return count($this->_nodes);

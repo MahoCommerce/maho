@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Bundle
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -42,6 +38,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      */
     protected $_customerGroups;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('bundle/price_index', 'entity_id');
@@ -316,7 +313,6 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      * Retrieve salable product statuses
      *
      * @param int|array $products
-     * @param Mage_Core_Model_Website $website
      * @return array
      * @throws Mage_Core_Exception
      */
@@ -421,7 +417,6 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      * Retrieve product(s) price data
      *
      * @param int|array $products
-     * @param Mage_Core_Model_Website $website
      * @return array
      * @throws Zend_Db_Adapter_Exception|Zend_Db_Statement_Exception
      */
@@ -454,9 +449,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
     /**
      * Add attribute data to select
      *
-     * @param Varien_Db_Select $select
      * @param string $attributeCode
-     * @param Mage_Core_Model_Website $website
      * @return $this
      * @throws Mage_Core_Exception
      */
@@ -508,7 +501,6 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      * Retrieve fixed bundle base price (with special price and rules)
      *
      * @param int $productId
-     * @param array $priceData
      * @param Mage_Core_Model_Website $website
      * @param Mage_Customer_Model_Group $customerGroup
      * @return float
@@ -533,7 +525,6 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      * Retrieve custom options for product
      *
      * @param int $productId
-     * @param Mage_Core_Model_Website $website
      * @return array
      * @throws Zend_Db_Adapter_Exception|Zend_Db_Statement_Exception
      */
@@ -677,7 +668,6 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      * Calculate custom options price
      * Return array with indexes(0 -> min_price, 1 -> max_price)
      *
-     * @param array $options
      * @param float $basePrice
      * @param float $minPrice
      * @param float $maxPrice
@@ -719,8 +709,6 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      * Calculate minimal and maximal price for bundle selections
      * Return array with prices (0 -> min_price, 1 -> max_price)
      *
-     * @param array $options
-     * @param array $salableStatus
      * @param int $productId
      * @param int $priceType
      * @param float $basePrice
@@ -816,8 +804,6 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      * Apply special price
      *
      * @param float $finalPrice
-     * @param array $priceData
-     * @param Mage_Core_Model_Website $website
      * @return float
      */
     public function _calculateSpecialPrice($finalPrice, array $priceData, Mage_Core_Model_Website $website)

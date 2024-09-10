@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Checkout
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -32,7 +28,6 @@ class Mage_Checkout_Block_Total_Nominal extends Mage_Checkout_Block_Total_Defaul
     /**
      * Getter for a quote item name
      *
-     * @param Mage_Sales_Model_Quote_Item_Abstract $quoteItem
      * @return string
      */
     public function getItemName(Mage_Sales_Model_Quote_Item_Abstract $quoteItem)
@@ -43,7 +38,6 @@ class Mage_Checkout_Block_Total_Nominal extends Mage_Checkout_Block_Total_Defaul
     /**
      * Getter for a quote item row total
      *
-     * @param Mage_Sales_Model_Quote_Item_Abstract $quoteItem
      * @return float
      */
     public function getItemRowTotal(Mage_Sales_Model_Quote_Item_Abstract $quoteItem)
@@ -54,7 +48,6 @@ class Mage_Checkout_Block_Total_Nominal extends Mage_Checkout_Block_Total_Defaul
     /**
      * Getter for nominal total item details
      *
-     * @param Mage_Sales_Model_Quote_Item_Abstract $quoteItem
      * @return array
      */
     public function getTotalItemDetails(Mage_Sales_Model_Quote_Item_Abstract $quoteItem)
@@ -65,7 +58,6 @@ class Mage_Checkout_Block_Total_Nominal extends Mage_Checkout_Block_Total_Defaul
     /**
      * Getter for details row label
      *
-     * @param Varien_Object $row
      * @return string
      */
     public function getItemDetailsRowLabel(Varien_Object $row)
@@ -76,7 +68,6 @@ class Mage_Checkout_Block_Total_Nominal extends Mage_Checkout_Block_Total_Defaul
     /**
      * Getter for details row amount
      *
-     * @param Varien_Object $row
      * @return string
      */
     public function getItemDetailsRowAmount(Varien_Object $row)
@@ -87,7 +78,6 @@ class Mage_Checkout_Block_Total_Nominal extends Mage_Checkout_Block_Total_Defaul
     /**
      * Getter for details row compounded state
      *
-     * @param Varien_Object $row
      * @return bool
      */
     public function getItemDetailsRowIsCompounded(Varien_Object $row)
@@ -111,6 +101,7 @@ class Mage_Checkout_Block_Total_Nominal extends Mage_Checkout_Block_Total_Defaul
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         $total = $this->getTotal();

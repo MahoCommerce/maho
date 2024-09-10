@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -75,7 +71,6 @@ class Mage_Sales_Model_Observer
     /**
      * Set expire quotes additional fields to filter
      *
-     * @param array $fields
      * @return $this
      */
     public function setExpireQuotesAdditionalFilterFields(array $fields)
@@ -88,7 +83,6 @@ class Mage_Sales_Model_Observer
      * When deleting product, substract it from all quotes quantities
      *
      * @throws Exception
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function substractQtyFromQuotes(Varien_Event_Observer $observer)
@@ -102,7 +96,6 @@ class Mage_Sales_Model_Observer
     /**
      * When applying a catalog price rule, make related quotes recollect on demand
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function markQuotesRecollectOnCatalogRules(Varien_Event_Observer $observer)
@@ -132,7 +125,6 @@ class Mage_Sales_Model_Observer
     /**
      * Catalog Product After Save (change status process)
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function catalogProductSaveAfter(Varien_Event_Observer $observer)
@@ -151,7 +143,6 @@ class Mage_Sales_Model_Observer
     /**
      * Catalog Mass Status update process
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function catalogProductStatusUpdate(Varien_Event_Observer $observer)
@@ -298,7 +289,6 @@ class Mage_Sales_Model_Observer
     /**
      * Set new customer group to all his quotes
      *
-     * @param  Varien_Event_Observer $observer
      * @return $this
      */
     public function customerSaveAfter(Varien_Event_Observer $observer)
@@ -335,8 +325,6 @@ class Mage_Sales_Model_Observer
 
     /**
      * Set Quote information about MSRP price enabled
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function setQuoteCanApplyMsrp(Varien_Event_Observer $observer)
     {
@@ -358,8 +346,6 @@ class Mage_Sales_Model_Observer
 
     /**
      * Add VAT validation request date and identifier to order comments
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function addVatRequestParamsOrderComment(Varien_Event_Observer $observer)
     {
@@ -407,7 +393,6 @@ class Mage_Sales_Model_Observer
     /**
      * Retrieve customer address (default billing or default shipping) ID on which tax calculation must be based
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @param Mage_Core_Model_Store|string|int|null $store
      * @return int|string
      */
@@ -427,8 +412,6 @@ class Mage_Sales_Model_Observer
 
     /**
      * Handle customer VAT number if needed on collect_totals_before event of quote address
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function changeQuoteCustomerGroupId(Varien_Event_Observer $observer)
     {

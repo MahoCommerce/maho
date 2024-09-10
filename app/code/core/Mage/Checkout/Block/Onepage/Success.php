@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Checkout
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -29,11 +25,6 @@
  */
 class Mage_Checkout_Block_Onepage_Success extends Mage_Core_Block_Template
 {
-    /**
-     * @deprecated after 1.4.0.1
-     */
-    private $_order;
-
     /**
      * Check order print availability
      *
@@ -68,7 +59,6 @@ class Mage_Checkout_Block_Onepage_Success extends Mage_Core_Block_Template
     /**
      * Getter for recurring profile view page
      *
-     * @param Varien_Object|Mage_Sales_Model_Recurring_Profile $profile
      * @return string
      */
     public function getProfileUrl(Varien_Object $profile)
@@ -79,6 +69,7 @@ class Mage_Checkout_Block_Onepage_Success extends Mage_Core_Block_Template
     /**
      * Initialize data and prepare it for output
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         $this->_prepareLastOrder();

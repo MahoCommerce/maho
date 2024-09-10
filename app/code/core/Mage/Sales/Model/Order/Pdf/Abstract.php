@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -103,7 +99,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      * @param  string $string
      * @param  int $x
      * @param  int $columnWidth
-     * @param  Zend_Pdf_Resource_Font $font
      * @param  int $fontSize
      * @param  int $padding
      * @return int
@@ -120,7 +115,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      * @param  string $string
      * @param  int $x
      * @param  int $columnWidth
-     * @param  Zend_Pdf_Resource_Font $font
      * @param  int $fontSize
      * @return int
      */
@@ -499,7 +493,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     /**
      * Insert title and number for concrete document type
      *
-     * @param  Zend_Pdf_Page $page
      * @param  string $text
      */
     public function insertDocumentNumber(Zend_Pdf_Page $page, $text)
@@ -727,9 +720,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     /**
      * Render item
      *
-     * @param Varien_Object $item
-     * @param Zend_Pdf_Page $page
-     * @param Mage_Sales_Model_Order $order
      * @param Mage_Sales_Model_Order_Pdf_Items_Abstract $renderer
      *
      * @return Mage_Sales_Model_Order_Pdf_Abstract
@@ -749,9 +739,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     /**
      * Draw Item process
      *
-     * @param  Varien_Object $item
-     * @param  Zend_Pdf_Page $page
-     * @param  Mage_Sales_Model_Order $order
      * @return Zend_Pdf_Page
      */
     protected function _drawItem(Varien_Object $item, Zend_Pdf_Page $page, Mage_Sales_Model_Order $order)
@@ -823,7 +810,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     /**
      * Set PDF object
      *
-     * @param  Zend_Pdf $pdf
      * @return Mage_Sales_Model_Order_Pdf_Abstract
      */
     protected function _setPdf(Zend_Pdf $pdf)
@@ -850,7 +836,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
     /**
      * Create new page and assign to PDF object
      *
-     * @param  array $settings
      * @return Zend_Pdf_Page
      */
     public function newPage(array $settings = [])
@@ -882,9 +867,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
      * align        string; text align (also see feed parametr), optional left, right
      * height       int;line spacing (default 10)
      *
-     * @param  Zend_Pdf_Page $page
-     * @param  array $draw
-     * @param  array $pageSettings
      * @throws Mage_Core_Exception
      * @return Zend_Pdf_Page
      */

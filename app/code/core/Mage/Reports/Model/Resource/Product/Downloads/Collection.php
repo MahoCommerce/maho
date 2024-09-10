@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Reports
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -76,6 +72,7 @@ class Mage_Reports_Model_Resource_Product_Downloads_Collection extends Mage_Cata
      * @param string $dir
      * @return $this
      */
+    #[\Override]
     public function setOrder($attribute, $dir = self::SORT_ORDER_DESC)
     {
         if ($attribute == 'purchases' || $attribute == 'downloads' || $attribute == 'link_title') {
@@ -93,6 +90,7 @@ class Mage_Reports_Model_Resource_Product_Downloads_Collection extends Mage_Cata
      * @param string $condition
      * @return $this
      */
+    #[\Override]
     public function addFieldToFilter($field, $condition = null)
     {
         if ($field == 'link_title') {

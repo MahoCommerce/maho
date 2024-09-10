@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Eav
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -90,6 +86,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      *
      * @return string
      */
+    #[\Override]
     public function getType()
     {
         return $this->getAttribute()->getBackendType();
@@ -100,6 +97,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      *
      * @return bool
      */
+    #[\Override]
     public function isStatic()
     {
         return $this->getAttribute()->isStatic();
@@ -110,6 +108,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      *
      * @return string
      */
+    #[\Override]
     public function getTable()
     {
         if (empty($this->_table)) {
@@ -132,6 +131,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      *
      * @return string
      */
+    #[\Override]
     public function getEntityIdField()
     {
         if (empty($this->_entityIdField)) {
@@ -151,6 +151,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @param int $valueId
      * @return $this
      */
+    #[\Override]
     public function setValueId($valueId)
     {
         $this->_valueId = $valueId;
@@ -164,6 +165,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @param int $valueId
      * @return $this
      */
+    #[\Override]
     public function setEntityValueId($entity, $valueId)
     {
         if (!$entity || !$entity->getId()) {
@@ -179,6 +181,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      *
      * @return int
      */
+    #[\Override]
     public function getValueId()
     {
         return $this->_valueId;
@@ -190,6 +193,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @param Varien_Object $entity
      * @return int
      */
+    #[\Override]
     public function getEntityValueId($entity)
     {
         if (!$entity || !$entity->getId() || !array_key_exists($entity->getId(), $this->_valueIds)) {
@@ -267,6 +271,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @param Varien_Object $object
      * @return $this
      */
+    #[\Override]
     public function afterLoad($object)
     {
         return $this;
@@ -278,6 +283,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @param Varien_Object $object
      * @return $this
      */
+    #[\Override]
     public function beforeSave($object)
     {
         $attrCode = $this->getAttribute()->getAttributeCode();
@@ -294,6 +300,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @param Varien_Object $object
      * @return $this
      */
+    #[\Override]
     public function afterSave($object)
     {
         return $this;
@@ -305,6 +312,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @param Varien_Object $object
      * @return $this
      */
+    #[\Override]
     public function beforeDelete($object)
     {
         return $this;
@@ -315,6 +323,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
      * @param Varien_Object $object
      * @return $this
      */
+    #[\Override]
     public function afterDelete($object)
     {
         return $this;

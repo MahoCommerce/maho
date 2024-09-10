@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Wishlist
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -43,6 +39,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
      *
      * @return $this|void
      */
+    #[\Override]
     public function preDispatch()
     {
         parent::preDispatch();
@@ -77,6 +74,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
      * @param int $wishlistId
      * @return Mage_Wishlist_Model_Wishlist|false
      */
+    #[\Override]
     protected function _getWishlist($wishlistId = null)
     {
         $wishlist = Mage::registry('wishlist');

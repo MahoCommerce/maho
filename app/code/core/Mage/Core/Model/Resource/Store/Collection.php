@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -33,6 +29,7 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
      *  Define resource model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->setFlag('load_default_store', false);
@@ -125,6 +122,7 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
      *
      * @return array
      */
+    #[\Override]
     public function toOptionArray()
     {
         return $this->_toOptionArray('store_id', 'name');
@@ -135,6 +133,7 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
      *
      * @return array
      */
+    #[\Override]
     public function toOptionHash()
     {
         return $this->_toOptionHash('store_id', 'name');
@@ -143,6 +142,7 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {
         if (!$this->getLoadDefault()) {
@@ -160,7 +160,6 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
     /**
      * Add root category id filter to store collection
      *
-     * @param array $categories
      * @return $this
      */
     public function loadByCategoryIds(array $categories)

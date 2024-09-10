@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_ImportExport
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -111,6 +107,7 @@ abstract class Mage_ImportExport_Model_Import_Adapter_Abstract implements Seekab
      * @return array
      */
     #[\ReturnTypeWillChange]
+    #[\Override]
     public function current()
     {
         return array_combine(
@@ -137,6 +134,7 @@ abstract class Mage_ImportExport_Model_Import_Adapter_Abstract implements Seekab
      * @return int More than 0 integer on success, integer 0 on failure.
      */
     #[\ReturnTypeWillChange]
+    #[\Override]
     public function key()
     {
         return $this->_currentKey;
@@ -148,6 +146,7 @@ abstract class Mage_ImportExport_Model_Import_Adapter_Abstract implements Seekab
      * @param int $position The position to seek to.
      */
     #[\ReturnTypeWillChange]
+    #[\Override]
     public function seek($position)
     {
         Mage::throwException(Mage::helper('importexport')->__('Not implemented yet'));
@@ -159,6 +158,7 @@ abstract class Mage_ImportExport_Model_Import_Adapter_Abstract implements Seekab
      * @return bool Returns true on success or false on failure.
      */
     #[\ReturnTypeWillChange]
+    #[\Override]
     public function valid()
     {
         return !empty($this->_currentRow);

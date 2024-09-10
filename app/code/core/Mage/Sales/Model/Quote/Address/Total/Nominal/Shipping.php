@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -45,9 +41,9 @@ class Mage_Sales_Model_Quote_Address_Total_Nominal_Shipping extends Mage_Sales_M
     /**
      * Collect shipping amount individually for each item
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return $this
      */
+    #[\Override]
     public function collect(Mage_Sales_Model_Quote_Address $address)
     {
         $items = $address->getAllNominalItems();
@@ -79,9 +75,9 @@ class Mage_Sales_Model_Quote_Address_Total_Nominal_Shipping extends Mage_Sales_M
     /**
      * Don't fetch anything
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return array
      */
+    #[\Override]
     public function fetch(Mage_Sales_Model_Quote_Address $address)
     {
         return Mage_Sales_Model_Quote_Address_Total_Abstract::fetch($address);
@@ -90,9 +86,9 @@ class Mage_Sales_Model_Quote_Address_Total_Nominal_Shipping extends Mage_Sales_M
     /**
      * Get nominal items only or indeed get all items, depending on current logic requirements
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return array
      */
+    #[\Override]
     protected function _getAddressItems(Mage_Sales_Model_Quote_Address $address)
     {
         if ($this->_shouldGetAllItems) {

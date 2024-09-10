@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Reports
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -70,7 +66,6 @@ class Mage_Reports_Model_Event_Observer
     /**
      * Customer login action
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function customerLogin(Varien_Event_Observer $observer)
@@ -97,7 +92,6 @@ class Mage_Reports_Model_Event_Observer
     /**
      * Customer logout processing
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function customerLogout(Varien_Event_Observer $observer)
@@ -117,7 +111,6 @@ class Mage_Reports_Model_Event_Observer
     /**
      * View Catalog Product action
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function catalogProductView(Varien_Event_Observer $observer)
@@ -139,7 +132,6 @@ class Mage_Reports_Model_Event_Observer
     /**
      * Send Product link to friends action
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function sendfriendProduct(Varien_Event_Observer $observer)
@@ -159,7 +151,6 @@ class Mage_Reports_Model_Event_Observer
      *
      * Reset count of compared products cache
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function catalogProductCompareRemoveProduct(Varien_Event_Observer $observer)
@@ -176,7 +167,6 @@ class Mage_Reports_Model_Event_Observer
      *
      * Reset count of compared products cache
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function catalogProductCompareClear(Varien_Event_Observer $observer)
@@ -193,7 +183,6 @@ class Mage_Reports_Model_Event_Observer
      *
      * Reset count of compared products cache
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function catalogProductCompareAddProduct(Varien_Event_Observer $observer)
@@ -215,7 +204,6 @@ class Mage_Reports_Model_Event_Observer
     /**
      * Add product to shopping cart action
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function checkoutCartAddProduct(Varien_Event_Observer $observer)
@@ -235,7 +223,6 @@ class Mage_Reports_Model_Event_Observer
     /**
      * Add product to wishlist action
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function wishlistAddProduct(Varien_Event_Observer $observer)
@@ -253,7 +240,6 @@ class Mage_Reports_Model_Event_Observer
     /**
      * Share customer wishlist action
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function wishlistShare(Varien_Event_Observer $observer)
@@ -273,7 +259,6 @@ class Mage_Reports_Model_Event_Observer
      *
      * @see Global Log Clean Settings
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function eventClean(Varien_Event_Observer $observer)

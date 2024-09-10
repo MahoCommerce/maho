@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Cms
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -49,6 +45,7 @@ class Mage_Cms_Block_Page extends Mage_Core_Block_Abstract
      * @inheritDoc
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $page = $this->getPage();
@@ -112,6 +109,7 @@ class Mage_Cms_Block_Page extends Mage_Core_Block_Abstract
      * @throws Mage_Core_Model_Store_Exception
      * @throws Exception
      */
+    #[\Override]
     protected function _toHtml()
     {
         /** @var Mage_Cms_Helper_Data $helper */

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_GiftMessage
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -48,7 +44,6 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
      * Retrieve old stule edit button html for editing of giftmessage in popup
      *
      * @param string $type
-     * @param Varien_Object $entity
      * @return string
      */
     public function getButton($type, Varien_Object $entity)
@@ -68,7 +63,6 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
      * Retrieve inline giftmessage edit form for specified entity
      *
      * @param string $type
-     * @param Varien_Object $entity
      * @param bool $dontDisplayContainer
      * @return string
      */
@@ -91,7 +85,6 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
      * Check availability of giftmessages for specified entity.
      *
      * @param string $type
-     * @param Varien_Object $entity
      * @param Mage_Core_Model_Store|integer $store
      * @return bool|int
      */
@@ -170,7 +163,6 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
      * Alias for isMessagesAvailable(...)
      *
      * @param string $type
-     * @param Varien_Object $entity
      * @param Mage_Core_Model_Store|integer $store
      * @return bool|int
      */
@@ -182,7 +174,6 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
     /**
      * Retrieve escaped and preformatted gift message text for specified entity
      *
-     * @param Varien_Object $entity
      * @return string|null
      */
     public function getEscapedGiftMessage(Varien_Object $entity)
@@ -197,7 +188,6 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
     /**
      * Retrieve gift message for entity. If message not exists return null
      *
-     * @param Varien_Object $entity
      * @return Mage_GiftMessage_Model_Message
      */
     public function getGiftMessageForEntity(Varien_Object $entity)

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Api
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -154,7 +150,6 @@ class Mage_Api_Model_Config extends Varien_Simplexml_Config
     /**
      * Load Acl resources from config
      *
-     * @param Mage_Api_Model_Acl $acl
      * @param Mage_Core_Model_Config_Element $resource
      * @param string $parentName
      * @return $this
@@ -252,6 +247,7 @@ class Mage_Api_Model_Config extends Varien_Simplexml_Config
      *
      * @return Zend_Cache_Core
      */
+    #[\Override]
     public function getCache()
     {
         return Mage::app()->getCache();
@@ -261,6 +257,7 @@ class Mage_Api_Model_Config extends Varien_Simplexml_Config
      * @param string $id
      * @return bool|mixed
      */
+    #[\Override]
     protected function _loadCache($id)
     {
         return Mage::app()->loadCache($id);
@@ -273,6 +270,7 @@ class Mage_Api_Model_Config extends Varien_Simplexml_Config
      * @param bool $lifetime
      * @return bool|Mage_Core_Model_App
      */
+    #[\Override]
     protected function _saveCache($data, $id, $tags = [], $lifetime = false)
     {
         return Mage::app()->saveCache($data, $id, $tags, $lifetime);
@@ -282,6 +280,7 @@ class Mage_Api_Model_Config extends Varien_Simplexml_Config
      * @param string $id
      * @return Mage_Core_Model_App
      */
+    #[\Override]
     protected function _removeCache($id)
     {
         return Mage::app()->removeCache($id);

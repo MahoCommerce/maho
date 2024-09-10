@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -45,6 +41,7 @@ class Mage_Catalog_Model_Resource_Product_Compare_Item_Collection extends Mage_C
     /**
      * Initialize resources
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_compare_item', 'catalog/product');
@@ -189,7 +186,6 @@ class Mage_Catalog_Model_Resource_Product_Compare_Item_Collection extends Mage_C
     /**
      * Retrieve attribute ids by set ids
      *
-     * @param array $setIds
      * @return array
      */
     protected function _getAttributeIdsBySetIds(array $setIds)
@@ -290,6 +286,7 @@ class Mage_Catalog_Model_Resource_Product_Compare_Item_Collection extends Mage_C
      *
      * @return $this
      */
+    #[\Override]
     public function clear()
     {
         Mage::getResourceSingleton('catalog/product_compare_item')
@@ -305,6 +302,7 @@ class Mage_Catalog_Model_Resource_Product_Compare_Item_Collection extends Mage_C
      *
      * @return bool
      */
+    #[\Override]
     public function isEnabledFlat()
     {
         if (!Mage::helper('catalog/product_compare')->getAllowUsedFlat()) {

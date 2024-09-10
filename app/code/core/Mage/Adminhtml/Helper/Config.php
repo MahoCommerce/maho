@@ -3,15 +3,11 @@
 declare(strict_types=1);
 
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -29,7 +25,6 @@ class Mage_Adminhtml_Helper_Config extends Mage_Core_Helper_Abstract
      * Return information array of input types
      *
      * @param string $inputType
-     * @return array
      */
     public function getInputTypes(?string $inputType = null): array
     {
@@ -49,9 +44,6 @@ class Mage_Adminhtml_Helper_Config extends Mage_Core_Helper_Abstract
 
     /**
      * Return default backend model by input type
-     *
-     * @param string $inputType
-     * @return string|null
      */
     public function getBackendModelByInputType(string $inputType): ?string
     {
@@ -64,9 +56,6 @@ class Mage_Adminhtml_Helper_Config extends Mage_Core_Helper_Abstract
 
     /**
      * Get field backend model by field config node
-     *
-     * @param Varien_Simplexml_Element $fieldConfig
-     * @return string|null
      */
     public function getBackendModelByFieldConfig(Varien_Simplexml_Element $fieldConfig): ?string
     {

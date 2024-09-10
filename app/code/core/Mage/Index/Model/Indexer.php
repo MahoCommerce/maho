@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Index
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -114,7 +110,6 @@ class Mage_Index_Model_Indexer
     /**
      * Function returns array of indexer's process with order by sort_order field
      *
-     * @param array $codes
      * @return array
      */
     public function getProcessesCollectionByCodes(array $codes)
@@ -230,7 +225,6 @@ class Mage_Index_Model_Indexer
     /**
      * Index one event by all processes
      *
-     * @param   Mage_Index_Model_Event $event
      * @return  Mage_Index_Model_Indexer
      */
     public function indexEvent(Mage_Index_Model_Event $event)
@@ -242,7 +236,6 @@ class Mage_Index_Model_Indexer
     /**
      * Register event in each indexing process process
      *
-     * @param Mage_Index_Model_Event $event
      * @return $this
      */
     public function registerEvent(Mage_Index_Model_Event $event)
@@ -254,7 +247,6 @@ class Mage_Index_Model_Indexer
     /**
      * Create new event log and register event in all processes
      *
-     * @param   Varien_Object $entity
      * @param   string $entityType
      * @param   string $eventType
      * @param   bool $doSave
@@ -279,10 +271,8 @@ class Mage_Index_Model_Indexer
      * Create new event log and register event in all processes.
      * Initiate events indexing procedure.
      *
-     * @param   Varien_Object $entity
      * @param   string $entityType
      * @param   string $eventType
-     * @return  Mage_Index_Model_Indexer
      * @throws Exception|Throwable
      */
     public function processEntityAction(Varien_Object $entity, $entityType, $eventType): Mage_Index_Model_Indexer

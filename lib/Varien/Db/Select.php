@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Varien
  * @package    Varien_Db
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -49,8 +45,6 @@ class Varien_Db_Select extends Zend_Db_Select
     /**
      * Class constructor
      * Add straight join support
-     *
-     * @param Zend_Db_Adapter_Abstract $adapter
      */
     public function __construct(Zend_Db_Adapter_Abstract $adapter)
     {
@@ -93,6 +87,7 @@ class Varien_Db_Select extends Zend_Db_Select
      * @param null|string|int $type  OPTIONAL The type of the given value e.g. Zend_Db::INT_TYPE, "INT"
      * @return $this
      */
+    #[\Override]
     public function where($cond, $value = null, $type = null)
     {
         if (is_null($value) && is_null($type)) {
@@ -265,6 +260,7 @@ class Varien_Db_Select extends Zend_Db_Select
      * @return Zend_Db_Select This Zend_Db_Select object
      * @throws Zend_Db_Select_Exception
      */
+    #[\Override]
     protected function _join($type, $name, $cond, $cols, $schema = null)
     {
         if ($type == self::INNER_JOIN && empty($cond)) {
@@ -280,6 +276,7 @@ class Varien_Db_Select extends Zend_Db_Select
      * @param int $offset OPTIONAL Start returning after this many rows.
      * @return Zend_Db_Select This Zend_Db_Select object.
      */
+    #[\Override]
     public function limit($count = null, $offset = null)
     {
         if ($count === null) {
@@ -392,6 +389,7 @@ class Varien_Db_Select extends Zend_Db_Select
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _tableCols($correlationName, $cols, $afterCorrelationName = null)
     {
         if (!is_array($cols)) {
@@ -425,6 +423,7 @@ class Varien_Db_Select extends Zend_Db_Select
      * @param string   $sql SQL query
      * @return string
      */
+    #[\Override]
     protected function _renderForupdate($sql)
     {
         if ($this->_parts[self::FOR_UPDATE]) {

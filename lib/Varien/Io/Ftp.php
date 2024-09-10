@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Varien
  * @package    Varien_Io
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -66,11 +62,10 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      * - path        default empty
      * - file_mode   default FTP_BINARY
      *
-     * @param array $args
      * @return boolean
-     *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function open(array $args = [])
     {
         if (empty($args['host'])) {
@@ -143,6 +138,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function close()
     {
         return @ftp_close($this->_conn);
@@ -159,6 +155,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function mkdir($dir, $mode = 0777, $recursive = true)
     {
         return @ftp_mkdir($this->_conn, $dir);
@@ -172,6 +169,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function rmdir($dir, $recursive = false)
     {
         return @ftp_rmdir($this->_conn, $dir);
@@ -184,6 +182,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function pwd()
     {
         return @ftp_pwd($this->_conn);
@@ -197,6 +196,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function cd($dir)
     {
         return @ftp_chdir($this->_conn, $dir);
@@ -209,6 +209,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      * @param string|resource|null $dest destination file name, stream, or if null will return file contents
      * @return bool|string
      */
+    #[\Override]
     public function read($filename, $dest = null)
     {
         if (is_string($dest)) {
@@ -244,6 +245,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function write($filename, $src, $mode = null)
     {
         if (is_string($src) && is_readable($src)) {
@@ -276,6 +278,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function rm($filename)
     {
         return @ftp_delete($this->_conn, $filename);
@@ -290,6 +293,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function mv($src, $dest)
     {
         return @ftp_rename($this->_conn, $src, $dest);
@@ -304,6 +308,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
      *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function chmod($filename, $mode)
     {
         return @ftp_chmod($this->_conn, $mode, $filename);
@@ -312,6 +317,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
     /**
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
+    #[\Override]
     public function ls($grep = null)
     {
         $ls = @ftp_nlist($this->_conn, '.');

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -54,6 +50,7 @@ class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_
      *
      * @return bool
      */
+    #[\Override]
     public function isVisible()
     {
         /** @var Mage_Catalog_Helper_Category_Flat $categoryFlatHelper */
@@ -66,6 +63,7 @@ class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_
      *
      * @return string
      */
+    #[\Override]
     public function getName()
     {
         return Mage::helper('catalog')->__('Category Flat Data');
@@ -76,6 +74,7 @@ class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_
      *
      * @return string
      */
+    #[\Override]
     public function getDescription()
     {
         return Mage::helper('catalog')->__('Reorganize EAV category structure to flat structure');
@@ -96,9 +95,9 @@ class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_
      * Overwrote for check is flat catalog category is enabled and specific save
      * category, store, store_group
      *
-     * @param Event $event
      * @return bool
      */
+    #[\Override]
     public function matchEvent(Event $event)
     {
         /** @var Mage_Catalog_Helper_Category_Flat $categoryFlatHelper */
@@ -154,9 +153,8 @@ class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_
 
     /**
      * Register data required by process in event object
-     *
-     * @param Event $event
      */
+    #[\Override]
     protected function _registerEvent(Event $event)
     {
         $event->addNewData(self::EVENT_MATCH_RESULT_KEY, true);
@@ -182,7 +180,6 @@ class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_
     /**
      * Register data required by catalog category process in event object
      *
-     * @param Event $event
      * @return $this
      */
     protected function _registerCatalogCategoryEvent(Event $event)
@@ -210,7 +207,6 @@ class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_
     /**
      * Register core store delete process
      *
-     * @param Event $event
      * @return $this
      */
     protected function _registerCoreStoreEvent(Event $event)
@@ -225,9 +221,8 @@ class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_
 
     /**
      * Process event
-     *
-     * @param Event $event
      */
+    #[\Override]
     protected function _processEvent(Event $event)
     {
         $data = $event->getNewData();
@@ -251,6 +246,7 @@ class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_
      * Rebuild all index data
      *
      */
+    #[\Override]
     public function reindexAll()
     {
         $this->_getIndexer()->reindexAll();

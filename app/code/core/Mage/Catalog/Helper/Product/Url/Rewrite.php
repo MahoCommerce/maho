@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -37,8 +33,6 @@ class Mage_Catalog_Helper_Product_Url_Rewrite implements Mage_Catalog_Helper_Pro
 
     /**
      * Initialize resource and connection instances
-     *
-     * @param array $args
      */
     public function __construct(array $args = [])
     {
@@ -50,11 +44,11 @@ class Mage_Catalog_Helper_Product_Url_Rewrite implements Mage_Catalog_Helper_Pro
     /**
      * Prepare and return select
      *
-     * @param array $productIds
      * @param int $categoryId
      * @param int $storeId
      * @return Varien_Db_Select
      */
+    #[\Override]
     public function getTableSelect(array $productIds, $categoryId, $storeId)
     {
         return $this->_connection->select()
@@ -69,10 +63,10 @@ class Mage_Catalog_Helper_Product_Url_Rewrite implements Mage_Catalog_Helper_Pro
     /**
      * Prepare url rewrite left join statement for given select instance and store_id parameter.
      *
-     * @param Varien_Db_Select $select
      * @param int $storeId
      * @return Mage_Catalog_Helper_Product_Url_Rewrite_Interface
      */
+    #[\Override]
     public function joinTableToSelect(Varien_Db_Select $select, $storeId)
     {
         $select->joinLeft(

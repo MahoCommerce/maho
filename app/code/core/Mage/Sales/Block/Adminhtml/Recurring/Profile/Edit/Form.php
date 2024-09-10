@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -52,7 +48,6 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_Edit_Form extends Mage_Adminh
     /**
      * Setter for parent element
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return Mage_Sales_Block_Adminhtml_Recurring_Profile_Edit_Form
      */
     public function setParentElement(Varien_Data_Form_Element_Abstract $element)
@@ -64,7 +59,6 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_Edit_Form extends Mage_Adminh
     /**
      * Setter for current product
      *
-     * @param Mage_Catalog_Model_Product $product
      * @return Mage_Sales_Block_Adminhtml_Recurring_Profile_Edit_Form
      */
     public function setProductEntity(Mage_Catalog_Model_Product $product)
@@ -76,6 +70,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_Edit_Form extends Mage_Adminh
     /**
      * Instantiate a recurring payment profile to use it as a helper
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_profile = Mage::getSingleton('sales/recurring_profile');
@@ -87,6 +82,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_Edit_Form extends Mage_Adminh
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         // TODO: implement $this->_isReadonly setting

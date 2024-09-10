@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Index
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -60,22 +56,17 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
 
     /**
      * Register indexer required data inside event object
-     *
-     * @param   Mage_Index_Model_Event $event
      */
     abstract protected function _registerEvent(Mage_Index_Model_Event $event);
 
     /**
      * Process event based on event state data
-     *
-     * @param   Mage_Index_Model_Event $event
      */
     abstract protected function _processEvent(Mage_Index_Model_Event $event);
 
     /**
      * Register data required by process in event object
      *
-     * @param Mage_Index_Model_Event $event
      * @return Mage_Index_Model_Indexer_Abstract
      */
     public function register(Mage_Index_Model_Event $event)
@@ -89,7 +80,6 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
     /**
      * Process event
      *
-     * @param   Mage_Index_Model_Event $event
      * @return  Mage_Index_Model_Indexer_Abstract
      */
     public function processEvent(Mage_Index_Model_Event $event)
@@ -103,7 +93,6 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
     /**
      * Check if event can be matched by process
      *
-     * @param Mage_Index_Model_Event $event
      * @return bool
      */
     public function matchEvent(Mage_Index_Model_Event $event)
@@ -142,7 +131,6 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
      * Try dynamically detect and call event handler from resource model.
      * Handler name will be generated from event entity and type code
      *
-     * @param   Mage_Index_Model_Event $event
      * @return  Mage_Index_Model_Indexer_Abstract
      */
     public function callEventHandler(Mage_Index_Model_Event $event)

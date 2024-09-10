@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Page
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -39,6 +35,7 @@ class Mage_Page_Block_Template_Links extends Mage_Core_Block_Template
      * Set default template
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->setTemplate('page/template/links.phtml');
@@ -172,6 +169,7 @@ class Mage_Page_Block_Template_Links extends Mage_Core_Block_Template
      *
      * @return array
      */
+    #[\Override]
     public function getCacheKeyInfo()
     {
         if (is_null($this->_cacheKeyInfo)) {
@@ -217,6 +215,7 @@ class Mage_Page_Block_Template_Links extends Mage_Core_Block_Template
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeToHtml()
     {
         if (!empty($this->_links)) {
@@ -242,7 +241,7 @@ class Mage_Page_Block_Template_Links extends Mage_Core_Block_Template
             }
         } else {
             $position = 0;
-            foreach ($this->_links as $k => $v) {
+            foreach (array_keys($this->_links) as $k) {
                 $position = $k;
             }
             $position += 10;
@@ -255,6 +254,7 @@ class Mage_Page_Block_Template_Links extends Mage_Core_Block_Template
      *
      * @return array
      */
+    #[\Override]
     public function getCacheTags()
     {
         if (Mage::getSingleton('customer/session')->isLoggedIn()) {

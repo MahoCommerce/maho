@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Tag
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -68,12 +64,11 @@ class Mage_Tag_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Clear tag from the separating characters
      *
-     * @param array $tagNamesArr
      * @return array
      */
     public function cleanTags(array $tagNamesArr)
     {
-        foreach ($tagNamesArr as $key => $tagName) {
+        foreach (array_keys($tagNamesArr) as $key) {
             $tagNamesArr[$key] = trim($tagNamesArr[$key], '\'');
             $tagNamesArr[$key] = trim($tagNamesArr[$key]);
             if ($tagNamesArr[$key] == '') {

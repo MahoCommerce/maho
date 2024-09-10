@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -117,6 +113,7 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
     protected $_address;
     protected $_quote;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/quote_address_item');
@@ -125,6 +122,7 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
     /**
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();
@@ -137,7 +135,6 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
     /**
      * Declare address model
      *
-     * @param   Mage_Sales_Model_Quote_Address $address
      * @return  $this
      */
     public function setAddress(Mage_Sales_Model_Quote_Address $address)
@@ -162,6 +159,7 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
      *
      * @return Mage_Sales_Model_Quote
      */
+    #[\Override]
     public function getQuote()
     {
         return $this->_quote;
@@ -170,7 +168,6 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
     /**
      * Import item to quote
      *
-     * @param Mage_Sales_Model_Quote_Item $quoteItem
      * @return $this
      */
     public function importQuoteItem(Mage_Sales_Model_Quote_Item $quoteItem)
@@ -199,6 +196,7 @@ class Mage_Sales_Model_Quote_Address_Item extends Mage_Sales_Model_Quote_Item_Ab
      * @param string $code
      * @return Mage_Catalog_Model_Product_Configuration_Item_Option_Interface|null
      */
+    #[\Override]
     public function getOptionBycode($code)
     {
         if ($this->getQuoteItem()) {

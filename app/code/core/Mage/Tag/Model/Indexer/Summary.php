@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Tag
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -57,6 +53,7 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
         ]
     ];
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('tag/indexer_summary');
@@ -67,6 +64,7 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function getName()
     {
         return Mage::helper('tag')->__('Tag Aggregation Data');
@@ -77,6 +75,7 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function getDescription()
     {
         return Mage::helper('tag')->__('Rebuild Tag aggregation data');
@@ -98,9 +97,8 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
 
     /**
      * Register data required by process in event object
-     *
-     * @param Mage_Index_Model_Event $event
      */
+    #[\Override]
     protected function _registerEvent(Mage_Index_Model_Event $event)
     {
         if ($event->getEntity() == Mage_Catalog_Model_Product::ENTITY) {
@@ -114,8 +112,6 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
 
     /**
      * Register data required by catalog product save process
-     *
-     * @param Mage_Index_Model_Event $event
      */
     protected function _registerCatalogProductSaveEvent(Mage_Index_Model_Event $event)
     {
@@ -134,8 +130,6 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
 
     /**
      * Register data required by catalog product delete process
-     *
-     * @param Mage_Index_Model_Event $event
      */
     protected function _registerCatalogProductDeleteEvent(Mage_Index_Model_Event $event)
     {
@@ -149,8 +143,6 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
 
     /**
      * Register data required by catalog product massaction process
-     *
-     * @param Mage_Index_Model_Event $event
      */
     protected function _registerCatalogProductMassActionEvent(Mage_Index_Model_Event $event)
     {
@@ -185,9 +177,6 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
         }
     }
 
-    /**
-     * @param Mage_Index_Model_Event $event
-     */
     protected function _registerCatalogProduct(Mage_Index_Model_Event $event)
     {
         switch ($event->getType()) {
@@ -205,9 +194,6 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
         }
     }
 
-    /**
-     * @param Mage_Index_Model_Event $event
-     */
     protected function _registerTag(Mage_Index_Model_Event $event)
     {
         if ($event->getType() == Mage_Index_Model_Event::TYPE_SAVE) {
@@ -215,9 +201,6 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
         }
     }
 
-    /**
-     * @param Mage_Index_Model_Event $event
-     */
     protected function _registerTagRelation(Mage_Index_Model_Event $event)
     {
         if ($event->getType() == Mage_Index_Model_Event::TYPE_SAVE) {
@@ -227,9 +210,8 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
 
     /**
      * Process event
-     *
-     * @param Mage_Index_Model_Event $event
      */
+    #[\Override]
     protected function _processEvent(Mage_Index_Model_Event $event)
     {
         $this->callEventHandler($event);

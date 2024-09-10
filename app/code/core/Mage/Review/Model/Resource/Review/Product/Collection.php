@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Review
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -53,6 +49,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
      * Define module
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product');
@@ -66,6 +63,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
      *
      * @return $this
      */
+    #[\Override]
     protected function _initSelect()
     {
         parent::_initSelect();
@@ -79,6 +77,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
      * @param mixed $storeId
      * @return $this
      */
+    #[\Override]
     public function addStoreFilter($storeId = null)
     {
         if (is_null($storeId)) {
@@ -128,7 +127,6 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
     /**
      * Applies all store filters in one place to prevent multiple joins in select
      *
-     * @param null|Zend_Db_Select $select
      * @return $this
      */
     protected function _applyStoresFilterToSelect(?Zend_Db_Select $select = null)
@@ -291,6 +289,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
      *
      * @inheritDoc
      */
+    #[\Override]
     public function getAllIds($limit = null, $offset = null)
     {
         $idsSelect = clone $this->getSelect();
@@ -307,6 +306,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
      *
      * @return Varien_Db_Select|null
      */
+    #[\Override]
     public function getSelectCountSql()
     {
         $select = parent::getSelectCountSql();
@@ -324,6 +324,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
      * @param string $dir
      * @return $this
      */
+    #[\Override]
     public function setOrder($attribute, $dir = 'DESC')
     {
         switch ($attribute) {
@@ -355,6 +356,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
      * @param string $joinType
      * @return $this
      */
+    #[\Override]
     public function addAttributeToFilter($attribute, $condition = null, $joinType = 'inner')
     {
         switch ($attribute) {
@@ -402,6 +404,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
      * @param string $colName
      * @return array
      */
+    #[\Override]
     public function getColumnValues($colName)
     {
         $col = [];
@@ -416,6 +419,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad()
     {
         parent::_afterLoad();
@@ -465,6 +469,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
      *
      * @return $this
      */
+    #[\Override]
     protected function _beforeLoad()
     {
         parent::_beforeLoad();

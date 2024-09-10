@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -235,6 +231,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     /**
      * Init resource model
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/quote');
@@ -246,6 +243,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      *
      * @return Varien_Object
      */
+    #[\Override]
     protected function _initOldFieldsMap()
     {
         return $this;
@@ -277,7 +275,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     /**
      * Declare quote store model
      *
-     * @param   Mage_Core_Model_Store $store
      * @return  $this
      */
     public function setStore(Mage_Core_Model_Store $store)
@@ -309,6 +306,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      * @inheritDoc
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _beforeSave()
     {
         /**
@@ -368,6 +366,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterSave()
     {
         parent::_afterSave();
@@ -439,7 +438,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     /**
      * Assign customer model object data to quote
      *
-     * @param   Mage_Customer_Model_Customer $customer
      * @return  $this
      */
     public function assignCustomer(Mage_Customer_Model_Customer $customer)
@@ -450,9 +448,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     /**
      * Assign customer model to quote with billing and shipping address change
      *
-     * @param Mage_Customer_Model_Customer $customer
-     * @param Mage_Sales_Model_Quote_Address|null $billingAddress
-     * @param Mage_Sales_Model_Quote_Address|null $shippingAddress
      * @return $this
      * @throws Mage_Core_Exception
      */
@@ -493,7 +488,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     /**
      * Define customer object
      *
-     * @param   Mage_Customer_Model_Customer $customer
      * @return  $this
      */
     public function setCustomer(Mage_Customer_Model_Customer $customer)
@@ -743,7 +737,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return $this
      * @throws Mage_Core_Exception
      */
@@ -757,7 +750,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return $this
      */
     public function setBillingAddress(Mage_Sales_Model_Quote_Address $address)
@@ -773,7 +765,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return $this
      */
     public function setShippingAddress(Mage_Sales_Model_Quote_Address $address)
@@ -793,7 +784,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return $this
      */
     public function addShippingAddress(Mage_Sales_Model_Quote_Address $address)
@@ -921,7 +911,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     /**
      * Delete quote item. If it does not have identifier then it will be only removed from collection
      *
-     * @param   Mage_Sales_Model_Quote_Item $item
      * @return  $this
      */
     public function deleteItem(Mage_Sales_Model_Quote_Item $item)
@@ -1002,7 +991,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     /**
      * Adding new item to quote
      *
-     * @param   Mage_Sales_Model_Quote_Item $item
      * @return  $this
      */
     public function addItem(Mage_Sales_Model_Quote_Item $item)
@@ -1033,7 +1021,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      * Advanced func to add product to quote - processing mode can be specified there.
      * Returns error message if product type instance can't prepare product.
      *
-     * @param Mage_Catalog_Model_Product $product
      * @param null|float|Varien_Object $request
      * @param null|string $processMode
      * @return Mage_Sales_Model_Quote_Item|string
@@ -1117,7 +1104,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      *
      * return error message if product type instance can't prepare product
      *
-     * @param Mage_Catalog_Model_Product $product
      * @param null|float|Varien_Object $request
      * @return Mage_Sales_Model_Quote_Item|string
      */
@@ -1133,7 +1119,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     /**
      * Adding catalog product object data to quote
      *
-     * @param Mage_Catalog_Model_Product $product
      * @param int $qty
      * @return  Mage_Sales_Model_Quote_Item
      * @throws Mage_Core_Model_Store_Exception
@@ -1372,7 +1357,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param Mage_Sales_Model_Quote_Payment $payment
      * @return $this
      * @throws Mage_Core_Exception
      */
@@ -1386,7 +1370,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param Mage_Sales_Model_Quote_Payment $payment
      * @return Mage_Sales_Model_Quote_Payment
      */
     public function setPayment(Mage_Sales_Model_Quote_Payment $payment)
@@ -1857,7 +1840,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     /**
      * Merge quotes
      *
-     * @param   Mage_Sales_Model_Quote $quote
      * @return  $this
      */
     public function merge(Mage_Sales_Model_Quote $quote)
@@ -2020,6 +2002,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterLoad()
     {
         // collect totals and save me, if required
@@ -2079,6 +2062,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     public function save()
     {
         if ($this->_preventSaving) {
@@ -2087,16 +2071,12 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return parent::save();
     }
 
-    /**
-     * @return string
-     */
     public function getCouponCode(): string
     {
         return (string)$this->_getData('coupon_code');
     }
 
     /**
-     * @param string|null $couponCode
      * @return $this
      */
     public function setCouponCode(?string $couponCode)

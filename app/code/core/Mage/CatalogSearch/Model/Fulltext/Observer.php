@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_CatalogSearch
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -34,7 +30,6 @@ class Mage_CatalogSearch_Model_Fulltext_Observer
     /**
      * Update product index when product data updated
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function refreshProductIndex(Varien_Event_Observer $observer)
@@ -52,7 +47,6 @@ class Mage_CatalogSearch_Model_Fulltext_Observer
     /**
      * Clean product index when product deleted or marked as unsearchable/invisible
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function cleanProductIndex(Varien_Event_Observer $observer)
@@ -70,7 +64,6 @@ class Mage_CatalogSearch_Model_Fulltext_Observer
     /**
      * Update all attribute-dependant index
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function eavAttributeChange(Varien_Event_Observer $observer)
@@ -123,7 +116,6 @@ class Mage_CatalogSearch_Model_Fulltext_Observer
     /**
      * Refresh fulltext index when we add new store
      *
-     * @param   Varien_Event_Observer $observer
      * @return  Mage_CatalogSearch_Model_Fulltext_Observer
      */
     public function refreshStoreIndex(Varien_Event_Observer $observer)
@@ -136,7 +128,6 @@ class Mage_CatalogSearch_Model_Fulltext_Observer
     /**
      * Catalog Product mass website update
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function catalogProductWebsiteUpdate(Varien_Event_Observer $observer)
@@ -165,7 +156,6 @@ class Mage_CatalogSearch_Model_Fulltext_Observer
     /**
      * Store delete processing
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function cleanStoreIndex(Varien_Event_Observer $observer)

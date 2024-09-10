@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Api
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -34,6 +30,7 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
      * @param string $handler
      * @return $this
      */
+    #[\Override]
     public function setHandler($handler)
     {
         $this->setData('handler', $handler);
@@ -45,6 +42,7 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
      *
      * @return string
      */
+    #[\Override]
     public function getHandler()
     {
         return $this->getData('handler');
@@ -53,9 +51,9 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
     /**
      * Set webservice api controller
      *
-     * @param Mage_Api_Controller_Action $controller
      * @return $this
      */
+    #[\Override]
     public function setController(Mage_Api_Controller_Action $controller)
     {
         $this->setData('controller', $controller);
@@ -67,6 +65,7 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
      *
      * @return Mage_Api_Controller_Action|Varien_Object
      */
+    #[\Override]
     public function getController()
     {
         $controller = $this->getData('controller');
@@ -86,6 +85,7 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
      *
      * @return $this
      */
+    #[\Override]
     public function run()
     {
         $apiConfigCharset = Mage::getStoreConfig('api/config/charset');
@@ -107,6 +107,7 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
      * @param string $message
      * @return never
      */
+    #[\Override]
     public function fault($code, $message)
     {
         throw new Zend_XmlRpc_Server_Exception($message, $code);

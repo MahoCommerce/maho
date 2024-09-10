@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Varien
  * @package    Varien_Cache
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -76,6 +72,7 @@ class Varien_Cache_Core extends Zend_Cache_Core
      * @param  string $id Cache id
      * @return string Cache id (with or without prefix)
      */
+    #[\Override]
     protected function _id($id)
     {
         if ($id !== null) {
@@ -111,6 +108,7 @@ class Varien_Cache_Core extends Zend_Cache_Core
      * @param  int $priority         integer between 0 (very low priority) and 10 (maximum priority) used by some particular backends
      * @return boolean True if no problem
      */
+    #[\Override]
     public function save($data, $id = null, $tags = [], $specificLifetime = false, $priority = 8)
     {
         $tags = $this->_tags($tags);
@@ -141,6 +139,7 @@ class Varien_Cache_Core extends Zend_Cache_Core
      * @param  boolean $doNotUnserialize       Do not serialize (even if automatic_serialization is true) => for internal use
      * @return mixed|false Cached datas
      */
+    #[\Override]
     public function load($id, $doNotTestCacheValidity = false, $doNotUnserialize = false)
     {
         $data = parent::load($id, $doNotTestCacheValidity, $doNotUnserialize);
@@ -193,6 +192,7 @@ class Varien_Cache_Core extends Zend_Cache_Core
      * @throws Zend_Cache_Exception
      * @return boolean True if ok
      */
+    #[\Override]
     public function clean($mode = 'all', $tags = [])
     {
         $tags = $this->_tags($tags);
@@ -207,6 +207,7 @@ class Varien_Cache_Core extends Zend_Cache_Core
      * @param array $tags array of tags
      * @return array array of matching cache ids (string)
      */
+    #[\Override]
     public function getIdsMatchingTags($tags = [])
     {
         $tags = $this->_tags($tags);
@@ -221,6 +222,7 @@ class Varien_Cache_Core extends Zend_Cache_Core
      * @param array $tags array of tags
      * @return array array of not matching cache ids (string)
      */
+    #[\Override]
     public function getIdsNotMatchingTags($tags = [])
     {
         $tags = $this->_tags($tags);

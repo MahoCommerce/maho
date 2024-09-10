@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -406,7 +402,6 @@ class Mage_Core_Model_App
     /**
      * Initialize application cache instance
      *
-     * @param array $cacheInitOptions
      * @return $this
      */
     protected function _initCache(array $cacheInitOptions = [])
@@ -1288,7 +1283,6 @@ class Mage_Core_Model_App
     /**
      * Request setter
      *
-     * @param Mage_Core_Controller_Request_Http $request
      * @return $this
      */
     public function setRequest(Mage_Core_Controller_Request_Http $request)
@@ -1346,7 +1340,6 @@ class Mage_Core_Model_App
     /**
      * Response setter
      *
-     * @param Mage_Core_Controller_Response_Http $response
      * @return $this
      */
     public function setResponse(Mage_Core_Controller_Response_Http $response)

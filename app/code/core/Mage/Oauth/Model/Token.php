@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Oauth
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -71,6 +67,7 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
     /**
      * Initialize resource model
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('oauth/token');
@@ -81,6 +78,7 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterSave()
     {
         parent::_afterSave();
@@ -196,6 +194,7 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
      * @param string $format
      * @return string
      */
+    #[\Override]
     public function toString($format = '')
     {
         return http_build_query(['oauth_token' => $this->getToken(), 'oauth_token_secret' => $this->getSecret()]);
@@ -206,6 +205,7 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
      *
      * @return Mage_Oauth_Model_Token
      */
+    #[\Override]
     protected function _beforeSave()
     {
         $this->validate();

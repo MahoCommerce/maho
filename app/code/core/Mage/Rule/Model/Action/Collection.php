@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Rule
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -42,9 +38,9 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
      *   {action::asArray}
      * )
      *
-     * @param array $arrAttributes
      * @return array
      */
+    #[\Override]
     public function asArray(array $arrAttributes = [])
     {
         $out = parent::asArray();
@@ -56,9 +52,9 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
     }
 
     /**
-     * @param array $arr
      * @return $this|Mage_Rule_Model_Action_Abstract
      */
+    #[\Override]
     public function loadArray(array $arr)
     {
         if (!empty($arr['actions']) && is_array($arr['actions'])) {
@@ -75,7 +71,6 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
     }
 
     /**
-     * @param Mage_Rule_Model_Action_Interface $action
      * @return $this
      */
     public function addAction(Mage_Rule_Model_Action_Interface $action)
@@ -96,6 +91,7 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
     /**
      * @return string
      */
+    #[\Override]
     public function asHtml()
     {
         $html = $this->getTypeElement()->toHtml() . 'Perform following actions: ';
@@ -120,6 +116,7 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
     /**
      * @return string
      */
+    #[\Override]
     public function asHtmlRecursive()
     {
         $html = $this->asHtml() . '<ul id="action:' . $this->getId() . ':children">';
@@ -134,6 +131,7 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
      * @param string $format
      * @return string
      */
+    #[\Override]
     public function asString($format = '')
     {
         return Mage::helper('rule')->__('Perform following actions');
@@ -143,6 +141,7 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
      * @param int $level
      * @return string
      */
+    #[\Override]
     public function asStringRecursive($level = 0)
     {
         $str = $this->asString();
@@ -155,6 +154,7 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
     /**
      * @return $this|Mage_Rule_Model_Action_Abstract
      */
+    #[\Override]
     public function process()
     {
         foreach ($this->getActions() as $action) {

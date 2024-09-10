@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -59,7 +55,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
     /**
      * Set order model
      *
-     * @param  Mage_Sales_Model_Order $order
      * @return Mage_Sales_Model_Order_Pdf_Items_Abstract
      */
     public function setOrder(Mage_Sales_Model_Order $order)
@@ -71,7 +66,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
     /**
      * Set Source model
      *
-     * @param  Mage_Core_Model_Abstract $source
      * @return Mage_Sales_Model_Order_Pdf_Items_Abstract
      */
     public function setSource(Mage_Core_Model_Abstract $source)
@@ -83,7 +77,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
     /**
      * Set item object
      *
-     * @param  Varien_Object $item
      * @return Mage_Sales_Model_Order_Pdf_Items_Abstract
      */
     public function setItem(Varien_Object $item)
@@ -95,7 +88,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
     /**
      * Set Pdf model
      *
-     * @param  Mage_Sales_Model_Order_Pdf_Abstract $pdf
      * @return Mage_Sales_Model_Order_Pdf_Items_Abstract
      */
     public function setPdf(Mage_Sales_Model_Order_Pdf_Abstract $pdf)
@@ -107,7 +99,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
     /**
      * Set current page
      *
-     * @param  Zend_Pdf_Page $page
      * @return Mage_Sales_Model_Order_Pdf_Items_Abstract
      */
     public function setPage(Zend_Pdf_Page $page)

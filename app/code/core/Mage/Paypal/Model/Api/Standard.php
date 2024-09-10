@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Paypal
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -150,6 +146,7 @@ class Mage_Paypal_Model_Api_Standard extends Mage_Paypal_Model_Api_Abstract
      * Merchant account email getter
      * @return string
      */
+    #[\Override]
     public function getBusinessAccount()
     {
         return $this->_getDataOrConfig('business_account');
@@ -159,6 +156,7 @@ class Mage_Paypal_Model_Api_Standard extends Mage_Paypal_Model_Api_Abstract
      * Payment action getter
      * @return string
      */
+    #[\Override]
     public function getPaymentAction()
     {
         return strtolower(parent::getPaymentAction());
@@ -178,10 +176,10 @@ class Mage_Paypal_Model_Api_Standard extends Mage_Paypal_Model_Api_Abstract
      * For some reason PayPal ignores shipping total variables exactly when line items is enabled
      * Note that $i = 1
      *
-     * @param array $request
      * @param int $i
      * @return bool
      */
+    #[\Override]
     protected function _exportLineItems(array &$request, $i = 1)
     {
         if (!$this->_cart) {

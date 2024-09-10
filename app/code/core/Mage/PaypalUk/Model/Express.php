@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_PaypalUk
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -44,6 +40,7 @@ class Mage_PaypalUk_Model_Express extends Mage_Paypal_Model_Express
      * @param Mage_Sales_Model_Quote $quote
      * @return bool
      */
+    #[\Override]
     public function isAvailable($quote = null)
     {
         if (!parent::isAvailable($quote)) {
@@ -65,6 +62,7 @@ class Mage_PaypalUk_Model_Express extends Mage_Paypal_Model_Express
      * @param Mage_Paypal_Model_Api_Nvp $api
      * @param Mage_Sales_Model_Order_Payment $payment
      */
+    #[\Override]
     protected function _importToPayment($api, $payment)
     {
         $payment->setTransactionId($api->getPaypalTransactionId())->setIsTransactionClosed(0)
@@ -86,6 +84,7 @@ class Mage_PaypalUk_Model_Express extends Mage_Paypal_Model_Express
      * @see Mage_Sales_Model_Quote_Payment::getCheckoutRedirectUrl()
      * @return string
      */
+    #[\Override]
     public function getCheckoutRedirectUrl()
     {
         return Mage::getUrl('paypaluk/express/start');

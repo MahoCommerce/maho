@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -24,7 +20,6 @@ interface Mage_Catalog_Helper_Category_Url_Rewrite_Interface
     /**
      * Join url rewrite table to eav collection
      *
-     * @param Mage_Eav_Model_Entity_Collection_Abstract $collection
      * @param int $storeId
      * @return Mage_Catalog_Helper_Category_Url_Rewrite
      */
@@ -33,7 +28,6 @@ interface Mage_Catalog_Helper_Category_Url_Rewrite_Interface
     /**
      * Join url rewrite table to flat collection
      *
-     * @param Mage_Catalog_Model_Resource_Category_Flat_Collection $collection
      * @param int $storeId
      * @return Mage_Catalog_Helper_Category_Url_Rewrite_Interface
      */
@@ -42,7 +36,6 @@ interface Mage_Catalog_Helper_Category_Url_Rewrite_Interface
     /**
      * Join url rewrite to select
      *
-     * @param Varien_Db_Select $select
      * @param int $storeId
      * @return Mage_Catalog_Helper_Category_Url_Rewrite
      */

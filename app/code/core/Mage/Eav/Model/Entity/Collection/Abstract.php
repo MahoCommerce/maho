@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Eav
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -244,9 +240,9 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
     /**
      * Add an object to the collection
      *
-     * @param Varien_Object $object
      * @inheritDoc
      */
+    #[\Override]
     public function addItem(Varien_Object $object)
     {
         if (get_class($object) !== $this->_itemObjectClass) {
@@ -325,6 +321,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      *
      * @inheritDoc
      */
+    #[\Override]
     public function addFieldToFilter($attribute, $condition = null)
     {
         return $this->addAttributeToFilter($attribute, $condition);
@@ -855,6 +852,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * @throws Mage_Core_Exception
      * @throws Mage_Eav_Exception
      */
+    #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {
         if ($this->isLoaded()) {
@@ -916,6 +914,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * @param int $offset
      * @return array
      */
+    #[\Override]
     public function getAllIds($limit = null, $offset = null)
     {
         return $this->getConnection()->fetchCol($this->_getAllIdsSelect($limit, $offset), $this->_bindParams);
@@ -1418,6 +1417,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      *
      * @inheritDoc
      */
+    #[\Override]
     public function setOrder($attribute, $dir = self::SORT_ORDER_ASC)
     {
         if (is_array($attribute)) {
@@ -1435,6 +1435,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * @param array $arrAttributes
      * @return array
      */
+    #[\Override]
     public function toArray($arrAttributes = [])
     {
         $arr = [];
@@ -1449,6 +1450,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      *
      * @return $this
      */
+    #[\Override]
     protected function _renderOrders()
     {
         if (!$this->_isOrdersRendered) {
@@ -1465,6 +1467,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad()
     {
         return $this;
@@ -1475,6 +1478,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      *
      * @return $this
      */
+    #[\Override]
     protected function _reset()
     {
         parent::_reset();

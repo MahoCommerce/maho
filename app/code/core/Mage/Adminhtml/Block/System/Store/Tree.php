@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -31,6 +27,7 @@ class Mage_Adminhtml_Block_System_Store_Tree extends Mage_Adminhtml_Block_Widget
     /**
      * Internal constructor, that is called from real constructor
      */
+    #[\Override]
     public function _construct()
     {
         $this->setTemplate('system/store/tree.phtml');
@@ -42,6 +39,7 @@ class Mage_Adminhtml_Block_System_Store_Tree extends Mage_Adminhtml_Block_Widget
      *
      * @return Mage_Core_Block_Abstract
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $this->_cellTemplate = $this->getLayout()
@@ -111,7 +109,6 @@ class Mage_Adminhtml_Block_System_Store_Tree extends Mage_Adminhtml_Block_Widget
     /**
      * Render website
      *
-     * @param Mage_Core_Model_Website $website
      * @return string
      */
     public function renderWebsite(Mage_Core_Model_Website $website)
@@ -126,7 +123,6 @@ class Mage_Adminhtml_Block_System_Store_Tree extends Mage_Adminhtml_Block_Widget
     /**
      * Render store group
      *
-     * @param Mage_Core_Model_Store_Group $storeGroup
      * @return string
      */
     public function renderStoreGroup(Mage_Core_Model_Store_Group $storeGroup)
@@ -142,7 +138,6 @@ class Mage_Adminhtml_Block_System_Store_Tree extends Mage_Adminhtml_Block_Widget
     /**
      * Render store
      *
-     * @param Mage_Core_Model_Store $store
      * @return string
      */
     public function renderStore(Mage_Core_Model_Store $store)

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Customer
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -98,7 +94,6 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * Set customer object and setting customer id in session
      *
-     * @param   Mage_Customer_Model_Customer $customer
      * @return  Mage_Customer_Model_Session
      */
     public function setCustomer(Mage_Customer_Model_Customer $customer)
@@ -284,7 +279,6 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * Authenticate controller action by login customer
      *
-     * @param   Mage_Core_Controller_Varien_Action $action
      * @param   bool $loginUrl
      * @return  bool
      */
@@ -364,6 +358,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
      *
      * @return $this
      */
+    #[\Override]
     public function renewSession()
     {
         parent::renewSession();

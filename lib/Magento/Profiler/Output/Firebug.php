@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Magento
  * @package    Magento_Profiler
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -41,8 +37,6 @@ class Magento_Profiler_Output_Firebug extends Magento_Profiler_OutputAbstract
 
     /**
      * Request setter
-     *
-     * @param Zend_Controller_Request_Abstract $request
      */
     public function setRequest(Zend_Controller_Request_Abstract $request)
     {
@@ -51,8 +45,6 @@ class Magento_Profiler_Output_Firebug extends Magento_Profiler_OutputAbstract
 
     /**
      * Response setter
-     *
-     * @param Zend_Controller_Response_Abstract $response
      */
     public function setResponse(Zend_Controller_Response_Abstract $response)
     {
@@ -62,6 +54,7 @@ class Magento_Profiler_Output_Firebug extends Magento_Profiler_OutputAbstract
     /**
      * Display profiling results and flush output buffer
      */
+    #[\Override]
     public function display()
     {
         $firebugMessage = new Zend_Wildfire_Plugin_FirePhp_TableMessage($this->_renderCaption());
@@ -97,6 +90,7 @@ class Magento_Profiler_Output_Firebug extends Magento_Profiler_OutputAbstract
      * @param string $timerId
      * @return string
      */
+    #[\Override]
     protected function _renderTimerId($timerId)
     {
         $nestingSep = preg_quote(Magento_Profiler::NESTING_SEPARATOR, '/');

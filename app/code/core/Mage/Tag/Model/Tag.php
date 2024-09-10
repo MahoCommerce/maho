@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Tag
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -75,6 +71,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
      */
     protected $_addBasePopularity = false;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('tag/tag');
@@ -85,6 +82,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     public function afterCommitCallback()
     {
         parent::afterCommitCallback();
@@ -121,7 +119,6 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
     /**
      * Product event tags collection getter
      *
-     * @param  Varien_Event_Observer $observer
      * @return Mage_Tag_Model_Resource_Tag_Collection
      */
     protected function _getProductEventTagsCollection(Varien_Event_Observer $observer)
@@ -341,6 +338,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
      * @return Mage_Core_Model_Abstract
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         $this->_protectFromNonAdmin();
@@ -463,6 +461,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
      *
      * @return Mage_Core_Model_Abstract
      */
+    #[\Override]
     protected function _afterSave()
     {
         if ($this->hasData('tag_assigned_products')) {

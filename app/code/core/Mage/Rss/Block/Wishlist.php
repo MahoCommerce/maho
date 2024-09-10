@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Rss
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2021-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -41,6 +37,7 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
      * @return Mage_Wishlist_Model_Wishlist
      * @throws Exception
      */
+    #[\Override]
     protected function _getWishlist()
     {
         if (is_null($this->_wishlist)) {
@@ -100,6 +97,7 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
      * @throws Mage_Core_Exception
      * @throws Exception
      */
+    #[\Override]
     protected function _toHtml()
     {
         /** @var Mage_Rss_Model_Rss $rssObj */
@@ -185,6 +183,7 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
      * @param array $additional
      * @return string
      */
+    #[\Override]
     public function getProductUrl($product, $additional = [])
     {
         $additional['_rss'] = true;
@@ -198,6 +197,7 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
      * @param string $block Block Type
      * @param string $template Template
      */
+    #[\Override]
     public function addPriceBlockType($type, $block = '', $template = '')
     {
         if ($type) {

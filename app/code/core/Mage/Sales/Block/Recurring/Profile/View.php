@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -310,7 +306,6 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
     /**
      * Get rendered row value
      *
-     * @param Varien_Object $row
      * @return string
      */
     public function renderRowValue(Varien_Object $row)
@@ -347,7 +342,6 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
     /**
      * Add specified data to the $_info
      *
-     * @param array $data
      * @param string $key = null
      */
     protected function _addInfo(array $data, $key = null)
@@ -363,6 +357,7 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
     /**
      * Get current profile from registry and assign store/locale information to it
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $this->_profile = Mage::registry('current_recurring_profile')
@@ -377,6 +372,7 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         if (!$this->_profile || $this->_shouldRenderInfo && !$this->_info) {

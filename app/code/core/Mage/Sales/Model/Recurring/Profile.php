@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -337,6 +333,7 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
      *
      * @return bool
      */
+    #[\Override]
     public function isValid()
     {
         parent::isValid();
@@ -352,7 +349,6 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
     /**
      * Import quote information to the profile
      *
-     * @param Mage_Sales_Model_Quote $quote
      * @return $this
      * @throws Exception
      */
@@ -387,7 +383,6 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
     /**
      * Import quote item information to the profile
      *
-     * @param Mage_Sales_Model_Quote_Item_Abstract $item
      * @return $this
      */
     public function importQuoteItem(Mage_Sales_Model_Quote_Item_Abstract $item)
@@ -422,6 +417,7 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
      * @param string $field
      * @return string|null
      */
+    #[\Override]
     public function getFieldLabel($field)
     {
         switch ($field) {
@@ -444,6 +440,7 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
      * @param string $field
      * @return string|null
      */
+    #[\Override]
     public function getFieldComment($field)
     {
         switch ($field) {
@@ -507,6 +504,7 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
      * @param string $key
      * @return mixed
      */
+    #[\Override]
     public function renderData($key)
     {
         $value = $this->_getData($key);
@@ -544,6 +542,7 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
         }
     }
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/recurring_profile');
@@ -554,6 +553,7 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _filterValues()
     {
         $result = parent::_filterValues();

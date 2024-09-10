@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -91,6 +87,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      * Initialize email template model
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/email_template');
@@ -112,7 +109,6 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     /**
      * Declare template processing filter
      *
-     * @param   Varien_Filter_Template $filter
      * @return  $this
      */
     public function setTemplateFilter(Varien_Filter_Template $filter)
@@ -243,6 +239,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      * Return template id
      * return int|null
      */
+    #[\Override]
     public function getId()
     {
         return $this->getTemplateId();
@@ -253,6 +250,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      * @param int $value
      * @return $this
      */
+    #[\Override]
     public function setId($value)
     {
         return $this->setTemplateId($value);
@@ -276,6 +274,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      *
      * @return int|string
      */
+    #[\Override]
     public function getType()
     {
         return $this->getTemplateType();
@@ -284,7 +283,6 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     /**
      * Process email template code
      *
-     * @param   array $variables
      * @return  string
      */
     public function getProcessedTemplate(array $variables = [])
@@ -351,7 +349,6 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      * Get template code for include directive
      *
      * @param   string $template
-     * @param   array $variables
      * @return  string
      */
     public function getInclude($template, array $variables)
@@ -538,7 +535,6 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     /**
      * Process email subject
      *
-     * @param   array $variables
      * @return  string
      */
     public function getProcessedTemplateSubject(array $variables)
@@ -652,6 +648,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      *
      * {@inheritDoc}
      */
+    #[\Override]
     protected function _beforeSave()
     {
         $code = $this->getTemplateCode();

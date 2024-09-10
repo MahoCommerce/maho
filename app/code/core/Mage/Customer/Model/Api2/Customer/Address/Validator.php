@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Customer
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -29,9 +25,9 @@ class Mage_Customer_Model_Api2_Customer_Address_Validator extends Mage_Api2_Mode
     /**
      * Filter request data.
      *
-     * @param  array $data
      * @return array Filtered data
      */
+    #[\Override]
     public function filter(array $data)
     {
         $filteredData = parent::filter($data);
@@ -55,7 +51,6 @@ class Mage_Customer_Model_Api2_Customer_Address_Validator extends Mage_Api2_Mode
     /**
      * Validate data for create association with the country
      *
-     * @param array $data
      * @return bool
      */
     public function isValidDataForCreateAssociationWithCountry(array $data)
@@ -66,8 +61,6 @@ class Mage_Customer_Model_Api2_Customer_Address_Validator extends Mage_Api2_Mode
     /**
      * Validate data for change association with the country
      *
-     * @param Mage_Customer_Model_Address $address
-     * @param array $data
      * @return bool
      */
     public function isValidDataForChangeAssociationWithCountry(Mage_Customer_Model_Address $address, array $data)
@@ -88,7 +81,6 @@ class Mage_Customer_Model_Api2_Customer_Address_Validator extends Mage_Api2_Mode
      * Check region
      *
      * @param array $data
-     * @param Mage_Directory_Model_Country $country
      * @return bool
      */
     protected function _checkRegion($data, Mage_Directory_Model_Country $country)

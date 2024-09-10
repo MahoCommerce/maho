@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -108,7 +104,7 @@ class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
         if (!count($this->_disallowedBlock)) {
             $disallowedBlockConfig = $this->_getDisallowedBlockConfigValue();
             if (is_array($disallowedBlockConfig)) {
-                foreach ($disallowedBlockConfig as $blockName => $value) {
+                foreach (array_keys($disallowedBlockConfig) as $blockName) {
                     $this->_disallowedBlock[] = $blockName;
                 }
             }
@@ -136,6 +132,7 @@ class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
      * @param Varien_Simplexml_Element|string $value
      * @return bool
      */
+    #[\Override]
     public function isValid($value)
     {
         if (is_string($value)) {
@@ -225,8 +222,6 @@ class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
      * If template path value has "../"
      *
      * @throws Exception
-     *
-     * @param array $templatePaths
      */
     public function validateTemplatePath(array $templatePaths)
     {

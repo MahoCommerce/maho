@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Usa
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -127,9 +123,9 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     /**
      * Collect and get rates
      *
-     * @param Mage_Shipping_Model_Rate_Request $request
      * @return Mage_Shipping_Model_Rate_Result|bool|null
      */
+    #[\Override]
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
         if (!$this->getConfigFlag($this->_activeFlag)) {
@@ -147,7 +143,6 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     /**
      * Prepare and set request to this instance
      *
-     * @param Mage_Shipping_Model_Rate_Request $request
      * @return $this
      */
     public function setRequest(Mage_Shipping_Model_Rate_Request $request)
@@ -1327,6 +1322,7 @@ XMLAuth;
      *
      * @return array
      */
+    #[\Override]
     public function getAllowedMethods()
     {
         $allowedMethods = explode(',', (string)$this->getConfigData('allowed_methods'));
@@ -1345,7 +1341,6 @@ XMLAuth;
     /**
      * Form XML for shipment request
      *
-     * @param Varien_Object $request
      * @return string
      */
     protected function _formShipmentRequest(Varien_Object $request)
@@ -1541,7 +1536,6 @@ XMLAuth;
     /**
      * Send and process shipment accept request
      *
-     * @param SimpleXMLElement $shipmentConfirmResponse
      * @return Varien_Object
      */
     protected function _sendShipmentAcceptRequest(SimpleXMLElement $shipmentConfirmResponse)
@@ -1599,6 +1593,7 @@ XMLAuth;
         return $result;
     }
 
+    #[\Override]
     protected function _doShipmentRequest(Varien_Object $request): Varien_Object
     {
         // this "if" will be removed after XML APIs will be shut down
@@ -2012,9 +2007,9 @@ XMLAuth;
     /**
      * Return container types of carrier
      *
-     * @param Varien_Object|null $params
      * @return array|bool
      */
+    #[\Override]
     public function getContainerTypes(?Varien_Object $params = null)
     {
         if ($params == null) {
@@ -2096,9 +2091,9 @@ XMLAuth;
     /**
      * Return delivery confirmation types of carrier
      *
-     * @param Varien_Object|null $params
      * @return array
      */
+    #[\Override]
     public function getDeliveryConfirmationTypes(?Varien_Object $params = null)
     {
         $countryRecipient           = $params != null ? $params->getCountryRecipient() : null;
@@ -2127,6 +2122,7 @@ XMLAuth;
      *
      * @return array
      */
+    #[\Override]
     public function getCustomizableContainerTypes()
     {
         $result = [];
@@ -2398,13 +2394,6 @@ XMLAuth;
 
     /**
      * Processing rate for ship element
-     *
-     * @param array $shipElement
-     * @param array $allowedMethods
-     * @param array $allowedCurrencies
-     * @param array $costArr
-     * @param array $priceArr
-     * @param bool $negotiatedActive
      */
     private function processShippingRestRateForItem(
         array $shipElement,

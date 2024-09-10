@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -28,6 +24,7 @@ class Mage_Catalog_Model_Api2_Product extends Mage_Api2_Model_Resource
      * @param string $operation
      * @return array
      */
+    #[\Override]
     public function getAvailableAttributes($userType, $operation)
     {
         $attributes = $this->getAvailableAttributesFromConfig();
@@ -42,7 +39,7 @@ class Mage_Catalog_Model_Api2_Product extends Mage_Api2_Model_Resource
         }
         $excludedAttrs = $this->getExcludedAttributes($userType, $operation);
         $includedAttrs = $this->getIncludedAttributes($userType, $operation);
-        foreach ($attributes as $code => $label) {
+        foreach (array_keys($attributes) as $code) {
             if (in_array($code, $excludedAttrs) || ($includedAttrs && !in_array($code, $includedAttrs))) {
                 unset($attributes[$code]);
             }
@@ -57,7 +54,6 @@ class Mage_Catalog_Model_Api2_Product extends Mage_Api2_Model_Resource
     /**
      * Define if attribute should be visible for passed user type
      *
-     * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute
      * @param string $userType
      * @return bool
      */

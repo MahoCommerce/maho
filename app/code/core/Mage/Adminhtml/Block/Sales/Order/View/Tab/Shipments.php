@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -38,6 +34,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Shipments extends Mage_Adminhtml
         return 'sales/order_shipment_grid_collection';
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel($this->_getCollectionClass())
@@ -52,6 +49,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Shipments extends Mage_Adminhtml
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('increment_id', [
@@ -89,6 +87,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Shipments extends Mage_Adminhtml
         return Mage::registry('current_order');
     }
 
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl(
@@ -100,21 +99,25 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Shipments extends Mage_Adminhtml
         );
     }
 
+    #[\Override]
     public function getGridUrl()
     {
         return $this->getUrl('*/*/shipments', ['_current' => true]);
     }
 
+    #[\Override]
     public function getTabLabel()
     {
         return Mage::helper('sales')->__('Shipments');
     }
 
+    #[\Override]
     public function getTabTitle()
     {
         return Mage::helper('sales')->__('Shipments');
     }
 
+    #[\Override]
     public function canShowTab()
     {
         if ($this->getOrder()->getIsVirtual()) {
@@ -123,6 +126,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Shipments extends Mage_Adminhtml
         return Mage::getSingleton('admin/session')->isAllowed('sales/shipment');
     }
 
+    #[\Override]
     public function isHidden()
     {
         return false;

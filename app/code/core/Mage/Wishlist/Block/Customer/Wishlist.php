@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Wishlist
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -32,6 +28,7 @@ class Mage_Wishlist_Block_Customer_Wishlist extends Mage_Wishlist_Block_Abstract
      * @param  Mage_Wishlist_Model_Resource_Item_Collection $collection
      * @return $this
      */
+    #[\Override]
     protected function _prepareCollection($collection)
     {
         $collection->setInStockFilter(true)->setOrder('added_at', 'ASC');
@@ -43,6 +40,7 @@ class Mage_Wishlist_Block_Customer_Wishlist extends Mage_Wishlist_Block_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         parent::_prepareLayout();
@@ -124,7 +122,6 @@ class Mage_Wishlist_Block_Customer_Wishlist extends Mage_Wishlist_Block_Abstract
      * Returns html for showing item options
      *
      * @deprecated after 1.6.2.0
-     * @param Mage_Wishlist_Model_Item $item
      * @return string
      */
     public function getDetailsHtml(Mage_Wishlist_Model_Item $item)
@@ -163,7 +160,6 @@ class Mage_Wishlist_Block_Customer_Wishlist extends Mage_Wishlist_Block_Abstract
      * Returns qty to show visually to user
      *
      * @deprecated after 1.6.2.0
-     * @param Mage_Wishlist_Model_Item $item
      * @return float
      */
     public function getAddToCartQty(Mage_Wishlist_Model_Item $item)

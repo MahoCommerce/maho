@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Admin
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,6 +17,7 @@
  */
 class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('admin/user', 'user_id');
@@ -29,6 +26,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     /**
      * @return $this
      */
+    #[\Override]
     protected function _initUniqueFields()
     {
         $this->_uniqueFields = [
@@ -47,7 +45,6 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     /**
      * Authenticate user by $username and $password
      *
-     * @param Mage_Admin_Model_User $user
      * @return $this
      */
     public function recordLogin(Mage_Admin_Model_User $user)
@@ -141,6 +138,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
      * @param Mage_Admin_Model_User $user
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $user)
     {
         if ($user->isObjectNew()) {
@@ -154,9 +152,9 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     /**
      * Unserialize user extra data after user save
      *
-     * @param Mage_Core_Model_Abstract $user
      * @return $this
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $user)
     {
         $this->_unserializeExtraData($user);
@@ -168,6 +166,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $user)
     {
         return parent::_afterLoad($this->_unserializeExtraData($user));
@@ -176,10 +175,10 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     /**
      * Delete user role record with user
      *
-     * @param Mage_Core_Model_Abstract $user
      * @return $this
      * @throws Exception
      */
+    #[\Override]
     public function delete(Mage_Core_Model_Abstract $user)
     {
         $this->_beforeDelete($user);
@@ -206,7 +205,6 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     /**
      * TODO: unify _saveRelations() and add() methods, they make same things
      *
-     * @param Mage_Core_Model_Abstract|Mage_Admin_Model_User $user
      * @return $this|Mage_Core_Model_Abstract
      */
     public function _saveRelations(Mage_Core_Model_Abstract $user)
@@ -265,7 +263,6 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     /**
      * Get user roles
      *
-     * @param Mage_Core_Model_Abstract $user
      * @return array
      */
     public function getRoles(Mage_Core_Model_Abstract $user)
@@ -301,7 +298,6 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     /**
      * Save user roles
      *
-     * @param Mage_Core_Model_Abstract|Mage_Admin_Model_User $user
      * @return $this
      */
     public function add(Mage_Core_Model_Abstract $user)
@@ -346,7 +342,6 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     /**
      * Delete user role
      *
-     * @param Mage_Core_Model_Abstract|Mage_Admin_Model_User $user
      * @return $this
      */
     public function deleteFromRole(Mage_Core_Model_Abstract $user)
@@ -372,7 +367,6 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     /**
      * Check if role user exists
      *
-     * @param Mage_Core_Model_Abstract|Mage_Admin_Model_User $user
      * @return array
      */
     public function roleUserExists(Mage_Core_Model_Abstract $user)
@@ -400,7 +394,6 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     /**
      * Check if user exists
      *
-     * @param Mage_Core_Model_Abstract|Mage_Admin_Model_User $user
      * @return array|false
      */
     public function userExists(Mage_Core_Model_Abstract $user)
@@ -471,7 +464,6 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     /**
      * Unserializes user extra data
      *
-     * @param Mage_Core_Model_Abstract|Mage_Admin_Model_User $user
      * @return Mage_Core_Model_Abstract
      */
     protected function _unserializeExtraData(Mage_Core_Model_Abstract $user)

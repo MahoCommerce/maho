@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Api2
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,8 +19,6 @@ class Mage_Api2_Model_Observer
 {
     /**
      * Save relation of admin user to API2 role
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function saveAdminToRoleRelation(Varien_Event_Observer $observer)
     {
@@ -47,7 +41,6 @@ class Mage_Api2_Model_Observer
     /**
      * After save attribute if it is not visible on front remove it from Attribute ACL
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function catalogAttributeSaveAfter(Varien_Event_Observer $observer)

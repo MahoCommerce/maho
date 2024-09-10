@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Customer
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -32,6 +28,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
      *
      * @return array
      */
+    #[\Override]
     protected function _getDefaultAttributes()
     {
         return [
@@ -52,6 +49,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
      * @return $this
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _beforeSave(Varien_Object $customer)
     {
         parent::_beforeSave($customer);
@@ -101,9 +99,9 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
     /**
      * Save customer addresses and set default addresses in attributes backend
      *
-     * @param Varien_Object $customer
      * @return Mage_Eav_Model_Entity_Abstract
      */
+    #[\Override]
     protected function _afterSave(Varien_Object $customer)
     {
         $this->_saveAddresses($customer);
@@ -113,7 +111,6 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
     /**
      * Save/delete customer address
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @return $this
      */
     protected function _saveAddresses(Mage_Customer_Model_Customer $customer)
@@ -172,6 +169,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
      * @param mixed $rowId
      * @return Zend_Db_Select
      */
+    #[\Override]
     protected function _getLoadRowSelect($object, $rowId)
     {
         $select = parent::_getLoadRowSelect($object, $rowId);
@@ -187,7 +185,6 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
      *
      * @throws Mage_Core_Exception
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @param string $email
      * @param bool $testOnly
      * @return $this
@@ -223,7 +220,6 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
     /**
      * Change customer password
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @param string $newPassword
      * @return $this
      */
@@ -297,9 +293,9 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
     /**
      * Custom setter of increment ID if its needed
      *
-     * @param Varien_Object $object
      * @return $this
      */
+    #[\Override]
     public function setNewIncrementId(Varien_Object $object)
     {
         if (Mage::getStoreConfig(Mage_Customer_Model_Customer::XML_PATH_GENERATE_HUMAN_FRIENDLY_ID)) {
@@ -313,7 +309,6 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
      *
      * Stores new reset password link token and its creation time
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @param string $newResetPasswordLinkToken
      * @return $this
      */
@@ -334,7 +329,6 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
      *
      * Stores new reset password link customer Id
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @param string $newResetPasswordLinkCustomerId
      * @return $this
      * @throws Exception

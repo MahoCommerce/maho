@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -47,7 +43,6 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
     /**
      * Returns select query with analytic functions
      *
-     * @param Varien_Db_Select $select
      * @return string
      */
     public function getQueryUsingAnalyticFunction(Varien_Db_Select $select)
@@ -59,7 +54,6 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      *
      * Returns Insert From Select On Duplicate query with analytic functions
      *
-     * @param Varien_Db_Select $select
      * @param string $table
      * @param array $fields
      * @return string
@@ -84,7 +78,6 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
     /**
      * Returns array of quoted orders with direction
      *
-     * @param Varien_Db_Select $select
      * @param bool $autoReset
      * @return array
      */
@@ -144,7 +137,6 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
     /**
      * Returns quoted group by fields
      *
-     * @param Varien_Db_Select $select
      * @param bool $autoReset
      * @return array
      */
@@ -170,7 +162,6 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
     /**
      * Prepare and returns having array
      *
-     * @param Varien_Db_Select $select
      * @param bool $autoReset
      * @return array
      * @throws Zend_Db_Exception
@@ -241,7 +232,6 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
     /**
      * Prepare select column list
      *
-     * @param Varien_Db_Select $select
      * @param string $groupByCondition
      * @return array
      * @throws Zend_Db_Exception
@@ -341,6 +331,7 @@ class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_He
      *
      * @see escapeLikeValue()
      */
+    #[\Override]
     public function addLikeEscape($value, $options = [])
     {
         $value = $this->escapeLikeValue($value, $options);

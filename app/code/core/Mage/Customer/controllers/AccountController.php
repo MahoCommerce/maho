@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Customer
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -48,6 +44,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      *
      * Check customer authentication for some actions
      */
+    #[\Override]
     public function preDispatch()
     {
         // @todo a brute-force protection here would be nice
@@ -88,6 +85,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      *
      * Remove No-referer flag from customer session after each action
      */
+    #[\Override]
     public function postDispatch()
     {
         parent::postDispatch();
@@ -322,7 +320,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Success Registration
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @return $this
      * @throws Mage_Core_Exception
      */
@@ -542,7 +539,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * Add welcome message and send new account email.
      * Returns success URL
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @param bool $isJustConfirmed
      * @return string
      * @throws Mage_Core_Model_Store_Exception
@@ -1099,7 +1095,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Get restore password params.
      *
-     * @param Mage_Customer_Model_Session $session
      * @return array array ($customerId, $resetPasswordToken)
      */
     protected function _getRestorePasswordParameters(Mage_Customer_Model_Session $session)

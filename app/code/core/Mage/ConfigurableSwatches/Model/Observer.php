@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_ConfigurableSwatches
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,7 +19,6 @@ class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
      * Attach children products after product list load
      * Observes: catalog_block_product_list_collection
      *
-     * @param Varien_Event_Observer $observer
      * @return void
      */
     public function productListCollectionLoadAfter(Varien_Event_Observer $observer)
@@ -70,8 +65,6 @@ class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
     /**
      * Attach children products after product load
      * Observes: catalog_product_load_after
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function productLoadAfter(Varien_Event_Observer $observer)
     {
@@ -98,8 +91,6 @@ class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
      * Instruct media attribute to load images for product's children
      * if config swatches enabled.
      * Observes: catalog_product_attribute_backend_media_load_gallery_before
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function loadChildProductImagesOnMediaLoad(Varien_Event_Observer $observer)
     {
@@ -139,8 +130,6 @@ class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
     /**
      * Convert a catalog layer block with the right templates
      * Observes: controller_action_layout_generate_blocks_after
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function convertLayerBlock(Varien_Event_Observer $observer)
     {

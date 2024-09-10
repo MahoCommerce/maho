@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -33,6 +29,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pag
      * @return int
      * @throws Exception
      */
+    #[\Override]
     public function getCurrentPage($displacement = 0)
     {
         if ($page = (int) $this->getRequest()->getParam($this->getPageVarName()) + $displacement) {
@@ -47,6 +44,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pag
     /**
      * @return int
      */
+    #[\Override]
     public function getLimit()
     {
         $limits = $this->getAvailableLimit();
@@ -58,6 +56,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pag
      * @param Varien_Data_Collection $collection
      * @return $this|Mage_Page_Block_Html_Pager
      */
+    #[\Override]
     public function setCollection($collection)
     {
         $this->_collection = $collection;
@@ -67,6 +66,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pag
     /**
      * @return Mage_Core_Model_Resource_Db_Collection_Abstract
      */
+    #[\Override]
     public function getCollection()
     {
         return $this->_collection;
@@ -75,6 +75,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pag
     /**
      * @return int
      */
+    #[\Override]
     public function getFirstNum()
     {
         return $this->_firstNum + 1;
@@ -93,6 +94,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pag
     /**
      * @return int
      */
+    #[\Override]
     public function getLastNum()
     {
         return $this->_lastNum;
@@ -111,6 +113,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pag
     /**
      * @return int
      */
+    #[\Override]
     public function getTotalNum()
     {
         return $this->_totalNum;
@@ -129,6 +132,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pag
     /**
      * @return bool
      */
+    #[\Override]
     public function isFirstPage()
     {
         return $this->getCurrentPage() == 1;
@@ -137,6 +141,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pag
     /**
      * @return int
      */
+    #[\Override]
     public function getLastPageNum()
     {
         return $this->_lastPageNumber;
@@ -155,6 +160,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pag
     /**
      * @return bool
      */
+    #[\Override]
     public function isLastPage()
     {
         return $this->getCurrentPage() >= $this->getLastPageNum();
@@ -163,6 +169,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pag
     /**
      * @return array
      */
+    #[\Override]
     public function getPages()
     {
         $pages = [];
@@ -189,6 +196,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pag
     /**
      * @return string
      */
+    #[\Override]
     public function getPreviousPageUrl()
     {
         return $this->getPageUrl($this->getCurrentPage(-1));
@@ -197,6 +205,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pag
     /**
      * @return string
      */
+    #[\Override]
     public function getNextPageUrl()
     {
         return $this->getPageUrl($this->getCurrentPage(+1));
@@ -205,6 +214,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pag
     /**
      * @return string
      */
+    #[\Override]
     public function getLastPageUrl()
     {
         return $this->getPageUrl($this->getLastPageNum());

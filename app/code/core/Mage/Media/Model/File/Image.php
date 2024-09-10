@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Media
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -24,6 +20,7 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
     /**
      * @return $this
      */
+    #[\Override]
     protected function _construct()
     {
         return $this;
@@ -32,6 +29,7 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
     /**
      * @return Varien_Db_Adapter_Interface|false
      */
+    #[\Override]
     protected function _getReadAdapter()
     {
         return false;
@@ -40,13 +38,13 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
     /**
      * @return Varien_Db_Adapter_Interface|false
      */
+    #[\Override]
     protected function _getWriteAdapter()
     {
         return false;
     }
 
     /**
-     * @param Mage_Media_Model_Image $object
      * @param mixed $file
      * @param mixed|null $field
      * @return $this
@@ -58,7 +56,6 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
     }
 
     /**
-     * @param Mage_Media_Model_Image $object
      * @return $this
      */
     public function save(Mage_Media_Model_Image $object)
@@ -68,7 +65,6 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
     }
 
     /**
-     * @param Mage_Media_Model_Image $object
      * @return $this
      */
     public function delete(Mage_Media_Model_Image $object)
@@ -79,7 +75,6 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
     /**
      * Create image resource for operation from file
      *
-     * @param Mage_Media_Model_Image $object
      * @return false|GdImage|resource
      * @throws Mage_Core_Exception
      */
@@ -115,7 +110,6 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
     /**
      * Create tmp image resource for operations
      *
-     * @param Mage_Media_Model_Image $object
      * @return false|GdImage|resource
      */
     public function getTmpImage(Mage_Media_Model_Image $object)
@@ -126,7 +120,6 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
     /**
      * Resize image
      *
-     * @param Mage_Media_Model_Image $object
      * @return $this
      */
     public function resize(Mage_Media_Model_Image $object)
@@ -153,7 +146,6 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
     /**
      * Add watermark for image
      *
-     * @param Mage_Media_Model_Image $object
      * @return $this
      */
     public function watermark(Mage_Media_Model_Image $object)
@@ -164,7 +156,6 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
     /**
      * Creates image
      *
-     * @param Mage_Media_Model_Image $object
      * @param string|null $extension
      * @return $this
      */
@@ -201,9 +192,7 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
     /**
      * Retrieve image dimensions
      *
-     * @param Mage_Media_Model_Image $object
      * @return Varien_Object
-     *
      * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     public function getDimensions(Mage_Media_Model_Image $object)
@@ -232,7 +221,6 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
     /**
      * Destroys resource object
      *
-     * @param Mage_Media_Model_Image $object
      * @return bool
      */
     public function hasSpecialImage(Mage_Media_Model_Image $object)

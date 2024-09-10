@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_ImportExport
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -122,6 +118,7 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
      * @param array $attrParams Refined attribute parameters.
      * @return Mage_ImportExport_Model_Import_Entity_Product_Type_Abstract
      */
+    #[\Override]
     protected function _addAttributeParams($attrSetName, array $attrParams)
     {
         // save super attributes for simplier and quicker search in future
@@ -149,6 +146,7 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
      * @param string $attrCode
      * @return bool
      */
+    #[\Override]
     protected function _isAttributeRequiredCheckNeeded($attrCode)
     {
         return !$this->_isAttributeSuper($attrCode); // do not check super attributes
@@ -168,10 +166,10 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
     /**
      * Validate particular attributes columns.
      *
-     * @param array $rowData
      * @param int $rowNum
      * @return bool
      */
+    #[\Override]
     protected function _isParticularAttributesValid(array $rowData, $rowNum)
     {
         if (!empty($rowData['_super_attribute_code'])) {
@@ -283,8 +281,6 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
     /**
      * Validate and prepare data about super attributes and associated products.
      *
-     * @param array $superData
-     * @param array $superAttributes
      * @return $this
      */
     protected function _processSuperData(array $superData, array &$superAttributes)
@@ -345,6 +341,7 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
      * @throws Exception
      * @return Mage_ImportExport_Model_Import_Entity_Product_Type_Abstract
      */
+    #[\Override]
     public function saveData()
     {
         $connection      = $this->_entityModel->getConnection();

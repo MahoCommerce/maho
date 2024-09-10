@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -65,8 +61,6 @@ class Mage_Sales_Model_Service_Quote
 
     /**
      * Class constructor
-     *
-     * @param Mage_Sales_Model_Quote $quote
      */
     public function __construct(Mage_Sales_Model_Quote $quote)
     {
@@ -77,7 +71,6 @@ class Mage_Sales_Model_Service_Quote
     /**
      * Quote convertor declaration
      *
-     * @param   Mage_Sales_Model_Convert_Quote $convertor
      * @return  Mage_Sales_Model_Service_Quote
      */
     public function setConvertor(Mage_Sales_Model_Convert_Quote $convertor)
@@ -99,7 +92,6 @@ class Mage_Sales_Model_Service_Quote
     /**
      * Specify additional order data
      *
-     * @param array $data
      * @return $this
      */
     public function setOrderData(array $data)

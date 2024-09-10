@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_GoogleCheckout
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,6 +26,7 @@ class Mage_GoogleCheckout_Model_Payment extends Mage_Payment_Model_Method_Abstra
      *
      * @return bool
      */
+    #[\Override]
     public function canEdit()
     {
         return false;
@@ -48,10 +45,10 @@ class Mage_GoogleCheckout_Model_Payment extends Mage_Payment_Model_Method_Abstra
     /**
      * Authorize
      *
-     * @param Varien_Object $payment
      * @param float $amount
      * @return void
      */
+    #[\Override]
     public function authorize(Varien_Object $payment, $amount)
     {
         Mage::throwException(Mage::helper('payment')->__('Google Checkout has been deprecated.'));
@@ -60,11 +57,11 @@ class Mage_GoogleCheckout_Model_Payment extends Mage_Payment_Model_Method_Abstra
     /**
      * Capture payment
      *
-     * @param Varien_Object $payment
      * @param float $amount
      * @throws Exception
      * @return void
      */
+    #[\Override]
     public function capture(Varien_Object $payment, $amount)
     {
         Mage::throwException(Mage::helper('payment')->__('Google Checkout has been deprecated.'));
@@ -73,21 +70,21 @@ class Mage_GoogleCheckout_Model_Payment extends Mage_Payment_Model_Method_Abstra
     /**
      * Refund money
      *
-     * @param Varien_Object $payment
      * @param float $amount
      * @throws Exception
      * @return void
      */
+    #[\Override]
     public function refund(Varien_Object $payment, $amount)
     {
         Mage::throwException(Mage::helper('payment')->__('Google Checkout has been deprecated.'));
     }
 
     /**
-     * @param Varien_Object $payment
      * @throws Exception
      * @return void
      */
+    #[\Override]
     public function void(Varien_Object $payment)
     {
         Mage::throwException(Mage::helper('payment')->__('Google Checkout has been deprecated.'));
@@ -96,10 +93,10 @@ class Mage_GoogleCheckout_Model_Payment extends Mage_Payment_Model_Method_Abstra
     /**
      * Void payment
      *
-     * @param Varien_Object $payment
      * @throws Exception
      * @return void
      */
+    #[\Override]
     public function cancel(Varien_Object $payment)
     {
         Mage::throwException(Mage::helper('payment')->__('Google Checkout has been deprecated.'));
@@ -110,9 +107,8 @@ class Mage_GoogleCheckout_Model_Payment extends Mage_Payment_Model_Method_Abstra
      *
      * @param string $field
      * @param int|string|null|Mage_Core_Model_Store $storeId
-     *
-     * @return  null
      */
+    #[\Override]
     public function getConfigData($field, $storeId = null)
     {
         return null;
@@ -121,9 +117,9 @@ class Mage_GoogleCheckout_Model_Payment extends Mage_Payment_Model_Method_Abstra
     /**
      * Check void availability
      *
-     * @param   Varien_Object $payment
      * @return  bool
      */
+    #[\Override]
     public function canVoid(Varien_Object $payment)
     {
         return false;

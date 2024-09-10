@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Paypal
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -41,6 +37,7 @@ class Mage_Paypal_Model_Standard extends Mage_Payment_Model_Method_Abstract
      * @param string $currencyCode
      * @return bool
      */
+    #[\Override]
     public function canUseForCurrency($currencyCode)
     {
         return $this->getConfig()->isCurrencyCodeSupported($currencyCode);
@@ -140,6 +137,7 @@ class Mage_Paypal_Model_Standard extends Mage_Payment_Model_Method_Abstract
      * @param string $paymentAction
      * @param Varien_Object $stateObject
      */
+    #[\Override]
     public function initialize($paymentAction, $stateObject)
     {
         $state = Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
@@ -171,6 +169,7 @@ class Mage_Paypal_Model_Standard extends Mage_Payment_Model_Method_Abstract
      * @param Mage_Sales_Model_Quote|null $quote
      * @return bool
      */
+    #[\Override]
     public function isAvailable($quote = null)
     {
         if (parent::isAvailable($quote) && $this->getConfig()->isMethodAvailable()) {
@@ -186,6 +185,7 @@ class Mage_Paypal_Model_Standard extends Mage_Payment_Model_Method_Abstract
      * @param int $storeId
      * @return mixed
      */
+    #[\Override]
     public function getConfigData($field, $storeId = null)
     {
         return $this->getConfig()->$field;

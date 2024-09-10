@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -122,6 +118,7 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
      * @param string|null $pathInfo
      * @return Zend_Controller_Request_Http
      */
+    #[\Override]
     public function setPathInfo($pathInfo = null)
     {
         if ($pathInfo === null) {
@@ -250,6 +247,7 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
     /**
      * @return string
      */
+    #[\Override]
     public function getBasePath()
     {
         $path = parent::getBasePath();
@@ -265,6 +263,7 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
      * @param bool $raw
      * @return string
      */
+    #[\Override]
     public function getBaseUrl($raw = false)
     {
         $url = parent::getBaseUrl($raw);
@@ -303,6 +302,7 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
      *
      * @return string
      */
+    #[\Override]
     public function getScheme()
     {
         return $this->getServer('HTTPS') == 'on'
@@ -318,6 +318,7 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
      * @param bool $trimPort
      * @return false|string
      */
+    #[\Override]
     public function getHttpHost($trimPort = true)
     {
         if (!isset($_SERVER['HTTP_HOST'])) {
@@ -346,6 +347,7 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
      *
      * @return $this
      */
+    #[\Override]
     public function setPost($key, $value = null)
     {
         if (is_array($key)) {
@@ -383,6 +385,7 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
      *
      * @return string
      */
+    #[\Override]
     public function getModuleName()
     {
         return $this->_module;
@@ -392,6 +395,7 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
      *
      * @return string
      */
+    #[\Override]
     public function getControllerName()
     {
         return $this->_controller;
@@ -401,6 +405,7 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
      *
      * @return string
      */
+    #[\Override]
     public function getActionName()
     {
         return $this->_action;
@@ -414,6 +419,7 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
      * @param string $name
      * @return string|null Returns null when no alias exists
      */
+    #[\Override]
     public function getAlias($name)
     {
         $aliases = $this->getAliases();
@@ -425,6 +431,7 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
      *
      * @return array
      */
+    #[\Override]
     public function getAliases()
     {
         return $this->_routingInfo['aliases'] ?? parent::getAliases();

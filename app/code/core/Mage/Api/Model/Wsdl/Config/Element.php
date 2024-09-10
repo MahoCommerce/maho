@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Api
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -26,6 +22,7 @@ class Mage_Api_Model_Wsdl_Config_Element extends Varien_Simplexml_Element
      * @param bool $overwrite
      * @return $this|Varien_Simplexml_Element
      */
+    #[\Override]
     public function extend($source, $overwrite = false)
     {
         if (!$source instanceof Varien_Simplexml_Element) {
@@ -49,6 +46,7 @@ class Mage_Api_Model_Wsdl_Config_Element extends Varien_Simplexml_Element
      * @param string $elmNamespace
      * @return Varien_Simplexml_Element
      */
+    #[\Override]
     public function extendChild($source, $overwrite = false, $elmNamespace = '')
     {
         // this will be our new target node
@@ -186,6 +184,7 @@ class Mage_Api_Model_Wsdl_Config_Element extends Varien_Simplexml_Element
      * @return bool
      */
     #[\ReturnTypeWillChange]
+    #[\Override]
     public function hasChildren()
     {
         if (!self::_getChildren($this)) {
@@ -244,6 +243,7 @@ class Mage_Api_Model_Wsdl_Config_Element extends Varien_Simplexml_Element
      * @param string $namespace
      * @return string|null
      */
+    #[\Override]
     public function getAttribute($name, $namespace = '')
     {
         $attrs = $this->attributes($namespace);

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Varien
  * @package    Varien_Directory
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -149,6 +145,7 @@ class Varien_Directory_Collection extends Varien_Data_Collection implements IFac
      * @param   IFactory $item - item of collection
      * @return  none
      */
+    #[\Override]
     public function addItem(IFactory $item)
     {
         $this->_items[] = $item;
@@ -176,6 +173,7 @@ class Varien_Directory_Collection extends Varien_Data_Collection implements IFac
      * @param   bool $useFilter - filter using
      * @return  none
      */
+    #[\Override]
     public function useFilter($useFilter)
     {
         $this->_renderFilters();
@@ -198,6 +196,7 @@ class Varien_Directory_Collection extends Varien_Data_Collection implements IFac
      * @param   array $files - array of files names
      * @return  none
      */
+    #[\Override]
     public function getFilesName(&$files)
     {
         $this->walk('getFilesName', [&$files]);
@@ -219,6 +218,7 @@ class Varien_Directory_Collection extends Varien_Data_Collection implements IFac
      * @param   array $files - array of files paths
      * @return  none
      */
+    #[\Override]
     public function getFilesPaths(&$paths)
     {
         $this->walk('getFilesPaths', [&$paths]);
@@ -240,6 +240,7 @@ class Varien_Directory_Collection extends Varien_Data_Collection implements IFac
      * @param   array $objs - array of SplFileObject objects
      * @return  none
      */
+    #[\Override]
     public function getFilesObj(&$objs)
     {
         $this->walk('getFilesObj', [&$objs]);
@@ -261,6 +262,7 @@ class Varien_Directory_Collection extends Varien_Data_Collection implements IFac
      * @param   array $dirs - array of names of dirs
      * @return  none
      */
+    #[\Override]
     public function getDirsName(&$dirs)
     {
         $this->walk('getDirsName', [&$dirs]);
@@ -294,6 +296,7 @@ class Varien_Directory_Collection extends Varien_Data_Collection implements IFac
      * @param   array &$arr - this collection array
      * @return  none
      */
+    #[\Override]
     public function toArray(&$arr)
     {
         if ($this->getRecursionLevel() > 0) {
@@ -322,6 +325,7 @@ class Varien_Directory_Collection extends Varien_Data_Collection implements IFac
      * @param   string $rootName - root element name
      * @return  none
      */
+    #[\Override]
     public function toXml(&$xml, $recursionLevel = 0, $addOpenTag = true, $rootName = 'Struct')
     {
         if ($recursionLevel == 0) {
@@ -343,6 +347,7 @@ class Varien_Directory_Collection extends Varien_Data_Collection implements IFac
      * apply filters
      * @return  none
      */
+    #[\Override]
     protected function _renderFilters()
     {
         $exts = [];
@@ -401,6 +406,7 @@ class Varien_Directory_Collection extends Varien_Data_Collection implements IFac
      * add filter
      * @return  none
      */
+    #[\Override]
     public function addFilter($field, $value)
     {
         $filter = [];

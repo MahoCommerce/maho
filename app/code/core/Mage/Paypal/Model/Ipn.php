@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Paypal
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -85,8 +81,6 @@ class Mage_Paypal_Model_Ipn
     /**
      * Get ipn data, send verification to PayPal, run corresponding handler
      *
-     * @param array $request
-     * @param Zend_Http_Client_Adapter_Interface|null $httpAdapter
      * @throws Mage_Core_Exception
      */
     public function processIpnRequest(array $request, ?Zend_Http_Client_Adapter_Interface $httpAdapter = null)
@@ -120,7 +114,6 @@ class Mage_Paypal_Model_Ipn
     /**
      * Post back to PayPal to check whether this request is a valid one
      *
-     * @param Zend_Http_Client_Adapter_Interface $httpAdapter
      * @throws Exception
      */
     protected function _postBack(Zend_Http_Client_Adapter_Interface $httpAdapter)

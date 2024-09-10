@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_CatalogRule
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -67,8 +63,6 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      * Constructor with parameters
      * Array of arguments with keys
      *  - 'factory' Mage_Core_Model_Factory
-     *
-     * @param array $args
      */
     public function __construct(array $args = [])
     {
@@ -81,6 +75,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     /**
      * Initialize main table and table id field
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalogrule/rule', 'rule_id');
@@ -89,10 +84,10 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     /**
      * Add customer group ids and website ids to rule data after load
      *
-     * @param Mage_Core_Model_Abstract $object
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {
         $object->setData('customer_group_ids', (array)$this->getCustomerGroupIds($object->getId()));
@@ -105,10 +100,10 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      * Bind catalog rule to customer group(s) and website(s).
      * Update products which are matched for rule.
      *
-     * @param Mage_Core_Model_Abstract $object
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
         if ($object->hasWebsiteIds()) {
@@ -135,7 +130,6 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      * Deletes records in catalogrule/product_data by rule ID and product IDs
      *
      * @param int $ruleId
-     * @param array $productIds
      */
     public function cleanProductData($ruleId, array $productIds = [])
     {
@@ -154,8 +148,6 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     /**
      * Return whether the product fits the rule
      *
-     * @param Mage_CatalogRule_Model_Rule $rule
-     * @param Varien_Object $product
      * @param array $websiteIds
      * @return bool
      */
@@ -182,10 +174,6 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
 
     /**
      * Inserts rule data into catalogrule/rule_product table
-     *
-     * @param Mage_CatalogRule_Model_Rule $rule
-     * @param array $websiteIds
-     * @param array $productIds
      */
     public function insertRuleData(Mage_CatalogRule_Model_Rule $rule, array $websiteIds, array $productIds = [])
     {
@@ -314,7 +302,6 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     /**
      * Update products which are matched for rule
      *
-     * @param Mage_CatalogRule_Model_Rule $rule
      *
      * @throws Exception
      * @return $this

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,6 +17,7 @@
  */
 class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_option', 'option_id');
@@ -29,9 +26,9 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
     /**
      * Save options store data
      *
-     * @param Mage_Core_Model_Abstract $object
      * @return Mage_Core_Model_Resource_Db_Abstract
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
         $this->_saveValuePrices($object);
@@ -43,7 +40,6 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
     /**
      * Save value prices
      *
-     * @param Mage_Core_Model_Abstract|Mage_Catalog_Model_Product_Option $object
      * @return $this
      */
     protected function _saveValuePrices(Mage_Core_Model_Abstract $object)
@@ -186,7 +182,6 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
     /**
      * Save titles
      *
-     * @param Mage_Core_Model_Abstract|Mage_Catalog_Model_Product_Option $object
      * @throws Zend_Db_Adapter_Exception
      */
     protected function _saveValueTitles(Mage_Core_Model_Abstract $object)
@@ -325,7 +320,6 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
     /**
      * Duplicate custom options for product
      *
-     * @param Mage_Catalog_Model_Product_Option $object
      * @param int $oldProductId
      * @param int $newProductId
      * @return Mage_Catalog_Model_Product_Option

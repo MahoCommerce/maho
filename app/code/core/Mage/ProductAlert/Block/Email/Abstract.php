@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_ProductAlert
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -92,8 +88,6 @@ abstract class Mage_ProductAlert_Block_Email_Abstract extends Mage_Core_Block_Te
 
     /**
      * Add product to collection
-     *
-     * @param Mage_Catalog_Model_Product $product
      */
     public function addProduct(Mage_Catalog_Model_Product $product)
     {
@@ -126,7 +120,6 @@ abstract class Mage_ProductAlert_Block_Email_Abstract extends Mage_Core_Block_Te
     /**
      * Get filtered product short description to be inserted into mail
      *
-     * @param Mage_Catalog_Model_Product $product
      * @return string|null
      */
     public function _getFilteredProductShortDescription(Mage_Catalog_Model_Product $product)

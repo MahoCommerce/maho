@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -37,6 +33,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      * Initialize template and cache settings
      *
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -50,6 +47,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      *
      * @return int
      */
+    #[\Override]
     public function getCacheLifetime()
     {
         return 86400;
@@ -60,6 +58,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      *
      * @return array
      */
+    #[\Override]
     public function getCacheKeyInfo()
     {
         $cacheKeyInfo = [
@@ -91,7 +90,6 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
     /**
      * Retrieve Title value for menu node
      *
-     * @param Varien_Simplexml_Element $child
      * @return string
      */
     protected function _getHelperValue(Varien_Simplexml_Element $child)
@@ -109,7 +107,6 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
     /**
      * Recursive Build Menu array
      *
-     * @param Varien_Simplexml_Element $parent
      * @param string $path
      * @param int $level
      * @return array
@@ -164,10 +161,8 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
 
         uasort($parentArr, [$this, '_sortMenu']);
 
-        foreach ($parentArr as $key => $value) {
-            $last = $key;
-        }
-        if (isset($last)) {
+        $last = array_key_last($parentArr);
+        if (!is_null($last)) {
             $parentArr[$last]['last'] = true;
         }
 
@@ -189,7 +184,6 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
     /**
      * Check Depends
      *
-     * @param Varien_Simplexml_Element $depends
      * @return bool
      */
     protected function _checkDepends(Varien_Simplexml_Element $depends)
@@ -236,6 +230,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      * @param   string $html
      * @return  string
      */
+    #[\Override]
     protected function _afterToHtml($html)
     {
         $html = preg_replace_callback('#' . Mage_Adminhtml_Model_Url::SECRET_KEY_PARAM_NAME . '/\$([^\/].*)/([^\$].*)\$#', [$this, '_callbackSecretKey'], $html);
@@ -292,7 +287,6 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
     /**
      * Check is module output enabled
      *
-     * @param Varien_Simplexml_Element $child
      * @return bool
      */
     protected function _isEnabledModuleOutput(Varien_Simplexml_Element $child)

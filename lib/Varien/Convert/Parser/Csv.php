@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Varien
  * @package    Varien_Convert
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,6 +17,7 @@
  */
 class Varien_Convert_Parser_Csv extends Varien_Convert_Parser_Abstract
 {
+    #[\Override]
     public function parse()
     {
         $fDel = $this->getVar('delimiter', ',');
@@ -44,7 +41,7 @@ class Varien_Convert_Parser_Csv extends Varien_Convert_Parser_Abstract
                     $fields = $line;
                     continue;
                 } else {
-                    foreach ($line as $j => $f) {
+                    foreach (array_keys($line) as $j) {
                         $fields[$j] = 'column' . ($j + 1);
                     }
                 }
@@ -87,7 +84,7 @@ class Varien_Convert_Parser_Csv extends Varien_Convert_Parser_Abstract
                     $fields = $line;
                     continue;
                 } else {
-                    foreach ($line as $j => $f) {
+                    foreach (array_keys($line) as $j) {
                         $fields[$j] = 'column' . ($j + 1);
                     }
                 }
@@ -110,6 +107,7 @@ class Varien_Convert_Parser_Csv extends Varien_Convert_Parser_Abstract
         return $this;
     }
 
+    #[\Override]
     public function unparse()
     {
         $csv = '';

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_ImportExport
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -45,6 +41,7 @@ class Mage_ImportExport_Model_Import_Adapter_Csv extends Mage_ImportExport_Model
     /**
      * Close file handler on shutdown
      */
+    #[\Override]
     public function destruct()
     {
         if (is_resource($this->_fileHandler)) {
@@ -57,6 +54,7 @@ class Mage_ImportExport_Model_Import_Adapter_Csv extends Mage_ImportExport_Model
      *
      * @return Mage_ImportExport_Model_Import_Adapter_Abstract
      */
+    #[\Override]
     protected function _init()
     {
         $this->_fileHandler = fopen($this->_source, 'r');
@@ -70,6 +68,7 @@ class Mage_ImportExport_Model_Import_Adapter_Csv extends Mage_ImportExport_Model
      * @return void Any returned value is ignored.
      */
     #[\ReturnTypeWillChange]
+    #[\Override]
     public function next()
     {
         $this->_currentRow = fgetcsv($this->_fileHandler, null, $this->_delimiter, $this->_enclosure);
@@ -82,6 +81,7 @@ class Mage_ImportExport_Model_Import_Adapter_Csv extends Mage_ImportExport_Model
      * @return void Any returned value is ignored.
      */
     #[\ReturnTypeWillChange]
+    #[\Override]
     public function rewind()
     {
         // rewind resource, reset column names, read first row as current
@@ -102,6 +102,7 @@ class Mage_ImportExport_Model_Import_Adapter_Csv extends Mage_ImportExport_Model
      * @return void
      */
     #[\ReturnTypeWillChange]
+    #[\Override]
     public function seek($position)
     {
         if ($position != $this->_currentKey) {

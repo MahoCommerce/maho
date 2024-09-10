@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -28,9 +24,8 @@ class Mage_Catalog_Model_Api2_Product_Rest_Admin_V1 extends Mage_Catalog_Model_A
 
     /**
      * Add special fields to product get response
-     *
-     * @param Mage_Catalog_Model_Product $product
      */
+    #[\Override]
     protected function _prepareProductForResponse(Mage_Catalog_Model_Product $product)
     {
         $pricesFilterKeys = ['price_id', 'all_groups', 'website_price'];
@@ -51,8 +46,6 @@ class Mage_Catalog_Model_Api2_Product_Rest_Admin_V1 extends Mage_Catalog_Model_A
     /**
      * Remove specified keys from associative or indexed array
      *
-     * @param array $array
-     * @param array $keys
      * @param bool $dropOrigKeys if true - return array as indexed array
      * @return array
      */
@@ -81,6 +74,7 @@ class Mage_Catalog_Model_Api2_Product_Rest_Admin_V1 extends Mage_Catalog_Model_A
      *
      * @return array
      */
+    #[\Override]
     protected function _retrieveCollection()
     {
         /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
@@ -100,6 +94,7 @@ class Mage_Catalog_Model_Api2_Product_Rest_Admin_V1 extends Mage_Catalog_Model_A
      *
      * @throws Mage_Api2_Exception
      */
+    #[\Override]
     protected function _delete()
     {
         $product = $this->_getProduct();
@@ -116,9 +111,9 @@ class Mage_Catalog_Model_Api2_Product_Rest_Admin_V1 extends Mage_Catalog_Model_A
     /**
      * Create product
      *
-     * @param array $data
      * @return string
      */
+    #[\Override]
     protected function _create(array $data)
     {
         /** @var Mage_Catalog_Model_Api2_Product_Validator_Product $validator */
@@ -177,9 +172,8 @@ class Mage_Catalog_Model_Api2_Product_Rest_Admin_V1 extends Mage_Catalog_Model_A
 
     /**
      * Update product by its ID
-     *
-     * @param array $data
      */
+    #[\Override]
     protected function _update(array $data)
     {
         $product = $this->_getProduct();

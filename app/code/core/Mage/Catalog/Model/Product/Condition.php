@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,6 +26,7 @@ class Mage_Catalog_Model_Product_Condition extends Varien_Object implements Mage
      * @param Mage_Catalog_Model_Resource_Product_Collection $collection
      * @return $this
      */
+    #[\Override]
     public function applyToCollection($collection)
     {
         if ($this->getTable() && $this->getPkFieldName()) {
@@ -46,6 +43,7 @@ class Mage_Catalog_Model_Product_Condition extends Varien_Object implements Mage
      * @param Magento_Db_Adapter_Pdo_Mysql $dbAdapter
      * @return string|Varien_Db_Select
      */
+    #[\Override]
     public function getIdsSelect($dbAdapter)
     {
         if ($this->getTable() && $this->getPkFieldName()) {

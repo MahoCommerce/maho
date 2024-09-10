@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_PaypalUk
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -323,6 +319,7 @@ class Mage_PaypalUk_Model_Api_Nvp extends Mage_Paypal_Model_Api_Nvp
      *
      * @return string
      */
+    #[\Override]
     public function getApiEndpoint()
     {
         return sprintf('https://%spayflowpro.paypal.com/transaction', $this->_config->sandboxFlag ? 'pilot-' : '');
@@ -401,6 +398,7 @@ class Mage_PaypalUk_Model_Api_Nvp extends Mage_Paypal_Model_Api_Nvp
      * @param array $request
      * @return array
      */
+    #[\Override]
     protected function _addMethodToRequest($methodName, $request)
     {
         $request['TRXTYPE'] = $this->_mapPaypalMethodName($methodName);
@@ -460,6 +458,7 @@ class Mage_PaypalUk_Model_Api_Nvp extends Mage_Paypal_Model_Api_Nvp
      * @param array $response
      * @return bool success flag
      */
+    #[\Override]
     protected function _isCallSuccessful($response)
     {
         $this->_callWarnings = [];
@@ -478,6 +477,7 @@ class Mage_PaypalUk_Model_Api_Nvp extends Mage_Paypal_Model_Api_Nvp
      *
      * @param array $response
      */
+    #[\Override]
     protected function _handleCallErrors($response)
     {
         if ($response['RESULT'] != self::RESPONSE_CODE_APPROVED) {
@@ -496,6 +496,7 @@ class Mage_PaypalUk_Model_Api_Nvp extends Mage_Paypal_Model_Api_Nvp
      * @param array $request
      * @return string
      */
+    #[\Override]
     protected function _buildQuery($request)
     {
         $result = '';
@@ -518,15 +519,13 @@ class Mage_PaypalUk_Model_Api_Nvp extends Mage_Paypal_Model_Api_Nvp
     /**
      * "GetTransactionDetails" method does not exists in PaypalUK
      */
+    #[\Override]
     public function callGetTransactionDetails()
     {
     }
 
     /**
      * Get FMF results from response, if any
-     *
-     * @param array $from
-     * @param array $collectedWarnings
      */
     protected function _importFraudFiltersResult(array $from, array $collectedWarnings)
     {
@@ -543,6 +542,7 @@ class Mage_PaypalUk_Model_Api_Nvp extends Mage_Paypal_Model_Api_Nvp
      * @param string $methodName Current method name
      * @return array
      */
+    #[\Override]
     protected function _prepareEachCallRequest($methodName)
     {
         return $this->_eachCallRequest;
@@ -555,6 +555,7 @@ class Mage_PaypalUk_Model_Api_Nvp extends Mage_Paypal_Model_Api_Nvp
      * @param array $requestFields Standard set of values
      * @return array
      */
+    #[\Override]
     protected function _prepareExpressCheckoutCallRequest(&$requestFields)
     {
         return $requestFields;
@@ -566,6 +567,7 @@ class Mage_PaypalUk_Model_Api_Nvp extends Mage_Paypal_Model_Api_Nvp
      *
      * @param array $request
      */
+    #[\Override]
     protected function _applyCountryWorkarounds(&$request)
     {
         if (isset($request['SHIPTOCOUNTRY']) && $request['SHIPTOCOUNTRY'] == 'PR') {
@@ -577,10 +579,10 @@ class Mage_PaypalUk_Model_Api_Nvp extends Mage_Paypal_Model_Api_Nvp
     /**
      * Checking negative line items
      *
-     * @param array $request
      * @param int $i
      * @return null|true
      */
+    #[\Override]
     protected function _exportLineItems(array &$request, $i = 0)
     {
         $requestBefore = $request;

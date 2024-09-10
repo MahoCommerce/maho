@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -66,6 +62,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function _prepareLayout()
     {
         $this->addMessages(Mage::getSingleton('core/session')->getMessages(true));
@@ -86,7 +83,6 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     /**
      * Set messages collection
      *
-     * @param   Mage_Core_Model_Message_Collection $messages
      * @return  Mage_Core_Block_Messages
      */
     public function setMessages(Mage_Core_Model_Message_Collection $messages)
@@ -98,7 +94,6 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     /**
      * Add messages to display
      *
-     * @param Mage_Core_Model_Message_Collection $messages
      * @return $this
      */
     public function addMessages(Mage_Core_Model_Message_Collection $messages)
@@ -125,7 +120,6 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     /**
      * Adding new message to message collection
      *
-     * @param   Mage_Core_Model_Message_Abstract $message
      * @return  Mage_Core_Block_Messages
      */
     public function addMessage(Mage_Core_Model_Message_Abstract $message)
@@ -254,6 +248,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
     /**
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         return $this->getGroupedHtml();
@@ -284,6 +279,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      *
      * @return array
      */
+    #[\Override]
     public function getCacheKeyInfo()
     {
         return [

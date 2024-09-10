@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -28,6 +24,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Cart extends Mage_Adminhtm
      */
     protected $_sidebarStorageAction = 'add_cart_item';
 
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -48,6 +45,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Cart extends Mage_Adminhtm
      *
      * @return mixed
      */
+    #[\Override]
     public function getItemCollection()
     {
         $collection = $this->getData('item_collection');
@@ -61,6 +59,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Cart extends Mage_Adminhtm
     /**
      * @return bool
      */
+    #[\Override]
     public function canDisplayItemQty()
     {
         return true;
@@ -72,6 +71,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Cart extends Mage_Adminhtm
      * @param Varien_Object $item
      * @return int
      */
+    #[\Override]
     public function getIdentifierId($item)
     {
         return $item->getId();
@@ -83,6 +83,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Cart extends Mage_Adminhtm
      * @param   Mage_Sales_Model_Quote_Item $item
      * @return  int
      */
+    #[\Override]
     public function getProductId($item)
     {
         return $item->getProduct()->getId();
@@ -91,6 +92,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Cart extends Mage_Adminhtm
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $deleteAllConfirmString = Mage::helper('core')->jsQuoteEscape(

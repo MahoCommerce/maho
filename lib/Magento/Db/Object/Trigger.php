@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Magento
  * @package    Magento_Db
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -34,6 +30,7 @@ class Magento_Db_Object_Trigger extends Magento_Db_Object implements Magento_Db_
     /**
      * @return bool
      */
+    #[\Override]
     public function isExists()
     {
         if (!isset($this->_data['triggers'][$this->_schemaName])) {
@@ -47,6 +44,7 @@ class Magento_Db_Object_Trigger extends Magento_Db_Object implements Magento_Db_
         return false;
     }
 
+    #[\Override]
     public function describe()
     {
         $columns = [

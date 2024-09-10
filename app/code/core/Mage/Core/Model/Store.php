@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -249,6 +245,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Initialize object
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('core/store');
@@ -283,6 +280,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function load($id, $field = null)
     {
         if (!is_numeric($id) && is_null($field)) {
@@ -439,8 +437,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
 
     /**
      * Set website model
-     *
-     * @param Mage_Core_Model_Website $website
      */
     public function setWebsite(Mage_Core_Model_Website $website)
     {
@@ -700,6 +696,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      *
      * @return  int
      */
+    #[\Override]
     public function getId()
     {
         return $this->_getData('store_id');
@@ -1156,6 +1153,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      *
      * {@inheritDoc}
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         $this->_protectFromNonAdmin();
@@ -1168,6 +1166,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterDelete()
     {
         parent::_afterDelete();
@@ -1180,6 +1179,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterDeleteCommit()
     {
         parent::_afterDeleteCommit();

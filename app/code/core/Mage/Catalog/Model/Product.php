@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2015-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2015-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -341,6 +337,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Initialize resources
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product');
@@ -352,6 +349,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return Varien_Object
      */
+    #[\Override]
     protected function _initOldFieldsMap()
     {
         return $this;
@@ -375,6 +373,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return Mage_Catalog_Model_Resource_Product_Collection
      */
+    #[\Override]
     public function getResourceCollection()
     {
         if (empty($this->_resourceCollectionName)) {
@@ -717,6 +716,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @throws Mage_Core_Exception
      */
+    #[\Override]
     protected function _beforeSave()
     {
         $this->cleanCache();
@@ -797,6 +797,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave()
     {
         $this->getLinkInstance()->saveProductRelations($this);
@@ -817,6 +818,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         $this->_protectFromNonAdmin();
@@ -828,6 +830,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Init indexing process after product delete commit
      */
+    #[\Override]
     protected function _afterDeleteCommit()
     {
         parent::_afterDeleteCommit();
@@ -844,6 +847,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _afterLoad()
     {
         parent::_afterLoad();
@@ -1719,6 +1723,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      * @param array $arrAttributes Attribute array
      * @return array
      */
+    #[\Override]
     public function toArray(array $arrAttributes = [])
     {
         $data = parent::toArray($arrAttributes);
@@ -1764,6 +1769,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     public function delete()
     {
         parent::delete();
@@ -1872,7 +1878,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Add option to array of product options
      *
-     * @param Mage_Catalog_Model_Product_Option $option
      * @return $this
      */
     public function addOption(Mage_Catalog_Model_Product_Option $option)
@@ -2101,6 +2106,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      * @param mixed $data
      * @return Varien_Object
      */
+    #[\Override]
     public function setOrigData($key = null, $data = null)
     {
         if (Mage::app()->getStore()->isAdmin()) {
@@ -2142,6 +2148,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return Mage_Core_Model_Abstract
      */
+    #[\Override]
     public function cleanModelCache()
     {
         $tags = $this->getCacheIdTagsWithCategories();
@@ -2154,7 +2161,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Check for empty SKU on each product
      *
-     * @param  array $productIds
      * @return bool|null
      */
     public function isProductsHasSku(array $productIds)
@@ -2174,7 +2180,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Parse buyRequest into options values used by product
      *
-     * @param  Varien_Object $buyRequest
      * @return Varien_Object
      */
     public function processBuyRequest(Varien_Object $buyRequest)
@@ -2240,6 +2245,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _clearReferences()
     {
         $this->_clearOptionReferences();
@@ -2251,6 +2257,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     protected function _clearData()
     {
         foreach ($this->_data as $data) {
@@ -2328,6 +2335,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return $this
      */
+    #[\Override]
     public function afterCommitCallback()
     {
         parent::afterCommitCallback();

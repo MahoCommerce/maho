@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_CatalogSearch
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -26,6 +22,7 @@ class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
      *
      * @return Mage_CatalogSearch_Model_Resource_Fulltext_Collection
      */
+    #[\Override]
     public function getProductCollection()
     {
         if (isset($this->_productCollections[$this->getCurrentCategory()->getId()])) {
@@ -44,6 +41,7 @@ class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
      * @param Mage_CatalogSearch_Model_Resource_Fulltext_Collection $collection
      * @return Mage_Catalog_Model_Layer
      */
+    #[\Override]
     public function prepareProductCollection($collection)
     {
         $collection
@@ -64,6 +62,7 @@ class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
      *
      * @return string
      */
+    #[\Override]
     public function getStateKey()
     {
         if ($this->_stateKey === null) {
@@ -76,9 +75,9 @@ class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
     /**
      * Get default tags for current layer state
      *
-     * @param   array $additionalTags
      * @return  array
      */
+    #[\Override]
     public function getStateTags(array $additionalTags = [])
     {
         $additionalTags = parent::getStateTags($additionalTags);
@@ -92,6 +91,7 @@ class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
      * @param   Mage_Catalog_Model_Resource_Product_Attribute_Collection $collection
      * @return  Mage_Catalog_Model_Resource_Product_Attribute_Collection
      */
+    #[\Override]
     protected function _prepareAttributeCollection($collection)
     {
         $collection->addIsFilterableInSearchFilter()
@@ -103,6 +103,7 @@ class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
      * Filter which attributes are included in getFilterableAttributes
      *
      */
+    #[\Override]
     protected function _filterFilterableAttributes(Mage_Catalog_Model_Resource_Eav_Attribute  $attribute): bool
     {
         return $attribute->getIsVisible() && $attribute->getIsFilterableInSearch() > 0;
@@ -114,6 +115,7 @@ class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
      * @param   Mage_Eav_Model_Entity_Attribute $attribute
      * @return  Mage_Eav_Model_Entity_Attribute
      */
+    #[\Override]
     protected function _prepareAttribute($attribute)
     {
         $attribute = parent::_prepareAttribute($attribute);

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_HTTP
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -113,6 +109,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
      *
      * @param int $value
      */
+    #[\Override]
     public function setTimeout($value)
     {
         $this->_timeout = (int) $value;
@@ -130,6 +127,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
 
      * @param array $headers
      */
+    #[\Override]
     public function setHeaders($headers)
     {
         $this->_headers = $headers;
@@ -141,6 +139,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
      * @param $name name, ex. "Location"
      * @param $value value ex. "http://google.com"
      */
+    #[\Override]
     public function addHeader($name, $value)
     {
         $this->_headers[$name] = $value;
@@ -151,6 +150,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
      *
      * @param string $name
      */
+    #[\Override]
     public function removeHeader($name)
     {
         unset($this->_headers[$name]);
@@ -163,6 +163,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
      * @param string $login username
      * @param string $pass password
      */
+    #[\Override]
     public function setCredentials($login, $pass)
     {
         $val = base64_encode("$login:$pass");
@@ -175,6 +176,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
      * @param string $name
      * @param string $value
      */
+    #[\Override]
     public function addCookie($name, $value)
     {
         $this->_cookies[$name] = $value;
@@ -185,6 +187,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
      *
      * @param string $name
      */
+    #[\Override]
     public function removeCookie($name)
     {
         unset($this->_cookies[$name]);
@@ -195,6 +198,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
      *
      * @param array $cookies
      */
+    #[\Override]
     public function setCookies($cookies)
     {
         $this->_cookies = $cookies;
@@ -203,6 +207,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
     /**
      * Clear cookies
      */
+    #[\Override]
     public function removeCookies()
     {
         $this->setCookies([]);
@@ -213,6 +218,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
      *
      * @param string $uri uri relative to host, ex. "/index.php"
      */
+    #[\Override]
     public function get($uri)
     {
         $this->makeRequest('GET', $uri);
@@ -222,6 +228,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
      * Make POST request
      * @see lib/Mage/HTTP/Mage_HTTP_Client#post($uri, $params)
      */
+    #[\Override]
     public function post($uri, $params)
     {
         $this->makeRequest('POST', $uri, $params);
@@ -232,6 +239,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
      *
      * @return array
      */
+    #[\Override]
     public function getHeaders()
     {
         return $this->_responseHeaders;
@@ -242,6 +250,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
      *
      * @return string
      */
+    #[\Override]
     public function getBody()
     {
         return $this->_responseBody;
@@ -252,6 +261,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
      *
      * @return array
      */
+    #[\Override]
     public function getCookies()
     {
         if (empty($this->_responseHeaders['Set-Cookie'])) {
@@ -312,6 +322,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
      * Get response status code
      * @see lib/Mage/HTTP/Mage_HTTP_Client#getStatus()
      */
+    #[\Override]
     public function getStatus()
     {
         return $this->_responseStatus;
@@ -396,8 +407,6 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
      *
      * @param resource $ch curl handle, not needed
      * @param string   $data
-     *
-     * @return int
      */
     protected function parseHeaders($ch, $data): int
     {
@@ -431,8 +440,6 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
     }
 
     /**
-     * @param array $line
-     *
      * @throws Exception
      */
     protected function validateHttpVersion(array $line)
@@ -478,6 +485,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
     /**
      * Set CURL options ovverides array  *
      */
+    #[\Override]
     public function setOptions($arr)
     {
         $this->_curlUserOptions = $arr;
@@ -486,6 +494,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
     /**
      * Set curl option
      */
+    #[\Override]
     public function setOption($name, $value)
     {
         $this->_curlUserOptions[$name] = $value;

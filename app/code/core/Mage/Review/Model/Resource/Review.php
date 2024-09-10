@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Review
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -73,6 +69,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Define main table. Define other tables name
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('review/review', 'review_id');
@@ -92,6 +89,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
      * @param Mage_Core_Model_Abstract $object
      * @return Zend_Db_Select
      */
+    #[\Override]
     protected function _getLoadSelect($field, $value, $object)
     {
         $select = parent::_getLoadSelect($field, $value, $object);
@@ -105,9 +103,9 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Perform actions before object save
      *
-     * @param Mage_Core_Model_Abstract|Mage_Review_Model_Review $object
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if (!$object->getId()) {
@@ -126,10 +124,10 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Perform actions after object save
      *
-     * @param Mage_Core_Model_Abstract|Mage_Review_Model_Review $object
      * @return $this
      * @throws Zend_Db_Adapter_Exception
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
         $adapter = $this->_getWriteAdapter();
@@ -191,10 +189,10 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Perform actions after object load
      *
-     * @param Mage_Core_Model_Abstract|Mage_Review_Model_Review $object
      * @return $this
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {
         $adapter = $this->_getReadAdapter();
@@ -213,9 +211,9 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Action before delete
      *
-     * @param Mage_Core_Model_Abstract|Mage_Review_Model_Review $object
      * @return $this
      */
+    #[\Override]
     protected function _beforeDelete(Mage_Core_Model_Abstract $object)
     {
         // prepare rating ids, that depend on review
@@ -229,7 +227,6 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Perform actions after object delete
      *
-     * @param Mage_Core_Model_Abstract $object
      * @return $this
      */
     public function afterDeleteCommit(Mage_Core_Model_Abstract $object)

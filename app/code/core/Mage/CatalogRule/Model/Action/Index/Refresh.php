@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_CatalogRule
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -56,8 +52,6 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
      *  - 'factory' Mage_Core_Model_Factory
      *  - 'resource' Mage_Core_Model_Resource_Db_Abstract
      *  - 'app' Mage_Core_Model_App
-     *
-     * @param array $args
      */
     public function __construct(array $args)
     {
@@ -69,8 +63,6 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
 
     /**
      * Set connection
-     *
-     * @param Varien_Db_Adapter_Interface $connection
      */
     protected function _setConnection(Varien_Db_Adapter_Interface $connection)
     {
@@ -79,8 +71,6 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
 
     /**
      * Set factory
-     *
-     * @param Mage_Core_Model_Factory $factory
      */
     protected function _setFactory(Mage_Core_Model_Factory $factory)
     {
@@ -89,8 +79,6 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
 
     /**
      * Set resource
-     *
-     * @param Mage_Core_Model_Resource_Db_Abstract $resource
      */
     protected function _setResource(Mage_Core_Model_Resource_Db_Abstract $resource)
     {
@@ -253,7 +241,6 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Prepare temporary data
      *
-     * @param Mage_Core_Model_Website $website
      * @return Varien_Db_Select
      */
     protected function _prepareTemporarySelect(Mage_Core_Model_Website $website)
@@ -455,7 +442,6 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Prepare index select
      *
-     * @param Mage_Core_Model_Website $website
      * @param int|Zend_Db_Expr $time
      * @return Varien_Db_Select
      */
@@ -553,8 +539,6 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
 
     /**
      * Remove old index data
-     *
-     * @param Mage_Core_Model_Website $website
      */
     protected function _removeOldIndexData(Mage_Core_Model_Website $website)
     {
@@ -567,7 +551,6 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Fill Index Data
      *
-     * @param Mage_Core_Model_Website $website
      * @param int $time
      */
     protected function _fillIndexData(Mage_Core_Model_Website $website, $time)
@@ -585,7 +568,6 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Reindex catalog prices by website for timestamp
      *
-     * @param Mage_Core_Model_Website $website
      * @param int $timestamp
      */
     protected function _reindex(Mage_Core_Model_Website $website, $timestamp)
@@ -628,8 +610,6 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
 
     /**
      * Return data for affected product
-     *
-     * @return null
      */
     protected function _getProduct()
     {

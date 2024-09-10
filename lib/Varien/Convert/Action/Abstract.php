@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Varien
  * @package    Varien_Convert
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -113,7 +109,6 @@ abstract class Varien_Convert_Action_Abstract implements Varien_Convert_Action_I
     /**
      * Set profile instance the action belongs to
      *
-     * @param Varien_Convert_Profile_Abstract $profile
      * @return Varien_Convert_Action_Abstract
      */
     public function setProfile(Varien_Convert_Profile_Abstract $profile)
@@ -159,6 +154,7 @@ abstract class Varien_Convert_Action_Abstract implements Varien_Convert_Action_I
      *
      * @return Varien_Convert_Action_Abstract
      */
+    #[\Override]
     public function run()
     {
         if ($method = $this->getParam('method')) {

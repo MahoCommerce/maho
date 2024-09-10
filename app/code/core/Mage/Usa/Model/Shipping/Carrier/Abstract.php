@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Usa
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -52,6 +48,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
      *
      * @return string
      */
+    #[\Override]
     public function getCarrierCode()
     {
         return $this->_code ?? null;
@@ -80,6 +77,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
      *
      * @return bool
      */
+    #[\Override]
     public function isTrackingAvailable()
     {
         return true;
@@ -90,6 +88,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
      *
      * @return bool
      */
+    #[\Override]
     public function isCityRequired()
     {
         return true;
@@ -101,6 +100,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
      * @param string|null $countryId
      * @return bool
      */
+    #[\Override]
     public function isZipCodeRequired($countryId = null)
     {
         if ($countryId != null) {
@@ -114,6 +114,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
      *
      * @return bool
      */
+    #[\Override]
     public function isShippingLabelsAvailable()
     {
         return true;
@@ -124,7 +125,6 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
      * bundle itself, otherwise we may not get a rate at all (e.g. when total weight of a bundle exceeds max weight
      * despite each item by itself is not)
      *
-     * @param Mage_Shipping_Model_Rate_Request $request
      * @return array
      */
     public function getAllItems(Mage_Shipping_Model_Rate_Request $request)
@@ -156,9 +156,9 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
     /**
      * Processing additional validation to check if carrier applicable.
      *
-     * @param Mage_Shipping_Model_Rate_Request $request
      * @return Mage_Shipping_Model_Carrier_Abstract|Mage_Shipping_Model_Rate_Result_Error|bool
      */
+    #[\Override]
     public function proccessAdditionalValidation(Mage_Shipping_Model_Rate_Request $request)
     {
         //Skip by item validation if there is no items in request
@@ -278,7 +278,6 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
      * Prepare shipment request.
      * Validate and correct request information
      *
-     * @param Varien_Object $request
      *
      */
     protected function _prepareShipmentRequest(Varien_Object $request)
@@ -295,9 +294,9 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
     /**
      * Do request to shipment
      *
-     * @param Mage_Shipping_Model_Shipment_Request $request
      * @return Varien_Object
      */
+    #[\Override]
     public function requestToShipment(Mage_Shipping_Model_Shipment_Request $request)
     {
         $packages = $request->getPackages();
@@ -346,6 +345,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
      * @param $request
      * @return Varien_Object
      */
+    #[\Override]
     public function returnOfShipment($request)
     {
         $request->setIsReturn(true);
@@ -405,7 +405,6 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
     /**
      * Do shipment request to carrier web service, obtain Print Shipping Labels and process errors in response
      *
-     * @param Varien_Object $request
      * @return Varien_Object
      */
     abstract protected function _doShipmentRequest(Varien_Object $request);

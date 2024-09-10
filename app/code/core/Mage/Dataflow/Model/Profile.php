@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Dataflow
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -61,11 +57,13 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
      */
     protected $_customerTablePermanentAttributes = ['email', 'website'];
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('dataflow/profile');
     }
 
+    #[\Override]
     protected function _afterLoad()
     {
         $guiData = '';
@@ -82,6 +80,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
         return parent::_afterLoad();
     }
 
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();
@@ -136,6 +135,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
         return $this;
     }
 
+    #[\Override]
     protected function _afterSave()
     {
         if ($this->getGuiData() && is_string($this->getGuiData())) {

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Paypal
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -86,9 +82,9 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
     /**
      * Init billing agreement
      *
-     * @param Mage_Payment_Model_Billing_AgreementAbstract $agreement
      * @return $this
      */
+    #[\Override]
     public function initBillingAgreementToken(Mage_Payment_Model_Billing_AgreementAbstract $agreement)
     {
         $api = $this->_pro->getApi()
@@ -106,9 +102,9 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
     /**
      * Retrieve billing agreement customer details by token
      *
-     * @param Mage_Payment_Model_Billing_AgreementAbstract $agreement
      * @return array
      */
+    #[\Override]
     public function getBillingAgreementTokenInfo(Mage_Payment_Model_Billing_AgreementAbstract $agreement)
     {
         $api = $this->_pro->getApi()
@@ -127,9 +123,9 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
     /**
      * Create billing agreement by token specified in request
      *
-     * @param Mage_Payment_Model_Billing_AgreementAbstract $agreement
      * @return $this
      */
+    #[\Override]
     public function placeBillingAgreement(Mage_Payment_Model_Billing_AgreementAbstract $agreement)
     {
         $api = $this->_pro->getApi()
@@ -142,9 +138,9 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
     /**
      * Update billing agreement status
      *
-     * @param Mage_Payment_Model_Billing_AgreementAbstract $agreement
      * @return $this
      */
+    #[\Override]
     public function updateBillingAgreementStatus(Mage_Payment_Model_Billing_AgreementAbstract $agreement)
     {
         $targetStatus = $agreement->getStatus();
@@ -167,10 +163,10 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
     /**
      * Authorize payment
      *
-     * @param Varien_Object $payment
      * @param float $amount
      * @return $this
      */
+    #[\Override]
     public function authorize(Varien_Object $payment, $amount)
     {
         return $this->_placeOrder($payment, $amount);
@@ -182,6 +178,7 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return $this
      */
+    #[\Override]
     public function void(Varien_Object $payment)
     {
         $this->_pro->void($payment);
@@ -195,6 +192,7 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
      * @param float $amount
      * @return $this
      */
+    #[\Override]
     public function capture(Varien_Object $payment, $amount)
     {
         if ($this->_pro->capture($payment, $amount) === false) {
@@ -210,6 +208,7 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
      * @param float $amount
      * @return $this
      */
+    #[\Override]
     public function refund(Varien_Object $payment, $amount)
     {
         $this->_pro->refund($payment, $amount);
@@ -222,6 +221,7 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return $this
      */
+    #[\Override]
     public function cancel(Varien_Object $payment)
     {
         $this->_pro->cancel($payment);
@@ -234,6 +234,7 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return bool
      */
+    #[\Override]
     public function canReviewPayment(Mage_Payment_Model_Info $payment)
     {
         return parent::canReviewPayment($payment) && $this->_pro->canReviewPayment($payment);
@@ -245,6 +246,7 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return bool
      */
+    #[\Override]
     public function acceptPayment(Mage_Payment_Model_Info $payment)
     {
         parent::acceptPayment($payment);
@@ -257,6 +259,7 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
      * @param Mage_Sales_Model_Order_Payment $payment
      * @return bool
      */
+    #[\Override]
     public function denyPayment(Mage_Payment_Model_Info $payment)
     {
         parent::denyPayment($payment);
@@ -266,10 +269,10 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
     /**
      * Fetch transaction details info
      *
-     * @param Mage_Payment_Model_Info $payment
      * @param string $transactionId
      * @return array
      */
+    #[\Override]
     public function fetchTransactionInfo(Mage_Payment_Model_Info $payment, $transactionId)
     {
         return $this->_pro->fetchTransactionInfo($payment, $transactionId);
@@ -278,7 +281,6 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
     /**
      * Place an order with authorization or capture action
      *
-     * @param Mage_Sales_Model_Order_Payment $payment
      * @param float $amount
      * @return $this
      */
@@ -321,6 +323,7 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
         return $this;
     }
 
+    #[\Override]
     protected function _isAvailable($quote)
     {
         return $this->_pro->getConfig()->isMethodAvailable($this->_code);
@@ -332,6 +335,7 @@ class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method
      * @see Mage_Sales_Model_Payment::place()
      * @return string
      */
+    #[\Override]
     public function getConfigPaymentAction()
     {
         return $this->_pro->getConfig()->getPaymentAction();

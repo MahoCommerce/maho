@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -90,6 +86,7 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
 
     protected $_quote;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/quote_payment');
@@ -98,7 +95,6 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
     /**
      * Declare quote model instance
      *
-     * @param   Mage_Sales_Model_Quote $quote
      * @return  $this
      */
     public function setQuote(Mage_Sales_Model_Quote $quote)
@@ -125,7 +121,6 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
      * Method calls quote totals collect because payment method availability
      * can be related to quote totals
      *
-     * @param   array $data
      * @throws  Mage_Core_Exception
      * @return  $this
      */
@@ -168,6 +163,7 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeSave()
     {
         if ($this->getQuote()) {
@@ -215,6 +211,7 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
      *
      * @return Mage_Payment_Model_Method_Abstract
      */
+    #[\Override]
     public function getMethodInstance()
     {
         $method = parent::getMethodInstance();

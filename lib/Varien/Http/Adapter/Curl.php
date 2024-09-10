@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Varien
  * @package    Varien_Http
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -75,7 +71,7 @@ class Varien_Http_Adapter_Curl implements Zend_Http_Client_Adapter_Interface
         $verifyHost = isset($this->_config['verifyhost']) ? $this->_config['verifyhost'] : 0;
         curl_setopt($this->_getResource(), CURLOPT_SSL_VERIFYHOST, $verifyHost);
 
-        foreach ($this->_config as $param => $curlOption) {
+        foreach (array_keys($this->_config) as $param) {
             if (array_key_exists($param, $this->_allowedParams)) {
                 curl_setopt($this->_getResource(), $this->_allowedParams[$param], $this->_config[$param]);
             }
@@ -86,7 +82,6 @@ class Varien_Http_Adapter_Curl implements Zend_Http_Client_Adapter_Interface
     /**
      * Set array of additional cURL options
      *
-     * @param array $options
      * @return Varien_Http_Adapter_Curl
      */
     public function setOptions(array $options = [])
@@ -111,7 +106,6 @@ class Varien_Http_Adapter_Curl implements Zend_Http_Client_Adapter_Interface
     /**
      * Add additional options list to curl
      *
-     * @param array $options
      *
      * @return Varien_Http_Adapter_Curl
      */
@@ -127,6 +121,7 @@ class Varien_Http_Adapter_Curl implements Zend_Http_Client_Adapter_Interface
      * @param array $config
      * @return Varien_Http_Adapter_Curl
      */
+    #[\Override]
     public function setConfig($config = [])
     {
         $this->_config = $config;
@@ -142,6 +137,7 @@ class Varien_Http_Adapter_Curl implements Zend_Http_Client_Adapter_Interface
      * @param boolean $secure
      * @return Varien_Http_Adapter_Curl
      */
+    #[\Override]
     public function connect($host, $port = 80, $secure = false)
     {
         return $this->_applyConfig();
@@ -157,6 +153,7 @@ class Varien_Http_Adapter_Curl implements Zend_Http_Client_Adapter_Interface
      * @param string        $body
      * @return string Request as text
      */
+    #[\Override]
     public function write($method, $url, $http_ver = '1.1', $headers = [], $body = '')
     {
         if ($url instanceof Zend_Uri_Http) {
@@ -191,6 +188,7 @@ class Varien_Http_Adapter_Curl implements Zend_Http_Client_Adapter_Interface
      *
      * @return string|bool
      */
+    #[\Override]
     public function read()
     {
         $response = curl_exec($this->_getResource());
@@ -213,6 +211,7 @@ class Varien_Http_Adapter_Curl implements Zend_Http_Client_Adapter_Interface
      *
      * @return Varien_Http_Adapter_Curl
      */
+    #[\Override]
     public function close()
     {
         curl_close($this->_getResource());

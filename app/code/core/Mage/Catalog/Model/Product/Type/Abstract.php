@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -297,7 +293,6 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * Prepare product and its configuration to be added to some products list.
      * Perform standard preparation process and then prepare options belonging to specific product type.
      *
-     * @param  Varien_Object $buyRequest
      * @param  Mage_Catalog_Model_Product $product
      * @param  string $processMode
      * @return array|string
@@ -367,7 +362,6 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
     /**
      * Process product configuration
      *
-     * @param Varien_Object $buyRequest
      * @param Mage_Catalog_Model_Product $product
      * @param string $processMode
      * @return array|string
@@ -388,7 +382,6 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * Initialize product(s) for add to cart process.
      * Advanced version of func to prepare product for cart - processMode can be specified there.
      *
-     * @param Varien_Object $buyRequest
      * @param Mage_Catalog_Model_Product $product
      * @param null|string $processMode
      * @return array|string
@@ -406,7 +399,6 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
     /**
      * Initialize product(s) for add to cart process
      *
-     * @param Varien_Object $buyRequest
      * @param Mage_Catalog_Model_Product $product
      * @return array|string
      */
@@ -505,7 +497,6 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
     /**
      * Process custom defined options for product
      *
-     * @param Varien_Object $buyRequest
      * @param Mage_Catalog_Model_Product $product
      * @param string $processMode
      * @return array
@@ -544,7 +535,6 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * @deprecated after 1.4.2.0
      * @see _prepareOptions()
      *
-     * @param Varien_Object $buyRequest
      * @param Mage_Catalog_Model_Product $product
      * @return array
      */
@@ -791,7 +781,6 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * so need to change configuration item qty option value too.
      *
      * @param array $options
-     * @param Varien_Object $option
      * @param mixed $value
      * @param Mage_Catalog_Model_Product $product
      * @return $this

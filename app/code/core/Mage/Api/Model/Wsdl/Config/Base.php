@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Api
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -44,7 +40,7 @@ class Mage_Api_Model_Wsdl_Config_Base extends Varien_Simplexml_Config
         // set up default WSDL template variables
         $this->_wsdlVariables = new Varien_Object(
             [
-                'name' => 'OpenMage',
+                'name' => 'Maho',
                 'url'  => Mage::helper('api')->getServiceUrl('*/*/*', ['_query' => $queryParams], true)
             ]
         );
@@ -79,6 +75,7 @@ class Mage_Api_Model_Wsdl_Config_Base extends Varien_Simplexml_Config
      * @param string $text
      * @return string
      */
+    #[\Override]
     public function processFileData($text)
     {
         /** @var Mage_Core_Model_Email_Template_Filter $template */
@@ -107,6 +104,7 @@ class Mage_Api_Model_Wsdl_Config_Base extends Varien_Simplexml_Config
      * @param string $file
      * @return $this|false
      */
+    #[\Override]
     public function loadFile($file)
     {
         if (in_array($file, $this->_loadedFiles)) {

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Paypal
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -39,9 +35,9 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Global extends Mage_Adm
     /**
      * Render fieldset html
      *
-     * @param Varien_Data_Form_Element_Abstract $fieldset
      * @return string
      */
+    #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $fieldset)
     {
         foreach ($fieldset->getSortedElements() as $element) {
@@ -80,7 +76,6 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Global extends Mage_Adm
     /**
      * Return checkbox html with hidden field for correct config values
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     public function getElementHtml(Varien_Data_Form_Element_Abstract $element)
@@ -107,7 +102,6 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Global extends Mage_Adm
     /**
      * Whether element should be rendered in "simplified" mode
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return bool
      */
     public function getIsElementSimplified(Varien_Data_Form_Element_Abstract $element)
@@ -119,7 +113,6 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Global extends Mage_Adm
     /**
      * Getter for element label
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     public function getElementLabel(Varien_Data_Form_Element_Abstract $element)
@@ -130,7 +123,6 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Global extends Mage_Adm
     /**
      * Getter for element comment
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     public function getElementComment(Varien_Data_Form_Element_Abstract $element)
@@ -141,7 +133,6 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Global extends Mage_Adm
     /**
      * Getter for element comment
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     public function getElementOriginalData(Varien_Data_Form_Element_Abstract $element, $key)
@@ -153,7 +144,6 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Global extends Mage_Adm
     /**
      * Check whether checkbox has "Use default" option or not
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return bool
      */
     public function hasInheritElement(Varien_Data_Form_Element_Abstract $element)
@@ -164,7 +154,6 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Global extends Mage_Adm
     /**
      * Return "Use default" checkbox html
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     public function getInheritElementHtml(Varien_Data_Form_Element_Abstract $element)
@@ -188,7 +177,6 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Global extends Mage_Adm
     /**
      * Return label for "Use default" checkbox
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     public function getInheritElementLabelHtml(Varien_Data_Form_Element_Abstract $element)
@@ -204,7 +192,6 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Global extends Mage_Adm
     /**
      * Return element label with tag SPAN
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     public function getElementLabelTextHtml(Varien_Data_Form_Element_Abstract $element)
@@ -219,7 +206,6 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Global extends Mage_Adm
     /**
      * Return backend config for element like JSON
      *
-     * @param Varien_Data_Form_Element_Abstract $element
      * @return string
      */
     public function getElementBackendConfig(Varien_Data_Form_Element_Abstract $element)

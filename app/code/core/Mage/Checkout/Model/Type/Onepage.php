@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Checkout
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -90,7 +86,6 @@ class Mage_Checkout_Model_Type_Onepage
     /**
      * Declare checkout quote instance
      *
-     * @param Mage_Sales_Model_Quote $quote
      * @return $this
      */
     public function setQuote(Mage_Sales_Model_Quote $quote)
@@ -119,7 +114,7 @@ class Mage_Checkout_Model_Type_Onepage
         $checkout = $this->getCheckout();
         $customerSession = $this->getCustomerSession();
         if (is_array($checkout->getStepData())) {
-            foreach ($checkout->getStepData() as $step => $data) {
+            foreach (array_keys($checkout->getStepData()) as $step) {
                 if (!($step === 'login' || $customerSession->isLoggedIn() && $step === 'billing')) {
                     $checkout->setStepData($step, 'allow', false);
                 }
@@ -377,7 +372,6 @@ class Mage_Checkout_Model_Type_Onepage
      * Validate customer data and set some its data for further usage in quote
      * Will return either true or array with error messages
      *
-     * @param array $data
      * @return true|array
      */
     protected function _validateCustomerData(array $data)
@@ -455,7 +449,6 @@ class Mage_Checkout_Model_Type_Onepage
      * Will return either true or array with error messages
      *
      * @deprecated since 1.4.0.1
-     * @param Mage_Sales_Model_Quote_Address $address
      * @return true|array
      */
     protected function _processValidateCustomer(Mage_Sales_Model_Quote_Address $address)

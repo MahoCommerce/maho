@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Paypal
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -508,7 +504,6 @@ class Mage_Paypal_Model_Express_Checkout
     /**
      * Return callback response with shipping options
      *
-     * @param array $request
      * @return string
      */
     public function getShippingOptionsCallbackResponse(array $request)
@@ -784,7 +779,6 @@ class Mage_Paypal_Model_Express_Checkout
      * Returns empty array if it was impossible to obtain any shipping rate
      * If there are shipping rates obtained, the method must return one of them as default.
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      * @param bool $mayReturnEmpty
      * @return array
      */
@@ -865,8 +859,6 @@ class Mage_Paypal_Model_Express_Checkout
      * This function is used as a callback comparison function in shipping options sorting process
      * @see self::_prepareShippingOptions()
      *
-     * @param Varien_Object $option1
-     * @param Varien_Object $option2
      * @return int
      */
     protected static function cmpShippingOptions(Varien_Object $option1, Varien_Object $option2)
@@ -883,7 +875,6 @@ class Mage_Paypal_Model_Express_Checkout
      * If in future the issue is fixed, we don't need to attempt to match it. It would be enough to set the method code
      * before collecting shipping rates
      *
-     * @param Mage_Sales_Model_Quote_Address $address
      * @param string $selectedCode
      * @return string
      */

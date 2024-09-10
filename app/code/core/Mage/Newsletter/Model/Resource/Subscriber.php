@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Newsletter
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -53,6 +49,7 @@ class Mage_Newsletter_Model_Resource_Subscriber extends Mage_Core_Model_Resource
      * Get tablename from config
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('newsletter/subscriber', 'subscriber_id');
@@ -95,7 +92,6 @@ class Mage_Newsletter_Model_Resource_Subscriber extends Mage_Core_Model_Resource
     /**
      * Load subscriber by customer
      *
-     * @param Mage_Customer_Model_Customer $customer
      * @return array
      */
     public function loadByCustomer(Mage_Customer_Model_Customer $customer)
@@ -140,8 +136,6 @@ class Mage_Newsletter_Model_Resource_Subscriber extends Mage_Core_Model_Resource
     /**
      * Updates data when subscriber received
      *
-     * @param Mage_Newsletter_Model_Subscriber $subscriber
-     * @param Mage_Newsletter_Model_Queue $queue
      * @return $this
      */
     public function received(Mage_Newsletter_Model_Subscriber $subscriber, Mage_Newsletter_Model_Queue $queue)

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Paypal
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,6 +21,7 @@ class Mage_Paypal_Model_Resource_Report_Settlement_Row_Collection extends Mage_C
      * Resource initializing
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('paypal/report_settlement_row');
@@ -35,6 +32,7 @@ class Mage_Paypal_Model_Resource_Report_Settlement_Row_Collection extends Mage_C
      *
      * @return $this
      */
+    #[\Override]
     protected function _initSelect()
     {
         parent::_initSelect();

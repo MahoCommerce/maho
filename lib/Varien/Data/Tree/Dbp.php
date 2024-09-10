@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Varien
  * @package    Varien_Data
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -133,6 +129,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
      * @param int $recursionLevel
      * @return Varien_Data_Tree_Dbp
      */
+    #[\Override]
     public function load($parentNode = null, $recursionLevel = 0)
     {
         if (!$this->_loaded) {
@@ -227,6 +224,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
      * @param int|string $nodeId
      * @return Varien_Data_Tree_Node
      */
+    #[\Override]
     public function loadNode($nodeId)
     {
         $select = clone $this->_select;
@@ -249,6 +247,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
      * @param array $result
      * @return array
      */
+    #[\Override]
     public function getChildren($node, $recursive = true, $result = [])
     {
         if (is_numeric($node)) {

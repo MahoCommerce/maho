@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Api
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -35,6 +31,7 @@ class Mage_Api_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstract
      */
     protected $_ruleTable;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('api/role', 'role_id');
@@ -46,9 +43,9 @@ class Mage_Api_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Process role before saving
      *
-     * @param Mage_Core_Model_Abstract|Mage_Api_Model_Roles $role
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $role)
     {
         if ($role->getId() == '') {
@@ -74,9 +71,9 @@ class Mage_Api_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Action after save
      *
-     * @param Mage_Core_Model_Abstract $role
      * @return $this
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $role)
     {
         $this->_updateRoleUsersAcl($role);
@@ -87,9 +84,9 @@ class Mage_Api_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Action after delete
      *
-     * @param Mage_Core_Model_Abstract $role
      * @return $this
      */
+    #[\Override]
     protected function _afterDelete(Mage_Core_Model_Abstract $role)
     {
         $adapter = $this->_getWriteAdapter();
@@ -101,7 +98,6 @@ class Mage_Api_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Get role users
      *
-     * @param Mage_Api_Model_Roles $role
      * @return array
      */
     public function getRoleUsers(Mage_Api_Model_Roles $role)
@@ -118,7 +114,6 @@ class Mage_Api_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Update role users
      *
-     * @param Mage_Api_Model_Roles $role
      * @return bool
      */
     private function _updateRoleUsersAcl(Mage_Api_Model_Roles $role)

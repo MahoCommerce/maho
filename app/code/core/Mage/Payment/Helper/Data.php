@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Payment
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -67,7 +63,7 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
     public function getStoreMethods($store = null, $quote = null)
     {
         $res = [];
-        foreach ($this->getPaymentMethods($store) as $code => $methodConfig) {
+        foreach (array_keys($this->getPaymentMethods($store)) as $code) {
             $prefix = self::XML_PATH_PAYMENT_METHODS . '/' . $code . '/';
             if (!$model = Mage::getStoreConfig($prefix . 'model', $store)) {
                 continue;
@@ -106,7 +102,6 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Retrieve payment method form html
      *
-     * @param Mage_Payment_Model_Method_Abstract $method
      * @return  Mage_Payment_Block_Form|Mage_Core_Block_Abstract
      */
     public function getMethodFormBlock(Mage_Payment_Model_Method_Abstract $method)
@@ -123,7 +118,6 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Retrieve payment information block
      *
-     * @param   Mage_Payment_Model_Info|false $info
      * @return  Mage_Core_Block_Template|Mage_Core_Block_Abstract
      */
     public function getInfoBlock(Mage_Payment_Model_Info|false $info)
@@ -177,7 +171,7 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
     public function getRecurringProfileMethods($store = null)
     {
         $result = [];
-        foreach ($this->getPaymentMethods($store) as $code => $data) {
+        foreach (array_keys($this->getPaymentMethods($store)) as $code) {
             $paymentMethodModelClassName = $this->getMethodModelClassName($code);
             if (!$paymentMethodModelClassName) {
                 continue;
@@ -255,7 +249,7 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
         }
         if ($asLabelValue) {
             $labelValues = [];
-            foreach ($methods as $code => $title) {
+            foreach (array_keys($methods) as $code) {
                 $labelValues[$code] = [];
             }
             foreach ($methods as $code => $title) {

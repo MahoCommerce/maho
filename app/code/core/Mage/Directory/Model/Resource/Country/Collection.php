@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Directory
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,6 +19,7 @@
  */
 class Mage_Directory_Model_Resource_Country_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('directory/country');
@@ -61,6 +58,7 @@ class Mage_Directory_Model_Resource_Country_Collection extends Mage_Core_Model_R
      * @param string $countryId
      * @return Mage_Directory_Model_Resource_Country|Mage_Directory_Model_Country
      */
+    #[\Override]
     public function getItemById($countryId)
     {
         foreach ($this->_items as $country) {
@@ -133,6 +131,7 @@ class Mage_Directory_Model_Resource_Country_Collection extends Mage_Core_Model_R
      * @param string $emptyLabel
      * @return array
      */
+    #[\Override]
     public function toOptionArray($emptyLabel = ' ')
     {
         $options = $this->_toOptionArray('country_id', 'name', ['title' => 'iso2_code']);

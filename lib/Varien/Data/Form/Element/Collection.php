@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Varien
  * @package    Varien_Data
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -51,6 +47,7 @@ class Varien_Data_Form_Element_Collection implements ArrayAccess, IteratorAggreg
      *
      * @return ArrayIterator
      */
+    #[\Override]
     public function getIterator(): \Traversable
     {
         return new ArrayIterator($this->_elements);
@@ -62,6 +59,7 @@ class Varien_Data_Form_Element_Collection implements ArrayAccess, IteratorAggreg
      * @param mixed $key
      * @param mixed $value
      */
+    #[\Override]
     public function offsetSet($key, $value): void
     {
         $this->_elements[$key] = $value;
@@ -74,6 +72,7 @@ class Varien_Data_Form_Element_Collection implements ArrayAccess, IteratorAggreg
      * @return mixed
      */
     #[\ReturnTypeWillChange]
+    #[\Override]
     public function offsetGet($key)
     {
         return $this->_elements[$key];
@@ -84,6 +83,7 @@ class Varien_Data_Form_Element_Collection implements ArrayAccess, IteratorAggreg
      *
      * @param mixed $key
      */
+    #[\Override]
     public function offsetUnset($key): void
     {
         unset($this->_elements[$key]);
@@ -93,8 +93,8 @@ class Varien_Data_Form_Element_Collection implements ArrayAccess, IteratorAggreg
      * Implementation of ArrayAccess:offsetExists()
      *
      * @param mixed $key
-     * @return bool
      */
+    #[\Override]
     public function offsetExists($key): bool
     {
         return isset($this->_elements[$key]);
@@ -104,9 +104,7 @@ class Varien_Data_Form_Element_Collection implements ArrayAccess, IteratorAggreg
      * Add element to collection
      *
      * @todo get it straight with $after
-     * @param Varien_Data_Form_Element_Abstract $element
      * @param bool|string $after
-     *
      * @return Varien_Data_Form_Element_Abstract
      */
     public function add(Varien_Data_Form_Element_Abstract $element, $after = false)
@@ -170,9 +168,8 @@ class Varien_Data_Form_Element_Collection implements ArrayAccess, IteratorAggreg
 
     /**
      * Count elements in collection
-     *
-     * @return int
      */
+    #[\Override]
     public function count(): int
     {
         return count($this->_elements);

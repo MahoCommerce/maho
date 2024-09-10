@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_CatalogRule
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -125,8 +121,6 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *  - 'factory' Mage_Core_Model_Factory
      *  - 'config' Mage_Core_Model_Config
      *  - 'app' Mage_Core_Model_App
-     *
-     * @param array $args
      */
     public function __construct(array $args = [])
     {
@@ -140,6 +134,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     /**
      * Init resource model and id field
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -152,6 +147,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return Mage_CatalogRule_Model_Rule_Condition_Combine
      */
+    #[\Override]
     public function getConditionsInstance()
     {
         return Mage::getModel('catalogrule/rule_condition_combine');
@@ -162,6 +158,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return Mage_CatalogRule_Model_Rule_Action_Collection
      */
+    #[\Override]
     public function getActionsInstance()
     {
         return Mage::getModel('catalogrule/rule_action_collection');
@@ -348,7 +345,6 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     /**
      * Calculate price using catalog price rule of product
      *
-     * @param Mage_Catalog_Model_Product $product
      * @param float $price
      * @return float|null
      */
@@ -446,6 +442,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return string
      */
+    #[\Override]
     public function toString($format = '')
     {
         return '';
@@ -467,6 +464,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      *
      * @return array
      */
+    #[\Override]
     public function toArray(array $arrAttributes = [])
     {
         return parent::toArray($arrAttributes);
@@ -475,7 +473,6 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     /**
      * Load matched product rules to the product
      *
-     * @param Mage_Catalog_Model_Product $product
      * @return $this
      */
     public function loadProductRules(Mage_Catalog_Model_Product $product)

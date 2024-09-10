@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -28,6 +24,7 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
      * @param array $values All product option values, i.e. array (option_id => mixed, option_id => mixed...)
      * @return Mage_Catalog_Model_Product_Option_Type_Default
      */
+    #[\Override]
     public function validateUserValue($values)
     {
         parent::validateUserValue($values);
@@ -56,6 +53,7 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
      *
      * @return int|string|null Prepared option value
      */
+    #[\Override]
     public function prepareForCart()
     {
         if ($this->getIsValid() && $this->getUserValue()) {
@@ -71,6 +69,7 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
      * @param string $optionValue Prepared for cart option value
      * @return string
      */
+    #[\Override]
     public function getFormattedOptionValue($optionValue)
     {
         if ($this->_formattedOptionValue === null) {
@@ -87,6 +86,7 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
      * @param string $optionValue Prepared for cart option value
      * @return string
      */
+    #[\Override]
     public function getPrintableOptionValue($optionValue)
     {
         return $this->getFormattedOptionValue($optionValue);
@@ -108,6 +108,7 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
      * @param string $optionValue Prepared for cart option value
      * @return string
      */
+    #[\Override]
     public function getEditableOptionValue($optionValue)
     {
         $option = $this->getOption();
@@ -155,6 +156,7 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
      * @param array $productOptionValues Values for product option
      * @return string|null
      */
+    #[\Override]
     public function parseOptionValue($optionValue, $productOptionValues)
     {
         $_values = [];
@@ -181,6 +183,7 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
      * @param string $optionValue
      * @return mixed
      */
+    #[\Override]
     public function prepareOptionValueForRequest($optionValue)
     {
         if (!$this->_isSingleSelection()) {
@@ -196,6 +199,7 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
      * @param float $basePrice
      * @return float
      */
+    #[\Override]
     public function getOptionPrice($optionValue, $basePrice)
     {
         $option = $this->getOption();
@@ -248,6 +252,7 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
      * @param string $skuDelimiter Delimiter for Sku parts
      * @return string
      */
+    #[\Override]
     public function getOptionSku($optionValue, $skuDelimiter)
     {
         $option = $this->getOption();

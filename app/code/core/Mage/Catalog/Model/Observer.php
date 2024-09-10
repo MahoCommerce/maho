@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -24,7 +20,6 @@ class Mage_Catalog_Model_Observer
     /**
      * Process catalog ata related with store data changes
      *
-     * @param   Varien_Event_Observer $observer
      * @return  Mage_Catalog_Model_Observer
      */
     public function storeEdit(Varien_Event_Observer $observer)
@@ -46,7 +41,6 @@ class Mage_Catalog_Model_Observer
     /**
      * Process catalog data related with new store
      *
-     * @param   Varien_Event_Observer $observer
      * @return  Mage_Catalog_Model_Observer
      */
     public function storeAdd(Varien_Event_Observer $observer)
@@ -67,7 +61,6 @@ class Mage_Catalog_Model_Observer
     /**
      * Process catalog data related with store group root category
      *
-     * @param   Varien_Event_Observer $observer
      * @return  Mage_Catalog_Model_Observer
      */
     public function storeGroupSave(Varien_Event_Observer $observer)
@@ -90,7 +83,6 @@ class Mage_Catalog_Model_Observer
     /**
      * Process delete of store
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function storeDelete(Varien_Event_Observer $observer)
@@ -107,7 +99,6 @@ class Mage_Catalog_Model_Observer
     /**
      * Process catalog data after category move
      *
-     * @param   Varien_Event_Observer $observer
      * @return  Mage_Catalog_Model_Observer
      */
     public function categoryMove(Varien_Event_Observer $observer)
@@ -126,7 +117,6 @@ class Mage_Catalog_Model_Observer
     /**
      * Process catalog data after products import
      *
-     * @param   Varien_Event_Observer $observer
      * @return  Mage_Catalog_Model_Observer
      */
     public function catalogProductImportAfter(Varien_Event_Observer $observer)
@@ -139,7 +129,6 @@ class Mage_Catalog_Model_Observer
     /**
      * Catalog Product Compare Items Clean
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function catalogProductCompareClean(Varien_Event_Observer $observer)
@@ -151,7 +140,6 @@ class Mage_Catalog_Model_Observer
     /**
      * After save event of category
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
     public function categorySaveAfter(Varien_Event_Observer $observer)
@@ -167,8 +155,6 @@ class Mage_Catalog_Model_Observer
 
     /**
      * Checking whether the using static urls in WYSIWYG allowed event
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function catalogCheckIsUsingStaticUrlsAllowed(Varien_Event_Observer $observer)
     {
@@ -179,8 +165,6 @@ class Mage_Catalog_Model_Observer
 
     /**
      * Cron job method for product prices to reindex
-     *
-     * @param Mage_Cron_Model_Schedule $schedule
      */
     public function reindexProductPrices(Mage_Cron_Model_Schedule $schedule)
     {
@@ -192,8 +176,6 @@ class Mage_Catalog_Model_Observer
 
     /**
      * Adds catalog categories to top menu
-     *
-     * @param Varien_Event_Observer $observer
      */
     public function addCatalogToTopmenuItems(Varien_Event_Observer $observer)
     {
@@ -275,7 +257,6 @@ class Mage_Catalog_Model_Observer
     /**
      * Checks whether attribute_code by current module is reserved
      *
-     * @param Varien_Event_Observer $observer
      * @throws Mage_Core_Exception
      */
     public function checkReservedAttributeCodes(Varien_Event_Observer $observer)

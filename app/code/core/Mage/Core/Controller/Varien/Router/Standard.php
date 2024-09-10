@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -105,6 +101,7 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
      * @param Mage_Core_Controller_Request_Http $request
      * @inheritDoc
      */
+    #[\Override]
     public function match(Zend_Controller_Request_Http $request)
     {
         //checking before even try to find out that current module
@@ -394,6 +391,7 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
      * @param string $routeName
      * @return false|string
      */
+    #[\Override]
     public function getFrontNameByRoute($routeName)
     {
         return $this->_routes[$routeName] ?? false;
@@ -403,6 +401,7 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
      * @param string $frontName
      * @return false|int|string
      */
+    #[\Override]
     public function getRouteByFrontName($frontName)
     {
         return array_search($frontName, $this->_routes);
@@ -449,7 +448,6 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
     }
 
     /**
-     * @param array $p
      * @return array
      */
     public function rewrite(array $p)

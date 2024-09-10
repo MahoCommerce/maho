@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Eav
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2016-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2016-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,6 +26,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
      *
      * @return array
      */
+    #[\Override]
     public function getAllOptions()
     {
         if (is_null($this->_options)) {
@@ -77,6 +74,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
      * @param string|int $value
      * @return string|false
      */
+    #[\Override]
     public function getOptionText($value)
     {
         $options = $this->getAllOptions();
@@ -93,6 +91,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
      *
      * @return array
      */
+    #[\Override]
     public function getFlatColums()
     {
         $attributeCode = $this->getAttribute()->getAttributeCode();
@@ -120,6 +119,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
      *
      * @return array
      */
+    #[\Override]
     public function getFlatIndexes()
     {
         $indexes = [];
@@ -139,6 +139,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
      * @param int $store
      * @return Varien_Db_Select|null
      */
+    #[\Override]
     public function getFlatUpdateSelect($store)
     {
         return Mage::getResourceModel('eav/entity_attribute')
@@ -151,6 +152,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
      * @param  string|int $value
      * @return string|bool
      */
+    #[\Override]
     public function getIndexOptionText($value)
     {
         switch ($value) {

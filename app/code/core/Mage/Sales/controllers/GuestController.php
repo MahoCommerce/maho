@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -27,6 +23,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
      * @param int $orderId
      * @return bool
      */
+    #[\Override]
     protected function _loadValidOrder($orderId = null)
     {
         return Mage::helper('sales/guest')->loadValidOrder();
@@ -38,6 +35,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
      * @param   Mage_Sales_Model_Order $order
      * @return  bool
      */
+    #[\Override]
     protected function _canViewOrder($order)
     {
         $currentOrder = Mage::registry('current_order');
@@ -47,6 +45,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
         return false;
     }
 
+    #[\Override]
     protected function _viewAction()
     {
         if (!$this->_loadValidOrder()) {
@@ -72,6 +71,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
         $this->renderLayout();
     }
 
+    #[\Override]
     public function printInvoiceAction()
     {
         if (!$this->_loadValidOrder()) {
@@ -97,6 +97,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
         }
     }
 
+    #[\Override]
     public function printShipmentAction()
     {
         if (!$this->_loadValidOrder()) {
@@ -121,6 +122,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
         }
     }
 
+    #[\Override]
     public function printCreditmemoAction()
     {
         if (!$this->_loadValidOrder()) {

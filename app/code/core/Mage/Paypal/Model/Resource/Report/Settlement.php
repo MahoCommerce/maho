@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Paypal
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -32,6 +28,7 @@ class Mage_Paypal_Model_Resource_Report_Settlement extends Mage_Core_Model_Resou
      * Init main table
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('paypal/settlement_report', 'report_id');
@@ -44,6 +41,7 @@ class Mage_Paypal_Model_Resource_Report_Settlement extends Mage_Core_Model_Resou
      * @param Mage_Paypal_Model_Report_Settlement $object
      * @return $this
      */
+    #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
         $rows = $object->getRows();
@@ -58,7 +56,7 @@ class Mage_Paypal_Model_Resource_Report_Settlement extends Mage_Core_Model_Resou
                 /** @var Mage_Core_Model_Date $date */
                 $date = Mage::getSingleton('core/date');
 
-                foreach ($rows as $key => $row) {
+                foreach (array_keys($rows) as $key) {
                     /*
                      * Converting dates
                      */
@@ -90,7 +88,6 @@ class Mage_Paypal_Model_Resource_Report_Settlement extends Mage_Core_Model_Resou
     /**
      * Check if report with same account and report date already fetched
      *
-     * @param Mage_Paypal_Model_Report_Settlement $report
      * @param string $accountId
      * @param string $reportDate
      * @return $this

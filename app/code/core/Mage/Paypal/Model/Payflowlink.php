@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Paypal
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -112,6 +108,7 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      *
      * @return  bool
      */
+    #[\Override]
     public function validate()
     {
         return true;
@@ -123,6 +120,7 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * @param Mage_Sales_Model_Quote|null $quote
      * @return bool
      */
+    #[\Override]
     public function isAvailable($quote = null)
     {
         $storeId = Mage::app()->getStore($this->getStore())->getId();
@@ -154,6 +152,7 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * @param Varien_Object $stateObject
      * @return $this
      */
+    #[\Override]
     public function initialize($paymentAction, $stateObject)
     {
         switch ($paymentAction) {
@@ -199,7 +198,6 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
     /**
      * Fill response with data.
      *
-     * @param array $postData
      * @return $this
      */
     public function setResponseData(array $postData)
@@ -252,8 +250,6 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
 
     /**
      * Operate with order using information from silent post
-     *
-     * @param Mage_Sales_Model_Order $order
      */
     protected function _processOrder(Mage_Sales_Model_Order $order)
     {
@@ -368,7 +364,6 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
     /**
      * Build request for getting token
      *
-     * @param Mage_Sales_Model_Order_Payment $payment
      * @return Varien_Object
      */
     protected function _buildTokenRequest(Mage_Sales_Model_Order_Payment $payment)
@@ -438,11 +433,11 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
     }
 
     /**
-      * Return request object with basic information for gateway request
-      *
-      * @param Varien_Object $payment
-      * @return Mage_Paypal_Model_Payflow_Request
-      */
+     * Return request object with basic information for gateway request
+     *
+     * @return Mage_Paypal_Model_Payflow_Request
+     */
+    #[\Override]
     protected function _buildBasicRequest(Varien_Object $payment)
     {
         $request = Mage::getModel('paypal/payflow_request');
@@ -568,7 +563,6 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * Initialize request
      *
      * @deprecated since 1.6.2.0
-     * @param Varien_Object $payment
      * @param mixed $amount
      * @return $this
      */
@@ -591,7 +585,6 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * Additional authorization logic for Account Verification
      *
      * @deprecated since 1.6.2.0
-     * @param Varien_Object $payment
      * @param mixed $amount
      * @param Mage_Paypal_Model_Payment_Transaction $transaction
      * @param string $txnId
@@ -606,7 +599,6 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * Operate with order or quote using information from silent post
      *
      * @deprecated since 1.6.2.0
-     * @param Varien_Object $document
      */
     protected function _process(Varien_Object $document)
     {
@@ -629,7 +621,6 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * Check response from Payflow gateway.
      *
      * @deprecated since 1.6.2.0
-     * @return null
      */
     protected function _getDocumentFromResponse()
     {

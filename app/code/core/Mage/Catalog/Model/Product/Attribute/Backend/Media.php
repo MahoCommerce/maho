@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -32,6 +28,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
      * @param Mage_Catalog_Model_Product $object
      * @return $this
      */
+    #[\Override]
     public function afterLoad($object)
     {
         $attrCode = $this->getAttribute()->getAttributeCode();
@@ -73,6 +70,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
      * @throws Mage_Core_Exception
      * @return bool
      */
+    #[\Override]
     public function validate($object)
     {
         if ($this->getAttribute()->getIsRequired()) {
@@ -98,6 +96,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
      * @return $this|Mage_Eav_Model_Entity_Attribute_Backend_Abstract|void
      * @throws Zend_Json_Exception
      */
+    #[\Override]
     public function beforeSave($object)
     {
         $attrCode = $this->getAttribute()->getAttributeCode();
@@ -197,6 +196,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
      * @param Mage_Catalog_Model_Product $object
      * @return Mage_Eav_Model_Entity_Attribute_Backend_Abstract|void
      */
+    #[\Override]
     public function afterSave($object)
     {
         if ($object->getIsDuplicate() == true) {
@@ -275,7 +275,6 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
     /**
      * Add image to media gallery and return new filename
      *
-     * @param Mage_Catalog_Model_Product $product
      * @param string                     $file              file path of image in file system
      * @param string|array               $mediaAttribute    code of attribute with type 'media_image',
      *                                                      leave blank if image should be only in gallery
@@ -380,7 +379,6 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
      * Add images with different media attributes.
      * Image will be added only once if the same image is used with different media attributes
      *
-     * @param Mage_Catalog_Model_Product $product
      * @param array $fileAndAttributesArray array of arrays of filename and corresponding media attribute
      * @param string $filePath path, where image cand be found
      * @param bool $move if true, it will move source file
@@ -419,7 +417,6 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
     /**
      * Update image in gallery
      *
-     * @param Mage_Catalog_Model_Product $product
      * @param string $file
      * @param array $data
      * @return $this
@@ -458,7 +455,6 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
     /**
      * Remove image from gallery
      *
-     * @param Mage_Catalog_Model_Product $product
      * @param string $file
      * @return $this
      */
@@ -486,7 +482,6 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
     /**
      * Retrieve image from gallery
      *
-     * @param Mage_Catalog_Model_Product $product
      * @param string $file
      * @return array|bool
      */
@@ -510,7 +505,6 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
     /**
      * Clear media attribute value
      *
-     * @param Mage_Catalog_Model_Product $product
      * @param string|array $mediaAttribute
      * @return $this
      */
@@ -534,7 +528,6 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
     /**
      * Set media attribute value
      *
-     * @param Mage_Catalog_Model_Product $product
      * @param string|array $mediaAttribute
      * @param string $value
      * @return $this

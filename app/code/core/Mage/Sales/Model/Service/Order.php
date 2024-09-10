@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -39,8 +35,6 @@ class Mage_Sales_Model_Service_Order
 
     /**
      * Class constructor
-     *
-     * @param Mage_Sales_Model_Order $order
      */
     public function __construct(Mage_Sales_Model_Order $order)
     {
@@ -51,7 +45,6 @@ class Mage_Sales_Model_Service_Order
     /**
      * Quote convertor declaration
      *
-     * @param   Mage_Sales_Model_Convert_Order $convertor
      * @return  Mage_Sales_Model_Service_Order
      */
     public function setConvertor(Mage_Sales_Model_Convert_Order $convertor)

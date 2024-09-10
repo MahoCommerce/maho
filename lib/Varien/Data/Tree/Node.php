@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Varien
  * @package    Varien_Data
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -80,6 +76,7 @@ class Varien_Data_Tree_Node extends Varien_Object
      *
      * @return mixed
      */
+    #[\Override]
     public function getId()
     {
         return $this->getData($this->getIdField());
@@ -110,7 +107,6 @@ class Varien_Data_Tree_Node extends Varien_Object
     /**
      * Set node tree object
      *
-     * @param   Varien_Data_Tree $tree
      * @return  $this
      */
     public function setTree(Varien_Data_Tree $tree)

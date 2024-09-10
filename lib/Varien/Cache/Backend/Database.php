@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Varien
  * @package    Varien_Cache
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -125,6 +121,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
      * @param  boolean $doNotTestCacheValidity If set to true, the cache validity won't be tested
      * @return string|false cached datas
      */
+    #[\Override]
     public function load($id, $doNotTestCacheValidity = false)
     {
         if ($this->_options['store_data']) {
@@ -147,6 +144,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
      * @param  string $id cache id
      * @return mixed|false (a cache is not available) or "last modified" timestamp (int) of the available cache record
      */
+    #[\Override]
     public function test($id)
     {
         if ($this->_options['store_data']) {
@@ -174,6 +172,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
      *
      * @return bool true if no problem
      */
+    #[\Override]
     public function save($data, $id, $tags = [], $specificLifetime = false)
     {
         if ($this->_options['store_data']) {
@@ -211,6 +210,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
      * @param  string $id Cache id
      * @return boolean True if no problem
      */
+    #[\Override]
     public function remove($id)
     {
         $adapter = $this->_getAdapter();
@@ -261,6 +261,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
      * @param  array  $tags Array of tags
      * @return boolean true if no problem
      */
+    #[\Override]
     public function clean($mode = Zend_Cache::CLEANING_MODE_ALL, $tags = [])
     {
         $adapter = $this->_getAdapter();
@@ -337,6 +338,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
      *
      * @return array array of stored cache ids (string)
      */
+    #[\Override]
     public function getIds()
     {
         if ($this->_options['store_data']) {
@@ -353,6 +355,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
      *
      * @return array array of stored tags (string)
      */
+    #[\Override]
     public function getTags()
     {
         $select = $this->_getAdapter()->select()
@@ -369,6 +372,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
      * @param array $tags array of tags
      * @return array array of matching cache ids (string)
      */
+    #[\Override]
     public function getIdsMatchingTags($tags = [])
     {
         $select = $this->_getAdapter()->select()
@@ -388,6 +392,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
      * @param array $tags array of tags
      * @return array array of not matching cache ids (string)
      */
+    #[\Override]
     public function getIdsNotMatchingTags($tags = [])
     {
         return array_diff($this->getIds(), $this->getIdsMatchingAnyTags($tags));
@@ -401,6 +406,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
      * @param array $tags array of tags
      * @return array array of any matching cache ids (string)
      */
+    #[\Override]
     public function getIdsMatchingAnyTags($tags = [])
     {
         $select = $this->_getAdapter()->select()
@@ -415,6 +421,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
      *
      * @return int integer between 0 and 100
      */
+    #[\Override]
     public function getFillingPercentage()
     {
         return 1;
@@ -431,6 +438,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
      * @param string $id cache id
      * @return array array of metadatas (false if the cache id is not found)
      */
+    #[\Override]
     public function getMetadatas($id)
     {
         $select = $this->_getAdapter()->select()
@@ -460,6 +468,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
      * @param int $extraLifetime
      * @return boolean true if ok
      */
+    #[\Override]
     public function touch($id, $extraLifetime)
     {
         if ($this->_options['store_data']) {
@@ -487,6 +496,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
      *
      * @return array associative of with capabilities
      */
+    #[\Override]
     public function getCapabilities()
     {
         return [

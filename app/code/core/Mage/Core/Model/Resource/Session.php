@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2016-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2016-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -156,8 +152,8 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
      *
      * @param string $savePath ignored
      * @param string $sessName ignored
-     * @return bool
      */
+    #[\Override]
     public function open($savePath, $sessName): bool
     {
         return true;
@@ -165,9 +161,8 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
 
     /**
      * Close session
-     *
-     * @return bool
      */
+    #[\Override]
     public function close(): bool
     {
         $this->gc($this->getLifeTime());
@@ -181,6 +176,7 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
      * @param string $sessId
      * @return string
      */
+    #[\Override]
     public function read($sessId): string|false
     {
         $select = $this->_read->select()
@@ -200,8 +196,8 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
      *
      * @param string $sessId
      * @param string $sessData
-     * @return bool
      */
+    #[\Override]
     public function write($sessId, $sessData): bool
     {
         $bindValues = [
@@ -233,8 +229,8 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
      * Destroy session
      *
      * @param string $sessId
-     * @return bool
      */
+    #[\Override]
     public function destroy($sessId): bool
     {
         $where = ['session_id = ?' => $sessId];
@@ -248,6 +244,7 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
      * @param int $sessMaxLifeTime ignored
      * @return int|false
      */
+    #[\Override]
     public function gc($sessMaxLifeTime): int|false
     {
         if ($this->_automaticCleaningFactor > 0) {

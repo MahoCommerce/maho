@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Reports
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,6 +21,7 @@ class Mage_Reports_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abst
      * Initialize main table and identifier field.
      * Set main entity table name and primary key field name.
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('reports/event', 'event_id');
@@ -33,7 +30,6 @@ class Mage_Reports_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Update customer type after customer login
      *
-     * @param Mage_Reports_Model_Event $model
      * @param int $visitorId
      * @param int $customerId
      * @param array $types
@@ -60,7 +56,6 @@ class Mage_Reports_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abst
      * The collection id field is used without corellation, so it must be unique.
      * DESC ordering by event will be added to the collection
      *
-     * @param Varien_Data_Collection_Db $collection
      * @param int $eventTypeId
      * @param int $eventSubjectId
      * @param int $subtype
@@ -108,7 +103,6 @@ class Mage_Reports_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Obtain all current store ids, depending on configuration
      *
-     * @param array|null $predefinedStoreIds
      * @return array
      * @throws Mage_Core_Model_Store_Exception
      */
@@ -151,7 +145,6 @@ class Mage_Reports_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Clean report event table
      *
-     * @param Mage_Reports_Model_Event $object
      * @return $this
      */
     public function clean(Mage_Reports_Model_Event $object)

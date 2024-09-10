@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Customer
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -230,6 +226,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Initialize customer model
      */
+    #[\Override]
     public function _construct()
     {
         $this->_init('customer/customer');
@@ -297,6 +294,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      * @return $this
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();
@@ -363,7 +361,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Add address to address collection
      *
-     * @param Mage_Customer_Model_Address $address
      * @return $this
      * @throws Mage_Core_Exception
      */
@@ -475,9 +472,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         return $this->_attributes[$attributeCode] ?? null;
     }
 
-    /**
-     * @return string
-     */
     public function getPassword(): string
     {
         return (string) $this->_getData('password');
@@ -702,7 +696,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Check if address is primary
      *
-     * @param Mage_Customer_Model_Address $address
      * @return bool
      */
     public function isAddressPrimary(Mage_Customer_Model_Address $address)
@@ -989,7 +982,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Set store to customer
      *
-     * @param Mage_Core_Model_Store $store
      * @return $this
      */
     public function setStore(Mage_Core_Model_Store $store)
@@ -1096,7 +1088,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Import customer data from text array
      *
-     * @param array $row
      * @return $this|null
      * @throws Mage_Core_Exception
      * @throws Mage_Core_Model_Store_Exception
@@ -1358,7 +1349,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Validate address
      *
-     * @param array $data
      * @param string $type
      * @return bool
      */
@@ -1396,6 +1386,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Prepare customer for delete
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         $this->_protectFromNonAdmin();

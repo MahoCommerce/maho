@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2015-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2015-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -498,6 +494,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      */
     protected $_historyEntityName = self::HISTORY_ENTITY_NAME;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('sales/order');
@@ -509,6 +506,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     *
     * @return Varien_Object
     */
+    #[\Override]
     protected function _initOldFieldsMap()
     {
         // pre 1.6 fields names, old => new
@@ -526,6 +524,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      * @param string $key data key
      * @return $this
      */
+    #[\Override]
     public function unsetData($key = null)
     {
         parent::unsetData($key);
@@ -610,6 +609,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      *
      * @return Mage_Core_Model_Store
      */
+    #[\Override]
     public function getStore()
     {
         $storeId = $this->getStoreId();
@@ -1005,7 +1005,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     /**
      * Declare order billing address
      *
-     * @param   Mage_Sales_Model_Order_Address $address
      * @return  $this
      */
     public function setBillingAddress(Mage_Sales_Model_Order_Address $address)
@@ -1021,7 +1020,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     /**
      * Declare order shipping address
      *
-     * @param   Mage_Sales_Model_Order_Address $address
      * @return  $this
      */
     public function setShippingAddress(Mage_Sales_Model_Order_Address $address)
@@ -1642,7 +1640,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     }
 
     /**
-     * @param Mage_Sales_Model_Order_Address $address
      * @return $this
      * @throws Exception
      */
@@ -1797,7 +1794,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     }
 
     /**
-     * @param Mage_Sales_Model_Order_Item $item
      * @return $this
      * @throws Exception
      */
@@ -1874,7 +1870,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     }
 
     /**
-     * @param Mage_Sales_Model_Order_Payment $payment
      * @return $this
      * @throws Exception
      */
@@ -1889,7 +1884,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     }
 
     /**
-     * @param Mage_Sales_Model_Order_Payment $payment
      * @return Mage_Sales_Model_Order_Payment
      */
     public function setPayment(Mage_Sales_Model_Order_Payment $payment)
@@ -1976,7 +1970,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      * See the entity_id attribute backend model.
      * Or the history record can be saved standalone after this.
      *
-     * @param Mage_Sales_Model_Order_Status_History $history
      * @return $this
      */
     public function addStatusHistory(Mage_Sales_Model_Order_Status_History $history)
@@ -2129,6 +2122,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      * @param int|string|null $index
      * @return float|mixed
      */
+    #[\Override]
     public function getData($key = '', $index = null)
     {
         if ($key == 'total_due') {
@@ -2296,7 +2290,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     /**
      * Add New object to related array
      *
-     * @param   Mage_Core_Model_Abstract $object
      * @return  $this
      */
     public function addRelatedObject(Mage_Core_Model_Abstract $object)
@@ -2332,6 +2325,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      *
      * @return Mage_Core_Model_Abstract
      */
+    #[\Override]
     protected function _beforeSave()
     {
         parent::_beforeSave();
@@ -2431,6 +2425,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      *
      * @inheritDoc
      */
+    #[\Override]
     protected function _afterSave()
     {
         if ($this->_addresses !== null) {
@@ -2557,6 +2552,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      * Protect order delete from not admin scope
      * @inheritDoc
      */
+    #[\Override]
     protected function _beforeDelete()
     {
         $this->_protectFromNonAdmin();

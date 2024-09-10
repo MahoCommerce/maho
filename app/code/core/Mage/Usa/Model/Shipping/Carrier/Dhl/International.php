@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Usa
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -144,6 +140,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * Sets necessary data
      */
+    #[\Override]
     protected function _construct()
     {
         if ($this->getConfigData('content_type') == self::DHL_CONTENT_TYPE_DOC) {
@@ -173,9 +170,9 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Collect and get rates
      *
-     * @param Mage_Shipping_Model_Rate_Request $request
      * @return bool|Mage_Shipping_Model_Rate_Result|null
      */
+    #[\Override]
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
         if (!$this->getConfigFlag($this->_activeFlag)) {
@@ -262,7 +259,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Prepare and set request in property of current instance
      *
-     * @param Varien_Object $request
      * @return $this
      */
     public function setRequest(Varien_Object $request)
@@ -369,6 +365,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @return array
      */
+    #[\Override]
     public function getAllowedMethods()
     {
         $contentType = $this->getConfigData('content_type');
@@ -645,8 +642,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
     /**
      * Make pieces
-     *
-     * @param SimpleXMLElement $nodeBkgDetails
      */
     protected function _makePieces(SimpleXMLElement $nodeBkgDetails)
     {
@@ -894,7 +889,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Set pick-up date in request XML object
      *
-     * @param SimpleXMLElement $requestXml
      * @param string $date
      * @return SimpleXMLElement
      */
@@ -994,7 +988,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Add rate to DHL rates array
      *
-     * @param SimpleXMLElement $shipmentDetails
      * @return $this
      */
     protected function _addRate(SimpleXMLElement $shipmentDetails)
@@ -1109,9 +1102,9 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Do shipment request to carrier web service, obtain Print Shipping Labels and process errors in response
      *
-     * @param Varien_Object $request
      * @return Varien_Object
      */
+    #[\Override]
     protected function _doShipmentRequest(Varien_Object $request)
     {
         $this->_prepareShipmentRequest($request);
@@ -1124,9 +1117,9 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Processing additional validation to check is carrier applicable.
      *
-     * @param Mage_Shipping_Model_Rate_Request $request
      * @return Mage_Shipping_Model_Carrier_Abstract|Mage_Shipping_Model_Rate_Result_Error|bool
      */
+    #[\Override]
     public function proccessAdditionalValidation(Mage_Shipping_Model_Rate_Request $request)
     {
         //Skip by item validation if there is no items in request
@@ -1173,9 +1166,9 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Return container types of carrier
      *
-     * @param Varien_Object|null $params
      * @return array
      */
+    #[\Override]
     public function getContainerTypes(?Varien_Object $params = null)
     {
         return [
@@ -1186,9 +1179,6 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
     /**
      * Map request to shipment
-     *
-     * @param Varien_Object $request
-     * @return null
      */
     protected function _mapRequestToShipment(Varien_Object $request)
     {
@@ -1716,6 +1706,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      * @param float $handlingFee
      * @return float
      */
+    #[\Override]
     protected function _getPerpackagePrice($cost, $handlingType, $handlingFee)
     {
         if ($handlingType == Mage_Shipping_Model_Carrier_Abstract::HANDLING_TYPE_PERCENT) {
@@ -1728,9 +1719,9 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Do request to shipment
      *
-     * @param Mage_Shipping_Model_Shipment_Request $request
      * @return Varien_Object
      */
+    #[\Override]
     public function requestToShipment(Mage_Shipping_Model_Shipment_Request $request)
     {
         $packages = $request->getPackages();

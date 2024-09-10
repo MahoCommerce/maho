@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_ImportExport
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -26,6 +22,7 @@ class Mage_ImportExport_Model_Resource_Import_Data extends Mage_Core_Model_Resou
      */
     protected $_iterator = null;
 
+    #[\Override]
     protected function _construct()
     {
         $this->_init('importexport/importdata', 'id');
@@ -37,6 +34,7 @@ class Mage_ImportExport_Model_Resource_Import_Data extends Mage_Core_Model_Resou
      * @return IteratorIterator
      */
     #[\ReturnTypeWillChange]
+    #[\Override]
     public function getIterator()
     {
         $adapter = $this->_getWriteAdapter();
@@ -132,7 +130,6 @@ class Mage_ImportExport_Model_Resource_Import_Data extends Mage_Core_Model_Resou
      *
      * @param string $entity
      * @param string $behavior
-     * @param array $data
      * @return int
      */
     public function saveBunch($entity, $behavior, array $data)

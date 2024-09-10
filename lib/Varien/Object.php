@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Varien
  * @package    Varien_Object
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -219,7 +215,6 @@ class Varien_Object implements ArrayAccess
      *
      * Retains previous data in the object.
      *
-     * @param array $arr
      * @return $this
      */
     public function addData(array $arr)
@@ -292,7 +287,7 @@ class Varien_Object implements ArrayAccess
     public function unsetOldData($key = null)
     {
         if (is_null($key)) {
-            foreach ($this->_oldFieldsMap as $key => $newFieldName) {
+            foreach (array_keys($this->_oldFieldsMap) as $key) {
                 unset($this->_data[$key]);
             }
         } else {
@@ -466,7 +461,6 @@ class Varien_Object implements ArrayAccess
     /**
      * Public wrapper for __toArray
      *
-     * @param array $arrAttributes
      * @return array
      */
     public function toArray(array $arrAttributes = [])
@@ -478,7 +472,6 @@ class Varien_Object implements ArrayAccess
      * Set required array elements
      *
      * @param   array $arr
-     * @param   array $elements
      * @return  array
      */
     protected function _prepareArray(&$arr, array $elements = [])
@@ -528,7 +521,6 @@ class Varien_Object implements ArrayAccess
     /**
      * Public wrapper for __toXml
      *
-     * @param array $arrAttributes
      * @param string $rootName
      * @param bool $addOpenTag
      * @param bool $addCdata
@@ -555,7 +547,6 @@ class Varien_Object implements ArrayAccess
     /**
      * Public wrapper for __toJson
      *
-     * @param array $arrAttributes
      * @return string
      */
     public function toJson(array $arrAttributes = [])
@@ -780,6 +771,7 @@ class Varien_Object implements ArrayAccess
      * @param string $offset
      * @param mixed $value
      */
+    #[\Override]
     public function offsetSet($offset, $value): void
     {
         $this->_data[$offset] = $value;
@@ -790,8 +782,8 @@ class Varien_Object implements ArrayAccess
      *
      * @link http://www.php.net/manual/en/arrayaccess.offsetexists.php
      * @param string $offset
-     * @return bool
      */
+    #[\Override]
     public function offsetExists($offset): bool
     {
         return isset($this->_data[$offset]);
@@ -803,6 +795,7 @@ class Varien_Object implements ArrayAccess
      * @link http://www.php.net/manual/en/arrayaccess.offsetunset.php
      * @param string $offset
      */
+    #[\Override]
     public function offsetUnset($offset): void
     {
         unset($this->_data[$offset]);
@@ -816,6 +809,7 @@ class Varien_Object implements ArrayAccess
      * @return mixed
      */
     #[\ReturnTypeWillChange]
+    #[\Override]
     public function offsetGet($offset)
     {
         return isset($this->_data[$offset]) ? $this->_data[$offset] : null;

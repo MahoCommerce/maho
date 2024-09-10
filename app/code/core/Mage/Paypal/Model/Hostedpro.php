@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Paypal
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -74,6 +70,7 @@ class Mage_Paypal_Model_Hostedpro extends Mage_Paypal_Model_Direct
      *
      * @return bool
      */
+    #[\Override]
     public function getAllowedCcTypes()
     {
         return true;
@@ -109,6 +106,7 @@ class Mage_Paypal_Model_Hostedpro extends Mage_Paypal_Model_Direct
      *
      * @return  bool
      */
+    #[\Override]
     public function validate()
     {
         return true;
@@ -120,6 +118,7 @@ class Mage_Paypal_Model_Hostedpro extends Mage_Paypal_Model_Direct
      * @param string $paymentAction
      * @param Varien_Object $stateObject
      */
+    #[\Override]
     public function initialize($paymentAction, $stateObject)
     {
         switch ($paymentAction) {
@@ -146,8 +145,6 @@ class Mage_Paypal_Model_Hostedpro extends Mage_Paypal_Model_Direct
 
     /**
      * Sends API request to PayPal to get form URL, then sets this URL to $payment object.
-     *
-     * @param Mage_Payment_Model_Info $payment
      */
     protected function _setPaymentFormUrl(Mage_Payment_Model_Info $payment)
     {
@@ -163,7 +160,6 @@ class Mage_Paypal_Model_Hostedpro extends Mage_Paypal_Model_Direct
     /**
      * Returns request object with needed data for API request to PayPal to get form URL.
      *
-     * @param Mage_Payment_Model_Info $payment
      * @return Mage_Paypal_Model_Hostedpro_Request
      */
     protected function _buildFormUrlRequest(Mage_Payment_Model_Info $payment)
@@ -176,7 +172,6 @@ class Mage_Paypal_Model_Hostedpro extends Mage_Paypal_Model_Direct
     /**
      * Returns form URL from request to PayPal.
      *
-     * @param Mage_Paypal_Model_Hostedpro_Request $request
      * @return string | false
      */
     protected function _sendFormUrlRequest(Mage_Paypal_Model_Hostedpro_Request $request)

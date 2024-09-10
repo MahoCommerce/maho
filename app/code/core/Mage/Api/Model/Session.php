@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Api
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -33,6 +29,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
      * @param string|null $sessionName
      * @return $this
      */
+    #[\Override]
     public function start($sessionName = null)
     {
         $this->_currentSessId = md5(time() . uniqid('', true) . $sessionName);
@@ -45,6 +42,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
      * @param string|null $sessionName
      * @return $this
      */
+    #[\Override]
     public function init($namespace, $sessionName = null)
     {
         if (is_null($this->_currentSessId)) {
@@ -56,6 +54,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * @return string
      */
+    #[\Override]
     public function getSessionId()
     {
         return $this->_currentSessId;
@@ -65,6 +64,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
      * @param string|null $sessId
      * @return $this
      */
+    #[\Override]
     public function setSessionId($sessId = null)
     {
         if (!is_null($sessId)) {
@@ -76,6 +76,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * @return void
      */
+    #[\Override]
     public function revalidateCookie()
     {
         // In api we don't use cookies
@@ -84,6 +85,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * @return bool
      */
+    #[\Override]
     public function clear()
     {
         if ($sessId = $this->getSessionId()) {
@@ -99,7 +101,6 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * Flag login as HTTP Basic Auth.
      *
-     * @param bool $isInstaLogin
      * @return $this
      */
     public function setIsInstaLogin(bool $isInstaLogin = true)
@@ -110,8 +111,6 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
 
     /**
      * Is insta-login?
-     *
-     * @return bool
      */
     public function getIsInstaLogin(): bool
     {

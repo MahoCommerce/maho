@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -299,7 +295,6 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
     /**
      * Sorts array with multibyte string keys
      *
-     * @param array $sort
      * @return array|false
      */
     public function ksortMultibyte(array &$sort)
@@ -375,8 +370,6 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
     /**
      * Append param to general result
      *
-     * @param array $result
-     * @param array $param
      * @return array
      */
     protected function _appendParam(array $result, array $param)
@@ -399,7 +392,6 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
     /**
      * Handle param recursively
      *
-     * @param array $param
      * @return array
      */
     protected function _handleRecursiveParamForQueryStr(array $param)

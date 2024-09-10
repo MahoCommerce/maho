@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Sitemap
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,6 +17,7 @@
  */
 class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Resource_Catalog_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product', 'entity_id');
@@ -32,6 +29,7 @@ class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Res
      * @param int $storeId
      * @return array|false
      */
+    #[\Override]
     public function getCollection($storeId)
     {
         $store = Mage::app()->getStore($storeId);
@@ -74,7 +72,6 @@ class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Res
      *
      * @deprecated after 1.7.0.2
      *
-     * @param array $productRow
      * @return Varien_Object
      */
     protected function _prepareProduct(array $productRow)
@@ -89,6 +86,7 @@ class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Res
      * @param Varien_Object $entity
      * @return string
      */
+    #[\Override]
     protected function _getEntityUrl($row, $entity)
     {
         return !empty($row['request_path']) ? $row['request_path'] : 'catalog/product/view/id/' . $entity->getId();
@@ -100,6 +98,7 @@ class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Res
      * @param string $attributeCode
      * @return Mage_Sitemap_Model_Resource_Catalog_Abstract
      */
+    #[\Override]
     protected function _loadAttribute($attributeCode)
     {
         $attribute = Mage::getSingleton('catalog/product')->getResource()->getAttribute($attributeCode);

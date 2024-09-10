@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Payment
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,6 +15,7 @@
  */
 class Mage_Payment_Block_Form_Cc extends Mage_Payment_Block_Form
 {
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -47,7 +44,7 @@ class Mage_Payment_Block_Form_Cc extends Mage_Payment_Block_Form
             $availableTypes = $method->getConfigData('cctypes');
             if ($availableTypes) {
                 $availableTypes = explode(',', $availableTypes);
-                foreach ($types as $code => $name) {
+                foreach (array_keys($types) as $code) {
                     if (!in_array($code, $availableTypes)) {
                         unset($types[$code]);
                     }
@@ -147,6 +144,7 @@ class Mage_Payment_Block_Form_Cc extends Mage_Payment_Block_Form
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         Mage::dispatchEvent('payment_form_block_to_html_before', [

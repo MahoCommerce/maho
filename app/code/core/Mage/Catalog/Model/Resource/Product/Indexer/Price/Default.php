@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -40,6 +36,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
      * Define main price index table
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/product_index_price', 'entity_id');
@@ -97,6 +94,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
      *
      * @return $this
      */
+    #[\Override]
     public function reindexAll()
     {
         $this->useIdxTable(true);
@@ -119,6 +117,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
      * @param int|array $entityIds
      * @return $this
      */
+    #[\Override]
     public function reindexEntity($entityIds)
     {
         $this->_prepareFinalPriceData($entityIds);
@@ -594,9 +593,8 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
 
     /**
      * Register data required by product type process in event object
-     *
-     * @param Mage_Index_Model_Event $event
      */
+    #[\Override]
     public function registerEvent(Mage_Index_Model_Event $event)
     {
     }
@@ -607,6 +605,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
      * @param string $table
      * @return string
      */
+    #[\Override]
     public function getIdxTable($table = null)
     {
         if ($this->useIdxTable()) {

@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Tag
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,6 +17,7 @@
  */
 class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resource_Product_Indexer_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('tag/summary', 'tag_id');
@@ -29,7 +26,6 @@ class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resourc
     /**
      * Process tag save
      *
-     * @param Mage_Index_Model_Event $event
      * @return $this
      */
     public function tagSave(Mage_Index_Model_Event $event)
@@ -44,7 +40,6 @@ class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resourc
     /**
      * Process tag relation save
      *
-     * @param Mage_Index_Model_Event $event
      * @return $this
      */
     public function tagRelationSave(Mage_Index_Model_Event $event)
@@ -60,7 +55,6 @@ class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resourc
      * Process product save.
      * Method is responsible for index support when product was saved.
      *
-     * @param Mage_Index_Model_Event $event
      * @return $this
      */
     public function catalogProductSave(Mage_Index_Model_Event $event)
@@ -81,7 +75,6 @@ class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resourc
      * Process product delete.
      * Method is responsible for index support when product was deleted
      *
-     * @param Mage_Index_Model_Event $event
      * @return $this
      */
     public function catalogProductDelete(Mage_Index_Model_Event $event)
@@ -96,7 +89,6 @@ class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resourc
     /**
      * Process product massaction
      *
-     * @param Mage_Index_Model_Event $event
      * @return $this
      */
     public function catalogProductMassAction(Mage_Index_Model_Event $event)
@@ -113,6 +105,7 @@ class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resourc
      *
      * @return $this
      */
+    #[\Override]
     public function reindexAll()
     {
         return $this->aggregate();

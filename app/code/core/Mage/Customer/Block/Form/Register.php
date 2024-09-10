@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Customer
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -36,6 +32,7 @@ class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
     /**
      * @inheritDoc
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $this->getLayout()->getBlock('head')->setTitle(Mage::helper('customer')->__('Create New Customer Account'));
@@ -102,6 +99,7 @@ class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
      *
      * @return int
      */
+    #[\Override]
     public function getCountryId()
     {
         $countryId = $this->getFormData()->getCountryId();
@@ -156,7 +154,6 @@ class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
      * Restore entity data from session
      * Entity and form code must be defined for the form
      *
-     * @param Mage_Customer_Model_Form $form
      * @param string|null $scope
      * @return $this
      */

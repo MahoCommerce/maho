@@ -1,15 +1,11 @@
 <?php
 /**
- * OpenMage
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available at https://opensource.org/license/osl-3-0-php
+ * Maho
  *
  * @category   Mage
  * @package    Mage_Paypal
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -35,6 +31,7 @@ class Mage_Paypal_Model_Resource_Payment_Transaction extends Mage_Core_Model_Res
      * Initialize main table and the primary key field name
      *
      */
+    #[\Override]
     protected function _construct()
     {
         $this->_init('paypal/payment_transaction', 'transaction_id');
@@ -43,6 +40,7 @@ class Mage_Paypal_Model_Resource_Payment_Transaction extends Mage_Core_Model_Res
     /**
      * @see Mage_Core_Model_Resource_Abstract::_unserializeField()
      */
+    #[\Override]
     protected function _unserializeField(Varien_Object $object, $field, $defaultValue = null)
     {
         $value = $object->getData($field);
@@ -63,7 +61,6 @@ class Mage_Paypal_Model_Resource_Payment_Transaction extends Mage_Core_Model_Res
     /**
      * Load the transaction object by specified txn_id
      *
-     * @param Mage_Paypal_Model_Payment_Transaction $transaction
      * @param string $txnId
      */
     public function loadObjectByTxnId(Mage_Paypal_Model_Payment_Transaction $transaction, $txnId)
@@ -81,6 +78,7 @@ class Mage_Paypal_Model_Resource_Payment_Transaction extends Mage_Core_Model_Res
      * @param Mage_Paypal_Model_Payment_Transaction $transaction
      * @return $this
      */
+    #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $transaction)
     {
         $txnId       = $transaction->getData('txn_id');
