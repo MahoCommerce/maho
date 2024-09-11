@@ -11,9 +11,6 @@
 
 define('MAGENTO_ROOT', dirname(__DIR__));
 
-$maintenanceFile = 'maintenance.flag';
-$maintenanceIpFile = 'maintenance.ip';
-
 if (file_exists(MAGENTO_ROOT . DIRECTORY_SEPARATOR . 'app/bootstrap.php')) {
     require MAGENTO_ROOT . '/app/bootstrap.php';
     require MAGENTO_ROOT . '/app/Mage.php';
@@ -32,15 +29,18 @@ $mageRunCode = $_SERVER['MAGE_RUN_CODE'] ?? '';
 /* Run store or run website */
 $mageRunType = $_SERVER['MAGE_RUN_TYPE'] ?? 'store';
 
+$maintenanceFile = BP . '/maintenance.flag';
+$maintenanceIpFile = BP . '/maintenance.ip';
 if (file_exists($maintenanceFile)) {
     $maintenanceBypass = false;
-
-    if (is_readable($maintenanceIpFile)) {
+    if (is_readable($maintenanceIpFile) && $maintenanceIpFileContents = file_get_contents($maintenanceIpFile)) {
         /* Use Mage to get remote IP (in order to respect remote_addr_headers xml config) */
         Mage::init($mageRunCode, $mageRunType);
         $currentIp = Mage::helper('core/http')->getRemoteAddr();
-        $allowedIps = preg_split('/[\ \n\,]+/', file_get_contents($maintenanceIpFile), 0, PREG_SPLIT_NO_EMPTY);
-        $maintenanceBypass = in_array($currentIp, $allowedIps, true);
+        $allowedIps = preg_split('/[\ \n\,]+/', $maintenanceIpFileContents, 0, PREG_SPLIT_NO_EMPTY);
+        if ($allowedIps) {
+            $maintenanceBypass = in_array($currentIp, $allowedIps, true);
+        }
     }
     if (!$maintenanceBypass) {
         mahoErrorReport();
