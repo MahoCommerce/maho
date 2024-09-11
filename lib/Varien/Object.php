@@ -626,7 +626,7 @@ class Varien_Object implements ArrayAccess
                 //Varien_Profiler::stop('HAS: '.get_class($this).'::'.$method);
                 return isset($this->_data[$key]);
         }
-        throw new Varien_Exception('Invalid method ' . get_class($this) . '::' . $method . '(' . print_r($args, 1) . ')');
+        throw new Varien_Exception('Invalid method ' . get_class($this) . '::' . $method . '(' . print_r($args, true) . ')');
     }
 
     /**
