@@ -73,7 +73,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
             Mage::getConfig()->releaseCacheSaveLock();
         }
         Mage::dispatchEvent('adminhtml_cache_flush_system');
-        $this->_getSession()->addSuccess(Mage::helper('adminhtml')->__('The OpenMage cache has been flushed and updates applied.'));
+        $this->_getSession()->addSuccess(Mage::helper('adminhtml')->__('The Maho cache has been flushed and updates applied.'));
         $this->_redirect('*/*');
     }
 
