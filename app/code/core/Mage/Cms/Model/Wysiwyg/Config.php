@@ -134,6 +134,11 @@ class Mage_Cms_Model_Wysiwyg_Config extends Varien_Object
      */
     public function isEnabled()
     {
+        $isTinymceInstalled = \Composer\InstalledVersions::isInstalled('tinymce/tinymce');
+        if (!$isTinymceInstalled) {
+            return false;
+        }
+
         $storeId = $this->getStoreId();
         if (!is_null($storeId)) {
             $wysiwygState = Mage::getStoreConfig('cms/wysiwyg/enabled', $storeId);
