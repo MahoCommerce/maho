@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5702dc5c8b3cafb0a0e0351b791c0635",
+    "content-hash": "77afe54157642095ce3141cca311a53a",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -121,12 +121,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
-                "reference": "e9c4efd7e5bc97cdd5817acb15a1d1e5c76a80d2"
+                "reference": "2fa8db9dd1f2dc2cd76ee498a4e44255ac8ceda7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/e9c4efd7e5bc97cdd5817acb15a1d1e5c76a80d2",
-                "reference": "e9c4efd7e5bc97cdd5817acb15a1d1e5c76a80d2",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/2fa8db9dd1f2dc2cd76ee498a4e44255ac8ceda7",
+                "reference": "2fa8db9dd1f2dc2cd76ee498a4e44255ac8ceda7",
                 "shasum": ""
             },
             "require": {
@@ -147,44 +147,7 @@
                 "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
                 "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/main"
             },
-            "time": "2024-09-06T19:29:18+00:00"
-        },
-        {
-            "name": "mklkj/tinymce-i18n",
-            "version": "24.9.9",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/mklkj/tinymce-i18n.git",
-                "reference": "d1a78c56ec83a37e562603f6e13655e83db56585"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/mklkj/tinymce-i18n/zipball/d1a78c56ec83a37e562603f6e13655e83db56585",
-                "reference": "d1a78c56ec83a37e562603f6e13655e83db56585",
-                "shasum": ""
-            },
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "TinyMCE Community"
-                }
-            ],
-            "description": "Languages for TinyMCE 4, 5 and 6",
-            "homepage": "https://github.com/mklkj/tinymce-i18n",
-            "keywords": [
-                "i18n",
-                "languages",
-                "tinymce"
-            ],
-            "support": {
-                "issues": "https://github.com/mklkj/tinymce-i18n/issues",
-                "source": "https://github.com/mklkj/tinymce-i18n/tree/24.9.9"
-            },
-            "time": "2024-09-09T10:52:16+00:00"
+            "time": "2024-09-12T11:58:54+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
@@ -1133,65 +1096,6 @@
                 }
             ],
             "time": "2024-08-12T09:59:40+00:00"
-        },
-        {
-            "name": "tinymce/tinymce",
-            "version": "6.8.4",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/tinymce/tinymce-dist.git",
-                "reference": "4d6a5af329af6992bef810fc73d4bb70b8253a6a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/4d6a5af329af6992bef810fc73d4bb70b8253a6a",
-                "reference": "4d6a5af329af6992bef810fc73d4bb70b8253a6a",
-                "shasum": ""
-            },
-            "type": "component",
-            "extra": {
-                "component": {
-                    "scripts": [
-                        "tinymce.js",
-                        "plugins/*/plugin.js",
-                        "themes/*/theme.js",
-                        "models/*/model.js",
-                        "icons/*/icons.js"
-                    ],
-                    "files": [
-                        "tinymce.min.js",
-                        "plugins/*/plugin.min.js",
-                        "themes/*/theme.min.js",
-                        "models/*/model.min.js",
-                        "skins/**",
-                        "icons/*/icons.min.js"
-                    ]
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT-only"
-            ],
-            "description": "Web based JavaScript HTML WYSIWYG editor control.",
-            "homepage": "https://www.tiny.cloud/",
-            "keywords": [
-                "contenteditable",
-                "editing",
-                "html",
-                "javascript",
-                "rich editor",
-                "rich text",
-                "rich text editor",
-                "richtext",
-                "rte",
-                "text",
-                "tinymce",
-                "wysiwyg"
-            ],
-            "support": {
-                "source": "https://github.com/tinymce/tinymce-dist/tree/6.8.4"
-            },
-            "time": "2024-06-19T09:28:48+00:00"
         }
     ],
     "packages-dev": [
@@ -1918,16 +1822,16 @@
         },
         {
             "name": "psr/log",
-            "version": "3.0.1",
+            "version": "3.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/log.git",
-                "reference": "79dff0b268932c640297f5208d6298f71855c03e"
+                "reference": "f16e1d5863e37f8d8c2a01719f5b34baa2b714d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/log/zipball/79dff0b268932c640297f5208d6298f71855c03e",
-                "reference": "79dff0b268932c640297f5208d6298f71855c03e",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/f16e1d5863e37f8d8c2a01719f5b34baa2b714d3",
+                "reference": "f16e1d5863e37f8d8c2a01719f5b34baa2b714d3",
                 "shasum": ""
             },
             "require": {
@@ -1962,9 +1866,9 @@
                 "psr-3"
             ],
             "support": {
-                "source": "https://github.com/php-fig/log/tree/3.0.1"
+                "source": "https://github.com/php-fig/log/tree/3.0.2"
             },
-            "time": "2024-08-21T13:31:24+00:00"
+            "time": "2024-09-11T13:17:53+00:00"
         },
         {
             "name": "react/cache",

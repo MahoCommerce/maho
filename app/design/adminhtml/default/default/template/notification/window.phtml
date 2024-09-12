@@ -16,32 +16,28 @@
 ?>
 <?php if ($this->canShow()): ?>
 <script type="text/javascript">
-//<![CDATA[
-    var messagePopupClosed = false;
+    let messagePopupClosed = false;
     function openMessagePopup() {
-        var height = $('html-body').getHeight();
-        $('message-popup-window-mask').setStyle({'height':height+'px'});
-        Element.show('message-popup-window-mask');
-        $('message-popup-window').addClassName('show');
+        const height = document.documentElement.scrollHeight;
+        const mask = document.getElementById('message-popup-window-mask');
+        mask.style.height = `${height}px`;
+        mask.style.display = 'block';
+        document.getElementById('message-popup-window').classList.add('show');
     }
 
     function closeMessagePopup() {
-        Element.hide('message-popup-window-mask');
-        $('message-popup-window').removeClassName('show');
+        document.getElementById('message-popup-window-mask').style.display = 'none';
+        document.getElementById('message-popup-window').classList.remove('show');
         messagePopupClosed = true;
     }
 
-    Event.observe(window, 'load', openMessagePopup);
-    Event.observe(window, 'keyup', function(evt) {
-        if(messagePopupClosed) return;
-        var code;
-        if (evt.keyCode) code = evt.keyCode;
-        else if (evt.which) code = evt.which;
-        if (code == Event.KEY_ESC) {
+    window.addEventListener('load', openMessagePopup);
+    window.addEventListener('keyup', (event) => {
+        if (messagePopupClosed) return;
+        if (event.key === 'Escape') {
             closeMessagePopup();
         }
     });
-//]]>
 </script>
 <div id="message-popup-window-mask" style="display:none;"></div>
 <div id="message-popup-window" class="message-popup">
@@ -51,7 +47,11 @@
     </div>
     <div class="message-popup-content">
         <div class="message">
-            <span class="message-icon message-<?= $this->getSeverityText() ?>" style="background-image:url(<?= $this->escapeUrl($this->getSeverityIconsUrl()) ?>);"><?= $this->getSeverityText() ?></span>
+            <span class="message-icon message-<?= $this->getSeverityText() ?>">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>
+                <br />
+                <?= $this->getSeverityText() ?>
+            </span>
             <p class="message-text"><?= $this->getNoticeMessageText() ?></p>
         </div>
         <p class="read-more"><a href="<?= $this->getNoticeMessageUrl() ?>" onclick="this.target='_blank';"><?= $this->getReadDetailsText() ?></a></p>

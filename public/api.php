@@ -11,9 +11,6 @@
 
 define('MAGENTO_ROOT', dirname(__DIR__));
 
-$maintenanceFile = 'maintenance.flag';
-$maintenanceIpFile = 'maintenance.ip';
-
 if (file_exists(MAGENTO_ROOT . DIRECTORY_SEPARATOR . 'app/bootstrap.php')) {
     require MAGENTO_ROOT . '/app/bootstrap.php';
     require MAGENTO_ROOT . '/app/Mage.php';

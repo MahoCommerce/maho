@@ -5,7 +5,7 @@
  * @category   Varien
  * @package    Varien_Http
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -284,8 +284,8 @@ class Varien_Http_Adapter_Curl implements Zend_Http_Client_Adapter_Interface
         foreach ($urls as $key => $url) {
             $handles[$key] = curl_init();
             curl_setopt($handles[$key], CURLOPT_URL, $url);
-            curl_setopt($handles[$key], CURLOPT_HEADER, 0);
-            curl_setopt($handles[$key], CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($handles[$key], CURLOPT_HEADER, false);
+            curl_setopt($handles[$key], CURLOPT_RETURNTRANSFER, true);
             if (!empty($options)) {
                 curl_setopt_array($handles[$key], $options);
             }

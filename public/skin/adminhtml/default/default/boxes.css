@@ -99,11 +99,11 @@
 .message-popup .message-popup-head a { float:right; border:1px solid #ea7601; padding:0 12px 0 7px; background:url(images/bkg_btn-close.gif) 0 50% repeat-x !important; font:normal 12px/17px Arial, Helvetica, sans-serif; color:#fff; text-decoration:none !important; cursor:pointer; }
 .message-popup .message-popup-head a span { float:left; background:url(images/bkg_btn-close2.gif) 0 50% no-repeat; padding-left:19px; }
 .message-popup .message-popup-content { background:#fdf4eb; padding:21px 21px 10px; }
-.message-popup .message-popup-content .message-icon { float:left; width:50px; padding:47px 0 0; background-position:50% 0; background-repeat:no-repeat; font-size:10px; line-height:12px; text-transform:uppercase; text-align:center; overflow:hidden; }
-.message-popup .message-popup-content .message-critical { background-image:url(images/severity_critical.gif); color:#e41101; }
-.message-popup .message-popup-content .message-major { /*background-image:url(images/severity_major.gif);*/ color:#f55600; }
-.message-popup .message-popup-content .message-minor { /*background-image:url(images/severity_minor.gif);*/ color:#ff9e22; }
-.message-popup .message-popup-content .message-notice { /*background-image:url(images/severity_notice.gif);*/ color:#659601; }
+.message-popup .message-popup-content .message-icon { float:left; width:50px; font-size:10px; line-height:12px; text-transform:uppercase; text-align:center; }
+.message-popup .message-popup-content .message-critical { color:#e41101; }
+.message-popup .message-popup-content .message-major { color:#f55600; }
+.message-popup .message-popup-content .message-minor { color:#ff9e22; }
+.message-popup .message-popup-content .message-notice { color:#659601; }
 .message-popup .message-popup-content .message-text { float:right; width:295px; min-height:4.5em; overflow:hidden; color:#644f3b; }
 .message-popup .message-popup-content .read-more { margin:7px 0 0; text-align:right; }
 .message-popup .message-popup-content .read-more a { background:url(images/more_arrow.gif) 0 50% no-repeat; padding-left:14px; text-decoration:underline; }

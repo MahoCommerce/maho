@@ -17,10 +17,8 @@
  */
 class Mage_AdminNotification_Model_Feed extends Mage_Core_Model_Abstract
 {
-    public const XML_USE_HTTPS_PATH    = 'system/adminnotification/use_https';
     public const XML_FEED_URL_PATH     = 'system/adminnotification/feed_url';
     public const XML_FREQUENCY_PATH    = 'system/adminnotification/frequency';
-    public const XML_LAST_UPDATE_PATH  = 'system/adminnotification/last_update';
 
     /**
      * Feed url
@@ -46,7 +44,7 @@ class Mage_AdminNotification_Model_Feed extends Mage_Core_Model_Abstract
     public function getFeedUrl()
     {
         if (is_null($this->_feedUrl)) {
-            $this->_feedUrl = 'https://' . Mage::getStoreConfig(self::XML_FEED_URL_PATH);
+            $this->_feedUrl = Mage::getStoreConfig(self::XML_FEED_URL_PATH);
         }
         return $this->_feedUrl;
     }
@@ -63,9 +61,7 @@ class Mage_AdminNotification_Model_Feed extends Mage_Core_Model_Abstract
         }
 
         $feedData = [];
-
         $feedXml = $this->getFeedData();
-
         if ($feedXml && $feedXml->channel && $feedXml->channel->item) {
             foreach ($feedXml->channel->item as $item) {
                 $feedData[] = [
