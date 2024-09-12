@@ -671,6 +671,9 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      */
     public function canVoidPayment()
     {
+        if ($this->getPayment() === false) {
+            return false;
+        }
         return $this->_canVoidOrder() ? $this->getPayment()->canVoid($this->getPayment()) : false;
     }
 
@@ -841,7 +844,16 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
             return false;
         }
 
-        if (!$this->getPayment()->getMethodInstance()->canEdit()) {
+        $payment = $this->getPayment();
+        if (!$payment) {
+            return false;
+        }
+
+        if (Mage::helper('payment')->getMethodModelClassName($payment->getMethod()) === null) {
+            return false;
+        }
+
+        if (!$payment->getMethodInstance()->canEdit()) {
             return false;
         }
 

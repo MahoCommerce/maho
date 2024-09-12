@@ -221,7 +221,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
 
     /**
      * Whether can void
-     * @var string
+     * @var bool|null
      */
     protected $_canVoidLookup = null;
 
@@ -650,6 +650,10 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
     public function canVoid(Varien_Object $document)
     {
         if ($this->_canVoidLookup === null) {
+            if (Mage::helper('payment')->getMethodModelClassName($this->getMethod()) === null) {
+                $this->_canVoidLookup = false;
+                return $this->_canVoidLookup;
+            }
             $this->_canVoidLookup = (bool)$this->getMethodInstance()->canVoid($document);
             if ($this->_canVoidLookup) {
                 $authTransaction = $this->getAuthorizationTransaction();

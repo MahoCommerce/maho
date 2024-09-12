@@ -449,8 +449,12 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
         ) {
             return false;
         }
-        if ($this->getOrder()->getPayment()->canCapture()) {
-            return $this->getOrder()->getPayment()->canCapturePartial();
+        $payment = $this->getOrder()->getPayment();
+        if ($payment
+            && $this->helper('payment')->getMethodModelClassName($payment->getMethod()) !== null
+            && $payment->canCapture()
+        ) {
+            return $payment->canCapturePartial();
         }
         return true;
     }
