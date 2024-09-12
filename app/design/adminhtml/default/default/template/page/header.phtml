@@ -12,7 +12,7 @@
 /** @var $this Mage_Adminhtml_Block_Page_Header */
 ?>
 <div class="header-top">
-    <a href="<?= $this->getHomeLink() ?>"><img src="<?= $this->getSkinUrl('images/logo.svg') ?>" alt="<?= Mage::helper('core')->quoteEscape($this->__('OpenMage Logo')) ?>" class="logo"/></a>
+    <a href="<?= $this->getHomeLink() ?>"><img src="<?= $this->getSkinUrl('images/logo.svg') ?>" alt="" class="logo"/></a>
     <div class="header-right">
         <p class="super">
             <?= $this->__("Logged in as %s", $this->escapeHtml($this->getUser()->getUsername())) ?><span class="separator">|</span><a href="<?= $this->getLogoutLink() ?>" class="link-logout"><?= $this->__('Log Out') ?></a>

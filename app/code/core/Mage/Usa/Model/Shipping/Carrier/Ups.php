@@ -1153,7 +1153,7 @@ XMLAuth;
             "Authorization: Bearer $accessToken",
             'Content-Type: application/json',
             'transId: track' . uniqid(),
-            'transactionSrc: OpenMage'
+            'transactionSrc: Maho'
         ];
 
         $ch = curl_init();
