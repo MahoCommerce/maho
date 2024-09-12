@@ -76,7 +76,6 @@
         <system>
             <adminnotification>
                 <feed_url>https://mahocommerce.com/assets/notifications.rss</feed_url>
-                <severity_icons_url>widgets.magentocommerce.com/%s/%s.gif</severity_icons_url>
                 <frequency>1</frequency>
             </adminnotification>
         </system>

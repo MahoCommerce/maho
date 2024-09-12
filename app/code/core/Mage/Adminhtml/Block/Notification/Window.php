@@ -16,18 +16,6 @@
 class Mage_Adminhtml_Block_Notification_Window extends Mage_Adminhtml_Block_Notification_Toolbar
 {
     /**
-     * XML path of Severity icons url
-     */
-    public const XML_SEVERITY_ICONS_URL_PATH  = 'system/adminnotification/severity_icons_url';
-
-    /**
-     * Severity icons url
-     *
-     * @var string|null
-     */
-    protected $_severityIconsUrl;
-
-    /**
      * Is available flag
      *
      * @var bool|null
@@ -123,26 +111,6 @@ class Mage_Adminhtml_Block_Notification_Window extends Mage_Adminhtml_Block_Noti
     public function getLastNotice()
     {
         return $this->_getHelper()->getLatestNotice();
-    }
-
-    /**
-     * Retrieve severity icons url
-     *
-     * @return string
-     */
-    public function getSeverityIconsUrl()
-    {
-        if (is_null($this->_severityIconsUrl)) {
-            $this->_severityIconsUrl =
-                (Mage::app()->getFrontController()->getRequest()->isSecure() ? 'https://' : 'http://')
-                . sprintf(
-                    Mage::getStoreConfig(self::XML_SEVERITY_ICONS_URL_PATH),
-                    Mage::getVersion(),
-                    $this->getNoticeSeverity()
-                )
-            ;
-        }
-        return $this->_severityIconsUrl;
     }
 
     /**
