@@ -16,7 +16,7 @@
  */
 class Mage_Core_Helper_EnvironmentConfigLoader extends Mage_Core_Helper_Abstract
 {
-    protected const ENV_STARTS_WITH = 'OPENMAGE_CONFIG';
+    protected const ENV_STARTS_WITH = 'MAHO_CONFIG';
     protected const ENV_KEY_SEPARATOR = '__';
     protected const CONFIG_KEY_DEFAULT = 'DEFAULT';
     protected const CONFIG_KEY_WEBSITES = 'WEBSITES';
@@ -33,7 +33,7 @@ class Mage_Core_Helper_EnvironmentConfigLoader extends Mage_Core_Helper_Abstract
      *
      * Environment variables work on this schema:
      *
-     * self::ENV_STARTS_WITH . self::ENV_KEY_SEPARATOR (OPENMAGE_CONFIG__)
+     * self::ENV_STARTS_WITH . self::ENV_KEY_SEPARATOR (MAHO_CONFIG__)
      *        ^ Prefix (required)
      *                  <SCOPE>__
      *                     ^ Where scope is DEFAULT, WEBSITES__<WEBSITE_CODE> or STORES__<STORE_CODE>
@@ -42,11 +42,11 @@ class Mage_Core_Helper_EnvironmentConfigLoader extends Mage_Core_Helper_Abstract
      *
      * Each example will override the 'general/store_information/name' value.
      * Override from the default configuration:
-     * @example OPENMAGE_CONFIG__DEFAULT__GENERAL__STORE_INFORMATION__NAME=default
+     * @example MAHO_CONFIG__DEFAULT__GENERAL__STORE_INFORMATION__NAME=default
      * Override the website 'base' configuration:
-     * @example OPENMAGE_CONFIG__WEBSITES__BASE__GENERAL__STORE_INFORMATION__NAME=website
+     * @example MAHO_CONFIG__WEBSITES__BASE__GENERAL__STORE_INFORMATION__NAME=website
      * Override the store 'german' configuration:
-     * @example OPENMAGE_CONFIG__STORES__GERMAN__GENERAL__STORE_INFORMATION__NAME=store_german
+     * @example MAHO_CONFIG__STORES__GERMAN__GENERAL__STORE_INFORMATION__NAME=store_german
      *
      * @return void
      */
@@ -121,7 +121,7 @@ class Mage_Core_Helper_EnvironmentConfigLoader extends Mage_Core_Helper_Abstract
             . static::ENV_KEY_SEPARATOR . $sectionGroupFieldRegexp
             . static::ENV_KEY_SEPARATOR . $sectionGroupFieldRegexp
             . static::ENV_KEY_SEPARATOR . $sectionGroupFieldRegexp . '/';
-        // /OPENMAGE_CONFIG__(WEBSITES__[A-Z-_]+|DEFAULT|STORES__[A-Z-_]+)__([A-Z-_]*)__([A-Z-_]*)__([A-Z-_]*)/
+        // /MAHO_CONFIG__(WEBSITES__[A-Z-_]+|DEFAULT|STORES__[A-Z-_]+)__([A-Z-_]*)__([A-Z-_]*)__([A-Z-_]*)/
 
         return preg_match($regexp, $configKey);
     }
