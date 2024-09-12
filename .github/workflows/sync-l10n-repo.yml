@@ -1,10 +1,5 @@
 name: Sync L10N Repo
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'app/locale/en_US/**'
   schedule:
     - cron: '0 0 * * *'  # Run every day at midnight UTC
   workflow_dispatch:
@@ -44,24 +39,15 @@ jobs:
           git checkout main
           git pull origin main
           git checkout -b tmp-${{ steps.date.outputs.DATE }}
-      - name: Copy changed files
+      - name: Sync locale files
         run: |
-          cd maho
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            changed_files=$(git diff --name-only origin/main HEAD | grep '^app/locale/en_US/')
-          else
-            changed_files=$(find app/locale/en_US/ -type f)
-          fi
-          if [ -n "$changed_files" ]; then
-            echo "Changed files: $changed_files"
-            for file in $changed_files; do
-              # Remove 'app/locale/' prefix and create the new path
-              new_path="../maho-l10n/${file#app/locale/}"
-              mkdir -p "$(dirname "$new_path")"
-              cp "$file" "$new_path"
-            done
-          else
-            echo "No changes in app/locale/en_US/"
+          rm -rf maho-l10n/en_US
+          cp -R maho/app/locale/en_US maho-l10n/
+
+          # Check if there are any changes
+          cd maho-l10n
+          if git diff --quiet; then
+            echo "No changes in locales"
             exit 0
           fi
       - name: Create Pull Request
