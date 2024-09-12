@@ -18,7 +18,7 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title><?= Mage::helper('install')->__('OpenMage Installation Wizard') ?></title>
+<title><?= Mage::helper('install')->__('Maho Installation Wizard') ?></title>
 <link rel="icon" href="<?= $this->getSkinUrl('favicon.ico') ?>" type="image/x-icon" />
 <script type="text/javascript" src="<?= $this->getJsUrl() ?>prototype/prototype.js"></script>
 <script type="text/javascript" src="<?= $this->getJsUrl() ?>prototype/validation.js"></script>
@@ -39,7 +39,7 @@
         <div class="header-top-container">
             <div class="header-top">
                 <h1 id="logo">
-                    <a href="<?= $this->getUrl('') ?>"><img src="<?= $this->getSkinUrl('images/logo.svg') ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('install')->__('OpenMage')) ?>" alt="<?= Mage::helper('core')->quoteEscape(Mage::helper('install')->__('OpenMage')) ?>" /></a>
+                    <a href="<?= $this->getUrl('') ?>"><img src="<?= $this->getSkinUrl('images/logo.svg') ?>" title="Maho" alt="Maho" /></a>
                 </h1>
 
                 <?= $this->getChildHtml('topSearch') ?>
@@ -86,12 +86,7 @@
     <div class="footer-container">
         <div class="footer">
         <p class="legality">
-            <?= Mage::helper('install')->__('Help Us to Keep OpenMage Healthy') ?> - <a href="https://github.com/OpenMage/magento-lts/issues" id="bug_tracking_link"><strong><?= Mage::helper('install')->__('Report All Bugs') ?></strong></a> <?= Mage::getMahoVersion() ?><br/>
-<script type="text/javascript">
-//<![CDATA[
-    $('bug_tracking_link').target = "varien_external";
-//]]>
-</script>
+            <a href="https://mahocommerce.com" target="_blank">Powered by Maho <?= Mage::getMahoVersion() ?></a>
         </p>
         </div>
     </div>
