@@ -121,12 +121,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
-                "reference": "e9c4efd7e5bc97cdd5817acb15a1d1e5c76a80d2"
+                "reference": "2fa8db9dd1f2dc2cd76ee498a4e44255ac8ceda7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/e9c4efd7e5bc97cdd5817acb15a1d1e5c76a80d2",
-                "reference": "e9c4efd7e5bc97cdd5817acb15a1d1e5c76a80d2",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/2fa8db9dd1f2dc2cd76ee498a4e44255ac8ceda7",
+                "reference": "2fa8db9dd1f2dc2cd76ee498a4e44255ac8ceda7",
                 "shasum": ""
             },
             "require": {
@@ -147,7 +147,7 @@
                 "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
                 "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/main"
             },
-            "time": "2024-09-06T19:29:18+00:00"
+            "time": "2024-09-12T11:58:54+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
