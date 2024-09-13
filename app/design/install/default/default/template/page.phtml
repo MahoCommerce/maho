@@ -43,20 +43,8 @@
                     <a href="<?= $this->getUrl('') ?>"><img src="<?= $this->getSkinUrl('images/logo.svg') ?>" title="Maho" alt="Maho" /></a>
                 </h1>
 
-                <?= $this->getChildHtml('topSearch') ?>
-
-                <div class="quick-access">
-                    <div class="account-access">
-                       <strong>&nbsp;<?= $this->getWelcome() ?></strong> <?= $this->getChildHtml('topLeftLinks') ?>
-                    </div>
-                    <div class="shop-access">
-                        <?= $this->getChildHtml('topRightLinks') ?>
-                    </div>
-                </div>
-
             </div>
         </div>
-        <?= $this->getChildHtml('topMenu') ?>
     </div>
 <!-- [end] header -->
 

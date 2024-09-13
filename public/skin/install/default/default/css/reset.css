@@ -13,7 +13,7 @@
 
 * { margin:0; padding:0; }
 
-body { background-color:#496778; color:#2f2f2f; font:12px/1.5 arial, helvetica, sans-serif; text-align:center; }
+body { color:#2f2f2f; font:12px/1.5 arial, helvetica, sans-serif; text-align:center; }
 
 a { color:#1e7ec8; text-decoration:underline; }
 a:hover { color:#1e7ec8; text-decoration:underline; }
@@ -44,7 +44,7 @@ q:before, q:after{content:'';}
 form { display:inline;}
 fieldset { border:none; }
 legend { display:none; display:block !important; height:0; line-height:0; margin:0; overflow:hidden; padding:0; width:0; visibility:hidden; }
-label { color:#666; /*font-size:.95em;*/  font-weight:bold; }
+label { color:#666; font-weight:bold; }
 input, select, button { vertical-align:middle; }
 
 /* Lists */
