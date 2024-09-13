@@ -263,7 +263,7 @@ small {
   padding-bottom: 0;
 }
 .content-header h3 {
-  margin: 0 0.3em 0.3em;
+  margin: 0 0 0.3em;
   line-height: 32px;
 }
 
@@ -433,7 +433,7 @@ small {
 }
 
 .header {
-  background: #3A499D;
+  background: black;
   position: relative;
 }
 
