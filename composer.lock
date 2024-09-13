@@ -145,7 +145,7 @@
             "notification-url": "https://packagist.org/downloads/",
             "support": {
                 "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
-                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/main"
+                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v1.2.0"
             },
             "time": "2024-09-12T11:58:54+00:00"
         },
