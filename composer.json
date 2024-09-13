@@ -78,11 +78,6 @@
         }
     },
     "config": {
-        "audit": {
-            "ignore": {
-                "CVE-2024-29881": "Fixed in https://github.com/MahoCommerce/maho/commit/4868c7f2876d99f9a70694be07bf3f8473b16aea"
-            }
-        },
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "cweagans/composer-patches": true,
