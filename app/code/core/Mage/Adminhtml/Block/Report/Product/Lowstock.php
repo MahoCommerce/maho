@@ -49,10 +49,4 @@ class Mage_Adminhtml_Block_Report_Product_Lowstock extends Mage_Adminhtml_Block_
     {
         return $this->getStoreSwitcherHtml() . parent::getGridHtml();
     }
-
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-report';
-    }
 }

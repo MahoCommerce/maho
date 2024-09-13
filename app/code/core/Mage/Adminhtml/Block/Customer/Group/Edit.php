@@ -61,13 +61,4 @@ class Mage_Adminhtml_Block_Customer_Group_Edit extends Mage_Adminhtml_Block_Widg
         }
         return Mage::helper('customer')->__('New Customer Group');
     }
-
-    /**
-     * @return string
-     */
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-customer-groups';
-    }
 }

@@ -25,10 +25,4 @@ class Mage_Adminhtml_Block_Report_Shopcart_Product extends Mage_Adminhtml_Block_
         parent::__construct();
         $this->_removeButton('add');
     }
-
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-report';
-    }
 }

@@ -26,7 +26,7 @@
         <!--Payment Method-->
         <div class="entry-edit">
             <div class="entry-edit-head">
-                <h4 class="icon-head head-payment-method"><?= Mage::helper('sales')->__('Payment Information') ?></h4>
+                <h4><?= Mage::helper('sales')->__('Payment Information') ?></h4>
             </div>
             <fieldset>
                 <?= $this->getPaymentHtml() ?>
@@ -42,7 +42,7 @@
         <!--Shipping Method-->
         <div class="entry-edit">
             <div class="entry-edit-head">
-                <h4 class="icon-head head-shipping-method"><?= Mage::helper('sales')->__('Shipping &amp; Handling Information') ?></h4>
+                <h4><?= Mage::helper('sales')->__('Shipping &amp; Handling Information') ?></h4>
             </div>
             <fieldset>
                 <?php  if ($_order->getTracksCollection()->count()) : ?>
@@ -82,7 +82,7 @@
     <div class="clear"></div>
     <div class="entry-edit">
         <div class="entry-edit-head">
-            <h4 class="icon-head head-products"><?= Mage::helper('sales')->__('Items Ordered') ?></h4>
+            <h4><?= Mage::helper('sales')->__('Items Ordered') ?></h4>
         </div>
     </div>
     <?= $this->getItemsHtml() ?>

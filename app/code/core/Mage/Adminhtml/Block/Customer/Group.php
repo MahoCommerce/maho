@@ -29,15 +29,4 @@ class Mage_Adminhtml_Block_Customer_Group extends Mage_Adminhtml_Block_Widget_Gr
         $this->_addButtonLabel = Mage::helper('customer')->__('Add New Customer Group');
         parent::__construct();
     }
-
-    /**
-     * Redefine header css class
-     *
-     * @return string
-     */
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-customer-groups';
-    }
 }

@@ -49,10 +49,4 @@ class Mage_Adminhtml_Block_Report_Shopcart_Abandoned extends Mage_Adminhtml_Bloc
     {
         return $this->getStoreSwitcherHtml() . parent::getGridHtml();
     }
-
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-report';
-    }
 }

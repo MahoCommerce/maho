@@ -11,7 +11,7 @@
  */
 ?>
 <div class="content-header">
-    <h3 class="icon-head head-system-email-template"><?= $this->getHeaderText() ?></h3>
+    <h3><?= $this->getHeaderText() ?></h3>
     <p class="content-buttons form-buttons">
                 <?= $this->getBackButtonHtml() ?>
                 <?= $this->getResetButtonHtml() ?>
@@ -31,7 +31,7 @@
     <?= $this->getBlockHtml('formkey') ?>
     <div class="entry-edit">
         <div class="entry-edit-head">
-            <h4 class="icon-head head-edit-form fieldset-legend">
+            <h4>
             <?= Mage::helper('adminhtml')->__('Load default template') ?>
             </h4>
             <div class="form-buttons"></div>

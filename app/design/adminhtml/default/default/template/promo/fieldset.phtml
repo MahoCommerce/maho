@@ -13,7 +13,7 @@
 <?php $_element = $this->getElement() ?>
 <div class="rule-tree">
     <div class="entry-edit-head">
-        <h4 class="icon-head head-edit-form fieldset-legend"><?= $_element->getLegend() ?></h4>
+        <h4><?= $_element->getLegend() ?></h4>
     </div>
     <fieldset id="<?= $_element->getHtmlId() ?>" <?= $_element->serialize(['class']) ?>>
     <?php if ($_element->getComment()): ?>

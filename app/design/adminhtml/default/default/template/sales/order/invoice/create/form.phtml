@@ -22,7 +22,7 @@
 
         <div class="entry-edit">
             <div class="entry-edit-head">
-                <h4 class="icon-head head-payment-method"><?= Mage::helper('sales')->__('Payment Information') ?></h4>
+                <h4><?= Mage::helper('sales')->__('Payment Information') ?></h4>
             </div>
             <fieldset>
                 <div><?= $this->getChildHtml('order_payment') ?></div>
@@ -35,7 +35,7 @@
         <!--Shipping Address-->
         <div class="entry-edit">
             <div class="entry-edit-head">
-                <h4 class="icon-head head-shipping-method"><?= Mage::helper('sales')->__('Shipping Information') ?></h4>
+                <h4><?= Mage::helper('sales')->__('Shipping Information') ?></h4>
             </div>
             <fieldset>
                 <div>
@@ -75,7 +75,7 @@
             <?php
                 $_itemsGridLabel = $this->getForcedShipmentCreate()?'Items to Invoice and Ship':'Items to Invoice';
             ?>
-            <h4 class="icon-head head-products"><?= Mage::helper('sales')->__('%s', $_itemsGridLabel) ?></h4>
+            <h4><?= Mage::helper('sales')->__('%s', $_itemsGridLabel) ?></h4>
         </div>
     </div>
     <div id="invoice_item_container">

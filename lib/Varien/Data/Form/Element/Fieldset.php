@@ -94,7 +94,7 @@ class Varien_Data_Form_Element_Fieldset extends Varien_Data_Form_Element_Abstrac
     #[\Override]
     public function getDefaultHtml()
     {
-        $html = '<div><h4 class="icon-head head-edit-form fieldset-legend">' . $this->getLegend() . '</h4>' . "\n";
+        $html = '<div><h4>' . $this->getLegend() . '</h4>' . "\n";
         $html .= $this->getElementHtml();
         return $html;
     }

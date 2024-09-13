@@ -23,7 +23,7 @@
         <!--Billing Address-->
         <div class="entry-edit">
             <div class="entry-edit-head">
-                <h4 class="icon-head head-payment-method"><?= Mage::helper('sales')->__('Payment Information') ?></h4>
+                <h4><?= Mage::helper('sales')->__('Payment Information') ?></h4>
             </div>
             <fieldset>
                 <div><?= $this->getChildHtml('order_payment') ?></div>
@@ -40,7 +40,7 @@
         <!--Shipping Address-->
         <div class="entry-edit">
             <div class="entry-edit-head">
-                <h4 class="icon-head head-shipping-method"><?= Mage::helper('sales')->__('Shipping Information') ?></h4>
+                <h4><?= Mage::helper('sales')->__('Shipping Information') ?></h4>
             </div>
             <fieldset>
                 <strong><?= $this->escapeHtml($_order->getShippingDescription()) ?></strong>
@@ -65,7 +65,7 @@
 
     <div class="entry-edit">
       <div class="entry-edit-head">
-          <h4 class="icon-head head-products"><?= Mage::helper('sales')->__('Items to Refund') ?></h4>
+          <h4><?= Mage::helper('sales')->__('Items to Refund') ?></h4>
       </div>
     </div>
     <div id="creditmemo_item_container">

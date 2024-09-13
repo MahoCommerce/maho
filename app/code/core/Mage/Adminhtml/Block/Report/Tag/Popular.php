@@ -49,10 +49,4 @@ class Mage_Adminhtml_Block_Report_Tag_Popular extends Mage_Adminhtml_Block_Widge
     {
         return $this->getStoreSwitcherHtml() . parent::getGridHtml();
     }
-
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-report';
-    }
 }

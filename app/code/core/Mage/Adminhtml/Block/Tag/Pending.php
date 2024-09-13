@@ -45,9 +45,4 @@ class Mage_Adminhtml_Block_Tag_Pending extends Mage_Adminhtml_Block_Template
     {
         return Mage::helper('tag')->__('Pending Tags');
     }
-
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-tag';
-    }
 }

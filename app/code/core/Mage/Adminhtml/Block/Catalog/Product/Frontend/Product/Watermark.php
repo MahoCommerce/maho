@@ -71,7 +71,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Frontend_Product_Watermark extends Ma
         $id = $element->getHtmlId();
         $default = !$this->getRequest()->getParam('website') && !$this->getRequest()->getParam('store');
 
-        $html = '<h4 class="icon-head head-edit-form">' . $element->getLegend() . '</h4>';
+        $html = '<h4>' . $element->getLegend() . '</h4>';
         $html .= '<fieldset class="config" id="' . $element->getHtmlId() . '">';
         $html .= '<legend>' . $element->getLegend() . '</legend>';
 

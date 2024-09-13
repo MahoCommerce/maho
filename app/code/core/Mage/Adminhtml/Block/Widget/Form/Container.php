@@ -167,15 +167,6 @@ class Mage_Adminhtml_Block_Widget_Form_Container extends Mage_Adminhtml_Block_Wi
      * @return string
      */
     #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-' . strtr($this->_controller, '_', '-');
-    }
-
-    /**
-     * @return string
-     */
-    #[\Override]
     public function getHeaderHtml()
     {
         return '<h3 class="' . $this->getHeaderCssClass() . '">' . $this->getHeaderText() . '</h3>';

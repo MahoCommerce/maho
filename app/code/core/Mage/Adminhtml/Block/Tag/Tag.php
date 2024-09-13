@@ -25,10 +25,4 @@ class Mage_Adminhtml_Block_Tag_Tag extends Mage_Adminhtml_Block_Widget_Grid_Cont
         $this->_addButtonLabel = Mage::helper('tag')->__('Add New Tag');
         parent::__construct();
     }
-
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-tag';
-    }
 }

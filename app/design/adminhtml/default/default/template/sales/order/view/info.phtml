@@ -25,7 +25,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
         endif; ?>
         <div class="entry-edit-head">
         <?php if ($this->getNoUseOrderLink()): ?>
-            <h4 class="icon-head head-account" data-copy-text="<?= $_order->getRealOrderId() ?>"><?= Mage::helper('sales')->__('Order # %s', $this->escapeHtml($_order->getRealOrderId())) ?> (<?= $_email ?>)</h4>
+            <h4 data-copy-text="<?= $_order->getRealOrderId() ?>"><?= Mage::helper('sales')->__('Order # %s', $this->escapeHtml($_order->getRealOrderId())) ?> (<?= $_email ?>)</h4>
         <?php else: ?>
             <a href="<?= $this->getViewUrl($_order->getId()) ?>"><?= Mage::helper('sales')->__('Order # %s', $this->escapeHtml($_order->getRealOrderId())) ?></a>
             <strong>(<?= $_email ?>)</strong>
@@ -93,7 +93,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
     <!--Account Information-->
     <div class="entry-edit">
         <div class="entry-edit-head">
-            <h4 class="icon-head head-account"><?= Mage::helper('sales')->__('Account Information') ?></h4>
+            <h4><?= Mage::helper('sales')->__('Account Information') ?></h4>
             <div class="tools"><?= $this->getAccountEditLink() ?></div>
         </div>
         <div class="fieldset">
@@ -136,7 +136,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
     <!--Billing Address-->
     <div class="entry-edit">
         <div class="entry-edit-head">
-            <h4 class="icon-head head-billing-address"><?= Mage::helper('sales')->__('Billing Address') ?></h4>
+            <h4><?= Mage::helper('sales')->__('Billing Address') ?></h4>
             <div class="tools"><?= $this->getAddressEditLink($_order->getBillingAddress()) ?></div>
         </div>
         <fieldset>
@@ -149,7 +149,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
     <!--Shipping Address-->
     <div class="entry-edit">
         <div class="entry-edit-head">
-            <h4 class="icon-head head-shipping-address"><?= Mage::helper('sales')->__('Shipping Address') ?></h4>
+            <h4><?= Mage::helper('sales')->__('Shipping Address') ?></h4>
             <div class="tools"><?= $this->getAddressEditLink($_order->getShippingAddress()) ?></div>
         </div>
         <fieldset>

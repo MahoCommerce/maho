@@ -49,10 +49,4 @@ class Mage_Adminhtml_Block_Report_Product_Downloads extends Mage_Adminhtml_Block
     {
         return $this->getStoreSwitcherHtml() . parent::getGridHtml();
     }
-
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-report';
-    }
 }

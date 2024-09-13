@@ -29,10 +29,4 @@ class Mage_Adminhtml_Block_Report_Tag_Customer_Detail extends Mage_Adminhtml_Blo
         $this->setBackUrl($this->getUrl('*/report_tag/customer/'));
         $this->_addBackButton();
     }
-
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-report';
-    }
 }

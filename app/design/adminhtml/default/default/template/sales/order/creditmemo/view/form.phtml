@@ -20,7 +20,7 @@
     <!--Billing Address-->
     <div class="entry-edit">
         <div class="entry-edit-head">
-            <h4 class="icon-head head-payment-method"><?= $this->helper('sales')->__('Payment Information') ?></h4>
+            <h4><?= $this->helper('sales')->__('Payment Information') ?></h4>
         </div>
         <fieldset>
             <div><?= $this->getChildHtml('order_payment') ?></div>
@@ -33,7 +33,7 @@
     <!--Shipping Address-->
     <div class="entry-edit">
         <div class="entry-edit-head">
-            <h4 class="icon-head head-shipping-method"><?= $this->helper('sales')->__('Shipping Information') ?></h4>
+            <h4><?= $this->helper('sales')->__('Shipping Information') ?></h4>
         </div>
         <fieldset>
             <strong><?= $this->escapeHtml($_order->getShippingDescription()) ?></strong>
@@ -58,7 +58,7 @@
 <?php $_items = $this->getCreditmemo()->getAllItems() ?>
 <div class="entry-edit">
     <div class="entry-edit-head">
-        <h4 class="icon-head head-products"><?= $this->helper('sales')->__('Items Refunded') ?></h4>
+        <h4><?= $this->helper('sales')->__('Items Refunded') ?></h4>
     </div>
 </div>
 <?php if (count($_items)): ?>

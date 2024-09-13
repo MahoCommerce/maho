@@ -36,10 +36,4 @@ class Mage_Adminhtml_Block_Report_Sales_Invoiced extends Mage_Adminhtml_Block_Wi
         $this->getRequest()->setParam('filter', null);
         return $this->getUrl('*/*/invoiced', ['_current' => true]);
     }
-
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-report';
-    }
 }

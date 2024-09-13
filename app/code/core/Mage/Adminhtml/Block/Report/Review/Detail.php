@@ -28,10 +28,4 @@ class Mage_Adminhtml_Block_Report_Review_Detail extends Mage_Adminhtml_Block_Wid
         $this->setBackUrl($this->getUrl('*/report_review/product/'));
         $this->_addBackButton();
     }
-
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-report';
-    }
 }

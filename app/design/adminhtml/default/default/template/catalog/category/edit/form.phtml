@@ -12,7 +12,7 @@
 ?>
 
 <div class="content-header">
-        <h3 class="icon-head head-categories"><?= $this->escapeHtml($this->getHeader()) . ($this->getCategoryId() ? ' (' . Mage::helper('catalog')->__('ID: %s', $this->getCategoryId()) . ')' : '') ?></h3>
+        <h3><?= $this->escapeHtml($this->getHeader()) . ($this->getCategoryId() ? ' (' . Mage::helper('catalog')->__('ID: %s', $this->getCategoryId()) . ')' : '') ?></h3>
         <p class="content-buttons form-buttons">
             <?= $this->getResetButtonHtml() ?>
             <?php if($this->getCategoryId()): ?>

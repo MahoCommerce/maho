@@ -28,10 +28,4 @@ class Mage_Adminhtml_Block_Report_Tag_Popular_Detail extends Mage_Adminhtml_Bloc
         $this->setBackUrl($this->getUrl('*/report_tag/popular/'));
         $this->_addBackButton();
     }
-
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-report';
-    }
 }

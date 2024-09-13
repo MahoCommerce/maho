@@ -25,10 +25,4 @@ class Mage_Adminhtml_Block_Report_Tag_Customer extends Mage_Adminhtml_Block_Widg
         parent::__construct();
         $this->_removeButton('add');
     }
-
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-report';
-    }
 }

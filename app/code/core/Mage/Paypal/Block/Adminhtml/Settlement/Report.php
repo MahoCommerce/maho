@@ -35,13 +35,4 @@ class Mage_Paypal_Block_Adminhtml_Settlement_Report extends Mage_Adminhtml_Block
             'class'   => 'task'
         ]);
     }
-
-    /**
-     * @return string
-     */
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-report';
-    }
 }

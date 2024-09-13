@@ -13,7 +13,7 @@
 <div class="content-header">
     <table cellspacing="0">
         <tr>
-            <td><h3 class="icon-head head-tax-rate-importExport"><?= Mage::helper('tax')->__('Import / Export Tax Rates') ?></h3></td>
+            <td><h3><?= Mage::helper('tax')->__('Import / Export Tax Rates') ?></h3></td>
         </tr>
     </table>
 </div>
@@ -23,7 +23,7 @@
         <form id="import_form" action="<?= $this->getUrl('*/*/importPost') ?>" method="post" enctype="multipart/form-data">
             <?= $this->getBlockHtml('formkey') ?>
             <div class="entry-edit-head">
-                <h4 class="icon-head head-edit-form fieldset-legend"><?= Mage::helper('tax')->__('Import Tax Rates') ?></h4>
+                <h4><?= Mage::helper('tax')->__('Import Tax Rates') ?></h4>
             </div>
             <fieldset>
                 <legend><?= Mage::helper('tax')->__('Import Tax Rates') ?></legend>
@@ -40,7 +40,7 @@
         <form id="export_form" action="<?= $this->getUrl('*/*/exportPost') ?>" method="post" enctype="multipart/form-data">
             <?= $this->getBlockHtml('formkey') ?>
             <div class="entry-edit-head">
-                <h4 class="icon-head head-edit-form fieldset-legend"><?= Mage::helper('tax')->__('Export Tax Rates') ?></h4>
+                <h4><?= Mage::helper('tax')->__('Export Tax Rates') ?></h4>
             </div>
             <fieldset>
                 <legend><?= Mage::helper('tax')->__('Export Tax Rates') ?></legend>

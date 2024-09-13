@@ -26,10 +26,4 @@ class Mage_Adminhtml_Block_Report_Product_Ordered extends Mage_Adminhtml_Block_W
         parent::__construct();
         $this->_removeButton('add');
     }
-
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-report';
-    }
 }
