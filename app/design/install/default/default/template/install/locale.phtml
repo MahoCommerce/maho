@@ -9,12 +9,6 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-
-/**
- * Install localization template
- *
- * @see Mage_Install_Block_Locale
- */
 ?>
 <div class="page-head">
     <h3><?= $this->__('Localization') ?></h3>
@@ -50,14 +44,19 @@
 </div>
 </form>
 <script type="text/javascript">
-    function changeLocale(event){
-        var elem = Event.element(event);
-        if(elem){
-            setLocation('<?= $this->getChangeUrl() ?>locale/'+elem.value+'/?timezone='+$('timezone').value+'&amp;currency='+$('currency').value);
+    const changeLocale = (event) => {
+        const elem = event.target;
+        if (elem) {
+            const timezoneValue = document.getElementById('timezone').value;
+            const currencyValue = document.getElementById('currency').value;
+            const url = `<?= $this->getChangeUrl() ?>locale/${elem.value}/?timezone=${timezoneValue}&currency=${currencyValue}`;
+            window.location.href = url;
         }
-    }
-    var dataForm = new VarienForm('form-validate');
-    if($('locale')){
-        Event.observe($('locale'), 'change', changeLocale);
+    };
+
+    const dataForm = new VarienForm('form-validate');
+    const localeElement = document.getElementById('locale');
+    if (localeElement) {
+        localeElement.addEventListener('change', changeLocale);
     }
 </script>

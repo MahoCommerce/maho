@@ -10,12 +10,7 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/**
- * Install configuration template
- *
- * @see Mage_Install_Block_Config
- * @var $this Mage_Install_Block_Config
- */
+/** @var $this Mage_Install_Block_Config */
 ?>
 <div class="page-head">
     <h3><?= $this->__('Configuration') ?></h3>
@@ -23,8 +18,6 @@
 <?= $this->getMessagesBlock()->toHtml() ?>
 <?php if($this->getInstaller()->getServerCheckStatus()): ?>
 <form action="<?= $this->getPostUrl() ?>" method="post" id="form-validate">
-
-<!--    database connection    -->
 <?= $this->getLayout()->getBlock('database')->toHtml() ?>
 
 <fieldset class="group-select">
