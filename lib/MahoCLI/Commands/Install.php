@@ -64,11 +64,28 @@ class Install extends BaseMahoCommand
 
         // Encryption key
         $this->addOption('encryption_key', null, InputOption::VALUE_OPTIONAL, 'Will be automatically generated and displayed on success, if not specified');
+
+        // Sample data
+        $this->addOption('sample_data', null, InputOption::VALUE_OPTIONAL, 'Also install sample data');
     }
 
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        // Reset some options in case we're installing sample data
+        if ($input->getOption('sample_data')) {
+            $options = $input->getOptions();
+            $options['locale'] = 'en_US';
+            $options['default_currency'] = 'USD';
+            unset($options['db_prefix']);
+
+            $_SERVER['argv'] = ['maho', 'install'];
+            foreach ($options as $key => $value) {
+                $_SERVER['argv'][] = "--{$key}";
+                $_SERVER['argv'][] = $value;
+            }
+        }
+
         $this->initMaho();
 
         array_shift($_SERVER['argv']);
@@ -82,18 +99,111 @@ class Install extends BaseMahoCommand
             if ($installer->init($app) && $installer->setArgs() && $installer->install()) {
                 $output->writeln('<info>Installation completed successfully</info>');
                 $output->writeln("The encryption key for your installation is {$installer->getEncryptionKey()}");
-                return Command::SUCCESS;
             }
         } catch (Exception $e) {
             $output->writeln("<error>{$e->getMessage()}</error>");
+            return Command::FAILURE;
         }
 
         if ($installer->getErrors()) {
             foreach ($installer->getErrors() as $error) {
                 $output->writeln("<error>{$error}</error>");
             }
+            return Command::FAILURE;
         }
 
-        return Command::FAILURE;
+        $output->writeln('');
+
+        // Download and decompress sample data
+        if ($input->getOption('sample_data')) {
+            $output->writeln('<info>Downloading sample data...</info>');
+
+            $sampleDataUrl = 'https://github.com/MahoCommerce/maho-sample-data/archive/refs/heads/main.tar.gz';
+            $tempFile = tempnam(sys_get_temp_dir(), 'maho_sample_data');
+            $targetDir = Mage::getBaseDir();
+
+            // Download the file
+            if (file_put_contents($tempFile, file_get_contents($sampleDataUrl)) === false) {
+                $output->writeln("<error>Failed to download sample data</error>");
+                return Command::FAILURE;
+            }
+
+            $output->writeln('<info>Extracting and copying sample data files...</info>');
+
+            // Extract the archive using tar
+            $extractCommand = "tar -xzf $tempFile -C $targetDir";
+            exec($extractCommand, $extractOutput, $extractReturnVar);
+
+            if ($extractReturnVar !== 0) {
+                $output->writeln("<error>Failed to extract sample data. tar command returned: $extractReturnVar</error>");
+                foreach ($extractOutput as $line) {
+                    $output->writeln($line);
+                }
+                return Command::FAILURE;
+            }
+
+            // Copy media files
+            $sourceMediaDir = $targetDir . '/maho-sample-data-main/media';
+            $targetMediaDir = $targetDir . '/public/media';
+
+            $copyCommand = "cp -R $sourceMediaDir/* $targetMediaDir/";
+            exec($copyCommand, $copyOutput, $copyReturnVar);
+
+            if ($copyReturnVar !== 0) {
+                $output->writeln("<error>Failed to copy media files. cp command returned: $copyReturnVar</error>");
+                foreach ($copyOutput as $line) {
+                    $output->writeln($line);
+                }
+                return Command::FAILURE;
+            }
+
+            $output->writeln('<info>Installing sample database</info>');
+
+            $dbHost = $input->getOption('db_host');
+            $dbName = $input->getOption('db_name');
+            $dbUser = $input->getOption('db_user');
+            $dbPass = $input->getOption('db_pass');
+            $sqlFiles = ['db_preparation.sql', 'db_data.sql'];
+
+            // Create a temporary MySQL configuration file
+            $sampleDataDir = $targetDir . '/maho-sample-data-main';
+            $tmpMyCnf = $sampleDataDir . '/temp_my.cnf';
+            file_put_contents($tmpMyCnf, "[client]\nuser={$dbUser}\npassword={$dbPass}\nhost={$dbHost}\n");
+            chmod($tmpMyCnf, 0600);
+
+            foreach ($sqlFiles as $sqlFile) {
+                $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
+                $importCommand = "mysql --defaults-extra-file=" . escapeshellarg($tmpMyCnf) . " {$dbName} < " . escapeshellarg($sqlFilePath) . " 2>&1";
+                exec($importCommand, $importOutput, $importReturnVar);
+
+                if ($importReturnVar !== 0) {
+                    $output->writeln("<error>Failed to import {$sqlFile}. mysql command returned: $importReturnVar</error>");
+                    $output->writeln("<error>Error output:</error>");
+                    foreach ($importOutput as $line) {
+                        $output->writeln($line);
+                    }
+                    unlink($tmpMyCnf);  // Remove the temporary configuration file
+                    return Command::FAILURE;
+                }
+            }
+
+            $output->writeln('<info>Sample data, media files, and database content installed successfully</info>');
+            $output->writeln('<info>Please run ./maho index:reindex:all</info>');
+
+            // Clean up
+            unlink($tempFile);
+            $rmCommand = "rm -rf " . escapeshellarg($targetDir . '/maho-sample-data-main');
+            exec($rmCommand, $rmOutput, $rmReturnVar);
+
+            if ($rmReturnVar !== 0) {
+                $output->writeln("<error>Failed to remove temporary files. rm command returned: $rmReturnVar</error>");
+                foreach ($rmOutput as $line) {
+                    $output->writeln($line);
+                }
+                // We don't return FAILURE here as the installation itself was successful
+            }
+        }
+
+        return Command::SUCCESS;
     }
 }
