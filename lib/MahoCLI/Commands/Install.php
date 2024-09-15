@@ -124,7 +124,7 @@ class Install extends BaseMahoCommand
 
             // Download the file
             if (file_put_contents($tempFile, file_get_contents($sampleDataUrl)) === false) {
-                $output->writeln("<error>Failed to download sample data</error>");
+                $output->writeln('<error>Failed to download sample data</error>');
                 return Command::FAILURE;
             }
 
@@ -173,12 +173,12 @@ class Install extends BaseMahoCommand
 
             foreach ($sqlFiles as $sqlFile) {
                 $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
-                $importCommand = "mysql --defaults-extra-file=" . escapeshellarg($tmpMyCnf) . " {$dbName} < " . escapeshellarg($sqlFilePath) . " 2>&1";
+                $importCommand = 'mysql --defaults-extra-file=' . escapeshellarg($tmpMyCnf) . " {$dbName} < " . escapeshellarg($sqlFilePath);
                 exec($importCommand, $importOutput, $importReturnVar);
 
                 if ($importReturnVar !== 0) {
                     $output->writeln("<error>Failed to import {$sqlFile}. mysql command returned: $importReturnVar</error>");
-                    $output->writeln("<error>Error output:</error>");
+                    $output->writeln('<error>Error output:</error>');
                     foreach ($importOutput as $line) {
                         $output->writeln($line);
                     }
@@ -192,7 +192,7 @@ class Install extends BaseMahoCommand
 
             // Clean up
             unlink($tempFile);
-            $rmCommand = "rm -rf " . escapeshellarg($targetDir . '/maho-sample-data-main');
+            $rmCommand = 'rm -rf ' . escapeshellarg($targetDir . '/maho-sample-data-main');
             exec($rmCommand, $rmOutput, $rmReturnVar);
 
             if ($rmReturnVar !== 0) {
