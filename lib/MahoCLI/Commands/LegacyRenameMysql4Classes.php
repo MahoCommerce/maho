@@ -54,7 +54,6 @@ class LegacyRenameMysql4Classes extends BaseMahoCommand
             'Mage_Api_Model_Mysql4_Rules_Collection' => 'Mage_Api_Model_Resource_Rules_Collection',
             'Mage_Api_Model_Mysql4_User' => 'Mage_Api_Model_Resource_User',
             'Mage_Api_Model_Mysql4_User_Collection' => 'Mage_Api_Model_Resource_User_Collection',
-            'Mage_Backup_Model_Mysql4_Db' => 'Mage_Backup_Model_Resource_Db',
             'Mage_Bundle_Model_Mysql4_Bundle' => 'Mage_Bundle_Model_Resource_Bundle',
             'Mage_Bundle_Model_Mysql4_Indexer_Price' => 'Mage_Bundle_Model_Resource_Indexer_Price',
             'Mage_Bundle_Model_Mysql4_Indexer_Stock' => 'Mage_Bundle_Model_Resource_Indexer_Stock',

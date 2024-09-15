@@ -641,11 +641,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/System/CurrencyController.php
 
 		-
-			message: "#^Method Mage_Adminhtml_System_StoreController\\:\\:_backupDatabase\\(\\) should return \\$this\\(Mage_Adminhtml_System_StoreController\\) but empty return statement found\\.$#"
-			count: 2
-			path: app/code/core/Mage/Adminhtml/controllers/System/StoreController.php
-
-		-
 			message: "#^Variable \\$codeBase might not be defined\\.$#"
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/System/StoreController.php
