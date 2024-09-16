@@ -18,7 +18,6 @@
 <link rel="icon" href="<?= $this->getSkinUrl('favicon.ico') ?>" type="image/x-icon"/>
 
 <script type="text/javascript">
-    var BLANK_IMG = '<?= $this->getJsUrl() ?>spacer.gif';
     var BASE_URL = '<?= $this->getUrl('*') ?>';
     var SKIN_URL = '<?= $this->jsQuoteEscape($this->getSkinUrl()) ?>';
     var FORM_KEY = '<?= $this->getFormKey() ?>';
@@ -30,7 +29,6 @@
 
 <?php if ($this->getCanLoadExtJs()): ?>
 <script type="text/javascript">
-    Ext.BLANK_IMAGE_URL = BLANK_IMG;
     Ext.UpdateManager.defaults.loadScripts = false;
     Ext.UpdateManager.defaults.disableCaching = true;
 </script>
