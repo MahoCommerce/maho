@@ -184,7 +184,7 @@ final class Mage
 
     public static function getMahoVersion(): string
     {
-        return '24.08';
+        return '24.9.0';
     }
 
     /**
