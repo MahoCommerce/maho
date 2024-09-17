@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -22,7 +22,7 @@
 class Mage_Wishlist_Model_Resource_Product_Collection extends Mage_Catalog_Model_Resource_Product_Collection
 {
     /**
-     * Add days in whishlist filter of product collection
+     * Add days in wishlist filter of product collection
      *
      * @var bool
      */
@@ -35,7 +35,7 @@ class Mage_Wishlist_Model_Resource_Product_Collection extends Mage_Catalog_Model
     protected $_wishlistItemTableAlias         = 't_wi';
 
     /**
-     * Get add days in whishlist filter of product collection flag
+     * Get add days in wishlist filter of product collection flag
      *
      * @return bool
      */
@@ -45,7 +45,7 @@ class Mage_Wishlist_Model_Resource_Product_Collection extends Mage_Catalog_Model
     }
 
     /**
-     * Set add days in whishlist filter of product collection flag
+     * Set add days in wishlist filter of product collection flag
      *
      * @param bool $flag
      * @return $this

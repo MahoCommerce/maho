@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -87,7 +87,7 @@ class Mage_Customer_Model_Api2_Customer_Address_Validator extends Mage_Api2_Mode
     protected function _checkRegion($data, Mage_Directory_Model_Country $country)
     {
         $regions = $country->getRegions();
-        // Is it the country with predifined regions?
+        // Is it the country with predefined regions?
         if ($regions->count()) {
             if (!array_key_exists('region', $data) || empty($data['region'])) {
                 $this->_addError('"State/Province" is required.');

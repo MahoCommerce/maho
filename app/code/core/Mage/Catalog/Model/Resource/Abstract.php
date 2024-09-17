@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -575,7 +575,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * Retrieve attribute's raw value from DB.
      *
      * @param int $entityId
-     * @param int|string|array $attribute atrribute's ids or codes
+     * @param int|string|array $attribute attribute's ids or codes
      * @param int|Mage_Core_Model_Store $store
      * @return bool|string|null|array
      */

@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -20,7 +20,7 @@
 class Mage_Paypal_Model_Cart
 {
     /**
-     * Totals that PayPal suppports when passing shopping cart
+     * Totals that PayPal supports when passing shopping cart
      *
      * @var string
      */
@@ -144,7 +144,7 @@ class Mage_Paypal_Model_Cart
     /**
      * Render and get totals
      * If the totals are invalid for any reason, they will be merged into one amount (subtotal is utilized for it)
-     * An option to substract discount from the subtotal is available
+     * An option to subtract discount from the subtotal is available
      *
      * @param bool $mergeDiscount
      * @return array

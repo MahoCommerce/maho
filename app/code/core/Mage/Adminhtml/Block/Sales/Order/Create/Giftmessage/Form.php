@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -143,7 +143,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Giftmessage_Form extends Mage_Admi
             $this->_prepareVisibleFields($fieldset);
         }
 
-        // Set default sender and recipient from billing and shipping adresses
+        // Set default sender and recipient from billing and shipping addresses
         if (!$this->getMessage()->getSender()) {
             $this->getMessage()->setSender($this->getDefaultSender());
         }
@@ -154,7 +154,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Giftmessage_Form extends Mage_Admi
 
         $this->getMessage()->setType($this->getEntityType());
 
-        // Overriden default data with edited when block reloads througth Ajax
+        // Overridden default data with edited when block reloads through Ajax
         $this->_applyPostData();
 
         $form->setValues($this->getMessage()->getData());

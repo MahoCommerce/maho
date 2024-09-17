@@ -5,7 +5,7 @@
  * @category   Varien
  * @package    Varien_Data
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -78,7 +78,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
         parent::__construct();
 
         if (!$connection) {
-            throw new Exception('Wrong "$connection" parametr');
+            throw new Exception('Wrong "$connection" parameter');
         }
 
         $this->_conn    = $connection;
@@ -89,7 +89,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
             || !isset($fields[self::LEVEL_FIELD])
             || !isset($fields[self::ORDER_FIELD])
         ) {
-            throw new Exception('"$fields" tree configuratin array');
+            throw new Exception('"$fields" tree configuration array');
         }
 
         $this->_idField     = $fields[self::ID_FIELD];

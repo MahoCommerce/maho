@@ -79,7 +79,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     }
 
     /**
-     * Mass action for cache enabeling
+     * Mass action for cache enabling
      */
     public function massEnableAction()
     {
@@ -101,7 +101,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     }
 
     /**
-     * Mass action for cache disabeling
+     * Mass action for cache disabling
      */
     public function massDisableAction()
     {

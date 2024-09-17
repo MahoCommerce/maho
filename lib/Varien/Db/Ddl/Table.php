@@ -644,7 +644,7 @@ class Varien_Db_Ddl_Table
     }
 
     /**
-     * Normalize positon of index columns array
+     * Normalize position of index columns array
      *
      * @param array $columns
      * @return array
@@ -661,7 +661,7 @@ class Varien_Db_Ddl_Table
     }
 
     /**
-     * Normalize positon of table columns array
+     * Normalize position of table columns array
      *
      * @param array $columns
      * @return array

@@ -11,7 +11,7 @@
  */
 
 /**
- * Bundle Extended Attribures Block
+ * Bundle Extended Attributes Block
  *
  * @category   Mage
  * @package    Mage_Bundle

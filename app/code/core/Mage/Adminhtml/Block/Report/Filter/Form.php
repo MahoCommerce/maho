@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -29,7 +29,7 @@ class Mage_Adminhtml_Block_Report_Filter_Form extends Mage_Adminhtml_Block_Widge
     protected $_fieldVisibility = [];
 
     /**
-     * Report field opions
+     * Report field options
      */
     protected $_fieldOptions = [];
 
@@ -168,7 +168,7 @@ class Mage_Adminhtml_Block_Report_Filter_Form extends Mage_Adminhtml_Block_Widge
     }
 
     /**
-     * Initialize form fileds values
+     * Initialize form fields values
      * Method will be called after prepareForm and can be used for field values initialization
      *
      * @return Mage_Adminhtml_Block_Widget_Form

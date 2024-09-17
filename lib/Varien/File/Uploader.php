@@ -5,7 +5,7 @@
  * @category   Varien
  * @package    Varien_File
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -73,8 +73,8 @@ class Varien_File_Uploader
     protected $_uploadedFileDir;
 
     /**
-     * If this variable is set to TRUE, our library will be able to automaticaly create
-     * non-existant directories.
+     * If this variable is set to TRUE, our library will be able to automatically create
+     * non-existent directories.
      *
      * @var bool
      * @access protected

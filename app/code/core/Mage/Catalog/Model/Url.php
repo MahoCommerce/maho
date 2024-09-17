@@ -83,7 +83,7 @@ class Mage_Catalog_Model_Url
     protected $_categoryUrlSuffix = [];
 
     /**
-     * Flag to overwrite config settings for Catalog URL rewrites history maintainance
+     * Flag to overwrite config settings for Catalog URL rewrites history maintenance
      *
      * @var bool
      */
@@ -489,7 +489,7 @@ class Mage_Catalog_Model_Url
             return $this;
         }
 
-        // Load all childs and refresh all categories
+        // Load all children and refresh all categories
         $category = $this->getResource()->loadCategoryChilds($category);
         $categoryIds = [$category->getId()];
         if ($category->getAllChilds()) {

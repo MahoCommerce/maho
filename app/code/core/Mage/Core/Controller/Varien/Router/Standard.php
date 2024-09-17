@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -287,7 +287,7 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
 
     /**
      * Generating and validating class file name,
-     * class and if evrything ok do include if needed and return of class name
+     * class and if everything ok do include if needed and return of class name
      *
      * @param string $realModule
      * @param string $controller

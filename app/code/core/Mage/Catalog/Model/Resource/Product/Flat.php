@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -149,7 +149,7 @@ class Mage_Catalog_Model_Resource_Product_Flat extends Mage_Core_Model_Resource_
 
     /**
      * Check whether the attribute is a real field in entity table
-     * Rewrited for EAV Collection
+     * Rewritten for EAV Collection
      *
      * @param int|string|Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @return bool
@@ -178,7 +178,7 @@ class Mage_Catalog_Model_Resource_Product_Flat extends Mage_Core_Model_Resource_
 
     /**
      * Retrieve entity id field name in entity table
-     * Rewrited for EAV collection compatible
+     * Rewritten for EAV collection compatible
      *
      * @return string
      */

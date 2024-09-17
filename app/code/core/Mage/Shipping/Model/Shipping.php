@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Shipping
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -213,7 +213,7 @@ class Mage_Shipping_Model_Shipping
 
     /**
      * Compose Packages For Carrier.
-     * Devides order into items and items into parts if it's neccesary
+     * Divides order into items and items into parts if it's necessary
      *
      * @param Mage_Shipping_Model_Carrier_Abstract $carrier
      * @param Mage_Shipping_Model_Rate_Request $request

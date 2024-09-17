@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -192,7 +192,7 @@ class Mage_Install_Model_Installer extends Varien_Object
 
     /**
      * Create admin user.
-     * Paramater can be prepared user model or array of data.
+     * Parameter can be prepared user model or array of data.
      * Returns TRUE or throws exception.
      *
      * @param mixed $data

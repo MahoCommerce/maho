@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -27,7 +27,7 @@ class Mage_Reports_Model_Resource_Product_Sold_Collection extends Mage_Reports_M
     {
         parent::_construct();
         $this->_useAnalyticFunction = true;
-        // skip adding stock information to collection for perfromance reasons
+        // skip adding stock information to collection for performance reasons
         $this->setFlag('no_stock_data', true);
     }
     /**

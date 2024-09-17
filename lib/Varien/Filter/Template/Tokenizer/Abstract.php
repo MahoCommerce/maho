@@ -5,7 +5,7 @@
  * @category   Varien
  * @package    Varien_Filter
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -47,7 +47,7 @@ abstract class Varien_Filter_Template_Tokenizer_Abstract
     }
 
     /**
-     * Move current index to previus char.
+     * Move current index to previous char.
      *
      * If index out of bounds returns false
      *

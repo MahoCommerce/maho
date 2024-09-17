@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -121,7 +121,7 @@ class Mage_Api_Model_Wsdl_Config_Base extends Varien_Simplexml_Config
     /**
      * Set variable to be used in WSDL template processing
      *
-     * @param string $key Varible key
+     * @param string $key Variable key
      * @param string $value Variable value
      * @return $this
      */

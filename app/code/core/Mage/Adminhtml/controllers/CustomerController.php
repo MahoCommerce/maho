@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -626,7 +626,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         # additional validate email
         if (!$response->getError()) {
             # Trying to load customer with the same email and return error message
-            # if customer with the same email address exisits
+            # if customer with the same email address exists
             $checkCustomer = Mage::getModel('customer/customer')
                 ->setWebsiteId($websiteId);
             $checkCustomer->loadByEmail($accountData['email']);

@@ -19,7 +19,7 @@
 class Mage_Core_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_Helper_Abstract
 {
     /**
-     * Returns expresion for field unification
+     * Returns expression for field unification
      *
      * @param string $field
      * @return string

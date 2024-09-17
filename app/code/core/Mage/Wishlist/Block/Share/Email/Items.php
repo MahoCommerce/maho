@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -56,7 +56,7 @@ class Mage_Wishlist_Block_Share_Email_Items extends Mage_Wishlist_Block_Abstract
     }
 
     /**
-     * Check whether whishlist item has description
+     * Check whether wishlist item has description
      *
      * @param Mage_Wishlist_Model_Item $item
      * @return bool

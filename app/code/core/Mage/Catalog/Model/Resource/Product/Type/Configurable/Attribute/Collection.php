@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2016-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2016-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -272,7 +272,7 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute_Collection
             });
 
             foreach ($pricings[0] as $pricing) {
-                // Addding pricing to options
+                // Adding pricing to options
                 $valueKey = $pricing['product_super_attribute_id'] . ':' . $pricing['value_index'];
                 if (isset($values[$valueKey])) {
                     $values[$valueKey]['pricing_value']     = $pricing['pricing_value'];

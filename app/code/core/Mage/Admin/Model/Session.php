@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Admin
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -51,7 +51,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
     public const XML_PATH_ALLOW_SID_FOR_ADMIN_AREA = 'web/session/use_admin_sid';
 
     /**
-     * Whether it is the first page after successfull login
+     * Whether it is the first page after successful login
      *
      * @var bool|null
      */
@@ -254,7 +254,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
-     * Check if it is the first page after successfull login
+     * Check if it is the first page after successful login
      *
      * @return bool
      */

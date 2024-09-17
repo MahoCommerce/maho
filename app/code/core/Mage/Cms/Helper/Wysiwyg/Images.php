@@ -32,7 +32,7 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
     protected $_currentUrl;
 
     /**
-     * Currenty selected store ID if applicable
+     * Currently selected store ID if applicable
      *
      * @var int
      */
@@ -262,7 +262,7 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Revert opration to idEncode
+     * Revert operation to idEncode
      *
      * @param string $string
      * @return string|false
