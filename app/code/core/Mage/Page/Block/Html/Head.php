@@ -267,7 +267,9 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
         // get static files from the js folder, no need in lookups
         foreach ($staticItems as $params => $rows) {
             foreach ($rows as $name) {
-                $items[$params][] = $mergeCallback ? Mage::getBaseDir() . DS . 'js' . DS . $name : $baseJsUrl . $name;
+                $items[$params][] = $mergeCallback
+                    ? Mage::getBaseDir() . DS . 'public' . DS . 'js' . DS . $name
+                    : $baseJsUrl . $name;
             }
         }
 
