@@ -635,7 +635,7 @@ class Varien_Object implements ArrayAccess
                 return isset($this->_data[$key]);
         }
         throw new Varien_Exception(
-        // phpcs:ignore Ecg.Security.ForbiddenFunction.Found
+            // phpcs:ignore Ecg.Security.ForbiddenFunction.Found
             'Invalid method ' . get_class($this) . '::' . $method . '(' . print_r($args, 1) . ')'
         );
     }
