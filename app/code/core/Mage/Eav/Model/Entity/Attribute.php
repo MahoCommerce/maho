@@ -31,18 +31,18 @@
  */
 class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Abstract
 {
-    public const SCOPE_STORE                           = 0;
-    public const SCOPE_GLOBAL                          = 1;
-    public const SCOPE_WEBSITE                         = 2;
+    public const SCOPE_STORE   = 0;
+    public const SCOPE_GLOBAL  = 1;
+    public const SCOPE_WEBSITE = 2;
 
     /**
      * Prefix of model events names
      *
      * @var string
      */
-    protected $_eventPrefix                         = 'eav_entity_attribute';
+    protected $_eventPrefix = 'eav_entity_attribute';
 
-    public const ATTRIBUTE_CODE_MAX_LENGTH                 = 30;
+    public const ATTRIBUTE_CODE_MAX_LENGTH = 30;
 
     /**
      * Parameter name in event
@@ -53,8 +53,8 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      */
     protected $_eventObject = 'attribute';
 
-    public const CACHE_TAG         = 'EAV_ATTRIBUTE';
-    protected $_cacheTag    = 'EAV_ATTRIBUTE';
+    public const CACHE_TAG = 'EAV_ATTRIBUTE';
+    protected $_cacheTag = 'EAV_ATTRIBUTE';
 
     /**
      * Retrieve default attribute backend model by attribute code
@@ -98,7 +98,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      * @return string
      */
     #[\Override]
-    protected function _getDefaultSourceModel()
+    public function _getDefaultSourceModel()
     {
         if ($this->getAttributeCode() == 'store_id') {
             return 'eav/entity_attribute_source_store';

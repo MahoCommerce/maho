@@ -516,7 +516,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     /**
      * @return string
      */
-    protected function _getDefaultSourceModel()
+    public function _getDefaultSourceModel()
     {
         return $this->getEntity()->getDefaultAttributeSourceModel();
     }

@@ -23,7 +23,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
      *
      * @var array
      */
-    protected static $_entityAttributes     = [];
+    protected static $_entityAttributes = [];
 
     #[\Override]
     protected function _construct()
