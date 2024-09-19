@@ -365,8 +365,8 @@ function mahoFindFileInIncludePath(string $relativePath): string|false
 function mahoListDirectories($path)
 {
     list($packages, $packageDirectories) = mahoGetComposerInstallationData();
-    if (!defined('MAGENTO_ROOT')) {
-        Mage::throwException('MAGENTO_ROOT constant is not defined.');
+    if (!defined('MAHO_ROOT_DIR')) {
+        Mage::throwException('MAHO_ROOT_DIR constant is not defined.');
     }
 
     foreach ($packages as $package) {
@@ -376,7 +376,7 @@ function mahoListDirectories($path)
     $path = ltrim($path, '/');
 
     $results = [];
-    array_unshift($packageDirectories, MAGENTO_ROOT);
+    array_unshift($packageDirectories, MAHO_ROOT_DIR);
     foreach ($packageDirectories as $packageDirectory) {
         $tmpList = glob($packageDirectory . DS . $path . '/*', GLOB_ONLYDIR);
         foreach ($tmpList as $folder) {
