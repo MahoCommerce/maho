@@ -36,7 +36,7 @@ class Mage_Adminhtml_Model_Customer_Observer
         $fieldset = $form->getElement('base_fieldset');
 
         // frontend properties fieldset
-        $fieldset = $form->addFieldset('front_fieldset', ['legend'=>Mage::helper('adminhtml')->__('Extra Properties')]);
+        $fieldset = $form->addFieldset('front_fieldset', ['legend' => Mage::helper('adminhtml')->__('Extra Properties')]);
 
         $fieldset->addField('use_in_forms', 'multiselect', [
             'name'   => 'use_in_forms',
@@ -92,7 +92,7 @@ class Mage_Adminhtml_Model_Customer_Observer
         $fieldset = $form->getElement('base_fieldset');
 
         // frontend properties fieldset
-        $fieldset = $form->addFieldset('front_fieldset', ['legend'=>Mage::helper('adminhtml')->__('Extra Properties')]);
+        $fieldset = $form->addFieldset('front_fieldset', ['legend' => Mage::helper('adminhtml')->__('Extra Properties')]);
 
         $fieldset->addField('use_in_forms', 'multiselect', [
             'name'   => 'use_in_forms',
