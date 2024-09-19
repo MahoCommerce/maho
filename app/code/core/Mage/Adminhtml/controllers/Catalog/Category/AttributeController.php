@@ -25,15 +25,9 @@ require_once 'Mage/Eav/Controller/Adminhtml/Attribute/Abstract.php';
  *
  * @category   Mage
  * @package    Mage_Adminhtml
- * @author      Magento Core Team <core@magentocommerce.com>
  */
-
 class Mage_Adminhtml_Catalog_Category_AttributeController extends Mage_Eav_Controller_Adminhtml_Attribute_Abstract
 {
-    /**
-     * Additional initialization
-     *
-     */
     protected function _construct()
     {
         $this->_entityCode = Mage_Catalog_Model_Category::ENTITY;
