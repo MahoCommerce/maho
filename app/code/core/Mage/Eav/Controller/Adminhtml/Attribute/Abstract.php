@@ -63,7 +63,7 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
         if ($id) {
             $model->load($id);
 
-            if (! $model->getId()) {
+            if (!$model->getId()) {
                 Mage::getSingleton('adminhtml/session')->addError(
                     Mage::helper('eav')->__('This attribute no longer exists')
                 );
