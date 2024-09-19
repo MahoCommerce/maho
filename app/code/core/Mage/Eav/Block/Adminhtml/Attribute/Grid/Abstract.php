@@ -21,7 +21,16 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Grid_Abstract extends Mage_Adm
     public function __construct()
     {
         parent::__construct();
-        $this->setId('attributeGrid');
+
+        /** @var Mage_Eav_Model_Entity_Type $entityType */
+        $entityType = Mage::registry('entity_type');
+
+        $gridId = 'attributeGrid';
+        if ($entityType && $entityType->getEntityTypeId()) {
+            $gridId .= '_' . $entityType->getEntityTypeCode();
+        }
+
+        $this->setId($gridId);
         $this->setDefaultSort('frontend_label');
         $this->setDefaultDir('ASC');
     }

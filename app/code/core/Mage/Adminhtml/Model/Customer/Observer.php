@@ -88,9 +88,6 @@ class Mage_Adminhtml_Model_Customer_Observer
         /** @var Varien_Data_Form $form */
         $form = $observer->getForm();
 
-        /** @var Varien_Data_Form_Element_Fieldset $fieldset */
-        $fieldset = $form->getElement('base_fieldset');
-
         // frontend properties fieldset
         $fieldset = $form->addFieldset('front_fieldset', ['legend' => Mage::helper('adminhtml')->__('Extra Properties')]);
 
