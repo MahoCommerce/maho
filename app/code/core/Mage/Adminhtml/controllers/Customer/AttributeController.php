@@ -9,8 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-require_once 'Mage/Eav/Controller/Adminhtml/Attribute/Abstract.php';
-
 /**
  * Customer attribute controller
  *
