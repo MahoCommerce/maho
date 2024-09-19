@@ -2766,11 +2766,6 @@ parameters:
 			path: app/code/core/Mage/Downloadable/controllers/DownloadController.php
 
 		-
-			message: "#^Return type \\(void\\) of method Mage_Downloadable_Product_EditController\\:\\:preDispatch\\(\\) should be compatible with return type \\(Mage_Adminhtml_Controller_Action\\) of method Mage_Adminhtml_Catalog_ProductController\\:\\:preDispatch\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Downloadable/controllers/Product/EditController.php
-
-		-
 			message: "#^Call to an undefined method Mage_Eav_Model_Resource_Entity_Attribute\\:\\:getUsedInForms\\(\\)\\.$#"
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Attribute.php
