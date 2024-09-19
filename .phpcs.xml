@@ -23,10 +23,8 @@
         <exclude-pattern>*/core/Mage/Bundle/controllers/Adminhtml/Bundle/Product/EditController.php*</exclude-pattern>
         <exclude-pattern>*/core/Mage/Bundle/controllers/Product/EditController.php*</exclude-pattern>
         <exclude-pattern>*/core/Mage/Bundle/controllers/SelectionController.php*</exclude-pattern>
-        <exclude-pattern>*/core/Mage/Centinel/Model/Api/Client.php*</exclude-pattern>
         <exclude-pattern>*/core/Mage/Downloadable/controllers/Adminhtml/Downloadable/Product/EditController.php*</exclude-pattern>
         <exclude-pattern>*/core/Mage/Downloadable/controllers/Product/EditController.php*</exclude-pattern>
-        <exclude-pattern>*/core/Mage/Downloadable/controllers/FileController.php*</exclude-pattern>
     </rule>
     <rule ref="PSR2">
         <exclude name="Generic.Files.LineLength.TooLong"/>
