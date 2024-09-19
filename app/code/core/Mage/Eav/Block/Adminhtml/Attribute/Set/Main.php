@@ -45,47 +45,59 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
     {
         $setId = $this->_getSetId();
 
-        $this->setChild('group_tree',
+        $this->setChild(
+            'group_tree',
             $this->getLayout()->createBlock('eav/adminhtml_attribute_set_main_tree_group')
         );
 
-        $this->setChild('edit_set_form',
+        $this->setChild(
+            'edit_set_form',
             $this->getLayout()->createBlock('eav/adminhtml_attribute_set_main_formset')
         );
 
-        $this->setChild('delete_group_button',
-            $this->getLayout()->createBlock('adminhtml/widget_button')->setData(array(
+        $this->setChild(
+            'delete_group_button',
+            $this->getLayout()->createBlock('adminhtml/widget_button')->setData([
                 'label'     => Mage::helper('eav')->__('Delete Selected Group'),
                 'onclick'   => 'editSet.submit();',
                 'class'     => 'delete'
-        )));
+        ])
+        );
 
-        $this->setChild('add_group_button',
-            $this->getLayout()->createBlock('adminhtml/widget_button')->setData(array(
+        $this->setChild(
+            'add_group_button',
+            $this->getLayout()->createBlock('adminhtml/widget_button')->setData([
                 'label'     => Mage::helper('eav')->__('Add New'),
                 'onclick'   => 'editSet.addGroup();',
                 'class'     => 'add'
-        )));
+        ])
+        );
 
-        $this->setChild('back_button',
-            $this->getLayout()->createBlock('adminhtml/widget_button')->setData(array(
+        $this->setChild(
+            'back_button',
+            $this->getLayout()->createBlock('adminhtml/widget_button')->setData([
                 'label'     => Mage::helper('eav')->__('Back'),
-                'onclick'   => 'setLocation(\''.$this->getUrl('*/*/').'\')',
+                'onclick'   => 'setLocation(\'' . $this->getUrl('*/*/') . '\')',
                 'class'     => 'back'
-        )));
+        ])
+        );
 
-        $this->setChild('reset_button',
-            $this->getLayout()->createBlock('adminhtml/widget_button')->setData(array(
+        $this->setChild(
+            'reset_button',
+            $this->getLayout()->createBlock('adminhtml/widget_button')->setData([
                 'label'     => Mage::helper('eav')->__('Reset'),
                 'onclick'   => 'window.location.reload()'
-        )));
+        ])
+        );
 
-        $this->setChild('save_button',
-            $this->getLayout()->createBlock('adminhtml/widget_button')->setData(array(
+        $this->setChild(
+            'save_button',
+            $this->getLayout()->createBlock('adminhtml/widget_button')->setData([
                 'label'     => Mage::helper('eav')->__('Save Attribute Set'),
                 'onclick'   => 'editSet.save();',
                 'class'     => 'save'
-        )));
+        ])
+        );
 
         if ($entity_type = Mage::registry('entity_type')) {
             $deleteConfirmMessage = $this->jsQuoteEscape(Mage::helper('eav')
@@ -94,19 +106,23 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
             $deleteConfirmMessage = $this->jsQuoteEscape(Mage::helper('eav')
                                                          ->__('All items of this set will be deleted! Are you sure you want to delete this attribute set?'));
         }
-        $deleteUrl = $this->getUrlSecure('*/*/delete', array('id' => $setId));
-        $this->setChild('delete_button',
-            $this->getLayout()->createBlock('adminhtml/widget_button')->setData(array(
+        $deleteUrl = $this->getUrlSecure('*/*/delete', ['id' => $setId]);
+        $this->setChild(
+            'delete_button',
+            $this->getLayout()->createBlock('adminhtml/widget_button')->setData([
                 'label'     => Mage::helper('eav')->__('Delete Attribute Set'),
                 'onclick'   => 'deleteConfirm(\'' . $deleteConfirmMessage . '\', \'' . $deleteUrl . '\')',
                 'class'     => 'delete'
-        )));
+        ])
+        );
 
-        $this->setChild('rename_button',
-            $this->getLayout()->createBlock('adminhtml/widget_button')->setData(array(
+        $this->setChild(
+            'rename_button',
+            $this->getLayout()->createBlock('adminhtml/widget_button')->setData([
                 'label'     => Mage::helper('eav')->__('New Set Name'),
                 'onclick'   => 'editSet.rename()'
-        )));
+        ])
+        );
 
         return parent::_prepareLayout();
     }
@@ -148,7 +164,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
      */
     public function getMoveUrl()
     {
-        return $this->getUrl('*/*/save', array('id' => $this->_getSetId()));
+        return $this->getUrl('*/*/save', ['id' => $this->_getSetId()]);
     }
 
     /**
@@ -158,7 +174,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
      */
     public function getGroupUrl()
     {
-        return $this->getUrl('*/*/save', array('id' => $this->_getSetId()));
+        return $this->getUrl('*/*/save', ['id' => $this->_getSetId()]);
     }
 
     /**
@@ -168,7 +184,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
      */
     public function getGroupTreeJson()
     {
-        $items = array();
+        $items = [];
         $setId = $this->_getSetId();
 
         /* @var $groups Mage_Eav_Model_Mysql4_Entity_Attribute_Group_Collection */
@@ -183,7 +199,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
 
         /* @var $node Mage_Eav_Model_Entity_Attribute_Group */
         foreach ($groups as $node) {
-            $item = array();
+            $item = [];
             $item['text']       = $node->getAttributeGroupName();
             $item['id']         = $node->getAttributeGroupId();
             $item['cls']        = 'folder';
@@ -197,10 +213,10 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
                          ->load();
 
             if ($nodeChildren->getSize() > 0) {
-                $item['children'] = array();
+                $item['children'] = [];
                 foreach ($nodeChildren->getItems() as $child) {
                     /* @var $child Mage_Eav_Model_Entity_Attribute */
-                    $attr = array(
+                    $attr = [
                         'text'              => $child->getAttributeCode(),
                         'id'                => $child->getAttributeId(),
                         'cls'               => (!$child->getIsUserDefined()) ? 'system-leaf' : 'leaf',
@@ -209,7 +225,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
                         'leaf'              => true,
                         'is_user_defined'   => $child->getIsUserDefined(),
                         'entity_id'         => $child->getEntityAttributeId()
-                    );
+                    ];
 
                     $item['children'][] = $attr;
                 }
@@ -228,7 +244,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
      */
     public function getAttributeTreeJson()
     {
-        $items = array();
+        $items = [];
         $setId = $this->_getSetId();
 
         /* @var $entity_type Mage_Eav_Model_Entity_Type */
@@ -240,7 +256,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
                    ->setAttributeSetFilter($setId)
                    ->load();
 
-        $attributesIds = array('0');
+        $attributesIds = ['0'];
         /* @var $item Mage_Eav_Model_Entity_Attribute */
         foreach ($collection->getItems() as $item) {
             $attributesIds[] = $item->getAttributeId();
@@ -254,7 +270,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
                    ->load();
 
         foreach ($attributes as $child) {
-            $attr = array(
+            $attr = [
                 'text'              => $child->getAttributeCode(),
                 'id'                => $child->getAttributeId(),
                 'cls'               => 'leaf',
@@ -263,19 +279,19 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
                 'leaf'              => true,
                 'is_user_defined'   => $child->getIsUserDefined(),
                 'entity_id'         => $child->getEntityId()
-            );
+            ];
 
             $items[] = $attr;
         }
 
         if (count($items) == 0) {
-            $items[] = array(
+            $items[] = [
                 'text'      => Mage::helper('eav')->__('Empty'),
                 'id'        => 'empty',
                 'cls'       => 'folder',
                 'allowDrop' => false,
                 'allowDrag' => false,
-            );
+            ];
         }
 
         return Mage::helper('core')->jsonEncode($items);
@@ -409,7 +425,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
     protected function _toHtml()
     {
         $type = Mage::registry('entity_type')->getEntityTypeCode();
-        Mage::dispatchEvent("adminhtml_{$type}_attribute_set_main_html_before", array('block' => $this));
+        Mage::dispatchEvent("adminhtml_{$type}_attribute_set_main_html_before", ['block' => $this]);
         return parent::_toHtml();
     }
 }

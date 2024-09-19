@@ -20,7 +20,6 @@
 
 class Mage_Eav_Block_Adminhtml_Attribute_Edit extends Mage_Adminhtml_Block_Widget_Form_Container
 {
-
     public function __construct()
     {
         $this->_objectId = 'attribute_id';
@@ -31,11 +30,11 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit extends Mage_Adminhtml_Block_Widge
 
         $this->_addButton(
             'save_and_edit_button',
-            array(
+            [
                 'label'     => Mage::helper('eav')->__('Save and Continue Edit'),
                 'onclick'   => 'saveAndContinueEdit()',
                 'class'     => 'save'
-            ),
+            ],
             100
         );
 
@@ -57,25 +56,23 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit extends Mage_Adminhtml_Block_Widge
                 $frontendLabel = $frontendLabel[0];
             }
             return Mage::helper('eav')->__('Edit %s Attribute "%s"', Mage::helper('eav')->formatTypeCode(Mage::registry('entity_type')), $this->escapeHtml($frontendLabel));
-        }
-        else {
+        } else {
             return Mage::helper('eav')->__('New %s Attribute', Mage::helper('eav')->formatTypeCode(Mage::registry('entity_type')));
         }
     }
 
     public function getValidationUrl()
     {
-        return $this->getUrl('*/*/validate', array('_current'=>true));
+        return $this->getUrl('*/*/validate', ['_current'=>true]);
     }
 
     public function getSaveUrl()
     {
-        return $this->getUrl('*/*/save', array('_current'=>true, 'back'=>null));
+        return $this->getUrl('*/*/save', ['_current'=>true, 'back'=>null]);
     }
 
     public function getHeaderCssClass()
     {
         return 'icon-head head-eav-attribute';
     }
-
 }

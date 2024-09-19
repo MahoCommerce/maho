@@ -104,7 +104,7 @@
  */
 class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 {
-    const ENTITY = 'customer';
+    public const ENTITY = 'customer';
 
     /**
      * Configuration paths for email templates and identities
@@ -139,7 +139,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     public const SUBSCRIBED_YES = 'yes';
     public const SUBSCRIBED_NO  = 'no';
 
-    const CACHE_TAG = self::ENTITY;
+    public const CACHE_TAG = self::ENTITY;
 
     /**
      * Minimum Password Length

@@ -28,7 +28,6 @@
 
 abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adminhtml_Controller_Action
 {
-
     /** @var string $_entityCode */
     protected $_entityCode;
 
@@ -77,7 +76,8 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
 
             if (! $model->getId()) {
                 Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('eav')->__('This attribute no longer exists'));
+                    Mage::helper('eav')->__('This attribute no longer exists')
+                );
                 $this->_redirect('*/*/');
                 return;
             }
@@ -85,7 +85,8 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
             // entity type check
             if ($model->getEntityTypeId() != $this->_entityType->getEntityTypeId()) {
                 Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('eav')->__('This attribute cannot be edited.'));
+                    Mage::helper('eav')->__('This attribute cannot be edited.')
+                );
                 $this->_redirect('*/*/');
                 return;
             }
@@ -117,7 +118,6 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
         );
 
         $this->renderLayout();
-
     }
 
     public function validateAction()
@@ -134,7 +134,8 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
 
         if ($attribute->getId() && !$attributeId) {
             Mage::getSingleton('adminhtml/session')->addError(
-                Mage::helper('eav')->__('Attribute with the same code already exists'));
+                Mage::helper('eav')->__('Attribute with the same code already exists')
+            );
             $this->_initLayoutMessages('adminhtml/session');
             $response->setError(true);
             $response->setMessage($this->getLayout()->getMessagesBlock()->getGroupedHtml());
@@ -188,12 +189,12 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
 
             //validate attribute_code
             if (isset($data['attribute_code'])) {
-                $validatorAttrCode = new Zend_Validate_Regex(array('pattern' => '/^(?!event$)[a-z][a-z_0-9]{1,254}$/'));
+                $validatorAttrCode = new Zend_Validate_Regex(['pattern' => '/^(?!event$)[a-z][a-z_0-9]{1,254}$/']);
                 if (!$validatorAttrCode->isValid($data['attribute_code'])) {
                     $session->addError(
                         Mage::helper('eav')->__('Attribute code is invalid. Please use only letters (a-z), numbers (0-9) or underscore(_) in this field, first character should be a letter. Do not use "event" for an attribute code.')
                     );
-                    $this->_redirect('*/*/edit', array('attribute_id' => $id, '_current' => true));
+                    $this->_redirect('*/*/edit', ['attribute_id' => $id, '_current' => true]);
                     return;
                 }
             }
@@ -207,7 +208,7 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
                     foreach ($validatorInputType->getMessages() as $message) {
                         $session->addError($message);
                     }
-                    $this->_redirect('*/*/edit', array('attribute_id' => $id, '_current' => true));
+                    $this->_redirect('*/*/edit', ['attribute_id' => $id, '_current' => true]);
                     return;
                 }
             }
@@ -217,7 +218,8 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
 
                 if (!$model->getId()) {
                     $session->addError(
-                        Mage::helper('eav')->__('This Attribute no longer exists'));
+                        Mage::helper('eav')->__('This Attribute no longer exists')
+                    );
                     $this->_redirect('*/*/');
                     return;
                 }
@@ -225,7 +227,8 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
                 // entity type check
                 if ($model->getEntityTypeId() != $this->_entityType->getEntityTypeId()) {
                     $session->addError(
-                        Mage::helper('eav')->__('This attribute cannot be updated.'));
+                        Mage::helper('eav')->__('This attribute cannot be updated.')
+                    );
                     $session->setAttributeData($data);
                     $this->_redirect('*/*/');
                     return;
@@ -274,29 +277,30 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
 
             Mage::dispatchEvent(
                 "adminhtml_{$this->_entityCode}_attribute_edit_prepare_save",
-                array('object' => $model, 'request' => $this->getRequest())
+                ['object' => $model, 'request' => $this->getRequest()]
             );
 
             try {
                 $model->save();
                 $session->addSuccess(
-                    Mage::helper('eav')->__('The attribute has been saved.'));
+                    Mage::helper('eav')->__('The attribute has been saved.')
+                );
 
                 /**
                  * Clear translation cache because attribute labels are stored in translation
                  */
-                Mage::app()->cleanCache(array(Mage_Core_Model_Translate::CACHE_TAG));
+                Mage::app()->cleanCache([Mage_Core_Model_Translate::CACHE_TAG]);
                 $session->setAttributeData(false);
                 if ($redirectBack) {
-                    $this->_redirect('*/*/edit', array('attribute_id' => $model->getId(),'_current'=>true));
+                    $this->_redirect('*/*/edit', ['attribute_id' => $model->getId(),'_current'=>true]);
                 } else {
-                    $this->_redirect('*/*/', array());
+                    $this->_redirect('*/*/', []);
                 }
                 return;
             } catch (Exception $e) {
                 $session->addError($e->getMessage());
                 $session->setAttributeData($data);
-                $this->_redirect('*/*/edit', array('attribute_id' => $id, '_current' => true));
+                $this->_redirect('*/*/edit', ['attribute_id' => $id, '_current' => true]);
                 return;
             }
         }
@@ -312,7 +316,8 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
             $model->load($id);
             if ($model->getEntityTypeId() != $this->_entityType->getEntityTypeId() || !$model->getIsUserDefined()) {
                 Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('eav')->__('This attribute cannot be deleted.'));
+                    Mage::helper('eav')->__('This attribute cannot be deleted.')
+                );
                 $this->_redirect('*/*/');
                 return;
             }
@@ -320,18 +325,19 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
             try {
                 $model->delete();
                 Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('eav')->__('The attribute has been deleted.'));
+                    Mage::helper('eav')->__('The attribute has been deleted.')
+                );
                 $this->_redirect('*/*/');
                 return;
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                $this->_redirect('*/*/edit', array('attribute_id' => $this->getRequest()->getParam('attribute_id')));
+                $this->_redirect('*/*/edit', ['attribute_id' => $this->getRequest()->getParam('attribute_id')]);
                 return;
             }
         }
         Mage::getSingleton('adminhtml/session')->addError(
-            Mage::helper('eav')->__('Unable to find an attribute to delete.'));
+            Mage::helper('eav')->__('Unable to find an attribute to delete.')
+        );
         $this->_redirect('*/*/');
     }
-
 }
