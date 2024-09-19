@@ -19,7 +19,16 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Grid extends Mage_Admin
     public function __construct()
     {
         parent::__construct();
-        $this->setId('setGrid');
+
+        /** @var Mage_Eav_Model_Entity_Type $entityType */
+        $entityType = Mage::registry('entity_type');
+
+        $gridId = 'attributeSetGrid';
+        if ($entityType && $entityType->getEntityTypeId()) {
+            $gridId .= '_' . $entityType->getEntityTypeCode();
+        }
+
+        $this->setId($gridId);
         $this->setDefaultSort('set_name');
         $this->setDefaultDir('ASC');
         $this->setSaveParametersInSession(true);
