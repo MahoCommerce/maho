@@ -18,7 +18,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-require_once 'Mage/Eav/controllers/Adminhtml/Attribute/AbstractController.php';
+require_once 'Mage/Eav/Controller/Adminhtml/Attribute/Abstract.php';
 
 /**
  * Catalog category attribute controller
@@ -28,7 +28,7 @@ require_once 'Mage/Eav/controllers/Adminhtml/Attribute/AbstractController.php';
  * @author      Magento Core Team <core@magentocommerce.com>
  */
 
-class Mage_Adminhtml_Catalog_Category_AttributeController extends Mage_Eav_Adminhtml_Attribute_AbstractController
+class Mage_Adminhtml_Catalog_Category_AttributeController extends Mage_Eav_Controller_Adminhtml_Attribute_Abstract
 {
     /**
      * Additional initialization
