@@ -23,6 +23,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit_Tabs extends Mage_Adminhtml_Block_
         $this->setTitle(Mage::helper('eav')->__('Attribute Information'));
     }
 
+    #[\Override]
     protected function _beforeToHtml()
     {
         $this->addTab('main', [

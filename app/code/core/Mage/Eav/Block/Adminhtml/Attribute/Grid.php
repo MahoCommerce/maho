@@ -20,6 +20,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Grid extends Mage_Eav_Block_Adminhtml_A
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareCollection()
     {
         if ($entity_type = Mage::registry('entity_type')) {
@@ -36,6 +37,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Grid extends Mage_Eav_Block_Adminhtml_A
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareColumns()
     {
         parent::_prepareColumns();

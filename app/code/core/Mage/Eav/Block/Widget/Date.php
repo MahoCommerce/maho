@@ -20,6 +20,7 @@ class Mage_Eav_Block_Widget_Date extends Mage_Eav_Block_Widget_Abstract
      */
     protected $_dateInputs = [];
 
+    #[\Override]
     public function _construct()
     {
         parent::_construct();

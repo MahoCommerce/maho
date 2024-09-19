@@ -18,6 +18,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit_Tab_Main extends Mage_Eav_Block_Ad
     /**
      * @return $this
      */
+    #[\Override]
     protected function _prepareForm()
     {
         parent::_prepareForm();

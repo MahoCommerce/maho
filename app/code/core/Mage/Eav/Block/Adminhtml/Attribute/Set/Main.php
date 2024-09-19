@@ -17,6 +17,7 @@
  */
 class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_Template
 {
+    #[\Override]
     protected function _construct()
     {
         $this->setTemplate('eav/attribute/set/main.phtml');
@@ -27,6 +28,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
      *
      * @return $this
      */
+    #[\Override]
     protected function _prepareLayout()
     {
         $setId = $this->_getSetId();
@@ -408,6 +410,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
      *
      * @return string
      */
+    #[\Override]
     protected function _toHtml()
     {
         $type = Mage::registry('entity_type')->getEntityTypeCode();

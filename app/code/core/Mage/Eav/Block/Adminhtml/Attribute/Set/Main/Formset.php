@@ -20,6 +20,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main_Formset extends Mage_Adminhtml
         parent::__construct();
     }
 
+    #[\Override]
     protected function _prepareForm()
     {
         $data = Mage::getModel('eav/entity_attribute_set')

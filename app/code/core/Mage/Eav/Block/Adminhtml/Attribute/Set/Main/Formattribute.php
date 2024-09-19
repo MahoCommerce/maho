@@ -20,6 +20,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main_Formattribute extends Mage_Adm
         parent::__construct();
     }
 
+    #[\Override]
     protected function _prepareForm()
     {
         $form = new Varien_Data_Form();

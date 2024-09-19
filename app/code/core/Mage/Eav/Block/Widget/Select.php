@@ -17,6 +17,7 @@
  */
 class Mage_Eav_Block_Widget_Select extends Mage_Eav_Block_Widget_Abstract
 {
+    #[\Override]
     public function _construct()
     {
         parent::_construct();

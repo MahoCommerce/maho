@@ -30,6 +30,7 @@ class Mage_Eav_Block_Adminhtml_Attribute extends Mage_Adminhtml_Block_Widget_Gri
         parent::__construct();
     }
 
+    #[\Override]
     public function getHeaderCssClass()
     {
         return 'icon-head head-eav-attribute';

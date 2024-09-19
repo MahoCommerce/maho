@@ -15,6 +15,7 @@
  */
 class Mage_Eav_Block_Adminhtml_Attribute_Set_Main_Tree_Attribute extends Mage_Adminhtml_Block_Template
 {
+    #[\Override]
     protected function _construct()
     {
         $this->setTemplate('eav/attribute/set/main/tree/attribute.phtml');

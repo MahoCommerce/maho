@@ -15,11 +15,13 @@
  */
 class Mage_Eav_Block_Adminhtml_Attribute_Set_Toolbar_Add extends Mage_Adminhtml_Block_Template
 {
+    #[\Override]
     protected function _construct()
     {
         $this->setTemplate('eav/attribute/set/toolbar/add.phtml');
     }
 
+    #[\Override]
     protected function _prepareLayout()
     {
         $this->setChild(

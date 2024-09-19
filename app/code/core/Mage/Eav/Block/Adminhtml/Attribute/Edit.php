@@ -43,6 +43,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit extends Mage_Adminhtml_Block_Widge
         }
     }
 
+    #[\Override]
     public function getHeaderText()
     {
         if (Mage::registry('entity_attribute')->getId()) {
@@ -61,11 +62,13 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit extends Mage_Adminhtml_Block_Widge
         return $this->getUrl('*/*/validate', ['_current' => true]);
     }
 
+    #[\Override]
     public function getSaveUrl()
     {
         return $this->getUrl('*/*/save', ['_current' => true, 'back' => null]);
     }
 
+    #[\Override]
     public function getHeaderCssClass()
     {
         return 'icon-head head-eav-attribute';

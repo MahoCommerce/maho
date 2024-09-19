@@ -17,11 +17,13 @@
  */
 class Mage_Adminhtml_Customer_AttributeController extends Mage_Eav_Controller_Adminhtml_Attribute_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_entityCode = Mage_Customer_Model_Customer::ENTITY;
     }
 
+    #[\Override]
     protected function _initAction()
     {
         parent::_initAction();
@@ -43,6 +45,7 @@ class Mage_Adminhtml_Customer_AttributeController extends Mage_Eav_Controller_Ad
         return $this;
     }
 
+    #[\Override]
     protected function _isAllowed()
     {
         return Mage::getSingleton('admin/session')->isAllowed('customer/attributes/customer_attributes');

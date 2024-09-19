@@ -28,6 +28,7 @@ abstract class Mage_Eav_Controller_Adminhtml_Set_Abstract extends Mage_Adminhtml
      *
      * @return Mage_Adminhtml_Controller_Action
      */
+    #[\Override]
     public function preDispatch()
     {
         $this->_setForcedFormKeyActions('delete');

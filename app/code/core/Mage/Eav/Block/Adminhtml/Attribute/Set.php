@@ -30,11 +30,13 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set extends Mage_Adminhtml_Block_Widget
         parent::__construct();
     }
 
+    #[\Override]
     public function getCreateUrl()
     {
         return $this->getUrl('*/*/add');
     }
 
+    #[\Override]
     public function getHeaderCssClass()
     {
         return 'icon-head head-eav-attribute-sets';
