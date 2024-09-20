@@ -44,6 +44,7 @@ $application->add(new \MahoCLI\Commands\CronRun());
 $application->add(new \MahoCLI\Commands\LogClean());
 $application->add(new \MahoCLI\Commands\LogStatus());
 
+$application->add(new \MahoCLI\Commands\HealthCheck());
 $application->add(new \MahoCLI\Commands\Install());
 $application->add(new \MahoCLI\Commands\Serve());
 $application->add(new \MahoCLI\Commands\LegacyRenameMysql4Classes());
