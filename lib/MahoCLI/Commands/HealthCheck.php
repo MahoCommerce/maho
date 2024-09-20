@@ -42,10 +42,11 @@ class HealthCheck extends BaseMahoCommand
                 $output->writeln('- ' . substr($file, 2));
             }
             $output->writeln('Replace all occurrences of "urn:Magento" or "urn:OpenMage" with "urn:Maho".');
+            $output->writeln('');
         }
 
         // Check for deprecated folders
-        $output->write('Checking deprecated folders... ');
+        $output->write('Checking for deprecated folders... ');
         $deprecatedFolders = [
             'app/code/core/Zend',
             'lib/Cm',
@@ -71,6 +72,7 @@ class HealthCheck extends BaseMahoCommand
                 $output->writeln('- ' . $folder);
             }
             $output->writeln('You should remove them to avoid unpredictable behaviors.');
+            $output->writeln('');
         }
 
         if ($hasErrors) {
