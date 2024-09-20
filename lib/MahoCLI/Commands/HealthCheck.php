@@ -28,14 +28,14 @@ class HealthCheck extends BaseMahoCommand
     {
         $hasErrors = false;
 
-        $output->write("Checking custom APIs... ");
+        $output->write('Checking custom APIs... ');
         exec('grep -ir -l -E "urn:Magento|urn:OpenMage" . --include="*.xml"', $matchingFiles, $returnCode);
 
         if (empty($matchingFiles)) {
-            $output->writeln("<info>OK</info>");
+            $output->writeln('<info>OK</info>');
         } else {
             $hasErrors = true;
-            $output->writeln("");
+            $output->writeln('');
             $output->writeln('<error>Error: Found "urn:Magento" or "urn:OpenMage" in the following files:</error>');
             foreach ($matchingFiles as $file) {
                 $output->writeln('- ' . substr($file, 2));
