@@ -11,19 +11,17 @@
     <file>lib/Varien/</file>
     <file>public/api.php</file>
     <file>public/index.php</file>
-    <!-- file contains include/include_once/... -->
     <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
-        <!-- controllers -->
-        <exclude-pattern>*/api.php*</exclude-pattern>
-        <exclude-pattern>*/index.php*</exclude-pattern>
-        <exclude-pattern>*/app/Mage.php*</exclude-pattern>
-        <exclude-pattern>*/core/Mage/Adminhtml/controllers/Sales/Order/EditController.php*</exclude-pattern>
-        <exclude-pattern>*/core/Mage/Adminhtml/controllers/System/Convert/GuiController.php*</exclude-pattern>
-        <exclude-pattern>*/core/Mage/Bundle/controllers/Adminhtml/Bundle/Product/EditController.php*</exclude-pattern>
-        <exclude-pattern>*/core/Mage/Bundle/controllers/Product/EditController.php*</exclude-pattern>
-        <exclude-pattern>*/core/Mage/Bundle/controllers/SelectionController.php*</exclude-pattern>
-        <exclude-pattern>*/core/Mage/Downloadable/controllers/Adminhtml/Downloadable/Product/EditController.php*</exclude-pattern>
-        <exclude-pattern>*/core/Mage/Downloadable/controllers/Product/EditController.php*</exclude-pattern>
+        <exclude-pattern>public/api.php</exclude-pattern>
+        <exclude-pattern>public/index.php</exclude-pattern>
+        <exclude-pattern>app/Mage.php</exclude-pattern>
+        <exclude-pattern>app/code/core/Mage/Adminhtml/controllers/Sales/Order/EditController.php</exclude-pattern>
+        <exclude-pattern>app/code/core/Mage/Adminhtml/controllers/System/Convert/GuiController.php</exclude-pattern>
+        <exclude-pattern>app/code/core/Mage/Bundle/controllers/Adminhtml/Bundle/Product/EditController.php</exclude-pattern>
+        <exclude-pattern>app/code/core/Mage/Bundle/controllers/Product/EditController.php</exclude-pattern>
+        <exclude-pattern>app/code/core/Mage/Bundle/controllers/SelectionController.php</exclude-pattern>
+        <exclude-pattern>app/code/core/Mage/Downloadable/controllers/Adminhtml/Downloadable/Product/EditController.php</exclude-pattern>
+        <exclude-pattern>app/code/core/Mage/Downloadable/controllers/Product/EditController.php</exclude-pattern>
     </rule>
     <rule ref="PSR2">
         <exclude name="Generic.Files.LineLength.TooLong"/>
