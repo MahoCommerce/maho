@@ -28,6 +28,7 @@ class HealthCheck extends BaseMahoCommand
     {
         $hasErrors = false;
 
+        // Check for custom API
         $output->write('Checking custom APIs... ');
         exec('grep -ir -l -E "urn:Magento|urn:OpenMage" . --include="*.xml"', $matchingFiles, $returnCode);
 
@@ -41,6 +42,35 @@ class HealthCheck extends BaseMahoCommand
                 $output->writeln('- ' . substr($file, 2));
             }
             $output->writeln('Replace all occurrences of "urn:Magento" or "urn:OpenMage" with "urn:Maho".');
+        }
+
+        // Check for deprecated folders
+        $output->write('Checking deprecated folders... ');
+        $deprecatedFolders = [
+            'app/code/core/Zend',
+            'lib/Cm',
+            'lib/Credis',
+            'lib/mcryptcompat',
+            'lib/Pelago',
+            'lib/phpseclib',
+            'lib/Zend'
+        ];
+        $existingDeprecatedFolders = [];
+        foreach ($deprecatedFolders as $folder) {
+            if (is_dir($folder)) {
+                $existingDeprecatedFolders[] = $folder;
+            }
+        }
+        if (empty($existingDeprecatedFolders)) {
+            $output->writeln('<info>OK</info>');
+        } else {
+            $hasErrors = true;
+            $output->writeln('');
+            $output->writeln('<error>Error: Found deprecated folders:</error>');
+            foreach ($existingDeprecatedFolders as $folder) {
+                $output->writeln('- ' . $folder);
+            }
+            $output->writeln('You should remove them to avoid unpredictable behaviors.');
         }
 
         if ($hasErrors) {
