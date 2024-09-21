@@ -30,14 +30,30 @@ class HealthCheck extends BaseMahoCommand
 
         // Check for M1 core files
         $output->write('Checking Magento/OpenMage core... ');
-        if (file_exists('app/Mage.php') || file_exists('app/bootstrap.php') || is_dir('app/code/core')) {
-            $output->writeln('');
-            $output->writeln('<error>Detected files/folder from an old Magento/OpenMage core</error>');
-            $output->writeln('Make sure you delete app/bootstrap.php, app/Mage.php and app/code/core,');
-            $output->writeln('unless you need to override some specific file from the core (which is unadvisable anyway).');
-            $output->writeln('');
-        } else {
+        $folders = [
+            'app/bootstrap.php',
+            'app/Mage.php',
+            'app/code/core'
+        ];
+        $existingFolders = [];
+        foreach ($folders as $folder) {
+            if (file_exists(MAHO_ROOT_DIR . "/{$folder}")) {
+                $existingFolders[] = $folder;
+            }
+        }
+
+        if (empty($existingFolders)) {
             $output->writeln('<info>OK</info>');
+        } else {
+            $hasErrors = true;
+            $output->writeln('');
+            $output->writeln('<error>Error: Detected files/folder from an old Magento/OpenMage core:</error>');
+            foreach ($existingFolders as $folder) {
+                $output->writeln('- ' . $folder);
+            }
+            $output->writeln('Make sure you delete them,');
+            $output->writeln('unless you need to override a specific file from the core (not advisable).');
+            $output->writeln('');
         }
 
         // Check for custom API
@@ -59,7 +75,7 @@ class HealthCheck extends BaseMahoCommand
 
         // Check for deprecated folders
         $output->write('Checking for deprecated folders... ');
-        $deprecatedFolders = [
+        $folders = [
             'app/code/core/Zend',
             'lib/Cm',
             'lib/Credis',
@@ -68,19 +84,19 @@ class HealthCheck extends BaseMahoCommand
             'lib/phpseclib',
             'lib/Zend'
         ];
-        $existingDeprecatedFolders = [];
-        foreach ($deprecatedFolders as $folder) {
-            if (is_dir($folder)) {
-                $existingDeprecatedFolders[] = $folder;
+        $existingFolders = [];
+        foreach ($folders as $folder) {
+            if (file_exists(MAHO_ROOT_DIR . "/{$folder}")) {
+                $existingFolders[] = $folder;
             }
         }
-        if (empty($existingDeprecatedFolders)) {
+        if (empty($existingFolders)) {
             $output->writeln('<info>OK</info>');
         } else {
             $hasErrors = true;
             $output->writeln('');
             $output->writeln('<error>Error: Found deprecated folders:</error>');
-            foreach ($existingDeprecatedFolders as $folder) {
+            foreach ($existingFolders as $folder) {
                 $output->writeln('- ' . $folder);
             }
             $output->writeln('You should remove them to avoid unpredictable behaviors.');
