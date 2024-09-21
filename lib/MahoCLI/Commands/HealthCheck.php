@@ -28,6 +28,18 @@ class HealthCheck extends BaseMahoCommand
     {
         $hasErrors = false;
 
+        // Check for M1 core files
+        $output->write('Checking Magento/OpenMage core... ');
+        if (file_exists('app/Mage.php') || file_exists('app/bootstrap.php') || is_dir('app/code/core')) {
+            $output->writeln('');
+            $output->writeln('<error>Detected files/folder from an old Magento/OpenMage core</error>');
+            $output->writeln('Make sure you delete app/bootstrap.php, app/Mage.php and app/code/core,');
+            $output->writeln('unless you need to override some specific file from the core (which is unadvisable anyway).');
+            $output->writeln('');
+        } else {
+            $output->writeln('<info>OK</info>');
+        }
+
         // Check for custom API
         $output->write('Checking custom APIs... ');
         exec('grep -ir -l -E "urn:Magento|urn:OpenMage" . --include="*.xml"', $matchingFiles, $returnCode);
