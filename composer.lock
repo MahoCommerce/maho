@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "77afe54157642095ce3141cca311a53a",
+    "content-hash": "f755191617b85312995e86c8a6ad22f9",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -3033,7 +3033,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.2 <8.5",
+        "php": ">=8.2",
         "ext-ctype": "*",
         "ext-curl": "*",
         "ext-dom": "*",
