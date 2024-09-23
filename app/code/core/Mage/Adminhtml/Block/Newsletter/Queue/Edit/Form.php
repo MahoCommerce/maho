@@ -51,7 +51,7 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit_Form extends Mage_Adminhtml_Blo
             if (!Mage::app()->isSingleStoreMode()) {
                 $fieldset->addField('stores', 'multiselect', [
                     'name'          => 'stores[]',
-                    'label'         => Mage::helper('newsletter')->__('Subscribers From')
+                    'label'         => Mage::helper('newsletter')->__('Subscribers From'),
                     'values'        => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(),
                     'value'         => $queue->getStores()
                 ]);
