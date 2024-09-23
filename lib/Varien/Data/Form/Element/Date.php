@@ -172,25 +172,18 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
         $html .= sprintf(
             '
             <script type="text/javascript">
-            //<![CDATA[
                 Calendar.setup({
                     inputField: "%s",
                     ifFormat: "%s",
-                    showsTime: %s,
-                    button: "%s_trig",
-                    align: "Bl",
-                    singleClick : true
+                    showsTime: %s
                 });
-            //]]>
             </script>',
             $this->getHtmlId(),
             $displayFormat,
             $this->getTime() ? 'true' : 'false',
-            $this->getHtmlId()
         );
 
         $html .= $this->getAfterElementHtml();
-
         return $html;
     }
 }

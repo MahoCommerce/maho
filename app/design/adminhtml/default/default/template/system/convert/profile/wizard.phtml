@@ -514,24 +514,16 @@ Event.observe(window, 'load', function(){
                 <span class="field-row">
                     <label for="customer_filter_created_at_from"><?= $this->__("Customer Since:") ?></label>
                     <input class="input-text" style="width:5em" id="customer_filter_created_at_from" name="gui_data[customer][filter][created_at][from]" value="<?= $this->getValue('gui_data/customer/filter/created_at/from') ?>"/>
-                    <img src="<?= $this->getSkinUrl('images/grid-cal.gif') ?>" alt="" class="v-middle" id="customer_filter_created_at_from_trig" title="<?= Mage::helper('core')->quoteEscape($this->__('Date selector')) ?>" />
                      <?= $this->__('to') ?>
                     <input class="input-text" style="width:5em" id="customer_filter_created_at_to" name="gui_data[customer][filter][created_at][to]" value="<?= $this->getValue('gui_data/customer/filter/created_at/to') ?>"/>
-                    <img src="<?= $this->getSkinUrl('images/grid-cal.gif') ?>" alt="" class="v-middle" id="customer_filter_created_at_to_trig" title="<?= Mage::helper('core')->quoteEscape($this->__('Date selector')) ?>" />
 <script type="text/javascript">
     Calendar.setup({
         inputField : "customer_filter_created_at_from",
-        ifFormat : "<?= $this->getShortDateFormat() ?>",
-        button : "customer_filter_created_at_from_trig",
-        align : "Bl",
-        singleClick : true
+        ifFormat : "<?= $this->getShortDateFormat() ?>"
     });
     Calendar.setup({
         inputField : "customer_filter_created_at_to",
-        ifFormat : "<?= $this->getShortDateFormat() ?>",
-        button : "customer_filter_created_at_to_trig",
-        align : "Bl",
-        singleClick : true
+        ifFormat : "<?= $this->getShortDateFormat() ?>"
     });
 </script>
                 </span>

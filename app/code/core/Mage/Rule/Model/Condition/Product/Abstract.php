@@ -403,26 +403,6 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     }
 
     /**
-     * Retrieve value element
-     *
-     * @return Varien_Data_Form_Element_Abstract
-     */
-    #[\Override]
-    public function getValueElement()
-    {
-        $element = parent::getValueElement();
-        if (is_object($this->getAttributeObject())) {
-            switch ($this->getAttributeObject()->getFrontendInput()) {
-                case 'date':
-                    $element->setImage(Mage::getDesign()->getSkinUrl('images/grid-cal.gif'));
-                    break;
-            }
-        }
-
-        return $element;
-    }
-
-    /**
      * Retrieve value element chooser URL
      *
      * @return string

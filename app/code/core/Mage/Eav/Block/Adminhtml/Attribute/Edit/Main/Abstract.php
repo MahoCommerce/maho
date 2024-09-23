@@ -111,7 +111,6 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
             'name'   => 'default_value_date',
             'label'  => Mage::helper('eav')->__('Default Value'),
             'title'  => Mage::helper('eav')->__('Default Value'),
-            'image'  => $this->getSkinUrl('images/grid-cal.gif'),
             'value'  => $attributeObject->getDefaultValue(),
             'format'       => $dateFormatIso
         ]);

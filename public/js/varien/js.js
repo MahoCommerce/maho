@@ -587,3 +587,64 @@ function buttonDisabler() {
         button.disabled = true;
     });
 }
+
+var Calendar = {};
+Calendar.setup = function(config) {
+    const {
+        inputField = '',
+        ifFormat = '',
+        showsTime = '',
+        range = ''
+    } = config;
+
+    const strftimeToDateConvertionMap = {
+        '%O': 'S',
+        '%d': 'd',
+        '%a': 'D',
+        '%e': 'j',
+        '%A': 'l',
+        '%u': 'N',
+        '%w': 'w',
+        '%j': 'z',
+        '%V': 'W',
+        '%B': 'F',
+        '%m': 'm',
+        '%b': 'M',
+        '%-m': 'n',
+        '%G': 'o',
+        '%Y': 'Y',
+        '%y': 'y',
+        '%P': 'a',
+        '%p': 'A',
+        '%l': 'g',
+        '%I': 'h',
+        '%H': 'H',
+        '%M': 'i',
+        '%S': 's',
+        '%z': 'O',
+        '%Z': 'T',
+        '%s': 'U'
+    };
+    const dateFormat = ifFormat.replace(/%[OdaeAuwjVBmbGYyPplIHMSzZs-]/g, match => strftimeToDateConvertionMap[match] || match);
+
+    let flatpickrOptions = {
+        allowInput: true,
+        dateFormat: dateFormat,
+        enableTime: showsTime
+    };
+
+    if (Array.isArray(range)) {
+        const [yearStart, yearEnd] = range;
+        if (yearStart) {
+            const minDate = new Date(yearStart, 0, 1);
+            flatpickrOptions.minDate = flatpickr.formatDate(minDate, dateFormat, {});
+        }
+        if (yearEnd) {
+            const maxDate = new Date(yearEnd, 11, 31);
+            flatpickrOptions.maxDate = flatpickr.formatDate(maxDate, dateFormat, {});
+        }
+    }
+
+    flatpickr('#' + inputField, flatpickrOptions);
+};
+

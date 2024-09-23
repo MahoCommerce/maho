@@ -1338,9 +1338,6 @@ td.label label.enabled { background:url(images/icon-enabled.png) no-repeat 100% 
 
 .attribute-change-checkbox label{ margin-left:5px; float:none !important; }
 
-/* PopUp Calendar */
-.calendar { z-index:105; }
-
 /** Order view **/
 .order-history { width:70%; margin-right:27px; }
 

@@ -197,10 +197,8 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
                     $element->setValues($attribute->getSource()->getAllOptions(false, true));
                     $element->setCanBeEmpty(true);
                 } elseif ($inputType == 'date') {
-                    $element->setImage($this->getSkinUrl('images/grid-cal.gif'));
                     $element->setFormat(Mage::app()->getLocale()->getDateFormatWithLongYear());
                 } elseif ($inputType == 'datetime') {
-                    $element->setImage($this->getSkinUrl('images/grid-cal.gif'));
                     $element->setTime(true);
                     $element->setStyle('width:50%;');
                     $element->setFormat(

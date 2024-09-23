@@ -46,12 +46,12 @@ $numColumns = count($this->getColumns());
         <?php if($this->getDateFilterVisibility()): ?>
             <td class="a-left filter">
                 <div class="f-left">
-                    <div><?= $this->__('From') ?>:&nbsp;<input class="input-text no-changes required-entry" type="text" id="period_date_from" name="report_from" value="<?= $this->getFilter('report_from') ?>" style="width:5em" /> <img src="<?= $this->getSkinUrl('images/grid-cal.gif') ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Select Date')) ?>" id="period_date_from_trig" alt="<?= Mage::helper('core')->quoteEscape($this->__('Select Date')) ?>" class="v-middle"/>&nbsp;&nbsp;</div>
+                    <div><?= $this->__('From') ?>:&nbsp;<input class="input-text no-changes required-entry" type="text" id="period_date_from" name="report_from" value="<?= $this->getFilter('report_from') ?>" style="width:5em" />&nbsp;&nbsp;</div>
                     <div id="period_date_from_advaice"></div>
                 </div>
 
                 <div class="f-left">
-                    <div><?= $this->__('To') ?>:&nbsp;<input  class="input-text no-changes required-entry" type="text" id="period_date_to" name="report_to"  value="<?= $this->getFilter('report_to') ?>" style="width:5em" /> <img src="<?= $this->getSkinUrl('images/grid-cal.gif') ?>" class="v-middle" title="<?= Mage::helper('core')->quoteEscape($this->__('Select Date')) ?>"id="period_date_to_trig" alt="<?= Mage::helper('core')->quoteEscape($this->__('Select Date')) ?>"/>&nbsp;&nbsp;</div>
+                    <div><?= $this->__('To') ?>:&nbsp;<input  class="input-text no-changes required-entry" type="text" id="period_date_to" name="report_to"  value="<?= $this->getFilter('report_to') ?>" style="width:5em" />&nbsp;&nbsp;</div>
                     <div id="period_date_to_advaice"></div>
                 </div>
 
@@ -68,17 +68,11 @@ $numColumns = count($this->getColumns());
                 <!--
                 Calendar.setup({
                     inputField : 'period_date_from',
-                    ifFormat : '<?= $this->getDateFormat() ?>',
-                    button : 'period_date_from_trig',
-                    align : 'Bl',
-                    singleClick : true
+                    ifFormat : '<?= $this->getDateFormat() ?>'
                 });
                 Calendar.setup({
                     inputField : 'period_date_to',
-                    ifFormat : '<?= $this->getDateFormat() ?>',
-                    button : 'period_date_to_trig',
-                    align : 'Bl',
-                    singleClick : true
+                    ifFormat : '<?= $this->getDateFormat() ?>'
                 });
                 //-->
                 </script>

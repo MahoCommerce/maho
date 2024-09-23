@@ -94,9 +94,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
     #[\Override]
     public function getHtml()
     {
-        $htmlId = $this->_getHtmlId() . microtime(true);
+        $htmlId = $this->_getHtmlId() . time();
         $format = $this->getLocale()->getDateStrFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-
         if ($this->getColumn()->getFilterTime()) {
             $format .= ' ' . $this->getLocale()->getTimeStrFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
         }
@@ -105,17 +104,11 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
             . '<span class="label">' . Mage::helper('adminhtml')->__('From') . '</span>'
             . '<input type="text" name="' . $this->_getHtmlName() . '[from]" id="' . $htmlId . '_from"'
                 . ' value="' . $this->getEscapedValue('from') . '" class="input-text no-changes"/>'
-            . '<img src="' . Mage::getDesign()->getSkinUrl('images/grid-cal.gif') . '" alt="" class="v-middle"'
-                . ' id="' . $htmlId . '_from_trig"'
-                . ' title="' . $this->escapeHtml(Mage::helper('adminhtml')->__('Date selector')) . '"/>'
             . '</div>';
         $html .= '<div class="range-line date">'
             . '<span class="label">' . Mage::helper('adminhtml')->__('To') . '</span>'
             . '<input type="text" name="' . $this->_getHtmlName() . '[to]" id="' . $htmlId . '_to"'
                 . ' value="' . $this->getEscapedValue('to') . '" class="input-text no-changes"/>'
-            . '<img src="' . Mage::getDesign()->getSkinUrl('images/grid-cal.gif') . '" alt="" class="v-middle"'
-                . ' id="' . $htmlId . '_to_trig"'
-                . ' title="' . $this->escapeHtml(Mage::helper('adminhtml')->__('Date selector')) . '"/>'
             . '</div></div>';
         $html .= '<input type="hidden" name="' . $this->_getHtmlName() . '[locale]"'
             . ' value="' . $this->getLocale()->getLocaleCode() . '"/>';
@@ -123,18 +116,12 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
             Calendar.setup({
                 inputField : "' . $htmlId . '_from",
                 ifFormat : "' . $format . '",
-                button : "' . $htmlId . '_from_trig",
-                showsTime: ' . ($this->getColumn()->getFilterTime() ? 'true' : 'false') . ',
-                align : "Bl",
-                singleClick : true
+                showsTime: ' . ($this->getColumn()->getFilterTime() ? 'true' : 'false') . '
             });
             Calendar.setup({
                 inputField : "' . $htmlId . '_to",
                 ifFormat : "' . $format . '",
-                button : "' . $htmlId . '_to_trig",
                 showsTime: ' . ($this->getColumn()->getFilterTime() ? 'true' : 'false') . ',
-                align : "Bl",
-                singleClick : true
             });
         </script>';
         return $html;
