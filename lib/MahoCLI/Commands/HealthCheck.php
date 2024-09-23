@@ -82,7 +82,8 @@ class HealthCheck extends BaseMahoCommand
             'lib/mcryptcompat',
             'lib/Pelago',
             'lib/phpseclib',
-            'lib/Zend'
+            'lib/Zend',
+            'skin'
         ];
         $existingFolders = [];
         foreach ($folders as $folder) {
