@@ -1202,7 +1202,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
                     'SCHEMA_NAME'       => $schemaName,
                     'TABLE_NAME'        => $tableName,
                     'COLUMN_NAME'       => $match[2],
-                    'REF_SHEMA_NAME'    => $match[3] ?? $schemaName,
+                    'REF_SHEMA_NAME'    => strlen($match[3]) ? $match[3] : $schemaName,
                     'REF_TABLE_NAME'    => $match[4],
                     'REF_COLUMN_NAME'   => $match[5],
                     'ON_DELETE'         => isset($match[6]) ? $match[7] : '',
