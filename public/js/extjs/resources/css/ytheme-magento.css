@@ -40,15 +40,15 @@
 
 /* some default icons for leaf/folder */
 .x-tree-node-collapsed .x-tree-node-icon {
-    background-image: url(../images/magento/tree/folder.gif);
+    background-image: url(../images/default/tree/folder.gif);
 }
 
 .x-tree-node-expanded .x-tree-node-icon {
-    background-image: url(../images/magento/tree/folder-open.gif);
+    background-image: url(../images/default/tree/folder-open.gif);
 }
 
 .x-tree-node-leaf .x-tree-node-icon {
-    background-image: url(../images/magento/tree/leaf.gif);
+    background-image: url(../images/default/tree/leaf.gif);
 }
 
 /* checkboxes */
@@ -79,31 +79,31 @@ input.x-tree-node-cb {
 
 /* Line styles */
 .x-tree-lines .x-tree-elbow {
-    background-image: url(../images/magento/tree/elbow.gif);
+    background-image: url(../images/default/tree/elbow.gif);
 }
 
 .x-tree-lines .x-tree-elbow-plus {
-    background-image: url(../images/magento/tree/elbow-plus.gif);
+    background-image: url(../images/default/tree/elbow-plus.gif);
 }
 
 .x-tree-lines .x-tree-elbow-minus {
-    background-image: url(../images/magento/tree/elbow-minus.gif);
+    background-image: url(../images/default/tree/elbow-minus.gif);
 }
 
 .x-tree-lines .x-tree-elbow-end {
-    background-image: url(../images/magento/tree/elbow-end.gif);
+    background-image: url(../images/default/tree/elbow-end.gif);
 }
 
 .x-tree-lines .x-tree-elbow-end-plus {
-    background-image: url(../images/magento/tree/elbow-end-plus.gif);
+    background-image: url(../images/default/tree/elbow-end-plus.gif);
 }
 
 .x-tree-lines .x-tree-elbow-end-minus {
-    background-image: url(../images/magento/tree/elbow-end-minus.gif);
+    background-image: url(../images/default/tree/elbow-end-minus.gif);
 }
 
 .x-tree-lines .x-tree-elbow-line {
-    background-image: url(../images/magento/tree/elbow-line.gif);
+    background-image: url(../images/default/tree/elbow-line.gif);
 }
 
 /* No line styles */
@@ -112,11 +112,11 @@ input.x-tree-node-cb {
 }
 
 .x-tree-no-lines .x-tree-elbow-plus {
-    background-image: url(../images/magento/tree/elbow-plus-nl.gif);
+    background-image: url(../images/default/tree/elbow-plus-nl.gif);
 }
 
 .x-tree-no-lines .x-tree-elbow-minus {
-    background-image: url(../images/magento/tree/elbow-minus-nl.gif);
+    background-image: url(../images/default/tree/elbow-minus-nl.gif);
 }
 
 .x-tree-no-lines .x-tree-elbow-end {
@@ -124,11 +124,11 @@ input.x-tree-node-cb {
 }
 
 .x-tree-no-lines .x-tree-elbow-end-plus {
-    background-image: url(../images/magento/tree/elbow-end-plus-nl.gif);
+    background-image: url(../images/default/tree/elbow-end-plus-nl.gif);
 }
 
 .x-tree-no-lines .x-tree-elbow-end-minus {
-    background-image: url(../images/magento/tree/elbow-end-minus-nl.gif);
+    background-image: url(../images/default/tree/elbow-end-minus-nl.gif);
 }
 
 .x-tree-no-lines .x-tree-elbow-line {
