@@ -37,5 +37,8 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
 
+      - name: Requiring rector
+        run: composer require rector/rector --dev
+
       - name: Rector
         run: php vendor/bin/rector -c .rector.php process --dry-run
