@@ -32,7 +32,7 @@ class Mage_Adminhtml_Customer_Address_SetController extends Mage_Eav_Controller_
              ->_title($this->__('Attributes'))
              ->_title($this->__('Manage Customer Address Attribute Sets'));
 
-        $this->_setActiveMenu('customer/attributes')
+        $this->_setActiveMenu('customer/attributes/customer_address_sets')
              ->_addBreadcrumb(
                  $this->__('Customers'),
                  $this->__('Customers')
