@@ -73,29 +73,6 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit_Tab_Main extends Mage_Eav_Block_Ad
         $frontendInputValues = array_merge($frontendInputElm->getValues(), $additionalTypes);
         $frontendInputElm->setValues($frontendInputValues);
 
-        $scopes = [
-            Mage_Eav_Model_Entity_Attribute::SCOPE_STORE => Mage::helper('eav')->__('Store View'),
-            Mage_Eav_Model_Entity_Attribute::SCOPE_WEBSITE => Mage::helper('eav')->__('Website'),
-            Mage_Eav_Model_Entity_Attribute::SCOPE_GLOBAL => Mage::helper('eav')->__('Global'),
-        ];
-
-        if ($attributeObject->getAttributeCode() == 'status') {
-            unset($scopes[Mage_Eav_Model_Entity_Attribute::SCOPE_STORE]);
-        }
-
-        $response = new Varien_Object();
-        $response->setScopes($scopes);
-        $response->setAttribute($attributeObject);
-        Mage::dispatchEvent("adminhtml_{$attributeTypeCode}_attribute_scopes", ['response' => $response]);
-
-        $fieldset->addField('is_global', 'select', [
-            'name'  => 'is_global',
-            'label' => Mage::helper('eav')->__('Scope'),
-            'title' => Mage::helper('eav')->__('Scope'),
-            'note'  => Mage::helper('eav')->__('Declare attribute value saving scope'),
-            'values' => $response->getScopes(),
-        ], 'attribute_code');
-
         Mage::dispatchEvent("adminhtml_{$attributeTypeCode}_attribute_edit_prepare_form", [
             'form'      => $form,
             'attribute' => $attributeObject
