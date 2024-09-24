@@ -9,9 +9,7 @@ parameters:
         - app/bootstrap.php
         - app/Mage.php
         - app/code/core/Mage
-        - lib/Mage
-        - lib/MahoCLI
-        - lib/Varien
+        - lib
         - maho
         - public
     excludePaths:
