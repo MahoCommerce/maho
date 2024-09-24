@@ -290,7 +290,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
      * Get connection by name or type
      *
      * @param string $connectionName
-     * @return Magento_Db_Adapter_Pdo_Mysql
+     * @return Varien_Db_Adapter_Pdo_Mysql
      */
     protected function _getConnection($connectionName)
     {
@@ -320,7 +320,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Retrieve connection for read data
      *
-     * @return Magento_Db_Adapter_Pdo_Mysql
+     * @return Varien_Db_Adapter_Pdo_Mysql
      */
     #[\Override]
     protected function _getReadAdapter()
@@ -339,7 +339,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Retrieve connection for write data
      *
-     * @return Magento_Db_Adapter_Pdo_Mysql
+     * @return Varien_Db_Adapter_Pdo_Mysql
      */
     #[\Override]
     protected function _getWriteAdapter()
