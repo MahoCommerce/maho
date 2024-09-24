@@ -31,11 +31,14 @@ class Mage_Core_Block_Profiler extends Mage_Core_Block_Abstract
 
         $timers = Varien_Profiler::getTimers();
 
-        #$out = '<div style="position:fixed;bottom:5px;right:5px;opacity:.1;background:white" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.1">';
-        #$out = '<div style="opacity:.1" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.1">';
-        $out = "<a href=\"javascript:void(0)\" onclick=\"$('profiler_section').style.display=$('profiler_section').style.display==''?'none':''\">[profiler]</a>";
-        $out .= '<div id="profiler_section" style="background:white; display:block">';
-        $out .= '<pre>Memory usage: real: ' . memory_get_usage(true) . ', emalloc: ' . memory_get_usage() . '</pre>';
+        $emalloc = memory_get_usage();
+        $memoryUsage = memory_get_usage(true);
+        $emallocMB = number_format($emalloc / 1048576, 2);
+        $memoryUsageMB = number_format($memoryUsage / 1048576, 2);
+
+        $out = "<a href=\"javascript:void(0)\" onclick=\"document.getElementById('profiler_section').style.display=document.getElementById('profiler_section').style.display=='block'?'none':'block'\">[profiler]</a>";
+        $out .= '<div id="profiler_section" style="background:white;display:block">';
+        $out .= '<pre>Memory usage: real: ' . $memoryUsage . '(' . $memoryUsageMB . 'MB), emalloc: ' . $emalloc . '(' . $emallocMB . 'MB)</pre>';
         $out .= '<table border="1" cellspacing="0" cellpadding="2" style="width:auto">';
         $out .= '<tr><th>Code Profiler</th><th>Time</th><th>Cnt</th><th>Emalloc</th><th>RealMem</th></tr>';
         foreach ($timers as $name => $timer) {
