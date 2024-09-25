@@ -37,11 +37,11 @@
             </core_store>
             <core_magento translate="title" module="core">
                 <model>core/magento_api</model>
-                <title>Magento info API</title>
+                <title>Maho info API</title>
                 <acl>core/magento</acl>
                 <methods>
                     <info translate="title" module="core">
-                        <title>Get info about current Magento installation</title>
+                        <title>Get info about current Maho installation</title>
                         <acl>core/magento/info</acl>
                     </info>
                 </methods>
@@ -76,9 +76,9 @@
                         </list>
                     </store>
                     <magento translate="title" module="core">
-                        <title>Magento info</title>
+                        <title>Maho info</title>
                         <info translate="title" module="core">
-                            <title>Retrieve info about current Magento installation</title>
+                            <title>Retrieve info about current Maho installation</title>
                         </info>
                     </magento>
                 </core>

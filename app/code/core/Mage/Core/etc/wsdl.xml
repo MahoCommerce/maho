@@ -61,7 +61,7 @@
             <output message="typens:storeInfoResponse" />
         </operation>
         <operation name="magentoInfo">
-            <documentation>Info about current Magento installation</documentation>
+            <documentation>Info about current Maho installation</documentation>
             <input message="typens:magentoInfoRequest" />
             <output message="typens:magentoInfoResponse" />
         </operation>

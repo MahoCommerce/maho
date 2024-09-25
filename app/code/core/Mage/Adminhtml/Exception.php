@@ -10,7 +10,7 @@
  */
 
 /**
- * Magento adminhtml module exception
+ * Maho adminhtml module exception
  *
  * @category   Mage
  * @package    Mage_Adminhtml

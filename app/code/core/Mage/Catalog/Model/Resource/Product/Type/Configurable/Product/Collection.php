@@ -66,7 +66,7 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Product_Collection e
 
     /**
      * Retrieve is flat enabled flag
-     * Return alvays false if magento run admin
+     * Return always false in admin context
      *
      * @return bool
      */

@@ -125,7 +125,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
 
                 $headers = 'GET ' . $path . $query . ' HTTP/1.0' . "\r\n"
                     . 'Host: ' . $urlProp['host'] . "\r\n"
-                    . 'User-Agent: Magento ver/' . Mage::getVersion() . "\r\n"
+                    . 'User-Agent: Maho ver/' . Mage::getMahoVersion() . "\r\n"
                     . 'Connection: close' . "\r\n"
                     . "\r\n";
                 fwrite($this->_handle, $headers);

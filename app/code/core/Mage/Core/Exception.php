@@ -11,7 +11,7 @@
  */
 
 /**
- * Magento Core Exception
+ * Maho Core Exception
  *
  * This class will be extended by other modules
  *

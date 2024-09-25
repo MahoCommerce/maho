@@ -1000,7 +1000,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
     }
 
     /**
-     * Get Magento App instance
+     * Get Maho App instance
      *
      * @return Mage_Core_Model_App
      */

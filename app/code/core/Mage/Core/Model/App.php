@@ -234,7 +234,7 @@ class Mage_Core_Model_App
     protected $_isCacheLocked = null;
 
     /**
-     * Flag for Magento installation status
+     * Flag for Maho installation status
      *
      * @var null|bool
      */

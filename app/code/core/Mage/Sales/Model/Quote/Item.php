@@ -292,7 +292,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     }
 
     /**
-     * Get Magento App instance
+     * Get Maho App instance
      *
      * @return Mage_Core_Model_App
      */
