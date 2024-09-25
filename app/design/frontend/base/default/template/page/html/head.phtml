@@ -20,8 +20,8 @@
 <meta name="description" content="<?= htmlspecialchars($this->getDescription()) ?>" />
 <meta name="keywords" content="<?= htmlspecialchars($this->getKeywords()) ?>" />
 <meta name="robots" content="<?= htmlspecialchars($this->getRobots()) ?>" />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any">
-<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="icon" type="image/svg+xml" href="<?= $this->getSkinUrl('images/favicon.svg') ?>" sizes="any">
+<link rel="icon" type="image/png" href="<?= $this->getSkinUrl('images/favicon.png') ?>">
 <?= $this->getCssJsHtml() ?>
 <?= $this->getChildHtml() ?>
 <?= $this->helper('core/js')->getTranslatorScript() ?>
