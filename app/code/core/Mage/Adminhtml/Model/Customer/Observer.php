@@ -75,6 +75,28 @@ class Mage_Adminhtml_Model_Customer_Observer
     }
 
     /**
+     * Add website switcher to customer attribute edit form
+     *
+     * @param Varien_Event_Observer $observer
+     * @return $this
+     */
+    public function customerAttributeEditGenerateBlocksAfter($observer)
+    {
+        $controller = $observer->getAction();
+        $fullActionName = $controller->getFullActionName();
+        $attribute_id = (int)$controller->getRequest()->getParam('attribute_id');
+
+        if ($fullActionName === 'adminhtml_customer_attribute_edit' && $attribute_id) {
+            $controller->getLayout()->getBlock('left')->append(
+                $controller->getLayout()->createBlock('adminhtml/website_switcher')
+                           ->setLabel($controller->__('Current Configuration Scope:'))
+                           ->setDefaultWebsiteName($controller->__('Default Config'))
+            );
+        }
+        return;
+    }
+
+    /**
      * Add frontend properties to customer address attribute edit form
      *
      * @param Varien_Event_Observer $observer
