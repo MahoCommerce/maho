@@ -10,7 +10,7 @@
  */
 
 /**
- * Magento info API
+ * Maho info API
  *
  * @category   Mage
  * @package    Mage_Core
@@ -18,7 +18,7 @@
 class Mage_Core_Model_Magento_Api extends Mage_Api_Model_Resource_Abstract
 {
     /**
-     * Retrieve information about current Magento installation
+     * Retrieve information about the current Maho installation
      *
      * @return array
      */

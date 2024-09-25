@@ -10,7 +10,7 @@
  */
 
 /**
- * Magento info API V2
+ * Maho info API V2
  *
  * @category   Mage
  * @package    Mage_Core

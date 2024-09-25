@@ -10,7 +10,7 @@
  */
 
 /**
- * Magento Cron Exception
+ * Maho Cron Exception
  *
  * @category   Mage
  * @package    Mage_Cron
