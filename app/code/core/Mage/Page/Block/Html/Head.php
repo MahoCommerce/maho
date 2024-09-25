@@ -496,7 +496,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
     /**
      * Getter for path to Favicon
      *
-     * @deprecated If needed, change the favicon in custom template if it is not already done.
+     * @deprecated If needed, overwrite favicon.svg and favicon.png in custom theme's skin directory.
      * @return string
      */
     public function getFaviconFile()
@@ -510,7 +510,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
     /**
      * Retrieve path to Favicon
      *
-     * @deprecated If needed, change the favicon in custom template if it is not already done.
+     * @deprecated If needed, overwrite favicon.svg and favicon.png in custom theme's skin directory.
      * @return string
      */
     protected function _getFaviconFile()
