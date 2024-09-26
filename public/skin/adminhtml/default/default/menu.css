@@ -1,87 +1,281 @@
-/**
- * Maho
- *
- * @category    design
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+/* ! Do not edit css files !
+   Edit scss version and compile with sass from scss folder like this:
+   $ sass menu.scss ../menu.css
  */
+/*
+ 205 = default,
+   0 = red,
+  60 = yellow,
+ 120 = green,
+ 180 = turquoise,
+ 240 = blue,
+ 300 = purple
+*/
+#nav ul li.active, #nav ul li {
+  float: none;
+  height: auto;
+  background: none;
+  margin: 0;
+}
 
-.nav-bar { border-top:1px solid #2d444f; border-bottom:1px solid #2d444f; background:url(images/nav1_bg.gif) repeat-x 0 100% #666e73; padding:0 30px;  }
+#usermenu ul li a:hover {
+  color: #2f2f2f;
+  text-decoration: none;
+  background: var(--color-main-xs);
+  display: block;
+}
 
-#nav { float:left; }
+.nav-bar {
+  background: black;
+  padding: 0 350px 0 70px;
+}
+.nav-bar:after {
+  content: ".";
+  display: block;
+  clear: both;
+  font-size: 0;
+  line-height: 0;
+  height: 0;
+  overflow: hidden;
+}
 
-/************** ALL LEVELS  *************/ /* Style consistent throughout all nav levels */
-#nav li { position:relative; text-align:left; }
-#nav li:hover { z-index:999; }
-#nav li.active { z-index:1000; } /* to prevent the li separator from showing through on mouseover on li */
-#nav a,
-#nav a:hover { display:block; text-decoration:none; }
-#nav span { display:block; /*cursor:pointer;*/ }
-#nav a { line-height:1.3em; }
+#nav {
+  padding-left: 0;
+}
+#nav li {
+  position: relative;
+  text-align: left;
+  float: left;
+}
+#nav li:hover {
+  z-index: 999;
+}
+#nav li:hover a {
+  color: #d6e2e5;
+}
+#nav li:hover ul {
+  left: 0;
+}
+#nav li:hover ul ul {
+  left: -10000px;
+}
+#nav li:hover ul a {
+  color: #202856;
+  font-size: 12px;
+}
+#nav li:hover ul li:hover ul {
+  left: 100px;
+}
+#nav li:hover ul li:hover ul ul {
+  left: -10000px;
+}
+#nav li:hover ul li:hover ul li:hover ul {
+  left: 100px;
+}
+#nav li.active {
+  margin-left: -1px;
+  color: #fff;
+  font-weight: bold;
+}
+#nav li.active em {
+  display: block;
+  position: absolute;
+  top: 0;
+  right: -1px;
+  width: 3px;
+  height: 27px;
+}
+#nav li.active li {
+  font-weight: normal;
+}
+#nav li.level0 > a {
+  text-transform: none;
+  font-weight: 400;
+  color: #fff;
+  height: 38px;
+  line-height: 38px;
+}
+#nav li.level0 > a:hover {
+  background: #2c3878;
+  color: #fff;
+}
+#nav li.level0 li.parent > a:after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  bottom: 9px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 5px 0 5px 6px;
+  border-color: transparent transparent transparent #c8c8c8;
+}
+#nav li.level0:hover > a {
+  background: #293470;
+  color: #fff;
+}
+#nav li.parent a {
+  cursor: default;
+}
+#nav li.parent li.parent a {
+  cursor: default;
+}
+#nav li.parent li.parent li.parent a {
+  cursor: default;
+}
+#nav li.parent li.parent li.parent li a {
+  cursor: pointer;
+}
+#nav li.parent li.parent li a {
+  cursor: pointer;
+}
+#nav li.parent li a {
+  cursor: pointer;
+}
+#nav li#bubblelauncher-status a {
+  background-position: center 8px;
+  line-height: 38px;
+  height: 38px;
+}
+#nav li#bubblelauncher-status.on a {
+  background-position: center -32px;
+}
+#nav a {
+  display: block;
+  text-decoration: none;
+  float: left;
+  padding: 0 12px;
+  color: #fff;
+  cursor: pointer;
+}
+#nav a:hover {
+  display: block;
+  text-decoration: none;
+}
+#nav ul {
+  position: absolute;
+  width: 189px;
+  top: 38px;
+  left: -10000px;
+  box-shadow: rgba(0, 0, 0, 0.180392) 1px 3px 4px;
+}
+#nav ul li {
+  padding: 0;
+}
+#nav ul li.active a {
+  color: #202856;
+  font-size: 12px;
+}
+#nav ul li a {
+  background: #fff;
+  padding: 9px 12px;
+  color: #202856;
+  font-size: 12px;
+}
+#nav ul li a.active {
+  text-decoration: underline;
+}
+#nav ul li a:hover {
+  background: #202856;
+  color: #fff;
+}
+#nav ul li.parent a {
+  background-position: 100% 100%;
+  background-repeat: no-repeat;
+}
+#nav ul li.parent li.parent a {
+  background-position: 100% 100%;
+  background-repeat: no-repeat;
+}
+#nav ul li.parent li.parent li a {
+  background-image: none;
+}
+#nav ul li.parent li a {
+  background-image: none;
+}
+#nav ul li:hover a {
+  font-weight: normal;
+}
+#nav ul li:hover a:hover {
+  font-weight: normal;
+}
+#nav ul a {
+  float: none;
+  line-height: 1.3em;
+  font-weight: normal;
+}
+#nav ul a:hover {
+  float: none;
+  line-height: 1.3em;
+}
+#nav ul ul {
+  border-top: 0;
+  padding-top: 2px;
+  left: 100px;
+  top: 13px;
+}
+#nav ul ul ul {
+  left: -10000px;
+}
+#nav .level0 > a:after {
+  content: "";
+  display: block;
+  margin-top: 10px;
+  height: 3px;
+  font-size: 0;
+}
+#nav .level0.active > a {
+  font-weight: 600;
+  background: #273169;
+}
 
+#usermenu {
+  display: inline;
+  float: right;
+  text-align: left;
+}
+#usermenu ul {
+  position: absolute;
+  width: 220px;
+  top: 40px;
+  right: -10000px;
+  display: none;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.207843), 0 0 5px rgba(0, 0, 0, 0.207843);
+  background: #fff;
+}
+#usermenu ul li a:hover {
+  background: #202856;
+}
+#usermenu ul li.last span {
+  border-bottom: none;
+}
+#usermenu li ul li {
+  right: 5px;
+  display: block;
+}
+#usermenu li ul span {
+  border-bottom: 1px dotted hsl(205, 40%, 75%);
+  display: block;
+  line-height: 31px;
+  padding: 0 10px;
+}
+#usermenu li:hover ul {
+  right: 27px;
+  display: block;
+}
+#usermenu li:hover ul a {
+  color: #000537;
+  text-decoration: none;
+  background: hsl(205, 52%, 95%);
+  display: block;
+}
+#usermenu > li > a {
+  padding: 0 27px 0 20px;
+  display: block;
+}
+#usermenu > li > a svg {
+  height: 40px;
+  width: auto;
+}
 
-/************ 1ST LEVEL  ***************/
-#nav li { float:left; background:url(images/nav1_sep.gif) no-repeat 100% 0;  }
-#nav li.active { margin-left:-1px; background:url(images/nav1_active.gif) no-repeat; color:#fff; font-weight:bold;  }
-#nav li.active em { display:block; position:absolute; top:0; right:-1px; width:3px; height:27px; background:url(images/nav1_active.gif) no-repeat 100% 0; }
-#nav a { float:left; padding:0 14px; color:#fff; line-height:27px; }
-#nav li:hover a { color:#d6e2e5; }
-
-
-/************ 1ST LEVEL RESET ************/
-#nav ul li,
-#nav ul li.active { float:none; height:auto; background:none; margin:0; }
-#nav ul a,
-#nav ul a:hover { float:none; padding:0; line-height:1.3em; }
-#nav ul li:hover a,
-#nav ul li:hover a:hover,
-#nav ul a,
-#nav li.active li { font-weight:normal; }
-
-
-/************ 2ND LEVEL ************/
-#nav ul { position:absolute; width:189px; top:27px; left:-10000px; padding-bottom:3px; border-top:1px solid #2d444f; }
-#nav ul ul  { border-top:0; background:url(images/nav3_bg.png) 0 0 no-repeat; padding-top:2px; left:100px; top:13px; }
-
-/* Show menu */
-#nav li:hover ul { left:-1px; }
-#nav li:hover ul ul { left:-10000px; }
-#nav li:hover ul li:hover ul { left:100px; }
-
-#nav ul li { background:url(images/nav2_li_bg.png) repeat-y; padding:0 2px; }
-#nav ul li a { background:#e3ecee; }
-#nav ul li a:hover { background:#d0dfe2; }
-#nav li:hover ul a,
-#nav ul li.active a,
-#nav ul li a,
-#nav ul li a:hover { color:#2f2f2f; }
-#nav ul li a.active { text-decoration:underline; }
-#nav ul span,
-#nav ul li.last li span { padding:5px 15px; background:url(images/nav2_link_bg.gif) repeat-x 0 100%; }
-#nav ul li.last span,
-#nav ul li.last li.last span { background:none; }
-#nav ul li.last { background:url(images/nav2_last_li_bg.png) no-repeat 0 100%; padding-bottom:3px; }
-
-#nav ul li.parent a,
-#nav ul li.parent li.parent a { background-image:url(images/nav2_parent_arrow.gif); background-position:100% 100%; background-repeat:no-repeat; }
-#nav ul li.parent li a,
-#nav ul li.parent li.parent li a { background-image:none; }
-
-/************ 3RD+ LEVEL ************/
-/* Cursors */
-#nav li.parent a[href="#"],
-#nav li.parent li.parent a[href="#"],
-#nav li.parent li.parent li.parent a[href="#"] { cursor:default; }
-
-#nav li.parent li a,
-#nav li.parent li.parent li a,
-#nav li.parent li.parent li.parent li a { cursor:pointer; }
-
-/* Show menu */
-#nav ul ul ul { left:-10000px; }
-#nav li:hover ul li:hover ul ul { left:-10000px;}
-#nav li:hover ul li:hover ul li:hover ul { left:100px; }
-
-.nav-bar:after { content:"."; display:block; clear:both; font-size:0; line-height:0; height:0; overflow:hidden;  }
+/*# sourceMappingURL=menu.css.map */

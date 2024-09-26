@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<layout version="0.1.0">
-    <default>
-        <reference name="head">
-            <action method="addItem"><type>skin_css</type><name>override.css</name></action>
-            <action method="addItem"><type>skin_css</type><name>form.css</name></action>
-        </reference>
-    </default>
-</layout>

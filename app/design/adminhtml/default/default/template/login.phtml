@@ -4,7 +4,7 @@
  *
  * @category    design
  * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2006-2018 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
@@ -16,8 +16,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="robots" content="noindex, nofollow" />
     <title><?= Mage::helper('adminhtml')->__('Log into Maho Admin Page') ?></title>
-    <link type="text/css" rel="stylesheet" href="<?= $this->getSkinUrl('reset.css') ?>" media="all" />
-    <link type="text/css" rel="stylesheet" href="<?= $this->getSkinUrl('boxes.css') ?>" media="all" />
+    <link type="text/css" rel="stylesheet" href="<?= $this->getSkinUrl('login.css') ?>" media="all" />
     <link rel="icon" type="image/svg+xml" href="<?= $this->getSkinUrl('images/favicon.svg') ?>" sizes="any">
     <link rel="icon" type="image/png" href="<?= $this->getSkinUrl('images/favicon.png') ?>">
     <script type="text/javascript" src="<?= $this->getJsUrl('prototype/prototype.js') ?>"></script>
@@ -46,7 +45,7 @@
                     <div class="clear"></div>
                     <div class="form-buttons">
                         <a class="left" href="<?= Mage::helper('adminhtml')->getUrl('adminhtml/index/forgotpassword', ['_nosecret' => true]) ?>"><?= Mage::helper('adminhtml')->__('Forgot your password?') ?></a>
-                        <button type="submit" class="form-button"><span><span><span><?= Mage::helper('adminhtml')->__('Login') ?></span></span></span></button>
+                        <input type="submit" class="form-button" value="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" />
                     </div>
                 </div>
                 <p class="legal">Powered by Maho</p>
