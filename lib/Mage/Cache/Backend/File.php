@@ -175,7 +175,7 @@ class Mage_Cache_Backend_File extends Zend_Cache_Backend_File
             if (!is_writable($path)) {
                 // maybe, we just have to build the directory structure
                 $this->_recursiveMkdirAndChmod($id);
-                if (!is_writable($path)) {
+                if (!is_writable($path)) { // @phpstan-ignore booleanNot.alwaysTrue
                     return false;
                 }
             }

@@ -936,7 +936,6 @@ namespace PHPSTORM_META {
             'configurableswatches/catalog_product_view_type_configurable_swatches' => \Mage_ConfigurableSwatches_Block_Catalog_Product_View_Type_Configurable_Swatches::class,
             'core/abstract' => \Mage_Core_Block_Abstract::class,
             'core/flush' => \Mage_Core_Block_Flush::class,
-            'core/html_calendar' => \Mage_Core_Block_Html_Calendar::class,
             'core/html_date' => \Mage_Core_Block_Html_Date::class,
             'core/html_link' => \Mage_Core_Block_Html_Link::class,
             'core/html_select' => \Mage_Core_Block_Html_Select::class,

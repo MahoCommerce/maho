@@ -411,9 +411,8 @@ class Mage_Oauth_Model_Server
      *
      * @param string $message Exception message
      * @param int $code Exception code
-     * @return never
      */
-    protected function _throwException($message = '', $code = 0)
+    protected function _throwException($message = '', $code = 0): never
     {
         throw Mage::exception('Mage_Oauth', $message, $code);
     }

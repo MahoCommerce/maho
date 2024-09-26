@@ -841,7 +841,7 @@ class Mage_Paypal_Model_Express_Checkout
             $options[$iMin]->setIsDefault(true);
         }
 
-        // Magento will transfer only first 10 cheapest shipping options if there are more than 10 available.
+        // Maho will transfer only the first 10 cheapest shipping options if there are more than 10 available.
         if (count($options) > 10) {
             usort($options, [get_class($this),'cmpShippingOptions']);
             array_splice($options, 10);
@@ -924,7 +924,7 @@ class Mage_Paypal_Model_Express_Checkout
 
     /**
      * Prepare quote for customer registration and customer order submit
-     * and restore magento customer data from quote
+     * and restore Maho customer data from quote
      *
      * @return $this
      */

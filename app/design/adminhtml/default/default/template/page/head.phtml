@@ -22,7 +22,6 @@
     var BASE_URL = '<?= $this->getUrl('*') ?>';
     var SKIN_URL = '<?= $this->jsQuoteEscape($this->getSkinUrl()) ?>';
     var FORM_KEY = '<?= $this->getFormKey() ?>';
-    <?php # BC: cast to INT in case of non-existing method getLoadingTimeout() in 3rd-party code?>
     var LOADING_TIMEOUT = <?= (int)$this->getLoadingTimeout() ?>;
 </script>
 

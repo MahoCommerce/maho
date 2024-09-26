@@ -6,7 +6,6 @@
     <file>app/Mage.php</file>
     <file>app/code/core/Mage/</file>
     <file>lib/Mage/</file>
-    <file>lib/Magento/</file>
     <file>lib/MahoCLI/</file>
     <file>lib/Varien/</file>
     <file>public/api.php</file>

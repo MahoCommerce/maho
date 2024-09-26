@@ -19,9 +19,6 @@ declare(strict_types=1);
  */
 class Mage_Core_Model_Security_HtmlEscapedString implements Stringable
 {
-    /**
-     * @var string
-     */
     protected string $originalValue;
 
     /**

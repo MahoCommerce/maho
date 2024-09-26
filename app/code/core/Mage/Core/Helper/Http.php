@@ -73,10 +73,8 @@ class Mage_Core_Helper_Http extends Mage_Core_Helper_Abstract
 
     /**
      * Send auth failed Headers and exit
-     *
-     * @return never
      */
-    public function authFailed()
+    public function authFailed(): never
     {
         Mage::app()->getResponse()
             ->setHeader('HTTP/1.1', '401 Unauthorized')

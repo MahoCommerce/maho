@@ -255,7 +255,7 @@ class Mage_Core_Model_Input_Filter implements Zend_Filter_Interface
     }
 
     /**
-     * Try to create Magento helper for filtration based on $filterData. Return false on failure
+     * Try to create Maho helper for filtration based on $filterData. Return false on failure
      *
      * @param array $filterData
      * @return Mage_Core_Helper_Abstract
@@ -296,7 +296,7 @@ class Mage_Core_Model_Input_Filter implements Zend_Filter_Interface
     }
 
     /**
-     * Get Magento filters
+     * Get Maho filters
      *
      * @param array $filterData
      * @return Zend_Filter_Interface

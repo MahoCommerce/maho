@@ -803,7 +803,9 @@ Packaging.prototype = {
         if ('string' == typeof el.innerText) {
             return el.innerText;
         }
-        return el.innerHTML.replace(/<[^>]*>/g,'');
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(el.innerHTML, 'text/html');
+        return doc.body.textContent || "";
     }
 //******************** End Private functions ******************************//
 };

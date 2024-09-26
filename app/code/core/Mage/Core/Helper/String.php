@@ -512,23 +512,14 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
      * UnSerialize string
      * @param string $str
      * @return mixed|null
-     * @throws Exception
      */
     public function unserialize($str)
     {
         if (is_null($str)) {
             return null;
         }
-        $reader = new Unserialize_Reader_ArrValue('data');
-        $prevChar = null;
-        for ($i = 0; $i < strlen($str); $i++) {
-            $char = $str[$i];
-            $result = $reader->read($char, $prevChar);
-            if (!is_null($result)) {
-                return $result;
-            }
-            $prevChar = $char;
-        }
+
+        return unserialize($str);
     }
 
     /**
@@ -553,9 +544,7 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
     public function validateSerializedObject($str)
     {
         if ($this->isSerializedArrayOrObject($str)) {
-            try {
-                $this->unserialize($str);
-            } catch (Exception $e) {
+            if (!unserialize($str)) {
                 return false;
             }
         }

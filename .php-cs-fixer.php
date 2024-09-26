@@ -112,7 +112,6 @@ return $config
             ->in([
                 'app/code/core/Mage/',
                 'lib/Mage/',
-                'lib/Magento/',
                 'lib/MahoCLI/',
                 'lib/Varien/',
                 'public/',

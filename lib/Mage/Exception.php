@@ -10,10 +10,8 @@
  */
 
 /**
- * Class for Exception
- *
  * @category   Mage
- * @package     Mage
+ * @package    Mage
  */
 class Mage_Exception extends Exception
 {
