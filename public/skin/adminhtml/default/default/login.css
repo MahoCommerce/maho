@@ -24,7 +24,6 @@
   border: 0;
   cursor: pointer;
   display: inline-block;
-  font-family: Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
   font-size: 13px;
   font-weight: 400;
   line-height: 26px;
@@ -33,34 +32,6 @@
   vertical-align: middle;
 }
 
-@font-face {
-  font-family: "Open Sans";
-  src: url("fonts/opensans/OpenSans-Light.ttf") format("truetype"), url("fonts/opensans/OpenSans-Light.woff") format("woff"), url("fonts/opensans/OpenSans-Light.woff2") format("woff2");
-  /* Modern Browsers */
-  font-weight: 300;
-  font-style: normal;
-}
-@font-face {
-  font-family: "Open Sans";
-  src: url("fonts/opensans/OpenSans-Regular.ttf") format("truetype"), url("fonts/opensans/OpenSans-Regular.woff") format("woff"), url("fonts/opensans/OpenSans-Regular.woff2") format("woff2");
-  /* Modern Browsers */
-  font-weight: 400;
-  font-style: normal;
-}
-@font-face {
-  font-family: "Open Sans";
-  src: url("fonts/opensans/OpenSans-Bold.ttf") format("truetype"), url("fonts/opensans/OpenSans-Bold.woff") format("woff"), url("fonts/opensans/OpenSans-Bold.woff2") format("woff2");
-  /* Modern Browsers */
-  font-weight: 700;
-  font-style: normal;
-}
-@font-face {
-  font-family: "Open Sans";
-  src: url("fonts/opensans/OpenSans-SemiBold.ttf") format("truetype"), url("fonts/opensans/OpenSans-SemiBold.woff") format("woff"), url("fonts/opensans/OpenSans-SemiBold.woff2") format("woff2");
-  /* Modern Browsers */
-  font-weight: 600;
-  font-style: normal;
-}
 * {
   margin: 0;
   padding: 0;
@@ -69,7 +40,7 @@
 body {
   background: #e6e6e6;
   color: #2f2f2f;
-  font: 400 12px/1.33 Open Sans, sans-serif;
+  font: 400 12px/1.33 ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   background: #ebedef;
   font-size: 13px;
   overflow-x: hidden;
@@ -129,13 +100,12 @@ input {
 }
 input.input-text {
   background: #fff;
-  font: 12px Arial, sans-serif, Helvetica;
+  font-size: 12px;
   border-width: 1px;
   border-style: solid;
   border-color: #aaa;
   padding: 2px 2px 3px;
   line-height: 18px;
-  font-family: Open Sans, Helvetica Neue;
 }
 input.input-text:hover {
   outline: 2px solid rgba(117, 146, 163, 0.1);

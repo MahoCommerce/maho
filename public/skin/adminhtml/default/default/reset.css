@@ -13,7 +13,7 @@
 
 *                       { margin:0; padding:0; }
 
-body                    { background:#e6e6e6; color:#2f2f2f; font:12px/1.5em Arial, Helvetica, sans-serif;  }
+body                    { background:#e6e6e6; color:#2f2f2f; font:12px/1.5em ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";  }
 
 a                       { color:#ea7601; text-decoration:underline; }
 a:hover                 { color:#ea7601; text-decoration:underline; }

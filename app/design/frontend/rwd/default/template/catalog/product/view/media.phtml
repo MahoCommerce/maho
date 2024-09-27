@@ -33,7 +33,7 @@
         <?php $i=0; foreach ($this->getGalleryImages() as $_image): ?>
             <?php if ($this->isGalleryImageVisible($_image)): ?>
             <img id="image-<?= $i ?>"
-                 class="gallery-image"
+                 class="gallery-image" loading="lazy"
                  src="<?= $this->getGalleryImageUrl($_image) ?>"
                  data-zoom-image="<?=  $this->getGalleryImageUrl($_image) ?>" />
             <?php endif ?>

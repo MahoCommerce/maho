@@ -60,7 +60,6 @@ Default layout, loads most of the pages
 
                 <action method="addCss"><name>reset.css</name></action>
                 <action method="addCss"><name>boxes.css</name></action>
-                <action method="addCss"><name>custom.css</name></action>
                 <action method="addCss"><name>print.css</name><params>media="print"</params></action>
                 <action method="addItem"><type>skin_css</type><name>menu.css</name><params>media="screen, projection"</params></action>
                 <action method="addItem"><type>skin_css</type><name>override.css</name></action>

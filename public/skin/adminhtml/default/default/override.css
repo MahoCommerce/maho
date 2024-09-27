@@ -13,7 +13,7 @@
 */
 .popup-window .content-header, body {
   color: #2f2f2f;
-  font: 400 12px/1.33 "Open Sans", sans-serif;
+  font: 400 12px/1.33 ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   background: #f6f6f6;
 }
 
@@ -117,7 +117,7 @@ dl.accordion dt.open a:after, div.collapseable a.open:after {
 }
 
 .grid-severity-minor span, .grid-severity-major span, .grid-severity-critical span, .grid-severity-notice span {
-  font: 400 12px/1.33 "Open Sans", sans-serif;
+  font: 400 12px/1.33 ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   padding: 2px 10px;
 }
 
@@ -133,30 +133,6 @@ dl.accordion dt.open a:after, div.collapseable a.open:after {
   box-shadow: none;
 }
 
-@font-face {
-  font-family: "Open Sans";
-  src: url("fonts/opensans/OpenSans-Light.ttf") format("truetype"), url("fonts/opensans/OpenSans-Light.woff") format("woff"), url("fonts/opensans/OpenSans-Light.woff2") format("woff2"); /* Modern Browsers */
-  font-weight: 300;
-  font-style: normal;
-}
-@font-face {
-  font-family: "Open Sans";
-  src: url("fonts/opensans/OpenSans-Regular.ttf") format("truetype"), url("fonts/opensans/OpenSans-Regular.woff") format("woff"), url("fonts/opensans/OpenSans-Regular.woff2") format("woff2"); /* Modern Browsers */
-  font-weight: 400;
-  font-style: normal;
-}
-@font-face {
-  font-family: "Open Sans";
-  src: url("fonts/opensans/OpenSans-Bold.ttf") format("truetype"), url("fonts/opensans/OpenSans-Bold.woff") format("woff"), url("fonts/opensans/OpenSans-Bold.woff2") format("woff2"); /* Modern Browsers */
-  font-weight: 700;
-  font-style: normal;
-}
-@font-face {
-  font-family: "Open Sans";
-  src: url("fonts/opensans/OpenSans-SemiBold.ttf") format("truetype"), url("fonts/opensans/OpenSans-SemiBold.woff") format("woff"), url("fonts/opensans/OpenSans-SemiBold.woff2") format("woff2"); /* Modern Browsers */
-  font-weight: 600;
-  font-style: normal;
-}
 h1 {
   color: #2f2f2f;
   font-weight: 400;

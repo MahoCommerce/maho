@@ -1017,7 +1017,7 @@ parameters:
 
 		-
 			message: "#^Offset 'option_id' does not exist on array\\{final_price\\: mixed\\}\\.$#"
-			count: 4
+			count: 2
 			path: app/code/core/Mage/Bundle/Model/Product/Price.php
 
 		-
@@ -4387,7 +4387,7 @@ parameters:
 
 		-
 			message: "#^Invalid array key type strin\\.$#"
-			count: 3
+			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
 
 		-

@@ -30,7 +30,7 @@ Default layout, loads most of the pages
 
     <default>
 
-        <!-- Mage_Catalog -->
+        <!-- Mage_Catalog
         <reference name="left">
             <block type="core/template" name="left.permanent.callout" template="callouts/left_col.phtml">
                 <action method="setImgSrc"><src>images/media/col_left_callout.jpg</src></action>
@@ -45,6 +45,7 @@ Default layout, loads most of the pages
                 <action method="setImgAlt" translate="alt" module="catalog"><alt>Keep your eyes open for our special Back to School items and save A LOT!</alt></action>
             </block>
         </reference>
+        -->
         <reference name="footer_links">
             <action method="addLink" translate="label title" module="catalog" ifconfig="catalog/seo/site_map"><label>Site Map</label><url helper="catalog/map/getCategoryUrl" /><title>Site Map</title></action>
         </reference>

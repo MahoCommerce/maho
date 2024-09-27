@@ -10,7 +10,7 @@
 
  /* Reset ================================================================================= */
 * { margin:0; padding:0; }
-body          { background:#496778 50% 0 repeat-y; font:12px/1.55 Arial, Helvetica, sans-serif; color:#2f2f2f; text-align:center; }
+body          { background:#496778 50% 0 repeat-y; font:12px/1.55 ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; color:#2f2f2f; text-align:center; }
 img           { border:0; vertical-align:top; }
 a             { color:#1e7ec8; text-decoration:underline; }
 a:hover       { text-decoration:none; }
@@ -166,7 +166,7 @@ input.input-text, textarea, select {
     border-color: #AAAAAA #C8C8C8 #C8C8C8 #AAAAAA;
     border-style: solid;
     border-width: 1px;
-    font: 12px arial,helvetica,sans-serif;
+    font-size: 12px;
 }
 input.input-text, textarea {
     padding: 2px;
@@ -178,7 +178,8 @@ button, .form-button {
     border-width: 1px;
     color: #FFFFFF;
     cursor: pointer;
-    font: bold 12px arial,helvetica,sans-serif;
+    font-size: 12px;
+    font-weight: bold;
     padding: 0 7px 1px;
     text-align: center !important;
     white-space: nowrap;
@@ -198,7 +199,7 @@ h1 {
 
 h2 {
     color: #444444;
-    font: 16px Arial,Helvetica,sans-serif;
+    font-size: 16px;
     margin: 0 0 5px;
     text-align: left;
 }

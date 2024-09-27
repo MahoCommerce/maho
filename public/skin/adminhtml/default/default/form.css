@@ -13,7 +13,7 @@
  300 = purple
 */
 input.input-text, textarea, select {
-  font: 400 12px/1.33 'Open Sans', sans-serif;
+  font: 400 12px/1.33 ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   display: inline-block;
   padding: 1px 3px;
   margin: 0;
@@ -36,7 +36,6 @@ button, .form-button {
   border: 0;
   cursor: pointer;
   display: inline-block;
-  font-family: Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
   font-size: 13px;
   font-weight: 400;
   line-height: 26px;
@@ -63,7 +62,6 @@ button.save, button.ok_button, button.add, .form-button.ok_button {
   border: 0;
   cursor: pointer;
   display: inline-block;
-  font-family: Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
   font-size: 13px;
   font-weight: 400;
   line-height: 26px;
