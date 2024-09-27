@@ -306,7 +306,7 @@ final class Mage
         if (!self::$_objects) {
             self::$_objects = new Varien_Object_Cache();
         }
-        if (is_null($key)) {
+        if ($key === null) {
             return self::$_objects;
         } else {
             return self::$_objects->load($key);
@@ -819,7 +819,7 @@ final class Mage
             $maxLogLevel = Zend_Log::DEBUG;
         }
 
-        $level  = is_null($level) ? Zend_Log::DEBUG : $level;
+        $level  = $level === null ? Zend_Log::DEBUG : $level;
 
         if (!self::$_isDeveloperMode && $level > $maxLogLevel && !$forceLog) {
             return;
@@ -980,7 +980,7 @@ final class Mage
             }
         }
 
-        if (is_null($baseUrl)) {
+        if ($baseUrl === null) {
             $errorMessage = "Unable detect system directory: $folder";
             if ($exitIfNot) {
                 // exit because of infinity loop

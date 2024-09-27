@@ -30,7 +30,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
     #[\Override]
     public function getAllOptions()
     {
-        if (is_null($this->_options)) {
+        if ($this->_options === null) {
             $this->_options = [
                 [
                     'label' => Mage::helper('eav')->__('Yes'),

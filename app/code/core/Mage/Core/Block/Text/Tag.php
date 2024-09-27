@@ -38,7 +38,7 @@ class Mage_Core_Block_Text_Tag extends Mage_Core_Block_Text
      */
     public function setTagParam($param, $value = null)
     {
-        if (is_array($param) && is_null($value)) {
+        if (is_array($param) && $value === null) {
             foreach ($param as $k => $v) {
                 $this->setTagParam($k, $v);
             }

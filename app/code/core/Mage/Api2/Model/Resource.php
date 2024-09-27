@@ -1036,7 +1036,7 @@ abstract class Mage_Api2_Model_Resource
                 }
             } else {
                 // admin role
-                if (is_null($store)) {
+                if ($store === null) {
                     $store = Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID;
                 }
                 $store = Mage::app()->getStore($store);

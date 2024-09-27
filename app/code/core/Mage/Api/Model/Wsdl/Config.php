@@ -46,7 +46,7 @@ class Mage_Api_Model_Wsdl_Config extends Mage_Api_Model_Wsdl_Config_Base
      */
     public static function getNamespacesPrefix()
     {
-        if (is_null(self::$_namespacesPrefix)) {
+        if (self::$_namespacesPrefix === null) {
             self::$_namespacesPrefix = [];
             $config = Mage::getSingleton('api/config')->getNode('v2/wsdl/prefix')->children();
             foreach ($config as $prefix => $namespace) {

@@ -398,7 +398,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
         ) {
             $basedOn = 'default';
         } else {
-            if ((($billingAddress === false || is_null($billingAddress) || !$billingAddress->getCountryId())
+            if ((($billingAddress === false || $billingAddress === null || !$billingAddress->getCountryId())
                 && $basedOn == 'billing')
                 || (($shippingAddress === false || is_null($shippingAddress) || !$shippingAddress->getCountryId())
                     && $basedOn == 'shipping')

@@ -44,7 +44,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Time_Created extends Mage_Eav_Mode
     {
         $attributeCode = $this->getAttribute()->getAttributeCode();
         $date = $object->getData($attributeCode);
-        if (is_null($date)) {
+        if ($date === null) {
             if ($object->isObjectNew()) {
                 $object->setData($attributeCode, Varien_Date::now());
             }

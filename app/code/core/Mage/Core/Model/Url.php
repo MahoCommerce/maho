@@ -234,7 +234,7 @@ class Mage_Core_Model_Url extends Varien_Object
      */
     public function getUseSession()
     {
-        if (is_null($this->_useSession)) {
+        if ($this->_useSession === null) {
             $this->_useSession = Mage::app()->getUseSessionInUrl();
         }
         return $this->_useSession;

@@ -490,7 +490,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
         if (!$this->needPriceConversion($store)) {
             return $store->roundPrice($price);
         }
-        if (is_null($priceIncludesTax)) {
+        if ($priceIncludesTax === null) {
             $priceIncludesTax = $this->priceIncludesTax($store);
         }
 
@@ -498,7 +498,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
         $includingPercent = null;
 
         $taxClassId = $product->getTaxClassId();
-        if (is_null($percent)) {
+        if ($percent === null) {
             if ($taxClassId) {
                 $request = Mage::getSingleton('tax/calculation')
                     ->getRateRequest($shippingAddress, $billingAddress, $ctc, $store);
@@ -516,7 +516,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
             }
         }
 
-        if ($percent === false || is_null($percent)) {
+        if ($percent === false || $percent === null) {
             if ($priceIncludesTax && !$includingPercent) {
                 return $price;
             }

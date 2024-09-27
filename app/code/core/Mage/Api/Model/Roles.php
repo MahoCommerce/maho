@@ -114,7 +114,7 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
     ) {
         static $result;
 
-        if (is_null($resource)) {
+        if ($resource === null) {
             $resource = Mage::getSingleton('api/config')->getNode('acl/resources');
             $resourceName = null;
             $level = -1;
@@ -123,7 +123,7 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
             if ($resource->getName() != 'title' && $resource->getName() != 'sort_order'
                 && $resource->getName() != 'children'
             ) {
-                $resourceName = (is_null($parentName) ? '' : $parentName . '/') . $resource->getName();
+                $resourceName = ($parentName === null ? '' : $parentName . '/') . $resource->getName();
 
                 //assigning module for its' children nodes
                 if ($resource->getAttribute('module')) {
@@ -136,7 +136,7 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
 
                 $resource->title = Mage::helper($module)->__((string)$resource->title);
 
-                if (is_null($represent2Darray)) {
+                if ($represent2Darray === null) {
                     $result[$resourceName]['name']  = (string)$resource->title;
                     $result[$resourceName]['level'] = $level;
                 } else {

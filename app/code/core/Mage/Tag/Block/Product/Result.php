@@ -84,7 +84,7 @@ class Mage_Tag_Block_Product_Result extends Mage_Catalog_Block_Product_Abstract
      */
     protected function _getProductCollection()
     {
-        if (is_null($this->_productCollection)) {
+        if ($this->_productCollection === null) {
             $tagModel = Mage::getModel('tag/tag');
             $this->_productCollection = $tagModel->getEntityCollection()
                 ->addAttributeToSelect(Mage::getSingleton('catalog/config')->getProductAttributes())

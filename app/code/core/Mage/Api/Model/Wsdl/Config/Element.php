@@ -98,7 +98,7 @@ class Mage_Api_Model_Wsdl_Config_Element extends Varien_Simplexml_Element
         if ($elm !== null) {
             $targetChild = $elm;
         }
-        if (is_null($targetChild)) {
+        if ($targetChild === null) {
             // if child target is not found create new and descend
             $targetChild = $this->addChild($sourceName, null, $elmNamespace);
             $targetChild->setParent($this);

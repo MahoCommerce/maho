@@ -131,7 +131,7 @@ abstract class Mage_Api_Model_Server_Handler_Abstract
         }
         $this->_getServer()->getAdapter()->fault(
             $faults[$faultName]['code'],
-            (is_null($customMessage) ? $faults[$faultName]['message'] : $customMessage)
+            ($customMessage === null ? $faults[$faultName]['message'] : $customMessage)
         );
     }
 
@@ -155,7 +155,7 @@ abstract class Mage_Api_Model_Server_Handler_Abstract
         return [
             'isFault'      => true,
             'faultCode'    => $faults[$faultName]['code'],
-            'faultMessage' => (is_null($customMessage) ? $faults[$faultName]['message'] : $customMessage)
+            'faultMessage' => ($customMessage === null ? $faults[$faultName]['message'] : $customMessage)
         ];
     }
 
@@ -562,7 +562,7 @@ abstract class Mage_Api_Model_Server_Handler_Abstract
      */
     public function processingMethodResult($result)
     {
-        if (is_null($result) || is_bool($result) || is_numeric($result) || is_object($result)) {
+        if ($result === null || is_bool($result) || is_numeric($result) || is_object($result)) {
             return $result;
         } elseif (is_array($result)) {
             foreach ($result as $key => $value) {

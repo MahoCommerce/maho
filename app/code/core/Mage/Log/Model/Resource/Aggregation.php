@@ -90,7 +90,7 @@ class Mage_Log_Model_Resource_Aggregation extends Mage_Core_Model_Resource_Db_Ab
     public function saveLog($data, $id = null)
     {
         $adapter = $this->_getWriteAdapter();
-        if (is_null($id)) {
+        if ($id === null) {
             $adapter->insert($this->getTable('log/summary_table'), $data);
         } else {
             $condition = $adapter->quoteInto('summary_id = ?', $id);

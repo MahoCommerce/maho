@@ -82,7 +82,7 @@ class Mage_Core_Model_Date
      */
     public function gmtDate($format = null, $input = null)
     {
-        if (is_null($format)) {
+        if ($format === null) {
             $format = Varien_Date::DATETIME_PHP_FORMAT;
         }
 
@@ -105,7 +105,7 @@ class Mage_Core_Model_Date
      */
     public function date($format = null, $input = null)
     {
-        if (is_null($format)) {
+        if ($format === null) {
             $format = Varien_Date::DATETIME_PHP_FORMAT;
         }
 
@@ -120,7 +120,7 @@ class Mage_Core_Model_Date
      */
     public function gmtTimestamp($input = null)
     {
-        if (is_null($input)) {
+        if ($input === null) {
             return gmdate('U');
         } elseif (is_numeric($input)) {
             $result = $input;
@@ -149,7 +149,7 @@ class Mage_Core_Model_Date
      */
     public function timestamp($input = null)
     {
-        if (is_null($input)) {
+        if ($input === null) {
             $result = $this->gmtTimestamp();
         } elseif (is_numeric($input)) {
             $result = $input;

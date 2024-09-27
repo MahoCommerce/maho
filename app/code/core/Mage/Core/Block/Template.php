@@ -181,7 +181,7 @@ class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
      */
     public function getShowTemplateHintsAdmin()
     {
-        if (is_null(self::$_showTemplateHintsAdmin)) {
+        if (self::$_showTemplateHintsAdmin === null) {
             self::$_showTemplateHintsAdmin = Mage::getStoreConfig(self::XML_PATH_DEBUG_TEMPLATE_HINTS_ADMIN)
                 && Mage::helper('core')->isDevAllowed();
             self::$_showTemplateHintsBlocksAdmin = Mage::getStoreConfig(self::XML_PATH_DEBUG_TEMPLATE_HINTS_BLOCKS_ADMIN)
@@ -195,7 +195,7 @@ class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
      */
     public function getShowTemplateHints()
     {
-        if (is_null(self::$_showTemplateHints)) {
+        if (self::$_showTemplateHints === null) {
             self::$_showTemplateHints = Mage::getStoreConfig(self::XML_PATH_DEBUG_TEMPLATE_HINTS)
                 && Mage::helper('core')->isDevAllowed();
             self::$_showTemplateHintsBlocks = Mage::getStoreConfig(self::XML_PATH_DEBUG_TEMPLATE_HINTS_BLOCKS)

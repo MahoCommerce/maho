@@ -68,7 +68,7 @@ class Mage_Eav_Model_Resource_Form_Fieldset_Collection extends Mage_Core_Model_R
      */
     public function getStoreId()
     {
-        if (is_null($this->_storeId)) {
+        if ($this->_storeId === null) {
             return Mage::app()->getStore()->getId();
         }
         return $this->_storeId;

@@ -94,7 +94,7 @@ class Mage_Cms_Model_Page extends Mage_Core_Model_Abstract
     #[\Override]
     public function load($id, $field = null)
     {
-        if (is_null($id)) {
+        if ($id === null) {
             return $this->noRoutePage();
         }
         return parent::load($id, $field);
