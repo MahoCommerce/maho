@@ -1187,47 +1187,29 @@ var ProductMediaManager = {
     swapImage: function(targetImage) {
         targetImage = $j(targetImage);
         targetImage.addClass('gallery-image');
-
         ProductMediaManager.destroyZoom();
+        const imageGallery = $j('.product-image-gallery');
 
-        var imageGallery = $j('.product-image-gallery');
-
-        if(targetImage[0].complete) { //image already loaded -- swap immediately
-
+        const swapAndZoom = () => {
             imageGallery.find('.gallery-image').removeClass('visible');
-
-            //move target image to correct place, in case it's necessary
             imageGallery.append(targetImage);
-
-            //reveal new image
             targetImage.addClass('visible');
-
-            //wire zoom on new image
             ProductMediaManager.createZoom(targetImage);
+        };
 
-        } else { //need to wait for image to load
-
-            //add spinner
+        targetImage.removeAttr('loading'); // Remove lazy load
+        if (targetImage[0].complete) {
+            // Image already loaded, swap immediately
+            swapAndZoom();
+        } else {
+            // Need to wait for image to load
             imageGallery.addClass('loading');
-
-            //move target image to correct place, in case it's necessary
             imageGallery.append(targetImage);
 
-            //wait until image is loaded
-            imagesLoaded(targetImage, function() {
-                //remove spinner
+            targetImage.on('load', function() {
                 imageGallery.removeClass('loading');
-
-                //hide old image
-                imageGallery.find('.gallery-image').removeClass('visible');
-
-                //reveal new image
-                targetImage.addClass('visible');
-
-                //wire zoom on new image
-                ProductMediaManager.createZoom(targetImage);
+                swapAndZoom();
             });
-
         }
     },
 
@@ -1237,7 +1219,6 @@ var ProductMediaManager = {
             e.preventDefault();
             var jlink = $j(this);
             var target = $j('#image-' + jlink.data('image-index'));
-
             ProductMediaManager.swapImage(target);
         });
     },
@@ -1256,9 +1237,7 @@ var ProductMediaManager = {
         });
 
         ProductMediaManager.initZoom();
-
         ProductMediaManager.wireThumbnails();
-
         $j(document).trigger('product-media-loaded', ProductMediaManager);
     }
 };
