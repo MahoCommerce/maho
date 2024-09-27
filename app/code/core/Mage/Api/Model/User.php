@@ -97,7 +97,7 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
             $data['api_key']   = $this->_getEncodedApiKey($this->getNewApiKey());
         }
 
-        if (!is_null($this->getIsActive())) {
+        if ($this->getIsActive() !== null) {
             $data['is_active']  = (int) $this->getIsActive();
         }
 

@@ -68,7 +68,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
     #[\Override]
     public function setSessionId($sessId = null)
     {
-        if (!is_null($sessId)) {
+        if ($sessId !== null) {
             $this->_currentSessId = $sessId;
         }
         return $this;

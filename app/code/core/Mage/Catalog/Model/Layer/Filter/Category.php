@@ -123,7 +123,7 @@ class Mage_Catalog_Model_Layer_Filter_Category extends Mage_Catalog_Model_Layer_
      */
     public function getCategory()
     {
-        if (!is_null($this->_categoryId)) {
+        if ($this->_categoryId !== null) {
             $category = Mage::getModel('catalog/category')
                 ->load($this->_categoryId);
             if ($category->getId()) {

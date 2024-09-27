@@ -196,7 +196,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
         if (is_null($value)) {
             $value = $this->getProduct()->getPreconfiguredValues()->getData('options/' . $option->getId() . '/' . $name);
         }
-        if (!is_null($value)) {
+        if ($value !== null) {
             $select->setValue($value);
         }
 

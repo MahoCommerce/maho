@@ -122,7 +122,7 @@ abstract class Mage_Api_Model_Server_Handler_Abstract
     protected function _fault($faultName, $resourceName = null, $customMessage = null)
     {
         $faults = $this->_getConfig()->getFaults($resourceName);
-        if (!isset($faults[$faultName]) && !is_null($resourceName)) {
+        if (!isset($faults[$faultName]) && $resourceName !== null) {
             $this->_fault($faultName);
             return;
         } elseif (!isset($faults[$faultName])) {
@@ -146,7 +146,7 @@ abstract class Mage_Api_Model_Server_Handler_Abstract
     protected function _faultAsArray($faultName, $resourceName = null, $customMessage = null)
     {
         $faults = $this->_getConfig()->getFaults($resourceName);
-        if (!isset($faults[$faultName]) && !is_null($resourceName)) {
+        if (!isset($faults[$faultName]) && $resourceName !== null) {
             return $this->_faultAsArray($faultName);
         } elseif (!isset($faults[$faultName])) {
             return $this->_faultAsArray('unknown');

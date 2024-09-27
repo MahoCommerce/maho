@@ -34,7 +34,7 @@ class Mage_Core_Helper_Http extends Mage_Core_Helper_Abstract
      */
     public function authValidate($headers = null)
     {
-        if (!is_null($headers)) {
+        if ($headers !== null) {
             $_SERVER = $headers;
         }
 

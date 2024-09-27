@@ -281,7 +281,7 @@ abstract class Mage_Catalog_Model_Api2_Product_Rest extends Mage_Catalog_Model_A
         }
         $product->setTaxPercent($percent);
 
-        if (!is_null($includingTax)) {
+        if ($includingTax !== null) {
             if ($priceIncludesTax) {
                 if ($includingTax) {
                     /**

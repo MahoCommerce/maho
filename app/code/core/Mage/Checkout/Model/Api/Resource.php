@@ -60,7 +60,7 @@ class Mage_Checkout_Model_Api_Resource extends Mage_Api_Model_Resource_Abstract
             return false;
         }
 
-        if (!is_null($quote->getId())) {
+        if ($quote->getId() !== null) {
             $this->_fault('quote_already_exist');
         }
 

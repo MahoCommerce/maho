@@ -37,7 +37,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
 
     public function getDisplayCurrencySelect()
     {
-        if (!is_null($this->getColumn()->getData('display_currency_select'))) {
+        if ($this->getColumn()->getData('display_currency_select') !== null) {
             return $this->getColumn()->getData('display_currency_select');
         } else {
             return true;
@@ -46,7 +46,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
 
     public function getCurrencyAffect()
     {
-        if (!is_null($this->getColumn()->getData('currency_affect'))) {
+        if ($this->getColumn()->getData('currency_affect') !== null) {
             return $this->getColumn()->getData('currency_affect');
         } else {
             return true;

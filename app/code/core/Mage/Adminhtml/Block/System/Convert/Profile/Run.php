@@ -150,7 +150,7 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Run extends Mage_Adminhtml_Blo
      */
     public function getExceptions()
     {
-        if (!is_null(parent::getExceptions())) {
+        if (parent::getExceptions() !== null) {
             return parent::getExceptions();
         }
         $exceptions = [];

@@ -67,10 +67,10 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             'swatch' => $images[$text . self::SWATCH_LABEL_SUFFIX] ?? null,
         ];
 
-        if (!is_null($type) && array_key_exists($type, $resultImages)) {
+        if ($type !== null && array_key_exists($type, $resultImages)) {
             $image = $resultImages[$type];
         } else {
-            $image = (!is_null($resultImages['swatch'])) ? $resultImages['swatch'] : $resultImages['standard'];
+            $image = ($resultImages['swatch'] !== null) ? $resultImages['swatch'] : $resultImages['standard'];
         }
 
         return $image;
@@ -92,7 +92,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             $images = [];
             $searchValues = [];
 
-            if (!is_null($preValues) && is_array($preValues)) { // If a pre-defined list of valid values was passed
+            if ($preValues !== null && is_array($preValues)) { // If a pre-defined list of valid values was passed
                 $preValues = array_map('Mage_ConfigurableSwatches_Helper_Data::normalizeKey', $preValues);
                 foreach ($preValues as $value) {
                     $searchValues[] = $value;
@@ -194,7 +194,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             $image = $this->getProductImgByLabel($value, $product, 'standard');
         }
 
-        if (!is_null($image)) {
+        if ($image !== null) {
             $filename = $image->getFile();
             $swatchImage = $this->_resizeSwatchImage($filename, 'product', $width, $height);
             $swatchType = 'product';

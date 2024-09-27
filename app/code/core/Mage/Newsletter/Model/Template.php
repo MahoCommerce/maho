@@ -342,7 +342,7 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
                 'email_body' => $text
             ]);
             $this->_mail = null;
-            if (!is_null($queue)) {
+            if ($queue !== null) {
                 $subscriber->received($queue);
             }
         } catch (Exception $e) {
@@ -350,13 +350,13 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
                 // If letter sent for subscriber, we create a problem report entry
                 $problem = Mage::getModel('newsletter/problem');
                 $problem->addSubscriberData($subscriber);
-                if (!is_null($queue)) {
+                if ($queue !== null) {
                     $problem->addQueueData($queue);
                 }
                 $problem->addErrorData($e);
                 $problem->save();
 
-                if (!is_null($queue)) {
+                if ($queue !== null) {
                     $subscriber->received($queue);
                 }
             } else {

@@ -209,13 +209,13 @@ class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
      */
     private function _getCacheHintStatusColor(): string
     {
-        if (!is_null($this->getCacheLifetime())) {
+        if ($this->getCacheLifetime() !== null) {
             return 'green';
         } else {
             $currentParentBlock = $this;
             $i = 0;
             while ($i++ < 20 && $currentParentBlock instanceof Mage_Core_Block_Abstract) {
-                if (!is_null($currentParentBlock->getCacheLifetime())) {
+                if ($currentParentBlock->getCacheLifetime() !== null) {
                     return 'orange'; // not cached, but within cached
                 }
                 $currentParentBlock = $currentParentBlock->getParentBlock();

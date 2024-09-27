@@ -734,7 +734,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             $storeId = $this->_getWebsiteStoreId($this->getSendemailStoreId());
         }
 
-        if (!is_null($password)) {
+        if ($password !== null) {
             $this->setPassword($password);
         }
 

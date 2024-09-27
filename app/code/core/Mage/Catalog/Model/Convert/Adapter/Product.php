@@ -637,7 +637,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
             ->reset();
 
         if (empty($importData['store'])) {
-            if (!is_null($this->getBatchParams('store'))) {
+            if ($this->getBatchParams('store') !== null) {
                 $store = $this->getStoreById($this->getBatchParams('store'));
             } else {
                 $message = Mage::helper('catalog')->__('Skipping import row, required field "%s" is not defined.', 'store');

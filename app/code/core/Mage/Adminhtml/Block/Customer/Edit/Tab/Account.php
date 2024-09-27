@@ -67,7 +67,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
 
             $websites = [];
             foreach (Mage::app()->getWebsites(true) as $website) {
-                $websites[$website->getId()] = !is_null($website->getDefaultStore());
+                $websites[$website->getId()] = $website->getDefaultStore() !== null;
             }
             $prefix = $form->getHtmlIdPrefix();
 

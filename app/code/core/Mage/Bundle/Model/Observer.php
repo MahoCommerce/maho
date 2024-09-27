@@ -85,7 +85,7 @@ class Mage_Bundle_Model_Observer
         $resource   = Mage::getResourceSingleton('bundle/selection');
 
         $productIds = array_keys($collection->getItems());
-        if (!is_null($limit) && $limit <= count($productIds)) {
+        if ($limit !== null && $limit <= count($productIds)) {
             return $this;
         }
 
@@ -107,7 +107,7 @@ class Mage_Bundle_Model_Observer
         Mage::getSingleton('catalog/product_visibility')
             ->addVisibleInCatalogFilterToCollection($bundleCollection);
 
-        if (!is_null($limit)) {
+        if ($limit !== null) {
             $bundleCollection->setPageSize($limit);
         }
         $bundleCollection->addFieldToFilter('entity_id', ['in' => $bundleIds])

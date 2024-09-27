@@ -37,7 +37,7 @@ $taxIter++;
             <?php foreach ($rates as $rate): ?>
                 <tr class="summary-details<?php if ($isTop): echo ' summary-details-first'; endif; ?>"
                     style="display:none;">
-                    <?php if (!is_null($rate['percent'])): ?>
+                    <?php if ($rate['percent'] !== null): ?>
                         <td class="label"><?= $rate['title'] ?> (<?= (float)$rate['percent'] ?>%)<br/>
                         </td>
                     <?php else: ?>
@@ -64,7 +64,7 @@ $taxIter++;
 
             <tr class="summary-details<?php if ($isTop): echo ' summary-details-first'; endif; ?>"
                 style="display:none;">
-                <?php if (!is_null($info['percent'])): ?>
+                <?php if ($info['percent'] !== null): ?>
                     <td class="label"><?= $this->escapeHtml($info['title']) ?>
                         (<?= (float)$info['percent'] ?>%)<br/></td>
                 <?php else: ?>

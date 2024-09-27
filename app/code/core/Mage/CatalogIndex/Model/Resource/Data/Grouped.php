@@ -84,7 +84,7 @@ class Mage_CatalogIndex_Model_Resource_Data_Grouped extends Mage_CatalogIndex_Mo
                 }
             }
 
-            if (!is_null($resultMinimal)) {
+            if ($resultMinimal !== null) {
                 $result[] = [
                     'customer_group_id' => $customerGroup,
                     'minimal_value'     => $resultMinimal,

@@ -68,7 +68,7 @@ class Mage_Adminhtml_Block_Notification_Window extends Mage_Adminhtml_Block_Noti
      */
     public function canShow()
     {
-        if (!is_null($this->_available)) {
+        if ($this->_available !== null) {
             return $this->_available;
         }
 
@@ -131,7 +131,7 @@ class Mage_Adminhtml_Block_Notification_Window extends Mage_Adminhtml_Block_Noti
      */
     protected function _isAllowed()
     {
-        if (!is_null($this->_aclResourcePath)) {
+        if ($this->_aclResourcePath !== null) {
             return Mage::getSingleton('admin/session')
                 ->isAllowed('admin/system/adminnotification/show_toolbar');
         } else {

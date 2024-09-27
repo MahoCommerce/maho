@@ -107,7 +107,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Grouped extends Mage_Cat
         $statusCond = $write->quoteInto(' = ?', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
         $this->_addAttributeToSelect($select, 'status', 'e.entity_id', 'cs.store_id', $statusCond);
 
-        if (!is_null($entityIds)) {
+        if ($entityIds !== null) {
             $select->where('l.product_id IN(?)', $entityIds);
         }
 

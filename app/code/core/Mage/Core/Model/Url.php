@@ -746,7 +746,7 @@ class Mage_Core_Model_Url extends Varien_Object
             return $this->getBaseUrl() . $routeParams['_direct'];
         }
 
-        if (!is_null($routePath)) {
+        if ($routePath !== null) {
             $this->setRoutePath($routePath);
         }
         if (is_array($routeParams)) {

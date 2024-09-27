@@ -479,7 +479,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
     public function isSalable($product = null)
     {
         $salable = parent::isSalable($product);
-        if (!is_null($salable)) {
+        if ($salable !== null) {
             return $salable;
         }
 

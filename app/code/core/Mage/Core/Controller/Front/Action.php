@@ -129,7 +129,7 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
             ->setHeader('Content-Disposition', 'attachment; filename="' . $fileName . '"')
             ->setHeader('Last-Modified', date('r'));
 
-        if (!is_null($content)) {
+        if ($content !== null) {
             if ($isFile) {
                 $this->getResponse()->clearBody();
                 $this->getResponse()->sendHeaders();

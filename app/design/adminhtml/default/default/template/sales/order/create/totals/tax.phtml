@@ -33,7 +33,7 @@ $taxIter++; ?>
                 <td class="a-right" style="<?= $this->getTotal()->getStyle() ?>"
                     colspan="<?= $this->getColspan() ?>">
                     <?= $this->escapeHtml($rate['title']) ?>
-                    <?php if (!is_null($rate['percent'])): ?>
+                    <?php if ($rate['percent'] !== null): ?>
                         (<?= (float)$rate['percent'] ?>%)
                     <?php endif ?>
                     <br/>

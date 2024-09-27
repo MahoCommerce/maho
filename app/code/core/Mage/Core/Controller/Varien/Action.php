@@ -562,7 +562,7 @@ abstract class Mage_Core_Controller_Varien_Action
         Mage::dispatchEvent('controller_action_noroute', ['action' => $this, 'status' => $status]);
         if ($status->getLoaded() !== true
             || $status->getForwarded() === true
-            || !is_null($coreRoute)
+            || $coreRoute !== null
         ) {
             $this->loadLayout(['default', 'noRoute']);
             $this->renderLayout();
@@ -1067,7 +1067,7 @@ abstract class Mage_Core_Controller_Varien_Action
             ->setHeader('Content-Disposition', 'attachment; filename="' . $fileName . '"', true)
             ->setHeader('Last-Modified', date('r'), true);
 
-        if (!is_null($content)) {
+        if ($content !== null) {
             if ($isFile) {
                 $this->getResponse()->clearBody();
                 $this->getResponse()->sendHeaders();

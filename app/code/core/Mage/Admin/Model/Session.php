@@ -120,7 +120,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
         $user = $this->getUser();
         if ($user) {
             $extraData = $user->getExtra();
-            if (!is_null(Mage::app()->getRequest()->getParam('SID'))
+            if (Mage::app()->getRequest()->getParam('SID') !== null
                 && !$this->allowAdminSid()
                 || isset($extraData['indirect_login'])
                 && $this->getIndirectLogin()

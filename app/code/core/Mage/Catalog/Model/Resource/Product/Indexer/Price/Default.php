@@ -260,7 +260,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
             'base_group_price' => new Zend_Db_Expr('gp.price'),
         ]);
 
-        if (!is_null($entityIds)) {
+        if ($entityIds !== null) {
             $select->where('e.entity_id IN(?)', $entityIds);
         }
 

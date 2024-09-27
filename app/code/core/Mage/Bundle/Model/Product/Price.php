@@ -113,7 +113,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
     #[\Override]
     public function getFinalPrice($qty, $product)
     {
-        if (is_null($qty) && !is_null($product->getCalculatedFinalPrice())) {
+        if (is_null($qty) && $product->getCalculatedFinalPrice() !== null) {
             return $product->getCalculatedFinalPrice();
         }
 
@@ -720,7 +720,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         }
 
         if (is_null($prices) || !is_array($prices)) {
-            if (!is_null($qty)) {
+            if ($qty !== null) {
                 return 0;
             }
             return [[
@@ -967,7 +967,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         $specialPriceTo,
         $store = null
     ) {
-        if (!is_null($specialPrice) && $specialPrice != false) {
+        if ($specialPrice !== null && $specialPrice != false) {
             if (Mage::app()->getLocale()->isStoreDateInInterval($store, $specialPriceFrom, $specialPriceTo)) {
                 $specialPrice = Mage::app()->getStore()->roundPrice($finalPrice * $specialPrice / 100);
                 $finalPrice = min($finalPrice, $specialPrice);

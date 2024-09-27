@@ -54,7 +54,7 @@ class Mage_Adminhtml_Block_Store_Switcher extends Mage_Adminhtml_Block_Template
         $collection = Mage::getModel('core/website')->getResourceCollection();
 
         $websiteIds = $this->getWebsiteIds();
-        if (!is_null($websiteIds)) {
+        if ($websiteIds !== null) {
             $collection->addIdFilter($this->getWebsiteIds());
         }
 

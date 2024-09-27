@@ -201,7 +201,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
                         }
                     }
                 }
-                if (!is_null($productChildren) && !$hasChildren) {
+                if ($productChildren !== null && !$hasChildren) {
                     continue;
                 }
 
@@ -260,7 +260,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
                 ['in_stock' => 'stock_status']
             );
 
-        if (!is_null($productIds)) {
+        if ($productIds !== null) {
             $select->where('e.entity_id IN(?)', $productIds);
         }
 
@@ -435,7 +435,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
             $this->_searchableAttributes = $attributes;
         }
 
-        if (!is_null($backendType)) {
+        if ($backendType !== null) {
             $attributes = [];
             foreach ($this->_searchableAttributes as $attributeId => $attribute) {
                 if ($attribute->getBackendType() == $backendType) {
@@ -595,7 +595,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
                     [$relation->getChildFieldName()]
                 )
                 ->where("main.{$relation->getParentFieldName()} = ?", $productId);
-            if (!is_null($relation->getWhere())) {
+            if ($relation->getWhere() !== null) {
                 $select->where($relation->getWhere());
             }
 
@@ -670,7 +670,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
         foreach ($indexData as $entityId => $attributeData) {
             foreach ($attributeData as $attributeId => $attributeValue) {
                 $value = $this->_getAttributeValue($attributeId, $attributeValue, $storeId);
-                if (!is_null($value) && $value !== false) {
+                if ($value !== null && $value !== false) {
                     $attributeCode = $this->_getSearchableAttribute($attributeId)->getAttributeCode();
 
                     if (isset($index[$attributeCode])) {

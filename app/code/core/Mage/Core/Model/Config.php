@@ -1759,7 +1759,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     protected function _getResourceConnectionModel($moduleName = null)
     {
         $config = null;
-        if (!is_null($moduleName)) {
+        if ($moduleName !== null) {
             $setupResource = $moduleName . '_setup';
             $config        = $this->getResourceConnectionConfig($setupResource);
         }

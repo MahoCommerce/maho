@@ -87,7 +87,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
     {
         if ($this->_isUpdate()) {
             $product = $this->_getProduct();
-            if (!is_null($product) && $product->getId()) {
+            if ($product !== null && $product->getId()) {
                 $data['attribute_set_id'] = $product->getAttributeSetId();
                 $data['type_id'] = $product->getTypeId();
             }

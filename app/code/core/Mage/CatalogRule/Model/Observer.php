@@ -192,7 +192,7 @@ class Mage_CatalogRule_Model_Observer
             $pId = $product->getId();
 
             $key = $this->_getRulePricesKey([$date, $wId, $gId, $pId]);
-        } elseif (!is_null($storeId) && !is_null($product->getCustomerGroupId())) {
+        } elseif ($storeId !== null && $product->getCustomerGroupId() !== null) {
             $wId = Mage::app()->getStore($storeId)->getWebsiteId();
             $gId = $product->getCustomerGroupId();
             $pId = $product->getId();

@@ -117,7 +117,7 @@ class Mage_Catalog_Model_Api_Resource extends Mage_Api_Model_Resource_Abstract
      */
     public function currentStore($store = null)
     {
-        if (!is_null($store)) {
+        if ($store !== null) {
             try {
                 $storeId = Mage::app()->getStore($store)->getId();
             } catch (Mage_Core_Model_Store_Exception $e) {

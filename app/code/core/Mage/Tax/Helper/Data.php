@@ -531,7 +531,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
             $product->setAppliedRates($appliedRates);
         }
 
-        if (!is_null($includingTax)) {
+        if ($includingTax !== null) {
             if ($priceIncludesTax) {
                 if ($includingTax) {
                     /**

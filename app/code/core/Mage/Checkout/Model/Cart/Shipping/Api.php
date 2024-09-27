@@ -77,7 +77,7 @@ class Mage_Checkout_Model_Cart_Shipping_Api extends Mage_Checkout_Model_Api_Reso
             $ratesResult = [];
             foreach ($groupedRates as $carrierCode => $rates) {
                 $carrierName = $carrierCode;
-                if (!is_null(Mage::getStoreConfig('carriers/' . $carrierCode . '/title'))) {
+                if (Mage::getStoreConfig('carriers/' . $carrierCode . '/title') !== null) {
                     $carrierName = Mage::getStoreConfig('carriers/' . $carrierCode . '/title');
                 }
 

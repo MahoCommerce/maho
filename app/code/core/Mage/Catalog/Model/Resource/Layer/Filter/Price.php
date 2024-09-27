@@ -73,7 +73,7 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
         $collection = $filter->getLayer()->getProductCollection();
         $collection->addPriceData($filter->getCustomerGroupId(), $filter->getWebsiteId());
 
-        if (!is_null($collection->getCatalogPreparedSelect())) {
+        if ($collection->getCatalogPreparedSelect() !== null) {
             $select = clone $collection->getCatalogPreparedSelect();
         } else {
             $select = clone $collection->getSelect();
@@ -301,10 +301,10 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
         $select->columns([
             'min_price_expr' => $this->_getFullPriceExpression($filter, $select)
         ]);
-        if (!is_null($lowerPrice)) {
+        if ($lowerPrice !== null) {
             $select->where("$priceExpression >= " . $this->_getComparingValue($lowerPrice, $filter));
         }
-        if (!is_null($upperPrice)) {
+        if ($upperPrice !== null) {
             $select->where("$priceExpression < " . $this->_getComparingValue($upperPrice, $filter));
         }
         $select->order(new Zend_Db_Expr("$priceExpression ASC"))->limit($limit, $offset);
@@ -326,7 +326,7 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
         $select = $this->_getSelect($filter);
         $priceExpression = $this->_getPriceExpression($filter, $select);
         $select->columns('COUNT(*)')->where("$priceExpression < " . $this->_getComparingValue($price, $filter));
-        if (!is_null($lowerPrice)) {
+        if ($lowerPrice !== null) {
             $select->where("$priceExpression >= " . $this->_getComparingValue($lowerPrice, $filter));
         }
         $offset = $this->_getReadAdapter()->fetchOne($select);
@@ -354,7 +354,7 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
         $priceExpression = $this->_getPriceExpression($filter, $pricesSelect);
 
         $select->columns('COUNT(*)')->where("$priceExpression > " . $this->_getComparingValue($price, $filter, false));
-        if (!is_null($upperPrice)) {
+        if ($upperPrice !== null) {
             $select->where("$priceExpression < " . $this->_getComparingValue($upperPrice, $filter));
         }
         $offset = $this->_getReadAdapter()->fetchOne($select);
@@ -367,7 +367,7 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
                 'min_price_expr' => $this->_getFullPriceExpression($filter, $pricesSelect)
             ])
             ->where("$priceExpression >= " . $this->_getComparingValue($price, $filter));
-        if (!is_null($upperPrice)) {
+        if ($upperPrice !== null) {
             $pricesSelect->where("$priceExpression < " . $this->_getComparingValue($upperPrice, $filter));
         }
         $pricesSelect->order(new Zend_Db_Expr("$priceExpression DESC"))->limit($rightIndex - $offset + 1, $offset - 1);

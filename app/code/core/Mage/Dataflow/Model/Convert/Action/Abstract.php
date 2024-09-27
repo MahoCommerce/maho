@@ -151,7 +151,7 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
      */
     public function getContainer($name = null)
     {
-        if (!is_null($name)) {
+        if ($name !== null) {
             return $this->getProfile()->getContainer($name);
         }
 

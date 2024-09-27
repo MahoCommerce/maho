@@ -28,7 +28,7 @@ class Mage_Downloadable_Model_Product_Price extends Mage_Catalog_Model_Product_T
     #[\Override]
     public function getFinalPrice($qty, $product)
     {
-        if (is_null($qty) && !is_null($product->getCalculatedFinalPrice())) {
+        if (is_null($qty) && $product->getCalculatedFinalPrice() !== null) {
             return $product->getCalculatedFinalPrice();
         }
 

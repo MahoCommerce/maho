@@ -80,7 +80,7 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
                 $errors = true;
             }
 
-            if ($errors === false && !is_null($order->getCustomerId())) {
+            if ($errors === false && $order->getCustomerId() !== null) {
                 $errorMessage = 'Please log in to view your order details.';
                 $errors = true;
             }
@@ -92,7 +92,7 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
         } elseif ($cookieModel->get($this->_cookieName)) {
             $cookie = $cookieModel->get($this->_cookieName);
             $cookieOrder = $this->_loadOrderByCookie($cookie);
-            if (!is_null($cookieOrder)) {
+            if ($cookieOrder !== null) {
                 if (is_null($cookieOrder->getCustomerId())) {
                     $cookieModel->renew($this->_cookieName, $this->_lifeTime, '/');
                     $order = $cookieOrder;
@@ -153,7 +153,7 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
      */
     protected function _loadOrderByCookie($cookie = null)
     {
-        if (!is_null($cookie)) {
+        if ($cookie !== null) {
             $cookieData = explode(':', base64_decode($cookie));
             $protectCode = $cookieData[0] ?? null;
             $incrementId = $cookieData[1] ?? null;

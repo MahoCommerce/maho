@@ -103,7 +103,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Grouped extends Mage_Ca
             'status' => $stockStatusExpr
         ]);
 
-        if (!is_null($entityIds)) {
+        if ($entityIds !== null) {
             $select->where('e.entity_id IN(?)', $entityIds);
         }
 

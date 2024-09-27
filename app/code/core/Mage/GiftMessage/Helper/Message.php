@@ -285,7 +285,7 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
     public function getGiftMessage($messageId = null)
     {
         $message = Mage::getModel('giftmessage/message');
-        if (!is_null($messageId)) {
+        if ($messageId !== null) {
             $message->load($messageId);
         }
 

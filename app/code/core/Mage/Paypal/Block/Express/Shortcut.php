@@ -85,7 +85,7 @@ class Mage_Paypal_Block_Express_Shortcut extends Mage_Core_Block_Template
         if ($isInCatalog) {
             /** @var Mage_Catalog_Model_Product $currentProduct */
             $currentProduct = Mage::registry('current_product');
-            if (!is_null($currentProduct)) {
+            if ($currentProduct !== null) {
                 $price = (float)$currentProduct->getFinalPrice();
                 $typeInstance = $currentProduct->getTypeInstance();
                 if (empty($price) && !$currentProduct->isSuper() && !$typeInstance->canConfigure($currentProduct)) {

@@ -170,7 +170,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
         $this->cleanPasswordsValidationData();
 
-        if (!is_null($this->getIsActive())) {
+        if ($this->getIsActive() !== null) {
             $data['is_active'] = (int) $this->getIsActive();
         }
 

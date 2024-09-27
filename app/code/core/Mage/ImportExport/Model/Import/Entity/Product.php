@@ -1457,18 +1457,18 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                 // 6. Attributes phase
                 $rowStore     = self::SCOPE_STORE == $rowScope ? $this->_storeCodeToId[$rowData[self::COL_STORE]] : 0;
                 $productType  = $rowData[self::COL_TYPE] ?? null;
-                if (!is_null($productType)) {
+                if ($productType !== null) {
                     $previousType = $productType;
                 }
-                if (isset($rowData[self::COL_ATTR_SET]) && !is_null($rowData[self::COL_ATTR_SET])) {
+                if (isset($rowData[self::COL_ATTR_SET]) && $rowData[self::COL_ATTR_SET] !== null) {
                     $previousAttributeSet = $rowData[self::COL_ATTR_SET];
                 }
                 if (self::SCOPE_NULL == $rowScope) {
                     // for multiselect attributes only
-                    if (!is_null($previousAttributeSet)) {
+                    if ($previousAttributeSet !== null) {
                         $rowData[self::COL_ATTR_SET] = $previousAttributeSet;
                     }
-                    if (is_null($productType) && !is_null($previousType)) {
+                    if (is_null($productType) && $previousType !== null) {
                         $productType = $previousType;
                     }
                     if (is_null($productType)) {

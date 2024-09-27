@@ -333,7 +333,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
             }
             return '#';
         }
-        if (!is_null($tab->getUrl())) {
+        if ($tab->getUrl() !== null) {
             return $tab->getUrl();
         }
         return '#';

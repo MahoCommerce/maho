@@ -48,7 +48,7 @@ class Mage_CatalogInventory_Block_Adminhtml_Form_Field_Customergroup extends Mag
                 $this->_customerGroups[$item->getId()] = $item->getCustomerGroupCode();
             }
         }
-        if (!is_null($groupId)) {
+        if ($groupId !== null) {
             return $this->_customerGroups[$groupId] ?? null;
         }
         return $this->_customerGroups;

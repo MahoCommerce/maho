@@ -289,7 +289,7 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
                     );
                     $collection->addFieldToFilter('type_id', $type);
                     $this->_walkCollection($collection, $store, [], $priceAttributeCodes);
-                    if (!is_null($products) && !$this->getRetreiver($type)->getTypeInstance()->isComposite()) {
+                    if ($products !== null && !$this->getRetreiver($type)->getTypeInstance()->isComposite()) {
                         $this->_walkCollectionRelation($collection, $ws, [], $priceAttributeCodes);
                     }
                 }
@@ -305,7 +305,7 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
                     $collection->addFieldToFilter('type_id', $type);
 
                     $this->_walkCollection($collection, $store, $attributeCodes);
-                    if (!is_null($products) && !$this->getRetreiver($type)->getTypeInstance()->isComposite()) {
+                    if ($products !== null && !$this->getRetreiver($type)->getTypeInstance()->isComposite()) {
                         $this->_walkCollectionRelation($collection, $store, $attributeCodes);
                     }
                 }

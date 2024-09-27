@@ -73,7 +73,7 @@ class Mage_Customer_Model_Customer_Api extends Mage_Customer_Model_Api_Resource
             $this->_fault('not_exists');
         }
 
-        if (!is_null($attributes) && !is_array($attributes)) {
+        if ($attributes !== null && !is_array($attributes)) {
             $attributes = [$attributes];
         }
 

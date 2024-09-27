@@ -458,7 +458,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
      */
     public function getCustomerWishlist($cacheReload = false)
     {
-        if (!is_null($this->_wishlist) && !$cacheReload) {
+        if ($this->_wishlist !== null && !$cacheReload) {
             return $this->_wishlist;
         }
 
@@ -483,7 +483,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
      */
     public function getCustomerCart()
     {
-        if (!is_null($this->_cart)) {
+        if ($this->_cart !== null) {
             return $this->_cart;
         }
 
@@ -508,7 +508,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
      */
     public function getCustomerCompareList()
     {
-        if (!is_null($this->_compareList)) {
+        if ($this->_compareList !== null) {
             return $this->_compareList;
         }
 
