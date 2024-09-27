@@ -148,7 +148,7 @@
         }
 
         if (this._copyElement.checked) {
-            if (this.copyShippingToBilling_allowScrollTo && Modernizr.mq && Modernizr.mq("only screen and (max-width: 767px)")) {
+            if (this.copyShippingToBilling_allowScrollTo && window.matchMedia("only screen and (max-width: 767px)").matches) {
                 $('shipping-address').scrollTo();
             }
         } else {
