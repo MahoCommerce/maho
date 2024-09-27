@@ -39,6 +39,26 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
     }
 
     /**
+     *
+     *
+     * @return Mage_Core_Block_Abstract
+     */
+    #[\Override]
+    protected function _prepareLayout()
+    {
+        parent::_prepareLayout();
+
+        // If entity type has a scoped table, change renderer to allow "Use Default Value" checkbox
+        if (!Mage::app()->isSingleStoreMode() && $this->getAttributeObject()->getResource()->hasScopeTable()) {
+            Varien_Data_Form::setFieldsetElementRenderer(
+                $this->getLayout()->createBlock('eav/adminhtml_attribute_edit_renderer_fieldset_element')
+            );
+        }
+
+        return $this;
+    }
+
+    /**
      * Preparing default form elements for editing attribute
      *
      * @inheritDoc
@@ -53,6 +73,8 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
             'action' => $this->getData('action'),
             'method' => 'post'
         ]);
+
+        $form->setDataObject($attributeObject);
 
         $fieldset = $form->addFieldset(
             'base_fieldset',
@@ -167,8 +189,21 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
     protected function _initFormValues()
     {
         Mage::dispatchEvent('adminhtml_block_eav_attribute_edit_form_init', ['form' => $this->getForm()]);
-        $this->getForm()
-            ->addValues($this->getAttributeObject()->getData());
+
+        $attributeObject = $this->getAttributeObject();
+        $data = $attributeObject->getData();
+
+        // If website specified, unprefix relevant fields before adding to form
+        if ($attributeObject->getWebsite() && (int)$attributeObject->getWebsite()->getId()) {
+            foreach ($attributeObject->getResource()->getScopeFields($attributeObject) as $field) {
+                if (array_key_exists('scope_' . $field, $data)) {
+                    $data[$field] = $data['scope_' . $field];
+                    unset($data['scope_' . $field]);
+                }
+            }
+        }
+
+        $this->getForm()->addValues($data);
         return parent::_initFormValues();
     }
 
@@ -181,9 +216,12 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
     protected function _beforeToHtml()
     {
         parent::_beforeToHtml();
+
+        $form = $this->getForm();
         $attributeObject = $this->getAttributeObject();
+
+        // Disable any fields in config global/eav_attributes/$entity_type/$field/locked_fields
         if ($attributeObject->getId()) {
-            $form = $this->getForm();
             $disableAttributeFields = Mage::helper('eav')
                 ->getAttributeLockedFields($attributeObject->getEntityType()->getEntityTypeCode());
             if (isset($disableAttributeFields[$attributeObject->getAttributeCode()])) {
@@ -195,6 +233,28 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
                 }
             }
         }
+
+        // Set scope value and disable global fields if website selected
+        if ($attributeObject->getResource()->hasScopeTable()) {
+            $websiteId = $attributeObject->getWebsite() ? (int)$attributeObject->getWebsite()->getId() : 0;
+            $scopeFields = $attributeObject->getResource()->getScopeFields($attributeObject);
+
+            /** @var Varien_Data_Form_Element_Fieldset $fieldset */
+            $fieldset = $this->getForm()->getElement('base_fieldset');
+            foreach ($fieldset->getElements() as $elm) {
+                $field = $elm->getId();
+                if (str_starts_with($field, 'default_value')) {
+                    $field = 'default_value';
+                }
+                if (in_array($field, $scopeFields)) {
+                    $elm->setScope(Mage_Eav_Model_Entity_Attribute::SCOPE_WEBSITE);
+                } else {
+                    $elm->setScope(Mage_Eav_Model_Entity_Attribute::SCOPE_GLOBAL);
+                    $elm->setDisabled($elm->getDisabled() || $websiteId);
+                }
+            }
+        }
+
         return $this;
     }
 

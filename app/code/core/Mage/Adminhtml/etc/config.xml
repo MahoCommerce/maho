@@ -111,19 +111,11 @@
                     </bind_locale>
                 </observers>
             </admin_system_config_changed_section_admin>
-            <controller_action_layout_generate_blocks_after>
-                <observers>
-                    <eav>
-                        <class>adminhtml/customer_observer</class>
-                        <method>customerAttributeEditGenerateBlocksAfter</method>
-                    </eav>
-                </observers>
-            </controller_action_layout_generate_blocks_after>
             <adminhtml_customer_attribute_edit_prepare_form>
                 <observers>
                     <eav>
                         <class>adminhtml/customer_observer</class>
-                        <method>customerAttributeEditPrepareForm</method>
+                        <method>attributeEditPrepareForm</method>
                     </eav>
                 </observers>
             </adminhtml_customer_attribute_edit_prepare_form>
@@ -131,7 +123,7 @@
                 <observers>
                     <eav>
                         <class>adminhtml/customer_observer</class>
-                        <method>customerAttributeEditPrepareSave</method>
+                        <method>attributeEditPrepareSave</method>
                     </eav>
                 </observers>
             </adminhtml_customer_attribute_edit_prepare_save>
@@ -139,7 +131,7 @@
                 <observers>
                     <eav>
                         <class>adminhtml/customer_observer</class>
-                        <method>customerAddressAttributeEditPrepareForm</method>
+                        <method>attributeEditPrepareForm</method>
                     </eav>
                 </observers>
             </adminhtml_customer_address_attribute_edit_prepare_form>
@@ -147,7 +139,7 @@
                 <observers>
                     <eav>
                         <class>adminhtml/customer_observer</class>
-                        <method>customerAddressAttributeEditPrepareSave</method>
+                        <method>attributeEditPrepareSave</method>
                     </eav>
                 </observers>
             </adminhtml_customer_address_attribute_edit_prepare_save>

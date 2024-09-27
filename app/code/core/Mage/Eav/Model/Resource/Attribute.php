@@ -69,9 +69,7 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
             $adapter    = $this->_getReadAdapter();
             $columns    = [];
             $scopeTable = $this->_getEavWebsiteTable();
-            $describe   = $adapter->describeTable($scopeTable);
-            unset($describe['attribute_id']);
-            foreach (array_keys($describe) as $columnName) {
+            foreach ($this->getScopeFields($object) as $columnName) {
                 $columns['scope_' . $columnName] = $columnName;
             }
             $conditionSql = $adapter->quoteInto(
@@ -127,7 +125,6 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
         $websiteId = (int)$object->getWebsite()->getId();
         if ($websiteId) {
             $table      = $this->_getEavWebsiteTable();
-            $describe   = $this->_getReadAdapter()->describeTable($table);
             $data       = [];
             if (!$object->getScopeWebsiteId() || $object->getScopeWebsiteId() != $websiteId) {
                 $data = $this->getScopeValues($object);
@@ -135,11 +132,9 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
 
             $data['attribute_id']   = (int)$object->getId();
             $data['website_id']     = (int)$websiteId;
-            unset($describe['attribute_id']);
-            unset($describe['website_id']);
 
             $updateColumns = [];
-            foreach (array_keys($describe) as $columnName) {
+            foreach ($this->getScopeFields($object) as $columnName) {
                 $data[$columnName] = $object->getData('scope_' . $columnName);
                 $updateColumns[]   = $columnName;
             }
@@ -148,6 +143,38 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
         }
 
         return parent::_afterSave($object);
+    }
+
+    /**
+     * Check if we have a scope table for attribute
+     *
+     * @return bool
+     */
+    #[\Override]
+    public function hasScopeTable()
+    {
+        return !is_null($this->_getEavWebsiteTable());
+    }
+
+    /**
+     * Return scoped fields for attribute
+     *
+     * @return array
+     */
+    public function getScopeFields(Mage_Eav_Model_Attribute $object)
+    {
+        if (!$this->hasScopeTable()) {
+            return [];
+        }
+
+        $adapter = $this->_getReadAdapter();
+        $scopeTable = $this->_getEavWebsiteTable();
+        $describe = $adapter->describeTable($scopeTable);
+
+        unset($describe['attribute_id']);
+        unset($describe['website_id']);
+
+        return array_keys($describe);
     }
 
     /**

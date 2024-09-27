@@ -551,4 +551,14 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
 
         return $adapter->fetchCol($select);
     }
+
+    /**
+     * Check if we have a scope table for attribute
+     *
+     * @return bool
+     */
+    public function hasScopeTable()
+    {
+        return false;
+    }
 }

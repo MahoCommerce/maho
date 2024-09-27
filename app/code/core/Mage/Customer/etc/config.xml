@@ -446,6 +446,24 @@
                 </observers>
             </customer_customer_authenticated>
         </events>
+        <eav_attributes>
+            <customer>
+                <middlename>
+                    <code>middlename</code>
+                    <locked_fields>
+                        <is_required/>
+                    </locked_fields>
+                </middlename>
+            </customer>
+            <customer_address>
+                <middlename>
+                    <code>middlename</code>
+                    <locked_fields>
+                        <is_required/>
+                    </locked_fields>
+                </middlename>
+            </customer_address>
+        </eav_attributes>
     </global>
     <adminhtml>
         <translate>

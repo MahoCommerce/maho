@@ -62,6 +62,9 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
         $model = Mage::getModel($this->_entityType->getAttributeModel())
                ->setEntityTypeId($this->_entityType->getEntityTypeId());
         if ($id) {
+            if ($websiteId = $this->getRequest()->getParam('website')) {
+                $model->setWebsite($websiteId);
+            }
             $model->load($id);
 
             if (!$model->getId()) {
@@ -84,7 +87,17 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
 
         // set entered data if was error when we do save
         $data = Mage::getSingleton('adminhtml/session')->getAttributeData(true);
-        if (! empty($data)) {
+
+        if (!empty($data)) {
+            // If website specified, prefix relevant fields in saved data
+            if ($model->getWebsite() && (int)$model->getWebsite()->getId()) {
+                foreach ($model->getResource()->getScopeFields($model) as $field) {
+                    if (array_key_exists($field, $data)) {
+                        $data['scope_' . $field] = $data[$field];
+                        unset($data[$field]);
+                    }
+                }
+            }
             $model->addData($data);
         }
 
@@ -98,6 +111,16 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
                     : Mage::helper('eav')->__('New Attribute');
 
         $this->_addBreadcrumb($item, $item);
+
+        // Add website switcher if editing existing attribute and we have a scope table
+        if (!Mage::app()->isSingleStoreMode()) {
+            if ($id && $model->getResource()->hasScopeTable()) {
+                $this->_addLeft(
+                    $this->getLayout()->createBlock('adminhtml/website_switcher')
+                         ->setDefaultWebsiteName($this->__('Default Values'))
+                );
+            }
+        }
 
         $this->_addLeft($this->getLayout()->createBlock('eav/adminhtml_attribute_edit_tabs'))
              ->_addContent($this->getLayout()->createBlock('eav/adminhtml_attribute_edit'));
@@ -143,7 +166,7 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
     protected function _filterPostData($data)
     {
         if ($data) {
-            //labels
+            // labels
             $data['frontend_label'] = (array) $data['frontend_label'];
             foreach ($data['frontend_label'] as & $value) {
                 if ($value) {
@@ -177,7 +200,7 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
 
             $id = $this->getRequest()->getParam('attribute_id');
 
-            //validate attribute_code
+            // validate attribute_code
             if (isset($data['attribute_code'])) {
                 $validatorAttrCode = new Zend_Validate_Regex(['pattern' => '/^(?!event$)[a-z][a-z_0-9]{1,254}$/']);
                 if (!$validatorAttrCode->isValid($data['attribute_code'])) {
@@ -190,7 +213,7 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
             }
 
 
-            //validate frontend_input
+            // validate frontend_input
             if (isset($data['frontend_input'])) {
                 /** @var Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator $validatorInputType */
                 $validatorInputType = Mage::getModel('eav/adminhtml_system_config_source_inputtype_validator');
@@ -204,6 +227,9 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
             }
 
             if ($id) {
+                if ($websiteId = $this->getRequest()->getParam('website')) {
+                    $model->setWebsite($websiteId);
+                }
                 $model->load($id);
 
                 if (!$model->getId()) {
@@ -249,20 +275,33 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
                 $data['entity_type_id'] = $model->getEntityTypeId();
             }
 
-            //filter
+            // filter
             $data = $this->_filterPostData($data);
+
+            if ($model->getWebsite() && (int)$model->getWebsite()->getId()) {
+                // Check "Use Default Value" checkboxes values
+                if ($useDefaults = $this->getRequest()->getPost('use_default')) {
+                    foreach ($useDefaults as $field) {
+                        $data[$field] = null;
+                    }
+                    if (in_array($defaultValueField, $useDefaults)) {
+                        $data['default_value'] = null;
+                    }
+                }
+                // Prefix relevant fields in POST data
+                foreach ($model->getResource()->getScopeFields($model) as $field) {
+                    if (array_key_exists($field, $data)) {
+                        $data['scope_' . $field] = $data[$field];
+                        unset($data[$field]);
+                    }
+                }
+            }
+
             $model->addData($data);
 
             if (!$id) {
                 $model->setEntityTypeId($this->_entityType->getEntityTypeId());
                 $model->setIsUserDefined(1);
-            }
-
-
-            if ($this->getRequest()->getParam('set') && $this->getRequest()->getParam('group')) {
-                // For creating attribute on page we need specify attribute set and group
-                $model->setAttributeSetId($this->getRequest()->getParam('set'));
-                $model->setAttributeGroupId($this->getRequest()->getParam('group'));
             }
 
             Mage::dispatchEvent(
