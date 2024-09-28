@@ -8,7 +8,7 @@ on:
 
 jobs:
   rector:
-    name: Validation
+    name: Rector
     runs-on: [ubuntu-latest]
 
     steps:
