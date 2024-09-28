@@ -63,8 +63,9 @@ class Mage_Adminhtml_Model_Customer_Observer
         $data = $request->getPost();
         if ($data) {
             if (!isset($data['use_in_forms'])) {
-                $attribute->setData('used_in_forms', []);
+                $data['use_in_forms'] = [];
             }
+            $attribute->setData('used_in_forms', $data['use_in_forms']);
         }
 
         return $this;
