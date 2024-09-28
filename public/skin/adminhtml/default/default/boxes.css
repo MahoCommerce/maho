@@ -1069,7 +1069,7 @@ ul.item-options li { padding-left:.7em; }
 .rule-param-remove              { font-weight:normal; color:red; text-decoration:none; }
 .rule-param-remove:hover        { font-weight:normal; color:blue; text-decoration:none; }
 .rule-chooser                   { border:solid 1px #CCC; margin:5px; padding:5px; display:none; }
-.rule-param-wait                { padding-left:20px; background-image:url(images/rule-ajax-loader.gif); background-repeat:no-repeat; background-position:0 50%; }
+.rule-param-wait                { padding-left:20px; background-image:url(images/loading.svg); background-repeat:no-repeat; background-position:0 50%; }
 
 /* Product Customer Defined options */
 .custom-options  .box {padding:0 1.5em; }

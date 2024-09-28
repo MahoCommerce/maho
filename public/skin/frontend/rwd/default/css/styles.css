@@ -3957,7 +3957,7 @@ p.product-name a:hover {
   z-index: 2;
 }
 .products-grid .product-image:after {
-  background-image: url("../images/opc-ajax-loader.gif");
+  background-image: url("../images/loading.svg");
   background-repeat: no-repeat;
   background-position: center;
   z-index: 3;
@@ -4739,7 +4739,7 @@ p.product-name a:hover {
   z-index: 2;
 }
 .product-image-gallery:after {
-  background-image: url("../images/opc-ajax-loader.gif");
+  background-image: url("../images/loading.svg");
   background-repeat: no-repeat;
   background-position: center;
   z-index: 3;
@@ -8894,7 +8894,7 @@ div.paypal-logo span > img {
   z-index: 2;
 }
 .header-minicart .minicart-wrapper:after {
-  background-image: url("../images/opc-ajax-loader.gif");
+  background-image: url("../images/loading.svg");
   background-repeat: no-repeat;
   background-position: center;
   z-index: 3;
