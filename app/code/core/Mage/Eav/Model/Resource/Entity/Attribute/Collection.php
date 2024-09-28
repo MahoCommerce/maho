@@ -408,6 +408,24 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
     }
 
     /**
+     * Specify collection attribute codes not in filter
+     *
+     * @param string | array $code
+     * @return $this
+     */
+    public function setNotCodeFilter($code)
+    {
+        if (empty($code)) {
+            return $this;
+        }
+        if (!is_array($code)) {
+            $code = [$code];
+        }
+
+        return $this->addFieldToFilter('attribute_code', ['nin' => $code]);
+    }
+
+    /**
      * Add store label to attribute by specified store id
      *
      * @param int $storeId

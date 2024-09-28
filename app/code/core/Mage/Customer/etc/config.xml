@@ -448,6 +448,70 @@
         </events>
         <eav_attributes>
             <customer>
+                <rp_token_created_at>
+                    <code>rp_token_created_at</code>
+                    <hidden>1</hidden>
+                </rp_token_created_at>
+                <rp_token>
+                    <code>rp_token</code>
+                    <hidden>1</hidden>
+                </rp_token>
+                <rp_customer_id>
+                    <code>rp_customer_id</code>
+                    <hidden>1</hidden>
+                </rp_customer_id>
+                <reward_warning_notification>
+                    <code>reward_warning_notification</code>
+                    <hidden>1</hidden>
+                </reward_warning_notification>
+                <reward_update_notification>
+                    <code>reward_update_notification</code>
+                    <hidden>1</hidden>
+                </reward_update_notification>
+                <password_hash>
+                    <code>password_hash</code>
+                    <hidden>1</hidden>
+                </password_hash>
+                <website_id>
+                    <code>website_id</code>
+                    <hidden>1</hidden>
+                </website_id>
+                <store_id>
+                    <code>store_id</code>
+                    <hidden>1</hidden>
+                </store_id>
+                <created_at>
+                    <code>created_at</code>
+                    <hidden>1</hidden>
+                </created_at>
+                <created_in>
+                    <code>created_in</code>
+                    <hidden>1</hidden>
+                </created_in>
+                <default_billing>
+                    <code>default_billing</code>
+                    <hidden>1</hidden>
+                </default_billing>
+                <default_shipping>
+                    <code>default_shipping</code>
+                    <hidden>1</hidden>
+                </default_shipping>
+                <disable_auto_group_change>
+                    <code>disable_auto_group_change</code>
+                    <hidden>1</hidden>
+                </disable_auto_group_change>
+                <group_id>
+                    <code>group_id</code>
+                    <hidden>1</hidden>
+                </group_id>
+                <confirmation>
+                    <code>confirmation</code>
+                    <hidden>1</hidden>
+                </confirmation>
+                <password_created_at>
+                    <code>password_created_at</code>
+                    <hidden>1</hidden>
+                </password_created_at>
                 <middlename>
                     <code>middlename</code>
                     <locked_fields>

@@ -24,6 +24,8 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
 
     protected $_moduleName = 'Mage_Eav';
 
+    protected $_attributesHidden = [];
+
     protected $_attributesLockedFields = [];
 
     protected $_entityTypeFrontendClasses = [];
@@ -100,6 +102,33 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Retrieve hidden attributes for entity type
+     *
+     * @param string $entityTypeCode
+     * @return array
+     */
+    public function getHiddenAttributes($entityTypeCode)
+    {
+        if (!$entityTypeCode) {
+            return [];
+        }
+        if (isset($this->_attributesHidden[$entityTypeCode])) {
+            return $this->_attributesHidden[$entityTypeCode];
+        }
+        $_data = Mage::app()->getConfig()->getNode('global/eav_attributes/' . $entityTypeCode);
+        if ($_data) {
+            $this->_attributesHidden[$entityTypeCode] = [];
+            foreach ($_data->children() as $attribute) {
+                if ($attribute->is('hidden')) {
+                    $this->_attributesHidden[$entityTypeCode][] = $attribute->code;
+                }
+            }
+            return $this->_attributesHidden[$entityTypeCode];
+        }
+        return [];
+    }
+
+    /**
      * Retrieve attributes locked fields to edit
      *
      * @param string $entityTypeCode
@@ -115,9 +144,12 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
         }
         $_data = Mage::app()->getConfig()->getNode('global/eav_attributes/' . $entityTypeCode);
         if ($_data) {
+            $this->_attributesLockedFields[$entityTypeCode] = [];
             foreach ($_data->children() as $attribute) {
-                $this->_attributesLockedFields[$entityTypeCode][(string)$attribute->code] =
-                    array_keys($attribute->locked_fields->asArray());
+                if (isset($attribute->locked_fields)) {
+                    $this->_attributesLockedFields[$entityTypeCode][(string)$attribute->code] =
+                        array_keys($attribute->locked_fields->asArray());
+                }
             }
             return $this->_attributesLockedFields[$entityTypeCode];
         }

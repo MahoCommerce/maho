@@ -23,10 +23,14 @@ class Mage_Eav_Block_Adminhtml_Attribute_Grid extends Mage_Eav_Block_Adminhtml_A
     #[\Override]
     protected function _prepareCollection()
     {
-        if ($entity_type = Mage::registry('entity_type')) {
+        if ($entityType = Mage::registry('entity_type')) {
+            $hiddenAttributes = Mage::helper('eav')->getHiddenAttributes($entityType->getEntityTypeCode());
+
             /** @var Mage_Eav_Model_Resource_Entity_Attribute_Collection $collection */
-            $collection = Mage::getResourceModel($entity_type->getEntityAttributeCollection());
-            $collection->setEntityTypeFilter($entity_type->getEntityTypeId());
+            $collection = Mage::getResourceModel($entityType->getEntityAttributeCollection())
+                        ->setEntityTypeFilter($entityType->getEntityTypeId())
+                        ->setNotCodeFilter($hiddenAttributes);
+
             $this->setCollection($collection);
         }
         return parent::_prepareCollection();
