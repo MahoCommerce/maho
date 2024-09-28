@@ -27,9 +27,10 @@ class Mage_Eav_Block_Adminhtml_Attribute_Grid extends Mage_Eav_Block_Adminhtml_A
             $hiddenAttributes = Mage::helper('eav')->getHiddenAttributes($entityType->getEntityTypeCode());
 
             /** @var Mage_Eav_Model_Resource_Entity_Attribute_Collection $collection */
-            $collection = Mage::getResourceModel($entityType->getEntityAttributeCollection())
-                        ->setEntityTypeFilter($entityType->getEntityTypeId())
-                        ->setNotCodeFilter($hiddenAttributes);
+            $collection = Mage::getResourceModel($entityType->getEntityAttributeCollection());
+
+            $collection->setEntityTypeFilter($entityType->getEntityTypeId())
+                       ->setNotCodeFilter($hiddenAttributes);
 
             $this->setCollection($collection);
         }
