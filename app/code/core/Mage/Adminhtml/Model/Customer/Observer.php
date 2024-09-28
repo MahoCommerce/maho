@@ -28,6 +28,7 @@ class Mage_Adminhtml_Model_Customer_Observer
     {
         /** @var Mage_Customer_Model_Attribute $attribute */
         $attribute = $observer->getAttribute();
+        $attributeTypeCode = $attribute->getEntityType()->getEntityTypeCode();
 
         /** @var Varien_Data_Form $form */
         $form = $observer->getForm();
@@ -39,7 +40,7 @@ class Mage_Adminhtml_Model_Customer_Observer
             'name'   => 'use_in_forms',
             'label'  => Mage::helper('adminhtml')->__('Use in Forms'),
             'title'  => Mage::helper('adminhtml')->__('Use in Forms'),
-            'values' => Mage::getModel('customer/config_forms')->toOptionArray(),
+            'values' => Mage::getModel('eav/config_source_form')->toOptionArray($attributeTypeCode),
             'value'  => Mage::getResourceModel('customer/form_attribute')->getFormTypesByAttribute($attribute)
         ]);
 

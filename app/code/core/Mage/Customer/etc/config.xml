@@ -446,6 +446,36 @@
                 </observers>
             </customer_customer_authenticated>
         </events>
+        <eav_forms>
+            <customer>
+                <adminhtml_checkout translate="label" module="customer">
+                    <label>Adminhtml Checkout</label>
+                </adminhtml_checkout>
+                <adminhtml_customer translate="label" module="customer">
+                    <label>Adminhtml Customer</label>
+                </adminhtml_customer>
+                <checkout_register translate="label" module="customer">
+                    <label>Checkout Register</label>
+                </checkout_register>
+                <customer_account_create translate="label" module="customer">
+                    <label>Customer Account Create</label>
+                </customer_account_create>
+                <customer_account_edit translate="label" module="customer">
+                    <label>Customer Account Edit</label>
+                </customer_account_edit>
+            </customer>
+            <customer_address>
+                <adminhtml_customer_address translate="label" module="customer">
+                    <label>Adminhtml Customer Address</label>
+                </adminhtml_customer_address>
+                <customer_address_edit translate="label" module="customer">
+                    <label>Customer Address Edit</label>
+                </customer_address_edit>
+                <customer_register_address translate="label" module="customer">
+                    <label>Customer Register Address</label>
+                </customer_register_address>
+            </customer_address>
+        </eav_forms>
         <eav_attributes>
             <customer>
                 <rp_token_created_at>
