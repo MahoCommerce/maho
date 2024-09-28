@@ -201,7 +201,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
             if ($productViewed->getAttributeText('manufacturer')) {
                 $_item['item_brand'] = $productViewed->getAttributeText('manufacturer');
             }
-            array_push($eventData['items'], $_item);
+            $eventData['items'][] = $_item;
             $result[] = ['view_item', $eventData];
         } elseif ($moduleName == 'catalog' && $controllerName == 'category') {
             // Log this event when the user has been presented with a list of items of a certain category.
@@ -238,7 +238,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
                 if ($productViewed->getCategory()->getName()) {
                     $_item['item_category'] = $productViewed->getCategory()->getName();
                 }
-                array_push($eventData['items'], $_item);
+                $eventData['items'][] = $_item;
                 $index++;
                 $eventData['value'] += $productViewed->getFinalPrice();
             }
@@ -271,7 +271,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
                 if ($itemCategory) {
                     $_item['item_category'] = $itemCategory;
                 }
-                array_push($eventData['items'], $_item);
+                $eventData['items'][] = $_item;
                 $eventData['value'] += $_product->getFinalPrice() * $productInCart->getQty();
             }
             $eventData['value'] = $helper->formatPrice($eventData['value']);
@@ -303,7 +303,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
                     if ($itemCategory) {
                         $_item['item_category'] = $itemCategory;
                     }
-                    array_push($eventData['items'], $_item);
+                    $eventData['items'][] = $_item;
                     $eventData['value'] += $_product->getFinalPrice();
                 }
                 $eventData['value'] = $helper->formatPrice($eventData['value']);
@@ -349,7 +349,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
                     if ($itemCategory) {
                         $_item['item_category'] = $itemCategory;
                     }
-                    array_push($orderData['items'], $_item);
+                    $orderData['items'][] = $_item;
                 }
                 $result[] = ['purchase', $orderData];
             }

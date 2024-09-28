@@ -15,13 +15,13 @@
 <meta http-equiv="Content-Type" content="<?= $this->getContentType() ?>"/>
 <meta name="robots" content="noindex, nofollow"/>
 <title><?= htmlspecialchars(html_entity_decode($this->getTitle())) ?></title>
-<link rel="icon" href="<?= $this->getSkinUrl('favicon.ico') ?>" type="image/x-icon"/>
+<link rel="icon" type="image/svg+xml" href="<?= $this->getSkinUrl('images/favicon.svg') ?>" sizes="any">
+<link rel="icon" type="image/png" href="<?= $this->getSkinUrl('images/favicon.png') ?>">
 
 <script type="text/javascript">
     var BASE_URL = '<?= $this->getUrl('*') ?>';
     var SKIN_URL = '<?= $this->jsQuoteEscape($this->getSkinUrl()) ?>';
     var FORM_KEY = '<?= $this->getFormKey() ?>';
-    <?php # BC: cast to INT in case of non-existing method getLoadingTimeout() in 3rd-party code?>
     var LOADING_TIMEOUT = <?= (int)$this->getLoadingTimeout() ?>;
 </script>
 

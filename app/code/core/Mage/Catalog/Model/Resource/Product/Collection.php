@@ -307,7 +307,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
 
     /**
      * Retrieve is flat enabled flag
-     * Return always false if magento run admin
+     * Return always false in admin context
      *
      * @return bool
      */

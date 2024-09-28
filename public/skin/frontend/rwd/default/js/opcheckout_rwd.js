@@ -23,7 +23,7 @@ Checkout.prototype.gotoSection = function (section, reloadProgressBlock) {
     this.accordion.openSection('opc-' + section);
 
     // Scroll viewport to top of checkout steps for smaller viewports
-    if (Modernizr.mq('(max-width: ' + bp.xsmall + 'px)')) {
+    if (window.matchMedia('(max-width: ' + bp.xsmall + 'px)').matches) {
         $j('html,body').animate({scrollTop: $j('#checkoutSteps').offset().top}, 800);
     }
 

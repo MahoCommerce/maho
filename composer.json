@@ -8,7 +8,7 @@
     ],
     "type": "maho-source",
     "require": {
-        "php": ">=8.2 <8.5",
+        "php": ">=8.2",
         "ext-ctype": "*",
         "ext-curl": "*",
         "ext-dom": "*",
@@ -85,7 +85,6 @@
         },
         "platform": {
             "php": "8.2"
-        },
-        "sort-packages": true
+        }
     }
 }

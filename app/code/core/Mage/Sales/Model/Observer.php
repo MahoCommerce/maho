@@ -429,7 +429,7 @@ class Mage_Sales_Model_Observer
 
         $configAddressType = Mage::helper('customer/address')->getTaxCalculationAddressType($storeId);
 
-        // When VAT is based on billing address then Magento have to handle only billing addresses
+        // When VAT is based on billing address then Maho have to handle only billing addresses
         $additionalBillingAddressCondition = ($configAddressType == Mage_Customer_Model_Address_Abstract::TYPE_BILLING)
             ? $configAddressType != $quoteAddress->getAddressType() : false;
         // Handle only addresses that corresponds to VAT configuration
@@ -491,7 +491,7 @@ class Mage_Sales_Model_Observer
             ]);
         }
 
-        // Magento always has to emulate group even if customer uses default billing/shipping address
+        // Maho always has to emulate a group even if a customer uses default billing/shipping address.
         if (!$isDisableAutoGroupChange) {
             $groupId = $customerHelper->getCustomerGroupIdBasedOnVatNumber(
                 $customerCountryCode,

@@ -57,7 +57,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     }
 
     /**
-     * Flush all magento cache
+     * Flush all Maho caches
      */
     public function flushSystemAction()
     {

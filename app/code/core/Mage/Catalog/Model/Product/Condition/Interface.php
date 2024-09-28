@@ -22,7 +22,7 @@ interface Mage_Catalog_Model_Product_Condition_Interface
     public function applyToCollection($collection);
 
     /**
-     * @param Magento_Db_Adapter_Pdo_Mysql $dbAdapter
+     * @param Varien_Db_Adapter_Pdo_Mysql $dbAdapter
      * @return string|Varien_Db_Select
      */
     public function getIdsSelect($dbAdapter);

@@ -200,7 +200,6 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main extends Mage_Adminhtml_Bloc
             'name'   => 'from_date',
             'label'  => Mage::helper('salesrule')->__('From Date'),
             'title'  => Mage::helper('salesrule')->__('From Date'),
-            'image'  => $this->getSkinUrl('images/grid-cal.gif'),
             'input_format' => Varien_Date::DATE_INTERNAL_FORMAT,
             'format'       => $dateFormatIso
         ]);
@@ -208,7 +207,6 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main extends Mage_Adminhtml_Bloc
             'name'   => 'to_date',
             'label'  => Mage::helper('salesrule')->__('To Date'),
             'title'  => Mage::helper('salesrule')->__('To Date'),
-            'image'  => $this->getSkinUrl('images/grid-cal.gif'),
             'input_format' => Varien_Date::DATE_INTERNAL_FORMAT,
             'format'       => $dateFormatIso
         ]);

@@ -16,9 +16,6 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
 {
     public const CACHE_DEFINITION = 'Cache.DefinitionImpl';
 
-    /**
-     * @var HTMLPurifier|null
-     */
     protected ?HTMLPurifier $purifier;
 
     /**

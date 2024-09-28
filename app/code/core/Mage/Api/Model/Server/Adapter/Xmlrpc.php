@@ -106,10 +106,9 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
      *
      * @param int $code
      * @param string $message
-     * @return never
      */
     #[\Override]
-    public function fault($code, $message)
+    public function fault($code, $message): never
     {
         throw new Zend_XmlRpc_Server_Exception($message, $code);
     }

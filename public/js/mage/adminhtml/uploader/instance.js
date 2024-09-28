@@ -484,9 +484,7 @@
             return str
                 .stripScripts()
                 // Remove inline event handlers like onclick, onload, etc
-                .replace(/(on[a-z]+=["][^"]+["])(?=[^>]*>)/img, '')
-                .replace(/(on[a-z]+=['][^']+['])(?=[^>]*>)/img, '')
-            ;
+                .replace(/\s+on(?:\w|-)*\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/img, '');
         }
     });
 })(window, document);

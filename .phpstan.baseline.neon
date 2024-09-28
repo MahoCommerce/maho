@@ -1017,7 +1017,7 @@ parameters:
 
 		-
 			message: "#^Offset 'option_id' does not exist on array\\{final_price\\: mixed\\}\\.$#"
-			count: 4
+			count: 2
 			path: app/code/core/Mage/Bundle/Model/Product/Price.php
 
 		-
@@ -2156,11 +2156,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/App.php
 
 		-
-			message: "#^Method Mage_Core_Model_Cache\\:\\:getDbAdapter\\(\\) should return Zend_Db_Adapter_Abstract but returns Varien_Db_Adapter_Interface\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Core/Model/Cache.php
-
-		-
 			message: "#^Method Mage_Core_Model_Config\\:\\:cleanCache\\(\\) should return \\$this\\(Mage_Core_Model_Config\\) but returns Mage_Core_Model_Config\\.$#"
 			count: 1
 			path: app/code/core/Mage/Core/Model/Config.php
@@ -2321,21 +2316,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource.php
 
 		-
-			message: "#^Method Mage_Core_Model_Resource\\:\\:_getDefaultConnection\\(\\) should return string but returns Varien_Db_Adapter_Interface\\|false\\.$#"
-			count: 2
-			path: app/code/core/Mage/Core/Model/Resource.php
-
-		-
-			message: "#^Method Mage_Core_Model_Resource\\:\\:getConnection\\(\\) should return Varien_Db_Adapter_Interface\\|false but returns string\\.$#"
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource.php
-
-		-
-			message: "#^Method Mage_Core_Model_Resource_Db_Abstract\\:\\:_getConnection\\(\\) should return Magento_Db_Adapter_Pdo_Mysql but returns Varien_Db_Adapter_Interface\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Db/Abstract.php
-
-		-
 			message: "#^Property Mage_Core_Model_Resource_Db_Collection_Abstract\\:\\:\\$_resource \\(Mage_Core_Model_Resource_Db_Abstract\\) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract\\|false\\.$#"
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
@@ -2384,11 +2364,6 @@ parameters:
 			message: "#^PHPDoc tag @param for parameter \\$callbacks with type array\\|string is not subtype of native type array\\.$#"
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Iterator.php
-
-		-
-			message: "#^Property Mage_Core_Model_Resource_Setup\\:\\:\\$_conn \\(Varien_Db_Adapter_Pdo_Mysql\\) does not accept Varien_Db_Adapter_Interface\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Setup.php
 
 		-
 			message: "#^Property Mage_Core_Model_Resource_Setup\\:\\:\\$_resourceConfig \\(Mage_Core_Model_Config_Element\\) does not accept SimpleXMLElement\\.$#"
@@ -2831,37 +2806,7 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
 
 		-
-			message: "#^Method Mage_Eav_Model_Entity_Abstract\\:\\:_getReadAdapter\\(\\) should return Magento_Db_Adapter_Pdo_Mysql but returns Varien_Db_Adapter_Interface\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
-
-		-
-			message: "#^Method Mage_Eav_Model_Entity_Abstract\\:\\:_getWriteAdapter\\(\\) should return Magento_Db_Adapter_Pdo_Mysql but returns Varien_Db_Adapter_Interface\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
-
-		-
-			message: "#^Property Mage_Eav_Model_Entity_Abstract\\:\\:\\$_read \\(Varien_Db_Adapter_Pdo_Mysql\\) does not accept Varien_Db_Adapter_Interface\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
-
-		-
-			message: "#^Property Mage_Eav_Model_Entity_Abstract\\:\\:\\$_read \\(Varien_Db_Adapter_Pdo_Mysql\\) does not accept string\\|Zend_Db_Adapter_Abstract\\.$#"
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
-
-		-
 			message: "#^Property Mage_Eav_Model_Entity_Abstract\\:\\:\\$_type \\(Mage_Eav_Model_Entity_Type\\) in empty\\(\\) is not falsy\\.$#"
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
-
-		-
-			message: "#^Property Mage_Eav_Model_Entity_Abstract\\:\\:\\$_write \\(Varien_Db_Adapter_Pdo_Mysql\\) does not accept Varien_Db_Adapter_Interface\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
-
-		-
-			message: "#^Property Mage_Eav_Model_Entity_Abstract\\:\\:\\$_write \\(Varien_Db_Adapter_Pdo_Mysql\\) does not accept string\\|Zend_Db_Adapter_Abstract\\.$#"
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
 
@@ -3199,11 +3144,6 @@ parameters:
 			message: "#^Call to function is_array\\(\\) with '' will always evaluate to false\\.$#"
 			count: 1
 			path: app/code/core/Mage/Index/Model/Resource/Event.php
-
-		-
-			message: "#^Return type \\(Varien_Db_Adapter_Interface\\|false\\) of method Mage_Index_Model_Resource_Lock_Resource\\:\\:_getDefaultConnection\\(\\) should be compatible with return type \\(string\\) of method Mage_Core_Model_Resource\\:\\:_getDefaultConnection\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Index/Model/Resource/Lock/Resource.php
 
 		-
 			message: "#^Return type \\(void\\) of method Mage_Index_Model_Resource_Setup\\:\\:applyUpdates\\(\\) should be compatible with return type \\(\\$this\\(Mage_Core_Model_Resource_Setup\\)\\|true\\) of method Mage_Core_Model_Resource_Setup\\:\\:applyUpdates\\(\\)$#"
@@ -4447,7 +4387,7 @@ parameters:
 
 		-
 			message: "#^Invalid array key type strin\\.$#"
-			count: 3
+			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
 
 		-
@@ -4654,16 +4594,6 @@ parameters:
 			message: "#^Method Mage_Wishlist_IndexController\\:\\:downloadCustomOptionAction\\(\\) with return type void returns mixed but should not return anything\\.$#"
 			count: 3
 			path: app/code/core/Mage/Wishlist/controllers/IndexController.php
-
-		-
-			message: "#^Negated boolean expression is always true\\.$#"
-			count: 1
-			path: lib/Mage/Cache/Backend/File.php
-
-		-
-			message: "#^Argument of an invalid type Zend_Db_Statement_Interface supplied for foreach, only iterables are supported\\.$#"
-			count: 1
-			path: lib/Magento/Db/Object/Trigger.php
 
 		-
 			message: "#^Left side of && is always true\\.$#"

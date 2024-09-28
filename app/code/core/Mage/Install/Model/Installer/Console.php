@@ -141,7 +141,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
          */
         if (!$this->_checkFlag($args['license_agreement_accepted'])) {
             $this->addError(
-                'ERROR: You have to accept Magento license agreement terms and conditions to continue installation'
+                'ERROR: You have to accept Maho license agreement terms and conditions to continue installation'
             );
             return false;
         }
@@ -240,7 +240,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
          * Check if already installed
          */
         if (Mage::isInstalled()) {
-            $this->addError('ERROR: Magento is already installed');
+            $this->addError('ERROR: Maho is already installed');
             return false;
         }
 
@@ -309,7 +309,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
              * Check if already installed
              */
             if (Mage::isInstalled()) {
-                $this->addError('ERROR: Magento is already installed');
+                $this->addError('ERROR: Maho is already installed');
                 return false;
             }
 

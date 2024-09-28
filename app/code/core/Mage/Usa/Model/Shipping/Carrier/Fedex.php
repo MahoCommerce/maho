@@ -913,7 +913,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     }
 
     /**
-     *  Return FeDex currency ISO code by Magento Base Currency Code
+     *  Return FeDex currency ISO code by Maho Base Currency Code
      *
      *  @return string 3-digit currency code
      */

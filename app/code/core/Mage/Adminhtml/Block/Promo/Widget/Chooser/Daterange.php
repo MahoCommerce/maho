@@ -63,7 +63,6 @@ class Mage_Adminhtml_Block_Promo_Widget_Chooser_Daterange extends Mage_Adminhtml
             $element = new Varien_Data_Form_Element_Date([
                 'format'   => Varien_Date::DATE_INTERNAL_FORMAT, // hardcode because hardcoded values delimiter
                 'label'    => $label,
-                'image'    => $this->getSkinUrl('images/grid-cal.gif'),
                 'onchange' => "dateTimeChoose_{$idSuffix}()", // won't work through Event.observe()
                 'value'    => $this->_rangeValues[$key],
             ]);

@@ -292,7 +292,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     }
 
     /**
-     * Get Magento App instance
+     * Get Maho App instance
      *
      * @return Mage_Core_Model_App
      */
@@ -516,7 +516,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
                 // dispose of some options params, that can cramp comparing of arrays
                 if (is_string($itemOptionValue) && is_string($optionValue)) {
                     try {
-                        /** @var Unserialize_Parser $parser */
+                        /** @var Mage_Core_Helper_UnserializeArray $parser */
                         $parser = Mage::helper('core/unserializeArray');
 
                         $_itemOptionValue =

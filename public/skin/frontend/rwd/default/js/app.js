@@ -86,7 +86,7 @@ Varien.searchForm.prototype.blur = function (event) {
  * to determine the user's preferred pointer type.
  *
  * - getPointer() returns the last used pointer type, or, if the user has
- *   not yet interacted with the site, falls back to a Modernizr test.
+ *   not yet interacted with the site, falls back to a test.
  *
  * - The mouse-detected event is triggered on the window object when the user
  *   is using a mouse pointer input, or has switched from touch to mouse input.
@@ -132,13 +132,12 @@ var PointerManager = {
 
     /**
      * If called before init(), get best guess of input pointer type
-     * using Modernizr test.
      * If called after init(), get current pointer in use.
      */
     getPointer: function() {
         // On iOS devices, always default to touch, as this.lastTouchType will intermittently return 'mouse' if
         // multiple touches are triggered in rapid succession in Safari on iOS
-        if(Modernizr.ios) {
+        if(navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
             return this.TOUCH_POINTER_TYPE;
         }
 
@@ -146,7 +145,7 @@ var PointerManager = {
             return this.lastTouchType;
         }
 
-        return Modernizr.touch ? this.TOUCH_POINTER_TYPE : this.MOUSE_POINTER_TYPE;
+        return ('ontouchstart' in window || navigator.maxTouchPoints > 0) ? this.TOUCH_POINTER_TYPE : this.MOUSE_POINTER_TYPE;
     },
 
     setPointerEventLock: function() {
@@ -303,7 +302,7 @@ var MenuManager = {
      * @returns {boolean}
      */
     useSmallScreenBehavior: function() {
-        return Modernizr.mq("screen and (max-width:" + bp.medium + "px)");
+        return window.matchMedia("screen and (max-width:" + bp.medium + "px)").matches;
     },
 
     /**
@@ -657,10 +656,6 @@ $j(document).ready(function () {
     var w = $j(window);
     var d = $j(document);
     var body = $j('body');
-
-    Modernizr.addTest('ios', function () {
-        return navigator.userAgent.match(/(iPad|iPhone|iPod)/g);
-    });
 
     //initialize pointer abstraction manager
     PointerManager.init();
@@ -1157,7 +1152,7 @@ var ProductMediaManager = {
             // Don't use zoom on devices where touch has been used
             PointerManager.getPointer() == PointerManager.TOUCH_POINTER_TYPE
             // Don't use zoom when screen is small, or else zoom window shows outside body
-            || Modernizr.mq("screen and (max-width:" + bp.medium + "px)")
+            || window.matchMedia("screen and (max-width:" + bp.medium + "px)").matches
         ) {
             return; // zoom not enabled
         }
@@ -1187,47 +1182,29 @@ var ProductMediaManager = {
     swapImage: function(targetImage) {
         targetImage = $j(targetImage);
         targetImage.addClass('gallery-image');
-
         ProductMediaManager.destroyZoom();
+        const imageGallery = $j('.product-image-gallery');
 
-        var imageGallery = $j('.product-image-gallery');
-
-        if(targetImage[0].complete) { //image already loaded -- swap immediately
-
+        const swapAndZoom = () => {
             imageGallery.find('.gallery-image').removeClass('visible');
-
-            //move target image to correct place, in case it's necessary
             imageGallery.append(targetImage);
-
-            //reveal new image
             targetImage.addClass('visible');
-
-            //wire zoom on new image
             ProductMediaManager.createZoom(targetImage);
+        };
 
-        } else { //need to wait for image to load
-
-            //add spinner
+        targetImage.removeAttr('loading'); // Remove lazy load
+        if (targetImage[0].complete) {
+            // Image already loaded, swap immediately
+            swapAndZoom();
+        } else {
+            // Need to wait for image to load
             imageGallery.addClass('loading');
-
-            //move target image to correct place, in case it's necessary
             imageGallery.append(targetImage);
 
-            //wait until image is loaded
-            imagesLoaded(targetImage, function() {
-                //remove spinner
+            targetImage.on('load', function() {
                 imageGallery.removeClass('loading');
-
-                //hide old image
-                imageGallery.find('.gallery-image').removeClass('visible');
-
-                //reveal new image
-                targetImage.addClass('visible');
-
-                //wire zoom on new image
-                ProductMediaManager.createZoom(targetImage);
+                swapAndZoom();
             });
-
         }
     },
 
@@ -1237,7 +1214,6 @@ var ProductMediaManager = {
             e.preventDefault();
             var jlink = $j(this);
             var target = $j('#image-' + jlink.data('image-index'));
-
             ProductMediaManager.swapImage(target);
         });
     },
@@ -1256,9 +1232,7 @@ var ProductMediaManager = {
         });
 
         ProductMediaManager.initZoom();
-
         ProductMediaManager.wireThumbnails();
-
         $j(document).trigger('product-media-loaded', ProductMediaManager);
     }
 };

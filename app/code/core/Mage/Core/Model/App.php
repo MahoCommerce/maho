@@ -234,7 +234,7 @@ class Mage_Core_Model_App
     protected $_isCacheLocked = null;
 
     /**
-     * Flag for Magento installation status
+     * Flag for Maho installation status
      *
      * @var null|bool
      */
@@ -1472,9 +1472,8 @@ class Mage_Core_Model_App
     /**
      * @param string $text
      * @throws Mage_Core_Model_Store_Exception
-     * @return never
      */
-    public function throwStoreException($text = '')
+    public function throwStoreException($text = ''): never
     {
         throw new Mage_Core_Model_Store_Exception($text);
     }

@@ -10,14 +10,16 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+/** @deprecated Use MAHO_ROOT_DIR instead. */
 define('MAGENTO_ROOT', dirname(__DIR__));
+define('MAHO_ROOT_DIR', dirname(__DIR__));
 
-if (file_exists(MAGENTO_ROOT . DIRECTORY_SEPARATOR . 'app/bootstrap.php')) {
-    require MAGENTO_ROOT . '/app/bootstrap.php';
-    require MAGENTO_ROOT . '/app/Mage.php';
+if (file_exists(MAHO_ROOT_DIR . DIRECTORY_SEPARATOR . 'app/bootstrap.php')) {
+    require MAHO_ROOT_DIR . '/app/bootstrap.php';
+    require MAHO_ROOT_DIR . '/app/Mage.php';
 } else {
-    require MAGENTO_ROOT . '/vendor/mahocommerce/maho/app/bootstrap.php';
-    require MAGENTO_ROOT . '/vendor/mahocommerce/maho/app/Mage.php';
+    require MAHO_ROOT_DIR . '/vendor/mahocommerce/maho/app/bootstrap.php';
+    require MAHO_ROOT_DIR . '/vendor/mahocommerce/maho/app/Mage.php';
 }
 
 if (!Mage::isInstalled()) {

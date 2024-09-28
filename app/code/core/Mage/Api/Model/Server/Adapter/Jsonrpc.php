@@ -121,7 +121,7 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mag
      * @param string $message
      */
     #[\Override]
-    public function fault($code, $message)
+    public function fault($code, $message): never
     {
         throw new Zend_Json_Exception($message, $code);
     }

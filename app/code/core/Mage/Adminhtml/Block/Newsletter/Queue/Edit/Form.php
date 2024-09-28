@@ -45,15 +45,13 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit_Form extends Mage_Adminhtml_Blo
                 'name'      =>    'start_at',
                 'time'      =>    true,
                 'format'    =>    $outputFormat,
-                'label'     =>    Mage::helper('newsletter')->__('Queue Date Start'),
-                'image'     =>    $this->getSkinUrl('images/grid-cal.gif')
+                'label'     =>    Mage::helper('newsletter')->__('Queue Date Start')
             ]);
 
             if (!Mage::app()->isSingleStoreMode()) {
                 $fieldset->addField('stores', 'multiselect', [
                     'name'          => 'stores[]',
                     'label'         => Mage::helper('newsletter')->__('Subscribers From'),
-                    'image'         => $this->getSkinUrl('images/grid-cal.gif'),
                     'values'        => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(),
                     'value'         => $queue->getStores()
                 ]);
@@ -70,15 +68,13 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit_Form extends Mage_Adminhtml_Blo
                 'disabled'  => 'true',
                 'style'     => 'width:38%;',
                 'format'    => $outputFormat,
-                'label'     => Mage::helper('newsletter')->__('Queue Date Start'),
-                'image'     => $this->getSkinUrl('images/grid-cal.gif')
+                'label'     => Mage::helper('newsletter')->__('Queue Date Start')
             ]);
 
             if (!Mage::app()->isSingleStoreMode()) {
                 $fieldset->addField('stores', 'multiselect', [
                     'name'          => 'stores[]',
                     'label'         => Mage::helper('newsletter')->__('Subscribers From'),
-                    'image'         => $this->getSkinUrl('images/grid-cal.gif'),
                     'required'      => true,
                     'values'        => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(),
                     'value'         => $queue->getStores()

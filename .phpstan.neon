@@ -9,10 +9,7 @@ parameters:
         - app/bootstrap.php
         - app/Mage.php
         - app/code/core/Mage
-        - lib/Mage
-        - lib/Magento
-        - lib/MahoCLI
-        - lib/Varien
+        - lib
         - maho
         - public
     excludePaths:
@@ -52,7 +49,6 @@ parameters:
         - app/code/core/*/*/sql/*
 
         # requires Mycrypt
-        - lib/Magento/Crypt.php
         - lib/Varien/Crypt/Mcrypt.php
 
         # Instantiated class not found

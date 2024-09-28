@@ -1361,7 +1361,7 @@ class Mage_Paypal_Model_Config
     }
 
     /**
-     * Mapper from PayPal-specific payment actions to Magento payment actions
+     * Mapper from PayPal-specific payment actions to Maho payment actions
      *
      * @return string|null
      */

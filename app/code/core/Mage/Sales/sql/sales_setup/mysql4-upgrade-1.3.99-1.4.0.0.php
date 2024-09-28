@@ -1140,7 +1140,7 @@ $installer->getConnection()->query('DROP TEMPORARY TABLE ' . $temporaryTable);
  * Reproduces on upgrading from 1.4.0.x to 1.4.1.0
  *
  * Test case:
- * 1) Have Magento instance without flat sales yet, and without Mage_SalesRule/sql/mysql4-upgrade-0.7.10-0.7.11.php
+ * 1) Have Maho instance without flat sales yet, and without Mage_SalesRule/sql/mysql4-upgrade-0.7.10-0.7.11.php
  * 2) Upgrade it to the flat one instantly (runs this upgrade). Without this code the proper upgrade of coupon_code is missed. Data is lost.
  * 3) The Mage_SalesRule/sql/mysql4-upgrade-0.7.10-0.7.11.php runs AFTER this code, because it depends on Mage_Sales. But it is too late.
  * Result: the attribute has wrong type and data may be lost depending on upgrade history.
