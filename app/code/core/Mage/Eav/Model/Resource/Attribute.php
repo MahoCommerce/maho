@@ -161,6 +161,7 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
      *
      * @return array
      */
+    #[\Override]
     public function getScopeFields(Mage_Eav_Model_Attribute $object)
     {
         if (!$this->hasScopeTable()) {
