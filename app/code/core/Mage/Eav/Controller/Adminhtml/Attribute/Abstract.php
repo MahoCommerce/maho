@@ -295,6 +295,13 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
                         unset($data[$field]);
                     }
                 }
+            } else {
+                // Check for no forms selected and set to empty array
+                if ($model->getResource()->hasFormTable()) {
+                    if (!isset($data['used_in_forms'])) {
+                        $data['used_in_forms'] = [];
+                    }
+                }
             }
 
             $model->addData($data);

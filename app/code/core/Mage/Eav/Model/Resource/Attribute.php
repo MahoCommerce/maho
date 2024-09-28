@@ -205,6 +205,17 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
     }
 
     /**
+     * Check if we have a forms table for attribute
+     *
+     * @return bool
+     */
+    #[\Override]
+    public function hasFormTable()
+    {
+        return !is_null($this->_getFormAttributeTable());
+    }
+
+    /**
      * Return forms in which the attribute
      *
      * @return array

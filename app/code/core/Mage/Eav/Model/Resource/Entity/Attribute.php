@@ -571,4 +571,14 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
     {
         return [];
     }
+
+    /**
+     * Check if we have a forms table for attribute
+     *
+     * @return bool
+     */
+    public function hasFormTable()
+    {
+        return false;
+    }
 }

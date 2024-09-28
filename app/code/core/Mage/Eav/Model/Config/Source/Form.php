@@ -10,7 +10,7 @@
  */
 
 /**
- * Used in creating options for use_in_forms selection
+ * Used in creating options for used_in_forms selection
  *
  * @category   Mage
  * @package    Mage_Eav
