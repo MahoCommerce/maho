@@ -98,7 +98,7 @@
         <button type="button" id="review_button" value="<?= $this->__('Place Order') ?>" class="button btn-checkout"><span><span><?= $this->__('Place Order') ?></span></span></button>
         <button type="button" id="review_submit" value="<?= $this->__('Place Order') ?>" class="button btn-checkout"><span><span><?= $this->__('Place Order') ?></span></span></button>
         <span class="please-wait" id="review-please-wait" style="display:none;">
-            <img src="<?= $this->getSkinUrl('images/opc-ajax-loader.gif') ?>" alt="<?= $this->quoteEscape($this->__('Submitting order information...')) ?>" title="<?= $this->quoteEscape($this->__('Submitting order information...')) ?>" class="v-middle" /> <?= $this->__('Submitting order information...') ?>
+            <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Submitting order information...')) ?>" title="<?= $this->quoteEscape($this->__('Submitting order information...')) ?>" class="v-middle" /> <?= $this->__('Submitting order information...') ?>
         </span>
     </div>
 </form>
