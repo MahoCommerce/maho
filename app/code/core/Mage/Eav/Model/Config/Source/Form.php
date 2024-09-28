@@ -25,6 +25,8 @@ class Mage_Eav_Model_Config_Source_Form
         if ($node === false) {
             return [];
         }
+
+        $forms = [];
         foreach ($node->children() as $form) {
             $moduleName = $form->getAttribute('module') ?? 'eav';
             $translatedLabel = Mage::helper($moduleName)->__((string)$form->label[0]);
