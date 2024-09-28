@@ -186,11 +186,17 @@ class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
      */
     public function extraFields()
     {
+        /** @var Mage_Customer_Model_Customer $customer */
+        $customer = Mage::getModel('customer/customer');
+
         /** @var Mage_Customer_Model_Form $form */
         $form = Mage::getModel('customer/form');
-        $form->setFormCode('customer_account_create');
+        $form->setFormCode('customer_account_create')
+             ->setEntity($customer)
+             ->initDefaultValues();
 
         $attributes = $form->getAttributes();
+
         foreach ($attributes as $code => $attribute) {
             if (!$attribute->getIsUserDefined()) {
                 unset($attributes[$code]);
