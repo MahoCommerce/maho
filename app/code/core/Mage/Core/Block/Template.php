@@ -105,6 +105,19 @@ class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
     }
 
     /**
+     * Set path to template only if it exists
+     */
+    public function setTemplateIfExists(string $template): Mage_Core_Block_Template
+    {
+        $oldTemplate = $this->getTemplate();
+        $this->setTemplate($template);
+        if (!$this->getTemplateFile()) {
+            $this->setTemplate($oldTemplate);
+        }
+        return $this;
+    }
+
+    /**
      * Get absolute path to template
      *
      * @return string

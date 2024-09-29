@@ -7,6 +7,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2017-2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -14,14 +15,26 @@
 <layout version="0.1.0">
     <customer_account_login>
         <update handle="customer_account_login_persistent" ifconfig="persistent/options/enabled" />
+        <action block="customer_form_login" method="setTemplateIfExists">
+            <template>persistent/customer/form/login.phtml</template>
+        </action>
     </customer_account_login>
 
     <customer_account_create>
         <update handle="customer_account_create_persistent" ifconfig="persistent/options/enabled" />
+        <action block="customer_form_register" method="setTemplateIfExists">
+            <template>persistent/customer/form/register.phtml</template>
+        </action>
     </customer_account_create>
 
     <checkout_onepage_index>
         <update handle="checkout_onepage_index_persistent" ifconfig="persistent/options/enabled" />
+        <action block="checkout.onepage.login" method="setTemplateIfExists">
+            <template>persistent/checkout/onepage/login.phtml</template>
+        </action>
+        <action block="checkout.onepage.billing" method="setTemplateIfExists">
+            <template>persistent/checkout/onepage/billing.phtml</template>
+        </action>
     </checkout_onepage_index>
 
     <customer_account_login_persistent>
