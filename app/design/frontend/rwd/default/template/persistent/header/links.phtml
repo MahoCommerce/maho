@@ -1,0 +1,27 @@
+<?php
+/**
+ * Maho
+ *
+ * @category    design
+ * @package     rwd_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<?php
+/**
+ * @see Mage_Page_Block_Template_Links
+ */
+?>
+<?php $_links = $this->getLinks(); ?>
+<?php if(count($_links)>0): ?>
+    <?php foreach($_links as $_link): ?>
+        <?php if ($_link instanceof Mage_Core_Block_Abstract):?>
+            <?= $_link->toHtml() ?>
+        <?php else: ?>
+            <a href="<?= $_link->getUrl() ?>" title="<?= $_link->getTitle() ?>" <?= $_link->getAParams() ?>><?= $_link->getLabel() ?></a>
+        <?php endif ?>
+    <?php endforeach ?>
+<?php endif ?>
