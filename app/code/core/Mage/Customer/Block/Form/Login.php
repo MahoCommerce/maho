@@ -50,6 +50,20 @@ class Mage_Customer_Block_Form_Login extends Mage_Core_Block_Template
     }
 
     /**
+     * Retrieve create new account url with context
+     *
+     * @return string
+     */
+    public function getCreateAccountUrlContext()
+    {
+        $url = $this->getCreateAccountUrl();
+        if (Mage::helper('checkout')->isContextCheckout()) {
+            $url = Mage::helper('core/url')->addRequestParam($url, ['context' => 'checkout']);
+        }
+        return $url;
+    }
+
+    /**
      * Retrieve password forgotten url
      *
      * @return string
@@ -108,5 +122,15 @@ class Mage_Customer_Block_Form_Login extends Mage_Core_Block_Template
         Mage::getSingleton('customer/session')->setBeforeAuthUrl($url);
 
         return true;
+    }
+
+    /**
+     * Retrieve minimum length of customer password
+     *
+     * @return int
+     */
+    public function getMinPasswordLength()
+    {
+        return Mage::getStoreConfigAsInt(Mage_Customer_Model_Customer::XML_PATH_MIN_PASSWORD_LENGTH);
     }
 }

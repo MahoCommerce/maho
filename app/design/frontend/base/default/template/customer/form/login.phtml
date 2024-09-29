@@ -14,7 +14,7 @@
 /**
  * Customer login form template
  *
- * @see Mage_Customer_Block_Form_Login
+ * @var $this Mage_Customer_Block_Form_Login
  */
 ?>
 <div class="account-login">
@@ -45,13 +45,16 @@
                             </div>
                         </li>
                         <li>
+                            <?php $minPasswordLength = $this->getMinPasswordLength(); ?>
                             <label for="pass" class="required"><em>*</em><?= $this->__('Password') ?></label>
                             <div class="input-box">
-                                <input type="password" name="login[password]" class="input-text required-entry validate-password min-pass-length-5" id="pass" title="<?= Mage::helper('core')->quoteEscape($this->__('Password')) ?>" autocomplete="off" />
+                                <input type="password" name="login[password]" class="input-text required-entry validate-password min-pass-length-<?= $minPasswordLength ?>" id="pass" title="<?= Mage::helper('core')->quoteEscape($this->__('Password')) ?>" autocomplete="off" />
                             </div>
                         </li>
                         <?= $this->getChildHtml('form.additional.info') ?>
+                        <?= $this->getChildHtml('persistent.remember.me') ?>
                     </ul>
+                    <?= $this->getChildHtml('persistent.remember.me.tooltip') ?>
                     <p class="required"><?= $this->__('* Required Fields') ?></p>
                 </div>
             </div>
@@ -59,7 +62,7 @@
         <div class="col2-set">
             <div class="col-1 new-users">
                 <div class="buttons-set">
-                    <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Create an Account')) ?>" class="button" onclick="window.location='<?= $this->getCreateAccountUrl() ?>';"><?= $this->__('Create an Account') ?></button>
+                    <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Create an Account')) ?>" class="button" onclick="window.location='<?= $this->getCreateAccountUrlContext() ?>';"><?= $this->__('Create an Account') ?></button>
                 </div>
             </div>
             <div class="col-2 registered-users">
@@ -69,6 +72,9 @@
                 </div>
             </div>
         </div>
+        <?php if (Mage::helper('checkout')->isContextCheckout()): ?>
+            <input name="context" type="hidden" value="checkout" />
+        <?php endif ?>
     </form>
     <script type="text/javascript">
     //<![CDATA[
