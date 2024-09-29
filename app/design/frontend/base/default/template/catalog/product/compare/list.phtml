@@ -160,7 +160,7 @@ $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()]));
     <div class="buttons-set">
         <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Close Window')) ?>" class="button" onclick="window.close();"><?= $this->__('Close Window') ?></button>
         <span class="please-wait" id="compare-list-please-wait" style="display:none;">
-            <img src="<?= $this->getSkinUrl('images/opc-ajax-loader.gif') ?>" alt="<?= Mage::helper('core')->quoteEscape($this->__('Please wait...')) ?>" title="<?= $this->__('Please wait...') ?>" class="v-middle" /> <?= $this->__('Please wait...') ?>
+            <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= Mage::helper('core')->quoteEscape($this->__('Please wait...')) ?>" title="<?= $this->__('Please wait...') ?>" class="v-middle" /> <?= $this->__('Please wait...') ?>
         </span>
     </div>
     <script type="text/javascript">

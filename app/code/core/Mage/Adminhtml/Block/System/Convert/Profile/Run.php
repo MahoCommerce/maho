@@ -64,7 +64,7 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Run extends Mage_Adminhtml_Blo
                                 'icon' => Mage::getDesign()->getSkinUrl('images/fam_bullet_success.gif'),
                                 'bg'   => '#DDF'
                             ],
-                            'loader'  => Mage::getDesign()->getSkinUrl('images/ajax-loader.gif')
+                            'loader'  => Mage::getDesign()->getSkinUrl('images/loading.svg')
                         ],
                         'template' => '<li style="#{style}" id="#{id}">'
                                     . '<img id="#{id}_img" src="#{image}" class="v-middle" style="margin-right:5px"/>'
