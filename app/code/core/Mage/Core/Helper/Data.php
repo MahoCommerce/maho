@@ -264,7 +264,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      * @param string|int|bool $salt
      * @return string
      */
-    public function getHash($password, $salt = false)
+    public function getHash(#[\SensitiveParameter] $password, $salt = false)
     {
         return $this->getEncryptor()->getHash($password, $salt);
     }
@@ -276,7 +276,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      * @param mixed $salt
      * @return string
      */
-    public function getHashPassword($password, $salt = false)
+    public function getHashPassword(#[\SensitiveParameter] $password, $salt = false)
     {
         $encryptionModel = $this->getEncryptor();
         $latestVersionHash = $this->getVersionHash($encryptionModel);
@@ -292,7 +292,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      * @return bool
      * @throws Exception
      */
-    public function validateHash($password, $hash)
+    public function validateHash(#[\SensitiveParameter] $password, $hash)
     {
         return $this->getEncryptor()->validateHash($password, $hash);
     }
