@@ -7264,10 +7264,6 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 .remember-me-box a.hide {
   display: none;
 }
-.remember-me-box .link-tip {
-  font-size: 13px;
-  padding-left: 10px;
-}
 
 .remember-me-popup {
   display: none;
