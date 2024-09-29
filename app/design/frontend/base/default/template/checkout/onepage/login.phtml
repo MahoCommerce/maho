@@ -38,11 +38,11 @@
             <ul class="form-list">
                 <?php if($isAllowedGuestCheckout): ?>
                 <li class="control">
-                    <input type="radio" name="checkout_method" id="login:guest" value="guest"<?php if($this->getQuote()->getCheckoutMethod()==Mage_Checkout_Model_Type_Onepage::METHOD_GUEST): ?> checked="checked"<?php endif ?> class="radio" /><label for="login:guest"><?= $this->__('Checkout as Guest') ?></label>
+                    <input type="radio" name="checkout_method" id="login:guest" value="guest"<?php if($this->getQuote()->getCheckoutMethod() == Mage_Checkout_Model_Type_Onepage::METHOD_GUEST): ?> checked="checked"<?php endif ?> class="radio" /><label for="login:guest"><?= $this->__('Checkout as Guest') ?></label>
                 </li>
                 <?php endif ?>
                 <li class="control">
-                    <input type="radio" name="checkout_method" id="login:register" value="register"<?php if($this->getQuote()->getCheckoutMethod()==Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER || !$isAllowedGuestCheckout): ?> checked="checked"<?php endif ?> class="radio" /><label for="login:register"><?= $this->__('Register') ?></label>
+                    <input type="radio" name="checkout_method" id="login:register" value="register"<?php if($this->getQuote()->getCheckoutMethod() == Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER || !$isAllowedGuestCheckout): ?> checked="checked"<?php endif ?> class="radio" /><label for="login:register"><?= $this->__('Register') ?></label>
                 </li>
             </ul>
             <h4><?= $this->__('Register and save time!') ?></h4>
@@ -109,37 +109,30 @@
         </div>
     </div>
 </div>
+<?php $registerParam = $this->getRequest()->getParam('register') ?>
 <script type="text/javascript">
-//<![CDATA[
-    var loginForm = new VarienForm('login-form', true);
-    $('login-email').observe('keypress', bindLoginPost);
-    $('login-password').observe('keypress', bindLoginPost);
-    function bindLoginPost(evt){
+    const loginForm = new VarienForm('login-form', true);
+    document.getElementById('login-email').addEventListener('keypress', bindLoginPost);
+    document.getElementById('login-password').addEventListener('keypress', bindLoginPost);
+    function bindLoginPost(evt) {
         if (evt.keyCode == Event.KEY_RETURN) {
             loginForm.submit();
         }
     }
-    function onepageLogin(button)
-    {
+    function onepageLogin(button) {
         if(loginForm.validator && loginForm.validator.validate()){
             button.disabled = true;
             loginForm.submit();
         }
     }
-//]]>
-</script>
-<?php
-    $registerParam = $this->getRequest()->getParam('register');
-    if ($registerParam || $registerParam === ''):
-?>
-    <script type="text/javascript">
-    //<![CDATA[
-        document.observe("dom:loaded", function() {
-            if($('login:register')) {
-                $('login:register').checked = true;
+
+    <?php if ($registerParam || $registerParam === ''): ?>
+        document.addEventListener("DOMContentLoaded", function() {
+            const registerCheckbox = document.getElementById('login:register');
+            if (registerCheckbox) {
+                registerCheckbox.checked = true;
                 checkout.setMethod();
             }
-        })
-    //]]>
-    </script>
-<?php endif ?>
+        });
+    <?php endif ?>
+</script>
