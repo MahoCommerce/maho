@@ -1573,21 +1573,21 @@ XMLAuth;
         }
         curl_close($ch);
 
+        $result = new Varien_Object();
+
         try {
             $response = new SimpleXMLElement($xmlResponse);
+            if (isset($response->Error)) {
+                $result->setErrors((string)$response->Error->ErrorDescription);
+            } else {
+                $shippingLabelContent = (string)$response->ShipmentResults->PackageResults->LabelImage->GraphicImage;
+                $trackingNumber       = (string)$response->ShipmentResults->PackageResults->TrackingNumber;
+
+                $result->setShippingLabelContent(base64_decode($shippingLabelContent));
+                $result->setTrackingNumber($trackingNumber);
+            }
         } catch (Exception $e) {
             $debugData['result'] = ['error' => $e->getMessage(), 'code' => $e->getCode()];
-        }
-
-        $result = new Varien_Object();
-        if (isset($response->Error)) {
-            $result->setErrors((string)$response->Error->ErrorDescription);
-        } else {
-            $shippingLabelContent = (string)$response->ShipmentResults->PackageResults->LabelImage->GraphicImage;
-            $trackingNumber       = (string)$response->ShipmentResults->PackageResults->TrackingNumber;
-
-            $result->setShippingLabelContent(base64_decode($shippingLabelContent));
-            $result->setTrackingNumber($trackingNumber);
         }
 
         $this->_debug($debugData);
@@ -1954,6 +1954,7 @@ XMLAuth;
         $result = new Varien_Object();
         $xmlRequest = $this->_formShipmentRequest($request);
         $xmlResponse = $this->_getCachedQuotes($xmlRequest);
+        $debugData = ['request' => $xmlRequest];
 
         if ($xmlResponse === null) {
             $url = $this->getConfigData('shipconfirm_xml_url');
@@ -1965,7 +1966,6 @@ XMLAuth;
                 }
             }
 
-            $debugData = ['request' => $xmlRequest];
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

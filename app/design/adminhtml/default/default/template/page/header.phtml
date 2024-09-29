@@ -36,7 +36,7 @@
         <fieldset>
             <legend>Search</legend>
             <span id="global_search_indicator" class="autocomplete-indicator" style="display: none">
-                <img src="<?= $this->getSkinUrl('images/ajax-loader.gif') ?>" alt="<?= Mage::helper('core')->quoteEscape($this->__('Loading...')) ?>" class="v-middle"/>
+                <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= Mage::helper('core')->quoteEscape($this->__('Loading...')) ?>" class="v-middle"/>
             </span>
             <?php $defSearch = $this->__('Global Record Search') ?>
             <input id="global_search" name="query" type="text" class="input-text" value="<?php if(!empty($query)): ?><?= $query ?><?php else: ?><?= Mage::helper('core')->quoteEscape($defSearch) ?><?php endif ?>" onfocus="if(this.value=='<?= Mage::helper('core')->quoteEscape($defSearch, true) ?>')this.value=''; " onblur="if(this.value=='')this.value='<?= $defSearch ?>';" autocomplete="off" />
