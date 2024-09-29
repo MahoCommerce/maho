@@ -3636,55 +3636,6 @@ a.skip-link {
 .footer .form-subscribe-header {
   display: none;
 }
-.footer .links.social-media em {
-  background-image: url(../images/social_icons.png);
-  background-repeat: no-repeat;
-  width: 13px;
-  vertical-align: middle;
-  display: inline-block;
-  margin-right: 7px;
-}
-@media (-webkit-min-device-pixel-ratio: 2), (min--moz-device-pixel-ratio: 2), (-o-min-device-pixel-ratio: 4 / 2), (min-device-pixel-ratio: 2), (min-resolution: 192dpi), (min-resolution: 2dppx) {
-  .footer .links.social-media em {
-    background-image: url(../images/social_icons@2x.png);
-    background-size: 50px 125px;
-  }
-}
-.footer .links.social-media em.facebook {
-  background-position: 0 -0px;
-  height: 13px;
-}
-.footer .links.social-media a:hover em.facebook {
-  background-position: -25px -0px;
-}
-.footer .links.social-media em.twitter {
-  background-position: 0 -24px;
-  height: 13px;
-}
-.footer .links.social-media a:hover em.twitter {
-  background-position: -25px -24px;
-}
-.footer .links.social-media em.youtube {
-  background-position: 0 -49px;
-  height: 13px;
-}
-.footer .links.social-media a:hover em.youtube {
-  background-position: -25px -49px;
-}
-.footer .links.social-media em.pinterest {
-  background-position: 0 -74px;
-  height: 15px;
-}
-.footer .links.social-media a:hover em.pinterest {
-  background-position: -25px -74px;
-}
-.footer .links.social-media em.rss {
-  background-position: 0 -99px;
-  height: 13px;
-}
-.footer .links.social-media a:hover em.rss {
-  background-position: -25px -99px;
-}
 .footer .block-subscribe .input-box {
   float: left;
   width: 65.625%;
