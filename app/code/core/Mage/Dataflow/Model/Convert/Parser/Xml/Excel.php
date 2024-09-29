@@ -221,7 +221,7 @@ class Mage_Dataflow_Model_Convert_Parser_Xml_Excel extends Mage_Dataflow_Model_C
             }
         }
 
-        if (is_null($this->_parseFieldNames)) {
+        if ($this->_parseFieldNames === null) {
             $this->_parseFieldNames = $xmlData;
             return $this;
         }
@@ -315,7 +315,7 @@ class Mage_Dataflow_Model_Convert_Parser_Xml_Excel extends Mage_Dataflow_Model_C
         $xmlHeader = '<?xml version="1.0"?>' . "\n";
         $xmlRegexp = '/^<cell><row>(.*)?<\/row><\/cell>\s?$/ms';
 
-        if (is_null($this->_xmlElement)) {
+        if ($this->_xmlElement === null) {
             $xmlString = $xmlHeader . '<cell><row></row></cell>';
             $this->_xmlElement = new SimpleXMLElement($xmlString, LIBXML_NOBLANKS);
         }

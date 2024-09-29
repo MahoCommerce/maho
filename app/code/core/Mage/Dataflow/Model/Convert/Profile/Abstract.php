@@ -57,7 +57,7 @@ abstract class Mage_Dataflow_Model_Convert_Profile_Abstract implements Mage_Data
 
     public function getContainer($name = null)
     {
-        if (is_null($name)) {
+        if ($name === null) {
             $name = '_default';
         }
         return $this->getContainers()->getItem($name);

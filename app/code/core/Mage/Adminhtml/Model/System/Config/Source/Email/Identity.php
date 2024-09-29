@@ -19,7 +19,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Email_Identity
 
     public function toOptionArray()
     {
-        if (is_null($this->_options)) {
+        if ($this->_options === null) {
             $this->_options = [];
             $config = Mage::getSingleton('adminhtml/config')->getSection('trans_email')->groups->children();
             foreach ($config as $node) {

@@ -60,7 +60,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Admin_Page
 
     protected function _getUrlModel()
     {
-        if (is_null($this->_url)) {
+        if ($this->_url === null) {
             $this->_url = Mage::getModel('adminhtml/url');
         }
         return $this->_url;

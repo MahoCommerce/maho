@@ -114,7 +114,7 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getWishlist()
     {
-        if (is_null($this->_wishlist)) {
+        if ($this->_wishlist === null) {
             if (Mage::registry('shared_wishlist')) {
                 $this->_wishlist = Mage::registry('shared_wishlist');
             } elseif (Mage::registry('wishlist')) {
@@ -197,7 +197,7 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getWishlistItemCollection()
     {
-        if (is_null($this->_wishlistItemCollection)) {
+        if ($this->_wishlistItemCollection === null) {
             $this->_wishlistItemCollection = $this->_createWishlistItemCollection();
         }
         return $this->_wishlistItemCollection;
@@ -213,7 +213,7 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getProductCollection()
     {
-        if (is_null($this->_productCollection)) {
+        if ($this->_productCollection === null) {
             $this->_productCollection = $this->getWishlist()
                 ->getProductCollection();
 

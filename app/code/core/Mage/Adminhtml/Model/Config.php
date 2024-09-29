@@ -94,7 +94,7 @@ class Mage_Adminhtml_Model_Config extends Varien_Simplexml_Config
         if ($this->getCacheSaved()) {
             return $this;
         }
-        if (is_null($tags)) {
+        if ($tags === null) {
             $tags = $this->_cacheTags;
         }
         $xmlString = $this->_config->getXmlString();

@@ -39,7 +39,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Renderer_Region extends Mage_Adminhtml_
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
         $country = $element->getForm()->getElement('country_id');
-        if (is_null($country)) {
+        if ($country === null) {
             return $element->getDefaultHtml();
         }
 

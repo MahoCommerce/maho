@@ -423,7 +423,7 @@ class Mage_Adminhtml_Model_System_Store extends Varien_Object
      */
     public function reload($type = null)
     {
-        if (is_null($type)) {
+        if ($type === null) {
             $this->_loadWebsiteCollection();
             $this->_loadGroupCollection();
             $this->_loadStoreCollection();

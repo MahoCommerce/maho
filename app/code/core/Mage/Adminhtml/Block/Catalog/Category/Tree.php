@@ -80,7 +80,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Ca
     {
         $storeId = $this->getRequest()->getParam('store', $this->_getDefaultStoreId());
         $collection = $this->getData('category_collection');
-        if (is_null($collection)) {
+        if ($collection === null) {
             $collection = Mage::getModel('catalog/category')->getCollection();
 
             /** @var Mage_Catalog_Model_Resource_Category_Collection $collection */
@@ -123,7 +123,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Ca
     public function getLoadTreeUrl($expanded = null)
     {
         $params = ['_current' => true, 'id' => null,'store' => null];
-        if ((is_null($expanded) && Mage::getSingleton('admin/session')->getIsTreeWasExpanded())
+        if (($expanded === null && Mage::getSingleton('admin/session')->getIsTreeWasExpanded())
             || $expanded == true
         ) {
             $params['expand_all'] = true;

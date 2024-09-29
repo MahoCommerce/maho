@@ -33,10 +33,10 @@ class Mage_Adminhtml_Block_Widget_Grid_Container extends Mage_Adminhtml_Block_Wi
      */
     public function __construct()
     {
-        if (is_null($this->_addButtonLabel)) {
+        if ($this->_addButtonLabel === null) {
             $this->_addButtonLabel = $this->__('Add New');
         }
-        if (is_null($this->_backButtonLabel)) {
+        if ($this->_backButtonLabel === null) {
             $this->_backButtonLabel = $this->__('Back');
         }
 

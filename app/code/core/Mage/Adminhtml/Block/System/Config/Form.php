@@ -613,7 +613,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     public function getScope()
     {
         $scope = $this->getData('scope');
-        if (is_null($scope)) {
+        if ($scope === null) {
             if ($this->getStoreCode()) {
                 $scope = self::SCOPE_STORES;
             } elseif ($this->getWebsiteCode()) {
@@ -651,7 +651,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     public function getScopeCode()
     {
         $scopeCode = $this->getData('scope_code');
-        if (is_null($scopeCode)) {
+        if ($scopeCode === null) {
             if ($this->getStoreCode()) {
                 $scopeCode = $this->getStoreCode();
             } elseif ($this->getWebsiteCode()) {
@@ -673,7 +673,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     public function getScopeId()
     {
         $scopeId = $this->getData('scope_id');
-        if (is_null($scopeId)) {
+        if ($scopeId === null) {
             if ($this->getStoreCode()) {
                 $scopeId = Mage::app()->getStore($this->getStoreCode())->getId();
             } elseif ($this->getWebsiteCode()) {

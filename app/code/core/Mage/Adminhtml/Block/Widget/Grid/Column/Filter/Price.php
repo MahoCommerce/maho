@@ -55,7 +55,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
 
     protected function _getCurrencyModel()
     {
-        if (is_null($this->_currencyModel)) {
+        if ($this->_currencyModel === null) {
             $this->_currencyModel = Mage::getModel('directory/currency');
         }
 
@@ -81,7 +81,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
 
     protected function _getCurrencyList()
     {
-        if (is_null($this->_currencyList)) {
+        if ($this->_currencyList === null) {
             $this->_currencyList = $this->_getCurrencyModel()->getConfigAllowCurrencies();
         }
         return $this->_currencyList;

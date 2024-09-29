@@ -314,7 +314,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
     public function getProduct()
     {
         $product = $this->_getData('product');
-        if (is_null($product)) {
+        if ($product === null) {
             if (!$this->getProductId()) {
                 throw new Mage_Core_Exception(
                     Mage::helper('wishlist')->__('Cannot specify product.'),

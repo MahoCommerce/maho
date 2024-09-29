@@ -55,7 +55,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
 
     public function setVar($key, $value = null)
     {
-        if (is_array($key) && is_null($value)) {
+        if (is_array($key) && $value === null) {
             $this->_vars = $key;
         } else {
             $this->_vars[$key] = $value;
@@ -87,7 +87,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
 
     public function getData()
     {
-        if (is_null($this->_data) && $this->getProfile()) {
+        if ($this->_data === null && $this->getProfile()) {
             $this->_data = $this->getProfile()->getContainer()->getData();
         }
         return $this->_data;
@@ -114,7 +114,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
      */
     public function validateDataSerialized($data = null)
     {
-        if (is_null($data)) {
+        if ($data === null) {
             $data = $this->getData();
         }
 
@@ -136,7 +136,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
 
     public function validateDataString($data = null)
     {
-        if (is_null($data)) {
+        if ($data === null) {
             $data = $this->getData();
         }
         if (!is_string($data)) {
@@ -147,7 +147,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
 
     public function validateDataArray($data = null)
     {
-        if (is_null($data)) {
+        if ($data === null) {
             $data = $this->getData();
         }
         if (!is_array($data)) {
@@ -158,7 +158,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
 
     public function validateDataGrid($data = null)
     {
-        if (is_null($data)) {
+        if ($data === null) {
             $data = $this->getData();
         }
         if (!is_array($data) || !is_array(current($data))) {

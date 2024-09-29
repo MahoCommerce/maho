@@ -80,7 +80,7 @@ class Mage_Adminhtml_Model_Session_Quote extends Mage_Core_Model_Session_Abstrac
      */
     public function getQuote()
     {
-        if (is_null($this->_quote)) {
+        if ($this->_quote === null) {
             $this->_quote = Mage::getModel('sales/quote');
             if ($this->getStoreId() && $this->getQuoteId()) {
                 $this->_quote->setStoreId($this->getStoreId())

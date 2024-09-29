@@ -116,7 +116,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
     {
         $filter = $this->getParam($this->getVarNameFilter(), null);
 
-        if (is_null($filter)) {
+        if ($filter === null) {
             $filter = $this->_defaultFilter;
         }
 
@@ -648,7 +648,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
      */
     public function getCurrentCurrencyCode()
     {
-        if (is_null($this->_currentCurrencyCode)) {
+        if ($this->_currentCurrencyCode === null) {
             if ($this->getRequest()->getParam('store')) {
                 $store = $this->getRequest()->getParam('store');
                 $this->_currentCurrencyCode = Mage::app()->getStore($store)->getBaseCurrencyCode();

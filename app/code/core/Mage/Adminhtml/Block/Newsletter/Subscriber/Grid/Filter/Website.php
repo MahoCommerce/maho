@@ -40,7 +40,7 @@ class Mage_Adminhtml_Block_Newsletter_Subscriber_Grid_Filter_Website extends Mag
      */
     public function getCollection()
     {
-        if (is_null($this->_websiteCollection)) {
+        if ($this->_websiteCollection === null) {
             $this->_websiteCollection = Mage::getResourceModel('core/website_collection')
                 ->load();
         }

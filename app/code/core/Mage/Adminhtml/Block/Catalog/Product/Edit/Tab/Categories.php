@@ -98,7 +98,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Categories extends Mage_Admi
             return $this->getNode($parentNodeCategory, $recursionLevel);
         }
         $root = Mage::registry('root');
-        if (is_null($root)) {
+        if ($root === null) {
             $storeId = (int) $this->getRequest()->getParam('store');
 
             if ($storeId) {

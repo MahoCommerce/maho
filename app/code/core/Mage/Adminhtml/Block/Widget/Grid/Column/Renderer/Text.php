@@ -35,7 +35,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Text extends Mage_Adminht
     {
         $format = ($this->getColumn()->getFormat()) ? $this->getColumn()->getFormat() : null;
         $defaultValue = $this->getColumn()->getDefault();
-        if (is_null($format)) {
+        if ($format === null) {
             // If no format and it column not filtered specified return data as is.
             $data = parent::_getValue($row);
             $string = $data ?? $defaultValue ?? '';

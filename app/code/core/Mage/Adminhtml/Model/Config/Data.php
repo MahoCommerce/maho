@@ -218,7 +218,7 @@ class Mage_Adminhtml_Model_Config_Data extends Varien_Object
      */
     public function load()
     {
-        if (is_null($this->_configData)) {
+        if ($this->_configData === null) {
             $this->_validate();
             $this->_getScope();
             $this->_configData = $this->_getConfig(false);
