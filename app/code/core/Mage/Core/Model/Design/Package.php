@@ -90,10 +90,10 @@ class Mage_Core_Model_Design_Package
 
     public function __construct()
     {
-        if (is_null($this->_config)) {
+        if ($this->_config === null) {
             $this->_config = Mage::getSingleton('core/design_config');
         }
-        if (is_null($this->_fallback)) {
+        if ($this->_fallback === null) {
             $this->_fallback = Mage::getSingleton('core/design_fallback', [
                 'config' => $this->_config,
             ]);
@@ -144,7 +144,7 @@ class Mage_Core_Model_Design_Package
      */
     public function getArea()
     {
-        if (is_null($this->_area)) {
+        if ($this->_area === null) {
             $this->_area = self::DEFAULT_AREA;
         }
         return $this->_area;
@@ -550,7 +550,7 @@ class Mage_Core_Model_Design_Package
     {
         $result = [];
 
-        if (is_null($package)) {
+        if ($package === null) {
             foreach ($this->getPackageList() as $package) {
                 $result[$package] = $this->getThemeList($package);
             }

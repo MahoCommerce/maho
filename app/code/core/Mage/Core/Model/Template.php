@@ -91,7 +91,7 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
      */
     protected function getDesignConfig()
     {
-        if (is_null($this->_designConfig)) {
+        if ($this->_designConfig === null) {
             $store = Mage::getDesign()->getStore();
             $storeId = is_object($store) ? $store->getId() : $store;
             $this->_designConfig = new Varien_Object([

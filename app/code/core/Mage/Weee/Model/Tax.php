@@ -134,7 +134,7 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
             return [];
         }
 
-        if (is_null($this->_allAttributes)) {
+        if ($this->_allAttributes === null) {
             $this->_allAttributes = Mage::getModel('eav/entity_attribute')->getAttributeCodesByFrontendType('weee');
         }
         return $this->_allAttributes;

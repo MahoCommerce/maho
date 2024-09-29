@@ -36,7 +36,7 @@ class Mage_Catalog_Model_Category_Attribute_Source_Sortby extends Mage_Eav_Model
     #[\Override]
     public function getAllOptions()
     {
-        if (is_null($this->_options)) {
+        if ($this->_options === null) {
             $this->_options = [[
                 'label' => Mage::helper('catalog')->__('Best Value'),
                 'value' => 'position'

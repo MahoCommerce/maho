@@ -83,7 +83,7 @@ class Mage_Checkout_Model_Cart extends Varien_Object implements Mage_Checkout_Mo
     public function getQuoteProductIds()
     {
         $products = $this->getData('product_ids');
-        if (is_null($products)) {
+        if ($products === null) {
             $products = [];
             foreach ($this->getQuote()->getAllItems() as $item) {
                 $productId = $item->getProductId();
@@ -161,7 +161,7 @@ class Mage_Checkout_Model_Cart extends Varien_Object implements Mage_Checkout_Mo
 
             $info = $orderItem->getProductOptionByCode('info_buyRequest');
             $info = new Varien_Object($info);
-            if (is_null($qtyFlag)) {
+            if ($qtyFlag === null) {
                 $info->setQty($orderItem->getQtyOrdered());
             } else {
                 $info->setQty(1);

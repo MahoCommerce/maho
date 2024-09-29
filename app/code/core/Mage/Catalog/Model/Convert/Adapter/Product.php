@@ -218,7 +218,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
      */
     public function getProductModel()
     {
-        if (is_null($this->_productModel)) {
+        if ($this->_productModel === null) {
             $productModel = Mage::getModel('catalog/product');
             $this->_productModel = Mage::objects()->save($productModel);
         }
@@ -252,7 +252,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
      */
     public function getProductTypes()
     {
-        if (is_null($this->_productTypes)) {
+        if ($this->_productTypes === null) {
             $this->_productTypes = [];
             $options = Mage::getModel('catalog/product_type')
                 ->getOptionArray();
@@ -286,7 +286,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
      */
     public function getProductAttributeSets()
     {
-        if (is_null($this->_productAttributeSets)) {
+        if ($this->_productAttributeSets === null) {
             $this->_productAttributeSets = [];
 
             $entityTypeId = Mage::getModel('eav/entity')
@@ -307,7 +307,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
      */
     protected function _initStores()
     {
-        if (is_null($this->_stores)) {
+        if ($this->_stores === null) {
             $this->_stores = Mage::app()->getStores(true, true);
             foreach ($this->_stores as $code => $store) {
                 $this->_storesIdCode[$store->getId()] = $code;
@@ -745,7 +745,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
             if (in_array($field, $this->_inventoryFields)) {
                 continue;
             }
-            if (is_null($value)) {
+            if ($value === null) {
                 continue;
             }
 

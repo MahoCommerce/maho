@@ -669,7 +669,7 @@ class Mage_Core_Model_App
             $websiteStores[$store->getWebsiteId()][$store->getId()] = $store;
             $groupStores[$store->getGroupId()][$store->getId()] = $store;
 
-            if (is_null($this->_store) && $store->getId()) {
+            if ($this->_store === null && $store->getId()) {
                 $this->_store = $store;
             }
         }
@@ -975,7 +975,7 @@ class Mage_Core_Model_App
      */
     public function getWebsite($id = null)
     {
-        if (is_null($id)) {
+        if ($id === null) {
             $id = $this->getStore()->getWebsiteId();
         } elseif ($id instanceof Mage_Core_Model_Website) {
             return $id;
@@ -1036,7 +1036,7 @@ class Mage_Core_Model_App
      */
     public function getGroup($id = null)
     {
-        if (is_null($id)) {
+        if ($id === null) {
             $id = $this->getStore()->getGroup()->getId();
         } elseif ($id instanceof Mage_Core_Model_Store_Group) {
             return $id;
@@ -1661,7 +1661,7 @@ class Mage_Core_Model_App
      */
     public function clearWebsiteCache($id = null)
     {
-        if (is_null($id)) {
+        if ($id === null) {
             $id = $this->getStore()->getWebsiteId();
         } elseif ($id instanceof Mage_Core_Model_Website) {
             $id = $id->getId();

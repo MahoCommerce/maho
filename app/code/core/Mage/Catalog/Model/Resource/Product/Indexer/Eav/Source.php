@@ -80,7 +80,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source extends Mage_Catalo
         $adapter    = $this->_getWriteAdapter();
         $idxTable   = $this->getIdxTable();
         // prepare select attributes
-        if (is_null($attributeId)) {
+        if ($attributeId === null) {
             $attrIds    = $this->_getIndexableAttributes(false);
         } else {
             $attrIds    = [$attributeId];
@@ -161,7 +161,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source extends Mage_Catalo
         $adapter    = $this->_getWriteAdapter();
 
         // prepare multiselect attributes
-        if (is_null($attributeId)) {
+        if ($attributeId === null) {
             $attrIds    = $this->_getIndexableAttributes(true);
         } else {
             $attrIds    = [$attributeId];

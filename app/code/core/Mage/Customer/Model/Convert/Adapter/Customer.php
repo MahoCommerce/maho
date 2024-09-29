@@ -69,7 +69,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
      */
     public function getCustomerModel()
     {
-        if (is_null($this->_customerModel)) {
+        if ($this->_customerModel === null) {
             $object = Mage::getModel('customer/customer');
             $this->_customerModel = Mage::objects()->save($object);
         }
@@ -83,7 +83,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
      */
     public function getBillingAddressModel()
     {
-        if (is_null($this->_billingAddressModel)) {
+        if ($this->_billingAddressModel === null) {
             $object = Mage::getModel('customer/address');
             $this->_billingAddressModel = Mage::objects()->save($object);
         }
@@ -97,7 +97,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
      */
     public function getShippingAddressModel()
     {
-        if (is_null($this->_shippingAddressModel)) {
+        if ($this->_shippingAddressModel === null) {
             $object = Mage::getModel('customer/address');
             $this->_shippingAddressModel = Mage::objects()->save($object);
         }
@@ -112,7 +112,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
      */
     public function getStoreByCode($store)
     {
-        if (is_null($this->_stores)) {
+        if ($this->_stores === null) {
             $this->_stores = Mage::app()->getStores(true, true);
         }
         if (isset($this->_stores[$store])) {
@@ -129,7 +129,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
      */
     public function getWebsiteByCode($websiteCode)
     {
-        if (is_null($this->_websites)) {
+        if ($this->_websites === null) {
             $this->_websites = Mage::app()->getWebsites(true, true);
         }
         if (isset($this->_websites[$websiteCode])) {
@@ -161,7 +161,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
      */
     public function getRegionId($country, $regionName)
     {
-        if (is_null($this->_regions)) {
+        if ($this->_regions === null) {
             $this->_regions = [];
 
             $collection = Mage::getModel('directory/region')
@@ -186,7 +186,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
      */
     public function getCustomerGroups()
     {
-        if (is_null($this->_customerGroups)) {
+        if ($this->_customerGroups === null) {
             $this->_customerGroups = [];
             $collection = Mage::getModel('customer/group')
                 ->getCollection()

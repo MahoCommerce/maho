@@ -229,13 +229,13 @@ class Mage_Core_Model_Cookie
         if ($domain === null) {
             $domain = $this->getDomain();
         }
-        if (is_null($secure)) {
+        if ($secure === null) {
             $secure = $this->isSecure();
         }
-        if (is_null($httponly)) {
+        if ($httponly === null) {
             $httponly = $this->getHttponly();
         }
-        if (is_null($sameSite)) {
+        if ($sameSite === null) {
             $sameSite = $this->getSameSite();
         }
 

@@ -74,7 +74,7 @@ class Mage_Dataflow_Model_Batch_Io
      */
     public function getPath()
     {
-        if (is_null($this->_path)) {
+        if ($this->_path === null) {
             $this->_path = $this->getIoAdapter()->getCleanPath(Mage::getBaseDir('tmp'));
             $this->getIoAdapter()->checkAndCreateFolder($this->_path);
         }
@@ -88,7 +88,7 @@ class Mage_Dataflow_Model_Batch_Io
      */
     public function getFile($withPath = false)
     {
-        if (is_null($this->_filename)) {
+        if ($this->_filename === null) {
             $this->_filename = sprintf(self::TMP_NAME, $this->_batchModel->getId());
         }
         if ($withPath) {
@@ -104,7 +104,7 @@ class Mage_Dataflow_Model_Batch_Io
      */
     public function getIoAdapter()
     {
-        if (is_null($this->_ioFile)) {
+        if ($this->_ioFile === null) {
             $this->_ioFile = new Varien_Io_File();
         }
         return $this->_ioFile;

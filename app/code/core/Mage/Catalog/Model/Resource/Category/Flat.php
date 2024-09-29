@@ -143,7 +143,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      */
     public function getStoreId()
     {
-        if (is_null($this->_storeId)) {
+        if ($this->_storeId === null) {
             return (int)Mage::app()->getStore()->getId();
         }
         return $this->_storeId;
@@ -425,7 +425,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      */
     public function getNodeById($nodeId, $nodes = null)
     {
-        if (is_null($nodes)) {
+        if ($nodes === null) {
             $nodes = $this->getNodes($nodeId);
         }
         if (isset($nodes[$nodeId])) {
@@ -447,7 +447,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      */
     public function isBuilt($storeView = null)
     {
-        $storeView = is_null($storeView) ? Mage::app()->getDefaultStoreView() : Mage::app()->getStore($storeView);
+        $storeView = $storeView === null ? Mage::app()->getDefaultStoreView() : Mage::app()->getStore($storeView);
         if ($storeView === null) {
             $storeId = Mage_Core_Model_App::ADMIN_STORE_ID;
         } else {
@@ -919,7 +919,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      */
     public function synchronize($category = null, $storeIds = [])
     {
-        if (is_null($category)) {
+        if ($category === null) {
             if (empty($storeIds)) {
                 $storeIds = null;
             }
@@ -1439,7 +1439,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      */
     public function getStoresRootCategories($storeIds = null)
     {
-        if (is_null($this->_storesRootCategories)) {
+        if ($this->_storesRootCategories === null) {
             $select = $this->_getWriteAdapter()->select()
                 ->from(['cs' => $this->getTable('core/store')], ['store_id'])
                 ->join(

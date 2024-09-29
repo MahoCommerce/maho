@@ -28,7 +28,7 @@ class Mage_Catalog_Model_Product_Type_Configurable_Price extends Mage_Catalog_Mo
     #[\Override]
     public function getFinalPrice($qty, $product)
     {
-        if (is_null($qty) && $product->getCalculatedFinalPrice() !== null) {
+        if ($qty === null && $product->getCalculatedFinalPrice() !== null) {
             return $product->getCalculatedFinalPrice();
         }
 

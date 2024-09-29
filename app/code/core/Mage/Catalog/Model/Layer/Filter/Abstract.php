@@ -102,7 +102,7 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends Varien_Object
      */
     public function getItems()
     {
-        if (is_null($this->_items)) {
+        if ($this->_items === null) {
             $this->_initItems();
         }
         return $this->_items;
@@ -155,7 +155,7 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends Varien_Object
     public function getLayer()
     {
         $layer = $this->_getData('layer');
-        if (is_null($layer)) {
+        if ($layer === null) {
             $layer = Mage::getSingleton('catalog/layer');
             $this->setData('layer', $layer);
         }
@@ -220,7 +220,7 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends Varien_Object
     public function getAttributeModel()
     {
         $attribute = $this->getData('attribute_model');
-        if (is_null($attribute)) {
+        if ($attribute === null) {
             Mage::throwException(Mage::helper('catalog')->__('The attribute model is not defined'));
         }
         return $attribute;
@@ -244,7 +244,7 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends Varien_Object
     public function getStoreId()
     {
         $storeId = $this->_getData('store_id');
-        if (is_null($storeId)) {
+        if ($storeId === null) {
             $storeId = Mage::app()->getStore()->getId();
         }
         return $storeId;
@@ -269,7 +269,7 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends Varien_Object
     public function getWebsiteId()
     {
         $websiteId = $this->_getData('website_id');
-        if (is_null($websiteId)) {
+        if ($websiteId === null) {
             $websiteId = Mage::app()->getStore()->getWebsiteId();
         }
         return $websiteId;

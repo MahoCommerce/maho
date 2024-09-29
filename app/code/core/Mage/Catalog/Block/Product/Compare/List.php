@@ -87,7 +87,7 @@ class Mage_Catalog_Block_Product_Compare_List extends Mage_Catalog_Block_Product
      */
     public function getItems()
     {
-        if (is_null($this->_items)) {
+        if ($this->_items === null) {
             Mage::helper('catalog/product_compare')->setAllowUsedFlat(false);
 
             $this->_items = Mage::getResourceModel('catalog/product_compare_item_collection')
@@ -122,7 +122,7 @@ class Mage_Catalog_Block_Product_Compare_List extends Mage_Catalog_Block_Product
      */
     public function getAttributes()
     {
-        if (is_null($this->_attributes)) {
+        if ($this->_attributes === null) {
             $this->_attributes = $this->getItems()->getComparableAttributes();
         }
 

@@ -94,7 +94,7 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
     #[\Override]
     public function getTierPrices($product = null, $parent = null)
     {
-        if (is_null($product)) {
+        if ($product === null) {
             $product = $this->getProduct();
         }
         $prices = $product->getFormatedTierPrice();

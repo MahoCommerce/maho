@@ -73,7 +73,7 @@ class Mage_Reports_Model_Event extends Mage_Core_Model_Abstract
      */
     public function updateCustomerType($visitorId, $customerId, $types = null)
     {
-        if (is_null($types)) {
+        if ($types === null) {
             $types = [];
             foreach (Mage::getModel('reports/event_type')->getCollection() as $eventType) {
                 if ($eventType->getCustomerLogin()) {

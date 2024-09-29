@@ -67,7 +67,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      */
     protected function _getWebsites()
     {
-        if (is_null($this->_websites)) {
+        if ($this->_websites === null) {
             $this->_websites = Mage::app()->getWebsites(false);
         }
         return $this->_websites;
@@ -81,7 +81,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
      */
     protected function _getCustomerGroups()
     {
-        if (is_null($this->_customerGroups)) {
+        if ($this->_customerGroups === null) {
             $this->_customerGroups = [];
             foreach (Mage::getModel('customer/group')->getCollection() as $group) {
                 $this->_customerGroups[$group->getId()] = $group;

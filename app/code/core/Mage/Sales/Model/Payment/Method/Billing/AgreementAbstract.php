@@ -44,7 +44,7 @@ abstract class Mage_Sales_Model_Payment_Method_Billing_AgreementAbstract extends
     #[\Override]
     public function isAvailable($quote = null)
     {
-        if (is_null($this->_isAvailable)) {
+        if ($this->_isAvailable === null) {
             if (is_object($quote) && $quote->getCustomer()) {
                 $availableBA = Mage::getModel('sales/billing_agreement')->getAvailableCustomerBillingAgreements(
                     $quote->getCustomer()->getId()

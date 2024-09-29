@@ -26,7 +26,7 @@ class Mage_Bundle_Model_Product_Attribute_Source_Price_View extends Mage_Eav_Mod
     #[\Override]
     public function getAllOptions()
     {
-        if (is_null($this->_options)) {
+        if ($this->_options === null) {
             $this->_options = [
                 [
                     'label' => Mage::helper('bundle')->__('As Low as'),

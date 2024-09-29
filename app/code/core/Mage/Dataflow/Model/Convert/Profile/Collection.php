@@ -68,7 +68,7 @@ class Mage_Dataflow_Model_Convert_Profile_Collection
 
     public function addProfile($name, ?Mage_Dataflow_Model_Convert_Profile_Interface $profile = null)
     {
-        if (is_null($profile)) {
+        if ($profile === null) {
             $profile = new $this->_profileDefaultClass();
         }
         $this->_profiles[$name] = $profile;

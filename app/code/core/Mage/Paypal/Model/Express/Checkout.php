@@ -827,7 +827,7 @@ class Mage_Paypal_Model_Express_Checkout
             }
         }
 
-        if ($mayReturnEmpty && is_null($userSelectedOption)) {
+        if ($mayReturnEmpty && $userSelectedOption === null) {
             $options[] = new Varien_Object([
                 'is_default' => true,
                 'name'       => Mage::helper('paypal')->__('N/A'),
@@ -837,7 +837,7 @@ class Mage_Paypal_Model_Express_Checkout
             if ($calculateTax) {
                 $options[$i]->setTaxAmount($address->getTaxAmount());
             }
-        } elseif (is_null($userSelectedOption) && isset($options[$iMin])) {
+        } elseif ($userSelectedOption === null && isset($options[$iMin])) {
             $options[$iMin]->setIsDefault(true);
         }
 

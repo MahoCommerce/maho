@@ -399,7 +399,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
     public function getValueName()
     {
         $value = $this->getValue();
-        if (is_null($value) || $value === '') {
+        if ($value === null || $value === '') {
             return '...';
         }
 

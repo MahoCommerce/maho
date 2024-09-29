@@ -213,7 +213,7 @@ class Mage_Reports_Model_Resource_Report_Collection_Abstract extends Mage_Core_M
      */
     public function isTotals($flag = null)
     {
-        if (is_null($flag)) {
+        if ($flag === null) {
             return $this->_isTotals;
         }
         $this->_isTotals = $flag;
@@ -228,7 +228,7 @@ class Mage_Reports_Model_Resource_Report_Collection_Abstract extends Mage_Core_M
      */
     public function isSubTotals($flag = null)
     {
-        if (is_null($flag)) {
+        if ($flag === null) {
             return $this->_isSubTotals;
         }
         $this->_isSubTotals = $flag;

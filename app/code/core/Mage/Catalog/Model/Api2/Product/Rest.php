@@ -175,7 +175,7 @@ abstract class Mage_Catalog_Model_Api2_Product_Rest extends Mage_Catalog_Model_A
      */
     protected function _getProduct()
     {
-        if (is_null($this->_product)) {
+        if ($this->_product === null) {
             $productId = $this->getRequest()->getParam('id');
             /** @var Mage_Catalog_Helper_Product $productHelper */
             $productHelper = Mage::helper('catalog/product');
@@ -246,7 +246,7 @@ abstract class Mage_Catalog_Model_Api2_Product_Rest extends Mage_Catalog_Model_A
         $product = $this->_getProduct();
         $store = $this->_getStore();
 
-        if (is_null($priceIncludesTax)) {
+        if ($priceIncludesTax === null) {
             /** @var Mage_Tax_Model_Config $config */
             $config = Mage::getSingleton('tax/config');
             $priceIncludesTax = $config->priceIncludesTax($store) || $config->getNeedUseShippingExcludeTax();
@@ -256,7 +256,7 @@ abstract class Mage_Catalog_Model_Api2_Product_Rest extends Mage_Catalog_Model_A
         $includingPercent = null;
 
         $taxClassId = $product->getTaxClassId();
-        if (is_null($percent)) {
+        if ($percent === null) {
             if ($taxClassId) {
                 $request = Mage::getSingleton('tax/calculation')
                     ->getRateRequest($shippingAddress, $billingAddress, $ctc, $store);
@@ -274,7 +274,7 @@ abstract class Mage_Catalog_Model_Api2_Product_Rest extends Mage_Catalog_Model_A
             }
         }
 
-        if ($percent === false || is_null($percent)) {
+        if ($percent === false || $percent === null) {
             if ($priceIncludesTax && !$includingPercent) {
                 return $price;
             }

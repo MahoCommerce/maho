@@ -26,7 +26,7 @@ class Mage_Customer_Model_Customer_Attribute_Backend_Shipping extends Mage_Eav_M
     public function beforeSave($object)
     {
         $defaultShipping = $object->getDefaultShipping();
-        if (is_null($defaultShipping)) {
+        if ($defaultShipping === null) {
             $object->unsetDefaultShipping();
         }
         return $this;

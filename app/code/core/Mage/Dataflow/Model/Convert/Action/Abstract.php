@@ -68,7 +68,7 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
      */
     public function setParam($key, $value = null)
     {
-        if (is_array($key) && is_null($value)) {
+        if (is_array($key) && $value === null) {
             $this->_params = $key;
         } else {
             $this->_params[$key] = $value;
@@ -122,7 +122,7 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
 
     public function addAction(?Mage_Dataflow_Model_Convert_Action_Interface $action = null)
     {
-        if (is_null($action)) {
+        if ($action === null) {
             $action = new $this->_actionDefaultClass();
         }
         $this->_actions[] = $action;

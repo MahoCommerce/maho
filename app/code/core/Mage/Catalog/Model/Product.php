@@ -482,7 +482,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     public function getTypeInstance($singleton = false)
     {
         if ($singleton === true) {
-            if (is_null($this->_typeInstanceSingleton)) {
+            if ($this->_typeInstanceSingleton === null) {
                 $this->_typeInstanceSingleton = Mage::getSingleton('catalog/product_type')
                     ->factory($this, true);
             }
@@ -558,7 +558,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     public function getCategory()
     {
         $category = $this->getData('category');
-        if (is_null($category) && $this->getCategoryId()) {
+        if ($category === null && $this->getCategoryId()) {
             $category = Mage::getModel('catalog/category')->load($this->getCategoryId());
             $this->setCategory($category);
         }

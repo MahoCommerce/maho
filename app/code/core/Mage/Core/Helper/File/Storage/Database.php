@@ -69,7 +69,7 @@ class Mage_Core_Helper_File_Storage_Database extends Mage_Core_Helper_Abstract
      */
     public function getStorageDatabaseModel()
     {
-        if (is_null($this->_databaseModel)) {
+        if ($this->_databaseModel === null) {
             $this->_databaseModel = Mage::getModel('core/file_storage_database');
         }
 
@@ -93,7 +93,7 @@ class Mage_Core_Helper_File_Storage_Database extends Mage_Core_Helper_Abstract
      */
     public function getResourceStorageModel()
     {
-        if (is_null($this->_resourceModel)) {
+        if ($this->_resourceModel === null) {
             $this->_resourceModel = $this->getStorageDatabaseModel()->getResource();
         }
         return $this->_resourceModel;

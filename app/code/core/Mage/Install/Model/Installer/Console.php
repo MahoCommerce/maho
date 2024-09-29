@@ -52,7 +52,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
      */
     protected function _getOptions()
     {
-        if (is_null($this->_options)) {
+        if ($this->_options === null) {
             $this->_options = [
                 'license_agreement_accepted'    => ['required' => true, 'comment' => ''],
                 'locale'              => ['required' => true, 'comment' => ''],
@@ -210,7 +210,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
      */
     protected function _getDataModel()
     {
-        if (is_null($this->_dataModel)) {
+        if ($this->_dataModel === null) {
             $this->_dataModel = Mage::getModel('install/installer_data');
         }
         return $this->_dataModel;
@@ -441,7 +441,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
         if (defined('STDIN') && defined('STDOUT') && (defined('STDERR'))) {
             return true;
         }
-        if (is_null($url)) {
+        if ($url === null) {
             $url = preg_replace('/install\.php/i', '', Mage::getBaseUrl());
             $url = preg_replace('/\/\/$/', '/', $url);
         }

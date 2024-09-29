@@ -70,7 +70,7 @@ class Mage_Index_Model_Indexer
      */
     public function getProcessesCollection()
     {
-        if (is_null($this->_processesCollection)) {
+        if ($this->_processesCollection === null) {
             $this->_processesCollection = Mage::getResourceModel('index/process_collection');
         }
         return $this->_processesCollection;
@@ -411,7 +411,7 @@ class Mage_Index_Model_Indexer
             && $process->getMode() !== Mage_Index_Model_Process::MODE_MANUAL
             && !$process->isLocked()
             && (
-                is_null($event)
+                $event === null
                 || ($event instanceof Mage_Index_Model_Event && $process->matchEvent($event))
                 || (is_array($event) && $process->matchEntityAndType($event[0], $event[1]))
             )

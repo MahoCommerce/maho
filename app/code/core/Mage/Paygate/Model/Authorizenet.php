@@ -1005,10 +1005,10 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      */
     public function getCardsStorage($payment = null)
     {
-        if (is_null($payment)) {
+        if ($payment === null) {
             $payment = $this->getInfoInstance();
         }
-        if (is_null($this->_cardsStorage)) {
+        if ($this->_cardsStorage === null) {
             $this->_initCardsStorage($payment);
         }
         return $this->_cardsStorage;
@@ -1022,7 +1022,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      */
     public function isPartialAuthorization($payment = null)
     {
-        if (is_null($payment)) {
+        if ($payment === null) {
             $payment = $this->getInfoInstance();
         }
         return $payment->getAdditionalInformation($this->_splitTenderIdKey);
@@ -1083,7 +1083,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
          * because controller have another object for this transaction and Mage_Sales_Model_Order_Payment_Transaction::RAW_DETAILS isn't includes _isTransactionFraud flag.
          */
         $transaction = Mage::registry('current_transaction');
-        if (is_null($transaction)) {
+        if ($transaction === null) {
             //this is for payment info update:
             $transactionId = $card->getLastTransId();
             $transaction = $payment->getTransaction($transactionId);

@@ -210,10 +210,10 @@ class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Ma
         if (!Mage::isInstalled()) {
             return false;
         }
-        if (is_null($request)) {
+        if ($request === null) {
             $request = Mage::app()->getFrontController()->getRequest();
         }
-        if (is_null($response)) {
+        if ($response === null) {
             $response = Mage::app()->getFrontController()->getResponse();
         }
         if (is_null($this->getStoreId()) || $this->getStoreId() === false) {

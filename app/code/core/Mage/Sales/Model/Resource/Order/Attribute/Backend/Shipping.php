@@ -28,7 +28,7 @@ class Mage_Sales_Model_Resource_Order_Attribute_Backend_Shipping extends Mage_Ea
     public function beforeSave($object)
     {
         $shippingAddressId = $object->getShippingAddressId();
-        if (is_null($shippingAddressId)) {
+        if ($shippingAddressId === null) {
             $object->unsetShippingAddressId();
         }
         return $this;

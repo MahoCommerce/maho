@@ -209,7 +209,7 @@ class Mage_Dataflow_Model_Convert_Parser_Xml_Excel extends Mage_Dataflow_Model_C
         $itemData = [];
         $cellIndex = 0;
         foreach ($xmlElement->Row->children() as $cell) {
-            if (is_null($this->_parseFieldNames)) {
+            if ($this->_parseFieldNames === null) {
                 $xmlData[(string)$cell->Data] = (string)$cell->Data;
             } else {
                 $attributes = $cell->attributes('urn:schemas-microsoft-com:office:spreadsheet');

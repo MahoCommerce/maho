@@ -65,7 +65,7 @@ class Mage_Catalog_Model_Product_Flat_Indexer extends Mage_Core_Model_Abstract
      */
     public function rebuild($store = null)
     {
-        if (is_null($store)) {
+        if ($store === null) {
             $this->_getResource()->prepareFlatTables();
         } else {
             $this->_getResource()->prepareFlatTable($store);
@@ -88,7 +88,7 @@ class Mage_Catalog_Model_Product_Flat_Indexer extends Mage_Core_Model_Abstract
      */
     public function updateAttribute($attributeCode, $store = null, $productIds = null)
     {
-        if (is_null($store)) {
+        if ($store === null) {
             foreach (Mage::app()->getStores() as $store) {
                 $this->updateAttribute($attributeCode, $store->getId(), $productIds);
             }
@@ -112,7 +112,7 @@ class Mage_Catalog_Model_Product_Flat_Indexer extends Mage_Core_Model_Abstract
      */
     public function prepareDataStorage($store = null)
     {
-        if (is_null($store)) {
+        if ($store === null) {
             foreach (Mage::app()->getStores() as $store) {
                 $this->prepareDataStorage($store->getId());
             }
@@ -133,7 +133,7 @@ class Mage_Catalog_Model_Product_Flat_Indexer extends Mage_Core_Model_Abstract
      */
     public function updateEventAttributes($store = null)
     {
-        if (is_null($store)) {
+        if ($store === null) {
             foreach (Mage::app()->getStores() as $store) {
                 $this->updateEventAttributes($store->getId());
             }
@@ -158,7 +158,7 @@ class Mage_Catalog_Model_Product_Flat_Indexer extends Mage_Core_Model_Abstract
      */
     public function updateProductStatus($productId, $status, $store = null)
     {
-        if (is_null($store)) {
+        if ($store === null) {
             foreach (Mage::app()->getStores() as $store) {
                 $this->updateProductStatus($productId, $status, $store->getId());
             }
@@ -184,7 +184,7 @@ class Mage_Catalog_Model_Product_Flat_Indexer extends Mage_Core_Model_Abstract
      */
     public function updateProduct($productIds, $store = null)
     {
-        if (is_null($store)) {
+        if ($store === null) {
             foreach (Mage::app()->getStores() as $store) {
                 $this->updateProduct($productIds, $store->getId());
             }
@@ -215,7 +215,7 @@ class Mage_Catalog_Model_Product_Flat_Indexer extends Mage_Core_Model_Abstract
      */
     public function saveProduct($productIds, $store = null)
     {
-        if (is_null($store)) {
+        if ($store === null) {
             foreach (Mage::app()->getStores() as $store) {
                 $this->saveProduct($productIds, $store->getId());
             }
@@ -246,7 +246,7 @@ class Mage_Catalog_Model_Product_Flat_Indexer extends Mage_Core_Model_Abstract
      */
     public function removeProduct($productIds, $store = null)
     {
-        if (is_null($store)) {
+        if ($store === null) {
             foreach (Mage::app()->getStores() as $store) {
                 $this->removeProduct($productIds, $store->getId());
             }

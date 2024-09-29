@@ -156,7 +156,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
      */
     protected function _getXmlConfig()
     {
-        if (is_null($this->_config)) {
+        if ($this->_config === null) {
             $canUsaCache = Mage::app()->useCache('config');
             $cachedXml = Mage::app()->loadCache(self::JAVASCRIPT_TRANSLATE_CONFIG_KEY);
             if ($canUsaCache && $cachedXml) {
@@ -187,7 +187,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
      */
     public function getDeleteConfirmJs(string $url, ?string $message = null): string
     {
-        if (is_null($message)) {
+        if ($message === null) {
             $message = Mage::helper('adminhtml')->__('Are you sure you want to do this?');
         }
 
@@ -203,7 +203,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
      */
     public function getConfirmSetLocationJs(string $url, ?string $message = null): string
     {
-        if (is_null($message)) {
+        if ($message === null) {
             $message = Mage::helper('adminhtml')->__('Are you sure you want to do this?');
         }
 

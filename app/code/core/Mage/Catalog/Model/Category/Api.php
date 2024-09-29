@@ -113,9 +113,9 @@ class Mage_Catalog_Model_Category_Api extends Mage_Catalog_Model_Api_Resource
      */
     public function tree($parentId = null, $store = null)
     {
-        if (is_null($parentId) && $store !== null) {
+        if ($parentId === null && $store !== null) {
             $parentId = Mage::app()->getStore($this->_getStoreId($store))->getRootCategoryId();
-        } elseif (is_null($parentId)) {
+        } elseif ($parentId === null) {
             $parentId = 1;
         }
 

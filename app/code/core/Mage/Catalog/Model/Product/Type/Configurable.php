@@ -139,7 +139,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
     #[\Override]
     public function getEditableAttributes($product = null)
     {
-        if (is_null($this->_editableAttributes)) {
+        if ($this->_editableAttributes === null) {
             $this->_editableAttributes = parent::getEditableAttributes($product);
             foreach ($this->_editableAttributes as $index => $attribute) {
                 if ($this->getUsedProductAttributeIds($product)
@@ -317,7 +317,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
     {
         Varien_Profiler::start('CONFIGURABLE:' . __METHOD__);
         if (!$this->getProduct($product)->hasData($this->_usedProducts)) {
-            if (is_null($requiredAttributeIds)
+            if ($requiredAttributeIds === null
                 && is_null($this->getProduct($product)->getData($this->_configurableAttributes))
             ) {
                 // If used products load before attributes, we will load attributes.

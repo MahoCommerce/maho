@@ -46,7 +46,7 @@ class Mage_Dataflow_Model_Convert_Mapper_Column extends Mage_Dataflow_Model_Conv
      */
     public function getBatchModel()
     {
-        if (is_null($this->_batch)) {
+        if ($this->_batch === null) {
             $this->_batch = Mage::getSingleton('dataflow/batch');
         }
         return $this->_batch;

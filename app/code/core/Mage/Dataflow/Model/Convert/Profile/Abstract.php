@@ -33,7 +33,7 @@ abstract class Mage_Dataflow_Model_Convert_Profile_Abstract implements Mage_Data
 
     public function addAction(?Mage_Dataflow_Model_Convert_Action_Interface $action = null)
     {
-        if (is_null($action)) {
+        if ($action === null) {
             $action = new $this->_actionDefaultClass();
         }
         $this->_actions[] = $action;

@@ -44,7 +44,7 @@ class Mage_Sales_Model_Resource_Report_Collection_Abstract extends Mage_Reports_
      */
     protected function _applyOrderStatusFilter()
     {
-        if (is_null($this->_orderStatus)) {
+        if ($this->_orderStatus === null) {
             return $this;
         }
         $orderStatus = $this->_orderStatus;

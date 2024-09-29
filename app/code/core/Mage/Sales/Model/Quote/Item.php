@@ -272,7 +272,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     #[\Override]
     public function getQuote()
     {
-        if (is_null($this->_quote)) {
+        if ($this->_quote === null) {
             $this->_quote = Mage::getModel('sales/quote')->load($this->getQuoteId());
         }
         return $this->_quote;
@@ -359,7 +359,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     public function getQtyOptions()
     {
         $qtyOptions = $this->getData('qty_options');
-        if (is_null($qtyOptions)) {
+        if ($qtyOptions === null) {
             $productIds = [];
             $qtyOptions = [];
             foreach ($this->getOptions() as $option) {

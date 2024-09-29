@@ -259,7 +259,7 @@ class Mage_Core_Model_Url extends Varien_Object
      */
     public function getConfigData($key, $prefix = null)
     {
-        if (is_null($prefix)) {
+        if ($prefix === null) {
             $prefix = 'web/' . ($this->getSecure() ? 'secure' : 'unsecure') . '/';
         }
         $path = $prefix . $key;
@@ -495,7 +495,7 @@ class Mage_Core_Model_Url extends Varien_Object
             $routePath = $this->getActionPath();
             if ($this->getRouteParams()) {
                 foreach ($this->getRouteParams() as $key => $value) {
-                    if (is_null($value) || $value === false || $value === '' || !is_scalar($value)) {
+                    if ($value === null || $value === false || $value === '' || !is_scalar($value)) {
                         continue;
                     }
                     $routePath .= $key . '/' . $value . '/';

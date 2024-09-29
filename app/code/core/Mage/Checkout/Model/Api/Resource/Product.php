@@ -107,7 +107,7 @@ class Mage_Checkout_Model_Api_Resource_Product extends Mage_Checkout_Model_Api_R
             $item = $quote->getItemByProduct($candidate);
         }
 
-        if (is_null($item)) {
+        if ($item === null) {
             $item = Mage::getModel('sales/quote_item');
         }
 

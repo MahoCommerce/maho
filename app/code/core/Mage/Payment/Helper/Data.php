@@ -44,7 +44,7 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
     public function getMethodInstance($code)
     {
         $class = $this->getMethodModelClassName($code);
-        if (is_null($class)) {
+        if ($class === null) {
             Mage::logException(new Exception(sprintf('Unknown payment method with code "%s"', $code)));
             return false;
         }

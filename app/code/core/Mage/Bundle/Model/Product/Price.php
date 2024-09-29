@@ -113,7 +113,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
     #[\Override]
     public function getFinalPrice($qty, $product)
     {
-        if (is_null($qty) && $product->getCalculatedFinalPrice() !== null) {
+        if ($qty === null && $product->getCalculatedFinalPrice() !== null) {
             return $product->getCalculatedFinalPrice();
         }
 
@@ -560,7 +560,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         $multiplyQty = true,
         $takeTierPrice = true
     ) {
-        if (is_null($selectionQty)) {
+        if ($selectionQty === null) {
             $selectionQty = $selectionProduct->getSelectionQty();
         }
 
@@ -644,7 +644,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
     {
         $groupPrices = $product->getData('group_price');
 
-        if (is_null($groupPrices)) {
+        if ($groupPrices === null) {
             $attribute = $product->getResource()->getAttribute('group_price');
             if ($attribute) {
                 $attribute->getBackend()->afterLoad($product);
@@ -652,7 +652,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
             }
         }
 
-        if (is_null($groupPrices) || !is_array($groupPrices)) {
+        if ($groupPrices === null || !is_array($groupPrices)) {
             return null;
         }
 
@@ -682,7 +682,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
     #[\Override]
     protected function _applyTierPrice($product, $qty, $finalPrice)
     {
-        if (is_null($qty)) {
+        if ($qty === null) {
             return $finalPrice;
         }
 
@@ -711,7 +711,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         $allGroups = Mage_Customer_Model_Group::CUST_GROUP_ALL;
         $prices = $product->getData('tier_price');
 
-        if (is_null($prices)) {
+        if ($prices === null) {
             $attribute = $product->getResource()->getAttribute('tier_price');
             if ($attribute) {
                 $attribute->getBackend()->afterLoad($product);
@@ -719,7 +719,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
             }
         }
 
-        if (is_null($prices) || !is_array($prices)) {
+        if ($prices === null || !is_array($prices)) {
             if ($qty !== null) {
                 return 0;
             }

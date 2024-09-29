@@ -70,7 +70,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
      */
     public function getCustomerModel()
     {
-        if (is_null($this->_customerModel)) {
+        if ($this->_customerModel === null) {
             $object = Mage::getModel('customer/customer');
             $this->_customerModel = Mage::objects()->save($object);
         }
@@ -84,7 +84,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
      */
     public function getCustomerAddressModel()
     {
-        if (is_null($this->_customerAddressModel)) {
+        if ($this->_customerAddressModel === null) {
             $object = Mage::getModel('customer/address');
             $this->_customerAddressModel = Mage::objects()->save($object);
         }
@@ -98,7 +98,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
      */
     public function getNewsletterModel()
     {
-        if (is_null($this->_newsletterModel)) {
+        if ($this->_newsletterModel === null) {
             $object = Mage::getModel('newsletter/subscriber');
             $this->_newsletterModel = Mage::objects()->save($object);
         }
@@ -112,7 +112,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
      */
     public function getStore()
     {
-        if (is_null($this->_store)) {
+        if ($this->_store === null) {
             try {
                 $store = Mage::app()->getStore($this->getVar('store'));
             } catch (Exception $e) {
@@ -131,7 +131,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
      */
     public function getStoreId()
     {
-        if (is_null($this->_storeId)) {
+        if ($this->_storeId === null) {
             $this->_storeId = $this->getStore()->getId();
         }
         return $this->_storeId;
@@ -143,7 +143,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
      */
     public function getStoreById($storeId)
     {
-        if (is_null($this->_stores)) {
+        if ($this->_stores === null) {
             $this->_stores = Mage::app()->getStores(true);
         }
         if (isset($this->_stores[$storeId])) {
@@ -160,7 +160,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
      */
     public function getWebsiteById($websiteId)
     {
-        if (is_null($this->_websites)) {
+        if ($this->_websites === null) {
             $this->_websites = Mage::app()->getWebsites(true);
         }
         if (isset($this->_websites[$websiteId])) {
@@ -325,7 +325,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
 
             if ($customer->getGroupId()) {
                 $groupCode = $this->_getCustomerGroupCode($customer);
-                if (is_null($groupCode)) {
+                if ($groupCode === null) {
                     $this->addException(
                         Mage::helper('catalog')->__('An invalid group ID is specified, skipping the record.'),
                         Mage_Dataflow_Model_Convert_Exception::ERROR
@@ -425,7 +425,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
      */
     protected function _getCustomerGroupCode($customer)
     {
-        if (is_null($this->_customerGroups)) {
+        if ($this->_customerGroups === null) {
             $groups = Mage::getResourceModel('customer/group_collection')
                     ->load();
 
@@ -512,7 +512,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
                         if ($attribute->usesSource()) {
                             $source = $attribute->getSource();
                             $optionId = $this->getSourceOptionId($source, $value);
-                            if (is_null($optionId)) {
+                            if ($optionId === null) {
                                 $rowError = true;
                                 $this->addException(
                                     Mage::helper('customer')->__(

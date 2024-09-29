@@ -208,7 +208,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Shipping extends Mage_Sales_Model_Quote_A
      */
     protected function _getStoreTaxRequest($address)
     {
-        if (is_null($this->_storeTaxRequest)) {
+        if ($this->_storeTaxRequest === null) {
             $this->_storeTaxRequest = $this->_calculator->getRateOriginRequest($address->getQuote()->getStore());
         }
         return $this->_storeTaxRequest;
