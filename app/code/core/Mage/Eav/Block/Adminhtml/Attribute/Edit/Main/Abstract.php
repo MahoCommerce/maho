@@ -167,18 +167,14 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
         ]);
 
         if ($attributeObject->getResource()->hasFormTable()) {
-            /** @var Mage_Eav_Model_Resource_Form_Attribute $resourceModel */
-            $resourceModel = Mage::getResourceModel(strstr($attributeObject->getResourceName(), '/', true) . '/form_attribute');
-            if ($resourceModel) {
-                $attributeObjectTypeCode = $attributeObject->getEntityType()->getEntityTypeCode();
-                $fieldset->addField('used_in_forms', 'multiselect', [
-                    'name'   => 'used_in_forms',
-                    'label'  => Mage::helper('adminhtml')->__('Use in Forms'),
-                    'title'  => Mage::helper('adminhtml')->__('Use in Forms'),
-                    'values' => Mage::getModel('eav/config_source_form')->toOptionArray($attributeObjectTypeCode),
-                    'value'  => $resourceModel->getFormTypesByAttribute($attributeObject)
-                ]);
-            }
+            $attributeObjectTypeCode = $attributeObject->getEntityType()->getEntityTypeCode();
+            $fieldset->addField('used_in_forms', 'multiselect', [
+                'name'   => 'used_in_forms',
+                'label'  => Mage::helper('adminhtml')->__('Use in Forms'),
+                'title'  => Mage::helper('adminhtml')->__('Use in Forms'),
+                'values' => Mage::getModel('eav/config_source_form')->toOptionArray($attributeObjectTypeCode),
+                'value'  => $attributeObject->getUsedInForms(),
+            ]);
         }
 
         if ($attributeObject->getId()) {
