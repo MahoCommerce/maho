@@ -3,7 +3,7 @@
  * Maho
  *
  * @category   Mage
- * @package    Mage_Persistent
+ * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
@@ -14,9 +14,9 @@
  * Remember Me block
  *
  * @category   Mage
- * @package    Mage_Persistent
+ * @package    Mage_Customer
  */
-class Mage_Persistent_Block_Form_Remember extends Mage_Core_Block_Template
+class Mage_Customer_Block_Form_Remember extends Mage_Core_Block_Template
 {
     /**
      * Prevent rendering if Persistent disabled
@@ -26,9 +26,7 @@ class Mage_Persistent_Block_Form_Remember extends Mage_Core_Block_Template
     #[\Override]
     protected function _toHtml()
     {
-        /** @var Mage_Persistent_Helper_Data $helper */
-        $helper = Mage::helper('persistent');
-        return ($helper->isEnabled() && $helper->isRememberMeEnabled()) ? parent::_toHtml() : '';
+        return '';
     }
 
     /**
@@ -38,8 +36,6 @@ class Mage_Persistent_Block_Form_Remember extends Mage_Core_Block_Template
      */
     public function isRememberMeChecked()
     {
-        /** @var Mage_Persistent_Helper_Data $helper */
-        $helper = Mage::helper('persistent');
-        return $helper->isEnabled() && $helper->isRememberMeEnabled() && $helper->isRememberMeCheckedDefault();
+        return false;
     }
 }

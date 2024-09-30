@@ -21,7 +21,6 @@
 $isRegistrationAllowed = $this->helper('customer')->isRegistrationAllowed();
 $isAllowedGuestCheckout = $this->helper('checkout')->isAllowedGuestCheckout($this->getQuote());
 $isCustomerMustBeLogged = $this->helper('checkout')->isCustomerMustBeLogged();
-$isPersistentEnabled = $this->helper('checkout')->isPersistentEnabled();
 ?>
 <?php /* Extensions placeholder */ ?>
 <?= $this->getChildHtml('login_before') ?>
@@ -63,10 +62,6 @@ $isPersistentEnabled = $this->helper('checkout')->isPersistentEnabled();
                 <button id="onepage-guest-register-button" type="button" class="button" onclick="checkout.setMethod();"><?= $this->__('Continue') ?></button>
             <?php elseif ($isCustomerMustBeLogged): ?>
                 <button id="onepage-guest-register-button" type="button" class="button" onclick="window.location='<?= $this->helper('checkout/url')->getRegistrationUrl();?>'"><?= $this->__('Register') ?></button>
-            <?php elseif ($isPersistentEnabled): ?>
-                <form action="<?= $this->getUrl('persistent/index/saveMethod') ?>">
-                    <button id="onepage-guest-register-button" type="submit" class="button"><?= $this->__('Register') ?></button>
-                </form>
             <?php else: ?>
                 <button id="onepage-guest-register-button" type="button" class="button" onclick="checkout.setMethod();"><?= $this->__('Register') ?></button>
             <?php endif ?>
@@ -99,7 +94,7 @@ $isPersistentEnabled = $this->helper('checkout')->isPersistentEnabled();
                     <a href="<?= $this->getUrl('customer/account/forgotpassword') ?>" class="f-left"><?= $this->__('Forgot your password?') ?></a>
                 </li>
                 <?= $this->getChildHtml('form.additional.info') ?>
-                <?= $this->getChildHtml('persistent.remember.me') ?>
+                <?= $this->getChildHtml('remember.me') ?>
             </ul>
             <input name="context" type="hidden" value="checkout" />
         </fieldset>
