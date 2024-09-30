@@ -65,7 +65,7 @@ class Mage_Core_Model_Encryption
      * @param mixed $salt
      * @return string
      */
-    public function getHash($password, $salt = false)
+    public function getHash(#[\SensitiveParameter] $password, $salt = false)
     {
         if (is_int($salt)) {
             $salt = $this->_helper->getRandomString($salt);
@@ -82,7 +82,7 @@ class Mage_Core_Model_Encryption
      * @param mixed $salt
      * @return string
      */
-    public function getHashPassword($password, $salt = null)
+    public function getHashPassword(#[\SensitiveParameter] $password, $salt = null)
     {
         if (is_int($salt)) {
             $salt = $this->_helper->getRandomString($salt);
@@ -119,7 +119,7 @@ class Mage_Core_Model_Encryption
      * @return bool
      * @throws Exception
      */
-    public function validateHash($password, $hash)
+    public function validateHash(#[\SensitiveParameter] $password, $hash)
     {
         if (strlen($password) > self::MAXIMUM_PASSWORD_LENGTH) {
             return false;
@@ -139,7 +139,7 @@ class Mage_Core_Model_Encryption
      * @param int $version
      * @return bool
      */
-    public function validateHashByVersion($password, $hash, $version = self::HASH_VERSION_MD5)
+    public function validateHashByVersion(#[\SensitiveParameter] $password, $hash, $version = self::HASH_VERSION_MD5)
     {
         if ($version == self::HASH_VERSION_LATEST && $version == $this->_helper->getVersionHash($this)) {
             return password_verify($password, $hash);
