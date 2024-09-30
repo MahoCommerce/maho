@@ -346,7 +346,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
             $website = Mage::getModel('core/website')->load($data['website_id']);
             $isAllWebsitesValue = is_numeric($data['website_id']) && ($data['website_id'] == 0);
             $isGlobalPriceScope = (int)$catalogHelper->getPriceScope() == Mage_Catalog_Helper_Data::PRICE_SCOPE_GLOBAL;
-            if (is_null($website->getId()) || ($isGlobalPriceScope && !$isAllWebsitesValue)) {
+            if ($website->getId() === null || ($isGlobalPriceScope && !$isAllWebsitesValue)) {
                 $this->_addError(sprintf('Invalid "website_id" value in the "%s" set.', $fieldSet));
             }
         }
@@ -427,7 +427,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
                 $this->_addError(sprintf('Invalid "cust_group" value in the "%s" set', $fieldSet));
             } else {
                 $customerGroup = Mage::getModel('customer/group')->load($data['cust_group']);
-                if (is_null($customerGroup->getId())) {
+                if ($customerGroup->getId() === null) {
                     $this->_addError(sprintf('Invalid "cust_group" value in the "%s" set', $fieldSet));
                 }
             }

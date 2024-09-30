@@ -216,7 +216,7 @@ class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Ma
         if ($response === null) {
             $response = Mage::app()->getFrontController()->getResponse();
         }
-        if (is_null($this->getStoreId()) || $this->getStoreId() === false) {
+        if ($this->getStoreId() === null || $this->getStoreId() === false) {
             $this->setStoreId(Mage::app()->getStore()->getId());
         }
 

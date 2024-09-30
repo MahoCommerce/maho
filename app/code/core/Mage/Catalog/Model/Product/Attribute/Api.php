@@ -152,7 +152,7 @@ class Mage_Catalog_Model_Product_Attribute_Api extends Mage_Catalog_Model_Api_Re
 
         $data['source_model'] = $helper->getAttributeSourceModelByInputType($data['frontend_input']);
         $data['backend_model'] = $helper->getAttributeBackendModelByInputType($data['frontend_input']);
-        if (!$model->getBackendType() && (is_null($model->getIsUserDefined()) || $model->getIsUserDefined() != 0)) {
+        if (!$model->getBackendType() && ($model->getIsUserDefined() === null || $model->getIsUserDefined() != 0)) {
             $data['backend_type'] = $model->getBackendTypeByInput($data['frontend_input']);
         }
 

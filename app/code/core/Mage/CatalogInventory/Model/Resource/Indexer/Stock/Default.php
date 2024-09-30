@@ -94,7 +94,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default extends Mage_Ca
     #[\Override]
     public function getTypeId()
     {
-        if (is_null($this->_typeId)) {
+        if ($this->_typeId === null) {
             Mage::throwException(Mage::helper('cataloginventory')->__('Undefined product type.'));
         }
         return $this->_typeId;

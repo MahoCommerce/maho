@@ -127,7 +127,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext_Collection extends Mage_Catalog
      */
     public function getFoundIds()
     {
-        if (is_null($this->_foundData)) {
+        if ($this->_foundData === null) {
             /** @var Mage_CatalogSearch_Model_Fulltext $preparedResult */
             $preparedResult = Mage::getSingleton('catalogsearch/fulltext');
             $preparedResult->prepareResult();

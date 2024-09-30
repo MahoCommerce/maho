@@ -29,7 +29,7 @@ class Mage_ConfigurableSwatches_Model_System_Config_Source_Catalog_Product_Confi
      */
     public function toOptionArray()
     {
-        if (is_null($this->_attributes)) {
+        if ($this->_attributes === null) {
             $attrCollection = Mage::getResourceModel('catalog/product_attribute_collection')
                 ->addVisibleFilter()
                 ->setFrontendInputTypeFilter('select')

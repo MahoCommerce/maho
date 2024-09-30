@@ -318,7 +318,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
         Varien_Profiler::start('CONFIGURABLE:' . __METHOD__);
         if (!$this->getProduct($product)->hasData($this->_usedProducts)) {
             if ($requiredAttributeIds === null
-                && is_null($this->getProduct($product)->getData($this->_configurableAttributes))
+                && $this->getProduct($product)->getData($this->_configurableAttributes) === null
             ) {
                 // If used products load before attributes, we will load attributes.
                 $this->getConfigurableAttributes($product);

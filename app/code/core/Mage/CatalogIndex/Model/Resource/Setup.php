@@ -38,7 +38,7 @@ class Mage_CatalogIndex_Model_Resource_Setup extends Mage_Core_Model_Resource_Se
      */
     protected function _getStoreToWebsiteAssignments()
     {
-        if (is_null($this->_storeToWebsite)) {
+        if ($this->_storeToWebsite === null) {
             $this->_storeToWebsite = [];
             $websiteCollection = Mage::getModel('core/website')->getCollection();
             foreach ($websiteCollection as $website) {

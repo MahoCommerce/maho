@@ -134,7 +134,7 @@ class Mage_CatalogInventory_Model_Observer
         /** @var Mage_Catalog_Model_Product $product */
         $product = $observer->getEvent()->getProduct();
 
-        if (is_null($product->getStockData())) {
+        if ($product->getStockData() === null) {
             if ($product->getIsChangedWebsites() || $product->dataHasChangedFor('status')) {
                 Mage::getSingleton('cataloginventory/stock_status')
                     ->updateStatus($product->getId());
@@ -200,27 +200,27 @@ class Mage_CatalogInventory_Model_Observer
             ->setProductId($product->getId())
             ->setStockId($item->getStockId());
         if ($product->getData('stock_data/min_qty') !== null
-            && is_null($product->getData('stock_data/use_config_min_qty'))
+            && $product->getData('stock_data/use_config_min_qty') === null
         ) {
             $item->setData('use_config_min_qty', false);
         }
         if ($product->getData('stock_data/min_sale_qty') !== null
-            && is_null($product->getData('stock_data/use_config_min_sale_qty'))
+            && $product->getData('stock_data/use_config_min_sale_qty') === null
         ) {
             $item->setData('use_config_min_sale_qty', false);
         }
         if ($product->getData('stock_data/max_sale_qty') !== null
-            && is_null($product->getData('stock_data/use_config_max_sale_qty'))
+            && $product->getData('stock_data/use_config_max_sale_qty') === null
         ) {
             $item->setData('use_config_max_sale_qty', false);
         }
         if ($product->getData('stock_data/backorders') !== null
-            && is_null($product->getData('stock_data/use_config_backorders'))
+            && $product->getData('stock_data/use_config_backorders') === null
         ) {
             $item->setData('use_config_backorders', false);
         }
         if ($product->getData('stock_data/notify_stock_qty') !== null
-            && is_null($product->getData('stock_data/use_config_notify_stock_qty'))
+            && $product->getData('stock_data/use_config_notify_stock_qty') === null
         ) {
             $item->setData('use_config_notify_stock_qty', false);
         }
@@ -229,12 +229,12 @@ class Mage_CatalogInventory_Model_Observer
             $item->setQtyCorrection($item->getQty() - $originalQty);
         }
         if ($product->getData('stock_data/enable_qty_increments') !== null
-            && is_null($product->getData('stock_data/use_config_enable_qty_inc'))
+            && $product->getData('stock_data/use_config_enable_qty_inc') === null
         ) {
             $item->setData('use_config_enable_qty_inc', false);
         }
         if ($product->getData('stock_data/qty_increments') !== null
-            && is_null($product->getData('stock_data/use_config_qty_increments'))
+            && $product->getData('stock_data/use_config_qty_increments') === null
         ) {
             $item->setData('use_config_qty_increments', false);
         }

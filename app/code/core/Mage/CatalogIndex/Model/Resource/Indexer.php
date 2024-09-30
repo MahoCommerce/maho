@@ -192,7 +192,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
          * )
          */
         $products = Mage::getSingleton('catalogindex/retreiver')->assignProductTypes($products);
-        if (is_null($forcedId)) {
+        if ($forcedId === null) {
             foreach ($products as $type => $typeIds) {
                 $retreiver = Mage::getSingleton('catalogindex/retreiver')->getRetreiver($type);
                 if ($retreiver->areChildrenIndexable(Mage_CatalogIndex_Model_Retreiver::CHILDREN_FOR_TIERS)) {
@@ -209,7 +209,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
         $attributeIndex = $this->getTierData($products, $store);
         foreach ($attributeIndex as $index) {
             $type = $index['type_id'];
-            $id = (is_null($forcedId) ? $index['entity_id'] : $forcedId);
+            $id = ($forcedId === null ? $index['entity_id'] : $forcedId);
             if ($id && $index['value']) {
                 if ($index['all_groups'] == 1) {
                     foreach (Mage::getSingleton('catalogindex/retreiver')->getCustomerGroups() as $group) {
@@ -276,7 +276,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
         foreach ($productTypes as $type => $products) {
             $retreiver = Mage::getSingleton('catalogindex/retreiver')->getRetreiver($type);
             foreach ($products as $product) {
-                if (is_null($forcedId)) {
+                if ($forcedId === null) {
                     if ($retreiver->areChildrenIndexable(Mage_CatalogIndex_Model_Retreiver::CHILDREN_FOR_PRICES)) {
                         $children = $retreiver->getChildProductIds($store, $product);
                         if ($children) {
@@ -397,7 +397,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
 
         $products = Mage::getSingleton('catalogindex/retreiver')->assignProductTypes($products);
 
-        if (is_null($forcedId)) {
+        if ($forcedId === null) {
             foreach ($products as $type => $typeIds) {
                 $retreiver = Mage::getSingleton('catalogindex/retreiver')->getRetreiver($type);
                 if ($retreiver->areChildrenIndexable(Mage_CatalogIndex_Model_Retreiver::CHILDREN_FOR_ATTRIBUTES)) {
@@ -414,7 +414,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
         $attributeIndex = $this->getProductData($products, $attributeIds, $store);
         foreach ($attributeIndex as $index) {
             $type = $index['type_id'];
-            $id = (is_null($forcedId) ? $index['entity_id'] : $forcedId);
+            $id = ($forcedId === null ? $index['entity_id'] : $forcedId);
 
             if ($id && $index['attribute_id'] && isset($index['value'])) {
                 $attribute = $this->_loadAttribute($index['attribute_id']);
@@ -428,7 +428,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
                             $id,
                             $index['attribute_id'],
                             $value,
-                            (is_null($websiteId) ? $store->getId() : $websiteId)
+                            ($websiteId === null ? $store->getId() : $websiteId)
                         ]);
                     }
                 } else {
@@ -436,7 +436,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
                         $id,
                         $index['attribute_id'],
                         $index['value'],
-                        (is_null($websiteId) ? $store->getId() : $websiteId)
+                        ($websiteId === null ? $store->getId() : $websiteId)
                     ]);
                 }
             }
@@ -616,7 +616,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
      */
     public function updateCatalogProductFlat($storeId, $productIds = null, $tableName = null)
     {
-        if (is_null($tableName)) {
+        if ($tableName === null) {
             $tableName = $this->getTable('catalog/product_flat') . '_' . $storeId;
         }
         $addChildData = Mage::helper('catalog/product_flat')->isAddChildData();

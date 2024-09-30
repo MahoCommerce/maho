@@ -217,7 +217,7 @@ class Mage_Api_Model_Wsdl_Config_Element extends Varien_Simplexml_Element
                 $elm = true;
                 foreach ($extendElmAttributes as $namespace => $attributes) {
                     foreach ($attributes as $key => $value) {
-                        if (is_null($child->getAttribute($key, $namespace)) || $child->getAttribute($key, $namespace) != $value) {
+                        if ($child->getAttribute($key, $namespace) === null || $child->getAttribute($key, $namespace) != $value) {
                             $elm = false;
                         }
                     }

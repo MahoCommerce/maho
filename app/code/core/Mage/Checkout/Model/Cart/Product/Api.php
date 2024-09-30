@@ -115,7 +115,7 @@ class Mage_Checkout_Model_Cart_Product_Api extends Mage_Checkout_Model_Api_Resou
                 $productByItem,
                 $this->_getProductRequest($productItem)
             );
-            if (is_null($quoteItem->getId())) {
+            if ($quoteItem->getId() === null) {
                 $errors[] = Mage::helper('checkout')->__('One item of products is not belong any of quote item');
                 continue;
             }
@@ -173,7 +173,7 @@ class Mage_Checkout_Model_Cart_Product_Api extends Mage_Checkout_Model_Api_Resou
                     $productByItem,
                     $this->_getProductRequest($productItem)
                 );
-                if (is_null($quoteItem->getId())) {
+                if ($quoteItem->getId() === null) {
                     $errors[] = Mage::helper('checkout')->__('One item of products is not belong any of quote item');
                     continue;
                 }
@@ -244,7 +244,7 @@ class Mage_Checkout_Model_Cart_Product_Api extends Mage_Checkout_Model_Api_Resou
         }
 
         $customer = $quote->getCustomer();
-        if (is_null($customer->getId())) {
+        if ($customer->getId() === null) {
             $this->_fault('customer_not_set_for_quote');
         }
 
@@ -253,7 +253,7 @@ class Mage_Checkout_Model_Cart_Product_Api extends Mage_Checkout_Model_Api_Resou
             ->setStoreId($store)
             ->loadByCustomer($customer);
 
-        if (is_null($customerQuote->getId())) {
+        if ($customerQuote->getId() === null) {
             $this->_fault('customer_quote_not_exist');
         }
 

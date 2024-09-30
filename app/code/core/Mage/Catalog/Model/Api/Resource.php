@@ -103,7 +103,7 @@ class Mage_Catalog_Model_Api_Resource extends Mage_Api_Model_Resource_Abstract
     protected function _getProduct($productId, $store = null, $identifierType = null)
     {
         $product = Mage::helper('catalog/product')->getProduct($productId, $this->_getStoreId($store), $identifierType);
-        if (is_null($product->getId())) {
+        if ($product->getId() === null) {
             $this->_fault('product_not_exists');
         }
         return $product;

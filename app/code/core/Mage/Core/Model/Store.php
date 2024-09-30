@@ -451,7 +451,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      */
     public function getWebsite()
     {
-        if (is_null($this->getWebsiteId())) {
+        if ($this->getWebsiteId() === null) {
             return false;
         }
         if ($this->_website === null) {
@@ -1027,7 +1027,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      */
     public function getGroup()
     {
-        if (is_null($this->getGroupId())) {
+        if ($this->getGroupId() === null) {
             return false;
         }
         if ($this->_group === null) {

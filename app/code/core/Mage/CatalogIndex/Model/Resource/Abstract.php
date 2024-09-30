@@ -58,7 +58,7 @@ class Mage_CatalogIndex_Model_Resource_Abstract extends Mage_Core_Model_Resource
      */
     public function getWebsiteId()
     {
-        if (is_null($this->_websiteId)) {
+        if ($this->_websiteId === null) {
             $result = Mage::app()->getStore($this->getStoreId())->getWebsiteId();
             $this->_websiteId = $result;
         }

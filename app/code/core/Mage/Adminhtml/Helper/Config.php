@@ -34,7 +34,7 @@ class Mage_Adminhtml_Helper_Config extends Mage_Core_Helper_Abstract
             ]
         ];
 
-        if (is_null($inputType)) {
+        if ($inputType === null) {
             return $inputTypes;
         } elseif (isset($inputTypes[$inputType])) {
             return $inputTypes[$inputType];

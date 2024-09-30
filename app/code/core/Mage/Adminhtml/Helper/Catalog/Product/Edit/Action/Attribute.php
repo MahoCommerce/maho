@@ -46,7 +46,7 @@ class Mage_Adminhtml_Helper_Catalog_Product_Edit_Action_Attribute extends Mage_C
      */
     public function getProducts()
     {
-        if (is_null($this->_products)) {
+        if ($this->_products === null) {
             $productsIds = $this->getProductIds();
 
             if (!is_array($productsIds)) {
@@ -105,7 +105,7 @@ class Mage_Adminhtml_Helper_Catalog_Product_Edit_Action_Attribute extends Mage_C
      */
     public function getAttributes()
     {
-        if (is_null($this->_attributes)) {
+        if ($this->_attributes === null) {
             $this->_attributes  = Mage::getSingleton('eav/config')
                 ->getEntityType(Mage_Catalog_Model_Product::ENTITY)
                 ->getAttributeCollection()

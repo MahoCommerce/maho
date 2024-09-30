@@ -443,7 +443,7 @@ class Mage_Catalog_Model_Product_Api extends Mage_Catalog_Model_Api_Resource
     protected function _checkProductAttributeSet($attributeSetId)
     {
         $attributeSet = Mage::getModel('eav/entity_attribute_set')->load($attributeSetId);
-        if (is_null($attributeSet->getId())) {
+        if ($attributeSet->getId() === null) {
             $this->_fault('product_attribute_set_not_exists');
         }
         if (Mage::getModel('catalog/product')->getResource()->getTypeId() != $attributeSet->getEntityTypeId()) {

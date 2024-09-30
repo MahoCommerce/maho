@@ -127,7 +127,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
             throw new Exception(Mage::helper('adminhtml')->__('Wrong tab configuration.'));
         }
 
-        if (is_null($this->_tabs[$tabId]->getUrl())) {
+        if ($this->_tabs[$tabId]->getUrl() === null) {
             $this->_tabs[$tabId]->setUrl('#');
         }
 

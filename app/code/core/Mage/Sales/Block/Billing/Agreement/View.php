@@ -113,7 +113,7 @@ class Mage_Sales_Block_Billing_Agreement_View extends Mage_Core_Block_Template
     #[\Override]
     protected function _prepareLayout()
     {
-        if (is_null($this->_billingAgreementInstance)) {
+        if ($this->_billingAgreementInstance === null) {
             $this->_billingAgreementInstance = Mage::registry('current_billing_agreement');
         }
         parent::_prepareLayout();

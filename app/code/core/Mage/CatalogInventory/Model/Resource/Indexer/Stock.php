@@ -241,7 +241,7 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock extends Mage_Catalog_Mo
      */
     protected function _getTypeIndexers()
     {
-        if (is_null($this->_indexers)) {
+        if ($this->_indexers === null) {
             $this->_indexers = [];
             $types = Mage::getSingleton('catalog/product_type')->getTypesByPriority();
             foreach ($types as $typeId => $typeInfo) {

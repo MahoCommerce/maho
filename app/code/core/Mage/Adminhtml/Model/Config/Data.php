@@ -273,13 +273,13 @@ class Mage_Adminhtml_Model_Config_Data extends Varien_Object
      */
     protected function _validate()
     {
-        if (is_null($this->getSection())) {
+        if ($this->getSection() === null) {
             $this->setSection('');
         }
-        if (is_null($this->getWebsite())) {
+        if ($this->getWebsite() === null) {
             $this->setWebsite('');
         }
-        if (is_null($this->getStore())) {
+        if ($this->getStore() === null) {
             $this->setStore('');
         }
     }
@@ -359,7 +359,7 @@ class Mage_Adminhtml_Model_Config_Data extends Varien_Object
     public function getConfigDataValue($path, &$inherit = null, $configData = null)
     {
         $this->load();
-        if (is_null($configData)) {
+        if ($configData === null) {
             $configData = $this->_configData;
         }
         if (array_key_exists($path, $configData)) {
@@ -380,7 +380,7 @@ class Mage_Adminhtml_Model_Config_Data extends Varien_Object
      */
     public function getConfigRoot()
     {
-        if (is_null($this->_configRoot)) {
+        if ($this->_configRoot === null) {
             $this->load();
             $this->_configRoot = Mage::getConfig()->getNode(null, $this->getScope(), $this->getScopeCode());
         }

@@ -93,7 +93,7 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
             $cookie = $cookieModel->get($this->_cookieName);
             $cookieOrder = $this->_loadOrderByCookie($cookie);
             if ($cookieOrder !== null) {
-                if (is_null($cookieOrder->getCustomerId())) {
+                if ($cookieOrder->getCustomerId() === null) {
                     $cookieModel->renew($this->_cookieName, $this->_lifeTime, '/');
                     $order = $cookieOrder;
                 } else {

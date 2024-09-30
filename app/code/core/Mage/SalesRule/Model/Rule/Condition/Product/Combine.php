@@ -101,7 +101,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Combine extends Mage_Rule_Mode
      */
     protected function _initializeProductAttributesInfo()
     {
-        if (is_null($this->_productAttributesInfo)) {
+        if ($this->_productAttributesInfo === null) {
             $this->_productAttributesInfo = [];
             $productAttributes = Mage::getModel('salesrule/rule_condition_product')
                 ->loadAttributeOptions()

@@ -227,7 +227,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
                         'title',
                         $option->getStoreTitle() === null
                     );
-                    $value['scopeTitleDisabled'] = is_null($option->getStoreTitle()) ? 'disabled' : null;
+                    $value['scopeTitleDisabled'] = $option->getStoreTitle() === null ? 'disabled' : null;
                 }
 
                 if ($option->getGroupByType() == Mage_Catalog_Model_Product_Option::OPTION_GROUP_SELECT) {
@@ -251,19 +251,19 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
                             $value['optionValues'][$i]['checkboxScopeTitle'] = $this->getCheckboxScopeHtml(
                                 $_value->getOptionId(),
                                 'title',
-                                is_null($_value->getStoreTitle()),
+                                $_value->getStoreTitle() === null,
                                 $_value->getOptionTypeId()
                             );
-                            $value['optionValues'][$i]['scopeTitleDisabled'] = is_null($_value->getStoreTitle())
+                            $value['optionValues'][$i]['scopeTitleDisabled'] = $_value->getStoreTitle() === null
                                 ? 'disabled' : null;
                             if ($scope == Mage_Core_Model_Store::PRICE_SCOPE_WEBSITE) {
                                 $value['optionValues'][$i]['checkboxScopePrice'] = $this->getCheckboxScopeHtml(
                                     $_value->getOptionId(),
                                     'price',
-                                    is_null($_value->getstorePrice()),
+                                    $_value->getstorePrice() === null,
                                     $_value->getOptionTypeId()
                                 );
-                                $value['optionValues'][$i]['scopePriceDisabled'] = is_null($_value->getStorePrice())
+                                $value['optionValues'][$i]['scopePriceDisabled'] = $_value->getStorePrice() === null
                                     ? 'disabled' : null;
                             }
                         }
@@ -284,9 +284,9 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
                         $value['checkboxScopePrice'] = $this->getCheckboxScopeHtml(
                             $option->getOptionId(),
                             'price',
-                            is_null($option->getStorePrice())
+                            $option->getStorePrice() === null
                         );
-                        $value['scopePriceDisabled'] = is_null($option->getStorePrice()) ? 'disabled' : null;
+                        $value['scopePriceDisabled'] = $option->getStorePrice() === null ? 'disabled' : null;
                     }
                 }
                 $values[] = new Varien_Object($value);

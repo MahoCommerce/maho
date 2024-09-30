@@ -35,7 +35,7 @@ class Mage_Checkout_Model_Cart_Shipping_Api extends Mage_Checkout_Model_Api_Reso
         $quote = $this->_getQuote($quoteId, $store);
 
         $quoteShippingAddress = $quote->getShippingAddress();
-        if (is_null($quoteShippingAddress->getId())) {
+        if ($quoteShippingAddress->getId() === null) {
             $this->_fault('shipping_address_is_not_set');
         }
 
@@ -66,7 +66,7 @@ class Mage_Checkout_Model_Cart_Shipping_Api extends Mage_Checkout_Model_Api_Reso
         $quote = $this->_getQuote($quoteId, $store);
 
         $quoteShippingAddress = $quote->getShippingAddress();
-        if (is_null($quoteShippingAddress->getId())) {
+        if ($quoteShippingAddress->getId() === null) {
             $this->_fault('shipping_address_is_not_set');
         }
 

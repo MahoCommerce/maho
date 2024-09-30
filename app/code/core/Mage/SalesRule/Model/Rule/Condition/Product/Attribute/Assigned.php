@@ -86,7 +86,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
     #[\Override]
     public function getOperatorSelectOptions()
     {
-        if (is_null($this->_cachedOperatorSelectOptionsCache)) {
+        if ($this->_cachedOperatorSelectOptionsCache === null) {
             $this->_cachedOperatorSelectOptionsCache = [];
             foreach ($this->_operatorSelectOptionsHash as $operatorValue => $operatorLabel) {
                 $this->_cachedOperatorSelectOptionsCache[] = [

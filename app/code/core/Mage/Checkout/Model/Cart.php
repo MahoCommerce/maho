@@ -151,7 +151,7 @@ class Mage_Checkout_Model_Cart extends Varien_Object implements Mage_Checkout_Mo
      */
     public function addOrderItem($orderItem, $qtyFlag = null)
     {
-        if (is_null($orderItem->getParentItem())) {
+        if ($orderItem->getParentItem() === null) {
             $product = Mage::getModel('catalog/product')
                 ->setStoreId(Mage::app()->getStore()->getId())
                 ->load($orderItem->getProductId());

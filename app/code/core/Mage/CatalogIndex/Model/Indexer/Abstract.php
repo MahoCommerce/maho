@@ -42,7 +42,7 @@ abstract class Mage_CatalogIndex_Model_Indexer_Abstract extends Mage_Core_Model_
                 break;
         }
 
-        if (!$this->_isObjectIndexable($object) && is_null($forceId)) {
+        if (!$this->_isObjectIndexable($object) && $forceId === null) {
             return;
         }
 

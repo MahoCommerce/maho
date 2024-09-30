@@ -137,7 +137,7 @@ class Mage_Checkout_Model_Cart_Payment_Api extends Mage_Checkout_Model_Api_Resou
 
         if ($quote->isVirtual()) {
             // check if billing address is set
-            if (is_null($quote->getBillingAddress()->getId())) {
+            if ($quote->getBillingAddress()->getId() === null) {
                 $this->_fault('billing_address_is_not_set');
             }
             $quote->getBillingAddress()->setPaymentMethod(
@@ -145,7 +145,7 @@ class Mage_Checkout_Model_Cart_Payment_Api extends Mage_Checkout_Model_Api_Resou
             );
         } else {
             // check if shipping address is set
-            if (is_null($quote->getShippingAddress()->getId())) {
+            if ($quote->getShippingAddress()->getId() === null) {
                 $this->_fault('shipping_address_is_not_set');
             }
             $quote->getShippingAddress()->setPaymentMethod(

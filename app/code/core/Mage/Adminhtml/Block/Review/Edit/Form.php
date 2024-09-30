@@ -42,7 +42,7 @@ class Mage_Adminhtml_Block_Review_Edit_Form extends Mage_Adminhtml_Block_Widget_
         if ($customer->getId()) {
             $customerText = Mage::helper('review')->__('<a href="%1$s" onclick="this.target=\'blank\'">%2$s</a> <a href="mailto:%3$s">(%3$s)</a>', $this->getUrl('*/customer/edit', ['id' => $customer->getId(), 'active_tab' => 'review']), $this->escapeHtml($customer->getName()), $this->escapeHtml($customer->getEmail()));
         } else {
-            if (is_null($review->getCustomerId())) {
+            if ($review->getCustomerId() === null) {
                 $customerText = Mage::helper('review')->__('Guest');
             } elseif ($review->getCustomerId() == 0) {
                 $customerText = Mage::helper('review')->__('Administrator');

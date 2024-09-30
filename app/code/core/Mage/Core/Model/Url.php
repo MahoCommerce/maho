@@ -1152,7 +1152,7 @@ class Mage_Core_Model_Url extends Varien_Object
     public function useSessionIdForUrl($secure = false)
     {
         $key = 'use_session_id_for_url_' . (int) $secure;
-        if (is_null($this->getData($key))) {
+        if ($this->getData($key) === null) {
             $httpHost = Mage::app()->getFrontController()->getRequest()->getHttpHost();
             $urlHost = parse_url(
                 Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK, $secure),

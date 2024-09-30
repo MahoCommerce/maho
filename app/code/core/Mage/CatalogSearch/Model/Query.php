@@ -85,7 +85,7 @@ class Mage_CatalogSearch_Model_Query extends Mage_Core_Model_Abstract
     public function getResultCollection()
     {
         $collection = $this->getData('result_collection');
-        if (is_null($collection)) {
+        if ($collection === null) {
             $collection = $this->getSearchCollection();
 
             $text = $this->getSynonymFor();
@@ -110,7 +110,7 @@ class Mage_CatalogSearch_Model_Query extends Mage_Core_Model_Abstract
     public function getSuggestCollection()
     {
         $collection = $this->getData('suggest_collection');
-        if (is_null($collection)) {
+        if ($collection === null) {
             $collection = Mage::getResourceModel('catalogsearch/query_collection')
                 ->setStoreId($this->getStoreId())
                 ->setQueryFilter($this->getQueryText());

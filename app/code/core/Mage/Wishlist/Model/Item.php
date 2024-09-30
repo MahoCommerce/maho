@@ -257,12 +257,12 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
         $this->validate();
 
         // set current store id if it is not defined
-        if (is_null($this->getStoreId())) {
+        if ($this->getStoreId() === null) {
             $this->setStoreId(Mage::app()->getStore()->getId());
         }
 
         // set current date if added at data is not defined
-        if (is_null($this->getAddedAt())) {
+        if ($this->getAddedAt() === null) {
             $this->setAddedAt(Mage::getSingleton('core/date')->gmtDate());
         }
 

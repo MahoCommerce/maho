@@ -38,7 +38,7 @@ class Mage_Directory_Block_Currency extends Mage_Core_Block_Template
     public function getCurrencies()
     {
         $currencies = $this->getData('currencies');
-        if (is_null($currencies)) {
+        if ($currencies === null) {
             $currencies = [];
             $codes = Mage::app()->getStore()->getAvailableCurrencyCodes(true);
             if (is_array($codes) && count($codes) > 1) {
@@ -88,7 +88,7 @@ class Mage_Directory_Block_Currency extends Mage_Core_Block_Template
      */
     public function getCurrentCurrencyCode()
     {
-        if (is_null($this->_getData('current_currency_code'))) {
+        if ($this->_getData('current_currency_code') === null) {
             // do not use Mage::app()->getStore()->getCurrentCurrencyCode() because of probability
             // to get an invalid (without base rate) currency from code saved in session
             $this->setData('current_currency_code', Mage::app()->getStore()->getCurrentCurrency()->getCode());
