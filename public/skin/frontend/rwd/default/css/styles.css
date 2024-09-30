@@ -7261,37 +7261,6 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
   color: #767676;
 }
 
-.remember-me-box a.hide {
-  display: none;
-}
-.remember-me-box .link-tip {
-  font-size: 13px;
-  padding-left: 10px;
-}
-
-.remember-me-popup {
-  display: none;
-  border: 1px solid #cccccc;
-  padding: 10px;
-  position: relative;
-}
-.remember-me-popup.show {
-  display: block;
-}
-.remember-me-popup p {
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
-}
-.remember-me-popup .remember-me-popup-close {
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 10px;
-  font-size: 12px;
-}
-.remember-me-popup .remember-me-popup-close-button {
-  display: none;
-}
-
 .customer-account-create .buttons-set {
   max-width: 455px;
 }
@@ -7307,9 +7276,6 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 }
 .customer-account-create .fieldset .hidden {
   display: none;
-}
-.customer-account-create #remember-me-popup {
-  max-width: 455px;
 }
 
 .customer-account-forgotpassword .fieldset,
