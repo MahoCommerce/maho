@@ -117,7 +117,7 @@ class Mage_Tag_Model_Tag_Relation extends Mage_Core_Model_Abstract
      */
     public function getRelatedTagIds()
     {
-        if (is_null($this->getData('related_tag_ids'))) {
+        if ($this->getData('related_tag_ids') === null) {
             $this->setRelatedTagIds($this->_getResource()->getRelatedTagIds($this));
         }
         return $this->getData('related_tag_ids');
