@@ -210,7 +210,7 @@
     var billingRegionUpdater = new RegionUpdater('billing:country_id', 'billing:region', 'billing:region_id', <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, 'billing:postcode');
     if ($('onepage-guest-register-button')) {
         Event.observe($('onepage-guest-register-button'), 'click', function(event) {
-            var billingRememberMe = $('co-billing-form').select('#remember-me-box');
+            var billingRememberMe = $('co-billing-form').select('.remember-me-box');
             if (billingRememberMe.length > 0) {
                 if ($('login:guest') && $('login:guest').checked) {
                     billingRememberMe[0].hide();

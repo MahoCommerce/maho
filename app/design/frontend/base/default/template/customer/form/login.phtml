@@ -44,7 +44,7 @@
             </div>
             <?php endif ?>
             <?php // This column should be col-1 if the registration column is not displayed ?>
-            <div class="<?php if ($isRegistrationAllowed): ?>col-2<?php else: ?>col-1<?php endif ?> registered-users">
+            <div class="<?= $isRegistrationAllowed ? 'col-2' : 'col-1'?> registered-users">
                 <div class="content fieldset">
                     <h2><?= $this->__('Registered Customers') ?></h2>
                     <p class="form-instructions"><?= $this->__('If you have an account with us, please log in.') ?></p>
