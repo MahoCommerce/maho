@@ -13,6 +13,12 @@
 
 -->
 <layout version="0.1.0">
+    <default>
+        <reference name="header">
+            <block type="page/template_links" name="account.links" as="accountLinks" template="persistent/header/links.phtml"/>
+        </reference>
+    </default>
+
     <customer_account_login>
         <update handle="customer_account_login_persistent" ifconfig="persistent/options/enabled" />
         <action block="customer_form_login" method="setTemplateIfExists">
@@ -40,14 +46,12 @@
     <customer_account_login_persistent>
         <reference name="customer_form_login">
             <block type="persistent/form_remember" name="persistent.remember.me" template="persistent/remember_me.phtml" />
-            <block type="core/template" name="persistent.remember.me.tooltip" template="persistent/remember_me_tooltip.phtml" />
         </reference>
     </customer_account_login_persistent>
 
     <customer_account_create_persistent>
         <reference name="customer_form_register">
             <block type="persistent/form_remember" name="persistent.remember.me" template="persistent/remember_me.phtml" />
-            <block type="core/template" name="persistent.remember.me.tooltip" template="persistent/remember_me_tooltip.phtml" />
         </reference>
     </customer_account_create_persistent>
 
@@ -57,7 +61,6 @@
         </reference>
         <reference name="checkout.onepage.billing">
             <block type="persistent/form_remember" name="persistent.remember.me" template="persistent/remember_me.phtml" />
-            <block type="core/template" name="persistent.remember.me.tooltip" template="persistent/remember_me_tooltip.phtml" />
         </reference>
     </checkout_onepage_index_persistent>
 
