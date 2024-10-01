@@ -123,14 +123,9 @@ class Mage_Core_Model_Cookie
      */
     public function getLifetime()
     {
-        if (!is_null($this->_lifetime)) {
-            $lifetime = $this->_lifetime;
-        } else {
-            $lifetime = Mage::getStoreConfig(self::XML_PATH_COOKIE_LIFETIME, $this->getStore());
-        }
-        if (!is_numeric($lifetime)) {
-            $lifetime = 3600;
-        }
+        $lifetime = $this->_lifetime ?? Mage::getStoreConfigAsInt(self::XML_PATH_COOKIE_LIFETIME, $this->getStore());
+        $lifetime = min($lifetime, Mage_Core_Model_Session::SESSION_MAX_COOKIE_LIFETIME);
+        $lifetime = max($lifetime, Mage_Core_Model_Session::SESSION_MIN_COOKIE_LIFETIME);
         return $lifetime;
     }
 
@@ -244,25 +239,18 @@ class Mage_Core_Model_Cookie
             $secure = true;
         }
 
-        if (PHP_VERSION_ID >= 70300) {
-            setcookie(
-                $name,
-                (string)$value,
-                [
-                    'expires'  => $expire,
-                    'path'     => $path,
-                    'domain'   => $domain,
-                    'secure'   => $secure,
-                    'httponly' => $httponly,
-                    'samesite' => $sameSite
-                ]
-            );
-        } else {
-            if (!empty($sameSite)) {
-                $path .= "; samesite={$sameSite}";
-            }
-            setcookie($name, (string)$value, $expire, $path, $domain, $secure, $httponly);
-        }
+        setcookie(
+            $name,
+            (string)$value,
+            [
+                'expires'  => $expire,
+                'path'     => $path,
+                'domain'   => $domain,
+                'secure'   => $secure,
+                'httponly' => $httponly,
+                'samesite' => $sameSite
+            ]
+        );
 
         return $this;
     }

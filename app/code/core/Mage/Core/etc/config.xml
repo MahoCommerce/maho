@@ -399,7 +399,10 @@
                 <offloader_header>SSL_OFFLOADED</offloader_header>
             </secure>
             <cookie>
-                <cookie_lifetime>3600</cookie_lifetime>
+                <cookie_lifetime>2592000</cookie_lifetime>
+                <remember_enabled>1</remember_enabled>
+                <remember_cookie_lifetime>31536000</remember_cookie_lifetime>
+                <remember_default>1</remember_default>
                 <cookie_httponly>1</cookie_httponly>
                 <cookie_samesite>None</cookie_samesite>
                 <cookie_restriction>0</cookie_restriction>

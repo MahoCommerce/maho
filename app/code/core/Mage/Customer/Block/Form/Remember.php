@@ -19,14 +19,16 @@
 class Mage_Customer_Block_Form_Remember extends Mage_Core_Block_Template
 {
     /**
-     * Prevent rendering if Persistent disabled
+     * Prevent rendering if Remember me is disabled
      *
      * @return string
      */
     #[\Override]
     protected function _toHtml()
     {
-        return '';
+        if (Mage::getStoreConfigFlag('web/cookie/remember_enabled')) {
+            return parent::_toHtml();
+        }
     }
 
     /**
@@ -36,6 +38,6 @@ class Mage_Customer_Block_Form_Remember extends Mage_Core_Block_Template
      */
     public function isRememberMeChecked()
     {
-        return false;
+        return Mage::getStoreConfigFlag('web/cookie/remember_default');
     }
 }

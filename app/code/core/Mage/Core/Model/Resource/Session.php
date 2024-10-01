@@ -19,18 +19,6 @@
 class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
 {
     /**
-     * Session maximum cookie lifetime
-     */
-    public const SEESION_MAX_COOKIE_LIFETIME = 3155692600;
-
-    /**
-     * Session lifetime
-     *
-     * @var string|int|null
-     */
-    protected $_lifeTime;
-
-    /**
      * Session data table name
      *
      * @var string
@@ -80,24 +68,7 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
      */
     public function getLifeTime()
     {
-        if (is_null($this->_lifeTime)) {
-            $configNode = Mage::app()->getStore()->isAdmin() ?
-                    'admin/security/session_cookie_lifetime' : 'web/cookie/cookie_lifetime';
-            $this->_lifeTime = Mage::getStoreConfigAsInt($configNode);
-
-            if ($this->_lifeTime < 60) {
-                $this->_lifeTime = ini_get('session.gc_maxlifetime');
-            }
-
-            if ($this->_lifeTime < 60) {
-                $this->_lifeTime = 3600; //one hour
-            }
-
-            if ($this->_lifeTime > self::SEESION_MAX_COOKIE_LIFETIME) {
-                $this->_lifeTime = self::SEESION_MAX_COOKIE_LIFETIME; // 100 years
-            }
-        }
-        return $this->_lifeTime;
+        return Mage::getSingleton('core/cookie')->getLifetime();
     }
 
     /**

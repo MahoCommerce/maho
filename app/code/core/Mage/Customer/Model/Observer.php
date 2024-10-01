@@ -250,4 +250,26 @@ class Mage_Customer_Model_Observer
             $model->changePassword($password, false);
         }
     }
+
+    /**
+     * Set the customer's or guest's session time based on config
+     */
+    public function cookieSetLifetime(Varien_Event_Observer $observer)
+    {
+        /** @var Mage_Core_Model_Session $session */
+        $session = Mage::getSingleton('customer/session');
+        if ($session->getSessionName() === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
+            if ($session->getRememberMe() && Mage::getStoreConfigFlag('web/cookie/remember_enabled')) {
+                $lifetime = Mage::getStoreConfigAsInt('web/cookie/remember_cookie_lifetime');
+            } else {
+                $lifetime = Mage::getStoreConfigAsInt('web/cookie/cookie_lifetime');
+            }
+            $lifetime = min($lifetime, Mage_Core_Model_Session::SESSION_MAX_COOKIE_LIFETIME);
+            $lifetime = max($lifetime, Mage_Core_Model_Session::SESSION_MIN_COOKIE_LIFETIME);
+
+            /** @var Mage_Core_Model_Cookie $cookie */
+            $cookie = $observer->getCookie();
+            $cookie->setLifetime($lifetime);
+        }
+    }
 }

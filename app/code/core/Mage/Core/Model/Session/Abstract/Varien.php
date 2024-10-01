@@ -100,6 +100,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
             }
         }
 
+
         // session cookie params
         $cookieParams = [
             'lifetime' => (int)$cookie->getLifetime(),
