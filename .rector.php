@@ -29,4 +29,9 @@ return RectorConfig::configure()
         DeadCode\Property\RemoveUselessVarTagRector::class,
         Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector::class,
         TypeDeclaration\ClassMethod\ReturnNeverTypeRector::class
+    ])
+    ->withConfiguredRule(Rector\Php82\Rector\Param\AddSensitiveParameterAttributeRector::class, [
+        'sensitive_parameters' => [
+            'password'
+        ],
     ]);

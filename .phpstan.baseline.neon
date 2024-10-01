@@ -4471,21 +4471,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
 
 		-
-			message: "#^Property Mage_Usa_Model_Shipping_Carrier_Ups\\:\\:\\$_baseCurrencyRate \\(float\\) does not accept string\\.$#"
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups.php
-
-		-
-			message: "#^Variable \\$debugData might not be defined\\.$#"
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups.php
-
-		-
-			message: "#^Variable \\$response might not be defined\\.$#"
-			count: 2
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups.php
-
-		-
 			message: "#^Call to an undefined method Mage_Core_Helper_Abstract\\:\\:priceIncludesTax\\(\\)\\.$#"
 			count: 1
 			path: app/code/core/Mage/Weee/Helper/Data.php
