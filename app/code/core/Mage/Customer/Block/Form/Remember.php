@@ -29,6 +29,7 @@ class Mage_Customer_Block_Form_Remember extends Mage_Core_Block_Template
         if (Mage::getStoreConfigFlag('web/cookie/remember_enabled')) {
             return parent::_toHtml();
         }
+        return '';
     }
 
     /**
