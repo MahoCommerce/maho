@@ -16,9 +16,6 @@
 body.cms-home .main-container {
   padding-top: 20px;
 }
-body.cms-home .slideshow-container {
-  margin-top: 0;
-}
 
 .slideshow .banner-msg {
   position: absolute;
@@ -208,7 +205,6 @@ body .promos > li {
   margin-right: 2.66667% !important;
   margin-bottom: 10px;
   border: 1px solid #cccccc;
-  padding: 10px;
 }
 
 .catblocks li:hover {
