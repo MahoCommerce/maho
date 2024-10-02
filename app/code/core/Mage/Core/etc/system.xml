@@ -1206,8 +1206,8 @@
                         </use_case_sensitive_login>
                         <session_cookie_lifetime translate="label comment">
                             <label>Session Lifetime (seconds)</label>
-                            <comment>Values less than 60 are ignored. Note that changes will apply after logout.</comment>
-                            <validate>validate-digits</validate>
+                            <comment>Values less than 60 are ignored.</comment>
+                            <validate>validate-digits validate-digits-range digits-range-60-</validate>
                             <sort_order>3</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
