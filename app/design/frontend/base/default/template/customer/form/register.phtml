@@ -65,7 +65,7 @@
                 <li><?= $_gender->setGender($this->getFormData()->getGender())->toHtml() ?></li>
             <?php endif ?>
 
-            <?php foreach ($this->extraFields() as $_code => $_attribute): ?>
+            <?php foreach ($this->getExtraFields() as $_code => $_attribute): ?>
                 <?php $_block = 'eav/widget_'.$_attribute->getFrontendInput() ?>
                 <?php $_element = $this->getLayout()->createBlock($_block)->setData('attribute', $_attribute) ?>
                 <?php if ($_element->isEnabled()): ?>

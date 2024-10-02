@@ -181,28 +181,9 @@ class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
 
     /**
      * Return extra EAV fields used in this form
-     *
-     * @return array
      */
-    public function extraFields()
+    public function getExtraFields(): array
     {
-        /** @var Mage_Customer_Model_Customer $customer */
-        $customer = Mage::getModel('customer/customer');
-
-        /** @var Mage_Customer_Model_Form $form */
-        $form = Mage::getModel('customer/form');
-        $form->setFormCode('customer_account_create')
-             ->setEntity($customer)
-             ->initDefaultValues();
-
-        $attributes = $form->getAttributes();
-
-        foreach ($attributes as $code => $attribute) {
-            if (!$attribute->getIsUserDefined()) {
-                unset($attributes[$code]);
-            }
-        }
-
-        return $attributes;
+        return Mage::helper('customer')->getExtraFields('customer_account_create');
     }
 }

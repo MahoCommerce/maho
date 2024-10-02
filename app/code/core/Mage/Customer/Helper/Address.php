@@ -277,4 +277,36 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_VAT_FRONTEND_VISIBILITY);
     }
+
+    /**
+     * Return extra EAV fields used in customer address forms
+     */
+    public function getExtraFields(string $formCode, Mage_Customer_Model_Address|int $addressId = null): array
+    {
+        if ($addressId instanceof Mage_Customer_Model_Address) {
+            $address = $addressId;
+        } else if (is_int($addressId)) {
+            /** @var Mage_Customer_Model_Customer $customer */
+            $customer = Mage::getModel('customer/customer');
+            $address = $customer->getAddressById($addressId);
+        } else {
+            $address = Mage::getModel('customer/address');
+        }
+
+        /** @var Mage_Customer_Model_Form $form */
+        $form = Mage::getModel('customer/form');
+        $form->setFormCode($formCode)
+             ->setEntity($address)
+             ->initDefaultValues();
+
+        $attributes = $form->getAttributes();
+
+        foreach ($attributes as $code => $attribute) {
+            if (!$attribute->getIsUserDefined()) {
+                unset($attributes[$code]);
+            }
+        }
+
+        return $attributes;
+    }
 }

@@ -142,7 +142,7 @@
     <div class="fieldset">
         <h2 class="legend"><?php echo $this->__('Other') ?></h2>
         <ul class="form-list">
-            <?php foreach ($this->extraFields() as $_code => $_attribute): ?>
+            <?php foreach ($this->getExtraFields() as $_code => $_attribute): ?>
                 <?php $_block = 'eav/widget_'.$_attribute->getFrontendInput() ?>
                 <?php $_element = $this->getLayout()->createBlock($_block)->setData('attribute', $_attribute) ?>
                 <?php if ($_element->isEnabled()): ?>

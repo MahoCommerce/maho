@@ -742,4 +742,29 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
 
         return $countryCode === 'GR' ? 'EL' : $countryCode;
     }
+
+    /**
+     * Return extra EAV fields used in customer forms
+     */
+    public function getExtraFields(string $formCode): array
+    {
+        /** @var Mage_Customer_Model_Customer $customer */
+        $customer = Mage::getModel('customer/customer');
+
+        /** @var Mage_Customer_Model_Form $form */
+        $form = Mage::getModel('customer/form');
+        $form->setFormCode($formCode)
+             ->setEntity($customer)
+             ->initDefaultValues();
+
+        $attributes = $form->getAttributes();
+
+        foreach ($attributes as $code => $attribute) {
+            if (!$attribute->getIsUserDefined()) {
+                unset($attributes[$code]);
+            }
+        }
+
+        return $attributes;
+    }
 }

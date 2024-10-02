@@ -207,32 +207,26 @@ class Mage_Checkout_Block_Onepage_Billing extends Mage_Checkout_Block_Onepage_Ab
 
     /**
      * Return extra EAV fields used in this form
-     *
-     * @return array
      */
-    public function extraFields()
+    public function getExtraCustomerFields(): array
     {
-        /** @var Mage_Customer_Model_Form $form */
-        $form = Mage::getModel('customer/form');
-        $form->setFormCode('checkout_register');
+        return Mage::helper('customer')->getExtraFields('checkout_register');
+    }
 
-        $attributes = $form->getAttributes();
-        foreach ($attributes as $code => $attribute) {
-            if (!$attribute->getIsUserDefined()) {
-                unset($attributes[$code]);
-            }
-        }
-
-        return $attributes;
+    /**
+     * Return extra EAV fields used in this form
+     */
+    public function getExtraCustomerAddressFields(): array
+    {
+        return Mage::helper('customer/address')->getExtraFields('checkout_address_create');
     }
 
     /**
      * Return extra EAV fields from incomplete checkout session
-     *
-     * @return Varien_Object
      */
-    public function getExtraFieldsSession()
+    public function getExtraFieldsSession(): Varien_Object
     {
+        // TODO, need to separate from customer and customer address
         return new Varien_Object($this->getCheckout()->getExtraFields());
     }
 }

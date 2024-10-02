@@ -414,6 +414,7 @@ class Mage_Checkout_Model_Type_Onepage
             $customer->setPassword($customerRequest->getParam('customer_password'));
             $customer->setPasswordConfirmation($customerRequest->getParam('confirm_password'));
 
+            // TODO, need to separate from customer and customer address
             // store additional EAV fields in session
             $extraFields = [];
             foreach ($customerForm->getAttributes() as $attribute) {
@@ -720,6 +721,7 @@ class Mage_Checkout_Model_Type_Onepage
             $customerBilling->setIsDefaultShipping(true);
         }
 
+        // TODO, need to separate from customer and customer address
         // copy additional EAV fields from session to customer object
         if ($quote->getCheckoutMethod() == self::METHOD_REGISTER) {
             $extraFields = $this->_checkoutSession->getExtraFields();

@@ -468,6 +468,9 @@
                 <adminhtml_customer_address translate="label" module="customer">
                     <label>Adminhtml Customer Address</label>
                 </adminhtml_customer_address>
+                <checkout_address_create translate="label" module="customer">
+                    <label>Checkout Address Create</label>
+                </checkout_address_create>
                 <customer_address_edit translate="label" module="customer">
                     <label>Customer Address Edit</label>
                 </customer_address_edit>
