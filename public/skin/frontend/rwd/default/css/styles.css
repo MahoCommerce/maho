@@ -4171,7 +4171,6 @@ p.product-name a:hover {
  * ============================================ */
 .category-image {
   border: 1px solid #cccccc;
-  padding: 10px;
 }
 .category-image img {
   width: 100%;
@@ -8274,165 +8273,50 @@ div.paypal-logo span > img {
 /* ============================================ *
  * Slideshow
  * ============================================ */
-.slideshow-container {
-  position: relative;
-  display: block;
+
+.slideshow {
   width: 100%;
-  margin: 10px 0;
-  border: 1px solid #ededed;
-}
-.slideshow-container .slideshow {
-  width: 100%;
-  padding: 0;
-  position: relative;
-  margin: 0;
-  border: 10px solid #FFFFFF;
-}
-.slideshow-container .slideshow > li {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: 0;
-  display: block;
-  margin: 0;
-}
-.slideshow-container .slideshow > li:first-child {
-  position: static;
-  z-index: 100;
-}
-.slideshow-container .slideshow > li img {
-  max-width: 100%;
-  width: 100%;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
 }
 
-.slideshow-pager {
-  text-align: center;
-  width: 100%;
-  z-index: 115;
-  position: absolute;
-  bottom: 0px;
-  top: auto;
-  overflow: hidden;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -webkit-user-select: none;
-  -o-user-select: none;
-  user-select: none;
+.slideshow ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  white-space: nowrap;
 }
-.slideshow-pager span {
-  font-family: arial;
-  width: 44px;
-  height: 44px;
+
+.slideshow ul li {
+  scroll-snap-align: center;
   display: inline-block;
-  color: #DDDDDD;
+  margin: 0;
+}
+
+.slideshow ul li a img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.slideshow-dots {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.slideshow-dots .dot {
+  height: 8px;
+  width: 8px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0 5px;
   cursor: pointer;
 }
-.slideshow-pager span:before {
-  content: '';
-  display: block;
-  width: 16px;
-  height: 16px;
-  left: 50%;
-  top: 50%;
-  margin-left: -8px;
-  margin-top: -8px;
-  border-radius: 1px;
-  background-color: #FFFFFF;
-  position: relative;
-}
-.slideshow-pager span:hover:before {
-  background-color: #2e8ab8;
-}
-.slideshow-pager span.cycle-pager-active:before {
-  background-color: #297aa3;
-}
-.slideshow-pager > * {
-  cursor: pointer;
-}
 
-.slideshow-prev,
-.slideshow-next {
-  position: absolute;
-  top: 0;
-  width: 15%;
-  max-width: 80px;
-  height: 100%;
-  opacity: 0.6;
-  z-index: 110;
-  cursor: pointer;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -webkit-user-select: none;
-  -o-user-select: none;
-  user-select: none;
-}
-.slideshow-prev:before,
-.slideshow-next:before {
-  content: '';
-  width: 0;
-  height: 0;
-  font-size: 0;
-  position: absolute;
-  border-style: solid;
-  display: block;
-  top: 50%;
-  margin-top: -15px;
-}
-.slideshow-prev:hover,
-.slideshow-next:hover {
-  opacity: 1;
-}
-.slideshow-prev.disabled,
-.slideshow-next.disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.slideshow-prev {
-  left: 8px;
-}
-.slideshow-prev:before {
-  border-width: 15px 15px 15px 0;
-  border-color: transparent #FFFFFF transparent transparent;
-  top: 50%;
-  left: 10px;
-}
-.slideshow-prev:hover:before {
-  border-color: transparent #2e8ab8 transparent transparent;
-}
-
-.slideshow-next {
-  right: 8px;
-}
-.slideshow-next:before {
-  border-width: 15px 0 15px 15px;
-  border-color: transparent transparent transparent #FFFFFF;
-  top: 50%;
-  right: 10px;
-}
-.slideshow-next:hover:before {
-  border-color: transparent transparent transparent #2e8ab8;
-}
-
-.cycle-caption {
-  position: absolute;
-  color: white;
-  bottom: 15px;
-  right: 15px;
-  z-index: 110;
-}
-
-.cycle-overlay {
-  font-family: tahoma, arial;
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  z-index: 120;
-  background: black;
-  color: white;
-  padding: 15px;
-  opacity: .5;
+.slideshow-dots .dot.active {
+  background-color: #636363;
 }
 
 /* ============================================ *
