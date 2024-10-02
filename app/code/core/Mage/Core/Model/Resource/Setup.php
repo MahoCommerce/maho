@@ -558,7 +558,6 @@ class Mage_Core_Model_Resource_Setup
         $files      = [];
 
         $filesDir   = Mage::getModuleDir('data', $modName) . DS . $this->_resourceName;
-        echo $filesDir;die("a");
         $filesDir   = mahoFindFileInIncludePath($filesDir);
         if (is_dir($filesDir) && is_readable($filesDir)) {
             $regExp     = sprintf('#^%s-(.*)\.php$#i', $actionType);
