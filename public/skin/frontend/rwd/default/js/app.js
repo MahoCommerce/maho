@@ -1243,8 +1243,12 @@ $j(document).ready(function() {
 
 // Slideshow management
 document.addEventListener('DOMContentLoaded', () => {
-    const container = document.querySelector('.slideshow');
-    const slideshow = container.querySelector('ul');
+    const slideshowContainer = document.querySelector('.slideshow');
+    if (!slideshowContainer) {
+        return;
+    }
+
+    const slideshow = slideshowContainer.querySelector('ul');
     const slides = slideshow.querySelectorAll('li');
 
     const dotsContainer = document.createElement('div');
@@ -1252,17 +1256,17 @@ document.addEventListener('DOMContentLoaded', () => {
     slides.forEach((_, index) => {
         const dot = document.createElement('span');
         dot.className = 'dot';
-        dot.addEventListener('click', () => container.scrollLeft = index * slides[0].offsetWidth);
+        dot.addEventListener('click', () => slideshowContainer.scrollLeft = index * slides[0].offsetWidth);
         dotsContainer.appendChild(dot);
     });
-    container.insertAdjacentElement('afterend', dotsContainer);
+    slideshowContainer.insertAdjacentElement('afterend', dotsContainer);
 
     const updateDots = () => {
-        const index = Math.round(container.scrollLeft / slides[0].offsetWidth);
+        const index = Math.round(slideshowContainer.scrollLeft / slides[0].offsetWidth);
         dotsContainer.querySelectorAll('.dot').forEach((dot, i) =>
             dot.classList.toggle('active', i === index)
         );
     };
-    container.addEventListener('scroll', updateDots);
+    slideshowContainer.addEventListener('scroll', updateDots);
     updateDots();
 });

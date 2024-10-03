@@ -29,6 +29,7 @@ class Mage_Core_Model_Resource_Setup
     public const TYPE_DB_UNINSTALL         = 'uninstall';
     public const TYPE_DATA_INSTALL         = 'data-install';
     public const TYPE_DATA_UPGRADE         = 'data-upgrade';
+    public const TYPE_MAHO                 = 'maho';
 
     /**
      * Setup resource name
@@ -196,8 +197,6 @@ class Mage_Core_Model_Resource_Setup
     }
 
     /**
-     * Apply database updates whenever needed
-     *
      * @return bool
      */
     public static function applyAllUpdates()
@@ -232,10 +231,6 @@ class Mage_Core_Model_Resource_Setup
         return true;
     }
 
-    /**
-     * Apply database data updates whenever needed
-     *
-     */
     public static function applyAllDataUpdates()
     {
         if (!self::$_schemaUpdatesChecked) {
@@ -272,6 +267,41 @@ class Mage_Core_Model_Resource_Setup
             }
         } elseif ($configVer) {
             $this->_installData($configVer);
+        }
+        return $this;
+    }
+
+    public static function applyAllMahoUpdates(): void
+    {
+        if (!self::$_schemaUpdatesChecked) {
+            return;
+        }
+        $resources = Mage::getConfig()->getNode('global/resources')->children();
+        foreach ($resources as $resName => $resource) {
+            if (!$resource->setup) {
+                continue;
+            }
+            $className = __CLASS__;
+            if (isset($resource->setup->class)) {
+                $className = $resource->setup->getClassName();
+            }
+            /** @var Mage_Core_Model_Resource_Setup $setupClass */
+            $setupClass = new $className($resName);
+            $setupClass->applyMahoUpdates();
+        }
+    }
+
+    public function applyMahoUpdates(): self
+    {
+        $dataVer = $this->_getResource()->getMahoVersion($this->_resourceName);
+        $configVer = Mage::getMahoVersion();
+        if ($dataVer !== false) {
+            $status = version_compare($configVer, $dataVer);
+            if ($status == self::VERSION_COMPARE_GREATER) {
+                $this->_upgradeMaho($dataVer, $configVer);
+            }
+        } elseif ($configVer) {
+            $this->_installMaho($configVer);
         }
         return $this;
     }
@@ -390,6 +420,26 @@ class Mage_Core_Model_Resource_Setup
     {
         $this->_modifyResourceDb('data-upgrade', $oldVersion, $newVersion);
         $this->_getResource()->setDataVersion($this->_resourceName, $newVersion);
+
+        return $this;
+    }
+
+    /**
+     * Run Maho install scripts
+     */
+    protected function _installMaho(string $newVersion): self
+    {
+        $this->_modifyResourceDb(self::TYPE_MAHO, '', $newVersion);
+
+        return $this;
+    }
+
+    /**
+     * Run Maho upgrade scripts
+     */
+    protected function _upgradeMaho(string $oldVersion, string $newVersion): self
+    {
+        $this->_modifyResourceDb(self::TYPE_MAHO, $oldVersion, $newVersion);
 
         return $this;
     }
@@ -544,13 +594,38 @@ class Mage_Core_Model_Resource_Setup
     }
 
     /**
-     * Save resource version
-     *
-     * @param string $actionType
-     * @param string $version
-     * @return $this
+     * Retrieve available Maho install/upgrade files for current module
      */
-    protected function _setResourceVersion($actionType, $version)
+    protected function _getAvailableMahoFiles(string $actionType, string $fromVersion, string $toVersion): array
+    {
+        $modName    = (string)$this->_moduleConfig[0]->getName();
+        $files      = [];
+
+        $filesDir   = Mage::getModuleDir('sql', $modName) . DS . 'maho_setup';
+        $filesDir   = mahoFindFileInIncludePath($filesDir);
+        if (is_dir($filesDir) && is_readable($filesDir)) {
+            $regExp     = sprintf('#^%s-(.*)\.php$#i', $actionType);
+            $handlerDir = dir($filesDir);
+            while (($file = $handlerDir->read()) !== false) {
+                $matches = [];
+                if (preg_match($regExp, $file, $matches)) {
+                    $files[$matches[1]] = $filesDir . DS . $file;
+                }
+            }
+            $handlerDir->close();
+        }
+
+        if (empty($files)) {
+            return [];
+        }
+
+        return $this->_getModifySqlFiles($actionType, $fromVersion, $toVersion, $files);
+    }
+
+    /**
+     * Save resource version
+     */
+    protected function _setResourceVersion(string $actionType, string $version): self
     {
         switch ($actionType) {
             case self::TYPE_DB_INSTALL:
@@ -561,6 +636,8 @@ class Mage_Core_Model_Resource_Setup
             case self::TYPE_DATA_UPGRADE:
                 $this->_getResource()->setDataVersion($this->_resourceName, $version);
                 break;
+            case self::TYPE_MAHO:
+                $this->_getResource()->setMahoVersion($this->_resourceName, $version);
         }
 
         return $this;
@@ -586,6 +663,9 @@ class Mage_Core_Model_Resource_Setup
             case self::TYPE_DATA_INSTALL:
             case self::TYPE_DATA_UPGRADE:
                 $files = $this->_getAvailableDataFiles($actionType, $fromVersion, $toVersion);
+                break;
+            case self::TYPE_MAHO:
+                $files = $this->_getAvailableMahoFiles($actionType, $fromVersion, $toVersion);
                 break;
             default:
                 $files = [];
@@ -682,16 +762,22 @@ class Mage_Core_Model_Resource_Setup
                 }
                 break;
 
-            case self::TYPE_DB_ROLLBACK:
+            case self::TYPE_MAHO:
+                uksort($arrFiles, 'version_compare');
+                foreach ($arrFiles as $version => $file) {
+                    $arrRes[] = [
+                        'toVersion' => $version,
+                        'fileName'  => $file
+                    ];
+                }
                 break;
 
+            case self::TYPE_DB_ROLLBACK:
             case self::TYPE_DB_UNINSTALL:
                 break;
         }
         return $arrRes;
     }
-
-    /******************* UTILITY METHODS *****************/
 
     /**
      * Retrieve row or field from table by id or string and parent id

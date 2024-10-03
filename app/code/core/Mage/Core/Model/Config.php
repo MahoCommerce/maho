@@ -1288,6 +1288,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             case 'sql':
                 $dir .= DS . 'sql';
                 break;
+
             case 'data':
                 $dir .= DS . 'data';
                 break;
