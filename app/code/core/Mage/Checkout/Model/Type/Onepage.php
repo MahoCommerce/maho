@@ -768,7 +768,9 @@ class Mage_Checkout_Model_Type_Onepage
             );
         } else {
             $customer->sendNewAccountEmail('registered', '', $this->getQuote()->getStoreId());
-            $this->getCustomerSession()->loginById($customer->getId());
+            $this->getCustomerSession()
+                 ->setRememberMe($this->_checkoutSession->getRememberMe())
+                 ->loginById($customer->getId());
         }
         return $this;
     }

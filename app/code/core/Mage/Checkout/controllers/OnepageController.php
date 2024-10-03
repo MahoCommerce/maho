@@ -386,6 +386,10 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                 }
             }
 
+            /** @var Mage_Checkout_Model_Session */
+            $session = Mage::getSingleton('checkout/session');
+            $session->setRememberMe((bool)$this->getRequest()->getPost('remember_me'));
+
             $this->_prepareDataJSON($result);
         }
     }
