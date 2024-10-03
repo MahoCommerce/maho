@@ -6,6 +6,7 @@ on:
 jobs:
   sync-locales:
     runs-on: ubuntu-latest
+    if: github.repository == 'MahoCommerce/maho'
     steps:
       - name: Generate token
         id: generate_token

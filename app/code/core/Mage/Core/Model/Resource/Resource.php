@@ -32,6 +32,13 @@ class Mage_Core_Model_Resource_Resource extends Mage_Core_Model_Resource_Db_Abst
      */
     protected static $_dataVersions    = null;
 
+    /**
+     * Resource maho versions cache array
+     *
+     * @var array|null
+     */
+    protected static $_mahoVersions    = null;
+
     #[\Override]
     protected function _construct()
     {
@@ -52,9 +59,11 @@ class Mage_Core_Model_Resource_Resource extends Mage_Core_Model_Resource_Db_Abst
     {
         if ((($needType == 'db') && is_null(self::$_versions))
             || (($needType == 'data') && is_null(self::$_dataVersions))
+            || (($needType == 'maho') && is_null(self::$_mahoVersions))
         ) {
             self::$_versions     = []; // Db version column always exists
             self::$_dataVersions = null; // Data version array will be filled only if Data column exist
+            self::$_mahoVersions = null; // Maho version array will be filled only if Maho column exist
 
             if ($this->_getReadAdapter()->isTableExists($this->getMainTable())) {
                 $select = $this->_getReadAdapter()->select()
@@ -67,6 +76,12 @@ class Mage_Core_Model_Resource_Resource extends Mage_Core_Model_Resource_Db_Abst
                             self::$_dataVersions = [];
                         }
                         self::$_dataVersions[$row['code']] = $row['data_version'];
+                    }
+                    if (array_key_exists('maho_version', $row)) {
+                        if (is_null(self::$_mahoVersions)) {
+                            self::$_mahoVersions = [];
+                        }
+                        self::$_mahoVersions[$row['code']] = $row['maho_version'];
                     }
                 }
             }
@@ -149,6 +164,40 @@ class Mage_Core_Model_Resource_Resource extends Mage_Core_Model_Resource_Db_Abst
         ];
 
         if ($this->getDbVersion($resName) || $this->getDataVersion($resName)) {
+            self::$_dataVersions[$resName] = $version;
+            $this->_getWriteAdapter()->update($this->getMainTable(), $data, ['code = ?' => $resName]);
+        } else {
+            self::$_dataVersions[$resName] = $version;
+            $this->_getWriteAdapter()->insert($this->getMainTable(), $data);
+        }
+        return $this;
+    }
+
+    /**
+     * Get resource version for Maho-specific install scripts
+     */
+    public function getMahoVersion(string $resName): string|false
+    {
+        if (!$this->_getReadAdapter()) {
+            return false;
+        }
+
+        $this->_loadVersionData('maho');
+
+        return self::$_mahoVersions[$resName] ?? false;
+    }
+
+    /**
+     * Specify resource version for Maho-specific install scripts
+     */
+    public function setMahoVersion(string $resName, string $version): self
+    {
+        $data = [
+            'code'          => $resName,
+            'maho_version'  => $version
+        ];
+
+        if ($this->getDbVersion($resName) || $this->getDataVersion($resName) || $this->getMahoVersion($resName)) {
             self::$_dataVersions[$resName] = $version;
             $this->_getWriteAdapter()->update($this->getMainTable(), $data, ['code = ?' => $resName]);
         } else {
