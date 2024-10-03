@@ -351,6 +351,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
 
             // apply data updates
             Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
+            Mage_Core_Model_Resource_Setup::applyAllMahoUpdates();
 
             /**
              * Validate entered data for administrator user
