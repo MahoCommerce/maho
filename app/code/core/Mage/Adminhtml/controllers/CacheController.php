@@ -68,6 +68,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
             Mage::app()->cleanCache();
             Mage_Core_Model_Resource_Setup::applyAllUpdates();
             Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
+            Mage_Core_Model_Resource_Setup::applyAllMahoUpdates();
             Mage::app()->getCacheInstance()->unbanUse('config');
             Mage::getConfig()->saveCache();
         } finally {
