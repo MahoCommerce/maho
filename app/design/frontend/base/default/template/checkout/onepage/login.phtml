@@ -120,14 +120,4 @@ $isCustomerMustBeLogged = $this->helper('checkout')->isCustomerMustBeLogged();
             loginForm.submit();
         }
     }
-
-    <?php if ($registerParam || $registerParam === ''): ?>
-        document.addEventListener("DOMContentLoaded", function() {
-            const registerCheckbox = document.getElementById('login:register');
-            if (registerCheckbox) {
-                registerCheckbox.checked = true;
-                checkout.setMethod();
-            }
-        });
-    <?php endif ?>
 </script>
