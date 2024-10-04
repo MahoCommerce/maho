@@ -331,23 +331,29 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     public function loadBase()
     {
-        $etcDir = $this->getOptions()->getEtcDir();
-
-        $coreFiles = glob(BP . '/vendor/mahocommerce/maho/app/etc/*.xml');
-        $modulesFiles = array_diff(
-            glob(BP . '/vendor/*/*/app/etc/*.xml'),
-            $coreFiles
-        );
-        $localFiles = glob($etcDir . DS . '*.xml');
-
         $files = [];
-        foreach (array_merge($localFiles, $modulesFiles, $coreFiles) as $file) {
-            $basename = basename($file);
-            if (!isset($files[$basename])) {
-                $files[$basename] = $file;
+
+        // If we installed with the starter project, include core Maho files first
+        if (MAHO_IS_STARTER_KIT) {
+            foreach (glob(BP . '/vendor/mahocommerce/maho/app/etc/*.xml') as $file) {
+                $files[basename($file)] = $file;
             }
         }
-        $files = array_reverse($files);
+
+        // Include all other vendor files, except those we already added from core
+        foreach (glob(BP . '/vendor/*/*/app/etc/*.xml') as $file) {
+            if (!in_array($file, $files)) {
+                $files[basename($file)] = $file;
+            }
+        }
+
+        // Prevent any module from defining a local.xml
+        unset($files['local.xml']);
+
+        // Lastly, include local files, always overriding core and module files
+        foreach (glob($this->getOptions()->getEtcDir() . '/*.xml') as $file) {
+            $files[basename($file)] = $file;
+        }
 
         $this->loadFile(current($files));
         while ($file = next($files)) {
@@ -356,7 +362,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             $this->extend($merge);
         }
 
-        if (in_array($etcDir . DS . 'local.xml', $files)) {
+        if (isset($files['local.xml'])) {
             $this->_isLocalConfigLoaded = true;
         }
 
@@ -824,23 +830,26 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     protected function _getDeclaredModuleFiles()
     {
-        $etcDir = $this->getOptions()->getEtcDir();
-
-        $coreFiles = glob(BP . '/vendor/mahocommerce/maho/app/etc/modules/*.xml');
-        $modulesFiles = array_diff(
-            glob(BP . '/vendor/*/*/app/etc/modules/*.xml'),
-            $coreFiles
-        );
-        $localFiles = glob($etcDir . DS . 'modules' . DS . '*.xml');
-
         $moduleFiles = [];
-        foreach (array_merge($localFiles, $modulesFiles, $coreFiles) as $file) {
-            $basename = basename($file);
-            if (!isset($moduleFiles[$basename])) {
-                $moduleFiles[$basename] = $file;
+
+        // If we installed with the starter project, include core Maho files first
+        if (MAHO_IS_STARTER_KIT) {
+            foreach (glob(BP . '/vendor/mahocommerce/maho/app/etc/modules/*.xml') as $file) {
+                $moduleFiles[basename($file)] = $file;
             }
         }
-        $moduleFiles = array_reverse($moduleFiles);
+
+        // Include all other vendor files, except those we already added from core
+        foreach (glob(BP . '/vendor/*/*/app/etc/modules/*.xml') as $file) {
+            if (!in_array($file, $moduleFiles)) {
+                $moduleFiles[basename($file)] = $file;
+            }
+        }
+
+        // Lastly, include local files, always overriding core and module files
+        foreach (glob($this->getOptions()->getEtcDir() . '/modules/*.xml') as $file) {
+            $moduleFiles[basename($file)] = $file;
+        }
 
         if (!$moduleFiles) {
             return false;

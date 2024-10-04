@@ -12,11 +12,12 @@
 
 define('DS', DIRECTORY_SEPARATOR);
 define('PS', PATH_SEPARATOR);
-if (file_exists(__DIR__ . '/vendor/mahocommerce/maho')) {
+
+if (file_exists(dirname(__DIR__) . '/vendor/mahocommerce/maho')) {
+    define('MAHO_IS_STARTER_KIT', true);
     define('BP', dirname(getcwd()));
-} elseif (str_contains(__DIR__, '/vendor/mahocommerce/maho')) {
-    define('BP', str_replace('/vendor/mahocommerce/maho/app', '', __DIR__));
 } else {
+    define('MAHO_IS_STARTER_KIT', false);
     define('BP', dirname(__DIR__));
 }
 
@@ -32,20 +33,12 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
 /**
  * Set include path
  */
-$paths = [];
-$paths[] = BP . '/app/code/local';
-$paths[] = BP . '/app/code/community';
-$paths[] = BP . '/app/code/core';
-$paths[] = BP . '/vendor/mahocommerce/maho/app/code/core';
-$paths[] = BP . '/lib';
-$paths[] = BP . '/vendor/mahocommerce/maho/lib';
-$appPath = implode(PS, $paths);
-set_include_path($appPath . PS . Mage::registry('original_include_path'));
-include_once "Mage/Core/functions.php";
-include_once "Varien/Autoload.php";
+
+include_once BP . '/app/code/core/Mage/Core/functions.php';
+include_once BP . '/lib/Varien/Autoload.php';
 
 Varien_Autoload::register();
-require_once BP . DS . 'vendor' . DS . 'autoload.php';
+require_once BP . '/vendor/autoload.php';
 
 $paths = require BP . '/vendor/composer/include_paths.php';
 $paths[] = BP . '/app/code/local';
@@ -60,7 +53,9 @@ foreach ($allModules as $module) {
     $paths[] = "$module/app/code/community";
     $paths[] = "$module/app/code/core";
 }
-$paths[] = BP . '/vendor/mahocommerce/maho/app/code/core';
+if (MAHO_IS_STARTER_KIT) {
+    $paths[] = BP . '/vendor/mahocommerce/maho/app/code/core';
+}
 $paths[] = BP . '/lib';
 foreach ($allModules as $module) {
     if (str_contains($module, 'mahocommerce/maho')) {
@@ -68,12 +63,18 @@ foreach ($allModules as $module) {
     }
     $paths[] = "$module/lib";
 }
-$paths[] = BP . '/vendor/mahocommerce/maho/lib';
+if (MAHO_IS_STARTER_KIT) {
+    $paths[] = BP . '/vendor/mahocommerce/maho/lib';
+}
+
 $appPath = implode(PS, $paths);
 set_include_path($appPath . PS . Mage::registry('original_include_path'));
 
-/* Support additional includes, such as composer's vendor/autoload.php files */
-foreach (glob(BP . DS . 'app' . DS . 'etc' . DS . 'includes' . DS . '*.php') as $path) {
+/**
+ * Support additional includes, originally used for OpenMage composer support
+ * See: https://github.com/OpenMage/magento-lts/pull/559
+ */
+foreach (glob(BP . '/app/etc/includes/*.php') as $path) {
     include_once $path;
 }
 

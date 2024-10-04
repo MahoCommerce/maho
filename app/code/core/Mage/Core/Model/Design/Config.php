@@ -30,7 +30,7 @@ class Mage_Core_Model_Design_Config extends Varien_Simplexml_Config
             if (!is_dir($params['designRoot'])) {
                 throw new Mage_Core_Exception("Design root '{$params['designRoot']}' isn't a directory.");
             }
-            $this->_designRoot = $params['designRoot'];
+            $this->_designRoot = rtrim($params['designRoot'], '/\\');
         } else {
             $this->_designRoot = Mage::getBaseDir('design');
         }
@@ -39,22 +39,32 @@ class Mage_Core_Model_Design_Config extends Varien_Simplexml_Config
         $this->setCache(Mage::app()->getCache());
         if (!$this->loadCache()) {
             $this->loadString('<theme />');
-            $files = array_merge(
-                glob($this->_designRoot . '/*/*/*/etc/theme.xml'),
-                glob(BP . '/vendor/mahocommerce/maho' . str_replace(BP, '', $this->_designRoot) . '/*/*/*/etc/theme.xml'),
-            );
 
-            $filesByIdentifier = [];
-            foreach ($files as $file) {
-                $id = str_replace(BP . '/vendor/mahocommerce/maho', '', $file);
-                $id = str_replace(BP, '', $id);
-                $id = ltrim($id, '/');
-                if (!isset($filesByIdentifier[$id])) {
-                    $filesByIdentifier[$id] = $file;
+            $files = [];
+
+            // If we installed with the starter project, include core Maho files first
+            if (MAHO_IS_STARTER_KIT) {
+                foreach (glob(BP . '/vendor/mahocommerce/maho/app/design/*/*/*/etc/theme.xml') as $file) {
+                    $normalizedFile = str_replace(BP . '/vendor/mahocommerce/maho/app/design/', '', $file);
+                    $files[$normalizedFile] = $file;
                 }
             }
 
-            $files = array_values($filesByIdentifier);
+            // Include all other vendor files, except those we already added from core
+            foreach (glob(BP . '/vendor/*/*/app/design/*/*/*/etc/theme.xml') as $file) {
+                if (!in_array($file, $files)) {
+                    $normalizedFile = str_replace(BP . '/vendor/', '', $file);
+                    $normalizedFile = implode('/', array_slice(explode('/', $normalizedFile), 4));
+                    $files[$normalizedFile] = $file;
+                }
+            }
+
+            // Lastly, include local files, always overriding core and module files
+            foreach (glob($this->_designRoot . '/*/*/*/etc/theme.xml') as $file) {
+                $normalizedFile = str_replace($this->_designRoot, '', $file);
+                $files[$normalizedFile] = $file;
+            }
+
             foreach ($files as $file) {
                 $config = new Varien_Simplexml_Config();
                 $config->loadFile($file);
