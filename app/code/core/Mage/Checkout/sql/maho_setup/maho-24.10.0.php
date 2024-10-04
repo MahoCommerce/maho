@@ -17,12 +17,12 @@ const XML_PATH_CUSTOMER_MUST_BE_LOGGED = 'checkout/options/customer_must_be_logg
 $installer = $this;
 
 $defaultConfigValue = false;
-foreach(Mage::app()->getWebsites(true) as $website) {
+foreach (Mage::app()->getWebsites(true) as $website) {
     $configValue = !$website->getConfig(XML_PATH_GUEST_CHECKOUT) && $website->getConfig(XML_PATH_CUSTOMER_MUST_BE_LOGGED);
     if ($website->getId() === 0) {
         $defaultConfigValue = $configValue;
         $this->setConfigData(XML_PATH_REDIRECT_REGISTER, $configValue);
-    } else if($configValue !== $defaultConfigValue) {
+    } elseif ($configValue !== $defaultConfigValue) {
         $this->setConfigData(XML_PATH_REDIRECT_REGISTER, true, 'websites', $website->getId());
     }
 }
