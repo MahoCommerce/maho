@@ -144,7 +144,7 @@
 "Grouped Product Image","Grouped Product Image"
 "HTML","HTML"
 "ID","ID"
-"If enabled, customers choosing to register during checkout will be redirected to the customer/account/create page.<br />Note: If email confirmation is required, users won't be able to complete the order before confirming their email.",""If enabled, customers choosing to register during checkout will be redirected to the customer/account/create page.<br />Note: If email confirmation is required, users won't be able to complete the order before confirming their email.""
+"If enabled, customers choosing to register during checkout will be redirected to the customer/account/create page.<br />Note: If email confirmation is required, users won't be able to complete the order before confirming their email.","If enabled, customers choosing to register during checkout will be redirected to the customer/account/create page.<br />Note: If email confirmation is required, users won't be able to complete the order before confirming their email."
 "Incl. Tax","Incl. Tax"
 "Invalid checkout type.","Invalid checkout type."
 "Invalid data.","Invalid data."
