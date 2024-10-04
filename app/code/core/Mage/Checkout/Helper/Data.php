@@ -21,11 +21,8 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_GUEST_CHECKOUT = 'checkout/options/guest_checkout';
     public const XML_PATH_REDIRECT_REGISTER = 'checkout/options/redirect_register';
 
-    /**
-     * @deprecated 24.11.0 use XML_PATH_REDIRECT_REGISTER instead
-     */
+    /** @deprecated 24.11.0 use XML_PATH_REDIRECT_REGISTER instead */
     public const XML_PATH_CUSTOMER_MUST_BE_LOGGED = 'checkout/options/customer_must_be_logged';
-
 
     protected $_moduleName = 'Mage_Checkout';
 
