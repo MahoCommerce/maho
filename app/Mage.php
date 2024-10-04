@@ -12,14 +12,14 @@
 
 define('DS', DIRECTORY_SEPARATOR);
 define('PS', PATH_SEPARATOR);
-define('BP', MAHO_ROOT_DIR);
+define('BP', str_replace('/vendor/mahocommerce/maho', '', dirname(__DIR__)));
 
-if (file_exists(MAHO_ROOT_DIR . '/vendor/mahocommerce/maho')) {
+if (file_exists(BP . '/vendor/mahocommerce/maho')) {
     define('MAHO_IS_STARTER_KIT', true);
-    define('MAHO_ROOT_SOURCE_DIR', MAHO_ROOT_DIR . '/vendor/mahocommerce/maho');
+    define('MAHO_ROOT_SOURCE_DIR', BP . '/vendor/mahocommerce/maho');
 } else {
     define('MAHO_IS_STARTER_KIT', false);
-    define('MAHO_ROOT_SOURCE_DIR', MAHO_ROOT_DIR);
+    define('MAHO_ROOT_SOURCE_DIR', BP);
 }
 
 if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPER_MODE'])) {
