@@ -21,8 +21,6 @@ if (file_exists(dirname(__DIR__) . '/vendor/mahocommerce/maho')) {
     define('BP', dirname(__DIR__));
 }
 
-Mage::register('original_include_path', get_include_path());
-
 if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPER_MODE'])) {
     Mage::setIsDeveloperMode(true);
     ini_set('display_errors', '1');
@@ -30,20 +28,33 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
     ini_set('error_append_string', '</pre>');
 }
 
+if (MAHO_IS_STARTER_KIT) {
+    require_once BP . '/vendor/mahocommerce/maho/app/code/core/Mage/Core/functions.php';
+} else {
+    require_once BP . '/app/code/core/Mage/Core/functions.php';
+}
+
+
 /**
- * Set include path
+ * Require autoloaders
+ *   We want Varien autoloader to be first, but Composer uses the prepend option when registering
+ *   So, we'll load Varien second and also use the prepend option
  */
-
-include_once BP . '/app/code/core/Mage/Core/functions.php';
-include_once BP . '/lib/Varien/Autoload.php';
-
-Varien_Autoload::register();
 require_once BP . '/vendor/autoload.php';
+require_once BP . '/lib/Varien/Autoload.php';
+Varien_Autoload::register();
 
-$paths = require BP . '/vendor/composer/include_paths.php';
+
+/**
+ * Build include paths, note that Composer paths are last
+ */
+Mage::register('original_include_path', get_include_path());
+
+$paths = [];
 $paths[] = BP . '/app/code/local';
 $paths[] = BP . '/app/code/community';
 $paths[] = BP . '/app/code/core';
+
 $allModules = mahoGetComposerInstallationData()[1];
 foreach ($allModules as $module) {
     if (str_contains($module, 'mahocommerce/maho')) {
@@ -56,6 +67,7 @@ foreach ($allModules as $module) {
 if (MAHO_IS_STARTER_KIT) {
     $paths[] = BP . '/vendor/mahocommerce/maho/app/code/core';
 }
+
 $paths[] = BP . '/lib';
 foreach ($allModules as $module) {
     if (str_contains($module, 'mahocommerce/maho')) {
@@ -67,8 +79,11 @@ if (MAHO_IS_STARTER_KIT) {
     $paths[] = BP . '/vendor/mahocommerce/maho/lib';
 }
 
+array_push($paths, ...require BP . '/vendor/composer/include_paths.php');
+
 $appPath = implode(PS, $paths);
 set_include_path($appPath . PS . Mage::registry('original_include_path'));
+
 
 /**
  * Support additional includes, originally used for OpenMage composer support
@@ -77,6 +92,7 @@ set_include_path($appPath . PS . Mage::registry('original_include_path'));
 foreach (glob(BP . '/app/etc/includes/*.php') as $path) {
     include_once $path;
 }
+
 
 /**
  * Main Mage hub class

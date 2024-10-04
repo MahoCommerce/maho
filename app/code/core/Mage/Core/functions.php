@@ -312,7 +312,6 @@ function mahoGetComposerInstallationData(): array
     $installedVersions = \Composer\InstalledVersions::getAllRawData();
 
     foreach ($installedVersions as $datasets) {
-        array_shift($datasets['versions']);
         foreach ($datasets['versions'] as $package => $version) {
             if (!isset($version['install_path'])) {
                 continue;
@@ -320,8 +319,12 @@ function mahoGetComposerInstallationData(): array
             if (!in_array($version['type'], ['maho-source', 'maho-module', 'magento-module'])) {
                 continue;
             }
-            $packages[] = $package;
-            $packageDirectories[] = realpath($version['install_path']);
+
+            $path = realpath($version['install_path']);
+            if ($path !== BP) {
+                $packages[] = $package;
+                $packageDirectories[] = $path;
+            }
         }
     }
 

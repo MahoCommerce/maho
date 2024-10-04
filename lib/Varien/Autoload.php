@@ -37,7 +37,7 @@ class Varien_Autoload
      */
     public static function register()
     {
-        spl_autoload_register([self::instance(), 'autoload']);
+        spl_autoload_register([self::instance(), 'autoload'], true, true);
     }
 
     /**
