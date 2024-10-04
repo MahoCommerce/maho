@@ -5,6 +5,8 @@ includes:
 parameters:
     magentoRootPath: %currentWorkingDirectory%
     phpVersion: 80200
+    dynamicConstantNames:
+        - MAHO_STARTER_KIT
     paths:
         - app/bootstrap.php
         - app/Mage.php
