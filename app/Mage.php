@@ -38,13 +38,9 @@ Mage::register('original_include_path', get_include_path());
 
 
 /**
- * Require autoloaders
- *   We want Varien autoloader to be first, but Composer uses the prepend option when registering
- *   So, we'll load Varien second and also use the prepend option
+ * Require Composer autoloader
  */
 require_once BP . '/vendor/autoload.php';
-require_once MAHO_ROOT_SOURCE_DIR . '/lib/Varien/Autoload.php';
-Varien_Autoload::register();
 
 
 /**

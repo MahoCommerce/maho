@@ -78,6 +78,7 @@
         }
     },
     "config": {
+        "use-include-path": true,
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "cweagans/composer-patches": true,
