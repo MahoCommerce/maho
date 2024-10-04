@@ -16,8 +16,10 @@ define('BP', MAHO_ROOT_DIR);
 
 if (file_exists(MAHO_ROOT_DIR . '/vendor/mahocommerce/maho')) {
     define('MAHO_IS_STARTER_KIT', true);
+    define('MAHO_ROOT_SOURCE_DIR', MAHO_ROOT_DIR . '/vendor/mahocommerce/maho');
 } else {
     define('MAHO_IS_STARTER_KIT', false);
+    define('MAHO_ROOT_SOURCE_DIR', MAHO_ROOT_DIR);
 }
 
 if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPER_MODE'])) {
@@ -30,11 +32,7 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
     ini_set('opcache.revalidate_path', 1);
 }
 
-if (MAHO_IS_STARTER_KIT) {
-    require_once BP . '/vendor/mahocommerce/maho/app/code/core/Mage/Core/functions.php';
-} else {
-    require_once BP . '/app/code/core/Mage/Core/functions.php';
-}
+require_once MAHO_ROOT_SOURCE_DIR . '/app/code/core/Mage/Core/functions.php';
 
 Mage::register('original_include_path', get_include_path());
 
@@ -45,7 +43,7 @@ Mage::register('original_include_path', get_include_path());
  *   So, we'll load Varien second and also use the prepend option
  */
 require_once BP . '/vendor/autoload.php';
-require_once dirname(__DIR__) . '/lib/Varien/Autoload.php';
+require_once MAHO_ROOT_SOURCE_DIR . '/lib/Varien/Autoload.php';
 Varien_Autoload::register();
 
 
@@ -67,7 +65,7 @@ foreach ($allModules as $module) {
     $paths[] = "$module/app/code/core";
 }
 if (MAHO_IS_STARTER_KIT) {
-    $paths[] = BP . '/vendor/mahocommerce/maho/app/code/core';
+    $paths[] = MAHO_ROOT_SOURCE_DIR . '/app/code/core';
 }
 
 $paths[] = BP . '/lib';
@@ -78,7 +76,7 @@ foreach ($allModules as $module) {
     $paths[] = "$module/lib";
 }
 if (MAHO_IS_STARTER_KIT) {
-    $paths[] = BP . '/vendor/mahocommerce/maho/lib';
+    $paths[] = MAHO_ROOT_SOURCE_DIR . '/lib';
 }
 
 array_push($paths, ...require BP . '/vendor/composer/include_paths.php');
