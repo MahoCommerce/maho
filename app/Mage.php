@@ -26,6 +26,9 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
     ini_set('display_errors', '1');
     ini_set('error_prepend_string', '<pre>');
     ini_set('error_append_string', '</pre>');
+
+    // Fix for overriding zf1-future during development
+    ini_set('opcache.revalidate_path', 1);
 }
 
 if (MAHO_IS_STARTER_KIT) {
