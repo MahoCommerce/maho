@@ -144,6 +144,7 @@
 "Grouped Product Image","Grouped Product Image"
 "HTML","HTML"
 "ID","ID"
+"If enabled, customers choosing to register during checkout will be redirected to the customer/account/create page.<br />Note: If guest checkout is disabled, users won't be able to complete the order without registering.","If enabled, customers choosing to register during checkout will be redirected to the customer/account/create page.<br />Note: If guest checkout is disabled, users won't be able to complete the order without registering."
 "Incl. Tax","Incl. Tax"
 "Invalid checkout type.","Invalid checkout type."
 "Invalid data.","Invalid data."
