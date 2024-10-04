@@ -34,6 +34,8 @@ if (MAHO_IS_STARTER_KIT) {
     require_once BP . '/app/code/core/Mage/Core/functions.php';
 }
 
+Mage::register('original_include_path', get_include_path());
+
 
 /**
  * Require autoloaders
@@ -48,8 +50,6 @@ Varien_Autoload::register();
 /**
  * Build include paths, note that Composer paths are last
  */
-Mage::register('original_include_path', get_include_path());
-
 $paths = [];
 $paths[] = BP . '/app/code/local';
 $paths[] = BP . '/app/code/community';
