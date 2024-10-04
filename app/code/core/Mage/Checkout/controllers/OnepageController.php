@@ -664,7 +664,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         return Mage::getSingleton('customer/session')->isLoggedIn()
             || $this->getRequest()->getActionName() == 'index'
             || Mage::helper('checkout')->isAllowedGuestCheckout($this->getOnepage()->getQuote())
-            || !Mage::helper('checkout')->isCustomerMustBeLogged();
+            || !Mage::helper('checkout')->isRedirectRegisterStep();
     }
 
     /**

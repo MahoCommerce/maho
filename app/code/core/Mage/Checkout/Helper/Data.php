@@ -19,6 +19,9 @@
 class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_GUEST_CHECKOUT = 'checkout/options/guest_checkout';
+    public const XML_PATH_REDIRECT_REGISTER = 'checkout/options/redirect_register';
+
+    /** @deprecated 24.11.0 use XML_PATH_REDIRECT_REGISTER instead */
     public const XML_PATH_CUSTOMER_MUST_BE_LOGGED = 'checkout/options/customer_must_be_logged';
 
     protected $_moduleName = 'Mage_Checkout';
@@ -331,13 +334,20 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Check if user must be logged during checkout process
-     *
-     * @return bool
+     * Check if we should redirect the user to a separate register step during checkout
      */
-    public function isCustomerMustBeLogged()
+    public function isRedirectRegisterStep(): bool
     {
-        return Mage::getStoreConfigFlag(self::XML_PATH_CUSTOMER_MUST_BE_LOGGED);
+        return Mage::getStoreConfigFlag(self::XML_PATH_REDIRECT_REGISTER);
+    }
+
+    /**
+     * Check if user must be logged during checkout process
+     * @deprecated 24.11.0 use isRedirectRegisterStep() instead
+     */
+    public function isCustomerMustBeLogged(): bool
+    {
+        return $this->isRedirectRegisterStep();
     }
 
     public function isPersistentEnabled(): bool

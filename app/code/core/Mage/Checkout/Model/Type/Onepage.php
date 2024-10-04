@@ -191,17 +191,6 @@ class Mage_Checkout_Model_Type_Onepage
     }
 
     /**
-     * Get quote checkout method
-     *
-     * @deprecated since 1.4.0.1
-     * @return string
-     */
-    public function getCheckoutMehod()
-    {
-        return $this->getCheckoutMethod();
-    }
-
-    /**
      * Specify checkout method
      *
      * @param   string $method
