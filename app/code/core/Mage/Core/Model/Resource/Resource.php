@@ -78,7 +78,7 @@ class Mage_Core_Model_Resource_Resource extends Mage_Core_Model_Resource_Db_Abst
                         self::$_dataVersions[$row['code']] = $row['data_version'];
                     }
                     if (array_key_exists('maho_version', $row)) {
-                        if (is_null(self::$_mahoVersions)) {
+                        if (self::$_mahoVersions === null) {
                             self::$_mahoVersions = [];
                         }
                         self::$_mahoVersions[$row['code']] = $row['maho_version'];
