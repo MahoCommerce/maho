@@ -12,13 +12,12 @@
 
 define('DS', DIRECTORY_SEPARATOR);
 define('PS', PATH_SEPARATOR);
+define('BP', MAHO_ROOT_DIR);
 
-if (file_exists(dirname(__DIR__) . '/vendor/mahocommerce/maho')) {
+if (file_exists(MAHO_ROOT_DIR . '/vendor/mahocommerce/maho')) {
     define('MAHO_IS_STARTER_KIT', true);
-    define('BP', dirname(getcwd()));
 } else {
     define('MAHO_IS_STARTER_KIT', false);
-    define('BP', dirname(__DIR__));
 }
 
 if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPER_MODE'])) {
@@ -46,7 +45,7 @@ Mage::register('original_include_path', get_include_path());
  *   So, we'll load Varien second and also use the prepend option
  */
 require_once BP . '/vendor/autoload.php';
-require_once BP . '/lib/Varien/Autoload.php';
+require_once dirname(__DIR__) . '/lib/Varien/Autoload.php';
 Varien_Autoload::register();
 
 
