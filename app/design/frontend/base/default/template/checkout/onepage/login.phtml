@@ -19,8 +19,9 @@
 ?>
 <?php
 $isRegistrationAllowed = $this->helper('customer')->isRegistrationAllowed();
+$isRedirectRegisterStep = $this->helper('checkout')->isRedirectRegisterStep();
 $isAllowedGuestCheckout = $this->helper('checkout')->isAllowedGuestCheckout($this->getQuote());
-$isCustomerMustBeLogged = $this->helper('checkout')->isCustomerMustBeLogged();
+$isPersistentEnabled = $this->helper('checkout')->isPersistentEnabled();
 ?>
 <?php /* Extensions placeholder */ ?>
 <?= $this->getChildHtml('login_before') ?>
@@ -58,13 +59,9 @@ $isCustomerMustBeLogged = $this->helper('checkout')->isCustomerMustBeLogged();
 
         <div class="buttons-set">
             <p class="required">&nbsp;</p>
-            <?php if ($isAllowedGuestCheckout): ?>
-                <button id="onepage-guest-register-button" type="button" class="button" onclick="checkout.setMethod();"><?= $this->__('Continue') ?></button>
-            <?php elseif ($isCustomerMustBeLogged): ?>
-                <button id="onepage-guest-register-button" type="button" class="button" onclick="window.location='<?= $this->helper('checkout/url')->getRegistrationUrl();?>'"><?= $this->__('Register') ?></button>
-            <?php else: ?>
-                <button id="onepage-guest-register-button" type="button" class="button" onclick="checkout.setMethod();"><?= $this->__('Register') ?></button>
-            <?php endif ?>
+            <button id="onepage-guest-register-button" type="button" class="button">
+                <?= $this->__($isAllowedGuestCheckout ? 'Continue' : 'Register') ?>
+            </button>
         </div>
     </div>
     <?php endif ?>
@@ -100,13 +97,14 @@ $isCustomerMustBeLogged = $this->helper('checkout')->isCustomerMustBeLogged();
         </fieldset>
         </form>
         <div class="buttons-set">
-            <button type="submit" class="button" onclick="onepageLogin(this)"><?= $this->__('Login') ?></button>
+            <button id="onepage-login-button" type="submit" class="button"><?= $this->__('Login') ?></button>
         </div>
     </div>
 </div>
 <?php $registerParam = $this->getRequest()->getParam('register') ?>
 <script type="text/javascript">
     const loginForm = new VarienForm('login-form', true);
+
     document.getElementById('login-email').addEventListener('keypress', bindLoginPost);
     document.getElementById('login-password').addEventListener('keypress', bindLoginPost);
     function bindLoginPost(evt) {
@@ -114,10 +112,37 @@ $isCustomerMustBeLogged = $this->helper('checkout')->isCustomerMustBeLogged();
             loginForm.submit();
         }
     }
-    function onepageLogin(button) {
+
+    document.getElementById('onepage-login-button').addEventListener('click', onepageLogin);
+    function onepageLogin() {
         if(loginForm.validator && loginForm.validator.validate()){
-            button.disabled = true;
+            this.disabled = true;
             loginForm.submit();
         }
     }
+
+    document.getElementById('onepage-guest-register-button').addEventListener('click', onepageRegisterOrGuest);
+    function onepageRegisterOrGuest() {
+        if (document.getElementById('login:register').checked) {
+            <?php if ($isRedirectRegisterStep): ?>
+                window.location = '<?= $this->quoteEscape($this->helper('checkout/url')->getRegistrationUrl()) ?>';
+            <?php elseif($isPersistentEnabled): ?>
+                window.location = '<?= $this->quoteEscape($this->getUrl('persistent/index/saveMethod')) ?>';
+            <?php else: ?>
+                checkout.setMethod();
+            <?php endif; ?>
+        } else if(document.getElementById('login:guest').checked) {
+            checkout.setMethod();
+        }
+    }
+
+    <?php if ($registerParam || $registerParam === ''): ?>
+        document.addEventListener("DOMContentLoaded", function() {
+            const registerCheckbox = document.getElementById('login:register');
+            if (registerCheckbox) {
+                registerCheckbox.checked = true;
+                checkout.setMethod();
+            }
+        });
+    <?php endif ?>
 </script>
