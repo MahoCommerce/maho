@@ -59,7 +59,7 @@ foreach ($modules as $module => $info) {
         continue;
     }
     foreach ($info['codePools'] as $dir) {
-        $paths[] = "$module/app/code/$dir";
+        $paths[] = $info['path'] . "/app/code/$dir";
     }
 }
 
@@ -77,7 +77,7 @@ foreach ($modules as $module => $info) {
         continue;
     }
     foreach ($info['extraDirs'] as $dir) {
-        $paths[] = "$module/$dir";
+        $paths[] = $info['path'] . "/$dir";
     }
 }
 if (MAHO_IS_CHILD_PROJECT) {
