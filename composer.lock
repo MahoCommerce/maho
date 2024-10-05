@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d026de9acb79aecbd82c0ac8096649ab",
+    "content-hash": "a7868608b3b1107787accbce16c35317",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -1680,16 +1680,16 @@
         },
         {
             "name": "mahocommerce/maho-phpstan-plugin",
-            "version": "v1.1.0",
+            "version": "dev-topic-autoloader",
             "source": {
                 "type": "git",
-                "url": "https://github.com/MahoCommerce/maho-phpstan-plugin.git",
-                "reference": "02b39cb586d42d7e031844533c6a53d9df40b409"
+                "url": "https://github.com/justinbeaty/maho-phpstan-plugin.git",
+                "reference": "1eca9f7a4cda3afdc67509cc63ec1f2e6cec6a83"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/02b39cb586d42d7e031844533c6a53d9df40b409",
-                "reference": "02b39cb586d42d7e031844533c6a53d9df40b409",
+                "url": "https://api.github.com/repos/justinbeaty/maho-phpstan-plugin/zipball/1eca9f7a4cda3afdc67509cc63ec1f2e6cec6a83",
+                "reference": "1eca9f7a4cda3afdc67509cc63ec1f2e6cec6a83",
                 "shasum": ""
             },
             "require": {
@@ -1702,15 +1702,14 @@
                     "PHPStanMagento1\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
             "description": "Extension for PHPStan to allow analysis of Maho platform.",
             "support": {
-                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v1.1.0"
+                "source": "https://github.com/justinbeaty/maho-phpstan-plugin/tree/topic-autoloader"
             },
-            "time": "2024-09-24T20:58:03+00:00"
+            "time": "2024-10-05T18:08:07+00:00"
         },
         {
             "name": "phpstan/phpstan",
@@ -3056,7 +3055,7 @@
         "ext-zlib": "*",
         "composer-runtime-api": "^2"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "platform-overrides": {
         "php": "8.2"
     },
