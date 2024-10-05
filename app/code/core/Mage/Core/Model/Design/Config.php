@@ -50,11 +50,14 @@ class Mage_Core_Model_Design_Config extends Varien_Simplexml_Config
                 }
             }
 
-            // Include all other vendor files, except those we already added from core
-            foreach (glob(BP . '/vendor/*/*/app/design/*/*/*/etc/theme.xml') as $file) {
-                if (!MAHO_IS_CHILD_PROJECT || !str_starts_with($file, MAHO_FRAMEWORK_DIR)) {
-                    $normalizedFile = str_replace(BP . '/vendor/', '', $file);
-                    $normalizedFile = implode('/', array_slice(explode('/', $normalizedFile), 4));
+            // Include all other module files, except those from Maho source
+            $modules = mahoGetComposerInstallationData();
+            foreach ($modules as $module => $info) {
+                if ($module === 'mahocommerce/maho') {
+                    continue;
+                }
+                foreach (glob(BP . "/vendor/$module/app/design/*/*/*/etc/theme.xml") as $file) {
+                    $normalizedFile = str_replace(BP . "/vendor/$module", '', $file);
                     $files[$normalizedFile] = $file;
                 }
             }

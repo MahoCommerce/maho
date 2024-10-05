@@ -55,7 +55,7 @@ if (MAHO_IS_CHILD_PROJECT) {
 
 $modules = mahoGetComposerInstallationData();
 foreach ($modules as $module => $info) {
-    if (str_contains($module, 'mahocommerce/maho')) {
+    if ($module === 'mahocommerce/maho') {
         continue;
     }
     foreach ($info['codePools'] as $dir) {
@@ -73,7 +73,7 @@ if (MAHO_IS_CHILD_PROJECT) {
     $paths[] = BP . '/lib';
 }
 foreach ($modules as $module => $info) {
-    if (str_contains($module, 'mahocommerce/maho')) {
+    if ($module === 'mahocommerce/maho') {
         continue;
     }
     foreach ($info['extraDirs'] as $dir) {

@@ -340,9 +340,13 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             }
         }
 
-        // Include all other vendor files, except those we already added from core
-        foreach (glob(BP . '/vendor/*/*/app/etc/*.xml') as $file) {
-            if (!MAHO_IS_CHILD_PROJECT || !str_starts_with($file, MAHO_FRAMEWORK_DIR)) {
+        // Include all other module files, except those from Maho source
+        $modules = mahoGetComposerInstallationData();
+        foreach ($modules as $module => $info) {
+            if ($module === 'mahocommerce/maho') {
+                continue;
+            }
+            foreach (glob(BP . "/vendor/$module/app/etc/*.xml") as $file) {
                 $files[basename($file)] = $file;
             }
         }
@@ -839,9 +843,13 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             }
         }
 
-        // Include all other vendor files, except those we already added from core
-        foreach (glob(BP . '/vendor/*/*/app/etc/modules/*.xml') as $file) {
-            if (!MAHO_IS_CHILD_PROJECT || !str_starts_with($file, MAHO_FRAMEWORK_DIR)) {
+        // Include all other module files, except those from Maho source
+        $modules = mahoGetComposerInstallationData();
+        foreach ($modules as $module => $info) {
+            if ($module === 'mahocommerce/maho') {
+                continue;
+            }
+            foreach (glob(BP . "/vendor/$module/app/etc/modules/*.xml") as $file) {
                 $moduleFiles[basename($file)] = $file;
             }
         }
