@@ -303,45 +303,54 @@ function is_dir_writeable($dir)
 
 function mahoGetComposerInstallationData(): array
 {
-    static $composerInstallationData = null;
-    if ($composerInstallationData !== null) {
-        return $composerInstallationData;
+    static $packages = null;
+    if ($packages !== null) {
+        return $packages;
     }
 
-    $packages = $packageDirectories = [];
-    $installedVersions = \Composer\InstalledVersions::getAllRawData();
+    $datasets = \Composer\InstalledVersions::getAllRawData();
+    $dataset = end($datasets); // We only care about the packages installed to root vendor dir
 
-    foreach ($installedVersions as $datasets) {
-        foreach ($datasets['versions'] as $package => $version) {
-            if (!isset($version['install_path'])) {
-                continue;
-            }
-            if (!in_array($version['type'], ['maho-source', 'maho-module', 'magento-module'])) {
-                continue;
-            }
+    // Alternatively, we could consider doing:
+    // $dataset = require BP . "/vendor/composer/installed.php";
 
-            $path = realpath($version['install_path']);
-            if ($path !== BP) {
-                $packages[] = $package;
-                $packageDirectories[] = $path;
-            }
+    $packages = [];
+
+    foreach ($dataset['versions'] as $package => $info) {
+        if (!isset($info['install_path'])) {
+            continue;
         }
+        if (!in_array($info['type'], ['maho-source', 'maho-module', 'magento-module'])) {
+            continue;
+        }
+        $path = realpath($info['install_path']);
+        $codePools = array_filter(
+            ['local', 'community', 'core'],
+            fn($dir) => is_dir("$path/app/code/$dir")
+        );
+        $extraDirs = array_filter(
+            ['lib'],
+            fn($dir) => is_dir("$path/$dir")
+        );
+        $packages[$package] = [
+            'type' => $info['type'],
+            'path' => $path,
+            'codePools' => $codePools,
+            'extraDirs' => $extraDirs,
+        ];
     }
-
-    $packages = array_unique($packages);
-    $packageDirectories = array_unique($packageDirectories);
-
-    $composerInstallationData = [
-        $packages,
-        $packageDirectories
-    ];
-
-    return $composerInstallationData;
+    return $packages;
 }
 
 function mahoFindFileInIncludePath(string $relativePath): string|false
 {
-    list($packages, $packageDirectories) = mahoGetComposerInstallationData();
+    // list($packages, $packageDirectories) = mahoGetComposerInstallationData();
+
+    // Just temp code compatibility
+    $tmp = mahoGetComposerInstallationData();
+    $packages = array_keys($tmp);
+    $packageDirectories = array_column($tmp, 'path');
+
     foreach ($packages as $package) {
         $relativePath = str_replace(BP . DS . 'vendor' . DS . $package, '', $relativePath);
     }
@@ -367,7 +376,13 @@ function mahoFindFileInIncludePath(string $relativePath): string|false
 
 function mahoListDirectories($path)
 {
-    list($packages, $packageDirectories) = mahoGetComposerInstallationData();
+    // list($packages, $packageDirectories) = mahoGetComposerInstallationData();
+
+    // Just temp code compatibility
+    $tmp = mahoGetComposerInstallationData();
+    $packages = array_keys($tmp);
+    $packageDirectories = array_column($tmp, 'path');
+
     if (!defined('MAHO_ROOT_DIR')) {
         Mage::throwException('MAHO_ROOT_DIR constant is not defined.');
     }

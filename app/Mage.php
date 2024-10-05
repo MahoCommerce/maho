@@ -49,30 +49,41 @@ require_once BP . '/vendor/autoload.php';
 $paths = [];
 $paths[] = BP . '/app/code/local';
 $paths[] = BP . '/app/code/community';
-$paths[] = BP . '/app/code/core';
+if (MAHO_IS_STARTER_KIT) {
+    $paths[] = BP . '/app/code/core';
+}
 
-$allModules = mahoGetComposerInstallationData()[1];
-foreach ($allModules as $module) {
+$modules = mahoGetComposerInstallationData();
+foreach ($modules as $module => $info) {
     if (str_contains($module, 'mahocommerce/maho')) {
         continue;
     }
-    $paths[] = "$module/app/code/local";
-    $paths[] = "$module/app/code/community";
-    $paths[] = "$module/app/code/core";
+    foreach ($info['codePools'] as $dir) {
+        $paths[] = "$module/app/code/$dir";
+    }
 }
+
 if (MAHO_IS_STARTER_KIT) {
     $paths[] = MAHO_ROOT_SOURCE_DIR . '/app/code/core';
+} else {
+    $paths[] = BP . '/app/code/core';
 }
 
-$paths[] = BP . '/lib';
-foreach ($allModules as $module) {
+if (MAHO_IS_STARTER_KIT) {
+    $paths[] = BP . '/lib';
+}
+foreach ($modules as $module => $info) {
     if (str_contains($module, 'mahocommerce/maho')) {
         continue;
     }
-    $paths[] = "$module/lib";
+    foreach ($info['codePools'] as $dir) {
+        $paths[] = "$module/$dir";
+    }
 }
 if (MAHO_IS_STARTER_KIT) {
     $paths[] = MAHO_ROOT_SOURCE_DIR . '/lib';
+} else {
+    $paths[] = BP . '/lib';
 }
 
 array_push($paths, ...require BP . '/vendor/composer/include_paths.php');
