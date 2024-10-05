@@ -334,15 +334,15 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $files = [];
 
         // If we installed with the starter project, include core Maho files first
-        if (MAHO_IS_STARTER_KIT) {
-            foreach (glob(MAHO_ROOT_SOURCE_DIR . '/app/etc/*.xml') as $file) {
+        if (MAHO_IS_CHILD_PROJECT) {
+            foreach (glob(MAHO_FRAMEWORK_DIR . '/app/etc/*.xml') as $file) {
                 $files[basename($file)] = $file;
             }
         }
 
         // Include all other vendor files, except those we already added from core
         foreach (glob(BP . '/vendor/*/*/app/etc/*.xml') as $file) {
-            if (!MAHO_IS_STARTER_KIT || !str_starts_with($file, MAHO_ROOT_SOURCE_DIR)) {
+            if (!MAHO_IS_CHILD_PROJECT || !str_starts_with($file, MAHO_FRAMEWORK_DIR)) {
                 $files[basename($file)] = $file;
             }
         }
@@ -833,15 +833,15 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $moduleFiles = [];
 
         // If we installed with the starter project, include core Maho files first
-        if (MAHO_IS_STARTER_KIT) {
-            foreach (glob(MAHO_ROOT_SOURCE_DIR . '/app/etc/modules/*.xml') as $file) {
+        if (MAHO_IS_CHILD_PROJECT) {
+            foreach (glob(MAHO_FRAMEWORK_DIR . '/app/etc/modules/*.xml') as $file) {
                 $moduleFiles[basename($file)] = $file;
             }
         }
 
         // Include all other vendor files, except those we already added from core
         foreach (glob(BP . '/vendor/*/*/app/etc/modules/*.xml') as $file) {
-            if (!MAHO_IS_STARTER_KIT || !str_starts_with($file, MAHO_ROOT_SOURCE_DIR)) {
+            if (!MAHO_IS_CHILD_PROJECT || !str_starts_with($file, MAHO_FRAMEWORK_DIR)) {
                 $moduleFiles[basename($file)] = $file;
             }
         }

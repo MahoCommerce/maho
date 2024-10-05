@@ -15,11 +15,11 @@ define('PS', PATH_SEPARATOR);
 define('BP', str_replace('/vendor/mahocommerce/maho', '', dirname(__DIR__)));
 
 if (file_exists(BP . '/vendor/mahocommerce/maho')) {
-    define('MAHO_IS_STARTER_KIT', true);
-    define('MAHO_ROOT_SOURCE_DIR', BP . '/vendor/mahocommerce/maho');
+    define('MAHO_IS_CHILD_PROJECT', true);
+    define('MAHO_FRAMEWORK_DIR', BP . '/vendor/mahocommerce/maho');
 } else {
-    define('MAHO_IS_STARTER_KIT', false);
-    define('MAHO_ROOT_SOURCE_DIR', BP);
+    define('MAHO_IS_CHILD_PROJECT', false);
+    define('MAHO_FRAMEWORK_DIR', BP);
 }
 
 if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPER_MODE'])) {
@@ -32,7 +32,7 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
     ini_set('opcache.revalidate_path', 1);
 }
 
-require_once MAHO_ROOT_SOURCE_DIR . '/app/code/core/Mage/Core/functions.php';
+require_once MAHO_FRAMEWORK_DIR . '/app/code/core/Mage/Core/functions.php';
 
 Mage::register('original_include_path', get_include_path());
 
@@ -49,7 +49,7 @@ require_once BP . '/vendor/autoload.php';
 $paths = [];
 $paths[] = BP . '/app/code/local';
 $paths[] = BP . '/app/code/community';
-if (MAHO_IS_STARTER_KIT) {
+if (MAHO_IS_CHILD_PROJECT) {
     $paths[] = BP . '/app/code/core';
 }
 
@@ -63,13 +63,13 @@ foreach ($modules as $module => $info) {
     }
 }
 
-if (MAHO_IS_STARTER_KIT) {
-    $paths[] = MAHO_ROOT_SOURCE_DIR . '/app/code/core';
+if (MAHO_IS_CHILD_PROJECT) {
+    $paths[] = MAHO_FRAMEWORK_DIR . '/app/code/core';
 } else {
     $paths[] = BP . '/app/code/core';
 }
 
-if (MAHO_IS_STARTER_KIT) {
+if (MAHO_IS_CHILD_PROJECT) {
     $paths[] = BP . '/lib';
 }
 foreach ($modules as $module => $info) {
@@ -80,8 +80,8 @@ foreach ($modules as $module => $info) {
         $paths[] = "$module/$dir";
     }
 }
-if (MAHO_IS_STARTER_KIT) {
-    $paths[] = MAHO_ROOT_SOURCE_DIR . '/lib';
+if (MAHO_IS_CHILD_PROJECT) {
+    $paths[] = MAHO_FRAMEWORK_DIR . '/lib';
 } else {
     $paths[] = BP . '/lib';
 }
