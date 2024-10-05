@@ -765,10 +765,14 @@ class Mage_Core_Model_Resource_Setup
             case self::TYPE_MAHO:
                 uksort($arrFiles, 'version_compare');
                 foreach ($arrFiles as $version => $file) {
-                    $arrRes[] = [
-                        'toVersion' => $version,
-                        'fileName'  => $file
-                    ];
+                    if (version_compare($version, $fromVersion) === self::VERSION_COMPARE_GREATER
+                        && version_compare($version, $toVersion) !== self::VERSION_COMPARE_GREATER
+                    ) {
+                        $arrRes[] = [
+                            'toVersion' => $version,
+                            'fileName'  => $file
+                        ];
+                    }
                 }
                 break;
 
