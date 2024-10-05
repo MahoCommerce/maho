@@ -372,28 +372,16 @@ function mahoFindFileInIncludePath(string $relativePath): string|false
 
 function mahoListDirectories($path)
 {
-    // list($packages, $packageDirectories) = mahoGetComposerInstallationData();
-
-    // Just temp code compatibility
-    $tmp = mahoGetComposerInstallationData();
-    $packages = array_keys($tmp);
-    $packageDirectories = array_column($tmp, 'path');
-
-    if (!defined('MAHO_ROOT_DIR')) {
-        Mage::throwException('MAHO_ROOT_DIR constant is not defined.');
-    }
-
-    foreach ($packages as $package) {
-        $path = str_replace(BP . DS . 'vendor' . DS . $package, '', $path);
-    }
-    $path = str_replace(BP, '', $path);
-    $path = ltrim($path, '/');
-
     $results = [];
-    array_unshift($packageDirectories, MAHO_ROOT_DIR);
-    foreach ($packageDirectories as $packageDirectory) {
-        $tmpList = glob($packageDirectory . DS . $path . '/*', GLOB_ONLYDIR);
-        foreach ($tmpList as $folder) {
+    $relativePath = str_replace(BP . '/', '', $path);
+
+    foreach (glob("$path/*", GLOB_ONLYDIR) as $folder) {
+        $results[] = basename($folder);
+    }
+
+    $modules = mahoGetComposerInstallationData();
+    foreach ($modules as $module => $info) {
+        foreach (glob($info['path'] . "/$relativePath/*", GLOB_ONLYDIR) as $folder) {
             $results[] = basename($folder);
         }
     }
