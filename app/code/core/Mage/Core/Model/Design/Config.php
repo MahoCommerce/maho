@@ -52,7 +52,7 @@ class Mage_Core_Model_Design_Config extends Varien_Simplexml_Config
 
             // Include all other module files, except those from Maho source
             $modules = mahoGetComposerInstallationData();
-            foreach ($modules as $module => $info) {
+            foreach (array_keys($modules) as $module) {
                 if ($module === 'mahocommerce/maho') {
                     continue;
                 }

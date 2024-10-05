@@ -342,7 +342,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
         // Include all other module files, except those from Maho source
         $modules = mahoGetComposerInstallationData();
-        foreach ($modules as $module => $info) {
+        foreach (array_keys($modules) as $module) {
             if ($module === 'mahocommerce/maho') {
                 continue;
             }
@@ -845,7 +845,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
         // Include all other module files, except those from Maho source
         $modules = mahoGetComposerInstallationData();
-        foreach ($modules as $module => $info) {
+        foreach (array_keys($modules) as $module) {
             if ($module === 'mahocommerce/maho') {
                 continue;
             }
