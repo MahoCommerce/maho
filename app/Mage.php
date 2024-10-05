@@ -76,7 +76,7 @@ foreach ($modules as $module => $info) {
     if (str_contains($module, 'mahocommerce/maho')) {
         continue;
     }
-    foreach ($info['codePools'] as $dir) {
+    foreach ($info['extraDirs'] as $dir) {
         $paths[] = "$module/$dir";
     }
 }
