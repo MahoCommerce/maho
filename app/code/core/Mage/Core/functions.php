@@ -344,34 +344,30 @@ function mahoGetComposerInstallationData(): array
 
 function mahoFindFileInIncludePath(string $relativePath): string|false
 {
-    // list($packages, $packageDirectories) = mahoGetComposerInstallationData();
+    $paths = [];
+    $paths[] = BP;
 
-    // Just temp code compatibility
-    $tmp = mahoGetComposerInstallationData();
-    $packages = array_keys($tmp);
-    $packageDirectories = array_column($tmp, 'path');
-
-    foreach ($packages as $package) {
-        $relativePath = str_replace(BP . DS . 'vendor' . DS . $package, '', $relativePath);
+    $modules = mahoGetComposerInstallationData();
+    foreach ($modules as $module => $info) {
+        if ($module === 'mahocommerce/maho') {
+            continue;
+        }
+        $paths[] = $info['path'];
     }
-    $relativePath = str_replace(BP, '', $relativePath);
+    if (MAHO_IS_CHILD_PROJECT) {
+        $paths[] = MAHO_FRAMEWORK_DIR;
+    }
+
+    $relativePath = str_replace($paths, '', $relativePath);
     $relativePath = ltrim($relativePath, '/');
 
-    // if file exists in the current folder, don't look elsewhere
-    $fullPath = BP . DS . $relativePath;
-    if (file_exists($fullPath)) {
-        return $fullPath;
-    }
+    // Temporarily set include paths, then revert
+    $oldPaths = get_include_path();
+    set_include_path(implode(PS, $paths));
+    $file = stream_resolve_include_path($relativePath);
+    set_include_path($oldPaths);
 
-    // search for the file in composer packages
-    foreach ($packageDirectories as $basePath) {
-        $fullPath = $basePath . DIRECTORY_SEPARATOR . $relativePath;
-        if (file_exists($fullPath)) {
-            return realpath($fullPath);
-        }
-    }
-
-    return false;
+    return $file;
 }
 
 function mahoListDirectories($path)
