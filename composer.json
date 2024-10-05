@@ -29,6 +29,7 @@
         "ext-soap": "*",
         "ext-spl": "*",
         "ext-zlib": "*",
+        "composer-runtime-api": "^2",
         "cweagans/composer-patches": "^1.7",
         "ezyang/htmlpurifier": "^4.17",
         "mahocommerce/maho-composer-plugin": "dev-main",
@@ -36,8 +37,7 @@
         "phpseclib/mcrypt_compat": "^2.0.3",
         "phpseclib/phpseclib": "^3.0.14",
         "shardj/zf1-future": "1.24.0",
-        "symfony/console": "^7.1",
-        "composer-runtime-api": "^2"
+        "symfony/console": "^7.1"
     },
     "replace": {
         "symfony/polyfill-ctype": "*",
