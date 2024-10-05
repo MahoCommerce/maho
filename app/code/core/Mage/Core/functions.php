@@ -342,7 +342,7 @@ function mahoGetComposerInstallationData(): array
     return $packages;
 }
 
-function mahoFindFileInIncludePath(string $relativePath): string|false
+function mahoFindFileInIncludePath(string $path): string|false
 {
     $paths = [];
     $paths[] = BP;
@@ -358,7 +358,7 @@ function mahoFindFileInIncludePath(string $relativePath): string|false
         $paths[] = MAHO_FRAMEWORK_DIR;
     }
 
-    $relativePath = str_replace($paths, '', $relativePath);
+    $relativePath = str_replace(array_reverse($paths), '', $path);
     $relativePath = ltrim($relativePath, '/');
 
     // Temporarily set include paths, then revert
@@ -370,7 +370,7 @@ function mahoFindFileInIncludePath(string $relativePath): string|false
     return $file;
 }
 
-function mahoListDirectories($path)
+function mahoListDirectories(string $path): array
 {
     $results = [];
     $relativePath = str_replace(BP . '/', '', $path);
