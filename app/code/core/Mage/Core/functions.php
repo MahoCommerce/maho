@@ -326,11 +326,11 @@ function mahoGetComposerInstallationData(): array
         $path = realpath($info['install_path']);
         $codePools = array_filter(
             ['local', 'community', 'core'],
-            fn($dir) => is_dir("$path/app/code/$dir")
+            fn ($dir) => is_dir("$path/app/code/$dir")
         );
         $extraDirs = array_filter(
             ['lib'],
-            fn($dir) => is_dir("$path/$dir")
+            fn ($dir) => is_dir("$path/$dir")
         );
         $packages[$package] = [
             'type' => $info['type'],
