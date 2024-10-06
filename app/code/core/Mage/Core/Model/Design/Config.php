@@ -45,19 +45,19 @@ class Mage_Core_Model_Design_Config extends Varien_Simplexml_Config
             // If we installed with the starter project, include core Maho files first
             if (MAHO_IS_CHILD_PROJECT) {
                 foreach (glob(MAHO_FRAMEWORK_DIR . '/app/design/*/*/*/etc/theme.xml') as $file) {
-                    $normalizedFile = str_replace(MAHO_FRAMEWORK_DIR . '/app/design/', '', $file);
+                    $normalizedFile = str_replace(MAHO_FRAMEWORK_DIR . '/app/design', '', $file);
                     $files[$normalizedFile] = $file;
                 }
             }
 
             // Include all other module files, except those from Maho source
             $modules = mahoGetComposerInstallationData();
-            foreach (array_keys($modules) as $module) {
+            foreach ($modules as $module => $info) {
                 if ($module === 'mahocommerce/maho') {
                     continue;
                 }
-                foreach (glob(BP . "/vendor/$module/app/design/*/*/*/etc/theme.xml") as $file) {
-                    $normalizedFile = str_replace(BP . "/vendor/$module", '', $file);
+                foreach (glob($info['path'] . '/app/design/*/*/*/etc/theme.xml') as $file) {
+                    $normalizedFile = str_replace($info['path'] . '/app/design', '', $file);
                     $files[$normalizedFile] = $file;
                 }
             }
