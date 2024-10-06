@@ -62,7 +62,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
      */
     public function getTypeId()
     {
-        if (is_null($this->_typeId)) {
+        if ($this->_typeId === null) {
             Mage::throwException(Mage::helper('catalog')->__('A product type is not defined for the indexer.'));
         }
         return $this->_typeId;
@@ -260,7 +260,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
             'base_group_price' => new Zend_Db_Expr('gp.price'),
         ]);
 
-        if (!is_null($entityIds)) {
+        if ($entityIds !== null) {
             $select->where('e.entity_id IN(?)', $entityIds);
         }
 

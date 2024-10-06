@@ -109,7 +109,7 @@ class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
      */
     protected function _getWishlist()
     {
-        if (is_null($this->_wishlist)) {
+        if ($this->_wishlist === null) {
             $this->_wishlist = Mage::getModel('wishlist/wishlist');
             $wishlistId = $this->getRequest()->getParam('wishlist_id');
             if ($wishlistId) {
@@ -130,7 +130,7 @@ class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
      */
     protected function _getCustomer()
     {
-        if (is_null($this->_customer)) {
+        if ($this->_customer === null) {
             $this->_customer = Mage::getModel('customer/customer');
 
             $params = $this->_getHelper('core')->urlDecode($this->getRequest()->getParam('data'));

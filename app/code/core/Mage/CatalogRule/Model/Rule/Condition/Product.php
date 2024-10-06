@@ -62,7 +62,7 @@ class Mage_CatalogRule_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
     protected function _restoreOldAttrValue($object, $oldAttrValue)
     {
         $attrCode = $this->getAttribute();
-        if (is_null($oldAttrValue)) {
+        if ($oldAttrValue === null) {
             $object->unsetData($attrCode);
         } else {
             $object->setData($attrCode, $oldAttrValue);

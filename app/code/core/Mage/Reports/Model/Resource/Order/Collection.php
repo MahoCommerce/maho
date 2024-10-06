@@ -84,7 +84,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      */
     protected function _getSalesAmountExpression()
     {
-        if (is_null($this->_salesAmountExpression)) {
+        if ($this->_salesAmountExpression === null) {
             $adapter = $this->getConnection();
             $expressionTransferObject = new Varien_Object([
                 'expression' => '%s - %s - %s - (%s - %s - %s)',

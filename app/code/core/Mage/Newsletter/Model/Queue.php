@@ -97,7 +97,7 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
      */
     public function isNew()
     {
-        return (is_null($this->getQueueStatus()));
+        return ($this->getQueueStatus() === null);
     }
 
     /**
@@ -107,7 +107,7 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
      */
     public function getSubscribersCollection()
     {
-        if (is_null($this->_subscribersCollection)) {
+        if ($this->_subscribersCollection === null) {
             $this->_subscribersCollection = Mage::getResourceModel('newsletter/subscriber_collection')
                 ->useQueue($this);
         }
@@ -140,7 +140,7 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
      */
     public function setQueueStartAtByString($startAt)
     {
-        if (is_null($startAt) || $startAt == '') {
+        if ($startAt === null || $startAt == '') {
             $this->setQueueStartAt(null);
         } else {
             $locale = Mage::app()->getLocale();
@@ -333,7 +333,7 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
      */
     public function getTemplate()
     {
-        if (is_null($this->_template)) {
+        if ($this->_template === null) {
             $this->_template = Mage::getModel('newsletter/template')
                 ->load($this->getTemplateId());
         }

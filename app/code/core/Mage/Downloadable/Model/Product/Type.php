@@ -29,7 +29,7 @@ class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Ty
     public function getLinks($product = null)
     {
         $product = $this->getProduct($product);
-        if (is_null($product->getDownloadableLinks())) {
+        if ($product->getDownloadableLinks() === null) {
             $_linkCollection = Mage::getModel('downloadable/link')->getCollection()
                 ->addProductToFilter($product->getId())
                 ->addTitleToResult($product->getStoreId())
@@ -108,7 +108,7 @@ class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Ty
     public function getSamples($product = null)
     {
         $product = $this->getProduct($product);
-        if (is_null($product->getDownloadableSamples())) {
+        if ($product->getDownloadableSamples() === null) {
             $_sampleCollection = Mage::getModel('downloadable/sample')->getCollection()
                 ->addProductToFilter($product->getId())
                 ->addTitleToResult($product->getStoreId());

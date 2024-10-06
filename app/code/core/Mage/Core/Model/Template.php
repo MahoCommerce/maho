@@ -62,7 +62,7 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
         $store = $designConfig->getStore();
         $storeId = is_object($store) ? $store->getId() : $store;
         $area = $designConfig->getArea();
-        if (!is_null($storeId) && ($storeId != Mage::app()->getStore()->getId())) {
+        if ($storeId !== null && ($storeId != Mage::app()->getStore()->getId())) {
             $appEmulation = Mage::getSingleton('core/app_emulation');
             $this->_initialEnvironmentInfo = $appEmulation->startEnvironmentEmulation($storeId, $area);
         }
@@ -91,7 +91,7 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
      */
     protected function getDesignConfig()
     {
-        if (is_null($this->_designConfig)) {
+        if ($this->_designConfig === null) {
             $store = Mage::getDesign()->getStore();
             $storeId = is_object($store) ? $store->getId() : $store;
             $this->_designConfig = new Varien_Object([

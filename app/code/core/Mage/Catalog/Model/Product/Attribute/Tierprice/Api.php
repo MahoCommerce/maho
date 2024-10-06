@@ -72,7 +72,7 @@ class Mage_Catalog_Model_Product_Attribute_Tierprice_Api extends Mage_Catalog_Mo
         $product = $this->_initProduct($productId, $identifierType);
 
         $updatedTierPrices = $this->prepareTierPrices($product, $tierPrices);
-        if (is_null($updatedTierPrices)) {
+        if ($updatedTierPrices === null) {
             $this->_fault('data_invalid', Mage::helper('catalog')->__('Invalid Tier Prices'));
         }
 

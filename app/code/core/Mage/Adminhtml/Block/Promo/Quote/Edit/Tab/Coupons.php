@@ -70,6 +70,6 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Coupons extends Mage_Adminhtml_B
     protected function _isEditing()
     {
         $priceRule = Mage::registry('current_promo_quote_rule');
-        return !is_null($priceRule->getRuleId());
+        return $priceRule->getRuleId() !== null;
     }
 }

@@ -47,7 +47,7 @@ class Mage_Adminhtml_Block_Newsletter_Subscriber extends Mage_Adminhtml_Block_Te
      */
     public function getQueueCollection()
     {
-        if (is_null($this->_queueCollection)) {
+        if ($this->_queueCollection === null) {
             $this->_queueCollection = Mage::getResourceSingleton('newsletter/queue_collection')
                 ->addTemplateInfo()
                 ->addOnlyUnsentFilter()

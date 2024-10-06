@@ -272,7 +272,7 @@ class Mage_Core_Model_Resource
             $tableName = $tablePrefix . $tableName;
         }
 
-        if (!is_null($tableSuffix)) {
+        if ($tableSuffix !== null) {
             $tableName .= '_' . $tableSuffix;
         }
         return $this->getConnection(self::DEFAULT_READ_RESOURCE)->getTableName($tableName);

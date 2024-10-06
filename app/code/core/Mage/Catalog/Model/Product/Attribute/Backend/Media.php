@@ -40,7 +40,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
 
         foreach ($this->_getResource()->loadGallery($object, $this) as $image) {
             foreach ($localAttributes as $localAttribute) {
-                if (is_null($image[$localAttribute])) {
+                if ($image[$localAttribute] === null) {
                     $image[$localAttribute . '_use_default'] = true;
                     $image[$localAttribute] = $this->_getDefaultValue($localAttribute, $image);
                 } else {
@@ -373,7 +373,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
 
         $product->setData($attrCode, $mediaGalleryData);
 
-        if (!is_null($mediaAttribute)) {
+        if ($mediaAttribute !== null) {
             $this->setMediaAttribute($product, $mediaAttribute, $fileName);
         }
 
@@ -411,7 +411,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
                 $savedFileName = $alreadyAddedFilesNames[$keyInAddedFiles];
             }
 
-            if (!is_null($value['mediaAttribute'])) {
+            if ($value['mediaAttribute'] !== null) {
                 $this->setMediaAttribute($product, $value['mediaAttribute'], $savedFileName);
             }
         }

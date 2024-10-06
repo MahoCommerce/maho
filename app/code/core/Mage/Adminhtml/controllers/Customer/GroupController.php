@@ -42,7 +42,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
 
         Mage::register('current_group', Mage::getModel('customer/group'));
         $groupId = $this->getRequest()->getParam('id');
-        if (!is_null($groupId)) {
+        if ($groupId !== null) {
             Mage::registry('current_group')->load($groupId);
         }
     }
@@ -74,7 +74,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
 
         $currentGroup = Mage::registry('current_group');
 
-        if (!is_null($currentGroup->getId())) {
+        if ($currentGroup->getId() !== null) {
             $this->_addBreadcrumb(Mage::helper('customer')->__('Edit Group'), Mage::helper('customer')->__('Edit Customer Groups'));
         } else {
             $this->_addBreadcrumb(Mage::helper('customer')->__('New Group'), Mage::helper('customer')->__('New Customer Groups'));
@@ -104,7 +104,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     {
         $customerGroup = Mage::getModel('customer/group');
         $id = $this->getRequest()->getParam('id');
-        if (!is_null($id)) {
+        if ($id !== null) {
             $customerGroup->load((int)$id);
         }
 

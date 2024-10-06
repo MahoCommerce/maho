@@ -32,7 +32,7 @@ class Mage_Checkout_Block_Cart_Crosssell extends Mage_Catalog_Block_Product_Abst
     public function getItems()
     {
         $items = $this->getData('items');
-        if (is_null($items)) {
+        if ($items === null) {
             $items = [];
             $ninProductIds = $this->_getCartProductIds();
             if ($ninProductIds) {
@@ -90,7 +90,7 @@ class Mage_Checkout_Block_Cart_Crosssell extends Mage_Catalog_Block_Product_Abst
     protected function _getCartProductIds()
     {
         $ids = $this->getData('_cart_product_ids');
-        if (is_null($ids)) {
+        if ($ids === null) {
             $ids = [];
             foreach ($this->getQuote()->getAllItems() as $item) {
                 if ($product = $item->getProduct()) {

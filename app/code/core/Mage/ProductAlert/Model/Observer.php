@@ -66,7 +66,7 @@ class Mage_ProductAlert_Model_Observer
      */
     protected function _getWebsites()
     {
-        if (is_null($this->_websites)) {
+        if ($this->_websites === null) {
             try {
                 $this->_websites = Mage::app()->getWebsites();
             } catch (Exception $e) {

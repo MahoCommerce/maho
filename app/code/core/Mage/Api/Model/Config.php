@@ -158,10 +158,10 @@ class Mage_Api_Model_Config extends Varien_Simplexml_Config
     public function loadAclResources(Mage_Api_Model_Acl $acl, $resource = null, $parentName = null)
     {
         $resourceName = null;
-        if (is_null($resource)) {
+        if ($resource === null) {
             $resource = $this->getNode('acl/resources');
         } else {
-            $resourceName = (is_null($parentName) ? '' : $parentName . '/') . $resource->getName();
+            $resourceName = ($parentName === null ? '' : $parentName . '/') . $resource->getName();
             $acl->add(Mage::getModel('api/acl_resource', $resourceName), $parentName);
         }
 
@@ -217,7 +217,7 @@ class Mage_Api_Model_Config extends Varien_Simplexml_Config
      */
     public function getFaults($resourceName = null)
     {
-        if (is_null($resourceName)
+        if ($resourceName === null
             || !isset($this->getResources()->$resourceName)
             || !isset($this->getResources()->$resourceName->faults)
         ) {

@@ -102,7 +102,7 @@ class Mage_CatalogSearch_Model_Advanced extends Mage_Core_Model_Abstract
     {
         /** @var Mage_Catalog_Model_Resource_Product_Attribute_Collection $attributes */
         $attributes = $this->getData('attributes');
-        if (is_null($attributes)) {
+        if ($attributes === null) {
             $product = Mage::getModel('catalog/product');
             $attributes = Mage::getResourceModel('catalog/product_attribute_collection')
                 ->addHasOptionsFilter()
@@ -298,7 +298,7 @@ class Mage_CatalogSearch_Model_Advanced extends Mage_Core_Model_Abstract
      */
     public function getProductCollection()
     {
-        if (is_null($this->_productCollection)) {
+        if ($this->_productCollection === null) {
             $collection = $this->_engine->getAdvancedResultCollection();
             $this->prepareProductCollection($collection);
             if (!$collection) {

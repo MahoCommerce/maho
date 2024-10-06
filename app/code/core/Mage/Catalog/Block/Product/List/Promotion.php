@@ -22,7 +22,7 @@ class Mage_Catalog_Block_Product_List_Promotion extends Mage_Catalog_Block_Produ
     #[\Override]
     protected function _getProductCollection()
     {
-        if (is_null($this->_productCollection)) {
+        if ($this->_productCollection === null) {
             $collection = Mage::getResourceModel('catalog/product_collection');
             Mage::getModel('catalog/layer')->prepareProductCollection($collection);
             // your custom filter

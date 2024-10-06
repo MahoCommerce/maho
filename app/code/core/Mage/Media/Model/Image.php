@@ -75,7 +75,7 @@ class Mage_Media_Model_Image extends Mage_Core_Model_Abstract
      */
     public function getImage()
     {
-        if (is_null($this->_image)) {
+        if ($this->_image === null) {
             $this->_image = $this->_getResource()->getImage($this);
         }
 
@@ -87,7 +87,7 @@ class Mage_Media_Model_Image extends Mage_Core_Model_Abstract
      */
     public function getTmpImage()
     {
-        if (is_null($this->_image)) {
+        if ($this->_image === null) {
             $this->_tmpImage = $this->_getResource()->getTmpImage($this);
         }
 

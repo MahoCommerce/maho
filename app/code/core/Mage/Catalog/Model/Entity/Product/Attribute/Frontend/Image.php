@@ -27,10 +27,10 @@ class Mage_Catalog_Model_Entity_Product_Attribute_Frontend_Image extends Mage_Ea
         $url = false;
         $image = $object->getData($this->getAttribute()->getAttributeCode());
 
-        if (!is_null($size) && file_exists(Mage::getBaseDir('media') . '/catalog/product/' . $size . '/' . $image)) {
+        if ($size !== null && file_exists(Mage::getBaseDir('media') . '/catalog/product/' . $size . '/' . $image)) {
             // image is cached
             $url = Mage::getBaseUrl('media') . 'catalog/product/' . $size . '/' . $image;
-        } elseif (!is_null($size)) {
+        } elseif ($size !== null) {
             // image is not cached
             $url = Mage::getBaseUrl() . 'catalog/product/image/size/' . $size . '/' . $image;
         } else {

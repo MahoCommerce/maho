@@ -60,7 +60,7 @@ class Mage_Checkout_Model_Api_Resource extends Mage_Api_Model_Resource_Abstract
             return false;
         }
 
-        if (!is_null($quote->getId())) {
+        if ($quote->getId() !== null) {
             $this->_fault('quote_already_exist');
         }
 
@@ -76,7 +76,7 @@ class Mage_Checkout_Model_Api_Resource extends Mage_Api_Model_Resource_Abstract
      */
     protected function _getStoreId($store = null)
     {
-        if (is_null($store)) {
+        if ($store === null) {
             $store = ($this->_getSession()->hasData($this->_storeIdSessionField)
                         ? $this->_getSession()->getData($this->_storeIdSessionField) : 0);
         }
@@ -110,7 +110,7 @@ class Mage_Checkout_Model_Api_Resource extends Mage_Api_Model_Resource_Abstract
             $quote->setStoreId($storeId)
                 ->load($quoteId);
         }
-        if (is_null($quote->getId())) {
+        if ($quote->getId() === null) {
             $this->_fault('quote_not_exists');
         }
 

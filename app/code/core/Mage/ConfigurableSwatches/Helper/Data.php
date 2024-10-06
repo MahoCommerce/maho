@@ -32,7 +32,7 @@ class Mage_ConfigurableSwatches_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function isEnabled()
     {
-        if (is_null($this->_enabled)) {
+        if ($this->_enabled === null) {
             $this->_enabled = (
                 Mage::getStoreConfigFlag(self::CONFIG_PATH_ENABLED)
                 && Mage::helper('configurableswatches/productlist')->getSwatchAttributeId()
@@ -86,7 +86,7 @@ class Mage_ConfigurableSwatches_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getSwatchAttributeIds()
     {
-        if (is_null($this->_configAttributeIds)) {
+        if ($this->_configAttributeIds === null) {
             $this->_configAttributeIds = [];
             if (Mage::getStoreConfig(self::CONFIG_PATH_SWATCH_ATTRIBUTES)) {
                 $this->_configAttributeIds = explode(',', Mage::getStoreConfig(self::CONFIG_PATH_SWATCH_ATTRIBUTES));

@@ -41,7 +41,7 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
     #[\Override]
     protected function _getWishlist()
     {
-        if (is_null($this->_wishlist)) {
+        if ($this->_wishlist === null) {
             $this->_wishlist = Mage::getModel('wishlist/wishlist');
             $wishlistId = $this->getRequest()->getParam('wishlist_id');
             if ($wishlistId) {
@@ -66,7 +66,7 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
      */
     protected function _getCustomer()
     {
-        if (is_null($this->_customer)) {
+        if ($this->_customer === null) {
             $this->_customer = Mage::getModel('customer/customer');
 
             $params = Mage::helper('core')->urlDecode($this->getRequest()->getParam('data'));

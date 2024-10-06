@@ -218,7 +218,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
      */
     public function getTreeModelInstance()
     {
-        if (is_null($this->_treeModel)) {
+        if ($this->_treeModel === null) {
             $this->_treeModel = Mage::getResourceSingleton('catalog/category_tree');
         }
         return $this->_treeModel;
@@ -368,7 +368,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
         }
 
         $array = $this->getData('products_position');
-        if (is_null($array)) {
+        if ($array === null) {
             $array = $this->getResource()->getProductsPosition($this);
             $this->setData('products_position', $array);
         }
@@ -703,7 +703,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     public function getPathIds()
     {
         $ids = $this->getData('path_ids');
-        if (is_null($ids)) {
+        if ($ids === null) {
             $ids = explode('/', (string)$this->getPath());
             $this->setData('path_ids', $ids);
         }

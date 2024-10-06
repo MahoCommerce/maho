@@ -57,7 +57,7 @@ class Mage_Checkout_Model_Api_Resource_Customer extends Mage_Checkout_Model_Api_
     protected function _getCustomerAddress($addressId)
     {
         $address = Mage::getModel('customer/address')->load((int)$addressId);
-        if (is_null($address->getId())) {
+        if ($address->getId() === null) {
             $this->_fault('invalid_address_id');
         }
 

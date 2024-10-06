@@ -36,7 +36,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      */
     public function getStoreId()
     {
-        if (is_null($this->_store)) {
+        if ($this->_store === null) {
             try {
                 $this->_store = Mage::app()->getStore($this->getVar('store'));
             } catch (Exception $e) {
@@ -74,10 +74,10 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      */
     public function setFilter($attrFilterArray, $attrToDb = null, $bind = null, $joinType = null)
     {
-        if (is_null($bind)) {
+        if ($bind === null) {
             $defBind = 'entity_id';
         }
-        if (is_null($joinType)) {
+        if ($joinType === null) {
             $joinType = 'LEFT';
         }
 
@@ -118,7 +118,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
             } else {
                 $val = $filters[$key] ?? null;
             }
-            if (is_null($val)) {
+            if ($val === null) {
                 continue;
             }
             $attr = [];

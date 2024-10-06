@@ -77,7 +77,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
      */
     public function getCssClass()
     {
-        if (is_null($this->_cssClass)) {
+        if ($this->_cssClass === null) {
             if ($this->getAlign()) {
                 $this->_cssClass .= 'a-' . $this->getAlign();
             }

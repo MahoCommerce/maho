@@ -91,7 +91,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Bl
      */
     public function getGroup($element = null)
     {
-        if (is_null($element)) {
+        if ($element === null) {
             $element = $this->getElement();
         }
         if ($element && $element->getGroup() instanceof Mage_Core_Model_Config_Element) {

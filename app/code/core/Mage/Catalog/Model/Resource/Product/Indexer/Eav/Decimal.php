@@ -37,7 +37,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Decimal extends Mage_Catal
         $write      = $this->_getWriteAdapter();
         $idxTable   = $this->getIdxTable();
         // prepare select attributes
-        if (is_null($attributeId)) {
+        if ($attributeId === null) {
             $attrIds    = $this->_getIndexableAttributes();
         } else {
             $attrIds    = [$attributeId];
@@ -72,7 +72,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Decimal extends Mage_Catal
         $statusCond = $write->quoteInto('=?', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
         $this->_addAttributeToSelect($select, 'status', 'pdd.entity_id', 'cs.store_id', $statusCond);
 
-        if (!is_null($entityIds)) {
+        if ($entityIds !== null) {
             $select->where('pdd.entity_id IN(?)', $entityIds);
         }
 

@@ -806,14 +806,14 @@ class Mage_Core_Model_Resource_Setup
             $select  = $adapter->select()
                 ->from($table)
                 ->where($adapter->quoteIdentifier($idField) . '= :id_field');
-            if (!is_null($parentField)) {
+            if ($parentField !== null) {
                 $select->where($adapter->quoteIdentifier($parentField) . '= :parent_id');
                 $bind['parent_id'] = $parentId;
             }
             $this->_setupCache[$table][$parentId][$id] = $adapter->fetchRow($select, $bind);
         }
 
-        if (is_null($field)) {
+        if ($field === null) {
             return $this->_setupCache[$table][$parentId][$id];
         }
         return $this->_setupCache[$table][$parentId][$id][$field] ?? false;
@@ -837,7 +837,7 @@ class Mage_Core_Model_Resource_Setup
 
         $adapter = $this->getConnection();
         $where = [$adapter->quoteIdentifier($idField) . '=?' => $id];
-        if (!is_null($parentField)) {
+        if ($parentField !== null) {
             $where[$adapter->quoteIdentifier($parentField) . '=?'] = $parentId;
         }
 
@@ -983,7 +983,7 @@ class Mage_Core_Model_Resource_Setup
     public function deleteConfigData($path, $scope = null)
     {
         $where = ['path = ?' => $path];
-        if (!is_null($scope)) {
+        if ($scope !== null) {
             $where['scope = ?'] = $scope;
         }
         $this->getConnection()->delete($this->getTable('core/config_data'), $where);

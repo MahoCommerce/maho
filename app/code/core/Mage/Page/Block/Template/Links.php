@@ -79,7 +79,7 @@ class Mage_Page_Block_Template_Links extends Mage_Core_Block_Template
         $beforeText = '',
         $afterText = ''
     ) {
-        if (is_null($label) || $label === false) {
+        if ($label === null || $label === false) {
             return $this;
         }
         $link = new Varien_Object([
@@ -173,7 +173,7 @@ class Mage_Page_Block_Template_Links extends Mage_Core_Block_Template
     #[\Override]
     public function getCacheKeyInfo()
     {
-        if (is_null($this->_cacheKeyInfo)) {
+        if ($this->_cacheKeyInfo === null) {
             $links = [];
             if (!empty($this->_links)) {
                 foreach ($this->_links as $position => $link) {

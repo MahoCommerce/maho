@@ -38,7 +38,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Datetime extends Mage_Eav_Model_En
                 throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Invalid date'));
             }
 
-            if (is_null($value)) {
+            if ($value === null) {
                 $value = $object->getData($attributeName);
             }
 

@@ -80,7 +80,7 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
      */
     public function getLifeTime()
     {
-        if (is_null($this->_lifeTime)) {
+        if ($this->_lifeTime === null) {
             $configNode = Mage::app()->getStore()->isAdmin() ?
                     'admin/security/session_cookie_lifetime' : 'web/cookie/cookie_lifetime';
             $this->_lifeTime = Mage::getStoreConfigAsInt($configNode);

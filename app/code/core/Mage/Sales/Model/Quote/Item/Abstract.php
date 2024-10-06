@@ -487,7 +487,7 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
     public function getCalculationPrice()
     {
         $price = $this->_getData('calculation_price');
-        if (is_null($price)) {
+        if ($price === null) {
             if ($this->hasCustomPrice()) {
                 $price = $this->getCustomPrice();
             } else {
@@ -507,7 +507,7 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
     public function getCalculationPriceOriginal()
     {
         $price = $this->_getData('calculation_price');
-        if (is_null($price)) {
+        if ($price === null) {
             if ($this->hasOriginalCustomPrice()) {
                 $price = $this->getOriginalCustomPrice();
             } else {
@@ -596,7 +596,7 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
     public function getOriginalPrice()
     {
         $price = $this->_getData('original_price');
-        if (is_null($price)) {
+        if ($price === null) {
             $price = $this->getStore()->convertPrice($this->getBaseOriginalPrice());
             $this->setData('original_price', $price);
         }
@@ -667,7 +667,7 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
     public function getConvertedPrice()
     {
         $price = $this->_getData('converted_price');
-        if (is_null($price)) {
+        if ($price === null) {
             $price = $this->getStore()->convertPrice($this->getPrice());
             $this->setData('converted_price', $price);
         }

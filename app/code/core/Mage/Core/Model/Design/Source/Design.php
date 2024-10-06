@@ -50,7 +50,7 @@ class Mage_Core_Model_Design_Source_Design extends Mage_Eav_Model_Entity_Attribu
     #[\Override]
     public function getAllOptions($withEmpty = true)
     {
-        if (is_null($this->_options)) {
+        if ($this->_options === null) {
             $design = Mage::getModel('core/design_package')->getThemeList();
             $options = [];
             foreach ($design as $package => $themes) {

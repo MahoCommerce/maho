@@ -1499,7 +1499,7 @@ XMLAuth;
                     $serviceOptionsNode = $shipmentPart->addChild('ShipmentServiceOptions');
                     break;
             }
-            if (!is_null($serviceOptionsNode)) {
+            if ($serviceOptionsNode !== null) {
                 $serviceOptionsNode
                     ->addChild('DeliveryConfirmation')
                     ->addChild('DCISType', $packageParams->getDeliveryConfirmation());
@@ -2143,7 +2143,7 @@ XMLAuth;
      */
     protected function _getDeliveryConfirmationLevel($countyDest = null)
     {
-        if (is_null($countyDest)) {
+        if ($countyDest === null) {
             return null;
         }
 

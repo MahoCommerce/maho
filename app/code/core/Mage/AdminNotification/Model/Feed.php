@@ -44,7 +44,7 @@ class Mage_AdminNotification_Model_Feed extends Mage_Core_Model_Abstract
      */
     public function getFeedUrl()
     {
-        if (is_null($this->_feedUrl)) {
+        if ($this->_feedUrl === null) {
             $this->_feedUrl = Mage::getStoreConfig(self::XML_FEED_URL_PATH);
         }
         return $this->_feedUrl;

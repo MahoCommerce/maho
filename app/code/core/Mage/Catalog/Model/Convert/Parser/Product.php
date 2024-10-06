@@ -120,7 +120,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
      */
     public function getProductTypes()
     {
-        if (is_null($this->_productTypes)) {
+        if ($this->_productTypes === null) {
             $this->_productTypes = Mage::getSingleton('catalog/product_type')
                 ->getOptionArray();
         }
@@ -161,7 +161,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
      */
     public function getProductModel()
     {
-        if (is_null($this->_productModel)) {
+        if ($this->_productModel === null) {
             $productModel = Mage::getModel('catalog/product');
             $this->_productModel = Mage::objects()->save($productModel);
         }
@@ -175,7 +175,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
      */
     public function getStore()
     {
-        if (is_null($this->_store)) {
+        if ($this->_store === null) {
             try {
                 $store = Mage::app()->getStore($this->getVar('store'));
             } catch (Exception $e) {
@@ -197,7 +197,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
      */
     public function getStoreId()
     {
-        if (is_null($this->_storeId)) {
+        if ($this->_storeId === null) {
             $this->_storeId = $this->getStore()->getId();
         }
         return $this->_storeId;
@@ -339,7 +339,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
                         if ($attribute->usesSource()) {
                             $source = $attribute->getSource();
                             $optionId = $this->getSourceOptionId($source, $value);
-                            if (is_null($optionId)) {
+                            if ($optionId === null) {
                                 $rowError = true;
                                 $this->addException(
                                     Mage::helper('catalog')->__('Invalid attribute option specified for attribute %s (%s), skipping the record.', $field, $value),

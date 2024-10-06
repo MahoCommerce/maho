@@ -93,7 +93,7 @@ class Mage_Checkout_Model_Cart_Customer_Api extends Mage_Checkout_Model_Api_Reso
         $quote = $this->_getQuote($quoteId, $store);
 
         $customerAddressData = $this->_prepareCustomerAddressData($customerAddressData);
-        if (is_null($customerAddressData)) {
+        if ($customerAddressData === null) {
             $this->_fault('customer_address_data_empty');
         }
 

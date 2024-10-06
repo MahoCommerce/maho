@@ -315,7 +315,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
      */
     public function setSessionId($id = null)
     {
-        if (!is_null($id) && preg_match('#^[0-9a-zA-Z,-]+$#', $id)) {
+        if ($id !== null && preg_match('#^[0-9a-zA-Z,-]+$#', $id)) {
             session_id($id);
         }
         return $this;

@@ -41,7 +41,7 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
     public function truncate($string, $length = 80, $etc = '...', &$remainder = '', $breakWords = true)
     {
         $remainder = '';
-        if (is_null($string) || $length == 0) {
+        if ($string === null || $length == 0) {
             return '';
         }
 
@@ -72,7 +72,7 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
      */
     public function strlen($string)
     {
-        return is_null($string) ? 0 : iconv_strlen($string, self::ICONV_CHARSET);
+        return $string === null ? 0 : iconv_strlen($string, self::ICONV_CHARSET);
     }
 
     /**
@@ -85,11 +85,11 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
      */
     public function substr($string, $offset, $length = null)
     {
-        if (is_null($string)) {
+        if ($string === null) {
             return '';
         }
         $string = $this->cleanString($string);
-        if (is_null($length)) {
+        if ($length === null) {
             $length = $this->strlen($string) - $offset;
         }
         return iconv_substr($string, $offset, $length, self::ICONV_CHARSET);
@@ -246,7 +246,7 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
      */
     public function splitWords($str, $uniqueOnly = false, $maxWordLength = 0, $wordSeparatorRegexp = '\s')
     {
-        if (is_null($str)) {
+        if ($str === null) {
             return [];
         }
         $result = [];
@@ -272,7 +272,7 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
      */
     public function cleanString($string)
     {
-        if (is_null($string)) {
+        if ($string === null) {
             return '';
         }
         return '"libiconv"' == ICONV_IMPL
@@ -321,7 +321,7 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
      */
     public function parseQueryStr($str)
     {
-        if (is_null($str)) {
+        if ($str === null) {
             return [];
         }
         $argSeparator = '&';
@@ -515,7 +515,7 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
      */
     public function unserialize($str)
     {
-        if (is_null($str)) {
+        if ($str === null) {
             return null;
         }
 

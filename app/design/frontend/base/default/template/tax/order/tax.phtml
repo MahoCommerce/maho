@@ -34,7 +34,7 @@
         <tr class="summary-details-<?= $taxIter ?> summary-details<?php if ($isTop): echo ' summary-details-first'; endif; ?>"<?php if (!$this->getIsPlaneMode()):?> style="display:none;"<?php endif ?>>
             <td <?= $this->getLabelProperties() ?>>
                 <?= $this->escapeHtml($rate['title']) ?>
-                <?php if (!is_null($rate['percent'])): ?>
+                <?php if ($rate['percent'] !== null): ?>
                     (<?= (float)$rate['percent'] ?>%)
                 <?php endif ?>
                 <br />

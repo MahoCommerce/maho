@@ -59,7 +59,7 @@ class Mage_Sales_Block_Order_Comments extends Mage_Core_Block_Template
      */
     public function getComments()
     {
-        if (is_null($this->_commentCollection)) {
+        if ($this->_commentCollection === null) {
             $entity = $this->getEntity();
             if ($entity instanceof Mage_Sales_Model_Order_Invoice) {
                 $collectionClass = 'sales/order_invoice_comment_collection';

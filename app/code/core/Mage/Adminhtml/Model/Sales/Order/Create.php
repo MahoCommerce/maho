@@ -458,7 +458,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
      */
     public function getCustomerWishlist($cacheReload = false)
     {
-        if (!is_null($this->_wishlist) && !$cacheReload) {
+        if ($this->_wishlist !== null && !$cacheReload) {
             return $this->_wishlist;
         }
 
@@ -483,7 +483,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
      */
     public function getCustomerCart()
     {
-        if (!is_null($this->_cart)) {
+        if ($this->_cart !== null) {
             return $this->_cart;
         }
 
@@ -508,7 +508,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
      */
     public function getCustomerCompareList()
     {
-        if (!is_null($this->_compareList)) {
+        if ($this->_compareList !== null) {
             return $this->_compareList;
         }
 
@@ -565,7 +565,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
                     break;
                 case 'cart':
                     $cart = $this->getCustomerCart();
-                    if ($cart && is_null($item->getOptionByCode('additional_options'))) {
+                    if ($cart && $item->getOptionByCode('additional_options') === null) {
                         //options and info buy request
                         $product = Mage::getModel('catalog/product')
                             ->setStoreId($this->getQuote()->getStoreId())
@@ -1047,7 +1047,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
      */
     protected function _getCustomerForm()
     {
-        if (is_null($this->_customerForm)) {
+        if ($this->_customerForm === null) {
             $this->_customerForm = Mage::getModel('customer/form')
                 ->setFormCode('adminhtml_checkout')
                 ->ignoreInvisible(false);
@@ -1062,7 +1062,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
      */
     protected function _getCustomerAddressForm()
     {
-        if (is_null($this->_customerAddressForm)) {
+        if ($this->_customerAddressForm === null) {
             $this->_customerAddressForm = Mage::getModel('customer/form')
                 ->setFormCode('adminhtml_customer_address')
                 ->ignoreInvisible(false);
@@ -1418,11 +1418,11 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
                 }
             }
 
-            if (is_null($customer->getDefaultBilling()) && $customerBillingAddress) {
+            if ($customer->getDefaultBilling() === null && $customerBillingAddress) {
                 $customerBillingAddress->setIsDefaultBilling(true);
             }
 
-            if (is_null($customer->getDefaultShipping())) {
+            if ($customer->getDefaultShipping() === null) {
                 if ($this->getShippingAddress()->getSameAsBilling() && $customerBillingAddress) {
                     $customerBillingAddress->setIsDefaultShipping(true);
                 } elseif ($customerShippingAddress) {
@@ -1576,7 +1576,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
     protected function _validate()
     {
         $customerId = $this->getSession()->getCustomerId();
-        if (is_null($customerId)) {
+        if ($customerId === null) {
             Mage::throwException(Mage::helper('adminhtml')->__('Please select a customer.'));
         }
 

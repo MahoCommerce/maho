@@ -187,7 +187,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
             return $time;
         }
 
-        if (is_null($time)) {
+        if ($time === null) {
             $date = Mage::app()->getLocale()->date(time());
         } elseif ($time instanceof Zend_Date) {
             $date = $time;
@@ -248,7 +248,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getRandomString($len, $chars = null)
     {
-        if (is_null($chars)) {
+        if ($chars === null) {
             $chars = self::CHARS_LOWERS . self::CHARS_UPPERS . self::CHARS_DIGITS;
         }
         for ($i = 0, $str = '', $lc = strlen($chars) - 1; $i < $len; $i++) {

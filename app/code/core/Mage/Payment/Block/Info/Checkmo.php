@@ -31,7 +31,7 @@ class Mage_Payment_Block_Info_Checkmo extends Mage_Payment_Block_Info
      */
     public function getPayableTo()
     {
-        if (is_null($this->_payableTo)) {
+        if ($this->_payableTo === null) {
             $this->_convertAdditionalData();
         }
         return $this->_payableTo;
@@ -42,7 +42,7 @@ class Mage_Payment_Block_Info_Checkmo extends Mage_Payment_Block_Info
      */
     public function getMailingAddress()
     {
-        if (is_null($this->_mailingAddress)) {
+        if ($this->_mailingAddress === null) {
             $this->_convertAdditionalData();
         }
         return $this->_mailingAddress;

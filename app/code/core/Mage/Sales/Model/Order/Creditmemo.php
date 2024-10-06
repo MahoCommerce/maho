@@ -588,7 +588,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
         );
 
         $state = $this->getState();
-        if (is_null($state)) {
+        if ($state === null) {
             $this->setState(self::STATE_OPEN);
         }
         return $this;
@@ -601,7 +601,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
      */
     public static function getStates()
     {
-        if (is_null(self::$_states)) {
+        if (self::$_states === null) {
             self::$_states = [
                 self::STATE_OPEN       => Mage::helper('sales')->__('Pending'),
                 self::STATE_REFUNDED   => Mage::helper('sales')->__('Refunded'),
@@ -619,11 +619,11 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
      */
     public function getStateName($stateId = null)
     {
-        if (is_null($stateId)) {
+        if ($stateId === null) {
             $stateId = $this->getState();
         }
 
-        if (is_null(self::$_states)) {
+        if (self::$_states === null) {
             self::getStates();
         }
         return self::$_states[$stateId] ?? Mage::helper('sales')->__('Unknown State');
@@ -717,7 +717,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
      */
     public function getCommentsCollection($reload = false)
     {
-        if (is_null($this->_comments) || $reload) {
+        if ($this->_comments === null || $reload) {
             $this->_comments = Mage::getResourceModel('sales/order_creditmemo_comment_collection')
                 ->setCreditmemoFilter($this->getId())
                 ->setCreatedAtOrder();

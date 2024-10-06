@@ -54,7 +54,7 @@ class Mage_Catalog_Model_Layer_State extends Varien_Object
     public function getFilters()
     {
         $filters = $this->getData('filters');
-        if (is_null($filters)) {
+        if ($filters === null) {
             $filters = [];
             $this->setData('filters', $filters);
         }

@@ -41,7 +41,7 @@ class Mage_Catalog_Model_Mysql4_Convert
             $this->_productEntity = Mage::getResourceModel('catalog/product')
                 ->loadAllAttributes();
         }
-        return is_null($field) ? $this->_productEntity : $this->_productEntity->getData($field);
+        return $field === null ? $this->_productEntity : $this->_productEntity->getData($field);
     }
 
     public function getSkuAttribute($field = 'attribute_id')

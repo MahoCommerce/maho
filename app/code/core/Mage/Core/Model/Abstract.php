@@ -113,7 +113,7 @@ abstract class Mage_Core_Model_Abstract extends Varien_Object
      */
     public function getOrigData($key = null)
     {
-        if (is_null($key)) {
+        if ($key === null) {
             return $this->_origData;
         }
         return isset($this->_origData[$key]) ? $this->_origData[$key] : null;
@@ -128,7 +128,7 @@ abstract class Mage_Core_Model_Abstract extends Varien_Object
      */
     public function setOrigData($key = null, $data = null)
     {
-        if (is_null($key)) {
+        if ($key === null) {
             $this->_origData = $this->_data;
         } else {
             $this->_origData[$key] = $data;
@@ -161,7 +161,7 @@ abstract class Mage_Core_Model_Abstract extends Varien_Object
     protected function _setResourceModel($resourceName, $resourceCollectionName = null)
     {
         $this->_resourceName = $resourceName;
-        if (is_null($resourceCollectionName)) {
+        if ($resourceCollectionName === null) {
             $resourceCollectionName = $resourceName . '_collection';
         }
         $this->_resourceCollectionName = $resourceCollectionName;

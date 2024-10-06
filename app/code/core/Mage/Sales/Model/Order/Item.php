@@ -443,7 +443,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      */
     public function getOrder()
     {
-        if (is_null($this->_order) && ($orderId = $this->getOrderId())) {
+        if ($this->_order === null && ($orderId = $this->getOrderId())) {
             $order = Mage::getModel('sales/order');
             $order->load($orderId);
             $this->setOrder($order);
@@ -533,7 +533,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      */
     public static function getStatusName($statusId)
     {
-        if (is_null(self::$_statuses)) {
+        if (self::$_statuses === null) {
             self::getStatuses();
         }
         return self::$_statuses[$statusId] ?? Mage::helper('sales')->__('Unknown Status');
@@ -568,7 +568,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      */
     public static function getStatuses()
     {
-        if (is_null(self::$_statuses)) {
+        if (self::$_statuses === null) {
             self::$_statuses = [
                 self::STATUS_PENDING        => Mage::helper('sales')->__('Ordered'),
                 self::STATUS_SHIPPED        => Mage::helper('sales')->__('Shipped'),
@@ -592,7 +592,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     public function getOriginalPrice()
     {
         $price = $this->getData('original_price');
-        if (is_null($price)) {
+        if ($price === null) {
             return $this->getPrice();
         }
         return $price;
@@ -632,7 +632,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     public function getProductOptionByCode($code = null)
     {
         $options = $this->getProductOptions();
-        if (is_null($code)) {
+        if ($code === null) {
             return $options;
         }
         return $options[$code] ?? null;

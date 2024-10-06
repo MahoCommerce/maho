@@ -44,7 +44,7 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
      */
     protected function _getWebsiteCurrencyRates($websiteId = null)
     {
-        if (is_null($this->_rates)) {
+        if ($this->_rates === null) {
             $this->_rates = [];
             $baseCurrency = Mage::app()->getBaseCurrencyCode();
 

@@ -69,7 +69,7 @@ class Mage_Catalog_Model_Api2_Product_Rest_Customer_V1 extends Mage_Catalog_Mode
      */
     protected function _getCustomer()
     {
-        if (is_null($this->_customer)) {
+        if ($this->_customer === null) {
             /** @var Mage_Customer_Model_Customer $customer */
             $customer = Mage::getModel('customer/customer')->load($this->getApiUser()->getUserId());
             if (!$customer->getId()) {

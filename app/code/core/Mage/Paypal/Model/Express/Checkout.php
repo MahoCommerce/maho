@@ -827,7 +827,7 @@ class Mage_Paypal_Model_Express_Checkout
             }
         }
 
-        if ($mayReturnEmpty && is_null($userSelectedOption)) {
+        if ($mayReturnEmpty && $userSelectedOption === null) {
             $options[] = new Varien_Object([
                 'is_default' => true,
                 'name'       => Mage::helper('paypal')->__('N/A'),
@@ -837,7 +837,7 @@ class Mage_Paypal_Model_Express_Checkout
             if ($calculateTax) {
                 $options[$i]->setTaxAmount($address->getTaxAmount());
             }
-        } elseif (is_null($userSelectedOption) && isset($options[$iMin])) {
+        } elseif ($userSelectedOption === null && isset($options[$iMin])) {
             $options[$iMin]->setIsDefault(true);
         }
 
@@ -846,7 +846,7 @@ class Mage_Paypal_Model_Express_Checkout
             usort($options, [get_class($this),'cmpShippingOptions']);
             array_splice($options, 10);
             // User selected option will be always included in options list
-            if (!is_null($userSelectedOption) && !in_array($userSelectedOption, $options)) {
+            if ($userSelectedOption !== null && !in_array($userSelectedOption, $options)) {
                 $options[9] = $userSelectedOption;
             }
         }
@@ -1066,11 +1066,11 @@ class Mage_Paypal_Model_Express_Checkout
         $result    = false;
         $customer  = Mage::getModel('customer/customer');
         $websiteId = Mage::app()->getStore()->getWebsiteId();
-        if (!is_null($websiteId)) {
+        if ($websiteId !== null) {
             $customer->setWebsiteId($websiteId);
         }
         $customer->loadByEmail($email);
-        if (!is_null($customer->getId())) {
+        if ($customer->getId() !== null) {
             $result = true;
         }
 

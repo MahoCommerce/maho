@@ -77,7 +77,7 @@ class Mage_GiftMessage_Helper_Url extends Mage_Core_Helper_Url
      */
     public function getSaveUrl($itemId, $type, $giftMessageId = null, $params = [])
     {
-        if (!is_null($giftMessageId)) {
+        if ($giftMessageId !== null) {
             $params = array_merge($params, ['message' => $giftMessageId, 'item' => $itemId, 'type' => $type]);
             return $this->_getUrl('giftmessage/index/save', $params);
         } else {

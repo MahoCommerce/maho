@@ -139,7 +139,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
     #[\Override]
     public function getEditableAttributes($product = null)
     {
-        if (is_null($this->_editableAttributes)) {
+        if ($this->_editableAttributes === null) {
             $this->_editableAttributes = parent::getEditableAttributes($product);
             foreach ($this->_editableAttributes as $index => $attribute) {
                 if ($this->getUsedProductAttributeIds($product)
@@ -220,7 +220,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
             $usedProductAttributes = [];
             $usedAttributes        = [];
             foreach ($this->getConfigurableAttributes($product) as $attribute) {
-                if (!is_null($attribute->getProductAttribute())) {
+                if ($attribute->getProductAttribute() !== null) {
                     $id = $attribute->getProductAttribute()->getId();
                     $usedProductAttributes[$id] = $attribute->getProductAttribute();
                     $usedAttributes[$id]        = $attribute;
@@ -317,8 +317,8 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
     {
         Varien_Profiler::start('CONFIGURABLE:' . __METHOD__);
         if (!$this->getProduct($product)->hasData($this->_usedProducts)) {
-            if (is_null($requiredAttributeIds)
-                && is_null($this->getProduct($product)->getData($this->_configurableAttributes))
+            if ($requiredAttributeIds === null
+                && $this->getProduct($product)->getData($this->_configurableAttributes) === null
             ) {
                 // If used products load before attributes, we will load attributes.
                 $this->getConfigurableAttributes($product);
@@ -345,7 +345,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
             if (is_array($requiredAttributeIds)) {
                 foreach ($requiredAttributeIds as $attributeId) {
                     $attribute = $this->getAttributeById($attributeId, $product);
-                    if (!is_null($attribute)) {
+                    if ($attribute !== null) {
                         $collection->addAttributeToFilter($attribute->getAttributeCode(), ['notnull' => 1]);
                     }
                 }
@@ -373,7 +373,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
             ->setFlag('require_stock_items', true)
             ->setFlag('product_children', true)
             ->setProductFilter($this->getProduct($product));
-        if (!is_null($this->getStoreFilter($product))) {
+        if ($this->getStoreFilter($product) !== null) {
             $collection->addStoreFilter($this->getStoreFilter($product));
         }
 
@@ -464,7 +464,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
 
         if ($salable !== false) {
             $salable = false;
-            if (!is_null($product)) {
+            if ($product !== null) {
                 $this->setStoreFilter($product->getStoreId(), $product);
             }
             foreach ($this->getUsedProducts(null, $product) as $child) {

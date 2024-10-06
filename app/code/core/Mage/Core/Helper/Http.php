@@ -34,7 +34,7 @@ class Mage_Core_Helper_Http extends Mage_Core_Helper_Abstract
      */
     public function authValidate($headers = null)
     {
-        if (!is_null($headers)) {
+        if ($headers !== null) {
             $_SERVER = $headers;
         }
 
@@ -110,7 +110,7 @@ class Mage_Core_Helper_Http extends Mage_Core_Helper_Abstract
      */
     public function getRemoteAddr($ipToLong = false)
     {
-        if (is_null($this->_remoteAddr)) {
+        if ($this->_remoteAddr === null) {
             $headers = $this->getRemoteAddrHeaders();
             foreach ($headers as $var) {
                 if ($var != 'REMOTE_ADDR' && $this->_getRequest()->getServer($var, false)) {

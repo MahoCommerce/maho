@@ -34,7 +34,7 @@ class Mage_Page_Block_Html_Topmenu_Renderer extends Mage_Page_Block_Html_Topmenu
         $this->_addCacheTags();
         $menuTree = $this->getMenuTree();
         $childrenWrapClass = $this->getChildrenWrapClass();
-        if (!$this->getTemplate() || is_null($menuTree) || is_null($childrenWrapClass)) {
+        if (!$this->getTemplate() || $menuTree === null || $childrenWrapClass === null) {
             throw new Exception("Top-menu renderer isn't fully configured.");
         }
 

@@ -30,7 +30,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Composite_Fieldset_Configurable exten
             $this->setData('product', Mage::registry('product'));
         }
         $product = $this->getData('product');
-        if (is_null($product->getTypeInstance(true)->getStoreFilter($product))) {
+        if ($product->getTypeInstance(true)->getStoreFilter($product) === null) {
             $product->getTypeInstance(true)->setStoreFilter(Mage::app()->getStore($product->getStoreId()), $product);
         }
 

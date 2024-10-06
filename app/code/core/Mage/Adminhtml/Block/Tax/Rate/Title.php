@@ -28,7 +28,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Title extends Mage_Core_Block_Template
 
     public function getTitles()
     {
-        if (is_null($this->_titles)) {
+        if ($this->_titles === null) {
             $this->_titles = [];
             $titles = Mage::getSingleton('tax/calculation_rate')->getTitles();
             foreach ($titles as $title) {
@@ -46,7 +46,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Title extends Mage_Core_Block_Template
     public function getStores()
     {
         $stores = $this->getData('stores');
-        if (is_null($stores)) {
+        if ($stores === null) {
             $stores = Mage::getModel('core/store')
                 ->getResourceCollection()
                 ->setLoadDefault(false)

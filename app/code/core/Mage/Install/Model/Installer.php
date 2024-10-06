@@ -48,7 +48,7 @@ class Mage_Install_Model_Installer extends Varien_Object
      */
     public function getDataModel()
     {
-        if (is_null($this->_dataModel)) {
+        if ($this->_dataModel === null) {
             $this->setDataModel(Mage::getSingleton('install/session'));
         }
         return $this->_dataModel;
@@ -93,7 +93,7 @@ class Mage_Install_Model_Installer extends Varien_Object
     public function getServerCheckStatus()
     {
         $status = $this->getData('server_check_status');
-        if (is_null($status)) {
+        if ($status === null) {
             $status = $this->checkServer();
         }
         return $status;

@@ -29,7 +29,7 @@ class Mage_Dataflow_Model_Convert_Container_Collection
 
     public function addItem($name, Mage_Dataflow_Model_Convert_Container_Interface $item)
     {
-        if (is_null($name)) {
+        if ($name === null) {
             if ($item->getName()) {
                 $name = $item->getName();
             } else {

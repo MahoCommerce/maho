@@ -88,7 +88,7 @@ class Mage_Tag_Model_Tag_Relation extends Mage_Core_Model_Abstract
         $this->setProductId($productId);
         $this->setTagId($tagId);
         $this->setCustomerId($customerId);
-        if (!is_null($storeId)) {
+        if ($storeId !== null) {
             $this->setStoreId($storeId);
         }
         $this->_getResource()->loadByTagCustomer($this);
@@ -103,7 +103,7 @@ class Mage_Tag_Model_Tag_Relation extends Mage_Core_Model_Abstract
     public function getProductIds()
     {
         $ids = $this->getData('product_ids');
-        if (is_null($ids)) {
+        if ($ids === null) {
             $ids = $this->_getResource()->getProductIds($this);
             $this->setProductIds($ids);
         }
@@ -117,7 +117,7 @@ class Mage_Tag_Model_Tag_Relation extends Mage_Core_Model_Abstract
      */
     public function getRelatedTagIds()
     {
-        if (is_null($this->getData('related_tag_ids'))) {
+        if ($this->getData('related_tag_ids') === null) {
             $this->setRelatedTagIds($this->_getResource()->getRelatedTagIds($this));
         }
         return $this->getData('related_tag_ids');

@@ -233,7 +233,7 @@ class Mage_Downloadable_Model_Link_Api extends Mage_Catalog_Model_Api_Resource
         }
 
         $downloadableModel->load($linkId);
-        if (is_null($downloadableModel->getId())) {
+        if ($downloadableModel->getId() === null) {
             $this->_fault('link_was_not_found');
         }
 

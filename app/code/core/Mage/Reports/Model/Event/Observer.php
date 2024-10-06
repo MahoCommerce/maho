@@ -41,7 +41,7 @@ class Mage_Reports_Model_Event_Observer
      */
     protected function _event($eventTypeId, $objectId, $subjectId = null, $subtype = 0)
     {
-        if (is_null($subjectId)) {
+        if ($subjectId === null) {
             if (Mage::getSingleton('customer/session')->isLoggedIn()) {
                 $customer = Mage::getSingleton('customer/session')->getCustomer();
                 $subjectId = $customer->getId();

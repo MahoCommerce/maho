@@ -321,7 +321,7 @@ class Mage_Core_Model_Translate
      */
     public function getData()
     {
-        if (is_null($this->_data)) {
+        if ($this->_data === null) {
             return [];
             //Mage::throwException('Translation data is not initialized. Please contact developers.');
         }
@@ -335,7 +335,7 @@ class Mage_Core_Model_Translate
      */
     public function getLocale()
     {
-        if (is_null($this->_locale)) {
+        if ($this->_locale === null) {
             $this->_locale = Mage::app()->getLocale()->getLocaleCode();
         }
         return $this->_locale;
@@ -368,7 +368,7 @@ class Mage_Core_Model_Translate
      */
     public function getTranslate()
     {
-        if (is_null($this->_translate)) {
+        if ($this->_translate === null) {
             $this->_translate = new Zend_Translate('array', $this->getData(), $this->getLocale());
         }
         return $this->_translate;
@@ -385,7 +385,7 @@ class Mage_Core_Model_Translate
         $text = array_shift($args);
 
         if (is_string($text) && $text == ''
-            || is_null($text)
+            || $text === null
             || is_bool($text) && $text === false
             || is_object($text) && $text->getText() == ''
         ) {
@@ -457,7 +457,7 @@ class Mage_Core_Model_Translate
      */
     public function getTemplateFile($file, $type, $localeCode = null)
     {
-        if (is_null($localeCode) || preg_match('/[^a-zA-Z_]/', $localeCode)) {
+        if ($localeCode === null || preg_match('/[^a-zA-Z_]/', $localeCode)) {
             $localeCode = $this->getLocale();
         }
 
@@ -489,7 +489,7 @@ class Mage_Core_Model_Translate
      */
     public function getCacheId()
     {
-        if (is_null($this->_cacheId)) {
+        if ($this->_cacheId === null) {
             $this->_cacheId = 'translate';
             if (isset($this->_config[self::CONFIG_KEY_LOCALE])) {
                 $this->_cacheId .= '_' . $this->_config[self::CONFIG_KEY_LOCALE];

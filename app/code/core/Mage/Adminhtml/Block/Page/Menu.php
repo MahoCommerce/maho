@@ -163,7 +163,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
         uasort($parentArr, [$this, '_sortMenu']);
 
         $last = array_key_last($parentArr);
-        if (!is_null($last)) {
+        if ($last !== null) {
             $parentArr[$last]['last'] = true;
         }
 

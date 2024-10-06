@@ -101,7 +101,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      */
     public function getMail()
     {
-        if (is_null($this->_mail)) {
+        if ($this->_mail === null) {
             $this->_mail = new Zend_Mail('utf-8');
         }
         return $this->_mail;
@@ -201,7 +201,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      */
     public static function getDefaultTemplates()
     {
-        if (is_null(self::$_defaultTemplates)) {
+        if (self::$_defaultTemplates === null) {
             self::$_defaultTemplates = Mage::getConfig()->getNode(self::XML_PATH_TEMPLATE_EMAIL)->asArray();
         }
 

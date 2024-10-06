@@ -83,7 +83,7 @@ class Mage_Tag_Model_Resource_Tag_Relation extends Mage_Core_Model_Resource_Db_A
             ->from($this->getMainTable(), 'product_id')
             ->where($this->getMainTable() . '.tag_id=:tag_id');
 
-        if (!is_null($model->getCustomerId())) {
+        if ($model->getCustomerId() !== null) {
             $select->where($this->getMainTable() . '.customer_id= :customer_id');
             $bind['customer_id'] = $model->getCustomerId();
         }
@@ -93,7 +93,7 @@ class Mage_Tag_Model_Resource_Tag_Relation extends Mage_Core_Model_Resource_Db_A
             $bind['store_id'] = $model->getStoreId();
         }
 
-        if (!is_null($model->getStatusFilter())) {
+        if ($model->getStatusFilter() !== null) {
             $select->join(
                 $this->getTable('tag/tag'),
                 $this->getTable('tag/tag') . '.tag_id = ' . $this->getMainTable() . '.tag_id'

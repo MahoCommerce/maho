@@ -147,7 +147,7 @@ class Mage_GiftMessage_Model_Api extends Mage_Checkout_Model_Api_Resource_Produc
     {
         /** @var Mage_Sales_Model_Quote_Item $quoteItem */
         $quoteItem = Mage::getModel('sales/quote_item')->load($quoteItemId);
-        if (is_null($quoteItem->getId())) {
+        if ($quoteItem->getId() === null) {
             $this->_fault('quote_item_not_exists');
         }
 

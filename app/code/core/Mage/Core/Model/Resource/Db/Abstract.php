@@ -163,7 +163,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
             $this->_resourcePrefix = $connections;
         }
 
-        if (is_null($tables) && is_string($connections)) {
+        if ($tables === null && is_string($connections)) {
             $this->_resourceModel = $this->_resourcePrefix;
         } elseif (is_array($tables)) {
             foreach ($tables as $k => $v) {
@@ -194,7 +194,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
             $this->_setMainTable($mainTableArr[1], $idFieldName);
         } else {
             $this->_mainTable = $mainTable;
-            if (is_null($idFieldName)) {
+            if ($idFieldName === null) {
                 $idFieldName = $mainTable . '_id';
             }
             $this->_idFieldName = $idFieldName;
@@ -251,7 +251,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
         }
 
         if (strpos($entityName, '/')) {
-            if (!is_null($entitySuffix)) {
+            if ($entitySuffix !== null) {
                 $modelEntity = [$entityName, $entitySuffix];
             } else {
                 $modelEntity = $entityName;
@@ -259,14 +259,14 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
             $this->_tables[$cacheName] = $this->_resources->getTableName($modelEntity);
         } elseif (!empty($this->_resourceModel)) {
             $entityName = sprintf('%s/%s', $this->_resourceModel, $entityName);
-            if (!is_null($entitySuffix)) {
+            if ($entitySuffix !== null) {
                 $modelEntity = [$entityName, $entitySuffix];
             } else {
                 $modelEntity = $entityName;
             }
             $this->_tables[$cacheName] = $this->_resources->getTableName($modelEntity);
         } else {
-            if (!is_null($entitySuffix)) {
+            if ($entitySuffix !== null) {
                 $entityName .= '_' . $entitySuffix;
             }
             $this->_tables[$cacheName] = $entityName;
@@ -366,12 +366,12 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
      */
     public function load(Mage_Core_Model_Abstract $object, $value, $field = null)
     {
-        if (is_null($field)) {
+        if ($field === null) {
             $field = $this->getIdFieldName();
         }
 
         $read = $this->_getReadAdapter();
-        if ($read && !is_null($value)) {
+        if ($read && $value !== null) {
             $select = $this->_getLoadSelect($field, $value, $object);
             $data = $read->fetchRow($select);
 
@@ -424,7 +424,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
         $this->_serializeFields($object);
         $this->_beforeSave($object);
         $this->_checkUnique($object);
-        if (!is_null($object->getId()) && (!$this->_useIsObjectNew || !$object->isObjectNew())) {
+        if ($object->getId() !== null && (!$this->_useIsObjectNew || !$object->isObjectNew())) {
             $condition = $this->_getWriteAdapter()->quoteInto($this->getIdFieldName() . '=?', $object->getId());
             /**
              * Not auto increment primary key support
@@ -480,7 +480,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
         $bind = $this->_prepareDataForSave($object);
         $adapter = $this->_getWriteAdapter();
         // update
-        if (!is_null($object->getId()) && $this->_isPkAutoIncrement) {
+        if ($object->getId() !== null && $this->_isPkAutoIncrement) {
             unset($bind[$this->getIdFieldName()]);
             $condition = $adapter->quoteInto($this->getIdFieldName() . '=?', $object->getId());
             $adapter->update($this->getMainTable(), $bind, $condition);
@@ -519,7 +519,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
      */
     public function addUniqueField($field)
     {
-        if (is_null($this->_uniqueFields)) {
+        if ($this->_uniqueFields === null) {
             $this->_initUniqueFields();
         }
         if (is_array($this->_uniqueFields)) {
@@ -568,7 +568,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
      */
     public function getUniqueFields()
     {
-        if (is_null($this->_uniqueFields)) {
+        if ($this->_uniqueFields === null) {
             $this->_initUniqueFields();
         }
         return $this->_uniqueFields;

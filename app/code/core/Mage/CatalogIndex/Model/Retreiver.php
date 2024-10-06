@@ -97,7 +97,7 @@ class Mage_CatalogIndex_Model_Retreiver extends Mage_Core_Model_Abstract
      */
     public function getCustomerGroups()
     {
-        if (is_null($this->_customerGroups)) {
+        if ($this->_customerGroups === null) {
             $this->_customerGroups = Mage::getModel('customer/group')->getCollection();
         }
         return $this->_customerGroups;

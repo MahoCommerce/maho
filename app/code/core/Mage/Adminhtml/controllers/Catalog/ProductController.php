@@ -688,7 +688,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      */
     protected function _filterStockData(&$stockData)
     {
-        if (is_null($stockData)) {
+        if ($stockData === null) {
             return;
         }
         if (!isset($stockData['use_config_manage_stock'])) {

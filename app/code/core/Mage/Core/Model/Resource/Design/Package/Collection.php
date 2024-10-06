@@ -25,7 +25,7 @@ class Mage_Core_Model_Resource_Design_Package_Collection extends Varien_Object
     public function load()
     {
         $packages = $this->getData('packages');
-        if (is_null($packages)) {
+        if ($packages === null) {
             $packages = Mage::getModel('core/design_package')->getPackageList();
             $this->setData('packages', $packages);
         }

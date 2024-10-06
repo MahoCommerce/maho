@@ -205,7 +205,7 @@ class Mage_Catalog_Model_Resource_Product_Compare_Item_Collection extends Mage_C
      */
     public function getComparableAttributes()
     {
-        if (is_null($this->_comparableAttributes)) {
+        if ($this->_comparableAttributes === null) {
             $this->_comparableAttributes = [];
             $setIds = $this->_getAttributeSetIds();
             if ($setIds) {

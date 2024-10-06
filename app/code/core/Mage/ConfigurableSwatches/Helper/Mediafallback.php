@@ -362,13 +362,13 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
             $realProductId = $relationship[$image['product_id']];
             $product = $products[$realProductId];
 
-            if (is_null($image['label'])) {
+            if ($image['label'] === null) {
                 $image['label'] = $image['label_default'];
             }
-            if (is_null($image['position'])) {
+            if ($image['position'] === null) {
                 $image['position'] = $image['position_default'];
             }
-            if (is_null($image['disabled'])) {
+            if ($image['disabled'] === null) {
                 $image['disabled'] = $image['disabled_default'];
             }
 

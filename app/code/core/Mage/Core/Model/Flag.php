@@ -55,7 +55,7 @@ class Mage_Core_Model_Flag extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _beforeSave()
     {
-        if (is_null($this->_flagCode)) {
+        if ($this->_flagCode === null) {
             Mage::throwException(Mage::helper('core')->__('Please define flag code.'));
         }
 
@@ -97,7 +97,7 @@ class Mage_Core_Model_Flag extends Mage_Core_Model_Abstract
      */
     public function loadSelf()
     {
-        if (is_null($this->_flagCode)) {
+        if ($this->_flagCode === null) {
             Mage::throwException(Mage::helper('core')->__('Please define flag code.'));
         }
 

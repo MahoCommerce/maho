@@ -35,7 +35,7 @@ class Mage_Checkout_Model_Cart_Shipping_Api extends Mage_Checkout_Model_Api_Reso
         $quote = $this->_getQuote($quoteId, $store);
 
         $quoteShippingAddress = $quote->getShippingAddress();
-        if (is_null($quoteShippingAddress->getId())) {
+        if ($quoteShippingAddress->getId() === null) {
             $this->_fault('shipping_address_is_not_set');
         }
 
@@ -66,7 +66,7 @@ class Mage_Checkout_Model_Cart_Shipping_Api extends Mage_Checkout_Model_Api_Reso
         $quote = $this->_getQuote($quoteId, $store);
 
         $quoteShippingAddress = $quote->getShippingAddress();
-        if (is_null($quoteShippingAddress->getId())) {
+        if ($quoteShippingAddress->getId() === null) {
             $this->_fault('shipping_address_is_not_set');
         }
 
@@ -77,7 +77,7 @@ class Mage_Checkout_Model_Cart_Shipping_Api extends Mage_Checkout_Model_Api_Reso
             $ratesResult = [];
             foreach ($groupedRates as $carrierCode => $rates) {
                 $carrierName = $carrierCode;
-                if (!is_null(Mage::getStoreConfig('carriers/' . $carrierCode . '/title'))) {
+                if (Mage::getStoreConfig('carriers/' . $carrierCode . '/title') !== null) {
                     $carrierName = Mage::getStoreConfig('carriers/' . $carrierCode . '/title');
                 }
 

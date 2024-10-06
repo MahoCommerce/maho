@@ -104,7 +104,7 @@ class Mage_GiftMessage_Block_Message_Form extends Mage_Core_Block_Template
      */
     public function getMessage()
     {
-        if (is_null($this->_giftMessage)) {
+        if ($this->_giftMessage === null) {
             $this->_initMessage();
         }
 

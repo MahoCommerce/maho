@@ -84,7 +84,7 @@ class Mage_Rss_Helper_Order extends Mage_Core_Helper_Abstract
         /** @var Mage_Sales_Model_Order $order */
         $order = Mage::getModel('sales/order')->load($orderId);
 
-        if (!is_null($order->getId())
+        if ($order->getId() !== null
             && (int) $order->getIncrementId() === $incrementId
             && (int) $order->getCustomerId() === $customerId
         ) {

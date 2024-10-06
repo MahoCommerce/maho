@@ -52,7 +52,7 @@ class Mage_Core_Model_Cookie
      */
     public function getStore()
     {
-        if (is_null($this->_store)) {
+        if ($this->_store === null) {
             $this->_store = Mage::app()->getStore();
         }
         return $this->_store;
@@ -123,7 +123,7 @@ class Mage_Core_Model_Cookie
      */
     public function getLifetime()
     {
-        if (!is_null($this->_lifetime)) {
+        if ($this->_lifetime !== null) {
             $lifetime = $this->_lifetime;
         } else {
             $lifetime = Mage::getStoreConfig(self::XML_PATH_COOKIE_LIFETIME, $this->getStore());
@@ -154,7 +154,7 @@ class Mage_Core_Model_Cookie
     public function getHttponly()
     {
         $httponly = Mage::getStoreConfig(self::XML_PATH_COOKIE_HTTPONLY, $this->getStore());
-        if (is_null($httponly)) {
+        if ($httponly === null) {
             return null;
         }
         return (bool)$httponly;
@@ -166,7 +166,7 @@ class Mage_Core_Model_Cookie
     public function getSameSite(): string
     {
         $sameSite = Mage::getStoreConfig(self::XML_PATH_COOKIE_SAMESITE, $this->getStore());
-        if (is_null($sameSite)) {
+        if ($sameSite === null) {
             return 'None';
         }
         return (string)$sameSite;
@@ -214,7 +214,7 @@ class Mage_Core_Model_Cookie
 
         if ($period === true) {
             $period = 3600 * 24 * 365;
-        } elseif (is_null($period)) {
+        } elseif ($period === null) {
             $period = $this->getLifetime();
         }
 
@@ -223,19 +223,19 @@ class Mage_Core_Model_Cookie
         } else {
             $expire = time() + $period;
         }
-        if (is_null($path)) {
+        if ($path === null) {
             $path = $this->getPath();
         }
-        if (is_null($domain)) {
+        if ($domain === null) {
             $domain = $this->getDomain();
         }
-        if (is_null($secure)) {
+        if ($secure === null) {
             $secure = $this->isSecure();
         }
-        if (is_null($httponly)) {
+        if ($httponly === null) {
             $httponly = $this->getHttponly();
         }
-        if (is_null($sameSite)) {
+        if ($sameSite === null) {
             $sameSite = $this->getSameSite();
         }
 

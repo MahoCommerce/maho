@@ -155,7 +155,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     public function getFullCustomerName($object = null)
     {
         $name = '';
-        if (is_null($object)) {
+        if ($object === null) {
             $name = $this->getCustomerName();
         } else {
             $config = Mage::getSingleton('eav/config');

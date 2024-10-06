@@ -67,7 +67,7 @@ abstract class Mage_Payment_Model_Billing_AgreementAbstract extends Mage_Core_Mo
      */
     public function getPaymentMethodInstance()
     {
-        if (is_null($this->_paymentMethodInstance)) {
+        if ($this->_paymentMethodInstance === null) {
             $this->_paymentMethodInstance = Mage::helper('payment')->getMethodInstance($this->getMethodCode());
         }
         if ($this->_paymentMethodInstance) {
@@ -84,7 +84,7 @@ abstract class Mage_Payment_Model_Billing_AgreementAbstract extends Mage_Core_Mo
     public function isValid()
     {
         $this->_errors = [];
-        if (is_null($this->getPaymentMethodInstance()) || !$this->getPaymentMethodInstance()->getCode()) {
+        if ($this->getPaymentMethodInstance() === null || !$this->getPaymentMethodInstance()->getCode()) {
             $this->_errors[] = Mage::helper('payment')->__('Payment method code is not set.');
         }
         if (!$this->getReferenceId()) {

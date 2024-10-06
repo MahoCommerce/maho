@@ -94,7 +94,7 @@ class Mage_Newsletter_Model_Problem extends Mage_Core_Model_Abstract
             return null;
         }
 
-        if (is_null($this->_subscriber)) {
+        if ($this->_subscriber === null) {
             $this->_subscriber = Mage::getModel('newsletter/subscriber')
                 ->load($this->getSubscriberId());
         }

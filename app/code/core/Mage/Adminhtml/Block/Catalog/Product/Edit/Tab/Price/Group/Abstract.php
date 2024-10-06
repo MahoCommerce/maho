@@ -181,7 +181,7 @@ abstract class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Price_Group_Abstrac
      */
     public function getWebsites()
     {
-        if (!is_null($this->_websites)) {
+        if ($this->_websites !== null) {
             return $this->_websites;
         }
 

@@ -60,7 +60,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Admin_Page
 
     protected function _getUrlModel()
     {
-        if (is_null($this->_url)) {
+        if ($this->_url === null) {
             $this->_url = Mage::getModel('adminhtml/url');
         }
         return $this->_url;
@@ -68,7 +68,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Admin_Page
 
     protected function _buildMenuArray(?Varien_Simplexml_Element $parent = null, $path = '', $level = 0)
     {
-        if (is_null($parent)) {
+        if ($parent === null) {
             $parent = Mage::getSingleton('admin/config')->getAdminhtmlConfig()->getNode('menu');
         }
 
@@ -106,7 +106,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Admin_Page
         uasort($parentArr, [$this, '_sortMenu']);
 
         $last = array_key_last($parentArr);
-        if (!is_null($last)) {
+        if ($last !== null) {
             $parentArr[$last]['last'] = true;
         }
 

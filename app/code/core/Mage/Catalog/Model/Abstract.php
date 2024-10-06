@@ -177,7 +177,7 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
     #[\Override]
     public function unsetData($key = null)
     {
-        if ((!is_null($key) && $this->isLockedAttribute($key)) ||
+        if (($key !== null && $this->isLockedAttribute($key)) ||
             $this->isReadonly()
         ) {
             return $this;

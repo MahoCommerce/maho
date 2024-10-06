@@ -116,7 +116,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
      */
     public function getOrder()
     {
-        if (is_null($this->_order)) {
+        if ($this->_order === null) {
             Mage::throwException(Mage::helper('sales')->__('Order object is not specified.'));
         }
         return $this->_order;
@@ -130,7 +130,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
      */
     public function getSource()
     {
-        if (is_null($this->_source)) {
+        if ($this->_source === null) {
             Mage::throwException(Mage::helper('sales')->__('Source object is not specified.'));
         }
         return $this->_source;
@@ -144,7 +144,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
      */
     public function getItem()
     {
-        if (is_null($this->_item)) {
+        if ($this->_item === null) {
             Mage::throwException(Mage::helper('sales')->__('Item object is not specified.'));
         }
         return $this->_item;
@@ -158,7 +158,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
      */
     public function getPdf()
     {
-        if (is_null($this->_pdf)) {
+        if ($this->_pdf === null) {
             Mage::throwException(Mage::helper('sales')->__('PDF object is not specified.'));
         }
         return $this->_pdf;
@@ -172,7 +172,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
      */
     public function getPage()
     {
-        if (is_null($this->_pdfPage)) {
+        if ($this->_pdfPage === null) {
             Mage::throwException(Mage::helper('sales')->__('PDF page object is not specified.'));
         }
         return $this->_pdfPage;

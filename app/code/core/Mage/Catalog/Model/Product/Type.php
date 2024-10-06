@@ -167,7 +167,7 @@ class Mage_Catalog_Model_Product_Type
      */
     public static function getTypes()
     {
-        if (is_null(self::$_types)) {
+        if (self::$_types === null) {
             $productTypes = Mage::getConfig()->getNode('global/catalog/product/type')->asArray();
             foreach ($productTypes as $productKey => $productConfig) {
                 $moduleName = $productConfig['@']['module'] ?? 'catalog';
@@ -187,7 +187,7 @@ class Mage_Catalog_Model_Product_Type
      */
     public static function getCompositeTypes()
     {
-        if (is_null(self::$_compositeTypes)) {
+        if (self::$_compositeTypes === null) {
             self::$_compositeTypes = [];
             $types = self::getTypes();
             foreach ($types as $typeId => $typeInfo) {
@@ -206,7 +206,7 @@ class Mage_Catalog_Model_Product_Type
      */
     public static function getTypesByPriority()
     {
-        if (is_null(self::$_typesPriority)) {
+        if (self::$_typesPriority === null) {
             self::$_typesPriority = [];
             $a = [];
             $b = [];

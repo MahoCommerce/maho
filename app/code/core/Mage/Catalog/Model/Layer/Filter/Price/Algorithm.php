@@ -223,7 +223,7 @@ class Mage_Catalog_Model_Layer_Filter_Price_Algorithm
      */
     public function getIntervalsNumber()
     {
-        if (!is_null($this->_intervalsNumber)) {
+        if ($this->_intervalsNumber !== null) {
             return $this->_intervalsNumber;
         }
 
@@ -322,7 +322,7 @@ class Mage_Catalog_Model_Layer_Filter_Price_Algorithm
         $quantileInterval = $this->_getQuantileInterval($quantileNumber);
         $intervalPricesCount = $quantileInterval[1] - $quantileInterval[0] + 1;
         $offset = $quantileInterval[0];
-        if (!is_null($this->_lastPriceLimiter[0])) {
+        if ($this->_lastPriceLimiter[0] !== null) {
             $offset -= $this->_lastPriceLimiter[0];
         }
         if ($offset < 0) {
@@ -335,7 +335,7 @@ class Mage_Catalog_Model_Layer_Filter_Price_Algorithm
             $offset = 0;
         }
         $lowerPrice = $this->_lastPriceLimiter[1];
-        if (!is_null($this->_lowerLimit)) {
+        if ($this->_lowerLimit !== null) {
             $lowerPrice = max($lowerPrice, $this->_lowerLimit);
         }
         if ($intervalPricesCount >= 0) {
@@ -432,7 +432,7 @@ class Mage_Catalog_Model_Layer_Filter_Price_Algorithm
         $lowerPrice = round($lowerPrice, 3);
         $upperPrice = round($upperPrice, 3);
 
-        if (!is_null($roundingFactor)) {
+        if ($roundingFactor !== null) {
             // Can't separate if prices are equal
             if ($lowerPrice >= $upperPrice) {
                 if ($lowerPrice > $upperPrice || $returnEmpty) {
@@ -523,7 +523,7 @@ class Mage_Catalog_Model_Layer_Filter_Price_Algorithm
         $result = [];
         $lastCount = 0;
         $intervalFirstPrice = $this->_minPrice;
-        $lastSeparator = is_null($this->_lowerLimit) ? 0 : $this->_lowerLimit;
+        $lastSeparator = $this->_lowerLimit === null ? 0 : $this->_lowerLimit;
 
         for ($i = 1; $i < $this->getIntervalsNumber(); ++$i) {
             $separator = $this->_findPriceSeparator($i);
@@ -586,7 +586,7 @@ class Mage_Catalog_Model_Layer_Filter_Price_Algorithm
             $isEqualPrice = ($intervalFirstPrice == $this->_maxPrice) ? $intervalFirstPrice : false;
             $result[$this->getIntervalsNumber()] = [
                 'from'  => $isEqualPrice ? $isEqualPrice : $lastSeparator,
-                'to'    => $isEqualPrice ? $isEqualPrice : (is_null($this->_upperLimit) ? '' : $this->_upperLimit),
+                'to'    => $isEqualPrice ? $isEqualPrice : ($this->_upperLimit === null ? '' : $this->_upperLimit),
                 'count' => $this->_count - $lastCount,
             ];
         }

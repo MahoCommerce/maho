@@ -92,7 +92,7 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Sortby extends Mage_Eav_Mode
             }
             $object->setData($attributeCode, implode(',', $data));
         }
-        if (is_null($object->getData($attributeCode))) {
+        if ($object->getData($attributeCode) === null) {
             $object->setData($attributeCode, false);
         }
         return $this;
