@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a7868608b3b1107787accbce16c35317",
+    "content-hash": "d026de9acb79aecbd82c0ac8096649ab",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -1680,16 +1680,16 @@
         },
         {
             "name": "mahocommerce/maho-phpstan-plugin",
-            "version": "dev-topic-autoloader",
+            "version": "v1.2.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/justinbeaty/maho-phpstan-plugin.git",
-                "reference": "1eca9f7a4cda3afdc67509cc63ec1f2e6cec6a83"
+                "url": "https://github.com/MahoCommerce/maho-phpstan-plugin.git",
+                "reference": "9e37410fb5f2c75acbeca0ad81003f5e6b815f2b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/justinbeaty/maho-phpstan-plugin/zipball/1eca9f7a4cda3afdc67509cc63ec1f2e6cec6a83",
-                "reference": "1eca9f7a4cda3afdc67509cc63ec1f2e6cec6a83",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/9e37410fb5f2c75acbeca0ad81003f5e6b815f2b",
+                "reference": "9e37410fb5f2c75acbeca0ad81003f5e6b815f2b",
                 "shasum": ""
             },
             "require": {
@@ -1702,27 +1702,28 @@
                     "PHPStanMagento1\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
             "description": "Extension for PHPStan to allow analysis of Maho platform.",
             "support": {
-                "source": "https://github.com/justinbeaty/maho-phpstan-plugin/tree/topic-autoloader"
+                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v1.2.0"
             },
-            "time": "2024-10-05T18:08:07+00:00"
+            "time": "2024-10-06T17:07:56+00:00"
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.12.5",
+            "version": "1.12.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "7e6c6cb7cecb0a6254009a1a8a7d54ec99812b17"
+                "reference": "dc4d2f145a88ea7141ae698effd64d9df46527ae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/7e6c6cb7cecb0a6254009a1a8a7d54ec99812b17",
-                "reference": "7e6c6cb7cecb0a6254009a1a8a7d54ec99812b17",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/dc4d2f145a88ea7141ae698effd64d9df46527ae",
+                "reference": "dc4d2f145a88ea7141ae698effd64d9df46527ae",
                 "shasum": ""
             },
             "require": {
@@ -1767,7 +1768,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-09-26T12:45:22+00:00"
+            "time": "2024-10-06T15:03:59+00:00"
         },
         {
             "name": "psr/event-dispatcher",

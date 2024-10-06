@@ -7,9 +7,6 @@
         "AFL-3.0"
     ],
     "type": "maho-source",
-    "repositories": [
-        { "type": "vcs", "url": "https://github.com/justinbeaty/maho-phpstan-plugin.git" }
-    ],
     "require": {
         "php": ">=8.2",
         "ext-ctype": "*",
@@ -53,7 +50,7 @@
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
         "friendsofphp/php-cs-fixer": "^3.4",
-        "mahocommerce/maho-phpstan-plugin": "dev-topic-autoloader",
+        "mahocommerce/maho-phpstan-plugin": "@dev",
         "phpstan/phpstan": "^1.12",
         "squizlabs/php_codesniffer": "^3.7"
     },
