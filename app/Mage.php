@@ -38,7 +38,7 @@ require_once MAHO_FRAMEWORK_DIR . '/app/code/core/Mage/Core/functions.php';
 /**
  * Require Composer autoloader, make sure we enabled use-include-path
  */
-$loader = require_once BP . '/vendor/autoload.php';
+$loader = require BP . '/vendor/autoload.php';
 
 if ($loader->getUseIncludePath() === false) {
     die('Fatal error, please run: ./maho health-check');
