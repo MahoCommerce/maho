@@ -496,7 +496,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
         if ($disableLocalModules === true) {
             $paths = explode(PS, get_include_path());
-            $paths = array_filter($paths,
+            $paths = array_filter(
+                $paths,
                 fn ($path) => $path !== BP . '/app/code/local'
             );
             set_include_path(implode(PS, $paths));
