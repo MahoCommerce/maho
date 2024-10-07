@@ -46,7 +46,7 @@ if ($loader->getUseIncludePath() === false) {
 
 
 /**
- * Build include paths, will be prepended to composer's paths
+ * Build PSR-0 prefixes
  */
 $paths = [];
 $paths[] = BP . '/app/code/local';
@@ -71,6 +71,23 @@ if (MAHO_IS_CHILD_PROJECT) {
     $paths[] = BP . '/app/code/core';
 }
 
+$prefixes = [];
+foreach ($paths as $path) {
+    foreach (glob("$path/*/*", GLOB_ONLYDIR) as $subdir) {
+        $prefix = str_replace('/', '_', substr($subdir, strlen($path) + 1)) . '_';
+        $prefixes[$prefix] ??= [];
+        $prefixes[$prefix][] = $path;
+    }
+}
+foreach ($prefixes as $prefix => $paths) {
+    $loader->add($prefix, $paths, true);
+}
+
+
+/**
+ * Build include paths, will be prepended to composer's paths
+ */
+$paths = [];
 if (MAHO_IS_CHILD_PROJECT) {
     $paths[] = BP . '/lib';
 }

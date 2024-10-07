@@ -70,16 +70,8 @@ function is_empty_date($date)
  */
 function mageFindClassFile($class)
 {
-    $classFile = uc_words($class, DIRECTORY_SEPARATOR) . '.php';
-    $found = false;
-    foreach (explode(PS, get_include_path()) as $path) {
-        $fileName = $path . DS . $classFile;
-        if (file_exists($fileName)) {
-            $found = $fileName;
-            break;
-        }
-    }
-    return $found;
+    $loader = require BP . '/vendor/autoload.php';
+    return $loader->findFile($class);
 }
 
 /**
