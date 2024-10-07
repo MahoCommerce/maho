@@ -495,12 +495,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         }
 
         if ($disableLocalModules === true) {
-            set_include_path(
-                BP . DS . 'app' . DS . 'code' . DS . 'community' . PS .
-                BP . DS . 'app' . DS . 'code' . DS . 'core' . PS .
-                BP . DS . 'lib' . PS .
-                Mage::registry('original_include_path')
+            $paths = explode(PS, get_include_path());
+            $paths = array_filter($paths,
+                fn ($path) => $path !== BP . '/app/code/local'
             );
+            set_include_path(implode(PS, $paths));
         }
         $this->_canUseLocalModules = !$disableLocalModules;
         return $this->_canUseLocalModules;

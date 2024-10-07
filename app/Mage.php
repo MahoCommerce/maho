@@ -34,17 +34,19 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
 
 require_once MAHO_FRAMEWORK_DIR . '/app/code/core/Mage/Core/functions.php';
 
-Mage::register('original_include_path', get_include_path());
-
 
 /**
- * Require Composer autoloader
+ * Require Composer autoloader, make sure we enabled use-include-path
  */
-require_once BP . '/vendor/autoload.php';
+$loader = require_once BP . '/vendor/autoload.php';
+
+if ($loader->getUseIncludePath() === false) {
+    die('Run: composer config use-include-path true; composer dump;');
+}
 
 
 /**
- * Build include paths, note that Composer paths are last
+ * Build include paths, will be prepended to composer's paths
  */
 $paths = [];
 $paths[] = BP . '/app/code/local';
@@ -86,10 +88,7 @@ if (MAHO_IS_CHILD_PROJECT) {
     $paths[] = BP . '/lib';
 }
 
-array_push($paths, ...require BP . '/vendor/composer/include_paths.php');
-
-$appPath = implode(PS, $paths);
-set_include_path($appPath . PS . Mage::registry('original_include_path'));
+set_include_path(implode(PS, $paths) . PS . get_include_path());
 
 
 /**
