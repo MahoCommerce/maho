@@ -28,6 +28,19 @@ class HealthCheck extends BaseMahoCommand
     {
         $hasErrors = false;
 
+        // Check for use-include-path in composer.json
+        $output->write('Checking composer.json... ');
+        $loader = require MAHO_ROOT_DIR . '/vendor/autoload.php';
+        if ($loader->getUseIncludePath() === true) {
+            $output->writeln('<info>OK</info>');
+        } else {
+            $hasErrors = true;
+            $output->writeln('');
+            $output->writeln('<error>Error: Detected invalid composer.json config:</error>');
+            $output->writeln('Run: composer config use-include-path true; composer dump;');
+            $output->writeln('');
+        }
+
         // Check for M1 core files
         $output->write('Checking Magento/OpenMage core... ');
         $folders = [
