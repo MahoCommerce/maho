@@ -48,7 +48,7 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
         if (count($prefixes[$prefix])) {
             $prefixes[$prefix] = array_diff($prefixes[$prefix], $paths);
         }
-        array_push($prefixes[$prefix], $paths);
+        $prefixes[$prefix][] = $paths;
         $loader->set($prefix, $paths);
     }
 }
