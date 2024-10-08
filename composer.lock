@@ -121,12 +121,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/justinbeaty/maho-composer-plugin.git",
-                "reference": "ea65d564e3ce0ba136fb77b92164b4459e9f9e70"
+                "reference": "b26378811aa94793d8f312f2121aa0e80b5c9b76"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/justinbeaty/maho-composer-plugin/zipball/ea65d564e3ce0ba136fb77b92164b4459e9f9e70",
-                "reference": "ea65d564e3ce0ba136fb77b92164b4459e9f9e70",
+                "url": "https://api.github.com/repos/justinbeaty/maho-composer-plugin/zipball/b26378811aa94793d8f312f2121aa0e80b5c9b76",
+                "reference": "b26378811aa94793d8f312f2121aa0e80b5c9b76",
                 "shasum": ""
             },
             "require": {
@@ -144,7 +144,7 @@
             "support": {
                 "source": "https://github.com/justinbeaty/maho-composer-plugin/tree/topic-autoloader"
             },
-            "time": "2024-10-08T22:17:57+00:00"
+            "time": "2024-10-08T22:59:55+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
