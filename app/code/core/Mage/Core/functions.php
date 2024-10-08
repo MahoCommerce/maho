@@ -66,6 +66,7 @@ function is_empty_date($date)
 
 /**
  * @param string $class
+ * @deprecated 24.11.0
  * @return bool|string
  */
 function mageFindClassFile($class)
