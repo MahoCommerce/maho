@@ -44,6 +44,8 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                             <comment>Valid values range: from 0.0 to 1.0.</comment>
+                            <frontend_class>validate-number</frontend_class>
+                            <depends><changefreq separator=",">always,hourly,daily,weekly,monthly,yearly,never</changefreq></depends>
                         </priority>
                         <lastmod translate="label">
                             <label>Show lastmod</label>
@@ -53,6 +55,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><changefreq separator=",">always,hourly,daily,weekly,monthly,yearly,never</changefreq></depends>
                         </lastmod>
                     </fields>
                 </category>
@@ -80,6 +83,8 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                             <comment>Valid values range: from 0.0 to 1.0.</comment>
+                            <frontend_class>validate-number</frontend_class>
+                            <depends><changefreq separator=",">always,hourly,daily,weekly,monthly,yearly,never</changefreq></depends>
                         </priority>
                         <lastmod translate="label">
                             <label>Show lastmod</label>
@@ -89,6 +94,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><changefreq separator=",">always,hourly,daily,weekly,monthly,yearly,never</changefreq></depends>
                         </lastmod>
                     </fields>
                 </product>
@@ -116,6 +122,8 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                             <comment>Valid values range: from 0.0 to 1.0.</comment>
+                            <frontend_class>validate-number</frontend_class>
+                            <depends><changefreq separator=",">always,hourly,daily,weekly,monthly,yearly,never</changefreq></depends>
                         </priority>
                         <lastmod translate="label">
                             <label>Show lastmod</label>
@@ -125,6 +133,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><changefreq separator=",">always,hourly,daily,weekly,monthly,yearly,never</changefreq></depends>
                         </lastmod>
                     </fields>
                 </page>
@@ -151,6 +160,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
                         </error_email>
                         <error_email_identity translate="label">
                             <label>Error Email Sender</label>
@@ -160,6 +170,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><enabled>1</enabled></depends>
                         </error_email_identity>
                         <error_email_template translate="label">
                             <label>Error Email Template</label>
@@ -169,6 +180,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><enabled>1</enabled></depends>
                         </error_email_template>
                         <frequency translate="label">
                             <label>Frequency</label>
@@ -179,6 +191,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
                         </frequency>
                         <time translate="label">
                             <label>Start Time</label>
@@ -187,6 +200,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
                         </time>
                     </fields>
                 </generate>

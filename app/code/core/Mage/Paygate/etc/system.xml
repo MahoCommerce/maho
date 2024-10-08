@@ -39,6 +39,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </cctypes>
                         <useccv translate="label">
                             <label>Credit Card Verification</label>
@@ -48,6 +49,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </useccv>
                         <email_customer translate="label">
                             <label>Email Customer</label>
@@ -57,6 +59,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </email_customer>
                         <login translate="label">
                             <label>API Login ID</label>
@@ -66,6 +69,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </login>
                         <merchant_email translate="label">
                             <label>Merchant's Email</label>
@@ -74,6 +78,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </merchant_email>
                         <order_status translate="label">
                             <label>New Order Status</label>
@@ -83,6 +88,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </order_status>
                         <sort_order translate="label">
                             <label>Sort Order</label>
@@ -90,6 +96,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </sort_order>
                         <test translate="label">
                             <label>Test Mode</label>
@@ -99,6 +106,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </test>
                         <debug translate="label">
                             <label>Debug</label>
@@ -108,6 +116,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </debug>
                         <title translate="label">
                             <label>Title</label>
@@ -115,6 +124,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><active>1</active></depends>
                         </title>
                         <trans_key translate="label">
                             <label>Transaction Key</label>
@@ -124,6 +134,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </trans_key>
                         <payment_action translate="label">
                             <label>Payment Action</label>
@@ -133,6 +144,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </payment_action>
                         <cgi_url>
                             <label>Gateway URL</label>
@@ -140,6 +152,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </cgi_url>
                         <cgi_url_td>
                             <label>Payment Update URL</label>
@@ -147,6 +160,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </cgi_url_td>
                         <currency translate="label">
                             <label>Accepted Currency</label>
@@ -156,6 +170,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </currency>
                         <allowspecific translate="label">
                             <label>Payment from Applicable Countries</label>
@@ -165,6 +180,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </allowspecific>
                         <specificcountry translate="label">
                             <label>Payment from Specific Countries</label>
@@ -174,6 +190,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </specificcountry>
                         <min_order_total translate="label">
                             <label>Minimum Order Total</label>
@@ -181,6 +198,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </min_order_total>
                         <max_order_total translate="label">
                             <label>Maximum Order Total</label>
@@ -188,6 +206,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </max_order_total>
                         <allow_partial_authorization translate="label">
                             <label>Allow Partial Authorization</label>
@@ -197,6 +216,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </allow_partial_authorization>
                         <heading_3dsecure translate="label">
                             <label>3D Secure</label>
@@ -204,6 +224,7 @@
                             <sort_order>105</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
+                            <depends><active>1</active></depends>
                         </heading_3dsecure>
                         <centinel translate="label">
                             <label>3D Secure Card Validation</label>
@@ -212,6 +233,7 @@
                             <sort_order>125</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
+                            <depends><active>1</active></depends>
                         </centinel>
                         <centinel_is_mode_strict translate="label comment">
                             <label>Severe 3D Secure Card Validation</label>
@@ -222,6 +244,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <depends><centinel>1</centinel></depends>
+                            <depends><active>1</active></depends>
                         </centinel_is_mode_strict>
                         <centinel_api_url translate="label comment">
                             <label>Centinel API URL</label>
@@ -230,7 +253,10 @@
                             <sort_order>135</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <depends><centinel>1</centinel></depends>
+                            <depends>
+                                <active>1</active>
+                                <centinel>1</centinel>
+                            </depends>
                         </centinel_api_url>
                         <model>
                         </model>

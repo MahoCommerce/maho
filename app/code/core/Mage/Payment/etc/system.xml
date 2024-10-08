@@ -44,6 +44,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </order_status>
                         <sort_order translate="label">
                             <label>Sort Order</label>
@@ -52,6 +53,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                             <frontend_class>validate-number</frontend_class>
+                            <depends><active>1</active></depends>
                         </sort_order>
                         <title translate="label">
                             <label>Title</label>
@@ -59,6 +61,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><active>1</active></depends>
                         </title>
                          <allowspecific translate="label">
                             <label>Payment from Applicable Countries</label>
@@ -68,6 +71,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                             <depends><active>1</active></depends>
                         </allowspecific>
                         <specificcountry translate="label">
                             <label>Payment from Specific Countries</label>
@@ -78,6 +82,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                             <can_be_empty>1</can_be_empty>
+                            <depends><active>1</active></depends>
                         </specificcountry>
                         <payable_to translate="label">
                             <label>Make Check Payable to</label>
@@ -85,6 +90,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><active>1</active></depends>
                         </payable_to>
                         <mailing_address translate="label">
                             <label>Send Check to</label>
@@ -93,6 +99,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><active>1</active></depends>
                         </mailing_address>
                         <min_order_total translate="label">
                             <label>Minimum Order Total</label>
@@ -100,6 +107,8 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <frontend_class>validate-number</frontend_class>
+                            <depends><active>1</active></depends>
                         </min_order_total>
                         <max_order_total translate="label">
                             <label>Maximum Order Total</label>
@@ -107,6 +116,8 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <frontend_class>validate-number</frontend_class>
+                            <depends><active>1</active></depends>
                         </max_order_total>
                         <model>
                         </model>
@@ -136,6 +147,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </order_status>
                         <payment_action translate="label">
                             <label>Automatically Invoice All Items</label>
@@ -146,6 +158,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                             <depends>
+                                <active>1</active>
                                 <order_status separator=",">processing,processed_ogone</order_status>
                             </depends>
                         </payment_action>
@@ -156,6 +169,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                             <frontend_class>validate-number</frontend_class>
+                            <depends><active>1</active></depends>
                         </sort_order>
                         <title translate="label">
                             <label>Title</label>
@@ -163,6 +177,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><active>1</active></depends>
                         </title>
                         <allowspecific translate="label">
                             <label>Payment from Applicable Countries</label>
@@ -172,6 +187,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </allowspecific>
                         <specificcountry translate="label">
                             <label>Payment from Specific Countries</label>
@@ -182,6 +198,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                             <can_be_empty>1</can_be_empty>
+                            <depends><active>1</active></depends>
                         </specificcountry>
 <!--
                         <min_order_total translate="label">
@@ -190,6 +207,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </min_order_total>
                         <max_order_total translate="label">
                             <label>Maximum Order Total</label>
@@ -197,6 +215,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </max_order_total>
 -->
                         <model>
@@ -227,6 +246,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </order_status>
                         <sort_order translate="label">
                             <label>Sort Order</label>
@@ -235,6 +255,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                             <frontend_class>validate-number</frontend_class>
+                            <depends><active>1</active></depends>
                         </sort_order>
                         <title translate="label">
                             <label>Title</label>
@@ -242,6 +263,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><active>1</active></depends>
                         </title>
                         <allowspecific translate="label">
                             <label>Payment from Applicable Countries</label>
@@ -251,6 +273,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </allowspecific>
                         <specificcountry translate="label">
                             <label>Payment from Specific Countries</label>
@@ -261,6 +284,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                             <can_be_empty>1</can_be_empty>
+                            <depends><active>1</active></depends>
                         </specificcountry>
                         <min_order_total translate="label">
                             <label>Minimum Order Total</label>
@@ -268,6 +292,8 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <frontend_class>validate-number</frontend_class>
+                            <depends><active>1</active></depends>
                         </min_order_total>
                         <max_order_total translate="label">
                             <label>Maximum Order Total</label>
@@ -275,6 +301,8 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <frontend_class>validate-number</frontend_class>
+                            <depends><active>1</active></depends>
                         </max_order_total>
                         <model>
                         </model>
@@ -302,6 +330,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><active>1</active></depends>
                         </title>
                         <order_status translate="label">
                             <label>New Order Status</label>
@@ -311,6 +340,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </order_status>
                         <allowspecific translate="label">
                             <label>Payment from Applicable Countries</label>
@@ -320,6 +350,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </allowspecific>
                         <specificcountry translate="label">
                             <label>Payment from Specific Countries</label>
@@ -330,6 +361,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                             <can_be_empty>1</can_be_empty>
+                            <depends><active>1</active></depends>
                         </specificcountry>
                         <instructions translate="label">
                             <label>Instructions</label>
@@ -338,6 +370,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><active>1</active></depends>
                         </instructions>
                         <min_order_total translate="label">
                             <label>Minimum Order Total</label>
@@ -345,6 +378,8 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <frontend_class>validate-number</frontend_class>
+                            <depends><active>1</active></depends>
                         </min_order_total>
                         <max_order_total translate="label">
                             <label>Maximum Order Total</label>
@@ -352,6 +387,8 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <frontend_class>validate-number</frontend_class>
+                            <depends><active>1</active></depends>
                         </max_order_total>
                         <sort_order translate="label">
                             <label>Sort Order</label>
@@ -359,6 +396,8 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <frontend_class>validate-number</frontend_class>
+                            <depends><active>1</active></depends>
                         </sort_order>
                     </fields>
                 </banktransfer>
@@ -384,6 +423,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><active>1</active></depends>
                         </title>
                         <order_status translate="label">
                             <label>New Order Status</label>
@@ -393,6 +433,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </order_status>
                         <allowspecific translate="label">
                             <label>Payment from Applicable Countries</label>
@@ -402,6 +443,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
                         </allowspecific>
                         <specificcountry translate="label">
                             <label>Payment from Specific Countries</label>
@@ -412,6 +454,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                             <can_be_empty>1</can_be_empty>
+                            <depends><active>1</active></depends>
                         </specificcountry>
                         <instructions translate="label">
                             <label>Instructions</label>
@@ -420,6 +463,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><active>1</active></depends>
                         </instructions>
                         <min_order_total translate="label">
                             <label>Minimum Order Total</label>
@@ -427,6 +471,8 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <frontend_class>validate-number</frontend_class>
+                            <depends><active>1</active></depends>
                         </min_order_total>
                         <max_order_total translate="label">
                             <label>Maximum Order Total</label>
@@ -434,6 +480,8 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <frontend_class>validate-number</frontend_class>
+                            <depends><active>1</active></depends>
                         </max_order_total>
                         <sort_order translate="label">
                             <label>Sort Order</label>
@@ -441,6 +489,8 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <frontend_class>validate-number</frontend_class>
+                            <depends><active>1</active></depends>
                         </sort_order>
                     </fields>
                 </cashondelivery>
