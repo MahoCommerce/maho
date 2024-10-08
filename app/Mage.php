@@ -22,6 +22,11 @@ if (file_exists(BP . '/vendor/mahocommerce/maho')) {
     define('MAHO_FRAMEWORK_DIR', BP);
 }
 
+/**
+ * Require Composer autoloader
+ */
+$loader = require BP . '/vendor/autoload.php';
+
 if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPER_MODE'])) {
     Mage::setIsDeveloperMode(true);
     ini_set('display_errors', '1');
@@ -30,83 +35,25 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
 
     // Fix for overriding zf1-future during development
     ini_set('opcache.revalidate_path', 1);
+
+    // $classMap = $loader->getClassMap();
+    // if ($classMap['Mage_Core_Model_App']) {
+    //     die('Optimized autoloader found in developer mode');
+    // }
+
+    // Reload PSR-0 namespaces during development in case new files are added
+    $prefixes = $loader->getPrefixes();
+    foreach (\Maho\MahoAutoload::generatePsr0(BP) as $prefix => $paths) {
+        $prefixes[$prefix] ??= [];
+        if (count($prefixes[$prefix])) {
+            $prefixes[$prefix] = array_diff($prefixes[$prefix], $paths);
+        }
+        array_push($prefixes[$prefix], $paths);
+        $loader->set($prefix, $paths);
+    }
 }
 
 require_once MAHO_FRAMEWORK_DIR . '/app/code/core/Mage/Core/functions.php';
-
-
-/**
- * Require Composer autoloader, make sure we enabled use-include-path
- */
-$loader = require BP . '/vendor/autoload.php';
-
-if ($loader->getUseIncludePath() === false) {
-    die('Fatal error, please run: ./maho health-check');
-}
-
-
-/**
- * Build PSR-0 prefixes
- */
-$paths = [];
-$paths[] = BP . '/app/code/local';
-$paths[] = BP . '/app/code/community';
-if (MAHO_IS_CHILD_PROJECT) {
-    $paths[] = BP . '/app/code/core';
-}
-
-$modules = mahoGetComposerInstallationData();
-foreach ($modules as $module => $info) {
-    if ($module === 'mahocommerce/maho') {
-        continue;
-    }
-    foreach ($info['codePools'] as $dir) {
-        $paths[] = $info['path'] . "/app/code/$dir";
-    }
-}
-
-if (MAHO_IS_CHILD_PROJECT) {
-    $paths[] = MAHO_FRAMEWORK_DIR . '/app/code/core';
-} else {
-    $paths[] = BP . '/app/code/core';
-}
-
-$prefixes = [];
-foreach ($paths as $path) {
-    foreach (glob("$path/*/*", GLOB_ONLYDIR) as $subdir) {
-        $prefix = str_replace('/', '_', substr($subdir, strlen($path) + 1)) . '_';
-        $prefixes[$prefix] ??= [];
-        $prefixes[$prefix][] = $path;
-    }
-}
-foreach ($prefixes as $prefix => $paths) {
-    $loader->add($prefix, $paths, true);
-}
-
-
-/**
- * Build include paths, will be prepended to composer's paths
- */
-$paths = [];
-if (MAHO_IS_CHILD_PROJECT) {
-    $paths[] = BP . '/lib';
-}
-foreach ($modules as $module => $info) {
-    if ($module === 'mahocommerce/maho') {
-        continue;
-    }
-    foreach ($info['extraDirs'] as $dir) {
-        $paths[] = $info['path'] . "/$dir";
-    }
-}
-if (MAHO_IS_CHILD_PROJECT) {
-    $paths[] = MAHO_FRAMEWORK_DIR . '/lib';
-} else {
-    $paths[] = BP . '/lib';
-}
-
-set_include_path(implode(PS, $paths) . PS . get_include_path());
-
 
 /**
  * Support additional includes, originally used for OpenMage composer support

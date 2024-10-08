@@ -94,9 +94,8 @@ class Mage_ProductAlert_Helper_Data extends Mage_Core_Helper_Url
                     Mage::throwException($error);
                 }
             }
-            try {
+            if (class_exists($block)) {
                 $block = new $block([]);
-            } catch (Error) {
             }
         }
         if (!$block instanceof Mage_Core_Block_Abstract) {

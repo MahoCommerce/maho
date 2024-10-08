@@ -295,43 +295,7 @@ function is_dir_writeable($dir)
 
 function mahoGetComposerInstallationData(): array
 {
-    static $packages = null;
-    if ($packages !== null) {
-        return $packages;
-    }
-
-    $datasets = \Composer\InstalledVersions::getAllRawData();
-    $dataset = end($datasets); // We only care about the packages installed to root vendor dir
-
-    // Alternatively, we could consider doing:
-    // $dataset = require BP . "/vendor/composer/installed.php";
-
-    $packages = [];
-
-    foreach ($dataset['versions'] as $package => $info) {
-        if (!isset($info['install_path'])) {
-            continue;
-        }
-        if (!in_array($info['type'], ['maho-source', 'maho-module', 'magento-module'])) {
-            continue;
-        }
-        $path = realpath($info['install_path']);
-        $codePools = array_filter(
-            ['local', 'community', 'core'],
-            fn ($dir) => is_dir("$path/app/code/$dir")
-        );
-        $extraDirs = array_filter(
-            ['lib'],
-            fn ($dir) => is_dir("$path/$dir")
-        );
-        $packages[$package] = [
-            'type' => $info['type'],
-            'path' => $path,
-            'codePools' => $codePools,
-            'extraDirs' => $extraDirs,
-        ];
-    }
-    return $packages;
+    return \Maho\MahoAutoload::getInstalledModules();
 }
 
 function mahoFindFileInIncludePath(string $path): string|false
