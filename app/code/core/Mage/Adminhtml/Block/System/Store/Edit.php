@@ -21,6 +21,7 @@ class Mage_Adminhtml_Block_System_Store_Edit extends Mage_Adminhtml_Block_Widget
 {
     public function __construct()
     {
+        $saveLabel = $deleteLabel = $deleteUrl = '';
         switch (Mage::registry('store_type')) {
             case 'website':
                 $this->_objectId = 'website_id';
@@ -65,6 +66,7 @@ class Mage_Adminhtml_Block_System_Store_Edit extends Mage_Adminhtml_Block_Widget
     #[\Override]
     public function getHeaderText()
     {
+        $addLabel = $editLabel = '';
         switch (Mage::registry('store_type')) {
             case 'website':
                 $editLabel = Mage::helper('core')->__('Edit Website');
