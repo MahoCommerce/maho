@@ -37,7 +37,7 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
     ini_set('opcache.revalidate_path', 1);
 
     // $classMap = $loader->getClassMap();
-    // if ($classMap['Mage_Core_Model_App']) {
+    // if (isset($classMap['Mage_Core_Model_App'])) {
     //     die('Optimized autoloader found in developer mode');
     // }
 
