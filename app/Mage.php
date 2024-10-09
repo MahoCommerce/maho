@@ -12,19 +12,8 @@
 
 define('DS', DIRECTORY_SEPARATOR);
 define('PS', PATH_SEPARATOR);
-define('BP', str_replace('/vendor/mahocommerce/maho', '', dirname(__DIR__)));
+define('BP', MAHO_ROOT_DIR);
 
-if (file_exists(BP . '/vendor/mahocommerce/maho')) {
-    define('MAHO_IS_CHILD_PROJECT', true);
-    define('MAHO_FRAMEWORK_DIR', BP . '/vendor/mahocommerce/maho');
-} else {
-    define('MAHO_IS_CHILD_PROJECT', false);
-    define('MAHO_FRAMEWORK_DIR', BP);
-}
-
-/**
- * Require Composer autoloader
- */
 $loader = require BP . '/vendor/autoload.php';
 
 if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPER_MODE'])) {
@@ -53,7 +42,7 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
     }
 }
 
-require_once MAHO_FRAMEWORK_DIR . '/app/code/core/Mage/Core/functions.php';
+require_once __DIR__ . '/code/core/Mage/Core/functions.php';
 
 /**
  * Support additional includes, originally used for OpenMage composer support

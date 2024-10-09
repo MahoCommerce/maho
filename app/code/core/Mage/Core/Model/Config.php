@@ -333,17 +333,10 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         $files = [];
 
-        // If we installed with the starter project, include core Maho files first
-        if (MAHO_IS_CHILD_PROJECT) {
-            foreach (glob(MAHO_FRAMEWORK_DIR . '/app/etc/*.xml') as $file) {
-                $files[basename($file)] = $file;
-            }
-        }
-
-        // Include all other module files, except those from Maho source
+        // Include module files
         $modules = mahoGetComposerInstallationData();
         foreach ($modules as $module => $info) {
-            if ($module === 'mahocommerce/maho') {
+            if ($module === 'mahocommerce/maho' && $info['isChildProject'] === false) {
                 continue;
             }
             foreach (glob($info['path'] . '/app/etc/*.xml') as $file) {
@@ -354,7 +347,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         // Prevent any module from defining a local.xml
         unset($files['local.xml']);
 
-        // Lastly, include local files, always overriding core and module files
+        // Include local files, overriding module files
         foreach (glob($this->getOptions()->getEtcDir() . '/*.xml') as $file) {
             $files[basename($file)] = $file;
         }
@@ -836,17 +829,10 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         $moduleFiles = [];
 
-        // If we installed with the starter project, include core Maho files first
-        if (MAHO_IS_CHILD_PROJECT) {
-            foreach (glob(MAHO_FRAMEWORK_DIR . '/app/etc/modules/*.xml') as $file) {
-                $moduleFiles[basename($file)] = $file;
-            }
-        }
-
-        // Include all other module files, except those from Maho source
+        // Include module files
         $modules = mahoGetComposerInstallationData();
         foreach ($modules as $module => $info) {
-            if ($module === 'mahocommerce/maho') {
+            if ($module === 'mahocommerce/maho' && $info['isChildProject'] === false) {
                 continue;
             }
             foreach (glob($info['path'] . '/app/etc/modules/*.xml') as $file) {
@@ -854,7 +840,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             }
         }
 
-        // Lastly, include local files, always overriding core and module files
+        // Include local files, overriding module files
         foreach (glob($this->getOptions()->getEtcDir() . '/modules/*.xml') as $file) {
             $moduleFiles[basename($file)] = $file;
         }
