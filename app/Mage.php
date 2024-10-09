@@ -14,7 +14,15 @@ define('DS', DIRECTORY_SEPARATOR);
 define('PS', PATH_SEPARATOR);
 define('BP', MAHO_ROOT_DIR);
 
+/**
+ * Require Composer autoloader, make sure we enabled use-include-path
+ */
 $loader = require BP . '/vendor/autoload.php';
+if ($loader->getUseIncludePath() === false) {
+    die('Fatal error, please run: ./maho health-check');
+}
+set_include_path(implode(PS, \Maho\MahoAutoload::generatePaths(BP)) . PS . get_include_path());
+
 
 if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPER_MODE'])) {
     Mage::setIsDeveloperMode(true);

@@ -62,7 +62,7 @@
         "colinmollenhour/magento-redis-session": "Redis support for PHP sessions"
     },
     "minimum-stability": "dev",
-    "prefer-stable" : true,
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "MahoCLI\\": "lib/MahoCLI"
@@ -82,6 +82,7 @@
         }
     },
     "config": {
+        "use-include-path": true,
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "cweagans/composer-patches": true,
