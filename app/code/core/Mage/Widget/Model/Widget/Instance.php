@@ -386,6 +386,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
                     '_theme'   => $this->getTheme(),
                     '_type'    => 'etc'
                     ]) . DS . 'widget.xml';
+                $configFile = mahoFindFileInIncludePath($configFile);
                 if (is_readable($configFile)) {
                     $themeWidgetsConfig = new Varien_Simplexml_Config();
                     $themeWidgetsConfig->loadFile($configFile);
