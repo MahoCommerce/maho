@@ -17,6 +17,15 @@
  */
 class Mage_Adminhtml_Model_Observer
 {
+    public function displayBootupWarnings($observer)
+    {
+        if (Mage::registry('bootup_optimized_autoloader_development') === true) {
+            Mage::getSingleton('adminhtml/session')->addWarning(
+                Mage::helper('adminhtml')->__('Optimized composer autoloader detected in developer mode.')
+            );
+        }
+    }
+
     public function bindLocale($observer)
     {
         if ($locale = $observer->getEvent()->getLocale()) {

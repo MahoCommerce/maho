@@ -33,10 +33,11 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
     // Fix for overriding zf1-future during development
     ini_set('opcache.revalidate_path', 1);
 
-    // $classMap = $loader->getClassMap();
-    // if (isset($classMap['Mage_Core_Model_App'])) {
-    //     die('Optimized autoloader found in developer mode');
-    // }
+    // Check if we used `composer dump --optimize-autoloader` in development
+    $classMap = $loader->getClassMap();
+    if (isset($classMap['Mage_Core_Model_App'])) {
+        Mage::register('bootup_optimized_autoloader_development', true);
+    }
 
     // Reload PSR-0 namespaces during development in case new files are added
     $prefixes = $loader->getPrefixes();

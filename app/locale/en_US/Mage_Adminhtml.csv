@@ -691,6 +691,7 @@
 "Only Once (version upgrade)","Only Once (version upgrade)"
 "Only attributes with scope ""Global"", input type ""Dropdown"" and Use To Create Configurable Product ""Yes"" are available.","Only attributes with scope ""Global"", input type ""Dropdown"" and Use To Create Configurable Product ""Yes"" are available."
 "Only mapped fields","Only mapped fields"
+"Optimized composer autoloader detected in developer mode.","Optimized composer autoloader detected in developer mode."
 "Maho Project","Maho Project"
 "Optional","Optional"
 "Options","Options"
