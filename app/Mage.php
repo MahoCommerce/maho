@@ -39,7 +39,7 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
         Mage::register('bootup_optimized_autoloader_development', true);
     }
 
-    // Reload PSR-0 namespaces during development in case new files are added
+    // Reload PSR-0 namespaces and controller classmap during development in case new files are added
     $prefixes = $loader->getPrefixes();
     foreach (\Maho\MahoAutoload::generatePsr0(BP) as $prefix => $paths) {
         $prefixes[$prefix] ??= [];
@@ -49,6 +49,7 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
         array_push($prefixes[$prefix], ...$paths);
         $loader->set($prefix, $paths);
     }
+    $loader->addClassMap(\Maho\MahoAutoload::generateControllerClassMap(BP));
 }
 
 require_once __DIR__ . '/code/core/Mage/Core/functions.php';
