@@ -294,17 +294,12 @@ function is_dir_writeable($dir)
     return false;
 }
 
-function mahoGetComposerInstallationData(): array
-{
-    return \Maho\MahoAutoload::getInstalledModules(BP);
-}
-
 function mahoFindFileInIncludePath(string $path): string|false
 {
     $paths = [];
     $paths[] = BP;
 
-    $modules = mahoGetComposerInstallationData();
+    $modules = \Maho\MahoAutoload::getInstalledModules(BP);
     foreach ($modules as $module => $info) {
         if ($module === 'mahocommerce/maho') {
             continue;
@@ -336,7 +331,7 @@ function mahoListDirectories(string $path): array
         $results[] = basename($folder);
     }
 
-    $modules = mahoGetComposerInstallationData();
+    $modules = \Maho\MahoAutoload::getInstalledModules(BP);
     foreach ($modules as $module => $info) {
         foreach (glob($info['path'] . "/$relativePath/*", GLOB_ONLYDIR) as $folder) {
             $results[] = basename($folder);

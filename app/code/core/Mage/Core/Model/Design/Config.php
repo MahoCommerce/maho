@@ -43,7 +43,7 @@ class Mage_Core_Model_Design_Config extends Varien_Simplexml_Config
             $files = [];
 
             // Include module files
-            $modules = mahoGetComposerInstallationData();
+            $modules = \Maho\MahoAutoload::getInstalledModules(BP);
             foreach ($modules as $module => $info) {
                 if ($module === 'mahocommerce/maho' && $info['isChildProject'] === false) {
                     continue;

@@ -334,7 +334,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $files = [];
 
         // Include module files
-        $modules = mahoGetComposerInstallationData();
+        $modules = \Maho\MahoAutoload::getInstalledModules(BP);
         foreach ($modules as $module => $info) {
             if ($module === 'mahocommerce/maho' && $info['isChildProject'] === false) {
                 continue;
@@ -826,7 +826,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $moduleFiles = [];
 
         // Include module files
-        $modules = mahoGetComposerInstallationData();
+        $modules = \Maho\MahoAutoload::getInstalledModules(BP);
         foreach ($modules as $module => $info) {
             if ($module === 'mahocommerce/maho' && $info['isChildProject'] === false) {
                 continue;
