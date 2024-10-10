@@ -14,13 +14,12 @@ define('DS', DIRECTORY_SEPARATOR);
 define('PS', PATH_SEPARATOR);
 define('BP', MAHO_ROOT_DIR);
 
-
-/**
+/*
  * Require Composer autoloader and set include paths
+ * @var \Composer\Autoload\ClassLoader $composerClassLoader
  */
-$loader = require BP . '/vendor/autoload.php';
+$composerClassLoader = require BP . '/vendor/autoload.php';
 set_include_path(implode(PS, \Maho\MahoAutoload::generatePaths(BP)) . PS . get_include_path());
-
 
 if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPER_MODE'])) {
     Mage::setIsDeveloperMode(true);
@@ -32,22 +31,22 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
     ini_set('opcache.revalidate_path', 1);
 
     // Check if we used `composer dump --optimize-autoloader` in development
-    $classMap = $loader->getClassMap();
+    $classMap = $composerClassLoader->getClassMap();
     if (isset($classMap['Mage_Core_Model_App'])) {
         Mage::addBootupWarning('Optimized autoloader detected in developer mode.');
     }
 
     // Reload PSR-0 namespaces and controller classmap during development in case new files are added
-    $prefixes = $loader->getPrefixes();
+    $prefixes = $composerClassLoader->getPrefixes();
     foreach (\Maho\MahoAutoload::generatePsr0(BP) as $prefix => $paths) {
         $prefixes[$prefix] ??= [];
         if (count($prefixes[$prefix])) {
             $prefixes[$prefix] = array_diff($prefixes[$prefix], $paths);
         }
         array_push($prefixes[$prefix], ...$paths);
-        $loader->set($prefix, $paths);
+        $composerClassLoader->set($prefix, $paths);
     }
-    $loader->addClassMap(\Maho\MahoAutoload::generateControllerClassMap(BP));
+    $composerClassLoader->addClassMap(\Maho\MahoAutoload::generateControllerClassMap(BP));
 }
 
 require_once __DIR__ . '/code/core/Mage/Core/functions.php';
@@ -59,7 +58,6 @@ require_once __DIR__ . '/code/core/Mage/Core/functions.php';
 foreach (glob(BP . '/app/etc/includes/*.php') as $path) {
     include_once $path;
 }
-
 
 /**
  * Main Mage hub class
@@ -631,7 +629,7 @@ final class Mage
     {
         try {
             self::setRoot();
-            self::$_app     = new Mage_Core_Model_App();
+            self::$_app = new Mage_Core_Model_App();
             self::_setIsInstalled($options);
             self::_setConfigModel($options);
 
