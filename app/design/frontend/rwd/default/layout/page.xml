@@ -34,7 +34,6 @@
 
                 <!-- Add vendor dependencies -->
                 <action method="addItem"><type>skin_js</type><name>js/app.js</name></action>
-                <action method="addLinkRel"><rel>stylesheet</rel><href><![CDATA[//fonts.googleapis.com/css?family=Raleway:300,400,500,700,600&display=swap]]></href></action>
                 <action method="addItem"><type>skin_js</type><name>js/minicart.js</name></action>
 
                 <!-- Add stylesheets with media queries for use by modern browsers -->

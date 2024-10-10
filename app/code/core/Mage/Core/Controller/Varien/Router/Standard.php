@@ -296,18 +296,12 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
      */
     protected function _validateControllerClassName($realModule, $controller)
     {
-        $controllerFileName = $this->getControllerFileName($realModule, $controller);
-        if (!$this->validateControllerFileName($controllerFileName)) {
-            return false;
-        }
-
         $controllerClassName = $this->getControllerClassName($realModule, $controller);
         if (!$controllerClassName) {
             return false;
         }
 
-        // include controller file if needed
-        if (!$this->_includeControllerClass($controllerFileName, $controllerClassName)) {
+        if (!class_exists($controllerClassName)) {
             return false;
         }
 
@@ -333,6 +327,7 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
      * @param string $controllerFileName
      * @param string $controllerClassName
      * @return bool
+     * @deprecated
      */
     protected function _includeControllerClass($controllerFileName, $controllerClassName)
     {
@@ -412,6 +407,7 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
      * @param string $realModule
      * @param string $controller
      * @return string
+     * @deprecated
      */
     public function getControllerFileName($realModule, $controller)
     {
@@ -429,6 +425,7 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
     /**
      * @param string $fileName
      * @return bool
+     * @deprecated
      */
     public function validateControllerFileName($fileName)
     {
