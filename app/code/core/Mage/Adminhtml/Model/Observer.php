@@ -21,10 +21,7 @@ class Mage_Adminhtml_Model_Observer
     {
         $bootupWarnings = Mage::registry('bootup_warnings') ?? [];
         foreach ($bootupWarnings as $message) {
-            Mage::getSingleton('adminhtml/session')->addWarning(
-                Mage::helper('adminhtml')->__('Bootup warning:') . ' ' .
-                Mage::helper('adminhtml')->__($message)
-            );
+            Mage::getSingleton('adminhtml/session')->addWarning("Bootup warning: $message");
         }
     }
 
