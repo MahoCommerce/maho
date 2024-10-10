@@ -14,12 +14,14 @@ define('DS', DIRECTORY_SEPARATOR);
 define('PS', PATH_SEPARATOR);
 define('BP', MAHO_ROOT_DIR);
 
+$bootupWarnings = [];
+
 /**
  * Require Composer autoloader, make sure we enabled use-include-path
  */
 $loader = require BP . '/vendor/autoload.php';
 if ($loader->getUseIncludePath() === false) {
-    die('Fatal error, please run: ./maho health-check');
+    $bootupWarnings[] = 'Use include paths not enabled.';
 }
 set_include_path(implode(PS, \Maho\MahoAutoload::generatePaths(BP)) . PS . get_include_path());
 
@@ -36,7 +38,7 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
     // Check if we used `composer dump --optimize-autoloader` in development
     $classMap = $loader->getClassMap();
     if (isset($classMap['Mage_Core_Model_App'])) {
-        Mage::register('bootup_optimized_autoloader_development', true);
+        $bootupWarnings[] = 'Optimized autoloader detected in developer mode.';
     }
 
     // Reload PSR-0 namespaces and controller classmap during development in case new files are added
@@ -62,6 +64,7 @@ foreach (glob(BP . '/app/etc/includes/*.php') as $path) {
     include_once $path;
 }
 
+Mage::register('bootup_warnings', $bootupWarnings);
 
 /**
  * Main Mage hub class

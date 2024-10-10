@@ -19,9 +19,11 @@ class Mage_Adminhtml_Model_Observer
 {
     public function displayBootupWarnings($observer)
     {
-        if (Mage::registry('bootup_optimized_autoloader_development') === true) {
+        $bootupWarnings = Mage::registry('bootup_warnings', []);
+        foreach ($bootupWarnings as $message) {
             Mage::getSingleton('adminhtml/session')->addWarning(
-                Mage::helper('adminhtml')->__('Optimized composer autoloader detected in developer mode.')
+                Mage::helper('adminhtml')->__('Bootup warning:') . ' ' .
+                Mage::helper('adminhtml')->__($message)
             );
         }
     }

@@ -23,6 +23,29 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class HealthCheck extends BaseMahoCommand
 {
+    protected function checkComposer(OutputInterface $output): ?int
+    {
+        $result = Command::SUCCESS;
+
+        $loader = require MAHO_ROOT_DIR . '/vendor/autoload.php';
+        if ($loader->getUseIncludePath() !== true) {
+            $result = Command::FAILURE;
+            $output->writeln('');
+            $output->writeln('<comment>Warning: Use include paths not enabled.</comment>');
+            $output->writeln('Run: composer config use-include-path true; composer dump;');
+        }
+
+        $classMap = $loader->getClassMap();
+        if (isset($classMap['Mage_Core_Model_App'])) {
+            $result = Command::FAILURE;
+            $output->writeln('');
+            $output->writeln('<comment>Warning: Optimized autoloader detected.</comment>');
+            $output->writeln('Ignore if you are in a production environment, otherwise run: composer dump');
+        }
+
+        return $result;
+    }
+
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -30,14 +53,10 @@ class HealthCheck extends BaseMahoCommand
 
         // Check for use-include-path in composer.json
         $output->write('Checking composer.json... ');
-        $loader = require MAHO_ROOT_DIR . '/vendor/autoload.php';
-        if ($loader->getUseIncludePath() === true) {
+        if ($this->checkComposer($output) === Command::SUCCESS) {
             $output->writeln('<info>OK</info>');
         } else {
             $hasErrors = true;
-            $output->writeln('');
-            $output->writeln('<error>Error: Detected invalid composer.json config:</error>');
-            $output->writeln('Run: composer config use-include-path true; composer dump;');
             $output->writeln('');
         }
 
