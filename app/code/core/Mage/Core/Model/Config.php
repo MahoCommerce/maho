@@ -333,12 +333,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         $files = [];
 
-        // Include module files
+        // Include Maho core and 3rd party module files
         $modules = \Maho\MahoAutoload::getInstalledModules(BP);
         foreach ($modules as $module => $info) {
-            if ($module === 'mahocommerce/maho' && $info['isChildProject'] === false) {
-                continue;
-            }
             foreach (glob($info['path'] . '/app/etc/*.xml') as $file) {
                 $files[basename($file)] = $file;
             }
@@ -347,7 +344,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         // Prevent any module from defining a local.xml
         unset($files['local.xml']);
 
-        // Include local files, overriding module files
+        // Include local files, overriding core and 3rd party module files
         foreach (glob($this->getOptions()->getEtcDir() . '/*.xml') as $file) {
             $files[basename($file)] = $file;
         }
@@ -825,18 +822,15 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         $moduleFiles = [];
 
-        // Include module files
+        // Include Maho core and 3rd party module files
         $modules = \Maho\MahoAutoload::getInstalledModules(BP);
         foreach ($modules as $module => $info) {
-            if ($module === 'mahocommerce/maho' && $info['isChildProject'] === false) {
-                continue;
-            }
             foreach (glob($info['path'] . '/app/etc/modules/*.xml') as $file) {
                 $moduleFiles[basename($file)] = $file;
             }
         }
 
-        // Include local files, overriding module files
+        // Include local files, overriding core and 3rd party module files
         foreach (glob($this->getOptions()->getEtcDir() . '/modules/*.xml') as $file) {
             $moduleFiles[basename($file)] = $file;
         }
