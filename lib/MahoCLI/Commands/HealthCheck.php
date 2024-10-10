@@ -26,16 +26,9 @@ class HealthCheck extends BaseMahoCommand
     protected function checkComposer(OutputInterface $output): ?int
     {
         $result = Command::SUCCESS;
-        $loader = require MAHO_ROOT_DIR . '/vendor/autoload.php';
+        $composerClassLoader = require MAHO_ROOT_DIR . '/vendor/autoload.php';
 
-        // if ($loader->getUseIncludePath() !== true) {
-        //     $result = Command::FAILURE;
-        //     $output->writeln('');
-        //     $output->writeln('<comment>Warning: Use include paths not enabled.</comment>');
-        //     $output->writeln('Run: composer config use-include-path true; composer dump;');
-        // }
-
-        $classMap = $loader->getClassMap();
+        $classMap = $composerClassLoader->getClassMap();
         if (isset($classMap['Mage_Core_Model_App'])) {
             $result = Command::FAILURE;
             $output->writeln('');
