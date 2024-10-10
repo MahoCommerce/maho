@@ -116,7 +116,6 @@ body .promos > li {
   top: 10%;
   font-weight: 500;
   font-size: 20px;
-  font-family: "Raleway", "Helvetica Neue", Verdana, Arial, sans-serif;
   text-shadow: 1px 1px 3px #555555;
 }
 
@@ -241,7 +240,6 @@ body .promos > li {
   color: #FFFFFF;
   position: absolute;
   background-color: #7B7C7B;
-  font-family: raleway;
   font-size: 17px;
   font-weight: bold;
   text-transform: uppercase;
