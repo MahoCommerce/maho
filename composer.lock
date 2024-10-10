@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "16a34140531f7672153ac163e0ecdb5b",
+    "content-hash": "d026de9acb79aecbd82c0ac8096649ab",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -117,21 +117,22 @@
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
-            "version": "dev-topic-autoloader",
+            "version": "dev-main",
             "source": {
                 "type": "git",
-                "url": "https://github.com/justinbeaty/maho-composer-plugin.git",
-                "reference": "5bb88abb6fe7d5a38a64673132676d0d2fead471"
+                "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
+                "reference": "49fe8b773fbc50a44e2d8018688ee85f29795f81"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/justinbeaty/maho-composer-plugin/zipball/5bb88abb6fe7d5a38a64673132676d0d2fead471",
-                "reference": "5bb88abb6fe7d5a38a64673132676d0d2fead471",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/49fe8b773fbc50a44e2d8018688ee85f29795f81",
+                "reference": "49fe8b773fbc50a44e2d8018688ee85f29795f81",
                 "shasum": ""
             },
             "require": {
                 "composer-plugin-api": "^2.0"
             },
+            "default-branch": true,
             "type": "composer-plugin",
             "extra": {
                 "class": "Maho\\MahoComposerPlugin"
@@ -141,10 +142,12 @@
                     "Maho\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "support": {
-                "source": "https://github.com/justinbeaty/maho-composer-plugin/tree/topic-autoloader"
+                "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
+                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v2.0.0"
             },
-            "time": "2024-10-09T17:52:53+00:00"
+            "time": "2024-10-10T17:22:21+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
