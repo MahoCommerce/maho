@@ -588,7 +588,7 @@ final class Mage
         throw new Mage_Core_Exception($message);
     }
 
-    public static function addBootupWarning(string $message): null
+    public static function addBootupWarning(string $message)
     {
         $messages = Mage::registry('bootup_warnings') ?? [];
         $messages[] = $message;
