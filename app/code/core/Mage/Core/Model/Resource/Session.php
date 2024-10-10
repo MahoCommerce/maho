@@ -160,7 +160,8 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
             'session_expires' => Varien_Date::toTimestamp(true)
         ];
 
-        return $this->_read->fetchOne($select, $bind);
+        // https://www.php.net/manual/en/sessionhandlerinterface.read.php#128107
+        return (string)$this->_read->fetchOne($select, $bind);
     }
 
     /**
