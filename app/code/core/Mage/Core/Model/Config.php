@@ -352,10 +352,17 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             $files[basename($file)] = $file;
         }
 
-        $this->loadFile(current($files));
-        while ($file = next($files)) {
+        // Merge all config files
+        $this->loadString('<?xml version="1.0"?><config></config>');
+        foreach ($files as $basename => $file) {
             $merge = clone $this->_prototype;
             $merge->loadFile($file);
+
+            // Prevent config files from setting certain nodes
+            if ($basename !== 'local.xml') {
+                $global = $merge->getNode('global');
+                unset($global->disable_local_modules);
+            }
             $this->extend($merge);
         }
 
@@ -468,9 +475,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
     /**
      * Check local modules enable/disable flag
-     * If local modules are disabled remove local modules path from include dirs
-     *
-     * return true if local modules enabled and false if disabled
      *
      * @return bool
      */
@@ -480,22 +484,14 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             return $this->_canUseLocalModules;
         }
 
-        $disableLocalModules = (string)$this->getNode('global/disable_local_modules');
-        if (!empty($disableLocalModules)) {
-            $disableLocalModules = (($disableLocalModules === 'true') || ($disableLocalModules === '1'));
+        $disable = (string)$this->getNode('global/disable_local_modules');
+
+        if ($disable === 'true' || $disable === '1') {
+            $this->_canUseLocalModules = false;
         } else {
-            $disableLocalModules = false;
+            $this->_canUseLocalModules = true;
         }
 
-        if ($disableLocalModules === true) {
-            $paths = explode(PS, get_include_path());
-            $paths = array_filter(
-                $paths,
-                fn ($path) => $path !== BP . '/app/code/local'
-            );
-            set_include_path(implode(PS, $paths));
-        }
-        $this->_canUseLocalModules = !$disableLocalModules;
         return $this->_canUseLocalModules;
     }
 
@@ -1094,18 +1090,17 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $modules = $this->getNode('modules')->children();
         foreach ($modules as $modName => $module) {
             if ($module->is('active')) {
-                if ($disableLocalModules && ((string)$module->codePool === 'local')) {
-                    continue;
-                }
                 if (!is_array($fileName)) {
                     $fileName = [$fileName];
                 }
 
                 foreach ($fileName as $configFile) {
                     $moduleDir = $this->getModuleDir('etc', $modName);
-                    $configFile = $moduleDir . DS . $configFile;
-                    $configFile = mahoFindFileInIncludePath($configFile);
+                    $configFile = mahoFindFileInIncludePath("$moduleDir/$configFile");
 
+                    if ($disableLocalModules && str_starts_with($configFile, BP . '/app/code/local')) {
+                        continue;
+                    }
                     if ($mergeModel->loadFile($configFile)) {
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_GLOBAL, $mergeModel);
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_FRONTEND, $mergeModel);
