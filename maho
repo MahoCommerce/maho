@@ -10,6 +10,7 @@
  */
 
 define('MAHO_ROOT_DIR', __DIR__);
+define('MAHO_PUBLIC_DIR', __DIR__ . '/public');
 
 require __DIR__ . '/vendor/autoload.php';
 

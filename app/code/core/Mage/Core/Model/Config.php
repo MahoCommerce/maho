@@ -223,13 +223,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     protected $_customEtcDir = null;
 
     /**
-     * Flag which allow to use modules from local code pool
-     *
-     * @var bool
-     */
-    protected $_canUseLocalModules = null;
-
-    /**
      * Active modules array per namespace
      * @var array
      */
@@ -331,24 +324,25 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     public function loadBase()
     {
-        $etcDir = $this->getOptions()->getEtcDir();
-
-        $coreFiles = glob(BP . '/vendor/mahocommerce/maho/app/etc/*.xml');
-        $modulesFiles = array_diff(
-            glob(BP . '/vendor/*/*/app/etc/*.xml'),
-            $coreFiles
-        );
-        $localFiles = glob($etcDir . DS . '*.xml');
-
         $files = [];
-        foreach (array_merge($localFiles, $modulesFiles, $coreFiles) as $file) {
-            $basename = basename($file);
-            if (!isset($files[$basename])) {
-                $files[$basename] = $file;
+
+        // Include Maho core and 3rd party module files
+        $modules = \Maho\MahoAutoload::getInstalledModules(BP);
+        foreach ($modules as $module => $info) {
+            foreach (glob($info['path'] . '/app/etc/*.xml') as $file) {
+                $files[basename($file)] = $file;
             }
         }
-        $files = array_reverse($files);
 
+        // Prevent any module from defining a local.xml
+        unset($files['local.xml']);
+
+        // Include local files, overriding core and 3rd party module files
+        foreach (glob($this->getOptions()->getEtcDir() . '/*.xml') as $file) {
+            $files[basename($file)] = $file;
+        }
+
+        // Merge all config files
         $this->loadFile(current($files));
         while ($file = next($files)) {
             $merge = clone $this->_prototype;
@@ -356,7 +350,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             $this->extend($merge);
         }
 
-        if (in_array($etcDir . DS . 'local.xml', $files)) {
+        if (isset($files['local.xml'])) {
             $this->_isLocalConfigLoaded = true;
         }
 
@@ -461,39 +455,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $this->_allowCacheForInit = false;
         $this->_useCache = false;
         return $this->init($options);
-    }
-
-    /**
-     * Check local modules enable/disable flag
-     * If local modules are disabled remove local modules path from include dirs
-     *
-     * return true if local modules enabled and false if disabled
-     *
-     * @return bool
-     */
-    protected function _canUseLocalModules()
-    {
-        if ($this->_canUseLocalModules !== null) {
-            return $this->_canUseLocalModules;
-        }
-
-        $disableLocalModules = (string)$this->getNode('global/disable_local_modules');
-        if (!empty($disableLocalModules)) {
-            $disableLocalModules = (($disableLocalModules === 'true') || ($disableLocalModules === '1'));
-        } else {
-            $disableLocalModules = false;
-        }
-
-        if ($disableLocalModules === true) {
-            set_include_path(
-                BP . DS . 'app' . DS . 'code' . DS . 'community' . PS .
-                BP . DS . 'app' . DS . 'code' . DS . 'core' . PS .
-                BP . DS . 'lib' . PS .
-                Mage::registry('original_include_path')
-            );
-        }
-        $this->_canUseLocalModules = !$disableLocalModules;
-        return $this->_canUseLocalModules;
     }
 
     /**
@@ -824,23 +785,20 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     protected function _getDeclaredModuleFiles()
     {
-        $etcDir = $this->getOptions()->getEtcDir();
-
-        $coreFiles = glob(BP . '/vendor/mahocommerce/maho/app/etc/modules/*.xml');
-        $modulesFiles = array_diff(
-            glob(BP . '/vendor/*/*/app/etc/modules/*.xml'),
-            $coreFiles
-        );
-        $localFiles = glob($etcDir . DS . 'modules' . DS . '*.xml');
-
         $moduleFiles = [];
-        foreach (array_merge($localFiles, $modulesFiles, $coreFiles) as $file) {
-            $basename = basename($file);
-            if (!isset($moduleFiles[$basename])) {
-                $moduleFiles[$basename] = $file;
+
+        // Include Maho core and 3rd party module files
+        $modules = \Maho\MahoAutoload::getInstalledModules(BP);
+        foreach ($modules as $module => $info) {
+            foreach (glob($info['path'] . '/app/etc/modules/*.xml') as $file) {
+                $moduleFiles[basename($file)] = $file;
             }
         }
-        $moduleFiles = array_reverse($moduleFiles);
+
+        // Include local files, overriding core and 3rd party module files
+        foreach (glob($this->getOptions()->getEtcDir() . '/modules/*.xml') as $file) {
+            $moduleFiles[basename($file)] = $file;
+        }
 
         if (!$moduleFiles) {
             return false;
@@ -1079,8 +1037,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     public function loadModulesConfiguration($fileName, $mergeToObject = null, $mergeModel = null)
     {
-        $disableLocalModules = !$this->_canUseLocalModules();
-
         if ($mergeToObject === null) {
             $mergeToObject = clone $this->_prototype;
             $mergeToObject->loadString('<config/>');
@@ -1091,17 +1047,13 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $modules = $this->getNode('modules')->children();
         foreach ($modules as $modName => $module) {
             if ($module->is('active')) {
-                if ($disableLocalModules && ((string)$module->codePool === 'local')) {
-                    continue;
-                }
                 if (!is_array($fileName)) {
                     $fileName = [$fileName];
                 }
 
                 foreach ($fileName as $configFile) {
                     $moduleDir = $this->getModuleDir('etc', $modName);
-                    $configFile = $moduleDir . DS . $configFile;
-                    $configFile = mahoFindFileInIncludePath($configFile);
+                    $configFile = mahoFindFileInIncludePath("$moduleDir/$configFile");
 
                     if ($mergeModel->loadFile($configFile)) {
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_GLOBAL, $mergeModel);

@@ -17,6 +17,14 @@
  */
 class Mage_Adminhtml_Model_Observer
 {
+    public function displayBootupWarnings($observer)
+    {
+        $bootupWarnings = Mage::registry('bootup_warnings') ?? [];
+        foreach ($bootupWarnings as $message) {
+            Mage::getSingleton('adminhtml/session')->addWarning("Bootup warning: $message");
+        }
+    }
+
     public function bindLocale($observer)
     {
         if ($locale = $observer->getEvent()->getLocale()) {

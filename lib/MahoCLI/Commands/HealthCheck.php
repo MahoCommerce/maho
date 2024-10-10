@@ -23,10 +23,37 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class HealthCheck extends BaseMahoCommand
 {
+    protected function checkComposer(OutputInterface $output): ?int
+    {
+        $result = Command::SUCCESS;
+
+        /** @var \Composer\Autoload\ClassLoader $composerClassLoader */
+        $composerClassLoader = require MAHO_ROOT_DIR . '/vendor/autoload.php';
+
+        $classMap = $composerClassLoader->getClassMap();
+        if (isset($classMap['Mage_Core_Model_App'])) {
+            $result = Command::FAILURE;
+            $output->writeln('');
+            $output->writeln('<comment>Warning: Optimized autoloader detected.</comment>');
+            $output->writeln('Ignore if you are in a production environment, otherwise run: composer dump');
+        }
+
+        return $result;
+    }
+
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $hasErrors = false;
+
+        // Check for use-include-path in composer.json
+        $output->write('Checking composer.json... ');
+        if ($this->checkComposer($output) === Command::SUCCESS) {
+            $output->writeln('<info>OK</info>');
+        } else {
+            $hasErrors = true;
+            $output->writeln('');
+        }
 
         // Check for M1 core files
         $output->write('Checking Magento/OpenMage core... ');

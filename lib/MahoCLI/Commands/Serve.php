@@ -34,7 +34,7 @@ class Serve extends BaseMahoCommand
     {
         $host = '127.0.0.1';
         $port = $input->getArgument('port');
-        $docroot = MAHO_ROOT_DIR . '/public';
+        $docroot = MAHO_PUBLIC_DIR;
 
         passthru("php -S {$host}:{$port} -t {$docroot}");
 

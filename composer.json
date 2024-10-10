@@ -29,6 +29,7 @@
         "ext-soap": "*",
         "ext-spl": "*",
         "ext-zlib": "*",
+        "composer-runtime-api": "^2",
         "cweagans/composer-patches": "^1.7",
         "ezyang/htmlpurifier": "^4.17",
         "mahocommerce/maho-composer-plugin": "dev-main",
@@ -58,7 +59,7 @@
         "colinmollenhour/magento-redis-session": "Redis support for PHP sessions"
     },
     "minimum-stability": "dev",
-    "prefer-stable" : true,
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "MahoCLI\\": "lib/MahoCLI"

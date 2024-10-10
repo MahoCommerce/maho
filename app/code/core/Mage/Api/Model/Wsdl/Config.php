@@ -113,6 +113,8 @@ class Mage_Api_Model_Wsdl_Config extends Mage_Api_Model_Wsdl_Config_Base
             }
         }
 
+        $moduleDir = Mage::getConfig()->getModuleDir('etc', 'Mage_Api');
+
         $mergeWsdl = new Mage_Api_Model_Wsdl_Config_Base();
         $mergeWsdl->setHandler($this->getHandler());
 
@@ -121,20 +123,22 @@ class Mage_Api_Model_Wsdl_Config extends Mage_Api_Model_Wsdl_Config_Base
              * Exclude Mage_Api wsdl xml file because it used for previous version
              * of API wsdl declaration
              */
-            $mergeWsdl->addLoadedFile('app/code/core/Mage/Api/etc/wsi.xml');
+            $mergeWsdl->addLoadedFile(mahoFindFileInIncludePath("$moduleDir/wsi.xml"));
 
-            $baseWsdlFile = 'app/code/core/Mage/Api/etc/wsi.xml';
-            $this->loadFile($baseWsdlFile);
+            // Base wsi file
+            $this->loadFile(mahoFindFileInIncludePath("$moduleDir/wsi.xml"));
+
             Mage::getConfig()->loadModulesConfiguration('wsi.xml', $this, $mergeWsdl);
         } else {
             /**
              * Exclude Mage_Api wsdl xml file because it used for previous version
              * of API wsdl declaration
              */
-            $mergeWsdl->addLoadedFile('app/code/core/Mage/Api/etc/wsdl.xml');
+            $mergeWsdl->addLoadedFile(mahoFindFileInIncludePath("$moduleDir/wsdl.xml"));
 
-            $baseWsdlFile = 'app/code/core/Mage/Api/etc/wsdl2.xml';
-            $this->loadFile($baseWsdlFile);
+            // Base wsdl file
+            $this->loadFile(mahoFindFileInIncludePath("$moduleDir/wsdl2.xml"));
+
             Mage::getConfig()->loadModulesConfiguration('wsdl.xml', $this, $mergeWsdl);
         }
 
