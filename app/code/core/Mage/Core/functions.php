@@ -71,6 +71,7 @@ function is_empty_date($date)
  */
 function mageFindClassFile($class)
 {
+    /** @var \Composer\Autoload\ClassLoader $composerClassLoader */
     $composerClassLoader = require BP . '/vendor/autoload.php';
     return $composerClassLoader->findFile($class);
 }

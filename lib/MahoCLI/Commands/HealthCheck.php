@@ -26,6 +26,8 @@ class HealthCheck extends BaseMahoCommand
     protected function checkComposer(OutputInterface $output): ?int
     {
         $result = Command::SUCCESS;
+
+        /** @var \Composer\Autoload\ClassLoader $composerClassLoader */
         $composerClassLoader = require MAHO_ROOT_DIR . '/vendor/autoload.php';
 
         $classMap = $composerClassLoader->getClassMap();
