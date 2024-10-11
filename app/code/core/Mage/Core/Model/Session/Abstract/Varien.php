@@ -104,31 +104,6 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
 
         $cookie = $this->getCookie();
 
-        // session cookie params
-        $cookieParams = [
-            'lifetime' => (int)$cookie->getLifetime(),
-            'path'     => $cookie->getPath(),
-            'domain'   => $cookie->getConfigDomain(),
-            'secure'   => $cookie->isSecure(),
-            'httponly' => $cookie->getHttponly()
-        ];
-
-        if (!$cookieParams['httponly']) {
-            unset($cookieParams['httponly']);
-            if (!$cookieParams['secure']) {
-                unset($cookieParams['secure']);
-                if (!$cookieParams['domain']) {
-                    unset($cookieParams['domain']);
-                }
-            }
-        }
-
-        if (isset($cookieParams['domain'])) {
-            $cookieParams['domain'] = $cookie->getDomain();
-        }
-
-        call_user_func_array('session_set_cookie_params', array_values($cookieParams));
-
         if (!empty($sessionName)) {
             $this->setSessionName($sessionName);
 
@@ -153,8 +128,9 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         }
 
         // Start session, abort and render error page if it fails
+        // Note, we set cookies manually, so disable here
         try {
-            if (session_start() === false) {
+            if (session_start(['use_cookies' => false]) === false) {
                 throw new Exception('Unable to start session.');
             }
         } catch (Throwable $e) {
@@ -170,7 +146,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         Mage::dispatchEvent('session_before_renew_cookie', ['cookie' => $cookie]);
 
         // Secure cookie check to prevent MITM attack
-        if (Mage::app()->getFrontController()->getRequest()->isSecure() && empty($cookieParams['secure'])) {
+        if (Mage::app()->getFrontController()->getRequest()->isSecure() && !$cookie->isSecure()) {
             $secureCookieName = $this->getSessionName() . '_cid';
             $cookieValue = $cookie->get($secureCookieName);
 
@@ -208,12 +184,9 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
             }
         }
 
-        /**
-         * Renew cookie expiration time if session id did not change
-         */
-        if ($cookie->get(session_name()) == $this->getSessionId()) {
-            $cookie->renew(session_name());
-        }
+        // Set or renew cookie
+        $cookie->set($this->getSessionName(), $this->getSessionId());
+
         Varien_Profiler::stop(__METHOD__ . '/start');
 
         return $this;
