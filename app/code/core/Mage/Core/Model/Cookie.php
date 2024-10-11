@@ -147,7 +147,7 @@ class Mage_Core_Model_Cookie
      */
     public function getHttponly()
     {
-        return Mage::getStoreConfigAsInt(self::XML_PATH_COOKIE_HTTPONLY, $this->getStore());
+        return Mage::getStoreConfigFlag(self::XML_PATH_COOKIE_HTTPONLY, $this->getStore());
     }
 
     /**
