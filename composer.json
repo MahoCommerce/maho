@@ -75,6 +75,9 @@
                 "OM-1081 - Not detecting HTTPS behind a proxy": "https://raw.githubusercontent.com/OpenMage/composer-patches/74862e7a9fa29dd62c5c02d585d931ce9e3c5815/patches/OM-1081.patch",
                 "OM-2047 - Pass delimiter char to preg_quote": "https://raw.githubusercontent.com/OpenMage/composer-patches/74862e7a9fa29dd62c5c02d585d931ce9e3c5815/patches/OM-2047.patch",
                 "OM-2050 - Prevent checking known date codes": "https://raw.githubusercontent.com/OpenMage/composer-patches/74862e7a9fa29dd62c5c02d585d931ce9e3c5815/patches/OM-2050.patch"
+            },
+            "colinmollenhour/magento-redis-session": {
+                "Cm_RedisSession-Revert-190": "https://raw.githubusercontent.com/justinbeaty/composer-patches/7c39eba67913d0e97c121618ee0ba9d5c1588b42/patches/Cm_RedisSession-Revert-190.patch"
             }
         }
     },
