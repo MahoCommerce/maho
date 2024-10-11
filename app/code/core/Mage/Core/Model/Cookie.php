@@ -24,6 +24,8 @@ class Mage_Core_Model_Cookie
     public const XML_PATH_COOKIE_HTTPONLY  = 'web/cookie/cookie_httponly';
     public const XML_PATH_COOKIE_SAMESITE  = 'web/cookie/cookie_samesite';
 
+    public const DEFAULT_COOKIE_LIFETIME   = 60 * 60 * 24 * 365;
+
     protected $_lifetime;
 
     /**
@@ -123,13 +125,7 @@ class Mage_Core_Model_Cookie
      */
     public function getLifetime()
     {
-        if ($this->_lifetime !== null) {
-            return $this->_lifetime;
-        }
-        $lifetime = Mage::getStoreConfigAsInt(self::XML_PATH_COOKIE_LIFETIME, $this->getStore());
-        $lifetime = min($lifetime, Mage_Core_Controller_Front_Action::SESSION_MAX_LIFETIME);
-        $lifetime = max($lifetime, Mage_Core_Controller_Front_Action::SESSION_MIN_LIFETIME);
-        return $lifetime;
+        return $this->_lifetime ?? self::DEFAULT_COOKIE_LIFETIME;
     }
 
     /**
@@ -211,11 +207,10 @@ class Mage_Core_Model_Cookie
         }
 
         if ($period === true) {
-            $period = 3600 * 24 * 365;
+            $period = self::DEFAULT_COOKIE_LIFETIME;
         } elseif (is_null($period)) {
             $period = $this->getLifetime();
         }
-
         if ($period == 0) {
             $expire = 0;
         } else {
