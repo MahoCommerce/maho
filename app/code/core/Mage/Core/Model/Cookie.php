@@ -147,11 +147,7 @@ class Mage_Core_Model_Cookie
      */
     public function getHttponly()
     {
-        $httponly = Mage::getStoreConfig(self::XML_PATH_COOKIE_HTTPONLY, $this->getStore());
-        if (is_null($httponly)) {
-            return null;
-        }
-        return (bool)$httponly;
+        return Mage::getStoreConfigAsInt(self::XML_PATH_COOKIE_HTTPONLY, $this->getStore());
     }
 
     /**
@@ -159,21 +155,21 @@ class Mage_Core_Model_Cookie
      */
     public function getSameSite(): string
     {
-        $sameSite = Mage::getStoreConfig(self::XML_PATH_COOKIE_SAMESITE, $this->getStore());
-        if (is_null($sameSite)) {
-            return 'None';
-        }
-        return (string)$sameSite;
+        return Mage::getStoreConfig(self::XML_PATH_COOKIE_SAMESITE, $this->getStore());
     }
 
     /**
-     * Is https secure request
-     * Use secure on adminhtml only
+     * Retrieve use secure cookie
      *
      * @return bool
      */
     public function isSecure()
     {
+        // If SameSite is None, we must force secure cookies
+        // https://web.dev/articles/samesite-cookies-explained
+        if ($this->getSameSite() === 'None') {
+            return true;
+        }
         if ($this->getStore()->isAdmin()) {
             return $this->_getRequest()->isSecure();
         }
@@ -208,45 +204,25 @@ class Mage_Core_Model_Cookie
 
         if ($period === true) {
             $period = self::DEFAULT_COOKIE_LIFETIME;
-        } elseif (is_null($period)) {
+        } else if (is_null($period)) {
             $period = $this->getLifetime();
         }
         if ($period == 0) {
-            $expire = 0;
+            $expires = 0;
         } else {
-            $expire = time() + $period;
-        }
-        if (is_null($path)) {
-            $path = $this->getPath();
-        }
-        if (is_null($domain)) {
-            $domain = $this->getDomain();
-        }
-        if (is_null($secure)) {
-            $secure = $this->isSecure();
-        }
-        if (is_null($httponly)) {
-            $httponly = $this->getHttponly();
-        }
-        if (is_null($sameSite)) {
-            $sameSite = $this->getSameSite();
-        }
-
-        if ($sameSite === 'None') {
-            // Enforce specification SameSite None requires secure
-            $secure = true;
+            $expires = time() + $period;
         }
 
         setcookie(
             $name,
             (string)$value,
             [
-                'expires'  => $expire,
-                'path'     => $path,
-                'domain'   => $domain,
-                'secure'   => $secure,
-                'httponly' => $httponly,
-                'samesite' => $sameSite
+                'expires'  => $expires,
+                'path'     => $path ?? $this->getPath(),
+                'domain'   => $domain ?? $this->getDomain(),
+                'secure'   => $secure ?? $this->isSecure(),
+                'httponly' => $httponly ?? $this->getHttponly(),
+                'samesite' => $sameSite ?? $this->getSameSite(),
             ]
         );
 
@@ -267,9 +243,6 @@ class Mage_Core_Model_Cookie
      */
     public function renew($name, $period = null, $path = null, $domain = null, $secure = null, $httponly = null, $sameSite = null)
     {
-        if (($period === null) && !$this->getLifetime()) {
-            return $this;
-        }
         $value = $this->_getRequest()->getCookie($name, false);
         if ($value !== false) {
             $this->set($name, $value, $period, $path, $domain, $secure, $httponly, $sameSite);
@@ -301,13 +274,6 @@ class Mage_Core_Model_Cookie
      */
     public function delete($name, $path = null, $domain = null, $secure = null, $httponly = null, $sameSite = null)
     {
-        /**
-         * Check headers sent
-         */
-        if (!$this->_getResponse()->canSendHeaders(false)) {
-            return $this;
-        }
-
         return $this->set($name, '', null, $path, $domain, $secure, $httponly, $sameSite);
     }
 }
