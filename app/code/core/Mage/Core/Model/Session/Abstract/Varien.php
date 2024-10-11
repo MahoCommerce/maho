@@ -65,6 +65,20 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
                 $sessionResource->setSaveHandler();
                 break;
             case 'redis':
+                /**
+                 * If we have not explicitly set redis_session lifetime values in local.xml,
+                 * then define using min and max values based on the session namespace.
+                 * Else, the defaults from colinmollenhour/php-redis-session-abstract will be used.
+                 */
+                $redisConfig = Mage::getConfig()->getNode('global/redis_session') ?:
+                             Mage::getConfig()->getNode('global')->addChild('redis_session');
+                if ($sessionName === Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE) {
+                    $redisConfig->min_lifetime ??= Mage_Adminhtml_Controller_Action::SESSION_MIN_LIFETIME;
+                    $redisConfig->max_lifetime ??= Mage_Adminhtml_Controller_Action::SESSION_MAX_LIFETIME;
+                } else {
+                    $redisConfig->min_lifetime ??= Mage_Core_Controller_Front_Action::SESSION_MIN_LIFETIME;
+                    $redisConfig->max_lifetime ??= Mage_Core_Controller_Front_Action::SESSION_MAX_LIFETIME;
+                }
                 /** @var Cm_RedisSession_Model_Session $sessionResource */
                 $sessionResource = Mage::getSingleton('cm_redissession/session');
                 $sessionResource->setSaveHandler();
