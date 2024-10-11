@@ -202,10 +202,9 @@ class Mage_Core_Model_Cookie
             return $this;
         }
 
+        $period ??= $this->getLifetime();
         if ($period === true) {
             $period = self::DEFAULT_COOKIE_LIFETIME;
-        } else if (is_null($period)) {
-            $period = $this->getLifetime();
         }
         if ($period == 0) {
             $expires = 0;
