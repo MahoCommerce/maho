@@ -20,9 +20,6 @@
  */
 class Mage_Adminhtml_Model_Session extends Mage_Core_Model_Session_Abstract
 {
-    public const SESSION_MIN_COOKIE_LIFETIME = 60;
-    public const SESSION_MAX_COOKIE_LIFETIME = 60 * 60 * 24 * 365 * 2;
-
     public function __construct()
     {
         $this->init('adminhtml');

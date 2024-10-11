@@ -123,9 +123,12 @@ class Mage_Core_Model_Cookie
      */
     public function getLifetime()
     {
-        $lifetime = $this->_lifetime ?? Mage::getStoreConfigAsInt(self::XML_PATH_COOKIE_LIFETIME, $this->getStore());
-        $lifetime = min($lifetime, Mage_Core_Model_Session::SESSION_MAX_COOKIE_LIFETIME);
-        $lifetime = max($lifetime, Mage_Core_Model_Session::SESSION_MIN_COOKIE_LIFETIME);
+        if ($this->_lifetime !== null) {
+            return $this->_lifetime;
+        }
+        $lifetime = Mage::getStoreConfigAsInt(self::XML_PATH_COOKIE_LIFETIME, $this->getStore());
+        $lifetime = min($lifetime, Mage_Core_Controller_Front_Action::SESSION_MAX_LIFETIME);
+        $lifetime = max($lifetime, Mage_Core_Controller_Front_Action::SESSION_MIN_LIFETIME);
         return $lifetime;
     }
 

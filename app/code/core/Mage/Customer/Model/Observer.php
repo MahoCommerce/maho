@@ -264,8 +264,8 @@ class Mage_Customer_Model_Observer
             } else {
                 $lifetime = Mage::getStoreConfigAsInt('web/cookie/cookie_lifetime');
             }
-            $lifetime = min($lifetime, Mage_Core_Model_Session::SESSION_MAX_COOKIE_LIFETIME);
-            $lifetime = max($lifetime, Mage_Core_Model_Session::SESSION_MIN_COOKIE_LIFETIME);
+            $lifetime = min($lifetime, Mage_Core_Controller_Front_Action::SESSION_MAX_LIFETIME);
+            $lifetime = max($lifetime, Mage_Core_Controller_Front_Action::SESSION_MIN_LIFETIME);
 
             /** @var Mage_Core_Model_Cookie $cookie */
             $cookie = $observer->getCookie();

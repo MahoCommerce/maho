@@ -24,9 +24,11 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
     public const FLAG_IS_URLS_CHECKED = 'check_url_settings';
 
     /**
-     * Session namespace to refer in other places
+     * Session constants to refer in other places
      */
     public const SESSION_NAMESPACE = 'adminhtml';
+    public const SESSION_MIN_LIFETIME = 60;
+    public const SESSION_MAX_LIFETIME = 60 * 60 * 24 * 365 * 2;
 
     /**
      * ACL resource

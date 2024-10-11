@@ -19,9 +19,11 @@
 class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Action
 {
     /**
-     * Session namespace to refer in other places
+     * Session constants to refer in other places
      */
     public const SESSION_NAMESPACE = 'om_frontend';
+    public const SESSION_MIN_LIFETIME = 60 * 60;
+    public const SESSION_MAX_LIFETIME = 60 * 60 * 24 * 365 * 2;
 
     /**
      * Add secret key to url config path

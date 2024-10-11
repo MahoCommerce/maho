@@ -76,8 +76,8 @@ class Mage_Adminhtml_Model_Observer
         $session = Mage::getSingleton('adminhtml/session');
         if ($session->getSessionName() === Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE) {
             $lifetime = Mage::getStoreConfigAsInt('admin/security/session_cookie_lifetime');
-            $lifetime = min($lifetime, Mage_Adminhtml_Model_Session::SESSION_MAX_COOKIE_LIFETIME);
-            $lifetime = max($lifetime, Mage_Adminhtml_Model_Session::SESSION_MIN_COOKIE_LIFETIME);
+            $lifetime = min($lifetime, Mage_Adminhtml_Controller_Action::SESSION_MAX_LIFETIME);
+            $lifetime = max($lifetime, Mage_Adminhtml_Controller_Action::SESSION_MIN_LIFETIME);
 
             /** @var Mage_Core_Model_Cookie $cookie */
             $cookie = $observer->getCookie();
