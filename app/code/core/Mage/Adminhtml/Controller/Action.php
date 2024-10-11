@@ -25,10 +25,13 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
 
     /**
      * Session constants to refer in other places
+     *
+     * Max lifetime is set to 400 days, as chromium based browsers will not allow anything higher
+     * https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-cookie-lifetime-limits
      */
     public const SESSION_NAMESPACE = 'adminhtml';
     public const SESSION_MIN_LIFETIME = 60;
-    public const SESSION_MAX_LIFETIME = 60 * 60 * 24 * 365 * 2;
+    public const SESSION_MAX_LIFETIME = 60 * 60 * 24 * 400;
 
     /**
      * ACL resource
