@@ -16,9 +16,9 @@
 <div class="header-container">
     <div class="header">
         <?php if ($this->getIsHomePage()):?>
-        <h1 class="logo"><strong><?= $this->getLogoAlt() ?></strong><a href="<?= $this->getUrl('') ?>" title="<?= $this->getLogoAlt() ?>" class="logo"><img src="<?= $this->getLogoSrc() ?>" alt="<?= $this->getLogoAlt() ?>" /></a></h1>
+        <h1 class="logo"><strong><?= $this->getLogoAlt() ?></strong><a href="<?= $this->getUrl('') ?>" title="<?= $this->__('Go to Home Page') ?>" class="logo"><img src="<?= $this->getLogoSrc() ?>" alt="<?= $this->getLogoAlt() ?>" /></a></h1>
         <?php else: ?>
-        <a href="<?= $this->getUrl('') ?>" title="<?= $this->getLogoAlt() ?>" class="logo"><strong><?= $this->getLogoAlt() ?></strong><img src="<?= $this->getLogoSrc() ?>" alt="<?= $this->getLogoAlt() ?>" /></a>
+        <a href="<?= $this->getUrl('') ?>" title="<?= $this->__('Go to Home Page') ?>" class="logo"><strong><?= $this->getLogoAlt() ?></strong><img src="<?= $this->getLogoSrc() ?>" alt="<?= $this->getLogoAlt() ?>" /></a>
         <?php endif ?>
         <div class="quick-access">
             <?= $this->getChildHtml('topSearch') ?>
