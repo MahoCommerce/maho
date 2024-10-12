@@ -127,7 +127,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         try {
             $this->setSessionName($sessionName);
             $this->setSessionId($_COOKIE[$sessionName] ?? null);
-            if (session_start(['use_cookies' => false]) === false) {
+            if (session_start(['use_cookies' => false, 'use_trans_sid' => false]) === false) {
                 throw new Exception('Unable to start session.');
             }
         } catch (Throwable $e) {
@@ -180,8 +180,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
             }
         }
 
-        // Set or renew cookie
-        $cookie->set($this->getSessionName(), $this->getSessionId());
+        $this->setSessionCookie();
 
         Varien_Profiler::stop(__METHOD__ . '/start');
 
@@ -206,6 +205,17 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
     public function setSessionHosts(array $hosts)
     {
         $this->_sessionHosts = $hosts;
+        return $this;
+    }
+
+    /**
+     * Set session cookie
+     *
+     * @return $this
+     */
+    public function setSessionCookie()
+    {
+        $this->getCookie()->set($this->getSessionName(), $this->getSessionId());
         return $this;
     }
 
@@ -587,6 +597,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
     public function regenerateSessionId()
     {
         session_regenerate_id(true);
+        $this->setSessionCookie();
         return $this;
     }
 }

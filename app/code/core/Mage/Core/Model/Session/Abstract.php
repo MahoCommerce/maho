@@ -573,9 +573,6 @@ class Mage_Core_Model_Session_Abstract extends Mage_Core_Model_Session_Abstract_
             }
         }
 
-        // Set new cookie
-        $this->getCookie()->set($this->getSessionName(), $this->getSessionId());
-
         return $this;
     }
 }
