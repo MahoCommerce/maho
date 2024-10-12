@@ -104,22 +104,16 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
 
         $cookie = $this->getCookie();
 
-        if (!empty($sessionName)) {
-            $this->setSessionName($sessionName);
-            $this->setSessionId($cookie->get($sessionName));
+        if (empty($sessionName)) {
+            $sessionName = $this->getSessionName();
+        }
 
-            // Migrate old cookie from 'frontend'
-            if ($sessionName === \Mage_Core_Controller_Front_Action::SESSION_NAMESPACE
-                && $cookie->get('frontend')
-                && ! $cookie->get(\Mage_Core_Controller_Front_Action::SESSION_NAMESPACE)
-            ) {
-                $frontendValue = $cookie->get('frontend');
-                $_COOKIE[\Mage_Core_Controller_Front_Action::SESSION_NAMESPACE] = $frontendValue;
-                $cookie->set(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE, $frontendValue);
+        // Migrate old cookie from 'frontend'
+        if ($sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
+            if ($cookie->get('frontend') && !$cookie->get($sessionName)) {
+                $_COOKIE[$sessionName] = $cookie->get('frontend');
                 $cookie->delete('frontend');
             }
-        } else {
-            $this->setSessionId();
         }
 
         Varien_Profiler::start(__METHOD__ . '/start');
@@ -131,6 +125,8 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         // Start session, abort and render error page if it fails
         // Note, we set cookies manually, so disable here
         try {
+            $this->setSessionName($sessionName);
+            $this->setSessionId($_COOKIE[$sessionName] ?? null);
             if (session_start(['use_cookies' => false]) === false) {
                 throw new Exception('Unable to start session.');
             }
@@ -151,15 +147,14 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
             $secureCookieName = $this->getSessionName() . '_cid';
             $cookieValue = $cookie->get($secureCookieName);
 
-            // Migrate old cookie from 'frontend'
-            if (!$cookieValue
-                && $sessionName === \Mage_Core_Controller_Front_Action::SESSION_NAMESPACE
-                && $cookie->get('frontend_cid')
-            ) {
-                $cookieValue = $cookie->get('frontend_cid');
-                $_COOKIE[$secureCookieName] = $cookieValue;
-                $cookie->set($secureCookieName, $cookieValue);
-                $cookie->delete('frontend_cid');
+            // Migrate old cookie from 'frontend_cid'
+            if ($sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
+                if ($cookie->get('frontend_cid') && !$cookieValue) {
+                    $cookieValue = $cookie->get('frontend_cid');
+                    $_COOKIE[$secureCookieName] = $cookieValue;
+                    $cookie->set($secureCookieName, $cookieValue);
+                    $cookie->delete('frontend_cid');
+                }
             }
 
             // Set secure cookie check value in session if not yet set
