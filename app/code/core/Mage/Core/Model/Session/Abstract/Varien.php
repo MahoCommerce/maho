@@ -106,6 +106,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
 
         if (!empty($sessionName)) {
             $this->setSessionName($sessionName);
+            $this->setSessionId($cookie->get($sessionName));
 
             // Migrate old cookie from 'frontend'
             if ($sessionName === \Mage_Core_Controller_Front_Action::SESSION_NAMESPACE
@@ -117,9 +118,9 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
                 $cookie->set(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE, $frontendValue);
                 $cookie->delete('frontend');
             }
+        } else {
+            $this->setSessionId();
         }
-        // potential custom logic for session id (ex. switching between hosts)
-        $this->setSessionId();
 
         Varien_Profiler::start(__METHOD__ . '/start');
         $sessionCacheLimiter = Mage::getConfig()->getNode('global/session_cache_limiter');
@@ -286,6 +287,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
 
     /**
      * Set custom session id
+     * potential custom logic for session id (ex. switching between hosts)
      *
      * @param string $id
      * @return $this
