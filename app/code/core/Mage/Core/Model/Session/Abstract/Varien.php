@@ -56,20 +56,15 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         // getSessionSaveMethod has to return correct version of handler in any case
         $moduleName = $this->getSessionSaveMethod();
         switch ($moduleName) {
-            /**
-             * backward compatibility with db argument (option is @deprecated after 1.12.0.2)
-             */
             case 'db':
                 /** @var Mage_Core_Model_Resource_Session $sessionResource */
                 $sessionResource = Mage::getResourceSingleton('core/session');
                 $sessionResource->setSaveHandler();
                 break;
             case 'redis':
-                /**
-                 * If we have not explicitly set redis_session lifetime values in local.xml,
-                 * then define using min and max values based on the session namespace.
-                 * Else, the defaults from colinmollenhour/php-redis-session-abstract will be used.
-                 */
+                // If we have not explicitly set redis_session lifetime values in local.xml,
+                // then define using min and max values based on the session namespace.
+                // Else, the defaults from colinmollenhour/php-redis-session-abstract will be used.
                 $redisConfig = Mage::getConfig()->getNode('global/redis_session') ?:
                              Mage::getConfig()->getNode('global')->addChild('redis_session');
                 if ($sessionName === Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE) {
@@ -104,16 +99,28 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
 
         $cookie = $this->getCookie();
 
-        if (empty($sessionName)) {
-            $sessionName = $this->getSessionName();
-        }
-
         // Migrate old cookie from 'frontend'
         if ($sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
             if ($cookie->get('frontend') && !$cookie->get($sessionName)) {
                 $_COOKIE[$sessionName] = $cookie->get('frontend');
                 $cookie->delete('frontend');
             }
+        }
+
+        // If session name is empty, we will use the default cookie name of PHPSESSID
+        // which should never happen in core.
+        if (!empty($sessionName)) {
+            $this->setSessionName($sessionName);
+        }
+
+        // Call any custom logic in child classes for setting the session id
+        // I.e. Checking the SID query param to enable switching between hosts
+        $this->setSessionId();
+
+        // If we still do not have a session id, then read from the cookie value
+        // Otherwise, we will be starting a new session.
+        if (empty($this->getSessionId()) && $cookie->get($sessionName)) {
+            $this->setSessionId($cookie->get($sessionName));
         }
 
         Varien_Profiler::start(__METHOD__ . '/start');
@@ -123,10 +130,10 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         }
 
         // Start session, abort and render error page if it fails
-        // Note, we set cookies manually, so disable here
+        // Note, we set the session cookie manually later on, so disable here.
+        // Also disable use_trans_sid, although the option is deprecated and will be removed in PHP9
+        // Ref: https://wiki.php.net/rfc/deprecate-get-post-sessions
         try {
-            $this->setSessionName($sessionName);
-            $this->setSessionId($_COOKIE[$sessionName] ?? null);
             if (session_start(['use_cookies' => false, 'use_trans_sid' => false]) === false) {
                 throw new Exception('Unable to start session.');
             }
@@ -140,6 +147,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
             }
         }
 
+        // Observers can change settings of the cookie such as lifetime, regenerate the session id, etc
         Mage::dispatchEvent('session_before_renew_cookie', ['cookie' => $cookie]);
 
         // Secure cookie check to prevent MITM attack
@@ -283,7 +291,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
     /**
      * Retrieve session Id
      *
-     * @return string
+     * @return string|false
      */
     public function getSessionId()
     {
@@ -292,7 +300,6 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
 
     /**
      * Set custom session id
-     * potential custom logic for session id (ex. switching between hosts)
      *
      * @param string $id
      * @return $this
