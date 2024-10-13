@@ -727,17 +727,6 @@ a.button:hover {
 }
 
 /* -------------------------------------------- *
- * Icons
- */
-.icon-sprite, .btn-remove2, .ratings .rating-box, .ratings .rating-box .rating, .sorter > .sort-by .sort-by-switcher, .sorter > .view-mode .grid,
-.sorter > .view-mode .list, .skip-nav .icon, .skip-search .icon, #search_mini_form .search-button:before, .skip-account .icon, .skip-cart .icon, .product-view .sharing-links a, .review-summary-table .rating-box .rating-number:after, .ratings-table .rating-box, .ratings-table .rating-box .rating {
-  background-repeat: no-repeat;
-  background-size: 20px;
-  background-position: center;
-  text-indent: -9999px;
-}
-
-/* -------------------------------------------- *
  * Breadcrumbs
  */
 .breadcrumbs {
@@ -2980,19 +2969,13 @@ a.skip-link {
 .skip-nav {
   width: 40%;
 }
-.skip-nav:not(.skip-active):hover {
-  text-decoration: none;
-}
-.skip-nav:not(.skip-active):hover .icon {
-  background-position: -46px 4px;
-}
 
 .skip-nav .label {
   display: inline;
 }
 
 .skip-nav .icon {
-  background-position: 4px 4px;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>');
 }
 
 @media only screen and (min-width: 500px) {
@@ -3192,11 +3175,11 @@ a.skip-link {
 /* ============================================ *
  * Search - Skip Link
  * ============================================ */
-.skip-search:not(.skip-active):hover .icon {
-  background-position: -46px -146px;
-}
-.skip-search .icon {
-  background-position: 4px -146px;
+.skip-search .icon.icon {
+  position: static;
+  width: 20px;
+  height: 20px;
+  margin: 0;
 }
 
 @media only screen and (min-width: 771px) {
@@ -3251,7 +3234,7 @@ a.skip-link {
   background: none;
 }
 
-#search_mini_form .search-button:before {
+#search_mini_form .search-button:before, .skip-search .icon {
   content: '';
   position: absolute;
   top: 50%;
