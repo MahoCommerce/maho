@@ -2796,7 +2796,7 @@ body {
 }
 .header-language-background,
 .header-language-background a {
-  color: #e6e6e6;
+  color: white;
 }
 
 @media only screen and (max-width: 770px) {
