@@ -155,7 +155,15 @@ class Mage_Core_Model_Cookie
      */
     public function getSameSite(): string
     {
-        return Mage::getStoreConfig(self::XML_PATH_COOKIE_SAMESITE, $this->getStore());
+        $value = Mage::getStoreConfig(self::XML_PATH_COOKIE_SAMESITE, $this->getStore());
+
+        // Do not permit SameSite=None on unsecure pages, upgrade to Lax
+        // https://developers.google.com/search/blog/2020/01/get-ready-for-new-samesitenone-secure
+        if ($value === 'None' && $this->isSecure() === false) {
+            return 'Lax';
+        }
+
+        return $value;
     }
 
     /**
@@ -165,11 +173,6 @@ class Mage_Core_Model_Cookie
      */
     public function isSecure()
     {
-        // If SameSite is None, we must force secure cookies
-        // https://web.dev/articles/samesite-cookies-explained
-        if ($this->getSameSite() === 'None') {
-            return true;
-        }
         if ($this->getStore()->isAdmin()) {
             return $this->_getRequest()->isSecure();
         }
