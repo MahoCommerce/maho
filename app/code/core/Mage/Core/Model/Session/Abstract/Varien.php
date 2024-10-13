@@ -147,9 +147,6 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
             }
         }
 
-        // Observers can change settings of the cookie such as lifetime, regenerate the session id, etc
-        Mage::dispatchEvent('session_before_renew_cookie', ['cookie' => $cookie]);
-
         // Secure cookie check to prevent MITM attack
         if (Mage::app()->getFrontController()->getRequest()->isSecure() && !$cookie->isSecure()) {
             $secureCookieName = $this->getSessionName() . '_cid';
@@ -187,6 +184,9 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
                 $_SESSION = [];
             }
         }
+
+        // Observers can change settings of the cookie such as lifetime, regenerate the session id, etc
+        Mage::dispatchEvent('session_before_renew_cookie', ['cookie' => $cookie]);
 
         $this->setSessionCookie();
 
