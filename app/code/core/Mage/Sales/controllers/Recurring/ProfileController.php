@@ -25,6 +25,9 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
 
     /**
      * Make sure customer is logged in and put it into registry
+     *
+     * @return $this|void
+     * @throws Mage_Core_Exception
      */
     #[\Override]
     public function preDispatch()

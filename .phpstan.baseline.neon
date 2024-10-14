@@ -696,11 +696,6 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Resource.php
 
 		-
-			message: "#^Method Mage_Api2_Model_Resource\\:\\:_getSubModel\\(\\) should return \\$this\\(Mage_Api2_Model_Resource\\) but returns Mage_Api2_Model_Resource\\.$#"
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Resource.php
-
-		-
 			message: "#^Method Mage_Api2_Model_Resource\\:\\:_multiCreate\\(\\) invoked with 1 parameter, 0 required\\.$#"
 			count: 1
 			path: app/code/core/Mage/Api2/Model/Resource.php
@@ -1141,11 +1136,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Category.php
 
 		-
-			message: "#^Method Mage_Catalog_Model_Category\\:\\:getParentDesignCategory\\(\\) should return \\$this\\(Mage_Catalog_Model_Category\\) but returns Mage_Catalog_Model_Category\\.$#"
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Category.php
-
-		-
 			message: "#^Cannot call method getRootCategoryId\\(\\) on int\\|string\\.$#"
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Category/Api.php
@@ -1262,11 +1252,6 @@ parameters:
 
 		-
 			message: "#^Method Mage_Catalog_Model_Product\\:\\:canBeShowInCategory\\(\\) should return bool but returns string\\.$#"
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product.php
-
-		-
-			message: "#^Method Mage_Catalog_Model_Product\\:\\:duplicate\\(\\) should return \\$this\\(Mage_Catalog_Model_Product\\) but returns Mage_Catalog_Model_Product\\.$#"
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product.php
 
@@ -1896,11 +1881,6 @@ parameters:
 			path: app/code/core/Mage/ConfigurableSwatches/Model/Resource/Catalog/Product/Type/Configurable/Product/Collection.php
 
 		-
-			message: "#^Method Mage_Core_Block_Abstract\\:\\:getHelper\\(\\) should return \\$this\\(Mage_Core_Block_Abstract\\) but returns Mage_Core_Block_Abstract\\.$#"
-			count: 1
-			path: app/code/core/Mage/Core/Block/Abstract.php
-
-		-
 			message: "#^Method Mage_Core_Block_Abstract\\:\\:getParentBlock\\(\\) should return \\$this\\(Mage_Core_Block_Abstract\\) but returns Mage_Core_Block_Abstract\\.$#"
 			count: 1
 			path: app/code/core/Mage/Core/Block/Abstract.php
@@ -2019,11 +1999,6 @@ parameters:
 			message: "#^Property Mage_Core_Model_App\\:\\:\\$_useSessionInUrl \\(bool\\) does not accept string\\|null\\.$#"
 			count: 1
 			path: app/code/core/Mage/Core/Model/App.php
-
-		-
-			message: "#^Method Mage_Core_Model_Config\\:\\:cleanCache\\(\\) should return \\$this\\(Mage_Core_Model_Config\\) but returns Mage_Core_Model_Config\\.$#"
-			count: 1
-			path: app/code/core/Mage/Core/Model/Config.php
 
 		-
 			message: "#^Method Mage_Core_Model_Config\\:\\:getNode\\(\\) should return Mage_Core_Model_Config_Element but returns Varien_Simplexml_Element\\|false\\.$#"
@@ -2701,11 +2676,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
 
 		-
-			message: "#^Method Mage_Eav_Model_Entity_Attribute_Abstract\\:\\:getFlatUpdateSelect\\(\\) should return \\$this\\(Mage_Eav_Model_Entity_Attribute_Abstract\\)\\|Varien_Db_Select but returns null\\.$#"
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
-
-		-
 			message: "#^Property Mage_Eav_Model_Entity_Attribute_Abstract\\:\\:\\$_backend \\(Mage_Eav_Model_Entity_Attribute_Backend_Abstract\\) in empty\\(\\) is not falsy\\.$#"
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
@@ -2966,11 +2936,6 @@ parameters:
 			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Product.php
 
 		-
-			message: "#^Method Mage_Index_Model_Lock\\:\\:getInstance\\(\\) should return \\$this\\(Mage_Index_Model_Lock\\) but returns Mage_Index_Model_Lock\\.$#"
-			count: 1
-			path: app/code/core/Mage/Index/Model/Lock.php
-
-		-
 			message: "#^Property Mage_Index_Model_Lock\\:\\:\\$_storage \\(Mage_Index_Model_Lock_Storage_Interface\\) does not accept Mage_Core_Model_Abstract\\|false\\.$#"
 			count: 1
 			path: app/code/core/Mage/Index/Model/Lock.php
@@ -3159,16 +3124,6 @@ parameters:
 			message: "#^Return type \\(false\\) of method Mage_Paypal_Block_Hosted_Pro_Info\\:\\:getCcTypeName\\(\\) should be compatible with return type \\(string\\|null\\) of method Mage_Paypal_Block_Payment_Info\\:\\:getCcTypeName\\(\\)$#"
 			count: 1
 			path: app/code/core/Mage/Paypal/Block/Hosted/Pro/Info.php
-
-		-
-			message: "#^Method Mage_Paypal_Block_Iframe\\:\\:_getBlock\\(\\) should return \\$this\\(Mage_Paypal_Block_Iframe\\) but returns Mage_Payment_Block_Form\\.$#"
-			count: 1
-			path: app/code/core/Mage/Paypal/Block/Iframe.php
-
-		-
-			message: "#^Property Mage_Paypal_Block_Iframe\\:\\:\\$_block \\(Mage_Payment_Block_Form\\) does not accept Mage_Core_Block_Abstract\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Paypal/Block/Iframe.php
 
 		-
 			message: "#^Return type \\(false\\) of method Mage_Paypal_Block_Payflow_Link_Info\\:\\:getCcTypeName\\(\\) should be compatible with return type \\(string\\|null\\) of method Mage_Paypal_Block_Payment_Info\\:\\:getCcTypeName\\(\\)$#"
@@ -3916,19 +3871,9 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Status/List.php
 
 		-
-			message: "#^Method Mage_Sales_Billing_AgreementController\\:\\:preDispatch\\(\\) should return \\$this\\(Mage_Sales_Billing_AgreementController\\) but empty return statement found\\.$#"
-			count: 1
-			path: app/code/core/Mage/Sales/controllers/Billing/AgreementController.php
-
-		-
 			message: "#^Variable \\$billingAgreement might not be defined\\.$#"
 			count: 2
 			path: app/code/core/Mage/Sales/controllers/Billing/AgreementController.php
-
-		-
-			message: "#^Method Mage_Sales_Recurring_ProfileController\\:\\:preDispatch\\(\\) should return \\$this\\(Mage_Sales_Recurring_ProfileController\\) but empty return statement found\\.$#"
-			count: 1
-			path: app/code/core/Mage/Sales/controllers/Recurring/ProfileController.php
 
 		-
 			message: "#^Return type \\(Mage_SalesRule_Model_Quote_Discount\\) of method Mage_SalesRule_Model_Quote_Discount\\:\\:fetch\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Quote_Address_Total_Abstract\\:\\:fetch\\(\\)$#"
@@ -3982,11 +3927,6 @@ parameters:
 
 		-
 			message: "#^Left side of && is always true\\.$#"
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Carrier/Abstract.php
-
-		-
-			message: "#^Method Mage_Shipping_Model_Carrier_Abstract\\:\\:checkAvailableShipCountries\\(\\) should return \\$this\\(Mage_Shipping_Model_Carrier_Abstract\\)\\|bool\\|Mage_Core_Model_Abstract but returns Mage_Shipping_Model_Rate_Result_Error\\.$#"
 			count: 1
 			path: app/code/core/Mage/Shipping/Model/Carrier/Abstract.php
 

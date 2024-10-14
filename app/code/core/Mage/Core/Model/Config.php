@@ -386,7 +386,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $this->_loadDeclaredModules();
 
         $resourceConfig = sprintf('config.%s.xml', $this->_getResourceConnectionModel('core'));
-        $this->loadModulesConfiguration(['config.xml',$resourceConfig], $this);
+        $this->loadModulesConfiguration(['config.xml', $resourceConfig], $this);
 
         /**
          * Prevent local.xml directives overwriting
@@ -447,7 +447,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Reinitialize configuration
      *
      * @param   array $options
-     * @return  Mage_Core_Model_Config
+     * @return  $this
      */
     public function reinit($options = [])
     {

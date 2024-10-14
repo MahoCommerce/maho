@@ -162,7 +162,6 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     /**
      * @var Varien_Object
      */
-    // phpcs:ignore Ecg.PHP.PrivateClassMember.PrivateClassMemberError
     private static $_transportObject;
 
     /**
@@ -415,7 +414,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
      *
      * Wrapper for method "setData"
      *
-     * @param   string $name
+     * @param   array|string $name
      * @param   mixed $value
      * @return  $this
      */
@@ -519,7 +518,6 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
             }
 
             Mage::helper('core/security')->validateAgainstBlockMethodBlacklist($child, $callback, $params);
-            // phpcs:ignore Ecg.Security.ForbiddenFunction.Found
             if ($result == call_user_func_array([&$child, $callback], $params)) {
                 $this->unsetChild($alias);
             }
@@ -1084,7 +1082,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
      * Return block helper
      *
      * @param string $type
-     * @return $this
+     * @return Mage_Core_Block_Abstract
      */
     public function getHelper($type)
     {
@@ -1160,7 +1158,6 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     public function __()
     {
         $args = func_get_args();
-        // phpcs:ignore Ecg.Classes.ObjectInstantiation.DirectInstantiation
         $expr = new Mage_Core_Model_Translate_Expr(array_shift($args), $this->getModuleName());
         array_unshift($args, $expr);
         return $this->_getApp()->getTranslator()->translate($args);
@@ -1198,7 +1195,6 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
      */
     public function escapeHtmlAsObject(string $data, ?array $allowedTags = null): Mage_Core_Model_Security_HtmlEscapedString
     {
-        // phpcs:ignore Ecg.Classes.ObjectInstantiation.DirectInstantiation
         return new Mage_Core_Model_Security_HtmlEscapedString($data, $allowedTags);
     }
 
