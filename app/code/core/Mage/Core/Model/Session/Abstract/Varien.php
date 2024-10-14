@@ -150,27 +150,22 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         // Secure cookie check to prevent MITM attack
         if (Mage::app()->getFrontController()->getRequest()->isSecure() && !$cookie->isSecure()) {
             $secureCookieName = $this->getSessionName() . '_cid';
-            $cookieValue = $cookie->get($secureCookieName);
+            $secureCookieValue = $cookie->get($secureCookieName);
 
             // Migrate old cookie from 'frontend_cid'
             if ($sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
-                if ($cookie->get('frontend_cid') && !$cookieValue) {
-                    $cookieValue = $cookie->get('frontend_cid');
-                    $_COOKIE[$secureCookieName] = $cookieValue;
-                    $cookie->set($secureCookieName, $cookieValue);
+                if ($cookie->get('frontend_cid') && !$secureCookieValue) {
+                    $secureCookieValue = $cookie->get('frontend_cid');
+                    $_COOKIE[$secureCookieName] = $secureCookieValue;
                     $cookie->delete('frontend_cid');
                 }
             }
 
-            // Set secure cookie check value in session if not yet set
             if (!isset($_SESSION[self::SECURE_COOKIE_CHECK_KEY])) {
-                $cookieValue = Mage::helper('core')->getRandomString(16);
-                $cookie->set($secureCookieName, $cookieValue, null, null, null, true, true);
-                $_SESSION[self::SECURE_COOKIE_CHECK_KEY] = md5($cookieValue);
-            } elseif (is_string($cookieValue) && $_SESSION[self::SECURE_COOKIE_CHECK_KEY] === md5($cookieValue)) {
-                // Renew secret check value cookie if it is valid
-                $cookie->renew($secureCookieName, null, null, null, true, true);
-            } else {
+                // Secure cookie check value not in session yet
+                $secureCookieValue = Mage::helper('core')->getRandomString(16);
+                $_SESSION[self::SECURE_COOKIE_CHECK_KEY] = md5($secureCookieValue);
+            } elseif (!is_string($secureCookieValue) || $_SESSION[self::SECURE_COOKIE_CHECK_KEY] !== md5($secureCookieValue)) {
                 // Secure cookie check value is invalid, regenerate session
                 session_regenerate_id(false);
                 $sessionHosts = $this->getSessionHosts();
@@ -181,14 +176,21 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
                         $cookie->delete($this->getSessionName(), null, $host);
                     }
                 }
-                $_SESSION = [];
+                unset($secureCookieValue);
+                session_unset();
             }
         }
 
         // Observers can change settings of the cookie such as lifetime, regenerate the session id, etc
         Mage::dispatchEvent('session_before_renew_cookie', ['cookie' => $cookie]);
 
+        // Set or renew regular session cookie
         $this->setSessionCookie();
+
+        // Set pre renew secure cookie if needed
+        if (isset($secureCookieValue)) {
+            $cookie->set($secureCookieName, $secureCookieValue, null, null, null, true, true);
+        }
 
         Varien_Profiler::stop(__METHOD__ . '/start');
 
