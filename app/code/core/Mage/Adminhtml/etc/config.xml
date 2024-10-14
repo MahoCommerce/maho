@@ -119,6 +119,46 @@
                     </bind_locale>
                 </observers>
             </admin_system_config_changed_section_admin>
+            <adminhtml_customer_attribute_edit_prepare_form>
+                <observers>
+                    <eav>
+                        <class>adminhtml/customer_observer</class>
+                        <method>attributeEditPrepareForm</method>
+                    </eav>
+                </observers>
+            </adminhtml_customer_attribute_edit_prepare_form>
+            <adminhtml_customer_attribute_edit_prepare_save>
+                <observers>
+                    <eav>
+                        <class>adminhtml/customer_observer</class>
+                        <method>attributeEditPrepareSave</method>
+                    </eav>
+                </observers>
+            </adminhtml_customer_attribute_edit_prepare_save>
+            <adminhtml_customer_address_attribute_edit_prepare_form>
+                <observers>
+                    <eav>
+                        <class>adminhtml/customer_observer</class>
+                        <method>attributeEditPrepareForm</method>
+                    </eav>
+                </observers>
+            </adminhtml_customer_address_attribute_edit_prepare_form>
+            <adminhtml_customer_address_attribute_edit_prepare_save>
+                <observers>
+                    <eav>
+                        <class>adminhtml/customer_observer</class>
+                        <method>attributeEditPrepareSave</method>
+                    </eav>
+                </observers>
+            </adminhtml_customer_address_attribute_edit_prepare_save>
+            <adminhtml_customer_address_attribute_types>
+                <observers>
+                    <eav>
+                        <class>adminhtml/customer_observer</class>
+                        <method>attributeAddInputTypes</method>
+                    </eav>
+                </observers>
+            </adminhtml_customer_address_attribute_types>
         </events>
         <global_search>
             <products>

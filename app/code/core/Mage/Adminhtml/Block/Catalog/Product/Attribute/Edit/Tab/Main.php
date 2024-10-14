@@ -112,13 +112,21 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Edit_Tab_Main extends Mage_
                 'custom'  => Mage::helper('catalog')->__('Selected Product Types')
             ],
             'required'    => true
-        ], 'frontend_class');
+        ]);
 
         $fieldset->addField('is_configurable', 'select', [
             'name' => 'is_configurable',
             'label' => Mage::helper('catalog')->__('Use To Create Configurable Product'),
             'values' => $yesnoSource,
-        ], 'apply_to');
+        ]);
+
+        $form->getElement('frontend_input')
+             ->setLabel(Mage::helper('catalog')->__('Input Type for Store Owner'))
+             ->setTitle(Mage::helper('catalog')->__('Input Type for Store Owner'));
+
+        $form->getElement('frontend_class')
+             ->setLabel(Mage::helper('catalog')->__('Input Validation for Store Owner'))
+             ->setTitle(Mage::helper('catalog')->__('Input Validation for Store Owner'));
 
         // frontend properties fieldset
         $fieldset = $form->addFieldset('front_fieldset', ['legend' => Mage::helper('catalog')->__('Frontend Properties')]);
@@ -230,17 +238,20 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Edit_Tab_Main extends Mage_
         // define field dependencies
         /** @var Mage_Adminhtml_Block_Widget_Form_Element_Dependence $block */
         $block = $this->getLayout()->createBlock('adminhtml/widget_form_element_dependence');
-        $this->setChild('form_after', $block
-            ->addFieldMap('is_wysiwyg_enabled', 'wysiwyg_enabled')
-            ->addFieldMap('is_html_allowed_on_front', 'html_allowed_on_front')
-            ->addFieldMap('frontend_input', 'frontend_input_type')
-            ->addFieldDependence('wysiwyg_enabled', 'frontend_input_type', 'textarea')
-            ->addFieldDependence('html_allowed_on_front', 'wysiwyg_enabled', '0'));
+
+        $block->addFieldMap('is_wysiwyg_enabled', 'wysiwyg_enabled')
+              ->addFieldMap('is_html_allowed_on_front', 'html_allowed_on_front')
+              ->addFieldMap('frontend_input', 'frontend_input_type')
+              ->addFieldDependence('wysiwyg_enabled', 'frontend_input_type', 'textarea')
+              ->addFieldDependence('html_allowed_on_front', 'wysiwyg_enabled', '0');
 
         Mage::dispatchEvent('adminhtml_catalog_product_attribute_edit_prepare_form', [
-            'form'      => $form,
-            'attribute' => $attributeObject
+            'form'       => $form,
+            'attribute'  => $attributeObject,
+            'dependence' => $block,
         ]);
+
+        $this->setChild('form_after', $block);
 
         return $this;
     }

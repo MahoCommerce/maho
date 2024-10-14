@@ -107,10 +107,32 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
 
         $fieldset->addField('frontend_input', 'select', [
             'name' => 'frontend_input',
-            'label' => Mage::helper('eav')->__('Input Type for Store Owner'),
-            'title' => Mage::helper('eav')->__('Input Type for Store Owner'),
+            'label' => Mage::helper('eav')->__('Input Type'),
+            'title' => Mage::helper('eav')->__('Input Type'),
             'value' => 'text',
             'values' => $inputTypes
+        ]);
+
+        $fieldset->addField('frontend_class', 'select', [
+            'name'  => 'frontend_class',
+            'label' => Mage::helper('eav')->__('Input Validation'),
+            'title' => Mage::helper('eav')->__('Input Validation'),
+            'values' => Mage::helper('eav')->getFrontendClasses($attributeObject->getEntityType()->getEntityTypeCode())
+        ]);
+
+        $fieldset->addField('is_required', 'select', [
+            'name' => 'is_required',
+            'label' => Mage::helper('eav')->__('Values Required'),
+            'title' => Mage::helper('eav')->__('Values Required'),
+            'values' => $yesno,
+        ]);
+
+        $fieldset->addField('is_unique', 'select', [
+            'name' => 'is_unique',
+            'label' => Mage::helper('eav')->__('Unique Value'),
+            'title' => Mage::helper('eav')->__('Unique Value (not shared with other products)'),
+            'note'  => Mage::helper('eav')->__('Not shared with other products'),
+            'values' => $yesno,
         ]);
 
         $fieldset->addField('default_value_text', 'text', [
@@ -144,28 +166,6 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
             'value' => $attributeObject->getDefaultValue(),
         ]);
 
-        $fieldset->addField('is_unique', 'select', [
-            'name' => 'is_unique',
-            'label' => Mage::helper('eav')->__('Unique Value'),
-            'title' => Mage::helper('eav')->__('Unique Value (not shared with other products)'),
-            'note'  => Mage::helper('eav')->__('Not shared with other products'),
-            'values' => $yesno,
-        ]);
-
-        $fieldset->addField('is_required', 'select', [
-            'name' => 'is_required',
-            'label' => Mage::helper('eav')->__('Values Required'),
-            'title' => Mage::helper('eav')->__('Values Required'),
-            'values' => $yesno,
-        ]);
-
-        $fieldset->addField('frontend_class', 'select', [
-            'name'  => 'frontend_class',
-            'label' => Mage::helper('eav')->__('Input Validation for Store Owner'),
-            'title' => Mage::helper('eav')->__('Input Validation for Store Owner'),
-            'values' => Mage::helper('eav')->getFrontendClasses($attributeObject->getEntityType()->getEntityTypeCode())
-        ]);
-
         if ($attributeObject->getResource()->hasFormTable()) {
             $attributeObjectTypeCode = $attributeObject->getEntityType()->getEntityTypeCode();
             $fieldset->addField('used_in_forms', 'multiselect', [
@@ -175,14 +175,6 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
                 'values' => Mage::getModel('eav/config_source_form')->toOptionArray($attributeObjectTypeCode),
                 'value'  => $attributeObject->getUsedInForms(),
             ]);
-        }
-
-        if ($attributeObject->getId()) {
-            $form->getElement('attribute_code')->setDisabled(1);
-            $form->getElement('frontend_input')->setDisabled(1);
-            if (!$attributeObject->getIsUserDefined()) {
-                $form->getElement('is_unique')->setDisabled(1);
-            }
         }
 
         $this->setForm($form);
@@ -234,12 +226,19 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
         if ($attributeObject->getId()) {
             $disableAttributeFields = Mage::helper('eav')
                 ->getAttributeLockedFields($attributeObject->getEntityType()->getEntityTypeCode());
-            if (isset($disableAttributeFields[$attributeObject->getAttributeCode()])) {
-                foreach ($disableAttributeFields[$attributeObject->getAttributeCode()] as $field) {
-                    if ($elm = $form->getElement($field)) {
-                        $elm->setDisabled(1);
-                        $elm->setReadonly(1);
-                    }
+            $disabledFields = $disableAttributeFields[$attributeObject->getAttributeCode()] ?? [];
+
+            // Add in default locked fields
+            $disabledFields[] = 'attribute_code';
+            $disabledFields[] = 'frontend_input';
+            if (!$attributeObject->getIsUserDefined()) {
+                $disabledFields[] = 'is_unique';
+            }
+
+            foreach ($disabledFields as $field) {
+                if ($elm = $form->getElement($field)) {
+                    $elm->setDisabled(1);
+                    $elm->setReadonly(1);
                 }
             }
         }
