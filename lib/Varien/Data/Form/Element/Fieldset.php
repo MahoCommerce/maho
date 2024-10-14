@@ -103,7 +103,7 @@ class Varien_Data_Form_Element_Fieldset extends Varien_Data_Form_Element_Abstrac
      * @param string $elementId
      * @param string $type
      * @param array $config
-     * @param boolean $after
+     * @param string|false $after
      * @return Varien_Data_Form_Element_Abstract
      */
     #[\Override]
