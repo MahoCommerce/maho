@@ -99,11 +99,14 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
 
         $cookie = $this->getCookie();
 
-        // Migrate old cookie from 'frontend'
-        if ($sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
-            if ($cookie->get('frontend') && !$cookie->get($sessionName)) {
-                $_COOKIE[$sessionName] = $cookie->get('frontend');
-                $cookie->delete('frontend');
+        // Migrate old cookie from (om_)frontend => maho_session
+        if (!$cookie->get($sessionName) && $sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
+            foreach (Mage_Core_Controller_Front_Action::SESSION_LEGACY_NAMESPACES as $namespace) {
+                if ($cookie->get($namespace)) {
+                    $_COOKIE[$sessionName] = $cookie->get($namespace);
+                    $cookie->delete($namespace);
+                    break;
+                }
             }
         }
 
@@ -152,12 +155,15 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
             $secureCookieName = $this->getSessionName() . '_cid';
             $secureCookieValue = $cookie->get($secureCookieName);
 
-            // Migrate old cookie from 'frontend_cid'
-            if ($sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
-                if ($cookie->get('frontend_cid') && !$secureCookieValue) {
-                    $secureCookieValue = $cookie->get('frontend_cid');
-                    $_COOKIE[$secureCookieName] = $secureCookieValue;
-                    $cookie->delete('frontend_cid');
+            // Migrate old cookie from (om_)frontend_cid => maho_session_cid
+            if (!$secureCookieValue && $sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
+                foreach (Mage_Core_Controller_Front_Action::SESSION_LEGACY_NAMESPACES as $namespace) {
+                    if ($cookie->get($namespace . '_cid')) {
+                        $secureCookieValue = $cookie->get($namespace . '_cid');
+                        $_COOKIE[$sessionName] = $secureCookieValue;
+                        $cookie->delete($namespace . '_cid');
+                        break;
+                    }
                 }
             }
 
