@@ -66,20 +66,14 @@ function is_empty_date($date)
 
 /**
  * @param string $class
+ * @deprecated 24.11.0
  * @return bool|string
  */
 function mageFindClassFile($class)
 {
-    $classFile = uc_words($class, DIRECTORY_SEPARATOR) . '.php';
-    $found = false;
-    foreach (explode(PS, get_include_path()) as $path) {
-        $fileName = $path . DS . $classFile;
-        if (file_exists($fileName)) {
-            $found = $fileName;
-            break;
-        }
-    }
-    return $found;
+    /** @var \Composer\Autoload\ClassLoader $composerClassLoader */
+    $composerClassLoader = require BP . '/vendor/autoload.php';
+    return $composerClassLoader->findFile($class);
 }
 
 /**
@@ -301,85 +295,46 @@ function is_dir_writeable($dir)
     return false;
 }
 
-function mahoGetComposerInstallationData(): array
+function mahoFindFileInIncludePath(string $path): string|false
 {
-    static $composerInstallationData = null;
-    if ($composerInstallationData !== null) {
-        return $composerInstallationData;
-    }
+    $paths = [];
+    $paths[] = BP;
 
-    $packages = $packageDirectories = [];
-    $installedVersions = \Composer\InstalledVersions::getAllRawData();
-
-    foreach ($installedVersions as $datasets) {
-        array_shift($datasets['versions']);
-        foreach ($datasets['versions'] as $package => $version) {
-            if (!isset($version['install_path'])) {
-                continue;
-            }
-            if (!in_array($version['type'], ['maho-source', 'maho-module', 'magento-module'])) {
-                continue;
-            }
-            $packages[] = $package;
-            $packageDirectories[] = realpath($version['install_path']);
+    $modules = \Maho\MahoAutoload::getInstalledModules(BP);
+    foreach ($modules as $module => $info) {
+        if ($module === 'mahocommerce/maho') {
+            continue;
         }
+        $paths[] = $info['path'];
+    }
+    if ($modules['mahocommerce/maho']['isChildProject']) {
+        $paths[] = $modules['mahocommerce/maho']['path'];
     }
 
-    $packages = array_unique($packages);
-    $packageDirectories = array_unique($packageDirectories);
-
-    $composerInstallationData = [
-        $packages,
-        $packageDirectories
-    ];
-
-    return $composerInstallationData;
-}
-
-function mahoFindFileInIncludePath(string $relativePath): string|false
-{
-    list($packages, $packageDirectories) = mahoGetComposerInstallationData();
-    foreach ($packages as $package) {
-        $relativePath = str_replace(BP . DS . 'vendor' . DS . $package, '', $relativePath);
-    }
-    $relativePath = str_replace(BP, '', $relativePath);
+    $relativePath = str_replace(array_reverse($paths), '', $path);
     $relativePath = ltrim($relativePath, '/');
 
-    // if file exists in the current folder, don't look elsewhere
-    $fullPath = BP . DS . $relativePath;
-    if (file_exists($fullPath)) {
-        return $fullPath;
-    }
+    // Temporarily set include paths, then revert
+    $oldPaths = get_include_path();
+    set_include_path(implode(PS, $paths));
+    $file = stream_resolve_include_path($relativePath);
+    set_include_path($oldPaths);
 
-    // search for the file in composer packages
-    foreach ($packageDirectories as $basePath) {
-        $fullPath = $basePath . DIRECTORY_SEPARATOR . $relativePath;
-        if (file_exists($fullPath)) {
-            return realpath($fullPath);
-        }
-    }
-
-    return false;
+    return $file;
 }
 
-function mahoListDirectories($path)
+function mahoListDirectories(string $path): array
 {
-    list($packages, $packageDirectories) = mahoGetComposerInstallationData();
-    if (!defined('MAHO_ROOT_DIR')) {
-        Mage::throwException('MAHO_ROOT_DIR constant is not defined.');
-    }
-
-    foreach ($packages as $package) {
-        $path = str_replace(BP . DS . 'vendor' . DS . $package, '', $path);
-    }
-    $path = str_replace(BP, '', $path);
-    $path = ltrim($path, '/');
-
     $results = [];
-    array_unshift($packageDirectories, MAHO_ROOT_DIR);
-    foreach ($packageDirectories as $packageDirectory) {
-        $tmpList = glob($packageDirectory . DS . $path . '/*', GLOB_ONLYDIR);
-        foreach ($tmpList as $folder) {
+    $relativePath = str_replace(BP . '/', '', $path);
+
+    foreach (glob("$path/*", GLOB_ONLYDIR) as $folder) {
+        $results[] = basename($folder);
+    }
+
+    $modules = \Maho\MahoAutoload::getInstalledModules(BP);
+    foreach ($modules as $module => $info) {
+        foreach (glob($info['path'] . "/$relativePath/*", GLOB_ONLYDIR) as $folder) {
             $results[] = basename($folder);
         }
     }

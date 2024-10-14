@@ -1240,3 +1240,33 @@ var ProductMediaManager = {
 $j(document).ready(function() {
     ProductMediaManager.init();
 });
+
+// Slideshow management
+document.addEventListener('DOMContentLoaded', () => {
+    const slideshowContainer = document.querySelector('.slideshow');
+    if (!slideshowContainer) {
+        return;
+    }
+
+    const slideshow = slideshowContainer.querySelector('ul');
+    const slides = slideshow.querySelectorAll('li');
+
+    const dotsContainer = document.createElement('div');
+    dotsContainer.className = 'slideshow-dots';
+    slides.forEach((_, index) => {
+        const dot = document.createElement('span');
+        dot.className = 'dot';
+        dot.addEventListener('click', () => slideshowContainer.scrollLeft = index * slides[0].offsetWidth);
+        dotsContainer.appendChild(dot);
+    });
+    slideshowContainer.insertAdjacentElement('afterend', dotsContainer);
+
+    const updateDots = () => {
+        const index = Math.round(slideshowContainer.scrollLeft / slides[0].offsetWidth);
+        dotsContainer.querySelectorAll('.dot').forEach((dot, i) =>
+            dot.classList.toggle('active', i === index)
+        );
+    };
+    slideshowContainer.addEventListener('scroll', updateDots);
+    updateDots();
+});

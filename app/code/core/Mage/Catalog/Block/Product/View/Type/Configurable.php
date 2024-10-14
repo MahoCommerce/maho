@@ -21,14 +21,14 @@ class Mage_Catalog_Block_Product_View_Type_Configurable extends Mage_Catalog_Blo
 {
     /**
      * Prices
-     *
+     * @deprecated
      * @var array
      */
     protected $_prices      = [];
 
     /**
      * Prepared prices
-     *
+     * @deprecated
      * @var array
      */
     protected $_resPrices   = [];
@@ -212,14 +212,7 @@ class Mage_Catalog_Block_Product_View_Type_Configurable extends Mage_Catalog_Blo
                     $optionPrices[] = $configurablePrice;
                 }
             }
-            /**
-             * Prepare formatted values for options choose
-             */
-            foreach ($optionPrices as $optionPrice) {
-                foreach ($optionPrices as $additional) {
-                    $this->_preparePrice(abs($additional - $optionPrice));
-                }
-            }
+
             if ($this->_validateAttributeInfo($info)) {
                 $attributes[$attributeId] = $info;
             }

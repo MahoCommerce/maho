@@ -23,7 +23,6 @@
             <block type="page/html_head" name="head" as="head">
                 <action method="addJs"><script>prototype/prototype.js</script></action>
                 <action method="addJs"><script>lib/jquery/jquery-3.7.1.min.js</script></action>
-                <action method="addJs"><script>lib/jquery/noconflict.js</script></action>
                 <action method="addJs"><script>prototype/validation.js</script></action>
                 <action method="addJs"><script>maho-autocomplete.js</script></action>
                 <action method="addJs"><script>varien/js.js</script></action>
@@ -35,9 +34,6 @@
 
                 <!-- Add vendor dependencies -->
                 <action method="addItem"><type>skin_js</type><name>js/app.js</name></action>
-                <action method="addItem"><type>skin_js</type><name>js/lib/jquery.cycle2.min.js</name></action>
-                <action method="addItem"><type>skin_js</type><name>js/slideshow.js</name></action>
-                <action method="addLinkRel"><rel>stylesheet</rel><href><![CDATA[//fonts.googleapis.com/css?family=Raleway:300,400,500,700,600&display=swap]]></href></action>
                 <action method="addItem"><type>skin_js</type><name>js/minicart.js</name></action>
 
                 <!-- Add stylesheets with media queries for use by modern browsers -->

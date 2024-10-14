@@ -13,8 +13,9 @@
 /** @deprecated Use MAHO_ROOT_DIR instead. */
 define('MAGENTO_ROOT', dirname(__DIR__));
 define('MAHO_ROOT_DIR', dirname(__DIR__));
+define('MAHO_PUBLIC_DIR', __DIR__);
 
-if (file_exists(MAHO_ROOT_DIR . DIRECTORY_SEPARATOR . 'app/bootstrap.php')) {
+if (file_exists(MAHO_ROOT_DIR . '/app/bootstrap.php')) {
     require MAHO_ROOT_DIR . '/app/bootstrap.php';
     require MAHO_ROOT_DIR . '/app/Mage.php';
 } else {

@@ -14,10 +14,7 @@
  * Primary Banner
  */
 body.cms-home .main-container {
-  padding-top: 20px;
-}
-body.cms-home .slideshow-container {
-  margin-top: 0;
+  padding-top: 0;
 }
 
 .slideshow .banner-msg {
@@ -119,7 +116,6 @@ body .promos > li {
   top: 10%;
   font-weight: 500;
   font-size: 20px;
-  font-family: "Raleway", "Helvetica Neue", Verdana, Arial, sans-serif;
   text-shadow: 1px 1px 3px #555555;
 }
 
@@ -208,7 +204,6 @@ body .promos > li {
   margin-right: 2.66667% !important;
   margin-bottom: 10px;
   border: 1px solid #cccccc;
-  padding: 10px;
 }
 
 .catblocks li:hover {
@@ -245,7 +240,6 @@ body .promos > li {
   color: #FFFFFF;
   position: absolute;
   background-color: #7B7C7B;
-  font-family: raleway;
   font-size: 17px;
   font-weight: bold;
   text-transform: uppercase;

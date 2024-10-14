@@ -95,6 +95,14 @@
                     </auth>
                 </observers>
             </controller_action_predispatch>
+            <controller_action_layout_generate_blocks_before>
+                <observers>
+                    <display_bootup_warnings>
+                        <class>adminhtml/observer</class>
+                        <method>displayBootupWarnings</method>
+                    </display_bootup_warnings>
+                </observers>
+            </controller_action_layout_generate_blocks_before>
             <core_locale_set_locale>
                 <observers>
                     <bind_locale>

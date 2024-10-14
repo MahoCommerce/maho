@@ -422,10 +422,16 @@ class Varien_Simplexml_Config
             return false;
         }
 
-        $filePath = mahoFindFileInIncludePath($filePath);
+        /**
+         * All calls from core will be an absolute path, but for compatibility with
+         * 3rd party modules we will alternatively use mahoFindFileInIncludePath()
+         */
         if (!is_readable($filePath)) {
-            //throw new Exception('Can not read xml file '.$filePath);
-            return false;
+            $filePath = mahoFindFileInIncludePath($filePath);
+            if (!is_readable($filePath)) {
+                //throw new Exception('Can not read xml file '.$filePath);
+                return false;
+            }
         }
 
         $fileData = file_get_contents($filePath);

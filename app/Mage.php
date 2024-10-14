@@ -12,68 +12,50 @@
 
 define('DS', DIRECTORY_SEPARATOR);
 define('PS', PATH_SEPARATOR);
-if (file_exists(__DIR__ . '/vendor/mahocommerce/maho')) {
-    define('BP', dirname(getcwd()));
-} elseif (str_contains(__DIR__, '/vendor/mahocommerce/maho')) {
-    define('BP', str_replace('/vendor/mahocommerce/maho/app', '', __DIR__));
-} else {
-    define('BP', dirname(__DIR__));
-}
+define('BP', MAHO_ROOT_DIR);
 
-Mage::register('original_include_path', get_include_path());
+/*
+ * Require Composer autoloader and set include paths
+ * @var \Composer\Autoload\ClassLoader $composerClassLoader
+ */
+$composerClassLoader = require BP . '/vendor/autoload.php';
+set_include_path(implode(PS, \Maho\MahoAutoload::generatePaths(BP)) . PS . get_include_path());
 
 if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPER_MODE'])) {
     Mage::setIsDeveloperMode(true);
     ini_set('display_errors', '1');
     ini_set('error_prepend_string', '<pre>');
     ini_set('error_append_string', '</pre>');
+
+    // Fix for overriding zf1-future during development
+    ini_set('opcache.revalidate_path', 1);
+
+    // Check if we used `composer dump --optimize-autoloader` in development
+    $classMap = $composerClassLoader->getClassMap();
+    if (isset($classMap['Mage_Core_Model_App'])) {
+        Mage::addBootupWarning('Optimized autoloader detected in developer mode.');
+    }
+
+    // Reload PSR-0 namespaces and controller classmap during development in case new files are added
+    $prefixes = $composerClassLoader->getPrefixes();
+    foreach (\Maho\MahoAutoload::generatePsr0(BP) as $prefix => $paths) {
+        $prefixes[$prefix] ??= [];
+        if (count($prefixes[$prefix])) {
+            $prefixes[$prefix] = array_diff($prefixes[$prefix], $paths);
+        }
+        array_push($prefixes[$prefix], ...$paths);
+        $composerClassLoader->set($prefix, $paths);
+    }
+    $composerClassLoader->addClassMap(\Maho\MahoAutoload::generateControllerClassMap(BP));
 }
+
+require_once __DIR__ . '/code/core/Mage/Core/functions.php';
 
 /**
- * Set include path
+ * Support additional includes, originally used for OpenMage composer support
+ * See: https://github.com/OpenMage/magento-lts/pull/559
  */
-$paths = [];
-$paths[] = BP . '/app/code/local';
-$paths[] = BP . '/app/code/community';
-$paths[] = BP . '/app/code/core';
-$paths[] = BP . '/vendor/mahocommerce/maho/app/code/core';
-$paths[] = BP . '/lib';
-$paths[] = BP . '/vendor/mahocommerce/maho/lib';
-$appPath = implode(PS, $paths);
-set_include_path($appPath . PS . Mage::registry('original_include_path'));
-include_once "Mage/Core/functions.php";
-include_once "Varien/Autoload.php";
-
-Varien_Autoload::register();
-require_once BP . DS . 'vendor' . DS . 'autoload.php';
-
-$paths = require BP . '/vendor/composer/include_paths.php';
-$paths[] = BP . '/app/code/local';
-$paths[] = BP . '/app/code/community';
-$paths[] = BP . '/app/code/core';
-$allModules = mahoGetComposerInstallationData()[1];
-foreach ($allModules as $module) {
-    if (str_contains($module, 'mahocommerce/maho')) {
-        continue;
-    }
-    $paths[] = "$module/app/code/local";
-    $paths[] = "$module/app/code/community";
-    $paths[] = "$module/app/code/core";
-}
-$paths[] = BP . '/vendor/mahocommerce/maho/app/code/core';
-$paths[] = BP . '/lib';
-foreach ($allModules as $module) {
-    if (str_contains($module, 'mahocommerce/maho')) {
-        continue;
-    }
-    $paths[] = "$module/lib";
-}
-$paths[] = BP . '/vendor/mahocommerce/maho/lib';
-$appPath = implode(PS, $paths);
-set_include_path($appPath . PS . Mage::registry('original_include_path'));
-
-/* Support additional includes, such as composer's vendor/autoload.php files */
-foreach (glob(BP . DS . 'app' . DS . 'etc' . DS . 'includes' . DS . '*.php') as $path) {
+foreach (glob(BP . '/app/etc/includes/*.php') as $path) {
     include_once $path;
 }
 
@@ -604,6 +586,13 @@ final class Mage
         throw new Mage_Core_Exception($message);
     }
 
+    public static function addBootupWarning(string $message)
+    {
+        $messages = Mage::registry('bootup_warnings') ?? [];
+        $messages[] = $message;
+        Mage::register('bootup_warnings', $message);
+    }
+
     /**
      * Get initialized application object.
      *
@@ -640,7 +629,7 @@ final class Mage
     {
         try {
             self::setRoot();
-            self::$_app     = new Mage_Core_Model_App();
+            self::$_app = new Mage_Core_Model_App();
             self::_setIsInstalled($options);
             self::_setConfigModel($options);
 
