@@ -1,0 +1,79 @@
+name: Sync daily OM commits to Maho
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Run at 6 AM UTC every day
+  workflow_dispatch:
+
+jobs:
+  sync-om:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Maho
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Fetch OM updates and create PRs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fetch OpenMage repository
+          git remote add upstream https://github.com/OpenMage/magento-lts.git
+          git fetch upstream
+
+          # Get yesterday's date
+          yesterday=$(date -d "yesterday" +%Y-%m-%d)
+
+          # Get list of commits from yesterday
+          commits=$(git log --since="$yesterday 00:00:00" --until="$yesterday 23:59:59" --format="%H" upstream/main)
+
+          # Function to create a PR for a commit
+          create_pr_for_commit() {
+            commit_hash=$1
+            branch_name="sync-openmage-${commit_hash:0:8}"
+
+            # Create a new branch
+            git checkout -b "$branch_name"
+
+            # Cherry-pick the commit
+            if git cherry-pick "$commit_hash"; then
+              # Push the branch
+              git push -u origin "$branch_name"
+
+              # Get commit message
+              commit_msg=$(git log -1 --pretty=format:"%s" "$commit_hash")
+
+              # Check if the commit is from a PR
+              pr_number=$(git log -1 --pretty=format:"%b" "$commit_hash" | grep -oP "(?<=Pull Request #)\d+")
+
+              if [ -n "$pr_number" ]; then
+                pr_title="OM PR $pr_number"
+              else
+                pr_title="OM commit: $commit_hash"
+              fi
+
+              # Create PR
+              gh pr create --title "$pr_title" --body "This PR syncs the OpenMage commit: $commit_hash
+
+              Original commit message: $commit_msg
+
+              For more details, see: https://github.com/OpenMage/magento-lts/commit/$commit_hash"
+            else
+              echo "Failed to cherry-pick commit $commit_hash. Skipping."
+              git cherry-pick --abort
+            fi
+
+            # Return to main branch
+            git checkout main
+          }
+
+          # Process each commit
+          for commit in $commits; do
+            create_pr_for_commit "$commit"
+          done
