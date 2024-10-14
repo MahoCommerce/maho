@@ -187,7 +187,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         // Set or renew regular session cookie
         $this->setSessionCookie();
 
-        // Set pre renew secure cookie if needed
+        // Set or renew secure cookie if needed
         if (isset($secureCookieName) && isset($secureCookieValue)) {
             $cookie->set($secureCookieName, $secureCookieValue, null, null, null, true, true);
         }
