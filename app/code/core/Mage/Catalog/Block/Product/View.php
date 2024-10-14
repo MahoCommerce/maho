@@ -92,17 +92,6 @@ class Mage_Catalog_Block_Product_View extends Mage_Catalog_Block_Product_Abstrac
     }
 
     /**
-     * Check if product can be emailed to friend
-     *
-     * @return bool
-     */
-    public function canEmailToFriend()
-    {
-        $sendToFriendModel = Mage::registry('send_to_friend_model');
-        return $sendToFriendModel && $sendToFriendModel->canEmailToFriend();
-    }
-
-    /**
      * Retrieve url for direct adding product to cart
      *
      * @param Mage_Catalog_Model_Product $product

@@ -131,23 +131,6 @@ class Mage_Reports_Model_Event_Observer
     }
 
     /**
-     * Send Product link to friends action
-     *
-     * @return $this
-     */
-    public function sendfriendProduct(Varien_Event_Observer $observer)
-    {
-        if (!$this->_enabledReports) {
-            return $this;
-        }
-
-        return $this->_event(
-            Mage_Reports_Model_Event::EVENT_PRODUCT_SEND,
-            $observer->getEvent()->getProduct()->getId()
-        );
-    }
-
-    /**
      * Remove Product from Compare Products action
      *
      * Reset count of compared products cache

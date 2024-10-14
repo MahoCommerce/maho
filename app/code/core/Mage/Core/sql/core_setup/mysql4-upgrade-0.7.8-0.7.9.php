@@ -31,7 +31,6 @@ $configValuesMap = [
     'sales_email/creditmemo_comment/template'           => 'sales_email_creditmemo_comment_template',
     'sales_email/shipment/template'                     => 'sales_email_shipment_template',
     'sales_email/shipment_comment/template'             => 'sales_email_shipment_comment_template',
-    'sendfriend/email/template'                         => 'sendfriend_email_template',
     'sitemap/generate/error_email_template'             => 'sitemap_generate_error_email_template',
     'wishlist/email/email_template'                     => 'wishlist_email_email_template',
 ];

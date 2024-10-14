@@ -25,7 +25,6 @@ CREATE TABLE {$this->getTable('report_event_types')} (
 
 INSERT INTO {$this->getTable('report_event_types')} VALUES
 (1, 'catalog_product_view'),
-(2, 'sendfriend_product'),
 (3, 'catalog_product_compare_add_product'),
 (4, 'checkout_cart_add_product'),
 (5, 'wishlist_add_product'),

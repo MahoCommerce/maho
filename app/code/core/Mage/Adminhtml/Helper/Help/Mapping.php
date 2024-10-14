@@ -151,7 +151,6 @@ abstract class Mage_Adminhtml_Helper_Help_Mapping extends Mage_Core_Helper_Abstr
             'system_config/edit/section/cataloginventory' => 'configuration/catalog/inventory.html',
             'system_config/edit/section/sitemap' => 'configuration/catalog/google-sitemap.html',
             'system_config/edit/section/rss' => 'configuration/catalog/rss-feeds.html',
-            'system_config/edit/section/sendfriend' => 'configuration/catalog/email-to-a-friend.html',
             'system_config/edit/section/newsletter' => 'configuration/customers/newsletter.html',
             'system_config/edit/section/customer' => 'configuration/customers/customer-configuration.html',
             'system_config/edit/section/wishlist' => 'configuration/customers/wishlist.html',
