@@ -281,11 +281,11 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     /**
      * Return extra EAV fields used in customer address forms
      */
-    public function getExtraFields(string $formCode, Mage_Customer_Model_Address|int $addressId = null): array
+    public function getExtraFields(string $formCode, Mage_Customer_Model_Address|int|null $addressId = null): array
     {
         if ($addressId instanceof Mage_Customer_Model_Address) {
             $address = $addressId;
-        } else if (is_int($addressId)) {
+        } elseif (is_int($addressId)) {
             /** @var Mage_Customer_Model_Customer $customer */
             $customer = Mage::getModel('customer/customer');
             $address = $customer->getAddressById($addressId);
