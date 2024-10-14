@@ -40,10 +40,6 @@
                 <h1><?= $_helper->productAttribute($_product, $_product->getName(), 'name') ?></h1>
             </div>
 
-            <?php if ($this->canEmailToFriend()): ?>
-                <p class="email-friend"><a href="<?= $this->helper('catalog/product')->getEmailToFriendUrl($_product) ?>"><?= $this->__('Email to a Friend') ?></a></p>
-            <?php endif ?>
-
             <?= $this->getReviewsSummaryHtml($_product, false, true) ?>
             <?= $this->getChildHtml('alert_urls') ?>
             <?= $this->getChildHtml('product_type_data') ?>

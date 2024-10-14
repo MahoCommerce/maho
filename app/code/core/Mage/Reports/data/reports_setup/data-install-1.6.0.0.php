@@ -22,10 +22,6 @@ $eventTypeData = [
         'event_name'    => 'catalog_product_view'
     ],
     [
-        'event_type_id' => Mage_Reports_Model_Event::EVENT_PRODUCT_SEND,
-        'event_name'    => 'sendfriend_product'
-    ],
-    [
         'event_type_id' => Mage_Reports_Model_Event::EVENT_PRODUCT_COMPARE,
         'event_name'    => 'catalog_product_compare_add_product'
     ],
