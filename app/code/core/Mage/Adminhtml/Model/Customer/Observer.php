@@ -73,7 +73,7 @@ class Mage_Adminhtml_Model_Customer_Observer
             'max' => 4,
         ], 'frontend_input');
 
-        /** @var Mage_Adminhtml_Block_Widget_Form_Element_Dependence $block */
+        /** @var Mage_Adminhtml_Block_Widget_Form_Element_Dependence $dependenceBlock */
         $dependenceBlock = $observer->getDependence();
 
         $dependenceBlock->addFieldMap('frontend_input', 'frontend_input')
