@@ -72,7 +72,7 @@ class Mage_Adminhtml_Model_Customer_Observer
             'min' => 1,
         ], 'frontend_input');
 
-        if ($attribute->getAttributeCode()) {
+        if ($attribute->getAttributeCode() === 'street') {
             $form->getElement('multiline_count')->setMax(4);
         }
 
