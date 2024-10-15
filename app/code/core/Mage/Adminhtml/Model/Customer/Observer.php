@@ -17,7 +17,6 @@
  */
 class Mage_Adminhtml_Model_Customer_Observer
 {
-
     /**
      * Add input types in customer and customer_address attribute edit forms
      *
