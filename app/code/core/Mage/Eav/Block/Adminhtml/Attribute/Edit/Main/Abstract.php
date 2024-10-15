@@ -88,8 +88,6 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
 
         $this->_addElementTypes($fieldset);
 
-        $yesno = Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray();
-
         $validateClass = sprintf(
             'validate-code validate-length maximum-length-%d',
             Mage_Eav_Model_Entity_Attribute::ATTRIBUTE_CODE_MAX_LENGTH
@@ -120,19 +118,17 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
             'values' => Mage::helper('eav')->getFrontendClasses($attributeObject->getEntityType()->getEntityTypeCode())
         ]);
 
-        $fieldset->addField('is_required', 'select', [
+        $fieldset->addField('is_required', 'boolean', [
             'name' => 'is_required',
             'label' => Mage::helper('eav')->__('Values Required'),
             'title' => Mage::helper('eav')->__('Values Required'),
-            'values' => $yesno,
         ]);
 
-        $fieldset->addField('is_unique', 'select', [
+        $fieldset->addField('is_unique', 'boolean', [
             'name' => 'is_unique',
             'label' => Mage::helper('eav')->__('Unique Value'),
             'title' => Mage::helper('eav')->__('Unique Value (not shared with other products)'),
             'note'  => Mage::helper('eav')->__('Not shared with other products'),
-            'values' => $yesno,
         ]);
 
         $fieldset->addField('default_value_text', 'text', [
@@ -142,11 +138,10 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
             'value' => $attributeObject->getDefaultValue(),
         ]);
 
-        $fieldset->addField('default_value_yesno', 'select', [
+        $fieldset->addField('default_value_yesno', 'boolean', [
             'name' => 'default_value_yesno',
             'label' => Mage::helper('eav')->__('Default Value'),
             'title' => Mage::helper('eav')->__('Default Value'),
-            'values' => $yesno,
             'value' => $attributeObject->getDefaultValue(),
         ]);
 

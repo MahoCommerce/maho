@@ -21,12 +21,12 @@ class Varien_Data_Form_Element_Boolean extends Varien_Data_Form_Element_Select
         parent::__construct($attributes);
         $this->setValues([
             [
-                'label' => Mage::helper('core')->__('No'),
-                'value' => 0,
-            ],
-            [
                 'label' => Mage::helper('core')->__('Yes'),
                 'value' => 1,
+            ],
+            [
+                'label' => Mage::helper('core')->__('No'),
+                'value' => 0,
             ],
         ]);
     }

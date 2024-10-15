@@ -57,11 +57,10 @@ class Mage_Adminhtml_Model_Customer_Observer
         /** @var Varien_Data_Form_Element_Fieldset $fieldset */
         $fieldset = $form->getElement('base_fieldset');
 
-        $fieldset->addField('is_visible', 'select', [
+        $fieldset->addField('is_visible', 'boolean', [
             'name'   => 'is_visible',
             'label'  => Mage::helper('adminhtml')->__('Is Visible'),
             'title'  => Mage::helper('adminhtml')->__('Is Visible'),
-            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
         ], 'frontend_class');
 
         $fieldset->addField('multiline_count', 'number', [
