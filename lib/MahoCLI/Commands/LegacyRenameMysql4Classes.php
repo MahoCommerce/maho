@@ -544,7 +544,6 @@ class LegacyRenameMysql4Classes extends BaseMahoCommand
             '<rule_mysql4>' => '<rule_resource>',
             '<sales_mysql4>' => '<sales_resource>',
             '<salesrule_mysql4>' => '<salesrule_resource>',
-            '<sendfriend_mysql4>' => '<sendfriend_resource>',
             '<shipping_mysql4>' => '<shipping_resource>',
             '<sitemap_mysql4>' => '<sitemap_resource>',
             '<tag_mysql4>' => '<tag_resource>',

@@ -72,6 +72,14 @@
                     </configuration_files_access_level_verification>
                 </observers>
             </admin_user_authenticate_after>
+            <session_before_renew_cookie>
+                <observers>
+                    <adminhtml_session_before_renew_cookie>
+                        <class>adminhtml/observer</class>
+                        <method>setCookieLifetime</method>
+                    </adminhtml_session_before_renew_cookie>
+                </observers>
+            </session_before_renew_cookie>
         </events>
     </global>
     <admin>

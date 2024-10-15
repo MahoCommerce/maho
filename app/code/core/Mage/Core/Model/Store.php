@@ -827,7 +827,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             if ($code == $this->getDefaultCurrency()) {
                 Mage::app()->getCookie()->delete(self::COOKIE_CURRENCY, $code);
             } else {
-                Mage::app()->getCookie()->set(self::COOKIE_CURRENCY, $code);
+                Mage::app()->getCookie()->set(self::COOKIE_CURRENCY, $code, true);
             }
         }
         return $this;

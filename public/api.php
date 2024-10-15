@@ -24,7 +24,7 @@ if (file_exists(MAHO_ROOT_DIR . '/app/bootstrap.php')) {
 }
 
 if (!Mage::isInstalled()) {
-    echo 'Application is not installed yet, please complete install wizard first.';
+    echo 'Application is not installed yet.';
     exit;
 }
 
@@ -42,31 +42,31 @@ if (in_array($apiAlias, Mage_Api2_Model_Server::getApiTypes())) {
     Mage::register('custom_entry_point', true);
     /** @var Mage_Api2_Model_Server $server */
     $server = Mage::getSingleton('api2/server');
-
     $server->run();
+    exit;
+}
+
+/* @var $server Mage_Api_Model_Server */
+$server = Mage::getSingleton('api/server');
+if (!$apiAlias) {
+    $adapterCode = 'default';
 } else {
-    /* @var $server Mage_Api_Model_Server */
-    $server = Mage::getSingleton('api/server');
-    if (!$apiAlias) {
-        $adapterCode = 'default';
-    } else {
-        $adapterCode = $server->getAdapterCodeByAlias($apiAlias);
-    }
-    // if no adapters found in aliases - find it by default, by code
-    if (null === $adapterCode) {
-        $adapterCode = $apiAlias;
-    }
-    try {
-        $server->initialize($adapterCode);
-        // emulate index.php entry point for correct URLs generation in API
-        Mage::register('custom_entry_point', true);
-        $server->run();
+    $adapterCode = $server->getAdapterCodeByAlias($apiAlias);
+}
 
-        Mage::app()->getResponse()->sendResponse();
-    } catch (Exception $e) {
-        Mage::logException($e);
+// if no adapters found in aliases - find it by default, by code
+if ($adapterCode === null) {
+    $adapterCode = $apiAlias;
+}
 
-        echo $e->getMessage();
-        exit;
-    }
+try {
+    $server->initialize($adapterCode);
+    // emulate index.php entry point for correct URLs generation in API
+    Mage::register('custom_entry_point', true);
+    $server->run();
+    Mage::app()->getResponse()->sendResponse();
+} catch (Exception $e) {
+    Mage::logException($e);
+    echo $e->getMessage();
+    exit;
 }

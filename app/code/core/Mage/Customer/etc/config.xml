@@ -445,6 +445,14 @@
                     </customer_upgrade_password>
                 </observers>
             </customer_customer_authenticated>
+            <session_before_renew_cookie>
+                <observers>
+                    <customer_session_before_renew_cookie>
+                        <class>customer/observer</class>
+                        <method>setCookieLifetime</method>
+                    </customer_session_before_renew_cookie>
+                </observers>
+            </session_before_renew_cookie>
         </events>
         <eav_forms>
             <customer>

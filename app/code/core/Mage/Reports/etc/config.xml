@@ -128,14 +128,6 @@
                     </reports>
                 </observers>
             </catalog_controller_product_view>
-            <sendfriend_product>
-                <observers>
-                    <reports>
-                        <class>reports/event_observer</class>
-                        <method>sendfriendProduct</method>
-                    </reports>
-                </observers>
-            </sendfriend_product>
             <catalog_product_compare_add_product>
                 <observers>
                     <reports>

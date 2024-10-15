@@ -109,8 +109,6 @@
  * @method bool getIsMultiPayment()
  * @method int getIsMultiShipping()
  * @method $this setIsMultiShipping(int $value)
- * @method bool getIsPersistent()
- * @method $this setIsPersistent(bool $value)
  * @method bool getIsSuperMode()
  * @method $this setIsSuperMode(bool $value)
  * @method $this setIsVirtual(int $value)

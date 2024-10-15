@@ -65,13 +65,6 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     protected $_isCustomerIdChecked = null;
 
     /**
-     * Persistent customer group id
-     *
-     * @var null|int
-     */
-    protected $_persistentCustomerGroupId = null;
-
-    /**
      * Retrieve customer sharing configuration model
      *
      * @return Mage_Customer_Model_Config_Share
@@ -326,6 +319,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     protected function _logout()
     {
         $this->setId(null);
+        $this->unsRememberMe();
         $this->setCustomerGroupId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
         $this->getCookie()->delete($this->getSessionName());
         Mage::getSingleton('core/session')->renewFormKey();

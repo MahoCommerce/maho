@@ -349,12 +349,4 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
     {
         return $this->isRedirectRegisterStep();
     }
-
-    public function isPersistentEnabled(): bool
-    {
-        if (Mage::helper('core')->isModuleEnabled('Mage_Persistent')) {
-            return Mage::helper('persistent')->isEnabled();
-        }
-        return false;
-    }
 }

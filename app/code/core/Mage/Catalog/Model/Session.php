@@ -24,8 +24,6 @@
  * @method int getLastVisitedCategoryId()
  * @method string getLimitPage()
  * @method bool getParamsMemorizeDisabled()
- * @method array getSendfriendFormData()
- * @method $this setSendfriendFormData(array $value)
  * @method string getSortDirection()
  * @method string getSortOrder()
  * @method $this unsDisplayMode()
