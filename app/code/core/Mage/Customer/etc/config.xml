@@ -449,7 +449,7 @@
                 <observers>
                     <customer_session_before_renew_cookie>
                         <class>customer/observer</class>
-                        <method>cookieSetLifetime</method>
+                        <method>setCookieLifetime</method>
                     </customer_session_before_renew_cookie>
                 </observers>
             </session_before_renew_cookie>

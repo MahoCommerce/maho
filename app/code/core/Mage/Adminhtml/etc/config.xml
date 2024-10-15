@@ -76,7 +76,7 @@
                 <observers>
                     <adminhtml_session_before_renew_cookie>
                         <class>adminhtml/observer</class>
-                        <method>cookieSetLifetime</method>
+                        <method>setCookieLifetime</method>
                     </adminhtml_session_before_renew_cookie>
                 </observers>
             </session_before_renew_cookie>

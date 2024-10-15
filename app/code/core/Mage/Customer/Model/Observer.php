@@ -254,7 +254,7 @@ class Mage_Customer_Model_Observer
     /**
      * Set the customer's or guest's session time based on config
      */
-    public function cookieSetLifetime(Varien_Event_Observer $observer)
+    public function setCookieLifetime(Varien_Event_Observer $observer)
     {
         /** @var Mage_Core_Model_Session $session */
         $session = Mage::getSingleton('customer/session');
