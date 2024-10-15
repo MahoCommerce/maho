@@ -11,7 +11,7 @@
 ?>
 <?php $_attribute = $this->getAttribute() ?>
 <?php $_code = $_attribute->getAttributeCode() ?>
-<label for="<?php echo $this->getFieldId($_code)?>"<?php if ($this->isRequired()) echo ' class="required"' ?>><?php if ($this->isRequired()) echo '<em>*</em>' ?><?php echo $this->__($_attribute->getStoreLabel()) ?></label>
+<label for="<?= $this->getFieldId($_code)?>"<?php if ($this->isRequired()) echo ' class="required"' ?>><?php if ($this->isRequired()) echo '<em>*</em>' ?><?= $this->__($_attribute->getStoreLabel()) ?></label>
 <div class="input-box">
-    <textarea id="<?php echo $this->getFieldId($_code)?>" name="<?php echo $this->getFieldName($_code)?>" title="<?php echo Mage::helper('core')->quoteEscape($this->__($_attribute->getStoreLabel())) ?>" class="input-text" <?php echo $this->getFieldParams() ?>><?php echo $this->escapeHtml($this->getObject()->getData($_code)) ?></textarea>
+    <textarea id="<?= $this->getFieldId($_code)?>" name="<?= $this->getFieldName($_code)?>" title="<?= Mage::helper('core')->quoteEscape($this->__($_attribute->getStoreLabel())) ?>" class="input-text" <?= $this->getFieldParams() ?>><?= $this->escapeHtml($this->getObject()->getData($_code)) ?></textarea>
 </div>

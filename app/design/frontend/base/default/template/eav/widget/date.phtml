@@ -11,8 +11,8 @@
 ?>
 <?php $_attribute = $this->getAttribute() ?>
 <?php $_code = $_attribute->getAttributeCode() ?>
-<label for="<?php echo $this->getFieldId('month')?>"<?php if ($this->isRequired()) echo ' class="required"' ?>><?php if ($this->isRequired()) echo '<em>*</em>' ?><?php echo $this->__($_attribute->getStoreLabel()) ?></label>
-<div class="input-box attribute-<?php echo $_code ?>">
+<label for="<?= $this->getFieldId('month')?>"<?php if ($this->isRequired()) echo ' class="required"' ?>><?php if ($this->isRequired()) echo '<em>*</em>' ?><?= $this->__($_attribute->getStoreLabel()) ?></label>
+<div class="input-box attribute-<?= $_code ?>">
 <?php
     $this->setDateInput('d',
         '<div class="date-day">
@@ -35,15 +35,15 @@
          </div>'
     );
 ?>
-    <?php echo $this->getSortedDateInputs() ?>
+    <?= $this->getSortedDateInputs() ?>
     <div class="date-full" style="display:none;">
-        <input type="hidden" id="<?php echo $this->getFieldId($_code)?>" name="<?php echo $this->getFieldName($_code)?>" />
+        <input type="hidden" id="<?= $this->getFieldId($_code)?>" name="<?= $this->getFieldName($_code)?>" />
     </div>
 
     <div class="validation-advice" style="display:none;"></div>
 </div>
 <script type="text/javascript">
 //<![CDATA[
-    new Varien.DateElementHelper('.attribute-<?php echo $_code ?>', <?php echo $this->isRequired() ? 'true' : 'false' ?>, '<?php echo $this->getDateFormat() ?>');
+    new Varien.DateElementHelper('.attribute-<?= $_code ?>', <?= $this->isRequired() ? 'true' : 'false' ?>, '<?= $this->getDateFormat() ?>');
 //]]>
 </script>

@@ -140,13 +140,13 @@
         </ul>
     </div>
     <div class="fieldset">
-        <h2 class="legend"><?php echo $this->__('Other') ?></h2>
+        <h2 class="legend"><?= $this->__('Other') ?></h2>
         <ul class="form-list">
             <?php foreach ($this->getExtraFields() as $_code => $_attribute): ?>
                 <?php $_block = 'eav/widget_'.$_attribute->getFrontendInput() ?>
                 <?php $_element = $this->getLayout()->createBlock($_block)->setData('attribute', $_attribute) ?>
                 <?php if ($_element->isEnabled()): ?>
-                    <li><?php echo $_element->setObject($this->getAddress())->toHtml() ?></li>
+                    <li><?= $_element->setObject($this->getAddress())->toHtml() ?></li>
                 <?php endif ?>
             <?php endforeach ?>
         </ul>

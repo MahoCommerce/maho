@@ -11,13 +11,13 @@
 ?>
 <?php $_attribute = $this->getAttribute() ?>
 <?php $_code = $_attribute->getAttributeCode() ?>
-<label for="<?php echo $this->getFieldId($_code)?>"<?php if ($this->isRequired()) echo ' class="required"' ?>><?php if ($this->isRequired()) echo '<em>*</em>' ?><?php echo $this->__($_attribute->getStoreLabel()) ?></label>
+<label for="<?= $this->getFieldId($_code)?>"<?php if ($this->isRequired()) echo ' class="required"' ?>><?php if ($this->isRequired()) echo '<em>*</em>' ?><?= $this->__($_attribute->getStoreLabel()) ?></label>
 <div class="input-box">
-    <select id="<?php echo $this->getFieldId($_code)?>" name="<?php echo $this->getFieldName($_code)?>" title="<?php echo Mage::helper('core')->quoteEscape($this->__($_code)) ?>"<?php if ($this->isRequired()):?> class="validate-select"<?php endif ?> <?php echo $this->getFieldParams() ?>>
+    <select id="<?= $this->getFieldId($_code)?>" name="<?= $this->getFieldName($_code)?>" title="<?= Mage::helper('core')->quoteEscape($this->__($_code)) ?>"<?php if ($this->isRequired()):?> class="validate-select"<?php endif ?> <?= $this->getFieldParams() ?>>
         <?php $options = $this->getOptions() ?>
         <?php $values = explode(',', $this->getObject()->getData($_code)) ?>
         <?php foreach ($options as $option): ?>
-            <option value="<?php echo $option['value'] ?>"<?php if (in_array($option['value'], $values)) echo ' selected="selected"' ?>><?php echo $this->__($option['label']) ?></option>
+            <option value="<?= $option['value'] ?>"<?php if (in_array($option['value'], $values)) echo ' selected="selected"' ?>><?= $this->__($option['label']) ?></option>
         <?php endforeach ?>
     </select>
 </div>

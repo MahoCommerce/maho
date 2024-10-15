@@ -45,7 +45,7 @@
             <?php $_block = 'eav/widget_'.$_attribute->getFrontendInput() ?>
             <?php $_element = $this->getLayout()->createBlock($_block)->setData('attribute', $_attribute) ?>
             <?php if ($_element->isEnabled()): ?>
-                <li><?php echo $_element->setObject($this->getCustomer())->toHtml() ?></li>
+                <li><?= $_element->setObject($this->getCustomer())->toHtml() ?></li>
             <?php endif ?>
         <?php endforeach ?>
 

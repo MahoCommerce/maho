@@ -123,7 +123,7 @@
             <?php $_block = 'eav/widget_'.$_attribute->getFrontendInput() ?>
             <?php $_element = $this->getLayout()->createBlock($_block)->setData('attribute', $_attribute)->setFieldIdFormat('billing:%s')->setFieldNameFormat('billing[%s]') ?>
             <?php if ($_element->isEnabled()): ?>
-                <li class="register-customer-extra-fields"><?php echo $_element->setObject($this->getExtraFieldsSession())->toHtml() ?></li>
+                <li class="register-customer-extra-fields"><?= $_element->setObject($this->getExtraFieldsSession())->toHtml() ?></li>
             <?php endif ?>
         <?php endforeach ?>
 
@@ -154,7 +154,7 @@
             <?php $_block = 'eav/widget_'.$_attribute->getFrontendInput() ?>
             <?php $_element = $this->getLayout()->createBlock($_block)->setData('attribute', $_attribute)->setFieldIdFormat('billing:%s')->setFieldNameFormat('billing[%s]') ?>
             <?php if ($_element->isEnabled()): ?>
-                <li class="register-customer-extra-fields"><?php echo $_element->setObject($this->getExtraFieldsSession())->toHtml() ?></li>
+                <li class="register-customer-extra-fields"><?= $_element->setObject($this->getExtraFieldsSession())->toHtml() ?></li>
             <?php endif ?>
         <?php endforeach ?>
 
