@@ -68,9 +68,9 @@ class Mage_Adminhtml_Model_Observer
     }
 
     /**
-     * Set the admin's session time based on config
+     * Set the admin's session lifetime based on config
      */
-    public function cookieSetLifetime(Varien_Event_Observer $observer)
+    public function cookieSetLifetime(Varien_Event_Observer $observer): void
     {
         /** @var Mage_Core_Model_Session $session */
         $session = Mage::getSingleton('adminhtml/session');

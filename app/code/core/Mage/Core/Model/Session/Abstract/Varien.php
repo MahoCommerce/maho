@@ -224,12 +224,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         return $this;
     }
 
-    /**
-     * Set session cookie
-     *
-     * @return $this
-     */
-    public function setSessionCookie()
+    public function setSessionCookie(): self
     {
         $this->getCookie()->set($this->getSessionName(), $this->getSessionId());
         return $this;
@@ -296,12 +291,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         return $data;
     }
 
-    /**
-     * Retrieve session Id
-     *
-     * @return string|false
-     */
-    public function getSessionId()
+    public function getSessionId(): string|false
     {
         return session_id();
     }
