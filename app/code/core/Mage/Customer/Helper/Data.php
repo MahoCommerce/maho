@@ -746,7 +746,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Return all EAV fields used in customer forms as groups
      */
-    public function getGroupedFields(string $formCode, ?Mage_Customer_Model_Customer $customer=null): array
+    public function getGroupedFields(string $formCode, ?Mage_Customer_Model_Customer $customer = null): array
     {
         $customer ??= Mage::getModel('customer/customer');
 
@@ -771,7 +771,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Return extra EAV fields used in customer forms
      */
-    public function getExtraFields(string $formCode, ?Mage_Customer_Model_Customer $customer=null): array
+    public function getExtraFields(string $formCode, ?Mage_Customer_Model_Customer $customer = null): array
     {
         $customer ??= Mage::getModel('customer/customer');
 
