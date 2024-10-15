@@ -291,7 +291,10 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         return $data;
     }
 
-    public function getSessionId(): string|false
+    /**
+     * @return false|string
+     */
+    public function getSessionId()
     {
         return session_id();
     }
