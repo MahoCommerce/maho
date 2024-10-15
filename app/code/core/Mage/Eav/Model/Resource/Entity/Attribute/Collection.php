@@ -316,7 +316,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
     }
 
     /**
-     * Ad information about attribute sets to collection result data
+     * Add information about attribute sets to collection result data
      *
      * @return $this
      */
