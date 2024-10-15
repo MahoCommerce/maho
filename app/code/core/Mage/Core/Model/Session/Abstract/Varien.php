@@ -56,15 +56,24 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         // getSessionSaveMethod has to return correct version of handler in any case
         $moduleName = $this->getSessionSaveMethod();
         switch ($moduleName) {
-            /**
-             * backward compatibility with db argument (option is @deprecated after 1.12.0.2)
-             */
             case 'db':
                 /** @var Mage_Core_Model_Resource_Session $sessionResource */
                 $sessionResource = Mage::getResourceSingleton('core/session');
                 $sessionResource->setSaveHandler();
                 break;
             case 'redis':
+                // If we have not explicitly set redis_session lifetime values in local.xml,
+                // then define using min and max values based on the session namespace.
+                // Else, the defaults from colinmollenhour/php-redis-session-abstract will be used.
+                $redisConfig = Mage::getConfig()->getNode('global/redis_session') ?:
+                             Mage::getConfig()->getNode('global')->addChild('redis_session');
+                if ($sessionName === Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE) {
+                    $redisConfig->min_lifetime ??= Mage_Adminhtml_Controller_Action::SESSION_MIN_LIFETIME;
+                    $redisConfig->max_lifetime ??= Mage_Adminhtml_Controller_Action::SESSION_MAX_LIFETIME;
+                } else {
+                    $redisConfig->min_lifetime ??= Mage_Core_Controller_Front_Action::SESSION_MIN_LIFETIME;
+                    $redisConfig->max_lifetime ??= Mage_Core_Controller_Front_Action::SESSION_MAX_LIFETIME;
+                }
                 /** @var Cm_RedisSession_Model_Session $sessionResource */
                 $sessionResource = Mage::getSingleton('cm_redissession/session');
                 $sessionResource->setSaveHandler();
@@ -89,58 +98,33 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         }
 
         $cookie = $this->getCookie();
-        if (Mage::app()->getStore()->isAdmin()) {
-            $sessionMaxLifetime = Mage_Core_Model_Resource_Session::SEESION_MAX_COOKIE_LIFETIME;
-            $adminSessionLifetime = Mage::getStoreConfigAsInt('admin/security/session_cookie_lifetime');
-            if ($adminSessionLifetime > $sessionMaxLifetime) {
-                $adminSessionLifetime = $sessionMaxLifetime;
-            }
-            if ($adminSessionLifetime > 60) {
-                $cookie->setLifetime($adminSessionLifetime);
-            }
-        }
 
-        // session cookie params
-        $cookieParams = [
-            'lifetime' => (int)$cookie->getLifetime(),
-            'path'     => $cookie->getPath(),
-            'domain'   => $cookie->getConfigDomain(),
-            'secure'   => $cookie->isSecure(),
-            'httponly' => $cookie->getHttponly()
-        ];
-
-        if (!$cookieParams['httponly']) {
-            unset($cookieParams['httponly']);
-            if (!$cookieParams['secure']) {
-                unset($cookieParams['secure']);
-                if (!$cookieParams['domain']) {
-                    unset($cookieParams['domain']);
+        // Migrate old cookie from (om_)frontend => maho_session
+        if (!$cookie->get($sessionName) && $sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
+            foreach (Mage_Core_Controller_Front_Action::SESSION_LEGACY_NAMESPACES as $namespace) {
+                if ($cookie->get($namespace)) {
+                    $_COOKIE[$sessionName] = $cookie->get($namespace);
+                    $cookie->delete($namespace);
+                    break;
                 }
             }
         }
 
-        if (isset($cookieParams['domain'])) {
-            $cookieParams['domain'] = $cookie->getDomain();
-        }
-
-        call_user_func_array('session_set_cookie_params', array_values($cookieParams));
-
+        // If session name is empty, we will use the default cookie name of PHPSESSID
+        // which should never happen in core.
         if (!empty($sessionName)) {
             $this->setSessionName($sessionName);
-
-            // Migrate old cookie from 'frontend'
-            if ($sessionName === \Mage_Core_Controller_Front_Action::SESSION_NAMESPACE
-                && $cookie->get('frontend')
-                && ! $cookie->get(\Mage_Core_Controller_Front_Action::SESSION_NAMESPACE)
-            ) {
-                $frontendValue = $cookie->get('frontend');
-                $_COOKIE[\Mage_Core_Controller_Front_Action::SESSION_NAMESPACE] = $frontendValue;
-                $cookie->set(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE, $frontendValue);
-                $cookie->delete('frontend');
-            }
         }
-        // potential custom logic for session id (ex. switching between hosts)
+
+        // Call any custom logic in child classes for setting the session id
+        // I.e. Checking the SID query param to enable switching between hosts
         $this->setSessionId();
+
+        // If we still do not have a session id, then read from the cookie value
+        // Otherwise, we will be starting a new session.
+        if (empty($this->getSessionId()) && $cookie->get($sessionName)) {
+            $this->setSessionId($cookie->get($sessionName));
+        }
 
         Varien_Profiler::start(__METHOD__ . '/start');
         $sessionCacheLimiter = Mage::getConfig()->getNode('global/session_cache_limiter');
@@ -149,8 +133,11 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         }
 
         // Start session, abort and render error page if it fails
+        // Note, we set the session cookie manually later on, so disable here.
+        // Also disable use_trans_sid, although the option is deprecated and will be removed in PHP9
+        // Ref: https://wiki.php.net/rfc/deprecate-get-post-sessions
         try {
-            if (session_start() === false) {
+            if (session_start(['use_cookies' => false, 'use_trans_sid' => false]) === false) {
                 throw new Exception('Unable to start session.');
             }
         } catch (Throwable $e) {
@@ -163,33 +150,28 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
             }
         }
 
-        Mage::dispatchEvent('session_before_renew_cookie', ['cookie' => $cookie]);
-
         // Secure cookie check to prevent MITM attack
-        if (Mage::app()->getFrontController()->getRequest()->isSecure() && empty($cookieParams['secure'])) {
+        if (Mage::app()->getFrontController()->getRequest()->isSecure() && !$cookie->isSecure()) {
             $secureCookieName = $this->getSessionName() . '_cid';
-            $cookieValue = $cookie->get($secureCookieName);
+            $secureCookieValue = $cookie->get($secureCookieName);
 
-            // Migrate old cookie from 'frontend'
-            if (!$cookieValue
-                && $sessionName === \Mage_Core_Controller_Front_Action::SESSION_NAMESPACE
-                && $cookie->get('frontend_cid')
-            ) {
-                $cookieValue = $cookie->get('frontend_cid');
-                $_COOKIE[$secureCookieName] = $cookieValue;
-                $cookie->set($secureCookieName, $cookieValue);
-                $cookie->delete('frontend_cid');
+            // Migrate old cookie from (om_)frontend_cid => maho_session_cid
+            if (!$secureCookieValue && $sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
+                foreach (Mage_Core_Controller_Front_Action::SESSION_LEGACY_NAMESPACES as $namespace) {
+                    if ($cookie->get($namespace . '_cid')) {
+                        $secureCookieValue = $cookie->get($namespace . '_cid');
+                        $_COOKIE[$sessionName] = $secureCookieValue;
+                        $cookie->delete($namespace . '_cid');
+                        break;
+                    }
+                }
             }
 
-            // Set secure cookie check value in session if not yet set
             if (!isset($_SESSION[self::SECURE_COOKIE_CHECK_KEY])) {
-                $cookieValue = Mage::helper('core')->getRandomString(16);
-                $cookie->set($secureCookieName, $cookieValue, null, null, null, true, true);
-                $_SESSION[self::SECURE_COOKIE_CHECK_KEY] = md5($cookieValue);
-            } elseif (is_string($cookieValue) && $_SESSION[self::SECURE_COOKIE_CHECK_KEY] === md5($cookieValue)) {
-                // Renew secret check value cookie if it is valid
-                $cookie->renew($secureCookieName, null, null, null, true, true);
-            } else {
+                // Secure cookie check value not in session yet
+                $secureCookieValue = Mage::helper('core')->getRandomString(16);
+                $_SESSION[self::SECURE_COOKIE_CHECK_KEY] = md5($secureCookieValue);
+            } elseif (!is_string($secureCookieValue) || $_SESSION[self::SECURE_COOKIE_CHECK_KEY] !== md5($secureCookieValue)) {
                 // Secure cookie check value is invalid, regenerate session
                 session_regenerate_id(false);
                 $sessionHosts = $this->getSessionHosts();
@@ -200,16 +182,22 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
                         $cookie->delete($this->getSessionName(), null, $host);
                     }
                 }
-                $_SESSION = [];
+                unset($secureCookieValue);
+                session_unset();
             }
         }
 
-        /**
-         * Renew cookie expiration time if session id did not change
-         */
-        if ($cookie->get(session_name()) == $this->getSessionId()) {
-            $cookie->renew(session_name());
+        // Observers can change settings of the cookie such as lifetime, regenerate the session id, etc
+        Mage::dispatchEvent('session_before_renew_cookie', ['cookie' => $cookie]);
+
+        // Set or renew regular session cookie
+        $this->setSessionCookie();
+
+        // Set or renew secure cookie if needed
+        if (isset($secureCookieName) && isset($secureCookieValue)) {
+            $cookie->set($secureCookieName, $secureCookieValue, null, null, null, true, true);
         }
+
         Varien_Profiler::stop(__METHOD__ . '/start');
 
         return $this;
@@ -233,6 +221,12 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
     public function setSessionHosts(array $hosts)
     {
         $this->_sessionHosts = $hosts;
+        return $this;
+    }
+
+    public function setSessionCookie(): self
+    {
+        $this->getCookie()->set($this->getSessionName(), $this->getSessionId());
         return $this;
     }
 
@@ -298,9 +292,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
     }
 
     /**
-     * Retrieve session Id
-     *
-     * @return string
+     * @return false|string
      */
     public function getSessionId()
     {
@@ -613,6 +605,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
     public function regenerateSessionId()
     {
         session_regenerate_id(true);
+        $this->setSessionCookie();
         return $this;
     }
 }

@@ -66,16 +66,6 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Items_Grid extends Mage_Adminhtml_
     }
 
     /**
-     * Returns the session
-     *
-     * @return Mage_Persistent_Helper_Session
-     */
-    public function getSession()
-    {
-        return $this->getParentBlock()->getSession();
-    }
-
-    /**
      * Returns the item's calculation price
      *
      * @param Mage_Sales_Model_Quote_Item $item

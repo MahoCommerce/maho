@@ -21,7 +21,6 @@
 $isRegistrationAllowed = $this->helper('customer')->isRegistrationAllowed();
 $isRedirectRegisterStep = $this->helper('checkout')->isRedirectRegisterStep();
 $isAllowedGuestCheckout = $this->helper('checkout')->isAllowedGuestCheckout($this->getQuote());
-$isPersistentEnabled = $this->helper('checkout')->isPersistentEnabled();
 ?>
 <?php /* Extensions placeholder */ ?>
 <?= $this->getChildHtml('login_before') ?>
@@ -91,7 +90,7 @@ $isPersistentEnabled = $this->helper('checkout')->isPersistentEnabled();
                     <a href="<?= $this->getUrl('customer/account/forgotpassword') ?>" class="f-left"><?= $this->__('Forgot your password?') ?></a>
                 </li>
                 <?= $this->getChildHtml('form.additional.info') ?>
-                <?= $this->getChildHtml('persistent.remember.me') ?>
+                <?= $this->getChildHtml('remember.me') ?>
             </ul>
             <input name="context" type="hidden" value="checkout" />
         </fieldset>
@@ -126,8 +125,6 @@ $isPersistentEnabled = $this->helper('checkout')->isPersistentEnabled();
         if (document.getElementById('login:register').checked) {
             <?php if ($isRedirectRegisterStep): ?>
                 window.location = '<?= $this->quoteEscape($this->helper('checkout/url')->getRegistrationUrl()) ?>';
-            <?php elseif($isPersistentEnabled): ?>
-                window.location = '<?= $this->quoteEscape($this->getUrl('persistent/index/saveMethod')) ?>';
             <?php else: ?>
                 checkout.setMethod();
             <?php endif; ?>

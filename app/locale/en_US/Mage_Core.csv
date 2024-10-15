@@ -419,7 +419,7 @@
 "Validate HTTP_X_FORWARDED_FOR","Validate HTTP_X_FORWARDED_FOR"
 "Validate REMOTE_ADDR","Validate REMOTE_ADDR"
 "Validation has failed.","Validation has failed."
-"Values less than 60 are ignored. Note that changes will apply after logout.","Values less than 60 are ignored. Note that changes will apply after logout."
+"Value must be between %d and %d","Value must be between %d and %d"
 "Variable Code must be unique.","Variable Code must be unique."
 "Warning! Enabling this feature is not recommended on production environments because it represents a potential security risk.","Warning! Enabling this feature is not recommended on production environments because it represents a potential security risk."
 "Web","Web"

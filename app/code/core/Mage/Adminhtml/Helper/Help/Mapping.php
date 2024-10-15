@@ -155,7 +155,6 @@ abstract class Mage_Adminhtml_Helper_Help_Mapping extends Mage_Core_Helper_Abstr
             'system_config/edit/section/customer' => 'configuration/customers/customer-configuration.html',
             'system_config/edit/section/wishlist' => 'configuration/customers/wishlist.html',
             'system_config/edit/section/promo' => 'configuration/customers/promotions.html',
-            'system_config/edit/section/persistent' => 'configuration/customers/persistent-shopping-cart.html',
             'system_config/edit/section/sales' => 'configuration/sales/sales.html',
             'system_config/edit/section/sales_email' => 'configuration/sales/sales-emails.html',
             'system_config/edit/section/sales_pdf' => 'configuration/sales/pdf-print-outs.html',

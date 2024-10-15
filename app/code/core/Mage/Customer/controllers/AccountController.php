@@ -147,7 +147,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $login = $this->getRequest()->getPost('login');
             if (!empty($login['username']) && !empty($login['password'])) {
                 try {
-                    $session->login($login['username'], $login['password']);
+                    $session->setRememberMe((bool)$this->getRequest()->getPost('remember_me'))
+                            ->login($login['username'], $login['password']);
                     if ($session->getCustomer()->getIsJustConfirmed()) {
                         $this->_welcomeCustomer($session->getCustomer(), true);
                     }
@@ -344,7 +345,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             ));
             $url = $this->_getUrl('*/*/index', ['_secure' => true]);
         } else {
-            $session->setCustomerAsLoggedIn($customer);
+            $session->setRememberMe((bool)$this->getRequest()->getPost('remember_me'))
+                    ->setCustomerAsLoggedIn($customer);
             $url = $this->_welcomeCustomer($customer);
         }
         $this->_redirectSuccess($url);
