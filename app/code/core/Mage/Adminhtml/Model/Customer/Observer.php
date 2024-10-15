@@ -68,9 +68,13 @@ class Mage_Adminhtml_Model_Customer_Observer
             'name' => 'multiline_count',
             'label' => Mage::helper('eav')->__('Multiline Count'),
             'title' => Mage::helper('eav')->__('Multiline Count'),
+            'value' => 1,
             'min' => 1,
-            'max' => 4,
         ], 'frontend_input');
+
+        if ($attribute->getAttributeCode()) {
+            $form->getElement('multiline_count')->setMax(4);
+        }
 
         /** @var Mage_Adminhtml_Block_Widget_Form_Element_Dependence $dependenceBlock */
         $dependenceBlock = $observer->getDependence();
