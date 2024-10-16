@@ -38,6 +38,11 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Bloc
         }
 
         if ($setId) {
+            $storeId = 0;
+            if ($this->getRequest()->getParam('store')) {
+                $storeId = Mage::app()->getStore($this->getRequest()->getParam('store'))->getId();
+            }
+
             $groupCollection = Mage::getResourceModel('eav/entity_attribute_group_collection')
                 ->setAttributeSetFilter($setId)
                 ->setSortOrder()
@@ -48,6 +53,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Bloc
                 // do not add groups without attributes
 
                 foreach ($attributes as $key => $attribute) {
+                    $attribute->setStoreId($storeId);
                     if (!$attribute->getIsVisible()) {
                         unset($attributes[$key]);
                     }
@@ -110,11 +116,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Bloc
                 'url'       => $this->getUrl('*/*/crosssell', ['_current' => true]),
                 'class'     => 'ajax',
             ]);
-
-            $storeId = 0;
-            if ($this->getRequest()->getParam('store')) {
-                $storeId = Mage::app()->getStore($this->getRequest()->getParam('store'))->getId();
-            }
 
             $alertPriceAllow = Mage::getStoreConfig('catalog/productalert/allow_price');
             $alertStockAllow = Mage::getStoreConfig('catalog/productalert/allow_stock');

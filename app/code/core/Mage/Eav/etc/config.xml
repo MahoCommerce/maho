@@ -147,6 +147,7 @@
                     <date>date</date>
                     <boolean>boolean</boolean>
                     <multiselect>multiselect</multiselect>
+                    <customselect>customselect</customselect>
                     <select>select</select>
                 </input_types>
             </validator_data>

@@ -35,7 +35,7 @@ function saveAttribute() {
 function checkOptionsPanelVisibility() {
     if ($('matage-options-panel')) {
         var panel = $('matage-options-panel');
-        if ($('frontend_input') && ($('frontend_input').value == 'select' || $('frontend_input').value == 'multiselect')) {
+        if ($('frontend_input') && ['select', 'multiselect', 'customselect'].includes($('frontend_input').value)) {
             panel.show();
         } else {
             panel.hide();
@@ -46,7 +46,7 @@ function checkOptionsPanelVisibility() {
 function bindAttributeInputType() {
     checkOptionsPanelVisibility();
     switchDefaultValueField();
-    if ($('frontend_input') && ($('frontend_input').value == 'select' || $('frontend_input').value == 'multiselect' || $('frontend_input').value == 'price')) {
+    if ($('frontend_input') && ['select', 'multiselect', 'price'].includes($('frontend_input').value)) {
         if ($('backend_type') && $('backend_type').options) {
             for (var i = 0; i < $('backend_type').options.length; i++) {
                 if ($('backend_type').options[i].value == 'int') $('backend_type').selectedIndex = i;
@@ -60,6 +60,7 @@ function bindAttributeInputType() {
             $('frontend_class').disabled = true;
             break;
         case 'text':
+        case 'customselect':
             if (!$('frontend_class').getAttribute('readonly')) {
                 $('frontend_class').disabled = false;
             }
@@ -88,6 +89,7 @@ function switchDefaultValueField() {
 
     switch (currentValue) {
         case 'select':
+        case 'customselect':
             optionDefaultInputType = 'radio';
             break;
 

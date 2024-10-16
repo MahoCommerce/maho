@@ -323,7 +323,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
                     if (in_array($optionId, $object->getDefault())) {
                         if ($object->getFrontendInput() == 'multiselect') {
                             $attributeDefaultValue[] = $intOptionId;
-                        } elseif ($object->getFrontendInput() == 'select') {
+                        } elseif (in_array($object->getFrontendInput(), ['select', 'customselect'])) {
                             $attributeDefaultValue = [$intOptionId];
                         }
                     }

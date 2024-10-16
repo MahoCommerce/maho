@@ -191,10 +191,10 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
 
                 $element->setAfterElementHtml($this->_getAdditionalElementHtml($element));
 
-                if ($inputType == 'select') {
-                    $element->setValues($attribute->getSource()->getAllOptions(true, true));
+                if ($inputType == 'select' || $inputType == 'customselect') {
+                    $element->setValues($attribute->getSource()->getAllOptions(true, false));
                 } elseif ($inputType == 'multiselect') {
-                    $element->setValues($attribute->getSource()->getAllOptions(false, true));
+                    $element->setValues($attribute->getSource()->getAllOptions(false, false));
                     $element->setCanBeEmpty(true);
                 } elseif ($inputType == 'date') {
                     $element->setFormat(Mage::app()->getLocale()->getDateFormatWithLongYear());

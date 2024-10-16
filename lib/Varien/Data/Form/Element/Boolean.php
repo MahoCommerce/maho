@@ -16,6 +16,10 @@
  */
 class Varien_Data_Form_Element_Boolean extends Varien_Data_Form_Element_Select
 {
+    /**
+     * Varien_Data_Form_Element_Boolean constructor.
+     * @param array $attributes
+     */
     public function __construct($attributes = [])
     {
         parent::__construct($attributes);
