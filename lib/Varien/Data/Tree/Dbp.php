@@ -160,6 +160,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
             $select->order($this->_table . '.' . $this->_orderField . ' ASC');
             if ($parentPath) {
                 $pathField = $this->_conn->quoteIdentifier([$this->_table, $this->_pathField]);
+                // phpcs:ignore Ecg.Sql.SlowQuery.SlowRawSql
                 $select->where("{$pathField} LIKE ?", "{$parentPath}/%");
             }
             if ($recursionLevel != 0) {
@@ -167,6 +168,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
                 $select->where("{$levelField} <= ?", $startLevel + $recursionLevel);
             }
 
+            // phpcs:ignore Ecg.Performance.FetchAll.Found
             $arrNodes = $this->_conn->fetchAll($select);
 
             $childrenItems = [];
@@ -187,7 +189,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
     }
 
     /**
-     * @param Varien_Data_Tree_Node $children
+     * @param Varien_Data_Tree_Node|array $children
      * @param string $path
      * @param Varien_Data_Tree_Node $parentNode
      * @param int $level
@@ -344,6 +346,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
             $select->where($condition);
         }
 
+        // phpcs:ignore Ecg.Performance.FetchAll.Found
         $arrNodes = $this->_conn->fetchAll($select);
 
         if ($arrNodes) {
@@ -365,7 +368,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
     }
 
     /**
-     * @param Varien_Data_Tree_Node $children
+     * @param Varien_Data_Tree_Node|array $children
      * @param string $path
      * @param Varien_Data_Tree_Node $parentNode
      * @param bool $withChildren
@@ -375,7 +378,7 @@ class Varien_Data_Tree_Dbp extends Varien_Data_Tree
     {
         if (isset($children[$path])) {
             foreach ($children[$path] as $child) {
-                $nodeId = isset($child[$this->_idField]) ? $child[$this->_idField] : false;
+                $nodeId = $child[$this->_idField] ?? false;
                 if ($parentNode && $nodeId && $node = $parentNode->getChildren()->searchById($nodeId)) {
                     $node->addData($child);
                 } else {

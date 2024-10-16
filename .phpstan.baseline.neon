@@ -51,11 +51,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Api/Tab/Userroles.php
 
 		-
-			message: "#^Return type \\(false\\) of method Mage_Adminhtml_Block_Cache_Grid\\:\\:getRowUrl\\(\\) should be compatible with return type \\(string\\) of method Mage_Adminhtml_Block_Widget_Grid\\:\\:getRowUrl\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Cache/Grid.php
-
-		-
 			message: "#^Cannot call method addAttributeToSelect\\(\\) on Mage_Core_Model_Resource_Db_Collection_Abstract\\|false\\.$#"
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Category/Widget/Chooser.php
@@ -389,11 +384,6 @@ parameters:
 			message: "#^Method Varien_Data_Collection\\:\\:toOptionArray\\(\\) invoked with 1 parameter, 0 required\\.$#"
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Country.php
-
-		-
-			message: "#^Method Mage_Adminhtml_Model_System_Store\\:\\:__construct\\(\\) with return type void returns \\$this\\(Mage_Adminhtml_Model_System_Store\\) but should not return anything\\.$#"
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Store.php
 
 		-
 			message: "#^Variable \\$values might not be defined\\.$#"
@@ -1651,11 +1641,6 @@ parameters:
 			path: app/code/core/Mage/CatalogIndex/Model/Indexer/Price.php
 
 		-
-			message: "#^Method Mage_CatalogIndex_Model_Resource_Indexer_Abstract\\:\\:saveIndex\\(\\) with return type void returns mixed but should not return anything\\.$#"
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Resource/Indexer/Abstract.php
-
-		-
 			message: "#^Method Mage_CatalogInventory_Block_Adminhtml_Form_Field_Minsaleqty\\:\\:_getGroupRenderer\\(\\) should return Mage_CatalogInventory_Block_Adminhtml_Form_Field_Customergroup but returns Mage_Core_Block_Abstract\\|false\\.$#"
 			count: 1
 			path: app/code/core/Mage/CatalogInventory/Block/Adminhtml/Form/Field/Minsaleqty.php
@@ -1976,11 +1961,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Abstract.php
 
 		-
-			message: "#^Method Mage_Core_Model_App\\:\\:getAnyStoreView\\(\\) should return Mage_Core_Model_Store but return statement is missing\\.$#"
-			count: 1
-			path: app/code/core/Mage/Core/Model/App.php
-
-		-
 			message: "#^Method Mage_Core_Model_App\\:\\:getResponse\\(\\) should return Mage_Core_Controller_Response_Http but returns Zend_Controller_Response_Http\\.$#"
 			count: 1
 			path: app/code/core/Mage/Core/Model/App.php
@@ -2134,11 +2114,6 @@ parameters:
 			message: "#^Method Mage_Core_Model_Layout_Update\\:\\:saveCache\\(\\) should return bool but returns Mage_Core_Model_App\\.$#"
 			count: 1
 			path: app/code/core/Mage/Core/Model/Layout/Update.php
-
-		-
-			message: "#^Method Mage_Core_Model_Message_Collection\\:\\:getMessageByIdentifier\\(\\) should return Mage_Core_Model_Message_Abstract\\|null but return statement is missing\\.$#"
-			count: 1
-			path: app/code/core/Mage/Core/Model/Message/Collection.php
 
 		-
 			message: "#^Call to an undefined method Mage_Core_Model_Resource_Type_Abstract\\:\\:getConnection\\(\\)\\.$#"
@@ -3766,26 +3741,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Item.php
 
 		-
-			message: "#^Method Mage_Sales_Model_Quote_Item\\:\\:__clone\\(\\) with return type void returns \\$this\\(Mage_Sales_Model_Quote_Item\\) but should not return anything\\.$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Item.php
-
-		-
-			message: "#^Return type \\(void\\) of method Mage_Sales_Model_Quote_Item\\:\\:__clone\\(\\) should be compatible with return type \\(\\$this\\(Mage_Sales_Model_Quote_Item_Abstract\\)\\) of method Mage_Sales_Model_Quote_Item_Abstract\\:\\:__clone\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Item.php
-
-		-
-			message: "#^Method Mage_Sales_Model_Quote_Item_Abstract\\:\\:__clone\\(\\) with return type void returns \\$this\\(Mage_Sales_Model_Quote_Item_Abstract\\) but should not return anything\\.$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Item/Abstract.php
-
-		-
-			message: "#^Method Mage_Sales_Model_Quote_Item_Option\\:\\:__clone\\(\\) with return type void returns \\$this\\(Mage_Sales_Model_Quote_Item_Option\\) but should not return anything\\.$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Item/Option.php
-
-		-
 			message: "#^Call to Exception\\:\\:__construct\\(\\) on a separate line has no effect\\.$#"
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
@@ -4361,24 +4316,9 @@ parameters:
 			path: app/code/core/Mage/Wishlist/Helper/Data.php
 
 		-
-			message: "#^Method Mage_Wishlist_Model_Item_Option\\:\\:__clone\\(\\) with return type void returns \\$this\\(Mage_Wishlist_Model_Item_Option\\) but should not return anything\\.$#"
-			count: 1
-			path: app/code/core/Mage/Wishlist/Model/Item/Option.php
-
-		-
 			message: "#^Variable \\$item might not be defined\\.$#"
 			count: 1
 			path: app/code/core/Mage/Wishlist/Model/Wishlist.php
-
-		-
-			message: "#^Method Mage_Wishlist_IndexController\\:\\:_addItemToWishList\\(\\) with return type void returns mixed but should not return anything\\.$#"
-			count: 1
-			path: app/code/core/Mage/Wishlist/controllers/IndexController.php
-
-		-
-			message: "#^Method Mage_Wishlist_IndexController\\:\\:downloadCustomOptionAction\\(\\) with return type void returns mixed but should not return anything\\.$#"
-			count: 3
-			path: app/code/core/Mage/Wishlist/controllers/IndexController.php
 
 		-
 			message: "#^Left side of && is always true\\.$#"

@@ -69,7 +69,7 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
      */
     public function getResourcesTree()
     {
-        return $this->_buildResourcesArray(null, null, null, null, true);
+        return $this->_buildResourcesArray(null, null, 0, null, true);
     }
 
     /**
@@ -85,7 +85,7 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
      */
     public function getResourcesList2D()
     {
-        return $this->_buildResourcesArray(null, null, null, true);
+        return $this->_buildResourcesArray(null, null, 0, true);
     }
 
     /**
