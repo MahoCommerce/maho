@@ -747,12 +747,10 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     {
         foreach ($this->_options as $index => $option) {
             if ($option->isDeleted()) {
-                // phpcs:ignore Ecg.Performance.Loop.ModelLSD
                 $option->delete();
                 unset($this->_options[$index]);
                 unset($this->_optionsByCode[$option->getCode()]);
             } else {
-                // phpcs:ignore Ecg.Performance.Loop.ModelLSD
                 $option->save();
             }
         }

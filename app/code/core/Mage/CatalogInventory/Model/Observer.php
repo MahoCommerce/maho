@@ -769,7 +769,6 @@ class Mage_CatalogInventory_Model_Observer
         // Reindex previously remembered items
         $productIds = [];
         foreach ($this->_itemsForReindex as $item) {
-            // phpcs:ignore Ecg.Performance.Loop.ModelLSD
             $item->save();
             $productIds[] = $item->getProductId();
         }

@@ -370,7 +370,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             $updatedItems = 0;
 
             foreach ($post['description'] as $itemId => $description) {
-                // phpcs:ignore Ecg.Performance.Loop.ModelLSD
                 $item = Mage::getModel('wishlist/item')->load($itemId);
                 if ($item->getWishlistId() != $wishlist->getId()) {
                     continue;
@@ -396,7 +395,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                     }
                 } elseif ($qty == 0) {
                     try {
-                        // phpcs:ignore Ecg.Performance.Loop.ModelLSD
                         $item->delete();
                     } catch (Exception $e) {
                         Mage::logException($e);
@@ -413,7 +411,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                 try {
                     $item->setDescription($description)
                         ->setQty($qty)
-                        // phpcs:ignore Ecg.Performance.Loop.ModelLSD
                         ->save();
                     $updatedItems++;
                 } catch (Exception $e) {
@@ -774,7 +771,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
         } catch (Exception $e) {
             $this->_forward('noRoute');
         }
-        // phpcs:ignore Ecg.Security.LanguageConstruct.ExitUsage
         exit(0);
     }
 }
