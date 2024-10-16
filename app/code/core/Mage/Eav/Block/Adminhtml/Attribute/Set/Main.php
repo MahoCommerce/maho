@@ -185,6 +185,8 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
         /* @var $entity_type Mage_Eav_Model_Entity_Type */
         $entity_type = Mage::registry('entity_type');
 
+        $hiddenAttributes = Mage::helper('eav')->getHiddenAttributes($entity_type->getEntityTypeCode());
+
         /* @var $node Mage_Eav_Model_Entity_Attribute_Group */
         foreach ($groups as $node) {
             $item = [];
@@ -193,8 +195,6 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
             $item['cls']        = 'folder';
             $item['allowDrop']  = true;
             $item['allowDrag']  = true;
-
-            $hiddenAttributes = Mage::helper('eav')->getHiddenAttributes($entity_type->getEntityTypeCode());
 
             /** @var Mage_Eav_Model_Entity_Attribute $nodeChildren */
             $nodeChildren = Mage::getResourceModel($entity_type->getEntityAttributeCollection());
