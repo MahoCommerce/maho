@@ -619,7 +619,7 @@ class Mage_Core_Model_App
 
     public function reinitStores()
     {
-        return $this->_initStores();
+        $this->_initStores();
     }
 
     /**
@@ -1504,7 +1504,7 @@ class Mage_Core_Model_App
     /**
      * Get either default or any store view
      *
-     * @return Mage_Core_Model_Store
+     * @return Mage_Core_Model_Store|void
      */
     public function getAnyStoreView()
     {

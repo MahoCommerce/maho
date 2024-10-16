@@ -22,7 +22,6 @@
  * @method $this setProductId(int $value)
  * @method int getWishlistItemId()
  * @method $this setWishlistItemId(int $value)
- * @method int getWishlistItemId()
  * @method $this setValue(string $sBuyRequest)
  */
 class Mage_Wishlist_Model_Item_Option extends Mage_Core_Model_Abstract implements Mage_Catalog_Model_Product_Configuration_Item_Option_Interface
@@ -128,13 +127,10 @@ class Mage_Wishlist_Model_Item_Option extends Mage_Core_Model_Abstract implement
 
     /**
      * Clone option object
-     *
-     * @return $this
      */
     public function __clone()
     {
         $this->setId(null);
         $this->_item    = null;
-        return $this;
     }
 }

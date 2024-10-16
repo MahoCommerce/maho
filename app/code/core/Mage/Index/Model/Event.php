@@ -23,8 +23,8 @@
  * @method $this setEntityPk(int $value)
  * @method string getCreatedAt()
  * @method $this setCreatedAt(string $value)
- * @method $this setOldData(string $value)
- * @method $this setNewData(string $value)
+ * @method $this setOldData(string|array $value)
+ * @method $this setNewData(string|array $value)
  * @method Varien_Object getDataObject()
  * @method $this setDataObject(Varien_Object $value)
  * @method bool hasCreatedAt()
@@ -69,7 +69,7 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
     /**
      * Specify process object
      *
-     * @param Mage_Index_Model_Process $process
+     * @param Mage_Index_Model_Process|null $process
      * @return $this
      */
     public function setProcess($process)
@@ -81,7 +81,7 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
     /**
      * Get related process object
      *
-     * @return Mage_Index_Model_Process
+     * @return Mage_Index_Model_Process|null
      */
     public function getProcess()
     {
@@ -90,7 +90,7 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
 
     /**
      * Specify namespace for old and new data
-     * @param string $namespace
+     * @param string|null $namespace
      * @return $this
      */
     public function setDataNamespace($namespace)
@@ -229,6 +229,7 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
      * @param bool $useNamespace
      * @return array
      */
+    // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClass
     public function getOldData($useNamespace = true)
     {
         return [];
@@ -262,6 +263,7 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
      * @return $this
      * @deprecated since 1.6.2.0
      */
+    // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClassAfterLastUsed
     public function addOldData($key, $value = null)
     {
         return $this;

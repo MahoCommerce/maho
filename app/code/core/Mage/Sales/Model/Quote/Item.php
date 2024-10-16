@@ -793,8 +793,6 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
 
     /**
      * Clone quote item
-     *
-     * @return $this
      */
     #[\Override]
     public function __clone()
@@ -807,7 +805,6 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
         foreach ($options as $option) {
             $this->addOption(clone $option);
         }
-        return $this;
     }
 
     /**

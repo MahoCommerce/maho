@@ -26,7 +26,7 @@
  * @method $this setConfirmation(bool|null $value)
  * @method string getCreatedAt()
  * @method int getCustomerId()
- * @method $this setCustomerId(int $value)
+ * @method $this setCustomerId(int|null $value)
  *
  * @method int getDefaultBilling()
  * @method $this setDefaultBilling(int $value)
@@ -380,7 +380,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Retrieve customer address by address id
      *
-     * @param   int $addressId
+     * @param   int|null $addressId
      * @return  Mage_Customer_Model_Address
      */
     public function getAddressById($addressId)
