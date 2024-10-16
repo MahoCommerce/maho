@@ -194,9 +194,12 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
             $item['allowDrop']  = true;
             $item['allowDrag']  = true;
 
+            $hiddenAttributes = Mage::helper('eav')->getHiddenAttributes($entity_type->getEntityTypeCode());
+
             /** @var Mage_Eav_Model_Entity_Attribute $nodeChildren */
             $nodeChildren = Mage::getResourceModel($entity_type->getEntityAttributeCollection());
             $nodeChildren->setEntityTypeFilter($entity_type->getEntityTypeId())
+                         ->setNotCodeFilter($hiddenAttributes)
                          ->setAttributeGroupFilter($node->getId())
                          ->load();
 
