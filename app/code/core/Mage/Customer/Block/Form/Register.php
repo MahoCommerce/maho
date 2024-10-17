@@ -178,4 +178,12 @@ class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
     {
         return Mage::getModel('customer/customer')->getMinPasswordLength();
     }
+
+    /**
+     * Return extra EAV fields used in this form
+     */
+    public function getExtraFields(): array
+    {
+        return Mage::helper('customer')->getExtraFields('customer_account_create');
+    }
 }

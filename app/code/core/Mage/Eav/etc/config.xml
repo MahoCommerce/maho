@@ -87,6 +87,11 @@
                 </setup>
             </eav_setup>
         </resources>
+        <blocks>
+            <eav>
+                <class>Mage_Eav_Block</class>
+            </eav>
+        </blocks>
         <cache>
             <types>
                 <eav translate="label,description" module="eav">
@@ -142,6 +147,7 @@
                     <date>date</date>
                     <boolean>boolean</boolean>
                     <multiselect>multiselect</multiselect>
+                    <customselect>customselect</customselect>
                     <select>select</select>
                 </input_types>
             </validator_data>

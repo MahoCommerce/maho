@@ -211,4 +211,12 @@ class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
             return $this->getUrl('customer/account/');
         }
     }
+
+    /**
+     * Return extra EAV fields used in this form
+     */
+    public function getExtraFields(): array
+    {
+        return Mage::helper('customer/address')->getExtraFields('checkout_address_create', $this->getAddress());
+    }
 }

@@ -634,6 +634,24 @@
                     </locked_fields>
                 </visibility>
             </catalog_product>
+            <catalog_category>
+                <all_children>
+                    <code>all_children</code>
+                    <hidden>1</hidden>
+                </all_children>
+                <children>
+                    <code>children</code>
+                    <hidden>1</hidden>
+                </children>
+                <url_path>
+                    <code>url_path</code>
+                    <hidden>1</hidden>
+                </url_path>
+                <path_in_store>
+                    <code>path_in_store</code>
+                    <hidden>1</hidden>
+                </path_in_store>
+            </catalog_category>
         </eav_attributes>
     </global>
     <adminhtml>

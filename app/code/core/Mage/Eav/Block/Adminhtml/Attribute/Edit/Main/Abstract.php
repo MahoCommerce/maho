@@ -21,7 +21,7 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
     protected $_attribute = null;
 
     /**
-     * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute
+     * @param Mage_Eav_Model_Entity_Attribute $attribute
      * @return $this
      */
     public function setAttributeObject($attribute)
@@ -31,11 +31,31 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
     }
 
     /**
-     * @return Mage_Catalog_Model_Resource_Eav_Attribute
+     * @return Mage_Eav_Model_Entity_Attribute
      */
     public function getAttributeObject()
     {
         return $this->_attribute ?? Mage::registry('entity_attribute');
+    }
+
+    /**
+     *
+     *
+     * @return Mage_Core_Block_Abstract
+     */
+    #[\Override]
+    protected function _prepareLayout()
+    {
+        parent::_prepareLayout();
+
+        // If entity type has a scoped table, change renderer to allow "Use Default Value" checkbox
+        if (!Mage::app()->isSingleStoreMode() && $this->getAttributeObject()->getResource()->hasScopeTable()) {
+            Varien_Data_Form::setFieldsetElementRenderer(
+                $this->getLayout()->createBlock('eav/adminhtml_attribute_edit_renderer_fieldset_element')
+            );
+        }
+
+        return $this;
     }
 
     /**
@@ -54,6 +74,8 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
             'method' => 'post'
         ]);
 
+        $form->setDataObject($attributeObject);
+
         $fieldset = $form->addFieldset(
             'base_fieldset',
             ['legend' => Mage::helper('eav')->__('Attribute Properties')]
@@ -65,8 +87,6 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
         }
 
         $this->_addElementTypes($fieldset);
-
-        $yesno = Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray();
 
         $validateClass = sprintf(
             'validate-code validate-length maximum-length-%d',
@@ -85,10 +105,30 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
 
         $fieldset->addField('frontend_input', 'select', [
             'name' => 'frontend_input',
-            'label' => Mage::helper('eav')->__('Catalog Input Type for Store Owner'),
-            'title' => Mage::helper('eav')->__('Catalog Input Type for Store Owner'),
+            'label' => Mage::helper('eav')->__('Input Type'),
+            'title' => Mage::helper('eav')->__('Input Type'),
             'value' => 'text',
             'values' => $inputTypes
+        ]);
+
+        $fieldset->addField('frontend_class', 'select', [
+            'name'  => 'frontend_class',
+            'label' => Mage::helper('eav')->__('Input Validation'),
+            'title' => Mage::helper('eav')->__('Input Validation'),
+            'values' => Mage::helper('eav')->getFrontendClasses($attributeObject->getEntityType()->getEntityTypeCode())
+        ]);
+
+        $fieldset->addField('is_required', 'boolean', [
+            'name' => 'is_required',
+            'label' => Mage::helper('eav')->__('Values Required'),
+            'title' => Mage::helper('eav')->__('Values Required'),
+        ]);
+
+        $fieldset->addField('is_unique', 'boolean', [
+            'name' => 'is_unique',
+            'label' => Mage::helper('eav')->__('Unique Value'),
+            'title' => Mage::helper('eav')->__('Unique Value (not shared with other products)'),
+            'note'  => Mage::helper('eav')->__('Not shared with other products'),
         ]);
 
         $fieldset->addField('default_value_text', 'text', [
@@ -98,11 +138,10 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
             'value' => $attributeObject->getDefaultValue(),
         ]);
 
-        $fieldset->addField('default_value_yesno', 'select', [
+        $fieldset->addField('default_value_yesno', 'boolean', [
             'name' => 'default_value_yesno',
             'label' => Mage::helper('eav')->__('Default Value'),
             'title' => Mage::helper('eav')->__('Default Value'),
-            'values' => $yesno,
             'value' => $attributeObject->getDefaultValue(),
         ]);
 
@@ -122,34 +161,15 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
             'value' => $attributeObject->getDefaultValue(),
         ]);
 
-        $fieldset->addField('is_unique', 'select', [
-            'name' => 'is_unique',
-            'label' => Mage::helper('eav')->__('Unique Value'),
-            'title' => Mage::helper('eav')->__('Unique Value (not shared with other products)'),
-            'note'  => Mage::helper('eav')->__('Not shared with other products'),
-            'values' => $yesno,
-        ]);
-
-        $fieldset->addField('is_required', 'select', [
-            'name' => 'is_required',
-            'label' => Mage::helper('eav')->__('Values Required'),
-            'title' => Mage::helper('eav')->__('Values Required'),
-            'values' => $yesno,
-        ]);
-
-        $fieldset->addField('frontend_class', 'select', [
-            'name'  => 'frontend_class',
-            'label' => Mage::helper('eav')->__('Input Validation for Store Owner'),
-            'title' => Mage::helper('eav')->__('Input Validation for Store Owner'),
-            'values' => Mage::helper('eav')->getFrontendClasses($attributeObject->getEntityType()->getEntityTypeCode())
-        ]);
-
-        if ($attributeObject->getId()) {
-            $form->getElement('attribute_code')->setDisabled(1);
-            $form->getElement('frontend_input')->setDisabled(1);
-            if (!$attributeObject->getIsUserDefined()) {
-                $form->getElement('is_unique')->setDisabled(1);
-            }
+        if ($attributeObject->getResource()->hasFormTable()) {
+            $attributeObjectTypeCode = $attributeObject->getEntityType()->getEntityTypeCode();
+            $fieldset->addField('used_in_forms', 'multiselect', [
+                'name'   => 'used_in_forms',
+                'label'  => Mage::helper('adminhtml')->__('Use in Forms'),
+                'title'  => Mage::helper('adminhtml')->__('Use in Forms'),
+                'values' => Mage::getModel('eav/config_source_form')->toOptionArray($attributeObjectTypeCode),
+                'value'  => $attributeObject->getUsedInForms(),
+            ]);
         }
 
         $this->setForm($form);
@@ -166,8 +186,21 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
     protected function _initFormValues()
     {
         Mage::dispatchEvent('adminhtml_block_eav_attribute_edit_form_init', ['form' => $this->getForm()]);
-        $this->getForm()
-            ->addValues($this->getAttributeObject()->getData());
+
+        $attributeObject = $this->getAttributeObject();
+        $data = $attributeObject->getData();
+
+        // If website specified, unprefix relevant fields before adding to form
+        if ($attributeObject->getWebsite() && (int)$attributeObject->getWebsite()->getId()) {
+            foreach ($attributeObject->getResource()->getScopeFields($attributeObject) as $field) {
+                if (array_key_exists('scope_' . $field, $data)) {
+                    $data[$field] = $data['scope_' . $field];
+                    unset($data['scope_' . $field]);
+                }
+            }
+        }
+
+        $this->getForm()->addValues($data);
         return parent::_initFormValues();
     }
 
@@ -180,20 +213,52 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
     protected function _beforeToHtml()
     {
         parent::_beforeToHtml();
+
+        $form = $this->getForm();
         $attributeObject = $this->getAttributeObject();
+
+        // Disable any fields in config global/eav_attributes/$entity_type/$field/locked_fields
         if ($attributeObject->getId()) {
-            $form = $this->getForm();
             $disableAttributeFields = Mage::helper('eav')
                 ->getAttributeLockedFields($attributeObject->getEntityType()->getEntityTypeCode());
-            if (isset($disableAttributeFields[$attributeObject->getAttributeCode()])) {
-                foreach ($disableAttributeFields[$attributeObject->getAttributeCode()] as $field) {
-                    if ($elm = $form->getElement($field)) {
-                        $elm->setDisabled(1);
-                        $elm->setReadonly(1);
-                    }
+            $disabledFields = $disableAttributeFields[$attributeObject->getAttributeCode()] ?? [];
+
+            // Add in default locked fields
+            $disabledFields[] = 'attribute_code';
+            $disabledFields[] = 'frontend_input';
+            if (!$attributeObject->getIsUserDefined()) {
+                $disabledFields[] = 'is_unique';
+            }
+
+            foreach ($disabledFields as $field) {
+                if ($elm = $form->getElement($field)) {
+                    $elm->setDisabled(1);
+                    $elm->setReadonly(1);
                 }
             }
         }
+
+        // Set scope value and disable global fields if website selected
+        if ($attributeObject->getResource()->hasScopeTable()) {
+            $websiteId = $attributeObject->getWebsite() ? (int)$attributeObject->getWebsite()->getId() : 0;
+            $scopeFields = $attributeObject->getResource()->getScopeFields($attributeObject);
+
+            /** @var Varien_Data_Form_Element_Fieldset $fieldset */
+            $fieldset = $this->getForm()->getElement('base_fieldset');
+            foreach ($fieldset->getElements() as $elm) {
+                $field = $elm->getId();
+                if (str_starts_with($field, 'default_value')) {
+                    $field = 'default_value';
+                }
+                if (in_array($field, $scopeFields)) {
+                    $elm->setScope(Mage_Eav_Model_Entity_Attribute::SCOPE_WEBSITE);
+                } else {
+                    $elm->setScope(Mage_Eav_Model_Entity_Attribute::SCOPE_GLOBAL);
+                    $elm->setDisabled($elm->getDisabled() || $websiteId);
+                }
+            }
+        }
+
         return $this;
     }
 
