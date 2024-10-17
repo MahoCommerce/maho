@@ -26,6 +26,7 @@
                 <all>
                     <element name="magento_version" type="xsd:string" />
                     <element name="magento_edition" type="xsd:string" />
+                    <element name="maho_version" type="xsd:string" />
                 </all>
             </complexType>
         </schema>
