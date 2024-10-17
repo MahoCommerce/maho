@@ -65,16 +65,20 @@ class Mage_Directory_Model_Observer
 
             /** @var Mage_Core_Model_Email_Template $mailTemplate */
             $mailTemplate = Mage::getModel('core/email_template');
-            $mailTemplate->setDesignConfig([
-                'area'  => 'frontend',
-            ])->sendTransactional(
-                Mage::getStoreConfig(self::XML_PATH_ERROR_TEMPLATE),
-                Mage::getStoreConfig(self::XML_PATH_ERROR_IDENTITY),
-                Mage::getStoreConfig(self::XML_PATH_ERROR_RECIPIENT),
-                null,
-                [
-                    'warnings' => implode("\n", $importWarnings),
-                ]
+            $mailTemplate
+                ->setDesignConfig(
+                    [
+                        'area'  => Mage_Core_Model_App_Area::AREA_FRONTEND
+                    ]
+                )
+                ->sendTransactional(
+                    Mage::getStoreConfig(self::XML_PATH_ERROR_TEMPLATE),
+                    Mage::getStoreConfig(self::XML_PATH_ERROR_IDENTITY),
+                    Mage::getStoreConfig(self::XML_PATH_ERROR_RECIPIENT),
+                    null,
+                    [
+                        'warnings' => implode("\n", $importWarnings),
+                    ]
             );
 
             $translate->setTranslateInline(true);

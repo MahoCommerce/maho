@@ -65,7 +65,7 @@ class Mage_Core_Model_Domainpolicy
 
         if ($action->getLayout()->getArea() === Mage_Core_Model_App_Area::AREA_ADMINHTML) {
             $policy = $this->getBackendPolicy();
-        } elseif ($action->getLayout()->getArea() == 'frontend') {
+        } elseif ($action->getLayout()->getArea() === Mage_Core_Model_App_Area::AREA_FRONTEND) {
             $policy = $this->getFrontendPolicy();
         }
 

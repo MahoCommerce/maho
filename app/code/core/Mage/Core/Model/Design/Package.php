@@ -16,7 +16,7 @@
  */
 class Mage_Core_Model_Design_Package
 {
-    public const DEFAULT_AREA    = 'frontend';
+    public const DEFAULT_AREA    = Mage_Core_Model_App_Area::AREA_FRONTEND;
     public const DEFAULT_PACKAGE = 'default';
     public const DEFAULT_THEME   = 'default';
     public const BASE_PACKAGE    = 'base';
