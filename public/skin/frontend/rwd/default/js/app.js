@@ -1237,7 +1237,7 @@ var ProductMediaManager = {
     }
 };
 
-$j(document).ready(function() {
+document.addEventListener('DOMContentLoaded', () => {
     ProductMediaManager.init();
 });
 
