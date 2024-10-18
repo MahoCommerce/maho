@@ -121,6 +121,11 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Permissions/Usernroles.php
 
 		-
+			message: "#^Method Mage_Adminhtml_Block_Report_Grid_Abstract\\:\\:getCollection\\(\\) should return Mage_Core_Model_Resource_Db_Collection_Abstract\\|Mage_Reports_Model_Grouped_Collection but returns Varien_Data_Collection_Db\\|null\\.$#"
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Report/Grid/Abstract.php
+
+		-
 			message: "#^Property Mage_Adminhtml_Block_Report_Grid_Abstract\\:\\:\\$_columnGroupBy \\(string\\) in isset\\(\\) is not nullable\\.$#"
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Report/Grid/Abstract.php
@@ -756,46 +761,6 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Route/ApiType.php
 
 		-
-			message: "#^Parameter \\#1 \\$elementId \\(string\\) of method Mage_Bundle_Block_Adminhtml_Catalog_Product_Composite_Fieldset_Options_Type_Checkbox\\:\\:setValidationContainer\\(\\) should be compatible with parameter \\$elementId \\(int\\) of method Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\\:\\:setValidationContainer\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Adminhtml/Catalog/Product/Composite/Fieldset/Options/Type/Checkbox.php
-
-		-
-			message: "#^Parameter \\#2 \\$containerId \\(string\\) of method Mage_Bundle_Block_Adminhtml_Catalog_Product_Composite_Fieldset_Options_Type_Checkbox\\:\\:setValidationContainer\\(\\) should be compatible with parameter \\$containerId \\(int\\) of method Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\\:\\:setValidationContainer\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Adminhtml/Catalog/Product/Composite/Fieldset/Options/Type/Checkbox.php
-
-		-
-			message: "#^Parameter \\#1 \\$elementId \\(string\\) of method Mage_Bundle_Block_Adminhtml_Catalog_Product_Composite_Fieldset_Options_Type_Multi\\:\\:setValidationContainer\\(\\) should be compatible with parameter \\$elementId \\(int\\) of method Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\\:\\:setValidationContainer\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Adminhtml/Catalog/Product/Composite/Fieldset/Options/Type/Multi.php
-
-		-
-			message: "#^Parameter \\#2 \\$containerId \\(string\\) of method Mage_Bundle_Block_Adminhtml_Catalog_Product_Composite_Fieldset_Options_Type_Multi\\:\\:setValidationContainer\\(\\) should be compatible with parameter \\$containerId \\(int\\) of method Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\\:\\:setValidationContainer\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Adminhtml/Catalog/Product/Composite/Fieldset/Options/Type/Multi.php
-
-		-
-			message: "#^Parameter \\#1 \\$elementId \\(string\\) of method Mage_Bundle_Block_Adminhtml_Catalog_Product_Composite_Fieldset_Options_Type_Radio\\:\\:setValidationContainer\\(\\) should be compatible with parameter \\$elementId \\(int\\) of method Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\\:\\:setValidationContainer\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Adminhtml/Catalog/Product/Composite/Fieldset/Options/Type/Radio.php
-
-		-
-			message: "#^Parameter \\#2 \\$containerId \\(string\\) of method Mage_Bundle_Block_Adminhtml_Catalog_Product_Composite_Fieldset_Options_Type_Radio\\:\\:setValidationContainer\\(\\) should be compatible with parameter \\$containerId \\(int\\) of method Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\\:\\:setValidationContainer\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Adminhtml/Catalog/Product/Composite/Fieldset/Options/Type/Radio.php
-
-		-
-			message: "#^Parameter \\#1 \\$elementId \\(string\\) of method Mage_Bundle_Block_Adminhtml_Catalog_Product_Composite_Fieldset_Options_Type_Select\\:\\:setValidationContainer\\(\\) should be compatible with parameter \\$elementId \\(int\\) of method Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\\:\\:setValidationContainer\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Adminhtml/Catalog/Product/Composite/Fieldset/Options/Type/Select.php
-
-		-
-			message: "#^Parameter \\#2 \\$containerId \\(string\\) of method Mage_Bundle_Block_Adminhtml_Catalog_Product_Composite_Fieldset_Options_Type_Select\\:\\:setValidationContainer\\(\\) should be compatible with parameter \\$containerId \\(int\\) of method Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\\:\\:setValidationContainer\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Adminhtml/Catalog/Product/Composite/Fieldset/Options/Type/Select.php
-
-		-
 			message: "#^Method Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Selection\\:\\:isUsedWebsitePrice\\(\\) should return string but returns bool\\.$#"
 			count: 1
 			path: app/code/core/Mage/Bundle/Block/Adminhtml/Catalog/Product/Edit/Tab/Bundle/Option/Selection.php
@@ -1369,16 +1334,6 @@ parameters:
 			message: "#^Method Mage_Catalog_Model_Resource_Attribute\\:\\:isUsedBySuperProducts\\(\\) should return int but returns string\\|false\\|null\\.$#"
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Attribute.php
-
-		-
-			message: "#^Method Mage_Catalog_Model_Resource_Category\\:\\:getChildrenAmount\\(\\) should return int but returns string\\|false\\|null\\.$#"
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category.php
-
-		-
-			message: "#^Method Mage_Catalog_Model_Resource_Category\\:\\:getChildrenCount\\(\\) should return int but returns string\\|false\\|null\\.$#"
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category.php
 
 		-
 			message: "#^Property Mage_Catalog_Model_Resource_Category\\:\\:\\$_storeId \\(int\\) on left side of \\?\\? is not nullable\\.$#"
@@ -2366,11 +2321,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Customer/Api/V2.php
 
 		-
-			message: "#^Method Mage_Customer_Model_Resource_Customer\\:\\:getWebsiteId\\(\\) should return int but returns string\\|false\\|null\\.$#"
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Resource/Customer.php
-
-		-
 			message: "#^Method Mage_Dataflow_Model_Batch\\:\\:setParams\\(\\) should return Mage_Dataflow_Model_Batch_Abstract but returns \\$this\\(Mage_Dataflow_Model_Batch\\)\\.$#"
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Batch.php
@@ -2609,6 +2559,11 @@ parameters:
 			message: "#^Variable \\$entity might not be defined\\.$#"
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
+
+		-
+			message: "#^Cannot call method lastInsertId\\(\\) on Varien_Db_Adapter_Interface\\|false\\.$#"
+			count: 1
+			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
 
 		-
 			message: "#^Property Mage_Eav_Model_Entity_Abstract\\:\\:\\$_type \\(Mage_Eav_Model_Entity_Type\\) in empty\\(\\) is not falsy\\.$#"
@@ -2858,6 +2813,11 @@ parameters:
 		-
 			message: "#^Method Mage_Eav_Model_Entity_Attribute_Source_Interface\\:\\:getAllOptions\\(\\) invoked with 1 parameter, 0 required\\.$#"
 			count: 4
+			path: app/code/core/Mage/ImportExport/Block/Adminhtml/Export/Filter.php
+
+		-
+			message: "#^Method Mage_ImportExport_Block_Adminhtml_Export_Filter\\:\\:prepareCollection\\(\\) should return Mage_Core_Model_Resource_Db_Collection_Abstract\\|null but returns Varien_Data_Collection_Db\\|null\\.$#"
+			count: 1
 			path: app/code/core/Mage/ImportExport/Block/Adminhtml/Export/Filter.php
 
 		-
