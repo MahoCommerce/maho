@@ -24,6 +24,8 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
 
     protected $_moduleName = 'Mage_Eav';
 
+    protected $_attributesHidden = [];
+
     protected $_attributesLockedFields = [];
 
     protected $_entityTypeFrontendClasses = [];
@@ -100,6 +102,33 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Retrieve hidden attributes for entity type
+     *
+     * @param string $entityTypeCode
+     * @return array
+     */
+    public function getHiddenAttributes($entityTypeCode)
+    {
+        if (!$entityTypeCode) {
+            return [];
+        }
+        if (isset($this->_attributesHidden[$entityTypeCode])) {
+            return $this->_attributesHidden[$entityTypeCode];
+        }
+        $_data = Mage::app()->getConfig()->getNode('global/eav_attributes/' . $entityTypeCode);
+        if ($_data) {
+            $this->_attributesHidden[$entityTypeCode] = [];
+            foreach ($_data->children() as $attribute) {
+                if ($attribute->is('hidden')) {
+                    $this->_attributesHidden[$entityTypeCode][] = $attribute->code;
+                }
+            }
+            return $this->_attributesHidden[$entityTypeCode];
+        }
+        return [];
+    }
+
+    /**
      * Retrieve attributes locked fields to edit
      *
      * @param string $entityTypeCode
@@ -115,9 +144,12 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
         }
         $_data = Mage::app()->getConfig()->getNode('global/eav_attributes/' . $entityTypeCode);
         if ($_data) {
+            $this->_attributesLockedFields[$entityTypeCode] = [];
             foreach ($_data->children() as $attribute) {
-                $this->_attributesLockedFields[$entityTypeCode][(string)$attribute->code] =
-                    array_keys($attribute->locked_fields->asArray());
+                if (isset($attribute->locked_fields)) {
+                    $this->_attributesLockedFields[$entityTypeCode][(string)$attribute->code] =
+                        array_keys($attribute->locked_fields->asArray());
+                }
             }
             return $this->_attributesLockedFields[$entityTypeCode];
         }
@@ -132,5 +164,85 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
     public function getInputTypesValidatorData()
     {
         return Mage::getStoreConfig(self::XML_PATH_VALIDATOR_DATA_INPUT_TYPES);
+    }
+
+    /**
+     * Return information array of attribute input types
+     * Only a small number of settings returned, so we won't break anything in current dataflow
+     * As soon as development process goes on we need to add there all possible settings
+     *
+     * @param string $inputType
+     * @return array
+     */
+    public function getAttributeInputTypes($inputType = null)
+    {
+        /**
+        * @todo specify there all relations for properties depending on input type
+        */
+        $inputTypes = [
+            'multiselect'   => [
+                'backend_model'     => 'eav/entity_attribute_backend_array'
+            ],
+            'boolean'       => [
+                'source_model'      => 'eav/entity_attribute_source_boolean'
+            ],
+            'customselect'  => [
+                'source_model'      => 'eav/entity_attribute_source_table'
+            ],
+        ];
+
+        if (is_null($inputType)) {
+            return $inputTypes;
+        } elseif (isset($inputTypes[$inputType])) {
+            return $inputTypes[$inputType];
+        }
+        return [];
+    }
+
+    /**
+     * Return default attribute backend model by input type
+     *
+     * @param string $inputType
+     * @return string|null
+     */
+    public function getAttributeBackendModelByInputType($inputType)
+    {
+        $inputTypes = $this->getAttributeInputTypes();
+        if (!empty($inputTypes[$inputType]['backend_model'])) {
+            return $inputTypes[$inputType]['backend_model'];
+        }
+        return null;
+    }
+
+    /**
+     * Return default attribute source model by input type
+     *
+     * @param string $inputType
+     * @return string|null
+     */
+    public function getAttributeSourceModelByInputType($inputType)
+    {
+        $inputTypes = $this->getAttributeInputTypes();
+        if (!empty($inputTypes[$inputType]['source_model'])) {
+            return $inputTypes[$inputType]['source_model'];
+        }
+        return null;
+    }
+
+    /**
+     * Return entity code formatted for humans
+     *
+     * @param Mage_Eav_Model_Entity_Type|string $entityTypeCode
+     * @return string
+     */
+    public function formatTypeCode($entityTypeCode)
+    {
+        if ($entityTypeCode instanceof Mage_Eav_Model_Entity_Type) {
+            $entityTypeCode = $entityTypeCode->getEntityTypeCode();
+        }
+        if (!is_string($entityTypeCode)) {
+            $entityTypeCode = '';
+        }
+        return ucwords(str_replace('_', ' ', $entityTypeCode));
     }
 }

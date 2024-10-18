@@ -204,4 +204,29 @@ class Mage_Checkout_Block_Onepage_Billing extends Mage_Checkout_Block_Onepage_Ab
             ->setFieldNameFormat('billing[%s]')
             ->toHtml();
     }
+
+    /**
+     * Return extra EAV fields used in this form
+     */
+    public function getExtraCustomerFields(): array
+    {
+        return Mage::helper('customer')->getExtraFields('checkout_register');
+    }
+
+    /**
+     * Return extra EAV fields used in this form
+     */
+    public function getExtraCustomerAddressFields(): array
+    {
+        return Mage::helper('customer/address')->getExtraFields('checkout_address_create');
+    }
+
+    /**
+     * Return extra EAV fields from incomplete checkout session
+     */
+    public function getExtraFieldsSession(): Varien_Object
+    {
+        // TODO, need to separate from customer and customer address
+        return new Varien_Object($this->getCheckout()->getExtraFields());
+    }
 }
