@@ -42,7 +42,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Collection object
      *
-     * @var Mage_Core_Model_Resource_Db_Collection_Abstract|null
+     * @var Mage_Core_Model_Resource_Db_Collection_Abstract|Varien_Data_Collection_Db|null
      */
     protected $_collection = null;
 
@@ -304,7 +304,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * set collection object
      *
-     * @param Mage_Core_Model_Resource_Db_Collection_Abstract $collection
+     * @param Mage_Core_Model_Resource_Db_Collection_Abstract|Varien_Data_Collection_Db $collection
      */
     public function setCollection($collection)
     {
@@ -314,7 +314,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * get collection object
      *
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract
+     * @return Mage_Core_Model_Resource_Db_Collection_Abstract|Varien_Data_Collection_Db
      */
     public function getCollection()
     {
