@@ -10,9 +10,7 @@
 function Minicart(options) {
     this.formKey = options.formKey;
     this.previousVal = null;
-
     this.defaultErrorMessage = 'Error occurred. Try to refresh page.';
-
     this.selectors = {
         itemRemove:           '#cart-sidebar .remove',
         container:            '#header-cart',
@@ -27,99 +25,132 @@ function Minicart(options) {
     };
 
     if (options.selectors) {
-        $j.extend(this.selectors, options.selectors);
+        this.selectors = { ...this.selectors, ...options.selectors };
     }
+
+    // Bind the methods to the current instance
+    this.removeItemHandler = this.removeItemHandler.bind(this);
+    this.focusHandler = this.focusHandler.bind(this);
+    this.blurHandler = this.blurHandler.bind(this);
+    this.quantityButtonHandler = this.processUpdateQuantity.bind(this);
 }
 
 Minicart.prototype = {
-    initAfterEvents : {},
-    removeItemAfterEvents : {},
+    initAfterEvents: {},
+    removeItemAfterEvents: {},
     init: function() {
         var cart = this;
 
-        // bind remove event
-        $j(this.selectors.itemRemove).unbind('click.minicart').bind('click.minicart', function(e) {
-            e.preventDefault();
-            cart.removeItem($j(this));
+        document.querySelectorAll(this.selectors.itemRemove).forEach(function(el) {
+            el.removeEventListener('click', cart.removeItemHandler);
+            el.addEventListener('click', cart.removeItemHandler);
         });
 
-        // bind update qty event
-        $j(this.selectors.inputQty)
-            .unbind('blur.minicart')
-            .unbind('focus.minicart')
-            .bind('focus.minicart', function() {
-                cart.previousVal = $j(this).val();
-                cart.displayQuantityButton($j(this));
-            })
-            .bind('blur.minicart', function() {
-                cart.revertInvalidValue(this);
+        document.querySelectorAll(this.selectors.inputQty).forEach(function(el) {
+            el.removeEventListener('focus', cart.focusHandler);
+            el.removeEventListener('blur', cart.blurHandler);
+            el.addEventListener('focus', function() {
+                cart.focusHandler(el);
             });
+            el.addEventListener('blur', function() {
+                cart.blurHandler(el);
+            });
+        });
 
-        $j(this.selectors.quantityButtonClass)
-            .unbind('click.quantity')
-            .bind('click.quantity', function() {
-                cart.processUpdateQuantity(this);
+        document.querySelectorAll(this.selectors.quantityButtonClass).forEach(function(el) {
+            el.removeEventListener('click', cart.quantityButtonHandler);
+            el.addEventListener('click', function() {
+                cart.processUpdateQuantity(el); // Pass the correct element to the method
+            });
         });
 
         for (var i in this.initAfterEvents) {
-            if (this.initAfterEvents.hasOwnProperty(i) && typeof(this.initAfterEvents[i]) === "function") {
+            if (this.initAfterEvents.hasOwnProperty(i) && typeof this.initAfterEvents[i] === "function") {
                 this.initAfterEvents[i]();
             }
         }
+    },
 
+    removeItemHandler: function(e) {
+        e.preventDefault();
+        this.removeItem(e.currentTarget);
+    },
+
+    focusHandler: function(el) {
+        this.previousVal = el.value;
+        this.displayQuantityButton(el);
+    },
+
+    blurHandler: function(el) {
+        this.revertInvalidValue(el);
     },
 
     removeItem: function(el) {
         var cart = this;
-        if (confirm(el.data('confirm'))) {
+        if (confirm(el.dataset.confirm)) {
             cart.hideMessage();
             cart.showOverlay();
-            $j.ajax({
-                type: 'POST',
-                dataType: 'json',
-                data: {form_key: cart.formKey},
-                url: el.attr('href')
-            }).done(function(result) {
-                cart.hideOverlay();
-                if (result.success) {
-                    cart.refreshIfOnCartPage();
-                    cart.updateCartQty(result.qty);
-                    cart.updateContentOnRemove(result, el.closest('li'));
-                } else {
-                    cart.showMessage(result);
-                }
-            }).error(function() {
-                cart.hideOverlay();
-                cart.showError(cart.defaultErrorMessage);
-            });
+
+            // Create a URL-encoded string
+            const formData = new URLSearchParams();
+            formData.append('form_key', cart.formKey);
+
+            fetch(el.getAttribute('href'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: formData.toString()
+            })
+                .then(response => response.json())
+                .then(function(result) {
+                    cart.hideOverlay();
+                    if (result.success) {
+                        cart.refreshIfOnCartPage();
+                        cart.updateCartQty(result.qty);
+                        cart.updateContentOnRemove(result, el.closest('li'));
+                    } else {
+                        cart.showMessage(result);
+                    }
+                    cart.init();
+                    truncateOptions();
+                })
+                .catch(function() {
+                    cart.hideOverlay();
+                    cart.showError(cart.defaultErrorMessage);
+                });
         }
         for (var i in this.removeItemAfterEvents) {
-            if (this.removeItemAfterEvents.hasOwnProperty(i) && typeof(this.removeItemAfterEvents[i]) === "function") {
+            if (this.removeItemAfterEvents.hasOwnProperty(i) && typeof this.removeItemAfterEvents[i] === "function") {
                 this.removeItemAfterEvents[i]();
             }
         }
     },
 
     revertInvalidValue: function(el) {
-        if (!this.isValidQty($j(el).val()) || $j(el).val() == this.previousVal) {
-            $j(el).val(this.previousVal);
+        if (!this.isValidQty(el.value) || el.value == this.previousVal) {
+            el.value = this.previousVal;
             this.hideQuantityButton(el);
         }
     },
 
     displayQuantityButton: function(el) {
-        var buttonId = this.selectors.quantityButtonPrefix + $j(el).data('item-id');
-        $j(buttonId).addClass('visible').attr('disabled',null);
+        var buttonId = this.selectors.quantityButtonPrefix + el.dataset.itemId;
+        var button = document.querySelector(buttonId);
+        button.classList.add('visible');
+        button.removeAttribute('disabled');
     },
 
     hideQuantityButton: function(el) {
-        var buttonId = this.selectors.quantityButtonPrefix + $j(el).data('item-id');
-        $j(buttonId).removeClass('visible').attr('disabled','disabled');
+        var buttonId = this.selectors.quantityButtonPrefix + el.dataset.itemId;
+        var button = document.querySelector(buttonId);
+        button.classList.remove('visible');
+        button.setAttribute('disabled', 'disabled');
     },
 
     processUpdateQuantity: function(el) {
-        var input = $j(this.selectors.quantityInputPrefix + $j(el).data('item-id'));
-        if (this.isValidQty(input.val()) && input.val() != this.previousVal) {
+        var input = document.querySelector(this.selectors.quantityInputPrefix + el.dataset.itemId);
+        if (this.isValidQty(input.value) && input.value != this.previousVal) {
             this.updateItem(el);
         } else {
             this.revertInvalidValue(input);
@@ -128,58 +159,69 @@ Minicart.prototype = {
 
     updateItem: function(el) {
         var cart = this;
-        var input = $j(this.selectors.quantityInputPrefix + $j(el).data('item-id'));
+        var input = document.querySelector(this.selectors.quantityInputPrefix + el.dataset.itemId);
 
-        if (!$j.isNumeric(input.val())) {
+        if (isNaN(input.value)) {
             cart.hideOverlay();
             cart.showError(cart.defaultErrorMessage);
             return false;
         }
 
-        var quantity = input.val();
+        var quantity = input.value;
         cart.hideMessage();
         cart.showOverlay();
-        $j.ajax({
-            type: 'POST',
-            dataType: 'json',
-            url: input.data('link'),
-            data: {qty: quantity, form_key: cart.formKey}
-        }).done(function(result) {
-            cart.hideOverlay();
-            if (result.success) {
-                cart.refreshIfOnCartPage();
-                cart.updateCartQty(result.qty);
-                if (quantity !== 0) {
-                    cart.updateContentOnUpdate(result);
+
+        // Create a URL-encoded string
+        const formData = new URLSearchParams();
+        formData.append('qty', quantity);
+        formData.append('form_key', cart.formKey);
+
+        fetch(input.dataset.link, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData.toString()
+        })
+            .then(response => response.json())
+            .then(function(result) {
+                cart.hideOverlay();
+                if (result.success) {
+                    cart.refreshIfOnCartPage();
+                    cart.updateCartQty(result.qty);
+                    if (quantity !== 0) {
+                        cart.updateContentOnUpdate(result);
+                    } else {
+                        cart.updateContentOnRemove(result, input.closest('li'));
+                    }
                 } else {
-                    cart.updateContentOnRemove(result, input.closest('li'));
+                    cart.showMessage(result);
                 }
-            } else {
-                cart.showMessage(result);
-            }
-        }).error(function() {
-            cart.hideOverlay();
-            cart.showError(cart.defaultErrorMessage);
-        });
+                cart.init();
+                truncateOptions();
+            })
+            .catch(function() {
+                cart.hideOverlay();
+                cart.showError(cart.defaultErrorMessage);
+            });
         return false;
     },
 
     updateContentOnRemove: function(result, el) {
         var cart = this;
-        el.hide('slow', function() {
-            $j(cart.selectors.container).html(result.content);
-            cart.showMessage(result);
-        });
+        el.style.display = 'none';
+        document.querySelector(this.selectors.container).innerHTML = result.content;
+        cart.showMessage(result);
     },
 
     updateContentOnUpdate: function(result) {
-        $j(this.selectors.container).html(result.content);
+        document.querySelector(this.selectors.container).innerHTML = result.content;
         this.showMessage(result);
     },
 
     updateCartQty: function(qty) {
-        if (typeof qty != 'undefined') {
-            $j(this.selectors.qty).text(qty);
+        if (typeof qty !== 'undefined') {
+            document.querySelector(this.selectors.qty).textContent = qty;
         }
     },
 
@@ -188,38 +230,42 @@ Minicart.prototype = {
     },
 
     showOverlay: function() {
-        $j(this.selectors.overlay).addClass('loading');
+        document.querySelector(this.selectors.overlay).classList.add('loading');
     },
 
     hideOverlay: function() {
-        $j(this.selectors.overlay).removeClass('loading');
+        document.querySelector(this.selectors.overlay).classList.remove('loading');
     },
 
     showMessage: function(result) {
-        if (typeof result.notice != 'undefined') {
+        if (typeof result.notice !== 'undefined') {
             this.showError(result.notice);
-        } else if (typeof result.error != 'undefined') {
+        } else if (typeof result.error !== 'undefined') {
             this.showError(result.error);
-        } else if (typeof result.message != 'undefined') {
+        } else if (typeof result.message !== 'undefined') {
             this.showSuccess(result.message);
         }
     },
 
     hideMessage: function() {
-        $j(this.selectors.error).fadeOut('slow');
-        $j(this.selectors.success).fadeOut('slow');
+        document.querySelector(this.selectors.error).style.display = 'none';
+        document.querySelector(this.selectors.success).style.display = 'none';
     },
 
     showError: function(message) {
-        $j(this.selectors.error).text(message).fadeIn('slow');
+        var errorElement = document.querySelector(this.selectors.error);
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
     },
 
     showSuccess: function(message) {
-        $j(this.selectors.success).text(message).fadeIn('slow');
+        var successElement = document.querySelector(this.selectors.success);
+        successElement.textContent = message;
+        successElement.style.display = 'block';
     },
 
     refreshIfOnCartPage: function() {
-        if (document.body.classList.contains("checkout-cart-index")){
+        if (document.body.classList.contains("checkout-cart-index")) {
             window.location.reload(true);
         }
     }
