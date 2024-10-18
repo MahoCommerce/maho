@@ -1139,101 +1139,110 @@ var ProductMediaManager = {
     IMAGE_ZOOM_THRESHOLD: 20,
     imageWrapper: null,
 
-    destroyZoom: function() {
-        $j('.zoomContainer').remove();
-        $j('.product-image-gallery .gallery-image').removeData('elevateZoom');
-    },
-
     createZoom: function(image) {
-        // Destroy since zoom shouldn't be enabled under certain conditions
-        ProductMediaManager.destroyZoom();
-
-        if(
-            // Don't use zoom on devices where touch has been used
-            PointerManager.getPointer() == PointerManager.TOUCH_POINTER_TYPE
-            // Don't use zoom when screen is small, or else zoom window shows outside body
-            || window.matchMedia("screen and (max-width:" + bp.medium + "px)").matches
-        ) {
-            return; // zoom not enabled
-        }
-
-        if(image.length <= 0) { //no image found
+        if (PointerManager.getPointer() == PointerManager.TOUCH_POINTER_TYPE
+            || window.matchMedia("screen and (max-width:" + bp.medium + "px)").matches) {
             return;
         }
 
-        if(image[0].naturalWidth && image[0].naturalHeight) {
-            var widthDiff = image[0].naturalWidth - image.width() - ProductMediaManager.IMAGE_ZOOM_THRESHOLD;
-            var heightDiff = image[0].naturalHeight - image.height() - ProductMediaManager.IMAGE_ZOOM_THRESHOLD;
+        if(image.length <= 0) {
+            return;
+        }
 
-            if(widthDiff < 0 && heightDiff < 0) {
-                //image not big enough
+        if (image.naturalWidth && image.naturalHeight) {
+            let widthDiff = image.naturalWidth - image.width - ProductMediaManager.IMAGE_ZOOM_THRESHOLD;
+            let heightDiff = image.naturalHeight - image.height - ProductMediaManager.IMAGE_ZOOM_THRESHOLD;
+            let parentImage = image.closest('.product-image');
 
-                image.parents('.product-image').removeClass('zoom-available');
-
+            if (widthDiff < 0 && heightDiff < 0) {
+                parentImage.classList.remove('zoom-available');
                 return;
             } else {
-                image.parents('.product-image').addClass('zoom-available');
+                parentImage.classList.add('zoom-available');
             }
         }
 
-        image.elevateZoom();
+        const container = document.querySelector(".product-image-gallery");
+        container.addEventListener("mousemove", onZoom);
+        container.addEventListener("mouseover", onZoom);
+        container.addEventListener("mouseleave", offZoom);
+
+        function onZoom(e) {
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const img = document.querySelector(".product-image-gallery img.visible");
+            img.style.transformOrigin = `${x}px ${y}px`;
+            img.style.transform = "scale(2.5)";
+        }
+
+        function offZoom(e) {
+            const img = document.querySelector(".product-image-gallery img.visible");
+            img.style.transformOrigin = `center center`;
+            img.style.transform = "scale(1)";
+        }
     },
 
     swapImage: function(targetImage) {
-        targetImage = $j(targetImage);
-        targetImage.addClass('gallery-image');
-        ProductMediaManager.destroyZoom();
-        const imageGallery = $j('.product-image-gallery');
+        targetImage.classList.add('gallery-image');
+        const imageGallery = document.querySelector('.product-image-gallery');
 
         const swapAndZoom = () => {
-            imageGallery.find('.gallery-image').removeClass('visible');
-            imageGallery.append(targetImage);
-            targetImage.addClass('visible');
+            imageGallery.querySelectorAll('.gallery-image').forEach(image => {
+                image.classList.remove('visible');
+            });
+
+            // Append targetImage to the gallery
+            imageGallery.appendChild(targetImage);
+            targetImage.classList.add('visible');
             ProductMediaManager.createZoom(targetImage);
         };
 
-        targetImage.removeAttr('loading'); // Remove lazy load
-        if (targetImage[0].complete) {
+        // Remove the loading attribute
+        targetImage.removeAttribute('loading'); // Remove lazy load
+        if (targetImage.complete) {
             // Image already loaded, swap immediately
             swapAndZoom();
         } else {
             // Need to wait for image to load
-            imageGallery.addClass('loading');
-            imageGallery.append(targetImage);
+            imageGallery.classList.add('loading');
+            imageGallery.appendChild(targetImage);
 
-            targetImage.on('load', function() {
-                imageGallery.removeClass('loading');
+            targetImage.onload = function() {
+                imageGallery.classList.remove('loading');
                 swapAndZoom();
-            });
+            };
         }
     },
 
     wireThumbnails: function() {
-        //trigger image change event on thumbnail click
-        $j('.product-image-thumbs .thumb-link').click(function(e) {
-            e.preventDefault();
-            var jlink = $j(this);
-            var target = $j('#image-' + jlink.data('image-index'));
-            ProductMediaManager.swapImage(target);
+        document.querySelectorAll('.product-image-thumbs .thumb-link').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                let imageIndex = link.getAttribute('data-image-index');
+                let target = document.querySelector('#image-' + imageIndex);
+                ProductMediaManager.swapImage(target);
+            });
         });
     },
 
     initZoom: function() {
-        ProductMediaManager.createZoom($j(".gallery-image.visible")); //set zoom on first image
+        ProductMediaManager.createZoom(document.querySelector(".gallery-image.visible"));
     },
 
     init: function() {
-        ProductMediaManager.imageWrapper = $j('.product-img-box');
+        ProductMediaManager.imageWrapper = document.querySelector('.product-img-box');
 
         // Re-initialize zoom on viewport size change since resizing causes problems with zoom and since smaller
         // viewport sizes shouldn't have zoom
-        $j(window).on('delayed-resize', function(e, resizeEvent) {
+        window.addEventListener('delayed-resize', function(e) {
             ProductMediaManager.initZoom();
         });
 
         ProductMediaManager.initZoom();
         ProductMediaManager.wireThumbnails();
-        $j(document).trigger('product-media-loaded', ProductMediaManager);
+        const event = new CustomEvent('product-media-loaded', { detail: ProductMediaManager });
+        document.dispatchEvent(event);
     }
 };
 

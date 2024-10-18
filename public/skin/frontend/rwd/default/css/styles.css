@@ -4576,6 +4576,7 @@ p.product-name a:hover {
 }
 .product-image-gallery {
   position: relative;
+  overflow: hidden;
 }
 .product-image-gallery .gallery-image {
   display: none;
