@@ -7,7 +7,6 @@
  * @copyright   Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-
 Catalog.Map.showHelp = Catalog.Map.showHelp.wrap(function (parent, event) {
     var helpBox = document.getElementById('map-popup');
     var bodyNode = document.getElementsByTagName('body')[0];
