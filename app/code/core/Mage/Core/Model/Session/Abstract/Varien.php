@@ -53,6 +53,11 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
             return $this;
         }
 
+        // Do not start a session if no sessionName was provided
+        if (empty($sessionName)) {
+            return $this;
+        }
+
         // getSessionSaveMethod has to return correct version of handler in any case
         $moduleName = $this->getSessionSaveMethod();
         switch ($moduleName) {
@@ -111,7 +116,6 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         }
 
         // If session name is empty, we will use the default cookie name of PHPSESSID
-        // which should never happen in core.
         if (!empty($sessionName)) {
             $this->setSessionName($sessionName);
         }
@@ -122,7 +126,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
 
         // If we still do not have a session id, then read from the cookie value
         // Otherwise, we will be starting a new session.
-        if (empty($this->getSessionId()) && $cookie->get($sessionName)) {
+        if (empty($this->getSessionId()) && is_string($cookie->get($sessionName))) {
             $this->setSessionId($cookie->get($sessionName));
         }
 
