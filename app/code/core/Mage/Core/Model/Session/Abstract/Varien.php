@@ -192,7 +192,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         }
 
         // Observers can change settings of the cookie such as lifetime, regenerate the session id, etc
-        Mage::dispatchEvent('session_before_renew_cookie', ['cookie' => $cookie]);
+        Mage::dispatchEvent('session_before_renew_cookie', ['cookie' => $cookie, 'session_name' => $sessionName]);
 
         // Set or renew regular session cookie
         $this->setSessionCookie();
