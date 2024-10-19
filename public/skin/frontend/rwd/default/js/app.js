@@ -1145,7 +1145,7 @@ var ProductMediaManager = {
             return;
         }
 
-        if(image.length <= 0) {
+        if (!image) {
             return;
         }
 
