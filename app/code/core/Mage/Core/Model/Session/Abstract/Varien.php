@@ -115,10 +115,8 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
             }
         }
 
-        // If session name is empty, we will use the default cookie name of PHPSESSID
-        if (!empty($sessionName)) {
-            $this->setSessionName($sessionName);
-        }
+        // Set the session name to maho_session, maho_admin_session, etc
+        $this->setSessionName($sessionName);
 
         // Call any custom logic in child classes for setting the session id
         // I.e. Checking the SID query param to enable switching between hosts
@@ -335,7 +333,9 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
      */
     public function setSessionName($name)
     {
-        session_name($name);
+        if (!empty($name)) {
+            session_name($name);
+        }
         return $this;
     }
 
