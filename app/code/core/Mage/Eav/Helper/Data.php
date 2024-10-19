@@ -185,10 +185,7 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
             ],
             'boolean'       => [
                 'source_model'      => 'eav/entity_attribute_source_boolean'
-            ],
-            'customselect'  => [
-                'source_model'      => 'eav/entity_attribute_source_table'
-            ],
+            ]
         ];
 
         if (is_null($inputType)) {
