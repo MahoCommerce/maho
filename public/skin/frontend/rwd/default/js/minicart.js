@@ -1,99 +1,91 @@
 /**
  * Maho
  *
- * @category    design
- * @package     rwd_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * @category   design
+ * @package    rwd_default
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-function Minicart(options) {
-    this.formKey = options.formKey;
-    this.previousVal = null;
-    this.defaultErrorMessage = 'Error occurred. Try to refresh page.';
-    this.selectors = {
-        itemRemove:           '#cart-sidebar .remove',
-        container:            '#header-cart',
-        inputQty:             '.cart-item-quantity',
-        qty:                  'div.header-minicart span.count',
-        overlay:              '.minicart-wrapper',
-        error:                '#minicart-error-message',
-        success:              '#minicart-success-message',
-        quantityButtonPrefix: '#qbutton-',
-        quantityInputPrefix:  '#qinput-',
-        quantityButtonClass:  '.quantity-button'
-    };
+class Minicart {
+    constructor(options) {
+        this.formKey = options.formKey;
+        this.previousVal = null;
+        this.defaultErrorMessage = 'Error occurred. Try to refresh page.';
+        this.selectors = {
+            itemRemove: '#cart-sidebar .remove',
+            container: '#header-cart',
+            inputQty: '.cart-item-quantity',
+            qty: 'div.header-minicart span.count',
+            overlay: '.minicart-wrapper',
+            error: '#minicart-error-message',
+            success: '#minicart-success-message',
+            quantityButtonPrefix: '#qbutton-',
+            quantityInputPrefix: '#qinput-',
+            quantityButtonClass: '.quantity-button'
+        };
 
-    if (options.selectors) {
-        this.selectors = { ...this.selectors, ...options.selectors };
+        if (options.selectors) {
+            this.selectors = { ...this.selectors, ...options.selectors };
+        }
+
+        // Bind the methods to the current instance
+        this.removeItemHandler = this.removeItemHandler.bind(this);
+        this.focusHandler = this.focusHandler.bind(this);
+        this.blurHandler = this.blurHandler.bind(this);
+        this.quantityButtonHandler = this.processUpdateQuantity.bind(this);
     }
 
-    // Bind the methods to the current instance
-    this.removeItemHandler = this.removeItemHandler.bind(this);
-    this.focusHandler = this.focusHandler.bind(this);
-    this.blurHandler = this.blurHandler.bind(this);
-    this.quantityButtonHandler = this.processUpdateQuantity.bind(this);
-}
+    initAfterEvents = {};
+    removeItemAfterEvents = {};
 
-Minicart.prototype = {
-    initAfterEvents: {},
-    removeItemAfterEvents: {},
-    init: function() {
-        var cart = this;
-
-        document.querySelectorAll(this.selectors.itemRemove).forEach(function(el) {
-            el.removeEventListener('click', cart.removeItemHandler);
-            el.addEventListener('click', cart.removeItemHandler);
+    init() {
+        document.querySelectorAll(this.selectors.itemRemove).forEach(el => {
+            el.removeEventListener('click', this.removeItemHandler);
+            el.addEventListener('click', this.removeItemHandler);
         });
 
-        document.querySelectorAll(this.selectors.inputQty).forEach(function(el) {
-            el.removeEventListener('focus', cart.focusHandler);
-            el.removeEventListener('blur', cart.blurHandler);
-            el.addEventListener('focus', function() {
-                cart.focusHandler(el);
-            });
-            el.addEventListener('blur', function() {
-                cart.blurHandler(el);
-            });
+        document.querySelectorAll(this.selectors.inputQty).forEach(el => {
+            el.removeEventListener('focus', this.focusHandler);
+            el.removeEventListener('blur', this.blurHandler);
+            el.addEventListener('focus', () => this.focusHandler(el));
+            el.addEventListener('blur', () => this.blurHandler(el));
         });
 
-        document.querySelectorAll(this.selectors.quantityButtonClass).forEach(function(el) {
-            el.removeEventListener('click', cart.quantityButtonHandler);
-            el.addEventListener('click', function() {
-                cart.processUpdateQuantity(el); // Pass the correct element to the method
-            });
+        document.querySelectorAll(this.selectors.quantityButtonClass).forEach(el => {
+            el.removeEventListener('click', this.quantityButtonHandler);
+            el.addEventListener('click', () => this.processUpdateQuantity(el));
         });
 
-        for (var i in this.initAfterEvents) {
-            if (this.initAfterEvents.hasOwnProperty(i) && typeof this.initAfterEvents[i] === "function") {
-                this.initAfterEvents[i]();
+        for (const [, event] of Object.entries(this.initAfterEvents)) {
+            if (typeof event === "function") {
+                event();
             }
         }
-    },
+    }
 
-    removeItemHandler: function(e) {
+    removeItemHandler(e) {
         e.preventDefault();
         this.removeItem(e.currentTarget);
-    },
+    }
 
-    focusHandler: function(el) {
+    focusHandler(el) {
         this.previousVal = el.value;
         this.displayQuantityButton(el);
-    },
+    }
 
-    blurHandler: function(el) {
+    blurHandler(el) {
         this.revertInvalidValue(el);
-    },
+    }
 
-    removeItem: function(el) {
-        var cart = this;
+    removeItem(el) {
         if (confirm(el.dataset.confirm)) {
-            cart.hideMessage();
-            cart.showOverlay();
+            this.hideMessage();
+            this.showOverlay();
 
-            // Create a URL-encoded string
             const formData = new URLSearchParams();
-            formData.append('form_key', cart.formKey);
+            formData.append('form_key', this.formKey);
 
             fetch(el.getAttribute('href'), {
                 method: 'POST',
@@ -103,78 +95,76 @@ Minicart.prototype = {
                 body: formData.toString()
             })
                 .then(response => response.json())
-                .then(function(result) {
-                    cart.hideOverlay();
+                .then(result => {
+                    this.hideOverlay();
                     if (result.success) {
-                        cart.refreshIfOnCartPage();
-                        cart.updateCartQty(result.qty);
-                        cart.updateContentOnRemove(result, el.closest('li'));
+                        this.refreshIfOnCartPage();
+                        this.updateCartQty(result.qty);
+                        this.updateContentOnRemove(result, el.closest('li'));
                     } else {
-                        cart.showMessage(result);
+                        this.showMessage(result);
                     }
-                    cart.init();
+                    this.init();
                     truncateOptions();
                 })
-                .catch(function() {
-                    cart.hideOverlay();
-                    cart.showError(cart.defaultErrorMessage);
+                .catch(() => {
+                    this.hideOverlay();
+                    this.showError(this.defaultErrorMessage);
                 });
         }
-        for (var i in this.removeItemAfterEvents) {
-            if (this.removeItemAfterEvents.hasOwnProperty(i) && typeof this.removeItemAfterEvents[i] === "function") {
-                this.removeItemAfterEvents[i]();
+        for (const [, event] of Object.entries(this.removeItemAfterEvents)) {
+            if (typeof event === "function") {
+                event();
             }
         }
-    },
+    }
 
-    revertInvalidValue: function(el) {
+    revertInvalidValue(el) {
         if (!this.isValidQty(el.value) || el.value == this.previousVal) {
             el.value = this.previousVal;
             this.hideQuantityButton(el);
         }
-    },
+    }
 
-    displayQuantityButton: function(el) {
-        var buttonId = this.selectors.quantityButtonPrefix + el.dataset.itemId;
-        var button = document.querySelector(buttonId);
+    displayQuantityButton(el) {
+        const buttonId = this.selectors.quantityButtonPrefix + el.dataset.itemId;
+        const button = document.querySelector(buttonId);
         button.classList.add('visible');
         button.removeAttribute('disabled');
-    },
+    }
 
-    hideQuantityButton: function(el) {
-        var buttonId = this.selectors.quantityButtonPrefix + el.dataset.itemId;
-        var button = document.querySelector(buttonId);
+    hideQuantityButton(el) {
+        const buttonId = this.selectors.quantityButtonPrefix + el.dataset.itemId;
+        const button = document.querySelector(buttonId);
         button.classList.remove('visible');
         button.setAttribute('disabled', 'disabled');
-    },
+    }
 
-    processUpdateQuantity: function(el) {
-        var input = document.querySelector(this.selectors.quantityInputPrefix + el.dataset.itemId);
+    processUpdateQuantity(el) {
+        const input = document.querySelector(this.selectors.quantityInputPrefix + el.dataset.itemId);
         if (this.isValidQty(input.value) && input.value != this.previousVal) {
             this.updateItem(el);
         } else {
             this.revertInvalidValue(input);
         }
-    },
+    }
 
-    updateItem: function(el) {
-        var cart = this;
-        var input = document.querySelector(this.selectors.quantityInputPrefix + el.dataset.itemId);
+    updateItem(el) {
+        const input = document.querySelector(this.selectors.quantityInputPrefix + el.dataset.itemId);
 
         if (isNaN(input.value)) {
-            cart.hideOverlay();
-            cart.showError(cart.defaultErrorMessage);
+            this.hideOverlay();
+            this.showError(this.defaultErrorMessage);
             return false;
         }
 
-        var quantity = input.value;
-        cart.hideMessage();
-        cart.showOverlay();
+        const quantity = input.value;
+        this.hideMessage();
+        this.showOverlay();
 
-        // Create a URL-encoded string
         const formData = new URLSearchParams();
         formData.append('qty', quantity);
-        formData.append('form_key', cart.formKey);
+        formData.append('form_key', this.formKey);
 
         fetch(input.dataset.link, {
             method: 'POST',
@@ -184,60 +174,59 @@ Minicart.prototype = {
             body: formData.toString()
         })
             .then(response => response.json())
-            .then(function(result) {
-                cart.hideOverlay();
+            .then(result => {
+                this.hideOverlay();
                 if (result.success) {
-                    cart.refreshIfOnCartPage();
-                    cart.updateCartQty(result.qty);
+                    this.refreshIfOnCartPage();
+                    this.updateCartQty(result.qty);
                     if (quantity !== 0) {
-                        cart.updateContentOnUpdate(result);
+                        this.updateContentOnUpdate(result);
                     } else {
-                        cart.updateContentOnRemove(result, input.closest('li'));
+                        this.updateContentOnRemove(result, input.closest('li'));
                     }
                 } else {
-                    cart.showMessage(result);
+                    this.showMessage(result);
                 }
-                cart.init();
+                this.init();
                 truncateOptions();
             })
-            .catch(function() {
-                cart.hideOverlay();
-                cart.showError(cart.defaultErrorMessage);
+            .catch(() => {
+                this.hideOverlay();
+                this.showError(this.defaultErrorMessage);
             });
         return false;
-    },
+    }
 
-    updateContentOnRemove: function(result, el) {
-        var cart = this;
+    updateContentOnRemove(result, el) {
         el.style.display = 'none';
         document.querySelector(this.selectors.container).innerHTML = result.content;
-        cart.showMessage(result);
-    },
+        this.showMessage(result);
+    }
 
-    updateContentOnUpdate: function(result) {
+    updateContentOnUpdate(result) {
         document.querySelector(this.selectors.container).innerHTML = result.content;
         this.showMessage(result);
-    },
+    }
 
-    updateCartQty: function(qty) {
+    updateCartQty(qty) {
         if (typeof qty !== 'undefined') {
             document.querySelector(this.selectors.qty).textContent = qty;
         }
-    },
+    }
 
-    isValidQty: function(val) {
+    isValidQty(val) {
         return (val.length > 0) && (val - 0 == val) && (val - 0 > 0);
-    },
+    }
 
-    showOverlay: function() {
+    showOverlay() {
         document.querySelector(this.selectors.overlay).classList.add('loading');
-    },
+    }
 
-    hideOverlay: function() {
+    hideOverlay() {
         document.querySelector(this.selectors.overlay).classList.remove('loading');
-    },
+    }
 
-    showMessage: function(result) {
+    showMessage(result) {
         if (typeof result.notice !== 'undefined') {
             this.showError(result.notice);
         } else if (typeof result.error !== 'undefined') {
@@ -245,26 +234,26 @@ Minicart.prototype = {
         } else if (typeof result.message !== 'undefined') {
             this.showSuccess(result.message);
         }
-    },
+    }
 
-    hideMessage: function() {
+    hideMessage() {
         document.querySelector(this.selectors.error).style.display = 'none';
         document.querySelector(this.selectors.success).style.display = 'none';
-    },
+    }
 
-    showError: function(message) {
-        var errorElement = document.querySelector(this.selectors.error);
+    showError(message) {
+        const errorElement = document.querySelector(this.selectors.error);
         errorElement.textContent = message;
         errorElement.style.display = 'block';
-    },
+    }
 
-    showSuccess: function(message) {
-        var successElement = document.querySelector(this.selectors.success);
+    showSuccess(message) {
+        const successElement = document.querySelector(this.selectors.success);
         successElement.textContent = message;
         successElement.style.display = 'block';
-    },
+    }
 
-    refreshIfOnCartPage: function() {
+    refreshIfOnCartPage() {
         if (document.body.classList.contains("checkout-cart-index")) {
             window.location.reload(true);
         }
