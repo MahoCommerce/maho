@@ -22,7 +22,7 @@
 
             <block type="page/html_head" name="head" as="head">
                 <action method="addJs"><script>prototype/prototype.js</script></action>
-                <action method="addJs"><script>lib/jquery/jquery-3.7.1.min.js</script></action>
+                <action method="addItem"><type>skin_js</type><name>js/jquery-3.7.1.min.js</name></action>
                 <action method="addJs"><script>prototype/validation.js</script></action>
                 <action method="addJs"><script>maho-autocomplete.js</script></action>
                 <action method="addJs"><script>varien/js.js</script></action>
