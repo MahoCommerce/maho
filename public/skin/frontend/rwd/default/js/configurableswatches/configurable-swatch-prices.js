@@ -18,7 +18,11 @@ var ConfigurableSwatchPrices = Class.create({
     },
 
     addObservers: function() {
-        $(document).on('click', '.swatch-link', this.onSwatchClick.bind(this));
+        document.addEventListener('click', function(event) {
+            if (event.target.closest('.swatch-link')) {
+                this.onSwatchClick.call(this, event);
+            }
+        }.bind(this));
     },
 
     onSwatchClick: function(e) {
@@ -48,13 +52,11 @@ var ConfigurableSwatchPrices = Class.create({
             return this.swatchesPrices[productId];
         }
         this.swatchesPrices[productId] = new Product.OptionsPrice(this.getProductConfig(productId));
-
         return this.swatchesPrices[productId];
     },
 
     getProductConfig: function(productId) {
         var generalConfigClone = Object.extend({}, this.generalConfig);
-
         return Object.extend(generalConfigClone, this.products[productId]);
     }
 });
