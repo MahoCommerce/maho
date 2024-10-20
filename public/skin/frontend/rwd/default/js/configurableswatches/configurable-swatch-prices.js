@@ -7,13 +7,11 @@
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-
 var ConfigurableSwatchPrices = Class.create({
     initialize: function(config) {
         this.swatchesPrices = [];
         this.generalConfig = config.generalConfig;
         this.products = config.products;
-
         this.addObservers();
     },
 
