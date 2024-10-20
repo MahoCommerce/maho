@@ -77,9 +77,9 @@ $attributes = [
     'prefix'            => [
         'is_user_defined'   => 0,
         'is_system'         => 0,
-        'is_visible'        => $addressHelper->getConfig('prefix_show', $store) == '' ? 0 : 1,
+        'is_visible'        => 0,
         'sort_order'        => 30,
-        'is_required'       => $addressHelper->getConfig('prefix_show', $store) == 'req' ? 1 : 0
+        'is_required'       => 0,
     ],
     'firstname'         => [
         'is_user_defined'   => 0,
@@ -95,9 +95,9 @@ $attributes = [
     'middlename'        => [
         'is_user_defined'   => 0,
         'is_system'         => 0,
-        'is_visible'        => $addressHelper->getConfig('middlename_show', $store) == '' ? 0 : 1,
+        'is_visible'        => 1,
         'sort_order'        => 50,
-        'is_required'       => $addressHelper->getConfig('middlename_show', $store) == 'req' ? 1 : 0
+        'is_required'       => 0,
     ],
     'lastname'          => [
         'is_user_defined'   => 0,
@@ -113,9 +113,9 @@ $attributes = [
     'suffix'            => [
         'is_user_defined'   => 0,
         'is_system'         => 0,
-        'is_visible'        => $addressHelper->getConfig('suffix_show', $store) == '' ? 0 : 1,
+        'is_visible'        => 0,
         'sort_order'        => 70,
-        'is_required'       => $addressHelper->getConfig('suffix_show', $store) == 'req' ? 1 : 0
+        'is_required'       => 0,
     ],
     'email'             => [
         'is_user_defined'   => 0,
@@ -131,9 +131,9 @@ $attributes = [
     'dob'               => [
         'is_user_defined'   => 0,
         'is_system'         => 0,
-        'is_visible'        => $addressHelper->getConfig('dob_show', $store) == '' ? 0 : 1,
+        'is_visible'        => 0,
         'sort_order'        => 90,
-        'is_required'       => $addressHelper->getConfig('dob_show', $store) == 'req' ? 1 : 0,
+        'is_required'       => 0,
         'validate_rules'    => [
             'input_validation'  => 'date'
         ],
@@ -143,9 +143,9 @@ $attributes = [
     'taxvat'            => [
         'is_user_defined'   => 0,
         'is_system'         => 0,
-        'is_visible'        => $addressHelper->getConfig('dob_show', $store) == '' ? 0 : 1,
+        'is_visible'        => 0,
         'sort_order'        => 100,
-        'is_required'       => $addressHelper->getConfig('dob_show', $store) == 'req' ? 1 : 0,
+        'is_required'       => 0,
         'validate_rules'    => [
             'max_text_length'   => 255,
         ],
@@ -154,9 +154,9 @@ $attributes = [
     'gender'            => [
         'is_user_defined'   => 0,
         'is_system'         => 0,
-        'is_visible'        => $addressHelper->getConfig('gender_show', $store) == '' ? 0 : 1,
+        'is_visible'        => 0,
         'sort_order'        => 110,
-        'is_required'       => $addressHelper->getConfig('gender_show', $store) == 'req' ? 1 : 0,
+        'is_required'       => 0,
         'validate_rules'    => [],
         'admin_checkout'    => 1
     ],
@@ -195,9 +195,9 @@ $attributes = [
     'prefix'            => [
         'is_user_defined'   => 0,
         'is_system'         => 0,
-        'is_visible'        => $addressHelper->getConfig('prefix_show', $store) == '' ? 0 : 1,
+        'is_visible'        => 0,
         'sort_order'        => 10,
-        'is_required'       => $addressHelper->getConfig('prefix_show', $store) == 'req' ? 1 : 0,
+        'is_required'       => 0,
     ],
     'firstname'         => [
         'is_user_defined'   => 0,
@@ -213,9 +213,9 @@ $attributes = [
     'middlename'        => [
         'is_user_defined'   => 0,
         'is_system'         => 0,
-        'is_visible'        => $addressHelper->getConfig('middlename_show', $store) == '' ? 0 : 1,
+        'is_visible'        => 1,
         'sort_order'        => 30,
-        'is_required'       => $addressHelper->getConfig('middlename_show', $store) == 'req' ? 1 : 0,
+        'is_required'       => 0,
     ],
     'lastname'          => [
         'is_user_defined'   => 0,
@@ -231,9 +231,9 @@ $attributes = [
     'suffix'            => [
         'is_user_defined'   => 0,
         'is_system'         => 0,
-        'is_visible'        => $addressHelper->getConfig('suffix_show', $store) == '' ? 0 : 1,
+        'is_visible'        => 0,
         'sort_order'        => 50,
-        'is_required'       => $addressHelper->getConfig('suffix_show', $store) == 'req' ? 1 : 0,
+        'is_required'       => 0,
     ],
     'company'           => [
         'is_user_defined'   => 0,
@@ -251,7 +251,7 @@ $attributes = [
         'is_system'         => 1,
         'is_visible'        => 1,
         'sort_order'        => 70,
-        'multiline_count'   => $addressHelper->getConfig('street_lines', $store),
+        'multiline_count'   => 2,
         'is_required'       => 1,
         'validate_rules'    => [
             'max_text_length'   => 255,

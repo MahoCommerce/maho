@@ -665,16 +665,6 @@
                 <account_new_email_template>customer_password_link_account_new_email_template</account_new_email_template>
                 <email_template>customer_password_link_email_template</email_template>
             </password_link>
-            <address>
-                <street_lines>2</street_lines>
-                <prefix_show/>
-                <prefix_options/>
-                <middlename_show>1</middlename_show>
-                <suffix_show/>
-                <suffix_options/>
-                <dob_show/>
-                <gender_show/>
-            </address>
             <startup>
                 <redirect_dashboard>1</redirect_dashboard>
             </startup>

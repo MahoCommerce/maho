@@ -168,40 +168,6 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses extends Mage_Adminhtml_Bl
             $customerStoreId = Mage::app()->getWebsite($customer->getWebsiteId())->getDefaultStore()->getId();
         }
 
-        $prefixElement = $form->getElement('prefix');
-        if ($prefixElement) {
-            /** @var Mage_Customer_Helper_Data $helper */
-            $helper = $this->helper('customer');
-            $prefixOptions = $helper->getNamePrefixOptions($customerStoreId);
-            if (!empty($prefixOptions)) {
-                $fieldset->removeField($prefixElement->getId());
-                $prefixField = $fieldset->addField(
-                    $prefixElement->getId(),
-                    'select',
-                    $prefixElement->getData(),
-                    '^'
-                );
-                $prefixField->setValues($prefixOptions);
-            }
-        }
-
-        $suffixElement = $form->getElement('suffix');
-        if ($suffixElement) {
-            /** @var Mage_Customer_Helper_Data $helper */
-            $helper = $this->helper('customer');
-            $suffixOptions = $helper->getNameSuffixOptions($customerStoreId);
-            if (!empty($suffixOptions)) {
-                $fieldset->removeField($suffixElement->getId());
-                $suffixField = $fieldset->addField(
-                    $suffixElement->getId(),
-                    'select',
-                    $suffixElement->getData(),
-                    $form->getElement('lastname')->getId()
-                );
-                $suffixField->setValues($suffixOptions);
-            }
-        }
-
         $addressCollection = $customer->getAddresses();
         $this->assign('customer', $customer);
         $this->assign('addressCollection', $addressCollection);

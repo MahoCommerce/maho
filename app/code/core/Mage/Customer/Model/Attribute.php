@@ -54,31 +54,4 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
     {
         $this->_init('customer/attribute');
     }
-
-    /**
-     * Save additional data
-     *
-     * @inheritDoc
-     */
-    #[\Override]
-    protected function _afterSave()
-    {
-        $websiteId = (int)$this->getWebsite()->getId();
-        $dataFieldPrefix = $websiteId ? 'scope_' : '';
-
-        // See Mage_Adminhtml_Model_System_Config_Backend_Customer_Show_Customer
-        if ($this->getData($dataFieldPrefix . 'is_required') !== $this->getOrigData($dataFieldPrefix . 'is_required')
-            || $this->getData($dataFieldPrefix . 'is_visible') !== $this->getOrigData($dataFieldPrefix . 'is_visible')
-        ) {
-            $code = $this->getAttributeCode();
-            if (in_array($code, ['prefix', 'middlename', 'lastname'])) {
-                // Note, with EAV editor it is possible to have different values for customer vs customer address
-                // TODO: sync value with customer_address
-            }
-            if (in_array($code, ['prefix', 'middlename', 'lastname', 'dob', 'taxvat', 'gender'])) {
-                // TODO: sync these values back to core_config, e.g. set 'customer/address/prefix_show' to '', 'opt', or 'req'
-            }
-        }
-        return parent::_afterSave();
-    }
 }

@@ -101,46 +101,6 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
             $customerStoreId = Mage::app()->getWebsite($customer->getWebsiteId())->getDefaultStore()->getId();
         }
 
-        $prefixElement = $form->getElement('prefix');
-        if ($prefixElement) {
-            /** @var Mage_Customer_Helper_Data $helper */
-            $helper = $this->helper('customer');
-            $prefixOptions = $helper->getNamePrefixOptions($customerStoreId);
-            if (!empty($prefixOptions)) {
-                $fieldset->removeField($prefixElement->getId());
-                $prefixField = $fieldset->addField(
-                    $prefixElement->getId(),
-                    'select',
-                    $prefixElement->getData(),
-                    $form->getElement('group_id')->getId()
-                );
-                $prefixField->setValues($prefixOptions);
-                if ($customer->getId()) {
-                    $prefixField->addElementValues($customer->getPrefix());
-                }
-            }
-        }
-
-        $suffixElement = $form->getElement('suffix');
-        if ($suffixElement) {
-            /** @var Mage_Customer_Helper_Data $helper */
-            $helper = $this->helper('customer');
-            $suffixOptions = $helper->getNameSuffixOptions($customerStoreId);
-            if (!empty($suffixOptions)) {
-                $fieldset->removeField($suffixElement->getId());
-                $suffixField = $fieldset->addField(
-                    $suffixElement->getId(),
-                    'select',
-                    $suffixElement->getData(),
-                    $form->getElement('lastname')->getId()
-                );
-                $suffixField->setValues($suffixOptions);
-                if ($customer->getId()) {
-                    $suffixField->addElementValues($customer->getSuffix());
-                }
-            }
-        }
-
         $minPasswordLength = Mage::getModel('customer/customer')->getMinPasswordLength();
         if ($customer->getId()) {
             if (!$customer->isReadonly()) {

@@ -110,46 +110,6 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Form_Address extends Mage_Adminhtm
         }
         $this->_addAttributesToForm($attributes, $fieldset);
 
-        $prefixElement = $this->_form->getElement('prefix');
-        if ($prefixElement) {
-            /** @var Mage_Customer_Helper_Data $helper */
-            $helper = $this->helper('customer');
-            $prefixOptions = $helper->getNamePrefixOptions($this->getStore());
-            if (!empty($prefixOptions)) {
-                $fieldset->removeField($prefixElement->getId());
-                $prefixField = $fieldset->addField(
-                    $prefixElement->getId(),
-                    'select',
-                    $prefixElement->getData(),
-                    '^'
-                );
-                $prefixField->setValues($prefixOptions);
-                if ($this->getAddressId()) {
-                    $prefixField->addElementValues($this->getAddress()->getPrefix());
-                }
-            }
-        }
-
-        $suffixElement = $this->_form->getElement('suffix');
-        if ($suffixElement) {
-            /** @var Mage_Customer_Helper_Data $helper */
-            $helper = $this->helper('customer');
-            $suffixOptions = $helper->getNameSuffixOptions($this->getStore());
-            if (!empty($suffixOptions)) {
-                $fieldset->removeField($suffixElement->getId());
-                $suffixField = $fieldset->addField(
-                    $suffixElement->getId(),
-                    'select',
-                    $suffixElement->getData(),
-                    $this->_form->getElement('lastname')->getId()
-                );
-                $suffixField->setValues($suffixOptions);
-                if ($this->getAddressId()) {
-                    $suffixField->addElementValues($this->getAddress()->getSuffix());
-                }
-            }
-        }
-
         $regionElement = $this->_form->getElement('region_id');
         if ($regionElement) {
             $regionElement->setNoDisplay(true);
