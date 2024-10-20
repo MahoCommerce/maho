@@ -517,7 +517,6 @@ document.addEventListener('DOMContentLoaded', () => {
             targetContainer.prepend(formLanguage);
         }
     };
-
     let maxWidthLargeMediaQuery = window.matchMedia('(max-width: ' + bp.large + 'px)');
     let maxWidthMediumMediaQuery = window.matchMedia('(max-width: ' + bp.medium + 'px)');
     maxWidthMediumMediaQuery.addEventListener('change', repositionLanguageSwitcher);
@@ -569,113 +568,116 @@ document.addEventListener('DOMContentLoaded', () => {
     //     <div class="block-content">Content that should show when </div>
     // </div>
     //
-    // JS: jQuery('.block-title').toggleSingle();
-    //
     // Options:
     //     destruct: defaults to false, but if true, the plugin will remove itself, display content, and remove event handlers
 
+    function toggleSingle(elements, options = {}) {
+        const settings = {
+            destruct: false,
+            ...options
+        };
 
-    $j.fn.toggleSingle = function (options) {
-
-        // passing destruct: true allows
-        var settings = $j.extend({
-            destruct: false
-        }, options);
-
-        return this.each(function () {
-            if (!settings.destruct) {
-                $j(this).on('click', function () {
-                    $j(this)
-                        .toggleClass('active')
-                        .next()
-                        .toggleClass('no-display');
-                });
-                // Hide the content
-                $j(this).next().addClass('no-display');
-            } else {
-                // Remove event handler so that the toggle link can no longer be used
-                $j(this).off('click');
-                // Remove all classes that were added by this plugin
-                $j(this)
-                    .removeClass('active')
-                    .next()
-                    .removeClass('no-display');
+        elements.forEach(element => {
+            // Remove event listener if it exists
+            if (element.toggleSingleHandler) {
+                element.removeEventListener('click', element.toggleSingleHandler);
+                element.toggleSingleHandler = null;
             }
 
+            if (!settings.destruct) {
+                element.toggleSingleHandler = function() {
+                    this.classList.toggle('active');
+                    const nextElement = this.nextElementSibling;
+                    if (nextElement) {
+                        nextElement.classList.toggle('no-display');
+                    }
+                };
+                element.addEventListener('click', element.toggleSingleHandler);
+
+                // Hide the content if it's not already hidden
+                const nextElement = element.nextElementSibling;
+                if (nextElement && !nextElement.classList.contains('no-display')) {
+                    nextElement.classList.add('no-display');
+                }
+            } else {
+                // Remove all classes that were added by this function
+                element.classList.remove('active');
+                const nextElement = element.nextElementSibling;
+                if (nextElement) {
+                    nextElement.classList.remove('no-display');
+                }
+            }
         });
-    };
+    }
 
     // ==============================================
     // UI Pattern - Toggle Content (tabs and accordions in one setup)
     // ==============================================
 
-    $j('.toggle-content').each(function () {
-        var wrapper = jQuery(this);
+    document.querySelectorAll('.toggle-content').forEach(wrapper => {
+        const hasTabs = wrapper.classList.contains('tabs');
+        const hasAccordion = wrapper.classList.contains('accordion');
+        const startOpen = wrapper.classList.contains('open');
+        const dl = wrapper.querySelector('dl');
+        const dts = Array.from(dl.querySelectorAll('dt'));
+        const panes = Array.from(dl.querySelectorAll('dd'));
+        const groups = [dts, panes];
 
-        var hasTabs = wrapper.hasClass('tabs');
-        var hasAccordion = wrapper.hasClass('accordion');
-        var startOpen = wrapper.hasClass('open');
-
-        var dl = wrapper.children('dl:first');
-        var dts = dl.children('dt');
-        var panes = dl.children('dd');
-        var groups = new Array(dts, panes);
-
-        //Create a ul for tabs if necessary.
+        // Create a ul for tabs if necessary
+        let lis = [];
         if (hasTabs) {
-            var ul = jQuery('<ul class="toggle-tabs"></ul>');
-            dts.each(function () {
-                var dt = jQuery(this);
-                var li = jQuery('<li></li>');
-                li.html(dt.html());
-                ul.append(li);
+            const ul = document.createElement('ul');
+            ul.className = 'toggle-tabs';
+            dts.forEach(dt => {
+                const li = document.createElement('li');
+                li.innerHTML = dt.innerHTML;
+                ul.appendChild(li);
             });
-            ul.insertBefore(dl);
-            var lis = ul.children();
+            dl.parentNode.insertBefore(ul, dl);
+            lis = Array.from(ul.children);
             groups.push(lis);
         }
 
-        //Add "last" classes.
-        var i;
-        for (i = 0; i < groups.length; i++) {
-            groups[i].filter(':last').addClass('last');
-        }
-
-        function toggleClasses(clickedItem, group) {
-            var index = group.index(clickedItem);
-            var i;
-            for (i = 0; i < groups.length; i++) {
-                groups[i].removeClass('current');
-                groups[i].eq(index).addClass('current');
-            }
-        }
-
-        //Toggle on tab (dt) click.
-        dts.on('click', function (e) {
-            //They clicked the current dt to close it. Restore the wrapper to unclicked state.
-            if (jQuery(this).hasClass('current') && wrapper.hasClass('accordion-open')) {
-                wrapper.removeClass('accordion-open');
-            } else {
-                //They're clicking something new. Reflect the explicit user interaction.
-                wrapper.addClass('accordion-open');
-            }
-            toggleClasses(jQuery(this), dts);
+        // Add "last" classes
+        groups.forEach(group => {
+            group[group.length - 1].classList.add('last');
         });
 
-        //Toggle on tab (li) click.
-        if (hasTabs) {
-            lis.on('click', function (e) {
-                toggleClasses(jQuery(this), lis);
+        function toggleClasses(clickedItem, group) {
+            const index = group.indexOf(clickedItem);
+            groups.forEach(g => {
+                g.forEach(item => item.classList.remove('current'));
+                g[index].classList.add('current');
             });
-            //Open the first tab.
-            lis.eq(0).trigger('click');
         }
 
-        //Open the first accordion if desired.
+        // Toggle on dt click
+        dts.forEach(dt => {
+            dt.addEventListener('click', () => {
+                if (dt.classList.contains('current') && wrapper.classList.contains('accordion-open')) {
+                    wrapper.classList.remove('accordion-open');
+                } else {
+                    wrapper.classList.add('accordion-open');
+                }
+                toggleClasses(dt, dts);
+            });
+        });
+
+        // Toggle on li click (for tabs)
+        if (hasTabs) {
+            lis.forEach(li => {
+                li.addEventListener('click', () => {
+                    toggleClasses(li, lis);
+                });
+            });
+            // Open the first tab
+            lis[0].click();
+        }
+
+        // Open the first accordion if desired
         if (startOpen) {
-            dts.eq(0).trigger('click');
+            dts[0].click();
         }
-
     });
 
 
@@ -687,14 +689,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // While it would make more sense to just move the .block-layered-nav block rather than .col-left-first
     // (since other blocks can be inserted into left_first), it creates simpler code to move the entire
     // .col-left-first block, so that is the approach we're taking
-    if ($j('.col-left-first > .block').length && $j('div.category-products').length) {
-        let repositionLayered = function (mq) {
+    if (document.querySelector('.col-left-first > .block') && document.querySelector('div.category-products')) {
+        const repositionLayered = (mq) => {
+            const colLeftFirst = document.querySelector('.col-left-first');
+            const categoryProducts = document.querySelector('div.category-products');
+            const colMain = document.querySelector('.col-main');
+
             if (mq.matches) {
-                $j('.col-left-first').insertBefore($j('div.category-products'));
+                categoryProducts.parentNode.insertBefore(colLeftFirst, categoryProducts);
             } else {
-                $j('.col-left-first').insertBefore($j('.col-main'));
+                colMain.parentNode.insertBefore(colLeftFirst, colMain);
             }
-        }
+        };
+
+        const maxWidthMediumMediaQuery = window.matchMedia('(max-width: 770px)');
         maxWidthMediumMediaQuery.addEventListener('change', repositionLayered);
         repositionLayered(maxWidthMediumMediaQuery);
     }
@@ -704,19 +712,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==============================================
 
     // On viewports smaller than 1000px, move the right column into the left column
-    if ($j('.main-container.col3-layout').length > 0) {
-        let reposition3rdColumn = function (mq) {
+    if (document.querySelector('.main-container.col3-layout')) {
+        const reposition3rdColumn = (mq) => {
+            const rightColumn = document.querySelector('.col-right');
             if (mq.matches) {
-                var rightColumn = $j('.col-right');
-                var colWrapper = $j('.col-wrapper');
-                rightColumn.appendTo(colWrapper);
+                const colWrapper = document.querySelector('.col-wrapper');
+                colWrapper.appendChild(rightColumn);
             } else {
-                var rightColumn = $j('.col-right');
-                var main = $j('.main');
-                rightColumn.appendTo(main);
+                const main = document.querySelector('.main');
+                main.appendChild(rightColumn);
             }
-        }
-        let maxWidth1000MediaQuery = window.matchMedia('(max-width: 1000px)');
+        };
+
+        const maxWidth1000MediaQuery = window.matchMedia('(max-width: 1000px)');
         maxWidth1000MediaQuery.addEventListener('change', reposition3rdColumn);
         reposition3rdColumn(maxWidth1000MediaQuery);
     }
@@ -725,21 +733,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Block collapsing (on smaller viewports)
     // ==============================================
 
-    let toggleElementsForMediumSize = function (mq) {
+    const toggleElementsForMediumSize = (mq) => {
+        const elements = document.querySelectorAll(
+            '.col-left-first .block:not(.block-layered-nav) .block-title, ' +
+            '.col-left-first .block-layered-nav .block-subtitle--filter, ' +
+            '.sidebar:not(.col-left-first) .block .block-title'
+        );
+
         if (mq.matches) {
-            $j(
-                '.col-left-first .block:not(.block-layered-nav) .block-title, ' +
-                '.col-left-first .block-layered-nav .block-subtitle--filter, ' +
-                '.sidebar:not(.col-left-first) .block .block-title'
-            ).toggleSingle();
+            toggleSingle(elements);
         } else {
-            $j(
-                '.col-left-first .block:not(.block-layered-nav) .block-title, ' +
-                '.col-left-first .block-layered-nav .block-subtitle--filter, ' +
-                '.sidebar:not(.col-left-first) .block .block-title'
-            ).toggleSingle({destruct: true});
+            toggleSingle(elements, { destruct: true });
         }
-    }
+    };
     maxWidthMediumMediaQuery.addEventListener('change', toggleElementsForMediumSize);
     toggleElementsForMediumSize(maxWidthMediumMediaQuery);
 
@@ -779,18 +785,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // Gift Registry Styles
     // ==============================================
 
-    if ($j('.a-left').length) {
-        repositionGiftRegistry = function (mq) {
+    if (document.querySelector('.a-left')) {
+        const repositionGiftRegistry = (mq) => {
             if (mq.matches) {
-                $j('.gift-info').each(function() {
-                    $j(this).next('td').children('textarea').appendTo(this).children();
+                document.querySelectorAll('.gift-info').forEach(giftInfo => {
+                    const textarea = giftInfo.nextElementSibling.querySelector('textarea');
+                    if (textarea) {
+                        giftInfo.appendChild(textarea);
+                    }
                 });
             } else {
-                $j('.left-note').each(function() {
-                    $j(this).prev('td').children('textarea').appendTo(this).children();
+                document.querySelectorAll('.left-note').forEach(leftNote => {
+                    const textarea = leftNote.previousElementSibling.querySelector('textarea');
+                    if (textarea) {
+                        leftNote.appendChild(textarea);
+                    }
                 });
             }
-        }
+        };
         maxWidthLargeMediaQuery.addEventListener(repositionGiftRegistry);
         repositionGiftRegistry(maxWidthLargeMediaQuery);
     }
@@ -867,7 +879,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Since the height of each cell and the number of columns per page may change when the page is resized, we are
         // going to run the alignment function each time the page is resized.
-        $j(window).on('delayed-resize', function (e, resizeEvent) {
+        window.addEventListener('delayed-resize', (e) => {
             alignProductGridActions();
         });
     }
@@ -877,11 +889,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==============================================
 
     // Using setTimeout since Web-Kit and some other browsers call the resize function constantly upon window resizing.
-    var resizeTimer;
-    $j(window).resize(function (e) {
+    let resizeTimer;
+    window.addEventListener('resize', (e) => {
         clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function () {
-            $j(window).trigger('delayed-resize', e);
+        resizeTimer = setTimeout(() => {
+            // Create and dispatch a custom event
+            const event = new CustomEvent('delayed-resize', { detail: e });
+            window.dispatchEvent(event);
         }, 250);
     });
 });
