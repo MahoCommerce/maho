@@ -24,10 +24,8 @@
                     <xsd:element minOccurs="0" maxOccurs="unbounded" name="complexObjectArray" type="typens:storeEntity" />
                 </xsd:sequence>
             </xsd:complexType>
-            <xsd:complexType name="magentoInfoEntity">
+            <xsd:complexType name="mahoInfoEntity">
                 <xsd:sequence>
-                    <xsd:element minOccurs="1" maxOccurs="1" name="magento_version" type="xsd:string" />
-                    <xsd:element minOccurs="1" maxOccurs="1" name="magento_edition" type="xsd:string" />
                     <xsd:element minOccurs="1" maxOccurs="1" name="maho_version" type="xsd:string" />
                 </xsd:sequence>
             </xsd:complexType>
@@ -60,17 +58,17 @@
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-            <xsd:element name="magentoInfoRequestParam">
+            <xsd:element name="mahoInfoRequestParam">
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element minOccurs="1" maxOccurs="1" name="sessionId" type="xsd:string" />
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-            <xsd:element name="magentoInfoResponseParam">
+            <xsd:element name="mahoInfoResponseParam">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element minOccurs="1" maxOccurs="1" name="result" type="typens:magentoInfoEntity" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="result" type="typens:mahoInfoEntity" />
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -88,11 +86,11 @@
     <wsdl:message name="storeInfoResponse">
         <wsdl:part name="parameters" element="typens:storeInfoResponseParam" />
     </wsdl:message>
-    <wsdl:message name="magentoInfoRequest">
-        <wsdl:part name="parameters" element="typens:magentoInfoRequestParam" />
+    <wsdl:message name="mahoInfoRequest">
+        <wsdl:part name="parameters" element="typens:mahoInfoRequestParam" />
     </wsdl:message>
-    <wsdl:message name="magentoInfoResponse">
-        <wsdl:part name="parameters" element="typens:magentoInfoResponseParam" />
+    <wsdl:message name="mahoInfoResponse">
+        <wsdl:part name="parameters" element="typens:mahoInfoResponseParam" />
     </wsdl:message>
     <wsdl:portType name="{{var wsdl.handler}}PortType">
         <wsdl:operation name="storeList">
@@ -105,10 +103,10 @@
             <wsdl:input message="typens:storeInfoRequest" />
             <wsdl:output message="typens:storeInfoResponse" />
         </wsdl:operation>
-        <wsdl:operation name="magentoInfo">
+        <wsdl:operation name="mahoInfo">
             <wsdl:documentation>Info about current Maho installation</wsdl:documentation>
-            <wsdl:input message="typens:magentoInfoRequest" />
-            <wsdl:output message="typens:magentoInfoResponse" />
+            <wsdl:input message="typens:mahoInfoRequest" />
+            <wsdl:output message="typens:mahoInfoResponse" />
         </wsdl:operation>
     </wsdl:portType>
     <wsdl:binding name="{{var wsdl.handler}}Binding" type="typens:{{var wsdl.handler}}PortType">
@@ -131,7 +129,7 @@
                 <soap:body use="literal" />
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="magentoInfo">
+        <wsdl:operation name="mahoInfo">
             <soap:operation soapAction="" />
             <wsdl:input>
                 <soap:body use="literal" />
