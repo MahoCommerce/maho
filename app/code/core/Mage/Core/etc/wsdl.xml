@@ -59,7 +59,7 @@
             <input message="typens:storeInfoRequest" />
             <output message="typens:storeInfoResponse" />
         </operation>
-        <operation name="mahoInfo">
+        <operation name="magentoInfo">
             <documentation>Info about current Maho installation</documentation>
             <input message="typens:mahoInfoRequest" />
             <output message="typens:mahoInfoResponse" />
@@ -85,7 +85,7 @@
                 <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
             </output>
         </operation>
-        <operation name="mahoInfo">
+        <operation name="magentoInfo">
             <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
             <input>
                 <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
