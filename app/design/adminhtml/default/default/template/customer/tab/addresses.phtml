@@ -95,8 +95,6 @@
                     $this->getForm()->setValues($_address->getData())
                             ->setHtmlIdPrefix("_item{$_address->getId()}")
                             ->setFieldNameSuffix('address['.$_address->getId().']');
-                    $this->addValuesToNamePrefixElement($_address->getPrefix())
-                        ->addValuesToNameSuffixElement($_address->getSuffix());
             ?>
             <?= $this->getForm()->getHtml() ?>
             <input type="hidden" name="address[<?= $_address->getId() ?>][_deleted]" id="deleted_address_item_<?= $_address->getId() ?>" />

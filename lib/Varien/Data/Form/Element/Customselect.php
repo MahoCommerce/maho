@@ -99,10 +99,10 @@ class Varien_Data_Form_Element_Customselect extends Varien_Data_Form_Element_Sel
         $values = $this->getData('values');
         if (!empty($values)) {
             foreach ($values as &$value) {
-                if (is_string($value)) {
-                    $value = ['value' => $value, 'label' => $value]; // TODO
-                } else {
+                if (is_array($value)) {
                     $value['value'] = $value['label'];
+                } else {
+                    $value = ['value' => (string)$value, 'label' => (string)$value];
                 }
             }
             $values[] = ['value' => $this->getCustomValue(), 'label' => Mage::helper('core')->__('Other')];

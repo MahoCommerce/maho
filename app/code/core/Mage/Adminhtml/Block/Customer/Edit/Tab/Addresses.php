@@ -240,12 +240,10 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses extends Mage_Adminhtml_Bl
      *
      * @param string|int|array $values
      * @return $this
+     * @deprecated
      */
     public function addValuesToNamePrefixElement($values)
     {
-        if ($this->getForm() && $this->getForm()->getElement('prefix')) {
-            $this->getForm()->getElement('prefix')->addElementValues($values);
-        }
         return $this;
     }
 
@@ -254,12 +252,10 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses extends Mage_Adminhtml_Bl
      *
      * @param string|int|array $values
      * @return $this
+     * @deprecated
      */
     public function addValuesToNameSuffixElement($values)
     {
-        if ($this->getForm() && $this->getForm()->getElement('suffix')) {
-            $this->getForm()->getElement('suffix')->addElementValues($values);
-        }
         return $this;
     }
 }
