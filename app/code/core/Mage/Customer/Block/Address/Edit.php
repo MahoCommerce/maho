@@ -213,10 +213,10 @@ class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
     }
 
     /**
-     * Return extra EAV fields used in this form
+     * Return all EAV fields used in this form as groups
      */
-    public function getExtraFields(): array
+    public function getGroupedFields(): array
     {
-        return Mage::helper('customer/address')->getExtraFields('checkout_address_create', $this->getAddress());
+        return Mage::helper('customer/address')->getGroupedFields('customer_address_edit', $this->getAddress());
     }
 }

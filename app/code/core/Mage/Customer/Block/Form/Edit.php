@@ -24,12 +24,4 @@ class Mage_Customer_Block_Form_Edit extends Mage_Customer_Block_Account_Dashboar
     {
         return Mage::helper('customer')->getGroupedFields('customer_account_edit', $this->getCustomer());
     }
-
-    /**
-     * Return extra EAV fields used in this form
-     */
-    public function getExtraFields(): array
-    {
-        return Mage::helper('customer')->getExtraFields('customer_account_edit', $this->getCustomer());
-    }
 }
