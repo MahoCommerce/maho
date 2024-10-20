@@ -35,7 +35,7 @@ class Mage_Eav_Block_Widget_Multiline extends Mage_Eav_Block_Widget_Abstract
             $field = new Varien_Object();
             $field->setFieldId($this->getFieldId($code) . "_$i");
             $field->setFieldName($this->getFieldName($code) . '[]');
-            $field->setValue($values[$i-1] ?? null);
+            $field->setValue($values[$i - 1] ?? null);
 
             if ($i === 1) {
                 $field->setStoreLabel($attribute->getStoreLabel());
