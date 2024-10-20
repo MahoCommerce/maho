@@ -96,7 +96,7 @@ Varien.searchForm.prototype.blur = function (event) {
  *   is using touch pointer input, or has switched from mouse to touch input.
  *   It can be observed in this manner: $j(window).on('touch-detected', function(event) { // custom code });
  */
-var PointerManager = {
+const PointerManager = {
     MOUSE_POINTER_TYPE: 'mouse',
     TOUCH_POINTER_TYPE: 'touch',
     POINTER_EVENT_TIMEOUT_MS: 500,
@@ -110,26 +110,6 @@ var PointerManager = {
         return this.standardTouch;
     },
 
-    getPointerEventsInputTypes: function() {
-        if (window.navigator.pointerEnabled) { //IE 11+
-            //return string values from http://msdn.microsoft.com/en-us/library/windows/apps/hh466130.aspx
-            return {
-                MOUSE: 'mouse',
-                TOUCH: 'touch',
-                PEN: 'pen'
-            };
-        } else if (window.navigator.msPointerEnabled) { //IE 10
-            //return numeric values from http://msdn.microsoft.com/en-us/library/windows/apps/hh466130.aspx
-            return {
-                MOUSE:  0x00000004,
-                TOUCH:  0x00000002,
-                PEN:    0x00000003
-            };
-        } else { //other browsers don't support pointer events
-            return {}; //return empty object
-        }
-    },
-
     /**
      * If called before init(), get best guess of input pointer type
      * If called after init(), get current pointer in use.
@@ -137,11 +117,11 @@ var PointerManager = {
     getPointer: function() {
         // On iOS devices, always default to touch, as this.lastTouchType will intermittently return 'mouse' if
         // multiple touches are triggered in rapid succession in Safari on iOS
-        if(navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
             return this.TOUCH_POINTER_TYPE;
         }
 
-        if(this.lastTouchType) {
+        if (this.lastTouchType) {
             return this.lastTouchType;
         }
 
@@ -151,13 +131,15 @@ var PointerManager = {
     setPointerEventLock: function() {
         this.pointerEventLock = true;
     },
+
     clearPointerEventLock: function() {
         this.pointerEventLock = false;
     },
+
     setPointerEventLockTimeout: function() {
         var that = this;
 
-        if(this.pointerTimeout) {
+        if (this.pointerTimeout) {
             clearTimeout(this.pointerTimeout);
         }
 
@@ -166,72 +148,44 @@ var PointerManager = {
     },
 
     triggerMouseEvent: function(originalEvent) {
-        if(this.lastTouchType == this.MOUSE_POINTER_TYPE) {
+        if (this.lastTouchType == this.MOUSE_POINTER_TYPE) {
             return; //prevent duplicate events
         }
 
         this.lastTouchType = this.MOUSE_POINTER_TYPE;
-        $j(window).trigger('mouse-detected', originalEvent);
+        window.dispatchEvent(new CustomEvent('mouse-detected', { detail: originalEvent }));
     },
+
     triggerTouchEvent: function(originalEvent) {
-        if(this.lastTouchType == this.TOUCH_POINTER_TYPE) {
+        if (this.lastTouchType == this.TOUCH_POINTER_TYPE) {
             return; //prevent duplicate events
         }
 
         this.lastTouchType = this.TOUCH_POINTER_TYPE;
-        $j(window).trigger('touch-detected', originalEvent);
+        window.dispatchEvent(new CustomEvent('touch-detected', { detail: originalEvent }));
     },
 
     initEnv: function() {
-        if (window.navigator.pointerEnabled) {
-            this.standardTouch = true;
-            this.touchDetectionEvent = 'pointermove';
-        } else if (window.navigator.msPointerEnabled) {
-            this.standardTouch = true;
-            this.touchDetectionEvent = 'MSPointerMove';
-        } else {
-            this.touchDetectionEvent = 'touchstart';
-        }
+        this.standardTouch = 'PointerEvent' in window;
+        this.touchDetectionEvent = 'pointerdown';
     },
 
     wirePointerDetection: function() {
         var that = this;
 
-        if(this.standardTouch) { //standard-based touch events. Wire only one event.
-            //detect pointer event
-            $j(window).on(this.touchDetectionEvent, function(e) {
-                switch(e.originalEvent.pointerType) {
-                    case that.getPointerEventsInputTypes().MOUSE:
-                        that.triggerMouseEvent(e);
-                        break;
-                    case that.getPointerEventsInputTypes().TOUCH:
-                    case that.getPointerEventsInputTypes().PEN:
-                        // intentionally group pen and touch together
-                        that.triggerTouchEvent(e);
-                        break;
-                }
-            });
-        } else { //non-standard touch events. Wire touch and mouse competing events.
-            //detect first touch
-            $j(window).on(this.touchDetectionEvent, function(e) {
-                if(that.pointerEventLock) {
-                    return;
-                }
+        window.addEventListener(this.touchDetectionEvent, function(e) {
+            if (that.pointerEventLock) {
+                return;
+            }
 
-                that.setPointerEventLockTimeout();
-                that.triggerTouchEvent(e);
-            });
+            that.setPointerEventLockTimeout();
 
-            //detect mouse usage
-            $j(document).on('mouseover', function(e) {
-                if(that.pointerEventLock) {
-                    return;
-                }
-
-                that.setPointerEventLockTimeout();
+            if (e.pointerType === 'mouse') {
                 that.triggerMouseEvent(e);
-            });
-        }
+            } else if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+                that.triggerTouchEvent(e);
+            }
+        });
     },
 
     init: function() {
