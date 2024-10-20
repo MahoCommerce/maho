@@ -45,11 +45,10 @@ if(empty($_cartQty)) {
         </div>
         <script type="text/javascript">
             truncateOptions();
-            $j('document').ready(function() {
-                var minicartOptions  = {
-                    formKey:           "<?= $this->getFormKey() ?>"
-                }
-                var Mini = new Minicart(minicartOptions);
+            document.addEventListener('DOMContentLoaded', function() {
+                var Mini = new Minicart({
+                    formKey: "<?= $this->getFormKey() ?>"
+                });
                 Mini.init();
             });
         </script>
@@ -89,6 +88,5 @@ if(empty($_cartQty)) {
 
     <?php else: ?>
         <p class="empty"><?= $this->__('You have no items in your shopping cart.') ?></p>
-
     <?php endif ?>
 </div>

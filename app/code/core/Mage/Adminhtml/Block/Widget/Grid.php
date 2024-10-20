@@ -370,7 +370,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      * @param string $columnId
      * @param array|Varien_Object $column
      * @param string $after
-     * @return  Mage_Adminhtml_Block_Widget_Grid
+     * @return $this
      * @throws Exception
      */
     public function addColumnAfter($columnId, $column, $after)
@@ -963,7 +963,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      *
      * @param   string $url
      * @param   string $label
-     * @return  Mage_Adminhtml_Block_Widget_Grid
+     * @return  $this
      */
     public function addExportType($url, $label)
     {
@@ -1009,7 +1009,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      *
      * @param string $url
      * @param string $label
-     * @return  Mage_Adminhtml_Block_Widget_Grid
+     * @return  $this
      * @throws Mage_Core_Model_Store_Exception
      */
     public function addRssList($url, $label)
@@ -1803,7 +1803,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * @param string|object $column
      * @param string $value
-     * @return bool|Mage_Adminhtml_Block_Widget_Grid
+     * @return bool|$this
      */
     public function isColumnGrouped($column, $value = null)
     {

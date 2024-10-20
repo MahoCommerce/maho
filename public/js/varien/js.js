@@ -464,22 +464,24 @@ if (typeof Validation !== 'undefined') {
 }
 
 function truncateOptions() {
-    $$('.truncated').each(function(element){
-        Event.observe(element, 'mouseover', function(){
-            if (element.down('div.truncated_full_value')) {
-                element.down('div.truncated_full_value').addClassName('show');
+    document.querySelectorAll('.truncated').forEach(function(element) {
+        element.addEventListener('mouseover', function() {
+            const fullValueDiv = element.querySelector('div.truncated_full_value');
+            if (fullValueDiv) {
+                fullValueDiv.classList.add('show');
             }
         });
-        Event.observe(element, 'mouseout', function(){
-            if (element.down('div.truncated_full_value')) {
-                element.down('div.truncated_full_value').removeClassName('show');
+        element.addEventListener('mouseout', function() {
+            const fullValueDiv = element.querySelector('div.truncated_full_value');
+            if (fullValueDiv) {
+                fullValueDiv.classList.remove('show');
             }
         });
-
     });
 }
-Event.observe(window, 'load', function(){
-   truncateOptions();
+
+document.addEventListener('DOMContentLoaded', function() {
+    truncateOptions();
 });
 
 Element.addMethods({
