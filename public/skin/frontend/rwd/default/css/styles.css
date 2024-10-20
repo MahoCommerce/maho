@@ -7110,9 +7110,6 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 /* ============================================ *
  * Customer
  * ============================================ */
-.customer-account-login .scaffold-form label:first-child {
-  width: 115px;
-}
 .customer-account-login .col2-set .buttons-set {
   text-align: left;
   border-top: 0;
@@ -7164,10 +7161,6 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
   .customer-account-login .col2-set p.required {
     display: none;
   }
-}
-
-.customer-account-create .scaffold-form label:first-child {
-  width: 140px;
 }
 
 .opc #opc-login p:not(.required) {
