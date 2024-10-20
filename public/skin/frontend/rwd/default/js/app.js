@@ -396,84 +396,81 @@ const MenuManager = {
 };
 
 // ==============================================
-// jQuery Init
+// Init
 // ==============================================
 
-$j(document).ready(function () {
-
+document.addEventListener('DOMContentLoaded', () => {
+    PointerManager.init();
     // ==============================================
     // Shared Vars
     // ==============================================
 
     // Document
-    var w = $j(window);
-    var d = $j(document);
-    var body = $j('body');
-
-    //initialize pointer abstraction manager
-    PointerManager.init();
+    const w = window;
+    const d = document;
+    const body = document.body;
 
     /* Wishlist Toggle Class */
-
-    $j(".change").click(function (e) {
-        $j( this ).toggleClass('active');
-        e.stopPropagation();
+    document.querySelectorAll('.change').forEach(element => {
+        element.addEventListener('click', function(e) {
+            this.classList.toggle('active');
+            e.stopPropagation();
+        });
     });
 
-    $j(document).click(function (e) {
-        if (! $j(e.target).hasClass('.change')) $j(".change").removeClass('active');
-    });
-
-
-    // =============================================
-    // Skip Links
-    // =============================================
-
-    var skipContents = $j('.skip-content');
-    var skipLinks = $j('.skip-link');
-
-    $j('.skip-links').on('click', '.skip-link', function (e) {
-        e.preventDefault();
-
-        var self = $j(this);
-        // Use the data-target-element attribute, if it exists. Fall back to href.
-        var target = self.attr('data-target-element') ? self.attr('data-target-element') : self.attr('href');
-
-        // Get target element
-        var elem = $j(target);
-
-        // Check if stub is open
-        var isSkipContentOpen = elem.hasClass('skip-active') ? 1 : 0;
-
-        // Hide all stubs
-        skipLinks.removeClass('skip-active');
-        skipContents.removeClass('skip-active');
-
-        // Toggle stubs
-        if (isSkipContentOpen) {
-            self.removeClass('skip-active');
-            elem.removeClass('skip-active');
-        } else {
-            self.addClass('skip-active');
-            elem.addClass('skip-active');
+    document.addEventListener('click', function(e) {
+        if (!e.target.classList.contains('change')) {
+            document.querySelectorAll('.change.active').forEach(element => {
+                element.classList.remove('active');
+            });
         }
+    });
 
-        if (target == '#header-search') {
-            let searchInput = document.getElementById('search');
-            if (searchInput) {
-                searchInput.focus();
+
+    // Skip Links
+    const skipContents = document.querySelectorAll('.skip-content');
+    const skipLinks = document.querySelectorAll('.skip-link');
+
+    document.querySelector('.skip-links').addEventListener('click', function(e) {
+        if (e.target.classList.contains('skip-link')) {
+            e.preventDefault();
+            const self = e.target;
+            const target = self.getAttribute('data-target-element') || self.getAttribute('href');
+            const elem = document.querySelector(target);
+            const isSkipContentOpen = elem.classList.contains('skip-active');
+
+            // Hide all stubs
+            skipLinks.forEach(link => link.classList.remove('skip-active'));
+            skipContents.forEach(content => content.classList.remove('skip-active'));
+
+            // Toggle stubs
+            if (isSkipContentOpen) {
+                self.classList.remove('skip-active');
+                elem.classList.remove('skip-active');
+            } else {
+                self.classList.add('skip-active');
+                elem.classList.add('skip-active');
+            }
+
+            if (target === '#header-search') {
+                const searchInput = document.getElementById('search');
+                if (searchInput) {
+                    searchInput.focus();
+                }
             }
         }
     });
 
-    $j('.skip-links').on('click', '#header-cart .skip-link-close', function(e) {
-        var parent = $j(this).parents('.skip-content');
-        var link = parent.siblings('.skip-link');
+    document.querySelector('.skip-links').addEventListener('click', (e) => {
+        if (e.target.matches('#header-cart .skip-link-close')) {
+            const parent = e.target.closest('.skip-content');
+            const link = parent.parentElement.querySelector('.skip-link');
 
-        parent.removeClass('skip-active');
-        link.removeClass('skip-active');
+            parent.classList.remove('skip-active');
+            link.classList.remove('skip-active');
 
-        e.preventDefault();
+            e.preventDefault();
+        }
     });
 
 
@@ -481,28 +478,29 @@ $j(document).ready(function () {
     // Header Menus
     // ==============================================
 
-    // initialize menu
     MenuManager.init();
 
     // Prevent sub menus from spilling out of the window.
     function preventMenuSpill() {
-        var windowWidth = $j(window).width();
-        $j('ul.level0').each(function(){
-            var ul = $j(this);
-            //Show it long enough to get info, then hide it.
-            ul.addClass('position-test');
-            ul.removeClass('spill');
-            var width = ul.outerWidth();
-            var offset = ul.offset().left;
-            ul.removeClass('position-test');
-            //Add the spill class if it will spill off the page.
+        const windowWidth = window.innerWidth;
+        document.querySelectorAll('ul.level0').forEach(ul => {
+            // Show it long enough to get info, then hide it.
+            ul.classList.add('position-test');
+            ul.classList.remove('spill');
+
+            const width = ul.offsetWidth;
+            const offset = ul.getBoundingClientRect().left;
+
+            ul.classList.remove('position-test');
+
+            // Add the spill class if it will spill off the page.
             if ((offset + width) > windowWidth) {
-                ul.addClass('spill');
+                ul.classList.add('spill');
             }
         });
     }
     preventMenuSpill();
-    $j(window).on('delayed-resize', preventMenuSpill);
+    window.addEventListener('delayed-resize', preventMenuSpill);
 
 
     // ==============================================
@@ -511,17 +509,20 @@ $j(document).ready(function () {
 
     // In order to display the language switcher next to the logo, we are moving the content at different viewports,
     // rather than having duplicate markup or changing the design
-    let repositionLanguageSwitcher = function (mq) {
+    const repositionLanguageSwitcher = (mq) => {
+        const currencySwitcher = document.querySelector('.currency-switcher');
+        const formLanguage = document.querySelector('.form-language');
+
         if (mq.matches) {
-            $j('.page-header-container .store-language-container')
-              .prepend($j('.currency-switcher'))
-              .prepend($j('.form-language'));
+            const targetContainer = document.querySelector('.page-header-container .store-language-container');
+            targetContainer.prepend(currencySwitcher);
+            targetContainer.prepend(formLanguage);
         } else {
-            $j('.header-language-container .store-language-container')
-              .prepend($j('.currency-switcher'))
-              .prepend($j('.form-language'));
+            const targetContainer = document.querySelector('.header-language-container .store-language-container');
+            targetContainer.prepend(currencySwitcher);
+            targetContainer.prepend(formLanguage);
         }
-    }
+    };
 
     let maxWidthLargeMediaQuery = window.matchMedia('(max-width: ' + bp.large + 'px)');
     let maxWidthMediumMediaQuery = window.matchMedia('(max-width: ' + bp.medium + 'px)');
@@ -532,11 +533,11 @@ $j(document).ready(function () {
     // Menu State
     // ==============================================
 
-    let resetMenuState = function (mq) {
-        $j('.menu-active').removeClass('menu-active');
-        $j('.sub-menu-active').removeClass('sub-menu-active');
-        $j('.skip-active').removeClass('skip-active');
-    }
+    const resetMenuState = (mq) => {
+        document.querySelectorAll('.menu-active').forEach(el => el.classList.remove('menu-active'));
+        document.querySelectorAll('.sub-menu-active').forEach(el => el.classList.remove('sub-menu-active'));
+        document.querySelectorAll('.skip-active').forEach(el => el.classList.remove('skip-active'));
+    };
     maxWidthMediumMediaQuery.addEventListener('change', resetMenuState);
     resetMenuState(maxWidthMediumMediaQuery);
 
@@ -545,13 +546,14 @@ $j(document).ready(function () {
     // ==============================================
 
     // Used to swap primary product photo from thumbnails.
-    var mediaListLinks = $j('.media-list').find('a');
-    var mediaPrimaryImage = $j('.primary-image').find('img');
+    const mediaListLinks = document.querySelectorAll('.media-list a');
+    const mediaPrimaryImage = document.querySelector('.primary-image img');
     if (mediaListLinks.length) {
-        mediaListLinks.on('click', function (e) {
-            e.preventDefault();
-            var self = $j(this);
-            mediaPrimaryImage.attr('src', self.attr('href'));
+        mediaListLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                mediaPrimaryImage.src = link.href;
+            });
         });
     }
 
@@ -751,14 +753,15 @@ $j(document).ready(function () {
     // OPC - Progress Block
     // ==============================================
 
-    if ($j('body.checkout-onepage-index').length) {
-        let repositionCheckoutProgress = function (mq) {
+    if (document.body.classList.contains('checkout-onepage-index')) {
+        const repositionCheckoutProgress = (mq) => {
+            const checkoutProgressWrapper = document.getElementById('checkout-progress-wrapper');
             if (mq.matches) {
-                $j('#checkout-step-review').prepend($j('#checkout-progress-wrapper'));
+                document.getElementById('checkout-step-review').prepend(checkoutProgressWrapper);
             } else {
-                $j('.col-right').prepend($j('#checkout-progress-wrapper'));
+                document.querySelector('.col-right').prepend(checkoutProgressWrapper);
             }
-        }
+        };
         maxWidthLargeMediaQuery.addEventListener('change', repositionCheckoutProgress);
         repositionCheckoutProgress(maxWidthLargeMediaQuery);
     }
@@ -767,9 +770,14 @@ $j(document).ready(function () {
     // Checkout Cart - events
     // ==============================================
 
-    if ($j('body.checkout-cart-index').length) {
-        $j('input[name^="cart"]').focus(function () {
-            $j(this).siblings('button').fadeIn();
+    if (document.body.classList.contains('checkout-cart-index')) {
+        document.querySelectorAll('input[name^="cart"]').forEach(input => {
+            input.addEventListener('focus', function() {
+                const siblingButton = this.nextElementSibling;
+                if (siblingButton && siblingButton.tagName === 'BUTTON') {
+                    siblingButton.style.display = 'inline-block'; // or 'block', depending on your layout
+                }
+            });
         });
     }
 
