@@ -510,12 +510,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (mq.matches) {
             const targetContainer = document.querySelector('.page-header-container .store-language-container');
-            targetContainer.prepend(currencySwitcher);
-            targetContainer.prepend(formLanguage);
+            if (currencySwitcher) targetContainer.prepend(currencySwitcher);
+            if (formLanguage) targetContainer.prepend(formLanguage);
         } else {
             const targetContainer = document.querySelector('.header-language-container .store-language-container');
-            targetContainer.prepend(currencySwitcher);
-            targetContainer.prepend(formLanguage);
+            if (currencySwitcher) targetContainer.prepend(currencySwitcher);
+            if (formLanguage) targetContainer.prepend(formLanguage);
         }
     };
     let maxWidthLargeMediaQuery = window.matchMedia('(max-width: ' + bp.large + 'px)');
