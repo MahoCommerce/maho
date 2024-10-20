@@ -781,6 +781,7 @@ ul.item-options li { padding-left:.7em; }
 .entry-edit .order-address input.input-text,
 .entry-edit .order-address .textarea     { width:95% !important; }
 .entry-edit .order-address .select       { width:96.5%; }
+.entry-edit .order-address .customselect + input.input-text { width: calc(95% - 166px) !important; }
 .entry-edit .order-address .validate-vat { text-align:right; padding:10px 0 0; width:96%; }
 .order-search-items .entry-edit .grid    { height:610px; overflow:auto; }
 .order-search-items .entry-edit .grid table { width:99.9%; }
