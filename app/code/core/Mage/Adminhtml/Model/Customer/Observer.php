@@ -72,7 +72,9 @@ class Mage_Adminhtml_Model_Customer_Observer
         ], 'frontend_input');
 
         if ($attribute->getAttributeCode() === 'street') {
-            $form->getElement('multiline_count')->setMax(4);
+            $form->getElement('multiline_count')
+                 ->setMin(Mage_Customer_Helper_Address::STREET_LINES_MIN)
+                 ->setMax(Mage_Customer_Helper_Address::STREET_LINES_MAX);
         }
 
         /** @var Mage_Adminhtml_Block_Widget_Form_Element_Dependence $dependenceBlock */

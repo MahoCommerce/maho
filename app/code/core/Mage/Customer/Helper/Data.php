@@ -381,9 +381,19 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getNamePrefixOptions($store = null)
     {
-        return $this->_prepareNamePrefixSuffixOptions(
-            Mage::helper('customer/address')->getConfig('prefix_options', $store)
-        );
+        $attribute = Mage::getSingleton('eav/config')->getAttribute('customer', 'prefix');
+        $attribute->setStoreId(Mage::app()->getStore($store)->getId());
+        $options = $attribute->getSource()->getAllOptions(false);
+
+        if (empty($options)) {
+            return false;
+        }
+        $result = [];
+        foreach ($options as $option) {
+            $value = $this->escapeHtml(trim($option['label']));
+            $result[$value] = $value;
+        }
+        return $result;
     }
 
     /**
@@ -394,27 +404,16 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getNameSuffixOptions($store = null)
     {
-        return $this->_prepareNamePrefixSuffixOptions(
-            Mage::helper('customer/address')->getConfig('suffix_options', $store)
-        );
-    }
+        $attribute = Mage::getSingleton('eav/config')->getAttribute('customer', 'suffix');
+        $attribute->setStoreId(Mage::app()->getStore($store)->getId());
+        $options = $attribute->getSource()->getAllOptions(false);
 
-    /**
-     * Unserialize and clear name prefix or suffix options
-     *
-     * @param string $options
-     * @return array|bool
-     */
-    protected function _prepareNamePrefixSuffixOptions($options)
-    {
-        $options = trim($options);
         if (empty($options)) {
             return false;
         }
         $result = [];
-        $options = explode(';', $options);
-        foreach ($options as $value) {
-            $value = $this->escapeHtml(trim($value));
+        foreach ($options as $option) {
+            $value = $this->escapeHtml(trim($option['label']));
             $result[$value] = $value;
         }
         return $result;
