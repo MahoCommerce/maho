@@ -814,63 +814,50 @@ document.addEventListener('DOMContentLoaded', () => {
     // Since the number of columns per grid will vary based on the viewport size, the only way to align the action
     // buttons/links is via JS
 
-    if ($j('.products-grid').length) {
-
+    if (document.querySelector('.products-grid')) {
         var alignProductGridActions = function () {
             // Loop through each product grid on the page
-            $j('.products-grid').each(function(){
-                var gridRows = []; // This will store an array per row
-                var tempRow = [];
-                productGridElements = $j(this).children('li');
-                productGridElements.each(function (index) {
-                    // The JS ought to be agnostic of the specific CSS breakpoints, so we are dynamically checking to find
-                    // each row by grouping all cells (eg, li elements) up until we find an element that is cleared.
-                    // We are ignoring the first cell since it will always be cleared.
-                    if ($j(this).css('clear') != 'none' && index != 0) {
-                        gridRows.push(tempRow); // Add the previous set of rows to the main array
-                        tempRow = []; // Reset the array since we're on a new row
-                    }
-                    tempRow.push(this);
+            document.querySelectorAll('.products-grid').forEach(grid => {
+                const gridRows = [];
+                let tempRow = [];
+                const productGridElements = Array.from(grid.children);
 
-                    // The last row will not contain any cells that clear that row, so we check to see if this is the last cell
-                    // in the grid, and if so, we add its row to the array
-                    if (productGridElements.length == index + 1) {
+                productGridElements.forEach((element, index) => {
+                    const computedStyle = window.getComputedStyle(element);
+                    if (computedStyle.clear !== 'none' && index !== 0) {
+                        gridRows.push(tempRow);
+                        tempRow = [];
+                    }
+                    tempRow.push(element);
+                    if (index === productGridElements.length - 1) {
                         gridRows.push(tempRow);
                     }
                 });
 
-                $j.each(gridRows, function () {
-                    var tallestProductInfo = 0;
-                    $j.each(this, function () {
-                        // Since this function is called every time the page is resized, we need to remove the min-height
-                        // and bottom-padding so each cell can return to its natural size before being measured.
-                        $j(this).find('.product-info').css({
-                            'min-height': '',
-                            'padding-bottom': ''
-                        });
+                gridRows.forEach(row => {
+                    let tallestProductInfo = 0;
 
-                        // We are checking the height of .product-info (rather than the entire li), because the images
-                        // will not be loaded when this JS is run.
-                        var productInfoHeight = $j(this).find('.product-info').height();
-                        // Space above .actions element
-                        var actionSpacing = 10;
-                        // The height of the absolutely positioned .actions element
-                        var actionHeight = $j(this).find('.product-info .actions').height();
+                    row.forEach(cell => {
+                        const productInfo = cell.querySelector('.product-info');
+                        const actions = cell.querySelector('.product-info .actions');
 
-                        // Add height of two elements. This is necessary since .actions is absolutely positioned and won't
-                        // be included in the height of .product-info
-                        var totalHeight = productInfoHeight + actionSpacing + actionHeight;
+                        productInfo.style.minHeight = '';
+                        productInfo.style.paddingBottom = '';
+
+                        const productInfoHeight = productInfo.offsetHeight;
+                        const actionSpacing = 10;
+                        const actionHeight = actions.offsetHeight;
+                        const totalHeight = productInfoHeight + actionSpacing + actionHeight;
+
                         if (totalHeight > tallestProductInfo) {
                             tallestProductInfo = totalHeight;
                         }
 
-                        // Set the bottom-padding to accommodate the height of the .actions element. Note: if .actions
-                        // elements are of varying heights, they will not be aligned.
-                        $j(this).find('.product-info').css('padding-bottom', actionHeight + 'px');
+                        productInfo.style.paddingBottom = `${actionHeight}px`;
                     });
-                    // Set the height of all .product-info elements in a row to the tallest height
-                    $j.each(this, function () {
-                        $j(this).find('.product-info').css('min-height', tallestProductInfo);
+
+                    row.forEach(cell => {
+                        cell.querySelector('.product-info').style.minHeight = `${tallestProductInfo}px`;
                     });
                 });
             });
