@@ -209,14 +209,14 @@ const PointerManager = {
  *   Firefox has disabled Apple-style touch events on desktop, so desktop devices using Firefox will not support
  *   the desired touch behavior.
  */
-var MenuManager = {
+const MenuManager = {
     // These variables are used to detect incorrect touch / mouse event order
     mouseEnterEventObserved: false,
     touchEventOrderIncorrect: false,
     cancelNextTouch: false,
 
     /**
-     * This class manages touch scroll detection
+     * This object manages touch scroll detection
      */
     TouchScroll: {
         /**
@@ -232,7 +232,7 @@ var MenuManager = {
          * Should probably be called on touchstart (or similar) event.
          */
         reset: function() {
-            this.touchStartPosition = $j(window).scrollTop();
+            this.touchStartPosition = window.scrollY;
         },
 
         /**
@@ -241,11 +241,11 @@ var MenuManager = {
          * @returns {boolean}
          */
         shouldCancelTouch: function() {
-            if(this.touchStartPosition == null) {
+            if (this.touchStartPosition == null) {
                 return false;
             }
 
-            var scroll = $j(window).scrollTop() - this.touchStartPosition;
+            const scroll = window.scrollY - this.touchStartPosition;
             return Math.abs(scroll) > this.TOUCH_SCROLL_THRESHOLD;
         }
     },
@@ -266,21 +266,21 @@ var MenuManager = {
      * @param target
      */
     toggleMenuVisibility: function(target) {
-        var link = $j(target);
-        var li = link.closest('li');
+        const li = target.closest('li');
 
-        if(!this.useSmallScreenBehavior()) {
+        if (!this.useSmallScreenBehavior()) {
             // remove menu-active from siblings and children of siblings
-            li.siblings()
-              .removeClass('menu-active')
-              .find('li')
-              .removeClass('menu-active');
-            //remove menu-active from children
-            li.find('li.menu-active').removeClass('menu-active');
+            li.parentElement.querySelectorAll('li.menu-active').forEach(el => {
+                if (el !== li) {
+                    el.classList.remove('menu-active');
+                }
+            });
+            // remove menu-active from children
+            li.querySelectorAll('li.menu-active').forEach(el => el.classList.remove('menu-active'));
         }
 
-        //toggle current item's active state
-        li.toggleClass('menu-active');
+        // toggle current item's active state
+        li.classList.toggle('menu-active');
     },
 
     // --------------------------------------------
@@ -297,244 +297,42 @@ var MenuManager = {
     },
 
     /**
-     * This method observes an absurd number of events
-     * depending on the capabilities of the current browser
-     * to implement expected header navigation functionality.
-     *
-     * The goal is to separate interactions into four buckets:
-     * - pointer enter using an actual mouse
-     * - pointer leave using an actual mouse
-     * - pointer down using an actual mouse
-     * - pointer down using touch
-     *
-     * Browsers supporting PointerEvent events will use these
-     * to differentiate pointer types.
-     *
-     * Browsers supporting Apple-style will use those events
-     * along with mouseenter / mouseleave to emulate pointer events.
+     * This method observes events to implement expected header navigation functionality.
+     * It differentiates between mouse and touch inputs using the PointerEvent API.
      */
     wirePointerEvents: function() {
-        var that = this;
-        var pointerTarget = $j('#nav a.has-children');
-        var hoverTarget = $j('#nav li');
+        const nav = document.getElementById('nav');
+        const hoverTargets = nav.querySelectorAll('li');
+        const pointerTargets = nav.querySelectorAll('a.has-children');
 
-        if(PointerManager.getPointerEventsSupported()) {
-            // pointer events supported, so observe those type of events
-
-            var enterEvent = window.navigator.pointerEnabled ? 'pointerenter' : 'mouseenter';
-            var leaveEvent = window.navigator.pointerEnabled ? 'pointerleave' : 'mouseleave';
-            var fullPointerSupport = window.navigator.pointerEnabled;
-
-            hoverTarget.on(enterEvent, function(e) {
-                if(e.originalEvent.pointerType === undefined // Browsers with partial PointerEvent support don't provide pointer type
-                    || e.originalEvent.pointerType == PointerManager.getPointerEventsInputTypes().MOUSE) {
-
-                    if(fullPointerSupport) {
-                        that.mouseEnterAction(e, this);
-                    } else {
-                        that.PartialPointerEventsSupport.mouseEnterAction(e, this);
-                    }
-                }
-            }).on(leaveEvent, function(e) {
-                if(e.originalEvent.pointerType === undefined // Browsers with partial PointerEvent support don't provide pointer type
-                    || e.originalEvent.pointerType == PointerManager.getPointerEventsInputTypes().MOUSE) {
-
-                    if(fullPointerSupport) {
-                        that.mouseLeaveAction(e, this);
-                    } else {
-                        that.PartialPointerEventsSupport.mouseLeaveAction(e, this);
-                    }
+        hoverTargets.forEach(target => {
+            target.addEventListener('pointerenter', (e) => {
+                if (e.pointerType === 'mouse') {
+                    this.mouseEnterAction(e, target);
                 }
             });
 
-            if(!fullPointerSupport) {
-                //click event doesn't have pointer type on it.
-                //observe MSPointerDown to set pointer type for click to find later
+            target.addEventListener('pointerleave', (e) => {
+                if (e.pointerType === 'mouse') {
+                    this.mouseLeaveAction(e, target);
+                }
+            });
+        });
 
-                pointerTarget.on('MSPointerDown', function(e) {
-                    $j(this).data('pointer-type', e.originalEvent.pointerType);
-                });
-            }
-
-            pointerTarget.on('click', function(e) {
-                var pointerType = fullPointerSupport ? e.originalEvent.pointerType : $j(this).data('pointer-type');
-
-                if(pointerType === undefined || pointerType == PointerManager.getPointerEventsInputTypes().MOUSE) {
-                    that.mouseClickAction(e, this);
+        pointerTargets.forEach(target => {
+            target.addEventListener('click', (e) => {
+                if (e.pointerType === 'mouse') {
+                    this.mouseClickAction(e, target);
                 } else {
-                    if(fullPointerSupport) {
-                        that.touchAction(e, this);
-                    } else {
-                        that.PartialPointerEventsSupport.touchAction(e, this);
-                    }
+                    this.touchAction(e, target);
                 }
-
-                $j(this).removeData('pointer-type'); // clear pointer type hint from target, if any
             });
-        } else {
-            //pointer events not supported, use Apple-style events to simulate
+        });
 
-            hoverTarget.on('mouseenter', function(e) {
-                // Touch events should cancel this event if a touch pointer is used.
-                // Record that this method has fired so that erroneous following
-                // touch events (if any) can respond accordingly.
-                that.mouseEnterEventObserved = true;
-                that.cancelNextTouch = true;
-
-                that.mouseEnterAction(e, this);
-            }).on('mouseleave', function(e) {
-                that.mouseLeaveAction(e, this);
-            });
-
-            $j(window).on('touchstart', function(e) {
-                if(that.mouseEnterEventObserved) {
-                    // If mouse enter observed before touch, then device touch
-                    // event order is incorrect.
-                    that.touchEventOrderIncorrect = true;
-                    that.mouseEnterEventObserved = false; // Reset test
-                }
-
-                // Reset TouchScroll in order to detect scroll later.
-                that.TouchScroll.reset();
-            });
-
-            pointerTarget.on('touchend', function(e) {
-                $j(this).data('was-touch', true); // Note that element was invoked by touch pointer
-
-                e.preventDefault(); // Prevent mouse compatibility events from firing where possible
-
-                if(that.TouchScroll.shouldCancelTouch()) {
-                    return; // Touch was a scroll -- don't do anything else
-                }
-
-                if(that.touchEventOrderIncorrect) {
-                    that.PartialTouchEventsSupport.touchAction(e, this);
-                } else {
-                    that.touchAction(e, this);
-                }
-            }).on('click', function(e) {
-                if($j(this).data('was-touch')) { // Event invoked after touch
-                    e.preventDefault(); // Prevent following link
-                    return; // Prevent other behavior
-                }
-
-                that.mouseClickAction(e, this);
-            });
-        }
-    },
-
-     // --------------------------------------------
-     // Behavior "buckets"
-     //
-
-    /**
-     * Browsers with incomplete PointerEvent support (such as IE 10)
-     * require special event management. This collection of methods
-     * accommodate such browsers.
-     */
-    PartialPointerEventsSupport: {
-        /**
-         * Without proper pointerenter / pointerleave / click pointerType support,
-         * we have to use mouseenter events. These end up triggering
-         * lots of mouseleave events that can be misleading.
-         *
-         * Each touch mouseenter and click event that ends up triggering
-         * an undesired mouseleave increments this lock variable.
-         *
-         * Mouseleave events are cancelled if this variable is > 0,
-         * and then the variable is decremented regardless.
-         */
-        mouseleaveLock: 0,
-
-        /**
-         * Handles mouse enter behavior, but if using touch,
-         * toggle menus in the absence of full PointerEvent support.
-         *
-         * @param event
-         * @param target
-         */
-        mouseEnterAction: function(event, target) {
-            if(MenuManager.useSmallScreenBehavior()) {
-                // fall back to normal method behavior
-                MenuManager.mouseEnterAction(event, target);
-                return;
-            }
-
-            event.stopPropagation();
-
-            var jtarget = $j(target);
-            if(!jtarget.hasClass('level0')) {
-                this.mouseleaveLock = jtarget.parents('li').length + 1;
-            }
-
-            MenuManager.toggleMenuVisibility(target);
-        },
-
-        /**
-         * Handles mouse leave behaivor, but obeys the mouseleaveLock
-         * to allow undesired mouseleave events to be cancelled.
-         *
-         * @param event
-         * @param target
-         */
-        mouseLeaveAction: function(event, target) {
-            if(MenuManager.useSmallScreenBehavior()) {
-                // fall back to normal method behavior
-                MenuManager.mouseLeaveAction(event, target);
-                return;
-            }
-
-            if(this.mouseleaveLock > 0) {
-                this.mouseleaveLock--;
-                return; // suppress duplicate mouseleave event after touch
-            }
-
-            $j(target).removeClass('menu-active'); //hide all menus
-        },
-
-        /**
-         * Does no work on its own, but increments mouseleaveLock
-         * to prevent following undesireable mouseleave events.
-         *
-         * @param event
-         * @param target
-         */
-        touchAction: function(event, target) {
-            if(MenuManager.useSmallScreenBehavior()) {
-                // fall back to normal method behavior
-                MenuManager.touchAction(event, target);
-                return;
-            }
-            event.preventDefault(); // prevent following link
-            this.mouseleaveLock++;
-        }
-    },
-
-    /**
-     * Browsers with incomplete Apple-style touch event support
-     * (such as the legacy Android browser) sometimes fire
-     * touch events out of order. In particular, mouseenter may
-     * fire before the touch events. This collection of methods
-     * accommodate such browsers.
-     */
-    PartialTouchEventsSupport: {
-        /**
-         * Toggles visibility of menu, unless suppressed by previous
-         * out of order mouseenter event.
-         *
-         * @param event
-         * @param target
-         */
-        touchAction: function(event, target) {
-            if(MenuManager.cancelNextTouch) {
-                // Mouseenter has already manipulated the menu.
-                // Suppress this undesired touch event.
-                MenuManager.cancelNextTouch = false;
-                return;
-            }
-
-            MenuManager.toggleMenuVisibility(target);
-        }
+        // Handling touch scrolling
+        window.addEventListener('touchstart', () => {
+            this.TouchScroll.reset();
+        });
     },
 
     /**
@@ -545,11 +343,11 @@ var MenuManager = {
      * @param target
      */
     mouseEnterAction: function(event, target) {
-        if(this.useSmallScreenBehavior()) {
+        if (this.useSmallScreenBehavior()) {
             return; // don't do mouse enter functionality on smaller screens
         }
 
-        $j(target).addClass('menu-active'); //show current menu
+        target.classList.add('menu-active'); // show current menu
     },
 
     /**
@@ -560,11 +358,11 @@ var MenuManager = {
      * @param target
      */
     mouseLeaveAction: function(event, target) {
-        if(this.useSmallScreenBehavior()) {
+        if (this.useSmallScreenBehavior()) {
             return; // don't do mouse leave functionality on smaller screens
         }
 
-        $j(target).removeClass('menu-active'); //hide all menus
+        target.classList.remove('menu-active'); // hide all menus
     },
 
     /**
@@ -575,9 +373,9 @@ var MenuManager = {
      * @param target
      */
     mouseClickAction: function(event, target) {
-        if(this.useSmallScreenBehavior()) {
-            event.preventDefault(); //don't follow link
-            this.toggleMenuVisibility(target); //instead, toggle visibility
+        if (this.useSmallScreenBehavior()) {
+            event.preventDefault(); // don't follow link
+            this.toggleMenuVisibility(target); // instead, toggle visibility
         }
     },
 
@@ -589,8 +387,10 @@ var MenuManager = {
      * @param target
      */
     touchAction: function(event, target) {
+        if (this.TouchScroll.shouldCancelTouch()) {
+            return; // Touch was a scroll -- don't do anything else
+        }
         this.toggleMenuVisibility(target);
-
         event.preventDefault();
     }
 };
@@ -599,7 +399,6 @@ var MenuManager = {
 // jQuery Init
 // ==============================================
 
-// Use $j(document).ready() because Magento executes Prototype inline
 $j(document).ready(function () {
 
     // ==============================================
