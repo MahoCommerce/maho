@@ -1936,11 +1936,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/App.php
 
 		-
-			message: "#^Method Mage_Core_Model_Config\\:\\:getNode\\(\\) should return Mage_Core_Model_Config_Element but returns Varien_Simplexml_Element\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Core/Model/Config.php
-
-		-
 			message: "#^Return type \\(Mage_Core_Model_App\\) of method Mage_Core_Model_Config\\:\\:_saveCache\\(\\) should be compatible with return type \\(bool\\) of method Varien_Simplexml_Config\\:\\:_saveCache\\(\\)$#"
 			count: 1
 			path: app/code/core/Mage/Core/Model/Config.php
@@ -2259,6 +2254,16 @@ parameters:
 			message: "#^Method Mage_Customer_Block_Newsletter\\:\\:getAction\\(\\) should return Mage_Core_Controller_Varien_Action but returns string\\.$#"
 			count: 1
 			path: app/code/core/Mage/Customer/Block/Newsletter.php
+
+		-
+			message: "#^Method Mage_Eav_Model_Entity_Attribute_Source_Interface\\:\\:getAllOptions\\(\\) invoked with 1 parameter, 0 required\\.$#"
+			count: 2
+			path: app/code/core/Mage/Customer/Helper/Address.php
+
+		-
+			message: "#^Method Mage_Eav_Model_Entity_Attribute_Source_Interface\\:\\:getAllOptions\\(\\) invoked with 1 parameter, 0 required\\.$#"
+			count: 2
+			path: app/code/core/Mage/Customer/Helper/Data.php
 
 		-
 			message: "#^Property Mage_Customer_Helper_Data\\:\\:\\$_customer \\(Mage_Customer_Model_Customer\\) in empty\\(\\) is not falsy\\.$#"

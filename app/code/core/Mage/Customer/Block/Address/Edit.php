@@ -211,4 +211,12 @@ class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
             return $this->getUrl('customer/account/');
         }
     }
+
+    /**
+     * Return all EAV fields used in this form as groups
+     */
+    public function getGroupedFields(): array
+    {
+        return Mage::helper('customer/address')->getGroupedFields('customer_address_edit', $this->getAddress());
+    }
 }

@@ -145,7 +145,7 @@ abstract class Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract extends Mag
                     $element->setRenderer($renderers[$attribute->getAttributeCode()]);
                 }
 
-                if ($inputType == 'select' || $inputType == 'multiselect') {
+                if (in_array($inputType, ['select', 'multiselect', 'customselect'])) {
                     $element->setValues($attribute->getFrontend()->getSelectOptions());
                 } elseif ($inputType == 'date') {
                     $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);

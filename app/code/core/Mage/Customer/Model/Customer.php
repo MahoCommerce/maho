@@ -104,6 +104,8 @@
  */
 class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 {
+    public const ENTITY = 'customer';
+
     /**
      * Configuration paths for email templates and identities
      */
@@ -137,7 +139,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     public const SUBSCRIBED_YES = 'yes';
     public const SUBSCRIBED_NO  = 'no';
 
-    public const CACHE_TAG = 'customer';
+    public const CACHE_TAG = self::ENTITY;
 
     /**
      * Minimum Password Length
@@ -160,14 +162,14 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      *
      * @var string
      */
-    protected $_eventPrefix = 'customer';
+    protected $_eventPrefix = self::ENTITY;
 
     /**
      * Name of the event object
      *
      * @var string
      */
-    protected $_eventObject = 'customer';
+    protected $_eventObject = self::ENTITY;
 
     /**
      * List of errors
@@ -1072,15 +1074,15 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 
         $entityType = Mage::getSingleton('eav/config')->getEntityType('customer');
         $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'dob');
-        if ($attribute->getIsRequired() && trim($this->getDob()) == '') {
+        if ($attribute->getIsVisible() && $attribute->getIsRequired() && trim($this->getDob()) == '') {
             $errors[] = Mage::helper('customer')->__('The Date of Birth is required.');
         }
         $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'taxvat');
-        if ($attribute->getIsRequired() && trim($this->getTaxvat()) == '') {
+        if ($attribute->getIsVisible() && $attribute->getIsRequired() && trim($this->getTaxvat()) == '') {
             $errors[] = Mage::helper('customer')->__('The TAX/VAT number is required.');
         }
         $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'gender');
-        if ($attribute->getIsRequired() && trim($this->getGender()) == '') {
+        if ($attribute->getIsVisible() && $attribute->getIsRequired() && trim($this->getGender()) == '') {
             $errors[] = Mage::helper('customer')->__('Gender is required.');
         }
 

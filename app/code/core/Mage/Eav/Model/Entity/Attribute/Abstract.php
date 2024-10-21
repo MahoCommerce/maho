@@ -516,8 +516,11 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     /**
      * @return string
      */
-    protected function _getDefaultSourceModel()
+    public function _getDefaultSourceModel()
     {
+        if ($this->getFrontendInput() === 'customselect') {
+            return 'eav/entity_attribute_source_table';
+        }
         return $this->getEntity()->getDefaultAttributeSourceModel();
     }
 

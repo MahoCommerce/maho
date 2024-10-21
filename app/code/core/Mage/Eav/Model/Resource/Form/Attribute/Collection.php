@@ -146,6 +146,36 @@ class Mage_Eav_Model_Resource_Form_Attribute_Collection extends Mage_Core_Model_
         return $this->setOrder('ca.sort_order', $direction);
     }
 
+    public function joinAttributeGroup()
+    {
+        if (!$this->getFlag('attribute_group_joined')) {
+            $this->setFlag('attribute_group_joined', true);
+
+            $this->getSelect()
+                 ->joinInner(
+                     ['eea' => $this->getTable('eav/entity_attribute')],
+                     'main_table.attribute_id = eea.attribute_id',
+                     []
+                 )
+                 ->joinLeft(
+                     ['eag' => $this->getTable('eav/attribute_group')],
+                     'eea.attribute_group_id = eag.attribute_group_id',
+                     ['eag.attribute_group_name']
+                 );
+        }
+        return $this;
+    }
+
+    public function filterAttributeSet($attributeSetId)
+    {
+        $this->joinAttributeGroup();
+        $this->getSelect()
+             ->where('eea.attribute_set_id = ?', $attributeSetId)
+             ->order(['eag.sort_order', 'eea.sort_order']);
+
+        return $this;
+    }
+
     /**
      * Add joins to select
      *

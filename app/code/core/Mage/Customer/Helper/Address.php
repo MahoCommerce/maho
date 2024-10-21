@@ -26,6 +26,9 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     public const XML_PATH_VIV_TAX_CALCULATION_ADDRESS_TYPE = 'customer/create_account/tax_calculation_address_type';
     public const XML_PATH_VAT_FRONTEND_VISIBILITY          = 'customer/create_account/vat_frontend_visibility';
 
+    public const STREET_LINES_MIN = 1;
+    public const STREET_LINES_MAX = 4;
+
     protected $_moduleName = 'Mage_Customer';
 
     /**
@@ -100,6 +103,52 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Retrieve name prefix dropdown options
+     *
+     * @param Mage_Core_Model_Store|int|string|null $store
+     * @return array|bool
+     */
+    public function getNamePrefixOptions($store = null)
+    {
+        $attribute = Mage::getSingleton('eav/config')->getAttribute('customer_address', 'prefix');
+        $attribute->setStoreId(Mage::app()->getStore($store)->getId());
+        $options = $attribute->getSource()->getAllOptions(false);
+
+        if (empty($options)) {
+            return false;
+        }
+        $result = [];
+        foreach ($options as $option) {
+            $value = $this->escapeHtml(trim($option['label']));
+            $result[$value] = $value;
+        }
+        return $result;
+    }
+
+    /**
+     * Retrieve name suffix dropdown options
+     *
+     * @param Mage_Core_Model_Store|int|string|null $store
+     * @return array|bool
+     */
+    public function getNameSuffixOptions($store = null)
+    {
+        $attribute = Mage::getSingleton('eav/config')->getAttribute('customer_address', 'suffix');
+        $attribute->setStoreId(Mage::app()->getStore($store)->getId());
+        $options = $attribute->getSource()->getAllOptions(false);
+
+        if (empty($options)) {
+            return false;
+        }
+        $result = [];
+        foreach ($options as $option) {
+            $value = $this->escapeHtml(trim($option['label']));
+            $result[$value] = $value;
+        }
+        return $result;
+    }
+
+    /**
      * Return Number of Lines in a Street Address for store
      *
      * @param Mage_Core_Model_Store|int|string $store
@@ -115,7 +164,7 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
             if ($lines <= 0) {
                 $lines = 2;
             }
-            $this->_streetLines[$websiteId] = min(20, $lines);
+            $this->_streetLines[$websiteId] = max(self::STREET_LINES_MIN, min(self::STREET_LINES_MAX, $lines));
         }
 
         return $this->_streetLines[$websiteId];
@@ -276,5 +325,70 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     public function isVatAttributeVisible()
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_VAT_FRONTEND_VISIBILITY);
+    }
+
+    /**
+     * Return all EAV fields used in customer forms as groups
+     */
+    public function getGroupedFields(string $formCode, Mage_Customer_Model_Address|int|null $addressId = null): array
+    {
+        if ($addressId instanceof Mage_Customer_Model_Address) {
+            $address = $addressId;
+        } elseif (is_int($addressId)) {
+            /** @var Mage_Customer_Model_Customer $customer */
+            $customer = Mage::getModel('customer/customer');
+            $address = $customer->getAddressById($addressId);
+        } else {
+            $address = Mage::getModel('customer/address');
+        }
+
+        /** @var Mage_Customer_Model_Form $form */
+        $form = Mage::getModel('customer/form');
+        $form->setFormCode($formCode)
+             ->setEntity($address)
+             ->initDefaultValues();
+
+        $groups = [];
+        $attributes = $form->getAttributes();
+
+        foreach ($attributes as $code => $attribute) {
+            $group = $attribute->getAttributeGroupName() ?? 'General';
+            $groups[$group] ??= [];
+            $groups[$group][$code] = $attribute;
+        }
+
+        return $groups;
+    }
+
+    /**
+     * Return extra EAV fields used in customer address forms
+     */
+    public function getExtraFields(string $formCode, Mage_Customer_Model_Address|int|null $addressId = null): array
+    {
+        if ($addressId instanceof Mage_Customer_Model_Address) {
+            $address = $addressId;
+        } elseif (is_int($addressId)) {
+            /** @var Mage_Customer_Model_Customer $customer */
+            $customer = Mage::getModel('customer/customer');
+            $address = $customer->getAddressById($addressId);
+        } else {
+            $address = Mage::getModel('customer/address');
+        }
+
+        /** @var Mage_Customer_Model_Form $form */
+        $form = Mage::getModel('customer/form');
+        $form->setFormCode($formCode)
+             ->setEntity($address)
+             ->initDefaultValues();
+
+        $attributes = $form->getAttributes();
+
+        foreach ($attributes as $code => $attribute) {
+            if (!$attribute->getIsUserDefined()) {
+                unset($attributes[$code]);
+            }
+        }
+
+        return $attributes;
     }
 }

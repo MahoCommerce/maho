@@ -26,7 +26,8 @@ class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype
             ['value' => 'date', 'label' => Mage::helper('eav')->__('Date')],
             ['value' => 'boolean', 'label' => Mage::helper('eav')->__('Yes/No')],
             ['value' => 'multiselect', 'label' => Mage::helper('eav')->__('Multiple Select')],
-            ['value' => 'select', 'label' => Mage::helper('eav')->__('Dropdown')]
+            ['value' => 'select', 'label' => Mage::helper('eav')->__('Dropdown')],
+            ['value' => 'customselect', 'label' => Mage::helper('eav')->__('Dropdown with Other Option')],
         ];
     }
 }
