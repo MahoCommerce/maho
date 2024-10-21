@@ -3700,24 +3700,19 @@ p.product-name a:hover {
  * Product Grid
  * ============================================ */
 .products-grid {
-  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-gap: 10px;
 }
 
-.products-grid:after {
-  content: '';
-  display: table;
-  clear: both;
+.products-grid:has(> :nth-child(2) ~ *) {
+  justify-items: center;
 }
 
 .products-grid > li {
-  position: relative;
+  max-width: 180px;
   margin-bottom: 20px;
   text-align: center;
-}
-.products-grid > li:after {
-  content: '';
-  display: table;
-  clear: both;
 }
 
 .products-grid .product-image {
@@ -3770,21 +3765,6 @@ p.product-name a:hover {
   margin-bottom: 0;
 }
 
-/* Config: Two columns + flexible gutter */
-.products-grid > li {
-  float: left;
-  width: 47.72727%;
-  margin-right: 4.54545%;
-}
-
-.products-grid > li:nth-child(odd) {
-  clear: left;
-}
-
-.products-grid > li:nth-child(even) {
-  margin-right: 0;
-}
-
 .products-grid .product-image {
   margin-bottom: 5px;
 }
@@ -3815,129 +3795,6 @@ p.product-name a:hover {
   display: block;
 }
 
-@media only screen and (min-width: 480px) {
-  /* Config: Three columns + flexible gutter */
-  .products-grid {
-    /* Undo two-column config */
-    /* Set three-column config */
-  }
-  .products-grid > li:nth-child(odd) {
-    clear: none;
-  }
-  .products-grid > li:nth-child(even) {
-    margin-right: 3.7037%;
-  }
-  .products-grid > li {
-    width: 30.8642%;
-    margin-right: 3.7037%;
-  }
-  .products-grid > li:nth-child(3n+1) {
-    clear: left;
-  }
-  .products-grid > li:nth-child(3n) {
-    margin-right: 0;
-  }
-}
-@media only screen and (min-width: 960px) {
-  /* Config: Columns + flexible gutter */
-  /* Undo three-column config */
-  .products-grid--max-4-col > li:nth-child(odd) {
-    clear: none;
-  }
-
-  .products-grid--max-4-col > li:nth-child(3n+1) {
-    clear: none;
-  }
-
-  .products-grid--max-4-col > li:nth-child(even),
-  .products-grid--max-4-col > li:nth-child(3n) {
-    margin-right: 2.22222%;
-  }
-
-  /* Set column config */
-  .products-grid--max-4-col > li {
-    margin-right: 2.22222%;
-  }
-
-  .products-grid--max-4-col > li {
-    width: 23.33333%;
-    margin-right: 2.22222%;
-  }
-
-  .products-grid--max-4-col > li:nth-child(4n+1) {
-    clear: left;
-  }
-
-  .products-grid--max-4-col > li:nth-child(4n) {
-    margin-right: 0;
-  }
-
-  /* Config: Columns + flexible gutter */
-  /* Undo three-column config */
-  .products-grid--max-5-col > li:nth-child(odd) {
-    clear: none;
-  }
-
-  .products-grid--max-5-col > li:nth-child(3n+1) {
-    clear: none;
-  }
-
-  .products-grid--max-5-col > li:nth-child(even),
-  .products-grid--max-5-col > li:nth-child(3n) {
-    margin-right: 2.22222%;
-  }
-
-  /* Set column config */
-  .products-grid--max-5-col > li {
-    margin-right: 2.22222%;
-  }
-
-  .products-grid--max-5-col > li {
-    width: 18.22222%;
-    margin-right: 2.22222%;
-  }
-
-  .products-grid--max-5-col > li:nth-child(5n+1) {
-    clear: left;
-  }
-
-  .products-grid--max-5-col > li:nth-child(5n) {
-    margin-right: 0;
-  }
-
-  /* Config: Columns + flexible gutter */
-  /* Undo three-column config */
-  .products-grid--max-6-col > li:nth-child(odd) {
-    clear: none;
-  }
-
-  .products-grid--max-6-col > li:nth-child(3n+1) {
-    clear: none;
-  }
-
-  .products-grid--max-6-col > li:nth-child(even),
-  .products-grid--max-6-col > li:nth-child(3n) {
-    margin-right: 2.22222%;
-  }
-
-  /* Set column config */
-  .products-grid--max-6-col > li {
-    margin-right: 2.22222%;
-  }
-
-  .products-grid--max-6-col > li {
-    width: 14.81481%;
-    margin-right: 2.22222%;
-  }
-
-  .products-grid--max-6-col > li:nth-child(6n+1) {
-    clear: left;
-  }
-
-  .products-grid--max-6-col > li:nth-child(6n) {
-    margin-right: 0;
-  }
-}
 /* ============================================ *
  * Product List
  * ============================================ */
@@ -9371,152 +9228,6 @@ body.customer-account .my-account .title-buttons.recurring-profiles-title-button
   width: 100%;
 }
 
-@media only screen and (min-width: 1199px) {
-  .col2-left-layout .col-main .widget,
-  .col2-right-layout .col-main .widget,
-  .col3-layout .col-main .widget {
-    /* Config: Columns + flexible gutter */
-    /* Undo three-column config */
-    /* Set column config */
-    /* Config: Columns + flexible gutter */
-    /* Undo three-column config */
-    /* Set column config */
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(odd),
-  .col2-right-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(odd),
-  .col3-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(odd) {
-    clear: none;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(3n+1),
-  .col2-right-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(3n+1),
-  .col3-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(3n+1) {
-    clear: none;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(even),
-  .col2-left-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(3n),
-  .col2-right-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(even),
-  .col2-right-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(3n),
-  .col3-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(even),
-  .col3-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(3n) {
-    margin-right: 2.22222%;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-4-col-widget > li,
-  .col2-right-layout .col-main .widget .products-grid--max-4-col-widget > li,
-  .col3-layout .col-main .widget .products-grid--max-4-col-widget > li {
-    margin-right: 2.22222%;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-4-col-widget > li,
-  .col2-right-layout .col-main .widget .products-grid--max-4-col-widget > li,
-  .col3-layout .col-main .widget .products-grid--max-4-col-widget > li {
-    width: 23.33333%;
-    margin-right: 2.22222%;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(4n+1),
-  .col2-right-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(4n+1),
-  .col3-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(4n+1) {
-    clear: left;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(4n),
-  .col2-right-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(4n),
-  .col3-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(4n) {
-    margin-right: 0;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(odd),
-  .col2-right-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(odd),
-  .col3-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(odd) {
-    clear: none;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(3n+1),
-  .col2-right-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(3n+1),
-  .col3-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(3n+1) {
-    clear: none;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(even),
-  .col2-left-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(3n),
-  .col2-right-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(even),
-  .col2-right-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(3n),
-  .col3-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(even),
-  .col3-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(3n) {
-    margin-right: 2.22222%;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-5-col-widget > li,
-  .col2-right-layout .col-main .widget .products-grid--max-5-col-widget > li,
-  .col3-layout .col-main .widget .products-grid--max-5-col-widget > li {
-    margin-right: 2.22222%;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-5-col-widget > li,
-  .col2-right-layout .col-main .widget .products-grid--max-5-col-widget > li,
-  .col3-layout .col-main .widget .products-grid--max-5-col-widget > li {
-    width: 18.22222%;
-    margin-right: 2.22222%;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(5n+1),
-  .col2-right-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(5n+1),
-  .col3-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(5n+1) {
-    clear: left;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(5n),
-  .col2-right-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(5n),
-  .col3-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(5n) {
-    margin-right: 0;
-  }
-}
-@media only screen and (min-width: 770px) {
-  .col1-layout .col-main .widget {
-    /* Config: Columns + flexible gutter */
-    /* Undo three-column config */
-    /* Set column config */
-    /* Config: Columns + flexible gutter */
-    /* Undo three-column config */
-    /* Set column config */
-  }
-  .col1-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(odd) {
-    clear: none;
-  }
-  .col1-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(3n+1) {
-    clear: none;
-  }
-  .col1-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(even),
-  .col1-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(3n) {
-    margin-right: 2.22222%;
-  }
-  .col1-layout .col-main .widget .products-grid--max-4-col-widget > li {
-    margin-right: 2.22222%;
-  }
-  .col1-layout .col-main .widget .products-grid--max-4-col-widget > li {
-    width: 23.33333%;
-    margin-right: 2.22222%;
-  }
-  .col1-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(4n+1) {
-    clear: left;
-  }
-  .col1-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(4n) {
-    margin-right: 0;
-  }
-  .col1-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(odd) {
-    clear: none;
-  }
-  .col1-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(3n+1) {
-    clear: none;
-  }
-  .col1-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(even),
-  .col1-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(3n) {
-    margin-right: 2.22222%;
-  }
-  .col1-layout .col-main .widget .products-grid--max-5-col-widget > li {
-    margin-right: 2.22222%;
-  }
-  .col1-layout .col-main .widget .products-grid--max-5-col-widget > li {
-    width: 18.22222%;
-    margin-right: 2.22222%;
-  }
-  .col1-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(5n+1) {
-    clear: left;
-  }
-  .col1-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(5n) {
-    margin-right: 0;
-  }
-}
 /* ============================================ *
  * Checkout - Multiple Addresses
  * ============================================ */
