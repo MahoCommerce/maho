@@ -132,9 +132,7 @@
     <?php $_columnCount = $this->getColumnCount(); ?>
     <ul class="products-grid products-grid--max-<?= $_columnCount ?>-col">
         <?php $i=0; foreach ($_productCollection as $_product): ?>
-            <?php /*if ($i++%$_columnCount==0): ?>
-            <?php endif*/ ?>
-            <li class="item<?php if(($i-1)%$_columnCount==0): ?> first<?php elseif($i%$_columnCount==0): ?> last<?php endif ?>">
+            <li class="item">
                 <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" class="product-image">
                     <?php $_imgSize = 210; ?>
                     <img id="product-collection-image-<?= $_product->getId() ?>" width="<?= $_imgSize ?>" height="<?= $_imgSize ?>"
@@ -200,8 +198,6 @@
                     </div>
                 </div>
             </li>
-            <?php /*if ($i%$_columnCount==0 || $i==$_collectionSize): ?>
-            <?php endif*/ ?>
         <?php endforeach ?>
     </ul>
     <?php endif ?>

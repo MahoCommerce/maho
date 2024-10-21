@@ -618,7 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasAccordion = wrapper.classList.contains('accordion');
         const startOpen = wrapper.classList.contains('open');
         const dl = wrapper.querySelector('dl');
-        const dts = Array.from(dl.querySelectorAll('dt'));
+        const dts = Array.from(dl.querySelectorAll(':scope > dt'));
         const panes = Array.from(dl.querySelectorAll('dd'));
         const groups = [dts, panes];
 

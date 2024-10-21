@@ -24,15 +24,12 @@
         <dl>
         <?php foreach ($_items as $_review):?>
             <dt>
-                <a href="<?= $this->getReviewUrl($_review->getId()) ?>">
-                    <?= $this->escapeHtml($_review->getTitle()) ?>
-                </a>
+                <?= $this->escapeHtml($_review->getTitle()) ?>
             </dt>
             <dd>
                 <?php $_votes = $_review->getRatingVotes(); ?>
 
                 <?= nl2br($this->escapeHtml($_review->getDetail())) ?>
-
 
                 <?php if (count($_votes)): ?>
                 <table class="ratings-table">
