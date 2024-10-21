@@ -24,6 +24,7 @@ class Mage_Core_Model_Magento_Api extends Mage_Core_Model_Maho_Api
      *
      * @return array
      */
+    #[\Override]
     public function info()
     {
         Mage::log('Deprecated API call to magentoInfo, use mahoInfo instead');
