@@ -195,7 +195,6 @@ h5, .h5 {
   margin: 0;
   margin-bottom: 10px;
   color: #636363;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
   font-size: 13px;
   font-weight: bold;
   font-style: normal;
@@ -208,7 +207,6 @@ h6, .h6 {
   margin: 0;
   margin-bottom: 5px;
   color: #636363;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
   font-size: 12px;
   font-weight: bold;
   font-style: normal;
@@ -804,7 +802,6 @@ a.button:hover {
   line-height: 20px;
   width: 100%;
   font-size: 10px;
-  font-family: Arial, "Helvetica Neue", Verdana, Arial, sans-serif;
   font-weight: bold;
 }
 .btn-remove:hover:after {
@@ -1343,7 +1340,6 @@ a.button:hover {
  */
 .price-box {
   margin: 7px 0;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
 }
 
 .price-box p {
@@ -1357,11 +1353,6 @@ a.button:hover {
 .price-box .price {
   color: #0472ad;
   font-size: 16px;
-}
-
-.price-box .price,
-.price {
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
 }
 
 .price-box .price-label {
@@ -1764,7 +1755,6 @@ span.weee {
 }
 .pager .amount {
   float: left;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
   white-space: nowrap;
   margin: 0 15px 0 0;
 }
@@ -1812,7 +1802,6 @@ span.weee {
   height: 30px;
   padding: 0;
   color: #0472ad;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
 }
 
 .pages .current,
@@ -2150,7 +2139,6 @@ span.required:after {
   content: ' *';
   color: #df280a;
   font-weight: normal;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
   font-size: 12px;
 }
 
@@ -3363,7 +3351,6 @@ a.skip-link {
   font-size: 11px;
   line-height: 22px;
   text-align: center;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
 }
 
 .skip-link.skip-active .count {
@@ -3683,7 +3670,6 @@ p.product-name {
   text-rendering: optimizeLegibility;
   text-transform: uppercase;
   font-size: 13px;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
   font-weight: normal;
   line-height: 1.4;
 }
@@ -6031,7 +6017,6 @@ p.product-name a:hover {
   .cart-table .product-cart-price:before {
     font-weight: 500;
     font-size: 15px;
-    font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
   }
   .cart-table .cart-footer-actions {
     text-align: center;
@@ -6187,10 +6172,6 @@ p.product-name a:hover {
   font-size: 24px;
   padding: 2px 5px;
   vertical-align: top;
-}
-.cart .cart-totals table tfoot strong span,
-.cart .cart-totals table tfoot span.price {
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
 }
 .cart .cart-totals table tfoot strong {
   font-weight: 400;
@@ -8957,7 +8938,6 @@ div.paypal-logo span > img {
   list-style: none;
   margin-left: 0;
   font-style: normal;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
 }
 
 #accordion .toggle-tabs {

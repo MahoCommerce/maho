@@ -42,7 +42,7 @@
             <li>
                 <label for="current_password" class="required"><em>*</em><?= Mage::helper('core')->quoteEscape($this->__('Current Password')) ?></label>
                 <div class="input-box">
-                    <!-- This is a dummy hidden field to trick firefox from auto filling the password -->
+                    <!-- This is a dummy hidden field to trick firefox from automatically filling the password -->
                     <input type="text" class="input-text no-display" name="dummy" id="dummy" />
                     <input type="password" title="<?= Mage::helper('core')->quoteEscape($this->__('Current Password')) ?>" class="input-text required-entry" name="current_password" id="current_password" autocomplete="off" />
                 </div>
@@ -81,14 +81,13 @@
     </div>
 </form>
 <script type="text/javascript">
-//<![CDATA[
     var dataForm = new VarienForm('form-validate', true);
-    function setPasswordForm(arg){
-        $('password').up('li')[arg ? 'show': 'hide']();
+    function setPasswordForm(arg) {
+        const fieldset = document.querySelector('#password').closest('.fieldset');
+        fieldset.style.display = arg ? '' : 'none';
     }
 
     <?php if($this->getCustomer()->getChangePassword()): ?>
         setPasswordForm(true);
     <?php endif ?>
-//]]>
 </script>

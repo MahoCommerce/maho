@@ -7,17 +7,16 @@
  * @copyright   Copyright (c) 2023 The OpenMage Contributors (https://openmage.org)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+function taxToggle(detailsId, switcherId, expandedClassName) {
+    const detailsElement = document.getElementById(detailsId);
+    const switcherElement = document.getElementById(switcherId);
 
-function taxToggle(details, switcher, expandedClassName)
-{
-    var detailsElement = document.getElementById(details);
-    var switcherElement = document.getElementById(switcher);
-
-    if (detailsElement.style.display == 'none') {
-        detailsElement.style.display = 'block';
-        switcherElement.classList.add(expandedClassName);
-    } else {
-        detailsElement.style.display = 'none';
-        switcherElement.classList.remove(expandedClassName);
+    if (!detailsElement || !switcherElement) {
+        console.error('Required elements not found');
+        return;
     }
+
+    const isCurrentlyHidden = detailsElement.style.display === 'none';
+    detailsElement.style.display = isCurrentlyHidden ? 'block' : 'none';
+    switcherElement.classList.toggle(expandedClassName, isCurrentlyHidden);
 }
