@@ -22,7 +22,7 @@
         <?php $i=0; ?>
         <ul class="products-grid products-grid--max-<?= $_columnCount ?>-col-widget">
             <?php foreach ($_products->getItems() as $_product): ?>
-                <li class="item<?php if(($i-1)%$_columnCount==0): ?>>
+                <li class="item">
                     <?php $_imgSize = 210; ?>
                     <?php // The image size is locked at 210 for this for display purposes. CSS has it at 75% which should equate to 278px?>
                     <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($_product->getName(), null, true) ?>" class="product-image">
