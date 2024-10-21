@@ -313,7 +313,6 @@ const MenuManager = {
                     this.mouseEnterAction(e, target);
                 }
             });
-
             target.addEventListener('pointerleave', (e) => {
                 if (e.pointerType === 'mouse') {
                     this.mouseLeaveAction(e, target);
@@ -331,7 +330,6 @@ const MenuManager = {
             });
         });
 
-        // Handling touch scrolling
         window.addEventListener('touchstart', () => {
             this.TouchScroll.reset();
         });
