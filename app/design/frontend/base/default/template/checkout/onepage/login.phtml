@@ -42,7 +42,7 @@ $isAllowedGuestCheckout = $this->helper('checkout')->isAllowedGuestCheckout($thi
         <?php if ($isRegistrationAllowed && $isAllowedGuestCheckout): ?>
             <ul class="form-list">
                 <li class="control">
-                    <input type="radio" name="checkout_method" id="login:guest" value="guest"<?php if($this->getQuote()->getCheckoutMethod() == Mage_Checkout_Model_Type_Onepage::METHOD_GUEST): ?> checked="checked"<?php endif ?> class="radio" />
+                    <input type="radio" name="checkout_method" id="login:guest" value="guest"<?php if($this->getQuote()->getCheckoutMethod() != Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER): ?> checked="checked"<?php endif ?> class="radio" />
                     <label for="login:guest"><?= $this->__('Checkout as Guest') ?></label>
                 </li>
                 <li class="control">
