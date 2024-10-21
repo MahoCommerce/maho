@@ -9,134 +9,133 @@
  * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-VarienForm = Class.create();
-VarienForm.prototype = {
-    initialize: function(formId, firstFieldFocus){
-        this.form       = $(formId);
+class VarienForm {
+    constructor(formId, firstFieldFocus) {
+        this.form = document.getElementById(formId);
         if (!this.form) {
             return;
         }
-        this.cache      = $A();
+        this.cache = new Map();
         this.currLoader = false;
         this.currDataIndex = false;
-        this.validator      = new Validation(this.form);
-        this.elementFocus   = this.elementOnFocus.bindAsEventListener(this);
-        this.elementBlur    = this.elementOnBlur.bindAsEventListener(this);
-        this.childLoader    = this.onChangeChildLoad.bindAsEventListener(this);
+        this.validator = new Validation(this.form);
+        this.elementFocus = this.elementOnFocus.bind(this);
+        this.elementBlur = this.elementOnBlur.bind(this);
+        this.childLoader = this.onChangeChildLoad.bind(this);
         this.highlightClass = 'highlight';
         this.extraChildParams = '';
-        this.firstFieldFocus= firstFieldFocus || false;
+        this.firstFieldFocus = firstFieldFocus || false;
         this.bindElements();
-        if(this.firstFieldFocus){
-            try{
-                Form.Element.focus(Form.findFirstElement(this.form));
+        if (this.firstFieldFocus) {
+            try {
+                const firstElement = this.form.elements[0];
+                if (firstElement) {
+                    firstElement.focus();
+                }
+            } catch(e) {
+                console.error('Error focusing on first element:', e);
             }
-            catch(e){}
         }
-    },
+    }
 
-    submit : function(url){
-        if(this.validator && this.validator.validate()){
-             this.form.submit();
+    submit(url) {
+        if (this.validator && this.validator.validate()) {
+            this.form.submit();
         }
         return false;
-    },
+    }
 
-    bindElements:function (){
-        var elements = Form.getElements(this.form);
-        for (var row in elements) {
-            if (elements[row].id) {
-                Event.observe(elements[row],'focus',this.elementFocus);
-                Event.observe(elements[row],'blur',this.elementBlur);
+    bindElements() {
+        const elements = this.form.elements;
+        for (let element of elements) {
+            if (element.id) {
+                element.addEventListener('focus', this.elementFocus);
+                element.addEventListener('blur', this.elementBlur);
             }
         }
-    },
+    }
 
-    elementOnFocus: function(event){
-        var element = Event.findElement(event, 'fieldset');
-        if(element){
-            Element.addClassName(element, this.highlightClass);
+    elementOnFocus(event) {
+        const element = event.target.closest('fieldset');
+        if (element) {
+            element.classList.add(this.highlightClass);
         }
-    },
+    }
 
-    elementOnBlur: function(event){
-        var element = Event.findElement(event, 'fieldset');
-        if(element){
-            Element.removeClassName(element, this.highlightClass);
+    elementOnBlur(event) {
+        const element = event.target.closest('fieldset');
+        if (element) {
+            element.classList.remove(this.highlightClass);
         }
-    },
+    }
 
-    setElementsRelation: function(parent, child, dataUrl, first){
-        if (parent=$(parent)) {
-            // TODO: array of relation and caching
-            if (!this.cache[parent.id]){
-                this.cache[parent.id] = $A();
-                this.cache[parent.id]['child']     = child;
-                this.cache[parent.id]['dataUrl']   = dataUrl;
-                this.cache[parent.id]['data']      = $A();
-                this.cache[parent.id]['first']      = first || false;
+    setElementsRelation(parent, child, dataUrl, first) {
+        const parentElement = document.getElementById(parent);
+        if (parentElement) {
+            if (!this.cache.has(parentElement.id)) {
+                this.cache.set(parentElement.id, {
+                    child: child,
+                    dataUrl: dataUrl,
+                    data: new Map(),
+                    first: first || false
+                });
             }
-            Event.observe(parent,'change',this.childLoader);
+            parentElement.addEventListener('change', this.childLoader);
         }
-    },
+    }
 
-    onChangeChildLoad: function(event){
-        element = Event.element(event);
+    onChangeChildLoad(event) {
+        const element = event.target;
         this.elementChildLoad(element);
-    },
+    }
 
-    elementChildLoad: function(element, callback){
+    elementChildLoad(element, callback) {
         this.callback = callback || false;
         if (element.value) {
             this.currLoader = element.id;
             this.currDataIndex = element.value;
-            if (this.cache[element.id]['data'][element.value]) {
-                this.setDataToChild(this.cache[element.id]['data'][element.value]);
-            }
-            else{
-                new Ajax.Request(this.cache[this.currLoader]['dataUrl'],{
-                        method: 'post',
-                        parameters: {"parent":element.value},
-                        onComplete: this.reloadChildren.bind(this)
-                });
+            const cacheData = this.cache.get(element.id);
+            if (cacheData.data.has(element.value)) {
+                this.setDataToChild(cacheData.data.get(element.value));
+            } else {
+                fetch(cacheData.dataUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `parent=${encodeURIComponent(element.value)}`
+                })
+                    .then(response => response.json())
+                    .then(data => this.reloadChildren(data))
+                    .catch(error => console.error('Error:', error));
             }
         }
-    },
+    }
 
-    reloadChildren: function(transport){
-        var data = transport.responseJSON || transport.responseText.evalJSON(true) || {};
-        this.cache[this.currLoader]['data'][this.currDataIndex] = data;
+    reloadChildren(data) {
+        const cacheData = this.cache.get(this.currLoader);
+        cacheData.data.set(this.currDataIndex, data);
         this.setDataToChild(data);
-    },
+    }
 
-    setDataToChild: function(data){
-        if (data.length) {
-            var child = $(this.cache[this.currLoader]['child']);
-            if (child){
-                var html = '<select name="'+child.name+'" id="'+child.id+'" class="'+child.className+'" title="'+child.title+'" '+this.extraChildParams+'>';
-                if(this.cache[this.currLoader]['first']){
-                    html+= '<option value="">'+this.cache[this.currLoader]['first']+'</option>';
+    setDataToChild(data) {
+        const cacheData = this.cache.get(this.currLoader);
+        const child = document.getElementById(cacheData.child);
+        if (child) {
+            if (data.length) {
+                let html = `<select name="${child.name}" id="${child.id}" class="${child.className}" title="${child.title}" ${this.extraChildParams}>`;
+                if (cacheData.first) {
+                    html += `<option value="">${cacheData.first}</option>`;
                 }
-                for (var i in data){
-                    if(data[i].value) {
-                        html+= '<option value="'+data[i].value+'"';
-                        if(child.value && (child.value == data[i].value || child.value == data[i].label)){
-                            html+= ' selected';
-                        }
-                        html+='>'+data[i].label+'</option>';
+                for (let item of data) {
+                    if (item.value) {
+                        html += `<option value="${item.value}"${(child.value && (child.value == item.value || child.value == item.label)) ? ' selected' : ''}>${item.label}</option>`;
                     }
                 }
-                html+= '</select>';
-                Element.insert(child, {before: html});
-                Element.remove(child);
-            }
-        }
-        else{
-            var child = $(this.cache[this.currLoader]['child']);
-            if (child){
-                var html = '<input type="text" name="'+child.name+'" id="'+child.id+'" class="'+child.className+'" title="'+child.title+'" '+this.extraChildParams+'>';
-                Element.insert(child, {before: html});
-                Element.remove(child);
+                html += '</select>';
+                child.outerHTML = html;
+            } else {
+                child.outerHTML = `<input type="text" name="${child.name}" id="${child.id}" class="${child.className}" title="${child.title}" ${this.extraChildParams}>`;
             }
         }
 
@@ -145,97 +144,66 @@ VarienForm.prototype = {
             this.callback();
         }
     }
-};
+}
 
-RegionUpdater = Class.create();
-RegionUpdater.prototype = {
-    initialize: function (countryEl, regionTextEl, regionSelectEl, regions, disableAction, zipEl){
-        this.countryEl = $(countryEl);
-        this.regionTextEl = $(regionTextEl);
-        this.regionSelectEl = $(regionSelectEl);
-        this.zipEl = $(zipEl);
-        this.config = regions['config'];
+class RegionUpdater {
+    constructor(countryEl, regionTextEl, regionSelectEl, regions, disableAction, zipEl) {
+        this.countryEl = document.getElementById(countryEl);
+        this.regionTextEl = document.getElementById(regionTextEl);
+        this.regionSelectEl = document.getElementById(regionSelectEl);
+        this.zipEl = document.getElementById(zipEl);
+        this.config = regions.config;
         delete regions.config;
         this.regions = regions;
 
-        this.disableAction = (typeof disableAction=='undefined') ? 'hide' : disableAction;
-        this.zipOptions = (typeof zipOptions=='undefined') ? false : zipOptions;
+        this.disableAction = (typeof disableAction === 'undefined') ? 'hide' : disableAction;
+        this.zipOptions = (typeof zipOptions === 'undefined') ? false : zipOptions;
 
-        if (this.regionSelectEl.options.length<=1) {
+        if (this.regionSelectEl.options.length <= 1) {
             this.update();
         }
 
-        Event.observe(this.countryEl, 'change', this.update.bind(this));
-    },
+        this.countryEl.addEventListener('change', this.update.bind(this));
+    }
 
-    _checkRegionRequired: function(){
-        var label, wildCard;
-        var elements = [this.regionTextEl, this.regionSelectEl];
-        var that = this;
-        if (typeof this.config == 'undefined') {
+    _checkRegionRequired() {
+        if (typeof this.config === 'undefined') {
             return;
         }
-        var regionRequired = this.config.regions_required.indexOf(this.countryEl.value) >= 0;
+        const regionRequired = this.config.regions_required.indexOf(this.countryEl.value) >= 0;
+        const elements = [this.regionTextEl, this.regionSelectEl];
 
-        elements.each(function(currentElement) {
+        elements.forEach(currentElement => {
             if (typeof Validation !== 'undefined') {
                 Validation.reset(currentElement);
             }
-            label = $$('label[for="' + currentElement.id + '"]')[0];
+            const label = document.querySelector(`label[for="${currentElement.id}"]`);
             if (label) {
-                wildCard = label.down('em') || label.down('span.required');
+                let wildCard = label.querySelector('em') || label.querySelector('span.required');
                 if (!wildCard) {
-                    label.insert(' <span class="required">*</span>');
-                    wildCard = label.down('span.required');
+                    label.insertAdjacentHTML('beforeend', ' <span class="required">*</span>');
+                    wildCard = label.querySelector('span.required');
                 }
-                if (!that.config.show_all_regions) {
-                    if (regionRequired) {
-                        label.up().show();
-                    } else {
-                        label.up().hide();
-                    }
+                if (!this.config.show_all_regions) {
+                    label.parentElement.style.display = regionRequired ? '' : 'none';
+                }
+
+                if (wildCard) {
+                    wildCard.style.display = regionRequired ? '' : 'none';
+                    label.classList.toggle('required', regionRequired);
                 }
             }
 
-            if (label && wildCard) {
-                if (!regionRequired) {
-                    wildCard.hide();
-                    if (label.hasClassName('required')) {
-                        label.removeClassName('required');
-                    }
-                } else if (regionRequired) {
-                    wildCard.show();
-                    if (!label.hasClassName('required')) {
-                        label.addClassName('required');
-                    }
-                }
-            }
-
-            if (!regionRequired) {
-                if (currentElement.hasClassName('required-entry')) {
-                    currentElement.removeClassName('required-entry');
-                }
-                if ('select' == currentElement.tagName.toLowerCase() &&
-                    currentElement.hasClassName('validate-select')) {
-                    currentElement.removeClassName('validate-select');
-                }
-            } else {
-                if (!currentElement.hasClassName('required-entry')) {
-                    currentElement.addClassName('required-entry');
-                }
-                if ('select' == currentElement.tagName.toLowerCase() &&
-                    !currentElement.hasClassName('validate-select')) {
-                    currentElement.addClassName('validate-select');
-                }
+            currentElement.classList.toggle('required-entry', regionRequired);
+            if (currentElement.tagName.toLowerCase() === 'select') {
+                currentElement.classList.toggle('validate-select', regionRequired);
             }
         });
-    },
+    }
 
-    update: function(){
+    update() {
         if (this.regions[this.countryEl.value]) {
-            var i, option, region, def;
-
-            def = this.regionSelectEl.getAttribute('defaultValue');
+            let def = this.regionSelectEl.getAttribute('defaultValue');
             if (this.regionTextEl) {
                 if (!def) {
                     def = this.regionTextEl.value.toLowerCase();
@@ -243,23 +211,19 @@ RegionUpdater.prototype = {
                 this.regionTextEl.value = '';
             }
 
-            this.regionSelectEl.options.length = 1;
-            for (regionId in this.regions[this.countryEl.value]) {
-                region = this.regions[this.countryEl.value][regionId];
-
-                option = document.createElement('OPTION');
+            this.regionSelectEl.innerHTML = '<option value="">Please select a region, state or province.</option>';
+            for (let regionId in this.regions[this.countryEl.value]) {
+                const region = this.regions[this.countryEl.value][regionId];
+                const option = document.createElement('option');
                 option.value = regionId;
-                option.text = region.name.stripTags();
+                option.textContent = region.name;
                 option.title = region.name;
 
-                if (this.regionSelectEl.options.add) {
-                    this.regionSelectEl.options.add(option);
-                } else {
-                    this.regionSelectEl.appendChild(option);
-                }
+                this.regionSelectEl.appendChild(option);
 
-                if (regionId == def || (region.name && region.name.toLowerCase() == def)
-                    || (region.name && region.code.toLowerCase() == def)
+                if (regionId == def ||
+                    (region.name && region.name.toLowerCase() == def) ||
+                    (region.name && region.code.toLowerCase() == def)
                 ) {
                     this.regionSelectEl.value = regionId;
                 }
@@ -269,7 +233,6 @@ RegionUpdater.prototype = {
                 if (this.regionTextEl) {
                     this.regionTextEl.style.display = 'none';
                 }
-
                 this.regionSelectEl.style.display = '';
             } else if (this.disableAction == 'disable') {
                 if (this.regionTextEl) {
@@ -279,7 +242,7 @@ RegionUpdater.prototype = {
             }
             this.setMarkDisplay(this.regionSelectEl, true);
         } else {
-            this.regionSelectEl.options.length = 1;
+            this.regionSelectEl.innerHTML = '<option value="">Please select a region, state or province.</option>';
             this.sortSelect();
             if (this.disableAction == 'hide') {
                 if (this.regionTextEl) {
@@ -295,9 +258,8 @@ RegionUpdater.prototype = {
                 }
                 this.regionSelectEl.disabled = true;
             } else if (this.disableAction == 'nullify') {
-                this.regionSelectEl.options.length = 1;
+                this.regionSelectEl.innerHTML = '<option value="">Please select a region, state or province.</option>';
                 this.regionSelectEl.value = '';
-                this.regionSelectEl.selectedIndex = 0;
                 this.lastCountryId = '';
             }
             this.setMarkDisplay(this.regionSelectEl, false);
@@ -305,67 +267,57 @@ RegionUpdater.prototype = {
 
         this._checkRegionRequired();
         // Make Zip and its label required/optional
-        var zipUpdater = new ZipUpdater(this.countryEl.value, this.zipEl);
+        const zipUpdater = new ZipUpdater(this.countryEl.value, this.zipEl);
         zipUpdater.update();
-    },
+    }
 
-    setMarkDisplay: function(elem, display){
-        elem = $(elem);
-        var labelElement = elem.up(0).down('label > span.required') ||
-                           elem.up(1).down('label > span.required') ||
-                           elem.up(0).down('label.required > em') ||
-                           elem.up(1).down('label.required > em');
-        if(labelElement) {
-            inputElement = labelElement.up().next('input');
+    setMarkDisplay(elem, display) {
+        const labelElement = elem.closest('div').querySelector('label > span.required') ||
+            elem.closest('div').querySelector('label.required > em');
+        if (labelElement) {
+            const inputElement = labelElement.closest('label').nextElementSibling;
             if (display) {
-                labelElement.show();
+                labelElement.style.display = '';
                 if (inputElement) {
-                    inputElement.addClassName('required-entry');
+                    inputElement.classList.add('required-entry');
                 }
             } else {
-                labelElement.hide();
+                labelElement.style.display = 'none';
                 if (inputElement) {
-                    inputElement.removeClassName('required-entry');
+                    inputElement.classList.remove('required-entry');
                 }
             }
         }
-    },
-
-    sortSelect: function () {
-        var elem = this.regionSelectEl;
-        var tmpArray = new Array();
-        var currentVal = $(elem).value;
-        for (var i = 0; i < $(elem).options.length; i++) {
-            if (i == 0) {
-                continue;
-            }
-            tmpArray[i-1] = new Array();
-            tmpArray[i-1][0] = $(elem).options[i].text;
-            tmpArray[i-1][1] = $(elem).options[i].value;
-        }
-        tmpArray.sort();
-        for (var i = 1; i <= tmpArray.length; i++) {
-            var op = new Option(tmpArray[i-1][0], tmpArray[i-1][1]);
-            $(elem).options[i] = op;
-        }
-        $(elem).value = currentVal;
-        return;
     }
-};
 
-ZipUpdater = Class.create();
-ZipUpdater.prototype = {
-    initialize: function(country, zipElement){
+    sortSelect() {
+        const elem = this.regionSelectEl;
+        const tmpArray = Array.from(elem.options)
+            .slice(1)
+            .map(option => [option.text, option.value])
+            .sort((a, b) => a[0].localeCompare(b[0]));
+
+        const currentVal = elem.value;
+        elem.innerHTML = '<option value="">Please select a region, state or province.</option>';
+        tmpArray.forEach(([text, value]) => {
+            const option = new Option(text, value);
+            elem.add(option);
+        });
+        elem.value = currentVal;
+    }
+}
+
+class ZipUpdater {
+    constructor(country, zipElement) {
         this.country = country;
-        this.zipElement = $(zipElement);
-    },
+        this.zipElement = document.getElementById(zipElement);
+    }
 
-    update: function(){
+    update() {
         // Country ISO 2-letter codes must be pre-defined
-        if (typeof optionalZipCountries == 'undefined') {
+        if (typeof optionalZipCountries === 'undefined') {
             return false;
         }
-
         // Ajax-request and normal content load compatibility
         if (this.zipElement != undefined) {
             if (typeof Validation !== 'undefined') {
@@ -373,45 +325,41 @@ ZipUpdater.prototype = {
             }
             this._setPostcodeOptional();
         } else {
-            Event.observe(window, "load", this._setPostcodeOptional.bind(this));
+            window.addEventListener("load", this._setPostcodeOptional.bind(this));
         }
-    },
+    }
 
-    _setPostcodeOptional: function(){
-        this.zipElement = $(this.zipElement);
+    _setPostcodeOptional() {
         if (this.zipElement === undefined) {
             return false;
         }
-
         // find label
-        var label = $$('label[for="' + this.zipElement.id + '"]')[0];
-        if (label !== undefined) {
-            var wildCard = label.down('em') || label.down('span.required');
+        const label = document.querySelector(`label[for="${this.zipElement.id}"]`);
+        let wildCard;
+        if (label !== null) {
+            wildCard = label.querySelector('em') || label.querySelector('span.required');
             if (!wildCard) {
-                label.insert(' <span class="required">*</span>');
-                wildCard = label.down('span.required');
+                label.insertAdjacentHTML('beforeend', ' <span class="required">*</span>');
+                wildCard = label.querySelector('span.required');
             }
         }
-
         // Make Zip and its label required/optional
         if (optionalZipCountries.indexOf(this.country) != -1) {
-            if (label !== undefined && label.hasClassName('required')) {
-                label.removeClassName('required');
+            if (label !== null) {
+                label.classList.remove('required');
             }
-            while (this.zipElement.hasClassName('required-entry')) {
-                this.zipElement.removeClassName('required-entry');
-            }
+            this.zipElement.classList.remove('required-entry');
             if (wildCard !== undefined) {
-                wildCard.hide();
+                wildCard.style.display = 'none';
             }
         } else {
-            if (label !== undefined && !label.hasClassName('required')) {
-                label.addClassName('required');
+            if (label !== null) {
+                label.classList.add('required');
             }
-            this.zipElement.addClassName('required-entry');
+            this.zipElement.classList.add('required-entry');
             if (wildCard !== undefined) {
-                wildCard.show();
+                wildCard.style.display = '';
             }
         }
     }
-};
+}
