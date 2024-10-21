@@ -330,10 +330,10 @@ class ZipUpdater {
     }
 
     _setPostcodeOptional() {
-        if (this.zipElement === undefined) {
+        if (!this.zipElement) {
             return false;
         }
-        // find label
+
         const label = document.querySelector(`label[for="${this.zipElement.id}"]`);
         let wildCard;
         if (label !== null) {
@@ -343,6 +343,7 @@ class ZipUpdater {
                 wildCard = label.querySelector('span.required');
             }
         }
+
         // Make Zip and its label required/optional
         if (optionalZipCountries.indexOf(this.country) != -1) {
             if (label !== null) {
