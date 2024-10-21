@@ -62,12 +62,16 @@ class Validation {
     };
 
     constructor(form, options = {}) {
+        if (typeof form === 'string') {
+            form = document.getElementById(form);
+        }
+        if (!form) {
+            return false;
+        }
+
         this.form = form;
         this.options = { ...Validation.defaultOptions, ...options };
-
-        if (this.options.onSubmit) {
-            this.form.addEventListener('submit', this.onSubmit.bind(this));
-        }
+        this.form.addEventListener('submit', this.onSubmit.bind(this));
 
         if (this.options.immediate) {
             const elements = [...this.form.getElementsByTagName('input'), ...this.form.getElementsByTagName('select')];
