@@ -180,10 +180,32 @@ class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
     }
 
     /**
-     * Return extra EAV fields used in this form
+     * Return all EAV fields used in this form as groups
      */
-    public function getExtraFields(): array
+    public function getGroupedFields(): array
     {
-        return Mage::helper('customer')->getExtraFields('customer_account_create');
+        return Mage::helper('customer')->getGroupedFields('customer_account_create');
+    }
+
+    /**
+     * Return all EAV fields used in this form as groups
+     */
+    public function getGroupedFieldsAddress(): array
+    {
+        $customerFields = $this->getGroupedFields();
+        $addressFields = Mage::helper('customer/address')->getGroupedFields('customer_address_edit');
+
+        foreach ($addressFields as $group => $fields) {
+            foreach (array_keys($fields) as $code) {
+                if (isset($customerFields[$group][$code])) {
+                    unset($addressFields[$group][$code]);
+                }
+            }
+            if (empty($addressFields[$group])) {
+                unset($addressFields[$group]);
+            }
+        }
+
+        return $addressFields;
     }
 }
