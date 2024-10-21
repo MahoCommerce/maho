@@ -35,6 +35,17 @@
                     </store_not_exists>
                 </faults>
             </core_store>
+            <core_maho translate="title" module="core">
+                <model>core/maho_api</model>
+                <title>Maho info API</title>
+                <acl>core/magento</acl>
+                <methods>
+                    <info translate="title" module="core">
+                        <title>Get info about current Maho installation</title>
+                        <acl>core/magento/info</acl>
+                    </info>
+                </methods>
+            </core_maho>
             <core_magento translate="title" module="core">
                 <model>core/magento_api</model>
                 <title>Maho info API</title>
@@ -49,11 +60,13 @@
         </resources>
         <resources_alias>
             <store>core_store</store>
+            <maho>core_maho</maho>
             <magento>core_magento</magento>
         </resources_alias>
         <v2>
             <resources_function_prefix>
                 <store>store</store>
+                <maho>maho</maho>
                 <magento>magento</magento>
             </resources_function_prefix>
         </v2>
