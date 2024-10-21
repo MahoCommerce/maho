@@ -22,10 +22,11 @@
                     </restriction>
                 </complexContent>
             </complexType>
-            <complexType name="magentoInfoEntity">
+            <complexType name="mahoInfoEntity">
                 <all>
-                    <element name="magento_version" type="xsd:string" />
-                    <element name="magento_edition" type="xsd:string" />
+                    <element name="maho_version" type="xsd:string" />
+                    <element name="magento_version" type="xsd:string" minOccurs="0" />
+                    <element name="magento_edition" type="xsd:string" minOccurs="0" />
                 </all>
             </complexType>
         </schema>
@@ -36,11 +37,11 @@
     <message name="storeListResponse">
         <part name="stores" type="typens:storeEntityArray" />
     </message>
-    <message name="magentoInfoRequest">
+    <message name="mahoInfoRequest">
         <part name="sessionId" type="xsd:string" />
     </message>
-    <message name="magentoInfoResponse">
-        <part name="info" type="typens:magentoInfoEntity" />
+    <message name="mahoInfoResponse">
+        <part name="info" type="typens:mahoInfoEntity" />
     </message>
     <message name="storeInfoRequest">
         <part name="sessionId" type="xsd:string" />
@@ -60,10 +61,15 @@
             <input message="typens:storeInfoRequest" />
             <output message="typens:storeInfoResponse" />
         </operation>
-        <operation name="magentoInfo">
+        <operation name="mahoInfo">
             <documentation>Info about current Maho installation</documentation>
-            <input message="typens:magentoInfoRequest" />
-            <output message="typens:magentoInfoResponse" />
+            <input message="typens:mahoInfoRequest" />
+            <output message="typens:mahoInfoResponse" />
+        </operation>
+        <operation name="magentoInfo">
+            <documentation>(deprecated) Info about current Magento installation</documentation>
+            <input message="typens:mahoInfoRequest" />
+            <output message="typens:mahoInfoResponse" />
         </operation>
     </portType>
     <binding name="{{var wsdl.handler}}Binding" type="typens:{{var wsdl.handler}}PortType">
@@ -78,6 +84,15 @@
             </output>
         </operation>
         <operation name="storeInfo">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+        <operation name="mahoInfo">
             <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
             <input>
                 <soap:body namespace="urn:Maho" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
