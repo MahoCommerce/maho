@@ -667,8 +667,8 @@ Validation.addAllThese([
     }],
     ['validate-cc-number', 'Please enter a valid credit card number.', (v, elm) => {
         const ccTypeContainer = document.getElementById(elm.id.substr(0, elm.id.indexOf('_cc_number')) + '_cc_type');
-        if (ccTypeContainer && typeof Validation.creditCartTypes.get(ccTypeContainer.value) != 'undefined'
-            && Validation.creditCartTypes.get(ccTypeContainer.value)[2] == false) {
+        if (ccTypeContainer && typeof Validation.creditCartTypes[ccTypeContainer.value] != 'undefined'
+            && Validation.creditCartTypes[ccTypeContainer.value][2] == false) {
             if (!Validation.get('IsEmpty').test(v) && Validation.get('validate-digits').test(v)) {
                 return true;
             } else {
@@ -680,23 +680,19 @@ Validation.addAllThese([
     ['validate-cc-type', 'Credit card number does not match credit card type.', (v, elm) => {
         elm.value = removeDelimiters(elm.value);
         v = removeDelimiters(v);
-
         const ccTypeContainer = document.getElementById(elm.id.substr(0, elm.id.indexOf('_cc_number')) + '_cc_type');
         if (!ccTypeContainer) {
             return true;
         }
         const ccType = ccTypeContainer.value;
-
-        if (typeof Validation.creditCartTypes.get(ccType) == 'undefined') {
+        if (typeof Validation.creditCartTypes[ccType] == 'undefined') {
             return false;
         }
-
-        if (Validation.creditCartTypes.get(ccType)[0] == false) {
+        if (Validation.creditCartTypes[ccType][0] == false) {
             return true;
         }
-
         let validationFailure = false;
-        Validation.creditCartTypes.forEach((value, key) => {
+        Object.entries(Validation.creditCartTypes).forEach(([key, value]) => {
             if (key == ccType) {
                 if (value[0] && !v.match(value[0])) {
                     validationFailure = true;
@@ -704,15 +700,12 @@ Validation.addAllThese([
                 return;
             }
         });
-
         if (validationFailure) {
             return false;
         }
-
         if (ccTypeContainer.classList.contains('validation-failed') && Validation.isOnChange) {
             Validation.validate(ccTypeContainer);
         }
-
         return true;
     }],
     ['validate-cc-type-select', 'Card type does not match credit card number.', (v, elm) => {
@@ -742,17 +735,13 @@ Validation.addAllThese([
             return true;
         }
         const ccType = ccTypeContainer.value;
-
-        if (typeof Validation.creditCartTypes.get(ccType) == 'undefined') {
+        if (typeof Validation.creditCartTypes[ccType] == 'undefined') {
             return false;
         }
-
-        const re = Validation.creditCartTypes.get(ccType)[1];
-
+        const re = Validation.creditCartTypes[ccType][1];
         if (v.match(re)) {
             return true;
         }
-
         return false;
     }],
     ['validate-ajax', '', v => true],
@@ -894,7 +883,7 @@ function validateCreditCard(input) {
  * 2 - check or not credit card number trough Luhn algorithm by
  *     function validateCreditCard which you can find above in this file
  */
-Validation.creditCartTypes = $H({
+Validation.creditCartTypes = {
     'SO': [new RegExp('^(6334[5-9]([0-9]{11}|[0-9]{13,14}))|(6767([0-9]{12}|[0-9]{14,15}))$'), new RegExp('^([0-9]{3}|[0-9]{4})?$'), true],
     'VI': [new RegExp('^4[0-9]{12}([0-9]{3})?$'), new RegExp('^[0-9]{3}$'), true],
     'MC': [new RegExp('^(5[1-5][0-9]{14}|2(22[1-9][0-9]{12}|2[3-9][0-9]{13}|[3-6][0-9]{14}|7[0-1][0-9]{13}|720[0-9]{12}))$'), new RegExp('^[0-9]{3}$'), true],
@@ -904,4 +893,4 @@ Validation.creditCartTypes = $H({
     'DICL': [new RegExp('^(30[0-5][0-9]{13}|3095[0-9]{12}|35(2[8-9][0-9]{12}|[3-8][0-9]{13})|36[0-9]{12}|3[8-9][0-9]{14}|6011(0[0-9]{11}|[2-4][0-9]{11}|74[0-9]{10}|7[7-9][0-9]{10}|8[6-9][0-9]{10}|9[0-9]{11})|62(2(12[6-9][0-9]{10}|1[3-9][0-9]{11}|[2-8][0-9]{12}|9[0-1][0-9]{11}|92[0-5][0-9]{10})|[4-6][0-9]{13}|8[2-8][0-9]{12})|6(4[4-9][0-9]{13}|5[0-9]{14}))$'), new RegExp('^[0-9]{3}$'), true],
     'SM': [new RegExp('(^(5[0678])[0-9]{11,18}$)|(^(6[^05])[0-9]{11,18}$)|(^(601)[^1][0-9]{9,16}$)|(^(6011)[0-9]{9,11}$)|(^(6011)[0-9]{13,16}$)|(^(65)[0-9]{11,13}$)|(^(65)[0-9]{15,18}$)|(^(49030)[2-9]([0-9]{10}$|[0-9]{12,13}$))|(^(49033)[5-9]([0-9]{10}$|[0-9]{12,13}$))|(^(49110)[1-2]([0-9]{10}$|[0-9]{12,13}$))|(^(49117)[4-9]([0-9]{10}$|[0-9]{12,13}$))|(^(49118)[0-2]([0-9]{10}$|[0-9]{12,13}$))|(^(4936)([0-9]{12}$|[0-9]{14,15}$))'), new RegExp('^([0-9]{3}|[0-9]{4})?$'), true],
     'OT': [false, new RegExp('^([0-9]{3}|[0-9]{4})?$'), false]
-});
+};
