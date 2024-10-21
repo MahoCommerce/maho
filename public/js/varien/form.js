@@ -1,11 +1,12 @@
 /**
  * Maho
  *
- * @category    Varien
- * @package     js
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * @category   Varien
+ * @package    js
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 VarienForm = Class.create();
@@ -18,9 +19,7 @@ VarienForm.prototype = {
         this.cache      = $A();
         this.currLoader = false;
         this.currDataIndex = false;
-        if (typeof Validation === 'function') {
-            this.validator  = new Validation(this.form);
-        }
+        this.validator      = new Validation(this.form);
         this.elementFocus   = this.elementOnFocus.bindAsEventListener(this);
         this.elementBlur    = this.elementOnBlur.bindAsEventListener(this);
         this.childLoader    = this.onChangeChildLoad.bindAsEventListener(this);
