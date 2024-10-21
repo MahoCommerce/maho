@@ -815,37 +815,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // Since the number of columns per grid will vary based on the viewport size, the only way to align the action
     // buttons/links is via JS
 
-    if (document.querySelector('.products-grid')) {
-        var alignProductGridActions = function () {
-            // Loop through each product grid on the page
-            document.querySelectorAll('.products-grid').forEach(grid => {
+    if (document.querySelectorAll('.products-grid').length) {
+        const alignProductGridActions = function () {
+            document.querySelectorAll('.products-grid').forEach(function(grid) {
                 const gridRows = [];
                 let tempRow = [];
-                const productGridElements = Array.from(grid.children);
+                const productGridElements = grid.children;
 
-                productGridElements.forEach((element, index) => {
-                    const computedStyle = window.getComputedStyle(element);
-                    if (computedStyle.clear !== 'none' && index !== 0) {
+                Array.from(productGridElements).forEach(function (element, index) {
+                    if (window.getComputedStyle(element).clear != 'none' && index != 0) {
                         gridRows.push(tempRow);
                         tempRow = [];
                     }
                     tempRow.push(element);
-                    if (index === productGridElements.length - 1) {
+                    if (productGridElements.length == index + 1) {
                         gridRows.push(tempRow);
                     }
                 });
 
-                gridRows.forEach(row => {
+                gridRows.forEach(function (row) {
                     let tallestProductInfo = 0;
-
-                    row.forEach(cell => {
+                    row.forEach(function (cell) {
                         const productInfo = cell.querySelector('.product-info');
                         const actions = cell.querySelector('.product-info .actions');
 
                         productInfo.style.minHeight = '';
                         productInfo.style.paddingBottom = '';
 
-                        const productInfoHeight = productInfo.offsetHeight;
+                        const productInfoHeight = productInfo.clientHeight - actions.offsetHeight;
                         const actionSpacing = 10;
                         const actionHeight = actions.offsetHeight;
                         const totalHeight = productInfoHeight + actionSpacing + actionHeight;
@@ -853,23 +850,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (totalHeight > tallestProductInfo) {
                             tallestProductInfo = totalHeight;
                         }
-
-                        productInfo.style.paddingBottom = `${actionHeight}px`;
                     });
 
-                    row.forEach(cell => {
-                        cell.querySelector('.product-info').style.minHeight = `${tallestProductInfo}px`;
+                    row.forEach(function (cell) {
+                        const productInfo = cell.querySelector('.product-info');
+                        const actions = cell.querySelector('.product-info .actions');
+
+                        productInfo.style.minHeight = `${tallestProductInfo}px`;
+                        productInfo.style.paddingBottom = `${actions.offsetHeight}px`;
                     });
                 });
             });
         };
+
+        // Run the alignment function initially
         alignProductGridActions();
 
-        // Since the height of each cell and the number of columns per page may change when the page is resized, we are
-        // going to run the alignment function each time the page is resized.
-        window.addEventListener('delayed-resize', (e) => {
-            alignProductGridActions();
-        });
+        // Run the alignment function on window resize
+        window.addEventListener('delayed-resize', alignProductGridActions);
     }
 
     // ==============================================
