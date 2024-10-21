@@ -38,11 +38,11 @@
             <core_maho translate="title" module="core">
                 <model>core/maho_api</model>
                 <title>Maho info API</title>
-                <acl>core/magento</acl>
+                <acl>core/maho</acl>
                 <methods>
                     <info translate="title" module="core">
                         <title>Get info about current Maho installation</title>
-                        <acl>core/magento/info</acl>
+                        <acl>core/maho/info</acl>
                     </info>
                 </methods>
             </core_maho>
@@ -88,10 +88,16 @@
                             <title>List of stores</title>
                         </list>
                     </store>
-                    <magento translate="title" module="core">
+                    <maho translate="title" module="core">
                         <title>Maho info</title>
                         <info translate="title" module="core">
                             <title>Retrieve info about current Maho installation</title>
+                        </info>
+                    </maho>
+                    <magento translate="title" module="core">
+                        <title>Magento info</title>
+                        <info translate="title" module="core">
+                            <title>(deprecated) Retrieve info about current Magento installation</title>
                         </info>
                     </magento>
                 </core>

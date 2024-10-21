@@ -19,4 +19,19 @@
  */
 class Mage_Core_Model_Magento_Api extends Mage_Core_Model_Maho_Api
 {
+    /**
+     * Retrieve information about the current Maho installation
+     *
+     * @return array
+     */
+    public function info()
+    {
+        Mage::log('Deprecated API call to magentoInfo, use mahoInfo instead');
+
+        $result = parent::info();
+        $result['magento_version'] = Mage::getVersion();
+        $result['magento_edition'] = Mage::getEdition();
+
+        return $result;
+    }
 }

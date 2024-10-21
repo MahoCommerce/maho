@@ -25,6 +25,8 @@
             <complexType name="mahoInfoEntity">
                 <all>
                     <element name="maho_version" type="xsd:string" />
+                    <element name="magento_version" type="xsd:string" minOccurs="0" />
+                    <element name="magento_edition" type="xsd:string" minOccurs="0" />
                 </all>
             </complexType>
         </schema>
@@ -65,7 +67,7 @@
             <output message="typens:mahoInfoResponse" />
         </operation>
         <operation name="magentoInfo">
-            <documentation>(deprecated) Alias of mahoInfo</documentation>
+            <documentation>(deprecated) Info about current Magento installation</documentation>
             <input message="typens:mahoInfoRequest" />
             <output message="typens:mahoInfoResponse" />
         </operation>
