@@ -39,15 +39,4 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Number extends Mage_Admin
         }
         return $this->getColumn()->getDefault();
     }
-
-    /**
-     * Renders CSS
-     *
-     * @return string
-     */
-    #[\Override]
-    public function renderCss()
-    {
-        return parent::renderCss() . ' a-right';
-    }
 }

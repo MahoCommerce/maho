@@ -82,15 +82,4 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Currency extends Mage_Adm
         }
         return 1;
     }
-
-    /**
-     * Returns HTML for CSS
-     *
-     * @return string
-     */
-    #[\Override]
-    public function renderCss()
-    {
-        return parent::renderCss() . ' a-right';
-    }
 }

@@ -40,16 +40,20 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
     #[\Override]
     public function getHtml()
     {
+        $fromLabel = Mage::helper('adminhtml')->__('From');
+        $toLabel = Mage::helper('adminhtml')->__('To');
         $htmlId = $this->_getHtmlId() . time();
         $format = $this->getLocale()->getDateStrFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
         $html = '<div class="range"><div class="range-line date">'
-            . '<span class="label">' . Mage::helper('adminhtml')->__('From') . '</span>'
+            . '<span class="label">' . $fromLabel . '</span>'
             . '<input type="text" name="' . $this->_getHtmlName() . '[from]" id="' . $htmlId . '_from"'
+                . ' placeholder="' . $fromLabel . '"'
                 . ' value="' . $this->getEscapedValue('from') . '" class="input-text no-changes"/>'
             . '</div>';
         $html .= '<div class="range-line date">'
-            . '<span class="label">' . Mage::helper('adminhtml')->__('To') . '</span>'
+            . '<span class="label">' . $toLabel . '</span>'
             . '<input type="text" name="' . $this->_getHtmlName() . '[to]" id="' . $htmlId . '_to"'
+                . ' placeholder="' . $fromLabel . '"'
                 . ' value="' . $this->getEscapedValue('to') . '" class="input-text no-changes"/>'
             . '</div></div>';
         $html .= '<input type="hidden" name="' . $this->_getHtmlName() . '[locale]"'

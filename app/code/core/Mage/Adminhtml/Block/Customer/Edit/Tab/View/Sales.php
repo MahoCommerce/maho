@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -45,14 +45,12 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales extends Mage_Adminhtml_B
     public function _beforeToHtml()
     {
         $this->_currency = Mage::getModel('directory/currency')
-            ->load(Mage::getStoreConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE))
-        ;
+            ->load(Mage_Directory_Helper_Data::getConfigCurrencyBase());
 
         $this->_collection = Mage::getResourceModel('sales/sale_collection')
             ->setCustomerFilter(Mage::registry('current_customer'))
             ->setOrderStateFilter(Mage_Sales_Model_Order::STATE_CANCELED, true)
-            ->load()
-        ;
+            ->load();
 
         $this->_groupedCollection = [];
 

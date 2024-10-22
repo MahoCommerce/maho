@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -63,12 +63,10 @@ class Mage_Adminhtml_Block_Tag_Grid_Products extends Mage_Adminhtml_Block_Widget
             'renderer'  => 'adminhtml/tag_grid_column_renderer_tags'
         ]);
         $this->addColumn('action', [
-            'header'    => Mage::helper('tag')->__('Action'),
+            'type'      => 'action',
             'align'     => 'center',
-            'width'     => '120px',
+            'width'     => '120',
             'format'    => '<a href="' . $this->getUrl('*/*/customers/product_id/$product_id') . '">' . Mage::helper('tag')->__('View Customers') . '</a>',
-            'filter'    => false,
-            'sortable'  => false,
             'is_system' => true
         ]);
 

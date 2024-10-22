@@ -301,11 +301,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Form.php
 
 		-
-			message: "#^Property Mage_Adminhtml_Block_Widget_Grid\\:\\:\\$defaultColumnSettings \\(array\\<array\\<array\\>\\>\\) does not accept default value of type array\\<string, array\\<string, int\\>\\>\\.$#"
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid.php
-
-		-
 			message: "#^Binary operation \"\\*\" between string and 1 results in an error\\.$#"
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Number.php
@@ -1934,11 +1929,6 @@ parameters:
 			message: "#^Property Mage_Core_Model_App\\:\\:\\$_useSessionInUrl \\(bool\\) does not accept string\\|null\\.$#"
 			count: 1
 			path: app/code/core/Mage/Core/Model/App.php
-
-		-
-			message: "#^Method Mage_Core_Model_Config\\:\\:getNode\\(\\) should return Mage_Core_Model_Config_Element but returns Varien_Simplexml_Element\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Core/Model/Config.php
 
 		-
 			message: "#^Return type \\(Mage_Core_Model_App\\) of method Mage_Core_Model_Config\\:\\:_saveCache\\(\\) should be compatible with return type \\(bool\\) of method Varien_Simplexml_Config\\:\\:_saveCache\\(\\)$#"
