@@ -21,11 +21,9 @@
  * @method $this setSuccessUrl(string $value)
  * @method $this setTitle(string $value)
  */
-class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
+class Mage_Customer_Block_Address_Edit extends Mage_Core_Block_Template
 {
     protected $_address;
-    protected $_countryCollection;
-    protected $_regionCollection;
 
     /**
      * @inheritDoc
@@ -63,9 +61,36 @@ class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
     }
 
     /**
+     * Create form block for template file
+     */
+    #[\Override]
+    protected function _beforeToHtml()
+    {
+        /** @var Mage_Customer_Model_Form $form */
+        $form = Mage::getModel('customer/form');
+        $form->setFormCode('customer_address_edit')
+             ->setEntity($this->_address)
+             ->initDefaultValues();
+
+        /** @var Mage_Eav_Block_Widget_Form $block */
+        $block = $this->getLayout()->createBlock('eav/widget_form');
+        $block->setTranslationHelper($this->helper('customer'));
+        $block->setForm($form);
+
+        $groups = array_keys($block->getGroupedAttributes());
+        if ($groups[0] === 'General') {
+            $block->setDefaultLabel('Address Information');
+        }
+        $this->setChild('form_customer_address_edit', $block);
+
+        return parent::_beforeToHtml();
+    }
+
+    /**
      * Generate name block html
      *
      * @return string
+     * @deprecated
      */
     public function getNameBlockHtml()
     {
@@ -125,19 +150,30 @@ class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
     }
 
     /**
-     * @return int
+     * @return string
+     * @deprecated
      */
-    #[\Override]
     public function getCountryId()
     {
         if ($countryId = $this->getAddress()->getCountryId()) {
             return $countryId;
         }
-        return parent::getCountryId();
+        return Mage::helper('core')->getDefaultCountry();
+    }
+
+    /**
+     * @return string
+     * @deprecated
+     */
+    public function getCountryHtmlSelect()
+    {
+        return $this->getLayout()->createBlock('directory/data')
+                    ->getCountryHtmlSelect($this->getCountryId());
     }
 
     /**
      * @return int
+     * @deprecated
      */
     public function getRegionId()
     {
@@ -210,13 +246,5 @@ class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
         } else {
             return $this->getUrl('customer/account/');
         }
-    }
-
-    /**
-     * Return all EAV fields used in this form as groups
-     */
-    public function getGroupedFields(): array
-    {
-        return Mage::helper('customer/address')->getGroupedFields('customer_address_edit', $this->getAddress());
     }
 }

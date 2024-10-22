@@ -5,15 +5,16 @@
  * @category   Mage
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://www.openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
- * @method string getTime()
+ * @method DateTime getTime()
  * @method $this setTime(string $value)
  */
-class Mage_Eav_Block_Widget_Date extends Mage_Eav_Block_Widget_Abstract
+class Mage_Eav_Block_Widget_Form_Element_Date extends Mage_Eav_Block_Widget_Form_Element_Abstract
 {
     /**
      * @var array
@@ -24,9 +25,7 @@ class Mage_Eav_Block_Widget_Date extends Mage_Eav_Block_Widget_Abstract
     public function _construct()
     {
         parent::_construct();
-
-        // default template location
-        $this->setTemplate('eav/widget/date.phtml');
+        $this->setTemplate('eav/widget/form/element/date.phtml');
     }
 
     /**
@@ -35,33 +34,50 @@ class Mage_Eav_Block_Widget_Date extends Mage_Eav_Block_Widget_Abstract
      */
     public function setDate($date)
     {
-        $this->setTime($date ? strtotime($date) : false);
+        if ($date) {
+            try {
+                $dateTime = new DateTime($date);
+                $this->setTime($dateTime);
+            } catch (Exception $e) {
+                Mage::logException($e);
+            }
+        }
+
         $this->setData('date', $date);
+
         return $this;
     }
 
     /**
-     * @return false|string
+     * @return bool
+     */
+    public function hasTime()
+    {
+        return $this->getTime() instanceof DateTime;
+    }
+
+    /**
+     * @return string
      */
     public function getDay()
     {
-        return $this->getTime() ? date('d', $this->getTime()) : '';
+        return $this->hasTime() ? $this->getTime()->format('d') : '';
     }
 
     /**
-     * @return false|string
+     * @return string
      */
     public function getMonth()
     {
-        return $this->getTime() ? date('m', $this->getTime()) : '';
+        return $this->hasTime() ? $this->getTime()->format('m') : '';
     }
 
     /**
-     * @return false|string
+     * @return string
      */
     public function getYear()
     {
-        return $this->getTime() ? date('Y', $this->getTime()) : '';
+        return $this->hasTime() ? $this->getTime()->format('Y') : '';
     }
 
     /**
@@ -82,7 +98,7 @@ class Mage_Eav_Block_Widget_Date extends Mage_Eav_Block_Widget_Abstract
      */
     public function setDateInput($code, $html)
     {
-        $this->_dateInputs[$code] = $html;
+        $this->_dateInputs[$code] = $html . "\n";
     }
 
     /**

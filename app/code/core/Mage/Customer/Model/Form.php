@@ -44,14 +44,15 @@ class Mage_Customer_Model_Form extends Mage_Eav_Model_Form
         $collection = parent::_getFormAttributeCollection()
                     ->addFieldToFilter('ea.attribute_code', ['neq' => 'created_at']);
 
-        $entity = $this->getEntity();
         $attributeSetId = null;
+        $entity = $this->getEntity();
+        $entityTypeCode = $this->getEntityType()->getEntityTypeCode();
 
-        if ($entity instanceof Mage_Customer_Model_Customer) {
+        if ($entityTypeCode === 'customer') {
             $group = Mage::getModel('customer/group')
                    ->load($entity->getGroupId());
             $attributeSetId = $group->getCustomerAttributeSetId();
-        } elseif ($entity instanceof Mage_Customer_Model_Address) {
+        } elseif ($entityTypeCode === 'customer_address') {
             $customer = $entity->getCustomer();
             if ($customer) {
                 $group = Mage::getModel('customer/group')

@@ -2317,6 +2317,16 @@ p.required,
 .form-list .control {
   margin-bottom: 10px;
 }
+.form-list .date-month,
+.form-list .date-day {
+  width: 60px;
+  float: left;
+  margin-right: 10px;
+}
+.form-list .date-year {
+  width: 100px;
+  float: left;
+}
 
 /* Turn the label of controls (radio/checkbox) into a button style that wraps the input */
 .form-list .control,

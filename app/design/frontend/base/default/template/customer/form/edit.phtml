@@ -17,24 +17,7 @@
 <form action="<?= $this->getUrl('customer/account/editPost') ?>" method="post" autocomplete="off" id="form-validate" enctype="multipart/form-data">
     <?= $this->getBlockHtml('formkey') ?>
 
-<?php $_groups = $this->getGroupedFields() ?>
-<?php foreach (array_keys($_groups) as $_i => $_group): ?>
-    <div class="fieldset">
-        <h2 class="legend"><?= $this->__($_group) ?></h2>
-    <?php if ($_i === 0): ?>
-        <p class="required"><?= $this->__('* Required Fields') ?></p>
-    <?php endif ?>
-        <ul class="form-list">
-    <?php foreach ($_groups[$_group] as $_code => $_attribute): ?>
-        <?php $_block = 'eav/widget_'.$_attribute->getFrontendInput() ?>
-        <?php $_element = $this->getLayout()->createBlock($_block)->setData('attribute', $_attribute) ?>
-        <?php if ($_element->isEnabled()): ?>
-            <li><?= $_element->setObject($this->getCustomer())->toHtml() ?></li>
-        <?php endif ?>
-    <?php endforeach ?>
-        </ul>
-    </div>
-<?php endforeach ?>
+    <?= $this->getChildHtml('form_customer_account_edit') ?>
 
     <div class="fieldset">
         <h2 class="legend"><?= $this->__('Password Information') ?></h2>

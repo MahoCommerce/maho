@@ -30,70 +30,7 @@
         <input type="hidden" name="error_url" value="<?= $this->getErrorUrl() ?>" />
         <input type="hidden" name="form_key" value="<?= Mage::getSingleton('core/session')->getFormKey() ?>" />
 
-
-    <?php $_groups = $this->getGroupedFields() ?>
-    <?php foreach (array_keys($_groups) as $_i => $_group): ?>
-        <div class="fieldset">
-            <h2 class="legend"><?= $this->__($_group) ?></h2>
-        <?php if ($_i === 0): ?>
-            <p class="required"><?= $this->__('* Required Fields') ?></p>
-        <?php endif ?>
-            <ul class="form-list">
-        <?php foreach ($_groups[$_group] as $_code => $_attribute): ?>
-            <?php $_block = 'eav/widget_'.$_attribute->getFrontendInput() ?>
-            <?php $_element = $this->getLayout()->createBlock($_block)->setData('attribute', $_attribute) ?>
-            <?php if ($_element->isEnabled()): ?>
-                <li class="wide"><?= $_element->setObject($this->getFormData())->toHtml() ?></li>
-            <?php endif ?>
-        <?php endforeach ?>
-            </ul>
-        </div>
-    <?php endforeach ?>
-
-    <?php if($this->getShowAddressFields()): ?>
-
-            <input type="hidden" name="create_address" value="1" />
-            <input type="hidden" name="default_billing" value="1" />
-            <input type="hidden" name="default_shipping" value="1" />
-
-<?php $_groups = $this->getGroupedFieldsAddress() ?>
-<?php foreach (array_keys($_groups) as $_i => $_group): ?>
-    <div class="fieldset">
-        <h2 class="legend"><?= $this->__($_group) ?></h2>
-    <?php if ($_i === 0): ?>
-        <p class="required"><?= $this->__('* Required Fields') ?></p>
-    <?php endif ?>
-        <ul class="form-list">
-    <?php foreach ($_groups[$_group] as $_code => $_attribute): ?>
-        <?php if ($_code === 'region'): continue ?>
-        <?php elseif ($_code === 'region_id'): ?>
-            <li class="wide">
-                <div class="field">
-                    <label for="region_id" class="required"><em>*</em><?= $this->__('State/Province') ?></label>
-                    <div class="input-box">
-                        <select id="region_id" name="region_id" title="<?= Mage::helper('core')->quoteEscape($this->__('State/Province')) ?>" class="validate-select" style="display:none;">
-                           <option value=""><?= $this->__('Please select region, state or province') ?></option>
-                        </select>
-                        <script type="text/javascript">
-                            $('region_id').setAttribute('defaultValue',  "<?= $this->getFormData()->getRegionId() ?>");
-                        </script>
-                        <input type="text" id="region" name="region" value="<?= $this->escapeHtml($this->getRegion()) ?>"  title="<?= Mage::helper('core')->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" />
-                    </div>
-                </div>
-            </li>
-        <?php else: ?>
-            <?php $_block = 'eav/widget_'.$_attribute->getFrontendInput() ?>
-            <?php $_element = $this->getLayout()->createBlock($_block)->setData('attribute', $_attribute) ?>
-            <?php if ($_element->isEnabled()): ?>
-                <li class="wide"><?= $_element->setObject($this->getAddress())->toHtml() ?></li>
-            <?php endif ?>
-        <?php endif ?>
-    <?php endforeach ?>
-        </ul>
-    </div>
-<?php endforeach ?>
-
-    <?php endif ?>
+        <?= $this->getChildHtml('form_customer_account_create') ?>
 
         <div class="fieldset">
             <h2 class="legend"><?= $this->__('Password Information') ?></h2>
@@ -139,16 +76,21 @@
             <p class="back-link"><a href="<?= $this->escapeUrl($this->getBackUrl()) ?>" class="back-link"><small>&laquo; </small><?= $this->__('Back') ?></a></p>
             <button type="submit" title="<?= $this->quoteEscape($this->__('Register')) ?>" class="button"><?= $this->__('Register') ?></button>
         </div>
-        <?php if (Mage::helper('checkout')->isContextCheckout()): ?>
-            <input name="context" type="hidden" value="checkout" />
-        <?php endif ?>
+
+    <?php if($this->getShowAddressFields()): ?>
+        <input type="hidden" name="create_address" value="1" />
+        <input type="hidden" name="default_billing" value="1" />
+        <input type="hidden" name="default_shipping" value="1" />
+    <?php endif ?>
+    <?php if (Mage::helper('checkout')->isContextCheckout()): ?>
+        <input name="context" type="hidden" value="checkout" />
+    <?php endif ?>
     </form>
     <script type="text/javascript">
-    //<![CDATA[
-        var dataForm = new VarienForm('form-validate', true);
+        const countryRegions = <?= Mage::helper('directory')->getRegionJsonByStore() ?>;
+        const dataForm = new VarienForm('form-validate', true);
         <?php if($this->getShowAddressFields()): ?>
-        new RegionUpdater('country_id', 'region', 'region_id', <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, 'postcode');
+        new RegionUpdater('country', 'region', 'region_id', countryRegions, undefined, 'zip');
         <?php endif ?>
-    //]]>
     </script>
 </div>

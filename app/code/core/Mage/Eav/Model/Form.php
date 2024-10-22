@@ -226,6 +226,21 @@ abstract class Mage_Eav_Model_Form
     }
 
     /**
+     * Return array of form attributes as groups
+     * TODO remove
+     */
+    public function getGroupedAttributes()
+    {
+        $groups = [];
+        foreach ($this->getAttributes() as $code => $attribute) {
+            $group = $attribute->getAttributeGroupName() ?? 'General';
+            $groups[$group] ??= [];
+            $groups[$group][$code] = $attribute;
+        }
+        return $groups;
+    }
+
+    /**
      * Return array of form attributes
      *
      * @return Mage_Customer_Model_Attribute[]

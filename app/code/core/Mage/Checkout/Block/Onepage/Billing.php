@@ -51,6 +51,56 @@ class Mage_Checkout_Block_Onepage_Billing extends Mage_Checkout_Block_Onepage_Ab
     }
 
     /**
+     * Create form block for template file
+     */
+    #[\Override]
+    protected function _beforeToHtml()
+    {
+        if ($this->getAddress()->getFirstname()) {
+            $address = $this->getAddress();
+        } else {
+            $address = Mage::getModel('customer/address');
+            $address->setCustomer($this->getQuote()->getCustomer());
+        }
+
+        /** @var Mage_Customer_Model_Form $form */
+        $form = Mage::getModel('customer/form');
+        $form->setFormCode('customer_address_edit')
+             ->setEntity($address)
+             ->setEntityType('customer_address')
+             ->initDefaultValues();
+
+        /** @var Mage_Eav_Block_Widget_Form $block */
+        $block = $this->getLayout()->createBlock('eav/widget_form');
+        $block->setTranslationHelper($this->helper('customer'));
+        $block->setForm($form);
+        $block->setFieldIdFormat('billing:%s');
+        $block->setFieldNameFormat('billing[%s]');
+
+        if (!$this->isCustomerLoggedIn()) {
+            /** @var Mage_Customer_Model_Form $form */
+            $registerForm = Mage::getModel('customer/form');
+            $registerForm->setFormCode('checkout_register')
+                         ->setEntity($this->getQuote()->getCustomer())
+                         ->initDefaultValues();
+
+            $block->mergeFormAttributes($registerForm);
+        }
+
+        $groups = array_keys($block->getGroupedAttributes());
+        if ($groups[0] === 'General') {
+            if ($this->isCustomerLoggedIn()) {
+                $block->setDefaultLabel('Account Information');
+            } else {
+                $block->setDefaultLabel('Address Information');
+            }
+        }
+        $this->setChild('form_checkout_address_create', $block);
+
+        return parent::_beforeToHtml();
+    }
+
+    /**
      * @return bool
      */
     public function isUseBillingAddressForShipping()
@@ -203,30 +253,5 @@ class Mage_Checkout_Block_Onepage_Billing extends Mage_Checkout_Block_Onepage_Ab
             ->setFieldIdFormat('billing:%s')
             ->setFieldNameFormat('billing[%s]')
             ->toHtml();
-    }
-
-    /**
-     * Return extra EAV fields used in this form
-     */
-    public function getExtraCustomerFields(): array
-    {
-        return Mage::helper('customer')->getExtraFields('checkout_register');
-    }
-
-    /**
-     * Return extra EAV fields used in this form
-     */
-    public function getExtraCustomerAddressFields(): array
-    {
-        return Mage::helper('customer/address')->getExtraFields('checkout_address_create');
-    }
-
-    /**
-     * Return extra EAV fields from incomplete checkout session
-     */
-    public function getExtraFieldsSession(): Varien_Object
-    {
-        // TODO, need to separate from customer and customer address
-        return new Varien_Object($this->getCheckout()->getExtraFields());
     }
 }
