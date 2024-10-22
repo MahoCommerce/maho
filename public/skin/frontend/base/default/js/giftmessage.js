@@ -8,7 +8,6 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 var GiftMessage = Class.create();
-
 GiftMessage.prototype = {
     uniqueId: 0,
     initialize: function (buttonId) {

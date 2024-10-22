@@ -86,8 +86,8 @@ Product.Bundle.prototype = {
             }
         }
 
-        //Tax is calculated in a different way for the the TOTAL BASED method
-        //We round the taxes at the end. Hence we do the same for consistency
+        //Tax is calculated in a different way for the TOTAL BASED method
+        //We round the taxes at the end. Hence, we do the same for consistency
         //This variable is set in the bundle.phtml
         if (taxCalcMethod == CACL_TOTAL_BASE) {
             var calculatedPriceFormatted = calculatedPrice.toFixed(10);
@@ -158,9 +158,6 @@ Product.Bundle.prototype = {
                 price = (this.config.basePrice*selection.priceValue)/100;
             }
         }
-        //price += this.config.options[optionId].selections[selectionId].plusDisposition;
-        //price -= this.config.options[optionId].selections[selectionId].minusDisposition;
-        //return price*qty;
         var disposition = this.config.options[optionId].selections[selectionId].plusDisposition +
             this.config.options[optionId].selections[selectionId].minusDisposition;
 

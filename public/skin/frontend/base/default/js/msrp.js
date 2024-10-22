@@ -12,9 +12,7 @@ if (!window.Catalog) {
 }
 
 Catalog.Map = {
-
     helpLinks: [],
-
     active: false,
 
     addHelpLink: function(linkElement, title, actualPrice, msrpPrice, addToCartLink) {
