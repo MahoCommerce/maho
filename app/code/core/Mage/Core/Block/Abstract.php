@@ -186,6 +186,13 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     protected $_app;
 
     /**
+     * Translation helper instance
+     *
+     * @var Mage_Core_Helper_Abstract
+     */
+    protected $_translationHelper = null;
+
+    /**
      * Initialize factory instance
      */
     public function __construct(array $args = [])
@@ -1166,6 +1173,30 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     }
 
     /**
+     * Helper getter for translations
+     *
+     * @return Mage_Core_Helper_Abstract
+     */
+    public function getTranslationHelper()
+    {
+        return $this->_translationHelper ?? $this->helper('core');
+    }
+
+    /**
+     * Helper setter for translations
+     *
+     * @param Mage_Core_Helper_Abstract $helper
+     * @return $this
+     */
+    public function setTranslationHelper($helper)
+    {
+        if ($helper instanceof Mage_Core_Helper_Abstract) {
+            $this->_translationHelper = $helper;
+        }
+        return $this;
+    }
+
+    /**
      * Translate block sentence
      *
      * @return string
@@ -1173,6 +1204,9 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     public function __()
     {
         $args = func_get_args();
+        if ($this->_translationHelper instanceof Mage_Core_Helper_Abstract) {
+            return $this->_translationHelper->__(...$args);
+        }
         $expr = new Mage_Core_Model_Translate_Expr(array_shift($args), $this->getModuleName());
         array_unshift($args, $expr);
         return $this->_getApp()->getTranslator()->translate($args);

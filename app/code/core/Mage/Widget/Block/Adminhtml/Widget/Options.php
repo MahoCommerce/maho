@@ -30,12 +30,6 @@ class Mage_Widget_Block_Adminhtml_Widget_Options extends Mage_Adminhtml_Block_Wi
     protected $_defaultElementType = 'text';
 
     /**
-     * Translation helper instance, defined by the widget type declaration root config node
-     * @var Mage_Core_Helper_Abstract
-     */
-    protected $_translationHelper = null;
-
-    /**
      * Prepare Widget Options Form and values according to specified type
      *
      * widget_type must be set in data before
@@ -108,7 +102,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Options extends Mage_Adminhtml_Block_Wi
             return $this;
         }
         $module = $config->getModule();
-        $this->_translationHelper = Mage::helper($module ? $module : 'widget');
+        $this->setTranslationHelper(Mage::helper($module ?: 'widget'));
         foreach ($config->getParameters() as $parameter) {
             $this->_addField($parameter);
         }
@@ -131,10 +125,10 @@ class Mage_Widget_Block_Adminhtml_Widget_Options extends Mage_Adminhtml_Block_Wi
         $fieldName = $parameter->getKey();
         $data = [
             'name'      => $form->addSuffixToName($fieldName, 'parameters'),
-            'label'     => $this->_translationHelper->__($parameter->getLabel()),
+            'label'     => $this->getTranslationHelper()->__($parameter->getLabel()),
             'required'  => $parameter->getRequired(),
             'class'     => 'widget-option',
-            'note'      => $this->_translationHelper->__($parameter->getDescription()),
+            'note'      => $this->getTranslationHelper()->__($parameter->getDescription()),
         ];
 
         if ($values = $this->getWidgetValues()) {
@@ -153,7 +147,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Options extends Mage_Adminhtml_Block_Wi
             $data['values'] = [];
             foreach ($values as $option) {
                 $data['values'][] = [
-                    'label' => $this->_translationHelper->__($option['label']),
+                    'label' => $this->getTranslationHelper()->__($option['label']),
                     'value' => $option['value']
                 ];
             }
@@ -184,7 +178,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Options extends Mage_Adminhtml_Block_Wi
             if ($helperBlock instanceof Varien_Object) {
                 $helperBlock->setConfig($helper->getData())
                     ->setFieldsetId($fieldset->getId())
-                    ->setTranslationHelper($this->_translationHelper)
+                    ->setTranslationHelper($this->getTranslationHelper())
                     ->prepareElementHtml($field);
             }
         }

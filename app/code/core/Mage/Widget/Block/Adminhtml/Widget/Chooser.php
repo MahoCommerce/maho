@@ -20,12 +20,23 @@
  * @method $this setElement(Varien_Data_Form_Element_Abstract $value)
  * @method $this setFieldsetId(string $value)
  * @method string getLabel()
- * @method $this setTranslationHelper(Mage_Core_Helper_Abstract $value)
  * @method $this setSourceUrl(string $value)
  * @method $this setUniqId(string $value)
  */
 class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Template
 {
+    /**
+     * Internal constructor, that is called from real constructor
+     *
+     * @return void
+     */
+    #[\Override]
+    protected function _construct()
+    {
+        parent::_construct();
+        $this->setTranslationHelper($this->helper('widget'));
+    }
+
     /**
      * Chooser source URL getter
      *
@@ -82,19 +93,6 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
         $config->setButtons($buttons);
 
         return $this->_getData('config');
-    }
-
-    /**
-     * Helper getter for translations
-     *
-     * @return Mage_Core_Helper_Abstract
-     */
-    public function getTranslationHelper()
-    {
-        if ($this->_getData('translation_helper') instanceof Mage_Core_Helper_Abstract) {
-            return $this->_getData('translation_helper');
-        }
-        return $this->helper('widget');
     }
 
     /**
