@@ -20,12 +20,23 @@
  * @method $this setElement(Varien_Data_Form_Element_Abstract $value)
  * @method $this setFieldsetId(string $value)
  * @method string getLabel()
- * @method $this setTranslationHelper(Mage_Core_Helper_Abstract $value)
  * @method $this setSourceUrl(string $value)
  * @method $this setUniqId(string $value)
  */
 class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Template
 {
+    /**
+     * Internal constructor, that is called from real constructor
+     *
+     * @return void
+     */
+    #[\Override]
+    protected function _construct()
+    {
+        parent::_construct();
+        $this->setTranslationHelper($this->helper('widget'));
+    }
+
     /**
      * Chooser source URL getter
      *
@@ -66,7 +77,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
 
         // define chooser label
         if (isset($configArray['label'])) {
-            $config->setData('label', $this->getTranslationHelper()->__($configArray['label']));
+            $config->setData('label', $this->__($configArray['label']));
         }
 
         // chooser control buttons
@@ -76,25 +87,12 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
         ];
         if (isset($configArray['button']) && is_array($configArray['button'])) {
             foreach ($configArray['button'] as $id => $label) {
-                $buttons[$id] = $this->getTranslationHelper()->__($label);
+                $buttons[$id] = $this->__($label);
             }
         }
         $config->setButtons($buttons);
 
         return $this->_getData('config');
-    }
-
-    /**
-     * Helper getter for translations
-     *
-     * @return Mage_Core_Helper_Abstract
-     */
-    public function getTranslationHelper()
-    {
-        if ($this->_getData('translation_helper') instanceof Mage_Core_Helper_Abstract) {
-            return $this->_getData('translation_helper');
-        }
-        return $this->helper('widget');
     }
 
     /**
