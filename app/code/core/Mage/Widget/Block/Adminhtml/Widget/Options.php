@@ -95,7 +95,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Options extends Mage_Adminhtml_Block_Wi
     {
         // get configuration node and translation helper
         if (!$this->getWidgetType()) {
-            Mage::throwException($this->__('Widget Type is not specified'));
+            Mage::throwException($this->helper('widget')->__('Widget Type is not specified'));
         }
         $config = Mage::getSingleton('widget/widget')->getConfigAsObject($this->getWidgetType());
         if (!$config->getParameters()) {
@@ -125,10 +125,10 @@ class Mage_Widget_Block_Adminhtml_Widget_Options extends Mage_Adminhtml_Block_Wi
         $fieldName = $parameter->getKey();
         $data = [
             'name'      => $form->addSuffixToName($fieldName, 'parameters'),
-            'label'     => $this->getTranslationHelper()->__($parameter->getLabel()),
+            'label'     => $this->__($parameter->getLabel()),
             'required'  => $parameter->getRequired(),
             'class'     => 'widget-option',
-            'note'      => $this->getTranslationHelper()->__($parameter->getDescription()),
+            'note'      => $this->__($parameter->getDescription()),
         ];
 
         if ($values = $this->getWidgetValues()) {
@@ -147,7 +147,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Options extends Mage_Adminhtml_Block_Wi
             $data['values'] = [];
             foreach ($values as $option) {
                 $data['values'][] = [
-                    'label' => $this->getTranslationHelper()->__($option['label']),
+                    'label' => $this->__($option['label']),
                     'value' => $option['value']
                 ];
             }

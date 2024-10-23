@@ -77,7 +77,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
 
         // define chooser label
         if (isset($configArray['label'])) {
-            $config->setData('label', $this->getTranslationHelper()->__($configArray['label']));
+            $config->setData('label', $this->__($configArray['label']));
         }
 
         // chooser control buttons
@@ -87,7 +87,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
         ];
         if (isset($configArray['button']) && is_array($configArray['button'])) {
             foreach ($configArray['button'] as $id => $label) {
-                $buttons[$id] = $this->getTranslationHelper()->__($label);
+                $buttons[$id] = $this->__($label);
             }
         }
         $config->setButtons($buttons);
