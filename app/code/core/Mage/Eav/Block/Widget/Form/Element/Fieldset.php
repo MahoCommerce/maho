@@ -38,22 +38,22 @@ class Mage_Eav_Block_Widget_Form_Element_Fieldset extends Mage_Core_Block_Templa
     public function getWrapperTags(): array
     {
         switch ($this->type) {
-        case Mage_Eav_Block_Widget_Form::FIELDSET_TYPE_DIV:
-            return [
-                ['<div class="form-list">', '</div>'],
-                ['<div>', '</div>'],
-            ];
-        case Mage_Eav_Block_Widget_Form::FIELDSET_TYPE_LI_WIDE:
-            return [
-                ['<ul class="form-list">', '</ul>'],
-                ['<li class="wide">', '</li>'],
-            ];
-        case Mage_Eav_Block_Widget_Form::FIELDSET_TYPE_LI:
-        default:
-            return [
-                ['<ul class="form-list">', '</ul>'],
-                ['<li>', '</li>'],
-            ];
+            case Mage_Eav_Block_Widget_Form::FIELDSET_TYPE_DIV:
+                return [
+                    ['<div class="form-list">', '</div>'],
+                    ['<div>', '</div>'],
+                ];
+            case Mage_Eav_Block_Widget_Form::FIELDSET_TYPE_LI_WIDE:
+                return [
+                    ['<ul class="form-list">', '</ul>'],
+                    ['<li class="wide">', '</li>'],
+                ];
+            case Mage_Eav_Block_Widget_Form::FIELDSET_TYPE_LI:
+            default:
+                return [
+                    ['<ul class="form-list">', '</ul>'],
+                    ['<li>', '</li>'],
+                ];
         }
     }
 }
