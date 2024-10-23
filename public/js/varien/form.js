@@ -310,7 +310,7 @@ class RegionUpdater {
 class ZipUpdater {
     constructor(country, zipElement) {
         this.country = country;
-        this.zipElement = document.getElementById(zipElement);
+        this.zipElement = zipElement;
     }
 
     update() {
@@ -330,7 +330,7 @@ class ZipUpdater {
     }
 
     _setPostcodeOptional() {
-        if (!this.zipElement) {
+        if (this.zipElement === undefined) {
             return false;
         }
 
