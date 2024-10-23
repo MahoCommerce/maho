@@ -85,16 +85,6 @@ class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
         }
     }
 
-    /**
-     * @deprecated after 1.3.2.3
-     * This functionality was removed
-     *
-     */
-    public function editAction()
-    {
-        $this->_forward('noRoute');
-    }
-
     public function removeAction()
     {
         if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
@@ -119,15 +109,5 @@ class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
         } else {
             $this->_forward('noRoute');
         }
-    }
-
-    /**
-     * @deprecated after 1.3.2.3
-     * This functionality was removed
-     *
-     */
-    public function saveAction()
-    {
-        $this->_forward('noRoute');
     }
 }

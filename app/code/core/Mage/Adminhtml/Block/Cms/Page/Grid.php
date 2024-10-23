@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -102,10 +102,8 @@ class Mage_Adminhtml_Block_Cms_Page_Grid extends Mage_Adminhtml_Block_Widget_Gri
         ]);
 
         $this->addColumn('page_actions', [
-            'header'    => Mage::helper('cms')->__('Action'),
+            'type'      => 'action',
             'width'     => 10,
-            'sortable'  => false,
-            'filter'    => false,
             'renderer'  => 'adminhtml/cms_page_grid_renderer_action',
         ]);
 

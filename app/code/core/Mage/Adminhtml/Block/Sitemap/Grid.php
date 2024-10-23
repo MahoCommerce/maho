@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -67,16 +67,12 @@ class Mage_Adminhtml_Block_Sitemap_Grid extends Mage_Adminhtml_Block_Widget_Grid
 
         if (!Mage::app()->isSingleStoreMode()) {
             $this->addColumn('store_id', [
-                'header'    => Mage::helper('sitemap')->__('Store View'),
-                'index'     => 'store_id',
                 'type'      => 'store',
             ]);
         }
 
         $this->addColumn('action', [
-            'header'   => Mage::helper('sitemap')->__('Action'),
-            'filter'   => false,
-            'sortable' => false,
+            'type'     => 'action',
             'width'    => '100',
             'renderer' => 'adminhtml/sitemap_grid_renderer_action'
         ]);

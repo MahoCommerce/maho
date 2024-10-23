@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -103,7 +103,6 @@ class Mage_Adminhtml_Block_Catalog_Search_Grid extends Mage_Adminhtml_Block_Widg
 
         $this->addColumn('display_in_terms', [
             'header' => Mage::helper('catalog')->__('Display in Suggested Terms'),
-            'sortable' => true,
             'index' => 'display_in_terms',
             'type' => 'options',
             'width' => '100px',
@@ -116,8 +115,6 @@ class Mage_Adminhtml_Block_Catalog_Search_Grid extends Mage_Adminhtml_Block_Widg
         $this->addColumn(
             'action',
             [
-                'header'    => Mage::helper('catalog')->__('Action'),
-                'width'     => '100px',
                 'type'      => 'action',
                 'getter'    => 'getId',
                 'actions'   => [[
@@ -127,8 +124,6 @@ class Mage_Adminhtml_Block_Catalog_Search_Grid extends Mage_Adminhtml_Block_Widg
                     ],
                     'field'   => 'id'
                 ]],
-                'filter'    => false,
-                'sortable'  => false,
                 'index'     => 'catalog',
             ]
         );

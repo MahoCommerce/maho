@@ -144,4 +144,11 @@
             </updates>
         </layout>
     </adminhtml>
+    <default>
+        <catalog>
+            <tags>
+                <enable_adding_tags_in_frontend>0</enable_adding_tags_in_frontend>
+            </tags>
+        </catalog>
+    </default>
 </config>

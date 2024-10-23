@@ -18,6 +18,7 @@ class Varien_File_Csv
     protected $_lineLength = 0;
     protected $_delimiter = ',';
     protected $_enclosure = '"';
+    protected $_escape = '\\';
 
     public function __construct()
     {
@@ -73,7 +74,7 @@ class Varien_File_Csv
         }
 
         $fh = fopen($file, 'r');
-        while ($rowData = fgetcsv($fh, $this->_lineLength, $this->_delimiter, $this->_enclosure)) {
+        while ($rowData = fgetcsv($fh, $this->_lineLength, $this->_delimiter, $this->_enclosure, $this->_escape)) {
             $data[] = $rowData;
         }
         fclose($fh);

@@ -134,4 +134,18 @@ class Mage_Tag_Block_Product_List extends Mage_Core_Block_Template
         }
         return $this->_uniqueHtmlId;
     }
+
+    /**
+     * @inheritDoc
+     */
+    #[\Override]
+    public function renderView()
+    {
+        $helper = $this->helper('tag');
+        if ($this->getCount() === 0 && $helper->isAddingTagsEnabledOnFrontend() === false) {
+            return '';
+        }
+
+        return parent::renderView();
+    }
 }

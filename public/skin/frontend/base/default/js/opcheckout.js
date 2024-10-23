@@ -181,45 +181,22 @@ Checkout.prototype = {
             $('shipping:same_as_billing').checked = true;
             this.gotoSection('shipping', true);
         }
-
-        // this refreshes the checkout progress column
-
-//        if ($('billing:use_for_shipping') && $('billing:use_for_shipping').checked){
-//            shipping.syncWithBilling();
-//            //this.setShipping();
-//            //shipping.save();
-//            $('opc-shipping').addClassName('allow');
-//            this.gotoSection('shipping_method');
-//        } else {
-//            $('shipping:same_as_billing').checked = false;
-//            this.gotoSection('shipping');
-//        }
-//        this.reloadProgressBlock();
-//        //this.accordion.openNextSection(true);
     },
 
     setShipping: function() {
-        //this.nextStep();
         this.gotoSection('shipping_method', true);
-        //this.accordion.openNextSection(true);
     },
 
     setShippingMethod: function() {
-        //this.nextStep();
         this.gotoSection('payment', true);
-        //this.accordion.openNextSection(true);
     },
 
     setPayment: function() {
-        //this.nextStep();
         this.gotoSection('review', true);
-        //this.accordion.openNextSection(true);
     },
 
     setReview: function() {
         this.reloadProgressBlock();
-        //this.nextStep();
-        //this.accordion.openNextSection(true);
     },
 
     back: function(){
@@ -338,11 +315,6 @@ Billing.prototype = {
         var validator = new Validation(this.form);
         if (validator.validate()) {
             checkout.setLoadWaiting('billing');
-
-//            if ($('billing:use_for_shipping') && $('billing:use_for_shipping').checked) {
-//                $('billing:use_for_shipping').value=1;
-//            }
-
             new Ajax.Request(
                 this.saveUrl,
                 {
@@ -390,10 +362,6 @@ Billing.prototype = {
         if(payment) {
             payment.initWhatIsCvvListeners();
         }
-        // DELETE
-        //alert('error: ' + response.error + ' / redirect: ' + response.redirect + ' / shipping_methods_html: ' + response.shipping_methods_html);
-        // This moves the accordion panels of one page checkout and updates the checkout progress
-        //checkout.setBilling();
     }
 };
 
@@ -463,8 +431,6 @@ Shipping.prototype = {
 
     setSameAsBilling: function(flag) {
         $('shipping:same_as_billing').checked = flag;
-// #5599. Also it hangs up, if the flag is not false
-//        $('billing:use_for_shipping_yes').checked = flag;
         if (flag) {
             this.syncWithBilling();
         }
@@ -483,11 +449,9 @@ Shipping.prototype = {
                     }
                 }
             }
-            //$('shipping:country_id').value = $('billing:country_id').value;
             shippingRegionUpdater.update();
             $('shipping:region_id').value = $('billing:region_id').value;
             $('shipping:region').value = $('billing:region').value;
-            //shippingForm.elementChildLoad($('shipping:country_id'), this.setRegionValue.bind(this));
         } else {
             $('shipping-address-select').value = $('billing-address-select').value;
         }
@@ -540,15 +504,6 @@ Shipping.prototype = {
         }
 
         checkout.setStepResponse(response);
-
-        /*
-         var updater = new Ajax.Updater(
-         'checkout-shipping-method-load',
-         this.methodsUrl,
-         {method:'get', onSuccess: checkout.setShipping.bind(checkout)}
-         );
-         */
-        //checkout.setShipping();
     }
 };
 
@@ -846,8 +801,6 @@ Payment.prototype = {
         }
 
         checkout.setStepResponse(response);
-
-        //checkout.setPayment();
     },
 
     initWhatIsCvvListeners: function(){

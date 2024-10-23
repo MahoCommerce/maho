@@ -4353,6 +4353,9 @@ p.product-name a:hover {
   font-size: 20px;
 }
 .product-view .price-box.map-info a {
+  display: none;
+}
+.product-view .price-box.map-info a:first-of-type {
   display: inherit;
 }
 .product-view .old-price .price-label {
@@ -8926,10 +8929,6 @@ div.paypal-logo span > img {
 
 .catalog-product-view .map-info {
   white-space: normal;
-}
-.catalog-product-view .map-info > span {
-  float: right;
-  margin-bottom: 5px;
 }
 .catalog-product-view .map-info .price-box.map-info > a {
   float: right;
