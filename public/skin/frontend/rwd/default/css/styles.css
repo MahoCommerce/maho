@@ -2082,7 +2082,7 @@ body.customer-account .data-table .show-details .summary-collapse:hover:before {
 }
 
 .fieldset + .fieldset {
-  margin-top: 5px;
+  margin-top: 30px;
 }
 
 form .legend {
