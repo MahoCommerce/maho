@@ -47,6 +47,6 @@
             full: el.querySelector('.date-full input'),
             advice: el.querySelector('.validation-advice')
         };
-        new Varien.DateElementHelper('container', container, <?= $this->isRequired() ? 'true' : 'false' ?>, '<?= $this->getDateFormat() ?>');
+        new Varien.DateElement('container', container, <?= $this->isRequired() ? 'true' : 'false' ?>, '<?= $this->getDateFormat() ?>');
     })();
 </script>
