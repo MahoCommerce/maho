@@ -100,7 +100,7 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends 
     {
         $attributeType = $this->getAttributeObject()->getFrontendInput();
         $defaultValues = $this->getAttributeObject()->getDefaultValue();
-        if ($attributeType === 'select' || $attributeType === 'multiselect') {
+        if (in_array($attributeType, ['select', 'multiselect', 'customselect'])) {
             $defaultValues = explode(',', (string)$defaultValues);
         } else {
             $defaultValues = [];
@@ -108,6 +108,7 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends 
 
         switch ($attributeType) {
             case 'select':
+            case 'customselect':
                 $inputType = 'radio';
                 break;
             case 'multiselect':

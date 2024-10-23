@@ -17,6 +17,8 @@
  *
  * @method Mage_Core_Model_Abstract getObject()
  * @method $this setObject(Mage_Core_Model_Abstract $value)
+ * @method $this setFieldIdFormat(string $field)
+ * @method $this setFieldNameFormat(string $field)
  */
 class Mage_Customer_Block_Widget_Abstract extends Mage_Core_Block_Template
 {

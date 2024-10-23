@@ -235,6 +235,9 @@ button {
   padding-left: 0 !important; }
   .form-list td.value input.input-text, .form-list td.value textarea, .form-list td.value select {
     width: 330px; }
+  .form-list td.value select.customselect, .form-list td.value select.customselect + input.input-text {
+    width: 163px; }
+
   .form-list td.value p.note {
     color: #202856;
     font-size: 11px;

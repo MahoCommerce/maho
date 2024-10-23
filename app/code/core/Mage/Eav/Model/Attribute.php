@@ -138,6 +138,17 @@ abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
     }
 
     /**
+     * Return scope value by key
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function getScopeValue($key)
+    {
+        return $this->_getScopeValue($key);
+    }
+
+    /**
      * Return is attribute value required
      *
      * @return mixed
