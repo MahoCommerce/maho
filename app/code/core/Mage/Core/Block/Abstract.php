@@ -188,7 +188,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     /**
      * Translation helper instance
      *
-     * @var Mage_Core_Helper_Abstract
+     * @var Mage_Core_Helper_Abstract|null
      */
     protected $_translationHelper = null;
 
