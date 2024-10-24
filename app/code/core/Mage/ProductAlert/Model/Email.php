@@ -261,12 +261,10 @@ class Mage_ProductAlert_Model_Email extends Mage_Core_Model_Abstract
         $appEmulation->stopEnvironmentEmulation($initialEnvironmentInfo);
 
         Mage::getModel('core/email_template')
-            ->setDesignConfig(
-                [
+            ->setDesignConfig([
                     'area'  => Mage_Core_Model_App_Area::AREA_FRONTEND,
                     'store' => $storeId
-                ]
-            )
+            ])
             ->sendTransactional(
                 $templateId,
                 Mage::getStoreConfig(self::XML_PATH_EMAIL_IDENTITY, $storeId),
