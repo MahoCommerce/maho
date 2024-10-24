@@ -79,7 +79,7 @@ class Mage_Directory_Model_Observer
                     [
                         'warnings' => implode("\n", $importWarnings),
                     ]
-            );
+                );
 
             $translate->setTranslateInline(true);
         }
