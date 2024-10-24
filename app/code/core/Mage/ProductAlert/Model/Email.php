@@ -262,8 +262,8 @@ class Mage_ProductAlert_Model_Email extends Mage_Core_Model_Abstract
 
         Mage::getModel('core/email_template')
             ->setDesignConfig([
-                    'area'  => Mage_Core_Model_App_Area::AREA_FRONTEND,
-                    'store' => $storeId
+                'area'  => Mage_Core_Model_App_Area::AREA_FRONTEND,
+                'store' => $storeId
             ])
             ->sendTransactional(
                 $templateId,
