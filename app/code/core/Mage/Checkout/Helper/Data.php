@@ -231,12 +231,10 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
 
         foreach ($sendTo as $recipient) {
             $mailTemplate
-                ->setDesignConfig(
-                    [
-                        'area' => Mage_Core_Model_App_Area::AREA_FRONTEND,
-                        'store' => $checkout->getStoreId()
-                    ]
-                )
+                ->setDesignConfig([
+                    'area' => Mage_Core_Model_App_Area::AREA_FRONTEND,
+                    'store' => $checkout->getStoreId()
+                ])
                 ->sendTransactional(
                     $template,
                     Mage::getStoreConfig('checkout/payment_failed/identity', $checkout->getStoreId()),
