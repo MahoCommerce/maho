@@ -54,7 +54,7 @@ class Mage_Core_Model_App
      * The absolute minimum of password length for all types of passwords
      *
      * With changing this value also need to change:
-     * 1. in `js/prototype/validation.js` declarations `var minLength = 7;` in two places;
+     * 1. in `js/validation.js` declarations `var minLength = 7;` in two places;
      * 2. in `app/code/core/Mage/Customer/etc/system.xml`
      *    comments for fields `min_password_length` and `min_admin_password_length`
      *    `<comment>Please enter a number 7 or greater in this field.</comment>`;

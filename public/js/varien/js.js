@@ -17,50 +17,12 @@ function setLocation(url){
 }
 
 function setPLocation(url, setFocus){
-    if( setFocus ) {
+    if (setFocus) {
         window.opener.focus();
     }
     window.opener.location.href = encodeURI(url);
 }
 
-/**
- * Add classes to specified elements.
- * Supported classes are: 'odd', 'even', 'first', 'last'
- *
- * @param elements - array of elements to be decorated
- * [@param decorateParams] - array of classes to be set. If omitted, all available will be used
- * @deprecated
- */
-function decorateGeneric(elements, decorateParams) {
-}
-
-/**
- * Decorate table rows and cells, tbody etc
- * @see decorateGeneric()
- * @deprecated
- */
-function decorateTable(table, options) {
-}
-
-/**
- * Set "odd", "even" and "last" CSS classes for list items
- * @see decorateGeneric()
- * @deprecated
- */
-function decorateList(list, nonRecursive) {
-}
-
-/**
- * Set "odd", "even" and "last" CSS classes for list items
- * @see decorateGeneric()
- * @deprecated
- */
-function decorateDataList(list) {
-}
-
-/**
- * Parse SID and produces the correct URL
- */
 function parseSidUrl(baseUrl, urlExt) {
     var sidPos = baseUrl.indexOf('/?SID=');
     var sid = '';
@@ -127,33 +89,32 @@ function formatCurrency(price, format, showPlus){
 };
 
 function expandDetails(el, childClass) {
-    if (Element.hasClassName(el,'show-details')) {
-        $$(childClass).each(function(item){
-            item.hide();
+    if (el.classList.contains('show-details')) {
+        document.querySelectorAll(childClass).forEach(item => {
+            item.style.display = 'none';
         });
-        Element.removeClassName(el,'show-details');
-    }
-    else {
-        $$(childClass).each(function(item){
-            item.show();
+        el.classList.remove('show-details');
+    } else {
+        document.querySelectorAll(childClass).forEach(item => {
+            item.style.display = 'block';
         });
-        Element.addClassName(el,'show-details');
+        el.classList.add('show-details');
     }
 }
 
-/** @deprecated since 20.0.19 */
-var isIE = false;
+window.Varien = window.Varien || {};
 
-if (!window.Varien)
-    var Varien = new Object();
-
-Varien.showLoading = function(){
-    var loader = $('loading-process');
-    loader && loader.show();
+Varien.showLoading = function() {
+    const loader = document.getElementById('loading-process');
+    if (loader) {
+        loader.style.display = 'block';
+    }
 };
-Varien.hideLoading = function(){
-    var loader = $('loading-process');
-    loader && loader.hide();
+Varien.hideLoading = function() {
+    const loader = document.getElementById('loading-process');
+    if (loader) {
+        loader.style.display = 'none';
+    }
 };
 Varien.GlobalHandlers = {
     onCreate: function() {
@@ -167,137 +128,136 @@ Varien.GlobalHandlers = {
     }
 };
 
-Ajax.Responders.register(Varien.GlobalHandlers);
-
-/**
- * Quick Search form client model
- */
-Varien.searchForm = Class.create();
-Varien.searchForm.prototype = {
-    initialize : function(form, field, emptyText){
-        this.form   = $(form);
-        this.field  = $(field);
+Varien.searchForm = class {
+    constructor(form, field, emptyText) {
+        this.form = document.getElementById(form);
+        this.field = document.getElementById(field);
         this.emptyText = emptyText;
 
-        Event.observe(this.form,  'submit', this.submit.bind(this));
-        Event.observe(this.field, 'focus', this.focus.bind(this));
-        Event.observe(this.field, 'blur', this.blur.bind(this));
+        this.form.addEventListener('submit', this.submit.bind(this));
+        this.field.addEventListener('focus', this.focus.bind(this));
+        this.field.addEventListener('blur', this.blur.bind(this));
         this.blur();
-    },
+    }
 
-    submit : function(event){
-        if (this.field.value == this.emptyText || this.field.value == ''){
-            Event.stop(event);
+    submit(event) {
+        if (this.field.value === this.emptyText || this.field.value === '') {
+            event.preventDefault();
             return false;
         }
         return true;
-    },
+    }
 
-    focus : function(event){
-        if(this.field.value==this.emptyText){
-            this.field.value='';
+    focus(event) {
+        if (this.field.value === this.emptyText) {
+            this.field.value = '';
         }
+    }
 
-    },
-
-    blur : function(event){
-        if(this.field.value==''){
-            this.field.value=this.emptyText;
+    blur(event) {
+        if (this.field.value === '') {
+            this.field.value = this.emptyText;
         }
-    },
+    }
 
-    initAutocomplete : function(url, destinationElement){
+    initAutocomplete(url, destinationElement) {
         new MahoAutocomplete(this.field, document.getElementById(destinationElement), url, {
             onSelect: (element) => this._selectAutocompleteItem(element)
         });
-    },
+    }
 
-    _selectAutocompleteItem : function(element){
-        if(element.title){
+    _selectAutocompleteItem(element) {
+        if (element.title) {
             this.field.value = element.title;
         }
         this.form.submit();
     }
 };
 
-Varien.Tabs = Class.create();
-Varien.Tabs.prototype = {
-  initialize: function(selector) {
-    var self=this;
-    $$(selector+' a').each(this.initTab.bind(this));
-  },
+Varien.Tabs = class {
+    constructor(selector) {
+        document.querySelectorAll(`${selector} a`).forEach(el => this.initTab(el));
+    }
 
-  initTab: function(el) {
-      el.href = 'javascript:void(0)';
-      if ($(el.parentNode).hasClassName('active')) {
-        this.showContent(el);
-      }
-      el.observe('click', this.showContent.bind(this, el));
-  },
+    initTab(el) {
+        el.href = 'javascript:void(0)';
+        if (el.parentNode.classList.contains('active')) {
+            this.showContent(el);
+        }
+        el.addEventListener('click', () => this.showContent(el));
+    }
 
-  showContent: function(a) {
-    var li = $(a.parentNode), ul = $(li.parentNode);
-    ul.getElementsBySelector('li', 'ol').each(function(el){
-      var contents = $(el.id+'_contents');
-      if (el==li) {
-        el.addClassName('active');
-        contents.show();
-      } else {
-        el.removeClassName('active');
-        contents.hide();
-      }
-    });
-  }
+    showContent(a) {
+        const li = a.parentNode;
+        const ul = li.parentNode;
+
+        // Get all li elements in both ul and ol within the parent
+        const allTabs = [...ul.querySelectorAll('li')];
+
+        allTabs.forEach(el => {
+            const contents = document.getElementById(`${el.id}_contents`);
+            if (el === li) {
+                el.classList.add('active');
+                contents.style.display = 'block';
+            } else {
+                el.classList.remove('active');
+                contents.style.display = 'none';
+            }
+        });
+    }
 };
 
-Varien.DateElement = Class.create();
-Varien.DateElement.prototype = {
-    initialize: function(type, content, required, format) {
-        if (type == 'id') {
+Varien.DateElement = class {
+    constructor(type, content, required, format) {
+        if (type === 'id') {
             // id prefix
-            this.day    = $(content + 'day');
-            this.month  = $(content + 'month');
-            this.year   = $(content + 'year');
-            this.full   = $(content + 'full');
-            this.advice = $(content + 'date-advice');
-        } else if (type == 'container') {
+            this.day = document.getElementById(content + 'day');
+            this.month = document.getElementById(content + 'month');
+            this.year = document.getElementById(content + 'year');
+            this.full = document.getElementById(content + 'full');
+            this.advice = document.getElementById(content + 'date-advice');
+        } else if (type === 'container') {
             // content must be container with data
-            this.day    = content.day;
-            this.month  = content.month;
-            this.year   = content.year;
-            this.full   = content.full;
+            this.day = content.day;
+            this.month = content.month;
+            this.year = content.year;
+            this.full = content.full;
             this.advice = content.advice;
         } else {
             return;
         }
 
         this.required = required;
-        this.format   = format;
+        this.format = format;
 
-        this.day.addClassName('validate-custom');
+        this.day.classList.add('validate-custom');
         this.day.validate = this.validate.bind(this);
-        this.month.addClassName('validate-custom');
+        this.month.classList.add('validate-custom');
         this.month.validate = this.validate.bind(this);
-        this.year.addClassName('validate-custom');
+        this.year.classList.add('validate-custom');
         this.year.validate = this.validate.bind(this);
 
         this.setDateRange(false, false);
-        this.year.setAttribute('autocomplete','off');
+        this.year.setAttribute('autocomplete', 'off');
 
-        this.advice.hide();
+        this.advice.style.display = 'none';
 
-        var date = new Date;
+        const date = new Date();
         this.curyear = date.getFullYear();
-    },
-    validate: function() {
-        var error = false,
-            day   = parseInt(this.day.value, 10)   || 0,
-            month = parseInt(this.month.value, 10) || 0,
-            year  = parseInt(this.year.value, 10)  || 0;
-        if (this.day.value.strip().empty()
-            && this.month.value.strip().empty()
-            && this.year.value.strip().empty()
-        ) {
+    }
+
+    validate() {
+        let error = false;
+        let valueError = false;  // Add this line to define valueError
+        let countDaysInMonth;    // Add this to fix scope
+
+        const day = parseInt(this.day.value, 10) || 0;
+        const month = parseInt(this.month.value, 10) || 0;
+        const year = parseInt(this.year.value, 10) || 0;
+
+        if (this.day.value.trim() === '' &&
+            this.month.value.trim() === '' &&
+            this.year.value.trim() === '') {
             if (this.required) {
                 error = 'This date is a required value.';
             } else {
@@ -306,34 +266,47 @@ Varien.DateElement.prototype = {
         } else if (!day || !month || !year) {
             error = 'Please enter a valid full date';
         } else {
-            var date = new Date, countDaysInMonth = 0, errorType = null;
-            date.setYear(year);date.setMonth(month-1);date.setDate(32);
+            const date = new Date(year, month - 1, 32);
             countDaysInMonth = 32 - date.getDate();
-            if(!countDaysInMonth || countDaysInMonth>31) countDaysInMonth = 31;
-            if(year < 1900) error = this.errorTextModifier(this.validateDataErrorText);
+            let errorType = null;
 
-            if (day<1 || day>countDaysInMonth) {
+            if (!countDaysInMonth || countDaysInMonth > 31) {
+                countDaysInMonth = 31;
+            }
+
+            if (year < 1900) {
+                error = this.errorTextModifier(this.validateDataErrorText);
+            }
+
+            if (day < 1 || day > countDaysInMonth) {
                 errorType = 'day';
                 error = 'Please enter a valid day (1-%d).';
-            } else if (month<1 || month>12) {
+            } else if (month < 1 || month > 12) {
                 errorType = 'month';
                 error = 'Please enter a valid month (1-12).';
             } else {
-                if(day % 10 == day) this.day.value = '0'+day;
-                if(month % 10 == month) this.month.value = '0'+month;
-                this.full.value = this.format.replace(/%[mb]/i, this.month.value).replace(/%[de]/i, this.day.value).replace(/%y/i, this.year.value);
-                var testFull = this.month.value + '/' + this.day.value + '/'+ this.year.value;
-                var test = new Date(testFull);
+                // Pad single digits with leading zero
+                this.day.value = day.toString().padStart(2, '0');
+                this.month.value = month.toString().padStart(2, '0');
+
+                this.full.value = this.format
+                    .replace(/%[mb]/i, this.month.value)
+                    .replace(/%[de]/i, this.day.value)
+                    .replace(/%y/i, this.year.value);
+
+                const testFull = `${this.month.value}/${this.day.value}/${this.year.value}`;
+                const test = new Date(testFull);
+
                 if (isNaN(test)) {
                     error = 'Please enter a valid date.';
                 } else {
                     this.setFullDate(test);
                 }
             }
-            var valueError = false;
-            if (!error && !this.validateData()){//(year<1900 || year>curyear) {
-                errorType = this.validateDataErrorType;//'year';
-                valueError = this.validateDataErrorText;//'Please enter a valid year (1900-%d).';
+
+            if (!error && !this.validateData()) {
+                errorType = this.validateDataErrorType;
+                valueError = this.validateDataErrorText;
                 error = valueError;
             }
         }
@@ -341,80 +314,93 @@ Varien.DateElement.prototype = {
         if (error !== false) {
             try {
                 error = Translator.translate(error);
+            } catch (e) {
+                // Translation failed, use original error
             }
-            catch (e) {}
+
             if (!valueError) {
                 this.advice.innerHTML = error.replace('%d', countDaysInMonth);
             } else {
                 this.advice.innerHTML = this.errorTextModifier(error);
             }
-            this.advice.show();
+            this.advice.style.display = 'block';
             return false;
         }
 
         // fixing elements class
-        this.day.removeClassName('validation-failed');
-        this.month.removeClassName('validation-failed');
-        this.year.removeClassName('validation-failed');
+        this.day.classList.remove('validation-failed');
+        this.month.classList.remove('validation-failed');
+        this.year.classList.remove('validation-failed');
 
-        this.advice.hide();
+        this.advice.style.display = 'none';
         return true;
-    },
-    validateData: function() {
-        var year = this.fullDate.getFullYear();
-        return (year>=1900 && year<=this.curyear);
-    },
-    validateDataErrorType: 'year',
-    validateDataErrorText: 'Please enter a valid year (1900-%d).',
-    errorTextModifier: function(text) {
+    }
+
+    validateData() {
+        const year = this.fullDate.getFullYear();
+        return (year >= 1900 && year <= this.curyear);
+    }
+
+    validateDataErrorType = 'year';
+    validateDataErrorText = 'Please enter a valid year (1900-%d).';
+
+    errorTextModifier(text) {
         text = Translator.translate(text);
         return text.replace('%d', this.curyear);
-    },
-    setDateRange: function(minDate, maxDate) {
+    }
+
+    setDateRange(minDate, maxDate) {
         this.minDate = minDate;
         this.maxDate = maxDate;
-    },
-    setFullDate: function(date) {
+    }
+
+    setFullDate(date) {
         this.fullDate = date;
     }
 };
 
-Varien.DOB = Class.create();
-Varien.DOB.prototype = {
-    initialize: function(selector, required, format) {
-        var el = $$(selector)[0];
-        var container       = {};
-        container.day       = Element.select(el, '.dob-day input')[0];
-        container.month     = Element.select(el, '.dob-month input')[0];
-        container.year      = Element.select(el, '.dob-year input')[0];
-        container.full      = Element.select(el, '.dob-full input')[0];
-        container.advice    = Element.select(el, '.validation-advice')[0];
+Varien.DOB = class {
+    constructor(selector, required, format) {
+        const el = document.querySelector(selector);
+
+        const container = {
+            day: el.querySelector('.dob-day input'),
+            month: el.querySelector('.dob-month input'),
+            year: el.querySelector('.dob-year input'),
+            full: el.querySelector('.dob-full input'),
+            advice: el.querySelector('.validation-advice')
+        };
 
         new Varien.DateElement('container', container, required, format);
     }
 };
 
-Varien.dateRangeDate = Class.create();
-Varien.dateRangeDate.prototype = Object.extend(new Varien.DateElement(), {
-    validateData: function() {
-        var validate = true;
-        if (this.minDate || this.maxValue) {
+Varien.dateRangeDate = class extends Varien.DateElement {
+    validateDataErrorText = 'Date should be between %s and %s';
+
+    validateData() {
+        let validate = true;
+
+        if (this.minDate || this.maxDate) {
             if (this.minDate) {
                 this.minDate = new Date(this.minDate);
                 this.minDate.setHours(0);
-                if (isNaN(this.minDate)) {
+                if (isNaN(this.minDate.getTime())) {
                     this.minDate = new Date('1/1/1900');
                 }
                 validate = validate && (this.fullDate >= this.minDate);
             }
+
             if (this.maxDate) {
                 this.maxDate = new Date(this.maxDate);
-                this.minDate.setHours(0);
-                if (isNaN(this.maxDate)) {
+                this.maxDate.setHours(0);
+                if (isNaN(this.maxDate.getTime())) {
                     this.maxDate = new Date();
                 }
                 validate = validate && (this.fullDate <= this.maxDate);
             }
+
+            // Set appropriate error message based on constraints
             if (this.maxDate && this.minDate) {
                 this.validateDataErrorText = 'Please enter a valid date between %s and %s';
             } else if (this.maxDate) {
@@ -425,72 +411,64 @@ Varien.dateRangeDate.prototype = Object.extend(new Varien.DateElement(), {
                 this.validateDataErrorText = '';
             }
         }
+
         return validate;
-    },
-    validateDataErrorText: 'Date should be between %s and %s',
-    errorTextModifier: function(text) {
+    }
+
+    errorTextModifier(text) {
         if (this.minDate) {
-            text = text.sub('%s', this.dateFormat(this.minDate));
+            text = text.replace('%s', this.dateFormat(this.minDate));
         }
         if (this.maxDate) {
-            text = text.sub('%s', this.dateFormat(this.maxDate));
+            text = text.replace('%s', this.dateFormat(this.maxDate));
         }
         return text;
-    },
-    dateFormat: function(date) {
-        return (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
     }
-});
 
-Varien.FileElement = Class.create();
-Varien.FileElement.prototype = {
-    initialize: function (id) {
-        this.fileElement = $(id);
-        this.hiddenElement = $(id + '_value');
+    dateFormat(date) {
+        return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+    }
+};
 
-        this.fileElement.observe('change', this.selectFile.bind(this));
-    },
-    selectFile: function(event) {
-        this.hiddenElement.value = this.fileElement.getValue();
+Varien.FileElement = class {
+    constructor(id) {
+        this.fileElement = document.getElementById(id);
+        this.hiddenElement = document.getElementById(id + '_value');
+        this.fileElement.addEventListener('change', this.selectFile.bind(this));
+    }
+
+    selectFile(event) {
+        this.hiddenElement.value = this.fileElement.value;
     }
 };
 
 if (typeof Validation !== 'undefined') {
     Validation.addAllThese([
-        ['validate-custom', ' ', function(v,elm) {
-            return elm.validate();
+        ['validate-custom', '', (value, element) => {
+            return element.validate();
         }]
     ]);
 }
 
 function truncateOptions() {
-    $$('.truncated').each(function(element){
-        Event.observe(element, 'mouseover', function(){
-            if (element.down('div.truncated_full_value')) {
-                element.down('div.truncated_full_value').addClassName('show');
+    document.querySelectorAll('.truncated').forEach(function(element) {
+        element.addEventListener('mouseover', function() {
+            const fullValueDiv = element.querySelector('div.truncated_full_value');
+            if (fullValueDiv) {
+                fullValueDiv.classList.add('show');
             }
         });
-        Event.observe(element, 'mouseout', function(){
-            if (element.down('div.truncated_full_value')) {
-                element.down('div.truncated_full_value').removeClassName('show');
+        element.addEventListener('mouseout', function() {
+            const fullValueDiv = element.querySelector('div.truncated_full_value');
+            if (fullValueDiv) {
+                fullValueDiv.classList.remove('show');
             }
         });
-
     });
 }
-Event.observe(window, 'load', function(){
-   truncateOptions();
-});
 
-Element.addMethods({
-    getInnerText: function(element)
-    {
-        element = $(element);
-        if(element.innerText && !Prototype.Browser.Opera) {
-            return element.innerText;
-        }
-        return element.innerHTML.stripScripts().unescapeHTML().replace(/[\n\r\s]+/g, ' ').strip();
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    truncateOptions();
 });
 
 /**
@@ -502,8 +480,10 @@ Element.addMethods({
  * @example fireEvent($('my-input', 'click'));
  */
 function fireEvent(element, event) {
-    var evt = document.createEvent("HTMLEvents");
-    evt.initEvent(event, true, true ); // event type, bubbling, cancelable
+    const evt = new Event(event, {
+        bubbles: true,
+        cancelable: true
+    });
     return element.dispatchEvent(evt);
 }
 
@@ -535,33 +515,36 @@ function modulo(dividend, divisor)
  * @param parametersArray
  * @param method
  */
-Varien.formCreator = Class.create();
-Varien.formCreator.prototype = {
-    initialize : function(url, parametersArray, method) {
+Varien.formCreator = class {
+    constructor(url, parametersArray, method) {
         this.url = url;
         this.parametersArray = JSON.parse(parametersArray);
         this.method = method;
         this.form = '';
-
         this.createForm();
         this.setFormData();
-    },
-    createForm : function() {
-        this.form = new Element('form', { 'method': this.method, action: this.url });
-    },
-    setFormData : function () {
-        for (var key in this.parametersArray) {
-            Element.insert(
-                this.form,
-                new Element('input', { name: key, value: this.parametersArray[key], type: 'hidden' })
-            );
+    }
+
+    createForm() {
+        this.form = document.createElement('form');
+        this.form.method = this.method;
+        this.form.action = this.url;
+    }
+
+    setFormData() {
+        for (const [key, value] of Object.entries(this.parametersArray)) {
+            const input = document.createElement('input');
+            input.name = key;
+            input.value = value;
+            input.type = 'hidden';
+            this.form.appendChild(input);
         }
     }
 };
 
 function customFormSubmit(url, parametersArray, method) {
-    var createdForm = new Varien.formCreator(url, parametersArray, method);
-    Element.insert($$('body')[0], createdForm.form);
+    const createdForm = new Varien.formCreator(url, parametersArray, method);
+    document.body.appendChild(createdForm.form);
     createdForm.form.submit();
 }
 
@@ -588,7 +571,7 @@ function buttonDisabler() {
     });
 }
 
-var Calendar = {};
+const Calendar = {};
 Calendar.setup = function(config) {
     const {
         inputField = '',
@@ -647,4 +630,3 @@ Calendar.setup = function(config) {
 
     flatpickr('#' + inputField, flatpickrOptions);
 };
-

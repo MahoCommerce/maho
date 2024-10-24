@@ -21,8 +21,6 @@
 <?php $optional_zip_countries = $this->helper('directory')->getCountriesWithOptionalZip(false) ?>
 <?php if (!empty($optional_zip_countries)): ?>
     <script>
-        //<![CDATA[
         optionalZipCountries = <?= $this->helper('core')->jsonEncode($optional_zip_countries) ?>;
-        //]]>
     </script>
 <?php endif ?>

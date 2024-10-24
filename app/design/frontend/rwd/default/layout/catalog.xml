@@ -165,7 +165,6 @@ Product view
             <action method="addJs"><script>varien/product.js</script></action>
             <action method="addJs"><script>varien/product_options.js</script></action>
             <action method="addJs"><script>varien/configurable.js</script></action>
-            <action method="addItem"><type>skin_js</type><script>js/jquery.elevateZoom-3.0.8.min.js</script></action>
             <action method="addItem"><type>js_css</type><name>flatpickr/flatpickr.min.css</name><params/></action>
             <action method="addItem"><type>js</type><name>flatpickr/flatpickr.min.js</name></action>
         </reference>
@@ -202,7 +201,6 @@ Product view
                 <block type="catalog/product_list_related" name="catalog.product.related" as="related_products" template="catalog/product/list/related.phtml" />
 
                 <block type="catalog/product_view" name="product.info.addto" as="addto" template="catalog/product/view/addto.phtml"/>
-                <block type="catalog/product_view" name="product.info.sharing" as="sharing" template="catalog/product/view/sharing.phtml"/>
                 <block type="catalog/product_view" name="product.info.addtocart" as="addtocart" template="catalog/product/view/addtocart.phtml"/>
 
                 <block type="core/text_list" name="product.info.extrahint" as="extrahint" translate="label">

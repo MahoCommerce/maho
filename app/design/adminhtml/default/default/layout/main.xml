@@ -43,7 +43,7 @@ Default layout, loads most of the pages
                 <action method="setTitle" translate="title"><title>Maho Admin</title></action>
                 <action method="addJs"><script>prototype/prototype.js</script></action>
                 <action method="addJs"><script>maho-dialog.js</script></action>
-                <action method="addJs"><script>prototype/validation.js</script></action>
+                <action method="addJs"><script>validation.js</script></action>
                 <action method="addJs"><script>varien/js.js</script></action>
                 <action method="addJs"><script>mage/translate.js</script></action>
 
@@ -139,7 +139,7 @@ Layout for editor element
             <action method="setCanLoadExtJs"><flag>1</flag></action>
             <action method="addJs"><script>mage/adminhtml/variables.js</script></action>
             <action method="addJs"><script>mage/adminhtml/wysiwyg/widget.js</script></action>
-            <action method="addJs"><name>lib/uploader/flow.min.js</name></action>
+            <action method="addJs"><name>flow.min.js</name></action>
             <action method="addJs"><name>mage/adminhtml/uploader/instance.js</name></action>
             <action method="addJs"><script>mage/adminhtml/browser.js</script></action>
             <action method="addJs"><script>maho-dialog.js</script></action>

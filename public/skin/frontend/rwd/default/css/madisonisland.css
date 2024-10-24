@@ -291,9 +291,13 @@ body .promos > li {
   height: 20px;
 }
 
+.catalog-category-view div.categoryland-caption p.desc,
+.cms-home #homepage-main-slides div.slides_control div div.slideshow-caption p.desc,
 .catalog-category-view div.categoryland-caption p.desc {
-  font: italic 18px/28px Georgia, "Times New Roman", Times, serif;
   color: #656565;
+  font-style: italic;
+  font-size: 18px;
+  line-height: 28px;
 }
 
 .cms-home #homepage-main-slides div.slides_control div div.slideshow-caption a.link:hover,
@@ -312,17 +316,4 @@ body .promos > li {
 
 .catalog-category-view div.categoryland-caption span.blue-big-text {
   padding: 0 !important;
-}
-
-.cms-home #homepage-main-slides div.slides_control div div.slideshow-caption span.three-dots,
-.catalog-category-view div.categoryland-caption span.three-dots {
-  background: url(../images/bg_threeDots.png) no-repeat center center;
-  display: block;
-  height: 20px;
-}
-
-.cms-home #homepage-main-slides div.slides_control div div.slideshow-caption p.desc,
-.catalog-category-view div.categoryland-caption p.desc {
-  font: italic 18px/28px Georgia, "Times New Roman", Times, serif;
-  color: #656565;
 }

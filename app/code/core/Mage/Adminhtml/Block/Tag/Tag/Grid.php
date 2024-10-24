@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -76,7 +76,6 @@ class Mage_Adminhtml_Block_Tag_Tag_Grid extends Mage_Adminhtml_Block_Widget_Grid
         $this->addColumn('products', [
             'header'        => Mage::helper('tag')->__('Products'),
             'width'         => 140,
-            'align'         => 'right',
             'index'         => 'products',
             'type'          => 'number',
         ]);
@@ -84,7 +83,6 @@ class Mage_Adminhtml_Block_Tag_Tag_Grid extends Mage_Adminhtml_Block_Widget_Grid
         $this->addColumn('customers', [
             'header'        => Mage::helper('tag')->__('Customers'),
             'width'         => 140,
-            'align'         => 'right',
             'index'         => 'customers',
             'type'          => 'number',
         ]);

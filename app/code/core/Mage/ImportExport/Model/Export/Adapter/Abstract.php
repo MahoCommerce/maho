@@ -34,6 +34,11 @@ abstract class Mage_ImportExport_Model_Export_Adapter_Abstract
     protected $_enclosure;
 
     /**
+     * @var string
+     */
+    protected $_escape;
+
+    /**
      * Destination file path.
      *
      * @var string
@@ -155,7 +160,7 @@ abstract class Mage_ImportExport_Model_Export_Adapter_Abstract
             foreach ($headerCols as $colName) {
                 $this->_headerCols[$colName] = false;
             }
-            fputcsv($this->_fileHandler, array_keys($this->_headerCols), $this->_delimiter, $this->_enclosure);
+            fputcsv($this->_fileHandler, array_keys($this->_headerCols), $this->_delimiter, $this->_enclosure, $this->_escape);
         }
         return $this;
     }

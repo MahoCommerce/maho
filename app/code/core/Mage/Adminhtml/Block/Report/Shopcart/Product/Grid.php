@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -40,8 +40,6 @@ class Mage_Adminhtml_Block_Report_Shopcart_Product_Grid extends Mage_Adminhtml_B
     {
         $this->addColumn('entity_id', [
             'header'    => Mage::helper('reports')->__('ID'),
-            'width'     => '50px',
-            'align'     => 'right',
             'index'     => 'entity_id'
         ]);
 
@@ -53,11 +51,8 @@ class Mage_Adminhtml_Block_Report_Shopcart_Product_Grid extends Mage_Adminhtml_B
         $currencyCode = $this->getCurrentCurrencyCode();
 
         $this->addColumn('price', [
-            'header'    => Mage::helper('reports')->__('Price'),
-            'width'     => '80px',
             'type'      => 'currency',
             'currency_code' => $currencyCode,
-            'index'     => 'price',
             'renderer'  => 'adminhtml/report_grid_column_renderer_currency',
             'rate'          => $this->getRate($currencyCode),
         ]);

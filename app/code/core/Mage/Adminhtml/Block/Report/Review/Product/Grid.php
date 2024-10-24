@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -42,7 +42,6 @@ class Mage_Adminhtml_Block_Report_Review_Product_Grid extends Mage_Adminhtml_Blo
     {
         $this->addColumn('entity_id', [
             'header'    => Mage::helper('reports')->__('ID'),
-            'width'     => '50px',
             'index'     => 'entity_id'
         ]);
 
@@ -80,11 +79,9 @@ class Mage_Adminhtml_Block_Report_Review_Product_Grid extends Mage_Adminhtml_Blo
         ]);
 
         $this->addColumn('action', [
-            'header'    => Mage::helper('reports')->__('Action'),
-            'width'     => '100px',
+            'type'      => 'action',
+            'width'     => '100',
             'align'     => 'center',
-            'filter'    => false,
-            'sortable'  => false,
             'renderer'  => 'adminhtml/report_grid_column_renderer_product',
             'is_system' => true
         ]);

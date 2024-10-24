@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<config>
+    <sections>
+        <catalog>
+            <groups>
+                <tags translate="label">
+                    <label>Product Tags</label>
+                    <sort_order>310</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enable_adding_tags_in_frontend translate="label">
+                            <label>Enable Adding Tags in Frontend</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enable_adding_tags_in_frontend>
+                    </fields>
+                </tags>
+            </groups>
+        </catalog>
+    </sections>
+</config>

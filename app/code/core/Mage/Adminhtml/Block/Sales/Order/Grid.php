@@ -70,9 +70,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
         if (!Mage::app()->isSingleStoreMode()) {
             $this->addColumn('store_id', [
                 'header'    => Mage::helper('sales')->__('Purchased From (Store)'),
-                'index'     => 'store_id',
                 'type'      => 'store',
-                'store_view' => true,
                 'display_deleted' => true,
                 'escape'  => true,
             ]);
@@ -120,8 +118,6 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
             $this->addColumn(
                 'action',
                 [
-                    'header'    => Mage::helper('sales')->__('Action'),
-                    'width'     => '50px',
                     'type'      => 'action',
                     'getter'     => 'getId',
                     'actions'   => [
@@ -132,18 +128,36 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
                             'data-column' => 'action',
                         ]
                     ],
-                    'filter'    => false,
-                    'sortable'  => false,
                     'index'     => 'stores',
                     'is_system' => true,
                 ]
             );
         }
 
+        $this->addRssFeedLink();
+
+        $this->addExportType('*/*/exportCsv', Mage::helper('sales')->__('CSV'));
+        $this->addExportType('*/*/exportExcel', Mage::helper('sales')->__('Excel XML'));
+
+        return parent::_prepareColumns();
+    }
+
+    /**
+     * Add link to RSS feed when enabled for filtered store-view
+     *
+     * @return $this
+     * @throws Mage_Core_Model_Store_Exception
+     */
+    public function addRssFeedLink()
+    {
         if (Mage::helper('sales')->isModuleOutputEnabled('Mage_Rss')) {
-            $filterString = $this->getParam($this->getVarNameFilter());
-            $filter = Mage::helper('adminhtml')->prepareFilterString($filterString);
-            $storeId = array_key_exists('store_id', $filter) ? $filter['store_id'] : null;
+            $storeId = null;
+
+            $filterString = $this->getParam($this->getVarNameFilter(), '');
+            if ($filterString) {
+                $filter = Mage::helper('adminhtml')->prepareFilterString($filterString);
+                $storeId = $filter['store_id'] ?? null;
+            }
 
             if (Mage::helper('rss')->isRssAdminOrderNewEnabled($storeId)) {
                 $slug = $storeId ? '/store/' . $storeId : '';
@@ -151,10 +165,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
             }
         }
 
-        $this->addExportType('*/*/exportCsv', Mage::helper('sales')->__('CSV'));
-        $this->addExportType('*/*/exportExcel', Mage::helper('sales')->__('Excel XML'));
-
-        return parent::_prepareColumns();
+        return $this;
     }
 
     /**

@@ -128,16 +128,27 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
      */
     public function removeRequestParam($url, $paramKey, $caseSensitive = false)
     {
-        $regExpression = '/\\?[^#]*?(' . preg_quote($paramKey, '/') . '\\=[^#&]*&?)/' . ($caseSensitive ? '' : 'i');
-        while (preg_match($regExpression, $url, $mathes) != 0) {
-            $paramString = $mathes[1];
-            if (preg_match('/&$/', $paramString) == 0) {
-                $url = preg_replace('/(&|\\?)?' . preg_quote($paramString, '/') . '/', '', $url);
-            } else {
-                $url = str_replace($paramString, '', $url);
+        if (!str_contains($url, '?')) {
+            return $url;
+        }
+
+        list($baseUrl, $query) = explode('?', $url, 2);
+        parse_str($query, $params);
+
+        if (!$caseSensitive) {
+            $paramsLower = array_change_key_case($params);
+            $paramKeyLower = strtolower($paramKey);
+
+            if (array_key_exists($paramKeyLower, $paramsLower)) {
+                $params[$paramKey] = $paramsLower[$paramKeyLower];
             }
         }
-        return $url;
+
+        if (array_key_exists($paramKey, $params)) {
+            unset($params[$paramKey]);
+        }
+
+        return $baseUrl . ($params === [] ? '' : '?' . http_build_query($params));
     }
 
     /**

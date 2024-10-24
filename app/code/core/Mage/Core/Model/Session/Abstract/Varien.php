@@ -53,6 +53,11 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
             return $this;
         }
 
+        // Do not start a session if no sessionName was provided
+        if (empty($sessionName)) {
+            return $this;
+        }
+
         // getSessionSaveMethod has to return correct version of handler in any case
         $moduleName = $this->getSessionSaveMethod();
         switch ($moduleName) {
@@ -110,11 +115,8 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
             }
         }
 
-        // If session name is empty, we will use the default cookie name of PHPSESSID
-        // which should never happen in core.
-        if (!empty($sessionName)) {
-            $this->setSessionName($sessionName);
-        }
+        // Set the session name to maho_session, maho_admin_session, etc
+        $this->setSessionName($sessionName);
 
         // Call any custom logic in child classes for setting the session id
         // I.e. Checking the SID query param to enable switching between hosts
@@ -122,7 +124,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
 
         // If we still do not have a session id, then read from the cookie value
         // Otherwise, we will be starting a new session.
-        if (empty($this->getSessionId()) && $cookie->get($sessionName)) {
+        if (empty($this->getSessionId()) && is_string($cookie->get($sessionName))) {
             $this->setSessionId($cookie->get($sessionName));
         }
 
@@ -188,7 +190,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         }
 
         // Observers can change settings of the cookie such as lifetime, regenerate the session id, etc
-        Mage::dispatchEvent('session_before_renew_cookie', ['cookie' => $cookie]);
+        Mage::dispatchEvent('session_before_renew_cookie', ['cookie' => $cookie, 'session_name' => $sessionName]);
 
         // Set or renew regular session cookie
         $this->setSessionCookie();
@@ -331,7 +333,9 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
      */
     public function setSessionName($name)
     {
-        session_name($name);
+        if (!empty($name)) {
+            session_name($name);
+        }
         return $this;
     }
 

@@ -23,6 +23,7 @@ class Varien_Convert_Parser_Csv extends Varien_Convert_Parser_Abstract
     {
         $fDel = $this->getVar('delimiter', ',');
         $fEnc = $this->getVar('enclose', '"');
+        $fEsc = $this->getVar('escape', '\\');
 
         if ($fDel == '\\t') {
             $fDel = "\t";
@@ -36,7 +37,7 @@ class Varien_Convert_Parser_Csv extends Varien_Convert_Parser_Abstract
         fseek($fp, 0);
 
         $data = [];
-        for ($i = 0; $line = fgetcsv($fp, 4096, $fDel, $fEnc); $i++) {
+        for ($i = 0; $line = fgetcsv($fp, 4096, $fDel, $fEnc, $fEsc); $i++) {
             if (0 == $i) {
                 if ($this->getVar('fieldnames')) {
                     $fields = $line;
@@ -63,6 +64,7 @@ class Varien_Convert_Parser_Csv extends Varien_Convert_Parser_Abstract
     {
         $fDel = $this->getVar('delimiter', ',');
         $fEnc = $this->getVar('enclose', '"');
+        $fEsc = $this->getVar('escape', '\\');
 
         if ($fDel == '\\t') {
             $fDel = "\t";
@@ -79,7 +81,7 @@ class Varien_Convert_Parser_Csv extends Varien_Convert_Parser_Abstract
         $sessionId = Mage::registry('current_dataflow_session_id');
         $import = Mage::getModel('dataflow/import');
         $map = new Varien_Convert_Mapper_Column();
-        for ($i = 0; $line = fgetcsv($fp, 4096, $fDel, $fEnc); $i++) {
+        for ($i = 0; $line = fgetcsv($fp, 4096, $fDel, $fEnc, $fEsc); $i++) {
             if (0 == $i) {
                 if ($this->getVar('fieldnames')) {
                     $fields = $line;

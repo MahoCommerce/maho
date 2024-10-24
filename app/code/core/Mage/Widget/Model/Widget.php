@@ -89,7 +89,7 @@ class Mage_Widget_Model_Widget extends Varien_Object
         $object->setData($xml->asCanonicalArray());
 
         // Set module for translations etc.
-        $module = $object->getData('@/module');
+        $module = $xml->getAttribute('module');
         if ($module) {
             $object->setModule($module);
         }

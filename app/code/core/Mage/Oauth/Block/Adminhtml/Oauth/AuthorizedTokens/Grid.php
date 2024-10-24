@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -60,9 +60,6 @@ class Mage_Oauth_Block_Adminhtml_Oauth_AuthorizedTokens_Grid extends Mage_Adminh
         $this->addColumn('entity_id', [
             'header'    => Mage::helper('oauth')->__('ID'),
             'index'     => 'entity_id',
-            'align'     => 'right',
-            'width'     => '50px',
-
         ]);
 
         $this->addColumn('name', [
@@ -92,7 +89,6 @@ class Mage_Oauth_Block_Adminhtml_Oauth_AuthorizedTokens_Grid extends Mage_Adminh
             'width'     => '100px',
             'type'      => 'options',
             'options'   => $sourceYesNo->toArray(),
-            'sortable'  => true,
         ]);
 
         parent::_prepareColumns();

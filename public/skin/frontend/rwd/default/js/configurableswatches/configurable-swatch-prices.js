@@ -7,18 +7,20 @@
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-
 var ConfigurableSwatchPrices = Class.create({
     initialize: function(config) {
         this.swatchesPrices = [];
         this.generalConfig = config.generalConfig;
         this.products = config.products;
-
         this.addObservers();
     },
 
     addObservers: function() {
-        $(document).on('click', '.swatch-link', this.onSwatchClick.bind(this));
+        document.addEventListener('click', function(event) {
+            if (event.target.closest('.swatch-link')) {
+                this.onSwatchClick.call(this, event);
+            }
+        }.bind(this));
     },
 
     onSwatchClick: function(e) {
@@ -48,13 +50,11 @@ var ConfigurableSwatchPrices = Class.create({
             return this.swatchesPrices[productId];
         }
         this.swatchesPrices[productId] = new Product.OptionsPrice(this.getProductConfig(productId));
-
         return this.swatchesPrices[productId];
     },
 
     getProductConfig: function(productId) {
         var generalConfigClone = Object.extend({}, this.generalConfig);
-
         return Object.extend(generalConfigClone, this.products[productId]);
     }
 });

@@ -18,7 +18,7 @@
         <?php if ($i++%$_columnCount==0): ?>
         <ul class="products-grid">
         <?php endif ?>
-            <li class="item<?php if(($i-1)%$_columnCount==0): ?> first<?php elseif($i%$_columnCount==0): ?> last<?php endif ?>">
+            <li class="item">
                 <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->escapeHtml($_product->getName()) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(135) ?>" width="135" height="135" alt="<?= $this->escapeHtml($_product->getName()) ?>" /></a>
                 <h3 class="product-name"><a href="<?= $_product->getProductUrl() ?>" title="<?= $this->escapeHtml($_product->getName()) ?>"><?= $this->escapeHtml($_product->getName()) ?></a></h3>
                 <?= $this->getReviewsSummaryHtml($_product, 'short') ?>

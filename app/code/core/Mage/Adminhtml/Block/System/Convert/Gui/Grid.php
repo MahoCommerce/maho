@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -64,11 +64,7 @@ class Mage_Adminhtml_Block_System_Convert_Gui_Grid extends Mage_Adminhtml_Block_
         ]);
 
         $this->addColumn('store_id', [
-            'header'    => Mage::helper('adminhtml')->__('Store'),
-            'align'     => 'center',
-            'index'     => 'store_id',
             'type'      => 'store',
-            'width'     => '200px',
         ]);
 
         $this->addColumn('created_at', [
@@ -85,11 +81,7 @@ class Mage_Adminhtml_Block_System_Convert_Gui_Grid extends Mage_Adminhtml_Block_
         ]);
 
         $this->addColumn('action', [
-            'header'    => Mage::helper('adminhtml')->__('Action'),
-            'width'     => '60px',
             'align'     => 'center',
-            'sortable'  => false,
-            'filter'    => false,
             'type'      => 'action',
             'actions'   => [
                 [

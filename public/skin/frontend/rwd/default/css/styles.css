@@ -195,7 +195,6 @@ h5, .h5 {
   margin: 0;
   margin-bottom: 10px;
   color: #636363;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
   font-size: 13px;
   font-weight: bold;
   font-style: normal;
@@ -208,7 +207,6 @@ h6, .h6 {
   margin: 0;
   margin-bottom: 5px;
   color: #636363;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
   font-size: 12px;
   font-weight: bold;
   font-style: normal;
@@ -804,7 +802,6 @@ a.button:hover {
   line-height: 20px;
   width: 100%;
   font-size: 10px;
-  font-family: Arial, "Helvetica Neue", Verdana, Arial, sans-serif;
   font-weight: bold;
 }
 .btn-remove:hover:after {
@@ -1343,7 +1340,6 @@ a.button:hover {
  */
 .price-box {
   margin: 7px 0;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
 }
 
 .price-box p {
@@ -1357,11 +1353,6 @@ a.button:hover {
 .price-box .price {
   color: #0472ad;
   font-size: 16px;
-}
-
-.price-box .price,
-.price {
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
 }
 
 .price-box .price-label {
@@ -1764,7 +1755,6 @@ span.weee {
 }
 .pager .amount {
   float: left;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
   white-space: nowrap;
   margin: 0 15px 0 0;
 }
@@ -1812,7 +1802,6 @@ span.weee {
   height: 30px;
   padding: 0;
   color: #0472ad;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
 }
 
 .pages .current,
@@ -2150,7 +2139,6 @@ span.required:after {
   content: ' *';
   color: #df280a;
   font-weight: normal;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
   font-size: 12px;
 }
 
@@ -2438,7 +2426,6 @@ p.required,
 
 form .form-instructions {
   font-style: italic;
-  font-family: Georgia, Times, "Times New Roman", serif;
   font-size: 13px;
   color: #767676;
 }
@@ -2473,11 +2460,6 @@ form .form-instructions {
 .data-table thead th,
 .data-table tbody td {
   border-bottom: 1px solid silver;
-}
-
-.data-table tbody td,
-.data-table tfoot td {
-  font-family: Georgia, Times, "Times New Roman", serif;
 }
 
 .data-table tfoot tr {
@@ -3369,7 +3351,6 @@ a.skip-link {
   font-size: 11px;
   line-height: 22px;
   text-align: center;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
 }
 
 .skip-link.skip-active .count {
@@ -3689,7 +3670,6 @@ p.product-name {
   text-rendering: optimizeLegibility;
   text-transform: uppercase;
   font-size: 13px;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
   font-weight: normal;
   line-height: 1.4;
 }
@@ -3720,24 +3700,19 @@ p.product-name a:hover {
  * Product Grid
  * ============================================ */
 .products-grid {
-  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-gap: 10px;
 }
 
-.products-grid:after {
-  content: '';
-  display: table;
-  clear: both;
+.products-grid:has(> :nth-child(2) ~ *) {
+  justify-items: center;
 }
 
 .products-grid > li {
-  position: relative;
+  max-width: 180px;
   margin-bottom: 20px;
   text-align: center;
-}
-.products-grid > li:after {
-  content: '';
-  display: table;
-  clear: both;
 }
 
 .products-grid .product-image {
@@ -3790,21 +3765,6 @@ p.product-name a:hover {
   margin-bottom: 0;
 }
 
-/* Config: Two columns + flexible gutter */
-.products-grid > li {
-  float: left;
-  width: 47.72727%;
-  margin-right: 4.54545%;
-}
-
-.products-grid > li:nth-child(odd) {
-  clear: left;
-}
-
-.products-grid > li:nth-child(even) {
-  margin-right: 0;
-}
-
 .products-grid .product-image {
   margin-bottom: 5px;
 }
@@ -3835,129 +3795,6 @@ p.product-name a:hover {
   display: block;
 }
 
-@media only screen and (min-width: 480px) {
-  /* Config: Three columns + flexible gutter */
-  .products-grid {
-    /* Undo two-column config */
-    /* Set three-column config */
-  }
-  .products-grid > li:nth-child(odd) {
-    clear: none;
-  }
-  .products-grid > li:nth-child(even) {
-    margin-right: 3.7037%;
-  }
-  .products-grid > li {
-    width: 30.8642%;
-    margin-right: 3.7037%;
-  }
-  .products-grid > li:nth-child(3n+1) {
-    clear: left;
-  }
-  .products-grid > li:nth-child(3n) {
-    margin-right: 0;
-  }
-}
-@media only screen and (min-width: 960px) {
-  /* Config: Columns + flexible gutter */
-  /* Undo three-column config */
-  .products-grid--max-4-col > li:nth-child(odd) {
-    clear: none;
-  }
-
-  .products-grid--max-4-col > li:nth-child(3n+1) {
-    clear: none;
-  }
-
-  .products-grid--max-4-col > li:nth-child(even),
-  .products-grid--max-4-col > li:nth-child(3n) {
-    margin-right: 2.22222%;
-  }
-
-  /* Set column config */
-  .products-grid--max-4-col > li {
-    margin-right: 2.22222%;
-  }
-
-  .products-grid--max-4-col > li {
-    width: 23.33333%;
-    margin-right: 2.22222%;
-  }
-
-  .products-grid--max-4-col > li:nth-child(4n+1) {
-    clear: left;
-  }
-
-  .products-grid--max-4-col > li:nth-child(4n) {
-    margin-right: 0;
-  }
-
-  /* Config: Columns + flexible gutter */
-  /* Undo three-column config */
-  .products-grid--max-5-col > li:nth-child(odd) {
-    clear: none;
-  }
-
-  .products-grid--max-5-col > li:nth-child(3n+1) {
-    clear: none;
-  }
-
-  .products-grid--max-5-col > li:nth-child(even),
-  .products-grid--max-5-col > li:nth-child(3n) {
-    margin-right: 2.22222%;
-  }
-
-  /* Set column config */
-  .products-grid--max-5-col > li {
-    margin-right: 2.22222%;
-  }
-
-  .products-grid--max-5-col > li {
-    width: 18.22222%;
-    margin-right: 2.22222%;
-  }
-
-  .products-grid--max-5-col > li:nth-child(5n+1) {
-    clear: left;
-  }
-
-  .products-grid--max-5-col > li:nth-child(5n) {
-    margin-right: 0;
-  }
-
-  /* Config: Columns + flexible gutter */
-  /* Undo three-column config */
-  .products-grid--max-6-col > li:nth-child(odd) {
-    clear: none;
-  }
-
-  .products-grid--max-6-col > li:nth-child(3n+1) {
-    clear: none;
-  }
-
-  .products-grid--max-6-col > li:nth-child(even),
-  .products-grid--max-6-col > li:nth-child(3n) {
-    margin-right: 2.22222%;
-  }
-
-  /* Set column config */
-  .products-grid--max-6-col > li {
-    margin-right: 2.22222%;
-  }
-
-  .products-grid--max-6-col > li {
-    width: 14.81481%;
-    margin-right: 2.22222%;
-  }
-
-  .products-grid--max-6-col > li:nth-child(6n+1) {
-    clear: left;
-  }
-
-  .products-grid--max-6-col > li:nth-child(6n) {
-    margin-right: 0;
-  }
-}
 /* ============================================ *
  * Product List
  * ============================================ */
@@ -4506,6 +4343,9 @@ p.product-name a:hover {
   font-size: 20px;
 }
 .product-view .price-box.map-info a {
+  display: none;
+}
+.product-view .price-box.map-info a:first-of-type {
   display: inherit;
 }
 .product-view .old-price .price-label {
@@ -4576,6 +4416,7 @@ p.product-name a:hover {
 }
 .product-image-gallery {
   position: relative;
+  overflow: hidden;
 }
 .product-image-gallery .gallery-image {
   display: none;
@@ -5828,7 +5669,6 @@ p.product-name a:hover {
   display: none;
 }
 .cart-table .product-cart-sku {
-  font-family: Georgia, Times, "Times New Roman", serif;
   font-style: italic;
   font-size: 12px;
   margin: 5px 0 12px;
@@ -6037,7 +5877,6 @@ p.product-name a:hover {
   .cart-table .product-cart-price:before {
     font-weight: 500;
     font-size: 15px;
-    font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
   }
   .cart-table .cart-footer-actions {
     text-align: center;
@@ -6126,7 +5965,6 @@ p.product-name a:hover {
   margin-bottom: 10px;
 }
 .shipping .sp-methods label {
-  font-family: Georgia, Times, "Times New Roman", serif;
   font-size: 12px;
   font-style: italic;
   min-width: 100px;
@@ -6194,10 +6032,6 @@ p.product-name a:hover {
   font-size: 24px;
   padding: 2px 5px;
   vertical-align: top;
-}
-.cart .cart-totals table tfoot strong span,
-.cart .cart-totals table tfoot span.price {
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
 }
 .cart .cart-totals table tfoot strong {
   font-weight: 400;
@@ -6670,7 +6504,6 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 .block-progress dd {
   padding-left: 15px;
   margin-bottom: 10px;
-  font-family: Georgia, Times, "Times New Roman", serif;
   font-style: italic;
 }
 .block-progress dd address {
@@ -6683,7 +6516,6 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
   padding: 0;
   margin: 0 0 3px 0;
   color: #636363;
-  font-family: Georgia, Times, "Times New Roman", serif;
   text-transform: none;
   font-style: italic;
   float: left;
@@ -7181,7 +7013,6 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 
 .opc #opc-login p:not(.required) {
   font-style: italic;
-  font-family: Georgia, Times, "Times New Roman", serif;
   font-size: 13px;
   color: #767676;
 }
@@ -7348,7 +7179,6 @@ body.customer-account .sidebar .block-reorder ol#cart-sidebar-reorder p.product-
 }
 .dashboard .box-account p,
 .dashboard .box-account address {
-  font-family: Georgia, Times, "Times New Roman", serif;
   font-style: italic;
 }
 .dashboard .col2-set .col-1,
@@ -7411,9 +7241,6 @@ body.customer-account .sidebar .block-reorder ol#cart-sidebar-reorder p.product-
 /* ============================================ *
  * Address Book
  * ============================================ */
-.my-account .addresses-list {
-  font-family: Georgia, Times, "Times New Roman", serif;
-}
 .my-account .addresses-list .col-1,
 .my-account .addresses-list .col-2 {
   padding-bottom: 0;
@@ -7510,11 +7337,9 @@ body.customer-account .sidebar .block-reorder ol#cart-sidebar-reorder p.product-
 }
 .order-info-box .box-content {
   float: left;
-  font-family: Georgia, Times, "Times New Roman", serif;
 }
 .order-info-box .box-content td,
 .order-info-box .box-content th {
-  font-family: Georgia, Times, "Times New Roman", serif;
   line-height: 1.3;
 }
 .order-info-box .box-content th {
@@ -7637,9 +7462,6 @@ ol#cart-sidebar-reorder p.product-name {
   }
   .dashboard .page-title h1 {
     margin-top: 0;
-  }
-  .dashboard .welcome-msg {
-    font-family: Georgia, Times, "Times New Roman", serif;
   }
   .dashboard .welcome-msg .hello {
     font-style: italic;
@@ -8015,7 +7837,6 @@ div.paypal-logo span > img {
   text-transform: uppercase;
 }
 #customer-reviews dl dd {
-  font-family: Georgia, Times, "Times New Roman", serif;
   font-size: 14px;
   margin: 10px 0;
 }
@@ -8521,7 +8342,7 @@ div.paypal-logo span > img {
 /* ============================================ *
  * Checkout - Mini cart
  * ============================================ */
-.header-minicart {
+.header-minicart, #cart-sidebar.mini-products-list .product-details .truncated {
   display: inline-block;
 }
 @media only screen and (max-width: 770px) {
@@ -8938,7 +8759,6 @@ div.paypal-logo span > img {
 .cms-page-view .std p,
 .cms-no-route .std p {
   color: #636363;
-  font-family: Georgia, Times, "Times New Roman", serif;
   font-size: 14px;
   font-style: italic;
   line-height: 24px;
@@ -8954,7 +8774,6 @@ div.paypal-logo span > img {
 .cms-page-view .std li,
 .cms-no-route .std li {
   color: #636363;
-  font-family: Georgia, Times, "Times New Roman", serif;
   font-size: 14px;
   font-style: italic;
   line-height: 24px;
@@ -8986,7 +8805,6 @@ div.paypal-logo span > img {
   list-style: none;
   margin-left: 0;
   font-style: normal;
-  font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
 }
 
 #accordion .toggle-tabs {
@@ -9108,10 +8926,6 @@ div.paypal-logo span > img {
 
 .catalog-product-view .map-info {
   white-space: normal;
-}
-.catalog-product-view .map-info > span {
-  float: right;
-  margin-bottom: 5px;
 }
 .catalog-product-view .map-info .price-box.map-info > a {
   float: right;
@@ -9413,152 +9227,6 @@ body.customer-account .my-account .title-buttons.recurring-profiles-title-button
   width: 100%;
 }
 
-@media only screen and (min-width: 1199px) {
-  .col2-left-layout .col-main .widget,
-  .col2-right-layout .col-main .widget,
-  .col3-layout .col-main .widget {
-    /* Config: Columns + flexible gutter */
-    /* Undo three-column config */
-    /* Set column config */
-    /* Config: Columns + flexible gutter */
-    /* Undo three-column config */
-    /* Set column config */
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(odd),
-  .col2-right-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(odd),
-  .col3-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(odd) {
-    clear: none;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(3n+1),
-  .col2-right-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(3n+1),
-  .col3-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(3n+1) {
-    clear: none;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(even),
-  .col2-left-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(3n),
-  .col2-right-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(even),
-  .col2-right-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(3n),
-  .col3-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(even),
-  .col3-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(3n) {
-    margin-right: 2.22222%;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-4-col-widget > li,
-  .col2-right-layout .col-main .widget .products-grid--max-4-col-widget > li,
-  .col3-layout .col-main .widget .products-grid--max-4-col-widget > li {
-    margin-right: 2.22222%;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-4-col-widget > li,
-  .col2-right-layout .col-main .widget .products-grid--max-4-col-widget > li,
-  .col3-layout .col-main .widget .products-grid--max-4-col-widget > li {
-    width: 23.33333%;
-    margin-right: 2.22222%;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(4n+1),
-  .col2-right-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(4n+1),
-  .col3-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(4n+1) {
-    clear: left;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(4n),
-  .col2-right-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(4n),
-  .col3-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(4n) {
-    margin-right: 0;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(odd),
-  .col2-right-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(odd),
-  .col3-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(odd) {
-    clear: none;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(3n+1),
-  .col2-right-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(3n+1),
-  .col3-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(3n+1) {
-    clear: none;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(even),
-  .col2-left-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(3n),
-  .col2-right-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(even),
-  .col2-right-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(3n),
-  .col3-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(even),
-  .col3-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(3n) {
-    margin-right: 2.22222%;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-5-col-widget > li,
-  .col2-right-layout .col-main .widget .products-grid--max-5-col-widget > li,
-  .col3-layout .col-main .widget .products-grid--max-5-col-widget > li {
-    margin-right: 2.22222%;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-5-col-widget > li,
-  .col2-right-layout .col-main .widget .products-grid--max-5-col-widget > li,
-  .col3-layout .col-main .widget .products-grid--max-5-col-widget > li {
-    width: 18.22222%;
-    margin-right: 2.22222%;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(5n+1),
-  .col2-right-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(5n+1),
-  .col3-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(5n+1) {
-    clear: left;
-  }
-  .col2-left-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(5n),
-  .col2-right-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(5n),
-  .col3-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(5n) {
-    margin-right: 0;
-  }
-}
-@media only screen and (min-width: 770px) {
-  .col1-layout .col-main .widget {
-    /* Config: Columns + flexible gutter */
-    /* Undo three-column config */
-    /* Set column config */
-    /* Config: Columns + flexible gutter */
-    /* Undo three-column config */
-    /* Set column config */
-  }
-  .col1-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(odd) {
-    clear: none;
-  }
-  .col1-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(3n+1) {
-    clear: none;
-  }
-  .col1-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(even),
-  .col1-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(3n) {
-    margin-right: 2.22222%;
-  }
-  .col1-layout .col-main .widget .products-grid--max-4-col-widget > li {
-    margin-right: 2.22222%;
-  }
-  .col1-layout .col-main .widget .products-grid--max-4-col-widget > li {
-    width: 23.33333%;
-    margin-right: 2.22222%;
-  }
-  .col1-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(4n+1) {
-    clear: left;
-  }
-  .col1-layout .col-main .widget .products-grid--max-4-col-widget > li:nth-child(4n) {
-    margin-right: 0;
-  }
-  .col1-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(odd) {
-    clear: none;
-  }
-  .col1-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(3n+1) {
-    clear: none;
-  }
-  .col1-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(even),
-  .col1-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(3n) {
-    margin-right: 2.22222%;
-  }
-  .col1-layout .col-main .widget .products-grid--max-5-col-widget > li {
-    margin-right: 2.22222%;
-  }
-  .col1-layout .col-main .widget .products-grid--max-5-col-widget > li {
-    width: 18.22222%;
-    margin-right: 2.22222%;
-  }
-  .col1-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(5n+1) {
-    clear: left;
-  }
-  .col1-layout .col-main .widget .products-grid--max-5-col-widget > li:nth-child(5n) {
-    margin-right: 0;
-  }
-}
 /* ============================================ *
  * Checkout - Multiple Addresses
  * ============================================ */

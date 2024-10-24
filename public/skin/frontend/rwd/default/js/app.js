@@ -1,11 +1,12 @@
 /**
  * Maho
  *
- * @category    design
- * @package     rwd_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * @category   design
+ * @package    rwd_default
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com/)
+ * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 // =============================================
@@ -33,21 +34,21 @@ var bp = {
  * class gets added to the input, but the "This is a required field." text does not display
  */
 Varien.searchForm.prototype.initialize = function (form, field, emptyText) {
-    this.form = $(form);
-    this.field = $(field);
+    this.form = document.getElementById(form);
+    this.field = document.getElementById(field);
     this.emptyText = emptyText;
 
-    Event.observe(this.form, 'submit', this.submit.bind(this));
-    Event.observe(this.field, 'change', this.change.bind(this));
-    Event.observe(this.field, 'focus', this.focus.bind(this));
-    Event.observe(this.field, 'blur', this.blur.bind(this));
+    this.form.addEventListener('submit', this.submit.bind(this));
+    this.field.addEventListener('change', this.change.bind(this));
+    this.field.addEventListener('focus', this.focus.bind(this));
+    this.field.addEventListener('blur', this.blur.bind(this));
     this.blur();
 };
 
 Varien.searchForm.prototype.submit = function (event) {
     if (this.field.value == this.emptyText || this.field.value == ''){
-        Event.stop(event);
-        this.field.addClassName('validation-failed');
+        event.preventDefault();
+        this.field.classList.add('validation-failed');
         this.field.focus();
         return false;
     }
@@ -58,15 +59,15 @@ Varien.searchForm.prototype.change = function (event) {
     if (
         this.field.value != this.emptyText
         && this.field.value != ''
-        && this.field.hasClassName('validation-failed')
+        && this.field.classList.contains('validation-failed')
     ) {
-        this.field.removeClassName('validation-failed');
+        this.field.classList.remove('validation-failed');
     }
 };
 
 Varien.searchForm.prototype.blur = function (event) {
-    if (this.field.hasClassName('validation-failed')) {
-        this.field.removeClassName('validation-failed');
+    if (this.field.classList.contains('validation-failed')) {
+        this.field.classList.remove('validation-failed');
     }
 };
 
@@ -96,7 +97,7 @@ Varien.searchForm.prototype.blur = function (event) {
  *   is using touch pointer input, or has switched from mouse to touch input.
  *   It can be observed in this manner: $j(window).on('touch-detected', function(event) { // custom code });
  */
-var PointerManager = {
+const PointerManager = {
     MOUSE_POINTER_TYPE: 'mouse',
     TOUCH_POINTER_TYPE: 'touch',
     POINTER_EVENT_TIMEOUT_MS: 500,
@@ -110,26 +111,6 @@ var PointerManager = {
         return this.standardTouch;
     },
 
-    getPointerEventsInputTypes: function() {
-        if (window.navigator.pointerEnabled) { //IE 11+
-            //return string values from http://msdn.microsoft.com/en-us/library/windows/apps/hh466130.aspx
-            return {
-                MOUSE: 'mouse',
-                TOUCH: 'touch',
-                PEN: 'pen'
-            };
-        } else if (window.navigator.msPointerEnabled) { //IE 10
-            //return numeric values from http://msdn.microsoft.com/en-us/library/windows/apps/hh466130.aspx
-            return {
-                MOUSE:  0x00000004,
-                TOUCH:  0x00000002,
-                PEN:    0x00000003
-            };
-        } else { //other browsers don't support pointer events
-            return {}; //return empty object
-        }
-    },
-
     /**
      * If called before init(), get best guess of input pointer type
      * If called after init(), get current pointer in use.
@@ -137,11 +118,11 @@ var PointerManager = {
     getPointer: function() {
         // On iOS devices, always default to touch, as this.lastTouchType will intermittently return 'mouse' if
         // multiple touches are triggered in rapid succession in Safari on iOS
-        if(navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
             return this.TOUCH_POINTER_TYPE;
         }
 
-        if(this.lastTouchType) {
+        if (this.lastTouchType) {
             return this.lastTouchType;
         }
 
@@ -151,13 +132,15 @@ var PointerManager = {
     setPointerEventLock: function() {
         this.pointerEventLock = true;
     },
+
     clearPointerEventLock: function() {
         this.pointerEventLock = false;
     },
+
     setPointerEventLockTimeout: function() {
         var that = this;
 
-        if(this.pointerTimeout) {
+        if (this.pointerTimeout) {
             clearTimeout(this.pointerTimeout);
         }
 
@@ -166,72 +149,44 @@ var PointerManager = {
     },
 
     triggerMouseEvent: function(originalEvent) {
-        if(this.lastTouchType == this.MOUSE_POINTER_TYPE) {
+        if (this.lastTouchType == this.MOUSE_POINTER_TYPE) {
             return; //prevent duplicate events
         }
 
         this.lastTouchType = this.MOUSE_POINTER_TYPE;
-        $j(window).trigger('mouse-detected', originalEvent);
+        window.dispatchEvent(new CustomEvent('mouse-detected', { detail: originalEvent }));
     },
+
     triggerTouchEvent: function(originalEvent) {
-        if(this.lastTouchType == this.TOUCH_POINTER_TYPE) {
+        if (this.lastTouchType == this.TOUCH_POINTER_TYPE) {
             return; //prevent duplicate events
         }
 
         this.lastTouchType = this.TOUCH_POINTER_TYPE;
-        $j(window).trigger('touch-detected', originalEvent);
+        window.dispatchEvent(new CustomEvent('touch-detected', { detail: originalEvent }));
     },
 
     initEnv: function() {
-        if (window.navigator.pointerEnabled) {
-            this.standardTouch = true;
-            this.touchDetectionEvent = 'pointermove';
-        } else if (window.navigator.msPointerEnabled) {
-            this.standardTouch = true;
-            this.touchDetectionEvent = 'MSPointerMove';
-        } else {
-            this.touchDetectionEvent = 'touchstart';
-        }
+        this.standardTouch = 'PointerEvent' in window;
+        this.touchDetectionEvent = 'pointerdown';
     },
 
     wirePointerDetection: function() {
         var that = this;
 
-        if(this.standardTouch) { //standard-based touch events. Wire only one event.
-            //detect pointer event
-            $j(window).on(this.touchDetectionEvent, function(e) {
-                switch(e.originalEvent.pointerType) {
-                    case that.getPointerEventsInputTypes().MOUSE:
-                        that.triggerMouseEvent(e);
-                        break;
-                    case that.getPointerEventsInputTypes().TOUCH:
-                    case that.getPointerEventsInputTypes().PEN:
-                        // intentionally group pen and touch together
-                        that.triggerTouchEvent(e);
-                        break;
-                }
-            });
-        } else { //non-standard touch events. Wire touch and mouse competing events.
-            //detect first touch
-            $j(window).on(this.touchDetectionEvent, function(e) {
-                if(that.pointerEventLock) {
-                    return;
-                }
+        window.addEventListener(this.touchDetectionEvent, function(e) {
+            if (that.pointerEventLock) {
+                return;
+            }
 
-                that.setPointerEventLockTimeout();
-                that.triggerTouchEvent(e);
-            });
+            that.setPointerEventLockTimeout();
 
-            //detect mouse usage
-            $j(document).on('mouseover', function(e) {
-                if(that.pointerEventLock) {
-                    return;
-                }
-
-                that.setPointerEventLockTimeout();
+            if (e.pointerType === 'mouse') {
                 that.triggerMouseEvent(e);
-            });
-        }
+            } else if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+                that.triggerTouchEvent(e);
+            }
+        });
     },
 
     init: function() {
@@ -255,14 +210,14 @@ var PointerManager = {
  *   Firefox has disabled Apple-style touch events on desktop, so desktop devices using Firefox will not support
  *   the desired touch behavior.
  */
-var MenuManager = {
+const MenuManager = {
     // These variables are used to detect incorrect touch / mouse event order
     mouseEnterEventObserved: false,
     touchEventOrderIncorrect: false,
     cancelNextTouch: false,
 
     /**
-     * This class manages touch scroll detection
+     * This object manages touch scroll detection
      */
     TouchScroll: {
         /**
@@ -278,7 +233,7 @@ var MenuManager = {
          * Should probably be called on touchstart (or similar) event.
          */
         reset: function() {
-            this.touchStartPosition = $j(window).scrollTop();
+            this.touchStartPosition = window.scrollY;
         },
 
         /**
@@ -287,11 +242,11 @@ var MenuManager = {
          * @returns {boolean}
          */
         shouldCancelTouch: function() {
-            if(this.touchStartPosition == null) {
+            if (this.touchStartPosition == null) {
                 return false;
             }
 
-            var scroll = $j(window).scrollTop() - this.touchStartPosition;
+            const scroll = window.scrollY - this.touchStartPosition;
             return Math.abs(scroll) > this.TOUCH_SCROLL_THRESHOLD;
         }
     },
@@ -312,21 +267,21 @@ var MenuManager = {
      * @param target
      */
     toggleMenuVisibility: function(target) {
-        var link = $j(target);
-        var li = link.closest('li');
+        const li = target.closest('li');
 
-        if(!this.useSmallScreenBehavior()) {
+        if (!this.useSmallScreenBehavior()) {
             // remove menu-active from siblings and children of siblings
-            li.siblings()
-              .removeClass('menu-active')
-              .find('li')
-              .removeClass('menu-active');
-            //remove menu-active from children
-            li.find('li.menu-active').removeClass('menu-active');
+            li.parentElement.querySelectorAll('li.menu-active').forEach(el => {
+                if (el !== li) {
+                    el.classList.remove('menu-active');
+                }
+            });
+            // remove menu-active from children
+            li.querySelectorAll('li.menu-active').forEach(el => el.classList.remove('menu-active'));
         }
 
-        //toggle current item's active state
-        li.toggleClass('menu-active');
+        // toggle current item's active state
+        li.classList.toggle('menu-active');
     },
 
     // --------------------------------------------
@@ -343,244 +298,41 @@ var MenuManager = {
     },
 
     /**
-     * This method observes an absurd number of events
-     * depending on the capabilities of the current browser
-     * to implement expected header navigation functionality.
-     *
-     * The goal is to separate interactions into four buckets:
-     * - pointer enter using an actual mouse
-     * - pointer leave using an actual mouse
-     * - pointer down using an actual mouse
-     * - pointer down using touch
-     *
-     * Browsers supporting PointerEvent events will use these
-     * to differentiate pointer types.
-     *
-     * Browsers supporting Apple-style will use those events
-     * along with mouseenter / mouseleave to emulate pointer events.
+     * This method observes events to implement expected header navigation functionality.
+     * It differentiates between mouse and touch inputs using the PointerEvent API.
      */
     wirePointerEvents: function() {
-        var that = this;
-        var pointerTarget = $j('#nav a.has-children');
-        var hoverTarget = $j('#nav li');
+        const nav = document.getElementById('nav');
+        if (!nav) return;
+        const hoverTargets = nav.querySelectorAll('li');
+        const pointerTargets = nav.querySelectorAll('a.has-children');
 
-        if(PointerManager.getPointerEventsSupported()) {
-            // pointer events supported, so observe those type of events
-
-            var enterEvent = window.navigator.pointerEnabled ? 'pointerenter' : 'mouseenter';
-            var leaveEvent = window.navigator.pointerEnabled ? 'pointerleave' : 'mouseleave';
-            var fullPointerSupport = window.navigator.pointerEnabled;
-
-            hoverTarget.on(enterEvent, function(e) {
-                if(e.originalEvent.pointerType === undefined // Browsers with partial PointerEvent support don't provide pointer type
-                    || e.originalEvent.pointerType == PointerManager.getPointerEventsInputTypes().MOUSE) {
-
-                    if(fullPointerSupport) {
-                        that.mouseEnterAction(e, this);
-                    } else {
-                        that.PartialPointerEventsSupport.mouseEnterAction(e, this);
-                    }
-                }
-            }).on(leaveEvent, function(e) {
-                if(e.originalEvent.pointerType === undefined // Browsers with partial PointerEvent support don't provide pointer type
-                    || e.originalEvent.pointerType == PointerManager.getPointerEventsInputTypes().MOUSE) {
-
-                    if(fullPointerSupport) {
-                        that.mouseLeaveAction(e, this);
-                    } else {
-                        that.PartialPointerEventsSupport.mouseLeaveAction(e, this);
-                    }
+        hoverTargets.forEach(target => {
+            target.addEventListener('pointerenter', (e) => {
+                if (e.pointerType === 'mouse') {
+                    this.mouseEnterAction(e, target);
                 }
             });
+            target.addEventListener('pointerleave', (e) => {
+                if (e.pointerType === 'mouse') {
+                    this.mouseLeaveAction(e, target);
+                }
+            });
+        });
 
-            if(!fullPointerSupport) {
-                //click event doesn't have pointer type on it.
-                //observe MSPointerDown to set pointer type for click to find later
-
-                pointerTarget.on('MSPointerDown', function(e) {
-                    $j(this).data('pointer-type', e.originalEvent.pointerType);
-                });
-            }
-
-            pointerTarget.on('click', function(e) {
-                var pointerType = fullPointerSupport ? e.originalEvent.pointerType : $j(this).data('pointer-type');
-
-                if(pointerType === undefined || pointerType == PointerManager.getPointerEventsInputTypes().MOUSE) {
-                    that.mouseClickAction(e, this);
+        pointerTargets.forEach(target => {
+            target.addEventListener('click', (e) => {
+                if (e.pointerType === 'mouse') {
+                    this.mouseClickAction(e, target);
                 } else {
-                    if(fullPointerSupport) {
-                        that.touchAction(e, this);
-                    } else {
-                        that.PartialPointerEventsSupport.touchAction(e, this);
-                    }
+                    this.touchAction(e, target);
                 }
-
-                $j(this).removeData('pointer-type'); // clear pointer type hint from target, if any
             });
-        } else {
-            //pointer events not supported, use Apple-style events to simulate
+        });
 
-            hoverTarget.on('mouseenter', function(e) {
-                // Touch events should cancel this event if a touch pointer is used.
-                // Record that this method has fired so that erroneous following
-                // touch events (if any) can respond accordingly.
-                that.mouseEnterEventObserved = true;
-                that.cancelNextTouch = true;
-
-                that.mouseEnterAction(e, this);
-            }).on('mouseleave', function(e) {
-                that.mouseLeaveAction(e, this);
-            });
-
-            $j(window).on('touchstart', function(e) {
-                if(that.mouseEnterEventObserved) {
-                    // If mouse enter observed before touch, then device touch
-                    // event order is incorrect.
-                    that.touchEventOrderIncorrect = true;
-                    that.mouseEnterEventObserved = false; // Reset test
-                }
-
-                // Reset TouchScroll in order to detect scroll later.
-                that.TouchScroll.reset();
-            });
-
-            pointerTarget.on('touchend', function(e) {
-                $j(this).data('was-touch', true); // Note that element was invoked by touch pointer
-
-                e.preventDefault(); // Prevent mouse compatibility events from firing where possible
-
-                if(that.TouchScroll.shouldCancelTouch()) {
-                    return; // Touch was a scroll -- don't do anything else
-                }
-
-                if(that.touchEventOrderIncorrect) {
-                    that.PartialTouchEventsSupport.touchAction(e, this);
-                } else {
-                    that.touchAction(e, this);
-                }
-            }).on('click', function(e) {
-                if($j(this).data('was-touch')) { // Event invoked after touch
-                    e.preventDefault(); // Prevent following link
-                    return; // Prevent other behavior
-                }
-
-                that.mouseClickAction(e, this);
-            });
-        }
-    },
-
-     // --------------------------------------------
-     // Behavior "buckets"
-     //
-
-    /**
-     * Browsers with incomplete PointerEvent support (such as IE 10)
-     * require special event management. This collection of methods
-     * accommodate such browsers.
-     */
-    PartialPointerEventsSupport: {
-        /**
-         * Without proper pointerenter / pointerleave / click pointerType support,
-         * we have to use mouseenter events. These end up triggering
-         * lots of mouseleave events that can be misleading.
-         *
-         * Each touch mouseenter and click event that ends up triggering
-         * an undesired mouseleave increments this lock variable.
-         *
-         * Mouseleave events are cancelled if this variable is > 0,
-         * and then the variable is decremented regardless.
-         */
-        mouseleaveLock: 0,
-
-        /**
-         * Handles mouse enter behavior, but if using touch,
-         * toggle menus in the absence of full PointerEvent support.
-         *
-         * @param event
-         * @param target
-         */
-        mouseEnterAction: function(event, target) {
-            if(MenuManager.useSmallScreenBehavior()) {
-                // fall back to normal method behavior
-                MenuManager.mouseEnterAction(event, target);
-                return;
-            }
-
-            event.stopPropagation();
-
-            var jtarget = $j(target);
-            if(!jtarget.hasClass('level0')) {
-                this.mouseleaveLock = jtarget.parents('li').length + 1;
-            }
-
-            MenuManager.toggleMenuVisibility(target);
-        },
-
-        /**
-         * Handles mouse leave behaivor, but obeys the mouseleaveLock
-         * to allow undesired mouseleave events to be cancelled.
-         *
-         * @param event
-         * @param target
-         */
-        mouseLeaveAction: function(event, target) {
-            if(MenuManager.useSmallScreenBehavior()) {
-                // fall back to normal method behavior
-                MenuManager.mouseLeaveAction(event, target);
-                return;
-            }
-
-            if(this.mouseleaveLock > 0) {
-                this.mouseleaveLock--;
-                return; // suppress duplicate mouseleave event after touch
-            }
-
-            $j(target).removeClass('menu-active'); //hide all menus
-        },
-
-        /**
-         * Does no work on its own, but increments mouseleaveLock
-         * to prevent following undesireable mouseleave events.
-         *
-         * @param event
-         * @param target
-         */
-        touchAction: function(event, target) {
-            if(MenuManager.useSmallScreenBehavior()) {
-                // fall back to normal method behavior
-                MenuManager.touchAction(event, target);
-                return;
-            }
-            event.preventDefault(); // prevent following link
-            this.mouseleaveLock++;
-        }
-    },
-
-    /**
-     * Browsers with incomplete Apple-style touch event support
-     * (such as the legacy Android browser) sometimes fire
-     * touch events out of order. In particular, mouseenter may
-     * fire before the touch events. This collection of methods
-     * accommodate such browsers.
-     */
-    PartialTouchEventsSupport: {
-        /**
-         * Toggles visibility of menu, unless suppressed by previous
-         * out of order mouseenter event.
-         *
-         * @param event
-         * @param target
-         */
-        touchAction: function(event, target) {
-            if(MenuManager.cancelNextTouch) {
-                // Mouseenter has already manipulated the menu.
-                // Suppress this undesired touch event.
-                MenuManager.cancelNextTouch = false;
-                return;
-            }
-
-            MenuManager.toggleMenuVisibility(target);
-        }
+        window.addEventListener('touchstart', () => {
+            this.TouchScroll.reset();
+        });
     },
 
     /**
@@ -591,11 +343,11 @@ var MenuManager = {
      * @param target
      */
     mouseEnterAction: function(event, target) {
-        if(this.useSmallScreenBehavior()) {
+        if (this.useSmallScreenBehavior()) {
             return; // don't do mouse enter functionality on smaller screens
         }
 
-        $j(target).addClass('menu-active'); //show current menu
+        target.classList.add('menu-active'); // show current menu
     },
 
     /**
@@ -606,11 +358,11 @@ var MenuManager = {
      * @param target
      */
     mouseLeaveAction: function(event, target) {
-        if(this.useSmallScreenBehavior()) {
+        if (this.useSmallScreenBehavior()) {
             return; // don't do mouse leave functionality on smaller screens
         }
 
-        $j(target).removeClass('menu-active'); //hide all menus
+        target.classList.remove('menu-active'); // hide all menus
     },
 
     /**
@@ -621,9 +373,9 @@ var MenuManager = {
      * @param target
      */
     mouseClickAction: function(event, target) {
-        if(this.useSmallScreenBehavior()) {
-            event.preventDefault(); //don't follow link
-            this.toggleMenuVisibility(target); //instead, toggle visibility
+        if (this.useSmallScreenBehavior()) {
+            event.preventDefault(); // don't follow link
+            this.toggleMenuVisibility(target); // instead, toggle visibility
         }
     },
 
@@ -635,121 +387,113 @@ var MenuManager = {
      * @param target
      */
     touchAction: function(event, target) {
+        if (this.TouchScroll.shouldCancelTouch()) {
+            return; // Touch was a scroll -- don't do anything else
+        }
         this.toggleMenuVisibility(target);
-
         event.preventDefault();
     }
 };
 
 // ==============================================
-// jQuery Init
+// Init
 // ==============================================
 
-// Use $j(document).ready() because Magento executes Prototype inline
-$j(document).ready(function () {
-
+document.addEventListener('DOMContentLoaded', () => {
+    PointerManager.init();
     // ==============================================
     // Shared Vars
     // ==============================================
 
     // Document
-    var w = $j(window);
-    var d = $j(document);
-    var body = $j('body');
-
-    //initialize pointer abstraction manager
-    PointerManager.init();
+    const w = window;
+    const d = document;
+    const body = document.body;
 
     /* Wishlist Toggle Class */
-
-    $j(".change").click(function (e) {
-        $j( this ).toggleClass('active');
-        e.stopPropagation();
+    document.querySelectorAll('.change').forEach(element => {
+        element.addEventListener('click', function(e) {
+            this.classList.toggle('active');
+            e.stopPropagation();
+        });
     });
 
-    $j(document).click(function (e) {
-        if (! $j(e.target).hasClass('.change')) $j(".change").removeClass('active');
+    document.addEventListener('click', function(e) {
+        if (!e.target.classList.contains('change')) {
+            document.querySelectorAll('.change.active').forEach(element => {
+                element.classList.remove('active');
+            });
+        }
     });
 
-
-    // =============================================
     // Skip Links
-    // =============================================
+    const skipLinks = document.querySelector('.skip-links');
+    if (skipLinks) {
+        skipLinks.addEventListener('click', (e) => {
+            const skipLink = e.target.closest('.skip-link');
+            if (!skipLink) return;
 
-    var skipContents = $j('.skip-content');
-    var skipLinks = $j('.skip-link');
+            e.preventDefault();
 
-    $j('.skip-links').on('click', '.skip-link', function (e) {
-        e.preventDefault();
+            const target = skipLink.getAttribute('data-target-element') || skipLink.getAttribute('href');
+            const elem = document.querySelector(target);
+            if (!elem) return;
 
-        var self = $j(this);
-        // Use the data-target-element attribute, if it exists. Fall back to href.
-        var target = self.attr('data-target-element') ? self.attr('data-target-element') : self.attr('href');
+            const isSkipContentOpen = elem.classList.contains('skip-active');
+            document.querySelectorAll('.skip-active').forEach(el => el.classList.remove('skip-active'));
 
-        // Get target element
-        var elem = $j(target);
-
-        // Check if stub is open
-        var isSkipContentOpen = elem.hasClass('skip-active') ? 1 : 0;
-
-        // Hide all stubs
-        skipLinks.removeClass('skip-active');
-        skipContents.removeClass('skip-active');
-
-        // Toggle stubs
-        if (isSkipContentOpen) {
-            self.removeClass('skip-active');
-            elem.removeClass('skip-active');
-        } else {
-            self.addClass('skip-active');
-            elem.addClass('skip-active');
-        }
-
-        if (target == '#header-search') {
-            let searchInput = document.getElementById('search');
-            if (searchInput) {
-                searchInput.focus();
+            if (!isSkipContentOpen) {
+                skipLink.classList.add('skip-active');
+                elem.classList.add('skip-active');
             }
-        }
-    });
 
-    $j('.skip-links').on('click', '#header-cart .skip-link-close', function(e) {
-        var parent = $j(this).parents('.skip-content');
-        var link = parent.siblings('.skip-link');
+            if (target === '#header-search') {
+                const searchInput = document.getElementById('search');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            }
+        });
 
-        parent.removeClass('skip-active');
-        link.removeClass('skip-active');
-
-        e.preventDefault();
-    });
+        skipLinks.addEventListener('click', (e) => {
+            if (e.target.matches('#header-cart .skip-link-close')) {
+                const parent = e.target.closest('.skip-content');
+                const link = parent.parentElement.querySelector('.skip-link');
+                parent.classList.remove('skip-active');
+                link.classList.remove('skip-active');
+                e.preventDefault();
+            }
+        });
+    }
 
 
     // ==============================================
     // Header Menus
     // ==============================================
 
-    // initialize menu
     MenuManager.init();
 
     // Prevent sub menus from spilling out of the window.
     function preventMenuSpill() {
-        var windowWidth = $j(window).width();
-        $j('ul.level0').each(function(){
-            var ul = $j(this);
-            //Show it long enough to get info, then hide it.
-            ul.addClass('position-test');
-            ul.removeClass('spill');
-            var width = ul.outerWidth();
-            var offset = ul.offset().left;
-            ul.removeClass('position-test');
-            //Add the spill class if it will spill off the page.
+        const windowWidth = window.innerWidth;
+        document.querySelectorAll('ul.level0').forEach(ul => {
+            // Show it long enough to get info, then hide it.
+            ul.classList.add('position-test');
+            ul.classList.remove('spill');
+
+            const width = ul.offsetWidth;
+            const offset = ul.getBoundingClientRect().left;
+
+            ul.classList.remove('position-test');
+
+            // Add the spill class if it will spill off the page.
             if ((offset + width) > windowWidth) {
-                ul.addClass('spill');
+                ul.classList.add('spill');
             }
         });
     }
     preventMenuSpill();
-    $j(window).on('delayed-resize', preventMenuSpill);
+    window.addEventListener('delayed-resize', preventMenuSpill);
 
 
     // ==============================================
@@ -758,18 +502,20 @@ $j(document).ready(function () {
 
     // In order to display the language switcher next to the logo, we are moving the content at different viewports,
     // rather than having duplicate markup or changing the design
-    let repositionLanguageSwitcher = function (mq) {
-        if (mq.matches) {
-            $j('.page-header-container .store-language-container')
-              .prepend($j('.currency-switcher'))
-              .prepend($j('.form-language'));
-        } else {
-            $j('.header-language-container .store-language-container')
-              .prepend($j('.currency-switcher'))
-              .prepend($j('.form-language'));
-        }
-    }
+    const repositionLanguageSwitcher = (mq) => {
+        const currencySwitcher = document.querySelector('.currency-switcher');
+        const formLanguage = document.querySelector('.form-language');
 
+        if (mq.matches) {
+            const targetContainer = document.querySelector('.page-header-container .store-language-container');
+            if (currencySwitcher) targetContainer.prepend(currencySwitcher);
+            if (formLanguage) targetContainer.prepend(formLanguage);
+        } else {
+            const targetContainer = document.querySelector('.header-language-container .store-language-container');
+            if (currencySwitcher) targetContainer.prepend(currencySwitcher);
+            if (formLanguage) targetContainer.prepend(formLanguage);
+        }
+    };
     let maxWidthLargeMediaQuery = window.matchMedia('(max-width: ' + bp.large + 'px)');
     let maxWidthMediumMediaQuery = window.matchMedia('(max-width: ' + bp.medium + 'px)');
     maxWidthMediumMediaQuery.addEventListener('change', repositionLanguageSwitcher);
@@ -779,11 +525,11 @@ $j(document).ready(function () {
     // Menu State
     // ==============================================
 
-    let resetMenuState = function (mq) {
-        $j('.menu-active').removeClass('menu-active');
-        $j('.sub-menu-active').removeClass('sub-menu-active');
-        $j('.skip-active').removeClass('skip-active');
-    }
+    const resetMenuState = (mq) => {
+        document.querySelectorAll('.menu-active').forEach(el => el.classList.remove('menu-active'));
+        document.querySelectorAll('.sub-menu-active').forEach(el => el.classList.remove('sub-menu-active'));
+        document.querySelectorAll('.skip-active').forEach(el => el.classList.remove('skip-active'));
+    };
     maxWidthMediumMediaQuery.addEventListener('change', resetMenuState);
     resetMenuState(maxWidthMediumMediaQuery);
 
@@ -792,13 +538,14 @@ $j(document).ready(function () {
     // ==============================================
 
     // Used to swap primary product photo from thumbnails.
-    var mediaListLinks = $j('.media-list').find('a');
-    var mediaPrimaryImage = $j('.primary-image').find('img');
+    const mediaListLinks = document.querySelectorAll('.media-list a');
+    const mediaPrimaryImage = document.querySelector('.primary-image img');
     if (mediaListLinks.length) {
-        mediaListLinks.on('click', function (e) {
-            e.preventDefault();
-            var self = $j(this);
-            mediaPrimaryImage.attr('src', self.attr('href'));
+        mediaListLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                mediaPrimaryImage.src = link.href;
+            });
         });
     }
 
@@ -820,113 +567,116 @@ $j(document).ready(function () {
     //     <div class="block-content">Content that should show when </div>
     // </div>
     //
-    // JS: jQuery('.block-title').toggleSingle();
-    //
     // Options:
     //     destruct: defaults to false, but if true, the plugin will remove itself, display content, and remove event handlers
 
+    function toggleSingle(elements, options = {}) {
+        const settings = {
+            destruct: false,
+            ...options
+        };
 
-    $j.fn.toggleSingle = function (options) {
-
-        // passing destruct: true allows
-        var settings = $j.extend({
-            destruct: false
-        }, options);
-
-        return this.each(function () {
-            if (!settings.destruct) {
-                $j(this).on('click', function () {
-                    $j(this)
-                        .toggleClass('active')
-                        .next()
-                        .toggleClass('no-display');
-                });
-                // Hide the content
-                $j(this).next().addClass('no-display');
-            } else {
-                // Remove event handler so that the toggle link can no longer be used
-                $j(this).off('click');
-                // Remove all classes that were added by this plugin
-                $j(this)
-                    .removeClass('active')
-                    .next()
-                    .removeClass('no-display');
+        elements.forEach(element => {
+            // Remove event listener if it exists
+            if (element.toggleSingleHandler) {
+                element.removeEventListener('click', element.toggleSingleHandler);
+                element.toggleSingleHandler = null;
             }
 
+            if (!settings.destruct) {
+                element.toggleSingleHandler = function() {
+                    this.classList.toggle('active');
+                    const nextElement = this.nextElementSibling;
+                    if (nextElement) {
+                        nextElement.classList.toggle('no-display');
+                    }
+                };
+                element.addEventListener('click', element.toggleSingleHandler);
+
+                // Hide the content if it's not already hidden
+                const nextElement = element.nextElementSibling;
+                if (nextElement && !nextElement.classList.contains('no-display')) {
+                    nextElement.classList.add('no-display');
+                }
+            } else {
+                // Remove all classes that were added by this function
+                element.classList.remove('active');
+                const nextElement = element.nextElementSibling;
+                if (nextElement) {
+                    nextElement.classList.remove('no-display');
+                }
+            }
         });
-    };
+    }
 
     // ==============================================
     // UI Pattern - Toggle Content (tabs and accordions in one setup)
     // ==============================================
 
-    $j('.toggle-content').each(function () {
-        var wrapper = jQuery(this);
+    document.querySelectorAll('.toggle-content').forEach(wrapper => {
+        const hasTabs = wrapper.classList.contains('tabs');
+        const hasAccordion = wrapper.classList.contains('accordion');
+        const startOpen = wrapper.classList.contains('open');
+        const dl = wrapper.querySelector('dl');
+        const dts = Array.from(dl.querySelectorAll(':scope > dt'));
+        const panes = Array.from(dl.querySelectorAll('dd'));
+        const groups = [dts, panes];
 
-        var hasTabs = wrapper.hasClass('tabs');
-        var hasAccordion = wrapper.hasClass('accordion');
-        var startOpen = wrapper.hasClass('open');
-
-        var dl = wrapper.children('dl:first');
-        var dts = dl.children('dt');
-        var panes = dl.children('dd');
-        var groups = new Array(dts, panes);
-
-        //Create a ul for tabs if necessary.
+        // Create a ul for tabs if necessary
+        let lis = [];
         if (hasTabs) {
-            var ul = jQuery('<ul class="toggle-tabs"></ul>');
-            dts.each(function () {
-                var dt = jQuery(this);
-                var li = jQuery('<li></li>');
-                li.html(dt.html());
-                ul.append(li);
+            const ul = document.createElement('ul');
+            ul.className = 'toggle-tabs';
+            dts.forEach(dt => {
+                const li = document.createElement('li');
+                li.innerHTML = dt.innerHTML;
+                ul.appendChild(li);
             });
-            ul.insertBefore(dl);
-            var lis = ul.children();
+            dl.parentNode.insertBefore(ul, dl);
+            lis = Array.from(ul.children);
             groups.push(lis);
         }
 
-        //Add "last" classes.
-        var i;
-        for (i = 0; i < groups.length; i++) {
-            groups[i].filter(':last').addClass('last');
-        }
-
-        function toggleClasses(clickedItem, group) {
-            var index = group.index(clickedItem);
-            var i;
-            for (i = 0; i < groups.length; i++) {
-                groups[i].removeClass('current');
-                groups[i].eq(index).addClass('current');
-            }
-        }
-
-        //Toggle on tab (dt) click.
-        dts.on('click', function (e) {
-            //They clicked the current dt to close it. Restore the wrapper to unclicked state.
-            if (jQuery(this).hasClass('current') && wrapper.hasClass('accordion-open')) {
-                wrapper.removeClass('accordion-open');
-            } else {
-                //They're clicking something new. Reflect the explicit user interaction.
-                wrapper.addClass('accordion-open');
-            }
-            toggleClasses(jQuery(this), dts);
+        // Add "last" classes
+        groups.forEach(group => {
+            group[group.length - 1].classList.add('last');
         });
 
-        //Toggle on tab (li) click.
-        if (hasTabs) {
-            lis.on('click', function (e) {
-                toggleClasses(jQuery(this), lis);
+        function toggleClasses(clickedItem, group) {
+            const index = group.indexOf(clickedItem);
+            groups.forEach(g => {
+                g.forEach(item => item.classList.remove('current'));
+                g[index].classList.add('current');
             });
-            //Open the first tab.
-            lis.eq(0).trigger('click');
         }
 
-        //Open the first accordion if desired.
+        // Toggle on dt click
+        dts.forEach(dt => {
+            dt.addEventListener('click', () => {
+                if (dt.classList.contains('current') && wrapper.classList.contains('accordion-open')) {
+                    wrapper.classList.remove('accordion-open');
+                } else {
+                    wrapper.classList.add('accordion-open');
+                }
+                toggleClasses(dt, dts);
+            });
+        });
+
+        // Toggle on li click (for tabs)
+        if (hasTabs) {
+            lis.forEach(li => {
+                li.addEventListener('click', () => {
+                    toggleClasses(li, lis);
+                });
+            });
+            // Open the first tab
+            lis[0].click();
+        }
+
+        // Open the first accordion if desired
         if (startOpen) {
-            dts.eq(0).trigger('click');
+            dts[0].click();
         }
-
     });
 
 
@@ -938,14 +688,20 @@ $j(document).ready(function () {
     // While it would make more sense to just move the .block-layered-nav block rather than .col-left-first
     // (since other blocks can be inserted into left_first), it creates simpler code to move the entire
     // .col-left-first block, so that is the approach we're taking
-    if ($j('.col-left-first > .block').length && $j('div.category-products').length) {
-        let repositionLayered = function (mq) {
+    if (document.querySelector('.col-left-first > .block') && document.querySelector('div.category-products')) {
+        const repositionLayered = (mq) => {
+            const colLeftFirst = document.querySelector('.col-left-first');
+            const categoryProducts = document.querySelector('div.category-products');
+            const colMain = document.querySelector('.col-main');
+
             if (mq.matches) {
-                $j('.col-left-first').insertBefore($j('div.category-products'));
+                categoryProducts.parentNode.insertBefore(colLeftFirst, categoryProducts);
             } else {
-                $j('.col-left-first').insertBefore($j('.col-main'));
+                colMain.parentNode.insertBefore(colLeftFirst, colMain);
             }
-        }
+        };
+
+        const maxWidthMediumMediaQuery = window.matchMedia('(max-width: 770px)');
         maxWidthMediumMediaQuery.addEventListener('change', repositionLayered);
         repositionLayered(maxWidthMediumMediaQuery);
     }
@@ -955,19 +711,19 @@ $j(document).ready(function () {
     // ==============================================
 
     // On viewports smaller than 1000px, move the right column into the left column
-    if ($j('.main-container.col3-layout').length > 0) {
-        let reposition3rdColumn = function (mq) {
+    if (document.querySelector('.main-container.col3-layout')) {
+        const reposition3rdColumn = (mq) => {
+            const rightColumn = document.querySelector('.col-right');
             if (mq.matches) {
-                var rightColumn = $j('.col-right');
-                var colWrapper = $j('.col-wrapper');
-                rightColumn.appendTo(colWrapper);
+                const colWrapper = document.querySelector('.col-wrapper');
+                colWrapper.appendChild(rightColumn);
             } else {
-                var rightColumn = $j('.col-right');
-                var main = $j('.main');
-                rightColumn.appendTo(main);
+                const main = document.querySelector('.main');
+                main.appendChild(rightColumn);
             }
-        }
-        let maxWidth1000MediaQuery = window.matchMedia('(max-width: 1000px)');
+        };
+
+        const maxWidth1000MediaQuery = window.matchMedia('(max-width: 1000px)');
         maxWidth1000MediaQuery.addEventListener('change', reposition3rdColumn);
         reposition3rdColumn(maxWidth1000MediaQuery);
     }
@@ -976,21 +732,19 @@ $j(document).ready(function () {
     // Block collapsing (on smaller viewports)
     // ==============================================
 
-    let toggleElementsForMediumSize = function (mq) {
+    const toggleElementsForMediumSize = (mq) => {
+        const elements = document.querySelectorAll(
+            '.col-left-first .block:not(.block-layered-nav) .block-title, ' +
+            '.col-left-first .block-layered-nav .block-subtitle--filter, ' +
+            '.sidebar:not(.col-left-first) .block .block-title'
+        );
+
         if (mq.matches) {
-            $j(
-                '.col-left-first .block:not(.block-layered-nav) .block-title, ' +
-                '.col-left-first .block-layered-nav .block-subtitle--filter, ' +
-                '.sidebar:not(.col-left-first) .block .block-title'
-            ).toggleSingle();
+            toggleSingle(elements);
         } else {
-            $j(
-                '.col-left-first .block:not(.block-layered-nav) .block-title, ' +
-                '.col-left-first .block-layered-nav .block-subtitle--filter, ' +
-                '.sidebar:not(.col-left-first) .block .block-title'
-            ).toggleSingle({destruct: true});
+            toggleSingle(elements, { destruct: true });
         }
-    }
+    };
     maxWidthMediumMediaQuery.addEventListener('change', toggleElementsForMediumSize);
     toggleElementsForMediumSize(maxWidthMediumMediaQuery);
 
@@ -998,14 +752,15 @@ $j(document).ready(function () {
     // OPC - Progress Block
     // ==============================================
 
-    if ($j('body.checkout-onepage-index').length) {
-        let repositionCheckoutProgress = function (mq) {
+    if (document.body.classList.contains('checkout-onepage-index')) {
+        const repositionCheckoutProgress = (mq) => {
+            const checkoutProgressWrapper = document.getElementById('checkout-progress-wrapper');
             if (mq.matches) {
-                $j('#checkout-step-review').prepend($j('#checkout-progress-wrapper'));
+                document.getElementById('checkout-step-review').prepend(checkoutProgressWrapper);
             } else {
-                $j('.col-right').prepend($j('#checkout-progress-wrapper'));
+                document.querySelector('.col-right').prepend(checkoutProgressWrapper);
             }
-        }
+        };
         maxWidthLargeMediaQuery.addEventListener('change', repositionCheckoutProgress);
         repositionCheckoutProgress(maxWidthLargeMediaQuery);
     }
@@ -1014,9 +769,14 @@ $j(document).ready(function () {
     // Checkout Cart - events
     // ==============================================
 
-    if ($j('body.checkout-cart-index').length) {
-        $j('input[name^="cart"]').focus(function () {
-            $j(this).siblings('button').fadeIn();
+    if (document.body.classList.contains('checkout-cart-index')) {
+        document.querySelectorAll('input[name^="cart"]').forEach(input => {
+            input.addEventListener('focus', function() {
+                const siblingButton = this.nextElementSibling;
+                if (siblingButton && siblingButton.tagName === 'BUTTON') {
+                    siblingButton.style.display = 'inline-block'; // or 'block', depending on your layout
+                }
+            });
         });
     }
 
@@ -1024,18 +784,24 @@ $j(document).ready(function () {
     // Gift Registry Styles
     // ==============================================
 
-    if ($j('.a-left').length) {
-        repositionGiftRegistry = function (mq) {
+    if (document.querySelector('.a-left')) {
+        const repositionGiftRegistry = (mq) => {
             if (mq.matches) {
-                $j('.gift-info').each(function() {
-                    $j(this).next('td').children('textarea').appendTo(this).children();
+                document.querySelectorAll('.gift-info').forEach(giftInfo => {
+                    const textarea = giftInfo.nextElementSibling.querySelector('textarea');
+                    if (textarea) {
+                        giftInfo.appendChild(textarea);
+                    }
                 });
             } else {
-                $j('.left-note').each(function() {
-                    $j(this).prev('td').children('textarea').appendTo(this).children();
+                document.querySelectorAll('.left-note').forEach(leftNote => {
+                    const textarea = leftNote.previousElementSibling.querySelector('textarea');
+                    if (textarea) {
+                        leftNote.appendChild(textarea);
+                    }
                 });
             }
-        }
+        };
         maxWidthLargeMediaQuery.addEventListener(repositionGiftRegistry);
         repositionGiftRegistry(maxWidthLargeMediaQuery);
     }
@@ -1047,74 +813,59 @@ $j(document).ready(function () {
     // Since the number of columns per grid will vary based on the viewport size, the only way to align the action
     // buttons/links is via JS
 
-    if ($j('.products-grid').length) {
+    if (document.querySelectorAll('.products-grid').length) {
+        const alignProductGridActions = function () {
+            document.querySelectorAll('.products-grid').forEach(function(grid) {
+                const gridRows = [];
+                let tempRow = [];
+                const productGridElements = grid.children;
 
-        var alignProductGridActions = function () {
-            // Loop through each product grid on the page
-            $j('.products-grid').each(function(){
-                var gridRows = []; // This will store an array per row
-                var tempRow = [];
-                productGridElements = $j(this).children('li');
-                productGridElements.each(function (index) {
-                    // The JS ought to be agnostic of the specific CSS breakpoints, so we are dynamically checking to find
-                    // each row by grouping all cells (eg, li elements) up until we find an element that is cleared.
-                    // We are ignoring the first cell since it will always be cleared.
-                    if ($j(this).css('clear') != 'none' && index != 0) {
-                        gridRows.push(tempRow); // Add the previous set of rows to the main array
-                        tempRow = []; // Reset the array since we're on a new row
+                Array.from(productGridElements).forEach(function (element, index) {
+                    if (window.getComputedStyle(element).clear != 'none' && index != 0) {
+                        gridRows.push(tempRow);
+                        tempRow = [];
                     }
-                    tempRow.push(this);
-
-                    // The last row will not contain any cells that clear that row, so we check to see if this is the last cell
-                    // in the grid, and if so, we add its row to the array
+                    tempRow.push(element);
                     if (productGridElements.length == index + 1) {
                         gridRows.push(tempRow);
                     }
                 });
 
-                $j.each(gridRows, function () {
-                    var tallestProductInfo = 0;
-                    $j.each(this, function () {
-                        // Since this function is called every time the page is resized, we need to remove the min-height
-                        // and bottom-padding so each cell can return to its natural size before being measured.
-                        $j(this).find('.product-info').css({
-                            'min-height': '',
-                            'padding-bottom': ''
-                        });
+                gridRows.forEach(function (row) {
+                    let tallestProductInfo = 0;
+                    row.forEach(function (cell) {
+                        const productInfo = cell.querySelector('.product-info');
+                        const actions = cell.querySelector('.product-info .actions');
 
-                        // We are checking the height of .product-info (rather than the entire li), because the images
-                        // will not be loaded when this JS is run.
-                        var productInfoHeight = $j(this).find('.product-info').height();
-                        // Space above .actions element
-                        var actionSpacing = 10;
-                        // The height of the absolutely positioned .actions element
-                        var actionHeight = $j(this).find('.product-info .actions').height();
+                        productInfo.style.minHeight = '';
+                        productInfo.style.paddingBottom = '';
 
-                        // Add height of two elements. This is necessary since .actions is absolutely positioned and won't
-                        // be included in the height of .product-info
-                        var totalHeight = productInfoHeight + actionSpacing + actionHeight;
+                        const productInfoHeight = productInfo.clientHeight - actions.offsetHeight;
+                        const actionSpacing = 10;
+                        const actionHeight = actions.offsetHeight;
+                        const totalHeight = productInfoHeight + actionSpacing + actionHeight;
+
                         if (totalHeight > tallestProductInfo) {
                             tallestProductInfo = totalHeight;
                         }
-
-                        // Set the bottom-padding to accommodate the height of the .actions element. Note: if .actions
-                        // elements are of varying heights, they will not be aligned.
-                        $j(this).find('.product-info').css('padding-bottom', actionHeight + 'px');
                     });
-                    // Set the height of all .product-info elements in a row to the tallest height
-                    $j.each(this, function () {
-                        $j(this).find('.product-info').css('min-height', tallestProductInfo);
+
+                    row.forEach(function (cell) {
+                        const productInfo = cell.querySelector('.product-info');
+                        const actions = cell.querySelector('.product-info .actions');
+
+                        productInfo.style.minHeight = `${tallestProductInfo}px`;
+                        productInfo.style.paddingBottom = `${actions.offsetHeight}px`;
                     });
                 });
             });
         };
+
+        // Run the alignment function initially
         alignProductGridActions();
 
-        // Since the height of each cell and the number of columns per page may change when the page is resized, we are
-        // going to run the alignment function each time the page is resized.
-        $j(window).on('delayed-resize', function (e, resizeEvent) {
-            alignProductGridActions();
-        });
+        // Run the alignment function on window resize
+        window.addEventListener('delayed-resize', alignProductGridActions);
     }
 
     // ==============================================
@@ -1122,11 +873,13 @@ $j(document).ready(function () {
     // ==============================================
 
     // Using setTimeout since Web-Kit and some other browsers call the resize function constantly upon window resizing.
-    var resizeTimer;
-    $j(window).resize(function (e) {
+    let resizeTimer;
+    window.addEventListener('resize', (e) => {
         clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function () {
-            $j(window).trigger('delayed-resize', e);
+        resizeTimer = setTimeout(() => {
+            // Create and dispatch a custom event
+            const event = new CustomEvent('delayed-resize', { detail: e });
+            window.dispatchEvent(event);
         }, 250);
     });
 });
@@ -1139,105 +892,114 @@ var ProductMediaManager = {
     IMAGE_ZOOM_THRESHOLD: 20,
     imageWrapper: null,
 
-    destroyZoom: function() {
-        $j('.zoomContainer').remove();
-        $j('.product-image-gallery .gallery-image').removeData('elevateZoom');
-    },
-
     createZoom: function(image) {
-        // Destroy since zoom shouldn't be enabled under certain conditions
-        ProductMediaManager.destroyZoom();
-
-        if(
-            // Don't use zoom on devices where touch has been used
-            PointerManager.getPointer() == PointerManager.TOUCH_POINTER_TYPE
-            // Don't use zoom when screen is small, or else zoom window shows outside body
-            || window.matchMedia("screen and (max-width:" + bp.medium + "px)").matches
-        ) {
-            return; // zoom not enabled
-        }
-
-        if(image.length <= 0) { //no image found
+        if (PointerManager.getPointer() == PointerManager.TOUCH_POINTER_TYPE
+            || window.matchMedia("screen and (max-width:" + bp.medium + "px)").matches) {
             return;
         }
 
-        if(image[0].naturalWidth && image[0].naturalHeight) {
-            var widthDiff = image[0].naturalWidth - image.width() - ProductMediaManager.IMAGE_ZOOM_THRESHOLD;
-            var heightDiff = image[0].naturalHeight - image.height() - ProductMediaManager.IMAGE_ZOOM_THRESHOLD;
+        if (!image) {
+            return;
+        }
 
-            if(widthDiff < 0 && heightDiff < 0) {
-                //image not big enough
+        if (image.naturalWidth && image.naturalHeight) {
+            let widthDiff = image.naturalWidth - image.width - ProductMediaManager.IMAGE_ZOOM_THRESHOLD;
+            let heightDiff = image.naturalHeight - image.height - ProductMediaManager.IMAGE_ZOOM_THRESHOLD;
+            let parentImage = image.closest('.product-image');
 
-                image.parents('.product-image').removeClass('zoom-available');
-
+            if (widthDiff < 0 && heightDiff < 0) {
+                parentImage.classList.remove('zoom-available');
                 return;
             } else {
-                image.parents('.product-image').addClass('zoom-available');
+                parentImage.classList.add('zoom-available');
             }
         }
 
-        image.elevateZoom();
+        const container = document.querySelector(".product-image-gallery");
+        container.addEventListener("mousemove", onZoom);
+        container.addEventListener("mouseover", onZoom);
+        container.addEventListener("mouseleave", offZoom);
+
+        function onZoom(e) {
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const img = document.querySelector(".product-image-gallery img.visible");
+            img.style.transformOrigin = `${x}px ${y}px`;
+            img.style.transform = "scale(2.5)";
+        }
+
+        function offZoom(e) {
+            const img = document.querySelector(".product-image-gallery img.visible");
+            img.style.transformOrigin = `center center`;
+            img.style.transform = "scale(1)";
+        }
     },
 
     swapImage: function(targetImage) {
-        targetImage = $j(targetImage);
-        targetImage.addClass('gallery-image');
-        ProductMediaManager.destroyZoom();
-        const imageGallery = $j('.product-image-gallery');
+        targetImage.classList.add('gallery-image');
+        const imageGallery = document.querySelector('.product-image-gallery');
 
         const swapAndZoom = () => {
-            imageGallery.find('.gallery-image').removeClass('visible');
-            imageGallery.append(targetImage);
-            targetImage.addClass('visible');
+            imageGallery.querySelectorAll('.gallery-image').forEach(image => {
+                image.classList.remove('visible');
+            });
+
+            // Append targetImage to the gallery
+            imageGallery.appendChild(targetImage);
+            targetImage.classList.add('visible');
             ProductMediaManager.createZoom(targetImage);
         };
 
-        targetImage.removeAttr('loading'); // Remove lazy load
-        if (targetImage[0].complete) {
+        // Remove the loading attribute
+        targetImage.removeAttribute('loading'); // Remove lazy load
+        if (targetImage.complete) {
             // Image already loaded, swap immediately
             swapAndZoom();
         } else {
             // Need to wait for image to load
-            imageGallery.addClass('loading');
-            imageGallery.append(targetImage);
+            imageGallery.classList.add('loading');
+            imageGallery.appendChild(targetImage);
 
-            targetImage.on('load', function() {
-                imageGallery.removeClass('loading');
+            targetImage.onload = function() {
+                imageGallery.classList.remove('loading');
                 swapAndZoom();
-            });
+            };
         }
     },
 
     wireThumbnails: function() {
-        //trigger image change event on thumbnail click
-        $j('.product-image-thumbs .thumb-link').click(function(e) {
-            e.preventDefault();
-            var jlink = $j(this);
-            var target = $j('#image-' + jlink.data('image-index'));
-            ProductMediaManager.swapImage(target);
+        document.querySelectorAll('.product-image-thumbs .thumb-link').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                let imageIndex = link.getAttribute('data-image-index');
+                let target = document.querySelector('#image-' + imageIndex);
+                ProductMediaManager.swapImage(target);
+            });
         });
     },
 
     initZoom: function() {
-        ProductMediaManager.createZoom($j(".gallery-image.visible")); //set zoom on first image
+        ProductMediaManager.createZoom(document.querySelector(".gallery-image.visible"));
     },
 
     init: function() {
-        ProductMediaManager.imageWrapper = $j('.product-img-box');
+        ProductMediaManager.imageWrapper = document.querySelector('.product-img-box');
 
         // Re-initialize zoom on viewport size change since resizing causes problems with zoom and since smaller
         // viewport sizes shouldn't have zoom
-        $j(window).on('delayed-resize', function(e, resizeEvent) {
+        window.addEventListener('delayed-resize', function(e) {
             ProductMediaManager.initZoom();
         });
 
         ProductMediaManager.initZoom();
         ProductMediaManager.wireThumbnails();
-        $j(document).trigger('product-media-loaded', ProductMediaManager);
+        const event = new CustomEvent('product-media-loaded', { detail: ProductMediaManager });
+        document.dispatchEvent(event);
     }
 };
 
-$j(document).ready(function() {
+document.addEventListener('DOMContentLoaded', () => {
     ProductMediaManager.init();
 });
 
