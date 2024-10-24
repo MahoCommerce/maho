@@ -39,7 +39,7 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
      *
      * @var string
      */
-    protected $_currentArea = 'frontend';
+    protected $_currentArea = Mage_Core_Model_App_Area::AREA_FRONTEND;
 
     /**
      * Namespace for session.

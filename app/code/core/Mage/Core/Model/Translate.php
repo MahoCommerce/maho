@@ -107,7 +107,7 @@ class Mage_Core_Model_Translate
         $this->setConfig([self::CONFIG_KEY_AREA => $area]);
 
         $this->_translateInline = Mage::getSingleton('core/translate_inline')
-            ->isAllowed($area == 'adminhtml' ? 'admin' : null);
+            ->isAllowed($area === Mage_Core_Model_App_Area::AREA_ADMINHTML ? 'admin' : null);
 
         if (!$forceReload) {
             if ($this->_canUseCache()) {

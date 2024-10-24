@@ -82,7 +82,7 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
                 // send email
                 $mailTemplate = Mage::getModel('core/email_template');
                 /** @var Mage_Core_Model_Email_Template $mailTemplate */
-                $mailTemplate->setDesignConfig(['area' => 'frontend'])
+                $mailTemplate->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND])
                     ->setReplyTo($post['email'])
                     ->sendTransactional(
                         Mage::getStoreConfig(self::XML_PATH_EMAIL_TEMPLATE),
@@ -100,7 +100,7 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
                 if (Mage::getStoreConfigFlag(self::XML_PATH_AUTO_REPLY_ENABLED)) {
                     $mailTemplate = Mage::getModel('core/email_template');
                     /** @var Mage_Core_Model_Email_Template $mailTemplate */
-                    $mailTemplate->setDesignConfig(['area' => 'frontend'])
+                    $mailTemplate->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND])
                         ->setReplyTo(Mage::getStoreConfig(self::XML_PATH_EMAIL_RECIPIENT))
                         ->sendTransactional(
                             Mage::getStoreConfig(self::XML_PATH_AUTO_REPLY_EMAIL_TEMPLATE),
