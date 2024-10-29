@@ -427,7 +427,7 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
     {
         $response = $this->getResponse();
         if ($response->getUser1()) {
-            return (int) $response->getUser1();
+            return (int)$response->getUser1();
         }
 
         return Mage::app()->getStore($this->getStore())->getId();

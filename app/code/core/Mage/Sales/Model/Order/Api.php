@@ -182,7 +182,7 @@ class Mage_Sales_Model_Order_Api extends Mage_Sales_Model_Api_Resource
                 $oldStore = Mage::getDesign()->getStore();
                 $oldArea = Mage::getDesign()->getArea();
                 Mage::getDesign()->setStore($order->getStoreId());
-                Mage::getDesign()->setArea('frontend');
+                Mage::getDesign()->setArea(Mage_Core_Model_App_Area::AREA_FRONTEND);
             }
 
             $order->save();

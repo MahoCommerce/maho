@@ -27,7 +27,7 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
     /**
      * Default design area for emulation
      */
-    public const DEFAULT_DESIGN_AREA = 'frontend';
+    public const DEFAULT_DESIGN_AREA = Mage_Core_Model_App_Area::AREA_FRONTEND;
 
     /**
      * Configuration of design package for template

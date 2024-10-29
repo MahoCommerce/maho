@@ -766,27 +766,12 @@ parameters:
 			path: app/code/core/Mage/Bundle/Block/Adminhtml/Sales/Order/Items/Renderer.php
 
 		-
-			message: "#^Call to an undefined method Mage_Catalog_Model_Product_Type_Price\\:\\:getIsPricesCalculatedByIndex\\(\\)\\.$#"
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Catalog/Product/Price.php
-
-		-
-			message: "#^Call to an undefined method Mage_Catalog_Model_Product_Type_Price\\:\\:getSelectionPreFinalPrice\\(\\)\\.$#"
-			count: 3
-			path: app/code/core/Mage/Bundle/Block/Catalog/Product/View/Type/Bundle/Option.php
-
-		-
 			message: "#^Variable \\$_items might not be defined\\.$#"
 			count: 1
 			path: app/code/core/Mage/Bundle/Block/Sales/Order/Items/Renderer.php
 
 		-
 			message: "#^Call to an undefined method Mage_Catalog_Model_Product_Configuration_Item_Interface\\:\\:getQty\\(\\)\\.$#"
-			count: 1
-			path: app/code/core/Mage/Bundle/Helper/Catalog/Product/Configuration.php
-
-		-
-			message: "#^Call to an undefined method Mage_Catalog_Model_Product_Type_Price\\:\\:getSelectionFinalTotalPrice\\(\\)\\.$#"
 			count: 1
 			path: app/code/core/Mage/Bundle/Helper/Catalog/Product/Configuration.php
 
@@ -829,11 +814,6 @@ parameters:
 			message: "#^Offset 'option_id' does not exist on array\\{final_price\\: mixed\\}\\.$#"
 			count: 2
 			path: app/code/core/Mage/Bundle/Model/Product/Price.php
-
-		-
-			message: "#^Call to an undefined method Mage_Catalog_Model_Product_Type_Price\\:\\:getSelectionFinalTotalPrice\\(\\)\\.$#"
-			count: 2
-			path: app/code/core/Mage/Bundle/Model/Product/Type.php
 
 		-
 			message: "#^Call to function is_array\\(\\) with string will always evaluate to false\\.$#"
@@ -996,11 +976,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Widget/Link.php
 
 		-
-			message: "#^Property Mage_Catalog_Helper_Data\\:\\:\\$_categoryPath \\(string\\) does not accept array\\<string, array\\<string, string\\>\\>\\.$#"
-			count: 1
-			path: app/code/core/Mage/Catalog/Helper/Data.php
-
-		-
 			message: "#^Property Mage_Catalog_Helper_Output\\:\\:\\$_templateProcessor \\(Varien_Filter_Template\\) does not accept Mage_Core_Model_Abstract\\|false\\.$#"
 			count: 1
 			path: app/code/core/Mage/Catalog/Helper/Output.php
@@ -1081,11 +1056,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Category.php
 
 		-
-			message: "#^Method Mage_Catalog_Model_Category\\:\\:getDefaultAttributeSetId\\(\\) should return int but returns string\\|null\\.$#"
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Category.php
-
-		-
 			message: "#^Cannot call method getRootCategoryId\\(\\) on int\\|string\\.$#"
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Category/Api.php
@@ -1116,7 +1086,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
 
 		-
-			message: "#^Call to an undefined method Mage_Eav_Model_Entity_Collection\\:\\:setStoreId\\(\\)\\.$#"
+			message: "#^Cannot call method setStoreId\\(\\) on Mage_Eav_Model_Entity_Collection\\|false\\.$#"
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
 
@@ -1131,7 +1101,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
 
 		-
-			message: "#^Return type \\(Mage_Catalog_Model_Resource_Product_Collection\\) of method Mage_Catalog_Model_Convert_Adapter_Product\\:\\:_getCollectionForLoad\\(\\) should be compatible with return type \\(Mage_Eav_Model_Entity_Collection\\) of method Mage_Eav_Model_Convert_Adapter_Entity\\:\\:_getCollectionForLoad\\(\\)$#"
+			message: "#^Return type \\(Mage_Catalog_Model_Resource_Product_Collection\\) of method Mage_Catalog_Model_Convert_Adapter_Product\\:\\:_getCollectionForLoad\\(\\) should be compatible with return type \\(Mage_Eav_Model_Entity_Collection\\|false\\) of method Mage_Eav_Model_Convert_Adapter_Entity\\:\\:_getCollectionForLoad\\(\\)$#"
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
 
@@ -1206,7 +1176,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product.php
 
 		-
-			message: "#^Method Mage_Catalog_Model_Product\\:\\:getDefaultAttributeSetId\\(\\) should return int but returns string\\|null\\.$#"
+			message: "#^Method Mage_Catalog_Model_Product\\:\\:getPriceModel\\(\\) should return Mage_Bundle_Model_Product_Price but returns Mage_Catalog_Model_Product_Type_Price\\.$#"
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product.php
 
@@ -1494,11 +1464,6 @@ parameters:
 			message: "#^Method Mage_Catalog_Model_Resource_Product_Compare_Item\\:\\:getCount\\(\\) should return int but returns string\\|false\\|null\\.$#"
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Compare/Item.php
-
-		-
-			message: "#^Method Mage_Catalog_Model_Resource_Product_Flat\\:\\:getTypeId\\(\\) should return int but returns string\\|null\\.$#"
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Flat.php
 
 		-
 			message: "#^Method Mage_Catalog_Model_Resource_Product_Indexer_Abstract\\:\\:_getAttribute\\(\\) should return Mage_Catalog_Model_Resource_Eav_Attribute but returns Mage_Eav_Model_Entity_Attribute_Abstract\\|false\\.$#"
@@ -2506,11 +2471,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Config.php
 
 		-
-			message: "#^Method Mage_Eav_Model_Convert_Adapter_Entity\\:\\:_getCollectionForLoad\\(\\) should return Mage_Eav_Model_Entity_Collection but returns Mage_Core_Model_Resource_Db_Collection_Abstract\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Entity.php
-
-		-
 			message: "#^Variable \\$defBind might not be defined\\.$#"
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Entity.php
@@ -2604,11 +2564,6 @@ parameters:
 			message: "#^Property Mage_Eav_Model_Entity_Attribute_Abstract\\:\\:\\$_source \\(Mage_Eav_Model_Entity_Attribute_Source_Abstract\\) in empty\\(\\) is not falsy\\.$#"
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
-
-		-
-			message: "#^Return type \\(\\$this\\(Mage_Eav_Model_Entity_Attribute_Backend_Abstract\\)\\) of method Mage_Eav_Model_Entity_Attribute_Backend_Abstract\\:\\:setValueId\\(\\) should be compatible with return type \\(int\\) of method Mage_Eav_Model_Entity_Attribute_Backend_Interface\\:\\:setValueId\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Backend/Abstract.php
 
 		-
 			message: "#^Variable \\$out in empty\\(\\) always exists and is not falsy\\.$#"
@@ -2739,11 +2694,6 @@ parameters:
 			message: "#^PHPDoc tag @param for parameter \\$object with type Mage_Eav_Model_Resource_Form_Type is incompatible with native type Mage_Core_Model_Abstract\\.$#"
 			count: 2
 			path: app/code/core/Mage/Eav/Model/Resource/Form/Type.php
-
-		-
-			message: "#^Method Mage_GiftMessage_Model_Api_V2\\:\\:_prepareData\\(\\) should return array but returns mixed\\.$#"
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Model/Api/V2.php
 
 		-
 			message: "#^Return type \\(stdClass\\) of method Mage_GiftMessage_Model_Api_V2\\:\\:_setGiftMessage\\(\\) should be compatible with return type \\(array\\) of method Mage_GiftMessage_Model_Api\\:\\:_setGiftMessage\\(\\)$#"
@@ -3416,21 +3366,6 @@ parameters:
 			path: app/code/core/Mage/Rule/Model/Condition/Product/Abstract.php
 
 		-
-			message: "#^Cannot call method setParentFilter\\(\\) on Mage_Core_Model_Resource_Db_Collection_Abstract\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Order/Comments.php
-
-		-
-			message: "#^Method Mage_Sales_Block_Order_Comments\\:\\:getComments\\(\\) should return Mage_Sales_Model_Resource_Order_Comment_Collection_Abstract but returns Mage_Core_Model_Resource_Db_Collection_Abstract\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Order/Comments.php
-
-		-
-			message: "#^Property Mage_Sales_Block_Order_Comments\\:\\:\\$_commentCollection \\(Mage_Sales_Model_Resource_Order_Comment_Collection_Abstract\\|null\\) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Order/Comments.php
-
-		-
 			message: "#^Call to method setOrderFilter\\(\\) on an unknown class Mage_Sales_Model_Resource_Invoice_Collection\\.$#"
 			count: 1
 			path: app/code/core/Mage/Sales/Block/Order/Details.php
@@ -3451,36 +3386,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Entity/Quote.php
 
 		-
-			message: "#^Return type \\(\\$this\\(Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend_Custbalance\\)\\) of method Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend_Custbalance\\:\\:fetchTotals\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend\\:\\:fetchTotals\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Quote/Address/Attribute/Frontend/Custbalance.php
-
-		-
-			message: "#^Return type \\(\\$this\\(Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend_Discount\\)\\) of method Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend_Discount\\:\\:fetchTotals\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend\\:\\:fetchTotals\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Quote/Address/Attribute/Frontend/Discount.php
-
-		-
-			message: "#^Return type \\(\\$this\\(Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend_Grand\\)\\) of method Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend_Grand\\:\\:fetchTotals\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend\\:\\:fetchTotals\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Quote/Address/Attribute/Frontend/Grand.php
-
-		-
-			message: "#^Return type \\(\\$this\\(Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend_Shipping\\)\\) of method Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend_Shipping\\:\\:fetchTotals\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend\\:\\:fetchTotals\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Quote/Address/Attribute/Frontend/Shipping.php
-
-		-
-			message: "#^Return type \\(\\$this\\(Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend_Subtotal\\)\\) of method Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend_Subtotal\\:\\:fetchTotals\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend\\:\\:fetchTotals\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Quote/Address/Attribute/Frontend/Subtotal.php
-
-		-
-			message: "#^Return type \\(\\$this\\(Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend_Tax\\)\\) of method Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend_Tax\\:\\:fetchTotals\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Entity_Quote_Address_Attribute_Frontend\\:\\:fetchTotals\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Quote/Address/Attribute/Frontend/Tax.php
-
-		-
 			message: "#^Variable \\$oldArea might not be defined\\.$#"
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Order/Api.php
@@ -3497,11 +3402,6 @@ parameters:
 
 		-
 			message: "#^Cannot call method addAttributeToFilter\\(\\) on Mage_Core_Model_Resource_Db_Collection_Abstract\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Invoice.php
-
-		-
-			message: "#^Property Mage_Core_Model_Abstract\\:\\:\\$_origData \\(array\\) does not accept null\\.$#"
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Order/Invoice.php
 
@@ -3626,37 +3526,7 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Address.php
 
 		-
-			message: "#^Return type \\(\\$this\\(Mage_Sales_Model_Quote_Address_Total_Discount\\)\\) of method Mage_Sales_Model_Quote_Address_Total_Discount\\:\\:fetch\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Quote_Address_Total_Abstract\\:\\:fetch\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Discount.php
-
-		-
-			message: "#^Return type \\(Mage_Sales_Model_Quote_Address_Total_Grand\\) of method Mage_Sales_Model_Quote_Address_Total_Grand\\:\\:fetch\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Quote_Address_Total_Abstract\\:\\:fetch\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Grand.php
-
-		-
-			message: "#^Return type \\(\\$this\\(Mage_Sales_Model_Quote_Address_Total_Nominal\\)\\) of method Mage_Sales_Model_Quote_Address_Total_Nominal\\:\\:fetch\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Quote_Address_Total_Abstract\\:\\:fetch\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Nominal.php
-
-		-
-			message: "#^Return type \\(array\\) of method Mage_Sales_Model_Quote_Address_Total_Nominal_Shipping\\:\\:fetch\\(\\) should be compatible with return type \\(Mage_Sales_Model_Quote_Address_Total_Shipping\\) of method Mage_Sales_Model_Quote_Address_Total_Shipping\\:\\:fetch\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Nominal/Shipping.php
-
-		-
-			message: "#^Return type \\(array\\) of method Mage_Sales_Model_Quote_Address_Total_Nominal_Subtotal\\:\\:fetch\\(\\) should be compatible with return type \\(Mage_Sales_Model_Quote_Address_Total_Subtotal\\) of method Mage_Sales_Model_Quote_Address_Total_Subtotal\\:\\:fetch\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Nominal/Subtotal.php
-
-		-
 			message: "#^Negated boolean expression is always true\\.$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Shipping.php
-
-		-
-			message: "#^Return type \\(Mage_Sales_Model_Quote_Address_Total_Shipping\\) of method Mage_Sales_Model_Quote_Address_Total_Shipping\\:\\:fetch\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Quote_Address_Total_Abstract\\:\\:fetch\\(\\)$#"
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Shipping.php
 
@@ -3664,16 +3534,6 @@ parameters:
 			message: "#^Variable \\$addressQty in isset\\(\\) always exists and is not nullable\\.$#"
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Shipping.php
-
-		-
-			message: "#^Return type \\(Mage_Sales_Model_Quote_Address_Total_Subtotal\\) of method Mage_Sales_Model_Quote_Address_Total_Subtotal\\:\\:fetch\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Quote_Address_Total_Abstract\\:\\:fetch\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Subtotal.php
-
-		-
-			message: "#^Return type \\(\\$this\\(Mage_Sales_Model_Quote_Address_Total_Tax\\)\\) of method Mage_Sales_Model_Quote_Address_Total_Tax\\:\\:fetch\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Quote_Address_Total_Abstract\\:\\:fetch\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Tax.php
 
 		-
 			message: "#^Instanceof between Mage_Sales_Model_Quote_Item_Option and Mage_Sales_Model_Quote_Item_Option will always evaluate to true\\.$#"
@@ -3711,36 +3571,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Resource/Order/Payment/Transaction.php
 
 		-
-			message: "#^Return type \\(\\$this\\(Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend_Custbalance\\)\\) of method Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend_Custbalance\\:\\:fetchTotals\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend\\:\\:fetchTotals\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Quote/Address/Attribute/Frontend/Custbalance.php
-
-		-
-			message: "#^Return type \\(\\$this\\(Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend_Discount\\)\\) of method Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend_Discount\\:\\:fetchTotals\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend\\:\\:fetchTotals\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Quote/Address/Attribute/Frontend/Discount.php
-
-		-
-			message: "#^Return type \\(\\$this\\(Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend_Grand\\)\\) of method Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend_Grand\\:\\:fetchTotals\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend\\:\\:fetchTotals\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Quote/Address/Attribute/Frontend/Grand.php
-
-		-
-			message: "#^Return type \\(\\$this\\(Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend_Shipping\\)\\) of method Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend_Shipping\\:\\:fetchTotals\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend\\:\\:fetchTotals\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Quote/Address/Attribute/Frontend/Shipping.php
-
-		-
-			message: "#^Return type \\(\\$this\\(Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend_Subtotal\\)\\) of method Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend_Subtotal\\:\\:fetchTotals\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend\\:\\:fetchTotals\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Quote/Address/Attribute/Frontend/Subtotal.php
-
-		-
-			message: "#^Return type \\(\\$this\\(Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend_Tax\\)\\) of method Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend_Tax\\:\\:fetchTotals\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend\\:\\:fetchTotals\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Quote/Address/Attribute/Frontend/Tax.php
-
-		-
 			message: "#^Comparison operation \"\\!\\=\" between array\\|int and 0 results in an error\\.$#"
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Resource/Report/Bestsellers/Collection.php
@@ -3769,16 +3599,6 @@ parameters:
 			message: "#^Variable \\$billingAgreement might not be defined\\.$#"
 			count: 2
 			path: app/code/core/Mage/Sales/controllers/Billing/AgreementController.php
-
-		-
-			message: "#^Return type \\(Mage_SalesRule_Model_Quote_Discount\\) of method Mage_SalesRule_Model_Quote_Discount\\:\\:fetch\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Quote_Address_Total_Abstract\\:\\:fetch\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Quote/Discount.php
-
-		-
-			message: "#^Return type \\(Mage_SalesRule_Model_Quote_Freeshipping\\) of method Mage_SalesRule_Model_Quote_Freeshipping\\:\\:fetch\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Quote_Address_Total_Abstract\\:\\:fetch\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Quote/Freeshipping.php
 
 		-
 			message: "#^Return type \\(array\\) of method Mage_SalesRule_Model_Quote_Nominal_Discount\\:\\:fetch\\(\\) should be compatible with return type \\(Mage_SalesRule_Model_Quote_Discount\\) of method Mage_SalesRule_Model_Quote_Discount\\:\\:fetch\\(\\)$#"
@@ -3949,16 +3769,6 @@ parameters:
 			message: "#^Variable \\$zipTo might not be defined\\.$#"
 			count: 1
 			path: app/code/core/Mage/Tax/Model/Resource/Calculation.php
-
-		-
-			message: "#^Return type \\(array\\) of method Mage_Tax_Model_Sales_Total_Quote_Nominal_Tax\\:\\:fetch\\(\\) should be compatible with return type \\(\\$this\\(Mage_Tax_Model_Sales_Total_Quote_Tax\\)\\) of method Mage_Tax_Model_Sales_Total_Quote_Tax\\:\\:fetch\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Sales/Total/Quote/Nominal/Tax.php
-
-		-
-			message: "#^Return type \\(\\$this\\(Mage_Tax_Model_Sales_Total_Quote_Tax\\)\\) of method Mage_Tax_Model_Sales_Total_Quote_Tax\\:\\:fetch\\(\\) should be compatible with return type \\(array\\) of method Mage_Sales_Model_Quote_Address_Total_Abstract\\:\\:fetch\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Sales/Total/Quote/Tax.php
 
 		-
 			message: "#^Variable \\$baseRowTax might not be defined\\.$#"
@@ -4179,11 +3989,6 @@ parameters:
 			message: "#^Method Mage_Weee_Helper_Data\\:\\:getOriginalAmount\\(\\) should return int but returns float\\.$#"
 			count: 1
 			path: app/code/core/Mage/Weee/Helper/Data.php
-
-		-
-			message: "#^Return type \\(\\$this\\(Mage_Weee_Model_Attribute_Backend_Weee_Tax\\)\\) of method Mage_Weee_Model_Attribute_Backend_Weee_Tax\\:\\:validate\\(\\) should be compatible with return type \\(bool\\) of method Mage_Eav_Model_Entity_Attribute_Backend_Abstract\\:\\:validate\\(\\)$#"
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Attribute/Backend/Weee/Tax.php
 
 		-
 			message: "#^Call to an undefined method Mage_Eav_Model_Entity_Attribute_Abstract\\:\\:isScopeGlobal\\(\\)\\.$#"

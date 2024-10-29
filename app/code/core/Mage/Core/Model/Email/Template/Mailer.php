@@ -56,7 +56,8 @@ class Mage_Core_Model_Email_Template_Mailer extends Varien_Object
             // Handle "Bcc" recipients of the current email
             $emailTemplate->addBcc($emailInfo->getBccEmails());
             // Set required design parameters and delegate email sending to Mage_Core_Model_Email_Template
-            $emailTemplate->setDesignConfig(['area' => 'frontend', 'store' => $this->getStoreId()])
+            $emailTemplate
+                ->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND, 'store' => $this->getStoreId()])
                 ->setQueue($this->getQueue())
                 ->sendTransactional(
                     $this->getTemplateId(),

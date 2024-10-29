@@ -511,7 +511,7 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
         $translate->setTranslateInline(false);
 
         $email = Mage::getModel('core/email_template');
-        $email->setDesignConfig(['area' => 'frontend', 'store' => $this->getStoreId()]);
+        $email->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND, 'store' => $this->getStoreId()]);
 
         $email->sendTransactional(
             Mage::getStoreConfig(self::XML_PATH_CONFIRM_EMAIL_TEMPLATE),
@@ -548,7 +548,7 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
         $translate->setTranslateInline(false);
 
         $email = Mage::getModel('core/email_template');
-        $email->setDesignConfig(['area' => 'frontend', 'store' => $this->getStoreId()]);
+        $email->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND, 'store' => $this->getStoreId()]);
 
         $email->sendTransactional(
             Mage::getStoreConfig(self::XML_PATH_SUCCESS_EMAIL_TEMPLATE),
@@ -584,7 +584,7 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
         $translate->setTranslateInline(false);
 
         $email = Mage::getModel('core/email_template');
-        $email->setDesignConfig(['area' => 'frontend', 'store' => $this->getStoreId()]);
+        $email->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND, 'store' => $this->getStoreId()]);
 
         $email->sendTransactional(
             Mage::getStoreConfig(self::XML_PATH_UNSUBSCRIBE_EMAIL_TEMPLATE),

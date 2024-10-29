@@ -21,8 +21,8 @@ class Varien_Data_Form_Filter_Datetime extends Varien_Data_Form_Filter_Date
     /**
      * Returns the result of filtering $value
      *
-     * @param string $value
-     * @return string
+     * @param string|null $value
+     * @return string|null
      */
     #[\Override]
     public function inputFilter($value)

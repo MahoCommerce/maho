@@ -204,7 +204,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
     }
 
     /**
-     * @param string $joinAttr
+     * @param array $joinAttr
      * @throws Exception
      */
     public function setJoinAttr($joinAttr)
@@ -320,7 +320,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      * Retrieve collection for load
      *
      * @param string $entityType
-     * @return Mage_Eav_Model_Entity_Collection
+     * @return Mage_Eav_Model_Entity_Collection|false
      */
     protected function _getCollectionForLoad($entityType)
     {
@@ -347,6 +347,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
         try {
             $i = 0;
             foreach ($collection->getIterator() as $model) {
+                // phpcs:ignore Ecg.Performance.Loop.ModelLSD
                 $model->save();
                 $i++;
             }

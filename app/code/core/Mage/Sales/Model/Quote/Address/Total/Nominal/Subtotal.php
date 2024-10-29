@@ -35,7 +35,7 @@ class Mage_Sales_Model_Quote_Address_Total_Nominal_Subtotal extends Mage_Sales_M
     /**
      * Don't fetch anything
      *
-     * @return array
+     * @return array|Mage_Sales_Model_Quote_Address_Total_Abstract
      */
     #[\Override]
     public function fetch(Mage_Sales_Model_Quote_Address $address)
