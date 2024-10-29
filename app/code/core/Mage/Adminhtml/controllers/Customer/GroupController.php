@@ -108,35 +108,25 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
             $customerGroup->load((int)$id);
         }
 
-        // save these fields for all groups except not logged in
-        if (is_null($id) || (int)$id !== Mage_Customer_Model_Group::NOT_LOGGED_IN_ID) {
-            $customerGroup->setCode((string)$this->getRequest()->getParam('code'));
-            $customerGroup->setCustomerAttributeSetId((int)$this->getRequest()->getParam('customer_attribute_set'));
-            $customerGroup->setCustomerAddressAttributeSetId((int)$this->getRequest()->getParam('customer_address_attribute_set'));
-        }
+        try {
+            $customerGroupCode = (string)$this->getRequest()->getParam('code');
 
-        $taxClass = (int)$this->getRequest()->getParam('tax_class');
-
-        if ($taxClass) {
-            try {
-                $customerGroupCode = (string)$this->getRequest()->getParam('code');
-
-                if (!empty($customerGroupCode)) {
-                    $customerGroup->setCode($customerGroupCode);
-                }
-
-                $customerGroup->setTaxClassId($taxClass)->save();
-                Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('customer')->__('The customer group has been saved.'));
-                $this->getResponse()->setRedirect($this->getUrl('*/customer_group'));
-                return;
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                Mage::getSingleton('adminhtml/session')->setCustomerGroupData($customerGroup->getData());
-                $this->getResponse()->setRedirect($this->getUrl('*/customer_group/edit', ['id' => $id]));
-                return;
+            if (!empty($customerGroupCode)) {
+                $customerGroup->setCode($customerGroupCode);
             }
-        } else {
-            $this->_forward('new');
+
+            $customerGroup
+                ->setCustomerAttributeSetId((int)$this->getRequest()->getParam('customer_attribute_set'))
+                ->setCustomerAddressAttributeSetId((int)$this->getRequest()->getParam('customer_address_attribute_set'))
+                ->setTaxClassId((int)$this->getRequest()->getParam('tax_class'))
+                ->save();
+
+            Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('customer')->__('The customer group has been saved.'));
+            $this->getResponse()->setRedirect($this->getUrl('*/customer_group'));
+        } catch (Exception $e) {
+            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            Mage::getSingleton('adminhtml/session')->setCustomerGroupData($customerGroup->getData());
+            $this->getResponse()->setRedirect($this->getUrl('*/customer_group/edit', ['id' => $id]));
         }
     }
 
