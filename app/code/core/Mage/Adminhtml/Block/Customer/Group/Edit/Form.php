@@ -34,35 +34,27 @@ class Mage_Adminhtml_Block_Customer_Group_Edit_Form extends Mage_Adminhtml_Block
             'required-entry validate-length maximum-length-%d',
             Mage_Customer_Model_Group::GROUP_CODE_MAX_LENGTH
         );
-        $name = $fieldset->addField(
-            'customer_group_code',
-            'text',
-            [
-                'name'  => 'code',
-                'label' => Mage::helper('customer')->__('Group Name'),
-                'title' => Mage::helper('customer')->__('Group Name'),
-                'note'  => Mage::helper('customer')->__('Maximum length must be less then %s symbols', Mage_Customer_Model_Group::GROUP_CODE_MAX_LENGTH),
-                'class' => $validateClass,
-                'required' => true,
-            ]
-        );
+        $name = $fieldset->addField('customer_group_code', 'text', [
+            'name'  => 'code',
+            'label' => Mage::helper('customer')->__('Group Name'),
+            'title' => Mage::helper('customer')->__('Group Name'),
+            'note'  => Mage::helper('customer')->__('Maximum length must be less then %s symbols', Mage_Customer_Model_Group::GROUP_CODE_MAX_LENGTH),
+            'class' => $validateClass,
+            'required' => true,
+        ]);
 
-        if ($customerGroup->getId() == 0 && $customerGroup->getCustomerGroupCode()) {
+        if ($customerGroup->getId() == Mage_Customer_Model_Group::NOT_LOGGED_IN_ID && $customerGroup->getCustomerGroupCode()) {
             $name->setDisabled(true);
         }
 
-        $fieldset->addField(
-            'tax_class_id',
-            'select',
-            [
-                'name'  => 'tax_class',
-                'label' => Mage::helper('customer')->__('Tax Class'),
-                'title' => Mage::helper('customer')->__('Tax Class'),
-                'class' => 'required-entry',
-                'required' => true,
-                'values' => Mage::getSingleton('tax/class_source_customer')->toOptionArray()
-            ]
-        );
+        $fieldset->addField('tax_class_id', 'select', [
+            'name'  => 'tax_class',
+            'label' => Mage::helper('customer')->__('Tax Class'),
+            'title' => Mage::helper('customer')->__('Tax Class'),
+            'class' => 'required-entry',
+            'required' => true,
+            'values' => Mage::getSingleton('tax/class_source_customer')->toOptionArray()
+        ]);
 
         $setsCustomer = Mage::getResourceModel('eav/entity_attribute_set_collection')
                       ->setEntityTypeFilter(Mage::getResourceModel('customer/customer')->getEntityType()->getId())
@@ -96,14 +88,10 @@ class Mage_Adminhtml_Block_Customer_Group_Edit_Form extends Mage_Adminhtml_Block
 
         if (!is_null($customerGroup->getId())) {
             // If edit add id
-            $form->addField(
-                'id',
-                'hidden',
-                [
-                    'name'  => 'id',
-                    'value' => $customerGroup->getId(),
-                ]
-            );
+            $form->addField('id', 'hidden', [
+                'name'  => 'id',
+                'value' => $customerGroup->getId(),
+            ]);
         }
 
         if (Mage::getSingleton('adminhtml/session')->getCustomerGroupData()) {

@@ -75,16 +75,15 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
         $currentGroup = Mage::registry('current_group');
 
         if (!is_null($currentGroup->getId())) {
+            $this->_title($currentGroup->getCode());
             $this->_addBreadcrumb(Mage::helper('customer')->__('Edit Group'), Mage::helper('customer')->__('Edit Customer Groups'));
         } else {
+            $this->_title($this->__('New Group'));
             $this->_addBreadcrumb(Mage::helper('customer')->__('New Group'), Mage::helper('customer')->__('New Customer Groups'));
         }
 
-        $this->_title($currentGroup->getId() ? $currentGroup->getCode() : $this->__('New Group'));
-
         $this->getLayout()->getBlock('content')
-            ->append($this->getLayout()->createBlock('adminhtml/customer_group_edit', 'group')
-                        ->setEditMode((bool)Mage::registry('current_group')->getId()));
+             ->append($this->getLayout()->createBlock('adminhtml/customer_group_edit', 'group'));
 
         $this->renderLayout();
     }
