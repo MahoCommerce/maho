@@ -12,6 +12,8 @@
 <label for="<?= $this->getFieldId() ?>_month" class="<?= $this->getLabelClass() ?>"><?= $this->getLabel() ?></label>
 <div class="input-box">
 <?php
+    $this->setDate($this->getValue());
+
     $this->setDateInput('d', <<<HTML
         <div class="date-day">
             <input type="text" id="{$this->getFieldId()}_day" name="{$this->getFieldName('day')}" value="{$this->getDay()}" title="{$this->__('Day')}" placeholder="{$this->__('DD')}" class="input-text validate-custom" {$this->getFieldParams()} />
