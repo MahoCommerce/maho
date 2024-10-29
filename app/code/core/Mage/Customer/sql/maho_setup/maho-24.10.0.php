@@ -17,7 +17,7 @@ $installer->getConnection()
         'type'     => Varien_Db_Ddl_Table::TYPE_SMALLINT,
         'unsigned' => true,
         'nullable' => false,
-        'default'  => 0,
+        'default'  => 1,
         'comment'  => 'Customer Group Attribute Set ID',
     ]);
 
@@ -26,7 +26,7 @@ $installer->getConnection()
         'type'     => Varien_Db_Ddl_Table::TYPE_SMALLINT,
         'unsigned' => true,
         'nullable' => false,
-        'default'  => 0,
+        'default'  => 1,
         'comment'  => 'Customer Group Address Attribute Set ID',
     ]);
 
