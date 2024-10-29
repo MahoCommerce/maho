@@ -95,7 +95,9 @@
  * @method string getSuffix()
  *
  * @method int getTagId()
- * @method $this setTaxClassId(bool $value)
+ * @method $this setAttributeSetId(int $value)
+ * @method $this setAddressAttributeSetId(int $value)
+ * @method $this setTaxClassId(int $value)
  * @method string getTaxvat()
  * @method $this setTotal(float $value)
  *
@@ -940,6 +942,34 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             $this->setTaxClassId(Mage::getModel('customer/group')->getTaxClassId($this->getGroupId()));
         }
         return $this->getData('tax_class_id');
+    }
+
+    /**
+     * Retrieve customer attribute set identifier
+     *
+     * @return int
+     * @throws Mage_Core_Model_Store_Exception
+     */
+    public function getAttributeSetId()
+    {
+        if (!$this->getData('attribute_set_id')) {
+            $this->setAttributeSetId(Mage::getModel('customer/group')->getCustomerAttributeSetId($this->getGroupId()));
+        }
+        return $this->getData('attribute_set_id');
+    }
+
+    /**
+     * Retrieve customer address attribute set identifier
+     *
+     * @return int
+     * @throws Mage_Core_Model_Store_Exception
+     */
+    public function getAddressAttributeSetId()
+    {
+        if (!$this->getData('address_attribute_set_id')) {
+            $this->setAddressAttributeSetId(Mage::getModel('customer/group')->getCustomerAddressAttributeSetId($this->getGroupId()));
+        }
+        return $this->getData('address_attribute_set_id');
     }
 
     /**

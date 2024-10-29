@@ -30,14 +30,17 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
     /**
      * Xml config path for create account default group
      */
-    public const XML_PATH_DEFAULT_ID       = 'customer/create_account/default_group';
+    public const XML_PATH_DEFAULT_ID               = 'customer/create_account/default_group';
 
-    public const NOT_LOGGED_IN_ID          = 0;
-    public const CUST_GROUP_ALL            = 32000;
+    public const ENTITY                            = 'customer_group';
 
-    public const ENTITY                    = 'customer_group';
+    public const NOT_LOGGED_IN_ID                  = 0;
+    public const DEFAULT_ATTRIBUTE_SET_ID          = 1;
+    public const DEFAULT_ADDRESS_ATTRIBUTE_SET_ID  = 1;
 
-    public const GROUP_CODE_MAX_LENGTH     = 32;
+    public const CUST_GROUP_ALL                    = 32000;
+
+    public const GROUP_CODE_MAX_LENGTH             = 32;
 
     /**
      * Prefix of model events names
@@ -56,6 +59,8 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
     protected $_eventObject = 'object';
 
     protected static $_taxClassIds = [];
+    protected static $_attributeSetIds = [];
+    protected static $_addressAttributeSetIds = [];
 
     #[\Override]
     protected function _construct()
@@ -98,6 +103,38 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
             $this->setData('tax_class_id', self::$_taxClassIds[$groupId]);
         }
         return $this->getData('tax_class_id');
+    }
+
+    /**
+     * @param int|null $groupId
+     * @return int
+     */
+    public function getCustomerAttributeSetId($groupId = null)
+    {
+        if (!is_null($groupId)) {
+            if (empty(self::$_attributeSetIds[$groupId])) {
+                $this->load($groupId);
+                self::$_attributeSetIds[$groupId] = $this->getData('customer_attribute_set_id');
+            }
+            $this->setData('customer_attribute_set_id', self::$_attributeSetIds[$groupId]);
+        }
+        return $this->getData('customer_attribute_set_id') ?? self::DEFAULT_ATTRIBUTE_SET_ID;
+    }
+
+    /**
+     * @param int|null $groupId
+     * @return int
+     */
+    public function getCustomerAddressAttributeSetId($groupId = null)
+    {
+        if (!is_null($groupId)) {
+            if (empty(self::$_addressAttributeSetIds[$groupId])) {
+                $this->load($groupId);
+                self::$_addressAttributeSetIds[$groupId] = $this->getData('customer_address_attribute_set_id');
+            }
+            $this->setData('customer_address_attribute_set_id', self::$_addressAttributeSetIds[$groupId]);
+        }
+        return $this->getData('customer_address_attribute_set_id') ?? self::DEFAULT_ADDRESS_ATTRIBUTE_SET_ID;
     }
 
     /**

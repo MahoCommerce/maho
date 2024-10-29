@@ -17,7 +17,7 @@ $installer->getConnection()
         'type'     => Varien_Db_Ddl_Table::TYPE_SMALLINT,
         'unsigned' => true,
         'nullable' => false,
-        'default'  => 1,
+        'default'  => Mage_Customer_Model_Group::DEFAULT_ATTRIBUTE_SET_ID,
         'comment'  => 'Customer Group Attribute Set ID',
     ]);
 
@@ -26,7 +26,7 @@ $installer->getConnection()
         'type'     => Varien_Db_Ddl_Table::TYPE_SMALLINT,
         'unsigned' => true,
         'nullable' => false,
-        'default'  => 1,
+        'default'  => Mage_Customer_Model_Group::DEFAULT_ADDRESS_ATTRIBUTE_SET_ID,
         'comment'  => 'Customer Group Address Attribute Set ID',
     ]);
 
