@@ -36,7 +36,7 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
 
     public const NOT_LOGGED_IN_ID                  = 0;
     public const DEFAULT_ATTRIBUTE_SET_ID          = 1;
-    public const DEFAULT_ADDRESS_ATTRIBUTE_SET_ID  = 1;
+    public const DEFAULT_ADDRESS_ATTRIBUTE_SET_ID  = 2;
 
     public const CUST_GROUP_ALL                    = 32000;
 
@@ -58,9 +58,8 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
      */
     protected $_eventObject = 'object';
 
+    /** @deprecated */
     protected static $_taxClassIds = [];
-    protected static $_attributeSetIds = [];
-    protected static $_addressAttributeSetIds = [];
 
     #[\Override]
     protected function _construct()
@@ -96,11 +95,9 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
     public function getTaxClassId($groupId = null)
     {
         if (!is_null($groupId)) {
-            if (empty(self::$_taxClassIds[$groupId])) {
-                $this->load($groupId);
-                self::$_taxClassIds[$groupId] = $this->getData('tax_class_id');
-            }
-            $this->setData('tax_class_id', self::$_taxClassIds[$groupId]);
+            $taxClassId = $this->getResource()->loadGroupTableData($groupId)['tax_class_id'];
+            self::$_taxClassIds[$groupId] = $taxClassId;
+            return $taxClassId;
         }
         return $this->getData('tax_class_id');
     }
@@ -112,13 +109,9 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
     public function getCustomerAttributeSetId($groupId = null)
     {
         if (!is_null($groupId)) {
-            if (empty(self::$_attributeSetIds[$groupId])) {
-                $this->load($groupId);
-                self::$_attributeSetIds[$groupId] = $this->getData('customer_attribute_set_id');
-            }
-            $this->setData('customer_attribute_set_id', self::$_attributeSetIds[$groupId]);
+            return $this->getResource()->loadGroupTableData($groupId)['customer_attribute_set_id'];
         }
-        return $this->getData('customer_attribute_set_id') ?? self::DEFAULT_ATTRIBUTE_SET_ID;
+        return $this->getData('customer_attribute_set_id');
     }
 
     /**
@@ -128,13 +121,9 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
     public function getCustomerAddressAttributeSetId($groupId = null)
     {
         if (!is_null($groupId)) {
-            if (empty(self::$_addressAttributeSetIds[$groupId])) {
-                $this->load($groupId);
-                self::$_addressAttributeSetIds[$groupId] = $this->getData('customer_address_attribute_set_id');
-            }
-            $this->setData('customer_address_attribute_set_id', self::$_addressAttributeSetIds[$groupId]);
+            return $this->getResource()->loadGroupTableData($groupId)['customer_address_attribute_set_id'];
         }
-        return $this->getData('customer_address_attribute_set_id') ?? self::DEFAULT_ADDRESS_ATTRIBUTE_SET_ID;
+        return $this->getData('customer_address_attribute_set_id');
     }
 
     /**

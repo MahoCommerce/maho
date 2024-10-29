@@ -934,7 +934,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      * Retrieve customer tax class identifier
      *
      * @return int
-     * @throws Mage_Core_Model_Store_Exception
      */
     public function getTaxClassId()
     {
@@ -948,7 +947,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      * Retrieve customer attribute set identifier
      *
      * @return int
-     * @throws Mage_Core_Model_Store_Exception
      */
     public function getAttributeSetId()
     {
@@ -962,7 +960,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      * Retrieve customer address attribute set identifier
      *
      * @return int
-     * @throws Mage_Core_Model_Store_Exception
      */
     public function getAddressAttributeSetId()
     {

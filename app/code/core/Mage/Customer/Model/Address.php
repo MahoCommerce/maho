@@ -91,6 +91,17 @@ class Mage_Customer_Model_Address extends Mage_Customer_Model_Address_Abstract
     }
 
     /**
+     * Retrieve customer address attribute set identifier
+     *
+     * @return int
+     */
+    public function getAttributeSetId()
+    {
+        $customer = $this->getCustomer() ?: Mage::getModel('customer/customer');
+        return $customer->getAddressAttributeSetId();
+    }
+
+    /**
      * Delete customer address
      *
      * @return $this

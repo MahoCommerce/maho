@@ -18,6 +18,11 @@
  */
 class Mage_Customer_Model_Resource_Group extends Mage_Core_Model_Resource_Db_Abstract
 {
+    /**
+     * Store data from customer_group table
+     */
+    protected static array $_groupTableData = [];
+
     #[\Override]
     protected function _construct()
     {
@@ -38,6 +43,24 @@ class Mage_Customer_Model_Resource_Group extends Mage_Core_Model_Resource_Db_Abs
                 'title' => Mage::helper('customer')->__('Customer Group')
             ]];
 
+        return $this;
+    }
+
+    /**
+     * Set default attribute set ids
+     *
+     * @return Mage_Core_Model_Resource_Db_Abstract
+     */
+    #[\Override]
+    protected function _afterLoad(Mage_Core_Model_Abstract $group)
+    {
+        parent::_afterLoad($group);
+        if (!$group->hasData('customer_attribute_set_id')) {
+            $group->setData('customer_attribute_set_id', Mage_Customer_Model_Group::DEFAULT_ATTRIBUTE_SET_ID);
+        }
+        if (!$group->hasData('customer_address_attribute_set_id')) {
+            $group->setData('customer_address_attribute_set_id', Mage_Customer_Model_Group::DEFAULT_ADDRESS_ATTRIBUTE_SET_ID);
+        }
         return $this;
     }
 
@@ -75,5 +98,16 @@ class Mage_Customer_Model_Resource_Group extends Mage_Core_Model_Resource_Db_Abs
             $customer->save();
         }
         return parent::_afterDelete($group);
+    }
+
+    /**
+     * Load group and store data in static property
+     */
+    public static function loadGroupTableData(int $groupId): array
+    {
+        if (empty(self::$_groupTableData[$groupId])) {
+            self::$_groupTableData[$groupId] = Mage::getModel('customer/group')->load($groupId)->getData();
+        }
+        return self::$_groupTableData[$groupId];
     }
 }
