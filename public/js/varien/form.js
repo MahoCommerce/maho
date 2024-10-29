@@ -203,7 +203,7 @@ class RegionUpdater {
 
     update() {
         if (this.regions[this.countryEl.value]) {
-            let def = this.regionSelectEl.getAttribute('defaultValue');
+            let def = this.regionSelectEl.dataset.defaultValue ?? this.regionSelectEl.getAttribute('defaultValue');
             if (this.regionTextEl) {
                 if (!def) {
                     def = this.regionTextEl.value.toLowerCase();

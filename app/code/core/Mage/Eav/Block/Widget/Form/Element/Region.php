@@ -19,4 +19,9 @@ class Mage_Eav_Block_Widget_Form_Element_Region extends Mage_Eav_Block_Widget_Fo
         parent::_construct();
         $this->setTemplate('eav/widget/form/element/region.phtml');
     }
+
+    public function getRegionId(): int
+    {
+        return $this->getObject()->getRegionId();
+    }
 }
