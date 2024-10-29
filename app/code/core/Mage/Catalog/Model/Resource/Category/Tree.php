@@ -90,7 +90,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
      */
     public function setStoreId($storeId)
     {
-        $this->_storeId = (int) $storeId;
+        $this->_storeId = $storeId;
         return $this;
     }
 

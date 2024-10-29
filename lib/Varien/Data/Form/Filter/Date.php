@@ -28,7 +28,7 @@ class Varien_Data_Form_Filter_Date implements Varien_Data_Form_Filter_Interface
     /**
      * Local
      *
-     * @var Zend_Locale
+     * @var string|Zend_Locale
      */
     protected $_locale;
 
@@ -36,7 +36,7 @@ class Varien_Data_Form_Filter_Date implements Varien_Data_Form_Filter_Interface
      * Initialize filter
      *
      * @param string $format    Zend_Date input/output format
-     * @param Zend_Locale $locale
+     * @param string|Zend_Locale $locale
      */
     public function __construct($format = null, $locale = null)
     {
@@ -50,8 +50,8 @@ class Varien_Data_Form_Filter_Date implements Varien_Data_Form_Filter_Interface
     /**
      * Returns the result of filtering $value
      *
-     * @param string $value
-     * @return string
+     * @param string|null $value
+     * @return string|null
      */
     #[\Override]
     public function inputFilter($value)
