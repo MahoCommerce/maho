@@ -5,10 +5,14 @@ includes:
 parameters:
     magentoRootPath: %currentWorkingDirectory%
     phpVersion: 80200
+    fileExtensions:
+        - php
+        - phtml
     paths:
         - app/bootstrap.php
         - app/Mage.php
         - app/code/core/Mage
+        - app/design
         - lib
         - maho
         - public
