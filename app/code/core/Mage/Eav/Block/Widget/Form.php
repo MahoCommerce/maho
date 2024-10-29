@@ -31,6 +31,7 @@ class Mage_Eav_Block_Widget_Form extends Mage_Core_Block_Template
     protected array $excludedForms = [];
 
     protected ?array $attributes = null;
+    protected array $attributeObjects = [];
 
     protected ?string $defaultLabel = null;
     protected string $groupMode     = self::GROUP_MODE_ATTRIBUTE_SET;
@@ -91,7 +92,10 @@ class Mage_Eav_Block_Widget_Form extends Mage_Core_Block_Template
 
         foreach ($this->mergedForms as $form) {
             foreach ($form->getAttributes() as $code => $attribute) {
-                $this->attributes[$code] ??= $attribute;
+                if (!isset($this->attributes[$code])) {
+                    $this->attributes[$code] = $attribute;
+                    $this->attributeObjects[$code] = $form->getEntity();
+                }
             }
         }
 
@@ -179,7 +183,7 @@ class Mage_Eav_Block_Widget_Form extends Mage_Core_Block_Template
             foreach ($attributes as $code => $attribute) {
                 if ($element = $this->getFieldsetElementRenderer($attribute)) {
                     $element->setData('attribute', $attribute);
-                    $element->setObject($this->form->getEntity());
+                    $element->setObject($this->attributeObjects[$code] ?? $this->form->getEntity());
                     $element->setTranslationHelper($this->getTranslationHelper());
                     $element->setFieldIdFormat($this->getFieldIdFormat());
                     $element->setFieldNameFormat($this->getFieldNameFormat());
