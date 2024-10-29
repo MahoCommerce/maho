@@ -4432,7 +4432,7 @@ parameters:
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 24
+			count: 23
 			path: app/design/adminhtml/default/default/template/customer/tab/addresses.phtml
 
 		-
@@ -4529,6 +4529,21 @@ parameters:
 			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 63
 			path: app/design/adminhtml/default/default/template/downloadable/sales/order/view/items/renderer/downloadable.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 6
+			path: app/design/adminhtml/default/default/template/eav/attribute/edit/renderer/fieldset/element.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 17
+			path: app/design/adminhtml/default/default/template/eav/attribute/set/main.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 5
+			path: app/design/adminhtml/default/default/template/eav/attribute/set/toolbar/add.phtml
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
@@ -5577,6 +5592,11 @@ parameters:
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 14
+			path: app/design/adminhtml/default/default/template/website/switcher.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 9
 			path: app/design/adminhtml/default/default/template/weee/renderer/tax.phtml
 
@@ -6301,11 +6321,6 @@ parameters:
 			path: app/design/frontend/base/default/template/checkout/multishipping/success.phtml
 
 		-
-			message: "#^Cannot call method isEnabled\\(\\) on Mage_Core_Block_Abstract\\|false\\.$#"
-			count: 4
-			path: app/design/frontend/base/default/template/checkout/onepage/billing.phtml
-
-		-
 			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 7
 			path: app/design/frontend/base/default/template/checkout/onepage/failure.phtml
@@ -6543,36 +6558,6 @@ parameters:
 		-
 			message: "#^Variable \\$action might not be defined\\.$#"
 			count: 1
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: "#^Variable \\$address might not be defined\\.$#"
-			count: 2
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: "#^Variable \\$countries might not be defined\\.$#"
-			count: 1
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: "#^Variable \\$data might not be defined\\.$#"
-			count: 12
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: "#^Variable \\$primaryTypes might not be defined\\.$#"
-			count: 1
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 51
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: "#^Variable \\$action might not be defined\\.$#"
-			count: 1
 			path: app/design/frontend/base/default/template/customer/form/changepassword.phtml
 
 		-
@@ -6587,7 +6572,7 @@ parameters:
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 36
+			count: 23
 			path: app/design/frontend/base/default/template/customer/form/edit.phtml
 
 		-
@@ -6599,11 +6584,6 @@ parameters:
 			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 16
 			path: app/design/frontend/base/default/template/customer/form/newsletter.phtml
-
-		-
-			message: "#^Cannot call method isEnabled\\(\\) on Mage_Core_Block_Abstract\\|false\\.$#"
-			count: 3
-			path: app/design/frontend/base/default/template/customer/form/register.phtml
 
 		-
 			message: "#^PHPDoc tag @var contains unresolvable type\\.$#"
@@ -6729,6 +6709,76 @@ parameters:
 			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 190
 			path: app/design/frontend/base/default/template/downloadable/sales/order/items/renderer/downloadable.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 1
+			path: app/design/frontend/base/default/template/eav/widget/form.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 12
+			path: app/design/frontend/base/default/template/eav/widget/form/element/boolean.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 4
+			path: app/design/frontend/base/default/template/eav/widget/form/element/country.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 14
+			path: app/design/frontend/base/default/template/eav/widget/form/element/customselect.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 32
+			path: app/design/frontend/base/default/template/eav/widget/form/element/date.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 6
+			path: app/design/frontend/base/default/template/eav/widget/form/element/fieldset.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 11
+			path: app/design/frontend/base/default/template/eav/widget/form/element/hidden.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 4
+			path: app/design/frontend/base/default/template/eav/widget/form/element/multiline.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 12
+			path: app/design/frontend/base/default/template/eav/widget/form/element/multiselect.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 11
+			path: app/design/frontend/base/default/template/eav/widget/form/element/postcode.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 20
+			path: app/design/frontend/base/default/template/eav/widget/form/element/region.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 12
+			path: app/design/frontend/base/default/template/eav/widget/form/element/select.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 11
+			path: app/design/frontend/base/default/template/eav/widget/form/element/text.phtml
+
+		-
+			message: "#^Variable \\$this might not be defined\\.$#"
+			count: 11
+			path: app/design/frontend/base/default/template/eav/widget/form/element/textarea.phtml
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
@@ -7618,36 +7668,6 @@ parameters:
 		-
 			message: "#^Variable \\$action might not be defined\\.$#"
 			count: 1
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: "#^Variable \\$address might not be defined\\.$#"
-			count: 2
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: "#^Variable \\$countries might not be defined\\.$#"
-			count: 1
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: "#^Variable \\$data might not be defined\\.$#"
-			count: 12
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: "#^Variable \\$primaryTypes might not be defined\\.$#"
-			count: 1
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 52
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: "#^Variable \\$action might not be defined\\.$#"
-			count: 1
 			path: app/design/frontend/rwd/default/template/customer/form/changepassword.phtml
 
 		-
@@ -7659,11 +7679,6 @@ parameters:
 			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 13
 			path: app/design/frontend/rwd/default/template/customer/form/confirmation.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 36
-			path: app/design/frontend/rwd/default/template/customer/form/edit.phtml
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
