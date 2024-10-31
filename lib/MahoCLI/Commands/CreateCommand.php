@@ -120,6 +120,7 @@ class CreateCommand extends BaseMahoCommand
 
 namespace MahoCLI\Commands;
 
+use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -134,6 +135,10 @@ class $className extends BaseMahoCommand
     #[\Override]
     protected function execute(InputInterface \$input, OutputInterface \$output): int
     {
+        \$this->initMaho();
+
+        // Your custom logic here
+
         \$output->writeln('Command executed successfully!');
         return Command::SUCCESS;
     }
