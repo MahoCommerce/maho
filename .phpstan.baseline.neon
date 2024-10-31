@@ -4222,18 +4222,8 @@ parameters:
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 1
-			path: app/design/adminhtml/default/default/template/catalog/category/edit.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 19
 			path: app/design/adminhtml/default/default/template/catalog/category/edit/form.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 27
-			path: app/design/adminhtml/default/default/template/catalog/category/tree.phtml
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
@@ -4246,8 +4236,8 @@ parameters:
 			path: app/design/adminhtml/default/default/template/catalog/product/attribute/new/created.phtml
 
 		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 17
+			message: "#^Call to protected method _getHeader\\(\\) of class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main\\.$#"
+			count: 1
 			path: app/design/adminhtml/default/default/template/catalog/product/attribute/set/main.phtml
 
 		-
@@ -4256,8 +4246,8 @@ parameters:
 			path: app/design/adminhtml/default/default/template/catalog/product/attribute/set/toolbar/add.phtml
 
 		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 2
+			message: "#^Call to protected method _getHeader\\(\\) of class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Toolbar_Main\\.$#"
+			count: 1
 			path: app/design/adminhtml/default/default/template/catalog/product/attribute/set/toolbar/main.phtml
 
 		-
@@ -4287,11 +4277,6 @@ parameters:
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 16
-			path: app/design/adminhtml/default/default/template/catalog/product/edit.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 6
 			path: app/design/adminhtml/default/default/template/catalog/product/edit/action/attribute.phtml
 
@@ -4307,41 +4292,6 @@ parameters:
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 12
-			path: app/design/adminhtml/default/default/template/catalog/product/edit/categories.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 3
-			path: app/design/adminhtml/default/default/template/catalog/product/edit/options.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 42
-			path: app/design/adminhtml/default/default/template/catalog/product/edit/options/option.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 4
-			path: app/design/adminhtml/default/default/template/catalog/product/edit/options/type/date.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 13
-			path: app/design/adminhtml/default/default/template/catalog/product/edit/options/type/file.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 7
-			path: app/design/adminhtml/default/default/template/catalog/product/edit/options/type/select.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 4
-			path: app/design/adminhtml/default/default/template/catalog/product/edit/options/type/text.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 3
 			path: app/design/adminhtml/default/default/template/catalog/product/edit/serializer.phtml
 
@@ -4352,33 +4302,8 @@ parameters:
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 12
-			path: app/design/adminhtml/default/default/template/catalog/product/edit/websites.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 51
 			path: app/design/adminhtml/default/default/template/catalog/product/helper/gallery.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 5
-			path: app/design/adminhtml/default/default/template/catalog/product/js.phtml
-
-		-
-			message: "#^PHPDoc tag @var has invalid value \\(\\$_coreHelper Mage_Core_Helper_Data\\)\\: Unexpected token \"\\$_coreHelper\", expected type at offset 9 on line 1$#"
-			count: 1
-			path: app/design/adminhtml/default/default/template/catalog/product/price.phtml
-
-		-
-			message: "#^PHPDoc tag @var has invalid value \\(\\$_taxHelper Mage_Tax_Helper_Data\\)\\: Unexpected token \"\\$_taxHelper\", expected type at offset 9 on line 1$#"
-			count: 1
-			path: app/design/adminhtml/default/default/template/catalog/product/price.phtml
-
-		-
-			message: "#^PHPDoc tag @var has invalid value \\(\\$_weeeHelper Mage_Weee_Helper_Data\\)\\: Unexpected token \"\\$_weeeHelper\", expected type at offset 9 on line 1$#"
-			count: 1
-			path: app/design/adminhtml/default/default/template/catalog/product/price.phtml
 
 		-
 			message: "#^Variable \\$_weeeTaxAttributes might not be defined\\.$#"
@@ -4392,11 +4317,6 @@ parameters:
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 70
-			path: app/design/adminhtml/default/default/template/catalog/product/tab/inventory.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 1
 			path: app/design/adminhtml/default/default/template/catalog/wysiwyg/js.phtml
 
@@ -4404,11 +4324,6 @@ parameters:
 			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 1
 			path: app/design/adminhtml/default/default/template/cms/page/edit/form/renderer/content.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 11
-			path: app/design/adminhtml/default/default/template/customer/edit/tab/account/form/renderer/group.phtml
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
@@ -4557,11 +4472,6 @@ parameters:
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 10
-			path: app/design/adminhtml/default/default/template/forgotpassword.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 20
 			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
 
@@ -4637,11 +4547,6 @@ parameters:
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 10
-			path: app/design/adminhtml/default/default/template/login.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 7
 			path: app/design/adminhtml/default/default/template/newsletter/preview/store.phtml
 
@@ -4679,11 +4584,6 @@ parameters:
 			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 11
 			path: app/design/adminhtml/default/default/template/overlay_popup.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 21
-			path: app/design/adminhtml/default/default/template/page.phtml
 
 		-
 			message: "#^Call to method __\\(\\) on an unknown class Mage_Adminhtml_Page_Block_Notices\\.$#"
@@ -4923,11 +4823,6 @@ parameters:
 		-
 			message: "#^Variable \\$resetPasswordLinkToken might not be defined\\.$#"
 			count: 1
-			path: app/design/adminhtml/default/default/template/resetforgottenpassword.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 12
 			path: app/design/adminhtml/default/default/template/resetforgottenpassword.phtml
 
 		-
@@ -5602,11 +5497,6 @@ parameters:
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 7
-			path: app/design/adminhtml/default/default/template/widget/accordion.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 4
 			path: app/design/adminhtml/default/default/template/widget/breadcrumbs.phtml
 
@@ -5631,21 +5521,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/widget/form/element/gallery.phtml
 
 		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 1
-			path: app/design/adminhtml/default/default/template/widget/form/renderer/element.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 3
-			path: app/design/adminhtml/default/default/template/widget/form/renderer/fieldset.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 1
-			path: app/design/adminhtml/default/default/template/widget/form/renderer/fieldset/element.phtml
-
-		-
 			message: "#^Method Mage_Adminhtml_Block_Widget_Grid\\:\\:getEmptyCellColspan\\(\\) invoked with 1 parameter, 0 required\\.$#"
 			count: 1
 			path: app/design/adminhtml/default/default/template/widget/grid.phtml
@@ -5656,28 +5531,13 @@ parameters:
 			path: app/design/adminhtml/default/default/template/widget/grid.phtml
 
 		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 4
-			path: app/design/adminhtml/default/default/template/widget/grid/container.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 29
+			message: "#^Call to an undefined method Mage_Adminhtml_Block_Widget_Grid_Massaction\\:\\:canDisplayContainer\\(\\)\\.$#"
+			count: 1
 			path: app/design/adminhtml/default/default/template/widget/grid/massaction.phtml
 
 		-
 			message: "#^File ends with a trailing whitespace\\. This may cause problems when running the code in the web browser\\. Remove the closing \\?\\> mark or remove the whitespace\\.$#"
 			count: 1
-			path: app/design/adminhtml/default/default/template/widget/grid/serializer.phtml
-
-		-
-			message: "#^PHPDoc tag @var does not specify variable name\\.$#"
-			count: 1
-			path: app/design/adminhtml/default/default/template/widget/grid/serializer.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 11
 			path: app/design/adminhtml/default/default/template/widget/grid/serializer.phtml
 
 		-
@@ -7684,11 +7544,6 @@ parameters:
 			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 14
 			path: app/design/frontend/rwd/default/template/customer/form/forgotpassword.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 10
-			path: app/design/frontend/rwd/default/template/customer/form/resetforgottenpassword.phtml
 
 		-
 			message: "#^Method Mage_Checkout_Helper_Data\\:\\:formatPrice\\(\\) invoked with 3 parameters, 1 required\\.$#"
