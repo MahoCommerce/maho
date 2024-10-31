@@ -32,7 +32,7 @@ class CreateCommand extends BaseMahoCommand
         $commandName = $io->ask(
             'What is the name of your command? (e.g., cache:clean)',
             null,
-            function($name) {
+            function ($name) {
                 if (empty($name)) {
                     throw new \RuntimeException('The command name cannot be empty');
                 }
@@ -47,7 +47,7 @@ class CreateCommand extends BaseMahoCommand
         $description = $io->ask(
             'Provide a description for your command',
             'A new Maho CLI command',
-            function($desc) {
+            function ($desc) {
                 if (empty($desc)) {
                     throw new \RuntimeException('The command description cannot be empty');
                 }
@@ -92,7 +92,7 @@ class CreateCommand extends BaseMahoCommand
         }
 
         $io->success([
-            "Command created successfully!",
+            'Command created successfully!',
             "File location: $filePath",
             "Use it with: php bin/maho $commandName"
         ]);
