@@ -12,22 +12,36 @@
 $installer = $this;
 $installer->startSetup();
 
-$installer->getConnection()
-    ->addColumn($installer->getTable('customer/customer_group'), 'customer_attribute_set_id', [
-        'type'     => Varien_Db_Ddl_Table::TYPE_SMALLINT,
-        'unsigned' => true,
-        'nullable' => false,
-        'default'  => Mage_Customer_Model_Group::DEFAULT_ATTRIBUTE_SET_ID,
-        'comment'  => 'Customer Group Attribute Set ID',
-    ]);
+$defs = [
+    [ 'model' => 'customer/customer', 'column' => 'customer_attribute_set_id' ],
+    [ 'model' => 'customer/address', 'column' => 'customer_address_attribute_set_id' ],
+];
 
-$installer->getConnection()
-    ->addColumn($installer->getTable('customer/customer_group'), 'customer_address_attribute_set_id', [
-        'type'     => Varien_Db_Ddl_Table::TYPE_SMALLINT,
-        'unsigned' => true,
-        'nullable' => false,
-        'default'  => Mage_Customer_Model_Group::DEFAULT_ADDRESS_ATTRIBUTE_SET_ID,
-        'comment'  => 'Customer Group Address Attribute Set ID',
-    ]);
+foreach ($defs as $info) {
+
+    $entityTypeId = Mage::getResourceModel($info['model'])
+                  ->getEntityType()
+                  ->getId();
+
+    $defaultSet = Mage::getResourceModel('eav/entity_attribute_set_collection')
+                ->setEntityTypeFilter($entityTypeId)
+                ->getFirstItem();
+
+    if ($defaultSet->getAttributeSetId() === null) {
+        $defaultSet = Mage::getModel('eav/entity_attribute_set')
+                    ->setEntityTypeId($entityTypeId)
+                    ->setAttributeSetName('Default')
+                    ->save();
+    }
+
+    $installer->getConnection()
+              ->addColumn($installer->getTable('customer/customer_group'), $info['column'], [
+                  'type'     => Varien_Db_Ddl_Table::TYPE_SMALLINT,
+                  'unsigned' => true,
+                  'nullable' => false,
+                  'default'  => $defaultSet->getAttributeSetId(),
+                  'comment'  => 'Customer Group Attribute Set ID',
+              ]);
+}
 
 $installer->endSetup();

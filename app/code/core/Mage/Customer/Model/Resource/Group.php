@@ -47,24 +47,6 @@ class Mage_Customer_Model_Resource_Group extends Mage_Core_Model_Resource_Db_Abs
     }
 
     /**
-     * Set default attribute set ids
-     *
-     * @return Mage_Core_Model_Resource_Db_Abstract
-     */
-    #[\Override]
-    protected function _afterLoad(Mage_Core_Model_Abstract $group)
-    {
-        parent::_afterLoad($group);
-        if (!$group->hasData('customer_attribute_set_id')) {
-            $group->setData('customer_attribute_set_id', Mage_Customer_Model_Group::DEFAULT_ATTRIBUTE_SET_ID);
-        }
-        if (!$group->hasData('customer_address_attribute_set_id')) {
-            $group->setData('customer_address_attribute_set_id', Mage_Customer_Model_Group::DEFAULT_ADDRESS_ATTRIBUTE_SET_ID);
-        }
-        return $this;
-    }
-
-    /**
      * Check if group uses as default
      *
      * @throws Mage_Core_Exception
