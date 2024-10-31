@@ -18,7 +18,6 @@ $defs = [
 ];
 
 foreach ($defs as $info) {
-
     $entityTypeId = Mage::getResourceModel($info['model'])
                   ->getEntityType()
                   ->getId();
