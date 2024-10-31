@@ -8,10 +8,14 @@ on:
 
 jobs:
   phpstan:
-    name: Analyze
+    name: Analyze PHP ${{ matrix.php-versions }} (${{ matrix.refs == 'pr-head' && github.head_ref || github.base_ref || github.ref_name }})
     runs-on: [ubuntu-latest]
     strategy:
+      fail-fast: false
       matrix:
+        refs: ['target-branch', 'pr-head']
+        exclude:
+          - refs: ${{ github.event_name != 'pull_request' && 'pr-head' }}
         php-versions: ['8.2', '8.3', '8.4']
 
     steps:
@@ -19,8 +23,10 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-    
+
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.refs == 'pr-head' && github.event.pull_request.head.sha || '' }}
 
       - name: Get composer cache directory
         id: composer-cache
@@ -36,19 +42,22 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
 
-      - name: "Restore result cache"
+      - name: Restore result cache
+        id: phpstan-result-cache
         uses: actions/cache/restore@v4
         with:
           path: var
-          key: "phpstan-result-cache-${{ runner.os }}-${{ matrix.php-versions }}-${{ github.run_id }}"
-          restore-keys: phpstan-result-cache-
+          key: phpstan-result-cache-${{ matrix.php-versions }}-${{ matrix.refs }}-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            phpstan-result-cache-${{ matrix.php-versions }}-${{ matrix.refs }}-${{ github.ref_name }}
+            phpstan-result-cache-${{ matrix.php-versions }}-target-branch-main
 
       - name: PHPStan Static Analysis
-        run: XDEBUG_MODE=off php vendor/bin/phpstan.phar analyze
+        run: XDEBUG_MODE=off php vendor/bin/phpstan.phar analyze -vvv
 
-      - name: "Save result cache"
+      - name: Save result cache
         uses: actions/cache/save@v4
         if: always()
         with:
           path: var
-          key: "phpstan-result-cache-${{ runner.os }}-${{ matrix.php-versions }}-${{ github.run_id }}"
+          key: ${{ steps.phpstan-result-cache.outputs.cache-primary-key }}
