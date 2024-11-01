@@ -190,7 +190,6 @@ class Mage_Catalog_Helper_Product_Type_Composite extends Mage_Core_Helper_Abstra
             'productOldPrice'     => Mage::helper('core')->currency($_regularPrice, false, false),
             'priceInclTax'        => Mage::helper('core')->currency($_priceInclTax, false, false),
             'priceExclTax'        => Mage::helper('core')->currency($_priceExclTax, false, false),
-            'skipCalculate'       => ($_priceExclTax != $_priceInclTax ? 0 : 1),
             'defaultTax'          => $defaultTax,
             'currentTax'          => $currentTax,
             'tierPrices'          => $_tierPrices,
