@@ -330,9 +330,7 @@ class ZipUpdater {
     }
 
     _setPostcodeOptional() {
-        if (this.zipElement === undefined) {
-            return false;
-        }
+        if (!this.zipElement) return false;
 
         const label = document.querySelector(`label[for="${this.zipElement.id}"]`);
         let wildCard;
