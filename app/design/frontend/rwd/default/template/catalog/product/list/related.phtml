@@ -47,40 +47,42 @@
         </ol>
     </div>
     <script type="text/javascript">
-    //<![CDATA[
-    $$('.related-checkbox').each(function(elem){
-        Event.observe(elem, 'click', addRelatedToProduct)
-    });
+        document.querySelectorAll('.related-checkbox').forEach(elem => {
+            elem.addEventListener('click', addRelatedToProduct);
+        });
 
-    var relatedProductsCheckFlag = false;
-    function selectAllRelated(txt){
-        if (relatedProductsCheckFlag == false) {
-            $$('.related-checkbox').each(function(elem){
-                elem.checked = true;
-            });
-            relatedProductsCheckFlag = true;
-            txt.innerHTML="<?= Mage::helper('core')->jsQuoteEscape($this->__('unselect all')) ?>";
-        } else {
-            $$('.related-checkbox').each(function(elem){
-                elem.checked = false;
-            });
-            relatedProductsCheckFlag = false;
-            txt.innerHTML="<?= Mage::helper('core')->jsQuoteEscape($this->__('select all')) ?>";
-        }
-        addRelatedToProduct();
-    }
+        let relatedProductsCheckFlag = false;
 
-    function addRelatedToProduct(){
-        var checkboxes = $$('.related-checkbox');
-        var values = [];
-        for(var i=0;i<checkboxes.length;i++){
-            if(checkboxes[i].checked) values.push(checkboxes[i].value);
+        function selectAllRelated(txt) {
+            if (relatedProductsCheckFlag === false) {
+                document.querySelectorAll('.related-checkbox').forEach(elem => {
+                    elem.checked = true;
+                });
+                relatedProductsCheckFlag = true;
+                txt.innerHTML = "<?= Mage::helper('core')->jsQuoteEscape($this->__('unselect all')) ?>";
+            } else {
+                document.querySelectorAll('.related-checkbox').forEach(elem => {
+                    elem.checked = false;
+                });
+                relatedProductsCheckFlag = false;
+                txt.innerHTML = "<?= Mage::helper('core')->jsQuoteEscape($this->__('select all')) ?>";
+            }
+            addRelatedToProduct();
         }
-        if($('related-products-field')){
-            $('related-products-field').value = values.join(',');
+
+        function addRelatedToProduct() {
+            const checkboxes = document.querySelectorAll('.related-checkbox');
+            const values = [];
+
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) values.push(checkbox.value);
+            });
+
+            const relatedProductsField = document.getElementById('related-products-field');
+            if (relatedProductsField) {
+                relatedProductsField.value = values.join(',');
+            }
         }
-    }
-    //]]>
     </script>
 </div>
 <?php endif ?>
