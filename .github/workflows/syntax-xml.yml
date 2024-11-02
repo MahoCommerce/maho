@@ -8,18 +8,52 @@ on:
 
 jobs:
   syntax_xml:
-    name: XML Validation
+    name: XML Syntax
     runs-on: [ubuntu-latest]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get last successful commit
+        id: last-successful-commit
+        uses: SamhammerAG/last-successful-build-action@v7
+        with:
+          branch: main
+          workflow: ${{ github.workflow }}
+          verify: true
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          base_sha: ${{ steps.last-successful-commit.outputs.sha }}
+          files: |
+            **/*.xml
 
       - name: Update APT repositories
+        if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
         run: "sudo apt update"
 
       - name: Install xmllint
+        if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
         run: "sudo apt-get -y install libxml2-utils"
 
-      - name: Validate XMLs
-        run: "find . -type f -iname '*.xml' | xargs -I '{}' xmllint --noout '{}'"
+      - name: Check changed files
+        if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          set +e
+          ERROR=0
+          for FILE in ${ALL_CHANGED_FILES}; do
+              MESSAGE=$(xmllint --noout "$FILE" 2>&1)
+              if [ $? -ne 0 ]; then
+                  ERROR=255
+                  LINE=$(echo "$MESSAGE" | head -n 1 | cut -d":" -f 2)
+                  echo "::error file=$FILE,line=$LINE::$MESSAGE"
+              fi
+          done
+          exit $ERROR

@@ -8,28 +8,58 @@ on:
 
 jobs:
   syntax_php:
+    name: PHP Syntax ${{ matrix.php-versions }}
     runs-on: [ubuntu-latest]
 
     strategy:
+      fail-fast: false
       matrix:
-        php: ['8.2', '8.3', '8.4']
-
-    name: PHP Syntax ${{ matrix.php }}
+        php-versions: ['8.2', '8.3', '8.4']
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get last successful commit
+        id: last-successful-commit
+        uses: SamhammerAG/last-successful-build-action@v7
+        with:
+          branch: main
+          workflow: ${{ github.workflow }}
+          verify: true
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          base_sha: ${{ steps.last-successful-commit.outputs.sha }}
+          files: |
+            **/*.{php,phtml}
+            !.phpstorm.meta.php/*
 
       - name: Setup PHP
+        if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php }}
-          extensions: mbstring #optional, setup extensions
-          ini-values: post_max_size=256M, short_open_tag=On #optional, setup php.ini configuration
-          coverage: none #optional, setup coverage driver
+          php-version: ${{ matrix.php-versions }}
+          ini-values: error_reporting=E_ALL, short_open_tag=Off
+          tools: none
 
-      - name: Check .php files
-        run: '! find . -not \( -path ./.phpstorm.meta.php -prune \) -type f -name "*.php" -exec php -d error_reporting=32767 -l {} \; 2>&1 1> /dev/null | grep "^"'
-
-      - name: Check .phtml files
-        run: '! find app/design -type f -name "*.phtml" -exec php -d error_reporting=32767 -l {} \; 2>&1 1> /dev/null | grep "^"'
+      - name: Check changed files
+        if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          set +e
+          ERROR=0
+          for FILE in ${ALL_CHANGED_FILES}; do
+              MESSAGE=$(php -l "$FILE" 2>&1 1>/dev/null)
+              if [ $? -ne 0 ]; then
+                  ERROR=255
+                  LINE=$(echo $MESSAGE | sed -En 's/.*on line ([0-9]+).*/\1/p')
+                  echo "::error file=$FILE,line=$LINE::$MESSAGE"
+              fi
+          done
+          exit $ERROR
