@@ -177,10 +177,10 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
             ->setSortOrder()
             ->load();
 
-        /* @var $entity_type Mage_Eav_Model_Entity_Type */
-        $entity_type = Mage::registry('entity_type');
+        /* @var $entityType Mage_Eav_Model_Entity_Type */
+        $entityType = Mage::registry('entity_type');
 
-        $hiddenAttributes = Mage::helper('eav')->getHiddenAttributes($entity_type->getEntityTypeCode());
+        $hiddenAttributes = Mage::helper('eav')->getHiddenAttributes($entityType->getEntityTypeCode());
 
         /* @var $node Mage_Eav_Model_Entity_Attribute_Group */
         foreach ($groups as $node) {
@@ -192,8 +192,8 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
             $item['allowDrag']  = true;
 
             /** @var Mage_Eav_Model_Entity_Attribute $nodeChildren */
-            $nodeChildren = Mage::getResourceModel($entity_type->getEntityAttributeCollection());
-            $nodeChildren->setEntityTypeFilter($entity_type->getEntityTypeId())
+            $nodeChildren = Mage::getResourceModel($entityType->getEntityAttributeCollection());
+            $nodeChildren->setEntityTypeFilter($entityType->getEntityTypeId())
                          ->setNotCodeFilter($hiddenAttributes)
                          ->setAttributeGroupFilter($node->getId())
                          ->load();
@@ -233,12 +233,12 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
         $items = [];
         $setId = $this->_getSetId();
 
-        /* @var $entity_type Mage_Eav_Model_Entity_Type */
-        $entity_type = Mage::registry('entity_type');
+        /* @var $entityType Mage_Eav_Model_Entity_Type */
+        $entityType = Mage::registry('entity_type');
 
         /** @var Mage_Eav_Model_Resource_Entity_Attribute_Collection $collection */
-        $collection = Mage::getResourceModel($entity_type->getEntityAttributeCollection());
-        $collection->setEntityTypeFilter($entity_type->getEntityTypeId())
+        $collection = Mage::getResourceModel($entityType->getEntityAttributeCollection());
+        $collection->setEntityTypeFilter($entityType->getEntityTypeId())
                    ->setAttributeSetFilter($setId)
                    ->load();
 
@@ -249,8 +249,8 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
         }
 
         /** @var Mage_Eav_Model_Resource_Entity_Attribute_Collection $attributes */
-        $attributes = Mage::getResourceModel($entity_type->getEntityAttributeCollection());
-        $attributes->setEntityTypeFilter($entity_type->getEntityTypeId())
+        $attributes = Mage::getResourceModel($entityType->getEntityAttributeCollection());
+        $attributes->setEntityTypeFilter($entityType->getEntityTypeId())
                    ->setAttributesExcludeFilter($attributesIds)
                    ->setOrder('attribute_code', 'asc')
                    ->load();

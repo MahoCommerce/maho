@@ -21,8 +21,8 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set extends Mage_Adminhtml_Block_Widget
     {
         $this->_blockGroup = 'eav';
         $this->_controller = 'adminhtml_attribute_set';
-        if ($entity_type = Mage::registry('entity_type')) {
-            $this->_headerText = Mage::helper('eav')->__('Manage %s Attribute Sets', Mage::helper('eav')->formatTypeCode($entity_type));
+        if ($entityType = Mage::registry('entity_type')) {
+            $this->_headerText = Mage::helper('eav')->__('Manage %s Attribute Sets', Mage::helper('eav')->formatTypeCode($entityType));
         } else {
             $this->_headerText = Mage::helper('eav')->__('Manage Attribute Sets');
         }

@@ -21,8 +21,8 @@ class Mage_Eav_Block_Adminhtml_Attribute extends Mage_Adminhtml_Block_Widget_Gri
     {
         $this->_blockGroup = 'eav';
         $this->_controller = 'adminhtml_attribute';
-        if ($entity_type = Mage::registry('entity_type')) {
-            $this->_headerText = Mage::helper('eav')->__('Manage %s Attributes', Mage::helper('eav')->formatTypeCode($entity_type));
+        if ($entityType = Mage::registry('entity_type')) {
+            $this->_headerText = Mage::helper('eav')->__('Manage %s Attributes', Mage::helper('eav')->formatTypeCode($entityType));
         } else {
             $this->_headerText = Mage::helper('eav')->__('Manage Attributes');
         }
