@@ -385,7 +385,9 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
     {
         $isDefault = $this->getData('is_current_set_default');
         if (is_null($isDefault)) {
-            $defaultSetId = Mage::registry('entity_type')->getDefaultAttributeSetId();
+            $defaultSetId = Mage::getSingleton('eav/config')
+                ->getEntityType(Mage::registry('entity_type'))
+                ->getDefaultAttributeSetId();
             $isDefault = $this->_getSetId() == $defaultSetId;
             $this->setData('is_current_set_default', $isDefault);
         }

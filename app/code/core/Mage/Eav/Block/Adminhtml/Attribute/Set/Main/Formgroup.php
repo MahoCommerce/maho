@@ -27,38 +27,26 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main_Formgroup extends Mage_Adminht
 
         $fieldset = $form->addFieldset('set_fieldset', ['legend' => Mage::helper('eav')->__('Add New Group')]);
 
-        $fieldset->addField(
-            'attribute_group_name',
-            'text',
-            [
-                'label' => Mage::helper('eav')->__('Name'),
-                'name' => 'attribute_group_name',
-                'required' => true,
-            ]
-        );
+        $fieldset->addField('attribute_group_name', 'text', [
+            'label' => Mage::helper('eav')->__('Name'),
+            'name' => 'attribute_group_name',
+            'required' => true,
+        ]);
 
-        $fieldset->addField(
-            'submit',
-            'note',
-            [
-                'text' => $this->getLayout()->createBlock('adminhtml/widget_button')
-                            ->setData([
-                                'label'     => Mage::helper('eav')->__('Add Group'),
-                                'onclick'   => 'this.form.submit();',
-                                'class' => 'add'
-                            ])
-                            ->toHtml(),
-            ]
-        );
+        $fieldset->addField('submit', 'note', [
+            'text' => $this->getLayout()->createBlock('adminhtml/widget_button')
+                           ->setData([
+                               'label'     => Mage::helper('eav')->__('Add Group'),
+                               'onclick'   => 'this.form.submit();',
+                               'class' => 'add'
+                           ])
+                           ->toHtml(),
+        ]);
 
-        $fieldset->addField(
-            'attribute_set_id',
-            'hidden',
-            [
-                'name' => 'attribute_set_id',
-                'value' => $this->_getSetId(),
-            ]
-        );
+        $fieldset->addField('attribute_set_id', 'hidden', [
+            'name' => 'attribute_set_id',
+            'value' => $this->_getSetId(),
+        ]);
 
         $form->setUseContainer(true);
         $form->setMethod('post');
@@ -69,8 +57,9 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main_Formgroup extends Mage_Adminht
 
     protected function _getSetId()
     {
-        return ((int) ($this->getRequest()->getParam('id')) > 0)
-                    ? (int) ($this->getRequest()->getParam('id'))
-                    : Mage::registry('entity_type')->getDefaultAttributeSetId();
+        return ((int) $this->getRequest()->getParam('id') > 0)
+                    ? (int) $this->getRequest()->getParam('id')
+                    : Mage::getSingleton('eav/config')->getEntityType(Mage::registry('entity_type'))
+                        ->getDefaultAttributeSetId();
     }
 }
