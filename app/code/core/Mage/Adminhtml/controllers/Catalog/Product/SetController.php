@@ -24,13 +24,29 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
      */
     public const ADMIN_RESOURCE = 'catalog/attributes/sets';
 
+    /**
+     * Controller predispatch method
+     *
+     * @return Mage_Adminhtml_Controller_Action
+     */
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->_setForcedFormKeyActions('delete');
+        $this->_entityType = Mage::getModel('catalog/product')->getResource()->getEntityType();
+        if (!Mage::registry('entity_type')) {
+            Mage::register('entity_type', $this->_entityType);
+        }
+        // For backwards compatibility set camelCase registry key with type id
+        Mage::register('entityType', $this->_entityType->getEntityTypeId());
+        return parent::preDispatch();
+    }
+
     public function indexAction()
     {
         $this->_title($this->__('Catalog'))
              ->_title($this->__('Attributes'))
              ->_title($this->__('Manage Attribute Sets'));
-
-        $this->_setTypeId();
 
         $this->loadLayout();
         $this->_setActiveMenu('catalog/attributes/sets');
@@ -53,7 +69,6 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
              ->_title($this->__('Attributes'))
              ->_title($this->__('Manage Attribute Sets'));
 
-        $this->_setTypeId();
         $attributeSet = Mage::getModel('eav/entity_attribute_set')
             ->load($this->getRequest()->getParam('id'));
 
@@ -83,7 +98,6 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
 
     public function setGridAction()
     {
-        $this->_setTypeId();
         $this->getResponse()->setBody(
             $this->getLayout()
                 ->createBlock('adminhtml/catalog_product_attribute_set_grid')
@@ -100,7 +114,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
      */
     public function saveAction()
     {
-        $entityTypeId   = $this->_getEntityTypeId();
+        $entityTypeId   = $this->_entityType->getEntityTypeId();
         $hasError       = false;
         $attributeSetId = $this->getRequest()->getParam('id', false);
         $isNewSet       = $this->getRequest()->getParam('gotoEdit', false) == '1';
@@ -177,8 +191,6 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
              ->_title($this->__('Manage Attribute Sets'))
              ->_title($this->__('New Set'));
 
-        $this->_setTypeId();
-
         $this->loadLayout();
         $this->_setActiveMenu('catalog/sets');
 
@@ -201,42 +213,5 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
             $this->_getSession()->addError($this->__('An error occurred while deleting this set.'));
             $this->_redirectReferer();
         }
-    }
-
-    /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions('delete');
-        return parent::preDispatch();
-    }
-
-    /**
-     * Define in register catalog_product entity type code as entityType
-     *
-     */
-    protected function _setTypeId()
-    {
-        Mage::register(
-            'entityType',
-            Mage::getModel('catalog/product')->getResource()->getTypeId()
-        );
-    }
-
-    /**
-     * Retrieve catalog product entity type id
-     *
-     * @return int
-     */
-    protected function _getEntityTypeId()
-    {
-        if (is_null(Mage::registry('entityType'))) {
-            $this->_setTypeId();
-        }
-        return Mage::registry('entityType');
     }
 }
