@@ -835,6 +835,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     let tallestProductInfo = 0;
                     row.forEach(function (cell) {
                         const productInfo = cell.querySelector('.product-info');
+                        if (!productInfo) return;
                         const actions = cell.querySelector('.product-info .actions');
 
                         productInfo.style.minHeight = '';
@@ -852,6 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     row.forEach(function (cell) {
                         const productInfo = cell.querySelector('.product-info');
+                        if (!productInfo) return;
                         const actions = cell.querySelector('.product-info .actions');
 
                         productInfo.style.minHeight = `${tallestProductInfo}px`;
