@@ -17,6 +17,12 @@
  */
 class Mage_Adminhtml_Customer_Address_SetController extends Mage_Eav_Controller_Adminhtml_Set_Abstract
 {
+    /**
+     * ACL resource
+     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
+     */
+    public const ADMIN_RESOURCE = 'customer/attributes/customer_address_sets';
+
     #[\Override]
     protected function _construct()
     {
@@ -43,11 +49,5 @@ class Mage_Adminhtml_Customer_Address_SetController extends Mage_Eav_Controller_
              );
 
         return $this;
-    }
-
-    #[\Override]
-    protected function _isAllowed()
-    {
-        return Mage::getSingleton('admin/session')->isAllowed('customer/attributes/customer_address_sets');
     }
 }

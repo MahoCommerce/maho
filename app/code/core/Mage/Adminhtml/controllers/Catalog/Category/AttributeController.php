@@ -17,6 +17,12 @@
  */
 class Mage_Adminhtml_Catalog_Category_AttributeController extends Mage_Eav_Controller_Adminhtml_Attribute_Abstract
 {
+    /**
+     * ACL resource
+     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
+     */
+    public const ADMIN_RESOURCE = 'catalog/attributes/category_attributes';
+
     #[\Override]
     protected function _construct()
     {
@@ -43,11 +49,5 @@ class Mage_Adminhtml_Catalog_Category_AttributeController extends Mage_Eav_Contr
              );
 
         return $this;
-    }
-
-    #[\Override]
-    protected function _isAllowed()
-    {
-        return Mage::getSingleton('admin/session')->isAllowed('catalog/attributes/category_attributes');
     }
 }

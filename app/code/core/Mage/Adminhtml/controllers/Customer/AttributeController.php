@@ -17,6 +17,12 @@
  */
 class Mage_Adminhtml_Customer_AttributeController extends Mage_Eav_Controller_Adminhtml_Attribute_Abstract
 {
+    /**
+     * ACL resource
+     * @see Mage_Adminhtml_Controller_Action::_isAllowed()
+     */
+    public const ADMIN_RESOURCE = 'customer/attributes/customer_attributes';
+
     #[\Override]
     protected function _construct()
     {
@@ -43,11 +49,5 @@ class Mage_Adminhtml_Customer_AttributeController extends Mage_Eav_Controller_Ad
              );
 
         return $this;
-    }
-
-    #[\Override]
-    protected function _isAllowed()
-    {
-        return Mage::getSingleton('admin/session')->isAllowed('customer/attributes/customer_attributes');
     }
 }
