@@ -59,7 +59,6 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main_Formgroup extends Mage_Adminht
     {
         return ((int) $this->getRequest()->getParam('id') > 0)
                     ? (int) $this->getRequest()->getParam('id')
-                    : Mage::getSingleton('eav/config')->getEntityType(Mage::registry('entity_type'))
-                        ->getDefaultAttributeSetId();
+                    : Mage::registry('entity_type')->getDefaultAttributeSetId();
     }
 }

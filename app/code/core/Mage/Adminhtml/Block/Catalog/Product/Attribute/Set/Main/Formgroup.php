@@ -27,33 +27,33 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main_Formgroup extends 
             'attribute_group_name',
             'text',
             [
-                                'label' => Mage::helper('catalog')->__('Name'),
-                                'name' => 'attribute_group_name',
-                                'required' => true,
-                            ]
+                'label' => Mage::helper('catalog')->__('Name'),
+                'name' => 'attribute_group_name',
+                'required' => true,
+            ]
         );
 
         $fieldset->addField(
             'submit',
             'note',
             [
-                                'text' => $this->getLayout()->createBlock('adminhtml/widget_button')
-                                            ->setData([
-                                                'label'     => Mage::helper('catalog')->__('Add Group'),
-                                                'onclick'   => 'this.form.submit();',
-                                                                                                'class' => 'add'
-                                            ])
-                                            ->toHtml(),
-                            ]
+                'text' => $this->getLayout()->createBlock('adminhtml/widget_button')
+                    ->setData([
+                        'label'     => Mage::helper('catalog')->__('Add Group'),
+                        'onclick'   => 'this.form.submit();',
+                        'class' => 'add'
+                    ])
+                    ->toHtml(),
+            ]
         );
 
         $fieldset->addField(
             'attribute_set_id',
             'hidden',
             [
-                                'name' => 'attribute_set_id',
-                                'value' => $this->_getSetId(),
-                            ]
+                'name' => 'attribute_set_id',
+                'value' => $this->_getSetId(),
+            ]
         );
 
         $form->setUseContainer(true);
@@ -67,7 +67,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main_Formgroup extends 
     {
         return ((int) $this->getRequest()->getParam('id') > 0)
                     ? (int) $this->getRequest()->getParam('id')
-                    : Mage::getSingleton('eav/config')->getEntityType(Mage::registry('entityType'))
-                        ->getDefaultAttributeSetId();
+                    : Mage::registry('entity_type')->getDefaultAttributeSetId();
     }
 }

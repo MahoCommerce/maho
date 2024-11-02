@@ -43,25 +43,31 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit extends Mage_Adminhtml_Block_Widge
         }
     }
 
+    /**
+     * @return string
+     */
     #[\Override]
     public function getHeaderText()
     {
-        if (Mage::registry('entity_attribute')->getId()) {
-            $frontendLabel = Mage::registry('entity_attribute')->getFrontendLabel();
-            if (is_array($frontendLabel)) {
-                $frontendLabel = $frontendLabel[0];
-            }
-            return Mage::helper('eav')->__('Edit %s Attribute "%s"', Mage::helper('eav')->formatTypeCode(Mage::registry('entity_type')), $this->escapeHtml($frontendLabel));
-        } else {
-            return Mage::helper('eav')->__('New %s Attribute', Mage::helper('eav')->formatTypeCode(Mage::registry('entity_type')));
+        $entityType = Mage::registry('entity_type');
+        $entityAttribute = Mage::registry('entity_attribute');
+        if ($entityAttribute->getId()) {
+            return Mage::helper('eav')->__('Edit %s Attribute "%s"', Mage::helper('eav')->formatTypeCode($entityType), $entityAttribute->getFrontendLabel());
         }
+        return Mage::helper('eav')->__('New %s Attribute', Mage::helper('eav')->formatTypeCode($entityType));
     }
 
+    /**
+     * @return string
+     */
     public function getValidationUrl()
     {
         return $this->getUrl('*/*/validate', ['_current' => true]);
     }
 
+    /**
+     * @return string
+     */
     #[\Override]
     public function getSaveUrl()
     {
