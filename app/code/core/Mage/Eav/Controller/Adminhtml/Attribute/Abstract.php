@@ -262,7 +262,7 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
                 $data['backend_model'] = $helper->getAttributeBackendModelByInputType($data['frontend_input']);
             }
 
-            if (is_null($model->getIsUserDefined()) || $model->getIsUserDefined() != 0) {
+            if (!$model->getBackendType() && (is_null($model->getIsUserDefined()) || $model->getIsUserDefined() != 0)) {
                 $data['backend_type'] = $model->getBackendTypeByInput($data['frontend_input']);
             }
 
