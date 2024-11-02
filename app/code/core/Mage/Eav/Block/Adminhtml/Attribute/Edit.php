@@ -67,10 +67,4 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit extends Mage_Adminhtml_Block_Widge
     {
         return $this->getUrl('*/*/save', ['_current' => true, 'back' => null]);
     }
-
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-eav-attribute';
-    }
 }

@@ -13,7 +13,6 @@
  *
  * @category   Mage
  * @package    Mage_Adminhtml
- * @author      Magento Core Team <core@magentocommerce.com>
  */
 class Mage_Adminhtml_Catalog_Category_SetController extends Mage_Eav_Controller_Adminhtml_Set_Abstract
 {

@@ -38,7 +38,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Toolbar_Add extends Mage_Adminhtml_
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
                     'label' => Mage::helper('eav')->__('Back'),
-                    'onclick' => 'setLocation(\'' . $this->getUrl('*/*/') . '\')',
+                    'onclick' => Mage::helper('core/js')->getSetLocationJs($this->getUrl('*/*/')),
                     'class' => 'back'
                 ])
         );
@@ -50,26 +50,41 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Toolbar_Add extends Mage_Adminhtml_
         return parent::_prepareLayout();
     }
 
+    /**
+     * @return string
+     */
     protected function _getHeader()
     {
         return Mage::helper('eav')->__('Add New Attribute Set');
     }
 
+    /**
+     * @return string
+     */
     protected function getSaveButtonHtml()
     {
         return $this->getChildHtml('save_button');
     }
 
+    /**
+     * @return string
+     */
     protected function getBackButtonHtml()
     {
         return $this->getChildHtml('back_button');
     }
 
+    /**
+     * @return string
+     */
     protected function getFormHtml()
     {
         return $this->getChildHtml('setForm');
     }
 
+    /**
+     * @return string
+     */
     protected function getFormId()
     {
         return $this->getChild('setForm')->getForm()->getId();

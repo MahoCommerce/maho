@@ -35,10 +35,4 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set extends Mage_Adminhtml_Block_Widget
     {
         return $this->getUrl('*/*/add');
     }
-
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head head-eav-attribute-sets';
-    }
 }

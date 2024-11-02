@@ -65,7 +65,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
             'back_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')->setData([
                 'label'     => Mage::helper('eav')->__('Back'),
-                'onclick'   => 'setLocation(\'' . $this->getUrl('*/*/') . '\')',
+                'onclick'   => Mage::helper('core/js')->getSetLocationJs($this->getUrl('*/*/')),
                 'class'     => 'back'
             ])
         );
@@ -87,19 +87,14 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main extends Mage_Adminhtml_Block_T
             ])
         );
 
-        if ($entity_type = Mage::registry('entity_type')) {
-            $deleteConfirmMessage = $this->jsQuoteEscape(Mage::helper('eav')
-                                                         ->__('All %s of this set will be deleted! Are you sure you want to delete this attribute set?'));
-        } else {
-            $deleteConfirmMessage = $this->jsQuoteEscape(Mage::helper('eav')
-                                                         ->__('All items of this set will be deleted! Are you sure you want to delete this attribute set?'));
-        }
-        $deleteUrl = $this->getUrlSecure('*/*/delete', ['id' => $setId]);
         $this->setChild(
             'delete_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')->setData([
                 'label'     => Mage::helper('eav')->__('Delete Attribute Set'),
-                'onclick'   => 'deleteConfirm(\'' . $deleteConfirmMessage . '\', \'' . $deleteUrl . '\')',
+                'onclick'   => Mage::helper('core/js')->getDeleteConfirmJs(
+                    $this->getUrlSecure('*/*/delete', ['id' => $setId]),
+                    Mage::helper('eav')->__('Are you sure you want to delete this attribute set?')
+                ),
                 'class'     => 'delete'
             ])
         );
