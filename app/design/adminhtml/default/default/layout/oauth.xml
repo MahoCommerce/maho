@@ -65,7 +65,6 @@
         <reference name="head">
             <action method="removeItem"><type>js</type><name>maho-dialog.js</name></action>
             <action method="removeItem"><type>js</type><name>varien/js.js</name></action>
-            <action method="removeItem"><type>js</type><name>mage/adminhtml/hash.js</name></action>
             <action method="removeItem"><type>js</type><name>mage/adminhtml/events.js</name></action>
             <action method="removeItem"><type>js</type><name>mage/adminhtml/loader.js</name></action>
             <action method="removeItem"><type>js</type><name>mage/adminhtml/grid.js</name></action>

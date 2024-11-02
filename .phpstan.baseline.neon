@@ -5787,11 +5787,6 @@ parameters:
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 2
-			path: app/design/frontend/base/default/template/catalog/category/page.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 3
 			path: app/design/frontend/base/default/template/catalog/category/widget/link/link_block.phtml
 
@@ -5939,11 +5934,6 @@ parameters:
 			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 1
 			path: app/design/frontend/base/default/template/catalog/product/view/options/wrapper/bottom.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 3
-			path: app/design/frontend/base/default/template/catalog/product/view/price.phtml
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
@@ -6099,16 +6089,6 @@ parameters:
 			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 7
 			path: app/design/frontend/base/default/template/checkout/cart/noItems.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 33
-			path: app/design/frontend/base/default/template/checkout/cart/render/default.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 33
-			path: app/design/frontend/base/default/template/checkout/cart/render/simple.phtml
 
 		-
 			message: "#^Method Mage_Checkout_Helper_Data\\:\\:formatPrice\\(\\) invoked with 3 parameters, 1 required\\.$#"
@@ -6451,16 +6431,6 @@ parameters:
 			path: app/design/frontend/base/default/template/customer/logout.phtml
 
 		-
-			message: "#^Variable \\$orders might not be defined\\.$#"
-			count: 2
-			path: app/design/frontend/base/default/template/customer/orders.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 11
-			path: app/design/frontend/base/default/template/customer/orders.phtml
-
-		-
 			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 11
 			path: app/design/frontend/base/default/template/customer/widget/gender.phtml
@@ -6469,16 +6439,6 @@ parameters:
 			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 11
 			path: app/design/frontend/base/default/template/customer/widget/taxvat.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 13
-			path: app/design/frontend/base/default/template/customer/wishlist.phtml
-
-		-
-			message: "#^Variable \\$wishlist might not be defined\\.$#"
-			count: 2
-			path: app/design/frontend/base/default/template/customer/wishlist.phtml
 
 		-
 			message: "#^Variable \\$currency might not be defined\\.$#"
@@ -6697,11 +6657,6 @@ parameters:
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 5
-			path: app/design/frontend/base/default/template/page/html/wrapper.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 7
 			path: app/design/frontend/base/default/template/page/redirect.phtml
 
@@ -6899,11 +6854,6 @@ parameters:
 			message: "#^Variable \\$this might not be defined\\.$#"
 			count: 167
 			path: app/design/frontend/base/default/template/sales/order/creditmemo/items/renderer/default.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 21
-			path: app/design/frontend/base/default/template/sales/order/details.phtml
 
 		-
 			message: "#^Variable \\$this might not be defined\\.$#"
@@ -7389,16 +7339,6 @@ parameters:
 			message: "#^Call to an undefined method Mage_Checkout_Block_Cart_Minicart\\:\\:isPossibleOnepageCheckout\\(\\)\\.$#"
 			count: 1
 			path: app/design/frontend/rwd/default/template/checkout/cart/minicart/items.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 33
-			path: app/design/frontend/rwd/default/template/checkout/cart/render/default.phtml
-
-		-
-			message: "#^Variable \\$this might not be defined\\.$#"
-			count: 33
-			path: app/design/frontend/rwd/default/template/checkout/cart/render/simple.phtml
 
 		-
 			message: "#^Method Mage_Checkout_Helper_Data\\:\\:formatPrice\\(\\) invoked with 3 parameters, 1 required\\.$#"
