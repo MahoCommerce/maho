@@ -24,6 +24,9 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
      */
     public const ADMIN_RESOURCE = 'catalog/attributes/sets';
 
+    /** @var Mage_Eav_Model_Entity_Type $_entityType */
+    protected $_entityType;
+
     /**
      * Controller predispatch method
      *
