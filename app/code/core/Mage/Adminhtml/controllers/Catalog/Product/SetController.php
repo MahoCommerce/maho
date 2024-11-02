@@ -24,7 +24,10 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
      */
     public const ADMIN_RESOURCE = 'catalog/attributes/sets';
 
-    /** @var Mage_Eav_Model_Entity_Type $_entityType */
+    /** @var string */
+    protected $_entityCode = Mage_Catalog_Model_Product::ENTITY;
+
+    /** @var Mage_Eav_Model_Entity_Type */
     protected $_entityType;
 
     /**
@@ -36,7 +39,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
     public function preDispatch()
     {
         $this->_setForcedFormKeyActions('delete');
-        $this->_entityType = Mage::getModel('catalog/product')->getResource()->getEntityType();
+        $this->_entityType = Mage::getModel('eav/entity')->setType($this->_entityCode)->getEntityType();
         if (!Mage::registry('entity_type')) {
             Mage::register('entity_type', $this->_entityType);
         }

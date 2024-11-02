@@ -17,10 +17,10 @@
  */
 abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adminhtml_Controller_Action
 {
-    /** @var string $_entityCode */
+    /** @var string */
     protected $_entityCode;
 
-    /** @var Mage_Eav_Model_Entity_Type $_entityType */
+    /** @var Mage_Eav_Model_Entity_Type */
     protected $_entityType;
 
     /**

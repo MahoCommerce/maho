@@ -18,8 +18,6 @@
  */
 class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_Controller_Action
 {
-    protected $_entityTypeId;
-
     /**
      * ACL resource
      * @see Mage_Adminhtml_Controller_Action::_isAllowed()
@@ -27,9 +25,18 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
     public const ADMIN_RESOURCE = 'catalog/attributes/attributes';
 
     /**
-         * List of tags from setting
-         */
+     * List of tags from setting
+     */
     public const XML_PATH_ALLOWED_TAGS = 'system/catalog/frontend/allowed_html_tags_list';
+
+    /** @var string */
+    protected $_entityCode = Mage_Catalog_Model_Product::ENTITY;
+
+    /** @var Mage_Eav_Model_Entity_Type */
+    protected $_entityType;
+
+    /** @var int */
+    protected $_entityTypeId;
 
     /**
      * Get list of allowed text formatted as array
@@ -45,9 +52,12 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
     public function preDispatch()
     {
         $this->_setForcedFormKeyActions('delete');
-        parent::preDispatch();
-        $this->_entityTypeId = Mage::getModel('eav/entity')->setType(Mage_Catalog_Model_Product::ENTITY)->getTypeId();
-        return $this;
+        $this->_entityType = Mage::getModel('eav/entity')->setType($this->_entityCode)->getEntityType();
+        if (!Mage::registry('entity_type')) {
+            Mage::register('entity_type', $this->_entityType);
+        }
+        $this->_entityTypeId = $this->_entityType->getEntityTypeId();
+        return parent::preDispatch();
     }
 
     protected function _initAction()
