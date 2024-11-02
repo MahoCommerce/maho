@@ -16,9 +16,7 @@
 class Mage_Eav_Block_Adminhtml_Attribute_Grid extends Mage_Eav_Block_Adminhtml_Attribute_Grid_Abstract
 {
     /**
-     * Prepare grid collection object
-     *
-     * @return $this
+     * @inheritDoc
      */
     #[\Override]
     protected function _prepareCollection()
