@@ -253,6 +253,7 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
                 $data['backend_model'] = $model->getBackendModel();
                 $data['attribute_code'] = $model->getAttributeCode();
                 $data['is_user_defined'] = $model->getIsUserDefined();
+                $data['entity_type_id'] = $model->getEntityTypeId();
                 $data['frontend_input'] = $model->getFrontendInput();
             } else {
                 /**
@@ -260,6 +261,8 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
                 */
                 $data['source_model'] = $helper->getAttributeSourceModelByInputType($data['frontend_input']);
                 $data['backend_model'] = $helper->getAttributeBackendModelByInputType($data['frontend_input']);
+                $data['entity_type_id'] = $this->_entityType->getEntityTypeId();
+                $data['is_user_defined'] = 1;
             }
 
             if (!$model->getBackendType() && (is_null($model->getIsUserDefined()) || $model->getIsUserDefined() != 0)) {
@@ -269,10 +272,6 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
             $defaultValueField = $model->getDefaultValueByInput($data['frontend_input']);
             if ($defaultValueField) {
                 $data['default_value'] = $this->getRequest()->getParam($defaultValueField);
-            }
-
-            if ($model) {
-                $data['entity_type_id'] = $model->getEntityTypeId();
             }
 
             // filter
@@ -305,11 +304,6 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
             }
 
             $model->addData($data);
-
-            if (!$id) {
-                $model->setEntityTypeId($this->_entityType->getEntityTypeId());
-                $model->setIsUserDefined(1);
-            }
 
             Mage::dispatchEvent(
                 "adminhtml_{$this->_entityCode}_attribute_edit_prepare_save",

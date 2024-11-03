@@ -261,6 +261,7 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
                 $data['backend_model'] = $model->getBackendModel();
                 $data['attribute_code'] = $model->getAttributeCode();
                 $data['is_user_defined'] = $model->getIsUserDefined();
+                $data['entity_type_id'] = $model->getEntityTypeId();
                 $data['frontend_input'] = $model->getFrontendInput();
             } else {
                 /**
@@ -268,6 +269,17 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
                 */
                 $data['source_model'] = $helper->getAttributeSourceModelByInputType($data['frontend_input']);
                 $data['backend_model'] = $helper->getAttributeBackendModelByInputType($data['frontend_input']);
+                $data['entity_type_id'] = $this->_entityType->getEntityTypeId();
+                $data['is_user_defined'] = 1;
+            }
+
+            if (!$model->getBackendType() && (is_null($model->getIsUserDefined()) || $model->getIsUserDefined() != 0)) {
+                $data['backend_type'] = $model->getBackendTypeByInput($data['frontend_input']);
+            }
+
+            $defaultValueField = $model->getDefaultValueByInput($data['frontend_input']);
+            if ($defaultValueField) {
+                $data['default_value'] = $this->getRequest()->getParam($defaultValueField);
             }
 
             if (!isset($data['is_configurable'])) {
@@ -280,32 +292,13 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
                 $data['is_filterable_in_search'] = 0;
             }
 
-            if (!$model->getBackendType() && (is_null($model->getIsUserDefined()) || $model->getIsUserDefined() != 0)) {
-                $data['backend_type'] = $model->getBackendTypeByInput($data['frontend_input']);
-            }
-
-            $defaultValueField = $model->getDefaultValueByInput($data['frontend_input']);
-            if ($defaultValueField) {
-                $data['default_value'] = $this->getRequest()->getParam($defaultValueField);
-            }
-
             if (!isset($data['apply_to'])) {
                 $data['apply_to'] = [];
-            }
-
-            if ($model) {
-                $data['entity_type_id'] = $model->getEntityTypeId();
             }
 
             //filter
             $data = $this->_filterPostData($data);
             $model->addData($data);
-
-            if (!$id) {
-                $data['entity_type_id'] = $this->_entityTypeId;
-                $model->setEntityTypeId($this->_entityTypeId);
-                $model->setIsUserDefined(1);
-            }
 
             if ($this->getRequest()->getParam('set') && $this->getRequest()->getParam('group')) {
                 // For creating product attribute on product page we need specify attribute set and group
