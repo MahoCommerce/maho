@@ -219,96 +219,40 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     }
 
     /**
-     * Detect backend storage type using frontend input type
+     * Return backend storage type by frontend input type
      *
-     * @return string backend_type field value
-     * @param string $type frontend_input field value
+     * @deprecated Instead use Mage::helper('eav')->getAttributeBackendTypeByInputType()
+     * @see Mage_Eav_Helper_Data::getAttributeBackendTypeByInputType()
+     * @param string $inputType
+     * @return string|null
      */
-    public function getBackendTypeByInput($type)
+    public function getBackendTypeByInput($inputType)
     {
-        $field = null;
-        switch ($type) {
-            case 'text':
-            case 'gallery':
-            case 'media_image':
-            case 'customselect':
-                $field = 'varchar';
-                break;
-
-            case 'image':
-            case 'textarea':
-            case 'multiselect':
-                $field = 'text';
-                break;
-
-            case 'date':
-                $field = 'datetime';
-                break;
-
-            case 'select':
-            case 'boolean':
-                $field = 'int';
-                break;
-
-            case 'price':
-                $field = 'decimal';
-                break;
-        }
-
-        return $field;
+        return Mage::helper('eav')->getAttributeBackendTypeByInputType($inputType);
     }
 
     /**
-     * Detect default value using frontend input type
+     * Return default value field by frontend input type
      *
-     * @return string default_value field value
-     * @param string $type frontend_input field name
+     * @deprecated Instead use Mage::helper('eav')->getDefaultValueFieldByInputType()
+     * @see Mage_Eav_Helper_Data::getDefaultValueFieldByInputType()
+     * @param string $inputType
+     * @return string|null
      */
-    public function getDefaultValueByInput($type)
+    public function getDefaultValueByInput($inputType)
     {
-        $field = '';
-        switch ($type) {
-            case 'select':
-            case 'customselect':
-            case 'gallery':
-            case 'media_image':
-                break;
-            case 'multiselect':
-                $field = null;
-                break;
-
-            case 'text':
-            case 'price':
-            case 'image':
-            case 'weight':
-                $field = 'default_value_text';
-                break;
-
-            case 'textarea':
-                $field = 'default_value_textarea';
-                break;
-
-            case 'date':
-                $field = 'default_value_date';
-                break;
-
-            case 'boolean':
-                $field = 'default_value_yesno';
-                break;
-        }
-
-        return $field;
+        return Mage::helper('eav')->getDefaultValueFieldByInputType($inputType);
     }
 
     /**
-     * Retrieve attribute codes by frontend type
+     * Return attribute codes by frontend input type
      *
-     * @param string $type
+     * @param string $inputType
      * @return array
      */
-    public function getAttributeCodesByFrontendType($type)
+    public function getAttributeCodesByFrontendType($inputType)
     {
-        return $this->getResource()->getAttributeCodesByFrontendType($type);
+        return $this->getResource()->getAttributeCodesByFrontendType($inputType);
     }
 
     /**

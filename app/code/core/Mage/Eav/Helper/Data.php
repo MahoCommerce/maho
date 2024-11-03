@@ -180,12 +180,42 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
         * @todo specify there all relations for properties depending on input type
         */
         $inputTypes = [
-            'multiselect'   => [
-                'backend_model'     => 'eav/entity_attribute_backend_array'
+            'text' => [
+                'backend_type'  => 'varchar',
             ],
-            'boolean'       => [
-                'source_model'      => 'eav/entity_attribute_source_boolean'
-            ]
+            'textarea' => [
+                'backend_type'  => 'text',
+            ],
+            'select' => [
+                'backend_type'  => 'int',
+            ],
+            'multiselect' => [
+                'backend_model' => 'eav/entity_attribute_backend_array',
+                'backend_type'  => 'text',
+            ],
+            'customselect' => [
+                'backend_type'  => 'varchar',
+                'source_model'  => 'eav/entity_attribute_source_table',
+            ],
+            'boolean' => [
+                'backend_type'  => 'int',
+                'source_model'  => 'eav/entity_attribute_source_boolean',
+            ],
+            'date' => [
+                'backend_type'  => 'datetime',
+            ],
+            'price' => [
+                'backend_type'  => 'decimal',
+            ],
+            'image' => [
+                'backend_type'  => 'text',
+            ],
+            'gallery' => [
+                'backend_type'  => 'varchar',
+            ],
+            'media_image' => [
+                'backend_type'  => 'varchar',
+            ],
         ];
 
         if (is_null($inputType)) {
@@ -197,33 +227,61 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Return default attribute backend model by input type
+     * Return default attribute backend type by frontend input type
+     *
+     * @param string $inputType
+     * @return string|null
+     */
+    public function getAttributeBackendTypeByInputType($inputType)
+    {
+        return $this->getAttributeInputTypes($inputType)['backend_type'] ?? null;
+    }
+
+    /**
+     * Return default attribute backend model by frontend input type
      *
      * @param string $inputType
      * @return string|null
      */
     public function getAttributeBackendModelByInputType($inputType)
     {
-        $inputTypes = $this->getAttributeInputTypes();
-        if (!empty($inputTypes[$inputType]['backend_model'])) {
-            return $inputTypes[$inputType]['backend_model'];
-        }
-        return null;
+        return $this->getAttributeInputTypes($inputType)['backend_model'] ?? null;
     }
 
     /**
-     * Return default attribute source model by input type
+     * Return default attribute source model by frontend input type
      *
      * @param string $inputType
      * @return string|null
      */
     public function getAttributeSourceModelByInputType($inputType)
     {
-        $inputTypes = $this->getAttributeInputTypes();
-        if (!empty($inputTypes[$inputType]['source_model'])) {
-            return $inputTypes[$inputType]['source_model'];
+        return $this->getAttributeInputTypes($inputType)['source_model'] ?? null;
+    }
+
+    /**
+     * Return default value field by frontend input type
+     *
+     * @param string $inputType
+     * @return string|null
+     */
+    public function getDefaultValueFieldByInputType($inputType)
+    {
+        switch ($inputType) {
+            case 'text':
+            case 'price':
+            case 'image':
+            case 'weight':
+                return 'default_value_text';
+            case 'textarea':
+                return 'default_value_textarea';
+            case 'date':
+                return 'default_value_date';
+            case 'boolean':
+                return 'default_value_yesno';
+            default:
+                return null;
         }
-        return null;
     }
 
     /**
