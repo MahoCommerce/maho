@@ -171,20 +171,33 @@
         </span>
     </div>
     <script type="text/javascript">
-        /**
-         * Send remove item request, after that reload windows
-         */
-        function removeItem(url)
-        {
-            new Ajax.Request(url, {
-                parameters: {isAjax: 1, method: 'POST'},
-                onLoading: function(){$('compare-list-please-wait').show();},
-                onSuccess: function(transport) {
-                    $('compare-list-please-wait').hide();
+        function removeItem(url) {
+            document.getElementById('compare-list-please-wait').style.display = 'block';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'isAjax=1'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        alert("ciao")
+                        throw new Error('Network response was not ok');
+                    }
+                    return response;
+                })
+                .then(() => {
+                    document.getElementById('compare-list-please-wait').style.display = 'none';
                     window.location.reload();
-                    window.opener.location.reload();
-                }
-            });
+                    if (window.opener) {
+                        window.opener.location.reload();
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('compare-list-please-wait').style.display = 'none';
+                });
         }
     </script>
 <?php else: ?>
