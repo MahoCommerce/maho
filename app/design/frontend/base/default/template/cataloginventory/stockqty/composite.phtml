@@ -41,12 +41,11 @@
         </tbody>
     </table>
     <script type="text/javascript">
-    //<![CDATA[
-    $('<?= $this->getPlaceholderId() ?>').observe('click', function(event){
-        this.toggleClassName('expanded');
-        $('<?= $this->getDetailsPlaceholderId() ?>').toggleClassName('no-display');
-        event.stop();
-    });
-    //]]>
+        document.getElementById('<?= $this->getPlaceholderId() ?>').addEventListener('click', function(event){
+            this.classList.toggle('expanded');
+            document.getElementById('<?= $this->getDetailsPlaceholderId() ?>').classList.toggle('no-display');
+            event.preventDefault();
+            event.stopPropagation();
+        });
     </script>
 <?php endif ?>

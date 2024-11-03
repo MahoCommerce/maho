@@ -2440,37 +2440,35 @@ form .form-instructions {
 /* ============================================ *
  * Data Table
  * ============================================ */
-.data-table {
+:is(.data-table, .availability-only-details) {
   width: 100%;
 }
 
-.data-table td,
-.data-table th {
+:is(.data-table, .availability-only-details) :is(td, th) {
   padding: 10px;
   vertical-align: top;
 }
 
-.data-table th {
+:is(.data-table, .availability-only-details) th {
   background: #f4f4f4;
   text-transform: uppercase;
   line-height: 1.4;
   white-space: nowrap;
 }
 
-.data-table thead th,
-.data-table tbody td {
+:is(.data-table, .availability-only-details) :is(thead th, tbody td) {
   border-bottom: 1px solid silver;
 }
 
-.data-table tfoot tr {
+:is(.data-table, .availability-only-details) tfoot tr {
   background: #f4f4f4;
 }
 
-.data-table tbody td .item-options {
+:is(.data-table, .availability-only-details) tbody td .item-options {
   margin-left: 20px;
   margin-top: 10px;
 }
-.data-table tbody td .item-options dt:after {
+:is(.data-table, .availability-only-details) tbody td .item-options dt:after {
   content: ':';
 }
 
