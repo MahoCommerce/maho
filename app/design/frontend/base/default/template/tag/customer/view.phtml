@@ -9,6 +9,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Tag_Block_Customer_View $this */
 ?>
 <div class="page-title">
     <h1><?= $this->__('My Tags') ?></h1>
@@ -22,6 +24,7 @@
 <?= $this->getToolbarHtml() ?>
 <table class="data-table" id="my-tags-table">
 <?php if(count($this->getMyProducts()) > 0): ?>
+    <?php $params[Mage_Core_Model_Url::FORM_KEY] = $this->getFormKey() ?>
     <col width="1" />
     <col />
     <col width="1" />
@@ -38,14 +41,20 @@
             </td>
             <td>
                 <?php if($_product->isSaleable()): ?>
-                    <?php $params[Mage_Core_Model_Url::FORM_KEY] = Mage::getSingleton('core/session')->getFormKey() ?>
                     <?php $params['product'] = $_product->getId(); ?>
                     <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Add to Cart')) ?>" class="button btn-cart" onclick="setLocation('<?= $this->getUrl('checkout/cart/add', $params) ?>')"><?= $this->__('Add to Cart') ?></button>
                 <?php endif ?>
                 <?php if ($this->helper('wishlist')->isAllow()) : ?>
                 <ul class="add-to-links">
                     <li>
-                        <a href="<?= $this->getUrl('wishlist/index/add', ['product'=>$_product->getId()]) ?>" class="link-wishlist"><?= $this->__('Add to Wishlist') ?></a>
+                        <a href="#"
+                           class="link-wishlist"
+                           onclick="customFormSubmit(
+                                   '<?= $this->getAddToWishlistUrlCustom($_product, false) ?>',
+                                   '<?= $this->escapeHtml(json_encode(['form_key' => $params[Mage_Core_Model_Url::FORM_KEY]])) ?>',
+                                   'post')">
+                            <?php echo $this->__('Add to Wishlist') ?>
+                        </a>
                     </li>
                 </ul>
                 <?php endif ?>
