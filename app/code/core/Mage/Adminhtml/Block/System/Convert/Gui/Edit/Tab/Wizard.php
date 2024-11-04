@@ -95,8 +95,10 @@ class Mage_Adminhtml_Block_System_Convert_Gui_Edit_Tab_Wizard extends Mage_Admin
 
     /**
      * @param string $key
-     * @param string $value
+     * @param string|bool|int $value
      * @return string
+     *
+     * @todo check remove int from param value
      */
     public function getSelected($key, $value)
     {
