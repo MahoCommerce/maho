@@ -27,9 +27,7 @@
         </api>
     </version>
     <template name="default">
-        <parameters>
-            <parameter name="graphs.enabled" value="false"/>
-            <parameter name="sourcecode" value="false"/>
-        </parameters>
+        <parameter name="graphs.enabled" value="false"/>
+        <parameter name="sourcecode" value="false"/>
     </template>
 </phpdocumentor>
