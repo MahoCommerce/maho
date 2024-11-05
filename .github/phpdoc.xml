@@ -26,8 +26,5 @@
             <visibility>private</visibility>
         </api>
     </version>
-    <template name="default">
-        <parameter name="graphs.enabled" value="false"/>
-        <parameter name="sourcecode" value="false"/>
-    </template>
+    <template name="default"/>
 </phpdocumentor>
