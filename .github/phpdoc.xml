@@ -24,7 +24,12 @@
             <visibility>public</visibility>
             <visibility>protected</visibility>
             <visibility>private</visibility>
+            <include-source>false</include-source>
         </api>
     </version>
-    <template name="default"/>
+    <template name="default">
+        <transformations>
+            <transformation writer="FileIo" query="indexes/files.html" />
+        </transformations>
+    </template>
 </phpdocumentor>
