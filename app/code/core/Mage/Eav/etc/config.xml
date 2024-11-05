@@ -101,10 +101,92 @@
                 </eav>
             </types>
         </cache>
+        <eav_attributes/>
+        <eav_forms/>
         <eav_frontendclasses>
+            <default>
+                <validate_number translate="label" module="eav">
+                    <label>Decimal Number</label>
+                    <value>validate-number</value>
+                </validate_number>
+                <validate_digits translate="label" module="eav">
+                    <label>Integer Number</label>
+                    <value>validate-digits</value>
+                </validate_digits>
+                <validate_email translate="label" module="eav">
+                    <label>Email</label>
+                    <value>validate-email</value>
+                </validate_email>
+                <validate_url translate="label" module="eav">
+                    <label>URL</label>
+                    <value>validate-url</value>
+                </validate_url>
+                <validate_alpha translate="label" module="eav">
+                    <label>Letters</label>
+                    <value>validate-alpha</value>
+                </validate_alpha>
+                <validate_alphanum translate="label" module="eav">
+                    <label>Letters (a-z, A-Z) or Numbers (0-9)</label>
+                    <value>validate-alphanum</value>
+                </validate_alphanum>
+            </default>
         </eav_frontendclasses>
-        <eav_attributes>
-        </eav_attributes>
+        <eav_inputtypes>
+            <!--
+                /**
+                * Return information array of attribute by input type
+                * Only a small number of settings returned, so we won't break anything in current dataflow
+                * As soon as development process goes on we need to add there all possible settings
+                * @todo specify there all relations for properties depending on input type
+                */
+            -->
+            <default>
+                <text translate="label" module="eav">
+                    <label>Text Field</label>
+                    <value>text</value>
+                    <backend_type>varchar</backend_type>
+                    <default_value_field>default_value_text</default_value_field>
+                </text>
+                <textarea translate="label" module="eav">
+                    <label>Text Area</label>
+                    <value>textarea</value>
+                    <backend_type>text</backend_type>
+                    <default_value_field>default_value_textarea</default_value_field>
+                </textarea>
+                <date translate="label" module="eav">
+                    <label>Date</label>
+                    <value>date</value>
+                    <backend_type>datetime</backend_type>
+                    <backend_model>eav/entity_attribute_backend_datetime</backend_model>
+                    <frontend_model>eav/entity_attribute_frontend_datetime</frontend_model>
+                    <default_value_field>default_value_date</default_value_field>
+                </date>
+                <boolean translate="label" module="eav">
+                    <label>Yes/No</label>
+                    <value>boolean</value>
+                    <backend_type>int</backend_type>
+                    <source_model>eav/entity_attribute_source_boolean</source_model>
+                    <default_value_field>default_value_yesno</default_value_field>
+                </boolean>
+                <multiselect translate="label" module="eav">
+                    <label>Multiple Select</label>
+                    <value>multiselect</value>
+                    <backend_type>text</backend_type>
+                    <backend_model>eav/entity_attribute_backend_array</backend_model>
+                </multiselect>
+                <select translate="label" module="eav">
+                    <label>Dropdown</label>
+                    <value>select</value>
+                    <backend_type>int</backend_type>
+                </select>
+                <customselect translate="label" module="eav">
+                    <label>Dropdown with Other Option</label>
+                    <value>customselect</value>
+                    <backend_type>varchar</backend_type>
+                    <source_model>eav/entity_attribute_source_table</source_model>
+                </customselect>
+            </default>
+        </eav_inputtypes>
         <events>
             <controller_action_predispatch>
                 <observers>

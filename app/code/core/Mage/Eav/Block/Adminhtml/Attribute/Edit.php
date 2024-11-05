@@ -15,31 +15,33 @@
  */
 class Mage_Eav_Block_Adminhtml_Attribute_Edit extends Mage_Adminhtml_Block_Widget_Form_Container
 {
+    protected Mage_Eav_Model_Entity_Type $entityType;
+    protected Mage_Eav_Model_Attribute $entityAttribute;
+
     public function __construct()
     {
+        $this->entityType = Mage::registry('entity_type');
+        $this->entityAttribute = Mage::registry('entity_attribute');
+
         $this->_objectId = 'attribute_id';
         $this->_blockGroup = 'eav';
         $this->_controller = 'adminhtml_attribute';
 
         parent::__construct();
 
-        $this->_addButton(
-            'save_and_edit_button',
-            [
-                'label'     => Mage::helper('eav')->__('Save and Continue Edit'),
-                'onclick'   => 'saveAndContinueEdit()',
-                'class'     => 'save'
-            ],
-            100
-        );
+        $this->_addButton('save_and_edit_button', [
+            'label'   => $this->__('Save and Continue Edit'),
+            'onclick' => 'saveAndContinueEdit()',
+            'class'   => 'save'
+        ], 100);
 
-        $this->_updateButton('save', 'label', Mage::helper('eav')->__('Save Attribute'));
+        $this->_updateButton('save', 'label', $this->__('Save Attribute'));
         $this->_updateButton('save', 'onclick', 'saveAttribute()');
 
-        if (!Mage::registry('entity_attribute')->getIsUserDefined()) {
-            $this->_removeButton('delete');
+        if ($this->entityAttribute->getIsUserDefined()) {
+            $this->_updateButton('delete', 'label', $this->__('Delete Attribute'));
         } else {
-            $this->_updateButton('delete', 'label', Mage::helper('eav')->__('Delete Attribute'));
+            $this->_removeButton('delete');
         }
     }
 
@@ -49,12 +51,17 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit extends Mage_Adminhtml_Block_Widge
     #[\Override]
     public function getHeaderText()
     {
-        $entityType = Mage::registry('entity_type');
-        $entityAttribute = Mage::registry('entity_attribute');
-        if ($entityAttribute->getId()) {
-            return Mage::helper('eav')->__('Edit %s Attribute "%s"', Mage::helper('eav')->formatTypeCode($entityType), $entityAttribute->getFrontendLabel());
+        if ($this->entityAttribute->getId()) {
+            return $this->__(
+                'Edit %s Attribute "%s"',
+                Mage::helper('eav')->formatTypeCode($this->entityType->getEntityTypeCode()),
+                $this->entityAttribute->getFrontendLabel()
+            );
         }
-        return Mage::helper('eav')->__('New %s Attribute', Mage::helper('eav')->formatTypeCode($entityType));
+        return $this->__(
+            'New %s Attribute',
+            Mage::helper('eav')->formatTypeCode($this->entityType->getEntityTypeCode()),
+        );
     }
 
     /**

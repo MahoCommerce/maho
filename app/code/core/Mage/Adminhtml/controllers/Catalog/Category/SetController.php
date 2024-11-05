@@ -10,9 +10,6 @@
 
 /**
  * Catalog category attribute sets controller
- *
- * @category   Mage
- * @package    Mage_Adminhtml
  */
 class Mage_Adminhtml_Catalog_Category_SetController extends Mage_Eav_Controller_Adminhtml_Set_Abstract
 {
@@ -25,7 +22,7 @@ class Mage_Adminhtml_Catalog_Category_SetController extends Mage_Eav_Controller_
     #[\Override]
     protected function _construct()
     {
-        $this->_entityCode = Mage_Catalog_Model_Category::ENTITY;
+        $this->entityTypeCode = Mage_Catalog_Model_Category::ENTITY;
     }
 
     #[\Override]

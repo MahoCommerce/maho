@@ -184,29 +184,25 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Retrieve attribute hidden fields
      *
+     * @deprecated Instead use Mage::helper('eav')->getInputTypeHiddenFields()
+     * @see Mage_Eav_Helper_Data::getInputTypeHiddenFields()
      * @return array
      */
     public function getAttributeHiddenFields()
     {
-        if (Mage::registry('attribute_type_hidden_fields')) {
-            return Mage::registry('attribute_type_hidden_fields');
-        } else {
-            return [];
-        }
+        return Mage::helper('eav')->getInputTypeHiddenFields(Mage_Catalog_Model_Product::ENTITY);
     }
 
     /**
      * Retrieve attribute disabled types
      *
+     * @deprecated Instead use Mage::helper('eav')->getInputTypeDisabledApplyToOptions()
+     * @see Mage_Eav_Helper_Data::getInputTypeDisabledApplyToOptions()
      * @return array
      */
     public function getAttributeDisabledTypes()
     {
-        if (Mage::registry('attribute_type_disabled_types')) {
-            return Mage::registry('attribute_type_disabled_types');
-        } else {
-            return [];
-        }
+        return Mage::helper('eav')->getInputTypeDisabledApplyToOptions(Mage_Catalog_Model_Product::ENTITY);
     }
 
     /**

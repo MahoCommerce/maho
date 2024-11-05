@@ -67,6 +67,7 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
     protected function _prepareForm()
     {
         $attributeObject = $this->getAttributeObject();
+        $entityTypeCode = $attributeObject->getEntityType()->getEntityTypeCode();
 
         $form = new Varien_Data_Form([
             'id' => 'edit_form',
@@ -96,78 +97,80 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
             'name'  => 'attribute_code',
             'label' => Mage::helper('eav')->__('Attribute Code'),
             'title' => Mage::helper('eav')->__('Attribute Code'),
-            'note'  => Mage::helper('eav')->__('For internal use. Must be unique with no spaces. Maximum length of attribute code must be less then %s symbols', Mage_Eav_Model_Entity_Attribute::ATTRIBUTE_CODE_MAX_LENGTH),
+            'note'  => Mage::helper('eav')->__(
+                'For internal use. Must be unique with no spaces. Maximum length of attribute code must be less then %s symbols',
+                Mage_Eav_Model_Entity_Attribute::ATTRIBUTE_CODE_MAX_LENGTH
+            ),
             'class' => $validateClass,
             'required' => true,
         ]);
 
-        $inputTypes = Mage::getModel('eav/adminhtml_system_config_source_inputtype')->toOptionArray();
-
         $fieldset->addField('frontend_input', 'select', [
-            'name' => 'frontend_input',
-            'label' => Mage::helper('eav')->__('Input Type'),
-            'title' => Mage::helper('eav')->__('Input Type'),
-            'value' => 'text',
-            'values' => $inputTypes
+            'name'   => 'frontend_input',
+            'label'  => Mage::helper('eav')->__('Input Type'),
+            'title'  => Mage::helper('eav')->__('Input Type'),
+            'values' => Mage::helper('eav')->getInputTypes($entityTypeCode),
+            'value'  => 'text',
         ]);
 
         $fieldset->addField('frontend_class', 'select', [
-            'name'  => 'frontend_class',
-            'label' => Mage::helper('eav')->__('Input Validation'),
-            'title' => Mage::helper('eav')->__('Input Validation'),
-            'values' => Mage::helper('eav')->getFrontendClasses($attributeObject->getEntityType()->getEntityTypeCode())
+            'name'   => 'frontend_class',
+            'label'  => Mage::helper('eav')->__('Input Validation'),
+            'title'  => Mage::helper('eav')->__('Input Validation'),
+            'values' => Mage::helper('eav')->getFrontendClasses($entityTypeCode),
         ]);
 
         $fieldset->addField('is_required', 'boolean', [
-            'name' => 'is_required',
+            'name'  => 'is_required',
             'label' => Mage::helper('eav')->__('Values Required'),
             'title' => Mage::helper('eav')->__('Values Required'),
         ]);
 
         $fieldset->addField('is_unique', 'boolean', [
-            'name' => 'is_unique',
+            'name'  => 'is_unique',
             'label' => Mage::helper('eav')->__('Unique Value'),
-            'title' => Mage::helper('eav')->__('Unique Value (not shared with other products)'),
-            'note'  => Mage::helper('eav')->__('Not shared with other products'),
+            'title' => Mage::helper('eav')->__('Unique Value'),
+            'note'  => Mage::helper('eav')->__(
+                'Not shared with other %s',
+                strtolower(Mage::helper('eav')->formatTypeCode($entityTypeCode))
+            )
         ]);
 
         $fieldset->addField('default_value_text', 'text', [
-            'name' => 'default_value_text',
+            'name'  => 'default_value_text',
             'label' => Mage::helper('eav')->__('Default Value'),
             'title' => Mage::helper('eav')->__('Default Value'),
             'value' => $attributeObject->getDefaultValue(),
         ]);
 
         $fieldset->addField('default_value_yesno', 'boolean', [
-            'name' => 'default_value_yesno',
+            'name'  => 'default_value_yesno',
             'label' => Mage::helper('eav')->__('Default Value'),
             'title' => Mage::helper('eav')->__('Default Value'),
             'value' => $attributeObject->getDefaultValue(),
         ]);
 
-        $dateFormatIso = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
         $fieldset->addField('default_value_date', 'date', [
             'name'   => 'default_value_date',
             'label'  => Mage::helper('eav')->__('Default Value'),
             'title'  => Mage::helper('eav')->__('Default Value'),
             'value'  => $attributeObject->getDefaultValue(),
-            'format'       => $dateFormatIso
+            'format' => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
         ]);
 
         $fieldset->addField('default_value_textarea', 'textarea', [
-            'name' => 'default_value_textarea',
+            'name'  => 'default_value_textarea',
             'label' => Mage::helper('eav')->__('Default Value'),
             'title' => Mage::helper('eav')->__('Default Value'),
             'value' => $attributeObject->getDefaultValue(),
         ]);
 
         if ($attributeObject->getResource()->hasFormTable()) {
-            $attributeObjectTypeCode = $attributeObject->getEntityType()->getEntityTypeCode();
             $fieldset->addField('used_in_forms', 'multiselect', [
                 'name'   => 'used_in_forms',
                 'label'  => Mage::helper('adminhtml')->__('Use in Forms'),
                 'title'  => Mage::helper('adminhtml')->__('Use in Forms'),
-                'values' => Mage::getModel('eav/config_source_form')->toOptionArray($attributeObjectTypeCode),
+                'values' => Mage::helper('eav')->getForms($entityTypeCode),
                 'value'  => $attributeObject->getUsedInForms(),
             ]);
         }

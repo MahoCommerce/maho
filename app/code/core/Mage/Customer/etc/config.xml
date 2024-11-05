@@ -454,39 +454,6 @@
                 </observers>
             </session_before_renew_cookie>
         </events>
-        <eav_forms>
-            <customer>
-                <adminhtml_checkout translate="label" module="customer">
-                    <label>Adminhtml Checkout</label>
-                </adminhtml_checkout>
-                <adminhtml_customer translate="label" module="customer">
-                    <label>Adminhtml Customer</label>
-                </adminhtml_customer>
-                <checkout_register translate="label" module="customer">
-                    <label>Checkout Register</label>
-                </checkout_register>
-                <customer_account_create translate="label" module="customer">
-                    <label>Customer Account Create</label>
-                </customer_account_create>
-                <customer_account_edit translate="label" module="customer">
-                    <label>Customer Account Edit</label>
-                </customer_account_edit>
-            </customer>
-            <customer_address>
-                <adminhtml_customer_address translate="label" module="customer">
-                    <label>Adminhtml Customer Address</label>
-                </adminhtml_customer_address>
-                <checkout_address_create translate="label" module="customer">
-                    <label>Checkout Address Create</label>
-                </checkout_address_create>
-                <customer_address_edit translate="label" module="customer">
-                    <label>Customer Address Edit</label>
-                </customer_address_edit>
-                <customer_register_address translate="label" module="customer">
-                    <label>Customer Register Address</label>
-                </customer_register_address>
-            </customer_address>
-        </eav_forms>
         <eav_attributes>
             <customer>
                 <rp_token_created_at>
@@ -569,6 +536,57 @@
                 </middlename>
             </customer_address>
         </eav_attributes>
+        <eav_forms>
+            <customer>
+                <adminhtml_checkout translate="label" module="customer">
+                    <label>Adminhtml Checkout</label>
+                    <value>adminhtml_checkout</value>
+                </adminhtml_checkout>
+                <adminhtml_customer translate="label" module="customer">
+                    <label>Adminhtml Customer</label>
+                    <value>adminhtml_customer</value>
+                </adminhtml_customer>
+                <checkout_register translate="label" module="customer">
+                    <label>Checkout Register</label>
+                    <value>checkout_register</value>
+                </checkout_register>
+                <customer_account_create translate="label" module="customer">
+                    <label>Customer Account Create</label>
+                    <value>customer_account_create</value>
+                </customer_account_create>
+                <customer_account_edit translate="label" module="customer">
+                    <label>Customer Account Edit</label>
+                    <value>customer_account_edit</value>
+                </customer_account_edit>
+            </customer>
+            <customer_address>
+                <adminhtml_customer_address translate="label" module="customer">
+                    <label>Adminhtml Customer Address</label>
+                    <value>adminhtml_customer_address</value>
+                </adminhtml_customer_address>
+                <checkout_address_create translate="label" module="customer">
+                    <label>Checkout Address Create</label>
+                    <value>checkout_address_create</value>
+                </checkout_address_create>
+                <customer_address_edit translate="label" module="customer">
+                    <label>Customer Address Edit</label>
+                    <value>customer_address_edit</value>
+                </customer_address_edit>
+                <customer_register_address translate="label" module="customer">
+                    <label>Customer Register Address</label>
+                    <value>customer_register_address</value>
+                </customer_register_address>
+            </customer_address>
+        </eav_forms>
+        <eav_inputtypes>
+            <customer_address>
+                <multiline translate="label" module="eav">
+                    <label>Multiline</label>
+                    <value>multiline</value>
+                    <backend_type>text</backend_type>
+                </multiline>
+            </customer_address>
+        </eav_inputtypes>
     </global>
     <adminhtml>
         <translate>

@@ -653,6 +653,40 @@
                 </path_in_store>
             </catalog_category>
         </eav_attributes>
+        <eav_inputtypes>
+            <catalog_product>
+                <price translate="label" module="catalog">
+                    <label>Price</label>
+                    <value>price</value>
+                    <backend_type>decimal</backend_type>
+                    <default_value_field>default_value_text</default_value_field>
+                </price>
+                <weight translate="label" module="catalog">
+                    <label>Weight</label>
+                    <value>weight</value>
+                    <backend_type>decimal</backend_type>
+                    <default_value_field>default_value_text</default_value_field>
+                </weight>
+                <gallery translate="label" module="catalog">
+                    <label>Gallery</label>
+                    <value>gallery</value>
+                    <backend_type>varchar</backend_type>
+                </gallery>
+                <media_image translate="label" module="catalog">
+                    <label>Media Image</label>
+                    <value>media_image</value>
+                    <backend_type>varchar</backend_type>
+                </media_image>
+            </catalog_product>
+            <catalog_category>
+                <image translate="label" module="catalog">
+                    <label>Image</label>
+                    <value>image</value>
+                    <backend_type>varchar</backend_type>
+                    <default_value_field>default_value_text</default_value_field>
+                </image>
+            </catalog_category>
+        </eav_inputtypes>
     </global>
     <adminhtml>
         <translate>

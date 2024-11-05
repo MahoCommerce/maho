@@ -10,18 +10,12 @@
  */
 
 /**
- * Attribute set controller
- *
- * @category   Mage
- * @package    Mage_Eav
+ * Abstract attribute set controller
  */
 abstract class Mage_Eav_Controller_Adminhtml_Set_Abstract extends Mage_Adminhtml_Controller_Action
 {
-    /** @var string */
-    protected $_entityCode;
-
-    /** @var Mage_Eav_Model_Entity_Type */
-    protected $_entityType;
+    protected string $entityTypeCode;
+    protected Mage_Eav_Model_Entity_Type $entityType;
 
     /**
      * Controller predispatch method
@@ -31,11 +25,10 @@ abstract class Mage_Eav_Controller_Adminhtml_Set_Abstract extends Mage_Adminhtml
     #[\Override]
     public function preDispatch()
     {
+        $this->entityType = Mage::getSingleton('eav/config')->getEntityType($this->entityTypeCode);
+        Mage::register('entity_type', $this->entityType, true);
+
         $this->_setForcedFormKeyActions('delete');
-        $this->_entityType = Mage::getModel('eav/entity')->setType($this->_entityCode)->getEntityType();
-        if (!Mage::registry('entity_type')) {
-            Mage::register('entity_type', $this->_entityType);
-        }
         return parent::preDispatch();
     }
 
@@ -51,8 +44,26 @@ abstract class Mage_Eav_Controller_Adminhtml_Set_Abstract extends Mage_Adminhtml
              ->renderLayout();
     }
 
+    public function setGridAction()
+    {
+        $this->getResponse()->setBody(
+            $this->getLayout()
+                 ->createBlock('eav/adminhtml_attribute_set_grid')
+                 ->toHtml()
+        );
+    }
+
+    public function addAction()
+    {
+        $this->_initAction()
+             ->_title($this->__('New Set'))
+             ->_addContent($this->getLayout()->createBlock('eav/adminhtml_attribute_set_toolbar_add'))
+             ->renderLayout();
+    }
+
     public function editAction()
     {
+        /** @var Mage_Eav_Model_Entity_Attribute_Set $attributeSet */
         $attributeSet = Mage::getModel('eav/entity_attribute_set')
             ->load($this->getRequest()->getParam('id'));
 
@@ -70,62 +81,64 @@ abstract class Mage_Eav_Controller_Adminhtml_Set_Abstract extends Mage_Adminhtml
         $this->renderLayout();
     }
 
-    public function setGridAction()
+    public function createFromSkeletonSetAction()
     {
-        $this->getResponse()->setBody(
-            $this->getLayout()
-                ->createBlock('eav/adminhtml_attribute_set_grid')
-                ->toHtml()
-        );
-    }
+        /** @var Mage_Eav_Model_Entity_Attribute_Set $attributeSet */
+        $attributeSet = Mage::getModel('eav/entity_attribute_set');
 
-    /**
-     * Save attribute set action
-     *
-     * [POST] Create attribute set from another set and redirect to edit page
-     * [AJAX] Save attribute set data
-     *
-     */
-    public function saveAction()
-    {
-        $entityTypeId   = $this->_entityType->getEntityTypeId();
-        $hasError       = false;
-        $attributeSetId = $this->getRequest()->getParam('id', false);
-        $isNewSet       = $this->getRequest()->getParam('gotoEdit', false) == '1';
-
-        /** @var Mage_Eav_Model_Entity_Attribute_Set $model */
-        $model  = Mage::getModel('eav/entity_attribute_set')
-                ->setEntityTypeId($entityTypeId);
+        /** @var Mage_Admin_Model_Session $session */
+        $session = Mage::getSingleton('adminhtml/session');
 
         /** @var Mage_Eav_Helper_Data $helper */
         $helper = Mage::helper('eav');
 
         try {
-            if ($isNewSet) {
-                //filter html tags
-                $name = $helper->stripTags($this->getRequest()->getParam('attribute_set_name'));
-                $model->setAttributeSetName(trim($name));
-            } else {
-                if ($attributeSetId) {
-                    $model->load($attributeSetId);
-                }
-                if (!$model->getId()) {
-                    Mage::throwException(Mage::helper('eav')->__('This attribute set no longer exists.'));
-                }
-                $data = Mage::helper('core')->jsonDecode($this->getRequest()->getPost('data'));
+            $data = $this->getRequest()->getPost();
 
-                //filter html tags
-                $data['attribute_set_name'] = $helper->stripTags($data['attribute_set_name']);
+            $attributeSet->setEntityTypeId($this->entityType->getEntityTypeId())
+                ->setAttributeSetName($helper->stripTags($data['attribute_set_name']));
 
-                $model->organizeData($data);
+            $attributeSet->validate();
+
+            $attributeSet->save()
+                ->initFromSkeleton($data['skeleton_set'])
+                ->save();
+
+            $this->_redirect('*/*/edit', ['id' => $attributeSet->getId()]);
+        } catch (Exception $e) {
+            $session->addError($e->getMessage());
+            $this->_redirect('*/*/edit', ['id' => $attributeSet->getId()]);
+        }
+    }
+
+    public function saveAction()
+    {
+        if ($this->getRequest()->getPost('skeleton_set')) {
+            $this->_forward('createFromSkeletonSet');
+            return;
+        }
+
+        /** @var Mage_Eav_Model_Entity_Attribute_Set $attributeSet */
+        $attributeSet = Mage::getModel('eav/entity_attribute_set')
+            ->load($this->getRequest()->getParam('id'));
+
+        /** @var Mage_Admin_Model_Session $session */
+        $session = Mage::getSingleton('adminhtml/session');
+
+        /** @var Mage_Eav_Helper_Data $helper */
+        $helper = Mage::helper('eav');
+
+        $hasError = false;
+        try {
+            if (!$attributeSet->getId()) {
+                Mage::throwException(Mage::helper('eav')->__('This attribute set no longer exists.'));
             }
+            $data = Mage::helper('core')->jsonDecode($this->getRequest()->getPost('data'));
+            $data['attribute_set_name'] = $helper->stripTags($data['attribute_set_name']);
 
-            $model->validate();
-            if ($isNewSet) {
-                $model->save();
-                $model->initFromSkeleton($this->getRequest()->getParam('skeleton_set'));
-            }
-            $model->save();
+            $attributeSet->organizeData($data)->validate();
+            $attributeSet->save();
+
             $this->_getSession()->addSuccess(Mage::helper('eav')->__('The attribute set has been saved.'));
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
@@ -138,41 +151,29 @@ abstract class Mage_Eav_Controller_Adminhtml_Set_Abstract extends Mage_Adminhtml
             $hasError = true;
         }
 
-        if ($isNewSet) {
-            if ($hasError) {
-                $this->_redirect('*/*/add');
-            } else {
-                $this->_redirect('*/*/edit', ['id' => $model->getId()]);
-            }
+        if ($hasError) {
+            $this->_initLayoutMessages('adminhtml/session');
+            $response = [
+                'error'   => 1,
+                'message' => $this->getLayout()->getMessagesBlock()->getGroupedHtml(),
+            ];
         } else {
-            $response = [];
-            if ($hasError) {
-                $this->_initLayoutMessages('adminhtml/session');
-                $response['error']   = 1;
-                $response['message'] = $this->getLayout()->getMessagesBlock()->getGroupedHtml();
-            } else {
-                $response['error']   = 0;
-                $response['url']     = $this->getUrl('*/*/');
-            }
-            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($response));
+            $response = [
+                'error'   => 0,
+                'url'     => $this->getUrl('*/*/'),
+            ];
         }
-    }
-
-    public function addAction()
-    {
-        $this->_initAction()
-             ->_title($this->__('New Set'))
-             ->_addContent($this->getLayout()->createBlock('eav/adminhtml_attribute_set_toolbar_add'))
-             ->renderLayout();
+        $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($response));
     }
 
     public function deleteAction()
     {
-        $setId = $this->getRequest()->getParam('id');
+        /** @var Mage_Eav_Model_Entity_Attribute_Set $attributeSet */
+        $attributeSet = Mage::getModel('eav/entity_attribute_set')
+            ->load($this->getRequest()->getParam('id'));
+
         try {
-            Mage::getModel('eav/entity_attribute_set')
-                ->setId($setId)
-                ->delete();
+            $attributeSet->delete();
 
             $this->_getSession()->addSuccess($this->__('The attribute set has been removed.'));
             $this->getResponse()->setRedirect($this->getUrl('*/*/'));

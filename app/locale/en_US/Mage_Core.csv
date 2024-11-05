@@ -167,7 +167,6 @@
 "If the current frame position does not cover utmost pages, will render link to current position plus/minus this value.","If the current frame position does not cover utmost pages, will render link to current position plus/minus this value."
 "Image Reprocess Quality","Image Reprocess Quality"
 "Incorrect credit card expiration date.","Incorrect credit card expiration date."
-"Input type ""%value%"" not found in the input types list.","Input type ""%value%"" not found in the input types list."
 "Invalid MIME type.","Invalid MIME type."
 "Invalid URL '%value%'.","Invalid URL '%value%'."
 "Invalid URL scheme.","Invalid URL scheme."

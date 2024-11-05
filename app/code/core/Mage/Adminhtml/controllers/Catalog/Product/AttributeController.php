@@ -173,23 +173,19 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
     protected function _filterPostData($data)
     {
         if ($data) {
-            /** @var Mage_Catalog_Helper_Data $helperCatalog */
-            $helperCatalog = Mage::helper('catalog');
-            //labels
+            // Labels
             $data['frontend_label'] = (array) $data['frontend_label'];
             foreach ($data['frontend_label'] as & $value) {
                 if ($value) {
-                    $value = $helperCatalog->stripTags($value);
+                    $value = Mage::helper('catalog')->stripTags($value);
                 }
             }
-
+            // Options
             if (!empty($data['option']) && !empty($data['option']['value']) && is_array($data['option']['value'])) {
-                $allowableTags = isset($data['is_html_allowed_on_front']) && $data['is_html_allowed_on_front']
-                    ? sprintf('<%s>', implode('><', $this->_getAllowedTags())) : null;
+                $allowedTags = !empty($data['is_html_allowed_on_front']) ? $this->_getAllowedTags() : [];
                 foreach ($data['option']['value'] as $key => $values) {
                     foreach ($values as $storeId => $storeLabel) {
-                        $data['option']['value'][$key][$storeId]
-                            = $helperCatalog->stripTags($storeLabel, $allowableTags);
+                        $data['option']['value'][$key][$storeId] = Mage::helper('catalog')->stripTags($storeLabel, $allowedTags);
                     }
                 }
             }
@@ -203,16 +199,12 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
         if ($data) {
             /** @var Mage_Admin_Model_Session $session */
             $session = Mage::getSingleton('adminhtml/session');
-
-            $redirectBack   = $this->getRequest()->getParam('back', false);
             /** @var Mage_Catalog_Model_Entity_Attribute $model */
             $model = Mage::getModel('catalog/resource_eav_attribute');
-            /** @var Mage_Catalog_Helper_Product $helper */
-            $helper = Mage::helper('catalog/product');
 
             $id = $this->getRequest()->getParam('attribute_id');
 
-            //validate attribute_code
+            // Validate attribute_code
             if (isset($data['attribute_code'])) {
                 $validatorAttrCode = new Zend_Validate_Regex(['pattern' => '/^(?!event$)[a-z][a-z_0-9]{1,254}$/']);
                 if (!$validatorAttrCode->isValid($data['attribute_code'])) {
@@ -224,7 +216,7 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
                 }
             }
 
-            //validate frontend_input
+            // Validate frontend_input
             if (isset($data['frontend_input'])) {
                 /** @var Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator $validatorInputType */
                 $validatorInputType = Mage::getModel('eav/adminhtml_system_config_source_inputtype_validator');
@@ -239,6 +231,7 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
 
             if ($id) {
                 $model->load($id);
+                $inputType = $model->getFrontendInput();
 
                 if (!$model->getId()) {
                     $session->addError(
@@ -248,8 +241,8 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
                     return;
                 }
 
-                // entity type check
-                if ($model->getEntityTypeId() != $this->_entityTypeId) {
+                // Entity type check
+                if ($model->getEntityTypeId() !== $this->_entityTypeId) {
                     $session->addError(
                         Mage::helper('catalog')->__('This attribute cannot be updated.')
                     );
@@ -257,29 +250,17 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
                     $this->_redirect('*/*/');
                     return;
                 }
-
-                $data['backend_model'] = $model->getBackendModel();
-                $data['attribute_code'] = $model->getAttributeCode();
-                $data['is_user_defined'] = $model->getIsUserDefined();
-                $data['entity_type_id'] = $model->getEntityTypeId();
-                $data['frontend_input'] = $model->getFrontendInput();
             } else {
-                /**
-                * @todo add to helper and specify all relations for properties
-                */
-                $data['source_model'] = $helper->getAttributeSourceModelByInputType($data['frontend_input']);
-                $data['backend_model'] = $helper->getAttributeBackendModelByInputType($data['frontend_input']);
+                $inputType = $data['frontend_input'];
+
+                // Setup default values for new attribute
                 $data['entity_type_id'] = $this->_entityType->getEntityTypeId();
                 $data['is_user_defined'] = 1;
             }
 
-            if (!$model->getBackendType() && (is_null($model->getIsUserDefined()) || $model->getIsUserDefined() != 0)) {
-                $data['backend_type'] = $model->getBackendTypeByInput($data['frontend_input']);
-            }
-
-            $defaultValueField = $model->getDefaultValueByInput($data['frontend_input']);
+            $defaultValueField = Mage::helper('eav')->getAttributeDefaultValueField($this->_entityCode, $inputType);
             if ($defaultValueField) {
-                $data['default_value'] = $this->getRequest()->getParam($defaultValueField);
+                $data['default_value'] = $data[$defaultValueField];
             }
 
             if (!isset($data['is_configurable'])) {
@@ -291,17 +272,16 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
             if (!isset($data['is_filterable_in_search'])) {
                 $data['is_filterable_in_search'] = 0;
             }
-
             if (!isset($data['apply_to'])) {
                 $data['apply_to'] = [];
             }
 
-            //filter
+            // Filter
             $data = $this->_filterPostData($data);
             $model->addData($data);
 
+            // For creating product attribute on product page we need specify attribute set and group
             if ($this->getRequest()->getParam('set') && $this->getRequest()->getParam('group')) {
-                // For creating product attribute on product page we need specify attribute set and group
                 $model->setAttributeSetId($this->getRequest()->getParam('set'));
                 $model->setAttributeGroupId($this->getRequest()->getParam('group'));
             }
@@ -312,10 +292,9 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
                     Mage::helper('catalog')->__('The product attribute has been saved.')
                 );
 
-                /**
-                 * Clear translation cache because attribute labels are stored in translation
-                 */
+                // Clear translation cache because attribute labels are stored in translation
                 Mage::app()->cleanCache([Mage_Core_Model_Translate::CACHE_TAG]);
+
                 $session->setAttributeData(false);
                 if ($this->getRequest()->getParam('popup')) {
                     $this->_redirect('adminhtml/catalog_product/addAttribute', [
@@ -323,7 +302,7 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
                         'attribute' => $model->getId(),
                         '_current' => true
                     ]);
-                } elseif ($redirectBack) {
+                } elseif ($this->getRequest()->getParam('back')) {
                     $this->_redirect('*/*/edit', ['attribute_id' => $model->getId(),'_current' => true]);
                 } else {
                     $this->_redirect('*/*/', []);
