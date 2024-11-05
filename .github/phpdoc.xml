@@ -24,12 +24,12 @@
             <visibility>public</visibility>
             <visibility>protected</visibility>
             <visibility>private</visibility>
-            <include-source>false</include-source>
         </api>
     </version>
     <template name="default">
-        <transformations>
-            <transformation writer="FileIo" query="indexes/files.html" />
-        </transformations>
+        <parameters>
+            <parameter name="graphs.enabled" value="false"/>
+            <parameter name="sourcecode" value="false"/>
+        </parameters>
     </template>
 </phpdocumentor>
