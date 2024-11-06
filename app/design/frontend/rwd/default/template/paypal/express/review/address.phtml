@@ -131,10 +131,8 @@
     </ul>
 </div>
 <script type="text/javascript">
-//<![CDATA[
     var <?= $prefix ?>RegionUpdater = new RegionUpdater('<?= $prefix ?>:country_id', '<?= $prefix ?>:region', '<?= $prefix ?>:region_id', <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, '<?= $prefix ?>:postcode');
     <?= $prefix ?>RegionUpdater.update();
-//]]>
 </script>
 <?php if ($this->getShowAsShippingCheckbox()): ?>
 <script type="text/javascript">

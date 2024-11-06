@@ -67,9 +67,7 @@
             </div>
         </form>
         <script type="text/javascript">
-        //<![CDATA[
             new RegionUpdater('country', 'region', 'region_id', <?= Mage::helper('directory')->getRegionJsonByStore() ?>);
-        //]]>
         </script>
 
         <?php if (($_shippingRateGroups = $this->getEstimateRates())): ?>
