@@ -160,27 +160,35 @@ class Validation {
         });
     }
 
-    static insertAdvice(elm, advice) {
+    static insertAdvice(elm, name, errorMsg) {
+        const div = document.createElement('div');
+        div.className = 'validation-advice';
+        div.id = `advice-${name}-${Validation.getElmID(elm)}`;
+        div.style.display = 'none';
+        div.textContent = errorMsg;
+
         const container = elm.closest('.field-row');
         if (container) {
-            container.insertAdjacentHTML('afterend', advice);
+            container.insertAdjacentElement('afterend', div);
         } else if (elm.closest('td.value')) {
-            elm.closest('td.value').insertAdjacentHTML('beforeend', advice);
-        } else if (elm.advaiceContainer && document.getElementById(elm.advaiceContainer)) {
-            document.getElementById(elm.advaiceContainer).innerHTML = advice;
+            elm.closest('td.value').insertAdjacentElement('beforeend', div);  // corrected from appendChild
+        } else if (elm.adviceContainer && document.getElementById(elm.adviceContainer)) {
+            const adviceContainer = document.getElementById(elm.adviceContainer);
+            adviceContainer.textContent = '';
+            adviceContainer.insertAdjacentElement('beforeend', div);
         } else {
             switch (elm.type.toLowerCase()) {
                 case 'checkbox':
                 case 'radio':
                     const p = elm.parentNode;
                     if (p) {
-                        p.insertAdjacentHTML('beforeend', advice);
+                        p.insertAdjacentElement('beforeend', div);
                     } else {
-                        elm.insertAdjacentHTML('afterend', advice);
+                        elm.insertAdjacentElement('afterend', div);
                     }
                     break;
                 default:
-                    elm.insertAdjacentHTML('afterend', advice);
+                    elm.insertAdjacentElement('afterend', div);
             }
         }
     }
@@ -328,9 +336,7 @@ class Validation {
         }
         catch(e){}
 
-        const advice = `<div class="validation-advice" id="advice-${name}-${Validation.getElmID(elm)}" style="display:none">${errorMsg}</div>`;
-
-        Validation.insertAdvice(elm, advice);
+        Validation.insertAdvice(elm, name, errorMsg);
         const adviceEl = Validation.getAdvice(name, elm);
         if(elm.classList.contains('absolute-advice')) {
             const dimensions = elm.getBoundingClientRect();
