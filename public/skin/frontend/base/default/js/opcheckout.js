@@ -253,21 +253,8 @@ Billing.prototype = {
         }
         this.addressUrl = addressUrl;
         this.saveUrl = saveUrl;
-        this.onAddressLoad = this.fillForm.bindAsEventListener(this);
         this.onSave = this.nextStep.bindAsEventListener(this);
         this.onComplete = this.resetLoadWaiting.bindAsEventListener(this);
-    },
-
-    setAddress: function(addressId){
-        if (addressId) {
-            new Ajax.Request(
-                this.addressUrl+addressId,
-                {method:'get', onSuccess: this.onAddressLoad, onFailure: checkout.ajaxFailure.bind(checkout)}
-            );
-        }
-        else {
-            this.fillForm(false);
-        }
     },
 
     newAddress: function(isNew){
@@ -283,25 +270,6 @@ Billing.prototype = {
         var selectElement = $('billing-address-select');
         if (selectElement) {
             selectElement.value='';
-        }
-    },
-
-    fillForm: function(transport){
-        var elementValues = transport.responseJSON || transport.responseText.evalJSON(true) || {};
-        if (!transport && !Object.keys(elementValues).length){
-            this.resetSelectedAddress();
-        }
-        var arrElements = Form.getElements(this.form);
-        for (var elemIndex in arrElements) {
-            if(arrElements.hasOwnProperty(elemIndex)) {
-                if (arrElements[elemIndex].id) {
-                    var fieldName = arrElements[elemIndex].id.replace(/^billing:/, '');
-                    arrElements[elemIndex].value = elementValues[fieldName] ? elementValues[fieldName] : '';
-                    if (fieldName == 'country_id' && billingForm){
-                        billingForm.elementChildLoad(arrElements[elemIndex]);
-                    }
-                }
-            }
         }
     },
 
@@ -376,21 +344,8 @@ Shipping.prototype = {
         this.addressUrl = addressUrl;
         this.saveUrl = saveUrl;
         this.methodsUrl = methodsUrl;
-        this.onAddressLoad = this.fillForm.bindAsEventListener(this);
         this.onSave = this.nextStep.bindAsEventListener(this);
         this.onComplete = this.resetLoadWaiting.bindAsEventListener(this);
-    },
-
-    setAddress: function(addressId){
-        if (addressId) {
-            new Ajax.Request(
-                this.addressUrl+addressId,
-                {method:'get', onSuccess: this.onAddressLoad, onFailure: checkout.ajaxFailure.bind(checkout)}
-            );
-        }
-        else {
-            this.fillForm(false);
-        }
     },
 
     newAddress: function(isNew){
@@ -407,25 +362,6 @@ Shipping.prototype = {
         var selectElement = $('shipping-address-select');
         if (selectElement) {
             selectElement.value='';
-        }
-    },
-
-    fillForm: function(transport){
-        var elementValues = transport.responseJSON || transport.responseText.evalJSON(true) || {};
-        if (!transport && !Object.keys(elementValues).length) {
-            this.resetSelectedAddress();
-        }
-        var arrElements = Form.getElements(this.form);
-        for (var elemIndex in arrElements) {
-            if(arrElements.hasOwnProperty(elemIndex)) {
-                if (arrElements[elemIndex].id) {
-                    var fieldName = arrElements[elemIndex].id.replace(/^shipping:/, '');
-                    arrElements[elemIndex].value = elementValues[fieldName] ? elementValues[fieldName] : '';
-                    if (fieldName == 'country_id' && shippingForm){
-                        shippingForm.elementChildLoad(arrElements[elemIndex]);
-                    }
-                }
-            }
         }
     },
 
@@ -542,7 +478,6 @@ ShippingMethod.prototype = {
     },
 
     save: function(){
-
         if (checkout.loadWaiting!=false) return;
         if (this.validate()) {
             checkout.setLoadWaiting('shipping-method');

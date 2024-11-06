@@ -204,7 +204,6 @@
     var billing = new Billing('co-billing-form', '<?= $this->getUrl('checkout/onepage/getAddress') ?>address/', '<?= $this->getUrl('checkout/onepage/saveBilling') ?>');
     var billingForm = new VarienForm('co-billing-form');
 
-    //billingForm.setElementsRelation('billing:country_id', 'billing:region', '<?= $this->getUrl('directory/json/childRegion') ?>', '<?= $this->jsQuoteEscape($this->__('Select State/Province...')) ?>');
     $('billing-address-select') && billing.newAddress(!$('billing-address-select').value);
 
     var billingRegionUpdater = new RegionUpdater('billing:country_id', 'billing:region', 'billing:region_id', <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, 'billing:postcode');

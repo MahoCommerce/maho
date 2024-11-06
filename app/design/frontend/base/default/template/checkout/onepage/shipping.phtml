@@ -140,7 +140,6 @@
         '<?= $this->getUrl('checkout/onepage/shippingMethod') ?>');
     var shippingForm = new VarienForm('co-shipping-form');
     shippingForm.extraChildParams = ' onchange="shipping.setSameAsBilling(false);"';
-    //shippingForm.setElementsRelation('shipping:country_id', 'shipping:region', '<?= $this->getUrl('directory/json/childRegion') ?>', '<?= Mage::helper('core')->jsQuoteEscape($this->__('Select State/Province...')) ?>');
     $('shipping-address-select') && shipping.newAddress(!$('shipping-address-select').value);
 
     var shippingRegionUpdater = new RegionUpdater('shipping:country_id', 'shipping:region', 'shipping:region_id', <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, 'shipping:postcode');
