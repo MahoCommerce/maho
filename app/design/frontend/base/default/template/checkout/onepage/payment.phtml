@@ -11,13 +11,11 @@
  */
 ?>
 <script type="text/javascript">
-//<![CDATA[
     var quoteBaseGrandTotal = <?= (float)$this->getQuoteBaseGrandTotal() ?>;
     var checkQuoteBaseGrandTotal = quoteBaseGrandTotal;
     var quoteGrandTotalClean = quoteBaseGrandTotal;
     var payment = new Payment('co-payment-form', '<?= $this->getUrl('checkout/onepage/savePayment') ?>');
     var lastPrice;
-//]]>
 </script>
 <form action="" id="co-payment-form">
     <fieldset id="checkout-payment-method-load">
@@ -38,24 +36,19 @@
     </span>
 </div>
 <script type="text/javascript">
-//<![CDATA[
-    function toggleToolTip(event){
-        if($('payment-tool-tip')){
-            $('payment-tool-tip').setStyle({
-                top: (Event.pointerY(event)-560)+'px'//,
-                //left: (Event.pointerX(event)+100)+'px'
-            })
-            $('payment-tool-tip').toggle();
-        }
-        Event.stop(event);
-    }
-    if($('payment-tool-tip-close')){
-        Event.observe($('payment-tool-tip-close'), 'click', toggleToolTip);
-    }
-//]]>
-</script>
-<script type="text/javascript">
-//<![CDATA[
     payment.currentMethod = "<?= $this->getChild('methods')->getSelectedMethodCode() ?>";
-//]]>
+    function toggleToolTip(event) {
+        let paymentToolTip = document.getElementById('payment-tool-tip');
+        if (paymentToolTip) {
+            paymentToolTip.style = {
+                top: (event.clientY-560) + 'px'
+            }
+            paymentToolTip.classList.toggle('hidden');
+        }
+        event.preventDefault();
+    }
+    let paymentToolTipClose = document.getElementById('payment-tool-tip-close');
+    if (paymentToolTipClose){
+        paymentToolTipClose.addEventListener('click', toggleToolTip);
+    }
 </script>
