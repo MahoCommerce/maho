@@ -46,28 +46,32 @@
         </form>
 
         <script type="text/javascript">
-        //<![CDATA[
-            var wishlistForm = new Validation($('wishlist-view-form'));
-            var wishlistAllCartForm = new Validation($('wishlist-allcart-form'));
+            const wishlistForm = new Validation(document.getElementById('wishlist-view-form'));
+            const wishlistAllCartForm = new Validation(document.getElementById('wishlist-allcart-form'));
 
             function calculateQty() {
-                var itemQtys = new Array();
-                $$('#wishlist-view-form .qty').each(
-                    function (input, index) {
-                        var idxStr = input.name;
-                        var idx = idxStr.replace( /[^\d.]/g, '' );
-                        itemQtys[idx] = input.value;
-                    }
-                );
+                const itemQtys = [];
 
-                $$('#qty')[0].value = JSON.stringify(itemQtys);
+                // Select all elements with class 'qty' inside the wishlist view form
+                document.querySelectorAll('#wishlist-view-form .qty').forEach(input => {
+                    const idxStr = input.name;
+                    const idx = idxStr.replace(/[^\d.]/g, '');
+                    itemQtys[idx] = input.value;
+                });
+
+                // Set the stringified array to the qty input
+                const qtyInput = document.querySelector('#qty');
+                if (qtyInput) {
+                    qtyInput.value = JSON.stringify(itemQtys);
+                }
             }
 
             function addAllWItemsToCart() {
                 calculateQty();
-                wishlistAllCartForm.form.submit();
+                if (wishlistAllCartForm && wishlistAllCartForm.form) {
+                    wishlistAllCartForm.form.submit();
+                }
             }
-        //]]>
         </script>
     </div>
     <?= $this->getChildHtml('bottom') ?>
