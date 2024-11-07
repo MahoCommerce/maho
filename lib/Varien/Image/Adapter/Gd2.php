@@ -15,6 +15,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
     protected $_requiredExtensions = ['gd'];
     private static $_callbacks = [
         IMAGETYPE_WEBP => ['output' => 'imagewebp', 'create' => 'imagecreatefromwebp'],
+        IMAGETYPE_AVIF => ['output' => 'imageavif', 'create' => 'imagecreatefromavif'],
         IMAGETYPE_GIF  => ['output' => 'imagegif',  'create' => 'imagecreatefromgif'],
         IMAGETYPE_JPEG => ['output' => 'imagejpeg', 'create' => 'imagecreatefromjpeg'],
         IMAGETYPE_PNG  => ['output' => 'imagepng',  'create' => 'imagecreatefrompng'],
@@ -151,7 +152,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
         }
 
         // convert palette based image to true color
-        if ($this->_fileType == IMAGETYPE_WEBP) {
+        if ($this->_fileType == IMAGETYPE_WEBP || $this->_fileType == IMAGETYPE_AVIF) {
             imagepalettetotruecolor($this->_imageHandler);
         }
 
@@ -302,13 +303,13 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
     {
         $isAlpha     = false;
         $isTrueColor = false;
-        // assume that transparency is supported by gif/png/webp only
-        if (($fileType === IMAGETYPE_GIF) || ($fileType === IMAGETYPE_PNG) || ($fileType === IMAGETYPE_WEBP)) {
+        // assume that transparency is supported by gif/png/webp/avif only
+        if (($fileType === IMAGETYPE_GIF) || ($fileType === IMAGETYPE_PNG) || ($fileType === IMAGETYPE_WEBP) || ($fileType === IMAGETYPE_AVIF)) {
             // check for specific transparent color
             $transparentIndex = imagecolortransparent($imageResource);
             if ($transparentIndex >= 0) {
                 return $transparentIndex;
-            } elseif ($fileType === IMAGETYPE_PNG || $fileType === IMAGETYPE_WEBP) {
+            } elseif ($fileType === IMAGETYPE_PNG || $fileType === IMAGETYPE_WEBP || $fileType === IMAGETYPE_AVIF) {
                 $isAlpha = $this->checkAlpha($this->_fileName);
                 $isTrueColor = true;
                 return $transparentIndex; // -1

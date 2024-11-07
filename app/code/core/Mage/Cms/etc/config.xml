@@ -99,6 +99,7 @@
                         <png>1</png>
                         <gif>1</gif>
                         <webp>1</webp>
+                        <avif>1</avif>
                     </allowed>
                     <image_allowed>
                         <jpg>1</jpg>
@@ -106,6 +107,7 @@
                         <png>1</png>
                         <gif>1</gif>
                         <webp>1</webp>
+                        <avif>1</avif>
                     </image_allowed>
                     <media_allowed>
                         <flv>1</flv>

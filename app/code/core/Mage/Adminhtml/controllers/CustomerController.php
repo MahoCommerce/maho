@@ -806,6 +806,9 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
                 case 'webp':
                     $contentType = 'image/webp';
                     break;
+                case 'avif':
+                    $contentType = 'image/avif';
+                    break;
                 case 'png':
                     $contentType = 'image/png';
                     break;

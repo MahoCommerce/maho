@@ -92,6 +92,10 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
                 $resource = imagecreatefromwebp($object->getFilePath());
                 break;
 
+            case 'avif':
+                $resource = imagecreatefromavif($object->getFilePath());
+                break;
+
             case 'gif':
                 $resource = imagecreatefromgif($object->getFilePath());
                 break;
@@ -174,6 +178,9 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
                 break;
             case 'webp':
                 $result = imagewebp($object->getTmpImage(), $object->getFilePath(true), 80);
+                break;
+            case 'avif':
+                $result = imageavif($object->getTmpImage(), $object->getFilePath(true), 80);
                 break;
             case 'gif':
                 $result = imagegif($object->getTmpImage(), $object->getFilePath(true));
