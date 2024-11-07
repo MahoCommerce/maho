@@ -312,11 +312,9 @@ class Validation {
     }
 
     static isVisible(elm) {
-        while(elm.tagName != 'BODY') {
-            if(getComputedStyle(elm).display === 'none') return false;
-            elm = elm.parentNode;
-        }
-        return true;
+        return (elm.tagName === 'INPUT' && elm.type === 'hidden')
+            ? this.isVisible(elm.parentElement)
+            : getComputedStyle(elm).display !== 'none';
     }
 
     static getAdvice(name, elm) {
