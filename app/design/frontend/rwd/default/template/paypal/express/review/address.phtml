@@ -136,7 +136,6 @@
 </script>
 <?php if ($this->getShowAsShippingCheckbox()): ?>
 <script type="text/javascript">
-    //<![CDATA[
     OrderReviewController.prototype._copyShippingToBilling_parent = OrderReviewController.prototype._copyShippingToBilling;
     OrderReviewController.prototype._copyShippingToBilling = function (event) {
         this._copyShippingToBilling_parent(event);
@@ -147,29 +146,31 @@
 
         if (this._copyElement.checked) {
             if (this.copyShippingToBilling_allowScrollTo && window.matchMedia("only screen and (max-width: 767px)").matches) {
-                $('shipping-address').scrollTo();
+                document.getElementById('shipping-address').scrollIntoView({behavior: 'smooth'});
             }
         } else {
-            $$('[id^="billing:"]').each(function (el) {
-                if ($(el).up('.field')) {
-                    $(el).up('.field').removeClassName('inactive');
+            document.querySelectorAll('[id^="billing:"]').forEach(function(el) {
+                const field = el.closest('.field');
+                if (field) {
+                    field.classList.remove('inactive');
                 }
-            })
+            });
         }
     }
 
     OrderReviewController.prototype._copyElementValue_parent = OrderReviewController.prototype._copyElementValue;
     OrderReviewController.prototype._copyElementValue = function (el) {
-        <?php // Note: We cannot call this._copyElementValue_parent because review.js is using each() to iterate without giving it context ?>
+        // We cannot call this._copyElementValue_parent because review.js is using each() to iterate without giving it context
         OrderReviewController.prototype._copyElementValue_parent(el);
 
-        var newId = el.id.replace('shipping:','billing:');
-        if (newId && $(newId) && $(newId).type != 'hidden') {
-            if ($(newId).up('.field')) {
-                $(newId).up('.field').addClassName('inactive');
+        const newId = el.id.replace('shipping:', 'billing:');
+        const newElement = document.getElementById(newId);
+        if (newElement && newElement.type !== 'hidden') {
+            const field = newElement.closest('.field');
+            if (field) {
+                field.classList.add('inactive');
             }
         }
     }
-    //]]>
 </script>
 <?php endif ?>
