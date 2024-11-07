@@ -18,7 +18,6 @@
  */
 ?>
 <script type="text/javascript">
-    //<![CDATA[
     let dbTypeIds = [];
     function showContent(select) {
         dbTypeIds.forEach(function (name) {
@@ -26,7 +25,6 @@
         });
         document.getElementById(select.value + '_conn_form').style.display = 'block';
     }
-    //]]>
 </script>
 
 <fieldset class="group-select">
@@ -49,9 +47,7 @@
 
         <?php foreach ($dbTypeOptions as $block): ?>
             <script type="text/javascript">
-                //<![CDATA[
                 dbTypeIds.push("<?= $block->getIdPrefix() ?>");
-                //]]>
             </script>
         <?php $block = $this->getDatabaseBlock($block->getIdPrefix()) ?>
 
