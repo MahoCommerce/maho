@@ -115,17 +115,13 @@
             function(v) {
                 const trs = document.getElementById('product-review-table').getElementsByTagName('tr');
                 let error = 1;
-
                 for (let j = 1; j < trs.length; j++) {
                     const inputs = trs[j].getElementsByTagName('input');
-                    console.log(inputs)
-
                     for (let i = 0; i < inputs.length; i++) {
                         if (inputs[i].checked === true) {
                             error = 0;
                         }
                     }
-
                     if (error === 1) {
                         return false;
                     } else {
