@@ -9,11 +9,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-/*
-store view name = $_order->getStore()->getName()
-web site name = $_order->getStore()->getWebsite()->getName()
-store name = $_order->getStore()->getGroup()->getName()
-*/
+
+/** @var Mage_Rss_Block_Order_Details $this */
 ?>
 <?php $_order=$this->getOrder() ?>
 <div>
@@ -34,7 +31,7 @@ store name = $_order->getStore()->getGroup()->getName()
 <?php $i=0; foreach ($_order->getAllItems() as $_item): $i++ ?>
         <tr <?= $i%2?'bgcolor="#eeeded"':'' ?>>
             <td align="left" valign="top" style="padding:3px 9px"><strong><?= $this->escapeHtml($_item->getName()) ?></strong>
-            <?php if($_item->getGiftMessageId() && $_giftMessage = $this->helper('giftmessage/message')->getGiftMessage($_item->getGiftMessageId())): ?>
+            <?php if($_giftMessage = $this->getGiftMessageItem($_item)): ?>
             <br /><strong><?= $this->__('Gift Message') ?></strong>
             <br /><?= $this->__('From:') ?> <?= $this->escapeHtml($_giftMessage->getSender()) ?>
             <br /><?= $this->__('To:') ?> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?>
@@ -48,7 +45,7 @@ store name = $_order->getStore()->getGroup()->getName()
     </tbody>
 
     <tfoot>
-    <?php if($_order->getGiftMessageId() && $_giftMessage = $this->helper('giftmessage/message')->getGiftMessage($_order->getGiftMessageId())): ?>
+    <?php if($_giftMessage = $this->getGiftMessageOrder()): ?>
         <tr>
             <td colspan="3" align="left" style="padding:3px 9px">
             <strong><?= $this->__('Gift Message') ?></strong>

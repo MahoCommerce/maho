@@ -9,20 +9,15 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
-/**
- * @var Mage_CurrencySymbol_Block_Adminhtml_System_Currencysymbol $this
- */
+
+/** @var Mage_CurrencySymbol_Block_Adminhtml_System_Currencysymbol $this*/
 ?>
 <div class="content-header">
     <table cellspacing="0">
         <tr>
             <td style="width:50%;"><h3><?= $this->getHeader() ?></h3></td>
             <td class="form-buttons">
-                <?php
-                    echo $this->getSaveButtonHtml();
-                ?>
+                <?= $this->getSaveButtonHtml() ?>
             </td>
         </tr>
     </table>

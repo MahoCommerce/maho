@@ -80,7 +80,9 @@
                 </div>
             </div>
             <div class="col-2 col-wide">
-                <?= $this->helper('giftmessage/message')->getInline('multishipping_adress_checkbox', $_address) ?>
+                <?php if ($this->helper('core')->isModuleOutputEnabled('Mage_GiftMessage')): ?>
+                    <?= $this->helper('giftmessage/message')->getInline('multishipping_adress_checkbox', $_address) ?>
+                <?php endif ?>
                 <h3><?= $this->__('Items') ?> <span class="separator">|</span> <a href="<?= $this->getItemsEditUrl($_address) ?>"><?= $this->__('Edit Items') ?></a></h3>
                 <table class="data-table" id="shipping-table-<?= $_address->getId() ?>">
                     <col />
@@ -102,7 +104,9 @@
                     <?php endforeach ?>
                     </tbody>
                 </table>
-                <?= $this->helper('giftmessage/message')->getInline('multishipping_adress', $_address) ?>
+                <?php if ($this->helper('core')->isModuleOutputEnabled('Mage_GiftMessage')): ?>
+                    <?= $this->helper('giftmessage/message')->getInline('multishipping_adress', $_address) ?>
+                <?php endif ?>
             </div>
         </div>
         <?php endforeach ?>

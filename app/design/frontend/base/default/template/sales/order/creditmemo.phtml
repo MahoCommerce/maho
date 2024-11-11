@@ -9,9 +9,11 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Sales_Block_Order_Creditmemo $this */
 ?>
 <div class="order-items order-details">
-<?php if($this->helper('giftmessage/message')->getIsMessagesAvailable('order', $this->getOrder())): ?>
+<?php if($this->canDisplayGiftmessage()): ?>
     <script type="text/javascript">
     //<![CDATA[
     function giftMessageToogle(giftMessageIdentifier)

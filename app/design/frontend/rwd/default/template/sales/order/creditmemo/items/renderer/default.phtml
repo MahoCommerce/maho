@@ -9,6 +9,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Sales_Block_Order_Item_Renderer_Default $this */
 ?>
 <?php $_item = $this->getItem() ?>
 <?php $_order = $this->getItem()->getOrderItem()->getOrder() ?>
@@ -41,7 +43,7 @@
         <?= $addInfoBlock->setItem($_item->getOrderItem())->toHtml() ?>
     <?php endif ?>
     <?= $this->escapeHtml($_item->getDescription()) ?>
-    <?php if ($this->helper('giftmessage/message')->getIsMessagesAvailable('order_item', $_item->getOrderItem()) && $_item->getGiftMessageId()): ?>
+    <?php if ($this->canDisplayGiftmessage()): ?>
         <a href="#" id="order-item-gift-message-link-<?= $_item->getId() ?>" class="gift-message-link"
            onclick="return giftMessageToogle('<?= $_item->getId() ?>')"><?= $this->__('Gift Message') ?></a>
     <?php endif ?>
