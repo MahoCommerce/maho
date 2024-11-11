@@ -108,18 +108,6 @@ gtag('set', 'user_id', '{$customer->getId()}');
      * Render information about specified orders and their items
      *
      * @return string
-     * @throws Mage_Core_Model_Store_Exception
-     * @deprecated
-     */
-    protected function _getOrdersTrackingCode()
-    {
-        return '';
-    }
-
-    /**
-     * Render information about specified orders and their items
-     *
-     * @return string
      * @throws JsonException
      */
     protected function _getEnhancedEcommerceDataForAnalytics4()

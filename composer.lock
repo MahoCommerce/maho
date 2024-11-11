@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d086ed70c9d3053205b7b91ebab25af5",
+    "content-hash": "02cefbf35d3d8ba2341f366c1b5adadb",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -1685,21 +1685,21 @@
         },
         {
             "name": "mahocommerce/maho-phpstan-plugin",
-            "version": "v1.2.0",
+            "version": "v2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-phpstan-plugin.git",
-                "reference": "9e37410fb5f2c75acbeca0ad81003f5e6b815f2b"
+                "reference": "71dbdaa6c53274ef5d5fd3ab0ec2867a79118f23"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/9e37410fb5f2c75acbeca0ad81003f5e6b815f2b",
-                "reference": "9e37410fb5f2c75acbeca0ad81003f5e6b815f2b",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/71dbdaa6c53274ef5d5fd3ab0ec2867a79118f23",
+                "reference": "71dbdaa6c53274ef5d5fd3ab0ec2867a79118f23",
                 "shasum": ""
             },
             "require": {
                 "php": ">= 8.2",
-                "phpstan/phpstan": "^1.11"
+                "phpstan/phpstan": "^2.0"
             },
             "type": "library",
             "autoload": {
@@ -1713,26 +1713,26 @@
             ],
             "description": "Extension for PHPStan to allow analysis of Maho platform.",
             "support": {
-                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v1.2.0"
+                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v2.4.0"
             },
-            "time": "2024-10-06T17:07:56+00:00"
+            "time": "2024-11-11T17:12:14+00:00"
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.12.9",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "ceb937fb39a92deabc02d20709cf14b2c452502c"
+                "reference": "ab4e9b4415a5fc9e4d27f7fe16c8bc9d067dcd6d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/ceb937fb39a92deabc02d20709cf14b2c452502c",
-                "reference": "ceb937fb39a92deabc02d20709cf14b2c452502c",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/ab4e9b4415a5fc9e4d27f7fe16c8bc9d067dcd6d",
+                "reference": "ab4e9b4415a5fc9e4d27f7fe16c8bc9d067dcd6d",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.2|^8.0"
+                "php": "^7.4|^8.0"
             },
             "conflict": {
                 "phpstan/phpstan-shim": "*"
@@ -1773,7 +1773,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-11-10T17:10:04+00:00"
+            "time": "2024-11-11T15:43:04+00:00"
         },
         {
             "name": "psr/event-dispatcher",
@@ -3032,8 +3032,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "mahocommerce/maho-composer-plugin": 20,
-        "mahocommerce/maho-phpstan-plugin": 20
+        "mahocommerce/maho-composer-plugin": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

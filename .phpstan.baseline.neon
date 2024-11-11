@@ -1261,11 +1261,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Abstract.php
 
 		-
-			message: "#^PHPDoc tag @var with type Mage_Catalog_Model_Entity_Attribute is not subtype of native type non\\-empty\\-array\\.$#"
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Abstract.php
-
-		-
 			message: "#^Right side of \\|\\| is always true\\.$#"
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Abstract.php
@@ -2911,17 +2906,7 @@ parameters:
 			path: app/code/core/Mage/Payment/Block/Catalog/Product/View/Profile.php
 
 		-
-			message: "#^Call to an undefined method Mage_Core_Model_Abstract\\:\\:isAvailable\\(\\)\\.$#"
-			count: 1
-			path: app/code/core/Mage/Payment/Helper/Data.php
-
-		-
 			message: "#^Cannot call method setInfo\\(\\) on object\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Payment/Helper/Data.php
-
-		-
-			message: "#^Method Mage_Payment_Helper_Data\\:\\:getStoreMethods\\(\\) should return array\\<Mage_Payment_Model_Method_Abstract\\> but returns array\\<int, Mage_Core_Model_Abstract\\>\\.$#"
 			count: 1
 			path: app/code/core/Mage/Payment/Helper/Data.php
 
