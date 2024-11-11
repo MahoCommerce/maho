@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -27,10 +27,10 @@ class Mage_Tax_Model_Resource_Sales_Order_Tax_Item extends Mage_Core_Model_Resou
     /**
      * Get Tax Items with order tax information
      *
-     * @param int $item_id
+     * @param int $itemId
      * @return array
      */
-    public function getTaxItemsByItemId($item_id)
+    public function getTaxItemsByItemId($itemId)
     {
         $adapter = $this->_getReadAdapter();
         $select = $adapter->select()
@@ -40,7 +40,7 @@ class Mage_Tax_Model_Resource_Sales_Order_Tax_Item extends Mage_Core_Model_Resou
                 'item.tax_id = tax.tax_id',
                 ['title', 'percent', 'base_amount']
             )
-            ->where('item_id = ?', $item_id);
+            ->where('item_id = ?', $itemId);
 
         return $adapter->fetchAll($select);
     }

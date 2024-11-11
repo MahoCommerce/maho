@@ -221,7 +221,7 @@ class Mage_Core_Model_Layout_Update
     }
 
     /**
-     * @return bool
+     * @return Mage_Core_Model_App|false
      */
     public function saveCache()
     {
@@ -337,8 +337,8 @@ class Mage_Core_Model_Layout_Update
      */
     public function fetchPackageLayoutUpdates($handle)
     {
-        $_profilerKey = 'layout/package_update: ' . $handle;
-        Varien_Profiler::start($_profilerKey);
+        $profilerKey = 'layout/package_update: ' . $handle;
+        Varien_Profiler::start($profilerKey);
         if (empty($this->_packageLayout)) {
             $this->fetchFileLayoutUpdates();
         }
@@ -347,7 +347,7 @@ class Mage_Core_Model_Layout_Update
             $this->fetchRecursiveUpdates($updateXml);
             $this->addUpdate($updateXml->innerXml());
         }
-        Varien_Profiler::stop($_profilerKey);
+        Varien_Profiler::stop($profilerKey);
 
         return true;
     }
@@ -358,11 +358,11 @@ class Mage_Core_Model_Layout_Update
      */
     public function fetchDbLayoutUpdates($handle)
     {
-        $_profilerKey = 'layout/db_update: ' . $handle;
-        Varien_Profiler::start($_profilerKey);
+        $profilerKey = 'layout/db_update: ' . $handle;
+        Varien_Profiler::start($profilerKey);
         $updateStr = $this->_getUpdateString($handle);
         if (!$updateStr) {
-            Varien_Profiler::stop($_profilerKey);
+            Varien_Profiler::stop($profilerKey);
             return false;
         }
         $updateStr = '<update_xml>' . $updateStr . '</update_xml>';
@@ -372,7 +372,7 @@ class Mage_Core_Model_Layout_Update
         $this->fetchRecursiveUpdates($updateXml);
         $this->addUpdate($updateXml->innerXml());
 
-        Varien_Profiler::stop($_profilerKey);
+        Varien_Profiler::stop($profilerKey);
         return true;
     }
 

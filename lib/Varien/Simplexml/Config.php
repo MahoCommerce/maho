@@ -129,8 +129,6 @@ class Varien_Simplexml_Config
      *
      * @param string $xpath
      * @return Varien_Simplexml_Element[]|false
-     *
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     public function getXpath($xpath)
     {

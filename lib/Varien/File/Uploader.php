@@ -529,9 +529,6 @@ class Varien_File_Uploader
         }
     }
 
-    /**
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
-     */
     private function _createDestinationFolder($destinationFolder)
     {
         if (!$destinationFolder) {

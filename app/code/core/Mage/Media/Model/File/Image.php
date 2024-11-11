@@ -201,7 +201,6 @@ class Mage_Media_Model_File_Image extends Mage_Core_Model_Resource_Abstract
      * Retrieve image dimensions
      *
      * @return Varien_Object
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     public function getDimensions(Mage_Media_Model_Image $object)
     {

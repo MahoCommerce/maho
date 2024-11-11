@@ -1,17 +1,18 @@
 <?php
+
 /**
  * Maho
  *
  * @category   Mage
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
- * Fylesystem installer
+ * Filesystem installer
  *
  * @category   Mage
  * @package    Mage_Install
@@ -76,7 +77,7 @@ class Mage_Install_Model_Installer_Filesystem extends Mage_Install_Model_Install
     protected function _checkFullPath($fullPath, $recursive, $existence)
     {
         $res = true;
-        $setError = $existence && (is_dir($fullPath) && !is_dir_writeable($fullPath) || !is_writable($fullPath))
+        $setError = $existence && (is_dir($fullPath) && !isDirWriteable($fullPath) || !is_writable($fullPath))
             || !$existence && file_exists($fullPath) && !is_writable($fullPath);
 
         if ($setError) {

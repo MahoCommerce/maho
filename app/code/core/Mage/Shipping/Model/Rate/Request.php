@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Shipping
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -53,8 +53,8 @@
  * @method $this setBaseSubtotalInclTax(float $value)
  *
  * @method $this setCity(string $value)
- * @method string getConditionName()
- * @method $this setConditionName(array $value)
+ * @method string|array getConditionName()
+ * @method $this setConditionName(string|array $value)
  * @method $this setCountryId(string $value)
  *
  * @method string getDestCountryId()

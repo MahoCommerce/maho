@@ -340,8 +340,6 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      * @param string $string
      * @param bool $german
      * @return false|string
-     *
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     public function removeAccents($string, $german = false)
     {
@@ -387,7 +385,6 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 
         // convert string from default database format (UTF-8)
         // to encoding which replacement arrays made with (ISO-8859-1)
-        // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
         if ($s = @iconv('UTF-8', 'ISO-8859-1', $string)) {
             $string = $s;
         }
@@ -766,7 +763,6 @@ XML;
      * @param callable $beforeMergeCallback
      * @param array|string $extensionsFilter
      * @return bool|string
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     public function mergeFiles(
         array $srcFiles,
@@ -787,7 +783,6 @@ XML;
                         if (!file_exists($file)) {
                             // no translation intentionally
                             Mage::logException(new Exception(sprintf('File %s not found.', $file)));
-                            // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged,Ecg.Security.ForbiddenFunction.Found
                         } elseif (@filemtime($file) > $targetMtime) {
                             $shouldMerge = true;
                             break;

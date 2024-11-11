@@ -196,7 +196,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
      * from select statement with single date column
      *
      *
-     * @param Varien_Db_Select $select
+     * @param Zend_Db_Select|string $select
      * @param string $periodColumn
      * @return string|false
      */

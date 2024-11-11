@@ -768,7 +768,6 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
 
     public function viewfileAction()
     {
-        $file   = null;
         $plain  = false;
         if ($this->getRequest()->getParam('file')) {
             // download file
@@ -778,7 +777,8 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
             $file   = Mage::helper('core')->urlDecode($this->getRequest()->getParam('image'));
             $plain  = true;
         } else {
-            return $this->norouteAction();
+            $this->norouteAction();
+            return;
         }
 
         $path = Mage::getBaseDir('media') . DS . 'customer';
@@ -791,7 +791,8 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         if ((!$ioFile->fileExists($fileName) || strpos($fileName, $path) !== 0)
             && !Mage::helper('core/file_storage')->processStorageFile(str_replace('/', DS, $fileName))
         ) {
-            return $this->norouteAction();
+            $this->norouteAction();
+            return;
         }
 
         if ($plain) {

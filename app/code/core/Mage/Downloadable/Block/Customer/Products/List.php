@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -37,9 +37,9 @@ class Mage_Downloadable_Block_Customer_Products_List extends Mage_Core_Block_Tem
             ->addOrder('created_at', 'desc');
         $this->setPurchased($purchased);
         $purchasedIds = [];
-        /** @var Mage_Downloadable_Model_Link_Purchased_Item $_item */
-        foreach ($purchased as $_item) {
-            $purchasedIds[] = $_item->getId();
+        /** @var Mage_Downloadable_Model_Link_Purchased_Item $item */
+        foreach ($purchased as $item) {
+            $purchasedIds[] = $item->getId();
         }
         if (empty($purchasedIds)) {
             $purchasedIds = [null];

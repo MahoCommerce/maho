@@ -283,7 +283,7 @@ abstract class Mage_Core_Controller_Varien_Action
      */
     public function loadLayoutUpdates()
     {
-        $_profilerKey = self::PROFILER_KEY . '::' . $this->getFullActionName();
+        $profilerKey = self::PROFILER_KEY . '::' . $this->getFullActionName();
 
         // dispatch event for adding handles to layout update
         Mage::dispatchEvent(
@@ -292,9 +292,9 @@ abstract class Mage_Core_Controller_Varien_Action
         );
 
         // load layout updates by specified handles
-        Varien_Profiler::start("$_profilerKey::layout_load");
+        Varien_Profiler::start("$profilerKey::layout_load");
         $this->getLayout()->getUpdate()->load();
-        Varien_Profiler::stop("$_profilerKey::layout_load");
+        Varien_Profiler::stop("$profilerKey::layout_load");
 
         return $this;
     }
@@ -304,7 +304,7 @@ abstract class Mage_Core_Controller_Varien_Action
      */
     public function generateLayoutXml()
     {
-        $_profilerKey = self::PROFILER_KEY . '::' . $this->getFullActionName();
+        $profilerKey = self::PROFILER_KEY . '::' . $this->getFullActionName();
         // dispatch event for adding text layouts
         if (!$this->getFlag('', self::FLAG_NO_DISPATCH_BLOCK_EVENT)) {
             Mage::dispatchEvent(
@@ -314,9 +314,9 @@ abstract class Mage_Core_Controller_Varien_Action
         }
 
         // generate xml from collected text updates
-        Varien_Profiler::start("$_profilerKey::layout_generate_xml");
+        Varien_Profiler::start("$profilerKey::layout_generate_xml");
         $this->getLayout()->generateXml();
-        Varien_Profiler::stop("$_profilerKey::layout_generate_xml");
+        Varien_Profiler::stop("$profilerKey::layout_generate_xml");
 
         return $this;
     }
@@ -326,7 +326,7 @@ abstract class Mage_Core_Controller_Varien_Action
      */
     public function generateLayoutBlocks()
     {
-        $_profilerKey = self::PROFILER_KEY . '::' . $this->getFullActionName();
+        $profilerKey = self::PROFILER_KEY . '::' . $this->getFullActionName();
         // dispatch event for adding xml layout elements
         if (!$this->getFlag('', self::FLAG_NO_DISPATCH_BLOCK_EVENT)) {
             Mage::dispatchEvent(
@@ -336,9 +336,9 @@ abstract class Mage_Core_Controller_Varien_Action
         }
 
         // generate blocks from xml layout
-        Varien_Profiler::start("$_profilerKey::layout_generate_blocks");
+        Varien_Profiler::start("$profilerKey::layout_generate_blocks");
         $this->getLayout()->generateBlocks();
-        Varien_Profiler::stop("$_profilerKey::layout_generate_blocks");
+        Varien_Profiler::stop("$profilerKey::layout_generate_blocks");
 
         if (!$this->getFlag('', self::FLAG_NO_DISPATCH_BLOCK_EVENT)) {
             Mage::dispatchEvent(
@@ -358,7 +358,7 @@ abstract class Mage_Core_Controller_Varien_Action
      */
     public function renderLayout($output = '')
     {
-        $_profilerKey = self::PROFILER_KEY . '::' . $this->getFullActionName();
+        $profilerKey = self::PROFILER_KEY . '::' . $this->getFullActionName();
 
         if ($this->getFlag('', 'no-renderLayout')) {
             return;
@@ -370,7 +370,7 @@ abstract class Mage_Core_Controller_Varien_Action
 
         $this->_renderTitles();
 
-        Varien_Profiler::start("$_profilerKey::layout_render");
+        Varien_Profiler::start("$profilerKey::layout_render");
 
         if ($output !== '') {
             $this->getLayout()->addOutputBlock($output);
@@ -385,7 +385,7 @@ abstract class Mage_Core_Controller_Varien_Action
         $output = $this->getLayout()->getOutput();
         Mage::getSingleton('core/translate_inline')->processResponseBody($output);
         $this->getResponse()->appendBody($output);
-        Varien_Profiler::stop("$_profilerKey::layout_render");
+        Varien_Profiler::stop("$profilerKey::layout_render");
 
         return $this;
     }
@@ -410,11 +410,11 @@ abstract class Mage_Core_Controller_Varien_Action
                  * preDispatch() didn't change the action, so we can continue
                  */
                 if (!$this->getFlag('', self::FLAG_NO_DISPATCH)) {
-                    $_profilerKey = self::PROFILER_KEY . '::' . $this->getFullActionName();
+                    $profilerKey = self::PROFILER_KEY . '::' . $this->getFullActionName();
 
-                    Varien_Profiler::start($_profilerKey);
+                    Varien_Profiler::start($profilerKey);
                     $this->$actionMethodName();
-                    Varien_Profiler::stop($_profilerKey);
+                    Varien_Profiler::stop($profilerKey);
 
                     Varien_Profiler::start(self::PROFILER_KEY . '::postdispatch');
                     $this->postDispatch();

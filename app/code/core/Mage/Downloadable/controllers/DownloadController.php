@@ -77,7 +77,6 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
 
     /**
      * Download sample action
-     *
      */
     public function sampleAction()
     {
@@ -112,7 +111,6 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
 
     /**
      * Download link's sample action
-     *
      */
     public function linkSampleAction()
     {
@@ -147,6 +145,8 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
 
     /**
      * Download link action
+     *
+     * @return Mage_Core_Controller_Varien_Action|void
      */
     public function linkAction()
     {
@@ -171,7 +171,7 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
                     Mage::getUrl('downloadable/customer/products/'),
                     ['_secure' => true]
                 );
-                return ;
+                return;
             }
             $linkPurchased = Mage::getModel('downloadable/link_purchased')->load($linkPurchasedItem->getPurchasedId());
             if ($linkPurchased->getCustomerId() != $customerId) {

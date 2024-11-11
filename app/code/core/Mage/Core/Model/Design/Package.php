@@ -380,7 +380,7 @@ class Mage_Core_Model_Design_Package
     /**
      * Get filename by specified theme parameters
      *
-     * @param array $file
+     * @param string $file
      * @return string
      */
     protected function _renderFilename($file, array $params)
@@ -569,7 +569,7 @@ class Mage_Core_Model_Design_Package
      * Will return false or found string.
      *
      * @param string $regexpsConfigPath
-     * @return mixed
+     * @return false|string
      */
     protected function _checkUserAgentAgainstRegexps($regexpsConfigPath)
     {
@@ -606,8 +606,6 @@ class Mage_Core_Model_Design_Package
      * @param array $rules - design exception rules
      * @param string $regexpsConfigPath
      * @return bool|string
-     *
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     public static function getPackageByUserAgent(array $rules, $regexpsConfigPath = 'path_mock')
     {
@@ -760,8 +758,8 @@ class Mage_Core_Model_Design_Package
     public function cleanMergedJsCss()
     {
         $result = (bool)$this->_initMergerDir('js', true);
-        $result = (bool)$this->_initMergerDir('css', true) && $result;
-        return (bool)$this->_initMergerDir('css_secure', true) && $result;
+        $result = $this->_initMergerDir('css', true) && $result;
+        return $this->_initMergerDir('css_secure', true) && $result;
     }
 
     /**
@@ -774,7 +772,6 @@ class Mage_Core_Model_Design_Package
      */
     protected function _initMergerDir($dirRelativeName, $cleanup = false)
     {
-        $mediaDir = Mage::getBaseDir('media');
         try {
             $dir = Mage::getBaseDir('media') . DS . $dirRelativeName;
             if ($cleanup) {

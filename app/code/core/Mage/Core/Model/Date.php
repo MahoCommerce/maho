@@ -49,8 +49,6 @@ class Mage_Core_Model_Date
      *
      * @param  string $timezone
      * @return int offset between timezone and gmt
-     *
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     public function calculateOffset($timezone = null)
     {

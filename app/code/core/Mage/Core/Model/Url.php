@@ -949,7 +949,7 @@ class Mage_Core_Model_Url extends Varien_Object
      *
      * @param string|null $routePath
      * @param array|null $routeParams
-     * @return  string
+     * @return string
      */
     public function getUrl($routePath = null, $routeParams = null)
     {

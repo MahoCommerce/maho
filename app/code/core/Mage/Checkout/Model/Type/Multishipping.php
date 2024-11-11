@@ -227,12 +227,12 @@ class Mage_Checkout_Model_Type_Multishipping extends Mage_Checkout_Model_Type_Ab
              * Delete all not virtual quote items which are not added to shipping address
              * MultishippingQty should be defined for each quote item when it processed with _addShippingItem
              */
-            foreach ($quote->getAllItems() as $_item) {
-                if (!$_item->getProduct()->getIsVirtual() &&
-                    !$_item->getParentItem() &&
-                    !$_item->getMultishippingQty()
+            foreach ($quote->getAllItems() as $item) {
+                if (!$item->getProduct()->getIsVirtual() &&
+                    !$item->getParentItem() &&
+                    !$item->getMultishippingQty()
                 ) {
-                    $quote->removeItem($_item->getId());
+                    $quote->removeItem($item->getId());
                 }
             }
 
@@ -244,18 +244,18 @@ class Mage_Checkout_Model_Type_Multishipping extends Mage_Checkout_Model_Type_Ab
                 $quote->getBillingAddress()->importCustomerAddress($customerDefaultBilling);
             }
 
-            foreach ($quote->getAllItems() as $_item) {
-                if (!$_item->getProduct()->getIsVirtual()) {
+            foreach ($quote->getAllItems() as $item) {
+                if (!$item->getProduct()->getIsVirtual()) {
                     continue;
                 }
 
-                if (isset($itemsInfo[$_item->getId()]['qty'])) {
-                    if ($qty = (int)$itemsInfo[$_item->getId()]['qty']) {
-                        $_item->setQty($qty);
-                        $quote->getBillingAddress()->addItem($_item);
+                if (isset($itemsInfo[$item->getId()]['qty'])) {
+                    if ($qty = (int)$itemsInfo[$item->getId()]['qty']) {
+                        $item->setQty($qty);
+                        $quote->getBillingAddress()->addItem($item);
                     } else {
-                        $_item->setQty(0);
-                        $quote->removeItem($_item->getId());
+                        $item->setQty(0);
+                        $quote->removeItem($item->getId());
                     }
                 }
             }

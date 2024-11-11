@@ -949,11 +949,11 @@ class Mage_Core_Model_App
      */
     public function getDefaultStoreView()
     {
-        foreach ($this->getWebsites() as $_website) {
-            if ($_website->getIsDefault()) {
-                $_defaultStore = $this->getGroup($_website->getDefaultGroupId())->getDefaultStore();
-                if ($_defaultStore) {
-                    return $_defaultStore;
+        foreach ($this->getWebsites() as $website) {
+            if ($website->getIsDefault()) {
+                $defaultStore = $this->getGroup($website->getDefaultGroupId())->getDefaultStore();
+                if ($defaultStore) {
+                    return $defaultStore;
                 }
             }
         }

@@ -347,7 +347,6 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
         try {
             $i = 0;
             foreach ($collection->getIterator() as $model) {
-                // phpcs:ignore Ecg.Performance.Loop.ModelLSD
                 $model->save();
                 $i++;
             }

@@ -136,9 +136,6 @@ abstract class Varien_Image_Adapter_Abstract
 
     abstract public function checkDependencies();
 
-    /**
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
-     */
     public function getMimeType()
     {
         if ($this->_fileMimeType) {

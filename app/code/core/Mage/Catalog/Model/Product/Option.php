@@ -31,11 +31,11 @@
  * @method $this setIsRequire(int $value)
  * @method int getMaxCharacters()
  * @method $this setMaxCharacters(int $value)
- * @method int getOptionId()
- * @method $this setOptionId(int $value)
+ * @method int|null getOptionId()
+ * @method $this setOptionId(int|null $value)
  * @method string getPriceType()
- * @method int getProductId()
- * @method $this setProductId(int $value)
+ * @method string|null getProductId()
+ * @method $this setProductId(string|null $value)
  * @method string getSku()
  * @method $this setSku(string $value)
  * @method int getSortOrder()
@@ -301,7 +301,9 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
     {
         $group = $this->getGroupByType($type);
         if (!empty($group)) {
-            return Mage::getModel('catalog/product_option_type_' . $group);
+            /** @var Mage_Catalog_Model_Product_Option_Type_Default $model */
+            $model = Mage::getModel('catalog/product_option_type_' . $group);
+            return $model;
         }
         Mage::throwException(Mage::helper('catalog')->__('Wrong option type to get group instance.'));
     }
@@ -417,24 +419,24 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
     /**
      * Delete prices of option
      *
-     * @param int $option_id
+     * @param int|string $optionId
      * @return $this
      */
-    public function deletePrices($option_id)
+    public function deletePrices($optionId)
     {
-        $this->getResource()->deletePrices($option_id);
+        $this->getResource()->deletePrices($optionId);
         return $this;
     }
 
     /**
      * Delete titles of option
      *
-     * @param int $option_id
+     * @param int|string $optionId
      * @return $this
      */
-    public function deleteTitles($option_id)
+    public function deleteTitles($optionId)
     {
-        $this->getResource()->deleteTitles($option_id);
+        $this->getResource()->deleteTitles($optionId);
         return $this;
     }
 
@@ -475,13 +477,13 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
      * Get collection of values by given option ids
      *
      * @param array $optionIds
-     * @param int $store_id
+     * @param int $storeId
      * @return Mage_Catalog_Model_Resource_Product_Option_Value_Collection
      */
-    public function getOptionValuesByOptionId($optionIds, $store_id)
+    public function getOptionValuesByOptionId($optionIds, $storeId)
     {
         return Mage::getModel('catalog/product_option_value')
-            ->getValuesByOption($optionIds, $this->getId(), $store_id);
+            ->getValuesByOption($optionIds, $this->getId(), $storeId);
     }
 
     /**
@@ -494,11 +496,11 @@ class Mage_Catalog_Model_Product_Option extends Mage_Core_Model_Abstract
         $this->setProductId(null);
         $this->setOptionId(null);
         $newOption = $this->__toArray();
-        $_values = $this->getValues();
-        if ($_values) {
+        $values = $this->getValues();
+        if ($values) {
             $newValuesArray = [];
-            foreach ($_values as $_value) {
-                $newValuesArray[] = $_value->prepareValueForDuplicate();
+            foreach ($values as $value) {
+                $newValuesArray[] = $value->prepareValueForDuplicate();
             }
             $newOption['values'] = $newValuesArray;
         }

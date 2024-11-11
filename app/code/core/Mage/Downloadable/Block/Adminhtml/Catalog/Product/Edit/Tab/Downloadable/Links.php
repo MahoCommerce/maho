@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -58,10 +58,10 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
     public function getPurchasedSeparatelyAttribute()
     {
         if ($this->_purchasedSeparatelyAttribute === null) {
-            $_attributeCode = 'links_purchased_separately';
+            $attributeCode = 'links_purchased_separately';
 
             $attribute = Mage::getSingleton('eav/config')
-                ->getAttribute(Mage_Catalog_Model_Product::ENTITY, $_attributeCode);
+                ->getAttribute(Mage_Catalog_Model_Product::ENTITY, $attributeCode);
             if (!($attribute instanceof Mage_Catalog_Model_Resource_Eav_Attribute)) {
                 Mage::throwException('Attribute links_purchased_separately must be of type Mage_Catalog_Model_Resource_Eav_Attribute');
             }

@@ -24,8 +24,6 @@ class Mage_Eav_Model_Attribute_Data_Image extends Mage_Eav_Model_Attribute_Data_
      *
      * @param array $value
      * @return array
-     *
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     #[\Override]
     protected function _validateByRules($value)

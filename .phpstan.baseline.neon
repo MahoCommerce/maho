@@ -346,11 +346,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/Giftmessage/Save.php
 
 		-
-			message: "#^Method Mage_Adminhtml_Model_Sales_Order_Create\\:\\:initFromOrderItem\\(\\) should return Mage_Sales_Model_Quote_Item\\|string but returns \\$this\\(Mage_Adminhtml_Model_Sales_Order_Create\\)\\.$#"
-			count: 2
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
 			message: "#^Variable \\$billingAddress might not be defined\\.$#"
 			count: 2
 			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
@@ -761,16 +756,6 @@ parameters:
 			path: app/code/core/Mage/Bundle/Block/Adminhtml/Catalog/Product/Edit/Tab/Bundle/Option/Selection.php
 
 		-
-			message: "#^Variable \\$_items might not be defined\\.$#"
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Adminhtml/Sales/Order/Items/Renderer.php
-
-		-
-			message: "#^Variable \\$_items might not be defined\\.$#"
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Sales/Order/Items/Renderer.php
-
-		-
 			message: "#^Call to an undefined method Mage_Catalog_Model_Product_Configuration_Item_Interface\\:\\:getQty\\(\\)\\.$#"
 			count: 1
 			path: app/code/core/Mage/Bundle/Helper/Catalog/Product/Configuration.php
@@ -844,11 +829,6 @@ parameters:
 			message: "#^Variable \\$customOptions might not be defined\\.$#"
 			count: 1
 			path: app/code/core/Mage/Bundle/Model/Resource/Price/Index.php
-
-		-
-			message: "#^Variable \\$_items might not be defined\\.$#"
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/Sales/Order/Pdf/Items/Abstract.php
 
 		-
 			message: "#^Argument of an invalid type string supplied for foreach, only iterables are supported\\.$#"
@@ -1209,11 +1189,6 @@ parameters:
 			message: "#^Cannot call method isIndexable\\(\\) on Mage_Eav_Model_Entity_Attribute_Abstract\\|false\\.$#"
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Indexer/Eav.php
-
-		-
-			message: "#^Method Mage_Catalog_Model_Product_Option\\:\\:groupFactory\\(\\) should return Mage_Catalog_Model_Product_Option_Type_Default but returns Mage_Core_Model_Abstract\\|false\\.$#"
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Option.php
 
 		-
 			message: "#^Call to an undefined method Mage_Catalog_Model_Product_Configuration_Item_Option_Interface\\:\\:getId\\(\\)\\.$#"
@@ -1831,11 +1806,6 @@ parameters:
 			path: app/code/core/Mage/Core/Controller/Varien/Router/Admin.php
 
 		-
-			message: "#^Argument of an invalid type string supplied for foreach, only iterables are supported\\.$#"
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Router/Standard.php
-
-		-
 			message: "#^Negated boolean expression is always true\\.$#"
 			count: 1
 			path: app/code/core/Mage/Core/Controller/Varien/Router/Standard.php
@@ -1936,11 +1906,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Design/Fallback.php
 
 		-
-			message: "#^Binary operation \"\\.\" between non\\-falsy\\-string and array results in an error\\.$#"
-			count: 1
-			path: app/code/core/Mage/Core/Model/Design/Package.php
-
-		-
 			message: "#^Property Mage_Core_Model_Design_Package\\:\\:\\$_store \\(int\\|Mage_Core_Model_Store\\|string\\) on left side of \\?\\? is not nullable\\.$#"
 			count: 1
 			path: app/code/core/Mage/Core/Model/Design/Package.php
@@ -2019,11 +1984,6 @@ parameters:
 			message: "#^Method Mage_Core_Model_Layout\\:\\:getMessagesBlock\\(\\) should return Mage_Core_Block_Messages but returns Mage_Core_Block_Abstract\\|false\\.$#"
 			count: 1
 			path: app/code/core/Mage/Core/Model/Layout.php
-
-		-
-			message: "#^Method Mage_Core_Model_Layout_Update\\:\\:saveCache\\(\\) should return bool but returns Mage_Core_Model_App\\.$#"
-			count: 1
-			path: app/code/core/Mage/Core/Model/Layout/Update.php
 
 		-
 			message: "#^Call to an undefined method Mage_Core_Model_Resource_Type_Abstract\\:\\:getConnection\\(\\)\\.$#"
@@ -3831,16 +3791,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
 
 		-
-			message: "#^Method Mage_Usa_Model_Shipping_Carrier_Dhl\\:\\:_doRequest\\(\\) should return Mage_Shipping_Model_Rate_Result\\|Varien_Object but empty return statement found\\.$#"
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
-			message: "#^Method Mage_Usa_Model_Shipping_Carrier_Dhl\\:\\:_getQuotes\\(\\) should return Mage_Shipping_Model_Rate_Result but returns Varien_Object\\.$#"
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
-
-		-
 			message: "#^Property Mage_Usa_Model_Shipping_Carrier_Dhl\\:\\:\\$_request \\(Mage_Shipping_Model_Rate_Request\\|null\\) does not accept Varien_Object\\.$#"
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl.php
@@ -3939,11 +3889,6 @@ parameters:
 			message: "#^Variable \\$packageType might not be defined\\.$#"
 			count: 2
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
-
-		-
-			message: "#^Method Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page\\:\\:drawText\\(\\) should return \\$this\\(Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page\\) but returns Zend_Pdf_Canvas_Interface\\.$#"
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/Label/Pdf/Page.php
 
 		-
 			message: "#^Call to an undefined method Zend_Pdf_Page\\:\\:drawLines\\(\\)\\.$#"
