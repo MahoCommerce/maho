@@ -34,16 +34,15 @@
 <?php endforeach ?>
 </ol>
 <script type="text/javascript">
-//<![CDATA[
-    var accordion = new Accordion('checkoutSteps', '.step-title', true);
+    const accordion = new Accordion('checkoutSteps', '.step-title', true);
     <?php if($this->getActiveStep()): ?>
     accordion.openSection('opc-<?= $this->getActiveStep() ?>');
     <?php endif ?>
-    var checkout = new Checkout(accordion,{
+
+    const checkout = new Checkout(accordion, {
         progress: '<?= $this->getUrl('checkout/onepage/progress') ?>',
         review: '<?= $this->getUrl('checkout/onepage/review') ?>',
         saveMethod: '<?= $this->getUrl('checkout/onepage/saveMethod') ?>',
-        failure: '<?= $this->getUrl('checkout/cart') ?>'}
-    );
-//]]>
+        failure: '<?= $this->getUrl('checkout/cart') ?>'
+    });
 </script>
