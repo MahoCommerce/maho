@@ -213,7 +213,7 @@ abstract class Mage_ImportExport_Model_Import_Entity_Abstract
     /**
      * Returns boolean TRUE if row scope is default (fundamental) scope.
      *
-     * @return bool
+     * @return true
      */
     protected function _isRowScopeDefault(array $rowData)
     {

@@ -906,7 +906,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl extends Mage_Usa_Model_Shipping_Carrie
         $desc = ($shipXml->EstimateDetail) ? (string)$shipXml->EstimateDetail->ServiceLevelCommitment->Desc : null;
 
         $totalEstimate = $shipXml->EstimateDetail
-                ? (string)$shipXml->EstimateDetail->RateEstimate->TotalChargeEstimate
+                ? (float)$shipXml->EstimateDetail->RateEstimate->TotalChargeEstimate
                 : null;
         /*
         * DHL can return with empty result and success code

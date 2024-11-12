@@ -213,7 +213,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
                         )
                         ->reset(Varien_Db_Select::COLUMNS)
                         ->columns([
-                            new Zend_Db_Expr($store->getWebsiteId()),
+                            new Zend_Db_Expr((string)$store->getWebsiteId()),
                             'cg.customer_group_id',
                             'p.entity_id',
                             new Zend_Db_Expr($rule->getId()),

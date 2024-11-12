@@ -216,7 +216,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      * @param Mage_Catalog_Model_Product $product
      * @param null|false|Varien_Object   $shipping
      * @param null|false|Varien_Object   $billing
-     * @param Mage_Core_Model_Website    $website
+     * @param int|Mage_Core_Model_Website $website
      * @param bool                       $calculateTaxes
      * @return array
      */
@@ -296,7 +296,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      * @param Mage_Catalog_Model_Product $product
      * @param null|false|Varien_Object $shipping Shipping Address
      * @param null|false|Varien_Object $billing Billing Address
-     * @param null|Mage_Core_Model_Website $website
+     * @param null|int $website
      * @param mixed $calculateTaxes
      * @return array
      */

@@ -1116,6 +1116,10 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
         return $this;
     }
 
+    /**
+     * @param array|Mage_Sales_Model_Quote_Address $address
+     * @return $this
+     */
     public function setShippingAddress($address)
     {
         if (is_array($address)) {
@@ -1164,6 +1168,10 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
         return $this->getQuote()->getBillingAddress();
     }
 
+    /**
+     * @param array|Mage_Sales_Model_Quote_Address $address
+     * @return $this
+     */
     public function setBillingAddress($address)
     {
         if (is_array($address)) {
@@ -1173,6 +1181,8 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
                 ->setAddressType(Mage_Sales_Model_Quote_Address::TYPE_BILLING);
             $this->_setQuoteAddress($billingAddress, $address);
             $billingAddress->implodeStreetAddress();
+        } elseif ($address instanceof Mage_Sales_Model_Quote_Address) {
+            $billingAddress = $address;
         }
 
         if ($this->getShippingAddress()->getSameAsBilling()) {

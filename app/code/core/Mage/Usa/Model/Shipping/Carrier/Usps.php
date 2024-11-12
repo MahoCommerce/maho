@@ -464,7 +464,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                                 if (in_array($serviceCode, $allowedMethods)) {
                                     $costArr[$serviceCode] = (string)$postage->Rate;
                                     $priceArr[$serviceCode] = $this->getMethodPrice(
-                                        (string)$postage->Rate,
+                                        (float)$postage->Rate,
                                         $serviceCode
                                     );
                                 }
@@ -483,7 +483,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                                 if (in_array($serviceCode, $allowedMethods)) {
                                     $costArr[$serviceCode] = (string)$service->Postage;
                                     $priceArr[$serviceCode] = $this->getMethodPrice(
-                                        (string)$service->Postage,
+                                        (float)$service->Postage,
                                         $serviceCode
                                     );
                                 }
@@ -1907,7 +1907,8 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         if (preg_match('/[\\d\\w]{5}\\-[\\d\\w]{4}/', $zipString) != 0) {
             $zip = explode('-', $zipString);
         }
-        for ($i = 0; $i < count($zip); ++$i) {
+        $zipCount = count($zip);
+        for ($i = 0; $i < $zipCount; ++$i) {
             if (strlen($zip[$i]) == 5) {
                 $zip5 = $zip[$i];
             } elseif (strlen($zip[$i]) == 4) {
