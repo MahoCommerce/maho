@@ -288,7 +288,6 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_History extends Mage_Adminhtml_B
      * @param mixed $b
      * @return int
      */
-    // phpcs:ignore Ecg.PHP.PrivateClassMember.PrivateClassMemberError
     private static function _sortHistoryByTimestamp($a, $b)
     {
         $createdAtA = $a['created_at'];

@@ -146,7 +146,6 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
         Mage::dispatchEvent('controller_front_init_routers', ['front' => $this]);
 
         // Add default router at the last
-        // phpcs:ignore Ecg.Classes.ObjectInstantiation.DirectInstantiation
         $default = new Mage_Core_Controller_Varien_Router_Default();
         $this->addRouter('default', $default);
 

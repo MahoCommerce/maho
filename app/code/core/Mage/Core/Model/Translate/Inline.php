@@ -496,7 +496,6 @@ class Mage_Core_Model_Translate_Inline
      * @param int $from
      * @return false|int return false if end of tag is not found
      */
-    // phpcs:ignore Ecg.PHP.PrivateClassMember.PrivateClassMemberError
     private function findEndOfTag($body, $tagName, $from)
     {
         $openTag = '<' . $tagName;

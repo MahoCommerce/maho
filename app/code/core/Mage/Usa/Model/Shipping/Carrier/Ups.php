@@ -2485,7 +2485,6 @@ XMLAuth;
     /**
      * Setting common request params for Rate Request
      */
-    // phpcs:ignore Ecg.PHP.PrivateClassMember.PrivateClassMemberError
     private function setQuoteRequestData(Varien_Object $rowRequest): array
     {
         if (self::USA_COUNTRY_ID == $rowRequest->getDestCountry()) {
@@ -2520,7 +2519,6 @@ XMLAuth;
         return $params;
     }
 
-    // phpcs:ignore Ecg.PHP.PrivateClassMember.PrivateClassMemberError
     private function mapCurrencyCode(string $code): string
     {
         $currencyMapping = [
