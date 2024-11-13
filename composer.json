@@ -38,7 +38,8 @@
         "phpseclib/mcrypt_compat": "^2.0.3",
         "phpseclib/phpseclib": "^3.0.14",
         "shardj/zf1-future": "^1.24.1",
-        "symfony/console": "^7.1"
+        "symfony/console": "^7.1",
+        "mahocommerce/maho-language-it_it": "^24.09"
     },
     "replace": {
         "symfony/polyfill-ctype": "*",
