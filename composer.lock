@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fa95cf0ad61ea2c307c4a89e0fcc44f3",
+    "content-hash": "02cefbf35d3d8ba2341f366c1b5adadb",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -148,36 +148,6 @@
                 "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v2.0.0"
             },
             "time": "2024-10-10T17:22:21+00:00"
-        },
-        {
-            "name": "mahocommerce/maho-language-it_it",
-            "version": "24.09.09",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/MahoCommerce/maho-language-it_IT.git",
-                "reference": "7114df16509b939f942e70dd6153b5c68191d8e3"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-language-it_IT/zipball/7114df16509b939f942e70dd6153b5c68191d8e3",
-                "reference": "7114df16509b939f942e70dd6153b5c68191d8e3",
-                "shasum": ""
-            },
-            "require": {
-                "mahocommerce/maho": "*"
-            },
-            "type": "maho-module",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "OSL-3.0",
-                "AFL-3.0"
-            ],
-            "description": "Italian (it_IT) language pack for Maho ecommerce platform",
-            "support": {
-                "issues": "https://github.com/MahoCommerce/maho-language-it_IT/issues",
-                "source": "https://github.com/MahoCommerce/maho-language-it_IT/tree/24.09.09"
-            },
-            "time": "2024-09-09T05:13:28+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",

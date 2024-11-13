@@ -17,35 +17,6 @@
 <meta name="description" content="<?= htmlspecialchars($this->getDescription()) ?>" />
 <meta name="keywords" content="<?= htmlspecialchars($this->getKeywords()) ?>" />
 <meta name="robots" content="<?= htmlspecialchars($this->getRobots()) ?>" />
-<?php
-
-$currentStoreId = Mage::app()->getStore()->getId();
-$activeStores = Mage::app()->getWebsite()->getStoreCollection()->addFieldToFilter('is_active', 1);
-
-if (count($activeStores) > 1) {
-    $currentUrl = Mage::helper('core/url')->getCurrentUrl();
-    $currentUrl = parse_url($currentUrl);
-    $currentUrl = ltrim($currentUrl['path'], '/');
-    $urlRewrite = Mage::getModel('core/url_rewrite')
-        ->setStoreId($currentStoreId)
-        ->loadByRequestPath($currentUrl);
-    $currentIdPath = $urlRewrite->getIdPath();
-
-    /** @var Mage_Core_Model_Store $store */
-    foreach ($activeStores as $store) {
-        if ($store->getId() != $currentStoreId) {
-            $language = explode('_', $store->getConfig('general/locale/code'))[0];
-            $urlRewrite = Mage::getModel('core/url_rewrite')
-                ->setStoreId($store->getId())
-                ->loadByIdPath($currentIdPath);
-            $targetUrl = $store->getUrl($urlRewrite->getRequestPath());
-
-            echo "<link rel=\"alternate\" hreflang=\"$language\" href=\"$targetUrl\" />\n";
-        }
-    }
-}
-
-?>
 <link rel="icon" type="image/svg+xml" href="<?= $this->getSkinUrl('images/favicon.svg') ?>" sizes="any">
 <link rel="icon" type="image/png" href="<?= $this->getSkinUrl('images/favicon.png') ?>">
 <?= $this->getCssJsHtml() ?>
