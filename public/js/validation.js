@@ -314,7 +314,7 @@ class Validation {
     static isVisible(elm) {
         return (elm.tagName === 'INPUT' && elm.type === 'hidden')
             ? this.isVisible(elm.parentElement)
-            : getComputedStyle(elm).display !== 'none';
+            : elm.checkVisibility();
     }
 
     static getAdvice(name, elm) {
