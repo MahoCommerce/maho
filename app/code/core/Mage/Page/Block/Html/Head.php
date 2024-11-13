@@ -488,11 +488,11 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
             /** @var Mage_Core_Model_Resource_Store_Collection $activeStores */
             $activeStores = Mage::app()->getWebsite()->getStoreCollection()->addFieldToFilter('is_active', 1);
             if (count($activeStores) > 1) {
-                $currentUrl = Mage::app()->getRequest()->getQuery('resource');
-                $urlRewrite = Mage::getModel('core/url_rewrite')
+                $currentUrl = Mage::app()->getRequest()->getQuery('resource') ?? '';
+                $currentIdPath = Mage::getModel('core/url_rewrite')
                     ->setStoreId($currentStoreId)
-                    ->loadByRequestPath($currentUrl);
-                $currentIdPath = $urlRewrite->getIdPath();
+                    ->loadByRequestPath($currentUrl)
+                    ->getIdPath();
 
                 /** @var Mage_Core_Model_Store $store */
                 foreach ($activeStores as $store) {
@@ -501,10 +501,12 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
                     }
 
                     $language = explode('_', $store->getConfig('general/locale/code'))[0];
-                    $urlRewrite = Mage::getModel('core/url_rewrite')
+                    $targetRequestPath = Mage::getModel('core/url_rewrite')
                         ->setStoreId($store->getId())
-                        ->loadByIdPath($currentIdPath);
-                    $targetUrl = $store->getUrl($urlRewrite->getRequestPath(), [
+                        ->loadByIdPath($currentIdPath)
+                        ->getRequestPath();
+
+                    $targetUrl = $store->getUrl($targetRequestPath, [
                         '_use_rewrite' => true,
                         '_secure' => Mage::app()->getFrontController()->getRequest()->isSecure()
                     ]);
@@ -517,7 +519,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
             }
         }
 
-        return implode(PHP_EOL, $this->_data['hreflang']);
+        return implode('', $this->_data['hreflang']);
     }
 
     /**
