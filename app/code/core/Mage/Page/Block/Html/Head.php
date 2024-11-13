@@ -480,6 +480,46 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
         return $this->_data['robots'];
     }
 
+    public function getHreflang(): string
+    {
+        if (empty($this->_data['hreflang'])) {
+            $this->_data['hreflang'] = [];
+            $currentStoreId = Mage::app()->getStore()->getId();
+            /** @var Mage_Core_Model_Resource_Store_Collection $activeStores */
+            $activeStores = Mage::app()->getWebsite()->getStoreCollection()->addFieldToFilter('is_active', 1);
+            if (count($activeStores) > 1) {
+                $currentUrl = Mage::app()->getRequest()->getQuery('resource');
+                $urlRewrite = Mage::getModel('core/url_rewrite')
+                    ->setStoreId($currentStoreId)
+                    ->loadByRequestPath($currentUrl);
+                $currentIdPath = $urlRewrite->getIdPath();
+
+                /** @var Mage_Core_Model_Store $store */
+                foreach ($activeStores as $store) {
+                    if ($store->getId() === $currentStoreId) {
+                        continue;
+                    }
+
+                    $language = explode('_', $store->getConfig('general/locale/code'))[0];
+                    $urlRewrite = Mage::getModel('core/url_rewrite')
+                        ->setStoreId($store->getId())
+                        ->loadByIdPath($currentIdPath);
+                    $targetUrl = $store->getUrl($urlRewrite->getRequestPath(), [
+                        '_use_rewrite' => true,
+                        '_secure' => Mage::app()->getFrontController()->getRequest()->isSecure()
+                    ]);
+                    if (!$targetUrl) {
+                        continue;
+                    }
+
+                    $this->_data['hreflang'][] = "<link rel=\"alternate\" hreflang=\"$language\" href=\"$targetUrl\" />\n";
+                }
+            }
+        }
+
+        return implode(PHP_EOL, $this->_data['hreflang']);
+    }
+
     /**
      * Get miscellaneous scripts/styles to be included in head before head closing tag
      *
