@@ -142,6 +142,7 @@
 "File name is too long. Maximum length is %s.","File name is too long. Maximum length is %s."
 "File not found","File not found"
 "File system","File system"
+"File type for image conversions","File type for image conversions"
 "File with an extension ""%value%"" is protected and cannot be uploaded","File with an extension ""%value%"" is protected and cannot be uploaded"
 "First Day of Week","First Day of Week"
 "Flush Cache Storage","Flush Cache Storage"
