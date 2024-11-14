@@ -413,6 +413,10 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
         $path[] = md5(implode('_', $miscParams));
 
+        // replacing file extension based on target file type
+        $targetFileExtension = image_type_to_extension(Mage::getStoreConfig('system/media_storage_configuration/image_file_type'));
+        $file = preg_replace('/\.[^.]+$/', $targetFileExtension, $file);
+
         // append prepared filename
         $this->_newFile = implode('/', $path) . $file; // the $file contains heading slash
 
@@ -459,6 +463,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         $this->_processor->constrainOnly($this->_constrainOnly);
         $this->_processor->backgroundColor($this->_backgroundColor);
         $this->_processor->quality($this->_quality);
+        $this->_processor->targetFileType(Mage::getStoreConfig('system/media_storage_configuration/image_file_type'));
         return $this->_processor;
     }
 

@@ -992,6 +992,15 @@
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
+                        <image_file_type translate="label">
+                            <label>File type for image conversions</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_storage_media_filetypes</source_model>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </image_file_type>
                         <media_storage translate="label">
                             <label>Media Storage</label>
                             <frontend_type>select</frontend_type>

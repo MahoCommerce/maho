@@ -175,6 +175,14 @@ class Varien_Image
     }
 
     /**
+     * Get/set target file type
+     */
+    public function targetFileType(int $value): int
+    {
+        return $this->_getAdapter()->targetFileType($value);
+    }
+
+    /**
      * Adds watermark to our image.
      *
      * @param string $watermarkImage. Absolute path to watermark image.

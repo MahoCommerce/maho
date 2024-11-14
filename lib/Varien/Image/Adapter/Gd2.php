@@ -124,8 +124,6 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
     #[\Override]
     public function save($destination = null, $newName = null)
     {
-        $fileName = (!isset($destination)) ? $this->_fileName : $destination;
-
         if (isset($destination) && isset($newName)) {
             $fileName = $destination . '/' . $newName;
         } elseif (isset($destination) && !isset($newName)) {
@@ -185,7 +183,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
         $functionParameters[] = $fileName;
 
         // set quality param for JPG file type
-        if (!is_null($this->quality()) && $this->_fileType == IMAGETYPE_JPEG) {
+        if (!is_null($this->quality()) && ($this->_fileType == IMAGETYPE_JPEG || $this->_fileType == IMAGETYPE_WEBP)) {
             $functionParameters[] = $this->quality();
         }
 
