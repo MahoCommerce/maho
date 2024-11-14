@@ -65,6 +65,9 @@
                 <ctype/>
                 <curl/>
                 <dom/>
+                <fileinfo/>
+                <filter/>
+                <ftp/>
                 <gd/>
                 <hash/>
                 <iconv/>
@@ -78,6 +81,8 @@
                     <mcrypt/>
                 </mcrypt>
                 <pdo/>
+                <pdo_mysql/>
+                <session/>
                 <simplexml/>
                 <soap/>
                 <spl/>
