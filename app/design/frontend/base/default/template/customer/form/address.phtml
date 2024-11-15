@@ -65,9 +65,7 @@
                             <option value=""><?= $this->__('Please select region, state or province') ?></option>
                         </select>
                         <script type="text/javascript">
-                        //<![CDATA[
-                            $('region_id').setAttribute('defaultValue',  "<?= $this->getAddress()->getRegionId() ?>");
-                        //]]>
+                            document.getElementById('region_id').setAttribute('defaultValue', "<?= $this->getAddress()->getRegionId() ?>");
                         </script>
                         <input type="text" id="region" name="region" value="<?= $this->escapeHtml($this->getAddress()->getRegion()) ?>"  title="<?= Mage::helper('core')->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" style="display:none;" />
                     </div>
