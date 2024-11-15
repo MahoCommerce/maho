@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "02cefbf35d3d8ba2341f366c1b5adadb",
+    "content-hash": "c55c597d2e92396f3255ab3fd01d284b",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -117,22 +117,21 @@
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
-            "version": "dev-main",
+            "version": "v2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
-                "reference": "49fe8b773fbc50a44e2d8018688ee85f29795f81"
+                "reference": "f27036354a10aa699718c9e3828fb2b2720eb94e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/49fe8b773fbc50a44e2d8018688ee85f29795f81",
-                "reference": "49fe8b773fbc50a44e2d8018688ee85f29795f81",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/f27036354a10aa699718c9e3828fb2b2720eb94e",
+                "reference": "f27036354a10aa699718c9e3828fb2b2720eb94e",
                 "shasum": ""
             },
             "require": {
                 "composer-plugin-api": "^2.0"
             },
-            "default-branch": true,
             "type": "composer-plugin",
             "extra": {
                 "class": "Maho\\MahoComposerPlugin"
@@ -145,9 +144,9 @@
             "notification-url": "https://packagist.org/downloads/",
             "support": {
                 "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
-                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v2.0.0"
+                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v2.1.0"
             },
-            "time": "2024-10-10T17:22:21+00:00"
+            "time": "2024-11-15T10:31:25+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
@@ -3031,9 +3030,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "mahocommerce/maho-composer-plugin": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
