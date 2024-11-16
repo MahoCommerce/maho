@@ -279,19 +279,26 @@ img.accordion-btn       { float:right; margin-top:1px; margin-right:5px; }
 *******************************************************************************/
 
 /* Vertical  Tabs */
-ul.tabs                         { border-top:1px solid #d3d3d3; background-color:#f4f4f5; }
+ul.tabs                         { }
 ul.tabs a, ul.tabs span         { display:block; }
 ul.tabs a, ul.tabs a:hover      { text-decoration:none; }
 /* ul.tabs a.notloaded             { color:#999; } */
 ul.tabs a, ul.tabs a:hover      { color:#000; }
-ul.tabs, ul.tabs a              { background:url(images/tabs_link_bg.gif) repeat-y 100% #f4f4f5; }
-ul.tabs a:hover                 { background-color:#D8E6E6; background-image:url(images/tabs_link_over_bg.gif); }
-ul.tabs a.active                { padding:0; outline:1px solid #d3d3d3; background:none; }
-ul.tabs a:hover.active          { padding:0; }
-ul.tabs span                    { background:url(images/tabs_span_bg.gif) repeat-x 0 100%; padding:.3em 0.5em .28em 1.5em; cursor:pointer; }
+ul.tabs a { padding: 8px 18px; border-radius: 6px; margin-bottom: 4px; font-size: 14px; }
+ul.tabs a:hover {
+    background: #d3d3d3;
+}
+ul.tabs a.active {
+    background: var(--body-color);
+    color: #fff;
+    box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 1px 2px 0px;
+    transition: border 200ms ease-in;
+}
+ul.tabs a:hover.active          { }
+ul.tabs span                    { cursor:pointer; font-weight: 400;}
 ul.tabs span em                 { float:right; }
 ul.tabs a.active span,
-ul.tabs a:hover.active span     { background:#fff; font-weight:bold; }
+ul.tabs a:hover.active span     { font-weight:600; }
 ul.tabs a.subitem               { padding-left:2.2em; }
 ul.tabs span.changed,
 ul.tabs span.error              { float:right; background:0; padding:0; }
@@ -350,11 +357,19 @@ select.countries option         { background-repeat:no-repeat; }
 
 /* Entry Edit  */ /* Site-wide form fieldset */
 table.form-edit                         { width:100%; }
+.entry-edit { margin-top: 18px; }
 .box,
 .entry-edit fieldset,
-.entry-edit .fieldset                   { padding:10px 15px; margin-bottom:15px; }
-.entry-edit .entry-edit-head h4         { float:left; padding:0; background:none; margin:0; color:#fff; font-size:1em; line-height:18px; min-height:0; }
-.entry-edit .entry-edit-head .tools     { float:right;}
+.entry-edit .fieldset {
+    padding:10px 15px;
+    margin-bottom:15px;
+    border: 1px solid lightgrey;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+}
+.entry-edit .entry-edit-head h4         { float:left; padding:0; background:none; margin:0; font-size:1.3em; font-weight: 600; line-height:21px; min-height:0; }
+.entry-edit .entry-edit-head .tools     { float:right; }
 .entry-edit .entry-edit-head strong,
 .entry-edit .entry-edit-head a          { color: var(--body-color); font-size:18px; line-height:18px; min-height:0; font-weight: 600; }
 .entry-edit .content                    { margin-left:0 !important; padding:10px 15px; }

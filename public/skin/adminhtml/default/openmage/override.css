@@ -1,70 +1,7 @@
-/* .popup-window .content-header, body {
-  color: var(--body-color);
-  font: 400 14px/1.33 var(--font-family-sans);
-  background: #fafafa;
-} */
-
-/* .content-header-floating .content-header, .footer-content, .middle, #nav, .header-top {
-  box-sizing: border-box;
-  width: 100%;
-} */
-
-/* .content-header h3, .content-header {
-  border: 0;
-  color: var(--body-color) !important;
-  font-size: 26px;
-  font-weight: 600;
-} */
-
-/* dl.accordion dt, .entry-edit .entry-edit-head {
-  background: none;
-  padding: 6px 4px;
-} */
-
-.box, .entry-edit .fieldset, .entry-edit fieldset {
-  border: 1px solid lightgrey;
-  background: #fff;
-  border-radius: 6px;
-  box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
-}
-
-/* .grid tr.headings th a.sort-arrow-asc, .grid tr.headings th a.sort-arrow-desc {
-  background: none;
-  border: 0;
-  box-sizing: border-box;
-  font-weight: bold;
-  position: relative;
-  padding: 0;
-}
-
-.grid tr.headings th a.sort-arrow-asc span.sort-title:after, .grid tr.headings th a.sort-arrow-desc span.sort-title:after {
-  content: "";
-  display: block;
-  right: 6px;
-  bottom: 8px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-} */
-
-ul.tabs a:hover, ul.tabs a.active {
-  background: #d3d3d3;
-  box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 1px 2px 0px;
-  color: #000;
-  transition: border 200ms ease-in;
-}
-ul.tabs a.active {
-  background: var(--body-color);
-  color: #fff;
-  padding: 8px 18px;
-}
-
 
 dl.accordion dt.open a, dl.accordion dt a:hover, dl.accordion dt a, div.collapseable a.open, div.collapseable a:hover, div.collapseable a, .entry-edit .entry-edit-head a, .entry-edit .entry-edit-head strong {
-  /* color: var(--link-color); */
   font-weight: 600;
 }
-
 
 dl.accordion dt a, div.collapseable a {
   display: flex;
@@ -75,9 +12,6 @@ dl.accordion dt a, div.collapseable a {
 dl.accordion dt a:before, div.collapseable a:before {
   content: "";
   display: block;
-  /* position: absolute;
-  right: 0;
-  bottom: 10px; */
   width: 0;
   height: 0;
   border-style: solid;
@@ -88,9 +22,6 @@ dl.accordion dt a:before, div.collapseable a:before {
 dl.accordion dt.open a:before, div.collapseable a.open:before {
   content: "";
   display: block;
-  /* position: absolute;
-  right: 0;
-  bottom: 10px; */
   width: 0;
   height: 0;
   border-style: solid;
@@ -124,111 +55,6 @@ dl.accordion dt.open a:before, div.collapseable a.open:before {
   color: #fff;
 }
 
-/* .header-right fieldset input.input-text:hover, .header-right fieldset input.input-text:focus {
-  background-color: #fff;
-  outline: none;
-  box-shadow: none;
-} */
-
-/* .wrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-} */
-
-/* .header-top {
-  border: 0;
-  display: contents;
-} */
-
-/* .middle {
-  background: #f1f1f1;
-  flex-grow: 1;
-} */
-
-/* .content-header-floating {
-  opacity: 1;
-  background: rgba(215, 223, 34, 0.45);
-  color: #fff !important;
-  border: 0;
-  box-shadow: 0 4px 10px 0 rgba(0,0,0,.1607843137);
-  backdrop-filter: blur(2px);
-} */
-/* .content-header-floating h3 {
-  font-size: 20px;
-} */
-/* .content-header-floating td {
-  padding-right: 0;
-  vertical-align: middle;
-} */
-/* .content-header-floating .form-buttons {
-  padding-right: 0;
-} */
-
-/* .content-header {
-  margin-bottom: 0;
-  padding-bottom: 12px;
-  border-bottom: 1px solid gainsboro;
-}
-.content-header h3 {
-  margin: 0;
-  line-height: 40px;
-} */
-
-/* .dashboard-container {
-  border: none;
-} */
-
-/* .columns {
-  background: none;
-} */
-
-/* .switcher {
-  font-size: 12px;
-  background: #e6e6e6;
-  border-radius: 6px;
-  box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
-  border: 1px solid lightgray;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  & > * {
-    min-width: fit-content;
-  }
-  margin: 4px 0;
-} */
-/* .side-col .switcher {
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  padding: 10px;
-} */
-/* .switcher label {
-  font-weight: 600;
-  line-height: 26px;
-} */
-/* .switcher p, .switcher select {
-  margin: 0 !important;
-}
-.switcher a {
-  text-decoration: underline;
-} */
-
-.entry-edit {
-  margin-top: 10px;
-}
-.entry-edit .entry-edit-head h4 {
-  color: inherit;
-  line-height: 32px;
-  font-size: 18px;
-  font-weight: 600;
-}
-.entry-edit .entry-edit-head .tools {
-  line-height: 32px;
-}
-.entry-edit .entry-edit-head .tools a:hover {
-  text-decoration: none;
-}
 .grid table {
   --border-color: lightgray;
   border: 1px solid var(--border-color);
@@ -415,78 +241,6 @@ input[type=radio] {
   height: 16px;
 }
 
-/* .header {
-  background: var(--body-color);
-  position: relative;
-} */
-
-/* .header-top {
-  border-bottom: none !important;
-  height: 10px;
-} */
-/* .header-top .logo {
-  position: absolute;
-  display: block;
-  top: 8px;
-  left: 0;
-  margin: 0;
-  height: 40px;
-  padding: 0 15px;
-}
-.header-top .logo svg {
-  height: 40px;
-  width: auto;
-} */
-
-/* .demo-notice {
-  background: #e60056;
-  display: none;
-} */
-
-/* .header-right {
-  position: absolute;
-  top: 7px;
-  right: 0;
-  padding: 0;
-  color: inherit;
-  z-index: 200;
-  height: 40px;
-  background: var(--color-main-xxl);
-} */
-/* .header-right fieldset {
-  display: inline;
-  line-height: 40px;
-} */
-/* .header-right fieldset input.input-text {
-  width: 250px;
-  height: 40px;
-  border: 0;
-  border-radius: 4px;
-  margin-top: -4px;
-  background-color: #fff;
-  padding: 8px 16px !important;
-  min-width: 250px;
-  transition: width 100ms;
-  transition-delay: 200ms;
-} */
-/* .header-right fieldset input.input-text:focus {
-  width: calc(100vw - 160px);
-} */
-/* .footer {
-  background: var(--body-color);
-  padding: 30px 15px;
-  font-size: 12px;
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5em;
-} */
-/* .footer a {
-  color: white;
-  text-decoration: underline;
-} */
-
 ul.tabs-horiz {
   background: #ebebeb;
   border-radius: 6px;
@@ -515,49 +269,11 @@ ul.tabs-horiz li a.active, ul.tabs-horiz li a:hover {
   outline: 1px solid #d3d3d3;
   box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px;
 }
-ul.tabs {
-  background: none;
-  /* color: var(--body-color); */
-  border-top: 0;
-}
+
 ul.tabs dl {
   background: none;
-  /* border: 1px solid #fafafa; */
 }
-ul.tabs a {
-  background: none;
-  /* background: var(--body-color);
-  color: #fff; */
-  padding: 8px 18px;
-  border-radius: 6px;
-  margin-bottom: 4px;
-  font-size: 14px;
-}
-ul.tabs a.active {
-  /* border-color: var(--body-color); */
-  /* border-left: 3px solid var(--accient-color); */
-  padding: 8px 18px;
-}
-ul.tabs a.active span {
-  padding: 0;
-  background: none;
-  font-weight: 600;
-}
-ul.tabs a:hover {
-  /* border-left: 3px solid var(--accient-color); */
-}
-ul.tabs a:hover.active {
-  padding: 8px 18px;
-}
-ul.tabs a:hover.active span {
-  background: none;
-  font-weight: 600;
-}
-ul.tabs span {
-  background: none;
-  padding: 0;
-  font-weight: 400;
-}
+
 ul.config-tabs dt {
   border: 0;
   font-weight: 500;
@@ -669,7 +385,6 @@ div.autocomplete ul li.selected {
 
 .massaction strong[id*=_massaction-count],
 .massaction button, .massaction button:hover {
-  /* --massaction-bg: #66666d; */
   --massaction-bg: #184fac;
   --massaction-color: #fff;
   background: var(--massaction-bg);
@@ -696,16 +411,6 @@ div.autocomplete ul li.selected {
   vertical-align: middle;
   margin: 0;
 }
-
-/* .head-products {
-  background-position: left center;
-} */
-
-/* .icon-head {
-  background-image: none;
-  padding-left: 0;
-  background-position: left center;
-} */
 
 .x-tree-node a {
   font-size: 12px;
@@ -967,9 +672,6 @@ dl.accordion dt.open a {
   background: none;
 }
 table.actions {
-  /* background: $white;
-  border: 1px solid $color_alto_approx; */
-  /* border-bottom: 1px solid #e6e6e6; */
   margin-bottom: 0;
 }
 table.actions tr {
@@ -980,9 +682,6 @@ table.actions tr {
 table.actions td.pager {
   padding: 10px;
   font-size: 12px;
-  /*     background: #fff;
-      border: 1px solid lightgray !important;
-      border-radius: 6px; */
 }
 table.actions td.pager .link-feed {
   margin: 0;
