@@ -60,15 +60,4 @@ class Mage_Cms_Helper_Data extends Mage_Core_Helper_Abstract
 
         return is_array($allowedStreamWrappers) ? $allowedStreamWrappers : [];
     }
-
-    /**
-     * Check is swf file extension disabled
-     *
-     * @return true
-     * @deprecated since 19.5.0
-     */
-    public function isSwfDisabled()
-    {
-        return true;
-    }
 }
