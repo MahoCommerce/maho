@@ -172,6 +172,13 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
     /**
      * Add misc configuration options to the javascript dependencies controller
      *
+     * Available options:
+     *   - on_event - the event name that triggers condition evaluation, false to disable, defaults to "change"
+     *   - field_map - key/value pairs of field aliases to their associated DOM IDs.
+     *   - field_values - key/value pairs of fallback values for fields not present in the form
+     *   - levels_up - deprecated: the number of ancestor elements to find the parent element to hide
+     *   - can_edit_price - deprecated: prevent enabling price inputs, only use this option if dependence block contains no other elements!
+     *
      * @return $this
      */
     public function addConfigOptions(array $options)
