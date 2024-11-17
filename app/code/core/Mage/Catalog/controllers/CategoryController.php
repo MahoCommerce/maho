@@ -160,6 +160,10 @@ class Mage_Catalog_CategoryController extends Mage_Core_Controller_Front_Action
             $this->_initLayoutMessages('catalog/session');
             $this->_initLayoutMessages('checkout/session');
             $this->renderLayout();
+
+            $this->getResponse()
+                ->setHeader('Pragma', 'public', true)
+                ->setHeader('Cache-Control', 'private max-age=60', true);
         } elseif (!$this->getResponse()->isRedirect()) {
             $this->_forward('noRoute');
         }
