@@ -20,10 +20,8 @@ $catalogSearchHelper =  $this->helper('catalogsearch');
         <button type="submit" title="<?= Mage::helper('core')->quoteEscape($this->__('Search')) ?>" class="button"><?= $this->__('Search') ?></button>
         <div id="search_autocomplete" class="search-autocomplete"></div>
         <script type="text/javascript">
-        //<![CDATA[
             var searchForm = new Varien.searchForm('search_mini_form', 'search', '<?= Mage::helper('core')->jsQuoteEscape($this->__('Search entire store here...')) ?>');
             searchForm.initAutocomplete('<?= $catalogSearchHelper->getSuggestUrl() ?>', 'search_autocomplete');
-        //]]>
         </script>
     </div>
 </form>

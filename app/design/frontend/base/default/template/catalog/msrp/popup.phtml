@@ -10,12 +10,6 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
-<?php
-/**
- * Template for MAP popup
- *
- */
-?>
 <?php if (Mage::helper('catalog')->isMsrpEnabled()): ?>
 <div id="map-popup" class="map-popup" style="display:none;">
     <a href="#" class="map-popup-close" id="map-popup-close">x</a>
@@ -34,9 +28,9 @@
         <div class="map-popup-msrp" id="map-popup-msrp-box"><strong><?= $this->__('Price') ?>:</strong> <span style="text-decoration:line-through;" id="map-popup-msrp"></span></div>
         <div class="map-popup-price" id="map-popup-price-box"><strong><?= $this->__('Actual Price') ?>:</strong> <span id="map-popup-price"></span></div>
         <script type="text/javascript">
-        //<![CDATA[
-            document.observe("dom:loaded", Catalog.Map.bindProductForm);
-        //]]>
+            document.addEventListener("DOMContentLoaded", () => {
+                Catalog.Map.bindProductForm();
+            });
         </script>
     </div>
     <div class="map-popup-text" id="map-popup-text"><?= Mage::helper('catalog')->getMsrpExplanationMessage() ?></div>
