@@ -571,7 +571,7 @@ class FormElementDependenceController {
      * Recursively evaluate a complex condition
      *
      * @param {Object} condition - key/value pairs of field names and wanted values, or subconditions
-     * @param {string} [mode] - logical operation to evaluate with, can be "AND" or "OR"
+     * @param {string} [mode] - logical operation to evaluate with, defaults to "AND"
      */
     evalCondition(condition, mode = FormElementDependenceController.MODE_AND) {
         // If there are no subconditions, evaluate to true
@@ -582,7 +582,7 @@ class FormElementDependenceController {
         for (let [dependentField, subcondition] of Object.entries(condition)) {
             let result = false;
             if (this.isLogicalOperator(dependentField)) {
-                // If subcondition is an NOT/AND/OR object, recurse
+                // If we have a logical operator, recurse
                 const operator = dependentField;
                 result = this.evalCondition(subcondition, operator);
             } else {
