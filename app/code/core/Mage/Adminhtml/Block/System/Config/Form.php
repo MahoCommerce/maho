@@ -223,15 +223,17 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
         $block = $this->_getDependence();
 
         // If we have a logical operator, recurse
-        if (isset($node['operator'])) {
+        if ($node->getName() === 'condition' && isset($node['operator'])) {
             $operator = strtoupper((string)$node['operator']);
-            if ($node->getName() === 'condition' && $block->isLogicalOperator($operator)) {
+            if ($block->isLogicalOperator($operator)) {
                 $conditions = [];
                 foreach ($node->children() as $child) {
                     list($fieldId, $condition) = $this->_buildDependenceCondition($child, $group, $section, $fieldPrefix);
                     $conditions[$fieldId] = $condition;
                 }
                 return [$operator, $conditions];
+            } else {
+                Mage::throwException($this->__("Invalid operator '%s', must be one of NOT, AND, OR, XOR", $operator));
             }
         }
 
