@@ -436,135 +436,213 @@ SelectUpdater.prototype = {
     }
 };
 
-
 /**
- * Observer that watches for dependent form elements
- * If an element depends on 1 or more of other elements, it should show up only when all of them gain specified values
+ * Observer that watches for dependent form elements with support for complex conditions
  */
-FormElementDependenceController = Class.create();
-FormElementDependenceController.prototype = {
-    /**
-     * Structure of elements: {
-     *     'id_of_dependent_element' : {
-     *         'id_of_master_element_1' : 'reference_value',
-     *         'id_of_master_element_2' : 'reference_value'
-     *         'id_of_master_element_3' : ['reference_value1', 'reference_value2']
-     *         ...
-     *     }
-     * }
-     * @param object elementsMap
-     * @param object config
-     */
-    initialize : function (elementsMap, config)
-    {
-        if (config) {
-            this._config = config;
-        }
-        for (var idTo in elementsMap) {
-            for (var idFrom in elementsMap[idTo]) {
-                if ($(idFrom)) {
-                    Event.observe($(idFrom), 'change', this.trackChange.bindAsEventListener(this, idTo, elementsMap[idTo]));
-                    this.trackChange(null, idTo, elementsMap[idTo]);
-                } else {
-                    this.trackChange(null, idTo, elementsMap[idTo]);
-                }
-            }
-        }
-    },
+class FormElementDependenceController {
+    static MODE_NOT = 'NOT';
+    static MODE_AND = 'AND';
+    static MODE_OR  = 'OR';
+    static MODE_XOR = 'XOR';
 
     /**
-     * Misc. config options
-     * Keys are underscored intentionally
+     * @param {Object.<string, Object>} elementsMap - key/value pairs of target fields and their conditions to be visible
+     * @param {Object} [config] - config options
+     * @param {Object.<string, string>} [config.field_map] - key/value pairs of field aliases to their associated DOM IDs.
+     * @param {Object.<string, string>} [config.field_values] - key/value pairs of fallback values for fields not present in the form
+     * @param {number} [config.levels_up] - deprecated: the number of ancestor elements to find the parent element to hide
+     * @param {boolean} [config.can_edit_price] - deprecated: prevent enabling price inputs, only use this option if dependence block contains no other elements!
      */
-    _config : {},
-
-    getSelectValues : function(select) {
-        var result = [];
-        var options = select && select.options;
-        var opt;
-        for (var i = 0, iLen = options.length; i < iLen; i++) {
-            opt = options[i];
-            if (opt.selected) {
-                result.push(opt.value);
-            }
-        }
-        return result;
-    },
-    hideElem : function(ele) {
-        ele.hide();
-    },
-    showElem : function(ele) {
-        ele.show();
-    },
-    /**
-     * Define whether target element should be toggled and show/hide its row
-     *
-     * @param object e - event
-     * @param string idTo - id of target element
-     * @param valuesFrom - ids of master elements and reference values
-     * @return
-     */
-    trackChange : function(e, idTo, valuesFrom)
-    {
-        var ele = document.getElementById(idTo), cnf = this._config;
-        if (!ele) {
-            idTo = 'row_' + idTo;
-            ele = $(idTo);
-            if (!ele) {
-                return;
-            }
-        } else {
-            var closest = cnf.levels_up; // @deprecated
-            if ((typeof closest == 'number') && (closest > 1)) {
-                ele = ele.up(closest);
-            } else {
-                ele = ele.closest('tr');
-            }
-        }
-
-        // define whether the target should show up
-        var shouldShowUp = true;
-        for (var idFrom in valuesFrom) {
-            var from = $(idFrom);
-            if (from.tagName === 'SELECT' && from.className.indexOf('multiselect') > -1) {
-                var elementValues = this.getSelectValues(from);
-                if (!from || elementValues.indexOf(valuesFrom[idFrom]) <= -1) {
-                    shouldShowUp = false;
-                }
-            } else {
-                if (valuesFrom[idFrom] instanceof Array) {
-                    if (!from || valuesFrom[idFrom].indexOf(from.value) == -1) {
-                        shouldShowUp = false;
-                    }
-                } else {
-                    if (!from || from.value != valuesFrom[idFrom]) {
-                        shouldShowUp = false;
-                    }
-                }
-            }
-        }
-
-        // toggle target row
-        if (shouldShowUp) {
-            ele.select('input', 'select', 'td').each(function (item) {
-                // don't touch hidden inputs (and Use Default inputs too), bc they may have custom logic
-                if ((!item.type || item.type != 'hidden') && !($(item.id+'_inherit') && $(item.id+'_inherit').checked)
-                    && !(cnf.can_edit_price != undefined && !cnf.can_edit_price)) {
-                    item.disabled = false;
-                }
-            });
-            this.showElem(ele);
-        } else {
-            ele.select('input', 'select', 'td', 'div').each(function (item){
-                // don't touch hidden inputs (and Use Default inputs too), bc they may have custom logic
-                if ((!item.type || item.type != 'hidden') && !($(item.id+'_inherit') && $(item.id+'_inherit').checked)) {
-                    item.disabled = true;
-                }
-            });
-            this.hideElem(ele);
+    constructor(elementsMap, config = {}) {
+        this.config = config;
+        for (let [targetField, condition] of Object.entries(elementsMap)) {
+            this.trackChange(null, targetField, condition);
+            this.bindEventListeners(condition, [targetField, condition]);
         }
     }
-};
+
+    /**
+     * Determine if the condition is a logical operator
+     *
+     * @param {string} operator
+     * @returns {boolean}
+     */
+    isLogicalOperator(operator) {
+        const operators = [
+            FormElementDependenceController.MODE_NOT,
+            FormElementDependenceController.MODE_AND,
+            FormElementDependenceController.MODE_OR,
+            FormElementDependenceController.MODE_XOR,
+        ];
+        return operators.includes(operator);
+    }
+
+    /**
+     * Recursively bind onchange events to all elements that can trigger a change
+     *
+     * @param {Object} condition
+     * @param {Array<any>} eventArgs
+     */
+    bindEventListeners(condition, eventArgs = []) {
+        for (let [dependentField, subcondition] of Object.entries(condition)) {
+            if (this.isLogicalOperator(dependentField)) {
+                this.bindEventListeners(subcondition, eventArgs);
+            } else {
+                const dependentEl = document.getElementById(this.mapFieldId(dependentField));
+                if (dependentEl) {
+                    dependentEl.addEventListener('change', (event) => this.trackChange(event, ...eventArgs));
+                }
+            }
+        }
+    }
+
+    /**
+     * Map field alias to associated DOM ID
+     *
+     * @param {string} field - field alias
+     * @returns {string}
+     */
+    mapFieldId(field) {
+        return this.config.field_map?.[field] ?? field;
+    }
+
+    /**
+     * Return the TR element containing the form element
+     *
+     * @param {string} id - the form element's DOM ID
+     * @returns {HTMLElement?}
+     */
+    findParentRow(id) {
+        const el = document.getElementById(this.mapFieldId(id));
+        if (!el) {
+            return document.getElementById('row_' + this.mapFieldId(id));
+        }
+        if (typeof this.config.levels_up === 'number' && this.config.levels_up > 0) {
+            let parent = el;
+            for (let i = 0; parent && i < this.config.levels_up; i++) {
+                parent = parent.parentElement;
+            }
+            return parent;
+        }
+        return el.closest('tr');
+    }
+
+    /**
+     * Return an array of selected values from a select or multiselect element
+     *
+     * @param {HTMLElement} el
+     * @returns {Array<string>}
+     */
+    getSelectValues(el) {
+        return Array.from(el.querySelectorAll('option:checked'), (option) => option.value);
+    }
+
+    /**
+     * Toggle the 'no-display' class on an element
+     *
+     * @param {HTMLElement} el
+     * @param {boolean} force
+     */
+    toggleElem(el, force = null) {
+        el.classList.toggle('no-display', force);
+    }
+
+    /**
+     * Add the 'no-display' class to an element
+     *
+     * @param {HTMLElement} el
+     */
+    hideElem(el) {
+        this.toggleElem(el, true);
+    }
+
+    /**
+     * Remove the 'no-display' class from an element
+     *
+     * @param {HTMLElement} el
+     */
+    showElem(el) {
+        this.toggleElem(el, false);
+    }
+
+    /**
+     * Recursively evaluate a complex condition
+     *
+     * @param {Object} condition - key/value pairs of field names and wanted values, or subconditions
+     * @param {string} [mode] - logical operation to evaluate with, can be "AND" or "OR"
+     */
+    evalCondition(condition, mode = FormElementDependenceController.MODE_AND) {
+        // If there are no subconditions, evaluate to true
+        if (Object.keys(condition).length === 0) {
+            return true;
+        }
+        const results = [];
+        for (let [dependentField, subcondition] of Object.entries(condition)) {
+            let result = false;
+            if (this.isLogicalOperator(dependentField)) {
+                // If subcondition is an NOT/AND/OR object, recurse
+                const operator = dependentField;
+                result = this.evalCondition(subcondition, operator);
+            } else {
+                // Otherwise check if we have this element in the form, or use fallback value
+                let dependentValues = [];
+                const dependentEl = document.getElementById(this.mapFieldId(dependentField));
+                if (dependentEl) {
+                    dependentValues = dependentEl.tagName === 'SELECT' ? this.getSelectValues(dependentEl) : [dependentEl.value];
+                } else {
+                    const fallbackValues = this.config.field_values?.[this.mapFieldId(dependentField)];
+                    if (fallbackValues) {
+                        dependentValues = Array.isArray(fallbackValues) ? fallbackValues : [fallbackValues];
+                    }
+                }
+                const refValues = Array.isArray(subcondition) ? subcondition : [subcondition];
+                result = dependentValues.some((val) => refValues.includes(val));
+            }
+            results.push(result)
+        }
+        if (mode === FormElementDependenceController.MODE_NOT) {
+            return results.every((value) => value === false);
+        } else if (mode === FormElementDependenceController.MODE_AND) {
+            return results.every((value) => value === true);
+        } else if (mode === FormElementDependenceController.MODE_OR) {
+            return results.some((value) => value === true);
+        } else if (mode === FormElementDependenceController.MODE_XOR) {
+            return results.filter((value) => value === true).length === 1;
+        }
+    }
+
+    /**
+     * Recursively evaluate a complex condition
+     *
+     * @param {Event?} event - the event object that triggered this function
+     * @param {string} field - field name alias or ID of the target element
+     * @param {Object} condition - key/value pairs of field names and wanted values, or subconditions
+     */
+    trackChange(event, field, condition) {
+        const rowEl = this.findParentRow(field);
+        if (!rowEl) {
+            return;
+        }
+
+        const shouldShowUp = this.evalCondition(condition);
+
+        // Find all child form elements, except hidden fields because they may have custom logic
+        rowEl.querySelectorAll('input:not([type=hidden]), textarea, select').forEach((el) => {
+            // If Use Default is checked, don't toggle the main form element, only toggle the inherit box itself
+            const inheritCheckboxEl = document.getElementById(el.id + '_inherit');
+            if (inheritCheckboxEl && inheritCheckboxEl.checked) {
+                return;
+            }
+            // Do not enable if can_edit_price option is set to true
+            if (shouldShowUp && this.config.can_edit_price != undefined && !this.config.can_edit_price) {
+                return;
+            }
+            el.disabled = !shouldShowUp;
+        });
+
+        this.toggleElem(rowEl, !shouldShowUp);
+    }
+}
 
 // optional_zip_countries.phtml
 function onAddressCountryChanged(countryElement) {
