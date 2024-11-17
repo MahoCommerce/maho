@@ -468,7 +468,7 @@ abstract class Mage_Core_Controller_Varien_Action
         if (!$this->getFlag('', self::FLAG_NO_CHECK_INSTALLATION)) {
             if (!Mage::isInstalled()) {
                 $this->setFlag('', self::FLAG_NO_DISPATCH, true);
-                $this->_redirect('install');
+                $this->_redirectUrl(Mage::getUrl('install'));
                 return;
             }
         }

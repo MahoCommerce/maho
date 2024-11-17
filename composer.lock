@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "02cefbf35d3d8ba2341f366c1b5adadb",
+    "content-hash": "c55c597d2e92396f3255ab3fd01d284b",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -117,22 +117,21 @@
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
-            "version": "dev-main",
+            "version": "v2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
-                "reference": "49fe8b773fbc50a44e2d8018688ee85f29795f81"
+                "reference": "f27036354a10aa699718c9e3828fb2b2720eb94e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/49fe8b773fbc50a44e2d8018688ee85f29795f81",
-                "reference": "49fe8b773fbc50a44e2d8018688ee85f29795f81",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/f27036354a10aa699718c9e3828fb2b2720eb94e",
+                "reference": "f27036354a10aa699718c9e3828fb2b2720eb94e",
                 "shasum": ""
             },
             "require": {
                 "composer-plugin-api": "^2.0"
             },
-            "default-branch": true,
             "type": "composer-plugin",
             "extra": {
                 "class": "Maho\\MahoComposerPlugin"
@@ -145,9 +144,9 @@
             "notification-url": "https://packagist.org/downloads/",
             "support": {
                 "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
-                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v2.0.0"
+                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v2.1.0"
             },
-            "time": "2024-10-10T17:22:21+00:00"
+            "time": "2024-11-15T10:31:25+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
@@ -1719,16 +1718,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.0.1",
+            "version": "2.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "ab4e9b4415a5fc9e4d27f7fe16c8bc9d067dcd6d"
+                "reference": "6c98c7600fc717b2c78c11ef60040d5b1e359c82"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/ab4e9b4415a5fc9e4d27f7fe16c8bc9d067dcd6d",
-                "reference": "ab4e9b4415a5fc9e4d27f7fe16c8bc9d067dcd6d",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/6c98c7600fc717b2c78c11ef60040d5b1e359c82",
+                "reference": "6c98c7600fc717b2c78c11ef60040d5b1e359c82",
                 "shasum": ""
             },
             "require": {
@@ -1773,7 +1772,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-11-11T15:43:04+00:00"
+            "time": "2024-11-17T14:17:00+00:00"
         },
         {
             "name": "psr/event-dispatcher",
@@ -2474,16 +2473,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.11.0",
+            "version": "3.11.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "70c08f8d20c0eb4fe56f26644dd94dae76a7f450"
+                "reference": "19473c30efe4f7b3cd42522d0b2e6e7f243c6f87"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/70c08f8d20c0eb4fe56f26644dd94dae76a7f450",
-                "reference": "70c08f8d20c0eb4fe56f26644dd94dae76a7f450",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/19473c30efe4f7b3cd42522d0b2e6e7f243c6f87",
+                "reference": "19473c30efe4f7b3cd42522d0b2e6e7f243c6f87",
                 "shasum": ""
             },
             "require": {
@@ -2550,7 +2549,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2024-11-12T09:53:29+00:00"
+            "time": "2024-11-16T12:02:36+00:00"
         },
         {
             "name": "symfony/event-dispatcher",
@@ -3031,9 +3030,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "mahocommerce/maho-composer-plugin": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

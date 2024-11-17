@@ -27,8 +27,12 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
     {
         $pageId = Mage::getStoreConfig(Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE);
         if (!Mage::helper('cms/page')->renderPage($this, $pageId)) {
-            $this->_forward('defaultIndex');
+            return $this->_forward('defaultIndex');
         }
+
+        $this->getResponse()
+            ->setHeader('Pragma', 'public', true)
+            ->setHeader('Cache-Control', 'private max-age=60', true);
     }
 
     /**

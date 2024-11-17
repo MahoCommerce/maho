@@ -33,7 +33,7 @@
         "composer-runtime-api": "^2",
         "cweagans/composer-patches": "^1.7",
         "ezyang/htmlpurifier": "^4.17",
-        "mahocommerce/maho-composer-plugin": "dev-main",
+        "mahocommerce/maho-composer-plugin": "^2",
         "pelago/emogrifier": "^7.0",
         "phpseclib/mcrypt_compat": "^2.0.3",
         "phpseclib/phpseclib": "^3.0.14",

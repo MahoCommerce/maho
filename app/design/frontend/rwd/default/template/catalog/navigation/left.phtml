@@ -21,10 +21,7 @@
 <?php $_categories = $this->getCurrentChildCategories() ?>
 <?php $_count = is_array($_categories)?count($_categories):$_categories->count(); ?>
 <?php if($_count): ?>
-<div class="block block-layered-nav block-layered-nav--no-filters">
-    <div class="block-title">
-        <strong><span><?= $this->__('Browse By') ?></span></strong>
-    </div>
+<div class="block block-layered-nav>
     <div class="block-content toggle-content open">
         <p class="block-subtitle block-subtitle--filter"><?= $this->__('Filter') ?></p>
         <dl id="narrow-by-list2">
