@@ -454,6 +454,7 @@ class FormElementDependenceController {
      * @param {boolean} [config.can_edit_price] - deprecated: prevent enabling price inputs, only use this option if dependence block contains no other elements!
      */
     constructor(elementsMap, config = {}) {
+        console.log(elementsMap, config);
         this.config = config;
         for (let [targetField, condition] of Object.entries(elementsMap)) {
             this.trackChange(null, targetField, condition);

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Test_Config>
+            <version>0.0.1</version>
+        </Test_Config>
+    </modules>
+    <global>
+        <models>
+            <test_config>
+                <class>Test_Config_Model</class>
+            </test_config>
+        </models>
+    </global>
+</config>

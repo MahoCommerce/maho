@@ -1,0 +1,422 @@
+<?xml version="1.0"?>
+<config>
+    <tabs>
+        <test>
+            <label>Test</label>
+        </test>
+    </tabs>
+    <sections>
+        <test>
+            <label>Test</label>
+            <tab>test</tab>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+                <simple_test>
+                    <label>Simple Test</label>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <comment><![CDATA[
+                    <h3>Result field will show if:</h3>
+                    <code>source == "Yes"</code>
+                    <br>
+                    ]]></comment>
+                    <fields>
+                        <source>
+                            <label>Source</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </source>
+                        <result>
+                            <label>Result</label>
+                            <frontend_type>text</frontend_type>
+                            <depends>
+                                <source>1</source>
+                            </depends>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </result>
+                    </fields>
+                </simple_test>
+                <multiple_test>
+                    <label>Multiple Test</label>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <comment><![CDATA[
+                    <h3>Result field will show if:</h3>
+                    <code>source == "foo" || source == "bar"</code>
+                    <br>
+                    ]]></comment>
+                    <fields>
+                        <source>
+                            <label>Source</label>
+                            <frontend_type>text</frontend_type>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Make sure to click out of the textbox for the onchange event to fire!</comment>
+                        </source>
+                        <result>
+                            <label>Result</label>
+                            <frontend_type>text</frontend_type>
+                            <depends>
+                                <source separator=",">foo,bar</source>
+                            </depends>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </result>
+                    </fields>
+                </multiple_test>
+                <and_test>
+                    <label>AND Test</label>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <comment><![CDATA[
+                    <h3>Result field will show if:</h3>
+                    <code>source_1 == "Yes" && source_2 == "Yes"</code>
+                    <br>
+                    ]]></comment>
+                    <fields>
+                        <source_1>
+                            <label>Source 1</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </source_1>
+                        <source_2>
+                            <label>Source 2</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </source_2>
+                        <result>
+                            <label>Result</label>
+                            <frontend_type>text</frontend_type>
+                            <depends>
+                                <source_1>1</source_1>
+                                <source_2>1</source_2>
+                            </depends>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </result>
+                    </fields>
+                </and_test>
+                <or_test>
+                    <label>OR Test</label>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <comment><![CDATA[
+                    <h3>Result field will show if:</h3>
+                    <code>source_1 == "Yes" || source_2 == "Yes"</code>
+                    <br>
+                    ]]></comment>
+                    <fields>
+                        <source_1>
+                            <label>Source 1</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </source_1>
+                        <source_2>
+                            <label>Source 2</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </source_2>
+                        <result>
+                            <label>Result</label>
+                            <frontend_type>text</frontend_type>
+                            <depends>
+                                <condition operator="or">
+                                    <source_1>1</source_1>
+                                    <source_2>1</source_2>
+                                </condition>
+                            </depends>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </result>
+                    </fields>
+                </or_test>
+                <xor_test>
+                    <label>XOR Test</label>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <comment><![CDATA[
+                    <h3>Result field will show if:</h3>
+                    <code>exactly one source == "Yes"</code>
+                    <br>
+                    ]]></comment>
+                    <fields>
+                        <source_1>
+                            <label>Source 1</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </source_1>
+                        <source_2>
+                            <label>Source 2</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </source_2>
+                        <source_3>
+                            <label>Source 3</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </source_3>
+                        <result>
+                            <label>Result</label>
+                            <frontend_type>text</frontend_type>
+                            <depends>
+                                <condition operator="xor">
+                                    <source_1>1</source_1>
+                                    <source_2>1</source_2>
+                                    <source_3>1</source_3>
+                                </condition>
+                            </depends>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </result>
+                    </fields>
+                </xor_test>
+                <not_test>
+                    <label>NOT Test</label>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <comment><![CDATA[
+                    <h3>Result field will show if:</h3>
+                    <code>source != "foo"</code>
+                    <br>
+                    ]]></comment>
+                    <fields>
+                        <source>
+                            <label>Source</label>
+                            <frontend_type>text</frontend_type>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Make sure to click out of the textbox for the onchange event to fire!</comment>
+                        </source>
+                        <result>
+                            <label>Result</label>
+                            <frontend_type>text</frontend_type>
+                            <depends>
+                                <condition operator="not">
+                                    <source>foo</source>
+                                </condition>
+                            </depends>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </result>
+                    </fields>
+                </not_test>
+                <complex_test>
+                    <label>Complex Test</label>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <comment><![CDATA[
+                    <h3>Result field will show if:</h3>
+                    <code>source_1 == "Yes" || (source_2 == "Yes" && source_3 == "Yes")</code>
+                    <br>
+                    ]]></comment>
+                    <fields>
+                        <source_1>
+                            <label>Source 1</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </source_1>
+                        <source_2>
+                            <label>Source 2</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </source_2>
+                        <source_3>
+                            <label>Source 3</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </source_3>
+                        <result>
+                            <label>Result</label>
+                            <frontend_type>text</frontend_type>
+                            <depends>
+                                <condition operator="or">
+                                    <source_1>1</source_1>
+                                    <condition operator="and">
+                                        <source_2>1</source_2>
+                                        <source_3>1</source_3>
+                                    </condition>
+                                </condition>
+                            </depends>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </result>
+                    </fields>
+                </complex_test>
+                <scope_test>
+                    <label>Scope Test</label>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <comment><![CDATA[
+                    <h3>Steps:</h3>
+                    <ol style="list-style: decimal; margin-left: 12px;">
+                    <li>Set source_1 = "Yes" in global scope and save
+                    <li>Switch to another scope
+                    <li>Uncheck "User Default" on source_2 and set to "Yes"
+                    </ol>
+                    <h3>Result field will show if:</h3>
+                    <code>source_1 == "Yes" && source_2 == "Yes"</code>
+                    <br>
+                    ]]></comment>
+                    <fields>
+                        <source_1>
+                            <label>Source 1</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                        </source_1>
+                        <source_2>
+                            <label>Source 2</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </source_2>
+                        <result>
+                            <label>Result</label>
+                            <frontend_type>text</frontend_type>
+                            <depends>
+                                <source_1>1</source_1>
+                                <source_2>1</source_2>
+                            </depends>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </result>
+                    </fields>
+                </scope_test>
+                <fieldset_test_source>
+                    <label>Fieldset Test (source)</label>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <comment><![CDATA[
+                    <h3>The below input controls a field in another group</h3>
+                    ]]></comment>
+                    <fields>
+                        <source>
+                            <label>Source</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </source>
+                    </fields>
+                </fieldset_test_source>
+                <fieldset_test_result>
+                    <label>Fieldset Test (result)</label>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <comment><![CDATA[
+                    <h3>Result field will show if:</h3>
+                    <code>fieldset_test_source.source == "Yes"</code>
+                    <br>
+                    ]]></comment>
+                    <fields>
+                        <result>
+                            <label>Result</label>
+                            <frontend_type>text</frontend_type>
+                            <depends>
+                                <source>
+                                    <fieldset>fieldset_test_source</fieldset>
+                                    <value>1</value>
+                                </source>
+                            </depends>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </result>
+                    </fields>
+                </fieldset_test_result>
+                <clone_model_test>
+                    <label>Clone Model Test (Prefix)</label>
+                    <clone_fields>1</clone_fields>
+                    <clone_model>test_config/system_config_clone_test</clone_model>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <comment><![CDATA[
+                    <h3>For each source input, result field will show if:</h3>
+                    <code>test_{$n}_source == "Yes"</code>
+                    <br>
+                    ]]></comment>
+                    <fields>
+                        <source>
+                            <label>Source</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </source>
+                        <result>
+                            <label>Result</label>
+                            <depends>
+                                <source>1</source>
+                            </depends>
+                            <frontend_type>text</frontend_type>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </result>
+                    </fields>
+                </clone_model_test>
+            </groups>
+        </test>
+    </sections>
+</config>
