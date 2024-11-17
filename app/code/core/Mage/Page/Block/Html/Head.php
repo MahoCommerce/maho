@@ -202,8 +202,6 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
         }
 
         // prepare HTML
-        $shouldMergeJs = Mage::getStoreConfigFlag('dev/js/merge_files');
-        $shouldMergeCss = Mage::getStoreConfigFlag('dev/css/merge_css_files');
         $html   = '';
         foreach ($lines as $if => $items) {
             if (empty($items)) {
@@ -218,16 +216,14 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
             $html .= $this->_prepareStaticAndSkinElements(
                 '<link rel="stylesheet" href="%s"%s >' . PHP_EOL,
                 empty($items['js_css']) ? [] : $items['js_css'],
-                empty($items['skin_css']) ? [] : $items['skin_css'],
-                $shouldMergeCss ? [Mage::getDesign(), 'getMergedCssUrl'] : null
+                empty($items['skin_css']) ? [] : $items['skin_css']
             );
 
             // static and skin javascripts
             $html .= $this->_prepareStaticAndSkinElements(
                 '<script src="%s"%s></script>' . PHP_EOL,
                 empty($items['js']) ? [] : $items['js'],
-                empty($items['skin_js']) ? [] : $items['skin_js'],
-                $shouldMergeJs ? [Mage::getDesign(), 'getMergedJsUrl'] : null
+                empty($items['skin_js']) ? [] : $items['skin_js']
             );
 
             // other stuff
@@ -248,55 +244,37 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
      * @param string $format - HTML element format for sprintf('<element src="%s"%s>', $src, $params)
      * @param array $staticItems - array of relative names of static items to be grabbed from js/ folder
      * @param array $skinItems - array of relative names of skin items to be found in skins according to design config
-     * @param callable $mergeCallback
      * @return string
      */
     protected function &_prepareStaticAndSkinElements(
         $format,
         array $staticItems,
-        array $skinItems,
-        $mergeCallback = null
+        array $skinItems
     ) {
         $designPackage = Mage::getDesign();
         $baseJsUrl = Mage::getBaseUrl('js');
         $items = [];
-        if ($mergeCallback && !is_callable($mergeCallback)) {
-            $mergeCallback = null;
-        }
 
         // get static files from the js folder, no need in lookups
         foreach ($staticItems as $params => $rows) {
             foreach ($rows as $name) {
-                $items[$params][] = $mergeCallback
-                    ? Mage::getBaseDir() . DS . 'public' . DS . 'js' . DS . $name
-                    : $baseJsUrl . $name;
+                $items[$params][] = $baseJsUrl . $name;
             }
         }
 
         // lookup each file basing on current theme configuration
         foreach ($skinItems as $params => $rows) {
             foreach ($rows as $name) {
-                $items[$params][] = $mergeCallback ? $designPackage->getFilename($name, ['_type' => 'skin'])
-                    : $designPackage->getSkinUrl($name, []);
+                $items[$params][] = $designPackage->getSkinUrl($name, []);
             }
         }
 
         $html = '';
         foreach ($items as $params => $rows) {
-            // attempt to merge
-            $mergedUrl = false;
-            if ($mergeCallback) {
-                $mergedUrl = call_user_func($mergeCallback, $rows);
-            }
-            // render elements
             $params = trim($params);
             $params = $params ? ' ' . $params : '';
-            if ($mergedUrl) {
-                $html .= sprintf($format, $mergedUrl, $params);
-            } else {
-                foreach ($rows as $src) {
-                    $html .= sprintf($format, $src, $params);
-                }
+            foreach ($rows as $src) {
+                $html .= sprintf($format, $src, $params);
             }
         }
         return $html;

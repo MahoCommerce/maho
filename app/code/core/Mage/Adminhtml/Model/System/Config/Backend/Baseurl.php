@@ -53,18 +53,6 @@ class Mage_Adminhtml_Model_System_Config_Backend_Baseurl extends Mage_Core_Model
     }
 
     /**
-     * Clean compiled JS/CSS when updating url configuration settings
-     */
-    #[\Override]
-    protected function _afterSave()
-    {
-        if ($this->isValueChanged()) {
-            Mage::getModel('core/design_package')->cleanMergedJsCss();
-        }
-        return $this;
-    }
-
-    /**
      * @inheritDoc
      */
     #[\Override]

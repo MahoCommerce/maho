@@ -4086,10 +4086,6 @@ p.product-name a:hover {
     border-bottom: none;
   }
 
-  .block-layered-nav--no-filters .block-title {
-    display: none;
-  }
-
   .block-layered-nav .block-content {
     padding-top: 0;
     margin-top: 15px;
