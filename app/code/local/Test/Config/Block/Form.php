@@ -119,11 +119,11 @@ class Test_Config_Block_Form extends Mage_Adminhtml_Block_Widget_Form
         ]);
         $block
             ->addComplexFieldDependence('test_3_result', $block::MODE_OR, [
-                $block::createCondition($block::MODE_AND, [
+                $block->createCondition($block::MODE_AND, [
                     'test_3_source_1' => '1',
                     'test_3_source_2' => '1',
                 ]),
-                $block::createCondition($block::MODE_AND, [
+                $block->createCondition($block::MODE_AND, [
                     'test_3_source_3' => '1',
                     'test_3_source_4' => '1',
                 ]),
