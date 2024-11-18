@@ -178,9 +178,6 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
 
     /**
      * Return a field's full simple or complex field dependence condition
-     *
-     * @param string $targetField field to be toggled
-     * @return ?array
      */
     public function getRawFieldDependence(string $targetField): ?array
     {
@@ -191,10 +188,6 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
      * Set a field's full simple or complex field dependence condition
      *
      * Warning: the condition will not be validated!
-     *
-     * @param string $targetField field to be toggled
-     * @param array $condition
-     * @return $this
      */
     public function setRawFieldDependence(string $targetField, array $condition): self
     {
@@ -204,9 +197,6 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
 
     /**
      * Clear a field's full simple or complex field dependence condition
-     *
-     * @param string $targetField field to be toggled
-     * @return $this
      */
     public function clearFieldDependence(string $targetField): self
     {
@@ -231,11 +221,8 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
      * Add configuration option to the javascript dependencies controller
      *
      * @see self::addConfigOptions()
-     * @param string $option
-     * @param mixed $value
-     * @return $this
      */
-    public function addConfigOption(string $option, $value)
+    public function addConfigOption(string $option, $value): self
     {
         $this->_configOptions[$option] = $value;
         return $this;
