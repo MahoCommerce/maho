@@ -77,7 +77,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
     public static function createCondition(string $operator, array $condition): array
     {
         if (!self::isLogicalOperator($operator)) {
-            Mage::throwException($this->__("Invalid operator '%s', must be one of NOT, AND, OR, XOR", $operator));
+            Mage::throwException(Mage::helper('adminhtml')->__("Invalid operator '%s', must be one of NOT, AND, OR, XOR", $operator));
         }
         return ['operator' => $operator, 'condition' => $condition];
     }
