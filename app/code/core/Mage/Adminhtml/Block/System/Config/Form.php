@@ -225,12 +225,12 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
         // If we have a logical operator, recurse
         if (str_starts_with($node->getName(), 'condition') && isset($node['operator'])) {
             $operator = strtoupper((string)$node['operator']);
-            if ($block::isLogicalOperator($operator)) {
+            if ($block->isLogicalOperator($operator)) {
                 $conditions = [];
                 foreach ($node->children() as $child) {
                     list($fieldId, $condition) = $this->_buildDependenceCondition($child, $group, $section, $fieldPrefix);
-                    if ($block::isLogicalOperator($fieldId)) {
-                        $conditions[] = $block::createCondition($fieldId, $condition);
+                    if ($block->isLogicalOperator($fieldId)) {
+                        $conditions[] = $block->createCondition($fieldId, $condition);
                     } else {
                         $conditions[$fieldId] = $condition;
                     }

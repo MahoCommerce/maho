@@ -55,7 +55,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
     /**
      * Determine if the condition is a logical operator
      */
-    public static function isLogicalOperator(?string $operator): bool
+    public function isLogicalOperator(?string $operator): bool
     {
         $operators = [
             self::MODE_NOT,
@@ -74,10 +74,10 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
      * @param array $condition
      * @return array
      */
-    public static function createCondition(string $operator, array $condition): array
+    public function createCondition(string $operator, array $condition): array
     {
-        if (!self::isLogicalOperator($operator)) {
-            Mage::throwException(Mage::helper('adminhtml')->__("Invalid operator '%s', must be one of NOT, AND, OR, XOR", $operator));
+        if (!$this->isLogicalOperator($operator)) {
+            Mage::throwException($this->__("Invalid operator '%s', must be one of NOT, AND, OR, XOR", $operator));
         }
         return ['operator' => $operator, 'condition' => $condition];
     }
@@ -107,7 +107,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
      */
     public function addFieldDependence($targetField, $dependentField, $refValues)
     {
-        if (self::isLogicalOperator($dependentField)) {
+        if ($this->isLogicalOperator($dependentField)) {
             Mage::throwException($this->__("Invalid field name '%s', must not be one of NOT, AND, OR, XOR", $dependentField));
         }
         $refValues = is_array($refValues) ? $refValues : [$refValues];
@@ -159,7 +159,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
      *
      * $block->addComplexFieldDependence('result', $block::MODE_OR, [
      *     'source_1' => 'foo',
-     *     $block::createCondition($block::MODE_AND, [
+     *     $block->createCondition($block::MODE_AND, [
      *         'source_2' => 'bar',
      *         'source_3' => 'baz',
      *     ]),
@@ -172,7 +172,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
      */
     public function addComplexFieldDependence(string $targetField, string $operator, array $condition): self
     {
-        $this->_depends[$targetField][] = self::createCondition($operator, $condition);
+        $this->_depends[$targetField][] = $this->createCondition($operator, $condition);
         return $this;
     }
 
@@ -190,7 +190,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
     public function setRawFieldDependence(string $targetField, array $condition): self
     {
         // Complex conditions must be wrapped in an array
-        if (self::isLogicalOperator($condition['operator'] ?? null) && is_array($condition['condition'] ?? null)) {
+        if ($this->isLogicalOperator($condition['operator'] ?? null) && is_array($condition['condition'] ?? null)) {
             $condition = [$condition];
         }
         $this->_depends[$targetField] = $condition;
