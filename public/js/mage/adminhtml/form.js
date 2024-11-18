@@ -460,12 +460,12 @@ class FormElementDependenceController {
 
     /**
      * @param {Object.<string, Object>} elementsMap - key/value pairs of target fields and their conditions to be visible
-     * @param {Object} [config] - config options
-     * @param {string|false} [config.on_event] - the event name that triggers condition evaluation, false to disable, defaults to "change"
-     * @param {Object.<string, string>} [config.field_map] - key/value pairs of field aliases to their associated DOM IDs.
-     * @param {Object.<string, string>} [config.field_values] - key/value pairs of fallback values for fields not present in the form
-     * @param {number} [config.levels_up] - deprecated: the number of ancestor elements to find the parent element to hide
-     * @param {boolean} [config.can_edit_price] - deprecated: prevent enabling price inputs, only use this option if dependence block contains no other elements!
+     * @param {Object} [config] - config options, see Mage_Adminhtml_Block_Widget_Form_Element_Dependence::addConfigOptions()
+     * @param {string|false} [config.on_event]
+     * @param {Object.<string, string>} [config.field_map]
+     * @param {Object.<string, string>} [config.field_values]
+     * @param {number} [config.levels_up]
+     * @param {boolean} [config.can_edit_price]
      */
     constructor(elementsMap, config = {}) {
         console.log(elementsMap, config);

@@ -156,7 +156,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
      * ]);
      *
      * @param string $targetField field to be toggled
-     * @param string $operator one of NOT, AND, OR
+     * @param self::MODE_* $operator one of MODE_NOT, MODE_AND, MODE_OR, MODE_XOR
      * @param array $condition
      * @return $this
      */
@@ -170,15 +170,29 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
     }
 
     /**
-     * Add misc configuration options to the javascript dependencies controller
+     * Add configuration option to the javascript dependencies controller
      *
-     * Available options:
-     *   - on_event - the event name that triggers condition evaluation, false to disable, defaults to "change"
-     *   - field_map - key/value pairs of field aliases to their associated DOM IDs.
-     *   - field_values - key/value pairs of fallback values for fields not present in the form
-     *   - levels_up - deprecated: the number of ancestor elements to find the parent element to hide
-     *   - can_edit_price - deprecated: prevent enabling price inputs, only use this option if dependence block contains no other elements!
+     * @see self::addConfigOptions()
+     * @param string $option
+     * @param mixed $value
+     * @return $this
+     */
+    public function addConfigOption(string $option, $value)
+    {
+        $this->_configOptions[$option] = $value;
+        return $this;
+    }
+
+    /**
+     * Add multiple configuration options to the javascript dependencies controller
      *
+     * @param array $options {
+     *     on_event: string,    // the event name that triggers condition evaluation, false to disable, defaults to "change"
+     *     field_map: array,    // key/value pairs of field aliases to their associated DOM IDs.
+     *     field_values: array, // key/value pairs of fallback values for fields not present in the form
+     *     levels_up: int,      // deprecated: the number of ancestor elements to find the parent element to hide
+     *     can_edit_price: bool // deprecated: prevent enabling fields, only use if dependence block contains no other elements
+     * }
      * @return $this
      */
     public function addConfigOptions(array $options)
@@ -227,8 +241,11 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
      */
     protected function _getConfigJson()
     {
-        $this->_configOptions['field_map'] = $this->_fields;
-        $this->_configOptions['field_values'] = $this->_fieldValues;
-        return Mage::helper('core')->jsonEncode($this->_configOptions);
+        $config = [
+            'field_map' => $this->_fields,
+            'field_values' => $this->_fieldValues,
+            ...$this->_configOptions,
+        ];
+        return Mage::helper('core')->jsonEncode($config);
     }
 }
