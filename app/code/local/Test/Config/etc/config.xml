@@ -11,5 +11,21 @@
                 <class>Test_Config_Model</class>
             </test_config>
         </models>
+        <blocks>
+            <test_config>
+                <class>Test_Config_Block</class>
+            </test_config>
+        </blocks>
     </global>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <test_module after="Mage_Adminhtml">Test_Config_Adminhtml</test_module>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
 </config>

@@ -1,9 +1,31 @@
 <?xml version="1.0"?>
 <config>
+    <menu>
+        <test>
+            <title>Test</title>
+            <children>
+                <form>
+                    <title>Form</title>
+                    <action>adminhtml/test</action>
+                </form>
+                <config>
+                    <title>Config</title>
+                    <action>adminhtml/system_config/edit/section/test</action>
+                </config>
+            </children>
+        </test>
+    </menu>
     <acl>
         <resources>
             <admin>
                 <children>
+                    <test>
+                        <children>
+                            <form>
+                                <title>Form</title>
+                            </form>
+                        </children>
+                    </test>
                     <system>
                         <children>
                             <config>
