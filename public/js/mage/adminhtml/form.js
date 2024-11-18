@@ -500,8 +500,8 @@ class FormElementDependenceController {
      */
     bindEventListeners(condition, eventArgs = []) {
         for (let [dependentField, subcondition] of Object.entries(condition)) {
-            if (this.isLogicalOperator(dependentField)) {
-                this.bindEventListeners(subcondition, eventArgs);
+            if (this.isLogicalOperator(subcondition?.operator)) {
+                this.bindEventListeners(subcondition.condition, eventArgs);
             } else {
                 const dependentEl = document.getElementById(this.mapFieldId(dependentField));
                 if (dependentEl) {
@@ -603,10 +603,9 @@ class FormElementDependenceController {
         const results = [];
         for (let [dependentField, subcondition] of Object.entries(condition)) {
             let result = false;
-            if (this.isLogicalOperator(dependentField)) {
+            if (this.isLogicalOperator(subcondition?.operator)) {
                 // If we have a logical operator, recurse
-                const operator = dependentField;
-                result = this.evalCondition(subcondition, operator);
+                result = this.evalCondition(subcondition.condition, subcondition.operator);
             } else {
                 // Otherwise check if we have this element in the form, or use fallback value
                 let dependentValues = [];
