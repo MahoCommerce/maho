@@ -438,6 +438,18 @@ SelectUpdater.prototype = {
 };
 
 /**
+ * Custom event that can be dispatched on dependent form elements to trigger an update
+ */
+class FormElementDependenceEvent extends Event {
+    /**
+     * @param {string} [eventName] - the name of the event, defaults to 'update', no other values are currently supported
+     */
+    constructor(eventName = 'update') {
+        super(eventName);
+    }
+}
+
+/**
  * Observer that watches for dependent form elements with support for complex conditions
  */
 class FormElementDependenceController {
@@ -460,9 +472,7 @@ class FormElementDependenceController {
         this.config = config;
         for (let [targetField, condition] of Object.entries(elementsMap)) {
             this.trackChange(null, targetField, condition);
-            if (this.config.on_event !== false) {
-                this.bindEventListeners(condition, [targetField, condition]);
-            }
+            this.bindEventListeners(condition, [targetField, condition]);
         }
     }
 
@@ -495,8 +505,15 @@ class FormElementDependenceController {
             } else {
                 const dependentEl = document.getElementById(this.mapFieldId(dependentField));
                 if (dependentEl) {
-                    dependentEl.addEventListener(this.config.on_event ?? 'change', (event) => {
-                        this.trackChange(event, ...eventArgs);
+                    if (this.config.on_event !== false) {
+                        dependentEl.addEventListener(this.config.on_event ?? 'change', (event) => {
+                            this.trackChange(event, ...eventArgs);
+                        });
+                    }
+                    dependentEl.addEventListener('update', (event) => {
+                        if (event instanceof FormElementDependenceEvent) {
+                            this.trackChange(event, ...eventArgs);
+                        }
                     });
                 }
             }
