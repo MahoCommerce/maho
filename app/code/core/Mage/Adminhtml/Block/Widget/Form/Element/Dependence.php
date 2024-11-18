@@ -186,11 +186,13 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
 
     /**
      * Set a field's full simple or complex field dependence condition
-     *
-     * Warning: the condition will not be validated!
      */
     public function setRawFieldDependence(string $targetField, array $condition): self
     {
+        // Complex conditions must be wrapped in an array
+        if (self::isLogicalOperator($condition['operator'] ?? null) && is_array($condition['condition'] ?? null)) {
+            $condition = [$condition];
+        }
         $this->_depends[$targetField] = $condition;
         return $this;
     }
