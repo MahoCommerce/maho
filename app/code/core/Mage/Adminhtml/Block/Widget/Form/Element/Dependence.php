@@ -283,10 +283,8 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
 
     /**
      * Config options with field map JSON map generator
-     *
-     * @return string
      */
-    protected function _getConfigJson()
+    protected function _getConfigJson(): string
     {
         $config = [
             'field_map' => $this->_fields,
