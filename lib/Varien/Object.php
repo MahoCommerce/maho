@@ -16,7 +16,7 @@
  * @category   Varien
  * @package    Varien_Object
  */
-class Varien_Object implements ArrayAccess
+class Varien_Object implements ArrayAccess, JsonSerializable
 {
     /**
      * Object attributes
@@ -563,17 +563,15 @@ class Varien_Object implements ArrayAccess
     }
 
     /**
-     * Convert object attributes to string
+     * Implementation of JsonSerializable::jsonSerialize()
      *
-     * @param  array  $arrAttributes array of required attributes
-     * @param  string $valueSeparator
-     * @return string
+     * @link https://www.php.net/manual/en/jsonserializable.jsonserialize.php
      */
-//    public function __toString(array $arrAttributes = array(), $valueSeparator=',')
-//    {
-//        $arrData = $this->toArray($arrAttributes);
-//        return implode($valueSeparator, $arrData);
-//    }
+    #[\Override]
+    public function jsonSerialize(): array
+    {
+        return $this->__toArray();
+    }
 
     /**
      * Public wrapper for __toString
