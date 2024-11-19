@@ -468,7 +468,6 @@ class FormElementDependenceController {
      * @param {boolean} [config.can_edit_price]
      */
     constructor(elementsMap, config = {}) {
-        console.log(elementsMap, config);
         this.config = config;
         for (let [targetField, condition] of Object.entries(elementsMap)) {
             this.trackChange(null, targetField, condition);
