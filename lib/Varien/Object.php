@@ -574,6 +574,19 @@ class Varien_Object implements ArrayAccess, JsonSerializable
     }
 
     /**
+     * Convert object attributes to string
+     *
+     * @param  array  $arrAttributes array of required attributes
+     * @param  string $valueSeparator
+     * @return string
+     */
+//    public function __toString(array $arrAttributes = array(), $valueSeparator=',')
+//    {
+//        $arrData = $this->toArray($arrAttributes);
+//        return implode($valueSeparator, $arrData);
+//    }
+
+    /**
      * Public wrapper for __toString
      *
      * Will use $format as an template and substitute {{key}} for attributes
