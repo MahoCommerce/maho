@@ -35,12 +35,12 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
      *
      * @var array
      */
-    protected $_translateData = null;
+    protected $_translateData = [];
 
     /**
      * Translate config
      *
-     * @var Varien_Simplexml_Config|null
+     * @var Mage_Core_Model_Translate_Config|null
      */
     protected $_config = null;
 
@@ -73,9 +73,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
      */
     public function getScript($script)
     {
-        return '<script type="text/javascript">//<![CDATA[
-        ' . $script . '
-        //]]></script>';
+        return '<script type="text/javascript">' . $script . '</script>' . "\n";
     }
 
     /**
@@ -123,27 +121,83 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Add messages to the JS translation array
+     *
+     * @param string|array $messageText a single or array of messages to translate
+     * @param ?string $module the helper module to use for translating, defaults to 'core'
+     */
+    public function addTranslateData(string|array $messageText, ?string $module)
+    {
+        $module = $module ?: 'core';
+        $messageText = is_array($messageText) ? $messageText : [$messageText];
+        foreach ($messageText as $text) {
+            $translated = Mage::helper($module)->__($text);
+            if ($text && $text !== $translated) {
+                $this->_translateData[$text] = $translated;
+            }
+        }
+    }
+
+    /**
      * Retrieve JS translation array
      *
      * @return array
      */
     protected function _getTranslateData()
     {
-        if ($this->_translateData === null) {
-            $this->_translateData = [];
-            $messages = $this->_getXmlConfig()->getXpath('*/message');
-            if (!empty($messages)) {
-                foreach ($messages as $message) {
-                    $messageText = (string)$message;
-                    $module = $message->getParent()->getAttribute('module');
-                    $this->_translateData[$messageText] = Mage::helper(empty($module) ? 'core' : $module)->__($messageText);
-                }
-            }
+        // Get current area, i.e. "adminhtml" or "frontend" plus "global"
+        $areas = [
+            Mage_Core_Model_App_Area::AREA_GLOBAL,
+            Mage::app()->getTranslator()->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA)
+        ];
+        // Get current layout handles
+        $handles = $this->getLayout()->getUpdate()->getHandles();
 
-            foreach ($this->_translateData as $key => $value) {
-                if ($key == $value) {
-                    unset($this->_translateData[$key]);
+        // Get currently loaded JS files
+        $headBlock = $this->getLayout()->getBlock('head');
+        $scripts = $headBlock ? array_keys($headBlock->getData('items')) : [];
+
+        foreach ($this->_getXmlConfig()->getNode()->children() as $node) {
+            // Check for <frontend>, <adminhtml>, and <global> nodes
+            if (in_array($node->getName(), $areas) && !isset($node['translate'])) {
+                foreach ($node->children() as $child) {
+                    $module = $child->xpath('ancestor-or-self::*/@module')[0]['module'] ?? null;
+                    $this->addTranslateData((string)$child->message, (string)$module);
                 }
+                continue;
+            }
+            // Allow nodes to define a custom separator for area, handle, and script path attributes
+            $separator = $node['separator'] ?? ',';
+
+            // Check if we have an area attribute for all other node types
+            if (isset($node['area']) && !array_intersect(explode($separator, $node['area']), $areas)) {
+                continue;
+            }
+            // Check for <layout> nodes and if current layout handles match
+            if ($node->getName() === 'layout' && isset($node['handle'])) {
+                if (array_intersect(explode($separator, $node['handle']), $handles)) {
+                    foreach ($node->children() as $child) {
+                        $module = $child->xpath('ancestor-or-self::*/@module')[0]['module'] ?? null;
+                        $this->addTranslateData((string)$child->message, (string)$module);
+                    }
+                }
+                continue;
+            }
+            // Check for <script> nodes and if we have loaded the JS file
+            if ($node->getName() === 'script' && isset($node['path'])) {
+                $type = $node['type'] ?? 'js';
+                $paths = array_map(fn ($path) => "$type/$path", explode($separator, $node['path']));
+                if (array_intersect($paths, $scripts)) {
+                    foreach ($node->children() as $child) {
+                        $module = $child->xpath('ancestor-or-self::*/@module')[0]['module'] ?? null;
+                        $this->addTranslateData((string)$child->message, (string)$module);
+                    }
+                }
+                continue;
+            }
+            // Default to original behavior
+            if (isset($node->message)) {
+                $this->addTranslateData((string)$node->message, (string)$node['module']);
             }
         }
         return $this->_translateData;
@@ -157,16 +211,18 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
     protected function _getXmlConfig()
     {
         if (is_null($this->_config)) {
-            $canUsaCache = Mage::app()->useCache('config');
+            /** @var Mage_Core_Model_Translate_Config $xmlConfig */
+            $xmlConfig = Mage::getModel('core/translate_config');
+
+            $canUseCache = Mage::app()->useCache('config');
             $cachedXml = Mage::app()->loadCache(self::JAVASCRIPT_TRANSLATE_CONFIG_KEY);
-            if ($canUsaCache && $cachedXml) {
-                $xmlConfig = new Varien_Simplexml_Config($cachedXml);
+            if ($canUseCache && $cachedXml) {
+                $xmlConfig->loadString($cachedXml);
             } else {
-                $xmlConfig = new Varien_Simplexml_Config();
                 $xmlConfig->loadString('<?xml version="1.0"?><jstranslator></jstranslator>');
                 Mage::getConfig()->loadModulesConfiguration(self::JAVASCRIPT_TRANSLATE_CONFIG_FILENAME, $xmlConfig);
 
-                if ($canUsaCache) {
+                if ($canUseCache) {
                     Mage::app()->saveCache(
                         $xmlConfig->getXmlString(),
                         self::JAVASCRIPT_TRANSLATE_CONFIG_KEY,
