@@ -5,6 +5,7 @@
  * @package     js
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -13,11 +14,9 @@ class Translate {
         this.data = new Map(Object.entries(data));
     }
 
-    translate(text) {
-        if(this.data.has(text)) {
-            return this.data.get(text);
-        }
-        return text;
+    translate(text, ...args) {
+        const translated = this.data.get(text) ?? text;
+        return translated.replaceAll(/%[ds]/g, (match) => args.shift() ?? match);
     }
 
     add(keyOrObject, value) {
