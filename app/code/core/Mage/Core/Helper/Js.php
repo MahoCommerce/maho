@@ -51,7 +51,8 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
      */
     public function getTranslateJson()
     {
-        return Mage::helper('core')->jsonEncode($this->_getTranslateData());
+        // return Mage::helper('core')->jsonEncode($this->_getTranslateData());
+        return json_encode($this->_getTranslateData(), JSON_PRETTY_PRINT);
     }
 
     /**
@@ -132,7 +133,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
         $messageText = is_array($messageText) ? $messageText : [$messageText];
         foreach ($messageText as $text) {
             $translated = Mage::helper($module)->__($text);
-            if ($text && $text !== $translated) {
+            if (1 || $text && $text !== $translated) {
                 $this->_translateData[$text] = $translated;
             }
         }
