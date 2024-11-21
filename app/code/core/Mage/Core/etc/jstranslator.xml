@@ -13,9 +13,6 @@
 -->
 <jstranslator>
     <script path="validation.js" module="core">
-        <validate-no-html-tags translate="message">
-            <message>HTML tags are not allowed</message>
-        </validate-no-html-tags>
         <validate-select translate="message">
             <message>Please select an option.</message>
         </validate-select>
@@ -37,12 +34,6 @@
         <validate-alpha translate="message">
             <message>Please use letters only (a-z or A-Z) in this field.</message>
         </validate-alpha>
-        <validate-code translate="message">
-            <message>Please use only letters (a-z), numbers (0-9) or underscore(_) in this field, first character should be a letter.</message>
-        </validate-code>
-        <validate-code-event translate="message">
-            <message>Please do not use "event" for an attribute code.</message>
-        </validate-code-event>
         <validate-alphanum translate="message">
             <message>Please use only letters (a-z or A-Z) or numbers (0-9) only in this field. No spaces or other characters are allowed.</message>
         </validate-alphanum>
@@ -67,30 +58,15 @@
         <validate-email translate="message">
             <message>Please enter a valid email address. For example johndoe@domain.com.</message>
         </validate-email>
-        <validate-email-sender translate="message">
-            <message>Please use only visible characters and spaces.</message>
-        </validate-email-sender>
         <validate-password translate="message">
             <message>Please enter more characters or clean leading or trailing spaces.</message>
         </validate-password>
-        <validate-admin-password translate="message">
-            <message>Please enter more characters. Password should contain both numeric and alphabetic characters.</message>
-        </validate-admin-password>
         <validate-cpassword translate="message">
             <message>Please make sure your passwords match.</message>
         </validate-cpassword>
         <validate-url translate="message">
             <message>Please enter a valid URL. Protocol is required (http://, https:// or ftp://)</message>
         </validate-url>
-        <validate-clean-url translate="message">
-            <message>Please enter a valid URL. For example http://www.example.com or www.example.com</message>
-        </validate-clean-url>
-        <validate-identifier translate="message">
-            <message>Please enter a valid URL Key. For example "example-page", "example-page.html" or "anotherlevel/example-page".</message>
-        </validate-identifier>
-        <validate-xml-identifier translate="message">
-            <message>Please enter a valid XML-identifier. For example something_1, block5, id-4.</message>
-        </validate-xml-identifier>
         <validate-ssn translate="message">
             <message>Please enter a valid social security number. For example 123-45-6789.</message>
         </validate-ssn>
@@ -142,21 +118,12 @@
         <validate-cc-cvn translate="message">
             <message>Please enter a valid credit card verification number.</message>
         </validate-cc-cvn>
-        <validate-data translate="message">
-            <message>Please use only letters (a-z or A-Z), numbers (0-9) or underscore(_) in this field, first character should be a letter.</message>
-        </validate-data>
-        <validate-css-length translate="message">
-            <message>Please input a valid CSS-length. For example 100px or 77pt or 20em or .5ex or 50%.</message>
-        </validate-css-length>
         <validate-length translate="message">
             <message>Text length does not satisfy specified text range.</message>
         </validate-length>
         <validate-percents translate="message">
             <message>Please enter a number lower than 100.</message>
         </validate-percents>
-        <required-file translate="message">
-            <message>Please select a file</message>
-        </required-file>
         <validate-cc-ukss translate="message">
             <message>Please enter issue number or start date for switch/solo card type.</message>
         </validate-cc-ukss>
