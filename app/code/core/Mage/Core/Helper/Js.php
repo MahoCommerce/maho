@@ -127,7 +127,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
      * @param string|array $messageText a single or array of messages to translate
      * @param ?string $module the helper module to use for translating, defaults to 'core'
      */
-    public function addTranslateData(string|array $messageText, ?string $module)
+    public function addTranslateData(string|array $messageText, ?string $module): void
     {
         $module = $module ?: 'core';
         $messageText = is_array($messageText) ? $messageText : [$messageText];
