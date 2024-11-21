@@ -133,9 +133,9 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
         $messageText = is_array($messageText) ? $messageText : [$messageText];
         foreach ($messageText as $text) {
             $translated = Mage::helper($module)->__($text);
-            if (1 || $text && $text !== $translated) {
+            // if ($text && $text !== $translated) {
                 $this->_translateData[$text] = $translated;
-            }
+            // }
         }
     }
 
