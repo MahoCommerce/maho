@@ -82,9 +82,6 @@ class Mage_Core_Model_Resource_Store_Group_Collection extends Mage_Core_Model_Re
         return $this->addFieldToFilter('main_table.default_store_id', ['gt' => 0]);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function _beforeLoad()
     {

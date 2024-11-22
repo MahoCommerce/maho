@@ -135,7 +135,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
     }
 
     /**
-     * @inheritDoc
      * @throws Mage_Core_Exception
      * @throws Mage_Core_Model_Store_Exception
      */

@@ -175,8 +175,6 @@ class Mage_Log_Model_Resource_Visitor_Collection extends Mage_Core_Model_Resourc
 
     /**
      * Filter by customer ID, as 'type' field does not exist
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function addFieldToFilter($fieldName, $condition = null)

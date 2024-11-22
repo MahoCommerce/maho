@@ -551,8 +551,6 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
 
     /**
      * Automatically set "unknown" state if not defined
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _filterValues()

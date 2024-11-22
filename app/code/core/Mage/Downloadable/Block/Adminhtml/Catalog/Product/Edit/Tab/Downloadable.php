@@ -101,11 +101,6 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable ex
         return false;
     }
 
-    /**
-     * Render block HTML
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _toHtml()
     {

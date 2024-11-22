@@ -131,9 +131,6 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
         $this->_prepareDownloadResponse(...$grid->getExcel('customer_totals.xml', -1));
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _isAllowed()
     {

@@ -36,11 +36,6 @@ class Mage_Api2_Block_Adminhtml_Permissions_User_Edit_Tab_Roles extends Mage_Adm
             ->setUseAjax(true);
     }
 
-    /**
-     * Prepare grid collection object
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -53,11 +48,6 @@ class Mage_Api2_Block_Adminhtml_Permissions_User_Edit_Tab_Roles extends Mage_Adm
         return parent::_prepareCollection();
     }
 
-    /**
-     * Prepare grid columns
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {

@@ -16,11 +16,6 @@
  */
 class Mage_Oauth_InitiateController extends Mage_Core_Controller_Front_Action
 {
-    /**
-     * Dispatch event before action
-     *
-     * @inheritDoc
-     */
     #[\Override]
     public function preDispatch()
     {

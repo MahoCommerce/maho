@@ -102,11 +102,6 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    /**
-     * Processing object before save data
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeSave()
     {

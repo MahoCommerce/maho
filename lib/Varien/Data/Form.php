@@ -43,9 +43,6 @@ class Varien_Data_Form extends Varien_Data_Form_Abstract
     protected static $_defaultFieldsetRenderer;
     protected static $_defaultFieldsetElementRenderer;
 
-    /**
-     * @inheritDoc
-     */
     public function __construct($attributes = [])
     {
         parent::__construct($attributes);

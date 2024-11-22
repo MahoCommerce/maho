@@ -29,10 +29,6 @@ class Mage_Adminhtml_Block_Report_Shopcart_Customer_Grid extends Mage_Adminhtml_
         $this->setId('grid');
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -45,9 +41,6 @@ class Mage_Adminhtml_Block_Report_Shopcart_Customer_Grid extends Mage_Adminhtml_
         return parent::_prepareCollection();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterLoadCollection()
     {
@@ -55,10 +48,6 @@ class Mage_Adminhtml_Block_Report_Shopcart_Customer_Grid extends Mage_Adminhtml_
         return parent::_afterLoadCollection();
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     #[\Override]
     protected function _prepareColumns()
     {

@@ -27,9 +27,6 @@ class Mage_Adminhtml_Block_Permissions_OrphanedResource_Grid extends Mage_Adminh
         $this->setDefaultDir('asc');
     }
 
-    /**
-     * @inheritdoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -51,9 +48,6 @@ class Mage_Adminhtml_Block_Permissions_OrphanedResource_Grid extends Mage_Adminh
         return parent::_prepareCollection();
     }
 
-    /**
-     * @inheritdoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {
@@ -65,9 +59,6 @@ class Mage_Adminhtml_Block_Permissions_OrphanedResource_Grid extends Mage_Adminh
         return parent::_prepareColumns();
     }
 
-    /**
-     * @inheritdoc
-     */
     #[\Override]
     protected function _prepareMassaction()
     {

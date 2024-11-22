@@ -31,9 +31,6 @@ class Mage_Adminhtml_Block_Tag_Grid_All extends Mage_Adminhtml_Block_Widget_Grid
         $this->setDefaultDir('desc');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -41,11 +38,6 @@ class Mage_Adminhtml_Block_Tag_Grid_All extends Mage_Adminhtml_Block_Widget_Grid
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }
-
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
 
     #[\Override]
     protected function _prepareColumns()

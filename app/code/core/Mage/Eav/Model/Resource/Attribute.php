@@ -37,11 +37,6 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
      */
     abstract protected function _getFormAttributeTable();
 
-    /**
-     * Perform actions before object save
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
@@ -92,7 +87,6 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
      * Save attribute/form relations after attribute save
      *
      * @param Mage_Eav_Model_Attribute $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)

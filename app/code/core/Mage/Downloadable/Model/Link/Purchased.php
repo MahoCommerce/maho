@@ -49,8 +49,6 @@ class Mage_Downloadable_Model_Link_Purchased extends Mage_Core_Model_Abstract
 
     /**
      * Check order id
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function _beforeSave()

@@ -302,7 +302,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @inheritDoc
      * @throws Mage_Core_Exception
      */
     #[\Override]
@@ -1998,8 +1997,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 
     /**
      * Trigger collect totals after loading, if required
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterLoad()
@@ -2058,8 +2055,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 
     /**
      * Save quote with prevention checking
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function save()

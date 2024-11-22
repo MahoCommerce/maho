@@ -50,10 +50,6 @@ class Mage_Adminhtml_Block_Api_User_Edit_Tab_Roles extends Mage_Adminhtml_Block_
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -63,10 +59,6 @@ class Mage_Adminhtml_Block_Api_User_Edit_Tab_Roles extends Mage_Adminhtml_Block_
         return parent::_prepareCollection();
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     #[\Override]
     protected function _prepareColumns()
     {

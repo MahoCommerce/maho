@@ -138,10 +138,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
     }
 
     /**
-     * Process product data before save
-     *
      * @param Mage_Catalog_Model_Product $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeSave(Varien_Object $object)
@@ -170,7 +167,6 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
      * Save data related with product
      *
      * @param Mage_Catalog_Model_Product $product
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave(Varien_Object $product)

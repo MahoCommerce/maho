@@ -21,7 +21,6 @@
 class Mage_Adminhtml_Block_Tag_Grid_Customers extends Mage_Adminhtml_Block_Widget_Grid
 {
     /**
-     * @inheritDoc
      * @throws Mage_Core_Exception
      */
     #[\Override]
@@ -45,10 +44,6 @@ class Mage_Adminhtml_Block_Tag_Grid_Customers extends Mage_Adminhtml_Block_Widge
         return parent::_prepareCollection();
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     #[\Override]
     protected function _prepareColumns()
     {

@@ -25,9 +25,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Grid extends Mage_Admin
         $this->setSaveParametersInSession(true);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {

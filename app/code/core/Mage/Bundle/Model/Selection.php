@@ -56,7 +56,6 @@ class Mage_Bundle_Model_Selection extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @inheritDoc
      * @throws Mage_Core_Model_Store_Exception
      */
     #[\Override]

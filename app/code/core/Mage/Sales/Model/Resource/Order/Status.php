@@ -89,7 +89,6 @@ class Mage_Sales_Model_Resource_Order_Status extends Mage_Core_Model_Resource_Db
      * Save status labels per store
      *
      * @param Mage_Sales_Model_Order|Mage_Sales_Model_Order_Status $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)

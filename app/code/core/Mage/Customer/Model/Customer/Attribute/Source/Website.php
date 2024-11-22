@@ -35,9 +35,6 @@ class Mage_Customer_Model_Customer_Attribute_Source_Website extends Mage_Eav_Mod
         return $this->_options;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function getOptionText($value)
     {

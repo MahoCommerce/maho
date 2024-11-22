@@ -58,11 +58,6 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Wid
         return $this;
     }
 
-    /**
-     * Prepare columns
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {

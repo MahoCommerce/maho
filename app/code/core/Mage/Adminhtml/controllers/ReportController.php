@@ -56,9 +56,6 @@ class Mage_Adminhtml_ReportController extends Mage_Adminhtml_Controller_Action
         $this->_prepareDownloadResponse(...$grid->getExcelFile('search.xml', -1));
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _isAllowed()
     {

@@ -39,9 +39,6 @@ class Mage_Adminhtml_Block_Permissions_Variable_Grid extends Mage_Adminhtml_Bloc
         return parent::_prepareCollection();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {

@@ -365,9 +365,6 @@ HTML;
         return $object->getDataUsingMethod((string)$key);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function getCacheKeyInfo()
     {

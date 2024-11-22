@@ -236,11 +236,6 @@ class Mage_Catalog_Model_Resource_Category_Flat_Collection extends Mage_Core_Mod
         return $this;
     }
 
-    /**
-     * Retrieve resource instance
-     *
-     * @inheritDoc
-     */
     #[\Override]
     public function getResource()
     {

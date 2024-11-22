@@ -36,9 +36,6 @@ class Mage_Paypal_Block_Adminhtml_Settlement_Report_Grid extends Mage_Adminhtml_
         $this->setUseAjax(true);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -50,9 +47,6 @@ class Mage_Paypal_Block_Adminhtml_Settlement_Report_Grid extends Mage_Adminhtml_
         return parent::_prepareCollection();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {

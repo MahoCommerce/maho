@@ -74,9 +74,6 @@ class Mage_Tag_Block_Product_List extends Mage_Core_Block_Template
         return $this->_collection;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeToHtml()
     {
@@ -135,9 +132,6 @@ class Mage_Tag_Block_Product_List extends Mage_Core_Block_Template
         return $this->_uniqueHtmlId;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function renderView()
     {

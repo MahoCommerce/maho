@@ -30,11 +30,6 @@ class Mage_Catalog_Block_Breadcrumbs extends Mage_Core_Block_Template
         return ' ' . $separator . ' ';
     }
 
-    /**
-     * Preparing layout
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

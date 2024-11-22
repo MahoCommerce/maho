@@ -172,7 +172,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid extends Ma
     }
 
     /**
-     * @inheritDoc
      * @throws Mage_Core_Exception
      */
     #[\Override]

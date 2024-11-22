@@ -31,9 +31,6 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Content extends Mage_Adminhtml_Bloc
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareForm()
     {

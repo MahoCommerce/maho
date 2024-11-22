@@ -24,11 +24,6 @@ class Mage_Widget_Model_Resource_Widget_Instance extends Mage_Core_Model_Resourc
         $this->_init('widget/widget_instance', 'instance_id');
     }
 
-    /**
-     * Perform actions after object load
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {
@@ -42,9 +37,6 @@ class Mage_Widget_Model_Resource_Widget_Instance extends Mage_Core_Model_Resourc
     }
 
     /**
-     * Perform actions after object save
-     *
-     * @inheritDoc
      * @throws Zend_Db_Adapter_Exception
      */
     #[\Override]
@@ -195,10 +187,7 @@ class Mage_Widget_Model_Resource_Widget_Instance extends Mage_Core_Model_Resourc
     }
 
     /**
-     * Perform actions after object delete.
      * Delete layout updates by layout update ids collected in _beforeSave
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterDelete(Mage_Core_Model_Abstract $object)

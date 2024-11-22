@@ -18,11 +18,6 @@
  */
 class Mage_Sales_Model_Resource_Order_Invoice_Attribute_Backend_Order extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
-    /**
-     * Method is invoked before save
-     *
-     * @inheritDoc
-     */
     #[\Override]
     public function beforeSave($object)
     {

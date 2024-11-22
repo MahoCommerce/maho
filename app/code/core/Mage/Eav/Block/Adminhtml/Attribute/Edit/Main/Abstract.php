@@ -38,11 +38,6 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
         return $this->_attribute ?? Mage::registry('entity_attribute');
     }
 
-    /**
-     * Preparing default form elements for editing attribute
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareForm()
     {
@@ -157,11 +152,6 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
         return parent::_prepareForm();
     }
 
-    /**
-     * Initialize form fields values
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _initFormValues()
     {

@@ -586,11 +586,6 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
         return false;
     }
 
-    /**
-     * Before object save
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeSave()
     {
@@ -613,7 +608,6 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
     }
 
     /**
-     * @inheritDoc
      * @throws Mage_Core_Exception
      */
     #[\Override]
@@ -623,11 +617,6 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
         return parent::_beforeDelete();
     }
 
-    /**
-     * After object save manipulations
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterSave()
     {

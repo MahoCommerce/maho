@@ -20,9 +20,6 @@ class Mage_Api_Model_Wsdl_Config extends Mage_Api_Model_Wsdl_Config_Base
 {
     protected static $_namespacesPrefix = null;
 
-    /**
-     * @inheritDoc
-     */
     public function __construct($sourceData = null)
     {
         $this->setCacheId(Mage::helper('api')->getCacheId());

@@ -20,9 +20,6 @@ class Mage_Api_Model_Config extends Varien_Simplexml_Config
 {
     public const CACHE_TAG         = 'config_api';
 
-    /**
-     * @inheritDoc
-     */
     public function __construct($sourceData = null)
     {
         $this->setCacheId('config_api');

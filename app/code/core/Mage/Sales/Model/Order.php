@@ -2429,8 +2429,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
 
     /**
      * Save order related objects
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave()
@@ -2557,7 +2555,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
 
     /**
      * Protect order delete from not admin scope
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeDelete()

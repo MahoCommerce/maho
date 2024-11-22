@@ -759,8 +759,6 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
 
     /**
      * Reset firstly loaded attributes
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function load($object, $entityId, $attributes = [])

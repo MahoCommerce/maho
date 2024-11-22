@@ -651,11 +651,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         return Mage::app()->removeCache($id);
     }
 
-    /**
-     * Remove configuration cache
-     *
-     * {@inheritDoc}
-     */
     #[\Override]
     public function removeCache()
     {
@@ -716,7 +711,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     /**
      * Returns node found by the $path and scope info
      *
-     * @inheritDoc
      * @return Mage_Core_Model_Config_Element|false
      */
     #[\Override]

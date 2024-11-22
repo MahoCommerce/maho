@@ -131,9 +131,6 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
         return $this->_toOptionHash('store_id', 'name');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {

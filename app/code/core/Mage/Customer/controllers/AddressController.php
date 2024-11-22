@@ -28,9 +28,6 @@ class Mage_Customer_AddressController extends Mage_Core_Controller_Front_Action
         return Mage::getSingleton('customer/session');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function preDispatch()
     {

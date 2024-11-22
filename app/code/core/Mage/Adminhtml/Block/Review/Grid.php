@@ -27,10 +27,6 @@ class Mage_Adminhtml_Block_Review_Grid extends Mage_Adminhtml_Block_Widget_Grid
         $this->setDefaultSort('created_at');
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -66,7 +62,6 @@ class Mage_Adminhtml_Block_Review_Grid extends Mage_Adminhtml_Block_Widget_Grid
     }
 
     /**
-     * @inheritDoc
      * @throws Mage_Core_Model_Store_Exception
      */
     #[\Override]
@@ -200,9 +195,6 @@ class Mage_Adminhtml_Block_Review_Grid extends Mage_Adminhtml_Block_Widget_Grid
         return parent::_prepareColumns();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareMassaction()
     {

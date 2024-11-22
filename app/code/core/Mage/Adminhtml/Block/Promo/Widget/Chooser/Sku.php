@@ -79,11 +79,6 @@ class Mage_Adminhtml_Block_Promo_Widget_Chooser_Sku extends Mage_Adminhtml_Block
         return $this;
     }
 
-    /**
-     * Prepare Catalog Product Collection for attribute SKU in Promo Conditions SKU chooser
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {

@@ -46,7 +46,6 @@ class Mage_Review_Block_Product_View_List extends Mage_Review_Block_Product_View
     }
 
     /**
-     * @inheritDoc
      * @throws Mage_Core_Model_Store_Exception
      */
     #[\Override]

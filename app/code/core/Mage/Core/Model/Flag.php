@@ -49,9 +49,6 @@ class Mage_Core_Model_Flag extends Mage_Core_Model_Abstract
         $this->_init('core/flag');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeSave()
     {

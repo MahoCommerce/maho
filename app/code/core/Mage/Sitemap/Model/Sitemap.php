@@ -51,7 +51,6 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @inheritDoc
      * @throws Mage_Core_Exception
      */
     #[\Override]

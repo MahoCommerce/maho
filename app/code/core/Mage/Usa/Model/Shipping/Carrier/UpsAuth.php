@@ -81,27 +81,18 @@ class Mage_Usa_Model_Shipping_Carrier_UpsAuth extends Mage_Usa_Model_Shipping_Ca
         return $result;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
         return false;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _doShipmentRequest(Varien_Object $request)
     {
         return new Varien_Object();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function getAllowedMethods(): array
     {

@@ -108,9 +108,6 @@ class Mage_Core_Model_Resource_Website_Collection extends Mage_Core_Model_Resour
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {

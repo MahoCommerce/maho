@@ -781,8 +781,6 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
 
     /**
      * Save item options after item saved
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave()

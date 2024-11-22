@@ -20,8 +20,6 @@ class Mage_ImportExport_Block_Adminhtml_Import_Edit_Form extends Mage_Adminhtml_
 {
     /**
      * Add fieldset
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _prepareForm()

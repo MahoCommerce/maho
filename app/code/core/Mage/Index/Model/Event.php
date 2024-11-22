@@ -315,9 +315,7 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Serelaize old and new data arrays before saving
-     *
-     * @inheritDoc
+     * Serialize old and new data arrays before saving
      */
     #[\Override]
     protected function _beforeSave()

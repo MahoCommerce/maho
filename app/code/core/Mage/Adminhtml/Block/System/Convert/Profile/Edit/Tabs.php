@@ -26,10 +26,6 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Edit_Tabs extends Mage_Adminht
         $this->setTitle(Mage::helper('adminhtml')->__('Import/Export Profile'));
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     #[\Override]
     protected function _beforeToHtml()
     {

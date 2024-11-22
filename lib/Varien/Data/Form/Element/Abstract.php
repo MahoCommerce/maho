@@ -151,9 +151,6 @@ abstract class Varien_Data_Form_Element_Abstract extends Varien_Data_Form_Abstra
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function removeField($elementId)
     {
@@ -311,9 +308,6 @@ abstract class Varien_Data_Form_Element_Abstract extends Varien_Data_Form_Abstra
         return $this->getHtml();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function serialize($attributes = [], $valueSeparator = '=', $fieldSeparator = ' ', $quote = '"')
     {

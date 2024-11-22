@@ -32,9 +32,6 @@ class Mage_Customer_Block_Newsletter extends Mage_Customer_Block_Account_Dashboa
         return $this->getSubscriptionObject()->isSubscribed();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function getAction()
     {

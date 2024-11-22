@@ -359,9 +359,6 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
         return $this->_forward('index', 'report_statistics');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _isAllowed()
     {

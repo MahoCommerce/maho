@@ -26,7 +26,6 @@ class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource
 
     /**
      * @param Mage_Core_Model_Translate_String $object
-     * @inheritDoc
      */
     #[\Override]
     public function load(Mage_Core_Model_Abstract $object, $value, $field = null)
@@ -61,10 +60,7 @@ class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource
     }
 
     /**
-     * After translation loading
-     *
      * @param Mage_Core_Model_Translate_String $object
-     * @inheritDoc
      */
     #[\Override]
     public function _afterLoad(Mage_Core_Model_Abstract $object)
@@ -80,7 +76,6 @@ class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource
 
     /**
      * @param Mage_Core_Model_Translate_String $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
@@ -102,7 +97,6 @@ class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource
 
     /**
      * @param Mage_Core_Model_Translate_String $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)

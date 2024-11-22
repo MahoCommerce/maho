@@ -98,9 +98,7 @@ class Mage_Tax_Model_Calculation_Rule extends Mage_Core_Model_Abstract
 
     /**
      * After rule delete
-     * redeclared for dispatch tax_settings_change_after event
-     *
-     * @inheritDoc
+     * Redeclared for dispatch tax_settings_change_after event
      */
     #[\Override]
     protected function _afterDelete()

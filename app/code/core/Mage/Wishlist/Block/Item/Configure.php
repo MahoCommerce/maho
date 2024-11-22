@@ -42,8 +42,6 @@ class Mage_Wishlist_Block_Item_Configure extends Mage_Core_Block_Template
 
     /**
      * Configure product view blocks
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _prepareLayout()

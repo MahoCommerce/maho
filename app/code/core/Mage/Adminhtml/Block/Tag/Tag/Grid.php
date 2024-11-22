@@ -48,7 +48,6 @@ class Mage_Adminhtml_Block_Tag_Tag_Grid extends Mage_Adminhtml_Block_Widget_Grid
     }
 
     /**
-     * @inheritDoc
      * @throws Mage_Core_Model_Store_Exception
      */
     #[\Override]
@@ -61,10 +60,6 @@ class Mage_Adminhtml_Block_Tag_Tag_Grid extends Mage_Adminhtml_Block_Widget_Grid
         return parent::_prepareCollection();
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     #[\Override]
     protected function _prepareColumns()
     {

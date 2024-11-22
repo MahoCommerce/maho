@@ -24,9 +24,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Toolbar_Main extends Ma
         $this->setTemplate('catalog/product/attribute/set/toolbar/main.phtml');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

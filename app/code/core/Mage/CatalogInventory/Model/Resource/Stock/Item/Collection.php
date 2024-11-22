@@ -127,9 +127,6 @@ class Mage_CatalogInventory_Model_Resource_Stock_Item_Collection extends Mage_Co
         return $this->addFieldToFilter('main_table.qty', [$methods[$comparsionMethod] => $qty]);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _initSelect()
     {

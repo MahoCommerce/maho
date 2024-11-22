@@ -32,7 +32,6 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     }
 
     /**
-     * @inheritDoc
      * @throws Mage_Core_Exception
      */
     #[\Override]
@@ -63,7 +62,6 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
 
     /**
      * @param Mage_Cms_Model_Page $object
-     * @inheritDoc
      * @throws Mage_Core_Exception
      */
     #[\Override]
@@ -132,7 +130,6 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
 
     /**
      * @param Mage_Cms_Model_Page $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
@@ -174,9 +171,6 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
         return parent::_afterSave($object);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function load(Mage_Core_Model_Abstract $object, $value, $field = null)
     {
@@ -187,9 +181,6 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
         return parent::load($object, $value, $field);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {

@@ -404,9 +404,6 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
         return Mage::getSingleton('customer/address_config');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeSave()
     {

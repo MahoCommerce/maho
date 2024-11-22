@@ -19,10 +19,7 @@
 class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
 {
     /**
-     * Prepare layout.
      * Add files to use dialog windows
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _prepareLayout()
@@ -38,8 +35,6 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
 
     /**
      * Add fields to form and create template info form
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _prepareForm()

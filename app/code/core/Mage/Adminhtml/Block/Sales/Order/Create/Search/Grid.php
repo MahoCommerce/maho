@@ -81,11 +81,6 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Search_Grid extends Mage_Adminhtml
         return $this;
     }
 
-    /**
-     * Prepare collection to be displayed in the grid
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -109,9 +104,6 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Search_Grid extends Mage_Adminhtml
         return parent::_prepareCollection();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {
@@ -197,8 +189,6 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Search_Grid extends Mage_Adminhtml
 
     /**
      * Add custom options to product collection
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterLoadCollection()

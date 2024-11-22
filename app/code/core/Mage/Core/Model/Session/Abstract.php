@@ -356,11 +356,6 @@ class Mage_Core_Model_Session_Abstract extends Mage_Core_Model_Session_Abstract_
         return $this;
     }
 
-    /**
-     * Specify session identifier
-     *
-     * @inheritDoc
-     */
     #[\Override]
     public function setSessionId($id = null)
     {

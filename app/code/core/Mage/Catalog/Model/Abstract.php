@@ -142,8 +142,6 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
      * If $key is an array, it will overwrite all the data in the object.
      *
      * $isChanged will specify if the object needs to be saved after an update.
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function setData($key, $value = null)
@@ -171,8 +169,6 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
      * $key can be a string only. Array will be ignored.
      *
      * $isChanged will specify if the object needs to be saved after an update.
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function unsetData($key = null)
@@ -291,8 +287,6 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
 
     /**
      * Before save unlock attributes
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeSave()

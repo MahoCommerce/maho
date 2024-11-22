@@ -75,11 +75,6 @@ class Mage_Reports_Model_Resource_Review_Product_Collection extends Mage_Catalog
         return $this;
     }
 
-    /**
-     * Add attribute to sort
-     *
-     * @inheritDoc
-     */
     #[\Override]
     public function addAttributeToSort($attribute, $dir = self::SORT_ORDER_ASC)
     {

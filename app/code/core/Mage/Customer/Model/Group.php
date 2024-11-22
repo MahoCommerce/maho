@@ -129,9 +129,6 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeSave()
     {

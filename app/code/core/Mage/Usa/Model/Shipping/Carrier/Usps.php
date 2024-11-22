@@ -267,7 +267,6 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     }
 
     /**
-     * @inheritdoc
      * Starting from 23.02.2018 USPS doesn't allow to create free shipping labels via their API.
      */
     #[\Override]

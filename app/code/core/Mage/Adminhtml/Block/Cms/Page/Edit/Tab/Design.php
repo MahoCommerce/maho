@@ -25,9 +25,6 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Design extends Mage_Adminhtml_Block
         $this->setShowGlobalIcon(true);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareForm()
     {

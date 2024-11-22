@@ -636,9 +636,6 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
         $this->_redirect('*/*/view', ['order_id' => $order->getId()]);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _isAllowed()
     {

@@ -246,10 +246,7 @@ class Mage_Reports_Model_Resource_Report_Collection_Abstract extends Mage_Core_M
     }
 
     /**
-     * Load data
      * Redeclare parent load method just for adding method _beforeLoad
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function load($printQuery = false, $logQuery = false)

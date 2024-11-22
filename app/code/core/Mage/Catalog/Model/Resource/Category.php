@@ -198,7 +198,6 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      * save related products ids and update path value
      *
      * @param Mage_Catalog_Model_Category $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave(Varien_Object $object)
