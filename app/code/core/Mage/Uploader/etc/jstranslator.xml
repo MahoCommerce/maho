@@ -7,24 +7,26 @@
  * @package    Mage_Uploader
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
 <jstranslator>
-    <uploader-exceed_max-1 translate="message" module="uploader">
-        <message>Maximum allowed file size for upload is</message>
-    </uploader-exceed_max-1>
-    <uploader-exceed_max-2 translate="message" module="uploader">
-        <message>Please check your server PHP settings.</message>
-    </uploader-exceed_max-2>
-    <uploader-tab-change-event-confirm translate="message" module="uploader">
-        <message>There are files that were selected but not uploaded yet. After switching to another tab your selections will be lost. Do you wish to continue ?</message>
-    </uploader-tab-change-event-confirm>
-    <uploader-complete-event-text translate="message" module="uploader">
-        <message>Complete</message>
-    </uploader-complete-event-text>
-    <uploader-uploading-progress translate="message" module="uploader">
-        <message>Uploading...</message>
-    </uploader-uploading-progress>
+    <script path="mage/adminhtml/uploader/instance.js" module="uploader">
+        <uploader-exceed_max-1 translate="message">
+            <message>Maximum allowed file size for upload is</message>
+        </uploader-exceed_max-1>
+        <uploader-exceed_max-2 translate="message">
+            <message>Please check your server PHP settings.</message>
+        </uploader-exceed_max-2>
+        <uploader-tab-change-event-confirm translate="message">
+            <message>There are files that were selected but not uploaded yet. After switching to another tab your selections will be lost. Do you wish to continue ?</message>
+        </uploader-tab-change-event-confirm>
+        <uploader-complete-event-text translate="message">
+            <message>Complete</message>
+        </uploader-complete-event-text>
+        <uploader-uploading-progress translate="message">
+            <message>Uploading...</message>
+        </uploader-uploading-progress>
+    </script>
 </jstranslator>
-
