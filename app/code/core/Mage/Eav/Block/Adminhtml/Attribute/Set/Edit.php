@@ -155,6 +155,26 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
     }
 
     /**
+     * Load all attributes including info about all sets they belong to
+     */
+    protected function getEntityAttributeCollection(): Mage_Eav_Model_Resource_Entity_Attribute_Collection
+    {
+        // Get global/eav_attributes/$entityType/$attributeCode/hidden config.xml nodes
+        $hiddenAttributes = Mage::helper('eav')->getHiddenAttributes($this->entityType->getEntityTypeCode());
+
+        /** @var Mage_Eav_Model_Resource_Entity_Attribute_Collection $collection */
+        $collection = Mage::getResourceModel($this->entityType->getEntityAttributeCollection());
+        $collection->setEntityTypeFilter($this->entityType->getEntityTypeId())
+            ->setOrder('attribute_code', 'asc')
+            ->setNotCodeFilter($hiddenAttributes)
+            ->addVisibleFilter()
+            ->addSetInfo(true)
+            ->load();
+
+        return $collection;
+    }
+
+    /**
      * Retrieve Attribute Set Group Tree as JSON format
      *
      * @return string
@@ -171,43 +191,36 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
             ->setSortOrder()
             ->load();
 
-        // Get global/eav_attributes/$entityType/$attributeCode/hidden config.xml nodes
-        $hiddenAttributes = Mage::helper('eav')->getHiddenAttributes($this->entityType->getEntityTypeCode());
-
         /** @var Mage_Eav_Model_Entity_Attribute_Group $node */
-        foreach ($groups as $node) {
+        foreach ($groups as $group) {
             $item = [];
-            $item['text']       = $node->getAttributeGroupName();
-            $item['id']         = $node->getAttributeGroupId();
+            $item['text']       = $group->getAttributeGroupName();
+            $item['id']         = $group->getAttributeGroupId();
             $item['cls']        = 'folder';
             $item['allowDrop']  = true;
             $item['allowDrag']  = true;
+            $item['children']   = [];
 
-            /** @var Mage_Eav_Model_Entity_Attribute $nodeChildren */
-            $nodeChildren = Mage::getResourceModel($this->entityType->getEntityAttributeCollection());
-            $nodeChildren->setEntityTypeFilter($this->entityType->getEntityTypeId())
-                ->setNotCodeFilter($hiddenAttributes)
-                ->setAttributeGroupFilter($node->getId())
-                ->load();
-
-            if ($nodeChildren->getSize() > 0) {
-                $item['children'] = [];
-                /** @var Mage_Eav_Model_Entity_Attribute $child */
-                foreach ($nodeChildren->getItems() as $child) {
-                    $attr = [
-                        'text'              => $child->getAttributeCode(),
-                        'id'                => $child->getAttributeId(),
-                        'cls'               => (!$child->getIsUserDefined()) ? 'system-leaf' : 'leaf',
-                        'allowDrop'         => false,
-                        'allowDrag'         => true,
-                        'leaf'              => true,
-                        'is_user_defined'   => $child->getIsUserDefined(),
-                        'entity_id'         => $child->getEntityAttributeId()
+            /** @var Mage_Eav_Model_Entity_Attribute $attribute */
+            foreach ($this->getEntityAttributeCollection()->getItems() as $attribute) {
+                $attributeGroupId = $attribute['attribute_set_info'][$setId]['group_id'] ?? null;
+                if ($attributeGroupId === $group->getId()) {
+                    $item['children'][] = [
+                        'text'            => $attribute->getAttributeCode(),
+                        'id'              => $attribute->getAttributeId(),
+                        'cls'             => (!$attribute->getIsUserDefined()) ? 'system-leaf' : 'leaf',
+                        'allowDrop'       => false,
+                        'allowDrag'       => true,
+                        'leaf'            => true,
+                        'is_user_defined' => $attribute->getIsUserDefined(),
+                        'entity_id'       => $attribute->getEntityAttributeId(),
+                        'sort'            => $attribute['attribute_set_info'][$setId]['sort'],
                     ];
-
-                    $item['children'][] = $attr;
                 }
             }
+
+            // Sort attributes by sort key
+            array_multisort(array_column($item['children'], 'sort'), $item['children']);
 
             $items[] = $item;
         }
@@ -225,47 +238,30 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
         $items = [];
         $setId = $this->_getSetId();
 
-        /** @var Mage_Eav_Model_Resource_Entity_Attribute_Collection $collection */
-        $collection = Mage::getResourceModel($this->entityType->getEntityAttributeCollection());
-        $collection->setEntityTypeFilter($this->entityType->getEntityTypeId())
-                   ->setAttributeSetFilter($setId)
-                   ->load();
-
-        $attributesIds = ['0'];
-        /** @var Mage_Eav_Model_Entity_Attribute $item */
-        foreach ($collection->getItems() as $item) {
-            $attributesIds[] = $item->getAttributeId();
+        /** @var Mage_Eav_Model_Entity_Attribute $attribute */
+        foreach ($this->getEntityAttributeCollection()->getItems() as $sort => $attribute) {
+            if (!isset($attribute['attribute_set_info'][$setId])) {
+                $items[] = [
+                    'text'            => $attribute->getAttributeCode(),
+                    'id'              => $attribute->getAttributeId(),
+                    'cls'             => 'leaf',
+                    'allowDrop'       => false,
+                    'allowDrag'       => true,
+                    'leaf'            => true,
+                    'is_user_defined' => $attribute->getIsUserDefined(),
+                    'entity_id'       => $attribute->getEntityId(),
+                    'sort'            => $sort,
+                ];
+            }
         }
 
-        /** @var Mage_Eav_Model_Resource_Entity_Attribute_Collection $attributes */
-        $attributes = Mage::getResourceModel($this->entityType->getEntityAttributeCollection());
-        $attributes->setEntityTypeFilter($this->entityType->getEntityTypeId())
-                   ->setAttributesExcludeFilter($attributesIds)
-                   ->setOrder('attribute_code', 'asc')
-                   ->load();
-
-        foreach ($attributes as $child) {
-            $attr = [
-                'text'              => $child->getAttributeCode(),
-                'id'                => $child->getAttributeId(),
-                'cls'               => 'leaf',
-                'allowDrop'         => false,
-                'allowDrag'         => true,
-                'leaf'              => true,
-                'is_user_defined'   => $child->getIsUserDefined(),
-                'entity_id'         => $child->getEntityId()
-            ];
-
-            $items[] = $attr;
-        }
-
-        if (count($items) == 0) {
+        if (count($items) === 0) {
             $items[] = [
-                'text'      => Mage::helper('eav')->__('Empty'),
-                'id'        => 'empty',
-                'cls'       => 'folder',
-                'allowDrop' => false,
-                'allowDrag' => false,
+                'text'                => Mage::helper('eav')->__('Empty'),
+                'id'                  => 'empty',
+                'cls'                 => 'folder',
+                'allowDrop'           => false,
+                'allowDrag'           => false,
             ];
         }
 
@@ -379,17 +375,6 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
             $this->setData('is_current_set_default', $isDefault);
         }
         return $isDefault;
-    }
-
-    /**
-     * Retrieve current Attribute Set object
-     *
-     * @deprecated use _getAttributeSet
-     * @return Mage_Eav_Model_Entity_Attribute_Set
-     */
-    protected function _getSetData()
-    {
-        return $this->_getAttributeSet();
     }
 
     /**
