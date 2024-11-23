@@ -26,8 +26,6 @@ class Mage_Dataflow_Model_Resource_Profile extends Mage_Core_Model_Resource_Db_A
 
     /**
      * Setting up created_at and updarted_at
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)

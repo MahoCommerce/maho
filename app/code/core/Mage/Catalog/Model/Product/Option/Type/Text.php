@@ -18,12 +18,17 @@
  */
 class Mage_Catalog_Model_Product_Option_Type_Text extends Mage_Catalog_Model_Product_Option_Type_Default
 {
+    public function getUserValue(): string
+    {
+        return (string) $this->getDataByKey('user_value');
+    }
+
     /**
      * Validate user input for option
      *
      * @throws Mage_Core_Exception
      * @param array $values All product option values, i.e. array (option_id => mixed, option_id => mixed...)
-     * @return Mage_Catalog_Model_Product_Option_Type_Default
+     * @return $this
      */
     #[\Override]
     public function validateUserValue($values)

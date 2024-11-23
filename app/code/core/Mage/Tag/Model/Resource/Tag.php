@@ -66,10 +66,7 @@ class Mage_Tag_Model_Resource_Tag extends Mage_Core_Model_Resource_Db_Abstract
     }
 
     /**
-     * Before saving actions
-     *
      * @param Mage_Tag_Model_Tag $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
@@ -95,7 +92,6 @@ class Mage_Tag_Model_Resource_Tag extends Mage_Core_Model_Resource_Db_Abstract
      * Saving tag's base popularity
      *
      * @param Mage_Tag_Model_Tag $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)

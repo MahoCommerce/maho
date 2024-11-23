@@ -31,10 +31,7 @@ class Mage_Eav_Model_Resource_Form_Type extends Mage_Core_Model_Resource_Db_Abst
     }
 
     /**
-     * Load an object
-     *
      * @param Mage_Eav_Model_Resource_Form_Type $object
-     * @inheritDoc
      */
     #[\Override]
     public function load(Mage_Core_Model_Abstract $object, $value, $field = null)
@@ -70,9 +67,7 @@ class Mage_Eav_Model_Resource_Form_Type extends Mage_Core_Model_Resource_Db_Abst
      * Save entity types after save form type
      *
      * @see Mage_Core_Model_Resource_Db_Abstract::_afterSave()
-     *
      * @param Mage_Eav_Model_Resource_Form_Type $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)

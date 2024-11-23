@@ -226,8 +226,6 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection extends Mag
 
     /**
      * Unserialize additional_information in each item
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterLoad()

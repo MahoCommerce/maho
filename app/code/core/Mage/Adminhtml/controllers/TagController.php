@@ -321,9 +321,6 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/' . $ret);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _isAllowed()
     {

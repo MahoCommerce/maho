@@ -42,9 +42,6 @@ class Mage_Checkout_Block_Multishipping_Overview extends Mage_Sales_Block_Items_
         return Mage::getSingleton('checkout/type_multishipping');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

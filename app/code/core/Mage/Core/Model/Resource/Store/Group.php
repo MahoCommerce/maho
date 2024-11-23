@@ -28,7 +28,6 @@ class Mage_Core_Model_Resource_Store_Group extends Mage_Core_Model_Resource_Db_A
      * Update default store group for website
      *
      * @param Mage_Core_Model_Store_Group $model
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $model)

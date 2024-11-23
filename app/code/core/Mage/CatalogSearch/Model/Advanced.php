@@ -78,11 +78,6 @@ class Mage_CatalogSearch_Model_Advanced extends Mage_Core_Model_Abstract
         return $this->_engine;
     }
 
-    /**
-     * Retrieve resource instance wrapper
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _getResource()
     {

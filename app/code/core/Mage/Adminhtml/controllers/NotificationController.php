@@ -142,9 +142,6 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
         $this->_redirectReferer();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _isAllowed()
     {

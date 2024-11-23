@@ -350,11 +350,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         $this->_productCategoryTable = $this->getResource()->getTable('catalog/category_product');
     }
 
-    /**
-     * Standard resource collection initialization
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _init($model, $entityModel = null)
     {
@@ -365,11 +360,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         return parent::_init($model, $entityModel);
     }
 
-    /**
-     * Prepare static entity fields
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareStaticFields()
     {
@@ -395,11 +385,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         return $object;
     }
 
-    /**
-     * Set entity to use for attributes
-     *
-     * @inheritDoc
-     */
     #[\Override]
     public function setEntity($entity)
     {
@@ -452,11 +437,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         return $this;
     }
 
-    /**
-     * Load attributes into loaded entities
-     *
-     * @inheritDoc
-     */
     #[\Override]
     public function _loadAttributes($printQuery = false, $logQuery = false)
     {
@@ -469,8 +449,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Add attribute to entities in collection
      * If $attribute=='*' select all attributes
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function addAttributeToSelect($attribute, $joinType = false)
@@ -504,8 +482,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
 
     /**
      * Add tax class id attribute to select and join price rules data if needed
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeLoad()
@@ -952,11 +928,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         return $select;
     }
 
-    /**
-     * Retrieve all ids for collection
-     *
-     * @inheritDoc
-     */
     #[\Override]
     public function getAllIds($limit = null, $offset = null)
     {
@@ -1360,9 +1331,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function addAttributeToFilter($attribute, $condition = null, $joinType = 'inner')
     {
@@ -1515,11 +1483,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         return $this;
     }
 
-    /**
-     * Add attribute to sort order
-     *
-     * @inheritDoc
-     */
     #[\Override]
     public function addAttributeToSort($attribute, $dir = self::SORT_ORDER_ASC)
     {
@@ -2052,11 +2015,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         return $this;
     }
 
-    /**
-     * Clear collection
-     *
-     * @inheritDoc
-     */
     #[\Override]
     public function clear()
     {

@@ -215,8 +215,6 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
 
     /**
      * Save item options after item saved
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave()

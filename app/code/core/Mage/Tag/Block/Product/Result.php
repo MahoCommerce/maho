@@ -33,9 +33,6 @@ class Mage_Tag_Block_Product_Result extends Mage_Catalog_Block_Product_Abstract
         return Mage::registry('current_tag');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

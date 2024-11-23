@@ -49,11 +49,6 @@ class Mage_Api2_Block_Adminhtml_Attribute_Grid extends Mage_Adminhtml_Block_Widg
         return $this;
     }
 
-    /**
-     * Prepare grid columns
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {

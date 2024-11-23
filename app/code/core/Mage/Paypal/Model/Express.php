@@ -539,9 +539,6 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
         return $this->_pro->updateRecurringProfileStatus($profile);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function assignData($data)
     {

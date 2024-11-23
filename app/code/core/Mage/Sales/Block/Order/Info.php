@@ -27,9 +27,6 @@ class Mage_Sales_Block_Order_Info extends Mage_Core_Block_Template
         $this->setTemplate('sales/order/info.phtml');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

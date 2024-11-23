@@ -62,9 +62,6 @@ class Mage_Adminhtml_Block_Promo_Catalog_Edit_Tab_Main extends Mage_Adminhtml_Bl
         return false;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareForm()
     {

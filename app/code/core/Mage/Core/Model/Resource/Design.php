@@ -26,7 +26,6 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
 
     /**
      * @param Mage_Core_Model_Design $object
-     * @inheritDoc
      */
     #[\Override]
     public function _beforeSave(Mage_Core_Model_Abstract $object)

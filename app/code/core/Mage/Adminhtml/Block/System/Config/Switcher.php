@@ -16,9 +16,6 @@
  */
 class Mage_Adminhtml_Block_System_Config_Switcher extends Mage_Adminhtml_Block_Template
 {
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

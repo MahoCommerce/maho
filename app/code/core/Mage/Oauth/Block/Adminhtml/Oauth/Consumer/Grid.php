@@ -42,11 +42,6 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Grid extends Mage_Adminhtml_Bloc
         $this->_editAllow = $session->isAllowed('system/oauth/consumer/edit');
     }
 
-    /**
-     * Prepare collection
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -56,11 +51,6 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Grid extends Mage_Adminhtml_Bloc
         return parent::_prepareCollection();
     }
 
-    /**
-     * Prepare columns
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {

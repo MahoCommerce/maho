@@ -40,11 +40,6 @@ class Mage_CatalogSearch_Block_Result extends Mage_Core_Block_Template
         return $helper->getQuery();
     }
 
-    /**
-     * Prepare layout
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

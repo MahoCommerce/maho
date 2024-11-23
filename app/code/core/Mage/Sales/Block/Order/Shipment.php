@@ -25,9 +25,6 @@ class Mage_Sales_Block_Order_Shipment extends Mage_Core_Block_Template
         $this->setTemplate('sales/order/shipment.phtml');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

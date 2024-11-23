@@ -278,9 +278,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         return $this->_session;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function load($id, $field = null)
     {
@@ -1150,10 +1147,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
 
     /**
      * Protect delete from non admin area
-     *
      * Register indexing event before delete store
-     *
-     * {@inheritDoc}
      */
     #[\Override]
     protected function _beforeDelete()

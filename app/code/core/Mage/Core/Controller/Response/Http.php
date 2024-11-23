@@ -27,7 +27,6 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
     /**
      * Fixes CGI only one Status header allowed bug
      * @link  http://bugs.php.net/bug.php?id=36705
-     * @inheritDoc
      */
     #[\Override]
     public function sendHeaders()
@@ -62,9 +61,6 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
         return parent::sendHeaders();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function sendResponse()
     {
@@ -74,8 +70,6 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
 
     /**
      * Additionally check for session messages in several domains case
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function setRedirect($url, $code = 302)

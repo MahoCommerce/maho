@@ -27,11 +27,6 @@ class Mage_Api2_Block_Adminhtml_Roles_Buttons extends Mage_Adminhtml_Block_Templ
         $this->setTemplate('api2/role/buttons.phtml');
     }
 
-    /**
-     * Preparing global layout
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

@@ -87,7 +87,6 @@ class Mage_CatalogSearch_Model_Resource_Query extends Mage_Core_Model_Resource_D
      *
      * @param int|string $value
      * @param null|string $field
-     * @inheritDoc
      */
     #[\Override]
     public function load(Mage_Core_Model_Abstract $object, $value, $field = null)

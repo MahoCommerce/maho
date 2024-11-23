@@ -285,11 +285,6 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
         return $this;
     }
 
-    /**
-     * Retrieve all ids for collection
-     *
-     * @inheritDoc
-     */
     #[\Override]
     public function getAllIds($limit = null, $offset = null)
     {

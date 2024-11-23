@@ -27,9 +27,6 @@ class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
     protected $_countryCollection;
     protected $_regionCollection;
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

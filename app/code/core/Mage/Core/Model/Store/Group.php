@@ -326,9 +326,6 @@ class Mage_Core_Model_Store_Group extends Mage_Core_Model_Abstract
         return $this->_getData('website_id');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeDelete()
     {

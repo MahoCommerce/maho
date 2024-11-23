@@ -57,9 +57,6 @@ class Mage_Directory_Model_Currency_Import_Currencyconverterapi extends Mage_Dir
         $this->_httpClient = new Varien_Http_Client();
     }
 
-    /**
-     * @inheritdoc
-     */
     #[\Override]
     protected function _convert($currencyFrom, $currencyTo)
     {

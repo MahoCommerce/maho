@@ -122,8 +122,6 @@ class Mage_Sales_Model_Quote_Item_Option extends Mage_Core_Model_Abstract implem
 
     /**
      * Initialize item identifier before save data
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeSave()

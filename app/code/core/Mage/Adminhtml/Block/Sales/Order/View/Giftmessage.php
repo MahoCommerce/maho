@@ -42,9 +42,6 @@ class Mage_Adminhtml_Block_Sales_Order_View_Giftmessage extends Mage_Adminhtml_B
      */
     protected $_giftMessage;
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeToHtml()
     {

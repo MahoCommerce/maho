@@ -37,10 +37,6 @@ class Mage_Adminhtml_Block_Report_Review_Detail_Grid extends Mage_Adminhtml_Bloc
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     #[\Override]
     protected function _prepareColumns()
     {

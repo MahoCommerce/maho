@@ -28,11 +28,6 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Coupons_Grid extends Mage_Adminh
         $this->setUseAjax(true);
     }
 
-    /**
-     * Prepare collection for grid
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -131,9 +126,6 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Coupons_Grid extends Mage_Adminh
         return $this->getUrl('*/*/couponsGrid', ['_current' => true]);
     }
 
-    /**
-     * @inheritdoc
-     */
     #[\Override]
     public function getRowUrl($row)
     {

@@ -79,11 +79,6 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main extends Mage_Adm
         return Mage::registry('current_widget_instance');
     }
 
-    /**
-     * Prepare form before rendering HTML
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareForm()
     {
@@ -190,11 +185,6 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main extends Mage_Adm
             ->setIsFullLabel(true)->getAllOptions(true);
     }
 
-    /**
-     * Initialize form fields values
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _initFormValues()
     {

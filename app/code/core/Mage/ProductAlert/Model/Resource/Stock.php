@@ -25,10 +25,7 @@ class Mage_ProductAlert_Model_Resource_Stock extends Mage_ProductAlert_Model_Res
     }
 
     /**
-     * Before save action
-     *
      * @param Mage_ProductAlert_Model_Stock $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)

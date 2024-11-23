@@ -35,8 +35,6 @@ class Mage_Eav_Model_Attribute_Data_Multiselect extends Mage_Eav_Model_Attribute
 
     /**
      * Export attribute value to entity model
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function compactValue($value)

@@ -65,11 +65,6 @@ class Mage_Catalog_Block_Product_Compare_List extends Mage_Catalog_Block_Product
         return $this->getAddToWishlistUrlCustom($product);
     }
 
-    /**
-     * Preparing layout
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

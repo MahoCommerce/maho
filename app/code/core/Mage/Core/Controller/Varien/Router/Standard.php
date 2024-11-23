@@ -100,7 +100,6 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
      * Match the request
      *
      * @param Mage_Core_Controller_Request_Http $request
-     * @inheritDoc
      */
     #[\Override]
     public function match(Zend_Controller_Request_Http $request)

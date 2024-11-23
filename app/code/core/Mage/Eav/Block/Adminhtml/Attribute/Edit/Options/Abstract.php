@@ -24,11 +24,6 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends 
         $this->setTemplate('eav/attribute/options.phtml');
     }
 
-    /**
-     * Preparing layout, adding buttons
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

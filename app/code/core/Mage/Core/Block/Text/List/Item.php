@@ -31,9 +31,6 @@ class Mage_Core_Block_Text_List_Item extends Mage_Core_Block_Text
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _toHtml()
     {

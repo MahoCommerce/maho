@@ -53,9 +53,6 @@ class Mage_Adminhtml_Block_Widget_Breadcrumbs extends Mage_Adminhtml_Block_Templ
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeToHtml()
     {

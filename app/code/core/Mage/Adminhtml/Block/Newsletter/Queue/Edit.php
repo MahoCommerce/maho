@@ -41,9 +41,6 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit extends Mage_Adminhtml_Block_Te
         return Mage::registry('current_queue');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeToHtml()
     {
@@ -71,9 +68,6 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit extends Mage_Adminhtml_Block_Te
         return $this->getUrl('*/*/save', $params);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

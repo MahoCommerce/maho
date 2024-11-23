@@ -24,9 +24,6 @@ class Mage_Cms_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstract
         $this->_init('cms/block', 'block_id');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeDelete(Mage_Core_Model_Abstract $object)
     {
@@ -59,9 +56,6 @@ class Mage_Cms_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstract
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
@@ -97,9 +91,6 @@ class Mage_Cms_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstract
         return parent::_afterSave($object);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function load(Mage_Core_Model_Abstract $object, $value, $field = null)
     {
@@ -110,9 +101,6 @@ class Mage_Cms_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstract
         return parent::load($object, $value, $field);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {

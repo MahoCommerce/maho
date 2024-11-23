@@ -21,9 +21,6 @@ class Mage_Review_Block_Product_View extends Mage_Catalog_Block_Product_View
     protected $_reviewsCollection;
 
     /**
-     * Render block HTML
-     *
-     * @inheritDoc
      * @throws Mage_Core_Exception
      */
     #[\Override]

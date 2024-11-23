@@ -181,8 +181,6 @@ class Mage_Catalog_Model_Resource_Product_Link_Product_Collection extends Mage_C
 
     /**
      * Join linked products when specified link model
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeLoad()
@@ -310,8 +308,6 @@ class Mage_Catalog_Model_Resource_Product_Link_Product_Collection extends Mage_C
      * Set sorting order
      *
      * $attribute can also be an array of attributes
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function setOrder($attribute, $dir = self::SORT_ORDER_ASC)

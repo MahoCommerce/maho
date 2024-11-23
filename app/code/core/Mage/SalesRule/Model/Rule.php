@@ -179,8 +179,6 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Set coupon code and uses per coupon
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterLoad()

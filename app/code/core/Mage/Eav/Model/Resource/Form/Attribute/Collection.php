@@ -148,8 +148,6 @@ class Mage_Eav_Model_Resource_Form_Attribute_Collection extends Mage_Core_Model_
 
     /**
      * Add joins to select
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeLoad()

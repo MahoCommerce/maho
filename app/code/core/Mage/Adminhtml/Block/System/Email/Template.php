@@ -28,9 +28,6 @@ class Mage_Adminhtml_Block_System_Email_Template extends Mage_Adminhtml_Block_Te
         $this->setTemplate('system/email/template/list.phtml');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

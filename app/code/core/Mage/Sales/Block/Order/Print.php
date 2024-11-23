@@ -18,9 +18,6 @@
  */
 class Mage_Sales_Block_Order_Print extends Mage_Sales_Block_Items_Abstract
 {
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

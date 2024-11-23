@@ -240,8 +240,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
 
     /**
      * Add an object to the collection
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function addItem(Varien_Object $object)
@@ -319,8 +317,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
 
     /**
      * Wrapper for compatibility with Varien_Data_Collection_Db
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function addFieldToFilter($attribute, $condition = null)
@@ -1413,10 +1409,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
 
     /**
      * Set sorting order
-     *
      * $attribute can also be an array of attributes
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function setOrder($attribute, $dir = self::SORT_ORDER_ASC)

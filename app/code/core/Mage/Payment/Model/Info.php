@@ -58,11 +58,6 @@ class Mage_Payment_Model_Info extends Mage_Core_Model_Abstract
      */
     protected $_additionalInformation = -1;
 
-    /**
-     * Retrieve data
-     *
-     * @inheritDoc
-     */
     #[\Override]
     public function getData($key = '', $index = null)
     {

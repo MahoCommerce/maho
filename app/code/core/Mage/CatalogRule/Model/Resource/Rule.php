@@ -84,9 +84,6 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
 
     /**
      * Add customer group ids and website ids to rule data after load
-     *
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $object)

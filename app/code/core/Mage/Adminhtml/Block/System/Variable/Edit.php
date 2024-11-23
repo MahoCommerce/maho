@@ -34,9 +34,6 @@ class Mage_Adminhtml_Block_System_Variable_Edit extends Mage_Adminhtml_Block_Wid
         return Mage::registry('current_variable');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _preparelayout()
     {

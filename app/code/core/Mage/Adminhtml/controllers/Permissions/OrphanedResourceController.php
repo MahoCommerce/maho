@@ -69,9 +69,6 @@ class Mage_Adminhtml_Permissions_OrphanedResourceController extends Mage_Adminht
         $this->_redirect('*/*/');
     }
 
-    /**
-     * @inheritdoc
-     */
     #[\Override]
     public function preDispatch()
     {

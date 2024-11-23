@@ -60,9 +60,6 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
      */
     protected $_usedStorageTypes = ['core/session'];
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function _prepareLayout()
     {

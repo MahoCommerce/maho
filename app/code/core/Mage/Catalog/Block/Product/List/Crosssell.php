@@ -59,10 +59,7 @@ class Mage_Catalog_Block_Product_List_Crosssell extends Mage_Catalog_Block_Produ
     }
 
     /**
-     * Before rendering html process
      * Prepare items collection
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeToHtml()

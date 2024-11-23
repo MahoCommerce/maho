@@ -67,8 +67,6 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
 
     /**
      * Save bind recipients to message
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave()
@@ -79,8 +77,6 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
 
     /**
      * Validate recipients before saving
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeSave()

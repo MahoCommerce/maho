@@ -18,9 +18,6 @@
  */
 class Mage_Customer_Model_Customer_Attribute_Backend_Website extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function beforeSave($object)
     {

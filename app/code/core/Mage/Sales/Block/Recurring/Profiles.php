@@ -111,8 +111,6 @@ class Mage_Sales_Block_Recurring_Profiles extends Mage_Core_Block_Template
 
     /**
      * Set back Url
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeToHtml()

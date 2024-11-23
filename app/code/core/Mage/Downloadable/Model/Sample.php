@@ -61,11 +61,6 @@ class Mage_Downloadable_Model_Sample extends Mage_Core_Model_Abstract
         return Mage::getBaseDir();
     }
 
-    /**
-     * After save process
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterSave()
     {

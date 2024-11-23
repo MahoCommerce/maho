@@ -444,11 +444,6 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
         return false;
     }
 
-    /**
-     * Load array
-     *
-     * @inheritDoc
-     */
     #[\Override]
     public function loadArray($arr)
     {

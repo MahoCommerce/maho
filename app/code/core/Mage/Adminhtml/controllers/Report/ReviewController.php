@@ -126,9 +126,6 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
         $this->_prepareDownloadResponse(...$grid->getExcel('review_product_detail.xml', -1));
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _isAllowed()
     {

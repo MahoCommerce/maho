@@ -31,9 +31,6 @@ class Mage_Adminhtml_Block_Catalog_Search_Grid extends Mage_Adminhtml_Block_Widg
     }
 
     /**
-     * Prepare collection for Grid
-     *
-     * @inheritDoc
      * @throws Mage_Core_Exception
      */
     #[\Override]
@@ -45,12 +42,6 @@ class Mage_Adminhtml_Block_Catalog_Search_Grid extends Mage_Adminhtml_Block_Widg
         return parent::_prepareCollection();
     }
 
-    /**
-     * Prepare Grid columns
-     *
-     * @inheritDoc
-     * @throws Exception
-     */
     #[\Override]
     protected function _prepareColumns()
     {
@@ -130,11 +121,6 @@ class Mage_Adminhtml_Block_Catalog_Search_Grid extends Mage_Adminhtml_Block_Widg
         return parent::_prepareColumns();
     }
 
-    /**
-     * Prepare grid massaction actions
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareMassaction()
     {

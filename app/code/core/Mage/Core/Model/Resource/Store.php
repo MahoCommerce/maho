@@ -43,7 +43,6 @@ class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstrac
      * Check store code before save
      *
      * @param Mage_Core_Model_Store $model
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $model)
@@ -61,7 +60,6 @@ class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstrac
      * Update Store Group data after save store
      *
      * @param Mage_Core_Model_Store $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
@@ -77,7 +75,6 @@ class Mage_Core_Model_Resource_Store extends Mage_Core_Model_Resource_Db_Abstrac
      * Remove core configuration data after delete store
      *
      * @param Mage_Core_Model_Store $model
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterDelete(Mage_Core_Model_Abstract $model)

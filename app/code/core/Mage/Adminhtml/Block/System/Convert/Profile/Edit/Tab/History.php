@@ -30,9 +30,6 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Edit_Tab_History extends Mage_
         $this->setUseAjax(true);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -43,10 +40,6 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Edit_Tab_History extends Mage_
         return parent::_prepareCollection();
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     #[\Override]
     protected function _prepareColumns()
     {

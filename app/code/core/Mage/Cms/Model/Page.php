@@ -88,9 +88,6 @@ class Mage_Cms_Model_Page extends Mage_Core_Model_Abstract
         $this->_init('cms/page');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function load($id, $field = null)
     {

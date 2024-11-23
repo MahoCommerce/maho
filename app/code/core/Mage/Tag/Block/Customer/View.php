@@ -91,11 +91,6 @@ class Mage_Tag_Block_Customer_View extends Mage_Catalog_Block_Product_Abstract
         return Mage::getUrl('review/product/list', ['id' => $productId]);
     }
 
-    /**
-     * Preparing block layout
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

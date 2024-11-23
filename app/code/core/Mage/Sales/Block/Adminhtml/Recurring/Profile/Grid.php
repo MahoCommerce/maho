@@ -27,11 +27,6 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_Grid extends Mage_Adminhtml_B
         $this->setSaveParametersInSession(true);
     }
 
-    /**
-     * Prepare grid collection object
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -43,11 +38,6 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_Grid extends Mage_Adminhtml_B
         return parent::_prepareCollection();
     }
 
-    /**
-     * Prepare grid columns
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {

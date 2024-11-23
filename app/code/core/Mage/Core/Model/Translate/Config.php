@@ -19,7 +19,6 @@ class Mage_Core_Model_Translate_Config extends Varien_Simplexml_Config
     /**
      * Extends current node with xml from $source, appending nodes without merging
      *
-     * @param Varien_Simplexml_Config $config
      * @param boolean $overwrite Argument has no effect, included for PHP 7.2 method signature compatibility
      * @return $this
      */

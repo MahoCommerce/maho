@@ -18,9 +18,6 @@
  */
 class Mage_Directory_Block_Adminhtml_Frontend_Currency_Base extends Mage_Adminhtml_Block_System_Config_Form_Field
 {
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {

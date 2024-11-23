@@ -40,9 +40,6 @@ class Mage_Api_Model_Resource_Role extends Mage_Core_Model_Resource_Db_Abstract
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function load(Mage_Core_Model_Abstract $object, $value, $field = null)
     {

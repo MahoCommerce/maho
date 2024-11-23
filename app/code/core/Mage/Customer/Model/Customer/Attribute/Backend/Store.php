@@ -20,7 +20,6 @@ class Mage_Customer_Model_Customer_Attribute_Backend_Store extends Mage_Eav_Mode
 {
     /**
      * @param Mage_Customer_Model_Customer $object
-     * @inheritDoc
      */
     #[\Override]
     public function beforeSave($object)

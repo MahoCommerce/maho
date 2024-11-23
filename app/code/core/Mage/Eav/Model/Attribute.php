@@ -64,11 +64,6 @@ abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
         return $this->_website;
     }
 
-    /**
-     * Processing object after save data
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterSave()
     {

@@ -25,9 +25,6 @@ class Mage_Sales_Block_Order_Creditmemo extends Mage_Sales_Block_Order_Creditmem
         $this->setTemplate('sales/order/creditmemo.phtml');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

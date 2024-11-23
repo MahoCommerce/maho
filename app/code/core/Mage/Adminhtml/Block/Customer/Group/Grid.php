@@ -27,10 +27,6 @@ class Mage_Adminhtml_Block_Customer_Group_Grid extends Mage_Adminhtml_Block_Widg
         $this->setSaveParametersInSession(true);
     }
 
-    /**
-     * Init customer groups collection
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {

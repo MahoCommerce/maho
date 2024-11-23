@@ -646,8 +646,6 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
 
     /**
      * Validate email template code
-     *
-     * {@inheritDoc}
      */
     #[\Override]
     protected function _beforeSave()

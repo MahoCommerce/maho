@@ -57,9 +57,6 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
         $this->_httpClient = new Varien_Http_Client();
     }
 
-    /**
-     * @inheritdoc
-     */
     #[\Override]
     protected function _convert($currencyFrom, $currencyTo)
     {

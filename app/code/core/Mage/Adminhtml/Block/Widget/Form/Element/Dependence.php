@@ -71,8 +71,6 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
      *
      * @see self::addComplexFieldDependence()
      * @param self::MODE_* $operator one of MODE_NOT, MODE_AND, MODE_OR, MODE_XOR
-     * @param array $condition
-     * @return array
      */
     public function createCondition(string $operator, array $condition): array
     {
@@ -167,7 +165,6 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
      *
      * @param string $targetField field to be toggled
      * @param self::MODE_* $operator one of MODE_NOT, MODE_AND, MODE_OR, MODE_XOR
-     * @param array $condition
      * @return $this
      */
     public function addComplexFieldDependence(string $targetField, string $operator, array $condition): self

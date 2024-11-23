@@ -592,11 +592,6 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    /**
-     * Save wishlist.
-     *
-     * @inheritDoc
-     */
     #[\Override]
     public function save()
     {

@@ -766,11 +766,6 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
         return $this->_getData('name');
     }
 
-    /**
-     * Before delete process
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeDelete()
     {
