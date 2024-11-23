@@ -24,7 +24,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
     {
         $this->entityType = Mage::registry('entity_type');
         $this->attributeSet = Mage::registry('attribute_set');
-        $this->setTemplate('eav/attribute/set/main.phtml');
+        $this->setTemplate('eav/attribute/set/edit.phtml');
     }
 
     /**

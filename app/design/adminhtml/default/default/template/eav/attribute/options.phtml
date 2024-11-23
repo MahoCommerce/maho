@@ -9,16 +9,11 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract $this **/
+$entityTypeCode = Mage::registry('entity_type')->getEntityTypeCode();
+$disabledAttr = $this->getReadOnly() ? 'disabled' : '';
 ?>
-<?php
-/**
- * Attribute options control
- *
- * @var Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract $this
- */
-?>
-<?php $entityTypeCode = Mage::registry('entity_type')->getEntityTypeCode() ?>
-<?php $disabledAttr = $this->getReadOnly() ? 'disabled' : '' ?>
 <ul class="messages">
     <li class="notice-msg">
         <ul>

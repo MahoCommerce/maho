@@ -9,8 +9,10 @@
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+/** @var Mage_Adminhtml_Block_Template $this */
+$entityTypeCode = Mage::registry('entity_type')->getEntityTypeCode();
 ?>
-<?php $entityTypeCode = Mage::registry('entity_type')->getEntityTypeCode() ?>
 <script>
 const inputTypeDefs = <?= Mage::helper('core')->jsonEncode(Mage::helper('eav')->getInputTypes($entityTypeCode)) ?>;
 

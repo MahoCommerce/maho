@@ -9,9 +9,12 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Adminhtml_Block_Template $this */
+$entityTypeCode = 'catalog_product';
 ?>
 <script>
-const inputTypeDefs = <?= Mage::helper('core')->jsonEncode(Mage::helper('eav')->getInputTypes('catalog_product')) ?>;
+const inputTypeDefs = <?= Mage::helper('core')->jsonEncode(Mage::helper('eav')->getInputTypes($entityTypeCode)) ?>;
 
 function saveAndContinueEdit() {
     const activeTab = product_attribute_tabsJsTabs.activeTab.id;
