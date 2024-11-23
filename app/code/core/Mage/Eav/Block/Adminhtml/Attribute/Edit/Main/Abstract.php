@@ -11,13 +11,14 @@
  */
 
 /**
- * Product attribute add/edit form main tab
+ * EAV attribute add/edit form main tab
  *
  * @category   Mage
  * @package    Mage_Eav
  */
-abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mage_Adminhtml_Block_Widget_Form
+abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    /** @var Mage_Eav_Model_Entity_Attribute $_attribute */
     protected $_attribute = null;
 
     /**
@@ -36,6 +37,30 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
     public function getAttributeObject()
     {
         return $this->_attribute ?? Mage::registry('entity_attribute');
+    }
+
+    #[\Override]
+    public function getTabLabel()
+    {
+        return Mage::helper('eav')->__('Properties');
+    }
+
+    #[\Override]
+    public function getTabTitle()
+    {
+        return Mage::helper('eav')->__('Properties');
+    }
+
+    #[\Override]
+    public function canShowTab()
+    {
+        return true;
+    }
+
+    #[\Override]
+    public function isHidden()
+    {
+        return false;
     }
 
     /**
@@ -59,9 +84,7 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
     }
 
     /**
-     * Preparing default form elements for editing attribute
-     *
-     * @inheritDoc
+     * Prepare default form elements for editing attribute
      */
     #[\Override]
     protected function _prepareForm()
@@ -181,6 +204,21 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
     }
 
     /**
+     * Return dependency block object
+     */
+    protected function _getDependence(): Mage_Adminhtml_Block_Widget_Form_Element_Dependence
+    {
+        if (!$this->getChild('form_after')) {
+            /** @var Mage_Adminhtml_Block_Widget_Form_Element_Dependence $block */
+            $block = $this->getLayout()->createBlock('adminhtml/widget_form_element_dependence');
+            $block->addConfigOption('on_event', false)
+                ->addFieldDependence('frontend_class', 'frontend_input', ['text', 'customselect']);
+            $this->setChild('form_after', $block);
+        }
+        return $this->getChild('form_after');
+    }
+
+    /**
      * Initialize form fields values
      *
      * @inheritDoc
@@ -263,20 +301,5 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
         }
 
         return $this;
-    }
-
-    /**
-     * Processing block html after rendering
-     * Adding js block to the end of this block
-     *
-     * @param   string $html
-     * @return  string
-     */
-    #[\Override]
-    protected function _afterToHtml($html)
-    {
-        $jsScripts = $this->getLayout()
-            ->createBlock('eav/adminhtml_attribute_edit_js')->toHtml();
-        return $html . $jsScripts;
     }
 }

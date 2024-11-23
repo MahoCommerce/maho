@@ -91,6 +91,10 @@
         <update handle="adminhtml_input_counter_handle"/>
     </adminhtml_catalog_product_attribute_edit>
 
+    <adminhtml_eav_attribute_edit>
+        <update handle="adminhtml_input_counter_handle"/>
+    </adminhtml_eav_attribute_edit>
+
     <adminhtml_catalog_product_edit>
         <update handle="adminhtml_input_counter_handle"/>
     </adminhtml_catalog_product_edit>

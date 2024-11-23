@@ -13,12 +13,14 @@
  * @category   Mage
  * @package    Mage_Eav
  */
-class Mage_Eav_Block_Adminhtml_Attribute_Set_Toolbar_Add extends Mage_Adminhtml_Block_Template
+class Mage_Eav_Block_Adminhtml_Attribute_Set_Add extends Mage_Adminhtml_Block_Template
 {
-    #[\Override]
-    protected function _construct()
+    protected Mage_Eav_Model_Entity_Type $entityType;
+
+    protected function __construct()
     {
-        $this->setTemplate('eav/attribute/set/toolbar/add.phtml');
+        $this->entityType = Mage::registry('entity_type');
+        $this->setTemplate('eav/attribute/set/add.phtml');
     }
 
     #[\Override]
@@ -42,11 +44,6 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Toolbar_Add extends Mage_Adminhtml_
                     'class' => 'back'
                 ])
         );
-
-        $this->setChild(
-            'setForm',
-            $this->getLayout()->createBlock('eav/adminhtml_attribute_set_main_formset')
-        );
         return parent::_prepareLayout();
     }
 
@@ -55,7 +52,10 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Toolbar_Add extends Mage_Adminhtml_
      */
     protected function _getHeader()
     {
-        return Mage::helper('eav')->__('Add New Attribute Set');
+        return Mage::helper('eav')->__(
+            'Add New %s Attribute Set',
+            Mage::helper('eav')->formatTypeCode($this->entityType->getEntityTypeCode())
+        );
     }
 
     /**
@@ -79,7 +79,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Toolbar_Add extends Mage_Adminhtml_
      */
     protected function getFormHtml()
     {
-        return $this->getChildHtml('setForm');
+        return $this->getChildHtml('set_form');
     }
 
     /**
@@ -87,6 +87,6 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Toolbar_Add extends Mage_Adminhtml_
      */
     protected function getFormId()
     {
-        return $this->getChild('setForm')->getForm()->getId();
+        return $this->getChild('set_form')->getForm()->getId();
     }
 }

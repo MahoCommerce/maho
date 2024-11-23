@@ -17,11 +17,6 @@ abstract class Mage_Eav_Controller_Adminhtml_Set_Abstract extends Mage_Adminhtml
     protected string $entityTypeCode;
     protected Mage_Eav_Model_Entity_Type $entityType;
 
-    /**
-     * Controller predispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
     #[\Override]
     public function preDispatch()
     {
@@ -32,6 +27,17 @@ abstract class Mage_Eav_Controller_Adminhtml_Set_Abstract extends Mage_Adminhtml
         return parent::preDispatch();
     }
 
+    #[\Override]
+    public function addActionLayoutHandles()
+    {
+        parent::addActionLayoutHandles();
+        $this->getLayout()->getUpdate()
+            ->removeHandle(strtolower($this->getFullActionName()))
+            ->addHandle(strtolower('adminhtml_eav_set_' . $this->getRequest()->getActionName()))
+            ->addHandle(strtolower($this->getFullActionName()));
+        return $this;
+    }
+
     protected function _initAction()
     {
         return $this->loadLayout();
@@ -40,25 +46,20 @@ abstract class Mage_Eav_Controller_Adminhtml_Set_Abstract extends Mage_Adminhtml
     public function indexAction()
     {
         $this->_initAction()
-             ->_addContent($this->getLayout()->createBlock('eav/adminhtml_attribute_set'))
-             ->renderLayout();
+            ->renderLayout();
     }
 
     public function setGridAction()
     {
-        $this->getResponse()->setBody(
-            $this->getLayout()
-                 ->createBlock('eav/adminhtml_attribute_set_grid')
-                 ->toHtml()
-        );
+        $this->_initAction()
+            ->renderLayout();
     }
 
     public function addAction()
     {
         $this->_initAction()
-             ->_title($this->__('New Set'))
-             ->_addContent($this->getLayout()->createBlock('eav/adminhtml_attribute_set_toolbar_add'))
-             ->renderLayout();
+            ->_title($this->__('New Set'))
+            ->renderLayout();
     }
 
     public function editAction()
@@ -75,10 +76,8 @@ abstract class Mage_Eav_Controller_Adminhtml_Set_Abstract extends Mage_Adminhtml
         Mage::register('current_attribute_set', $attributeSet);
 
         $this->_initAction()
-             ->_addContent($this->getLayout()->createBlock('eav/adminhtml_attribute_set_main'));
-
-        $this->getLayout()->getBlock('head')->setCanLoadExtJs(true);
-        $this->renderLayout();
+            ->_title($attributeSet->getAttributeSetName())
+            ->renderLayout();
     }
 
     public function createFromSkeletonSetAction()

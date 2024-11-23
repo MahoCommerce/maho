@@ -5,6 +5,7 @@
  * @category   Mage
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -13,11 +14,13 @@
  * @category   Mage
  * @package    Mage_Eav
  */
-class Mage_Eav_Block_Adminhtml_Attribute_Set_Main_Formset extends Mage_Adminhtml_Block_Widget_Form
+class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit_Formset extends Mage_Adminhtml_Block_Widget_Form
 {
+    protected Mage_Eav_Model_Entity_Type $entityType;
+
     public function __construct()
     {
-        parent::__construct();
+        $this->entityType = Mage::registry('entity_type');
     }
 
     #[\Override]
@@ -43,11 +46,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Main_Formset extends Mage_Adminhtml
                 'value' => '1'
             ]);
 
-            /** @var Mage_Eav_Model_Resource_Entity_Attribute_Set_Collection @collection */
-            $collection = Mage::getModel('eav/entity_attribute_set')
-                        ->getResourceCollection();
-
-            $sets = $collection->setEntityTypeFilter(Mage::registry('entity_type')->getEntityTypeId())
+            $sets = $this->entityType->getAttributeSetCollection()
                 ->setOrder('attribute_set_name', 'asc')
                 ->load()
                 ->toOptionArray();

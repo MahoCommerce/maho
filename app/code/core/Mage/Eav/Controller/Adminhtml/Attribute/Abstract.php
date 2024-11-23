@@ -17,11 +17,6 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
     protected string $entityTypeCode;
     protected Mage_Eav_Model_Entity_Type $entityType;
 
-    /**
-     * Controller predispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
     #[\Override]
     public function preDispatch()
     {
@@ -32,6 +27,17 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
         return parent::preDispatch();
     }
 
+    #[\Override]
+    public function addActionLayoutHandles()
+    {
+        parent::addActionLayoutHandles();
+        $this->getLayout()->getUpdate()
+            ->removeHandle(strtolower($this->getFullActionName()))
+            ->addHandle(strtolower('adminhtml_eav_attribute_' . $this->getRequest()->getActionName()))
+            ->addHandle(strtolower($this->getFullActionName()));
+        return $this;
+    }
+
     protected function _initAction()
     {
         return $this->loadLayout();
@@ -40,8 +46,7 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
     public function indexAction()
     {
         $this->_initAction()
-             ->_addContent($this->getLayout()->createBlock('eav/adminhtml_attribute'))
-             ->renderLayout();
+            ->renderLayout();
     }
 
     public function newAction()
@@ -119,20 +124,12 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
         // Add website switcher if editing existing attribute and we have a scope table
         if (!Mage::app()->isSingleStoreMode()) {
             if ($id && $attribute->getResource()->hasScopeTable()) {
-                $this->_addLeft(
+                $this->getLayout()->getBlock('left')->insert(
                     $this->getLayout()->createBlock('adminhtml/website_switcher')
-                         ->setDefaultWebsiteName($this->__('Default Values'))
+                        ->setDefaultWebsiteName($this->__('Default Values'))
                 );
             }
         }
-
-        $this->_addLeft($this->getLayout()->createBlock('eav/adminhtml_attribute_edit_tabs'))
-             ->_addContent($this->getLayout()->createBlock('eav/adminhtml_attribute_edit'));
-
-        $this->_addJs(
-            $this->getLayout()->createBlock('adminhtml/template')
-                 ->setTemplate('eav/attribute/js.phtml')
-        );
 
         $this->renderLayout();
     }
@@ -170,14 +167,12 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
     protected function _filterPostData($data)
     {
         if ($data) {
-            // Labels
             $data['frontend_label'] = (array) $data['frontend_label'];
             foreach ($data['frontend_label'] as & $value) {
                 if ($value) {
                     $value = Mage::helper('eav')->stripTags($value);
                 }
             }
-            // Options
             if (!empty($data['option']) && !empty($data['option']['value']) && is_array($data['option']['value'])) {
                 foreach ($data['option']['value'] as $key => $values) {
                     foreach ($values as $storeId => $storeLabel) {
@@ -235,7 +230,7 @@ abstract class Mage_Eav_Controller_Adminhtml_Attribute_Abstract extends Mage_Adm
             }
 
             // Entity type check
-            if ($attribute->getEntityTypeId() !== $this->entityType->getEntityTypeId()) {
+            if ($attribute->getEntityTypeId() != $this->entityType->getEntityTypeId()) {
                 $session->addError(
                     $this->__('This attribute cannot be updated.')
                 );

@@ -14,11 +14,11 @@
 /**
  * Attribute options control
  *
- * @see Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract
  * @var Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract $this
  */
 ?>
-<div>
+<?php $entityTypeCode = Mage::registry('entity_type')->getEntityTypeCode() ?>
+<?php $disabledAttr = $this->getReadOnly() ? 'disabled' : '' ?>
 <ul class="messages">
     <li class="notice-msg">
         <ul>
@@ -26,240 +26,90 @@
         </ul>
     </li>
 </ul>
-</div>
 
 <div class="entity-edit">
     <div class="entry-edit-head">
         <h4><?= $this->__('Manage Titles (Size, Color, etc.)') ?></h4>
     </div>
     <div class="box">
-            <div class="hor-scroll">
+        <div class="hor-scroll">
             <table class="dynamic-grid" cellspacing="0" id="attribute-labels-table">
                 <tr>
-                <?php foreach ($this->getStores() as $_store): ?>
-                    <th><?= $this->escapeHtml($_store->getName()) ?></th>
+                <?php foreach ($this->getStores() as $store): ?>
+                    <th><?= $this->escapeHtml($store->getName()) ?></th>
                 <?php endforeach ?>
                 </tr>
                 <tr>
-                    <?php $_labels = $this->getLabelValues() ?>
-                    <?php foreach ($this->getStores() as $_store): ?>
+                    <?php $labels = $this->getLabelValues() ?>
+                    <?php foreach ($this->getStores() as $store): ?>
                     <td>
-                        <input class="input-text<?php if($_store->getId()==0): ?> required-option<?php endif ?>" type="text" name="frontend_label[<?= $_store->getId() ?>]" value="<?= $this->escapeHtml($_labels[$_store->getId()]) ?>"<?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>/>
+                        <input class="input-text<?php if($store->getId()==0): ?> required-entry<?php endif ?>" type="text" name="frontend_label[<?= $store->getId() ?>]" value="<?= $this->escapeHtml($labels[$store->getId()]) ?>" <?= $disabledAttr ?>/>
                     </td>
                     <?php endforeach ?>
                 </tr>
             </table>
-            </div>
+        </div>
     </div>
 </div>
-<br/>
-<div class="entity-edit" id="matage-options-panel">
+
+<div class="entity-edit" id="manage-options-panel">
     <div class="entry-edit-head">
-    <h4><?= $this->__('Manage Options (values of your attribute)') ?></h4>
+        <h4><?= $this->__('Manage Options (values of your attribute)') ?></h4>
     </div>
     <div class="box">
         <div class="hor-scroll">
-            <table class="dynamic-grid" cellspacing="0"  cellpadding="0">
-                <tr id="attribute-options-table">
-                    <?php if ($this->isConfigurableSwatchesEnabled()): ?>
-                        <th><?= $this->escapeHtml($this->__('Swatch')) ?></th>
-                    <?php endif ?>
-                    <?php foreach ($this->getStores() as $_store): ?>
-                        <th><?= $this->escapeHtml($_store->getName()) ?></th>
-                    <?php endforeach ?>
-                        <th><?= $this->__('Position') ?></th>
-                        <th class="nobr a-center"><?= $this->escapeHtml($this->__('Is Default')) ?></th>
-                        <th>
-                            <?php if (!$this->getReadOnly()):?>
-                                <?= $this->getAddNewButtonHtml() ?>
-                            <?php endif ?>
-                        </th>
-                    </tr>
-                    <tr class="no-display template" id="row-template">    
-                        <?php if ($this->isConfigurableSwatchesEnabled()): ?>
-                        <td style="position:relative">
-                            <input type="hidden" disabled class="swatch-value" name="option[swatch][{{id}}]" value="{{swatch}}" />
-                            <input type="color" class="input-color-html5 validate-hex-color-hash {{swatch_class}}" value="{{swatch}}" />    
-                            <span class="swatch-delete" data-msg-delete="<?= $this->escapeHtml($this->__('Are you sure to delete this fallback color?')) ?>">X</span>
-                        </td>
+            <table class="dynamic-grid" cellspacing="0" cellpadding="0" id="attribute-options-table">
+                <tr>
+                <?php if ($this->isConfigurableSwatchesEnabled()): ?>
+                    <th><?= $this->escapeHtml($this->__('Swatch')) ?></th>
+                <?php endif ?>
+                <?php foreach ($this->getStores() as $store): ?>
+                    <th><?= $this->escapeHtml($store->getName()) ?></th>
+                <?php endforeach ?>
+                    <th><?= $this->__('Position') ?></th>
+                    <th class="nobr a-center"><?= $this->escapeHtml($this->__('Is Default')) ?></th>
+                    <th>
+                        <?php if (!$this->getReadOnly()):?>
+                            <?= $this->getAddNewButtonHtml() ?>
                         <?php endif ?>
-                        <?php foreach ($this->getStores() as $_store): ?>
-                        <td><input name="option[value][{{id}}][<?= $_store->getId() ?>]" value="{{store<?= $_store->getId() ?>}}" class="input-text<?php if($_store->getId()==0): ?> required-option<?php endif ?>" type="text" <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>/></td>
-                        <?php endforeach ?>
-                        <td class="a-center"><input class="input-text" type="text" name="option[order][{{id}}]" value="{{sort_order}}" <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>/></td>
-                        <td><input class="input-radio" type="radio" name="default[]" value="{{id}}" <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>/></td>
-                        <td class="a-left">
-                            <input type="hidden" class="delete-flag" name="option[delete][{{id}}]" value="" />
-                            <?php if (!$this->getReadOnly()):?>
-                                <?= $this->getDeleteButtonHtml() ?>
-                            <?php endif ?>
-                        </td>
-                    </tr>
+                    </th>
+                </tr>
             </table>
         </div>
         <input type="hidden" id="option-count-check" value="" />
     </div>
 </div>
-<script type="text/javascript">
-//<![CDATA[
-var optionDefaultInputType = 'radio';
 
-// IE removes quotes from element.innerHTML whenever it thinks they're not needed, which breaks html.
-var templateText =
-        '<tr class="option-row" title="ID: {{id}}">'+
+<template id="row-template">
+    <tr class="option-row" title="Option ID: {{id}}">
         <?php if ($this->isConfigurableSwatchesEnabled()): ?>
-            '<td style="position:relative">'+
-                '<input type="hidden" disabled class="swatch-value" name="option[swatch][{{id}}]" value="{{swatch}}" />'+
-                '<input type="color" class="swatch-option input-color-html5 validate-hex-color-hash {{swatch_class}}" value="{{swatch}}" />'+
-                '<span class="swatch-delete" data-msg-delete="<?= Mage::helper('core')->jsQuoteEscape($this->__('Are you sure to delete this fallback color?')) ?>">X</span>'+
-            '</td>'+
+        <td class="swatch-option {{swatch_class}}">
+            <input type="hidden" name="option[swatch][{{id}}]" class="swatch-value" disabled />
+            <input type="color" class="input-color-html5 validate-hex-color-hash" />
+            <button title="Delete Swatch" type="button" class="swatch-delete">X</button>
+        </td>
         <?php endif ?>
-<?php foreach ($this->getStores() as $_store): ?>
-            '<td><input name="option[value][{{id}}][<?= $_store->getId() ?>]" value="{{store<?= $_store->getId() ?>}}" class="input-text<?php if($_store->getId()==0): ?> required-option<?php endif ?>" type="text" <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>/><\/td>'+
-<?php endforeach ?>
-            '<td><input class="input-text" type="text" name="option[order][{{id}}]" value="{{sort_order}}" <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>/><\/td>'+
-            '<td class="a-center"><input class="input-radio" type="{{intype}}" name="default[]" value="{{id}}" {{checked}} <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>/><\/td>'+
-            '<td class="a-left" id="delete_button_container_{{id}}">'+
-                '<input type="hidden" class="delete-flag" name="option[delete][{{id}}]" value="" />'+
-                <?php if (!$this->getReadOnly()):?>
-                    '<?= Mage::helper('core')->jsQuoteEscape($this->getDeleteButtonHtml()) ?>'+
-                <?php endif ?>
-            '<\/td>'+
-        '<\/tr>';
+        <?php foreach ($this->getStores() as $store): ?>
+        <td><input type="text" name="option[value][{{id}}][<?= $store->getId() ?>]" value="{{store<?= $store->getId() ?>}}" class="input-text <?= $store->getId() == 0 ? 'required-entry' : '' ?>" <?= $disabledAttr ?>/></td>
+        <?php endforeach ?>
+        <td><input type="text" name="option[order][{{id}}]" value="{{sort_order}}" class="input-text" <?= $disabledAttr ?>/></td>
+        <td class="a-center"><input type="{{intype}}" name="default[]" value="{{id}}" class="input-radio" {{checked}} <?= $disabledAttr ?>/></td>
+        <td class="a-left">
+            <input type="hidden" name="option[delete][{{id}}]" value="" class="delete-flag" />
+            <?php if (!$this->getReadOnly()):?>
+                <?= $this->getDeleteButtonHtml() ?>
+            <?php endif ?>
+        </td>
+    </tr>
+</template>
 
-var attributeOption = {
-    table : document.getElementById('attribute-options-table'),
-    templateSyntax : /(^|.|\r|\n)({{(\w+)}})/,
-    templateText : templateText,
-    itemCount : 0,
-    totalItems : 0,
-    isReadOnly: <?= (int)$this->getReadOnly() ?>,
-    add : function(data) {
-        this.template = new Template(this.templateText, this.templateSyntax);
-        let isNewOption = false;
-        if (!data.id) {
-            data.id = 'option_' + this.itemCount;
-            isNewOption = true;
-        }
-        if (!data.intype) {
-            data.intype = optionDefaultInputType;
-        }
-        if (!data.swatch) {
-            data.swatch_class = 'swatch-disabled';
-        }
-        let newHTML = this.template.evaluate(data);
-        this.table.insertAdjacentHTML('afterend', newHTML);
-        if (isNewOption && !this.isReadOnly) {
-            this.enableNewOptionDeleteButton(data.id);
-        }
-        this.bindRemoveButtons();
-        this.bindSwatchButtons();
-        this.bindSwatchRemoveButtons();
-        this.itemCount++;
-        this.totalItems++;
-        this.updateItemsCountField();
-    },
-    remove : function(event){
-        let element = event.target.closest('tr');
-        if (element) {
-            let elementFlags = element.querySelectorAll('.delete-flag');
-            if (elementFlags.length > 0) {
-                elementFlags[0].value = 1;
-            }
+<script>
+Validation.add('required-options-count', '<?= $this->jsQuoteEscape($this->__('Options is required')) ?>', (v) => !Validation.get('IsEmpty').test(v));
 
-            element.classList.add('no-display', 'template');
-            this.totalItems--;
-            this.updateItemsCountField();
-        }
-    },
-    swatch : function(event){
-        let element = event.target.closest('tr');
-        if (element) {
-            let elementSwatchValue = element.querySelector('.swatch-value');
-            if (elementSwatchValue) {
-                elementSwatchValue.disabled = false;
-                elementSwatchValue.value = event.target.value;
-            }
-
-            event.target.classList.remove('swatch-disabled');
-        }
-    },
-    swatchremove : function(event){
-        if (!confirm(event.target.getAttribute('data-msg-delete'))) {
-            return;
-        }
-        let element = event.target.closest('tr');
-        if (element) {
-            let elementSwatchValue = element.querySelector('.swatch-value');
-            if (elementSwatchValue) {
-                elementSwatchValue.disabled = false;
-                elementSwatchValue.value = '';
-            }
-
-            let elementSwatchOption = element.querySelector('.swatch-option');
-            if (elementSwatchOption) {
-                elementSwatchOption.value = '';
-                elementSwatchOption.classList.add('swatch-disabled');
-            }
-        }
-    },
-    updateItemsCountField: function() {
-        let optionCountCheck = document.getElementById('option-count-check');
-        optionCountCheck.value = this.totalItems > 0 ? '1' : '';
-    },
-    enableNewOptionDeleteButton: function(id) {
-        document.querySelectorAll('#delete_button_container_' + id + ' button').forEach(function(button) {
-            button.disabled = false;
-            button.classList.remove('disabled');
-        });
-    },
-    bindRemoveButtons: function() {
-        let buttons = document.querySelectorAll('.delete-option');
-        buttons.forEach(function(button) {
-            if (!button.binded) {
-                button.binded = true;
-                button.addEventListener('click', attributeOption.remove.bind(attributeOption));
-            }
-        });
-    },
-    bindSwatchButtons: function() {
-        let buttons = document.querySelectorAll('.swatch-option');
-        buttons.forEach(function(button) {
-            if (!button.dataset.binded) {
-                button.dataset.binded = true;
-                button.addEventListener('change', attributeOption.swatch.bind(attributeOption));
-            }
-        });
-    },
-    bindSwatchRemoveButtons: function() {
-        let buttons = document.querySelectorAll('.swatch-delete');
-        buttons.forEach(function(button) {
-            if (!button.binded) {
-                button.binded = true;
-                button.addEventListener('click', attributeOption.swatchremove.bind(attributeOption));
-            }
-        });
-    }
-}
-let rowTemplate = document.getElementById('row-template');
-if (rowTemplate) {
-    rowTemplate.remove();
-}
-attributeOption.bindRemoveButtons();
-let addNewOptionButton = document.getElementById('add_new_option_button');
-if (addNewOptionButton) {
-    addNewOptionButton.addEventListener('click', attributeOption.add.bind(attributeOption));
-}
-Validation.addAllThese([
-    ['required-option', '<?= $this->jsQuoteEscape($this->__('Failed')) ?>', function(v) {
-        return !Validation.get('IsEmpty').test(v);
-}]]);
-Validation.addAllThese([
-    ['required-options-count', '<?= $this->jsQuoteEscape($this->__('Options is required')) ?>', function(v) {
-        return !Validation.get('IsEmpty').test(v);
-}]]);
-<?php foreach ($this->getOptionValues() as $_value): ?>
-    attributeOption.add(<?= $_value->toJson() ?>);
-<?php endforeach ?>
-//]]>
+document.addEventListener('DOMContentLoaded', () => {
+    const template = document.getElementById('row-template').innerHTML;
+    const inputTypeOptionsInfo = <?= Mage::helper('core')->jsonEncode(Mage::helper('eav')->getInputTypeOptionsPanelInfo($entityTypeCode)) ?>;
+    const optionsForm = new EavAttributeOptionsForm('manage-options-panel', inputTypeOptionsInfo, template);
+    optionsForm.addMany(<?= Mage::helper('core')->jsonEncode($this->getOptionValues()) ?>);
+});
 </script>

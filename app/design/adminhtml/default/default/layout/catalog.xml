@@ -261,9 +261,21 @@ Layout handle for configurable products
         </reference>
     </adminhtml_catalog_product_action_attribute_edit>
 
+<!--
+Layout handles for managing product attributes, inherits from adminhtml_eav_attribute_*
+-->
+    <adminhtml_catalog_product_attribute_index>
+        <reference name="content">
+            <block type="adminhtml/catalog_product_attribute" name="attribute_grid"></block>
+        </reference>
+    </adminhtml_catalog_product_attribute_index>
+
     <adminhtml_catalog_product_attribute_edit>
         <reference name="left">
-            <block type="adminhtml/catalog_product_attribute_edit_tabs" name="attribute_edit_tabs"></block>
+            <block type="adminhtml/catalog_product_attribute_edit_tabs" name="attribute_edit_tabs">
+                <action method="addTab"><name>main</name><block>adminhtml/catalog_product_attribute_edit_tab_main</block></action>
+                <action method="addTab"><name>labels</name><block>adminhtml/catalog_product_attribute_edit_tab_options</block></action>
+            </block>
         </reference>
         <reference name="content">
             <block type="adminhtml/catalog_product_attribute_edit" name="attribute_edit_content"></block>
@@ -273,6 +285,45 @@ Layout handle for configurable products
         </reference>
     </adminhtml_catalog_product_attribute_edit>
 
+<!--
+Layout handles for managing product attribute sets, inherits from adminhtml_eav_set_*
+-->
+    <adminhtml_catalog_product_set_index>
+        <reference name="content">
+            <block type="adminhtml/catalog_product_attribute_set_toolbar_main" name="attribute_set"></block>
+            <block type="adminhtml/catalog_product_attribute_set_grid" name="attribute_set_grid"></block>
+        </reference>
+    </adminhtml_catalog_product_set_index>
+
+    <adminhtml_catalog_product_set_setgrid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="adminhtml/catalog_product_attribute_set_grid" name="attribute_set_grid"/>
+        </block>
+    </adminhtml_catalog_product_set_setgrid>
+
+    <adminhtml_catalog_product_set_add>
+        <reference name="content">
+            <block type="adminhtml/catalog_product_attribute_set_toolbar_add" name="attribute_set_add">
+                <block type="adminhtml/catalog_product_attribute_set_main_formset" name="set_form"></block>
+            </block>
+        </reference>
+    </adminhtml_catalog_product_set_add>
+
+    <adminhtml_catalog_product_set_edit>
+        <reference name="head">
+            <action method="setCanLoadExtJs"><flag>1</flag></action>
+        </reference>
+        <reference name="content">
+            <block type="adminhtml/catalog_product_attribute_set_main" name="attribute_set_edit">
+                <block type="adminhtml/catalog_product_attribute_set_main_formset" name="set_form"></block>
+                <block type="adminhtml/catalog_product_attribute_set_main_tree_group" name="group_tree"></block>
+            </block>
+        </reference>
+    </adminhtml_catalog_product_set_edit>
+
+<!--
+Layout handles for managing categories
+-->
     <adminhtml_catalog_category_edit>
         <update handle="editor"/>
         <reference name="left">

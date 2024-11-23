@@ -22,4 +22,10 @@
         <message>Out of Stock</message>
     </out-of-stock>
     <!-- end swatches-product.js -->
+
+    <!-- mage/adminhtml/eav/options.js -->
+    <delete-msg translate="message" module="configurableswatches">
+        <message>Are you sure to delete this fallback color?</message>
+    </delete-msg>
+    <!-- end mage/adminhtml/eav/options.js -->
 </jstranslator>

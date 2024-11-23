@@ -194,12 +194,15 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
      *     - 'frontend_class': the "Input Validation" input
      *     - '_default_value': the various "Default Value" inputs
      *     - '_front_fieldset': the entire "Frontend Properties" fieldset
+     *     - '_scope': the saving scope dropdown
      * - disabled_types: (array) product types to remove from the "Apply To" dropdown, examples:
      *     - 'simple'
      *     - 'bundle'
      *     - 'configurable'
      *     - 'grouped'
      *     - 'virtual'
+     * - options_panel: (object) configuration options for the "Manage Options" panel
+     *     - 'intype': (string) the HTML input type to use for "Is Default" boxes, can be 'radio' or 'checkbox'
      *
      * See <eav_inputtypes> nodes in various config.xml files for examples
      */
@@ -237,7 +240,9 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
                 Mage::dispatchEvent($event, ['response' => $response]);
                 $inputTypes = $response->getTypes();
             }
-            $this->cacheInputTypes[$entityTypeCode] = $inputTypes;
+            foreach ($inputTypes as $type) {
+                $this->cacheInputTypes[$entityTypeCode][$type['value']] = $type;
+            }
         }
         return $this->cacheInputTypes[$entityTypeCode];
     }
@@ -247,13 +252,7 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getAttributeBackendType(string $entityTypeCode, string $inputType): ?string
     {
-        $inputTypes = $this->getInputTypes($entityTypeCode);
-        foreach ($inputTypes as $type) {
-            if ($inputType === $type['value']) {
-                return $type['backend_type'] ?? null;
-            }
-        }
-        return null;
+        return $this->getInputTypes($entityTypeCode)[$inputType]['backend_type'] ?? null;
     }
 
     /**
@@ -261,13 +260,7 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getAttributeBackendModel(string $entityTypeCode, string $inputType): ?string
     {
-        $inputTypes = $this->getInputTypes($entityTypeCode);
-        foreach ($inputTypes as $type) {
-            if ($inputType === $type['value']) {
-                return $type['backend_model'] ?? null;
-            }
-        }
-        return null;
+        return $this->getInputTypes($entityTypeCode)[$inputType]['backend_model'] ?? null;
     }
 
     /**
@@ -275,13 +268,7 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getAttributeFrontendModel(string $entityTypeCode, string $inputType): ?string
     {
-        $inputTypes = $this->getInputTypes($entityTypeCode);
-        foreach ($inputTypes as $type) {
-            if ($inputType === $type['value']) {
-                return $type['frontend_model'] ?? null;
-            }
-        }
-        return null;
+        return $this->getInputTypes($entityTypeCode)[$inputType]['frontend_model'] ?? null;
     }
 
     /**
@@ -289,13 +276,7 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getAttributeSourceModel(string $entityTypeCode, string $inputType): ?string
     {
-        $inputTypes = $this->getInputTypes($entityTypeCode);
-        foreach ($inputTypes as $type) {
-            if ($inputType === $type['value']) {
-                return $type['source_model'] ?? null;
-            }
-        }
-        return null;
+        return $this->getInputTypes($entityTypeCode)[$inputType]['source_model'] ?? null;
     }
 
     /**
@@ -303,13 +284,7 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getAttributeDefaultValueField(string $entityTypeCode, string $inputType): ?string
     {
-        $inputTypes = $this->getInputTypes($entityTypeCode);
-        foreach ($inputTypes as $type) {
-            if ($inputType === $type['value']) {
-                return $type['default_value_field'] ?? null;
-            }
-        }
-        return null;
+        return $this->getInputTypes($entityTypeCode)[$inputType]['default_value_field'] ?? null;
     }
 
     /**
@@ -318,9 +293,9 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
     public function getInputTypeHiddenFields(string $entityTypeCode): array
     {
         $hiddenFields = [];
-        foreach ($this->getInputTypes($entityTypeCode) as $type) {
+        foreach ($this->getInputTypes($entityTypeCode) as $key => $type) {
             if (isset($type['hide_fields'])) {
-                $hiddenFields[$type['value']] = $type['hide_fields'];
+                $hiddenFields[$key] = $type['hide_fields'];
             }
         }
         return $hiddenFields;
@@ -332,12 +307,26 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
     public function getInputTypeDisabledApplyToOptions(string $entityTypeCode): array
     {
         $disabledTypes = [];
-        foreach ($this->getInputTypes($entityTypeCode) as $type) {
+        foreach ($this->getInputTypes($entityTypeCode) as $key => $type) {
             if (isset($type['disabled_types'])) {
-                $disabledTypes[$type['value']] = $type['disabled_types'];
+                $disabledTypes[$key] = $type['disabled_types'];
             }
         }
         return $disabledTypes;
+    }
+
+    /**
+     * Return options panel info per input type when editing attribute for entity type
+     */
+    public function getInputTypeOptionsPanelInfo(string $entityTypeCode): array
+    {
+        $optionsPanel = [];
+        foreach ($this->getInputTypes($entityTypeCode) as $key => $type) {
+            if (isset($type['options_panel'])) {
+                $optionsPanel[$key] = $type['options_panel'];
+            }
+        }
+        return $optionsPanel;
     }
 
     /**

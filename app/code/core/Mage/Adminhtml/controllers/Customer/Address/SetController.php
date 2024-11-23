@@ -22,7 +22,7 @@ class Mage_Adminhtml_Customer_Address_SetController extends Mage_Eav_Controller_
     #[\Override]
     protected function _construct()
     {
-        $this->entityTypeCode = Mage_Customer_Model_Customer::ENTITY;
+        $this->entityTypeCode = Mage_Customer_Model_Address::ENTITY;
     }
 
     #[\Override]

@@ -15,42 +15,31 @@
  */
 class Mage_Eav_Block_Adminhtml_Attribute_Set_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
+    protected Mage_Eav_Model_Entity_Type $entityType;
+
     public function __construct()
     {
-        parent::__construct();
+        $this->entityType = Mage::registry('entity_type');
 
-        /** @var Mage_Eav_Model_Entity_Type $entityType */
-        $entityType = Mage::registry('entity_type');
-
-        $gridId = 'attributeSetGrid';
-        if ($entityType && $entityType->getEntityTypeId()) {
-            $gridId .= '_' . $entityType->getEntityTypeCode();
-        }
-
-        $this->setId($gridId);
+        $this->setId('attributeSetGrid_' . $this->entityType->getEntityTypeCode());
         $this->setDefaultSort('set_name');
         $this->setDefaultDir('ASC');
         $this->setSaveParametersInSession(true);
+
+        parent::__construct();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
         /** @var Mage_Eav_Model_Resource_Entity_Attribute_Set_Collection $collection */
-        $collection = Mage::getResourceModel('eav/entity_attribute_set_collection');
-
-        $collection->setEntityTypeFilter(Mage::registry('entity_type')->getEntityTypeId());
+        $collection = $this->entityType->getAttributeSetCollection();
 
         $this->setCollection($collection);
+
         return parent::_prepareCollection();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {
@@ -63,9 +52,6 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Grid extends Mage_Adminhtml_Block_W
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function getRowUrl($row)
     {

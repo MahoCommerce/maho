@@ -14,62 +14,6 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  */
-class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Grid extends Mage_Adminhtml_Block_Widget_Grid
+class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Grid extends Mage_Eav_Block_Adminhtml_Attribute_Set_Grid
 {
-    public function __construct()
-    {
-        parent::__construct();
-
-        /** @var Mage_Eav_Model_Entity_Type $entityType */
-        $entityType = Mage::registry('entity_type');
-
-        $gridId = 'attributeSetGrid';
-        if ($entityType && $entityType->getEntityTypeId()) {
-            $gridId .= '_' . $entityType->getEntityTypeCode();
-        }
-
-        $this->setId($gridId);
-        $this->setDefaultSort('set_name');
-        $this->setDefaultDir('ASC');
-        $this->setSaveParametersInSession(true);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    #[\Override]
-    protected function _prepareCollection()
-    {
-        $collection = Mage::getResourceModel('eav/entity_attribute_set_collection')
-            ->setEntityTypeFilter(Mage::registry('entity_type')->getEntityTypeId());
-
-        $this->setCollection($collection);
-        return parent::_prepareCollection();
-    }
-
-    /**
-     * @return $this
-     * @throws Exception
-     */
-    #[\Override]
-    protected function _prepareColumns()
-    {
-        $this->addColumn('set_name', [
-            'header'    => Mage::helper('catalog')->__('Set Name'),
-            'align'     => 'left',
-            'index'     => 'attribute_set_name',
-        ]);
-
-        return $this;
-    }
-
-    /**
-     * @param Varien_Object $row
-     * @return string
-     */
-    #[\Override]
-    public function getRowUrl($row)
-    {
-        return $this->getUrl('*/*/edit', ['id' => $row->getAttributeSetId()]);
-    }
 }

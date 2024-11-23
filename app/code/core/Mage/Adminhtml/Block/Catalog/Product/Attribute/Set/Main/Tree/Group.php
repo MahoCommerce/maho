@@ -14,11 +14,12 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  */
-class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main_Tree_Group extends Mage_Adminhtml_Block_Template
+class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main_Tree_Group extends Mage_Eav_Block_Adminhtml_Attribute_Set_Edit_Tree_Group
 {
-    #[\Override]
-    protected function _construct()
+    protected function __construct()
     {
-        $this->setTemplate('catalog/product/attribute/set/main/tree/group.phtml');
+        parent::__construct();
+
+        $this->setTemplateIfExists('catalog/product/attribute/set/main/tree/group.phtml');
     }
 }

@@ -11,13 +11,16 @@
  */
 
 /**
- * Attribute add/edit form options tab
+ * EAV Attribute add/edit form options tab
  *
  * @category   Mage
  * @package    Mage_Eav
  */
-abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends Mage_Adminhtml_Block_Widget
+abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends Mage_Adminhtml_Block_Widget implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    /** @var Mage_Eav_Model_Entity_Attribute $_attribute */
+    protected $_attribute = null;
+
     public function __construct()
     {
         parent::__construct();
@@ -25,42 +28,61 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends 
     }
 
     /**
-     * Preparing layout, adding buttons
-     *
-     * @inheritDoc
+     * @param Mage_Eav_Model_Entity_Attribute $attribute
+     * @return $this
      */
-    #[\Override]
-    protected function _prepareLayout()
+    public function setAttributeObject($attribute)
     {
-        $this->setChild(
-            'delete_button',
-            $this->getLayout()->createBlock('adminhtml/widget_button')
-                ->setData([
-                    'label' => Mage::helper('eav')->__('Delete'),
-                    'class' => 'delete delete-option'
-                ])
-        );
-
-        $this->setChild(
-            'add_button',
-            $this->getLayout()->createBlock('adminhtml/widget_button')
-                ->setData([
-                    'label' => Mage::helper('eav')->__('Add Option'),
-                    'class' => 'add',
-                    'id'    => 'add_new_option_button'
-                ])
-        );
-        return parent::_prepareLayout();
+        $this->_attribute = $attribute;
+        return $this;
     }
 
     /**
-     * Retrieve HTML of delete button
+     * @return Mage_Eav_Model_Entity_Attribute_Abstract
+     */
+    public function getAttributeObject()
+    {
+        return $this->_attribute ?? Mage::registry('entity_attribute');
+    }
+
+    #[\Override]
+    public function getTabLabel()
+    {
+        return Mage::helper('eav')->__('Manage Label / Options');
+    }
+
+    #[\Override]
+    public function getTabTitle()
+    {
+        return Mage::helper('eav')->__('Manage Label / Options');
+    }
+
+    #[\Override]
+    public function canShowTab()
+    {
+        return true;
+    }
+
+    #[\Override]
+    public function isHidden()
+    {
+        return false;
+    }
+
+    /**
+     * Retrieve HTML of delete button, returns new instance for each call so IDs are unique
      *
      * @return string
      */
     public function getDeleteButtonHtml()
     {
-        return $this->getChildHtml('delete_button');
+        /** @var Mage_Adminhtml_Block_Widget_Button $block */
+        $block = $this->getLayout()->createBlock('adminhtml/widget_button');
+        $block->setData([
+            'label' => Mage::helper('eav')->__('Delete'),
+            'class' => 'delete delete-option'
+        ]);
+        return $block->toHtml();
     }
 
     /**
@@ -70,6 +92,16 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends 
      */
     public function getAddNewButtonHtml()
     {
+        if (!$this->getChild('add_button')) {
+            /** @var Mage_Adminhtml_Block_Widget_Button $block */
+            $block = $this->getLayout()->createBlock('adminhtml/widget_button');
+            $block->setData([
+                'label' => Mage::helper('eav')->__('Add Option'),
+                'class' => 'add',
+                'id'    => 'add_new_option_button'
+            ]);
+            $this->setChild('add_button', $block);
+        }
         return $this->getChildHtml('add_button');
     }
 
@@ -98,60 +130,55 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends 
      */
     public function getOptionValues()
     {
-        $attributeType = $this->getAttributeObject()->getFrontendInput();
-        $defaultValues = $this->getAttributeObject()->getDefaultValue();
-        if (in_array($attributeType, ['select', 'multiselect', 'customselect'])) {
-            $defaultValues = explode(',', (string)$defaultValues);
-        } else {
-            $defaultValues = [];
-        }
-
-        switch ($attributeType) {
-            case 'select':
-            case 'customselect':
-                $inputType = 'radio';
-                break;
-            case 'multiselect':
-                $inputType = 'checkbox';
-                break;
-            default:
-                $inputType = '';
-                break;
-        }
-
         $values = $this->getData('option_values');
-        if (is_null($values)) {
-            $values = [];
+        if (!is_null($values)) {
+            return $values;
+        }
+        $values = [];
+
+        $attributeObject = $this->getAttributeObject();
+        $entityTypeCode = $attributeObject->getEntityType()->getEntityTypeCode();
+        $inputType = $attributeObject->getFrontendInput();
+
+        // Get global/eav_inputtypes/$inputType/options_panel config.xml node
+        $optionsInfo = Mage::helper('eav')->getInputTypeOptionsPanelInfo($entityTypeCode)[$inputType] ?? [];
+
+        if (!empty($optionsInfo)) {
+            $defaultValues = explode(',', (string)$attributeObject->getDefaultValue());
+
             $optionCollection = Mage::getResourceModel('eav/entity_attribute_option_collection')
-                ->setAttributeFilter($this->getAttributeObject()->getId())
+                ->setAttributeFilter($attributeObject->getId())
                 ->setPositionOrder('desc', true)
                 ->load();
 
-            $helper = Mage::helper('core');
             /** @var Mage_Eav_Model_Entity_Attribute_Option $option */
             foreach ($optionCollection as $option) {
-                $value = [];
+                $value = new Varien_Object();
                 if (in_array($option->getId(), $defaultValues)) {
                     $value['checked'] = 'checked="checked"';
                 } else {
                     $value['checked'] = '';
                 }
 
-                $value['intype'] = $inputType;
+                $value['intype'] = $optionsInfo['intype'];
                 $value['id'] = $option->getId();
                 $value['sort_order'] = $option->getSortOrder();
                 foreach ($this->getStores() as $store) {
                     $storeValues = $this->getStoreOptionValues($store->getId());
-                    $value['store' . $store->getId()] = isset($storeValues[$option->getId()])
-                        ? $helper->escapeHtml($storeValues[$option->getId()]) : '';
+                    if (isset($storeValues[$option->getId()])) {
+                        $value['store' . $store->getId()] = Mage::helper('core')->escapeHtml($storeValues[$option->getId()]);
+                    } else {
+                        $value['store' . $store->getId()] = '';
+                    }
                 }
                 if ($this->isConfigurableSwatchesEnabled()) {
                     $value['swatch'] = $option->getSwatchValue();
                 }
-                $values[] = new Varien_Object($value);
+                $values[] = $value;
             }
-            $this->setData('option_values', $values);
         }
+
+        $this->setData('option_values', $values);
         return $values;
     }
 
@@ -199,16 +226,6 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends 
             $this->setData('store_option_values_' . $storeId, $values);
         }
         return $values;
-    }
-
-    /**
-     * Retrieve attribute object from registry
-     *
-     * @return Mage_Eav_Model_Entity_Attribute_Abstract
-     */
-    public function getAttributeObject()
-    {
-        return Mage::registry('entity_attribute');
     }
 
     /**

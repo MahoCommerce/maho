@@ -29,7 +29,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit_Tab_Main extends Mage_Eav_Block_Ad
         $form = $this->getForm();
 
         /** @var Mage_Adminhtml_Block_Widget_Form_Element_Dependence $block */
-        $block = $this->getLayout()->createBlock('adminhtml/widget_form_element_dependence');
+        $block = $this->_getDependence();
 
         Mage::dispatchEvent("adminhtml_{$attributeTypeCode}_attribute_edit_prepare_form", [
             'form'       => $form,

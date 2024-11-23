@@ -127,10 +127,28 @@
                     </bind_locale>
                 </observers>
             </admin_system_config_changed_section_admin>
+
+            <controller_action_predispatch_adminhtml_catalog_product_attribute>
+                <observers>
+                    <eav>
+                        <class>adminhtml/observer_eav_product</class>
+                        <method>setEntityTypeRegistryIfNotExist</method>
+                    </eav>
+                </observers>
+            </controller_action_predispatch_adminhtml_catalog_product_attribute>
+            <controller_action_predispatch_adminhtml_catalog_product_set>
+                <observers>
+                    <eav>
+                        <class>adminhtml/observer_eav_product</class>
+                        <method>setEntityTypeRegistryIfNotExist</method>
+                    </eav>
+                </observers>
+            </controller_action_predispatch_adminhtml_catalog_product_set>
+
             <adminhtml_customer_attribute_edit_prepare_form>
                 <observers>
                     <eav>
-                        <class>adminhtml/customer_observer</class>
+                        <class>adminhtml/observer_eav_customer</class>
                         <method>attributeEditPrepareForm</method>
                     </eav>
                 </observers>
@@ -138,7 +156,7 @@
             <adminhtml_customer_address_attribute_edit_prepare_form>
                 <observers>
                     <eav>
-                        <class>adminhtml/customer_observer</class>
+                        <class>adminhtml/observer_eav_customer</class>
                         <method>attributeEditPrepareForm</method>
                     </eav>
                 </observers>

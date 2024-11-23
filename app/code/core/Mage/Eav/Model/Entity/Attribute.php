@@ -155,7 +155,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
         if (empty($code)) {
             throw Mage::exception('Mage_Eav', $helper->__('Attribute code cannot be empty'));
         }
-        if (!preg_match('/^[a-z][a-z_0-9]$/', $code)) {
+        if (!preg_match('/^[a-z][a-z_0-9]*$/', $code)) {
             throw Mage::exception('Mage_Eav', $helper->__('Attribute code must contain only letters (a-z), numbers (0-9) or underscore(_), first character should be a letter'));
         }
         if (strlen($code) < self::ATTRIBUTE_CODE_MIN_LENGTH || strlen($code) > self::ATTRIBUTE_CODE_MAX_LENGTH) {

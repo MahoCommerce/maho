@@ -12,6 +12,9 @@
 
 /**
  * Product attribute add/edit form main tab
+ *
+ * @category   Mage
+ * @package    Mage_Adminhtml
  */
 class Mage_Adminhtml_Block_Catalog_Product_Attribute_Edit_Tab_Main extends Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract
 {
@@ -104,8 +107,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Edit_Tab_Main extends Mage_
         $fieldset->addField('is_filterable', 'select', [
             'name' => 'is_filterable',
             'label' => Mage::helper('catalog')->__('Use In Layered Navigation'),
-            'title' => Mage::helper('catalog')->__('Can be used only with catalog input type Dropdown, Multiple Select and Price'),
-            'note' => Mage::helper('catalog')->__('Can be used only with catalog input type Dropdown, Multiple Select and Price'),
             'values' => [
                 ['value' => '0', 'label' => Mage::helper('catalog')->__('No')],
                 ['value' => '1', 'label' => Mage::helper('catalog')->__('Filterable (with results)')],
@@ -116,8 +117,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Edit_Tab_Main extends Mage_
         $fieldset->addField('is_filterable_in_search', 'boolean', [
             'name' => 'is_filterable_in_search',
             'label' => Mage::helper('catalog')->__('Use In Search Results Layered Navigation'),
-            'title' => Mage::helper('catalog')->__('Can be used only with catalog input type Dropdown, Multiple Select and Price'),
-            'note' => Mage::helper('catalog')->__('Can be used only with catalog input type Dropdown, Multiple Select and Price'),
         ]);
 
         $fieldset->addField('is_used_for_promo_rules', 'boolean', [
@@ -134,20 +133,21 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Edit_Tab_Main extends Mage_
             'class' => 'validate-digits',
         ]);
 
+        $fieldset->addField('is_html_allowed_on_front', 'boolean', [
+            'name' => 'is_html_allowed_on_front',
+            'label' => Mage::helper('catalog')->__('Allow HTML Tags on Frontend'),
+            'title' => Mage::helper('catalog')->__('Allow HTML Tags on Frontend'),
+        ]);
+
         $fieldset->addField('is_wysiwyg_enabled', 'boolean', [
             'name' => 'is_wysiwyg_enabled',
             'label' => Mage::helper('catalog')->__('Enable WYSIWYG'),
             'title' => Mage::helper('catalog')->__('Enable WYSIWYG'),
         ]);
 
-        $htmlAllowed = $fieldset->addField('is_html_allowed_on_front', 'boolean', [
-            'name' => 'is_html_allowed_on_front',
-            'label' => Mage::helper('catalog')->__('Allow HTML Tags on Frontend'),
-            'title' => Mage::helper('catalog')->__('Allow HTML Tags on Frontend'),
-        ]);
-        if (!$attributeObject->getId() || $attributeObject->getIsWysiwygEnabled()) {
-            $attributeObject->setIsHtmlAllowedOnFront(1);
-        }
+        // if (!$attributeObject->getId() || $attributeObject->getIsWysiwygEnabled()) {
+        //     $attributeObject->setIsHtmlAllowedOnFront(1);
+        // }
 
         $fieldset->addField('is_visible_on_front', 'boolean', [
             'name'      => 'is_visible_on_front',
@@ -178,21 +178,43 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Edit_Tab_Main extends Mage_
         }
 
         /** @var Mage_Adminhtml_Block_Widget_Form_Element_Dependence $block */
-        $block = $this->getLayout()->createBlock('adminhtml/widget_form_element_dependence');
+        $block = $this->_getDependence();
 
-        $block->addFieldMap('is_wysiwyg_enabled', 'wysiwyg_enabled')
-              ->addFieldMap('is_html_allowed_on_front', 'html_allowed_on_front')
-              ->addFieldMap('frontend_input', 'frontend_input_type')
-              ->addFieldDependence('wysiwyg_enabled', 'frontend_input_type', 'textarea')
-              ->addFieldDependence('html_allowed_on_front', 'wysiwyg_enabled', '0');
+        $block
+            ->addFieldDependence('is_filterable', 'frontend_input', ['select', 'multiselect', 'price'])
+            ->addFieldDependence('is_filterable_in_search', 'frontend_input', ['select', 'multiselect', 'price'])
+            ->addComplexFieldDependence('is_required', $block::MODE_NOT, [
+                'frontend_input' => ['media_image'],
+            ])
+            ->addComplexFieldDependence('is_unique', $block::MODE_NOT, [
+                'frontend_input' => ['media_image'],
+            ])
+            ->addComplexFieldDependence('is_global', $block::MODE_NOT, [
+                'frontend_input' => ['price'],
+            ])
+            ->addComplexFieldDependence('is_configurable', $block::MODE_AND, [
+                'is_global' => '1',
+                'frontend_input' => ['select'],
+            ])
+            ->addComplexFieldDependence('position', $block::MODE_NOT, [
+                'is_filterable' => '0',
+            ])
+            ->addComplexFieldDependence('used_for_sort_by', $block::MODE_NOT, [
+                'frontend_input' => ['multiselect', 'textarea', 'gallery'],
+            ])
+            ->addComplexFieldDependence('is_html_allowed_on_front', $block::MODE_AND, [
+                'frontend_input' => ['text', 'textarea', 'select', 'multiselect', 'customselect'],
+            ])
+            ->addComplexFieldDependence('is_wysiwyg_enabled', $block::MODE_AND, [
+                'frontend_input' => 'textarea',
+                'is_html_allowed_on_front' => '1',
+            ]);
 
         Mage::dispatchEvent('adminhtml_catalog_product_attribute_edit_prepare_form', [
             'form'       => $form,
             'attribute'  => $attributeObject,
             'dependence' => $block,
         ]);
-
-        $this->setChild('form_after', $block);
 
         return $this;
     }

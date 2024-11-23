@@ -173,17 +173,20 @@
                     <value>multiselect</value>
                     <backend_type>text</backend_type>
                     <backend_model>eav/entity_attribute_backend_array</backend_model>
+                    <options_panel><intype>checkbox</intype></options_panel>
                 </multiselect>
                 <select translate="label" module="eav">
                     <label>Dropdown</label>
                     <value>select</value>
                     <backend_type>int</backend_type>
+                    <options_panel><intype>radio</intype></options_panel>
                 </select>
                 <customselect translate="label" module="eav">
                     <label>Dropdown with Other Option</label>
                     <value>customselect</value>
                     <backend_type>varchar</backend_type>
                     <source_model>eav/entity_attribute_source_table</source_model>
+                    <options_panel><intype>radio</intype></options_panel>
                 </customselect>
             </default>
         </eav_inputtypes>
@@ -199,6 +202,13 @@
         </events>
     </global>
     <adminhtml>
+        <layout>
+            <updates>
+                <eav>
+                    <file>eav.xml</file>
+                </eav>
+            </updates>
+        </layout>
         <translate>
             <modules>
                 <Mage_Eav>
@@ -220,19 +230,4 @@
             </modules>
         </translate>
     </frontend>
-    <default>
-        <general>
-            <validator_data>
-                <input_types>
-                    <text>text</text>
-                    <textarea>textarea</textarea>
-                    <date>date</date>
-                    <boolean>boolean</boolean>
-                    <multiselect>multiselect</multiselect>
-                    <customselect>customselect</customselect>
-                    <select>select</select>
-                </input_types>
-            </validator_data>
-        </general>
-    </default>
 </config>

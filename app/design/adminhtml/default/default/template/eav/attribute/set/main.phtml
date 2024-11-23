@@ -5,14 +5,17 @@
  * @category    design
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Eav_Block_Adminhtml_Attribute_Set_Edit $this */
 ?>
 <div class="content-header">
     <table cellspacing="0">
         <tr>
-            <td style="width:50%;"><h3 class="icon-head head-eav-attribute-sets"><?= $this->escapeHtml($this->_getHeader()) ?></h3></td>
+            <td style="width:50%;"><h3><?= $this->escapeHtml($this->_getHeader()) ?></h3></td>
             <td class="form-buttons">
                 <?= $this->getBackButtonHtml() ?>
                 <?= $this->getResetButtonHtml() ?>
@@ -32,7 +35,7 @@
             <table cellspacing="0">
                     <tbody>
                         <tr>
-                            <td><h3><?= Mage::helper('eav')->__('Groups') ?></h3></td>
+                            <td><h3><?= $this->__('Groups') ?></h3></td>
                         </tr>
                     </tbody>
                 </table>
@@ -40,7 +43,7 @@
 
             <?php if (!$this->getIsReadOnly()): ?>
                 <p><?= $this->getAddGroupButton() ?>&nbsp;<?= $this->getDeleteGroupButton() ?></p>
-                <p class="note-block"><?= Mage::helper('eav')->__('Double click on a group to rename it') ?></p>
+                <p class="note-block"><?= $this->__('Double click on a group to rename it') ?></p>
             <?php endif ?>
 
             <?= $this->getSetsFilterHtml() ?>
@@ -51,16 +54,16 @@
                 <table cellspacing="0">
                     <tbody>
                         <tr>
-                            <td><h3><?= Mage::helper('eav')->__('Unassigned Attributes') ?></h3></td>
+                            <td><h3><?= $this->__('Unassigned Attributes') ?></h3></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <div id="tree-div2" style="height:400px; margin-top:5px;overflow:auto"></div>
+            <div id="tree-div2" style="height:550px;margin-top:5px;overflow:auto"></div>
             <script type="text/javascript">
             //<![CDATA[
-            var allowDragAndDrop = <?= ($this->getIsReadOnly() ? 'false' : 'true'); ?>;
-            var canEditGroups = <?= ($this->getIsReadOnly() ? 'false' : 'true'); ?>;
+            var allowDragAndDrop = <?= ($this->getIsReadOnly() ? 'false' : 'true') ?>;
+            var canEditGroups = <?= ($this->getIsReadOnly() ? 'false' : 'true') ?>;
 
             var TreePanels = function() {
                 // shorthand
@@ -95,7 +98,7 @@
 
                         this.ge = new Ext.tree.TreeEditor(tree, {
                             allowBlank:false,
-                            blankText:'<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('eav')->__('A name is required')) ?>',
+                            blankText:'<?= Mage::helper('core')->jsQuoteEscape($this->__('A name is required')) ?>',
                             selectOnFocus:true,
                             cls:'folder'
                         });
@@ -233,7 +236,12 @@
                         }
 
                         if( editSet.SystemNodesExists(editSet.currentNode) ) {
-                            alert('<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('eav')->__('This group contains system attributes. Please move system attributes to another group and try again.')) ?>');
+                            alert('<?= Mage::helper('core')->jsQuoteEscape($this->__('This group contains system attributes. Please move system attributes to another group and try again.')) ?>');
+                            return;
+                        }
+
+                        if (editSet.ConfigurableNodeExists(editSet.currentNode)) {
+                            alert('<?= Mage::helper('core')->jsQuoteEscape($this->__('This group contains attributes, used in configurable products. Please move these attributes to another group and try again.')) ?>');
                             return;
                         }
 
@@ -265,12 +273,24 @@
                         }
                     },
 
+                    ConfigurableNodeExists : function(currentNode) {
+                        for (var i in currentNode.childNodes ) {
+                            if (currentNode.childNodes[i].id) {
+                                child = editSet.currentNode.childNodes[i];
+                                if (child.attributes.is_configurable) {
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    },
+
                     rightAppend : function(node) {
                         return;
                     },
 
                     addGroup : function() {
-                        var group_name = prompt("<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('eav')->__('Please enter a new group name')) ?>","");
+                        var group_name = prompt("<?= Mage::helper('core')->jsQuoteEscape($this->__('Please enter a new group name')) ?>","");
                         group_name = group_name.strip();
                         if( group_name == '' ) {
                             this.addGroup();
@@ -303,7 +323,11 @@
                     },
 
                     beforeRenameGroup : function(obj, after, before) {
-                        return editSet.validateGroupName(after, obj.editNode.id);
+                        if (editSet.validateGroupName(after, obj.editNode.id)) {
+                            return true;
+                        }
+                        obj.field.el.dom.value = before;
+                        return false;
                     },
 
                     validateGroupName : function(name, exceptNodeId) {
@@ -313,7 +337,7 @@
                         }
                         for (var i=0; i < TreePanels.root.childNodes.length; i++) {
                             if (TreePanels.root.childNodes[i].text.toLowerCase() == name.toLowerCase() && TreePanels.root.childNodes[i].id != exceptNodeId) {
-                                errorText = "<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('eav')->__('Attribute group with the \"/name/\" name already exists')) ?>";
+                                errorText = "<?= Mage::helper('core')->jsQuoteEscape($this->__('Attribute group with the \"/name/\" name already exists')) ?>";
                                 alert(errorText.replace("/name/",name));
                                 return false;
                             }
@@ -350,7 +374,7 @@
                     },
 
                     failure : function(o) {
-                        alert('<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('eav')->__('Unable to complete this request.')) ?>');
+                        alert('<?= Mage::helper('core')->jsQuoteEscape($this->__('Unable to complete this request.')) ?>');
                     },
 
                     groupBeforeMove : function(tree, nodeThis, oldParent, newParent) {
@@ -365,7 +389,11 @@
 
                     rightBeforeAppend : function(tree, nodeThis, node, newParent) {
                         if (node.attributes.is_user_defined == 0) {
-                            alert('<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('eav')->__('You cannot remove system attribute from this set.')) ?>');
+                            alert('<?= Mage::helper('core')->jsQuoteEscape($this->__('You cannot remove system attribute from this set.')) ?>');
+                            return false;
+                        }
+                        else if (node.attributes.is_configurable == 1) {
+                            alert('<?= Mage::helper('core')->jsQuoteEscape($this->__('This attribute is used in configurable products. You cannot remove it from the attribute set.')) ?>');
                             return false;
                         }
                         else {
@@ -380,7 +408,11 @@
                         }
 
                         if (node.attributes.is_user_defined == 0) {
-                            alert('<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('eav')->__('You cannot remove system attribute from this set.')) ?>');
+                            alert('<?= Mage::helper('core')->jsQuoteEscape($this->__('You cannot remove system attribute from this set.')) ?>');
+                            return false;
+                        }
+                        else if (node.attributes.is_configurable == 1) {
+                            alert('<?= Mage::helper('core')->jsQuoteEscape($this->__('This attribute is used in configurable products. You cannot remove it from the attribute set.')) ?>');
                             return false;
                         }
                         else {
@@ -404,7 +436,7 @@
                     rightRemove : function(tree, nodeThis, node) {
                         if( nodeThis.firstChild == null && node.id != 'empty' ) {
                             var newNode = new Ext.tree.TreeNode({
-                                    text : '<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('eav')->__('Empty')) ?>',
+                                    text : '<?= Mage::helper('core')->jsQuoteEscape($this->__('Empty')) ?>',
                                     id : 'empty',
                                     cls : 'folder',
                                     is_user_defined : 1,

@@ -676,6 +676,9 @@
                     <label>Media Image</label>
                     <value>media_image</value>
                     <backend_type>varchar</backend_type>
+                    <hide_fields>
+                        <front_fieldset/>
+                    </hide_fields>
                 </media_image>
             </catalog_product>
             <catalog_category>

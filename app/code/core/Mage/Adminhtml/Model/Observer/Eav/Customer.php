@@ -8,19 +8,15 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-
 /**
  * Customer EAV Observer
  */
-class Mage_Adminhtml_Model_Customer_Observer
+class Mage_Adminhtml_Model_Observer_Eav_Customer
 {
     /**
      * Modify customer and customer_address attribute edit forms
-     *
-     * @param Varien_Event_Observer $observer
-     * @return $this
      */
-    public function attributeEditPrepareForm($observer)
+    public function attributeEditPrepareForm(Varien_Event_Observer $observer): self
     {
         /** @var Mage_Customer_Model_Attribute $attribute */
         $attribute = $observer->getAttribute();

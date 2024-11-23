@@ -18,9 +18,10 @@
  */
 class Mage_Eav_Block_Adminhtml_Attribute_Edit_Renderer_Fieldset_Element extends Mage_Adminhtml_Block_Widget_Form_Renderer_Fieldset_Element
 {
-    #[\Override]
-    protected function _construct()
+    protected function __construct()
     {
+        parent::__construct();
+
         $this->setTemplate('eav/attribute/edit/renderer/fieldset/element.phtml');
     }
 

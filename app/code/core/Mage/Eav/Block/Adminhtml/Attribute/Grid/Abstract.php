@@ -11,28 +11,24 @@
  */
 
 /**
- * Eav attributes grid
+ * Adminhtml generic EAV attribute grid abstract class
  *
  * @category   Mage
  * @package    Mage_Eav
  */
 abstract class Mage_Eav_Block_Adminhtml_Attribute_Grid_Abstract extends Mage_Adminhtml_Block_Widget_Grid
 {
+    protected Mage_Eav_Model_Entity_Type $entityType;
+
     public function __construct()
     {
-        parent::__construct();
+        $this->entityType = Mage::registry('entity_type');
 
-        /** @var Mage_Eav_Model_Entity_Type $entityType */
-        $entityType = Mage::registry('entity_type');
-
-        $gridId = 'attributeGrid';
-        if ($entityType && $entityType->getEntityTypeId()) {
-            $gridId .= '_' . $entityType->getEntityTypeCode();
-        }
-
-        $this->setId($gridId);
+        $this->setId('attributeGrid_' . $this->entityType->getEntityTypeCode());
         $this->setDefaultSort('frontend_label');
         $this->setDefaultDir('ASC');
+
+        parent::__construct();
     }
 
     /**
@@ -72,8 +68,8 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Grid_Abstract extends Mage_Adm
             'type' => 'options',
             'align' => 'center',
             'options' => [
-                '0' => Mage::helper('eav')->__('Yes'),   // intended reverted use
-                '1' => Mage::helper('eav')->__('No'),    // intended reverted use
+                '0' => Mage::helper('eav')->__('Yes'),   // intended reversed use
+                '1' => Mage::helper('eav')->__('No'),    // intended reversed use
             ],
         ]);
 

@@ -13,11 +13,10 @@
  * @category   Mage
  * @package    Mage_Eav
  */
-class Mage_Eav_Block_Adminhtml_Attribute_Set_Main_Tree_Attribute extends Mage_Adminhtml_Block_Template
+class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit_Tree_Group extends Mage_Adminhtml_Block_Template
 {
-    #[\Override]
-    protected function _construct()
+    protected function __construct()
     {
-        $this->setTemplate('eav/attribute/set/main/tree/attribute.phtml');
+        $this->setTemplate('eav/attribute/set/main/tree/group.phtml');
     }
 }

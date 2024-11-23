@@ -5,160 +5,32 @@
  * @category   design
  * @package    default_default
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 ?>
-<script type="text/javascript">
-//<![CDATA[
+<?php $entityTypeCode = Mage::registry('entity_type')->getEntityTypeCode() ?>
+<script>
+const inputTypeDefs = <?= Mage::helper('core')->jsonEncode(Mage::helper('eav')->getInputTypes($entityTypeCode)) ?>;
+
 function saveAndContinueEdit() {
+    const activeTab = eav_attribute_tabsJsTabs.activeTab.id;
+    const action = document.getElementById(editForm.formId).action;
+    saveAttribute(`${action}back/edit/tab/${activeTab}`);
+}
+
+function saveAttribute(url = null) {
     disableElements('save');
-    var activeTab = eav_attribute_tabsJsTabs.activeTab.id;
-    if (editForm.submit($('edit_form').action + 'back/edit/tab/' + activeTab) == false) {
+    if (editForm.submit(url) == false) {
         enableElements('save');
     }
-    varienGlobalEvents.attachEventHandler('formValidateAjaxComplete', function () {
+    varienGlobalEvents.attachEventHandler('formValidateAjaxComplete', () => {
         enableElements('save');
     });
 }
 
-function saveAttribute() {
-    disableElements('save');
-    if (editForm.submit() == false) {
-        enableElements('save');
-    }
-    varienGlobalEvents.attachEventHandler('formValidateAjaxComplete', function () {
-        enableElements('save');
-    });
-}
-
-function checkOptionsPanelVisibility() {
-    if ($('matage-options-panel')) {
-        var panel = $('matage-options-panel');
-        if ($('frontend_input') && ['select', 'multiselect', 'customselect'].includes($('frontend_input').value)) {
-            panel.show();
-        } else {
-            panel.hide();
-        }
-    }
-}
-
-function bindAttributeInputType() {
-    checkOptionsPanelVisibility();
-    switchDefaultValueField();
-    if ($('frontend_input') && ['select', 'multiselect', 'price'].includes($('frontend_input').value)) {
-        if ($('backend_type') && $('backend_type').options) {
-            for (var i = 0; i < $('backend_type').options.length; i++) {
-                if ($('backend_type').options[i].value == 'int') $('backend_type').selectedIndex = i;
-            }
-        }
-    }
-
-    switch ($('frontend_input').value) {
-        case 'textarea':
-            $('frontend_class').value = '';
-            $('frontend_class').disabled = true;
-            break;
-        case 'text':
-        case 'customselect':
-            if (!$('frontend_class').getAttribute('readonly')) {
-                $('frontend_class').disabled = false;
-            }
-            break;
-        case 'select':
-        case 'multiselect':
-            break;
-        default:
-            $('frontend_class').value = '';
-            $('frontend_class').disabled = true;
-    }
-
-}
-
-function switchDefaultValueField() {
-    if (!$('frontend_input')) {
-        return;
-    }
-
-    var currentValue = $('frontend_input').value;
-
-    var defaultValueTextVisibility = false;
-    var defaultValueTextareaVisibility = false;
-    var defaultValueDateVisibility = false;
-    var defaultValueYesnoVisibility = false;
-
-    switch (currentValue) {
-        case 'select':
-        case 'customselect':
-            optionDefaultInputType = 'radio';
-            break;
-
-        case 'multiselect':
-            optionDefaultInputType = 'checkbox';
-            break;
-
-        case 'date':
-            defaultValueDateVisibility = true;
-            break;
-
-        case 'boolean':
-            defaultValueYesnoVisibility = true;
-            break;
-
-        case 'textarea':
-            defaultValueTextareaVisibility = true;
-            break;
-
-        case 'media_image':
-            defaultValueTextVisibility = false;
-            break;
-
-        default:
-            defaultValueTextVisibility = true;
-            break;
-    }
-
-    setRowVisibility('default_value_text', defaultValueTextVisibility);
-    setRowVisibility('default_value_textarea', defaultValueTextareaVisibility);
-    setRowVisibility('default_value_date', defaultValueDateVisibility);
-    setRowVisibility('default_value_yesno', defaultValueYesnoVisibility);
-
-    var elems = document.getElementsByName('default[]');
-    for (var i = 0; i < elems.length; i++) {
-        elems[i].type = optionDefaultInputType;
-    }
-}
-
- function setRowVisibility(id, isVisible) {
-    if ($(id)) {
-        var td = $(id).parentNode;
-        var tr = $(td.parentNode);
-
-        if (isVisible) {
-            tr.show();
-        } else {
-            tr.blur();
-            tr.hide();
-        }
-    }
-}
-
-function updateRequriedOptions() {
-    if ($F('frontend_input') == 'select' && $F('is_required') == 1) {
-        $('option-count-check').addClassName('required-options-count');
-    } else {
-        $('option-count-check').removeClassName('required-options-count');
-    }
-}
-
-if ($('frontend_input')) {
-    Event.observe($('frontend_input'), 'change', updateRequriedOptions);
-    Event.observe($('frontend_input'), 'change', bindAttributeInputType);
-}
-
-if ($('is_required')) {
-    Event.observe($('is_required'), 'change', updateRequriedOptions);
-}
-bindAttributeInputType();
-//]]>
+document.addEventListener('DOMContentLoaded', () => {
+    new EavAttributeEditForm(editForm.formId, inputTypeDefs);
+});
 </script>
