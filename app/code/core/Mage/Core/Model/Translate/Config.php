@@ -22,6 +22,7 @@ class Mage_Core_Model_Translate_Config extends Varien_Simplexml_Config
      * @param boolean $overwrite Argument has no effect, included for PHP 7.2 method signature compatibility
      * @return $this
      */
+    #[\Override]
     public function extend(Varien_Simplexml_Config $config, $overwrite = true)
     {
         foreach ($config->getNode()->children() as $child) {
