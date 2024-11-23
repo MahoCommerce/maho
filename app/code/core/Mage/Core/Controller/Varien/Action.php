@@ -525,6 +525,10 @@ abstract class Mage_Core_Controller_Varien_Action
             ['controller_action' => $this]
         );
         Mage::dispatchEvent(
+            'controller_action_predispatch_' . $this->getRequest()->getRouteName() . '_' . $this->getRequest()->getControllerName(),
+            ['controller_action' => $this]
+        );
+        Mage::dispatchEvent(
             'controller_action_predispatch_' . $this->getFullActionName(),
             ['controller_action' => $this]
         );
@@ -541,6 +545,10 @@ abstract class Mage_Core_Controller_Varien_Action
 
         Mage::dispatchEvent(
             'controller_action_postdispatch_' . $this->getFullActionName(),
+            ['controller_action' => $this]
+        );
+        Mage::dispatchEvent(
+            'controller_action_postdispatch_' . $this->getRequest()->getRouteName() . '_' . $this->getRequest()->getControllerName(),
             ['controller_action' => $this]
         );
         Mage::dispatchEvent(
