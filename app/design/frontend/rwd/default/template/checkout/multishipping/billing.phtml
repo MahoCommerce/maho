@@ -83,25 +83,24 @@
         <?= $this->getBlockHtml('formkey') ?>
     </form>
     <script type="text/javascript">
-    //<![CDATA[
         var payment = new paymentForm('multishipping-billing-form');
         var quoteBaseGrandTotal = <?= (float)$this->getQuoteBaseGrandTotal() ?>;
-        function toggleToolTip(event){
-            if($('payment-tool-tip')){
-                /*$('payment-tool-tip').setStyle({
-                    top: (Event.pointerY(event)-510)+'px',
-                    left: (Event.pointerX(event)-800)+'px'
-                })*/
-                $('payment-tool-tip').toggle();
+
+        function toggleToolTip(event) {
+            const toolTip = document.getElementById('payment-tool-tip');
+            if (toolTip) {
+                toolTip.style.display = toolTip.style.display === 'none' ? 'block' : 'none';
             }
-            Event.stop(event);
+            event.preventDefault();
         }
-        if($('payment-tool-tip-close')){
-            Event.observe($('payment-tool-tip-close'), 'click', toggleToolTip);
+
+        const closeButton = document.getElementById('payment-tool-tip-close');
+        if (closeButton) {
+            closeButton.addEventListener('click', toggleToolTip);
         }
-        $$('.cvv-what-is-this').each(function(element){
-            Event.observe(element, 'click', toggleToolTip);
+
+        document.querySelectorAll('.cvv-what-is-this').forEach(element => {
+            element.addEventListener('click', toggleToolTip);
         });
-    //]]>
     </script>
 </div>

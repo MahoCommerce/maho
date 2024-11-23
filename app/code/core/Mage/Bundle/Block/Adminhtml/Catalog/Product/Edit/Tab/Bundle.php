@@ -42,11 +42,6 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle extends Mage_A
         return 'ajax';
     }
 
-    /**
-     * Prepare layout
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

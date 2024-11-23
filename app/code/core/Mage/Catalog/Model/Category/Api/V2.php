@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -64,13 +64,13 @@ class Mage_Catalog_Model_Category_Api_V2 extends Mage_Catalog_Model_Category_Api
     #[\Override]
     public function create($parentId, $categoryData, $store = null)
     {
-        $parent_category = $this->_initCategory($parentId, $store);
+        $parentCategory = $this->_initCategory($parentId, $store);
 
         /** @var Mage_Catalog_Model_Category $category */
         $category = Mage::getModel('catalog/category')
             ->setStoreId($this->_getStoreId($store));
 
-        $category->addData(['path' => implode('/', $parent_category->getPathIds())]);
+        $category->addData(['path' => implode('/', $parentCategory->getPathIds())]);
 
         $category ->setAttributeSetId($category->getDefaultAttributeSetId());
 
@@ -85,7 +85,7 @@ class Mage_Catalog_Model_Category_Api_V2 extends Mage_Catalog_Model_Category_Api
                 );
             }
         }
-        $category->setParentId($parent_category->getId());
+        $category->setParentId($parentCategory->getId());
         try {
             $validate = $category->validate();
             if ($validate !== true) {

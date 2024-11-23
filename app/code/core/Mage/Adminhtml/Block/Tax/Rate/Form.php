@@ -32,12 +32,6 @@ class Mage_Adminhtml_Block_Tax_Rate_Form extends Mage_Adminhtml_Block_Widget_For
         $this->setTemplate('tax/rate/form.phtml');
     }
 
-    /**
-     * Prepare form before rendering HTML
-     *
-     * @inheritDoc
-     * @throws Exception
-     */
     #[\Override]
     protected function _prepareForm()
     {

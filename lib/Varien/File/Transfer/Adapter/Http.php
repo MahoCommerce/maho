@@ -29,6 +29,7 @@ class Varien_File_Transfer_Adapter_Http
 
         // images
         'webp' => 'image/webp',
+        'avif' => 'image/avif',
         'png' => 'image/png',
         'jpe' => 'image/jpeg',
         'jpeg' => 'image/jpeg',

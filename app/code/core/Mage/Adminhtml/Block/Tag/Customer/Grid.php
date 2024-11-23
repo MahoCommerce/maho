@@ -40,9 +40,6 @@ class Mage_Adminhtml_Block_Tag_Customer_Grid extends Mage_Adminhtml_Block_Widget
         return $this->getUrl('*/*/customer', ['_current' => true]);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -59,9 +56,6 @@ class Mage_Adminhtml_Block_Tag_Customer_Grid extends Mage_Adminhtml_Block_Widget
         return parent::_prepareCollection();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterLoadCollection()
     {
@@ -69,9 +63,6 @@ class Mage_Adminhtml_Block_Tag_Customer_Grid extends Mage_Adminhtml_Block_Widget
         return parent::_afterLoadCollection();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {

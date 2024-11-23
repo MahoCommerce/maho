@@ -373,7 +373,6 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
 
     /**
      * export action from import/export tax
-     *
      */
     public function exportPostAction()
     {
@@ -437,9 +436,6 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
         $this->_prepareDownloadResponse('tax_rates.csv', $content);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _isAllowed()
     {

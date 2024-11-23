@@ -71,8 +71,6 @@
         </reference>
         <reference name="head">
             <action method="setTitle" translate="title" module="catalogsearch"><title>Advanced Search</title></action>
-            <action method="addItem"><type>js_css</type><name>flatpickr/flatpickr.min.css</name><params/></action>
-            <action method="addItem"><type>js</type><name>flatpickr/flatpickr.min.js</name></action>
         </reference>
         <reference name="content">
             <block type="catalogsearch/advanced_form" name="catalogsearch_advanced_form" template="catalogsearch/advanced/form.phtml"/>

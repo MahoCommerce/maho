@@ -39,8 +39,6 @@ class Mage_Sales_Model_Resource_Order_Payment_Collection extends Mage_Sales_Mode
 
     /**
      * Unserialize additional_information in each item
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterLoad()

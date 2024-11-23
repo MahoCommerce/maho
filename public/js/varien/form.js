@@ -16,14 +16,10 @@ class VarienForm {
             return;
         }
         this.cache = new Map();
-        this.currLoader = false;
-        this.currDataIndex = false;
         this.validator = new Validation(this.form);
         this.elementFocus = this.elementOnFocus.bind(this);
         this.elementBlur = this.elementOnBlur.bind(this);
-        this.childLoader = this.onChangeChildLoad.bind(this);
         this.highlightClass = 'highlight';
-        this.extraChildParams = '';
         this.firstFieldFocus = firstFieldFocus || false;
         this.bindElements();
         if (this.firstFieldFocus) {
@@ -66,82 +62,6 @@ class VarienForm {
         const element = event.target.closest('fieldset');
         if (element) {
             element.classList.remove(this.highlightClass);
-        }
-    }
-
-    setElementsRelation(parent, child, dataUrl, first) {
-        const parentElement = document.getElementById(parent);
-        if (parentElement) {
-            if (!this.cache.has(parentElement.id)) {
-                this.cache.set(parentElement.id, {
-                    child: child,
-                    dataUrl: dataUrl,
-                    data: new Map(),
-                    first: first || false
-                });
-            }
-            parentElement.addEventListener('change', this.childLoader);
-        }
-    }
-
-    onChangeChildLoad(event) {
-        const element = event.target;
-        this.elementChildLoad(element);
-    }
-
-    elementChildLoad(element, callback) {
-        this.callback = callback || false;
-        if (element.value) {
-            this.currLoader = element.id;
-            this.currDataIndex = element.value;
-            const cacheData = this.cache.get(element.id);
-            if (cacheData.data.has(element.value)) {
-                this.setDataToChild(cacheData.data.get(element.value));
-            } else {
-                fetch(cacheData.dataUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `parent=${encodeURIComponent(element.value)}`
-                })
-                    .then(response => response.json())
-                    .then(data => this.reloadChildren(data))
-                    .catch(error => console.error('Error:', error));
-            }
-        }
-    }
-
-    reloadChildren(data) {
-        const cacheData = this.cache.get(this.currLoader);
-        cacheData.data.set(this.currDataIndex, data);
-        this.setDataToChild(data);
-    }
-
-    setDataToChild(data) {
-        const cacheData = this.cache.get(this.currLoader);
-        const child = document.getElementById(cacheData.child);
-        if (child) {
-            if (data.length) {
-                let html = `<select name="${child.name}" id="${child.id}" class="${child.className}" title="${child.title}" ${this.extraChildParams}>`;
-                if (cacheData.first) {
-                    html += `<option value="">${cacheData.first}</option>`;
-                }
-                for (let item of data) {
-                    if (item.value) {
-                        html += `<option value="${item.value}"${(child.value && (child.value == item.value || child.value == item.label)) ? ' selected' : ''}>${item.label}</option>`;
-                    }
-                }
-                html += '</select>';
-                child.outerHTML = html;
-            } else {
-                child.outerHTML = `<input type="text" name="${child.name}" id="${child.id}" class="${child.className}" title="${child.title}" ${this.extraChildParams}>`;
-            }
-        }
-
-        this.bindElements();
-        if (this.callback) {
-            this.callback();
         }
     }
 }

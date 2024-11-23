@@ -111,9 +111,6 @@ class Mage_Adminhtml_Sales_TransactionsController extends Mage_Adminhtml_Control
         $this->_redirect('*/sales_transactions/view', ['_current' => true]);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _isAllowed()
     {

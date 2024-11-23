@@ -84,7 +84,6 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
      * Save product attributes used in rule.
      *
      * @param Mage_SalesRule_Model_Rule $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)

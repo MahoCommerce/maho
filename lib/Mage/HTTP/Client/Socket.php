@@ -107,11 +107,6 @@ class Mage_HTTP_Client_Socket implements Mage_HTTP_IClient
         $this->_port = (int) $port;
     }
 
-    /**
-     * Disconnect
-     *
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
-     */
     public function disconnect()
     {
         @fclose($this->_sock);
@@ -379,8 +374,6 @@ class Mage_HTTP_Client_Socket implements Mage_HTTP_IClient
 
     /**
      * Process response body
-     *
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     protected function processResponseBody()
     {
@@ -421,7 +414,7 @@ class Mage_HTTP_Client_Socket implements Mage_HTTP_IClient
 
     /**
      * Get response status code
-     * @see lib/Mage/HTTP/Mage_HTTP_Client#getStatus()
+     * @see Mage_HTTP_Client::getStatus()
      */
     #[\Override]
     public function getStatus()
@@ -434,8 +427,6 @@ class Mage_HTTP_Client_Socket implements Mage_HTTP_IClient
      * @param string $method
      * @param string $uri
      * @param array $params
-     *
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     protected function makeRequest($method, $uri, $params = [])
     {

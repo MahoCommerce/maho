@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -55,7 +55,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Storage_Media_Database
      */
     public function toOptionArray()
     {
-        $media_storages = [];
+        $mediaStorages = [];
 
         $this->_connections = (array) Mage::app()->getConfig()->getNode('global/resources')->children();
         foreach (array_keys($this->_connections) as $connectionName) {
@@ -64,11 +64,11 @@ class Mage_Adminhtml_Model_System_Config_Source_Storage_Media_Database
                 continue;
             }
 
-            $media_storages[] = ['value' => $connectionName, 'label' => $connectionName];
+            $mediaStorages[] = ['value' => $connectionName, 'label' => $connectionName];
         }
-        sort($media_storages);
-        reset($media_storages);
+        sort($mediaStorages);
+        reset($mediaStorages);
 
-        return $media_storages;
+        return $mediaStorages;
     }
 }

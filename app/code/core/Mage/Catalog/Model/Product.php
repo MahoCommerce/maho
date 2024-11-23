@@ -662,7 +662,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      * @param bool $skipSuper Not used
      * @return array
      */
-    // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClassAfterLastUsed
     public function getAttributes($groupId = null, $skipSuper = false)
     {
         /** @var Mage_Catalog_Model_Resource_Eav_Attribute[] $productAttributes */
@@ -798,8 +797,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     /**
      * Saving product type related data and init index
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave()
@@ -819,8 +816,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Clear cache related with product and protect delete from not admin
      * Register indexing event before delete product
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeDelete()

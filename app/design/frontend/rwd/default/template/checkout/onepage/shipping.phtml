@@ -9,11 +9,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
-/**
- * @var Mage_Checkout_Block_Onepage_Shipping $this
- */
+
+/** @var Mage_Checkout_Block_Onepage_Shipping $this */
 ?>
 <form action="" id="co-shipping-form">
     <ul class="form-list">
@@ -77,9 +74,7 @@
                                     <option value=""><?= $this->__('Please select region, state or province') ?></option>
                                 </select>
                                 <script type="text/javascript">
-                                //<![CDATA[
-                                    $('shipping:region_id').setAttribute('defaultValue',  "<?= $this->getAddress()->getRegionId() ?>");
-                                //]]>
+                                    document.getElementById('shipping:region_id').setAttribute('defaultValue', "<?= $this->getAddress()->getRegionId() ?>");
                                 </script>
                                 <input type="text" id="shipping:region" name="shipping[region]" value="<?= $this->escapeHtml($this->getAddress()->getRegion()) ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" style="display:none;" />
                             </div>
@@ -136,14 +131,15 @@
     <?= $this->getBlockHtml('formkey') ?>
 </form>
 <script type="text/javascript">
-//<![CDATA[
-    var shipping = new Shipping('co-shipping-form', '<?= $this->getUrl('checkout/onepage/getAddress') ?>address/', '<?= $this->getUrl('checkout/onepage/saveShipping') ?>',
-        '<?= $this->getUrl('checkout/onepage/shippingMethod') ?>');
+    var shipping = new Shipping('co-shipping-form', '<?= $this->getUrl('checkout/onepage/getAddress') ?>address/',
+        '<?= $this->getUrl('checkout/onepage/saveShipping') ?>', '<?= $this->getUrl('checkout/onepage/shippingMethod') ?>');
     var shippingForm = new VarienForm('co-shipping-form');
     shippingForm.extraChildParams = ' onchange="shipping.setSameAsBilling(false);"';
-    //shippingForm.setElementsRelation('shipping:country_id', 'shipping:region', '<?= $this->getUrl('directory/json/childRegion') ?>', '<?= Mage::helper('core')->jsQuoteEscape($this->__('Select State/Province...')) ?>');
-    $('shipping-address-select') && shipping.newAddress(!$('shipping-address-select').value);
+
+    var shippingAddressSelect = document.getElementById('shipping-address-select');
+    if (shippingAddressSelect) {
+        shipping.newAddress(!shippingAddressSelect.value);
+    }
 
     var shippingRegionUpdater = new RegionUpdater('shipping:country_id', 'shipping:region', 'shipping:region_id', <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, 'shipping:postcode');
-//]]>
 </script>

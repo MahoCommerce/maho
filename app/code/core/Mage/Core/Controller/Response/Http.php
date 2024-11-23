@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -27,7 +27,6 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
     /**
      * Fixes CGI only one Status header allowed bug
      * @link  http://bugs.php.net/bug.php?id=36705
-     * @inheritDoc
      */
     #[\Override]
     public function sendHeaders()
@@ -62,9 +61,6 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
         return parent::sendHeaders();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function sendResponse()
     {
@@ -74,8 +70,6 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
 
     /**
      * Additionally check for session messages in several domains case
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function setRedirect($url, $code = 302)

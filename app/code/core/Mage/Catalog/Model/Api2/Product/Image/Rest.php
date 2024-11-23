@@ -30,6 +30,7 @@ abstract class Mage_Catalog_Model_Api2_Product_Image_Rest extends Mage_Catalog_M
      */
     protected $_mimeTypes = [
         'image/webp' => 'webp',
+        'image/avif' => 'avif',
         'image/jpg'  => 'jpg',
         'image/jpeg' => 'jpg',
         'image/gif'  => 'gif',

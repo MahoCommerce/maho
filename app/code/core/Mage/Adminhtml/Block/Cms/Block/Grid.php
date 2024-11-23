@@ -26,10 +26,6 @@ class Mage_Adminhtml_Block_Cms_Block_Grid extends Mage_Adminhtml_Block_Widget_Gr
         $this->setDefaultDir('ASC');
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -38,10 +34,6 @@ class Mage_Adminhtml_Block_Cms_Block_Grid extends Mage_Adminhtml_Block_Widget_Gr
         return parent::_prepareCollection();
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     #[\Override]
     protected function _prepareColumns()
     {
@@ -95,9 +87,6 @@ class Mage_Adminhtml_Block_Cms_Block_Grid extends Mage_Adminhtml_Block_Widget_Gr
         return parent::_prepareColumns();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterLoadCollection()
     {

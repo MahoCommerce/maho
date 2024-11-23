@@ -215,8 +215,6 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
 
     /**
      * Save item options after item saved
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave()
@@ -463,9 +461,8 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
     public function setBuyRequest($buyRequest)
     {
         $buyRequest->setId($this->getId());
-
-        $_buyRequest = serialize($buyRequest->getData());
-        $this->setData('buy_request', $_buyRequest);
+        $request = serialize($buyRequest->getData());
+        $this->setData('buy_request', $request);
         return $this;
     }
 
@@ -594,7 +591,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
     /**
      * Add option to item
      *
-     * @param   Mage_Wishlist_Model_Item_Option $option
+     * @param   array|Mage_Wishlist_Model_Item_Option $option
      * @return  $this
      */
     public function addOption($option)

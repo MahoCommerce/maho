@@ -45,7 +45,6 @@ class Mage_Dataflow_Model_Convert_Adapter_Http extends Mage_Dataflow_Model_Conve
         return $this;
     }
 
-    // experimental code
     public function loadFile()
     {
         if (!$_FILES) {

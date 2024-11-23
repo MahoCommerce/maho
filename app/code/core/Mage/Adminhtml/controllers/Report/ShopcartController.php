@@ -120,9 +120,6 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
         $this->_prepareDownloadResponse(...$grid->getExcelFile('shopcart_abandoned.xml', -1));
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _isAllowed()
     {

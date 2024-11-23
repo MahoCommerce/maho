@@ -138,11 +138,6 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
         return $this;
     }
 
-    /**
-     * Before collection load
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeLoad()
     {
@@ -153,11 +148,6 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
         return parent::_beforeLoad();
     }
 
-    /**
-     * After collection load
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterLoad()
     {

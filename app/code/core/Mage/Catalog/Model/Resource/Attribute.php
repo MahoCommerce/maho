@@ -18,11 +18,6 @@
  */
 class Mage_Catalog_Model_Resource_Attribute extends Mage_Eav_Model_Resource_Entity_Attribute
 {
-    /**
-     * Perform actions before object save
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
@@ -33,11 +28,6 @@ class Mage_Catalog_Model_Resource_Attribute extends Mage_Eav_Model_Resource_Enti
         return parent::_beforeSave($object);
     }
 
-    /**
-     * Perform actions after object save
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {

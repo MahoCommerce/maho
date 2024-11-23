@@ -9,12 +9,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
-/**
- * @see Mage_Catalog_Block_Seo_Sitemap_
- * @var Mage_Catalog_Block_Seo_Sitemap_ $this
- */
+
+/** @var Mage_Catalog_Block_Seo_Sitemap_ $this */
 ?>
 <?php $_items = $this->getCollection(); ?>
 <?php if($_items->getSize()): ?>
@@ -28,10 +24,9 @@
         <?= $this->__('There are no %s available.', $this->getItemsTitle()) ?>
     </p>
     <script type="text/javascript">
-    //<![CDATA[
-        if ($('sitemap_top_links') != undefined) {
-            $('sitemap_top_links').hide();
+        const sitemapTopLinks = document.getElementById('sitemap_top_links');
+        if (sitemapTopLinks) {
+            sitemapTopLinks.style.display = 'none';
         }
-    //]]>
     </script>
 <?php endif ?>

@@ -143,8 +143,6 @@ class Mage_Wishlist_Model_Resource_Product_Collection extends Mage_Catalog_Model
 
     /**
      * Rewrite retrieve attribute field name for wishlist attributes
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _getAttributeFieldName($attributeCode)

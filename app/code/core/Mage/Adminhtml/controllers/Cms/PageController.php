@@ -218,9 +218,6 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
         return parent::preDispatch();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _isAllowed()
     {

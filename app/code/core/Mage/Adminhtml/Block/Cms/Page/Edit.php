@@ -87,9 +87,6 @@ class Mage_Adminhtml_Block_Cms_Page_Edit extends Mage_Adminhtml_Block_Widget_For
         ]);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

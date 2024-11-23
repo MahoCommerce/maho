@@ -573,60 +573,90 @@ function buttonDisabler() {
 
 const Calendar = {};
 Calendar.setup = function(config) {
-    const {
-        inputField = '',
-        ifFormat = '',
-        showsTime = '',
-        range = ''
-    } = config;
+    const { inputField = '' } = config;
 
-    const strftimeToDateConvertionMap = {
-        '%O': 'S',
-        '%d': 'd',
-        '%a': 'D',
-        '%e': 'j',
-        '%A': 'l',
-        '%u': 'N',
-        '%w': 'w',
-        '%j': 'z',
-        '%V': 'W',
-        '%B': 'F',
-        '%m': 'm',
-        '%b': 'M',
-        '%-m': 'n',
-        '%G': 'o',
-        '%Y': 'Y',
-        '%y': 'y',
-        '%P': 'a',
-        '%p': 'A',
-        '%l': 'g',
-        '%I': 'h',
-        '%H': 'H',
-        '%M': 'i',
-        '%S': 's',
-        '%z': 'O',
-        '%Z': 'T',
-        '%s': 'U'
-    };
-    const dateFormat = ifFormat.replace(/%[OdaeAuwjVBmbGYyPplIHMSzZs-]/g, match => strftimeToDateConvertionMap[match] || match);
-
-    let flatpickrOptions = {
-        allowInput: true,
-        dateFormat: dateFormat,
-        enableTime: showsTime
-    };
-
-    if (Array.isArray(range)) {
-        const [yearStart, yearEnd] = range;
-        if (yearStart) {
-            const minDate = new Date(yearStart, 0, 1);
-            flatpickrOptions.minDate = flatpickr.formatDate(minDate, dateFormat, {});
-        }
-        if (yearEnd) {
-            const maxDate = new Date(yearEnd, 11, 31);
-            flatpickrOptions.maxDate = flatpickr.formatDate(maxDate, dateFormat, {});
-        }
+    // Store config on the input element itself
+    const input = document.getElementById(inputField);
+    if (input) {
+        input.dataset.calendarConfig = JSON.stringify(config);
+        const initHandler = (event) => Calendar.initialize(event);
+        input.addEventListener('focus', initHandler);
+        input.addEventListener('click', initHandler);
     }
+};
 
-    flatpickr('#' + inputField, flatpickrOptions);
+Calendar.initialize = async function(event) {
+    if (!event?.target) return;
+
+    try {
+        // Get config from the input element
+        const config = JSON.parse(event.target.dataset.calendarConfig || '{}');
+
+        if (typeof flatpickr === 'undefined') {
+            // Load flatpickr CSS
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = '/js/flatpickr/flatpickr.min.css';
+            document.head.appendChild(link);
+            await new Promise(resolve => link.onload = resolve);
+
+            // Load flatpickr JS
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = '/js/flatpickr/flatpickr.min.js';
+                script.onload = resolve;
+                script.onerror = reject;
+                document.body.appendChild(script);
+            });
+        }
+
+        const {
+            inputField = '',
+            ifFormat = '',
+            showsTime = '',
+            range = ''
+        } = config;
+
+        const strftimeToDateConvertionMap = {
+            '%O': 'S', '%d': 'd', '%a': 'D', '%e': 'j', '%A': 'l', '%u': 'N', '%w': 'w', '%j': 'z', '%V': 'W',
+            '%B': 'F', '%m': 'm', '%b': 'M', '%-m': 'n', '%G': 'o', '%Y': 'Y', '%y': 'y', '%P': 'a', '%p': 'A',
+            '%l': 'g', '%I': 'h', '%H': 'H', '%M': 'i', '%S': 's', '%z': 'O', '%Z': 'T', '%s': 'U'
+        };
+
+        const dateFormat = ifFormat.replace(/%[OdaeAuwjVBmbGYyPplIHMSzZs-]/g,
+            match => strftimeToDateConvertionMap[match] || match
+        );
+
+        let flatpickrOptions = {
+            allowInput: true,
+            dateFormat: dateFormat,
+            enableTime: showsTime
+        };
+
+        if (Array.isArray(range)) {
+            const [yearStart, yearEnd] = range;
+            if (yearStart) {
+                const minDate = new Date(yearStart, 0, 1);
+                flatpickrOptions.minDate = flatpickr.formatDate(minDate, dateFormat, {});
+            }
+            if (yearEnd) {
+                const maxDate = new Date(yearEnd, 11, 31);
+                flatpickrOptions.maxDate = flatpickr.formatDate(maxDate, dateFormat, {});
+            }
+        }
+
+        // Initialize flatpickr and trigger it
+        flatpickr('#' + inputField, flatpickrOptions);
+        document.getElementById(inputField).click();
+
+        // remove our event handlers
+        const input = event.target;
+        const initHandler = (event) => Calendar.initialize(event);
+        input.removeEventListener('focus', initHandler);
+        input.removeEventListener('click', initHandler);
+        input.removeEventListener('touchstart', initHandler);
+
+        // Clean up the stored config
+        delete input.dataset.calendarConfig;
+    } catch (error) {}
 };

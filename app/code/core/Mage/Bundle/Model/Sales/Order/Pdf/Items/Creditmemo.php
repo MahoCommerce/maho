@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Bundle
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -30,17 +30,17 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Creditmemo extends Mage_Bundle_Mod
         $pdf    = $this->getPdf();
         $page   = $this->getPage();
 
-        $items = $this->getChilds($item);
+        $orderItems = $this->getChilds($item);
         $_prevOptionId = '';
         $drawItems  = [];
         $leftBound  = 35;
         $rightBound = 565;
 
-        foreach ($items as $_item) {
+        foreach ($orderItems as $orderItem) {
             $x      = $leftBound;
             $line   = [];
 
-            $attributes = $this->getSelectionAttributes($_item);
+            $attributes = $this->getSelectionAttributes($orderItem);
             if (is_array($attributes)) {
                 $optionId   = $attributes['option_id'];
             } else {
@@ -55,7 +55,7 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Creditmemo extends Mage_Bundle_Mod
             }
 
             // draw selection attributes
-            if ($_item->getOrderItem()->getParentItem()) {
+            if ($orderItem->getOrderItem()->getParentItem()) {
                 if ($_prevOptionId != $attributes['option_id']) {
                     $line[0] = [
                         'font'  => 'italic',
@@ -74,12 +74,12 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Creditmemo extends Mage_Bundle_Mod
             }
 
             // draw product titles
-            if ($_item->getOrderItem()->getParentItem()) {
+            if ($orderItem->getOrderItem()->getParentItem()) {
                 $feed = $x + 5;
-                $name = $this->getValueHtml($_item);
+                $name = $this->getValueHtml($orderItem);
             } else {
                 $feed = $x;
-                $name = $_item->getName();
+                $name = $orderItem->getName();
             }
 
             $line[] = [
@@ -90,7 +90,7 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Creditmemo extends Mage_Bundle_Mod
             $x += 220;
 
             // draw SKUs
-            if (!$_item->getOrderItem()->getParentItem()) {
+            if (!$orderItem->getOrderItem()->getParentItem()) {
                 $text = [];
                 foreach (Mage::helper('core/string')->str_split($item->getSku(), 17) as $part) {
                     $text[] = $part;
@@ -104,9 +104,9 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Creditmemo extends Mage_Bundle_Mod
             $x += 100;
 
             // draw prices
-            if ($this->canShowPriceInfo($_item)) {
+            if ($this->canShowPriceInfo($orderItem)) {
                 // draw Total(ex)
-                $text = $order->formatPriceTxt($_item->getRowTotal());
+                $text = $order->formatPriceTxt($orderItem->getRowTotal());
                 $line[] = [
                     'text'  => $text,
                     'feed'  => $x,
@@ -117,7 +117,7 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Creditmemo extends Mage_Bundle_Mod
                 $x += 50;
 
                 // draw Discount
-                $text = $order->formatPriceTxt(-$_item->getDiscountAmount());
+                $text = $order->formatPriceTxt(-$orderItem->getDiscountAmount());
                 $line[] = [
                     'text'  => $text,
                     'feed'  => $x,
@@ -128,9 +128,9 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Creditmemo extends Mage_Bundle_Mod
                 $x += 50;
 
                 // draw QTY
-                $text = $_item->getQty() * 1;
+                $text = $orderItem->getQty() * 1;
                 $line[] = [
-                    'text'  => $_item->getQty() * 1,
+                    'text'  => $orderItem->getQty() * 1,
                     'feed'  => $x,
                     'font'  => 'bold',
                     'align' => 'center',
@@ -139,7 +139,7 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Creditmemo extends Mage_Bundle_Mod
                 $x += 30;
 
                 // draw Tax
-                $text = $order->formatPriceTxt($_item->getTaxAmount());
+                $text = $order->formatPriceTxt($orderItem->getTaxAmount());
                 $line[] = [
                     'text'  => $text,
                     'feed'  => $x,
@@ -151,7 +151,7 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Creditmemo extends Mage_Bundle_Mod
 
                 // draw Total(inc)
                 $text = $order->formatPriceTxt(
-                    $_item->getRowTotal() + $_item->getTaxAmount() - $_item->getDiscountAmount()
+                    $orderItem->getRowTotal() + $orderItem->getTaxAmount() - $orderItem->getDiscountAmount()
                 );
                 $line[] = [
                     'text'  => $text,
@@ -178,11 +178,11 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Creditmemo extends Mage_Bundle_Mod
 
                     if ($option['value']) {
                         $text = [];
-                        $_printValue = $option['print_value'] ?? strip_tags($option['value']);
-                        $values = explode(', ', $_printValue);
+                        $printValue = $option['print_value'] ?? strip_tags($option['value']);
+                        $values = explode(', ', $printValue);
                         foreach ($values as $value) {
-                            foreach (Mage::helper('core/string')->str_split($value, 30, true, true) as $_value) {
-                                $text[] = $_value;
+                            foreach (Mage::helper('core/string')->str_split($value, 30, true, true) as $str) {
+                                $text[] = $str;
                             }
                         }
 

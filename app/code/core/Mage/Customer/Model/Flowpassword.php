@@ -29,9 +29,6 @@ class Mage_Customer_Model_Flowpassword extends Mage_Core_Model_Abstract
         $this->_init('customer/flowpassword');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeSave()
     {

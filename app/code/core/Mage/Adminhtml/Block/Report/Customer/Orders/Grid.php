@@ -35,9 +35,6 @@ class Mage_Adminhtml_Block_Report_Customer_Orders_Grid extends Mage_Adminhtml_Bl
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {

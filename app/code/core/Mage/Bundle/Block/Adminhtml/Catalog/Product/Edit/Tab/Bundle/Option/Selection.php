@@ -53,11 +53,6 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Selecti
         return 'bundle_selections';
     }
 
-    /**
-     * Prepare block layout
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {
@@ -134,7 +129,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Selecti
     /**
      * Check if used website scope price
      *
-     * @return string
+     * @return bool
      */
     public function isUsedWebsitePrice()
     {

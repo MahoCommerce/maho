@@ -137,11 +137,6 @@ class Varien_File_Uploader
     public const MULTIPLE_STYLE = 1;
 
     /**
-     * @deprecated Use UPLOAD_ERR_NO_FILE instead
-     */
-    public const TMP_NAME_EMPTY = UPLOAD_ERR_NO_FILE;
-
-    /**
      * Resulting of uploaded file
      *
      * @var array|bool      Array with file info keys: path, file. Result is
@@ -481,17 +476,6 @@ class Varien_File_Uploader
         return in_array(strtolower($extension), $this->_allowedExtensions);
     }
 
-    /**
-     * @deprecated after 1.5.0.0-beta2
-     *
-     * @param string $extension
-     * @return boolean
-     */
-    public function chechAllowedExtension($extension)
-    {
-        return $this->checkAllowedExtension($extension);
-    }
-
     private function _getMimeType()
     {
         return $this->_file['type'];
@@ -529,9 +513,6 @@ class Varien_File_Uploader
         }
     }
 
-    /**
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
-     */
     private function _createDestinationFolder($destinationFolder)
     {
         if (!$destinationFolder) {

@@ -35,9 +35,6 @@ class Mage_Adminhtml_Block_Newsletter_Template_Edit extends Mage_Adminhtml_Block
         return Mage::registry('_current_template');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

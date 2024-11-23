@@ -30,9 +30,6 @@ class Mage_Customer_Block_Form_Register extends Mage_Core_Block_Template
      */
     protected $_address;
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

@@ -321,7 +321,7 @@ class Mage_HTTP_Client_Curl implements Mage_HTTP_IClient
 
     /**
      * Get response status code
-     * @see lib/Mage/HTTP/Mage_HTTP_Client#getStatus()
+     * @see Mage_HTTP_Client::getStatus()
      */
     #[\Override]
     public function getStatus()

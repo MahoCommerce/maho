@@ -194,34 +194,37 @@
                 <p class="back-link"><a href="<?= $this->getBackUrl() ?>"><small>&laquo; </small><?= $this->__('Back to Billing Information') ?></a></p>
             </div>
         </form>
-        <script type="text/javascript">
-        //<![CDATA[
-            var submitted = false;
+    <script type="text/javascript">
+        var submitted = false;
+        function showLoader() {
+            if (submitted) {
+                return false;
+            }
 
-            function showLoader()
-            {
-                if (submitted) {
-                    return false;
-                }
-                if ($('checkout-agreements')) {
-                    var checkboxes = $$('#checkout-agreements input');
-                    for (var i=0, l=checkboxes.length; i<l; i++) {
-                        if (!checkboxes[i].checked) {
-                            alert("<?= Mage::helper('core')->jsQuoteEscape($this->__('Please agree to all Terms and Conditions before placing the orders.')) ?>");
-                            return false;
-                        }
+            const agreements = document.getElementById('checkout-agreements');
+            if (agreements) {
+                const checkboxes = agreements.querySelectorAll('input');
+                for (let i = 0; i < checkboxes.length; i++) {
+                    if (!checkboxes[i].checked) {
+                        alert("<?= $this->jsQuoteEscape($this->__('Please agree to all Terms and Conditions before placing the orders.')) ?>");
+                        return false;
                     }
                 }
-
-                submitted = true;
-                var step='review';
-                Element.show(step+'-please-wait');
-                $(step+'-buttons-container').setStyle({opacity:.5});
-                $(step+'-buttons-container').descendants().each(function(s) {
-                      s.disabled = true;
-                });
-                return true;
             }
-        //]]>
-        </script>
+
+            submitted = true;
+            const step = 'review';
+            document.getElementById(step + '-please-wait').style.display = 'block';
+
+            const buttonsContainer = document.getElementById(step + '-buttons-container');
+            buttonsContainer.style.opacity = '0.5';
+
+            const elements = buttonsContainer.getElementsByTagName('*');
+            Array.from(elements).forEach(element => {
+                element.disabled = true;
+            });
+
+            return true;
+        }
+    </script>
 </div>

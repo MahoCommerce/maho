@@ -90,6 +90,7 @@ AddDefaultCharset Off
 <IfModule mod_expires.c>
     ExpiresActive On
     ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/avif "access plus 1 year"
     ExpiresByType image/jpg "access plus 1 year"
     ExpiresByType image/jpeg "access plus 1 year"
     ExpiresByType image/gif "access plus 1 year"

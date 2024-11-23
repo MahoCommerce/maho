@@ -29,6 +29,9 @@ class Mage_Adminhtml_Model_Customer_Renderer_Region implements Varien_Data_Form_
      */
     protected static $_regionCollections;
 
+    /**
+     * @return string
+     */
     #[\Override]
     public function render(Varien_Data_Form_Element_Abstract $element)
     {

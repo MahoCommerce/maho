@@ -32,9 +32,6 @@ class Mage_Adminhtml_Block_Checkout_Agreement_Grid extends Mage_Adminhtml_Block_
         $this->setSaveParametersInSession(true);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -44,9 +41,6 @@ class Mage_Adminhtml_Block_Checkout_Agreement_Grid extends Mage_Adminhtml_Block_
         return parent::_prepareCollection();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {
@@ -102,9 +96,6 @@ class Mage_Adminhtml_Block_Checkout_Agreement_Grid extends Mage_Adminhtml_Block_
         return parent::_prepareColumns();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterLoadCollection()
     {

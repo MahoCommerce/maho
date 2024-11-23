@@ -380,7 +380,7 @@ class Mage_Core_Model_Design_Package
     /**
      * Get filename by specified theme parameters
      *
-     * @param array $file
+     * @param string $file
      * @return string
      */
     protected function _renderFilename($file, array $params)
@@ -569,7 +569,7 @@ class Mage_Core_Model_Design_Package
      * Will return false or found string.
      *
      * @param string $regexpsConfigPath
-     * @return mixed
+     * @return false|string
      */
     protected function _checkUserAgentAgainstRegexps($regexpsConfigPath)
     {
@@ -606,8 +606,6 @@ class Mage_Core_Model_Design_Package
      * @param array $rules - design exception rules
      * @param string $regexpsConfigPath
      * @return bool|string
-     *
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     public static function getPackageByUserAgent(array $rules, $regexpsConfigPath = 'path_mock')
     {
@@ -631,187 +629,6 @@ class Mage_Core_Model_Design_Package
     }
 
     /**
-     * Merge specified javascript files and return URL to the merged file on success
-     *
-     * @param array $files
-     * @return string
-     */
-    public function getMergedJsUrl($files)
-    {
-        $newestTimestamp = 0;
-        foreach ($files as $file) {
-            $filemtime = filemtime($file);
-            if ($filemtime > $newestTimestamp) {
-                $newestTimestamp = $filemtime;
-            }
-        }
-
-        $targetFilename = md5(implode(',', $files) . "|{$newestTimestamp}") . '.js';
-        $targetDir = $this->_initMergerDir('js');
-        if (!$targetDir) {
-            return '';
-        }
-        if ($this->_mergeFiles($files, $targetDir . DS . $targetFilename, false, null, 'js')) {
-            return Mage::getBaseUrl('media', Mage::app()->getRequest()->isSecure()) . 'js/' . $targetFilename;
-        }
-        return '';
-    }
-
-    /**
-     * Merge specified css files and return URL to the merged file on success
-     *
-     * @param array $files
-     * @return string
-     */
-    public function getMergedCssUrl($files)
-    {
-        // secure or unsecure
-        $isSecure = Mage::app()->getRequest()->isSecure();
-        $mergerDir = $isSecure ? 'css_secure' : 'css';
-        $targetDir = $this->_initMergerDir($mergerDir);
-        if (!$targetDir) {
-            return '';
-        }
-
-        // base hostname & port
-        $baseMediaUrl = Mage::getBaseUrl('media', $isSecure);
-        $hostname = parse_url($baseMediaUrl, PHP_URL_HOST);
-        $port = parse_url($baseMediaUrl, PHP_URL_PORT);
-        if ($port === false) {
-            $port = $isSecure ? 443 : 80;
-        }
-
-        // merge into target file
-        $newestTimestamp = 0;
-        foreach ($files as $file) {
-            $filemtime = filemtime($file);
-            if ($filemtime > $newestTimestamp) {
-                $newestTimestamp = $filemtime;
-            }
-        }
-
-        $targetFilename = md5(implode(',', $files) . "|{$hostname}|{$port}|{$newestTimestamp}") . '.css';
-        $mergeFilesResult = $this->_mergeFiles(
-            $files,
-            $targetDir . DS . $targetFilename,
-            false,
-            [$this, 'beforeMergeCss'],
-            'css'
-        );
-        if ($mergeFilesResult) {
-            return $baseMediaUrl . $mergerDir . '/' . $targetFilename;
-        }
-        return '';
-    }
-
-    /**
-     * Merges files into one and saves it into DB (if DB file storage is on)
-     *
-     * @see Mage_Core_Helper_Data::mergeFiles()
-     * @param string|bool $targetFile - file path to be written
-     * @param bool $mustMerge
-     * @param callable $beforeMergeCallback
-     * @param array|string $extensionsFilter
-     * @return bool|string
-     */
-    protected function _mergeFiles(
-        array $srcFiles,
-        $targetFile = false,
-        $mustMerge = false,
-        $beforeMergeCallback = null,
-        $extensionsFilter = []
-    ) {
-        if (Mage::helper('core/file_storage_database')->checkDbUsage()) {
-            if (!file_exists($targetFile)) {
-                Mage::helper('core/file_storage_database')->saveFileToFilesystem($targetFile);
-            }
-            if (file_exists($targetFile)) {
-                $filemtime = filemtime($targetFile);
-            } else {
-                $filemtime = null;
-            }
-            $result = Mage::helper('core')->mergeFiles(
-                $srcFiles,
-                $targetFile,
-                $mustMerge,
-                $beforeMergeCallback,
-                $extensionsFilter
-            );
-            if ($result && (filemtime($targetFile) > $filemtime)) {
-                Mage::helper('core/file_storage_database')->saveFile($targetFile);
-            }
-            return $result;
-        } else {
-            return Mage::helper('core')->mergeFiles(
-                $srcFiles,
-                $targetFile,
-                $mustMerge,
-                $beforeMergeCallback,
-                $extensionsFilter
-            );
-        }
-    }
-
-    /**
-     * Remove all merged js/css files
-     *
-     * @return  bool
-     */
-    public function cleanMergedJsCss()
-    {
-        $result = (bool)$this->_initMergerDir('js', true);
-        $result = (bool)$this->_initMergerDir('css', true) && $result;
-        return (bool)$this->_initMergerDir('css_secure', true) && $result;
-    }
-
-    /**
-     * Make sure merger dir exists and writeable
-     * Also can clean it up
-     *
-     * @param string $dirRelativeName
-     * @param bool $cleanup
-     * @return bool
-     */
-    protected function _initMergerDir($dirRelativeName, $cleanup = false)
-    {
-        $mediaDir = Mage::getBaseDir('media');
-        try {
-            $dir = Mage::getBaseDir('media') . DS . $dirRelativeName;
-            if ($cleanup) {
-                Varien_Io_File::rmdirRecursive($dir);
-                Mage::helper('core/file_storage_database')->deleteFolder($dir);
-            }
-            if (!is_dir($dir)) {
-                mkdir($dir);
-            }
-            return is_writable($dir) ? $dir : false;
-        } catch (Exception $e) {
-            Mage::logException($e);
-        }
-        return false;
-    }
-
-    /**
-     * Before merge css callback function
-     *
-     * @param string $file
-     * @param string $contents
-     * @return string
-     */
-    public function beforeMergeCss($file, $contents)
-    {
-        $this->_setCallbackFileDir($file);
-
-        $cssImport = '/@import\\s+([\'"])(.*?)[\'"]/';
-        $contents = preg_replace_callback($cssImport, [$this, '_cssMergerImportCallback'], $contents);
-
-        $cssUrl = '/url\\(\\s*(?![\\\'\\"]?data:)([^\\)\\s]+)\\s*\\)?/';
-        $contents = preg_replace_callback($cssUrl, [$this, '_cssMergerUrlCallback'], $contents);
-
-        return $contents;
-    }
-
-    /**
      * Set file dir for css file
      *
      * @param string $file
@@ -820,35 +637,6 @@ class Mage_Core_Model_Design_Package
     {
         $file = str_replace(Mage::getBaseDir() . DS, '', $file);
         $this->_callbackFileDir = dirname($file);
-    }
-
-    /**
-     * Callback function replaces relative links for @import matches in css file
-     *
-     * @param array $match
-     * @return string
-     */
-    protected function _cssMergerImportCallback($match)
-    {
-        $quote = $match[1];
-        $uri = $this->_prepareUrl($match[2]);
-
-        return "@import {$quote}{$uri}{$quote}";
-    }
-
-    /**
-     * Callback function replaces relative links for url() matches in css file
-     *
-     * @param array $match
-     * @return string
-     */
-    protected function _cssMergerUrlCallback($match)
-    {
-        $quote = ($match[1][0] == "'" || $match[1][0] == '"') ? $match[1][0] : '';
-        $uri = ($quote == '') ? $match[1] : substr($match[1], 1, -1);
-        $uri = $this->_prepareUrl($uri);
-
-        return "url({$quote}{$uri}{$quote})";
     }
 
     /**
@@ -900,15 +688,5 @@ class Mage_Core_Model_Design_Package
             $uri = $baseUrl . $fileDir . implode('/', $pathParts);
         }
         return $uri;
-    }
-
-    /**
-     * Default theme getter
-     * @return string
-     * @deprecated since 1.8.2.0
-     */
-    public function getFallbackTheme()
-    {
-        return Mage::getStoreConfig('design/theme/default', $this->getStore());
     }
 }

@@ -145,9 +145,6 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
         $this->_init('core/website');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function load($id, $field = null)
     {
@@ -470,9 +467,6 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
         return $this->_getData('code');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeDelete()
     {

@@ -30,11 +30,6 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_View_Tab_Orders extends Mage_
         ;
     }
 
-    /**
-     * Prepare grid collection object
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -45,13 +40,6 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_View_Tab_Orders extends Mage_
         return parent::_prepareCollection();
     }
 
-    /**
-     * Prepare grid columns
-     *
-     * TODO: fix up this mess
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {

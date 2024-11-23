@@ -137,9 +137,6 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     }
 
     /**
-     * Prepare data for save
-     *
-     * @inheritDoc
      * @throws Mage_Eav_Exception
      */
     #[\Override]
@@ -215,8 +212,6 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
 
     /**
      * Save additional data
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave()

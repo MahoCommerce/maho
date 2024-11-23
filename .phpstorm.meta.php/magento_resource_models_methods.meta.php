@@ -331,7 +331,6 @@ namespace PHPSTORM_META {
             'paypal/report_settlement_row' => \Mage_Paypal_Model_Resource_Report_Settlement_Row::class,
             'paypal/report_settlement_row_collection' => \Mage_Paypal_Model_Resource_Report_Settlement_Row_Collection::class,
             'paypal/setup' => \Mage_Paypal_Model_Resource_Setup::class,
-            'persistent/session' => \Mage_Persistent_Model_Resource_Session::class,
             'productalert/abstract' => \Mage_ProductAlert_Model_Resource_Abstract::class,
             'productalert/price' => \Mage_ProductAlert_Model_Resource_Price::class,
             'productalert/price_collection' => \Mage_ProductAlert_Model_Resource_Price_Collection::class,

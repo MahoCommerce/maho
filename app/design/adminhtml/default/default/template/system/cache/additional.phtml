@@ -9,6 +9,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Adminhtml_Block_Cache_Additional $this */
 ?>
 <br/>
 <div class="content-header">
@@ -34,14 +36,6 @@
         </td>
         <td class="scope-label">
             <?= Mage::helper('adminhtml')->__('Pregenerated configurable swatches image files.') ?>
-        </td>
-    </tr>
-    <tr>
-        <td class="scope-label">
-            <button onclick="setLocation('<?= $this->getCleanMediaUrl()?>')" type="button" class="scalable"><span><span><span><?= Mage::helper('adminhtml')->__('Flush JavaScript/CSS Cache') ?></span></span></span></button>
-        </td>
-        <td class="scope-label">
-            <?= Mage::helper('adminhtml')->__('Themes JavaScript and CSS files combined to one file.') ?>
         </td>
     </tr>
 </table>

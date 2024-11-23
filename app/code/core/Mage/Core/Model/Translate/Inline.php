@@ -238,9 +238,9 @@ class Mage_Core_Model_Translate_Inline
         }
 
         $baseJsUrl = Mage::getBaseUrl('js');
-        $url_prefix = Mage::app()->getStore()->isAdmin() ? 'adminhtml' : 'core';
+        $urlPrefix = Mage::app()->getStore()->isAdmin() ? 'adminhtml' : 'core';
         $ajaxUrl = Mage::getUrl(
-            $url_prefix . '/ajax/translate',
+            $urlPrefix . '/ajax/translate',
             ['_secure' => Mage::app()->getStore()->isCurrentlySecure()]
         );
         $trigImg = Mage::getDesign()->getSkinUrl('images/fam_book_open.png');

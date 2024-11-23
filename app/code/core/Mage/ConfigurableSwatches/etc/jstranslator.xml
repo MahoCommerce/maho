@@ -7,25 +7,26 @@
  * @package    Mage_ConfigurableSwatches
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
 <jstranslator>
-    <!-- swatches-product.js -->
-    <add-to-cart translate="message" module="configurableswatches">
-        <message>Add to Cart</message>
-    </add-to-cart>
-    <in-stock translate="message" module="configurableswatches">
-        <message>In Stock</message>
-    </in-stock>
-    <out-of-stock translate="message" module="configurableswatches">
-        <message>Out of Stock</message>
-    </out-of-stock>
-    <!-- end swatches-product.js -->
+    <script path="js/configurableswatches/swatches-product.js" type="skin_js" module="configurableswatches">
+        <add-to-cart translate="message">
+            <message>Add to Cart</message>
+        </add-to-cart>
+        <in-stock translate="message">
+            <message>In Stock</message>
+        </in-stock>
+        <out-of-stock translate="message">
+            <message>Out of Stock</message>
+        </out-of-stock>
+    </script>
 
-    <!-- mage/adminhtml/eav/options.js -->
-    <delete-msg translate="message" module="configurableswatches">
-        <message>Are you sure to delete this fallback color?</message>
-    </delete-msg>
-    <!-- end mage/adminhtml/eav/options.js -->
+    <script path="mage/adminhtml/eav/options.js" type="js" module="configurableswatches">
+        <delete-msg translate="message" module="configurableswatches">
+            <message>Are you sure to delete this fallback color?</message>
+        </delete-msg>
+    </script>
 </jstranslator>

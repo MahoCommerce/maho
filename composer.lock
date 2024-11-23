@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d086ed70c9d3053205b7b91ebab25af5",
+    "content-hash": "c55c597d2e92396f3255ab3fd01d284b",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -117,22 +117,21 @@
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
-            "version": "dev-main",
+            "version": "v2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
-                "reference": "49fe8b773fbc50a44e2d8018688ee85f29795f81"
+                "reference": "f27036354a10aa699718c9e3828fb2b2720eb94e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/49fe8b773fbc50a44e2d8018688ee85f29795f81",
-                "reference": "49fe8b773fbc50a44e2d8018688ee85f29795f81",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/f27036354a10aa699718c9e3828fb2b2720eb94e",
+                "reference": "f27036354a10aa699718c9e3828fb2b2720eb94e",
                 "shasum": ""
             },
             "require": {
                 "composer-plugin-api": "^2.0"
             },
-            "default-branch": true,
             "type": "composer-plugin",
             "extra": {
                 "class": "Maho\\MahoComposerPlugin"
@@ -145,9 +144,9 @@
             "notification-url": "https://packagist.org/downloads/",
             "support": {
                 "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
-                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v2.0.0"
+                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v2.1.0"
             },
-            "time": "2024-10-10T17:22:21+00:00"
+            "time": "2024-11-15T10:31:25+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
@@ -709,16 +708,16 @@
         },
         {
             "name": "symfony/console",
-            "version": "v7.1.6",
+            "version": "v7.1.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "bb5192af6edc797cbab5c8e8ecfea2fe5f421e57"
+                "reference": "ff04e5b5ba043d2badfb308197b9e6b42883fcd5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/bb5192af6edc797cbab5c8e8ecfea2fe5f421e57",
-                "reference": "bb5192af6edc797cbab5c8e8ecfea2fe5f421e57",
+                "url": "https://api.github.com/repos/symfony/console/zipball/ff04e5b5ba043d2badfb308197b9e6b42883fcd5",
+                "reference": "ff04e5b5ba043d2badfb308197b9e6b42883fcd5",
                 "shasum": ""
             },
             "require": {
@@ -782,7 +781,7 @@
                 "terminal"
             ],
             "support": {
-                "source": "https://github.com/symfony/console/tree/v7.1.6"
+                "source": "https://github.com/symfony/console/tree/v7.1.8"
             },
             "funding": [
                 {
@@ -798,7 +797,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-10-09T08:46:59+00:00"
+            "time": "2024-11-06T14:23:19+00:00"
         },
         {
             "name": "symfony/css-selector",
@@ -1017,16 +1016,16 @@
         },
         {
             "name": "symfony/string",
-            "version": "v7.1.6",
+            "version": "v7.1.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/string.git",
-                "reference": "61b72d66bf96c360a727ae6232df5ac83c71f626"
+                "reference": "591ebd41565f356fcd8b090fe64dbb5878f50281"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/string/zipball/61b72d66bf96c360a727ae6232df5ac83c71f626",
-                "reference": "61b72d66bf96c360a727ae6232df5ac83c71f626",
+                "url": "https://api.github.com/repos/symfony/string/zipball/591ebd41565f356fcd8b090fe64dbb5878f50281",
+                "reference": "591ebd41565f356fcd8b090fe64dbb5878f50281",
                 "shasum": ""
             },
             "require": {
@@ -1084,7 +1083,7 @@
                 "utf8"
             ],
             "support": {
-                "source": "https://github.com/symfony/string/tree/v7.1.6"
+                "source": "https://github.com/symfony/string/tree/v7.1.8"
             },
             "funding": [
                 {
@@ -1100,7 +1099,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-09-25T14:20:29+00:00"
+            "time": "2024-11-13T13:31:21+00:00"
         }
     ],
     "packages-dev": [
@@ -1170,16 +1169,16 @@
         },
         {
             "name": "composer/pcre",
-            "version": "3.3.1",
+            "version": "3.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/pcre.git",
-                "reference": "63aaeac21d7e775ff9bc9d45021e1745c97521c4"
+                "reference": "b2bed4734f0cc156ee1fe9c0da2550420d99a21e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/pcre/zipball/63aaeac21d7e775ff9bc9d45021e1745c97521c4",
-                "reference": "63aaeac21d7e775ff9bc9d45021e1745c97521c4",
+                "url": "https://api.github.com/repos/composer/pcre/zipball/b2bed4734f0cc156ee1fe9c0da2550420d99a21e",
+                "reference": "b2bed4734f0cc156ee1fe9c0da2550420d99a21e",
                 "shasum": ""
             },
             "require": {
@@ -1189,8 +1188,8 @@
                 "phpstan/phpstan": "<1.11.10"
             },
             "require-dev": {
-                "phpstan/phpstan": "^1.11.10",
-                "phpstan/phpstan-strict-rules": "^1.1",
+                "phpstan/phpstan": "^1.12 || ^2",
+                "phpstan/phpstan-strict-rules": "^1 || ^2",
                 "phpunit/phpunit": "^8 || ^9"
             },
             "type": "library",
@@ -1229,7 +1228,7 @@
             ],
             "support": {
                 "issues": "https://github.com/composer/pcre/issues",
-                "source": "https://github.com/composer/pcre/tree/3.3.1"
+                "source": "https://github.com/composer/pcre/tree/3.3.2"
             },
             "funding": [
                 {
@@ -1245,7 +1244,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-08-27T18:44:43+00:00"
+            "time": "2024-11-12T16:29:46+00:00"
         },
         {
             "name": "composer/semver",
@@ -1685,21 +1684,21 @@
         },
         {
             "name": "mahocommerce/maho-phpstan-plugin",
-            "version": "v1.2.0",
+            "version": "v2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-phpstan-plugin.git",
-                "reference": "9e37410fb5f2c75acbeca0ad81003f5e6b815f2b"
+                "reference": "71dbdaa6c53274ef5d5fd3ab0ec2867a79118f23"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/9e37410fb5f2c75acbeca0ad81003f5e6b815f2b",
-                "reference": "9e37410fb5f2c75acbeca0ad81003f5e6b815f2b",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/71dbdaa6c53274ef5d5fd3ab0ec2867a79118f23",
+                "reference": "71dbdaa6c53274ef5d5fd3ab0ec2867a79118f23",
                 "shasum": ""
             },
             "require": {
                 "php": ">= 8.2",
-                "phpstan/phpstan": "^1.11"
+                "phpstan/phpstan": "^2.0"
             },
             "type": "library",
             "autoload": {
@@ -1713,26 +1712,26 @@
             ],
             "description": "Extension for PHPStan to allow analysis of Maho platform.",
             "support": {
-                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v1.2.0"
+                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v2.4.0"
             },
-            "time": "2024-10-06T17:07:56+00:00"
+            "time": "2024-11-11T17:12:14+00:00"
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.12.7",
+            "version": "2.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "dc2b9976bd8b0f84ec9b0e50cc35378551de7af0"
+                "reference": "6c98c7600fc717b2c78c11ef60040d5b1e359c82"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/dc2b9976bd8b0f84ec9b0e50cc35378551de7af0",
-                "reference": "dc2b9976bd8b0f84ec9b0e50cc35378551de7af0",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/6c98c7600fc717b2c78c11ef60040d5b1e359c82",
+                "reference": "6c98c7600fc717b2c78c11ef60040d5b1e359c82",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.2|^8.0"
+                "php": "^7.4|^8.0"
             },
             "conflict": {
                 "phpstan/phpstan-shim": "*"
@@ -1773,7 +1772,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-10-18T11:12:07+00:00"
+            "time": "2024-11-17T14:17:00+00:00"
         },
         {
             "name": "psr/event-dispatcher",
@@ -2474,16 +2473,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.10.3",
+            "version": "3.11.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "62d32998e820bddc40f99f8251958aed187a5c9c"
+                "reference": "19473c30efe4f7b3cd42522d0b2e6e7f243c6f87"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/62d32998e820bddc40f99f8251958aed187a5c9c",
-                "reference": "62d32998e820bddc40f99f8251958aed187a5c9c",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/19473c30efe4f7b3cd42522d0b2e6e7f243c6f87",
+                "reference": "19473c30efe4f7b3cd42522d0b2e6e7f243c6f87",
                 "shasum": ""
             },
             "require": {
@@ -2550,7 +2549,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2024-09-18T10:38:58+00:00"
+            "time": "2024-11-16T12:02:36+00:00"
         },
         {
             "name": "symfony/event-dispatcher",
@@ -2907,16 +2906,16 @@
         },
         {
             "name": "symfony/process",
-            "version": "v7.1.6",
+            "version": "v7.1.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/process.git",
-                "reference": "6aaa189ddb4ff6b5de8fa3210f2fb42c87b4d12e"
+                "reference": "42783370fda6e538771f7c7a36e9fa2ee3a84892"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/process/zipball/6aaa189ddb4ff6b5de8fa3210f2fb42c87b4d12e",
-                "reference": "6aaa189ddb4ff6b5de8fa3210f2fb42c87b4d12e",
+                "url": "https://api.github.com/repos/symfony/process/zipball/42783370fda6e538771f7c7a36e9fa2ee3a84892",
+                "reference": "42783370fda6e538771f7c7a36e9fa2ee3a84892",
                 "shasum": ""
             },
             "require": {
@@ -2948,7 +2947,7 @@
             "description": "Executes commands in sub-processes",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/process/tree/v7.1.6"
+                "source": "https://github.com/symfony/process/tree/v7.1.8"
             },
             "funding": [
                 {
@@ -2964,7 +2963,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-09-25T14:20:29+00:00"
+            "time": "2024-11-06T14:23:19+00:00"
         },
         {
             "name": "symfony/stopwatch",
@@ -3031,10 +3030,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "mahocommerce/maho-composer-plugin": 20,
-        "mahocommerce/maho-phpstan-plugin": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

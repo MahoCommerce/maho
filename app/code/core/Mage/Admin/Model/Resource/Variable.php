@@ -53,9 +53,6 @@ class Mage_Admin_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abs
         return Mage::helper('core')->jsonDecode($data);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
@@ -63,9 +60,6 @@ class Mage_Admin_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abs
         return parent::_afterSave($object);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterDelete(Mage_Core_Model_Abstract $object)
     {

@@ -1,7 +1,6 @@
 includes:
     - vendor/mahocommerce/maho-phpstan-plugin/extension.neon
     - .phpstan.baseline.neon
-    - phar://phpstan.phar/conf/bleedingEdge.neon
 parameters:
     magentoRootPath: %currentWorkingDirectory%
     phpVersion: 80200

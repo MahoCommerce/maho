@@ -229,9 +229,6 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
         $this->_prepareDownloadResponse(...$grid->getExcelFile('tag_detail.xml', -1));
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _isAllowed()
     {

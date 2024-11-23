@@ -24,9 +24,4 @@ class Mage_Adminhtml_Block_Cache_Additional extends Mage_Adminhtml_Block_Templat
     {
         return $this->getUrl('*/*/cleanSwatches');
     }
-
-    public function getCleanMediaUrl()
-    {
-        return $this->getUrl('*/*/cleanMedia');
-    }
 }

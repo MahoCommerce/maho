@@ -33,9 +33,6 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit extends Mage_Adminhtml_Block_Widget_C
      */
     protected $_buttonsHtml;
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

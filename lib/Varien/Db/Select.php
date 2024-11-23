@@ -387,9 +387,6 @@ class Varien_Db_Select extends Zend_Db_Select
         return $sql;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _tableCols($correlationName, $cols, $afterCorrelationName = null)
     {

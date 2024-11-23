@@ -38,10 +38,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit extends Mage_Adminhtml_Bl
     }
 
     /**
-     * Prepare layout.
      * Adding save_and_continue button
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _preparelayout()

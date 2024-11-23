@@ -173,8 +173,6 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
  * @param bool $html
  * @param bool $showFirst
  * @return string|null
- *
- * @SuppressWarnings(PHPMD.ErrorControlOperator)
  */
 function mageDebugBacktrace($return = false, $html = true, $showFirst = false)
 {
@@ -213,8 +211,6 @@ function mageSendErrorFooter()
 
 /**
  * @param string $path
- *
- * @SuppressWarnings(PHPMD.ErrorControlOperator)
  */
 function mageDelTree($path)
 {
@@ -268,13 +264,7 @@ function mageParseCsv($string, $delimiter = ',', $enclosure = '"', $escape = '\\
     return $elements;
 }
 
-/**
- * @param string $dir
- * @return bool
- *
- * @SuppressWarnings(PHPMD.ErrorControlOperator)
- */
-function is_dir_writeable($dir)
+function isDirWriteable(string $dir): bool
 {
     if (is_dir($dir) && is_writable($dir)) {
         if (stripos(PHP_OS, 'win') === 0) {
@@ -293,6 +283,17 @@ function is_dir_writeable($dir)
         return true;
     }
     return false;
+}
+
+/**
+ * @param string $dir
+ * @return bool
+ * @see isDirWriteable()
+ * @deprecated
+ */
+function is_dir_writeable($dir)
+{
+    return isDirWriteable($dir);
 }
 
 function mahoFindFileInIncludePath(string $path): string|false

@@ -32,7 +32,6 @@ class Mage_Eav_Model_Resource_Form_Fieldset extends Mage_Core_Model_Resource_Db_
      * After save (save labels)
      *
      * @param Mage_Eav_Model_Form_Fieldset $object
-     * @inheritDoc
      * @throws Zend_Db_Adapter_Exception
      */
     #[\Override]

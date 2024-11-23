@@ -339,7 +339,7 @@ class Mage_Paypal_Model_Ipn
                     $this->_registerPaymentCapture(true);
                     break;
 
-                    // the holded payment was denied on paypal side
+                    // the held payment was denied on paypal side
                 case Mage_Paypal_Model_Info::PAYMENTSTATUS_DENIED:
                     $this->_registerPaymentDenial();
                     break;

@@ -24,8 +24,6 @@ class Mage_Eav_Model_Attribute_Data_Image extends Mage_Eav_Model_Attribute_Data_
      *
      * @param array $value
      * @return array
-     *
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     #[\Override]
     protected function _validateByRules($value)
@@ -45,7 +43,8 @@ class Mage_Eav_Model_Attribute_Data_Image extends Mage_Eav_Model_Attribute_Data_
             1   => 'gif',
             2   => 'jpg',
             3   => 'png',
-            18  => 'webp'
+            18  => 'webp',
+            19  => 'avif'
         ];
 
         if (!isset($allowImageTypes[$imageProp[2]])) {

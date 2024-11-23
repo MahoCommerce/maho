@@ -18,9 +18,6 @@
  */
 class Mage_Sales_Block_Order_Email_Creditmemo_Items extends Mage_Sales_Block_Items_Abstract
 {
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareItem(Mage_Core_Block_Abstract $renderer)
     {

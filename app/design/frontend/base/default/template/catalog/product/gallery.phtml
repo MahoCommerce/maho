@@ -40,13 +40,17 @@
     <?php endif ?>
 </div>
 <script type="text/javascript">
-//<![CDATA[
-Event.observe(window, 'load', function(){
-    var demensions = $('product-gallery-image').getDimensions();
-    if (demensions.width < 300) {
-        demensions.width = 300
-    }
-    window.resizeTo(demensions.width+90, demensions.height+210);
-});
-//]]>
+    window.addEventListener('load', function() {
+        const image = document.getElementById('product-gallery-image');
+        const dimensions = {
+            width: image.offsetWidth,
+            height: image.offsetHeight
+        };
+
+        if (dimensions.width < 300) {
+            dimensions.width = 300;
+        }
+
+        window.resizeTo(dimensions.width + 90, dimensions.height + 210);
+    });
 </script>

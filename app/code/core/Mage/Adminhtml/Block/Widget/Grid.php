@@ -222,9 +222,6 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         $this->_emptyText = Mage::helper('adminhtml')->__('No records found.');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {
@@ -551,7 +548,6 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         if ($this->getCollection()) {
             $field = $column->getFilterIndex() ?: $column->getIndex();
             if ($column->getFilterConditionCallback() && $column->getFilterConditionCallback()[0] instanceof self) {
-                // phpcs:ignore Ecg.Security.ForbiddenFunction.Found
                 call_user_func($column->getFilterConditionCallback(), $this->getCollection(), $column);
             } else {
                 $cond = $column->getFilter()->getCondition();
@@ -748,10 +744,6 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     #[\Override]
     protected function _beforeToHtml()
     {
@@ -1146,7 +1138,6 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
             $collection = clone $originalCollection;
             $collection->setPageSize($this->_exportPageSize);
             $collection->setCurPage($page);
-            // phpcs:ignore Ecg.Performance.Loop.ModelLSD
             $collection->load();
             if (is_null($count)) {
                 $count = $collection->getSize();
@@ -1158,7 +1149,6 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
             $page++;
 
             foreach ($collection as $item) {
-                // phpcs:ignore Ecg.Security.ForbiddenFunction.Found
                 call_user_func_array([$this, $callback], array_merge([$item], $args));
             }
             $collection->clear();

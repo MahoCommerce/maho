@@ -54,11 +54,6 @@ class Mage_Adminhtml_Block_Sales_Shipment_Grid extends Mage_Adminhtml_Block_Widg
         return parent::_prepareCollection();
     }
 
-    /**
-     * Prepare and add columns to grid
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {

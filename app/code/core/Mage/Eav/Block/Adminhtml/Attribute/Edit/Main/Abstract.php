@@ -218,11 +218,6 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
         return $this->getChild('form_after');
     }
 
-    /**
-     * Initialize form fields values
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _initFormValues()
     {

@@ -210,6 +210,72 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     }
 
     /**
+     * Build the dependence array while resolving field names and checking element visibility
+     *
+     * @param Varien_Simplexml_Element $node
+     * @param Varien_Simplexml_Element $group
+     * @param Varien_Simplexml_Element $section
+     * @param string $fieldPrefix
+     * @return array
+     */
+    protected function _buildDependenceCondition($node, $group, $section, $fieldPrefix = '')
+    {
+        $block = $this->_getDependence();
+
+        // If we have a logical operator, recurse
+        if (str_starts_with($node->getName(), 'condition') && isset($node['operator'])) {
+            $operator = strtoupper((string)$node['operator']);
+            if ($block->isLogicalOperator($operator)) {
+                $conditions = [];
+                foreach ($node->children() as $child) {
+                    list($fieldId, $condition) = $this->_buildDependenceCondition($child, $group, $section, $fieldPrefix);
+                    if ($block->isLogicalOperator($fieldId)) {
+                        $conditions[] = $block->createCondition($fieldId, $condition);
+                    } else {
+                        $conditions[$fieldId] = $condition;
+                    }
+                }
+                return [$operator, $conditions];
+            } else {
+                Mage::throwException($this->__("Invalid operator '%s', must be one of NOT, AND, OR, XOR", $operator));
+            }
+        }
+
+        // Conditions may reference fields in other groups by specifying a <fieldset> node
+        if (isset($this->_fieldsets[(string)$node->fieldset])) {
+            $fieldGroup = $this->_fieldsets[(string)$node->fieldset]->getGroup();
+        } else {
+            $fieldGroup = $group;
+        }
+
+        // Build the field's full path and DOM ID
+        $fieldName = $fieldPrefix . $node->getName();
+        $fieldPath = [
+            $section->getName(),
+            $fieldGroup->getName(),
+            $fieldName,
+        ];
+        $fieldId = implode('_', $fieldPath);
+
+        // Get the wanted value for the condition, can be multiple values if a separator attribute is provided
+        $condition = (string)($node->value ?? $node);
+        if (isset($node['separator'])) {
+            $condition = explode($node['separator'], $condition);
+        }
+
+        // If the field isn't shown in current scope, provide its value to the dependence block so conditions work properly
+        if (!$this->_canShowField($fieldGroup->fields->$fieldName)) {
+            $fieldConfigPath = implode('/', $fieldPath);
+            $fieldConfigValue = Mage::getStoreConfig($fieldConfigPath, $this->getStoreCode());
+            if ($fieldConfigValue) {
+                $block->addFieldValue($fieldId, $fieldConfigValue);
+            }
+        }
+
+        return [$fieldId, $condition];
+    }
+
+    /**
      * Init fieldset fields
      *
      * @param Varien_Data_Form_Element_Fieldset $fieldset
@@ -246,7 +312,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
                     continue;
                 }
 
-                if ((string)$element->getAttribute('type') == 'group') {
+                if ((string)$element->getAttribute('type') === 'group') {
                     $this->_initGroup($fieldset->getForm(), $element, $section, $fieldset);
                     continue;
                 }
@@ -306,56 +372,13 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
                 $id = $section->getName() . '_' . $group->getName() . '_' . $fieldPrefix . $element->getName();
 
                 if ($element->depends) {
-                    foreach ($element->depends->children() as $dependent) {
-                        /** @var Mage_Core_Model_Config_Element $dependent */
-
-                        if (isset($dependent->fieldset)) {
-                            $dependentFieldGroupName = (string)$dependent->fieldset;
-                            if (!isset($this->_fieldsets[$dependentFieldGroupName])) {
-                                $dependentFieldGroupName = $group->getName();
-                            }
+                    $dependenceBlock = $this->_getDependence();
+                    foreach ($element->depends->children() as $child) {
+                        $result = $this->_buildDependenceCondition($child, $group, $section, $fieldPrefix);
+                        if ($dependenceBlock->isLogicalOperator($result[0])) {
+                            $dependenceBlock->addComplexFieldDependence($id, $result[0], $result[1]);
                         } else {
-                            $dependentFieldGroupName = $group->getName();
-                        }
-
-                        $dependentFieldNameValue = $dependent->getName();
-                        $dependentFieldGroup = $dependentFieldGroupName == $group->getName()
-                            ? $group
-                            : $this->_fieldsets[$dependentFieldGroupName]->getGroup();
-
-                        $dependentId = $section->getName()
-                            . '_' . $dependentFieldGroupName
-                            . '_' . $fieldPrefix
-                            . $dependentFieldNameValue;
-                        $shouldBeAddedDependence = true;
-                        $dependentValue = (string)(isset($dependent->value) ? $dependent->value : $dependent);
-                        if (isset($dependent['separator'])) {
-                            $dependentValue = explode((string)$dependent['separator'], $dependentValue);
-                        }
-                        $dependentFieldName = $fieldPrefix . $dependent->getName();
-                        $dependentField     = $dependentFieldGroup->fields->$dependentFieldName;
-                        /*
-                         * If dependent field can't be shown in current scope and real dependent config value
-                         * is not equal to preferred one, then hide dependence fields by adding dependence
-                         * based on not shown field (not rendered field)
-                         */
-                        if (!$this->_canShowField($dependentField)) {
-                            $dependentFullPath = $section->getName()
-                                . '/' . $dependentFieldGroupName
-                                . '/' . $fieldPrefix
-                                . $dependent->getName();
-                            $dependentValueInStore = Mage::getStoreConfig($dependentFullPath, $this->getStoreCode());
-                            if (is_array($dependentValue)) {
-                                $shouldBeAddedDependence = !in_array($dependentValueInStore, $dependentValue);
-                            } else {
-                                $shouldBeAddedDependence = $dependentValue != $dependentValueInStore;
-                            }
-                        }
-                        if ($shouldBeAddedDependence) {
-                            $this->_getDependence()
-                                ->addFieldMap($id, $id)
-                                ->addFieldMap($dependentId, $dependentId)
-                                ->addFieldDependence($id, $dependentId, $dependentValue);
+                            $dependenceBlock->addFieldDependence($id, $result[0], $result[1]);
                         }
                     }
                 }

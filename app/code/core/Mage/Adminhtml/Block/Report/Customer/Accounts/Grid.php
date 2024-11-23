@@ -35,9 +35,6 @@ class Mage_Adminhtml_Block_Report_Customer_Accounts_Grid extends Mage_Adminhtml_
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {

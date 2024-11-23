@@ -9,6 +9,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Bundle_Block_Sales_Order_Items_Renderer $this */
 ?>
 <?php $parentItem = $this->getItem() ?>
 <?php $_order = $this->getItem()->getOrder(); ?>
@@ -17,14 +19,13 @@
 
 <?php $_prevOptionId = '' ?>
 
-<?php foreach ($items as $_item): ?>
-
-<?php if($this->getItemOptions() || $parentItem->getDescription() || $this->helper('giftmessage/message')->getIsMessagesAvailable('order_item', $parentItem) && $parentItem->getGiftMessageId()): ?>
+<?php if($this->getItemOptions() || $parentItem->getDescription() || $this->canDisplayGiftmessage()): ?>
     <?php $_showlastRow = true ?>
 <?php else: ?>
     <?php $_showlastRow = false ?>
 <?php endif ?>
 
+<?php foreach ($items as $_item): ?>
 <?php if ($_item->getOrderItem()->getParentItem()): ?>
     <?php $attributes = $this->getSelectionAttributes($_item) ?>
     <?php if ($_prevOptionId != $attributes['option_id']): ?>
@@ -40,7 +41,7 @@
     <?php if (!$_item->getOrderItem()->getParentItem()): ?>
         <td class="bundle-item-parent product-info">
             <p class="product-name"><?= $this->escapeHtml($_item->getName()) ?></p>
-            <p class="sku"><?= $this->__('SKU') ?>: <?= $this->escapeHtml($this->getSku($_item)) ?></p>
+            <p class="sku"><?= $this->__('SKU') ?>: <?= $this->escapeHtml($this->getSku()) ?></p>
         </td>
         <td class="bundle-item-parent align-center">
             <?php if ($this->canShowPriceInfo($_item)): ?>
@@ -154,7 +155,7 @@
             <?php endforeach ?>
         </dl>
         <?php endif ?>
-        <?= $this->escapeHtml($_item->getDescription()) ?>
+        <?= $this->escapeHtml($parentItem->getDescription()) ?>
     </td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>

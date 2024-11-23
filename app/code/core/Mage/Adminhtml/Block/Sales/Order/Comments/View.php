@@ -31,9 +31,6 @@ class Mage_Adminhtml_Block_Sales_Order_Comments_View extends Mage_Adminhtml_Bloc
         return parent::_beforeToHtml();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

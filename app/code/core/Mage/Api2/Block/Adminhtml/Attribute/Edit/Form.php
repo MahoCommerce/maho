@@ -18,11 +18,6 @@
  */
 class Mage_Api2_Block_Adminhtml_Attribute_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
 {
-    /**
-     * Prepare form before rendering HTML
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareForm()
     {

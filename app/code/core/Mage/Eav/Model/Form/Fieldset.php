@@ -48,7 +48,6 @@ class Mage_Eav_Model_Form_Fieldset extends Mage_Core_Model_Abstract
      * Validate data before save data
      *
      * @throws Mage_Core_Exception
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeSave()

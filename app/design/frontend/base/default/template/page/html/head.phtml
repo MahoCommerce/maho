@@ -9,17 +9,15 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
-/**
- * @var Mage_Page_Block_Html_Head $this
- */
+
+/** @var Mage_Page_Block_Html_Head $this */
 ?>
 <meta http-equiv="Content-Type" content="<?= $this->getContentType() ?>" />
 <title><?= $this->getTitle() ?></title>
 <meta name="description" content="<?= htmlspecialchars($this->getDescription()) ?>" />
 <meta name="keywords" content="<?= htmlspecialchars($this->getKeywords()) ?>" />
 <meta name="robots" content="<?= htmlspecialchars($this->getRobots()) ?>" />
+<?= $this->getHreflang() ?>
 <link rel="icon" type="image/svg+xml" href="<?= $this->getSkinUrl('images/favicon.svg') ?>" sizes="any">
 <link rel="icon" type="image/png" href="<?= $this->getSkinUrl('images/favicon.png') ?>">
 <?= $this->getCssJsHtml() ?>

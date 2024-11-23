@@ -87,8 +87,6 @@ class Mage_Eav_Model_Attribute_Data_Multiline extends Mage_Eav_Model_Attribute_D
 
     /**
      * Export attribute value to entity model
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function compactValue($value)

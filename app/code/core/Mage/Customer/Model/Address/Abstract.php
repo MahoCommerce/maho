@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -404,9 +404,6 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
         return Mage::getSingleton('customer/address_config');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeSave()
     {
@@ -465,8 +462,8 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
             $this->addError(Mage::helper('customer')->__('Please enter the telephone number.'));
         }
 
-        $_havingOptionalZip = Mage::helper('directory')->getCountriesWithOptionalZip();
-        if (!in_array($this->getCountryId(), $_havingOptionalZip)
+        $havingOptionalZip = Mage::helper('directory')->getCountriesWithOptionalZip();
+        if (!in_array($this->getCountryId(), $havingOptionalZip)
             && !Zend_Validate::is($this->getPostcode(), 'NotEmpty')
         ) {
             $this->addError(Mage::helper('customer')->__('Please enter the zip/postal code.'));

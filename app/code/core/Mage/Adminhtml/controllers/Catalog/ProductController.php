@@ -202,18 +202,18 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         if ($this->getRequest()->getParam('popup')) {
             $this->loadLayout('popup');
         } else {
-            $_additionalLayoutPart = '';
+            $additionalLayoutPart = '';
             if ($product->getTypeId() === Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
                 /** @var Mage_Catalog_Model_Product_Type_Configurable $productType */
                 $productType = $product->getTypeInstance();
                 if (!$productType->getUsedProductAttributeIds()) {
-                    $_additionalLayoutPart = '_new';
+                    $additionalLayoutPart = '_new';
                 }
             }
             $this->loadLayout([
                 'default',
                 strtolower($this->getFullActionName()),
-                'adminhtml_catalog_product_' . $product->getTypeId() . $_additionalLayoutPart
+                'adminhtml_catalog_product_' . $product->getTypeId() . $additionalLayoutPart
             ]);
             $this->_setActiveMenu('catalog/products');
         }
@@ -246,19 +246,19 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
 
         Mage::dispatchEvent('catalog_product_edit_action', ['product' => $product]);
 
-        $_additionalLayoutPart = '';
+        $additionalLayoutPart = '';
         if ($product->getTypeId() === Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
             /** @var Mage_Catalog_Model_Product_Type_Configurable $productType */
             $productType = $product->getTypeInstance();
             if (!$productType->getUsedProductAttributeIds()) {
-                $_additionalLayoutPart = '_new';
+                $additionalLayoutPart = '_new';
             }
         }
 
         $this->loadLayout([
             'default',
             strtolower($this->getFullActionName()),
-            'adminhtml_catalog_product_' . $product->getTypeId() . $_additionalLayoutPart
+            'adminhtml_catalog_product_' . $product->getTypeId() . $additionalLayoutPart
         ]);
 
         $this->_setActiveMenu('catalog/products');
@@ -1115,6 +1115,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      * Show item update result from updateAction
      * in Wishlist and Cart controllers.
      *
+     * @return false|void
      */
     public function showUpdateResultAction()
     {

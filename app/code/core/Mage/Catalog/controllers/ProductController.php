@@ -42,18 +42,6 @@ class Mage_Catalog_ProductController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Initialize product view layout
-     *
-     * @param   Mage_Catalog_Model_Product $product
-     * @return  Mage_Catalog_ProductController
-     */
-    protected function _initProductLayout($product)
-    {
-        Mage::helper('catalog/product_view')->initProductLayout($product, $this);
-        return $this;
-    }
-
-    /**
      * Recursively apply custom design settings to product if it's container
      * category custom_use_for_products option is set to 1.
      * If not or product shows not in category - applies product's internal settings
@@ -95,9 +83,6 @@ class Mage_Catalog_ProductController extends Mage_Core_Controller_Front_Action
         }
     }
 
-    /**
-     * Product view action
-     */
     public function viewAction()
     {
         // Get initial data from request
@@ -115,6 +100,9 @@ class Mage_Catalog_ProductController extends Mage_Core_Controller_Front_Action
         // Render page
         try {
             $viewHelper->prepareAndRender($productId, $this, $params);
+            $this->getResponse()
+                ->setHeader('Pragma', 'public', true)
+                ->setHeader('Cache-Control', 'private max-age=60', true);
         } catch (Exception $e) {
             if ($e->getCode() == $viewHelper->ERR_NO_PRODUCT_LOADED) {
                 if (isset($_GET['store'])  && !$this->getResponse()->isRedirect()) {
@@ -146,18 +134,5 @@ class Mage_Catalog_ProductController extends Mage_Core_Controller_Front_Action
         }
         $this->loadLayout();
         $this->renderLayout();
-    }
-
-    /**
-     * Display product image action
-     *
-     * @deprecated
-     */
-    public function imageAction()
-    {
-        /*
-         * All logic has been cut to avoid possible malicious usage of the method
-         */
-        $this->_forward('noRoute');
     }
 }

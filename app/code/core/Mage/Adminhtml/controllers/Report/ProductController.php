@@ -207,9 +207,6 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
         $this->_prepareDownloadResponse(...$grid->getExcel('products_downloads.xml', -1));
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _isAllowed()
     {

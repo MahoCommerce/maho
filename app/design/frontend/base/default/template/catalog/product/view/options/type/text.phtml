@@ -9,11 +9,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
-/**
- * @var Mage_Catalog_Block_Product_View_Options_Type_Text $this
- */
+
+/** @var Mage_Catalog_Block_Product_View_Options_Type_Text $this */
 ?>
 <?php $_option = $this->getOption(); ?>
 <dt><label<?php if ($_option->getIsRequire()) echo ' class="required"' ?>><?php if ($_option->getIsRequire()) echo '<em>*</em>' ?><?=  $this->escapeHtml($_option->getTitle()) ?></label>

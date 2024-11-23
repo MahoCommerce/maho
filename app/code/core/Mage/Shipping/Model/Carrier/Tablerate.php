@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/*
+/**
  * Class Mage_Shipping_Model_Carrier_Tablerate
  *
  * @category   Mage
@@ -131,6 +131,7 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
         $request->setPackageQty($oldQty);
 
         if (!empty($rate) && $rate['price'] >= 0) {
+            /** @var Mage_Shipping_Model_Rate_Result_Method $method */
             $method = $this->_getModel('shipping/rate_result_method');
 
             $method->setCarrier('tablerate');
@@ -160,6 +161,7 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
             $request->setPackageQty($freeQty);
             $rate = $this->getRate($request);
             if (!empty($rate) && $rate['price'] >= 0) {
+                /** @var Mage_Shipping_Model_Rate_Result_Method $method */
                 $method = $this->_getModel('shipping/rate_result_method');
 
                 $method->setCarrier('tablerate');
@@ -174,6 +176,7 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
                 $result->append($method);
             }
         } else {
+            /** @var Mage_Shipping_Model_Rate_Result_Error $error */
             $error = $this->_getModel('shipping/rate_result_error');
             $error->setCarrier('tablerate');
             $error->setCarrierTitle($this->getConfigData('title'));

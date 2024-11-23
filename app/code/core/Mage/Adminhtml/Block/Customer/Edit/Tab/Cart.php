@@ -35,9 +35,6 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Cart extends Mage_Adminhtml_Block_W
         $this->setTemplate('customer/tab/cart.phtml');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareGrid()
     {
@@ -45,9 +42,6 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Cart extends Mage_Adminhtml_Block_W
         return parent::_prepareGrid();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -71,9 +65,6 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Cart extends Mage_Adminhtml_Block_W
         return parent::_prepareCollection();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {

@@ -74,9 +74,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Crosssell extends Mage_Admin
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -109,9 +106,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Crosssell extends Mage_Admin
         return $this->_getProduct()->getCrosssellReadonly();
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {

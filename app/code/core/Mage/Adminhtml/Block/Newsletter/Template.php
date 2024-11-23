@@ -24,9 +24,6 @@ class Mage_Adminhtml_Block_Newsletter_Template extends Mage_Adminhtml_Block_Temp
         $this->setTemplate('newsletter/template/list.phtml');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

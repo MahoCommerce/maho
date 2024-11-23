@@ -555,7 +555,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
 
     /**
      * Obtain select for categories with attributes.
-     * By default everything from entity table is selected
+     * By default, everything from entity table is selected
      * + name, is_active and is_anchor
      * Also the correct product_count is selected, depending on is the category anchor or not.
      *

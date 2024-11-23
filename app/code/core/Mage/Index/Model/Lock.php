@@ -148,7 +148,6 @@ class Mage_Index_Model_Lock
      * @param bool $block
      * @return bool
      */
-    // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
     protected function _setLockDb($lockName, $block = false)
     {
         if ($this->_getLockStorage()->setLock($lockName)) {

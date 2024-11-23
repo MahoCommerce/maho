@@ -59,7 +59,6 @@ class Mage_Core_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abst
 
     /**
      * @param Mage_Core_Model_Variable $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
@@ -95,7 +94,6 @@ class Mage_Core_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abst
 
     /**
      * @param Mage_Core_Model_Variable $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _getLoadSelect($field, $value, $object)

@@ -9,11 +9,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
-/**
- * @var Mage_Page_Block_Html_CookieNotice $this
- */
+
+/** @var Mage_Page_Block_Html_CookieNotice $this */
 ?>
 <?php if (Mage::helper('core/cookie')->isUserNotAllowSaveCookie()): ?>
 <div class="global-site-notice notice-cookie" id="notice-cookie-block">
@@ -23,7 +20,6 @@
     </div>
 </div>
 <script type="text/javascript">
-    /* <![CDATA[ */
     function allowSaveCookie() {
         Mage.Cookies.set('<?= Mage_Core_Helper_Cookie::IS_USER_ALLOWED_SAVE_COOKIE ?>', '<?= Mage::helper('core/cookie')->getAcceptedSaveCookiesWebsiteIds()?>', new Date(new Date().getTime() + <?= Mage::helper('core/cookie')->getCookieRestrictionLifetime() ?> * 1000));
         if (Mage.Cookies.get('<?= Mage_Core_Helper_Cookie::IS_USER_ALLOWED_SAVE_COOKIE ?>')) {
@@ -32,8 +28,8 @@
             window.location.href = '<?= Mage::getUrl('cms/index/noCookies') ?>';
         }
     }
-    $('notice-cookie-block').show();
-    /* ]]> */
+
+    document.getElementById('notice-cookie-block').style.display = 'block';
 </script>
 <?php endif ?>
 

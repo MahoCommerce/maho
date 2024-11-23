@@ -103,19 +103,18 @@
             <li class="adv-container">&nbsp;</li>
         </ul>
         <script type="text/javascript">
-        //<![CDATA[
-        var SSChecked<?= $_code ?> = function() {
-            var elm = $('<?= $_code ?>_cc_type');
-            if (['SS','SM','SO'].indexOf(elm.value) != -1) {
-                $('<?= $_code ?>_cc_type_ss_div').show();
-            } else {
-                $('<?= $_code ?>_cc_type_ss_div').hide();
-            }
-        };
+            var SSChecked<?= $_code ?> = function() {
+                var elm = document.getElementById('<?= $_code ?>_cc_type');
+                var ssDiv = document.getElementById('<?= $_code ?>_cc_type_ss_div');
+                if (['SS','SM','SO'].indexOf(elm.value) !== -1) {
+                    ssDiv.style.display = 'block';
+                } else {
+                    ssDiv.style.display = 'none';
+                }
+            };
 
-        Event.observe($('<?= $_code ?>_cc_type'), 'change', SSChecked<?= $_code ?>);
-        SSChecked<?= $_code ?>();
-        //]]>
+            document.getElementById('<?= $_code ?>_cc_type').addEventListener('change', SSChecked<?= $_code ?>);
+            SSChecked<?= $_code ?>();
         </script>
     </li>
     <?php endif ?>

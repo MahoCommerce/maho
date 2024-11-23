@@ -88,11 +88,6 @@ class Mage_Catalog_Block_Layer_View extends Mage_Core_Block_Template
         return 'catalog/layer_filter_attribute';
     }
 
-    /**
-     * Prepare child blocks
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {

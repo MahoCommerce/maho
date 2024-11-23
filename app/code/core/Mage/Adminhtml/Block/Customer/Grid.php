@@ -33,7 +33,6 @@ class Mage_Adminhtml_Block_Customer_Grid extends Mage_Adminhtml_Block_Widget_Gri
     }
 
     /**
-     * @inheritDoc
      * @throws Mage_Core_Exception
      * @throws Mage_Eav_Exception
      */
@@ -56,10 +55,6 @@ class Mage_Adminhtml_Block_Customer_Grid extends Mage_Adminhtml_Block_Widget_Gri
         return parent::_prepareCollection();
     }
 
-    /**
-     * @inheritDoc
-     * @throws Exception
-     */
     #[\Override]
     protected function _prepareColumns()
     {

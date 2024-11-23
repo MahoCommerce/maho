@@ -136,7 +136,6 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
      * Validate attribute data before save
      *
      * @param Mage_Eav_Model_Entity_Attribute $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
@@ -167,9 +166,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
 
     /**
      * Save additional attribute data after save attribute
-     *
      * @param Mage_Eav_Model_Entity_Attribute $object
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)

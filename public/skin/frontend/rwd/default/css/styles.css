@@ -114,7 +114,7 @@ table,
 textarea {
   font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   color: #636363;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.5;
 }
 
@@ -147,7 +147,7 @@ h1, .h1 {
   margin: 0;
   margin-bottom: 0.7em;
   color: #0472ad;
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 400;
   font-style: normal;
   line-height: 1.2;
@@ -159,7 +159,7 @@ h2, .h2 {
   margin: 0;
   margin-bottom: 0.5em;
   color: #636363;
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 400;
   font-style: normal;
   line-height: 1.2;
@@ -171,7 +171,7 @@ h3, .h3 {
   margin: 0;
   margin-bottom: 10px;
   color: #636363;
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 400;
   font-style: normal;
   line-height: 1.4;
@@ -183,7 +183,7 @@ h4, .h4 {
   margin: 0;
   margin-bottom: 10px;
   color: #636363;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: bold;
   font-style: normal;
   line-height: 1.4;
@@ -195,7 +195,7 @@ h5, .h5 {
   margin: 0;
   margin-bottom: 10px;
   color: #636363;
-  font-size: 13px;
+  font-size: 0.813rem;
   font-weight: bold;
   font-style: normal;
   line-height: 1.4;
@@ -207,7 +207,7 @@ h6, .h6 {
   margin: 0;
   margin-bottom: 5px;
   color: #636363;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: bold;
   font-style: normal;
   line-height: 1.4;
@@ -224,7 +224,7 @@ h6, .h6 {
 
 .availability {
   margin-bottom: 0;
-  font-size: 13px;
+  font-size: 0.813rem;
   text-transform: uppercase;
 }
 
@@ -254,7 +254,7 @@ h6, .h6 {
 .product-name h1,
 .product-name .h1 {
   text-transform: uppercase;
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 600;
   color: #636363;
   padding-bottom: 3px;
@@ -285,7 +285,7 @@ h6, .h6 {
   margin: 0;
   margin-bottom: 10px;
   color: #636363;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: bold;
   font-style: normal;
   line-height: 1.4;
@@ -364,7 +364,7 @@ body:not(.customer-account) .block:first-child .block-title {
     margin: 0;
     margin-bottom: 10px;
     color: #636363;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: bold;
     font-style: normal;
     line-height: 1.4;
@@ -409,7 +409,7 @@ body:not(.customer-account) .block:first-child .block-title {
     margin: 0;
     margin-bottom: 10px;
     color: #636363;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: bold;
     font-style: normal;
     line-height: 1.4;
@@ -533,7 +533,7 @@ body:not(.customer-account) .block:first-child .block-title {
   padding: 7px 15px;
   border: 0;
   color: #FFFFFF;
-  font-size: 13px;
+  font-size: 0.813rem;
   font-weight: normal;
   line-height: 19px;
   text-align: center;
@@ -745,7 +745,7 @@ a.button:hover {
 
 .breadcrumbs li {
   float: left;
-  font-size: 12px;
+  font-size: 0.75rem;
   text-transform: uppercase;
 }
 
@@ -801,7 +801,7 @@ a.button:hover {
   height: 20px;
   line-height: 20px;
   width: 100%;
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: bold;
 }
 .btn-remove:hover:after {
@@ -878,7 +878,7 @@ a.button:hover {
  */
 .cvv-what-is-this {
   margin-left: 10px;
-  font-size: 13px;
+  font-size: 0.813rem;
   line-height: 24px;
 }
 
@@ -1102,7 +1102,7 @@ a.button:hover {
 .global-site-notice {
   background: #676157;
   color: #e6e6e6;
-  font-size: 11px;
+  font-size: 0.688rem;
 }
 .global-site-notice .notice-inner {
   width: 100%;
@@ -1167,7 +1167,7 @@ a.button:hover {
   margin-bottom: 5px;
   padding: 7px 10px 7px 20px;
   background: #f4f4f4;
-  font-size: 15px;
+  font-size: 0.938rem;
 }
 
 .messages li li:before {
@@ -1257,7 +1257,7 @@ a.button:hover {
 
 .page-popup h1 {
   margin: 0 0 0.5em;
-  font-size: 36px;
+  font-size: 2.25rem;
 }
 
 /* -------------------------------------------- *
@@ -1352,7 +1352,7 @@ a.button:hover {
 
 .price-box .price {
   color: #0472ad;
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .price-box .price-label {
@@ -1426,7 +1426,7 @@ span.weee {
 .product-pricing li,
 .tier-prices li,
 .tier-prices-grouped li {
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .product-pricing .benefit,
 .tier-prices .benefit,
@@ -1443,7 +1443,7 @@ span.weee {
  * Item Options
  * ============================================ */
 .item-options {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .item-options:after {
   content: '';
@@ -1646,7 +1646,7 @@ span.weee {
 
 .std .note {
   color: #767676;
-  font-size: 13px;
+  font-size: 0.813rem;
 }
 
 /* -------------------------------------------- *
@@ -1686,7 +1686,7 @@ span.weee {
 .pager {
   color: #636363;
   line-height: 30px;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .toolbar label,
@@ -1792,7 +1792,7 @@ span.weee {
 .pages .current {
   display: inline-block;
   border: 0;
-  font-size: 13px;
+  font-size: 0.813rem;
   text-align: center;
   text-transform: uppercase;
   vertical-align: middle;
@@ -2077,7 +2077,7 @@ body.customer-account .data-table .show-details .summary-collapse:hover:before {
 .fieldset p.required {
   margin-bottom: 5px;
   float: right;
-  font-size: 12px;
+  font-size: 0.75rem;
   margin-top: 0px;
 }
 
@@ -2089,7 +2089,7 @@ form .legend {
   margin: 0;
   margin-bottom: 10px;
   color: #636363;
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 400;
   font-style: normal;
   line-height: 1.4;
@@ -2125,7 +2125,7 @@ form .legend {
  */
 label {
   display: inline-block;
-  font-size: 13px;
+  font-size: 0.813rem;
   font-weight: 600;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -2139,7 +2139,7 @@ span.required:after {
   content: ' *';
   color: #df280a;
   font-weight: normal;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 label.required em,
@@ -2152,14 +2152,14 @@ span.required em {
  */
 .input-hint {
   color: #767676;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 /* -------------------------------------------- *
  * Select
  */
 select {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 select + select {
@@ -2169,7 +2169,7 @@ select + select {
 select[multiple] {
   width: 270px;
   border: 1px solid silver;
-  font-size: 15px;
+  font-size: 0.938rem;
   padding: 5px;
 }
 
@@ -2199,7 +2199,7 @@ textarea {
   border-radius: 2px;
   border: 1px solid silver;
   background: #FFFFFF;
-  font-size: 15px;
+  font-size: 0.938rem;
 }
 .input-text:focus {
   border: 1px solid #0472ad;
@@ -2242,7 +2242,7 @@ input[type=text] {
   input[type=tel],
   input[type=text],
   select {
-    font-size: 16px;
+    font-size: 1rem;
     /* Prevent from zooming on focus */
   }
 }
@@ -2283,7 +2283,7 @@ input:-moz-placeholder {
   width: auto;
   max-width: 85%;
   padding: 0 0 0 8px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: normal;
   vertical-align: top;
 }
@@ -2295,7 +2295,7 @@ p.required,
 .validation-advice {
   margin: 5px 0 0;
   color: #df280a;
-  font-size: 13px;
+  font-size: 0.813rem;
 }
 
 /* ============================================ *
@@ -2436,7 +2436,7 @@ p.required,
 
 form .form-instructions {
   font-style: italic;
-  font-size: 13px;
+  font-size: 0.813rem;
   color: #767676;
 }
 
@@ -2450,37 +2450,35 @@ form .form-instructions {
 /* ============================================ *
  * Data Table
  * ============================================ */
-.data-table {
+:is(.data-table, .availability-only-details) {
   width: 100%;
 }
 
-.data-table td,
-.data-table th {
+:is(.data-table, .availability-only-details) :is(td, th) {
   padding: 10px;
   vertical-align: top;
 }
 
-.data-table th {
+:is(.data-table, .availability-only-details) th {
   background: #f4f4f4;
   text-transform: uppercase;
   line-height: 1.4;
   white-space: nowrap;
 }
 
-.data-table thead th,
-.data-table tbody td {
+:is(.data-table, .availability-only-details) :is(thead th, tbody td) {
   border-bottom: 1px solid silver;
 }
 
-.data-table tfoot tr {
+:is(.data-table, .availability-only-details) tfoot tr {
   background: #f4f4f4;
 }
 
-.data-table tbody td .item-options {
+:is(.data-table, .availability-only-details) tbody td .item-options {
   margin-left: 20px;
   margin-top: 10px;
 }
-.data-table tbody td .item-options dt:after {
+:is(.data-table, .availability-only-details) tbody td .item-options dt:after {
   content: ':';
 }
 
@@ -2494,7 +2492,7 @@ form .form-instructions {
 }
 .info-box h2 {
   font-weight: bold;
-  font-size: 13px;
+  font-size: 0.813rem;
 }
 
 .info-table th,
@@ -2578,7 +2576,7 @@ form .form-instructions {
   }
   .linearize-table tbody td[data-rwd-label]:before {
     content: attr(data-rwd-label) ":";
-    font-size: 12px;
+    font-size: 0.75rem;
     padding-right: 5px;
     text-transform: uppercase;
   }
@@ -2660,7 +2658,7 @@ form .form-instructions {
   }
   .linearize-table-large tbody td[data-rwd-label]:before {
     content: attr(data-rwd-label) ":";
-    font-size: 12px;
+    font-size: 0.75rem;
     padding-right: 5px;
     text-transform: uppercase;
   }
@@ -2783,7 +2781,7 @@ body {
     padding-top: 8px;
   }
   .page-header-container .store-language-container select {
-    font-size: 12px;
+    font-size: 0.75rem;
   }
 }
 .header-language-background,
@@ -3358,7 +3356,7 @@ a.skip-link {
   height: 22px;
   background: rgba(51, 153, 204, 0.9);
   color: #FFFFFF;
-  font-size: 11px;
+  font-size: 0.688rem;
   line-height: 22px;
   text-align: center;
 }
@@ -3393,7 +3391,7 @@ a.skip-link {
     position: static;
     background: none;
     margin-left: 0px;
-    font-size: 14px;
+    font-size: 0.875rem;
     width: auto;
   }
   .skip-cart .count:before {
@@ -3441,7 +3439,7 @@ a.skip-link {
 /* Subtotal */
 .cart-menu .subtotal {
   padding: 0 15px 15px;
-  font-size: 24px;
+  font-size: 1.5rem;
   line-height: 1.2;
 }
 
@@ -3455,7 +3453,7 @@ a.skip-link {
   min-height: 90px;
   padding: 15px 15px 15px 90px;
   border-top: 1px solid #cccccc;
-  font-size: 13px;
+  font-size: 0.813rem;
   line-height: 1.35;
 }
 
@@ -3477,14 +3475,14 @@ a.skip-link {
 .mini-cart-list .has-options {
   margin-bottom: 0;
   color: #767676;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 /* Too full - additional items will be shown in cart */
 .cart-menu .last-added {
   padding: 10px 15px 15px;
   border-top: 1px solid #cccccc;
-  font-size: 13px;
+  font-size: 0.813rem;
 }
 
 /* ============================================ *
@@ -3543,7 +3541,7 @@ a.skip-link {
 .footer .links,
 .footer .block-subscribe {
   text-transform: uppercase;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .footer .form-subscribe-header {
   display: none;
@@ -3601,7 +3599,7 @@ a.skip-link {
   border-top: 1px solid #cccccc;
   text-align: center;
   width: 100%;
-  font-size: 11px;
+  font-size: 0.688rem;
   margin-top: 30px;
   padding: 30px 0;
 }
@@ -3673,13 +3671,13 @@ p.product-name {
   margin: 0;
   margin-bottom: 0.5em;
   color: #636363;
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 400;
   font-style: normal;
   line-height: 1.2;
   text-rendering: optimizeLegibility;
   text-transform: uppercase;
-  font-size: 13px;
+  font-size: 0.813rem;
   font-weight: normal;
   line-height: 1.4;
 }
@@ -3703,7 +3701,7 @@ p.product-name a:hover {
 .products-list .product-name {
   text-transform: uppercase;
   margin-bottom: 5px;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 /* ============================================ *
@@ -3767,7 +3765,7 @@ p.product-name a:hover {
 
 .products-grid .price-box {
   color: #767676;
-  font-size: 13px;
+  font-size: 0.813rem;
   margin: 0 0 5px;
 }
 
@@ -3858,7 +3856,7 @@ p.product-name a:hover {
   margin-top: 0;
 }
 .products-list .product-shop .price-box .price {
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 .products-list .product-shop .action {
   margin: 7px 0;
@@ -3881,7 +3879,7 @@ p.product-name a:hover {
 
 @media only screen and (min-width: 480px) {
   .products-list .product-name a {
-    font-size: 18px;
+    font-size: 1.125rem;
   }
 }
 @media only screen and (max-width: 1279px) {
@@ -3978,7 +3976,7 @@ p.product-name a:hover {
   margin: 0;
   margin-bottom: 10px;
   color: #636363;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: bold;
   font-style: normal;
   line-height: 1.4;
@@ -4024,7 +4022,7 @@ p.product-name a:hover {
   margin: 0;
   margin-bottom: 10px;
   color: #636363;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: bold;
   font-style: normal;
   line-height: 1.4;
@@ -4096,10 +4094,6 @@ p.product-name a:hover {
 @media only screen and (max-width: 770px) {
   .sidebar .block.block-layered-nav {
     border-bottom: none;
-  }
-
-  .block-layered-nav--no-filters .block-title {
-    display: none;
   }
 
   .block-layered-nav .block-content {
@@ -4219,7 +4213,7 @@ p.product-name a:hover {
   margin: 0;
   margin-bottom: 10px;
   color: #636363;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: bold;
   font-style: normal;
   line-height: 1.4;
@@ -4310,7 +4304,7 @@ p.product-name a:hover {
   margin-bottom: 8px;
 }
 .product-view .product-shop .availability {
-  font-size: 16px;
+  font-size: 1rem;
 }
 .product-view .product-shop .price-box {
   margin-top: 0;
@@ -4325,17 +4319,17 @@ p.product-name a:hover {
 .product-view .product-shop .price-box .special-price .price,
 .product-view .product-shop .price-box .full-product-price .price {
   color: #0472ad;
-  font-size: 24px;
+  font-size: 1.5rem;
 }
 .product-view .product-shop .price-box .special-price .price-label {
-  font-size: 16px;
+  font-size: 1rem;
   text-transform: uppercase;
 }
 .product-view .product-shop .price-box .special-price span.weee {
   color: #636363;
 }
 .product-view .product-shop .price-box .special-price span.weee span.price {
-  font-size: 16px;
+  font-size: 1rem;
 }
 .product-view .product-shop .price-box .price-excluding-tax,
 .product-view .product-shop .price-box .price-including-tax {
@@ -4345,12 +4339,12 @@ p.product-name a:hover {
 }
 .product-view .product-shop .price-box .price-excluding-tax .label,
 .product-view .product-shop .price-box .price-including-tax .label {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 300;
 }
 .product-view .product-shop .price-box .price-excluding-tax .price,
 .product-view .product-shop .price-box .price-including-tax .price {
-  font-size: 20px;
+  font-size: 1.25rem;
 }
 .product-view .price-box.map-info a {
   display: none;
@@ -4371,11 +4365,11 @@ p.product-name a:hover {
 @media only screen and (max-width: 850px) {
   .product-view .product-shop .price-box .price-excluding-tax .label,
   .product-view .product-shop .price-box .price-including-tax .label {
-    font-size: 15px;
+    font-size: 0.938rem;
   }
   .product-view .product-shop .price-box .price-excluding-tax .price,
   .product-view .product-shop .price-box .price-including-tax .price {
-    font-size: 18px;
+    font-size: 1.125rem;
   }
 }
 @media only screen and (max-width: 770px) {
@@ -4386,11 +4380,11 @@ p.product-name a:hover {
   }
   .product-view .product-shop .price-box .price-excluding-tax .label,
   .product-view .product-shop .price-box .price-including-tax .label {
-    font-size: 16px;
+    font-size: 1rem;
   }
   .product-view .product-shop .price-box .price-excluding-tax .price,
   .product-view .product-shop .price-box .price-including-tax .price {
-    font-size: 20px;
+    font-size: 1.25rem;
   }
 }
 @media only screen and (max-width: 420px) {
@@ -4567,7 +4561,7 @@ p.product-name a:hover {
 .product-view .add-to-cart-buttons .button {
   min-height: 40px;
   line-height: 40px;
-  font-size: 16px;
+  font-size: 1rem;
   padding: 0px 30px;
   float: left;
   min-width: 160px;
@@ -4707,7 +4701,7 @@ p.product-name a:hover {
     line-height: 40px;
     cursor: pointer;
     text-transform: uppercase;
-    font-size: 12px;
+    font-size: 0.75rem;
     position: relative;
     bottom: -1px;
   }
@@ -4756,7 +4750,7 @@ p.product-name a:hover {
     margin: 0;
     margin-bottom: 10px;
     color: #636363;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: bold;
     font-style: normal;
     line-height: 1.4;
@@ -5059,7 +5053,7 @@ p.product-name a:hover {
 
 .product-options p.note {
   margin: 0;
-  font-size: 11px;
+  font-size: 0.688rem;
 }
 
 .product-options-bottom {
@@ -5142,7 +5136,7 @@ p.product-name a:hover {
   margin: 0;
   margin-bottom: 0.5em;
   color: #636363;
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 400;
   font-style: normal;
   line-height: 1.2;
@@ -5180,7 +5174,7 @@ p.product-name a:hover {
 .block-related .product-details .price-box p:first-child,
 .block-related .product-details .price-box span:first-child {
   margin-left: 0;
-  font-size: 16px;
+  font-size: 1rem;
   padding-right: 5px;
   padding-left: 5px;
 }
@@ -5208,7 +5202,7 @@ p.product-name a:hover {
  * ============================================ */
 .cart-msrp-totals {
   color: red;
-  font-size: 12px !important;
+  font-size: 0.75rem !important;
   font-weight: bold;
   margin: 10px 10px 0;
   padding: 10px;
@@ -5219,7 +5213,7 @@ p.product-name a:hover {
 .map-cart-sidebar-total {
   color: red;
   display: block;
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: bold;
   text-align: left;
   padding: 2px 5px;
@@ -5255,7 +5249,7 @@ p.product-name a:hover {
   width: auto;
 }
 .map-popup .map-popup-heading h3 {
-  font-size: 14px;
+  font-size: 0.875rem;
   margin: 0;
   overflow: hidden;
   white-space: nowrap;
@@ -5275,7 +5269,7 @@ p.product-name a:hover {
   right: 0px;
   height: 36px;
   width: 36px;
-  font-size: 20px;
+  font-size: 1.25rem;
   line-height: 32px;
   text-align: center;
 }
@@ -5633,7 +5627,7 @@ p.product-name a:hover {
 }
 .cart-table h2 {
   color: #636363;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   margin-bottom: 0;
 }
@@ -5658,7 +5652,7 @@ p.product-name a:hover {
   clear: both;
 }
 .cart-table span.or {
-  font-size: 9px;
+  font-size: 0.563rem;
   padding: 0 5px;
   text-transform: uppercase;
 }
@@ -5680,7 +5674,7 @@ p.product-name a:hover {
 }
 .cart-table .product-cart-sku {
   font-style: italic;
-  font-size: 12px;
+  font-size: 0.75rem;
   margin: 5px 0 12px;
 }
 .cart-table .product-cart-sku .label {
@@ -5729,7 +5723,7 @@ p.product-name a:hover {
   line-height: 1.3;
   margin-bottom: 5px;
   min-width: 65px;
-  font-size: 13px;
+  font-size: 0.813rem;
 }
 .cart-table .cart-links > li > a {
   display: block;
@@ -5755,7 +5749,7 @@ p.product-name a:hover {
 
 @media only screen and (max-width: 770px) {
   .cart-table th {
-    font-size: 12px;
+    font-size: 0.75rem;
   }
   .cart-table th,
   .cart-table td {
@@ -5806,7 +5800,7 @@ p.product-name a:hover {
   }
   .cart-table td[data-rwd-label]:before {
     content: attr(data-rwd-label) ":";
-    font-size: 12px;
+    font-size: 0.75rem;
     padding-right: 5px;
     text-transform: uppercase;
   }
@@ -5814,7 +5808,7 @@ p.product-name a:hover {
     text-align: left;
   }
   .cart-table h2 {
-    font-size: 12px;
+    font-size: 0.75rem;
   }
   .cart-table .cart-links {
     padding-top: 5px;
@@ -5830,10 +5824,10 @@ p.product-name a:hover {
   .cart-table .cart-tax-info {
     font-style: italic;
     padding-left: 15px;
-    font-size: 13px;
+    font-size: 0.813rem;
   }
   .cart-table .cart-tax-info .price {
-    font-size: 13px;
+    font-size: 0.813rem;
   }
   .cart-table .product-cart-image {
     width: 25%;
@@ -5842,7 +5836,7 @@ p.product-name a:hover {
   }
   .cart-table .product-cart-image a.cart-edit {
     display: block;
-    font-size: 16px;
+    font-size: 1rem;
     text-align: center;
     text-transform: uppercase;
   }
@@ -5886,7 +5880,7 @@ p.product-name a:hover {
   .cart-table .price,
   .cart-table .product-cart-price:before {
     font-weight: 500;
-    font-size: 15px;
+    font-size: 0.938rem;
   }
   .cart-table .cart-footer-actions {
     text-align: center;
@@ -5911,7 +5905,7 @@ p.product-name a:hover {
  * Checkout - Estimate Shipping and Tax
  * ============================================ */
 .shipping h2 {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: bold;
   margin: 0 0 5px;
 }
@@ -5962,7 +5956,7 @@ p.product-name a:hover {
   margin-top: 4px;
 }
 .shipping .form-list label {
-  font-size: 13px;
+  font-size: 0.813rem;
   font-weight: 400;
   text-transform: uppercase;
   white-space: nowrap;
@@ -5975,7 +5969,7 @@ p.product-name a:hover {
   margin-bottom: 10px;
 }
 .shipping .sp-methods label {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-style: italic;
   min-width: 100px;
 }
@@ -6018,7 +6012,7 @@ p.product-name a:hover {
   clear: both;
 }
 .cart .cart-totals table {
-  font-size: 12px;
+  font-size: 0.75rem;
   margin-bottom: 20px;
   text-transform: uppercase;
   width: 100%;
@@ -6039,7 +6033,7 @@ p.product-name a:hover {
   border-bottom: 1px solid #E6E6E6;
 }
 .cart .cart-totals table tfoot td {
-  font-size: 24px;
+  font-size: 1.5rem;
   padding: 2px 5px;
   vertical-align: top;
 }
@@ -6054,7 +6048,7 @@ p.product-name a:hover {
 }
 @media only screen and (max-width: 770px) {
   .cart .cart-totals table tfoot td {
-    font-size: 18px;
+    font-size: 1.125rem;
   }
 }
 .discount-form:after,
@@ -6074,7 +6068,7 @@ p.product-name a:hover {
 }
 #discount-coupon-form label,
 .cart .giftcard label {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 400;
   text-align: left;
   text-transform: uppercase;
@@ -6116,7 +6110,7 @@ p.product-name a:hover {
   padding: 0px;
 }
 .cart .giftcard .check-gc-status > span > span {
-  font-size: 14px;
+  font-size: 0.875rem;
   text-transform: none;
 }
 
@@ -6278,7 +6272,7 @@ p.product-name a:hover {
 }
 
 .opc .section .step-title h2 {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 400;
   line-height: 40px;
   height: 40px;
@@ -6490,14 +6484,14 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
   padding-left: 20px;
 }
 .block-progress .block-content {
-  font-size: 13px;
+  font-size: 0.813rem;
 }
 .block-progress dt {
   padding-top: 6px;
   margin: 0;
   margin-bottom: 10px;
   color: #636363;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: bold;
   font-style: normal;
   line-height: 1.4;
@@ -6530,7 +6524,7 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
   font-style: italic;
   float: left;
   clear: both;
-  font-size: 13px;
+  font-size: 0.813rem;
 }
 .block-progress .payment-info dt:after {
   content: ': ';
@@ -6538,7 +6532,7 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 .block-progress .payment-info dd {
   float: left;
   margin-bottom: 3px;
-  font-size: 13px;
+  font-size: 0.813rem;
 }
 .block-progress .payment-info:after {
   content: '';
@@ -6751,7 +6745,7 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 .swatch-label {
   display: block;
   border-radius: 3px;
-  font-size: 14px;
+  font-size: 0.875rem;
   text-align: center;
   color: #636363;
   text-decoration: none;
@@ -6934,7 +6928,7 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 }
 .product-view .product-options .swatch-attr label,
 .product-view .product-options .swatch-attr .select-label {
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .product-view .product-options .swatch-attr label {
   display: block;
@@ -7016,7 +7010,7 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 
 .opc #opc-login p:not(.required) {
   font-style: italic;
-  font-size: 13px;
+  font-size: 0.813rem;
   color: #767676;
 }
 
@@ -7083,7 +7077,7 @@ body.customer-account .my-account .order-details h2 {
   display: inline-block;
 }
 body.customer-account .my-account .addresses-list h3 {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
 }
 body.customer-account .my-account .fieldset {
@@ -7096,7 +7090,7 @@ body.customer-account .data-table {
 body.customer-account .data-table td a {
   text-transform: uppercase;
   font-style: normal;
-  font-size: 13px;
+  font-size: 0.813rem;
 }
 body.customer-account .data-table span.nobr {
   white-space: normal;
@@ -7162,7 +7156,7 @@ body.customer-account .sidebar .block-reorder ol#cart-sidebar-reorder p.product-
   padding-bottom: 7px;
 }
 .dashboard .box-head h2 {
-  font-size: 15px;
+  font-size: 0.938rem;
   font-weight: 600;
   display: inline-block;
   margin-bottom: 0;
@@ -7173,7 +7167,7 @@ body.customer-account .sidebar .block-reorder ol#cart-sidebar-reorder p.product-
 .dashboard .box-title a,
 .dashboard .box-head a {
   text-transform: uppercase;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .dashboard .box-account {
   padding-bottom: 40px;
@@ -7199,7 +7193,7 @@ body.customer-account .sidebar .block-reorder ol#cart-sidebar-reorder p.product-
 .dashboard .col2-set .col-2 .box-title h2,
 .dashboard .col2-set .col-2 .box-title h3 {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 0.875rem;
   margin-bottom: 0;
 }
 .dashboard .col2-set .col-1 .box-title a,
@@ -7220,7 +7214,7 @@ body.customer-account .sidebar .block-reorder ol#cart-sidebar-reorder p.product-
   margin-right: -20px;
   float: left;
   line-height: 1.4;
-  font-size: 13px;
+  font-size: 0.813rem;
 }
 .dashboard .box-reviews li .details {
   margin-left: 20px;
@@ -7233,7 +7227,7 @@ body.customer-account .sidebar .block-reorder ol#cart-sidebar-reorder p.product-
 }
 .dashboard .box-reviews li .details .ratings strong {
   float: left;
-  font-size: 13px;
+  font-size: 0.813rem;
   margin-right: 5px;
 }
 .dashboard .box-reviews li .details .ratings .rating-box {
@@ -7331,7 +7325,7 @@ body.customer-account .sidebar .block-reorder ol#cart-sidebar-reorder p.product-
   float: left;
 }
 .order-info-box .box-title h2 {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: bold;
   line-height: 1.5;
 }
@@ -7726,7 +7720,7 @@ div.paypal-logo span > img {
   margin-top: 4px;
 }
 .sidebar .paypal-logo .label a {
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.5;
 }
 
@@ -7760,7 +7754,7 @@ div.paypal-logo span > img {
   margin-bottom: 0;
 }
 #customer-reviews .review-heading .pager .count-container .limiter label {
-  font-size: 10px;
+  font-size: 0.625rem;
   text-transform: uppercase;
 }
 #customer-reviews .review-heading .pager .amount {
@@ -7768,14 +7762,14 @@ div.paypal-logo span > img {
 }
 #customer-reviews h2 {
   color: #0472ad;
-  font-size: 12px;
+  font-size: 0.75rem;
   text-transform: uppercase;
 }
 #customer-reviews h2 span {
   color: #636363;
 }
 #customer-reviews h3 {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: normal;
   text-transform: uppercase;
 }
@@ -7788,7 +7782,7 @@ div.paypal-logo span > img {
 }
 #customer-reviews .fieldset h4 {
   border-bottom: 1px solid #cccccc;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: normal;
   padding-bottom: 5px;
   text-transform: uppercase;
@@ -7797,7 +7791,7 @@ div.paypal-logo span > img {
   display: none;
 }
 #customer-reviews .fieldset .form-list {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: normal;
   margin: 10px 0;
   text-transform: uppercase;
@@ -7809,7 +7803,7 @@ div.paypal-logo span > img {
   clear: both;
 }
 #customer-reviews .fieldset .form-list label {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: normal;
 }
 #customer-reviews .fieldset .form-list textarea {
@@ -7831,7 +7825,7 @@ div.paypal-logo span > img {
   width: 470px;
 }
 #customer-reviews dl {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: normal;
   margin-bottom: 10px;
 }
@@ -7840,11 +7834,11 @@ div.paypal-logo span > img {
   text-transform: uppercase;
 }
 #customer-reviews dl dd {
-  font-size: 14px;
+  font-size: 0.875rem;
   margin: 10px 0;
 }
 #customer-reviews dl dd .ratings-table {
-  font-size: 12px;
+  font-size: 0.75rem;
   width: 100%;
 }
 #customer-reviews dl dd .ratings-table tr {
@@ -7859,7 +7853,7 @@ div.paypal-logo span > img {
 }
 #customer-reviews dl dd .review-meta {
   color: #0472ad;
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: normal;
   text-transform: uppercase;
 }
@@ -7878,7 +7872,7 @@ div.paypal-logo span > img {
 }
 .review-summary-table tbody th {
   background: #FFFFFF;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .review-summary-table tbody td {
   border: none;
@@ -7908,7 +7902,7 @@ div.paypal-logo span > img {
  * Ratings - Global
  * ============================================ */
 .ratings-table {
-  font-size: 12px;
+  font-size: 0.75rem;
   text-transform: uppercase;
 }
 .ratings-table th {
@@ -8063,7 +8057,7 @@ div.paypal-logo span > img {
   text-align: center;
 }
 #wishlist-table.clean-table {
-  font-size: 12px;
+  font-size: 0.75rem;
   text-transform: uppercase;
   width: 100%;
 }
@@ -8075,11 +8069,11 @@ div.paypal-logo span > img {
   vertical-align: top;
 }
 #wishlist-table.clean-table thead th {
-  font-size: 12px;
+  font-size: 0.75rem;
   text-transform: uppercase;
 }
 #wishlist-table .product-name {
-  font-size: 16px;
+  font-size: 1rem;
   margin-bottom: 0;
   text-transform: uppercase;
 }
@@ -8087,14 +8081,14 @@ div.paypal-logo span > img {
   color: #0472ad;
 }
 #wishlist-table .wishlist-sku {
-  font-size: 11px;
+  font-size: 0.688rem;
   margin: 5px 0;
 }
 #wishlist-table textarea {
   border: 1px solid silver;
   width: 100%;
   height: 45px;
-  font-size: 11px;
+  font-size: 0.688rem;
 }
 #wishlist-table textarea::-webkit-input-placeholder {
   text-transform: uppercase;
@@ -8117,7 +8111,7 @@ div.paypal-logo span > img {
   padding-top: 5px;
 }
 #wishlist-table .item-manage .button {
-  font-size: 11px;
+  font-size: 0.688rem;
   padding: 3px 5px;
 }
 #wishlist-table .cart-cell {
@@ -8137,7 +8131,7 @@ div.paypal-logo span > img {
   width: 150px;
 }
 #wishlist-table td.customer-wishlist-item-cart .button {
-  font-size: 12px;
+  font-size: 0.75rem;
   margin-bottom: 10px;
   padding: 3px 5px;
   width: 100%;
@@ -8162,7 +8156,7 @@ div.paypal-logo span > img {
   white-space: normal;
 }
 #wishlist-table .price-box {
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 #wishlist-table .price-box .price {
   color: #636363;
@@ -8204,7 +8198,7 @@ div.paypal-logo span > img {
     width: 110px;
   }
   #wishlist-table .product-name {
-    font-size: 13px;
+    font-size: 0.813rem;
   }
 }
 @media only screen and (max-width: 770px) {
@@ -8214,7 +8208,7 @@ div.paypal-logo span > img {
     clear: both;
   }
   #wishlist-table .product-name {
-    font-size: 16px;
+    font-size: 1rem;
   }
   #wishlist-table textarea {
     height: 68px;
@@ -8332,7 +8326,7 @@ div.paypal-logo span > img {
 .block-wishlist .price-box,
 .block-wishlist .price-box .price,
 .block-wishlist .link-cart {
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .block-wishlist .link-cart {
   float: left;
@@ -8396,7 +8390,7 @@ div.paypal-logo span > img {
 }
 .header-minicart .block-subtitle {
   color: #50A4CF;
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: bold;
   line-height: 1.4;
   padding: 5px;
@@ -8411,7 +8405,7 @@ div.paypal-logo span > img {
   color: #636363;
   text-decoration: none;
   font-weight: normal;
-  font-size: 30px;
+  font-size: 1.875rem;
   position: absolute;
   top: -8px;
   right: -3px;
@@ -8504,7 +8498,7 @@ div.paypal-logo span > img {
   height: 33px;
   line-height: 39px;
   text-transform: uppercase;
-  font-size: 13px;
+  font-size: 0.813rem;
 }
 .header-minicart .minicart-actions .paypal-logo .paypal-or {
   line-height: 1.6;
@@ -8634,7 +8628,7 @@ div.paypal-logo span > img {
   border-bottom: 1px solid #f4f4f4;
   color: #0472ad;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 0.75rem;
   padding: 4px 6px;
   text-align: left;
 }
@@ -8689,7 +8683,7 @@ div.paypal-logo span > img {
  * ============================================ */
 .product-review .product-img-box p.label {
   border-bottom: 1px solid #cccccc;
-  font-size: 16px;
+  font-size: 1rem;
   margin-top: 20px;
   padding-bottom: 10px;
   text-transform: uppercase;
@@ -8700,7 +8694,7 @@ div.paypal-logo span > img {
 .product-review .product-details h2 {
   border-bottom: 1px solid #cccccc;
   color: #0472ad;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   padding-bottom: 10px;
 }
@@ -8709,13 +8703,13 @@ div.paypal-logo span > img {
 }
 .product-review .ratings-table tr {
   float: left;
-  font-size: 12px;
+  font-size: 0.75rem;
   margin-right: 10px;
   text-transform: uppercase;
 }
 .product-review .ratings-description dt {
   border-bottom: 1px solid #cccccc;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 400;
   margin-top: 20px;
   padding: 10px 0;
@@ -8723,7 +8717,7 @@ div.paypal-logo span > img {
 }
 .product-review .ratings-description dd {
   color: #737373;
-  font-size: 13px;
+  font-size: 0.813rem;
 }
 
 @media only screen and (min-width: 771px) {
@@ -8762,7 +8756,7 @@ div.paypal-logo span > img {
 .cms-page-view .std p,
 .cms-no-route .std p {
   color: #636363;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-style: italic;
   line-height: 24px;
 }
@@ -8777,7 +8771,7 @@ div.paypal-logo span > img {
 .cms-page-view .std li,
 .cms-no-route .std li {
   color: #636363;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-style: italic;
   line-height: 24px;
 }
@@ -8817,7 +8811,7 @@ div.paypal-logo span > img {
   margin: 0;
   margin-bottom: 10px;
   color: #636363;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: bold;
   font-style: normal;
   line-height: 1.4;
@@ -8884,7 +8878,7 @@ div.paypal-logo span > img {
 .page-sitemap .sitemap {
   padding: 0 20px;
   margin: 15px 0;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .page-sitemap .sitemap li {
   margin: 3px 0;
@@ -8919,7 +8913,7 @@ div.paypal-logo span > img {
  * ============================================ */
 .price-box .minimal-price-link .label {
   color: #cd4848;
-  font-size: 12px;
+  font-size: 0.75rem;
   text-transform: uppercase;
 }
 
@@ -9039,7 +9033,7 @@ div.paypal-logo span > img {
 }
 
 .block-tags .actions > a {
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .my-tag-edit .button.btn-remove {
@@ -9073,7 +9067,7 @@ div.paypal-logo span > img {
   .sales-order-creditmemo .sub-title,
   .sales-order-shipment .sub-title {
     float: left;
-    font-size: 15px;
+    font-size: 0.938rem;
     text-align: center;
     width: 100%;
   }
@@ -9095,7 +9089,7 @@ div.paypal-logo span > img {
 }
 @media only screen and (max-width: 479px) {
   #recurring_profile_list_view {
-    font-size: 12px;
+    font-size: 0.75rem;
   }
   #recurring_profile_list_view a {
     font-size: inherit;
@@ -9271,7 +9265,7 @@ body[class*="checkout-multishipping-"] .page-title .button {
 }
 body[class*="checkout-multishipping-"] .multiple-checkout > h2 {
   text-transform: none;
-  font-size: 17px;
+  font-size: 1.063rem;
   margin-bottom: 15px;
 }
 body[class*="checkout-multishipping-"] .messages {
@@ -9289,7 +9283,7 @@ body[class*="checkout-multishipping-"] .actions {
 }
 body[class*="checkout-multishipping-"] .grand-total {
   text-align: right;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: bold;
 }
 body[class*="checkout-multishipping-"] #checkout-review-submit {
@@ -9343,7 +9337,7 @@ body[class*="checkout-multishipping-"] #review-buttons-container {
   background: #f4f4f4;
   border-bottom: 1px solid #cccccc;
   padding: 10px;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .checkout-multishipping-shipping .col-1 > h4, .checkout-multishipping-shipping .col-2 > h4,
 .checkout-multishipping-billing .col-1 > h4,
@@ -9355,7 +9349,7 @@ body[class*="checkout-multishipping-"] #review-buttons-container {
   background: #f4f4f4;
   border-bottom: 1px solid #cccccc;
   padding: 10px;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .checkout-multishipping-shipping .col-1 .box-content, .checkout-multishipping-shipping .col-2 .box-content,
 .checkout-multishipping-billing .col-1 .box-content,

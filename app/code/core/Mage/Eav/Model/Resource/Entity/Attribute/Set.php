@@ -24,11 +24,6 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Set extends Mage_Core_Model_Resou
         $this->_init('eav/attribute_set', 'attribute_set_id');
     }
 
-    /**
-     * Perform actions after object save
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {

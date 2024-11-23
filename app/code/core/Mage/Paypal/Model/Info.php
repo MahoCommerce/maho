@@ -185,7 +185,7 @@ class Mage_Paypal_Model_Info
     /**
      * Grab data from source and map it into payment
      *
-     * @param array|Varien_Object|callback $from
+     * @param array|Varien_Object|callable $from
      */
     public function importToPayment($from, Mage_Payment_Model_Info $payment)
     {
@@ -199,7 +199,7 @@ class Mage_Paypal_Model_Info
     /**
      * Grab data from payment and map it into target
      *
-     * @param array|Varien_Object|callback $to
+     * @param array|Varien_Object|callable $to
      * @return array|Varien_Object
      */
     public function &exportFromPayment(Mage_Payment_Model_Info $payment, $to, ?array $map = null)

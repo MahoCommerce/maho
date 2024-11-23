@@ -140,7 +140,6 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction extends Mage_Sales_Mod
      * Lookup for parent_id in already saved transactions of this payment by the order_id
      * Also serialize additional information, if any
      *
-     * @inheritDoc
      * @throws Mage_Core_Exception
      */
     #[\Override]

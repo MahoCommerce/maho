@@ -97,6 +97,7 @@ abstract class Varien_Image_Adapter_Abstract
     protected $_watermarkHeigth = null;
     protected $_watermarkImageOpacity = null;
     protected $_quality = null;
+    protected ?int $targetFileType = null;
 
     protected $_keepAspectRatio;
     protected $_keepFrame;
@@ -136,9 +137,6 @@ abstract class Varien_Image_Adapter_Abstract
 
     abstract public function checkDependencies();
 
-    /**
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
-     */
     public function getMimeType()
     {
         if ($this->_fileMimeType) {
@@ -289,6 +287,17 @@ abstract class Varien_Image_Adapter_Abstract
             $this->_quality = (int)$value;
         }
         return $this->_quality;
+    }
+
+    /**
+     * Get/set target file type
+     */
+    public function targetFileType(?int $value): int
+    {
+        if (null !== $value) {
+            $this->targetFileType = $value;
+        }
+        return $this->targetFileType;
     }
 
     /**

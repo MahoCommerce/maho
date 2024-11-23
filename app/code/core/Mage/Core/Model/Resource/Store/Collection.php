@@ -21,18 +21,6 @@
  */
 class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
-    /**
-     * Load default flag
-     *
-     * @deprecated since 1.5.0.0
-     * @var bool
-     */
-    protected $_loadDefault    = false;
-
-    /**
-     *  Define resource model
-     *
-     */
     #[\Override]
     protected function _construct()
     {
@@ -143,9 +131,6 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
         return $this->_toOptionHash('store_id', 'name');
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {

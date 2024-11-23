@@ -31,11 +31,6 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Grid extends Mage_Adminhtml_Bl
         $this->setDefaultDir('ASC');
     }
 
-    /**
-     * Prepare grid collection object
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -45,11 +40,6 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Grid extends Mage_Adminhtml_Bl
         return parent::_prepareCollection();
     }
 
-    /**
-     * Prepare grid columns
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareColumns()
     {

@@ -60,9 +60,6 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Labels extends Mage_Adminhtml_Bl
         return false;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareForm()
     {

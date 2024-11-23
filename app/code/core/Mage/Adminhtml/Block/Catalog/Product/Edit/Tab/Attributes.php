@@ -33,9 +33,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Attributes extends Mage_Admi
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareForm()
     {

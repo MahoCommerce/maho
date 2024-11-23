@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,11 +23,11 @@ class Mage_Adminhtml_Block_Api_Tab_Rolesedit extends Mage_Adminhtml_Block_Widget
 
         $resources = Mage::getModel('api/roles')->getResourcesList();
 
-        $rules_set = Mage::getResourceModel('api/rules_collection')->getByRoles($rid)->load();
+        $rules = Mage::getResourceModel('api/rules_collection')->getByRoles($rid)->load();
 
         $selrids = [];
 
-        foreach ($rules_set->getItems() as $item) {
+        foreach ($rules->getItems() as $item) {
             if (array_key_exists(strtolower($item->getResource_id()), $resources)
                 && $item->getApiPermission() == 'allow'
             ) {

@@ -159,11 +159,6 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
         return $this;
     }
 
-    /**
-     * Prepare object for save
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeSave()
     {

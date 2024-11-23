@@ -78,8 +78,6 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
     /**
      * Prepare block children and data.
      * Set widget type and widget parameters if available
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _preparelayout()

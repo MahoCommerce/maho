@@ -68,8 +68,6 @@ class Mage_Payment_Block_Catalog_Product_View_Profile extends Mage_Core_Block_Te
 
     /**
      * Determine current product and initialize its recurring profile model
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _prepareLayout()

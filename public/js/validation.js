@@ -160,27 +160,35 @@ class Validation {
         });
     }
 
-    static insertAdvice(elm, advice) {
+    static insertAdvice(elm, name, errorMsg) {
+        const div = document.createElement('div');
+        div.className = 'validation-advice';
+        div.id = `advice-${name}-${Validation.getElmID(elm)}`;
+        div.style.display = 'none';
+        div.textContent = errorMsg;
+
         const container = elm.closest('.field-row');
         if (container) {
-            container.insertAdjacentHTML('afterend', advice);
+            container.insertAdjacentElement('afterend', div);
         } else if (elm.closest('td.value')) {
-            elm.closest('td.value').insertAdjacentHTML('beforeend', advice);
-        } else if (elm.advaiceContainer && document.getElementById(elm.advaiceContainer)) {
-            document.getElementById(elm.advaiceContainer).innerHTML = advice;
+            elm.closest('td.value').insertAdjacentElement('beforeend', div);  // corrected from appendChild
+        } else if (elm.adviceContainer && document.getElementById(elm.adviceContainer)) {
+            const adviceContainer = document.getElementById(elm.adviceContainer);
+            adviceContainer.textContent = '';
+            adviceContainer.insertAdjacentElement('beforeend', div);
         } else {
             switch (elm.type.toLowerCase()) {
                 case 'checkbox':
                 case 'radio':
                     const p = elm.parentNode;
                     if (p) {
-                        p.insertAdjacentHTML('beforeend', advice);
+                        p.insertAdjacentElement('beforeend', div);
                     } else {
-                        elm.insertAdjacentHTML('afterend', advice);
+                        elm.insertAdjacentElement('afterend', div);
                     }
                     break;
                 default:
-                    elm.insertAdjacentHTML('afterend', advice);
+                    elm.insertAdjacentElement('afterend', div);
             }
         }
     }
@@ -304,11 +312,9 @@ class Validation {
     }
 
     static isVisible(elm) {
-        while(elm.tagName != 'BODY') {
-            if(getComputedStyle(elm).display === 'none') return false;
-            elm = elm.parentNode;
-        }
-        return true;
+        return (elm.tagName === 'INPUT' && elm.type === 'hidden')
+            ? this.isVisible(elm.parentElement)
+            : elm.checkVisibility();
     }
 
     static getAdvice(name, elm) {
@@ -328,9 +334,7 @@ class Validation {
         }
         catch(e){}
 
-        const advice = `<div class="validation-advice" id="advice-${name}-${Validation.getElmID(elm)}" style="display:none">${errorMsg}</div>`;
-
-        Validation.insertAdvice(elm, advice);
+        Validation.insertAdvice(elm, name, errorMsg);
         const adviceEl = Validation.getAdvice(name, elm);
         if(elm.classList.contains('absolute-advice')) {
             const dimensions = elm.getBoundingClientRect();
@@ -577,10 +581,13 @@ Validation.addAllThese([
     }],
     ['validate-url', 'Please enter a valid URL. Protocol is required (http://, https:// or ftp://)', v => {
         v = (v || '').trim();
-        return Validation.get('IsEmpty').test(v) || /^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i.test(v);
-    }],
-    ['validate-clean-url', 'Please enter a valid URL. For example http://www.example.com or www.example.com', v => {
-        return Validation.get('IsEmpty').test(v) || /^(http|https|ftp):\/\/(([A-Z0-9][A-Z0-9_-]*)(\.[A-Z0-9][A-Z0-9_-]*)+.(com|org|net|dk|at|us|tv|info|uk|co.uk|biz|se)$)(:(\d+))?\/?/i.test(v) || /^(www)((\.[A-Z0-9][A-Z0-9_-]*)+.(com|org|net|dk|at|us|tv|info|uk|co.uk|biz|se)$)(:(\d+))?\/?/i.test(v);
+        if (Validation.get('IsEmpty').test(v)) return true;
+        try {
+            const url = new URL(v);
+            return ['http:', 'https:', 'ftp:'].includes(url.protocol);
+        } catch {
+            return false;
+        }
     }],
     ['validate-identifier', 'Please enter a valid URL Key. For example "example-page", "example-page.html" or "anotherlevel/example-page".', v => {
         return Validation.get('IsEmpty').test(v) || /^[a-z0-9][a-z0-9_\/-]+(\.[a-z0-9_-]+)?$/.test(v);

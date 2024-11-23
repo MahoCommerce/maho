@@ -79,11 +79,6 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Settings extends Mage
         return Mage::registry('current_widget_instance');
     }
 
-    /**
-     * Prepare form before rendering HTML
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareForm()
     {

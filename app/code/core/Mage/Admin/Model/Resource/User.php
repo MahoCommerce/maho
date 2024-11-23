@@ -135,9 +135,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
 
     /**
      * Set created/modified values before user save
-     *
      * @param Mage_Admin_Model_User $user
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $user)
@@ -164,8 +162,6 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
 
     /**
      * Unserialize user extra data after user load
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $user)

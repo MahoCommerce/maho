@@ -1507,7 +1507,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
      * @param   array $applied
      * @param   float $amount
      * @param   float $baseAmount
-     * @param   float $rate
+     * @param   float|null $rate
      */
     protected function _saveAppliedTaxes(
         Mage_Sales_Model_Quote_Address $address,
@@ -1531,8 +1531,8 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
             }
 
             if (!is_null($row['percent'])) {
-                $row['percent'] = $row['percent'] ? $row['percent'] : 1;
-                $rate = $rate ? $rate : 1;
+                $row['percent'] = $row['percent'] ?: 1;
+                $rate = $rate ?: 1;
 
                 $appliedAmount = $amount / $rate * $row['percent'];
                 $baseAppliedAmount = $baseAmount / $rate * $row['percent'];

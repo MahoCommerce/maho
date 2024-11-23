@@ -113,8 +113,6 @@ class Mage_Wishlist_Model_Item_Option extends Mage_Core_Model_Abstract implement
 
     /**
      * Initialize item identifier before save data
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeSave()

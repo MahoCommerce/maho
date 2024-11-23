@@ -267,7 +267,6 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     }
 
     /**
-     * @inheritdoc
      * Starting from 23.02.2018 USPS doesn't allow to create free shipping labels via their API.
      */
     #[\Override]
@@ -458,13 +457,13 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                         if (is_object($xml->Package) && is_object($xml->Package->Postage)) {
                             foreach ($xml->Package->Postage as $postage) {
                                 $serviceName = $this->_filterServiceName((string)$postage->MailService);
-                                $_serviceCode = $this->getCode('method_to_code', $serviceName);
-                                $serviceCode = $_serviceCode ? $_serviceCode : (string)$postage->attributes()->CLASSID;
+                                $serviceCodeMethod = $this->getCode('method_to_code', $serviceName);
+                                $serviceCode = $serviceCodeMethod ?: (string)$postage->attributes()->CLASSID;
                                 $serviceCodeToActualNameMap[$serviceCode] = $serviceName;
                                 if (in_array($serviceCode, $allowedMethods)) {
                                     $costArr[$serviceCode] = (string)$postage->Rate;
                                     $priceArr[$serviceCode] = $this->getMethodPrice(
-                                        (string)$postage->Rate,
+                                        (float)$postage->Rate,
                                         $serviceCode
                                     );
                                 }
@@ -483,7 +482,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                                 if (in_array($serviceCode, $allowedMethods)) {
                                     $costArr[$serviceCode] = (string)$service->Postage;
                                     $priceArr[$serviceCode] = $this->getMethodPrice(
-                                        (string)$service->Postage,
+                                        (float)$service->Postage,
                                         $serviceCode
                                     );
                                 }
@@ -1907,7 +1906,8 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         if (preg_match('/[\\d\\w]{5}\\-[\\d\\w]{4}/', $zipString) != 0) {
             $zip = explode('-', $zipString);
         }
-        for ($i = 0; $i < count($zip); ++$i) {
+        $zipCount = count($zip);
+        for ($i = 0; $i < $zipCount; ++$i) {
             if (strlen($zip[$i]) == 5) {
                 $zip5 = $zip[$i];
             } elseif (strlen($zip[$i]) == 4) {

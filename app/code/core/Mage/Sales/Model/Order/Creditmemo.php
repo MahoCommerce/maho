@@ -929,11 +929,6 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
         return parent::_beforeDelete();
     }
 
-    /**
-     * After save object manipulations
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterSave()
     {

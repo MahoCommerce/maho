@@ -84,9 +84,6 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
 
     /**
      * Add customer group ids and website ids to rule data after load
-     *
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
@@ -183,8 +180,8 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
 
         $customerGroupIds = $rule->getCustomerGroupIds();
 
-        $fromTime = (int) Mage::getModel('core/date')->gmtTimestamp(strtotime($rule->getFromDate()));
-        $toTime = (int) Mage::getModel('core/date')->gmtTimestamp(strtotime($rule->getToDate()));
+        $fromTime = (int) Mage::getModel('core/date')->gmtTimestamp(strtotime((string) $rule->getFromDate()));
+        $toTime = (int) Mage::getModel('core/date')->gmtTimestamp(strtotime((string) $rule->getToDate()));
         $toTime = $toTime ? ($toTime + self::SECONDS_IN_DAY - 1) : 0;
 
         $timestamp = time();
@@ -213,7 +210,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
                         )
                         ->reset(Varien_Db_Select::COLUMNS)
                         ->columns([
-                            new Zend_Db_Expr($store->getWebsiteId()),
+                            new Zend_Db_Expr((string)$store->getWebsiteId()),
                             'cg.customer_group_id',
                             'p.entity_id',
                             new Zend_Db_Expr($rule->getId()),

@@ -9,12 +9,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
-/**
- * @see Mage_Paypal_Block_Bml_Banners
- * @var Mage_Paypal_Block_Bml_Banners $this 
- */
+
+/** @var Mage_Paypal_Block_Bml_Banners $this */
 ?>
 <div class="paypal-logo bill-me-latter">
 <script type="text/javascript" data-pp-pubid="<?= $this->escapeHtml($this->getPublisherId()) ?>" data-pp-placementtype="<?= $this->escapeHtml($this->getSize()) ?>"> (function (d, t) {

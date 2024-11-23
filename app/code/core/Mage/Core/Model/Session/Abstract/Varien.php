@@ -46,6 +46,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
      *
      * @param string $sessionName
      * @return $this
+     * @throws Mage_Core_Model_Store_Exception
      */
     public function start($sessionName = null)
     {

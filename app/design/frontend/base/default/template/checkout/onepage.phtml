@@ -9,11 +9,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
-/**
- * @var Mage_Checkout_Block_Onepage $this
- */
+
+/** @var Mage_Checkout_Block_Onepage $this */
 ?>
 <div class="page-title">
     <h1><?= $this->__('Checkout') ?></h1>
@@ -36,16 +33,15 @@
 <?php endforeach ?>
 </ol>
 <script type="text/javascript">
-//<![CDATA[
-    var accordion = new Accordion('checkoutSteps', '.step-title', true);
+    const accordion = new Accordion('checkoutSteps', '.step-title', true);
     <?php if($this->getActiveStep()): ?>
     accordion.openSection('opc-<?= $this->getActiveStep() ?>');
     <?php endif ?>
-    var checkout = new Checkout(accordion,{
+
+    const checkout = new Checkout(accordion, {
         progress: '<?= $this->getUrl('checkout/onepage/progress') ?>',
         review: '<?= $this->getUrl('checkout/onepage/review') ?>',
         saveMethod: '<?= $this->getUrl('checkout/onepage/saveMethod') ?>',
-        failure: '<?= $this->getUrl('checkout/cart') ?>'}
-    );
-//]]>
+        failure: '<?= $this->getUrl('checkout/cart') ?>'
+    });
 </script>

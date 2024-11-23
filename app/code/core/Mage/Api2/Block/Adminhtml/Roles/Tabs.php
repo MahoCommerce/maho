@@ -29,11 +29,6 @@ class Mage_Api2_Block_Adminhtml_Roles_Tabs extends Mage_Adminhtml_Block_Widget_T
         $this->setData('title', Mage::helper('api2')->__('Role Information'));
     }
 
-    /**
-     * Hook before html rendering
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _beforeToHtml()
     {

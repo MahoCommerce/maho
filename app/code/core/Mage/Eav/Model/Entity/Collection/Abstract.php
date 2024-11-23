@@ -103,7 +103,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      *
      * @param Mage_Core_Model_Resource_Abstract $resource
      */
-    // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClass
     public function __construct($resource = null)
     {
         parent::__construct();
@@ -241,8 +240,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
 
     /**
      * Add an object to the collection
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function addItem(Varien_Object $object)
@@ -320,8 +317,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
 
     /**
      * Wrapper for compatibility with Varien_Data_Collection_Db
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function addFieldToFilter($attribute, $condition = null)
@@ -483,7 +478,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      *
      * @param string $alias
      * @param string $expression
-     * @param string $attribute
+     * @param string|array $attribute
      * @return $this
      */
     public function addExpressionAttributeToSelect($alias, $expression, $attribute)
@@ -743,7 +738,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * @param array|string|Zend_Db_Expr $table
      * @param string $bind
      * @param string|array $fields
-     * @param null|array $cond
+     * @param string|array|null $cond
      * @param string $joinType
      * @return $this
      */
@@ -1414,10 +1409,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
 
     /**
      * Set sorting order
-     *
      * $attribute can also be an array of attributes
-     *
-     * @inheritDoc
      */
     #[\Override]
     public function setOrder($attribute, $dir = self::SORT_ORDER_ASC)

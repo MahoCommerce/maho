@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -353,16 +353,16 @@ class Mage_Catalog_Model_Product_Option_Type_Default extends Varien_Object
     public function getProductOptions()
     {
         if (!isset($this->_productOptions[$this->getProduct()->getId()])) {
-            foreach ($this->getProduct()->getOptions() as $_option) {
-                $this->_productOptions[$this->getProduct()->getId()][$_option->getTitle()] = ['option_id' => $_option->getId()];
-                if ($_option->getGroupByType() == Mage_Catalog_Model_Product_Option::OPTION_GROUP_SELECT) {
+            foreach ($this->getProduct()->getOptions() as $option) {
+                $this->_productOptions[$this->getProduct()->getId()][$option->getTitle()] = ['option_id' => $option->getId()];
+                if ($option->getGroupByType() == Mage_Catalog_Model_Product_Option::OPTION_GROUP_SELECT) {
                     $optionValues = [];
-                    foreach ($_option->getValues() as $_value) {
-                        $optionValues[$_value->getTitle()] = $_value->getId();
+                    foreach ($option->getValues() as $value) {
+                        $optionValues[$value->getTitle()] = $value->getId();
                     }
-                    $this->_productOptions[$this->getProduct()->getId()][$_option->getTitle()]['values'] = $optionValues;
+                    $this->_productOptions[$this->getProduct()->getId()][$option->getTitle()]['values'] = $optionValues;
                 } else {
-                    $this->_productOptions[$this->getProduct()->getId()][$_option->getTitle()]['values'] = [];
+                    $this->_productOptions[$this->getProduct()->getId()][$option->getTitle()]['values'] = [];
                 }
             }
         }

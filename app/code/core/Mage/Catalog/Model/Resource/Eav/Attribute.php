@@ -122,11 +122,6 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
         return parent::_beforeSave();
     }
 
-    /**
-     * Processing object after save data
-     *
-     * @inheritDoc
-     */
     #[\Override]
     protected function _afterSave()
     {
@@ -140,8 +135,6 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
 
     /**
      * Register indexing event before delete catalog eav attribute
-     *
-     * @inheritDoc
      */
     #[\Override]
     protected function _beforeDelete()
@@ -225,7 +218,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
         if ($dataObject) {
             return $dataObject->getStoreId();
         }
-        return $this->getData('store_id');
+        return (int)$this->getData('store_id');
     }
 
     /**

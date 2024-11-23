@@ -109,38 +109,28 @@
             </div>
     </form>
     <script type="text/javascript">
-    //<![CDATA[
         var dataForm = new VarienForm('review-form');
-        Validation.addAllThese(
-        [
-               ['validate-rating', '<?= Mage::helper('core')->jsQuoteEscape($this->__('Please select one of each of the ratings above')) ?>', function(v) {
-                    var trs = $('product-review-table').select('tr');
-                    var inputs;
-                    var error = 1;
-
-                    for( var j=0; j < trs.length; j++ ) {
-                        var tr = trs[j];
-                        if( j > 0 ) {
-                            inputs = tr.select('input');
-
-                            for( i in inputs ) {
-                                if( inputs[i].checked == true ) {
-                                    error = 0;
-                                }
-                            }
-
-                            if( error == 1 ) {
-                                return false;
-                            } else {
-                                error = 1;
-                            }
+        Validation.add('validate-rating',
+            '<?= Mage::helper('core')->jsQuoteEscape($this->__('Please select one of each of the ratings above')) ?>',
+            function(v) {
+                const trs = document.getElementById('product-review-table').getElementsByTagName('tr');
+                let error = 1;
+                for (let j = 1; j < trs.length; j++) {
+                    const inputs = trs[j].getElementsByTagName('input');
+                    for (let i = 0; i < inputs.length; i++) {
+                        if (inputs[i].checked === true) {
+                            error = 0;
                         }
                     }
-                    return true;
-                }]
-        ]
+                    if (error === 1) {
+                        return false;
+                    } else {
+                        error = 1;
+                    }
+                }
+                return true;
+            }
         );
-    //]]>
     </script>
     <?php else: ?>
     <p class="review-nologged" id="review-form">

@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -19,7 +19,7 @@
 class Mage_Adminhtml_Block_Widget_Container extends Mage_Adminhtml_Block_Template
 {
     /**
-     * So called "container controller" to specify group of blocks participating in some action
+     * So-called "container controller" to specify group of blocks participating in some action
      *
      * @var string
      */
@@ -155,9 +155,6 @@ class Mage_Adminhtml_Block_Widget_Container extends Mage_Adminhtml_Block_Templat
         return $this->_updateButton($id, $key, $data);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareLayout()
     {
@@ -203,14 +200,14 @@ class Mage_Adminhtml_Block_Widget_Container extends Mage_Adminhtml_Block_Templat
     public function getButtonsHtml($area = null)
     {
         $out = '';
-        foreach ($this->_buttons as $level => $buttons) {
-            $_buttons = [];
-            foreach ($buttons as $id => $data) {
-                $_buttons[$data['sort_order']]['id'] = $id;
-                $_buttons[$data['sort_order']]['data'] = $data;
+        foreach ($this->_buttons as $cachedButtons) {
+            $buttons = [];
+            foreach ($cachedButtons as $id => $data) {
+                $buttons[$data['sort_order']]['id'] = $id;
+                $buttons[$data['sort_order']]['data'] = $data;
             }
-            ksort($_buttons);
-            foreach ($_buttons as $button) {
+            ksort($buttons);
+            foreach ($buttons as $button) {
                 $id = $button['id'];
                 $data = $button['data'];
                 if ($area && isset($data['area']) && ($area != $data['area'])) {

@@ -32,9 +32,6 @@ class Mage_Adminhtml_Block_Tag_Grid_Pending extends Mage_Adminhtml_Block_Widget_
              ->setSaveParametersInSession(true);
     }
 
-    /**
-     * @inheritDoc
-     */
     #[\Override]
     protected function _prepareCollection()
     {
@@ -47,7 +44,6 @@ class Mage_Adminhtml_Block_Tag_Grid_Pending extends Mage_Adminhtml_Block_Widget_
     }
 
     /**
-     * @inheritDoc
      * @throws Mage_Core_Exception
      * @throws Mage_Core_Model_Store_Exception
      */

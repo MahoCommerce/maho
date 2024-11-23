@@ -576,8 +576,6 @@ class Mage_Core_Model_Locale
      *
      * @param   mixed $store
      * @return  int
-     *
-     * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     public function storeTimeStamp($store = null)
     {
