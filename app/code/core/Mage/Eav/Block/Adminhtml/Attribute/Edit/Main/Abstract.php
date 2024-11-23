@@ -63,11 +63,6 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
         return false;
     }
 
-    /**
-     *
-     *
-     * @return Mage_Core_Block_Abstract
-     */
     #[\Override]
     protected function _prepareLayout()
     {

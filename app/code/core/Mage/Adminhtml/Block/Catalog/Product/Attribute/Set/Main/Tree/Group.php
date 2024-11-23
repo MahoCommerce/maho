@@ -16,7 +16,7 @@
  */
 class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main_Tree_Group extends Mage_Eav_Block_Adminhtml_Attribute_Set_Edit_Tree_Group
 {
-    protected function __construct()
+    public function __construct()
     {
         parent::__construct();
 

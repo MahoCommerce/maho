@@ -20,10 +20,10 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
     protected Mage_Eav_Model_Entity_Type $entityType;
     protected Mage_Eav_Model_Entity_Attribute_Set $attributeSet;
 
-    protected function __construct()
+    public function __construct()
     {
         $this->entityType = Mage::registry('entity_type');
-        $this->attributeSet = Mage::registry('attribute_set');
+        $this->attributeSet = Mage::registry('current_attribute_set');
         $this->setTemplate('eav/attribute/set/edit.phtml');
     }
 
@@ -164,7 +164,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
         $items = [];
         $setId = $this->_getSetId();
 
-        /* @var $groups Mage_Eav_Model_Mysql4_Entity_Attribute_Group_Collection */
+        /** @var Mage_Eav_Model_Resource_Entity_Attribute_Group_Collection $groups */
         $groups = Mage::getModel('eav/entity_attribute_group')
             ->getResourceCollection()
             ->setAttributeSetFilter($setId)
@@ -174,7 +174,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
         // Get global/eav_attributes/$entityType/$attributeCode/hidden config.xml nodes
         $hiddenAttributes = Mage::helper('eav')->getHiddenAttributes($this->entityType->getEntityTypeCode());
 
-        /* @var $node Mage_Eav_Model_Entity_Attribute_Group */
+        /** @var Mage_Eav_Model_Entity_Attribute_Group $node */
         foreach ($groups as $node) {
             $item = [];
             $item['text']       = $node->getAttributeGroupName();
@@ -186,14 +186,14 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
             /** @var Mage_Eav_Model_Entity_Attribute $nodeChildren */
             $nodeChildren = Mage::getResourceModel($this->entityType->getEntityAttributeCollection());
             $nodeChildren->setEntityTypeFilter($this->entityType->getEntityTypeId())
-                         ->setNotCodeFilter($hiddenAttributes)
-                         ->setAttributeGroupFilter($node->getId())
-                         ->load();
+                ->setNotCodeFilter($hiddenAttributes)
+                ->setAttributeGroupFilter($node->getId())
+                ->load();
 
             if ($nodeChildren->getSize() > 0) {
                 $item['children'] = [];
+                /** @var Mage_Eav_Model_Entity_Attribute $child */
                 foreach ($nodeChildren->getItems() as $child) {
-                    /* @var $child Mage_Eav_Model_Entity_Attribute */
                     $attr = [
                         'text'              => $child->getAttributeCode(),
                         'id'                => $child->getAttributeId(),
@@ -232,7 +232,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
                    ->load();
 
         $attributesIds = ['0'];
-        /* @var $item Mage_Eav_Model_Entity_Attribute */
+        /** @var Mage_Eav_Model_Entity_Attribute $item */
         foreach ($collection->getItems() as $item) {
             $attributesIds[] = $item->getAttributeId();
         }

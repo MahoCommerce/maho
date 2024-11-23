@@ -16,23 +16,8 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  */
-class Mage_Adminhtml_Block_Catalog_Product_Attribute_Grid extends Mage_Eav_Block_Adminhtml_Attribute_Grid_Abstract
+class Mage_Adminhtml_Block_Catalog_Product_Attribute_Grid extends Mage_Eav_Block_Adminhtml_Attribute_Grid
 {
-    /**
-     * Prepare product attributes grid collection object
-     *
-     * @return $this
-     */
-    #[\Override]
-    protected function _prepareCollection()
-    {
-        $collection = Mage::getResourceModel('catalog/product_attribute_collection')
-            ->addVisibleFilter();
-        $this->setCollection($collection);
-
-        return parent::_prepareCollection();
-    }
-
     /**
      * Prepare product attributes grid columns
      *

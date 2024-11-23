@@ -17,7 +17,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Add extends Mage_Adminhtml_Block_Te
 {
     protected Mage_Eav_Model_Entity_Type $entityType;
 
-    protected function __construct()
+    public function __construct()
     {
         $this->entityType = Mage::registry('entity_type');
         $this->setTemplate('eav/attribute/set/add.phtml');
