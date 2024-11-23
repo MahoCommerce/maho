@@ -362,13 +362,10 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function formatTypeCode(string $entityTypeCode): string
     {
-        switch ($entityTypeCode) {
-        case Mage_Catalog_Model_Product::ENTITY:
-            return 'Product';
-        case Mage_Catalog_Model_Category::ENTITY:
-            return 'Category';
-        default:
-            return ucwords(str_replace('_', ' ', $entityTypeCode));
-        }
+        return match ($entityTypeCode) {
+            Mage_Catalog_Model_Product::ENTITY => 'Product',
+            Mage_Catalog_Model_Category::ENTITY => 'Category',
+            default => ucwords(str_replace('_', ' ', $entityTypeCode)),
+        };
     }
 }
