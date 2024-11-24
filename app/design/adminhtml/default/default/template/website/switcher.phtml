@@ -9,8 +9,9 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Adminhtml_Block_Website_Switcher $this */
 ?>
-<?php /* @var $this Mage_Core_Block_Template */ ?>
 <?php if ($websites = $this->getWebsites()): ?>
 <p class="switcher"><label for="website_switcher"><?= $this->escapeHtml($this->getLabel()) ?></label>
 <select name="website_switcher" id="website_switcher" onchange="return switchWebsite(this);">

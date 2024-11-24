@@ -34,6 +34,8 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Eav_Controller_A
 
         // For backwards compatibility set camelCase registry key with type id
         Mage::register('entityType', $this->entityType->getEntityTypeId());
+
+        return $this;
     }
 
     #[\Override]

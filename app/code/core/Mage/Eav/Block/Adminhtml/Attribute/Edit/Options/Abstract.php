@@ -18,7 +18,7 @@
  */
 abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends Mage_Adminhtml_Block_Widget implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
-    /** @var Mage_Eav_Model_Entity_Attribute $_attribute */
+    /** @var ?Mage_Eav_Model_Entity_Attribute $_attribute */
     protected $_attribute = null;
 
     public function __construct()

@@ -192,7 +192,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
             ->setSortOrder()
             ->load();
 
-        /** @var Mage_Eav_Model_Entity_Attribute_Group $node */
+        /** @var Mage_Eav_Model_Entity_Attribute_Group $group */
         foreach ($groups as $group) {
             $item = [];
             $item['text']       = $group->getAttributeGroupName();

@@ -26,10 +26,8 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit_Renderer_Fieldset_Element extends 
 
     /**
      * Check "Use default" checkbox display availability
-     *
-     * @return bool
      */
-    protected function canDisplayUseDefault()
+    public function canDisplayUseDefault(): bool
     {
         $attributeObject = $this->getElement()->getForm()->getDataObject();
         if ($attributeObject->getWebsite() && (int)$attributeObject->getWebsite()->getId()) {
@@ -40,10 +38,8 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit_Renderer_Fieldset_Element extends 
 
     /**
      * Check default value usage fact
-     *
-     * @return bool
      */
-    protected function usedDefault()
+    public function usedDefault(): bool
     {
         $field = $this->getElement()->getId();
         if (str_starts_with($field, 'default_value')) {
@@ -55,10 +51,8 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit_Renderer_Fieldset_Element extends 
 
     /**
      * Disable field in default value using case
-     *
-     * @return $this
      */
-    public function checkFieldDisable()
+    public function checkFieldDisable(): self
     {
         if ($this->canDisplayUseDefault() && $this->usedDefault()) {
             $this->getElement()->setDisabled(true);
@@ -70,10 +64,8 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit_Renderer_Fieldset_Element extends 
      * Retrieve label of attribute scope
      *
      * GLOBAL | WEBSITE
-     *
-     * @return string
      */
-    protected function getScopeLabel()
+    public function getScopeLabel(): string
     {
         $html = '';
         if (Mage::app()->isSingleStoreMode()) {
