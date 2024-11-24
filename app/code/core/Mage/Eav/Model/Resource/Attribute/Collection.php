@@ -195,6 +195,7 @@ abstract class Mage_Eav_Model_Resource_Attribute_Collection extends Mage_Eav_Mod
      *
      * @return $this
      */
+    #[\Override]
     public function addVisibleFilter()
     {
         return $this->addFieldToFilter('is_visible', 1);

@@ -63,12 +63,7 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Eav_Contro
         return explode(',', Mage::getStoreConfig(self::XML_PATH_ALLOWED_TAGS));
     }
 
-    /**
-     * Filter post data
-     *
-     * @param array $data
-     * @return array
-     */
+    #[\Override]
     protected function _filterPostData($data)
     {
         if ($data) {
@@ -102,6 +97,7 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Eav_Contro
         return $data;
     }
 
+    #[\Override]
     public function saveAction()
     {
         $request = $this->getRequest();

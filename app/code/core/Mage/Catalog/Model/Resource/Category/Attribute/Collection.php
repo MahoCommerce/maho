@@ -53,6 +53,7 @@ class Mage_Catalog_Model_Resource_Category_Attribute_Collection extends Mage_Eav
      *
      * @return $this
      */
+    #[\Override]
     public function addVisibleFilter()
     {
         return $this->addFieldToFilter('additional_table.is_visible', 1);
