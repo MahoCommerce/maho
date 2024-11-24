@@ -21,6 +21,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit_Formset extends Mage_Adminhtml
     public function __construct()
     {
         $this->entityType = Mage::registry('entity_type');
+        parent::__construct();
     }
 
     #[\Override]
@@ -30,19 +31,20 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit_Formset extends Mage_Adminhtml
             ->load($this->getRequest()->getParam('id'));
 
         $form = new Varien_Data_Form();
+
         $fieldset = $form->addFieldset('set_name', ['legend' => Mage::helper('eav')->__('Edit Set Name')]);
         $fieldset->addField('attribute_set_name', 'text', [
-            'label' => Mage::helper('eav')->__('Name'),
-            'note' => Mage::helper('eav')->__('For internal use.'),
-            'name' => 'attribute_set_name',
+            'label'    => Mage::helper('eav')->__('Name'),
+            'name'     => 'attribute_set_name',
             'required' => true,
-            'class' => 'required-entry validate-no-html-tags',
-            'value' => $data->getAttributeSetName()
+            'class'    => 'required-entry validate-no-html-tags',
+            'value'    => $data->getAttributeSetName()
         ]);
 
         if (!$this->getRequest()->getParam('id', false)) {
+
             $fieldset->addField('gotoEdit', 'hidden', [
-                'name' => 'gotoEdit',
+                'name'  => 'gotoEdit',
                 'value' => '1'
             ]);
 
@@ -52,11 +54,11 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit_Formset extends Mage_Adminhtml
                 ->toOptionArray();
 
             $fieldset->addField('skeleton_set', 'select', [
-                'label' => Mage::helper('eav')->__('Based On'),
-                'name' => 'skeleton_set',
+                'label'    => Mage::helper('eav')->__('Based On'),
+                'name'     => 'skeleton_set',
                 'required' => true,
-                'class' => 'required-entry',
-                'values' => $sets,
+                'class'    => 'required-entry',
+                'values'   => $sets,
             ]);
         }
 

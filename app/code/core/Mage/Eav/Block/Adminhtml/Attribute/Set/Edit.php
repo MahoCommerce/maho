@@ -25,6 +25,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
         $this->entityType = Mage::registry('entity_type');
         $this->attributeSet = Mage::registry('current_attribute_set');
         $this->setTemplate('eav/attribute/set/edit.phtml');
+        parent::__construct();
     }
 
     /**
@@ -35,8 +36,6 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
     #[\Override]
     protected function _prepareLayout()
     {
-        $setId = $this->_getSetId();
-
         $this->setChild(
             'delete_group_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')->setData([
@@ -86,7 +85,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
             $this->getLayout()->createBlock('adminhtml/widget_button')->setData([
                 'label'     => Mage::helper('eav')->__('Delete Attribute Set'),
                 'onclick'   => Mage::helper('core/js')->getDeleteConfirmJs(
-                    $this->getUrlSecure('*/*/delete', ['id' => $setId]),
+                    $this->getUrlSecure('*/*/delete', ['id' => $this->_getSetId()]),
                     Mage::helper('eav')->__('Are you sure you want to delete this attribute set?')
                 ),
                 'class'     => 'delete'
@@ -131,7 +130,11 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
      */
     protected function _getHeader()
     {
-        return Mage::helper('eav')->__("Edit Attribute Set '%s'", $this->_getAttributeSet()->getAttributeSetName());
+        return Mage::helper('eav')->__(
+            "Manage %s Attribute Set '%s'",
+            Mage::helper('eav')->formatTypeCode($this->entityType->getEntityTypeCode()),
+            $this->_getAttributeSet()->getAttributeSetName()
+        );
     }
 
     /**
@@ -175,11 +178,9 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
     }
 
     /**
-     * Retrieve Attribute Set Group Tree as JSON format
-     *
-     * @return string
+     * Retrieve Attribute Set Group Tree
      */
-    public function getGroupTreeJson()
+    protected function getGroupTree(): array
     {
         $items = [];
         $setId = $this->_getSetId();
@@ -225,15 +226,13 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
             $items[] = $item;
         }
 
-        return Mage::helper('core')->jsonEncode($items);
+        return $items;
     }
 
     /**
-     * Retrieve Unused in Attribute Set Attribute Tree as JSON
-     *
-     * @return string
+     * Retrieve Unused in Attribute Set Attribute Tree
      */
-    public function getAttributeTreeJson()
+    protected function getAttributeTree(): array
     {
         $items = [];
         $setId = $this->_getSetId();
@@ -265,7 +264,27 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
             ];
         }
 
-        return Mage::helper('core')->jsonEncode($items);
+        return $items;
+    }
+
+    /**
+     * Retrieve Attribute Set Group Tree as JSON format
+     *
+     * @return string
+     */
+    public function getGroupTreeJson()
+    {
+        return Mage::helper('core')->jsonEncode($this->getGroupTree());
+    }
+
+    /**
+     * Retrieve Unused in Attribute Set Attribute Tree as JSON
+     *
+     * @return string
+     */
+    public function getAttributeTreeJson()
+    {
+        return Mage::helper('core')->jsonEncode($this->getAttributeTree());
     }
 
     /**

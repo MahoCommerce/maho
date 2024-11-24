@@ -18,5 +18,6 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit_Tree_Group extends Mage_Adminh
     public function __construct()
     {
         $this->setTemplate('eav/attribute/set/edit/tree/group.phtml');
+        parent::__construct();
     }
 }

@@ -64,24 +64,6 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
     }
 
     #[\Override]
-    protected function _prepareLayout()
-    {
-        parent::_prepareLayout();
-
-        // If entity type has a scoped table, change renderer to allow "Use Default Value" checkbox
-        if (!Mage::app()->isSingleStoreMode() && $this->getAttributeObject()->getResource()->hasScopeTable()) {
-            Varien_Data_Form::setFieldsetElementRenderer(
-                $this->getLayout()->createBlock('eav/adminhtml_attribute_edit_renderer_fieldset_element')
-            );
-        }
-
-        return $this;
-    }
-
-    /**
-     * Prepare default form elements for editing attribute
-     */
-    #[\Override]
     protected function _prepareForm()
     {
         $attributeObject = $this->getAttributeObject();
@@ -198,9 +180,6 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
         return parent::_prepareForm();
     }
 
-    /**
-     * Return dependency block object
-     */
     protected function _getDependence(): Mage_Adminhtml_Block_Widget_Form_Element_Dependence
     {
         if (!$this->getChild('form_after')) {
@@ -235,18 +214,23 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
         return parent::_initFormValues();
     }
 
-    /**
-     * This method is called before rendering HTML
-     *
-     * @return Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract
-     */
     #[\Override]
     protected function _beforeToHtml()
     {
+        $attributeObject = $this->getAttributeObject();
+
+        // If entity type has a scoped table, change renderer to allow "Use Default Value" checkbox
+        // This must be called before parent::_beforeToHtml()
+        if (!Mage::app()->isSingleStoreMode() && $attributeObject->getResource()->hasScopeTable()) {
+            Varien_Data_Form::setFieldsetElementRenderer(
+                $this->getLayout()->createBlock('eav/adminhtml_attribute_edit_renderer_fieldset_element')
+            );
+        }
+
+        // Calls $this->_prepareForm() and $this->_initFormValues();
         parent::_beforeToHtml();
 
         $form = $this->getForm();
-        $attributeObject = $this->getAttributeObject();
 
         // Disable any fields in config global/eav_attributes/$entity_type/$field/locked_fields
         if ($attributeObject->getId()) {

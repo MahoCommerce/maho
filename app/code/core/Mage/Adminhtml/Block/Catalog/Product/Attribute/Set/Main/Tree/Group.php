@@ -19,7 +19,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main_Tree_Group extends
     public function __construct()
     {
         parent::__construct();
-
         $this->setTemplateIfExists('catalog/product/attribute/set/main/tree/group.phtml');
     }
 }

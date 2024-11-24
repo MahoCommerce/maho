@@ -21,7 +21,6 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit_Renderer_Fieldset_Element extends 
     public function __construct()
     {
         parent::__construct();
-
         $this->setTemplate('eav/attribute/edit/renderer/fieldset/element.phtml');
     }
 

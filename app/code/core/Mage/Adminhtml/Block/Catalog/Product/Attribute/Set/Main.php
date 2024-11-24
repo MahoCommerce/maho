@@ -21,7 +21,24 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main extends Mage_Eav_B
     public function __construct()
     {
         parent::__construct();
-
         $this->setTemplateIfExists('catalog/product/attribute/set/main.phtml');
     }
+
+    #[\Override]
+    public function getGroupTreeJson()
+    {
+        $configurable = Mage::getResourceModel('catalog/product_type_configurable_attribute')
+            ->getUsedAttributes($this->_getSetId());
+
+        $items = $this->getGroupTree();
+
+        foreach ($items as &$item) {
+            foreach ($item['children'] as &$child) {
+                $child['is_configurable'] = (int) in_array($child['id'], $configurable);
+            }
+        }
+
+        return Mage::helper('core')->jsonEncode($items);
+    }
+
 }

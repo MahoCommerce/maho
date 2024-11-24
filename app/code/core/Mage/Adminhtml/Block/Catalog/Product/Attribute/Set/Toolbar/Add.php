@@ -21,7 +21,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Toolbar_Add extends Mag
     public function __construct()
     {
         parent::__construct();
-
         $this->setTemplateIfExists('catalog/product/attribute/set/toolbar/add.phtml');
     }
 }
