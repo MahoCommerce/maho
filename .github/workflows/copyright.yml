@@ -44,6 +44,13 @@ jobs:
               continue
             fi
 
+            # Skip CSV, SVG files and known binary extensions
+            extension="${file##*.}"
+            if [[ "${extension,,}" =~ ^(csv|svg|png|jpg|jpeg|gif|ico)$ ]]; then
+              echo "ℹ️ Skipping $file (excluded file type)"
+              continue
+            fi
+
             # Check if file contains the copyright string with current year
             # Pattern matches either:
             # @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
@@ -51,8 +58,6 @@ jobs:
             if ! grep -E -q "Copyright \(c\) (\(2024-\))?${CURRENT_YEAR} Maho \(https://mahocommerce\.com\)" "$file"; then
               echo "❌ Copyright notice missing in: $file"
               ERROR=1
-            else
-              echo "✅ Copyright notice found in: $file"
             fi
           done
 
