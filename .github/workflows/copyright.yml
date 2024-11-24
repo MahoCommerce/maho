@@ -43,11 +43,10 @@ jobs:
             if [ ! -f "$file" ]; then
               continue
             fi
-
-            # Skip CSV, SVG files and known binary extensions
+          
+            # Only check files with specific extensions
             extension="${file##*.}"
-            if [[ "${extension,,}" =~ ^(csv|svg|png|jpg|jpeg|gif|ico)$ ]]; then
-              echo "ℹ️ Skipping $file (excluded file type)"
+            if ! [[ "${extension,,}" =~ ^(css|js|php|phtml|template|xml)$ ]]; then
               continue
             fi
 
