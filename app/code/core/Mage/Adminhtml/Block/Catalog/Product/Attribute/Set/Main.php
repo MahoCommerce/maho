@@ -40,5 +40,4 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main extends Mage_Eav_B
 
         return Mage::helper('core')->jsonEncode($items);
     }
-
 }
