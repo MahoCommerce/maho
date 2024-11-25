@@ -59,6 +59,10 @@
         <p class="f-left"><?= $this->__('Forgot an Item?') ?> <a href="<?= $this->getUrl('checkout/cart') ?>" onclick="return confirm('<?= Mage::helper('core')->jsQuoteEscape($this->__('Are you sure you want to leave this page? You will need to go through the checkout steps again.')) ?>')"><?= $this->__('Edit Your Cart') ?></a></p>
     </div>
     <script type="text/javascript">
-        review = new Review('<?= $this->getUrl('checkout/onepage/saveOrder') ?>', '<?= $this->getUrl('checkout/onepage/success') ?>', $('checkout-agreements'));
+        review = new Review(
+            '<?= $this->getUrl('checkout/onepage/saveOrder') ?>',
+            '<?= $this->getUrl('checkout/onepage/success') ?>',
+            document.getElementById('checkout-agreements')
+        );
     </script>
 </div>

@@ -58,8 +58,10 @@
         </span>
     </div>
     <script type="text/javascript">
-    //<![CDATA[
-        review = new Review('<?= $this->getUrl('checkout/onepage/saveOrder') ?>', '<?= $this->getUrl('checkout/onepage/success') ?>', $('checkout-agreements'));
-    //]]>
+        review = new Review(
+            '<?= $this->getUrl('checkout/onepage/saveOrder') ?>',
+            '<?= $this->getUrl('checkout/onepage/success') ?>',
+            document.getElementById('checkout-agreements')
+        );
     </script>
 </div>
