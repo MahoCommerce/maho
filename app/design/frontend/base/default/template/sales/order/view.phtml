@@ -15,31 +15,28 @@
 <div class="order-items order-details">
     <?php if ($this->canDisplayGiftmessageItems()): ?>
     <script type="text/javascript">
-    //<![CDATA[
-    function giftMessageToogle(giftMessageIdentifier)
-    {
-        var link = $('order-item-gift-message-link-'+giftMessageIdentifier);
-        var container = $('order-item-gift-message-'+giftMessageIdentifier);
-        var row = $('order-item-row-'+giftMessageIdentifier);
-        if(link.expanded) {
-            link.expanded = false;
-            link.removeClassName('expanded');
-            if(container.hasClassName('last')) {
-                row.addClassName('last');
-            }
-            container.hide();
-        } else {
-            link.expanded = true;
-            link.addClassName('expanded');
-            if(container.hasClassName('last')) {
-                row.removeClassName('last');
-            }
-            container.show();
-        }
+        function giftMessageToogle(giftMessageIdentifier) {
+            const link = document.getElementById('order-item-gift-message-link-' + giftMessageIdentifier);
+            const container = document.getElementById('order-item-gift-message-' + giftMessageIdentifier);
+            const row = document.getElementById('order-item-row-' + giftMessageIdentifier);
 
-        return false;
-    }
-    //]]>
+            if (link.expanded) {
+                link.expanded = false;
+                link.classList.remove('expanded');
+                if (container.classList.contains('last')) {
+                    row.classList.add('last');
+                }
+                container.style.display = 'none';
+            } else {
+                link.expanded = true;
+                link.classList.add('expanded');
+                if (container.classList.contains('last')) {
+                    row.classList.remove('last');
+                }
+                container.style.display = 'block';
+            }
+            return false;
+        }
     </script>
     <?php endif ?>
     <?php $_order = $this->getOrder() ?>
