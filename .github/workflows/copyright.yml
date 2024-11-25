@@ -25,7 +25,7 @@ jobs:
       - name: Get changed files
         id: changed-files
         if: github.event_name == 'pull_request' || steps.skip_check.outputs.skip != 'true'
-        uses: tj-actions/changed-files@v42
+        uses: tj-actions/changed-files@v45
 
       - name: Check copyright in modified files
         if: github.event_name == 'pull_request' || steps.skip_check.outputs.skip != 'true'
