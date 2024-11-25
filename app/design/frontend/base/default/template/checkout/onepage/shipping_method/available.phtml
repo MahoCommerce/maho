@@ -34,9 +34,7 @@
 
                         <?php if ($_rate->getCode() === $this->getAddressShippingMethod()): ?>
                         <script type="text/javascript">
-                            //<![CDATA[
-                                lastPrice = <?= (float)$_rate->getPrice() ?>;
-                            //]]>
+                            lastPrice = <?= (float)$_rate->getPrice() ?>;
                         </script>
                         <?php endif ?>
 
