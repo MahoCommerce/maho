@@ -6,6 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,6 +18,8 @@
  *
  * @method Mage_Core_Model_Abstract getObject()
  * @method $this setObject(Mage_Core_Model_Abstract $value)
+ * @method $this setFieldIdFormat(string $field)
+ * @method $this setFieldNameFormat(string $field)
  */
 class Mage_Customer_Block_Widget_Abstract extends Mage_Core_Block_Template
 {

@@ -26,6 +26,8 @@
  */
 class Mage_Customer_Model_Address extends Mage_Customer_Model_Address_Abstract
 {
+    public const ENTITY = 'customer_address';
+
     protected $_customer;
 
     #[\Override]
@@ -86,6 +88,17 @@ class Mage_Customer_Model_Address extends Mage_Customer_Model_Address_Abstract
             $this->setCustomerId($customer->getId());
         }
         return $this;
+    }
+
+    /**
+     * Retrieve customer address attribute set identifier
+     *
+     * @return int
+     */
+    public function getAttributeSetId()
+    {
+        $customer = $this->getCustomer() ?: Mage::getModel('customer/customer');
+        return $customer->getAddressAttributeSetId();
     }
 
     /**

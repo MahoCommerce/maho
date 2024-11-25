@@ -1,0 +1,56 @@
+<?php
+/**
+ * Maho
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Eav_Block_Widget_Form_Element_Date $this */
+?>
+<label for="<?= $this->getFieldId() ?>_month" class="<?= $this->getLabelClass() ?>"><?= $this->getLabel() ?></label>
+<div class="input-box">
+<?php
+    $this->setDate($this->getValue());
+
+    $this->setDateInput('d', <<<HTML
+        <div class="date-day">
+            <input type="text" id="{$this->getFieldId()}_day" name="{$this->getFieldName('day')}" value="{$this->getDay()}" title="{$this->__('Day')}" placeholder="{$this->__('DD')}" class="input-text validate-custom" {$this->getFieldParams()} />
+        </div>
+    HTML);
+
+    $this->setDateInput('m', <<<HTML
+        <div class="date-month">
+            <input type="text" id="{$this->getFieldId()}_month" name="{$this->getFieldName('month')}" value="{$this->getMonth()}" title="{$this->__('Month')}" placeholder="{$this->__('MM')}" class="input-text validate-custom" {$this->getFieldParams()} />
+        </div>
+    HTML);
+
+    $this->setDateInput('y', <<<HTML
+        <div class="date-year">
+            <input type="text" id="{$this->getFieldId()}_year" name="{$this->getFieldName('year')}" value="{$this->getYear()}" title="{$this->__('Year')}" placeholder="{$this->__('YYYY')}" class="input-text validate-custom" {$this->getFieldParams()} />
+        </div>
+    HTML);
+?>
+    <?= $this->getSortedDateInputs() ?>
+    <div class="date-full" style="display:none;">
+        <input type="hidden" id="<?= $this->getFieldId()?>" name="<?= $this->getFieldName()?>" />
+    </div>
+
+    <div class="validation-advice" style="display:none;"></div>
+</div>
+<script type="text/javascript">
+    (function () {
+        const el = document.getElementById('<?= $this->getFieldId() ?>').closest('.input-box');
+        const container = {
+            day: el.querySelector('.date-day input'),
+            month: el.querySelector('.date-month input'),
+            year: el.querySelector('.date-year input'),
+            full: el.querySelector('.date-full input'),
+            advice: el.querySelector('.validation-advice')
+        };
+        new Varien.DateElement('container', container, <?= $this->isRequired() ? 'true' : 'false' ?>, '<?= $this->getDateFormat() ?>');
+    })();
+</script>

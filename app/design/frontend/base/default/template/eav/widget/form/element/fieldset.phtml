@@ -1,0 +1,27 @@
+<?php
+/**
+ * Maho
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Eav_Block_Widget_Form_Element_Fieldset $this */
+?>
+<?php $wrapperTags = $this->getWrapperTags() ?>
+<div class="fieldset">
+    <h2 class="legend"><?= $this->__($this->getLabel()) ?></h2>
+<?php if ($this->getIsRequired()): ?>
+    <p class="required"><?= $this->__('* Required Fields') ?></p>
+<?php endif ?>
+    <?= $wrapperTags[0][0] . "\n" ?>
+<?php foreach ($this->getChild() as $child): ?>
+    <?= $wrapperTags[1][0] . "\n" ?>
+        <?= $child->toHtml() ?>
+    <?= $wrapperTags[1][1] . "\n" ?>
+<?php endforeach ?>
+    <?= $wrapperTags[0][1] . "\n" ?>
+</div>

@@ -235,6 +235,9 @@ button {
   padding-left: 0 !important; }
   .form-list td.value input.input-text, .form-list td.value textarea, .form-list td.value select {
     width: 330px; }
+  .form-list td.value select.customselect, .form-list td.value select.customselect + input.input-text {
+    width: 163px; }
+
   .form-list td.value p.note {
     color: #202856;
     font-size: 11px;
@@ -244,24 +247,24 @@ button {
   padding: 12px 12px 14px;
   font-size: 18px; }
 
-td:has(input.swatch-option) {
+td.swatch-option {
+  position: relative;
   display: flex;
   gap: 2px; }
-  td:has(input.swatch-option) .swatch-delete {
-    cursor: pointer;
+  td.swatch-option .swatch-delete {
+    padding: 0;
     width: 14px;
     height: 14px;
-    display: flex;
-    justify-content: center;
+    line-height: 14px;
     font-size: 10px;
     background: #e63a3a;
     color: #fff;
     border-radius: 2px; }
-  td:has(input.swatch-option) .swatch-option {
+  td.swatch-option input[type=color] {
     width: 26px !important;
     height: 26px; }
 
-td:has(input.swatch-disabled) {
+td.swatch-option.swatch-disabled {
   background-image: url('data:image/svg+xml,<svg id="e5490f2e-3f54-4acd-9496-57eed667c240" data-name="Livello 1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 28.41093 28.29249"><title>placeholder</title><rect x="1.20546" y="1.08375" width="26" height="26" fill="%23fff" stroke="%23ccc" stroke-miterlimit="10"/><line x1="0.70546" y1="27.58375" x2="27.70546" y2="0.70875" fill="none" stroke="%23ff003a" stroke-miterlimit="10" stroke-width="2"/></svg>');
   background-repeat: no-repeat;
   outline: 1px solid #c8c8c8;
@@ -273,9 +276,9 @@ td:has(input.swatch-disabled) {
   display: block;
   background-position: center center;
   border-radius: 2px; }
-  td:has(input.swatch-disabled) .swatch-option {
+  td.swatch-option.swatch-disabled input[type=color] {
     opacity: 0; }
-  td:has(input.swatch-disabled) .swatch-delete {
+  td.swatch-option.swatch-disabled .swatch-delete {
     display: none; }
 
 /*# sourceMappingURL=form.css.map */

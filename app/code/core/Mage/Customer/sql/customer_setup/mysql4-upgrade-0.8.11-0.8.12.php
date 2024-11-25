@@ -6,6 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -14,41 +15,6 @@ $installer = $this;
 $installer->startSetup();
 
 $setup = $installer->getConnection();
-
-$select = $setup->select()
-    ->from($installer->getTable('core/config_data'), 'COUNT(*)')
-    ->where('path=?', 'customer/address/prefix_show')
-    ->where('value!=?', '0');
-$showPrefix = (bool)Mage::helper('customer/address')->getConfig('prefix_show')
-    || $setup->fetchOne($select) > 0;
-
-$select = $setup->select()
-    ->from($installer->getTable('core/config_data'), 'COUNT(*)')
-    ->where('path=?', 'customer/address/middlename_show')
-    ->where('value!=?', '0');
-$showMiddlename = (bool)Mage::helper('customer/address')->getConfig('middlename_show')
-    || $setup->fetchOne($select) > 0;
-
-$select = $setup->select()
-    ->from($installer->getTable('core/config_data'), 'COUNT(*)')
-    ->where('path=?', 'customer/address/suffix_show')
-    ->where('value!=?', '0');
-$showSuffix = (bool)Mage::helper('customer/address')->getConfig('suffix_show')
-    || $setup->fetchOne($select) > 0;
-
-$select = $setup->select()
-    ->from($installer->getTable('core/config_data'), 'COUNT(*)')
-    ->where('path=?', 'customer/address/dob_show')
-    ->where('value!=?', '0');
-$showDob = (bool)Mage::helper('customer/address')->getConfig('dob_show')
-    || $setup->fetchOne($select) > 0;
-
-$select = $setup->select()
-    ->from($installer->getTable('core/config_data'), 'COUNT(*)')
-    ->where('path=?', 'customer/address/taxvat_show')
-    ->where('value!=?', '0');
-$showTaxVat = (bool)Mage::helper('customer/address')->getConfig('taxvat_show')
-    || $setup->fetchOne($select) > 0;
 
 /**
  *****************************************************************************
@@ -85,64 +51,30 @@ $setup->insert($installer->getTable('eav/form_fieldset_label'), [
 ]);
 
 $elementSort = 0;
-if ($showPrefix) {
-    $setup->insert($installer->getTable('eav/form_element'), [
-        'type_id'       => $formTypeId,
-        'fieldset_id'   => $fieldsetId,
-        'attribute_id'  => $installer->getAttributeId($entityTypeId, 'prefix'),
-        'sort_order'    => $elementSort++
-    ]);
-}
 $setup->insert($installer->getTable('eav/form_element'), [
     'type_id'       => $formTypeId,
     'fieldset_id'   => $fieldsetId,
     'attribute_id'  => $installer->getAttributeId($entityTypeId, 'firstname'),
     'sort_order'    => $elementSort++
 ]);
-if ($showMiddlename) {
-    $setup->insert($installer->getTable('eav/form_element'), [
-        'type_id'       => $formTypeId,
-        'fieldset_id'   => $fieldsetId,
-        'attribute_id'  => $installer->getAttributeId($entityTypeId, 'middlename'),
-        'sort_order'    => $elementSort++
-    ]);
-}
+$setup->insert($installer->getTable('eav/form_element'), [
+    'type_id'       => $formTypeId,
+    'fieldset_id'   => $fieldsetId,
+    'attribute_id'  => $installer->getAttributeId($entityTypeId, 'middlename'),
+    'sort_order'    => $elementSort++
+]);
 $setup->insert($installer->getTable('eav/form_element'), [
     'type_id'       => $formTypeId,
     'fieldset_id'   => $fieldsetId,
     'attribute_id'  => $installer->getAttributeId($entityTypeId, 'lastname'),
     'sort_order'    => $elementSort++
 ]);
-if ($showSuffix) {
-    $setup->insert($installer->getTable('eav/form_element'), [
-        'type_id'       => $formTypeId,
-        'fieldset_id'   => $fieldsetId,
-        'attribute_id'  => $installer->getAttributeId($entityTypeId, 'suffix'),
-        'sort_order'    => $elementSort++
-    ]);
-}
 $setup->insert($installer->getTable('eav/form_element'), [
     'type_id'       => $formTypeId,
     'fieldset_id'   => $fieldsetId,
     'attribute_id'  => $installer->getAttributeId($entityTypeId, 'email'),
     'sort_order'    => $elementSort++
 ]);
-if ($showDob) {
-    $setup->insert($installer->getTable('eav/form_element'), [
-        'type_id'       => $formTypeId,
-        'fieldset_id'   => $fieldsetId,
-        'attribute_id'  => $installer->getAttributeId($entityTypeId, 'dob'),
-        'sort_order'    => $elementSort++
-    ]);
-}
-if ($showTaxVat) {
-    $setup->insert($installer->getTable('eav/form_element'), [
-        'type_id'       => $formTypeId,
-        'fieldset_id'   => $fieldsetId,
-        'attribute_id'  => $installer->getAttributeId($entityTypeId, 'taxvat'),
-        'sort_order'    => $elementSort++
-    ]);
-}
 
 /**
  *****************************************************************************
@@ -179,64 +111,30 @@ $setup->insert($installer->getTable('eav/form_fieldset_label'), [
 ]);
 
 $elementSort = 0;
-if ($showPrefix) {
-    $setup->insert($installer->getTable('eav/form_element'), [
-        'type_id'       => $formTypeId,
-        'fieldset_id'   => $fieldsetId,
-        'attribute_id'  => $installer->getAttributeId($entityTypeId, 'prefix'),
-        'sort_order'    => $elementSort++
-    ]);
-}
 $setup->insert($installer->getTable('eav/form_element'), [
     'type_id'       => $formTypeId,
     'fieldset_id'   => $fieldsetId,
     'attribute_id'  => $installer->getAttributeId($entityTypeId, 'firstname'),
     'sort_order'    => $elementSort++
 ]);
-if ($showMiddlename) {
-    $setup->insert($installer->getTable('eav/form_element'), [
-        'type_id'       => $formTypeId,
-        'fieldset_id'   => $fieldsetId,
-        'attribute_id'  => $installer->getAttributeId($entityTypeId, 'middlename'),
-        'sort_order'    => $elementSort++
-    ]);
-}
+$setup->insert($installer->getTable('eav/form_element'), [
+    'type_id'       => $formTypeId,
+    'fieldset_id'   => $fieldsetId,
+    'attribute_id'  => $installer->getAttributeId($entityTypeId, 'middlename'),
+    'sort_order'    => $elementSort++
+]);
 $setup->insert($installer->getTable('eav/form_element'), [
     'type_id'       => $formTypeId,
     'fieldset_id'   => $fieldsetId,
     'attribute_id'  => $installer->getAttributeId($entityTypeId, 'lastname'),
     'sort_order'    => $elementSort++
 ]);
-if ($showSuffix) {
-    $setup->insert($installer->getTable('eav/form_element'), [
-        'type_id'       => $formTypeId,
-        'fieldset_id'   => $fieldsetId,
-        'attribute_id'  => $installer->getAttributeId($entityTypeId, 'suffix'),
-        'sort_order'    => $elementSort++
-    ]);
-}
 $setup->insert($installer->getTable('eav/form_element'), [
     'type_id'       => $formTypeId,
     'fieldset_id'   => $fieldsetId,
     'attribute_id'  => $installer->getAttributeId($entityTypeId, 'email'),
     'sort_order'    => $elementSort++
 ]);
-if ($showDob) {
-    $setup->insert($installer->getTable('eav/form_element'), [
-        'type_id'       => $formTypeId,
-        'fieldset_id'   => $fieldsetId,
-        'attribute_id'  => $installer->getAttributeId($entityTypeId, 'dob'),
-        'sort_order'    => $elementSort++
-    ]);
-}
-if ($showTaxVat) {
-    $setup->insert($installer->getTable('eav/form_element'), [
-        'type_id'       => $formTypeId,
-        'fieldset_id'   => $fieldsetId,
-        'attribute_id'  => $installer->getAttributeId($entityTypeId, 'taxvat'),
-        'sort_order'    => $elementSort++
-    ]);
-}
 
 /**
  *****************************************************************************
@@ -273,42 +171,24 @@ $setup->insert($installer->getTable('eav/form_fieldset_label'), [
 ]);
 
 $elementSort = 0;
-if ($showPrefix) {
-    $setup->insert($installer->getTable('eav/form_element'), [
-        'type_id'       => $formTypeId,
-        'fieldset_id'   => $fieldsetId,
-        'attribute_id'  => $installer->getAttributeId($entityTypeId, 'prefix'),
-        'sort_order'    => $elementSort++
-    ]);
-}
 $setup->insert($installer->getTable('eav/form_element'), [
     'type_id'       => $formTypeId,
     'fieldset_id'   => $fieldsetId,
     'attribute_id'  => $installer->getAttributeId($entityTypeId, 'firstname'),
     'sort_order'    => $elementSort++
 ]);
-if ($showMiddlename) {
-    $setup->insert($installer->getTable('eav/form_element'), [
-        'type_id'       => $formTypeId,
-        'fieldset_id'   => $fieldsetId,
-        'attribute_id'  => $installer->getAttributeId($entityTypeId, 'middlename'),
-        'sort_order'    => $elementSort++
-    ]);
-}
+$setup->insert($installer->getTable('eav/form_element'), [
+    'type_id'       => $formTypeId,
+    'fieldset_id'   => $fieldsetId,
+    'attribute_id'  => $installer->getAttributeId($entityTypeId, 'middlename'),
+    'sort_order'    => $elementSort++
+]);
 $setup->insert($installer->getTable('eav/form_element'), [
     'type_id'       => $formTypeId,
     'fieldset_id'   => $fieldsetId,
     'attribute_id'  => $installer->getAttributeId($entityTypeId, 'lastname'),
     'sort_order'    => $elementSort++
 ]);
-if ($showSuffix) {
-    $setup->insert($installer->getTable('eav/form_element'), [
-        'type_id'       => $formTypeId,
-        'fieldset_id'   => $fieldsetId,
-        'attribute_id'  => $installer->getAttributeId($entityTypeId, 'suffix'),
-        'sort_order'    => $elementSort++
-    ]);
-}
 $setup->insert($installer->getTable('eav/form_element'), [
     'type_id'       => $formTypeId,
     'fieldset_id'   => $fieldsetId,

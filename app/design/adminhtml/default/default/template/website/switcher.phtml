@@ -1,0 +1,45 @@
+<?php
+/**
+ * Maho
+ *
+ * @category    design
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Adminhtml_Block_Website_Switcher $this */
+?>
+<?php if ($websites = $this->getWebsites()): ?>
+<p class="switcher"><label for="website_switcher"><?= $this->escapeHtml($this->getLabel()) ?></label>
+<select name="website_switcher" id="website_switcher" onchange="return switchWebsite(this);">
+<?php if ($this->hasDefaultOption()): ?>
+    <option value=""><?= $this->escapeHtml($this->getDefaultWebsiteName()) ?></option>
+<?php endif ?>
+    <?php foreach ($websites as $website): ?>
+        <option value="<?= $this->escapeHtml($website->getId()) ?>"<?php if($this->getWebsiteId() == $website->getId()): ?> selected="selected"<?php endif ?>><?= $this->escapeHtml($website->getName()) ?></option>
+    <?php endforeach ?>
+</select>
+</p>
+<script type="text/javascript">
+    function switchWebsite(obj) {
+        var websiteParam = obj.value ? 'website/' + obj.value + '/' : '';
+        if (obj.switchParams) {
+            websiteParam += obj.switchParams;
+        }
+    <?php if ($this->getUseConfirm()): ?>
+        if (confirm('<?= Mage::helper('core')->jsQuoteEscape($this->__('Please confirm site switching. All data that hasn\'t been saved will be lost.')) ?>')) {
+            setLocation('<?= $this->getSwitchUrl() ?>' + websiteParam);
+            return true;
+        } else {
+            obj.value = '<?= $this->getWebsiteId() ?>';
+        }
+        return false;
+    <?php else: ?>
+        setLocation('<?= $this->getSwitchUrl() ?>' + websiteParam);
+    <?php endif ?>
+    }
+</script>
+<?php endif ?>

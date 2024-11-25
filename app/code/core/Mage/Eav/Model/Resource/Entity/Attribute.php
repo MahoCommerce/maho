@@ -23,7 +23,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
      *
      * @var array
      */
-    protected static $_entityAttributes     = [];
+    protected static $_entityAttributes = [];
 
     #[\Override]
     protected function _construct()
@@ -134,7 +134,8 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
 
     /**
      * Validate attribute data before save
-     * @param Mage_Catalog_Model_Resource_Eav_Attribute $object
+     *
+     * @param Mage_Eav_Model_Entity_Attribute $object
      */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
@@ -153,6 +154,11 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
          */
         if ($object->usesSource() && !$object->getData('source_model')) {
             $object->setSourceModel($object->_getDefaultSourceModel());
+            if (!$object->getId()) {
+                if ($object->getFrontendInput() == 'select' || $object->getFrontendInput() == 'multiselect') {
+                    $object->setSourceModel('eav/entity_attribute_source_table');
+                }
+            }
         }
 
         return parent::_beforeSave($object);
@@ -314,7 +320,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
                     if (in_array($optionId, $object->getDefault())) {
                         if ($object->getFrontendInput() == 'multiselect') {
                             $attributeDefaultValue[] = $intOptionId;
-                        } elseif ($object->getFrontendInput() == 'select') {
+                        } elseif (in_array($object->getFrontendInput(), ['select', 'customselect'])) {
                             $attributeDefaultValue = [$intOptionId];
                         }
                     }
@@ -541,5 +547,35 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
             ->where('attribute_id IN (?)', $attributeIds);
 
         return $adapter->fetchCol($select);
+    }
+
+    /**
+     * Check if we have a scope table for attribute
+     *
+     * @return bool
+     */
+    public function hasScopeTable()
+    {
+        return false;
+    }
+
+    /**
+     * Return scoped fields for attribute
+     *
+     * @return array
+     */
+    public function getScopeFields(Mage_Eav_Model_Attribute $object)
+    {
+        return [];
+    }
+
+    /**
+     * Check if we have a forms table for attribute
+     *
+     * @return bool
+     */
+    public function hasFormTable()
+    {
+        return false;
     }
 }

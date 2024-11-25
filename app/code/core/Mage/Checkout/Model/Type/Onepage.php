@@ -402,6 +402,17 @@ class Mage_Checkout_Model_Type_Onepage
             // set customer password
             $customer->setPassword($customerRequest->getParam('customer_password'));
             $customer->setPasswordConfirmation($customerRequest->getParam('confirm_password'));
+
+            // TODO, need to separate from customer and customer address
+            // store additional EAV fields in session
+            $extraFields = [];
+            foreach ($customerForm->getAttributes() as $attribute) {
+                if ($attribute->getIsUserDefined()) {
+                    $code = $attribute->getAttributeCode();
+                    $extraFields[$code] = $data[$code];
+                }
+            }
+            $this->_checkoutSession->setExtraFields($extraFields);
         } else {
             // spoof customer password for guest
             $password = $customer->generatePassword();
@@ -697,6 +708,15 @@ class Mage_Checkout_Model_Type_Onepage
             $customerShipping->setIsDefaultShipping(true);
         } else {
             $customerBilling->setIsDefaultShipping(true);
+        }
+
+        // TODO, need to separate from customer and customer address
+        // copy additional EAV fields from session to customer object
+        if ($quote->getCheckoutMethod() == self::METHOD_REGISTER) {
+            $extraFields = $this->_checkoutSession->getExtraFields();
+            if ($extraFields) {
+                $customer->addData($extraFields);
+            }
         }
 
         Mage::helper('core')->copyFieldset('checkout_onepage_quote', 'to_customer', $quote, $customer);

@@ -6,6 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -116,7 +117,7 @@ class Mage_Catalog_Model_Product_Attribute_Api extends Mage_Catalog_Model_Api_Re
      */
     public function types()
     {
-        return Mage::getModel('catalog/product_attribute_source_inputtype')->toOptionArray();
+        return Mage::helper('eav')->getInputTypes(Mage_Catalog_Model_Product::ENTITY);
     }
 
     /**
@@ -129,31 +130,25 @@ class Mage_Catalog_Model_Product_Attribute_Api extends Mage_Catalog_Model_Api_Re
     {
         /** @var Mage_Catalog_Model_Resource_Eav_Attribute $model */
         $model = Mage::getModel('catalog/resource_eav_attribute');
-        /** @var Mage_Catalog_Helper_Product $helper */
-        $helper = Mage::helper('catalog/product');
 
         if (empty($data['attribute_code']) || (isset($data['frontend_label']) && !is_array($data['frontend_label']))) {
             $this->_fault('invalid_parameters');
         }
 
-        //validate attribute_code
-        if (!preg_match('/^[a-z][a-z_0-9]{0,254}$/', $data['attribute_code'])) {
+        // Validate attribute_code
+        $regex = sprintf(
+            '/^[a-z][a-z_0-9]{%d,%d}$/',
+            Mage_Eav_Model_Entity_Attribute::ATTRIBUTE_CODE_MIN_LENGTH,
+            Mage_Eav_Model_Entity_Attribute::ATTRIBUTE_CODE_MAX_LENGTH
+        );
+        if (!preg_match($regex, $data['attribute_code'])) {
             $this->_fault('invalid_code');
         }
 
-        //validate frontend_input
-        $allowedTypes = [];
-        foreach ($this->types() as $type) {
-            $allowedTypes[] = $type['value'];
-        }
+        // Validate frontend_input
+        $allowedTypes = array_column($this->types(), 'value');
         if (!in_array($data['frontend_input'], $allowedTypes)) {
             $this->_fault('invalid_frontend_input');
-        }
-
-        $data['source_model'] = $helper->getAttributeSourceModelByInputType($data['frontend_input']);
-        $data['backend_model'] = $helper->getAttributeBackendModelByInputType($data['frontend_input']);
-        if (!$model->getBackendType() && (is_null($model->getIsUserDefined()) || $model->getIsUserDefined() != 0)) {
-            $data['backend_type'] = $model->getBackendTypeByInput($data['frontend_input']);
         }
 
         $this->_prepareDataForSave($data);
@@ -164,7 +159,7 @@ class Mage_Catalog_Model_Product_Attribute_Api extends Mage_Catalog_Model_Api_Re
 
         try {
             $model->save();
-            // clear translation cache because attribute labels are stored in translation
+            // Clear translation cache because attribute labels are stored in translation
             Mage::app()->cleanCache([Mage_Core_Model_Translate::CACHE_TAG]);
         } catch (Exception $e) {
             $this->_fault('unable_to_save', $e->getMessage());

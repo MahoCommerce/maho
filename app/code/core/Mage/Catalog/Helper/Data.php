@@ -6,6 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -184,29 +185,25 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Retrieve attribute hidden fields
      *
+     * @deprecated Instead use Mage::helper('eav')->getInputTypeHiddenFields()
+     * @see Mage_Eav_Helper_Data::getInputTypeHiddenFields()
      * @return array
      */
     public function getAttributeHiddenFields()
     {
-        if (Mage::registry('attribute_type_hidden_fields')) {
-            return Mage::registry('attribute_type_hidden_fields');
-        } else {
-            return [];
-        }
+        return Mage::helper('eav')->getInputTypeHiddenFields(Mage_Catalog_Model_Product::ENTITY);
     }
 
     /**
      * Retrieve attribute disabled types
      *
+     * @deprecated Instead use Mage::helper('eav')->getInputTypeDisabledApplyToOptions()
+     * @see Mage_Eav_Helper_Data::getInputTypeDisabledApplyToOptions()
      * @return array
      */
     public function getAttributeDisabledTypes()
     {
-        if (Mage::registry('attribute_type_disabled_types')) {
-            return Mage::registry('attribute_type_disabled_types');
-        } else {
-            return [];
-        }
+        return Mage::helper('eav')->getInputTypeDisabledApplyToOptions(Mage_Catalog_Model_Product::ENTITY);
     }
 
     /**

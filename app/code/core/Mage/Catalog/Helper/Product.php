@@ -214,63 +214,46 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
     }
 
     /**
-     * Return information array of product attribute input types
-     * Only a small number of settings returned, so we won't break anything in current dataflow
-     * As soon as development process goes on we need to add there all possible settings
+     * Return information array of product attribute by input type
      *
+     * @deprecated Instead use Mage::helper('eav')->getInputTypes()
+     * @see Mage_Eav_Helper_Data::getInputTypes()
      * @param string $inputType
      * @return array
      */
     public function getAttributeInputTypes($inputType = null)
     {
-        /**
-        * @todo specify there all relations for properties depending on input type
-        */
-        $inputTypes = [
-            'multiselect'   => [
-                'backend_model'     => 'eav/entity_attribute_backend_array'
-            ],
-            'boolean'       => [
-                'source_model'      => 'eav/entity_attribute_source_boolean'
-            ]
-        ];
-
-        if (is_null($inputType)) {
+        $inputTypes = Mage::helper('eav')->getInputTypes(Mage_Catalog_Model_Product::ENTITY);
+        if ($inputType === null) {
             return $inputTypes;
-        } elseif (isset($inputTypes[$inputType])) {
-            return $inputTypes[$inputType];
         }
-        return [];
+        return $inputTypes[$inputType] ?? [];
     }
 
     /**
      * Return default attribute backend model by input type
      *
+     * @deprecated Instead use Mage::helper('eav')->getAttributeBackendModel()
+     * @see Mage_Eav_Helper_Data::getAttributeBackendModel()
      * @param string $inputType
      * @return string|null
      */
     public function getAttributeBackendModelByInputType($inputType)
     {
-        $inputTypes = $this->getAttributeInputTypes();
-        if (!empty($inputTypes[$inputType]['backend_model'])) {
-            return $inputTypes[$inputType]['backend_model'];
-        }
-        return null;
+        return Mage::helper('eav')->getAttributeBackendModel(Mage_Catalog_Model_Product::ENTITY, $inputType);
     }
 
     /**
      * Return default attribute source model by input type
      *
+     * @deprecated Instead use Mage::helper('eav')->getAttributeSourceModel()
+     * @see Mage_Eav_Helper_Data::getAttributeSourceModel()
      * @param string $inputType
      * @return string|null
      */
     public function getAttributeSourceModelByInputType($inputType)
     {
-        $inputTypes = $this->getAttributeInputTypes();
-        if (!empty($inputTypes[$inputType]['source_model'])) {
-            return $inputTypes[$inputType]['source_model'];
-        }
-        return null;
+        return Mage::helper('eav')->getAttributeSourceModel(Mage_Catalog_Model_Product::ENTITY, $inputType);
     }
 
     /**

@@ -2083,7 +2083,7 @@ body.customer-account .data-table .show-details .summary-collapse:hover:before {
 }
 
 .fieldset + .fieldset {
-  margin-top: 5px;
+  margin-top: 30px;
 }
 
 form .legend {
@@ -2317,6 +2317,16 @@ p.required,
 .form-list .wide,
 .form-list .control {
   margin-bottom: 10px;
+}
+.form-list .date-month,
+.form-list .date-day {
+  width: 60px;
+  float: left;
+  margin-right: 10px;
+}
+.form-list .date-year {
+  width: 100px;
+  float: left;
 }
 
 /* Turn the label of controls (radio/checkbox) into a button style that wraps the input */
@@ -6946,9 +6956,6 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 /* ============================================ *
  * Customer
  * ============================================ */
-.customer-account-login .scaffold-form label:first-child {
-  width: 115px;
-}
 .customer-account-login .col2-set .buttons-set {
   text-align: left;
   border-top: 0;
@@ -7000,10 +7007,6 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
   .customer-account-login .col2-set p.required {
     display: none;
   }
-}
-
-.customer-account-create .scaffold-form label:first-child {
-  width: 140px;
 }
 
 .opc #opc-login p:not(.required) {

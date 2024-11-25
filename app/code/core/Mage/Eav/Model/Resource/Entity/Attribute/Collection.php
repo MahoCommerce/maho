@@ -245,6 +245,16 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
     }
 
     /**
+     * Specify filter by "is_visible" field
+     *
+     * @return $this
+     */
+    public function addVisibleFilter()
+    {
+        return $this;
+    }
+
+    /**
      * Specify "is_unique" filter as true
      *
      * @return $this
@@ -316,7 +326,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
     }
 
     /**
-     * Ad information about attribute sets to collection result data
+     * Add information about attribute sets to collection result data
      *
      * @return $this
      */
@@ -366,7 +376,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
     }
 
     /**
-     * Ad information about attribute sets to collection result data
+     * Add information about attribute sets to collection result data
      *
      * @return Mage_Core_Model_Resource_Db_Collection_Abstract
      */
@@ -405,6 +415,24 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
         }
 
         return $this->addFieldToFilter('attribute_code', ['in' => $code]);
+    }
+
+    /**
+     * Specify collection attribute codes not in filter
+     *
+     * @param string | array $code
+     * @return $this
+     */
+    public function setNotCodeFilter($code)
+    {
+        if (empty($code)) {
+            return $this;
+        }
+        if (!is_array($code)) {
+            $code = [$code];
+        }
+
+        return $this->addFieldToFilter('attribute_code', ['nin' => $code]);
     }
 
     /**

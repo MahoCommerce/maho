@@ -21,7 +21,7 @@
  * @method $this setShowAddressFields(bool $value)
  * @method $this setSuccessUrl(string $value)
  */
-class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
+class Mage_Customer_Block_Form_Register extends Mage_Core_Block_Template
 {
     /**
      * Address instance with data
@@ -35,6 +35,46 @@ class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
     {
         $this->getLayout()->getBlock('head')->setTitle(Mage::helper('customer')->__('Create New Customer Account'));
         return parent::_prepareLayout();
+    }
+
+    /**
+     * Create form block for template file
+     */
+    #[\Override]
+    protected function _beforeToHtml()
+    {
+        /** @var Mage_Customer_Model_Form $form */
+        $form = Mage::getModel('customer/form');
+        $form->setFormCode('customer_account_create')
+             ->setEntity(Mage::getModel('customer/customer'))
+             ->initDefaultValues();
+
+        $this->restoreSessionData($form);
+
+        /** @var Mage_Eav_Block_Widget_Form $block */
+        $block = $this->getLayout()->createBlock('eav/widget_form');
+        $block->setTranslationHelper($this->helper('customer'));
+        $block->setForm($form);
+
+        if ($this->getShowAddressFields()) {
+            /** @var Mage_Customer_Model_Form $form */
+            $addressForm = Mage::getModel('customer/form');
+            $addressForm->setFormCode('customer_address_edit')
+                        ->setEntity($this->getAddress())
+                        ->initDefaultValues();
+
+            $this->restoreSessionData($addressForm);
+
+            $block->mergeFormAttributes($addressForm);
+        }
+
+        $groups = array_keys($block->getGroupedAttributes());
+        if ($groups[0] === 'General') {
+            $block->setDefaultLabel('Account Information');
+        }
+        $this->setChild('form_customer_account_create', $block);
+
+        return parent::_beforeToHtml();
     }
 
     /**
@@ -93,45 +133,21 @@ class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
     }
 
     /**
-     * Retrieve customer country identifier
+     * Restore entity data from session
+     * Entity and form code must be defined for the form
      *
-     * @return int
+     * @param string|null $scope
+     * @return $this
      */
-    #[\Override]
-    public function getCountryId()
+    public function restoreSessionData(Mage_Customer_Model_Form $form, $scope = null)
     {
-        $countryId = $this->getFormData()->getCountryId();
-        if ($countryId) {
-            return $countryId;
-        }
-        return parent::getCountryId();
-    }
-
-    /**
-     * Retrieve customer region identifier
-     *
-     * @return string|int|null
-     */
-    public function getRegion()
-    {
-        if (($region = $this->getFormData()->getRegion()) !== false) {
-            return $region;
+        if ($this->getFormData()->getCustomerData()) {
+            $request = $form->prepareRequest($this->getFormData()->getData());
+            $data    = $form->extractData($request, $scope, false);
+            $form->restoreData($data);
         }
 
-        if (($region = $this->getFormData()->getRegionId()) !== false) {
-            return $region;
-        }
-        return null;
-    }
-
-    /**
-     *  Newsletter module availability
-     *
-     *  @return bool
-     */
-    public function isNewsletterEnabled()
-    {
-        return Mage::helper('core')->isModuleOutputEnabled('Mage_Newsletter');
+        return $this;
     }
 
     /**
@@ -149,21 +165,47 @@ class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
     }
 
     /**
-     * Restore entity data from session
-     * Entity and form code must be defined for the form
-     *
-     * @param string|null $scope
-     * @return $this
+     * @return string
+     * @deprecated
      */
-    public function restoreSessionData(Mage_Customer_Model_Form $form, $scope = null)
+    public function getCountryId()
     {
-        if ($this->getFormData()->getCustomerData()) {
-            $request = $form->prepareRequest($this->getFormData()->getData());
-            $data    = $form->extractData($request, $scope, false);
-            $form->restoreData($data);
+        if ($countryId = $this->getFormData()->getCountryId()) {
+            return $countryId;
         }
+        return Mage::helper('core')->getDefaultCountry();
+    }
 
-        return $this;
+    /**
+     * @return string
+     * @deprecated
+     */
+    public function getCountryHtmlSelect()
+    {
+        return $this->getLayout()->createBlock('directory/data')
+                    ->getCountryHtmlSelect($this->getCountryId());
+    }
+
+    /**
+     * @return string|int|null
+     * @deprecated
+     */
+    public function getRegion()
+    {
+        if (($region = $this->getFormData()->getRegion()) !== false) {
+            return $region;
+        }
+        return null;
+    }
+
+    /**
+     *  Newsletter module availability
+     *
+     *  @return bool
+     */
+    public function isNewsletterEnabled()
+    {
+        return Mage::helper('core')->isModuleOutputEnabled('Mage_Newsletter');
     }
 
     /**

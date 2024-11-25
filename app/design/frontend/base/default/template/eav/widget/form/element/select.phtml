@@ -1,0 +1,22 @@
+<?php
+/**
+ * Maho
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Eav_Block_Widget_Form_Element_Select $this */
+?>
+<?php $value = $this->getValue() ?>
+<label for="<?= $this->getFieldId()?>" class="<?= $this->getLabelClass() ?>"><?= $this->getLabel() ?></label>
+<div class="input-box">
+    <select id="<?= $this->getFieldId()?>" name="<?= $this->getFieldName()?>" title="<?= $this->quoteEscape($this->getLabel()) ?>"<?= $this->isRequired() ? ' class="validate-select"' : '' ?> <?= $this->getFieldParams() ?>>
+        <?php foreach ($this->getOptions() as $option): ?>
+        <option value="<?= $option['value'] ?>"<?= $option['value'] == $value ? ' selected="selected"' : '' ?>><?= $this->__($option['label']) ?></option>
+        <?php endforeach ?>
+    </select>
+</div>

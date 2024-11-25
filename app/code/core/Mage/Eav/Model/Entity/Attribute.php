@@ -31,14 +31,19 @@
  */
 class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Abstract
 {
+    public const SCOPE_STORE   = 0;
+    public const SCOPE_GLOBAL  = 1;
+    public const SCOPE_WEBSITE = 2;
+
     /**
      * Prefix of model events names
      *
      * @var string
      */
-    protected $_eventPrefix                         = 'eav_entity_attribute';
+    protected $_eventPrefix = 'eav_entity_attribute';
 
-    public const ATTRIBUTE_CODE_MAX_LENGTH                 = 30;
+    public const ATTRIBUTE_CODE_MIN_LENGTH = 1;
+    public const ATTRIBUTE_CODE_MAX_LENGTH = 30;
 
     /**
      * Parameter name in event
@@ -49,8 +54,8 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      */
     protected $_eventObject = 'attribute';
 
-    public const CACHE_TAG         = 'EAV_ATTRIBUTE';
-    protected $_cacheTag    = 'EAV_ATTRIBUTE';
+    public const CACHE_TAG = 'EAV_ATTRIBUTE';
+    protected $_cacheTag = 'EAV_ATTRIBUTE';
 
     /**
      * Retrieve default attribute backend model by attribute code
@@ -94,7 +99,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      * @return string
      */
     #[\Override]
-    protected function _getDefaultSourceModel()
+    public function _getDefaultSourceModel()
     {
         if ($this->getAttributeCode() == 'store_id') {
             return 'eav/entity_attribute_source_store';
@@ -137,49 +142,61 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     #[\Override]
     protected function _beforeSave()
     {
+        /** @var Mage_Eav_Helper_Data $helper */
+        $helper = Mage::helper('eav');
+
         /**
-         * Check for maximum attribute_code length
+         * Validate attribute_code
          */
-        if (isset($this->_data['attribute_code']) &&
-            !Zend_Validate::is(
-                $this->_data['attribute_code'],
-                'StringLength',
-                ['max' => self::ATTRIBUTE_CODE_MAX_LENGTH]
-            )
-        ) {
-            throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Maximum length of attribute code must be less then %s symbols', self::ATTRIBUTE_CODE_MAX_LENGTH));
+        $code = $this->getAttributeCode();
+        if (empty($code)) {
+            throw Mage::exception('Mage_Eav', $helper->__('Attribute code cannot be empty'));
+        }
+        if (!preg_match('/^[a-z][a-z_0-9]*$/', $code)) {
+            throw Mage::exception('Mage_Eav', $helper->__('Attribute code must contain only letters (a-z), numbers (0-9) or underscore(_), first character should be a letter'));
+        }
+        if (strlen($code) < self::ATTRIBUTE_CODE_MIN_LENGTH || strlen($code) > self::ATTRIBUTE_CODE_MAX_LENGTH) {
+            throw Mage::exception('Mage_Eav', $helper->__('Attribute code must be between %d and %d characters', self::ATTRIBUTE_CODE_MIN_LENGTH, self::ATTRIBUTE_CODE_MAX_LENGTH));
         }
 
-        $defaultValue   = $this->getDefaultValue();
-        $hasDefaultValue = ((string)$defaultValue != '');
-
-        if ($this->getBackendType() == 'decimal' && $hasDefaultValue) {
-            $locale = Mage::app()->getLocale()->getLocaleCode();
-            if (!Zend_Locale_Format::isNumber($defaultValue, ['locale' => $locale])) {
-                throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Invalid default decimal value'));
-            }
-
-            try {
-                $filter = new Zend_Filter_LocalizedToNormalized(
-                    ['locale' => Mage::app()->getLocale()->getLocaleCode()]
-                );
-                $this->setDefaultValue($filter->filter($defaultValue));
-            } catch (Exception $e) {
-                throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Invalid default decimal value'));
-            }
+        /**
+         * Set default values from input type
+         */
+        $entityTypeCode = $this->getEntityType()->getEntityTypeCode();
+        $inputType = $this->getFrontendInput();
+        if (!$this->getBackendType()) {
+            $this->setBackendType($helper->getAttributeBackendType($entityTypeCode, $inputType));
+        }
+        if (!$this->getBackendModel()) {
+            $this->setBackendModel($helper->getAttributeBackendModel($entityTypeCode, $inputType));
+        }
+        if (!$this->getFrontendModel()) {
+            $this->setFrontendModel($helper->getAttributeFrontendModel($entityTypeCode, $inputType));
+        }
+        if (!$this->getSourceModel()) {
+            $this->setSourceModel($helper->getAttributeSourceModel($entityTypeCode, $inputType));
         }
 
-        if ($this->getBackendType() == 'datetime') {
-            if (!$this->getBackendModel()) {
-                $this->setBackendModel('eav/entity_attribute_backend_datetime');
+        /**
+         * Validate default_value
+         */
+        $defaultValue = $this->getDefaultValue();
+        if (!empty($defaultValue)) {
+            if ($this->getBackendType() === 'decimal') {
+                $locale = Mage::app()->getLocale()->getLocaleCode();
+                if (!Zend_Locale_Format::isNumber($defaultValue, ['locale' => $locale])) {
+                    throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Invalid default decimal value'));
+                }
+                try {
+                    $filter = new Zend_Filter_LocalizedToNormalized(
+                        ['locale' => Mage::app()->getLocale()->getLocaleCode()]
+                    );
+                    $this->setDefaultValue($filter->filter($defaultValue));
+                } catch (Exception $e) {
+                    throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Invalid default decimal value'));
+                }
             }
-
-            if (!$this->getFrontendModel()) {
-                $this->setFrontendModel('eav/entity_attribute_frontend_datetime');
-            }
-
-            // save default date value as timestamp
-            if ($hasDefaultValue) {
+            if ($this->getBackendType() == 'datetime') {
                 $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
                 try {
                     $defaultValue = Mage::app()->getLocale()->date($defaultValue, $format, null, false)->toValue();
@@ -187,12 +204,6 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
                 } catch (Exception $e) {
                     throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Invalid default date'));
                 }
-            }
-        }
-
-        if ($this->getBackendType() == 'gallery') {
-            if (!$this->getBackendModel()) {
-                $this->setBackendModel('eav/entity_attribute_backend_media');
             }
         }
 
@@ -210,94 +221,42 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     }
 
     /**
-     * Detect backend storage type using frontend input type
+     * Return backend storage type by frontend input type
      *
-     * @return string backend_type field value
-     * @param string $type frontend_input field value
+     * @deprecated Instead use Mage::helper('eav')->getAttributeBackendTypeByInputType()
+     * @see Mage_Eav_Helper_Data::getAttributeBackendTypeByInputType()
+     * @param string $inputType
+     * @return string|null
      */
-    public function getBackendTypeByInput($type)
+    public function getBackendTypeByInput($inputType)
     {
-        $field = null;
-        switch ($type) {
-            case 'text':
-            case 'gallery':
-            case 'media_image':
-                $field = 'varchar';
-                break;
-
-            case 'image':
-            case 'textarea':
-            case 'multiselect':
-                $field = 'text';
-                break;
-
-            case 'date':
-                $field = 'datetime';
-                break;
-
-            case 'select':
-            case 'boolean':
-                $field = 'int';
-                break;
-
-            case 'price':
-                $field = 'decimal';
-                break;
-        }
-
-        return $field;
+        $entityTypeCode = $this->getEntityType()->getEntityTypeCode();
+        return Mage::helper('eav')->getAttributeBackendType($entityTypeCode, $inputType);
     }
 
     /**
-     * Detect default value using frontend input type
+     * Return default value field by frontend input type
      *
-     * @return string default_value field value
-     * @param string $type frontend_input field name
+     * @deprecated Instead use Mage::helper('eav')->getDefaultValueFieldByInputType()
+     * @see Mage_Eav_Helper_Data::getDefaultValueFieldByInputType()
+     * @param string $inputType
+     * @return string|null
      */
-    public function getDefaultValueByInput($type)
+    public function getDefaultValueByInput($inputType)
     {
-        $field = '';
-        switch ($type) {
-            case 'select':
-            case 'gallery':
-            case 'media_image':
-                break;
-            case 'multiselect':
-                $field = null;
-                break;
-
-            case 'text':
-            case 'price':
-            case 'image':
-            case 'weight':
-                $field = 'default_value_text';
-                break;
-
-            case 'textarea':
-                $field = 'default_value_textarea';
-                break;
-
-            case 'date':
-                $field = 'default_value_date';
-                break;
-
-            case 'boolean':
-                $field = 'default_value_yesno';
-                break;
-        }
-
-        return $field;
+        $entityTypeCode = $this->getEntityType()->getEntityTypeCode();
+        return Mage::helper('eav')->getAttributeDefaultValueField($entityTypeCode, $inputType);
     }
 
     /**
-     * Retrieve attribute codes by frontend type
+     * Return attribute codes by frontend input type
      *
-     * @param string $type
+     * @param string $inputType
      * @return array
      */
-    public function getAttributeCodesByFrontendType($type)
+    public function getAttributeCodesByFrontendType($inputType)
     {
-        return $this->getResource()->getAttributeCodesByFrontendType($type);
+        return $this->getResource()->getAttributeCodesByFrontendType($inputType);
     }
 
     /**
