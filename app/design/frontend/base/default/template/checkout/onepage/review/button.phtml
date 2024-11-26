@@ -9,5 +9,7 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Core_Block_Template $this */
 ?>
 <button type="submit" title="<?= Mage::helper('core')->quoteEscape($this->__('Place Order')) ?>" class="button btn-checkout" onclick="review.save();"><?= $this->__('Place Order') ?></button>
