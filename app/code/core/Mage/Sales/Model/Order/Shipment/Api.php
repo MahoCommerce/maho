@@ -101,7 +101,7 @@ class Mage_Sales_Model_Order_Shipment_Api extends Mage_Sales_Model_Api_Resource
      * @param string $orderIncrementId
      * @param array $itemsQty
      * @param string $comment
-     * @param bool $email
+     * @param bool $notifyCustomer
      * @param bool $includeComment
      * @return string
      */
@@ -109,7 +109,7 @@ class Mage_Sales_Model_Order_Shipment_Api extends Mage_Sales_Model_Api_Resource
         $orderIncrementId,
         $itemsQty = [],
         $comment = null,
-        $email = false,
+        $notifyCustomer = false,
         $includeComment = false
     ) {
         $order = Mage::getModel('sales/order')->loadByIncrementId($orderIncrementId);
@@ -131,8 +131,8 @@ class Mage_Sales_Model_Order_Shipment_Api extends Mage_Sales_Model_Api_Resource
         $shipment = $order->prepareShipment($itemsQty);
         if ($shipment) {
             $shipment->register();
-            $shipment->addComment($comment, $email && $includeComment);
-            if ($email) {
+            $shipment->addComment($comment, $notifyCustomer && $includeComment);
+            if ($notifyCustomer) {
                 $shipment->setEmailSent(true);
             }
             $shipment->getOrder()->setIsInProcess(true);
@@ -141,7 +141,7 @@ class Mage_Sales_Model_Order_Shipment_Api extends Mage_Sales_Model_Api_Resource
                     ->addObject($shipment)
                     ->addObject($shipment->getOrder())
                     ->save();
-                $shipment->sendEmail($email, ($includeComment ? $comment : ''));
+                $shipment->sendEmail($notifyCustomer, ($includeComment ? $comment : ''));
             } catch (Mage_Core_Exception $e) {
                 $this->_fault('data_invalid', $e->getMessage());
             }
@@ -292,7 +292,8 @@ class Mage_Sales_Model_Order_Shipment_Api extends Mage_Sales_Model_Api_Resource
      * @param bool $includeInEmail
      * @return bool
      */
-    public function addComment($shipmentIncrementId, $comment, $email = false, $includeInEmail = false)
+    public function addComment($shipmentIncrementId, $comment, #[\SensitiveParameter]
+    $email = false, $includeInEmail = false)
     {
         $shipment = Mage::getModel('sales/order_shipment')->loadByIncrementId($shipmentIncrementId);
 

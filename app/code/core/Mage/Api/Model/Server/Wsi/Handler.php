@@ -77,7 +77,7 @@ class Mage_Api_Model_Server_Wsi_Handler extends Mage_Api_Model_Server_Handler_Ab
      * @return stdClass
      */
     #[\Override]
-    public function login($username, $apiKey = null)
+    public function login(#[\SensitiveParameter] $username, #[\SensitiveParameter] $apiKey = null)
     {
         if (is_object($username)) {
             $apiKey = $username->apiKey;
