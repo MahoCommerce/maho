@@ -17,9 +17,7 @@
        <!-- Content loaded dynamically -->
     </div>
     <script type="text/javascript">
-    //<![CDATA[
         var shippingMethod = new ShippingMethod('co-shipping-method-form', "<?= $this->getUrl('checkout/onepage/saveShippingMethod') ?>");
-    //]]>
     </script>
     <div id="onepage-checkout-shipping-method-additional-load">
         <?= $this->getChildHtml('additional') ?>
