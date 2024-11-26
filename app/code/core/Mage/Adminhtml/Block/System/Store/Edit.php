@@ -21,7 +21,15 @@ class Mage_Adminhtml_Block_System_Store_Edit extends Mage_Adminhtml_Block_Widget
 {
     public function __construct()
     {
-        $saveLabel = $deleteLabel = $deleteUrl = '';
+        $backupAvailable =
+            Mage::getSingleton('admin/session')->isAllowed('system/tools/backup')
+            && Mage::helper('core')->isModuleEnabled('Mage_Backup')
+            && !Mage::getStoreConfigFlag('advanced/modules_disable_output/Mage_Backup');
+
+        $saveLabel      = '';
+        $deleteLabel    = '';
+        $deleteUrl      = '';
+
         switch (Mage::registry('store_type')) {
             case 'website':
                 $this->_objectId = 'website_id';
