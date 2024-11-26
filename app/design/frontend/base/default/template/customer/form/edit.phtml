@@ -90,14 +90,13 @@
     </div>
 </form>
 <script type="text/javascript">
-//<![CDATA[
     var dataForm = new VarienForm('form-validate', true);
-    function setPasswordForm(arg){
-        $('password').up('.fieldset')[arg ? 'show': 'hide']();
+    function setPasswordForm(arg) {
+        const fieldset = document.querySelector('#password').closest('.fieldset');
+        fieldset.style.display = arg ? '' : 'none';
     }
 
     <?php if($this->getCustomer()->getChangePassword()): ?>
-        setPasswordForm(true);
+    setPasswordForm(true);
     <?php endif ?>
-//]]>
 </script>
