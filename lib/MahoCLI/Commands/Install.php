@@ -188,7 +188,7 @@ class Install extends BaseMahoCommand
             }
 
             $output->writeln('<info>Sample data, media files, and database content installed successfully</info>');
-            $output->writeln('<info>Please run ./maho index:reindex:all and ./maho cache::flush</info>');
+            $output->writeln('<info>Please run ./maho index:reindex:all and ./maho cache:flush</info>');
 
             // Clean up
             unlink($tempFile);
