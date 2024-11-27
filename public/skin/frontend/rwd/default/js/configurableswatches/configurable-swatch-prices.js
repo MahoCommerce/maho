@@ -8,54 +8,54 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-var ConfigurableSwatchPrices = Class.create({
-    initialize: function(config) {
+class ConfigurableSwatchPrices {
+    constructor(config) {
         this.swatchesPrices = [];
         this.generalConfig = config.generalConfig;
         this.products = config.products;
         this.addObservers();
-    },
+    }
 
-    addObservers: function() {
-        document.addEventListener('click', function(event) {
-            if (event.target.closest('.swatch-link')) {
-                this.onSwatchClick.call(this, event);
+    addObservers() {
+        document.addEventListener('click', (event) => {
+            const swatchLink = event.target.closest('.swatch-link');
+            if (swatchLink) {
+                this.onSwatchClick(event);
             }
-        }.bind(this));
-    },
+        });
+    }
 
-    onSwatchClick: function(e) {
-        var element = Event.findElement(e);
-        var swatchElement = element.up('[data-product-id]');
-        var productId = parseInt(swatchElement.getAttribute('data-product-id'), 10);
-        var swatchLabel = swatchElement.getAttribute('data-option-label');
-        var optionsPrice = this.optionsPrice(productId);
-        var swatchTarget = this.getSwatchPriceInfo(productId, swatchLabel);
+    onSwatchClick(e) {
+        const element = e.target;
+        const swatchElement = element.closest('[data-product-id]');
+        const productId = parseInt(swatchElement.getAttribute('data-product-id'), 10);
+        const swatchLabel = swatchElement.getAttribute('data-option-label');
+        const optionsPrice = this.optionsPrice(productId);
+        const swatchTarget = this.getSwatchPriceInfo(productId, swatchLabel);
 
-        if(swatchTarget) {
-            optionsPrice.changePrice('config', {price: swatchTarget.price, oldPrice: swatchTarget.oldPrice});
+        if (swatchTarget) {
+            optionsPrice.changePrice('config', { price: swatchTarget.price, oldPrice: swatchTarget.oldPrice });
             optionsPrice.reload();
         }
-    },
+    }
 
-    getSwatchPriceInfo: function(productId, swatchLabel) {
-        var productInfo = this.products[productId];
-        if(productInfo && productInfo.swatchPrices[swatchLabel]) {
-            return productInfo.swatchPrices[swatchLabel];
-        }
-        return 0;
-    },
+    getSwatchPriceInfo(productId, swatchLabel) {
+        const productInfo = this.products[productId];
+        return productInfo && productInfo.swatchPrices[swatchLabel] ? productInfo.swatchPrices[swatchLabel] : 0;
+    }
 
-    optionsPrice: function(productId) {
-        if(this.swatchesPrices[productId]) {
+    optionsPrice(productId) {
+        if (this.swatchesPrices[productId]) {
             return this.swatchesPrices[productId];
         }
         this.swatchesPrices[productId] = new Product.OptionsPrice(this.getProductConfig(productId));
         return this.swatchesPrices[productId];
-    },
-
-    getProductConfig: function(productId) {
-        var generalConfigClone = Object.extend({}, this.generalConfig);
-        return Object.extend(generalConfigClone, this.products[productId]);
     }
-});
+
+    getProductConfig(productId) {
+        return {
+            ...this.generalConfig,
+            ...this.products[productId]
+        };
+    }
+}
