@@ -643,19 +643,7 @@ parameters:
 			path: app/code/core/Mage/Api/Model/Server/Wsi/Adapter/Soap.php
 
 		-
-			message: '#^Parameter \#1 \$request \(stdClass\) of method Mage_Api_Model_Server_Wsi_Handler\:\:endSession\(\) should be compatible with parameter \$sessionId \(string\) of method Mage_Api_Model_Server_Handler_Abstract\:\:endSession\(\)$#'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Api/Model/Server/Wsi/Handler.php
-
-		-
 			message: '#^Return type \(stdClass\) of method Mage_Api_Model_Server_Wsi_Handler\:\:endSession\(\) should be compatible with return type \(true\) of method Mage_Api_Model_Server_Handler_Abstract\:\:endSession\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/Api/Model/Server/Wsi/Handler.php
-
-		-
-			message: '#^Return type \(stdClass\) of method Mage_Api_Model_Server_Wsi_Handler\:\:login\(\) should be compatible with return type \(string\) of method Mage_Api_Model_Server_Handler_Abstract\:\:login\(\)$#'
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Api/Model/Server/Wsi/Handler.php

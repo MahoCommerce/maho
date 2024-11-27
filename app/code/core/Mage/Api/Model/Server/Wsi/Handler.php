@@ -73,7 +73,7 @@ class Mage_Api_Model_Server_Wsi_Handler extends Mage_Api_Model_Server_Handler_Ab
      * Login user and Retrieve session id
      *
      * @param string $username
-     * @param string $apiKey
+     * @param string|null $apiKey
      * @return stdClass
      */
     #[\Override]
@@ -93,14 +93,15 @@ class Mage_Api_Model_Server_Wsi_Handler extends Mage_Api_Model_Server_Handler_Ab
      * Return called class and method names
      *
      * @param String $apiPath
-     * @return array
+     * @return array|void
      */
     protected function _getResourceName($apiPath)
     {
         list($resourceName, $methodName) = explode('.', $apiPath);
 
         if (empty($resourceName) || empty($methodName)) {
-            return $this->_fault('resource_path_invalid');
+            $this->_fault('resource_path_invalid');
+            return;
         }
 
         $resourcesAlias = $this->_getConfig()->getResourcesAlias();
@@ -162,14 +163,14 @@ class Mage_Api_Model_Server_Wsi_Handler extends Mage_Api_Model_Server_Handler_Ab
     /**
      * End web service session
      *
-     * @param stdClass $request
+     * @param stdClass|string $sessionId
      * @return stdClass
      */
     #[\Override]
-    public function endSession($request)
+    public function endSession($sessionId)
     {
         $stdObject = new stdClass();
-        $stdObject->result = parent::endSession($request->sessionId);
+        $stdObject->result = parent::endSession($sessionId->sessionId);
         return $stdObject;
     }
 }
