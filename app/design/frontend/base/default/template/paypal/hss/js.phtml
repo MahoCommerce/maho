@@ -9,39 +9,48 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/**
- * @see Mage_Paypal_Block_Iframe
- * @var Mage_Paypal_Block_Iframe $this 
- */
+/** @var Mage_Paypal_Block_Iframe $this */
 ?>
 <div id="checkout-paypaliframe-load" class="authentication"></div>
 <script type="text/javascript">
-//<![CDATA[
-Review.prototype.save = function() {
-    if (checkout.loadWaiting!=false) return;
-    checkout.setLoadWaiting('review');
-    var params = Form.serialize(payment.form);
-    if (this.agreementsForm) {
-        params += '&'+Form.serialize(this.agreementsForm);
-    }
-    params.save = true;
-    var request = new Ajax.Request(
-        this.saveUrl,
-        {
-            method:'post',
-            parameters:params,
-            onComplete: function(transport) {
-                if (transport) {
-                    var response = transport.responseJSON || transport.responseText.evalJSON(true) || {};
-                    if (response.error_messages) {
-                        checkout.setLoadWaiting(false);
-                    }
-                }
-            },
-            onSuccess: this.onSave,
-            onFailure: checkout.ajaxFailure.bind(checkout)
+    Review.prototype.save = function() {
+        if (checkout.loadWaiting !== false) return;
+        checkout.setLoadWaiting('review');
+
+        const formData = new FormData(payment.form);
+        if (this.agreementsForm) {
+            const agreementFormData = new FormData(this.agreementsForm);
+            for (let pair of agreementFormData.entries()) {
+                formData.append(pair[0], pair[1]);
+            }
         }
-    );
-}
-//]]>
+        formData.append('save', true);
+
+        const params = new URLSearchParams(formData).toString();
+        fetch(this.saveUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params
+        })
+            .then(response => {
+                return response.json().catch(() => response.text().then(text => {
+                    try {
+                        return JSON.parse(text);
+                    } catch(e) {
+                        return {};
+                    }
+                }));
+            })
+            .then(response => {
+                if (response.error_messages) {
+                    checkout.setLoadWaiting(false);
+                }
+                this.onSave({ responseJSON: response });
+            })
+            .catch(error => {
+                checkout.ajaxFailure.call(checkout, error);
+            });
+    }
 </script>
