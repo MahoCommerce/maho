@@ -10,19 +10,27 @@
  */
 
 var windowLoaded = false;
-Event.observe(window, 'load', function() { windowLoaded = true; });
+window.addEventListener('load', function() {
+    windowLoaded = true;
+});
 
-// rewrite the fillselect method from /js/varien/configurable.js
+if (typeof Product === 'undefined') {
+    var Product = {};
+}
+
+if (typeof Product.Config === 'undefined') {
+    Product.Config = function() {};
+}
+
 Product.Config.prototype.fillSelect = function (element) {
     return;
 };
-// rewrite the resetChildren method from /js/varien/configurable.js; it would reset the third attribute when selecting a swatch in the first attribute
+
 Product.Config.prototype.resetChildren = function (element) {
     return;
 };
-// rewrite the configureForValues method from /js/varien/configurable.js; it tries to select the options when a product has been selected (e.g. editing product from cart page), but we have our own method for that
-// @see: Product.ConfigurableSwatches.run()
-Product.Config.prototype.configureForValues = function(){
+
+Product.Config.prototype.configureForValues = function() {
     return;
 };
 
