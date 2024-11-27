@@ -67,9 +67,9 @@
                 });
 
                 Catalog.Map.addHelpLink(
-                    $('<?= $popupId ?>'),
+                    '<?= $popupId ?>',
                     "<?= $this->escapeHtml($_product->getName()) ?>",
-                    $("<?= $priceElementId ?>"),
+                    document.getElementById("<?= $priceElementId ?>"),
                     '<?= $_msrpPrice ?>',
                     "<?= $_product->isSalable() ? $this->getAddToCartUrlCustom($_product, [], false) : '' ?>"
                 );
@@ -84,7 +84,7 @@
         <a href="#" id="<?php echo($helpLinkId);?>"><?= $this->__("What's this?") ?></a>
         <script type="text/javascript">
             Catalog.Map.addHelpLink(
-                $('<?= $helpLinkId ?>'),
+                '<?= $helpLinkId ?>',
                 '<?= Mage::helper('core')->jsQuoteEscape($this->__("What's this?")) ?>'
             );
         </script>
