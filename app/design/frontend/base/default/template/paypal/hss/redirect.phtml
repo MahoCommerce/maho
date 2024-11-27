@@ -17,33 +17,31 @@
 ?>
 <html>
 <head>
-<script type="text/javascript">
-//<![CDATA[
-if (window.top == window.self) {
-    window.location = "<?= $this->getUrl('checkout/cart') ?>";
-}
-<?php if ($this->getGotoSection()): ?>
-    for (var s = 0; s < window.top.checkout.steps.length; s++) {
-        if (window.top.checkout.steps[s] == '<?= $this->getGotoSection() ?>') {
-            break;
+    <script type="text/javascript">
+        if (window.top == window.self) {
+            window.location = "<?= $this->getUrl('checkout/cart') ?>";
         }
-        if (window.top.document.getElementById('opc-' + window.top.checkout.steps[s])) {
-            window.top.document.getElementById('opc-' + window.top.checkout.steps[s]).addClassName('allow');
+        <?php if ($this->getGotoSection()): ?>
+        for (var s = 0; s < window.top.checkout.steps.length; s++) {
+            if (window.top.checkout.steps[s] == '<?= $this->getGotoSection() ?>') {
+                break;
+            }
+            if (window.top.document.getElementById('opc-' + window.top.checkout.steps[s])) {
+                window.top.document.getElementById('opc-' + window.top.checkout.steps[s]).classList.add('allow');
+            }
         }
-    }
-    window.top.checkout.gotoSection("<?= $this->getGotoSection() ?>");
-    window.top.document.getElementById('checkout-review-submit').show();
-    window.top.document.getElementById('iframe-warning').hide();
-    <?php if ($this->getErrorMsg()): ?>
+        window.top.checkout.gotoSection("<?= $this->getGotoSection() ?>");
+        window.top.document.getElementById('checkout-review-submit').style.display = 'block';
+        window.top.document.getElementById('iframe-warning').style.display = 'none';
+        <?php if ($this->getErrorMsg()): ?>
         alert('<?= Mage::helper('core')->jsQuoteEscape($this->getErrorMsg()) ?>');
-    <?php endif ?>
-<?php elseif ($this->getGotoSuccessPage()) : ?>
-    window.top.location="<?= $this->getUrl('checkout/onepage/success') ?>";
-<?php else: ?>
-    window.top.location="<?= $this->getUrl('checkout/cart') ?>";
-<?php endif ?>
-//]]>
-</script>
+        <?php endif ?>
+        <?php elseif ($this->getGotoSuccessPage()) : ?>
+        window.top.location="<?= $this->getUrl('checkout/onepage/success') ?>";
+        <?php else: ?>
+        window.top.location="<?= $this->getUrl('checkout/cart') ?>";
+        <?php endif ?>
+    </script>
 </head>
 <body></body>
 </html>
