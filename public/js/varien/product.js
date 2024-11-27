@@ -103,7 +103,6 @@ Product.Config.prototype = {
             this.resetChildren(element);
         }
         this.reloadPrice();
-//      Calculator.updatePrice();
     },
 
     reloadOptionLabels: function(element){
