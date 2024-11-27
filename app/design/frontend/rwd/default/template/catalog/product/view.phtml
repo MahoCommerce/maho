@@ -68,9 +68,6 @@
                     </div>
                 <?php endif ?>
 
-
-
-
                 <?= $this->getChildHtml('other') ?>
 
                 <?php if ($_product->isSaleable() && $this->hasOptions()):?>
@@ -118,7 +115,7 @@
                     var oldUrl = form.action;
 
                     if (url) {
-                       form.action = url;
+                        form.action = url;
                     }
                     var e = null;
                     try {
@@ -130,24 +127,29 @@
                         throw e;
                     }
 
-                    if (button && button != 'undefined') {
+                    if (button && button !== 'undefined') {
                         button.disabled = true;
                     }
                 }
             }.bind(productAddToCartForm);
 
-            productAddToCartForm.submitLight = function(button, url){
-                if(this.validator) {
-                    var nv = Validation.methods;
+            productAddToCartForm.submitLight = function(button, url) {
+                alert(34334)
+                if (this.validator) {
+                    // Store original validation methods
+                    const originalMethods = { ...Validation.methods };
+
+                    // Remove validation methods
                     delete Validation.methods['required-entry'];
                     delete Validation.methods['validate-one-required'];
                     delete Validation.methods['validate-one-required-by-name'];
-                    // Remove custom datetime validators
-                    for (var methodName in Validation.methods) {
+
+                    // Remove datetime validators
+                    Object.keys(Validation.methods).forEach(methodName => {
                         if (methodName.match(/^validate-datetime-.*/i)) {
                             delete Validation.methods[methodName];
                         }
-                    }
+                    });
 
                     if (this.validator.validate()) {
                         if (url) {
@@ -155,7 +157,9 @@
                         }
                         this.form.submit();
                     }
-                    Object.extend(Validation.methods, nv);
+
+                    // Restore original validation methods
+                    Validation.methods = { ...originalMethods };
                 }
             }.bind(productAddToCartForm);
         </script>
