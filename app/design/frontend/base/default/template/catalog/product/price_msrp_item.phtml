@@ -41,25 +41,33 @@
             <?php $popupId = 'msrp-popup-' . $_id . $_coreHelper->getRandomString(20); ?>
             <a href="#" id="<?php echo($popupId);?>"><?= $this->__('Click for price') ?></a>
             <script type="text/javascript">
-                Event.observe(window, 'load', function() {
-                    var priceElement = $("<?= $priceElementId ?>"),
-                        realPrice = <?= $this->getRealPriceJs($_product) ?>,
-                        priceHtml = realPrice.stripScripts();
+                window.addEventListener('load', function() {
+                    const priceElement = document.getElementById("<?= $priceElementId ?>");
+                    const realPrice = <?= $this->getRealPriceJs($_product) ?>;
 
+                    // Create a temporary div to safely parse HTML
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = realPrice;
+                    const priceHtml = tempDiv.innerHTML; // This replaces stripScripts()
                     priceElement.innerHTML = priceHtml;
-                    realPrice.evalScripts();
-                    var originalOptionPriceReload;
-                    if (typeof(optionsPrice) != 'undefined' && optionsPrice && optionsPrice.reload) {
+
+                    const scripts = tempDiv.getElementsByTagName('script');
+                    Array.from(scripts).forEach(script => {
+                        eval(script.innerHTML);
+                    });
+
+                    let originalOptionPriceReload;
+                    if (typeof optionsPrice !== 'undefined' && optionsPrice && optionsPrice.reload) {
                         originalOptionPriceReload = optionsPrice.reload;
                         Product.OptionsPrice.prototype.reload = function() {
                             if (originalOptionPriceReload) {
                                 originalOptionPriceReload.call(this);
                             }
-                            if ($('<?= $popupId ?>') == Catalog.Map.active) {
-                                Element.update(
-                                    $('map-popup-price'),
-                                    $("<?= $priceElementId ?>").innerHTML
-                                );
+
+                            const popupElement = document.getElementById('<?= $popupId ?>');
+                            if (popupElement === Catalog.Map.active) {
+                                const mapPopupPrice = document.getElementById('map-popup-price');
+                                mapPopupPrice.innerHTML = document.getElementById("<?= $priceElementId ?>").innerHTML;
                             }
                         }
                         optionsPrice.reload();
