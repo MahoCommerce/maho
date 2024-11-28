@@ -24,7 +24,7 @@ class Mage_Catalog_Block_Product_New extends Mage_Catalog_Block_Product_Abstract
     public const DEFAULT_PRODUCTS_COUNT = 10;
 
     /**
-     * Products count
+     * @var int
      */
     protected $_productsCount;
 

@@ -91,18 +91,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Wishlist.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Block_Customer_Sales_Order_Address_Form_Renderer_Vat\:\:getValidateButton\(\) should return Mage_Adminhtml_Block_Widget_Button but returns Mage_Core_Block_Abstract\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Sales/Order/Address/Form/Renderer/Vat.php
-
-		-
-			message: '#^Property Mage_Adminhtml_Block_Customer_Sales_Order_Address_Form_Renderer_Vat\:\:\$_validateButton \(Mage_Adminhtml_Block_Widget_Button\|null\) does not accept Mage_Core_Block_Abstract\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Sales/Order/Address/Form/Renderer/Vat.php
-
-		-
 			message: '#^Access to an undefined property Mage_Adminhtml_Block_Notification_Window\:\:\$_aclResourcePath\.$#'
 			identifier: property.notFound
 			count: 1
@@ -197,12 +185,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Newsletter.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Address\:\:getAddress\(\) should return Mage_Customer_Model_Address but returns Mage_Sales_Model_Quote_Address\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Shipping/Address.php
 
 		-
 			message: '#^Method Mage_Catalog_Model_Resource_Product_Compare_Item_Collection\:\:useProductItem\(\) invoked with 1 parameter, 0 required\.$#'
@@ -910,24 +892,12 @@ parameters:
 			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
-			path: app/code/core/Mage/Catalog/Block/Breadcrumbs.php
-
-		-
-			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
 			path: app/code/core/Mage/Catalog/Block/Navigation.php
 
 		-
 			message: '#^Cannot call method count\(\) on string\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: app/code/core/Mage/Catalog/Block/Navigation.php
-
-		-
-			message: '#^Property Mage_Catalog_Block_Navigation\:\:\$_currentCategoryKey \(string\) does not accept int\.$#'
-			identifier: assign.propertyType
-			count: 1
 			path: app/code/core/Mage/Catalog/Block/Navigation.php
 
 		-
@@ -943,46 +913,10 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Product.php
 
 		-
-			message: '#^Property Mage_Catalog_Block_Product_Abstract\:\:\$_reviewsHelperBlock \(Mage_Review_Block_Helper\|null\) does not accept Mage_Core_Block_Abstract\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/Abstract.php
-
-		-
 			message: '#^Method Mage_Catalog_Model_Resource_Product_Compare_Item_Collection\:\:useProductItem\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/Compare/List.php
-
-		-
-			message: '#^Method Mage_Catalog_Block_Product_List_Toolbar\:\:getDefaultPerPageValue\(\) should return string but returns int\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/List/Toolbar.php
-
-		-
-			message: '#^Property Mage_Catalog_Block_Product_List_Toolbar\:\:\$_availableMode \(string\) does not accept array\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/List/Toolbar.php
-
-		-
-			message: '#^Property Mage_Catalog_Block_Product_List_Toolbar\:\:\$_availableMode \(string\) does not accept array\<string, string\>\.$#'
-			identifier: assign.propertyType
-			count: 4
-			path: app/code/core/Mage/Catalog/Block/Product/List/Toolbar.php
-
-		-
-			message: '#^Property Mage_Catalog_Block_Product_List_Toolbar\:\:\$_availableMode \(string\) does not accept default value of type array\.$#'
-			identifier: property.defaultValue
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/List/Toolbar.php
-
-		-
-			message: '#^Property Mage_Catalog_Block_Product_List_Toolbar\:\:\$_availableMode \(string\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/List/Toolbar.php
 
 		-
 			message: '#^Property Mage_Catalog_Block_Product_List_Toolbar\:\:\$_collection \(Mage_Core_Model_Resource_Db_Collection_Abstract\) does not accept Varien_Data_Collection\.$#'
@@ -1001,12 +935,6 @@ parameters:
 			identifier: offsetAccess.invalidOffset
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/View/Type/Configurable.php
-
-		-
-			message: '#^Property Mage_Catalog_Block_Product_Widget_Html_Pager\:\:\$_lastPage \(int\) does not accept float\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/Widget/Html/Pager.php
 
 		-
 			message: '#^Variable \$finish might not be defined\.$#'
@@ -1069,12 +997,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Helper/Product.php
 
 		-
-			message: '#^Method Mage_Catalog_Helper_Product\:\:getMinimalQty\(\) should return int\|null but returns float\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Helper/Product.php
-
-		-
 			message: '#^Ternary operator condition is always true\.$#'
 			identifier: ternary.alwaysTrue
 			count: 1
@@ -1109,12 +1031,6 @@ parameters:
 			identifier: if.alwaysFalse
 			count: 2
 			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
-
-		-
-			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Admin/V1.php
 
 		-
 			message: '#^Call to an undefined method Mage_Core_Model_Abstract\:\:toOptionArray\(\)\.$#'
@@ -1163,12 +1079,6 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Category/Attribute/Api.php
-
-		-
-			message: '#^Property Mage_Catalog_Model_Category_Url\:\:\$_url \(Mage_Core_Model_Url\) does not accept bool\|Mage_Core_Model_Abstract\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Category/Url.php
 
 		-
 			message: '#^Call to an undefined method Mage_Catalog_Model_Config\:\:_init\(\)\.$#'
@@ -1225,12 +1135,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Design.php
 
 		-
-			message: '#^Method Mage_Catalog_Model_Design\:\:applyCustomDesign\(\) should return false\|null but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Design.php
-
-		-
 			message: '#^Variable \$_category might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -1241,30 +1145,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Entity/Product/Attribute/Design/Options/Container.php
-
-		-
-			message: '#^Method Mage_Catalog_Model_Factory\:\:getCategoryUrlInstance\(\) should return Mage_Catalog_Model_Category_Url but returns bool\|Mage_Core_Model_Abstract\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Factory.php
-
-		-
-			message: '#^Method Mage_Catalog_Model_Factory\:\:getCategoryUrlRewriteHelper\(\) should return Mage_Catalog_Helper_Category_Url_Rewrite_Interface but returns Mage_Core_Helper_Abstract\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Factory.php
-
-		-
-			message: '#^Method Mage_Catalog_Model_Factory\:\:getProductUrlInstance\(\) should return Mage_Catalog_Model_Product_Url but returns bool\|Mage_Core_Model_Abstract\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Factory.php
-
-		-
-			message: '#^Method Mage_Catalog_Model_Factory\:\:getProductUrlRewriteHelper\(\) should return Mage_Catalog_Helper_Product_Url_Rewrite_Interface but returns Mage_Core_Helper_Abstract\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Factory.php
 
 		-
 			message: '#^Parameter \#2 \$filterBlock \(Varien_Object\) of method Mage_Catalog_Model_Layer_Filter_Attribute\:\:apply\(\) should be compatible with parameter \$filterBlock \(null\) of method Mage_Catalog_Model_Layer_Filter_Abstract\:\:apply\(\)$#'
@@ -1287,12 +1167,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method Mage_Eav_Model_Entity_Attribute_Backend_Abstract\:\:addImage\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product.php
-
-		-
-			message: '#^Method Mage_Catalog_Model_Product\:\:canBeShowInCategory\(\) should return bool but returns string\.$#'
-			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product.php
 
@@ -1381,12 +1255,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
 
 		-
-			message: '#^Cannot access offset ''pricing_value'' on true\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable/Price.php
-
-		-
 			message: '#^Call to function is_array\(\) with string will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 1
@@ -1427,12 +1295,6 @@ parameters:
 			identifier: booleanOr.rightAlwaysTrue
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Abstract.php
-
-		-
-			message: '#^Method Mage_Catalog_Model_Resource_Attribute\:\:isUsedBySuperProducts\(\) should return int but returns string\|false\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Attribute.php
 
 		-
 			message: '#^Property Mage_Catalog_Model_Resource_Category\:\:\$_storeId \(int\) on left side of \?\? is not nullable\.$#'
@@ -1615,12 +1477,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
 
 		-
-			message: '#^Method Mage_Catalog_Model_Resource_Product_Compare_Item\:\:getCount\(\) should return int but returns string\|false\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Compare/Item.php
-
-		-
 			message: '#^Method Mage_Catalog_Model_Resource_Product_Indexer_Abstract\:\:_getAttribute\(\) should return Mage_Catalog_Model_Resource_Eav_Attribute but returns Mage_Eav_Model_Entity_Attribute_Abstract\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -1679,12 +1535,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/CatalogIndex/Model/Data/Abstract.php
-
-		-
-			message: '#^Parameter \#1 \$product \(array\) of method Mage_CatalogIndex_Model_Data_Grouped\:\:getFinalPrice\(\) should be compatible with parameter \$product \(int\) of method Mage_CatalogIndex_Model_Data_Abstract\:\:getFinalPrice\(\)$#'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Data/Grouped.php
 
 		-
 			message: '#^Return type \(false\) of method Mage_CatalogIndex_Model_Data_Grouped\:\:getFinalPrice\(\) should be compatible with return type \(float\) of method Mage_CatalogIndex_Model_Data_Abstract\:\:getFinalPrice\(\)$#'
@@ -3043,12 +2893,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Resource/Entity/Attribute.php
 
 		-
-			message: '#^Method Mage_Eav_Model_Resource_Entity_Attribute_Group\:\:_getMaxSortOrder\(\) should return int but returns string\|false\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Resource/Entity/Attribute/Group.php
-
-		-
 			message: '#^Call to an undefined method Mage_Eav_Model_Entity_Collection_Abstract\:\:getStoreId\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -3065,12 +2909,6 @@ parameters:
 			identifier: variable.undefined
 			count: 2
 			path: app/code/core/Mage/Eav/Model/Resource/Form/Attribute/Collection.php
-
-		-
-			message: '#^PHPDoc tag @param for parameter \$object with type Mage_Eav_Model_Resource_Form_Type is incompatible with native type Mage_Core_Model_Abstract\.$#'
-			identifier: parameter.phpDocType
-			count: 2
-			path: app/code/core/Mage/Eav/Model/Resource/Form/Type.php
 
 		-
 			message: '#^Return type \(stdClass\) of method Mage_GiftMessage_Model_Api_V2\:\:_setGiftMessage\(\) should be compatible with return type \(array\) of method Mage_GiftMessage_Model_Api\:\:_setGiftMessage\(\)$#'
@@ -3139,12 +2977,6 @@ parameters:
 			path: app/code/core/Mage/ImportExport/Block/Adminhtml/Export/Filter.php
 
 		-
-			message: '#^Method Mage_ImportExport_Block_Adminhtml_Export_Filter\:\:prepareCollection\(\) should return Mage_Core_Model_Resource_Db_Collection_Abstract\|null but returns Varien_Data_Collection_Db\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/ImportExport/Block/Adminhtml/Export/Filter.php
-
-		-
 			message: '#^Method Mage_Eav_Model_Entity_Attribute_Source_Interface\:\:getAllOptions\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -3157,26 +2989,8 @@ parameters:
 			path: app/code/core/Mage/ImportExport/Model/Export/Entity/Customer.php
 
 		-
-			message: '#^Call to an undefined method Mage_Eav_Model_Entity_Collection_Abstract\:\:addCategoryIds\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Export/Entity/Product.php
-
-		-
-			message: '#^Call to an undefined method Mage_Eav_Model_Entity_Collection_Abstract\:\:setStoreId\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Export/Entity/Product.php
-
-		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Export/Entity/Product.php
-
-		-
-			message: '#^Variable \$collection might not be defined\.$#'
-			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/ImportExport/Model/Export/Entity/Product.php
 
@@ -3217,20 +3031,8 @@ parameters:
 			path: app/code/core/Mage/Index/Model/Lock/Storage/Db.php
 
 		-
-			message: '#^Method Mage_Index_Model_Lock_Storage_Db\:\:releaseLock\(\) should return int\|null but returns bool\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Index/Model/Lock/Storage/Db.php
-
-		-
 			message: '#^Property Mage_Index_Model_Lock_Storage_Db\:\:\$_helper \(Mage_Index_Model_Resource_Helper_Mysql4\) does not accept Mage_Core_Model_Resource_Helper_Abstract\.$#'
 			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Index/Model/Lock/Storage/Db.php
-
-		-
-			message: '#^Return type \(int\|null\) of method Mage_Index_Model_Lock_Storage_Db\:\:releaseLock\(\) should be compatible with return type \(bool\) of method Mage_Index_Model_Lock_Storage_Interface\:\:releaseLock\(\)$#'
-			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Index/Model/Lock/Storage/Db.php
 
@@ -3331,24 +3133,6 @@ parameters:
 			path: app/code/core/Mage/Paygate/Block/Authorizenet/Form/Cc.php
 
 		-
-			message: '#^Cannot assign new offset to string\.$#'
-			identifier: offsetAssign.dimType
-			count: 1
-			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
-
-		-
-			message: '#^Variable \$defaultExceptionMessage might not be defined\.$#'
-			identifier: variable.undefined
-			count: 2
-			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
-
-		-
-			message: '#^Variable \$newTransactionType might not be defined\.$#'
-			identifier: variable.undefined
-			count: 3
-			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
-
-		-
 			message: '#^Call to an undefined method Mage_Payment_Model_Method_Abstract\:\:cancelPartialAuthorization\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -3391,12 +3175,6 @@ parameters:
 			path: app/code/core/Mage/Payment/Model/Recurring/Profile.php
 
 		-
-			message: '#^Method Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Group\:\:_getCollapseState\(\) should return bool but returns int\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Group.php
-
-		-
 			message: '#^Method Mage_Paypal_Block_Express_Review\:\:_formatPrice\(\) should return string but returns float\.$#'
 			identifier: return.type
 			count: 1
@@ -3435,18 +3213,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method Mage_Paypal_Model_Api_Nvp\:\:_import\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			message: '#^Method Mage_Paypal_Model_Api_Nvp\:\:_exportLineItems\(\) should return true\|null but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			message: '#^Method Mage_Paypal_Model_Api_Nvp\:\:_exportLineItems\(\) should return true\|null but returns bool\.$#'
-			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
 
@@ -3569,24 +3335,6 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/System/Config/Source/MerchantCountry.php
-
-		-
-			message: '#^Method Mage_Paypal_HostedproController\:\:_getIframeBlock\(\) should return Mage_Paypal_Block_Hosted_Pro_Iframe but returns Mage_Core_Block_Abstract\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Paypal/controllers/HostedproController.php
-
-		-
-			message: '#^Method Mage_Paypal_PayflowController\:\:_getIframeBlock\(\) should return Mage_Paypal_Block_Payflow_Link_Iframe but returns Mage_Core_Block_Abstract\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Paypal/controllers/PayflowController.php
-
-		-
-			message: '#^Method Mage_Paypal_PayflowadvancedController\:\:_getIframeBlock\(\) should return Mage_Paypal_Block_Payflow_Advanced_Iframe but returns Mage_Core_Block_Abstract\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Paypal/controllers/PayflowadvancedController.php
 
 		-
 			message: '#^Return type \(void\) of method Mage_PaypalUk_Model_Pro\:\:fetchTransactionInfo\(\) should be compatible with return type \(array\) of method Mage_Paypal_Model_Pro\:\:fetchTransactionInfo\(\)$#'
@@ -3737,12 +3485,6 @@ parameters:
 			identifier: staticMethod.notFound
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Resource/Review/Collection.php
-
-		-
-			message: '#^Method Mage_Reports_Model_Resource_Wishlist_Collection\:\:getSharedCount\(\) should return int but returns string\|false\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Wishlist/Collection.php
 
 		-
 			message: '#^Call to an undefined method Mage_Eav_Model_Entity_Abstract\:\:setStore\(\)\.$#'
@@ -5809,12 +5551,6 @@ parameters:
 			path: app/design/frontend/base/default/template/catalog/product/gallery.phtml
 
 		-
-			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: app/design/frontend/base/default/template/catalog/product/list/toolbar.phtml
-
-		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
 			count: 21
@@ -6809,12 +6545,6 @@ parameters:
 			identifier: method.nonObject
 			count: 1
 			path: app/design/frontend/rwd/default/template/catalog/layer/state.phtml
-
-		-
-			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: app/design/frontend/rwd/default/template/catalog/product/list/toolbar.phtml
 
 		-
 			message: '#^Left side of && is always true\.$#'
