@@ -71,6 +71,17 @@
             </cron>
         </system>
     </default>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <cron before="Mage_Adminhtml">Mage_Cron_Adminhtml</cron>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
     <adminhtml>
         <translate>
             <modules>

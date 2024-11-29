@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<config>
+    <menu>
+        <system>
+            <children>
+                <tools>
+                    <children>
+                        <cronjobs translate="title" module="cron">
+                            <title>Cron Jobs</title>
+                            <action>adminhtml/system_tools_cronjobs</action>
+                            <sort_order>100</sort_order>
+                        </cronjobs>
+                    </children>
+                </tools>
+            </children>
+        </system>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <tools>
+                                <children>
+                                    <cronjobs translate="title">
+                                        <title>Cron Jobs</title>
+                                    </cronjobs>
+                                </children>
+                            </tools>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>
