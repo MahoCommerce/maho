@@ -42,6 +42,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         );
     }
 
+    #[\Override]
     protected function _isAllowed(): bool
     {
         return Mage::getSingleton('admin/session')->isAllowed('system/tools/cronjobs');

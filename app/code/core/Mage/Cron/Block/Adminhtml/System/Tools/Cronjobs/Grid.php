@@ -23,6 +23,7 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
         $this->setSaveParametersInSession(true);
     }
 
+    #[\Override]
     protected function _prepareCollection(): self
     {
         $collection = Mage::getModel('cron/schedule')->getCollection();
@@ -30,6 +31,7 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns(): self
     {
         $this->addColumn('schedule_id', [
@@ -98,6 +100,7 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
         return parent::_prepareColumns();
     }
 
+    #[\Override]
     protected function _prepareMassaction(): self
     {
         $this->setMassactionIdField('schedule_id');
