@@ -117,6 +117,7 @@ class Mage_Sales_Model_Order_Status_History extends Mage_Sales_Model_Abstract
         if ($this->getOrder()) {
             return $this->getOrder()->getConfig()->getStatusLabel($this->getStatus());
         }
+        return '';
     }
 
     /**

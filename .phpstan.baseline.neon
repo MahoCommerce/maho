@@ -25,12 +25,6 @@ parameters:
 			path: app/code/core/Mage/Admin/Model/Resource/Acl.php
 
 		-
-			message: '#^Method Mage_Admin_Model_Resource_User\:\:_encryptPassword\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Resource/User.php
-
-		-
 			message: '#^Call to an undefined method Mage_Admin_Model_Resource_Roles\:\:update\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -1699,12 +1693,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Block/Cart/Shipping.php
 
 		-
-			message: '#^Method Mage_Checkout_Block_Cart_Sidebar\:\:_addTax\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: app/code/core/Mage/Checkout/Block/Cart/Sidebar.php
-
-		-
 			message: '#^Method Mage_Checkout_Block_Onepage_Billing\:\:_getTaxvat\(\) should return Mage_Customer_Block_Widget_Taxvat but returns Mage_Core_Block_Abstract\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -3103,12 +3091,6 @@ parameters:
 			path: app/code/core/Mage/Log/Model/Aggregation.php
 
 		-
-			message: '#^Method Mage_Log_Model_Aggregation\:\:_removeEmpty\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: app/code/core/Mage/Log/Model/Aggregation.php
-
-		-
 			message: '#^Property Mage_Log_Model_Aggregation\:\:\$_lastRecord \(string\) does not accept int\|false\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -3233,12 +3215,6 @@ parameters:
 			identifier: booleanAnd.leftAlwaysTrue
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Cart.php
-
-		-
-			message: '#^Method Mage_Paypal_Model_Config\:\:_matchBnCountryCode\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Config.php
 
 		-
 			message: '#^Negated boolean expression is always true\.$#'
@@ -3731,12 +3707,6 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Order/Shipment/Api/V2.php
-
-		-
-			message: '#^Method Mage_Sales_Model_Order_Status_History\:\:getStatusLabel\(\) should return string but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Status/History.php
 
 		-
 			message: '#^Call to an undefined method Mage_Sales_Model_Quote_Item_Abstract\:\:compare\(\)\.$#'
