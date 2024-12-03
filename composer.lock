@@ -121,10 +121,11 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/justinbeaty/maho-composer-plugin.git",
-                "reference": "5d79023ffea6c0dda505c87cb02c039f9468ad03"
+                "reference": "890cc0e84df30b5becd90c4d1c5ec1c348e91ee4"
             },
             "require": {
-                "composer-plugin-api": "^2.1"
+                "composer-plugin-api": "^2.1",
+                "composer-runtime-api": "^2"
             },
             "require-dev": {
                 "composer/composer": "^2.8",
@@ -135,8 +136,9 @@
             "type": "composer-plugin",
             "extra": {
                 "class": [
+                    "Maho\\ComposerPlugin\\AutoloadPlugin",
                     "Maho\\ComposerPlugin\\FileCopyPlugin",
-                    "Maho\\ComposerPlugin\\AutoloadPlugin"
+                    "Maho\\ComposerPlugin\\ModmanPlugin"
                 ]
             },
             "autoload": {
@@ -148,7 +150,7 @@
                 "MIT"
             ],
             "description": "Extension for Composer to copy assets and enable autoloading for Maho projects.",
-            "time": "2024-12-03T14:44:11+00:00"
+            "time": "2024-12-05T21:44:08+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",

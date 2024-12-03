@@ -89,6 +89,7 @@
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "cweagans/composer-patches": true,
+            "magento-hackathon/magento-composer-installer": false,
             "mahocommerce/maho-composer-plugin": true
         },
         "platform": {
