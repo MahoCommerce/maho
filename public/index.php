@@ -13,7 +13,7 @@
 define('MAHO_ROOT_DIR', dirname(__DIR__));
 define('MAHO_PUBLIC_DIR', __DIR__);
 
-require '../vendor/autoload.php';
+require MAHO_ROOT_DIR . '/vendor/autoload.php';
 
 #Varien_Profiler::enable();
 

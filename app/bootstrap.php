@@ -10,12 +10,15 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
-    require __DIR__ . '/../vendor/autoload.php';
-} elseif (file_exists(__DIR__ . '/../../../autoload.php')) {
-    require __DIR__ . '/../../../vendor/autoload.php';
-} else {
-    throw new Exception('Autoloader not found. Please run \'composer install\'.');
+// Require the autoloader if not already loaded
+if (!class_exists('Maho')) {
+    if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+        require __DIR__ . '/../vendor/autoload.php';
+    } elseif (file_exists(__DIR__ . '/../../../autoload.php')) {
+        require __DIR__ . '/../../../autoload.php';
+    } else {
+        throw new Exception('Autoloader not found. Please run \'composer install\'.');
+    }
 }
 
 defined('DS') || define('DS', DIRECTORY_SEPARATOR);

@@ -10,12 +10,10 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @deprecated Use MAHO_ROOT_DIR instead. */
-define('MAGENTO_ROOT', dirname(__DIR__));
 define('MAHO_ROOT_DIR', dirname(__DIR__));
 define('MAHO_PUBLIC_DIR', __DIR__);
 
-require '../vendor/autoload.php';
+require MAHO_ROOT_DIR . '/vendor/autoload.php';
 
 if (!Mage::isInstalled()) {
     echo 'Application is not installed yet.';

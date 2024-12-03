@@ -18,8 +18,9 @@ use Composer\Autoload\ClassLoader;
  */
 final class Maho
 {
-    /** @var ?ClassLoader */
-    private static $composerClassLoader = null;
+    private static ?ClassLoader $composerClassLoader = null;
+
+    private static ?string $bp = null;
 
     /**
      * Return an array of Maho packages installed by Composer
@@ -36,7 +37,10 @@ final class Maho
      */
     public static function getBasePath(): string
     {
-        return self::getInstalledPackages()['root']['path'];
+        if (self::$bp === null) {
+            self::$bp = realpath(self::getInstalledPackages()['root']['path']);
+        }
+        return self::$bp;
     }
 
     /**
@@ -44,9 +48,9 @@ final class Maho
      */
     public static function toRelativePath(string $path): string
     {
-        $relativePath = str_replace(self::getBasePath(), '', $path);
-        $relativePath = preg_replace("/^\/?(vendor\/\w+\/\w+\/)?/", '', $relativePath);
-        return $relativePath;
+        $paths = array_column(self::getInstalledPackages(), 'path');
+        usort($paths, fn ($a, $b) => strlen($b) <=> strlen($a));
+        return ltrim(str_replace($paths, '', $path), '/');
     }
 
     /**
