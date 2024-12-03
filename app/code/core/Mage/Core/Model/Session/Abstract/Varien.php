@@ -146,7 +146,7 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         } catch (Throwable $e) {
             session_abort();
             if (Mage::registry(self::REGISTRY_CONCURRENCY_ERROR)) {
-                mahoErrorReport();
+                Maho::errorReport();
                 die();
             } else {
                 Mage::printException($e);

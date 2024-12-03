@@ -373,7 +373,7 @@ class Mage_Core_Model_Design_Package
     {
         $fileName = $this->_renderFilename($file, $params);
         $fileName = (empty($params['_relative']) ? '' : Mage::getBaseDir('design') . DS) . $fileName;
-        $fileName = mahoFindFileInIncludePath($fileName);
+        $fileName = Maho::findFile($fileName);
         return $fileName;
     }
 
@@ -538,7 +538,7 @@ class Mage_Core_Model_Design_Package
     public function getPackageList()
     {
         $directory = Mage::getBaseDir('design') . DS . 'frontend';
-        return mahoListDirectories($directory);
+        return Maho::listDirectories($directory);
     }
 
     /**
@@ -556,7 +556,7 @@ class Mage_Core_Model_Design_Package
             }
         } else {
             $directory = Mage::getBaseDir('design') . DS . 'frontend' . DS . $package;
-            $result = mahoListDirectories($directory);
+            $result = Maho::listDirectories($directory);
         }
 
         return $result;

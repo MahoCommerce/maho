@@ -23,9 +23,7 @@ class Mage_Core_Model_Config_System extends Mage_Core_Model_Config_Base
      */
     public function load($module)
     {
-        $file = Mage::getConfig()->getModuleDir('etc', $module) . DS . 'system.xml';
-        $file = mahoFindFileInIncludePath($file);
-        $this->loadFile($file);
+        $this->loadFile(Maho::findFile(Mage::getConfig()->getModuleDir('etc', $module) . '/system.xml'));
         return $this;
     }
 }

@@ -6,6 +6,9 @@
         "OSL-3.0",
         "AFL-3.0"
     ],
+    "repositories": [
+        { "type": "git", "url": "https://github.com/justinbeaty/maho-composer-plugin.git" }
+    ],
     "type": "maho-source",
     "require": {
         "php": ">=8.2",
@@ -33,7 +36,7 @@
         "composer-runtime-api": "^2",
         "cweagans/composer-patches": "^1.7",
         "ezyang/htmlpurifier": "^4.17",
-        "mahocommerce/maho-composer-plugin": "^2",
+        "mahocommerce/maho-composer-plugin": "dev-topic-v3",
         "pelago/emogrifier": "^7.0",
         "phpseclib/mcrypt_compat": "^2.0.3",
         "phpseclib/phpseclib": "^3.0.14",

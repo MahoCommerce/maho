@@ -10,55 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-define('DS', DIRECTORY_SEPARATOR);
-define('PS', PATH_SEPARATOR);
-define('BP', MAHO_ROOT_DIR);
-
-/*
- * Require Composer autoloader and set include paths
- * @var \Composer\Autoload\ClassLoader $composerClassLoader
- */
-$composerClassLoader = require BP . '/vendor/autoload.php';
-set_include_path(implode(PS, \Maho\MahoAutoload::generatePaths(BP)) . PS . get_include_path());
-
-if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPER_MODE'])) {
-    Mage::setIsDeveloperMode(true);
-    ini_set('display_errors', '1');
-    ini_set('error_prepend_string', '<pre>');
-    ini_set('error_append_string', '</pre>');
-
-    // Fix for overriding zf1-future during development
-    ini_set('opcache.revalidate_path', 1);
-
-    // Check if we used `composer dump --optimize-autoloader` in development
-    $classMap = $composerClassLoader->getClassMap();
-    if (isset($classMap['Mage_Core_Model_App'])) {
-        Mage::addBootupWarning('Optimized autoloader detected in developer mode.');
-    }
-
-    // Reload PSR-0 namespaces and controller classmap during development in case new files are added
-    $prefixes = $composerClassLoader->getPrefixes();
-    foreach (\Maho\MahoAutoload::generatePsr0(BP) as $prefix => $paths) {
-        $prefixes[$prefix] ??= [];
-        if (count($prefixes[$prefix])) {
-            $prefixes[$prefix] = array_diff($prefixes[$prefix], $paths);
-        }
-        array_push($prefixes[$prefix], ...$paths);
-        $composerClassLoader->set($prefix, $paths);
-    }
-    $composerClassLoader->addClassMap(\Maho\MahoAutoload::generateControllerClassMap(BP));
-}
-
-require_once __DIR__ . '/code/core/Mage/Core/functions.php';
-
-/**
- * Support additional includes, originally used for OpenMage composer support
- * See: https://github.com/OpenMage/magento-lts/pull/559
- */
-foreach (glob(BP . '/app/etc/includes/*.php') as $path) {
-    include_once $path;
-}
-
 /**
  * Main Mage hub class
  */
@@ -588,9 +539,8 @@ final class Mage
 
     public static function addBootupWarning(string $message)
     {
-        $messages = Mage::registry('bootup_warnings') ?? [];
-        $messages[] = $message;
-        Mage::register('bootup_warnings', $message);
+        self::$_registry['bootup_warnings'] ??= [];
+        self::$_registry['bootup_warnings'][] = $message;
     }
 
     /**
@@ -642,7 +592,7 @@ final class Mage
             header('Location: ' . self::getBaseUrl());
             die;
         } catch (Mage_Core_Model_Store_Exception $e) {
-            mahoErrorReport([], 404);
+            Maho::errorReport([], 404);
             die;
         } catch (Exception $e) {
             self::printException($e);
@@ -685,7 +635,7 @@ final class Mage
             header('Location: ' . self::getBaseUrl());
             die();
         } catch (Mage_Core_Model_Store_Exception $e) {
-            mahoErrorReport([], 404);
+            Maho::errorReport([], 404);
             die();
         } catch (Exception $e) {
             if (self::isInstalled()) {
@@ -926,7 +876,7 @@ final class Mage
                 $reportData['script_name'] = $_SERVER['SCRIPT_NAME'];
             }
 
-            mahoErrorReport($reportData);
+            Maho::errorReport($reportData);
         }
 
         die();

@@ -325,20 +325,14 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         $files = [];
 
-        // Include Maho core and 3rd party module files
-        $modules = \Maho\MahoAutoload::getInstalledModules(BP);
-        foreach ($modules as $module => $info) {
+        foreach (Maho::getInstalledPackages() as $package => $info) {
             foreach (glob($info['path'] . '/app/etc/*.xml') as $file) {
-                $files[basename($file)] = $file;
+                $basename = basename($file);
+                if ($basename === 'local.xml' && $package !== 'root') {
+                    continue;
+                }
+                $files[$basename] = $file;
             }
-        }
-
-        // Prevent any module from defining a local.xml
-        unset($files['local.xml']);
-
-        // Include local files, overriding core and 3rd party module files
-        foreach (glob($this->getOptions()->getEtcDir() . '/*.xml') as $file) {
-            $files[basename($file)] = $file;
         }
 
         // Merge all config files
@@ -503,7 +497,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                 throw new Exception('Could not get lock on cache save operation.');
             } else {
                 Mage::log(sprintf('Failed to get cache save lock in %d seconds.', $waitTime), Zend_Log::NOTICE);
-                mahoErrorReport();
+                Maho::errorReport();
                 die();
             }
         }
@@ -780,20 +774,13 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         $moduleFiles = [];
 
-        // Include Maho core and 3rd party module files
-        $modules = \Maho\MahoAutoload::getInstalledModules(BP);
-        foreach ($modules as $module => $info) {
+        foreach (Maho::getInstalledPackages() as $package => $info) {
             foreach (glob($info['path'] . '/app/etc/modules/*.xml') as $file) {
                 $moduleFiles[basename($file)] = $file;
             }
         }
 
-        // Include local files, overriding core and 3rd party module files
-        foreach (glob($this->getOptions()->getEtcDir() . '/modules/*.xml') as $file) {
-            $moduleFiles[basename($file)] = $file;
-        }
-
-        if (!$moduleFiles) {
+        if (empty($moduleFiles)) {
             return false;
         }
 
@@ -803,9 +790,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         ];
 
         foreach ($moduleFiles as $v) {
-            $name = explode(DIRECTORY_SEPARATOR, $v);
-            $name = substr($name[count($name) - 1], 0, -4);
-
+            $name = pathinfo($v, PATHINFO_FILENAME);
             if (array_key_exists($name, self::MAGE_MODULES)) {
                 $collectModuleFiles['mage'][self::MAGE_MODULES[$name]] = $v;
             } else {
@@ -1037,6 +1022,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if ($mergeModel === null) {
             $mergeModel = clone $this->_prototype;
         }
+
         $modules = $this->getNode('modules')->children();
         foreach ($modules as $modName => $module) {
             if ($module->is('active')) {
@@ -1046,7 +1032,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
                 foreach ($fileName as $configFile) {
                     $moduleDir = $this->getModuleDir('etc', $modName);
-                    $configFile = mahoFindFileInIncludePath("$moduleDir/$configFile");
+                    $configFile = Maho::findFile("$moduleDir/$configFile");
 
                     if ($mergeModel->loadFile($configFile)) {
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_GLOBAL, $mergeModel);

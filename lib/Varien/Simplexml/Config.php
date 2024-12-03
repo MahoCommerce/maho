@@ -422,10 +422,10 @@ class Varien_Simplexml_Config
 
         /**
          * All calls from core will be an absolute path, but for compatibility with
-         * 3rd party modules we will alternatively use mahoFindFileInIncludePath()
+         * 3rd party modules we will alternatively use Maho::findFile()
          */
         if (!is_readable($filePath)) {
-            $filePath = mahoFindFileInIncludePath($filePath);
+            $filePath = Maho::findFile($filePath);
             if (!is_readable($filePath)) {
                 //throw new Exception('Can not read xml file '.$filePath);
                 return false;

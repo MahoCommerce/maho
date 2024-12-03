@@ -417,7 +417,7 @@ class Mage_Core_Controller_Varien_Router_Standard extends Mage_Core_Controller_V
             $file .= DS . implode(DS, $parts);
         }
         $file .= DS . uc_words($controller, DS) . 'Controller.php';
-        $file = mahoFindFileInIncludePath($file);
+        $file = Maho::findFile($file);
         return $file;
     }
 

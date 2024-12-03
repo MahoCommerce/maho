@@ -10,18 +10,10 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @deprecated Use MAHO_ROOT_DIR instead. */
-define('MAGENTO_ROOT', dirname(__DIR__));
 define('MAHO_ROOT_DIR', dirname(__DIR__));
 define('MAHO_PUBLIC_DIR', __DIR__);
 
-if (file_exists(MAHO_ROOT_DIR . '/app/bootstrap.php')) {
-    require MAHO_ROOT_DIR . '/app/bootstrap.php';
-    require MAHO_ROOT_DIR . '/app/Mage.php';
-} else {
-    require MAHO_ROOT_DIR . '/vendor/mahocommerce/maho/app/bootstrap.php';
-    require MAHO_ROOT_DIR . '/vendor/mahocommerce/maho/app/Mage.php';
-}
+require '../vendor/autoload.php';
 
 #Varien_Profiler::enable();
 
@@ -47,7 +39,7 @@ if (file_exists($maintenanceFile)) {
         }
     }
     if (!$maintenanceBypass) {
-        mahoErrorReport();
+        Maho::errorReport();
         exit;
     }
 

@@ -78,7 +78,7 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
 
         $this->_getInstaller()->getDataModel()->setConfigData($data);
 
-        $template = file_get_contents(mahoFindFileInIncludePath(Mage::getBaseDir('etc') . DS . 'local.xml.template'));
+        $template = file_get_contents(Maho::findFile(Mage::getBaseDir('etc') . DS . 'local.xml.template'));
         foreach ($data as $index => $value) {
             $template = str_replace('{{' . $index . '}}', '<![CDATA[' . $value . ']]>', $template);
         }

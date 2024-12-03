@@ -42,19 +42,10 @@ class Mage_Core_Model_Design_Config extends Varien_Simplexml_Config
 
             $files = [];
 
-            // Include Maho core and 3rd party module files
-            $modules = \Maho\MahoAutoload::getInstalledModules(BP);
-            foreach ($modules as $module => $info) {
+            foreach (Maho::getInstalledPackages() as $info) {
                 foreach (glob($info['path'] . '/app/design/*/*/*/etc/theme.xml') as $file) {
-                    $normalizedFile = str_replace($info['path'] . '/app/design', '', $file);
-                    $files[$normalizedFile] = $file;
+                    $files[Maho::toRelativePath($file)] = $file;
                 }
-            }
-
-            // Include local files, overriding core and 3rd party module files
-            foreach (glob($this->_designRoot . '/*/*/*/etc/theme.xml') as $file) {
-                $normalizedFile = str_replace($this->_designRoot, '', $file);
-                $files[$normalizedFile] = $file;
             }
 
             foreach ($files as $file) {

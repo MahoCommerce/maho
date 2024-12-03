@@ -15,13 +15,7 @@ define('MAGENTO_ROOT', dirname(__DIR__));
 define('MAHO_ROOT_DIR', dirname(__DIR__));
 define('MAHO_PUBLIC_DIR', __DIR__);
 
-if (file_exists(MAHO_ROOT_DIR . '/app/bootstrap.php')) {
-    require MAHO_ROOT_DIR . '/app/bootstrap.php';
-    require MAHO_ROOT_DIR . '/app/Mage.php';
-} else {
-    require MAHO_ROOT_DIR . '/vendor/mahocommerce/maho/app/bootstrap.php';
-    require MAHO_ROOT_DIR . '/vendor/mahocommerce/maho/app/Mage.php';
-}
+require '../vendor/autoload.php';
 
 if (!Mage::isInstalled()) {
     echo 'Application is not installed yet.';
