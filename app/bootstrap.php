@@ -11,7 +11,7 @@
  */
 
 // Require the autoloader if not already loaded
-if (!class_exists('Maho')) {
+if (!class_exists('Mage')) {
     if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
         require __DIR__ . '/../vendor/autoload.php';
     } elseif (file_exists(__DIR__ . '/../../../autoload.php')) {
