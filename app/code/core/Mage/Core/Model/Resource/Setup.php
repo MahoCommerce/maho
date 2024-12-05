@@ -520,10 +520,10 @@ class Mage_Core_Model_Resource_Setup
         $filesDir   = Mage::getModuleDir('sql', $modName) . DS . $this->_resourceName;
         foreach (Maho::globPackages("$filesDir/*") as $file) {
             $matches = [];
-            if (preg_match($regExpDb, $file, $matches)) {
-                $dbFiles[$matches[1]] = "$filesDir/$file";
-            } elseif (preg_match($regExpType, $file, $matches)) {
-                $typeFiles[$matches[1]] = "$filesDir/$file";
+            if (preg_match($regExpDb, basename($file), $matches) === 1) {
+                $dbFiles[$matches[1]] = $file;
+            } elseif (preg_match($regExpType, basename($file), $matches) === 1) {
+                $typeFiles[$matches[1]] = $file;
             }
         }
 
@@ -557,8 +557,8 @@ class Mage_Core_Model_Resource_Setup
         $filesDir   = Mage::getModuleDir('data', $modName) . DS . $this->_resourceName;
         foreach (Maho::globPackages("$filesDir/*") as $file) {
             $matches = [];
-            if (preg_match($regExp, $file, $matches)) {
-                $files[$matches[1]] = "$filesDir/$file";
+            if (preg_match($regExp, basename($file), $matches) === 1) {
+                $files[$matches[1]] = $file;
             }
         }
 
@@ -566,8 +566,8 @@ class Mage_Core_Model_Resource_Setup
         $filesDir   = Mage::getModuleDir('sql', $modName) . DS . $this->_resourceName;
         foreach (Maho::globPackages("$filesDir/*") as $file) {
             $matches = [];
-            if (preg_match($regExpOld, $file, $matches)) {
-                $files[$matches[1]] = "$filesDir/$file";
+            if (preg_match($regExpOld, basename($file), $matches) === 1) {
+                $files[$matches[1]] = $file;
             }
         }
 
@@ -591,8 +591,8 @@ class Mage_Core_Model_Resource_Setup
         $filesDir   = Mage::getModuleDir('sql', $modName) . DS . 'maho_setup';
         foreach (Maho::globPackages("$filesDir/*") as $file) {
             $matches = [];
-            if (preg_match($regExp, $file, $matches)) {
-                $files[$matches[1]] = "$filesDir/$file";
+            if (preg_match($regExp, basename($file), $matches) === 1) {
+                $files[$matches[1]] = $file;
             }
         }
 

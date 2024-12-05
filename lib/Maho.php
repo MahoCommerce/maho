@@ -58,6 +58,7 @@ final class Maho
      */
     public static function globPackages(string $pattern, int $flags = 0): array
     {
+        $pattern = self::toRelativePath($pattern);
         return AutoloadRuntime::globPackages($pattern, $flags);
     }
 
@@ -83,13 +84,10 @@ final class Maho
      */
     public static function listDirectories(string $path): array
     {
-        $relativePath = self::toRelativePath($path);
         $results = [];
-
-        foreach (AutoloadRuntime::globPackages("$relativePath/*", GLOB_ONLYDIR) as $dir) {
+        foreach (self::globPackages("$path/*", GLOB_ONLYDIR) as $dir) {
             $results[] = basename($dir);
         }
-
         return array_unique($results);
     }
 

@@ -42,10 +42,8 @@ class Mage_Core_Model_Design_Config extends Varien_Simplexml_Config
 
             $files = [];
 
-            foreach (Maho::getInstalledPackages() as $info) {
-                foreach (glob($info['path'] . '/app/design/*/*/*/etc/theme.xml') as $file) {
-                    $files[Maho::toRelativePath($file)] = $file;
-                }
+            foreach (Maho::globPackages('/app/design/*/*/*/etc/theme.xml') as $file) {
+                $files[Maho::toRelativePath($file)] = $file;
             }
 
             foreach ($files as $file) {

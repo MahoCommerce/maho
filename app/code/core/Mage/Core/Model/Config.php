@@ -774,10 +774,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         $moduleFiles = [];
 
-        foreach (Maho::getInstalledPackages() as $package => $info) {
-            foreach (glob($info['path'] . '/app/etc/modules/*.xml') as $file) {
-                $moduleFiles[basename($file)] = $file;
-            }
+        foreach (Maho::globPackages('/app/etc/modules/*.xml') as $file) {
+            $moduleFiles[basename($file)] = $file;
         }
 
         if (empty($moduleFiles)) {
