@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -106,11 +106,11 @@ class Mage_Sales_Model_Order_Invoice_Api extends Mage_Sales_Model_Api_Resource
      * @param string $orderIncrementId
      * @param array $itemsQty
      * @param string $comment
-     * @param bool $email
+     * @param bool $notifyCustomer
      * @param bool $includeComment
      * @return string
      */
-    public function create($orderIncrementId, $itemsQty = [], $comment = null, $email = false, $includeComment = false)
+    public function create($orderIncrementId, $itemsQty = [], $comment = null, $notifyCustomer = false, $includeComment = false)
     {
         $order = Mage::getModel('sales/order')->loadByIncrementId($orderIncrementId);
 
@@ -134,10 +134,10 @@ class Mage_Sales_Model_Order_Invoice_Api extends Mage_Sales_Model_Api_Resource
         $invoice->register();
 
         if ($comment !== null) {
-            $invoice->addComment($comment, $email);
+            $invoice->addComment($comment, $notifyCustomer);
         }
 
-        if ($email) {
+        if ($notifyCustomer) {
             $invoice->setEmailSent(true);
         }
 
@@ -149,7 +149,7 @@ class Mage_Sales_Model_Order_Invoice_Api extends Mage_Sales_Model_Api_Resource
                 ->addObject($invoice->getOrder())
                 ->save();
 
-            $invoice->sendEmail($email, ($includeComment ? $comment : ''));
+            $invoice->sendEmail($notifyCustomer, ($includeComment ? $comment : ''));
         } catch (Mage_Core_Exception $e) {
             $this->_fault('data_invalid', $e->getMessage());
         }
@@ -166,7 +166,8 @@ class Mage_Sales_Model_Order_Invoice_Api extends Mage_Sales_Model_Api_Resource
      * @param bool $includeComment
      * @return bool
      */
-    public function addComment($invoiceIncrementId, $comment, $email = false, $includeComment = false)
+    public function addComment($invoiceIncrementId, $comment, #[\SensitiveParameter]
+    $email = false, $includeComment = false)
     {
         $invoice = Mage::getModel('sales/order_invoice')->loadByIncrementId($invoiceIncrementId);
 

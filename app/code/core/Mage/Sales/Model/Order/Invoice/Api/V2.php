@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -24,12 +24,12 @@ class Mage_Sales_Model_Order_Invoice_Api_V2 extends Mage_Sales_Model_Order_Invoi
      * @param string $invoiceIncrementId
      * @param array $itemsQty
      * @param string $comment
-     * @param bool $email
+     * @param bool $notifyCustomer
      * @param bool $includeComment
      * @return string
      */
     #[\Override]
-    public function create($invoiceIncrementId, $itemsQty = [], $comment = null, $email = false, $includeComment = false)
+    public function create($invoiceIncrementId, $itemsQty = [], $comment = null, $notifyCustomer = false, $includeComment = false)
     {
         $order = Mage::getModel('sales/order')->loadByIncrementId($invoiceIncrementId);
         $itemsQty = $this->_prepareItemQtyData($itemsQty);
@@ -53,10 +53,10 @@ class Mage_Sales_Model_Order_Invoice_Api_V2 extends Mage_Sales_Model_Order_Invoi
         $invoice->register();
 
         if ($comment !== null) {
-            $invoice->addComment($comment, $email);
+            $invoice->addComment($comment, $notifyCustomer);
         }
 
-        if ($email) {
+        if ($notifyCustomer) {
             $invoice->setEmailSent(true);
         }
 
@@ -64,7 +64,7 @@ class Mage_Sales_Model_Order_Invoice_Api_V2 extends Mage_Sales_Model_Order_Invoi
 
         try {
             Mage::getModel('core/resource_transaction')->addObject($invoice)->addObject($invoice->getOrder())->save();
-            $invoice->sendEmail($email, ($includeComment ? $comment : ''));
+            $invoice->sendEmail($notifyCustomer, ($includeComment ? $comment : ''));
         } catch (Mage_Core_Exception $e) {
             $this->_fault('data_invalid', $e->getMessage());
         }

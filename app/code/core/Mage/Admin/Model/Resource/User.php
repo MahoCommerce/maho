@@ -72,7 +72,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
      * @param string $username
      * @return false|array
      */
-    public function loadByUsername($username)
+    public function loadByUsername(#[\SensitiveParameter] $username)
     {
         $adapter = $this->_getReadAdapter();
 
@@ -120,17 +120,6 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
         } else {
             return null;
         }
-    }
-
-    /**
-     * Encrypt password
-     *
-     * @param string $pwStr
-     * @return string
-     */
-    private function _encryptPassword($pwStr)
-    {
-        return Mage::helper('core')->getHash($pwStr, Mage_Admin_Model_User::HASH_SALT_LENGTH);
     }
 
     /**

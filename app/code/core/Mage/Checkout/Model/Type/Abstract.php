@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -143,7 +143,7 @@ abstract class Mage_Checkout_Model_Type_Abstract extends Varien_Object
      * @param Mage_Sales_Model_Order $order
      * @deprecated after 1.4.0.0-rc1
      */
-    protected function _emailOrderConfirmation($email, $name, $order)
+    protected function _emailOrderConfirmation(#[\SensitiveParameter] $email, $name, $order)
     {
         $mailer = Mage::getModel('core/email')
             ->setTemplate('email/order.phtml')

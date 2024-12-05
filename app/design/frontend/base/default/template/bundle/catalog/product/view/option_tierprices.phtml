@@ -197,7 +197,7 @@ if (Mage::helper('weee')->typeOfDisplay($_product, [1,2,4])) {
                 };
             <?php endif ?>
                 Catalog.Map.addHelpLink(
-                    $('<?= $popupId ?>'),
+                    '<?= $popupId ?>',
                     "<?= $this->escapeHtml($_product->getName()) ?>",
                     <?= json_encode($_price['real_price_html']) ?>,
                     "<?= $this->helper('core')->currency($_product->getMsrp(),true,false) ?>",

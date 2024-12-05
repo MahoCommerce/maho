@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -57,7 +57,7 @@ class Mage_Core_Model_Email_Info extends Varien_Object
      * @param string|null $name
      * @return $this
      */
-    public function addBcc($email, $name = null)
+    public function addBcc(#[\SensitiveParameter] $email, $name = null)
     {
         $this->_bccNames[] = $name;
         $this->_bccEmails[] = $email;
@@ -71,7 +71,7 @@ class Mage_Core_Model_Email_Info extends Varien_Object
      * @param array|string|null $name
      * @return $this
      */
-    public function addTo($email, $name = null)
+    public function addTo(#[\SensitiveParameter] $email, $name = null)
     {
         $this->_toNames[] = $name;
         $this->_toEmails[] = $email;

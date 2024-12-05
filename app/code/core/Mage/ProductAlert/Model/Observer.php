@@ -81,9 +81,9 @@ class Mage_ProductAlert_Model_Observer
      *
      * @return $this
      */
-    protected function _processPrice(Mage_ProductAlert_Model_Email $email)
+    protected function _processPrice(Mage_ProductAlert_Model_Email $emailAlertModel)
     {
-        $email->setType('price');
+        $emailAlertModel->setType('price');
         $originalStore = Mage::app()->getStore();
         foreach ($this->_getWebsites() as $website) {
             /** @var Mage_Core_Model_Website $website */
@@ -105,7 +105,7 @@ class Mage_ProductAlert_Model_Observer
             }
 
             $previousCustomer = null;
-            $email->setWebsite($website);
+            $emailAlertModel->setWebsite($website);
             Mage::app()->setCurrentStore($website->getDefaultGroup()->getDefaultStore());
             /** @var Mage_ProductAlert_Model_Price $alert */
             foreach ($collection as $alert) {
@@ -113,14 +113,14 @@ class Mage_ProductAlert_Model_Observer
                     if (!$previousCustomer || $previousCustomer->getId() != $alert->getCustomerId()) {
                         $customer = Mage::getModel('customer/customer')->load($alert->getCustomerId());
                         if ($previousCustomer) {
-                            $email->send();
+                            $emailAlertModel->send();
                         }
                         if (!$customer->getId()) {
                             continue;
                         }
                         $previousCustomer = $customer;
-                        $email->clean();
-                        $email->setCustomer($customer);
+                        $emailAlertModel->clean();
+                        $emailAlertModel->setCustomer($customer);
                     } else {
                         $customer = $previousCustomer;
                     }
@@ -136,7 +136,7 @@ class Mage_ProductAlert_Model_Observer
                         $productPrice = $product->getFinalPrice();
                         $product->setFinalPrice(Mage::helper('tax')->getPrice($product, $productPrice));
                         $product->setPrice(Mage::helper('tax')->getPrice($product, $product->getPrice()));
-                        $email->addPriceProduct($product);
+                        $emailAlertModel->addPriceProduct($product);
 
                         $alert->setPrice($productPrice);
                         $alert->setLastSendDate(Mage::getModel('core/date')->gmtDate());
@@ -150,7 +150,7 @@ class Mage_ProductAlert_Model_Observer
             }
             if ($previousCustomer) {
                 try {
-                    $email->send();
+                    $emailAlertModel->send();
                 } catch (Exception $e) {
                     $this->_errors[] = $e->getMessage();
                 }
@@ -165,9 +165,9 @@ class Mage_ProductAlert_Model_Observer
      *
      * @return $this
      */
-    protected function _processStock(Mage_ProductAlert_Model_Email $email)
+    protected function _processStock(Mage_ProductAlert_Model_Email $emailAlertModel)
     {
-        $email->setType('stock');
+        $emailAlertModel->setType('stock');
         $originalStore = Mage::app()->getStore();
 
         foreach ($this->_getWebsites() as $website) {
@@ -191,7 +191,7 @@ class Mage_ProductAlert_Model_Observer
             }
 
             $previousCustomer = null;
-            $email->setWebsite($website);
+            $emailAlertModel->setWebsite($website);
             Mage::app()->setCurrentStore($website->getDefaultGroup()->getDefaultStore());
             /** @var Mage_ProductAlert_Model_Stock $alert */
             foreach ($collection as $alert) {
@@ -199,14 +199,14 @@ class Mage_ProductAlert_Model_Observer
                     if (!$previousCustomer || $previousCustomer->getId() != $alert->getCustomerId()) {
                         $customer = Mage::getModel('customer/customer')->load($alert->getCustomerId());
                         if ($previousCustomer) {
-                            $email->send();
+                            $emailAlertModel->send();
                         }
                         if (!$customer->getId()) {
                             continue;
                         }
                         $previousCustomer = $customer;
-                        $email->clean();
-                        $email->setCustomer($customer);
+                        $emailAlertModel->clean();
+                        $emailAlertModel->setCustomer($customer);
                     } else {
                         $customer = $previousCustomer;
                     }
@@ -222,7 +222,7 @@ class Mage_ProductAlert_Model_Observer
                     $product->setCustomerGroupId($customer->getGroupId());
 
                     if ($product->isSalable()) {
-                        $email->addStockProduct($product);
+                        $emailAlertModel->addStockProduct($product);
 
                         $alert->setSendDate(Mage::getModel('core/date')->gmtDate());
                         $alert->setSendCount($alert->getSendCount() + 1);
@@ -236,7 +236,7 @@ class Mage_ProductAlert_Model_Observer
 
             if ($previousCustomer) {
                 try {
-                    $email->send();
+                    $emailAlertModel->send();
                 } catch (Exception $e) {
                     $this->_errors[] = $e->getMessage();
                 }

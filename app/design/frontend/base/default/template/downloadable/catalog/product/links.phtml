@@ -37,10 +37,9 @@
                     </span>
                     <?php if ($_isRequired): ?>
                         <script type="text/javascript">
-                        //<![CDATA[
-                            $('links_<?= $_link->getId() ?>').advaiceContainer = 'links-advice-container';
-                            $('links_<?= $_link->getId() ?>').callbackFunction = 'validateDownloadableCallback';
-                        //]]>
+                            var linkElement = document.getElementById('links_<?= $_link->getId() ?>');
+                            linkElement.advaiceContainer = 'links-advice-container';
+                            linkElement.callbackFunction = 'validateDownloadableCallback';
                         </script>
                     <?php endif ?>
                 </li>
@@ -53,47 +52,44 @@
         </dd>
     </dl>
     <script type="text/javascript">
-    //<![CDATA[
-        Product.Downloadable = Class.create();
-        Product.Downloadable.prototype = {
-            config : {},
-            initialize : function(config){
+        class ProductDownloadable {
+            constructor(config) {
                 this.config = config;
                 this.reloadPrice();
-                document.observe("dom:loaded", this.reloadPrice.bind(this));
-            },
-            reloadPrice : function(){
-                var price = 0;
-                config = this.config;
-                $$('.product-downloadable-link').each(function(elm){
+                document.addEventListener('DOMContentLoaded', () => this.reloadPrice());
+            }
+
+            reloadPrice() {
+                let price = 0;
+                const config = this.config;
+
+                document.querySelectorAll('.product-downloadable-link').forEach(elm => {
                     if (config[elm.value] && elm.checked) {
                         price += parseFloat(config[elm.value]);
                     }
                 });
+
                 try {
-                    var _displayZeroPrice = optionsPrice.displayZeroPrice;
+                    const _displayZeroPrice = optionsPrice.displayZeroPrice;
                     optionsPrice.displayZeroPrice = false;
                     optionsPrice.changePrice('downloadable', price);
                     optionsPrice.reload();
                     optionsPrice.displayZeroPrice = _displayZeroPrice;
-                } catch (e) {
-
-                }
-            }
-        };
-
-        function validateDownloadableCallback(elmId, result) {
-            var container = $('downloadable-links-list');
-            if (result == 'failed') {
-                container.removeClassName('validation-passed');
-                container.addClassName('validation-failed');
-            } else {
-                container.removeClassName('validation-failed');
-                container.addClassName('validation-passed');
+                } catch (e) {}
             }
         }
 
-        var dConfig = new Product.Downloadable(<?= $this->getJsonConfig() ?>);
-    //]]>
+        function validateDownloadableCallback(elmId, result) {
+            const container = document.getElementById('downloadable-links-list');
+            if (result == 'failed') {
+                container.classList.remove('validation-passed');
+                container.classList.add('validation-failed');
+            } else {
+                container.classList.remove('validation-failed');
+                container.classList.add('validation-passed');
+            }
+        }
+
+        const dConfig = new ProductDownloadable(<?= $this->getJsonConfig() ?>);
     </script>
 <?php endif ?>

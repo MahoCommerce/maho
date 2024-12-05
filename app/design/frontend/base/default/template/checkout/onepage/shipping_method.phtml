@@ -5,19 +5,19 @@
  * @category    design
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Checkout_Block_Onepage_Shipping_Method $this */
 ?>
 <form id="co-shipping-method-form" action="">
     <div id="checkout-shipping-method-load">
        <!-- Content loaded dynamically -->
     </div>
     <script type="text/javascript">
-    //<![CDATA[
         var shippingMethod = new ShippingMethod('co-shipping-method-form', "<?= $this->getUrl('checkout/onepage/saveShippingMethod') ?>");
-    //]]>
     </script>
     <div id="onepage-checkout-shipping-method-additional-load">
         <?= $this->getChildHtml('additional') ?>

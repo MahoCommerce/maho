@@ -80,7 +80,7 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
             <a id="<?= $helpLinkId ?>" href="#"
                class="map-help-link"><?= $this->__("What's this?") ?></a>
             <script type="text/javascript">
-                Catalog.Map.addHelpLink($('<?= $helpLinkId ?>'), "<?= Mage::helper('core')->jsQuoteEscape($this->__("What's this?")) ?>");
+                Catalog.Map.addHelpLink('<?= $helpLinkId ?>', "<?= Mage::helper('core')->jsQuoteEscape($this->__("What's this?")) ?>");
             </script>
         </span>
     </td>

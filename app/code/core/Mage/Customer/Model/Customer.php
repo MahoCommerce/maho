@@ -42,6 +42,7 @@
  * @method $this setEmail(string $value)
  *
  * @method string getFirstname()
+ * @method $this setFirstname(string $value)
  * @method bool getForceConfirmed()
  * @method $this setForceConfirmed(bool $value)
  *
@@ -63,6 +64,7 @@
  * @method $this setItems(int $value)
  *
  * @method string getLastname()
+ * @method $this setLastname(string $value)
  *
  * @method string getMiddlename()
  * @method string getMode()

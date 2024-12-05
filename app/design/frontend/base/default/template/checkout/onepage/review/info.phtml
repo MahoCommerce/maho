@@ -5,10 +5,12 @@
  * @category    design
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Checkout_Block_Onepage_Review_Info $this */
 ?>
 <?= $this->getChildHtml('items_before') ?>
 <div id="checkout-review-table-wrapper">
@@ -58,8 +60,10 @@
         </span>
     </div>
     <script type="text/javascript">
-    //<![CDATA[
-        review = new Review('<?= $this->getUrl('checkout/onepage/saveOrder') ?>', '<?= $this->getUrl('checkout/onepage/success') ?>', $('checkout-agreements'));
-    //]]>
+        review = new Review(
+            '<?= $this->getUrl('checkout/onepage/saveOrder') ?>',
+            '<?= $this->getUrl('checkout/onepage/success') ?>',
+            document.getElementById('checkout-agreements')
+        );
     </script>
 </div>
