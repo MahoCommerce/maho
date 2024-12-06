@@ -451,6 +451,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     public function reinit($options = [])
     {
+        $this->_xml = null;
+        $this->_isLocalConfigLoaded = false;
         $this->_allowCacheForInit = false;
         $this->_useCache = false;
         return $this->init($options);
