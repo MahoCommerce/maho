@@ -49,7 +49,8 @@ class Mage_Core_Model_Design_Config extends Varien_Simplexml_Config
                     $designRoot = $info['path'] . '/app/design';
                 }
                 foreach (glob("$designRoot/*/*/*/etc/theme.xml") as $file) {
-                    $files[Maho::toRelativePath($file)] = $file;
+                    $relativePath = str_replace($designRoot, '', $file);
+                    $files[$relativePath] = $file;
                 }
             }
 
