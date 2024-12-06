@@ -53,7 +53,6 @@ jobs:
           set +e
           ERROR=0
           for FILE in ${{ steps.changed-files.outputs.all_changed_files }}; do
-              echo "$FILE"
               MESSAGE=$(php -l "$FILE" 2>&1 1>/dev/null)
               if [ $? -ne 0 ]; then
                   ERROR=255
