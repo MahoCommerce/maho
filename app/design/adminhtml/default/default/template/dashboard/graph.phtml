@@ -15,6 +15,7 @@
 /** @var Mage_Adminhtml_Block_Dashboard_Graph $this */
 ?>
 
+<?php $chartRandomId = rand(100,999) ?>
 <div style="margin:20px;">
     <p class="switcher a-right" style="padding:5px 10px;"><?= $this->__('Select Range') ?>:
     <select name="period" id="order_<?= $this->getHtmlId() ?>_period" onchange="changeDiagramsPeriod(this);">
@@ -27,7 +28,53 @@
     $_containerStyle = "width:{$this->getWidth()}px;height:{$this->getHeight()}px; margin:0 auto;";
     ?>
     <?php if($this->getCount()): ?>
-    <p style="<?= $_containerStyle?>"><img src="<?= $this->getChartUrl(false) ?>" alt="chart" title="chart" /></p>
+        <?php $this->processData() ?>
+        <div class="a-center" style="<?= $_containerStyle?>"><canvas id="chart<?= $chartRandomId ?>"></canvas></div>
+
+        <script type="text/javascript">
+            window.chartsLoaded = window.chartsLoaded || false;
+            function loadCharts(callback) {
+                if (window.chartsLoaded && window.Chart) {
+                    callback();
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
+                script.async = true;
+                script.onload = () => {
+                    window.chartsLoaded = true;
+                    callback();
+                };
+                document.head.appendChild(script);
+            }
+
+            function initializeChart() {
+                const config = {
+                    type: 'line',
+                    data: {
+                        labels: <?= json_encode($this->_axisLabels['x']) ?>,
+                        datasets: [{
+                            data: <?= json_encode($this->_allSeries[array_key_first($this->_allSeries)]) ?>,
+                            borderColor: '#adb41a',
+                            tension: 0.2
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                };
+
+                if (window.chart<?= $chartRandomId ?> && window.chart<?= $chartRandomId ?>.destroy) window.chart<?= $chartRandomId ?>.destroy();
+                window.chart<?= $chartRandomId ?> = new Chart(document.getElementById('chart<?= $chartRandomId ?>'), config);
+            }
+
+            loadCharts(initializeChart);
+        </script>
     <?php else: ?>
     <p class="a-center" style="<?= $_containerStyle?>"><?= $this->__('No Data Found') ?></p>
     <?php endif ?>

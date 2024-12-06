@@ -19,11 +19,6 @@
 class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboard_Abstract
 {
     /**
-     * Api URL
-     */
-    public const API_URL = 'https://image-charts.com/chart';
-
-    /**
      * All series
      *
      * @var array
@@ -52,20 +47,6 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
     protected $_dataRows = [];
 
     /**
-     * Simple encoding chars
-     *
-     * @var string
-     */
-    protected $_simpleEncoding = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-    /**
-     * Extended encoding chars
-     *
-     * @var string
-     */
-    protected $_extendedEncoding = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.';
-
-    /**
      * Chart width
      *
      * @var string
@@ -78,15 +59,6 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
      * @var string
      */
     protected $_height = '300';
-
-    /**
-     * Google chart api data encoding
-     *
-     * @deprecated since the Google Image Charts API not accessible from March 14, 2019
-     *
-     * @var string
-     */
-    protected $_encoding = 'e';
 
     /**
      * Html identifier
@@ -159,26 +131,14 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
     }
 
     /**
-     * Get chart url
-     *
-     * @param bool $directUrl
-     * @return string
      * @throws Mage_Core_Model_Store_Exception
      * @throws Zend_Date_Exception
      */
-    public function getChartUrl($directUrl = true)
+    public function processData(): array
     {
-        $params = [
-            'cht'  => 'lc',
-            'chf'  => 'bg,s,f4f4f4|c,lg,90,ffffff,0.1,ededed,0',
-            'chm'  => 'B,f4d4b2,0,0,0',
-            'chco' => 'db4814',
-            'chxs' => '0,0,11|1,0,11',
-            'chma' => '15,15,15,15'
-        ];
+        $params = [];
 
         $this->_allSeries = $this->getRowsData($this->_dataRows);
-
         foreach ($this->_axisMaps as $axis => $attr) {
             $this->setAxisLabels($axis, $this->getRowsData($attr, true));
         }
@@ -222,28 +182,13 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
             $dates[] = $d;
         }
 
-        /**
-         * setting skip step
-         */
+        // setting skip step
         if (count($dates) > 8 && count($dates) < 15) {
             $c = 1;
         } elseif (count($dates) >= 15) {
             $c = 2;
         } else {
             $c = 0;
-        }
-        /**
-         * skipping some x labels for good reading
-         */
-        $i = 0;
-        foreach ($dates as $k => $d) {
-            if ($i == $c) {
-                $dates[$k] = $d;
-                $i = 0;
-            } else {
-                $dates[$k] = '';
-                $i++;
-            }
         }
 
         $this->_axisLabels['x'] = $dates;
@@ -325,9 +270,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
             $indexid = 0;
             foreach (array_keys($this->_axisLabels) as $idx) {
                 if ($idx === 'x') {
-                    /**
-                     * Format date
-                     */
+                    // format date
                     foreach ($this->_axisLabels[$idx] as $_index => $_label) {
                         if ($_label != '') {
                             switch ($this->getDataHelper()->getParam('period')) {
@@ -377,26 +320,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
             $params['chxl'] = implode('|', $valueBuffer);
         }
 
-        // chart size
-        $params['chs'] = $this->getWidth() . 'x' . $this->getHeight();
-
-        if (isset($deltaX, $deltaY)) {
-            $params['chg'] = $deltaX . ',' . $deltaY . ',1,0';
-        }
-
-        // return the encoded data
-        if ($directUrl) {
-            $p = [];
-            foreach ($params as $name => $value) {
-                $p[] = $name . '=' . urlencode($value);
-            }
-            return self::API_URL . '?' . implode('&', $p);
-        }
-
-        $gaData = urlencode(base64_encode(json_encode($params)));
-        $gaHash = Mage::helper('adminhtml/dashboard_data')->getChartDataHash($gaData);
-        $params = ['ga' => $gaData, 'h' => $gaHash];
-        return $this->getUrl('*/*/tunnel', ['_query' => $params]);
+        return $params;
     }
 
     /**
