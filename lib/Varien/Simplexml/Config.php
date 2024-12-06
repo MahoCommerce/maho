@@ -21,7 +21,7 @@ class Varien_Simplexml_Config
     /**
      * Configuration xml
      *
-     * @var Varien_Simplexml_Element|SimpleXMLElement
+     * @var Varien_Simplexml_Element|SimpleXMLElement|null
      */
     protected $_xml = null;
 

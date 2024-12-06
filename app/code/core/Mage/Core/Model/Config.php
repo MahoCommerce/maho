@@ -85,7 +85,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     /**
      * Configuration xml
      *
-     * @var Mage_Core_Model_Config_Element
+     * @var Mage_Core_Model_Config_Element|null
      */
     protected $_xml = null;
 
