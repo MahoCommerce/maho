@@ -330,7 +330,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         // Prevent double loading of base config
         if ($this->getNode() !== false) {
-            return;
+            return $this;
         }
 
         $files = [];
