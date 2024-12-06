@@ -40,7 +40,7 @@ jobs:
             !.phpstorm.meta.php/*
 
       - name: Setup PHP
-        if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
+        if: steps.changed-files.outputs.any_changed == 'true'
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
@@ -48,13 +48,29 @@ jobs:
           tools: none
 
       - name: Check changed files
-        if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
+        if: steps.changed-files.outputs.any_changed == 'true' && steps.changed-files.outputs.all_modified_files_count < 2000
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: |
           set +e
           ERROR=0
           for FILE in ${ALL_CHANGED_FILES}; do
+              MESSAGE=$(php -l "$FILE" 2>&1 1>/dev/null)
+              if [ $? -ne 0 ]; then
+                  ERROR=255
+                  LINE=$(echo $MESSAGE | sed -En 's/.*on line ([0-9]+).*/\1/p')
+                  echo "::error file=$FILE,line=$LINE::$MESSAGE"
+              fi
+          done
+          exit $ERROR
+
+      - name: Check all files
+        if: steps.changed-files.outputs.any_changed == 'true' && steps.changed-files.outputs.all_modified_files_count >= 2000
+        run: |
+          set +e
+          ERROR=0
+          find . -type f \( -iname "*.php" -o -iname "*.phtml" \) ! -path "./.phpstorm.meta.php/*" ! -path "./vendor/*" -print0 |
+          while IFS= read -r -d '' FILE; do
               MESSAGE=$(php -l "$FILE" 2>&1 1>/dev/null)
               if [ $? -ne 0 ]; then
                   ERROR=255
