@@ -120,14 +120,14 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
         return $this->_allSeries[$seriesId] ?? false;
     }
 
-    /**
-     * Get all series
-     *
-     * @return array
-     */
-    public function getAllSeries()
+    public function getAllSeries(): array
     {
         return $this->_allSeries;
+    }
+
+    public function getAxisLabels(string $axis): array
+    {
+        return $this->_axisLabels[$axis];
     }
 
     /**

@@ -50,12 +50,13 @@
             }
 
             function initializeChart() {
+                <?php $allSeries = $this->getAllSeries() ?>
                 const config = {
                     type: 'line',
                     data: {
-                        labels: <?= json_encode($this->_axisLabels['x']) ?>,
+                        labels: <?= json_encode($this->getAxisLabels('x')) ?>,
                         datasets: [{
-                            data: <?= json_encode($this->_allSeries[array_key_first($this->_allSeries)]) ?>,
+                            data: <?= json_encode($allSeries[array_key_first($allSeries)]) ?>,
                             borderColor: '#adb41a',
                             tension: 0.2
                         }]
