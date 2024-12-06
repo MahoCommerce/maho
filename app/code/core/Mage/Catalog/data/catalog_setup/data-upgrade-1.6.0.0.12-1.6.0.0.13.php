@@ -9,7 +9,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Mage_Catalog_Model_Resource_Setup $installer */
+/** @var Mage_Catalog_Model_Resource_Setup $this */
 $installer = $this;
 $groupPriceAttrId = $installer->getAttribute('catalog_product', 'group_price', 'attribute_id');
 $priceAttrId = $installer->getAttribute('catalog_product', 'price', 'attribute_id');

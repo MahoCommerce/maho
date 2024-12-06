@@ -9,7 +9,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Mage_Api2_Model_Resource_Setup $installer */
+/** @var Mage_Api2_Model_Resource_Setup $this */
 $installer = $this;
 $installer->startSetup();
 
