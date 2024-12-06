@@ -312,7 +312,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Send authorize request to gateway
      *
-     * @param  Mage_Payment_Model_Info $payment
+     * @param  Mage_Sales_Model_Order_Payment $payment
      * @param  float $amount
      * @return $this
      */
@@ -339,7 +339,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Send capture request to gateway
      *
-     * @param Mage_Payment_Model_Info $payment
+     * @param Mage_Sales_Model_Order_Payment $payment
      * @param float $amount
      * @return $this
      */
@@ -364,7 +364,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Void the payment through gateway
      *
-     * @param  Mage_Payment_Model_Info $payment
+     * @param  Mage_Sales_Model_Order_Payment $payment
      * @return $this
      */
     #[\Override]
@@ -399,7 +399,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Cancel the payment through gateway
      *
-     * @param  Mage_Payment_Model_Info $payment
+     * @param  Mage_Sales_Model_Order_Payment $payment
      * @return $this
      */
     #[\Override]
@@ -411,6 +411,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Refund the amount with transaction id
      *
+     * @param Mage_Sales_Model_Order_Payment $payment
      * @param float $requestedAmount
      * @return $this
      * @throws Mage_Core_Exception
@@ -494,9 +495,9 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Send request with new payment to gateway
      *
-     * @param Mage_Payment_Model_Info $payment
+     * @param Mage_Sales_Model_Order_Payment $payment
      * @param float $amount
-     * @param string $requestType
+     * @param self::REQUEST_TYPE_AUTH_* $requestType
      * @return $this
      * @throws Mage_Core_Exception
      */
@@ -593,9 +594,9 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Send request with new payment to gateway during partial authorization process
      *
-     * @param Mage_Payment_Model_Info $payment
+     * @param Mage_Sales_Model_Order_Payment $payment
      * @param float $amount
-     * @param string $requestType
+     * @param self::REQUEST_TYPE_AUTH_* $requestType
      * @return $this
      */
     protected function _partialAuthorization($payment, $amount, $requestType)
@@ -689,7 +690,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Send capture request to gateway for capture authorized transactions
      *
-     * @param Mage_Payment_Model_Info $payment
+     * @param Mage_Sales_Model_Order_Payment $payment
      * @param float $requestedAmount
      * @return $this
      */
@@ -743,7 +744,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Send capture request to gateway for capture authorized transactions of card
      *
-     * @param Mage_Payment_Model_Info $payment
+     * @param Mage_Sales_Model_Order_Payment $payment
      * @param float $amount
      * @param Varien_Object $card
      * @return Mage_Sales_Model_Order_Payment_Transaction
@@ -810,7 +811,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Void the card transaction through gateway
      *
-     * @param Mage_Payment_Model_Info $payment
+     * @param Mage_Sales_Model_Order_Payment $payment
      * @param Varien_Object $card
      * @return Mage_Sales_Model_Order_Payment_Transaction
      */
@@ -911,7 +912,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Refund the card transaction through gateway
      *
-     * @param Mage_Payment_Model_Info $payment
+     * @param Mage_Sales_Model_Order_Payment $payment
      * @param Varien_Object $card
      * @return Mage_Sales_Model_Order_Payment_Transaction
      */
@@ -1107,7 +1108,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     /**
      * Set split_tender_id to quote payment if needed
      *
-     * @param Varien_Object $response
+     * @param Mage_Paygate_Model_Authorizenet_Result $response
      * @param Mage_Sales_Model_Order_Payment $orderPayment
      * @return bool
      */
@@ -1511,7 +1512,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * Process exceptions for gateway action with a lot of transactions
      *
      * @param  Mage_Payment_Model_Info $payment
-     * @param  string $messages
+     * @param  array $messages
      * @param  bool $isSuccessfulTransactions
      */
     protected function _processFailureMultitransactionAction($payment, $messages, $isSuccessfulTransactions)

@@ -13,7 +13,7 @@ return $config
         // There MUST be one blank line after the namespace declaration.
         'blank_line_after_namespace' => true,
         // Ensure there is no code on the same line as the PHP open tag and it is followed by a blank line.
-        'blank_line_after_opening_tag' => true,
+        'blank_line_after_opening_tag' => false,
         // The body of each structure MUST be enclosed by braces. Braces should be properly placed. Body of braces should be properly indented.
         'braces' => true,
         // Whitespace around the keywords of a class, trait or interfaces definition should be one space.

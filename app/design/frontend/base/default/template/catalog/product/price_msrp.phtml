@@ -34,20 +34,20 @@
         <script type="text/javascript">
             <?php if ($this->helper('catalog')->isShowPriceOnGesture($_product)): ?>
                 var newLink = Catalog.Map.addHelpLink(
-                        $('<?= $helpLinkId ?>'),
-                        "<?= $this->escapeHtml($_product->getName()) ?>",
-                        <?= $this->getRealPriceJs($_product) ?>,
-                        '<?= $_msrpPrice ?>',
-                        "<?= $_product->isSalable() ? $this->getAddToCartUrlCustom($_product, [], false) : '' ?>"
+                    '<?= $helpLinkId ?>',
+                    "<?= $this->escapeHtml($_product->getName()) ?>",
+                    <?= $this->getRealPriceJs($_product) ?>,
+                    '<?= $_msrpPrice ?>',
+                    "<?= $_product->isSalable() ? $this->getAddToCartUrlCustom($_product, [], false) : '' ?>"
                 );
                 newLink.product_id = '<?= $_product->getId() ?>';
             <?php else: ?>
                 Catalog.Map.addHelpLink(
-                        $('<?= $helpLinkId ?>'),
-                        "<?= $this->escapeHtml($_product->getName()) ?>",
-                        null,
-                        null,
-                        "<?= $_product->getProductUrl() ?>"
+                    '<?= $helpLinkId ?>',
+                    "<?= $this->escapeHtml($_product->getName()) ?>",
+                    null,
+                    null,
+                    "<?= $_product->getProductUrl() ?>"
                 );
             <?php endif ?>
 

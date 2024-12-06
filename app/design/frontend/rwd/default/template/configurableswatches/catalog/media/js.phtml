@@ -15,20 +15,9 @@
 ?>
 
 <script type="text/javascript">
-    if(!(typeof $j == 'function' && $j === jQuery)) {
-        ConfigurableMediaImages.init('<?= $this->getImageType() ?>');
-        <?php foreach ($this->getProductImageFallbacks() as $imageFallback): ?>
-        ConfigurableMediaImages.setImageFallback(<?= $imageFallback['product']->getId() ?>, JSON.parse('<?= $imageFallback['image_fallback'] ?>'));
-        <?php endforeach ?>
-        document.dispatchEvent(new Event('configurable-media-images-init'));
-    } else {
-        // compatibility with rwd theme ProductMediaManager in app.js
-        $j(document).on('product-media-loaded', function() {
-            ConfigurableMediaImages.init('<?= $this->getImageType() ?>');
-            <?php foreach ($this->getProductImageFallbacks() as $imageFallback): ?>
-            ConfigurableMediaImages.setImageFallback(<?= $imageFallback['product']->getId() ?>, $j.parseJSON('<?= $imageFallback['image_fallback'] ?>'));
-            <?php endforeach ?>
-            $j(document).trigger('configurable-media-images-init', ConfigurableMediaImages);
-        });
-    }
+    ConfigurableMediaImages.init('<?= $this->getImageType() ?>');
+    <?php foreach ($this->getProductImageFallbacks() as $imageFallback): ?>
+    ConfigurableMediaImages.setImageFallback(<?= $imageFallback['product']->getId() ?>, JSON.parse('<?= $imageFallback['image_fallback'] ?>'));
+    <?php endforeach ?>
+    document.dispatchEvent(new Event('configurable-media-images-init'));
 </script>

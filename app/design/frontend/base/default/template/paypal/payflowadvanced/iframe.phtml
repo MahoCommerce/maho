@@ -9,6 +9,7 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
 /** @var Mage_Paypal_Block_Payflow_Advanced_Iframe $this */
 ?>
 <div id="iframe-warning" class="warning-message">
@@ -17,19 +18,18 @@
 <iframe id="payflow-advanced-iframe" style="display:none;" scrolling="no" frameborder="0"
         src="<?= $this->getFrameActionUrl() ?>" height="610" width="100%"></iframe>
 <script type="text/javascript">
-//<![CDATA[
-var headers = $$('#' + checkout.accordion.container.readAttribute('id') + ' .section');
-headers.each(function(header) {
-    header.removeClassName('allow');
-});
-$('payflow-advanced-iframe').observe('load', function(){
-    $('payflow-advanced-iframe').show();
-    $('iframe-warning').show();
-    checkout.loadWaiting = 'review';
-    checkout.setLoadWaiting(false);
-    if (checkout.accordion.currentSection == 'opc-review') {
-        $('checkout-review-submit').hide();
-    }
-});
-//]]>
+    const headers = document.querySelectorAll('#' + document.getElementById(checkout.accordion.container.getAttribute('id')) + ' .section');
+    headers.forEach(header => {
+        header.classList.remove('allow');
+    });
+
+    document.getElementById('payflow-advanced-iframe').addEventListener('load', function() {
+        document.getElementById('payflow-advanced-iframe').style.display = 'block';
+        document.getElementById('iframe-warning').style.display = 'block';
+        checkout.loadWaiting = 'review';
+        checkout.setLoadWaiting(false);
+        if (checkout.accordion.currentSection == 'opc-review') {
+            document.getElementById('checkout-review-submit').style.display = 'none';
+        }
+    });
 </script>

@@ -82,9 +82,7 @@
                                 <option value=""><?= $this->__('Please select region, state or province') ?></option>
                             </select>
                             <script type="text/javascript">
-                            //<![CDATA[
-                                $('billing:region_id').setAttribute('defaultValue',  "<?= $this->getAddress()->getRegionId() ?>");
-                            //]]>
+                                document.getElementById('billing:region_id').setAttribute('defaultValue', "<?= $this->getAddress()->getRegionId() ?>");
                             </script>
                             <input type="text" id="billing:region" name="billing[region]" value="<?= $this->escapeHtml($this->getAddress()->getRegion()) ?>"  title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" style="display:none;" />
                         </div>
@@ -200,24 +198,35 @@
 </div>
 </form>
 <script type="text/javascript">
-//<![CDATA[
     var billing = new Billing('co-billing-form', '<?= $this->getUrl('checkout/onepage/getAddress') ?>address/', '<?= $this->getUrl('checkout/onepage/saveBilling') ?>');
     var billingForm = new VarienForm('co-billing-form');
 
-    $('billing-address-select') && billing.newAddress(!$('billing-address-select').value);
+    const billingAddressSelect = document.getElementById('billing-address-select');
+    if (billingAddressSelect) {
+        billing.newAddress(!billingAddressSelect.value);
+    }
 
-    var billingRegionUpdater = new RegionUpdater('billing:country_id', 'billing:region', 'billing:region_id', <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, 'billing:postcode');
-    if ($('onepage-guest-register-button')) {
-        Event.observe($('onepage-guest-register-button'), 'click', function(event) {
-            var billingRememberMe = $('co-billing-form').select('.remember-me-box');
+    var billingRegionUpdater = new RegionUpdater(
+        'billing:country_id', 'billing:region', 'billing:region_id',
+        <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, 'billing:postcode'
+    );
+
+    const guestRegisterButton = document.getElementById('onepage-guest-register-button');
+    if (guestRegisterButton) {
+        guestRegisterButton.addEventListener('click', function(event) {
+            const billingForm = document.getElementById('co-billing-form');
+            const billingRememberMe = billingForm.querySelectorAll('.remember-me-box');
+
             if (billingRememberMe.length > 0) {
-                if ($('login:guest') && $('login:guest').checked) {
-                    billingRememberMe[0].hide();
-                } else if ($('login:register') && ($('login:register').checked || $('login:register').type == 'hidden')) {
-                    billingRememberMe[0].show();
+                const loginGuest = document.getElementById('login:guest');
+                const loginRegister = document.getElementById('login:register');
+
+                if (loginGuest && loginGuest.checked) {
+                    billingRememberMe[0].style.display = 'none';
+                } else if (loginRegister && (loginRegister.checked || loginRegister.type == 'hidden')) {
+                    billingRememberMe[0].style.display = 'block';
                 }
             }
         });
     }
-//]]>
 </script>

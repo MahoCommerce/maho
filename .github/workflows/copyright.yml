@@ -1,0 +1,81 @@
+name: Copyright Check
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  check-copyright:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Skip OM commits
+        if: github.event_name == 'push'
+        id: skip_check
+        run: |
+          COMMIT_MSG=$(git log --format=%B -n 1 ${{ github.sha }})
+          if [[ "$COMMIT_MSG" =~ ^OM\ PR ]]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get changed files
+        id: changed-files
+        if: github.event_name == 'pull_request' || steps.skip_check.outputs.skip != 'true'
+        uses: tj-actions/changed-files@v45
+
+      - name: Check copyright in modified files
+        if: github.event_name == 'pull_request' || steps.skip_check.outputs.skip != 'true'
+        shell: bash
+        run: |
+          # Get current year
+          CURRENT_YEAR=$(date +%Y)
+
+          # Initialize error flag
+          ERROR=0
+
+          # List of files to ignore
+          ignore="
+          .phpcs.xml
+          .php-cs-fixer.php
+          .rector.php
+          "
+
+          # Loop through each modified file
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            # Skip if file doesn't exist (was deleted)
+            if [ ! -f "$file" ]; then
+              continue
+            fi
+
+            # Only check files with specific extensions
+            extension="${file##*.}"
+            if ! [[ "${extension,,}" =~ ^(css|js|php|phtml|template|xml)$ ]]; then
+              continue
+            fi
+
+            # Check ignored files
+            if $( echo $ignore | grep -w -q $file ); then
+                continue;
+            fi
+
+            # Check if file contains the copyright string with current year
+            # Pattern matches either:
+            # @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+            # @copyright  Copyright (c) (2024-)2024 Maho (https://mahocommerce.com)
+            if ! grep -E -q "Copyright \(c\) (\(2024-\))?${CURRENT_YEAR} Maho \(https://mahocommerce\.com\)" "$file"; then
+              echo "❌ Copyright notice missing in: $file"
+              ERROR=1
+            fi
+          done
+
+          # Exit with error if any file is missing copyright
+          if [ $ERROR -eq 1 ]; then
+            echo "❌ Error: Some files are missing the required copyright notice"
+            exit 1
+          fi
+
+          echo "✅ Success: All modified files contain the required copyright notice"

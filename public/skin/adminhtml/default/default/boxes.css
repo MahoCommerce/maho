@@ -1469,26 +1469,14 @@ ul.super-product-attributes { padding-left:15px; }
 .options-box .option-header td { padding:5px 2px; }
 .options-box .option-header .tree { margin:5px 0 0; }
 
-/* CMS Popup Window */
-.popup-window .magento_message { padding:0 18px; }
-.popup-window .content-header { padding-top:9px; }
-.popup-window .content-header h3 { color:#eb5e00; padding:0; }
-.popup-window { height:auto !important; }
-.popup-window .grid { position:static; }
-.popup-window .table_window td.value2 .grid td,
-.popup-window .table_window td.value2 .grid th { padding:2px 4px !important; }
-.popup-window .table_window td.value2 .grid tr.headings th { padding:1px 4px 2px !important; }
-.popup-window .columns { background-image:none; }
-.popup-window .middle { background:none; padding:10px 0; }
-
-.popup-window .uploader .file-row { margin:16px 0; width:auto; }
-.popup-window #contents-uploader { margin-bottom:10px; background:#d7e5ef; padding:5px 10px; }
-.popup-window #contents-uploader .flex { font-size:0; line-height:0; height:20px; }
-.popup-window #contents { margin-left:-3px; height:400px; overflow:auto; position:relative; }
-.popup-window #contents .filecnt { float:left; border:1px solid #ccc; cursor:pointer; padding:3px; display:inline; margin:0 0 15px 4px; overflow:hidden; position:relative; width:100px; }
-.popup-window #contents .selected { border:1px solid #f1af73; background:#f0f0f0; cursor:default; }
-.popup-window #contents .nm { text-align:center; }
-.popup-window #contents .nm img { vertical-align:bottom; }
+dialog .uploader .file-row { margin:16px 0; width:auto; }
+dialog #contents-uploader { margin-bottom:10px; background:#d7e5ef; padding:5px 10px; }
+dialog #contents-uploader .flex { font-size:0; line-height:0; height:20px; }
+dialog #contents { margin-left:-3px; height:400px; overflow:auto; position:relative; }
+dialog #contents .filecnt { float:left; border:1px solid #ccc; cursor:pointer; padding:3px; display:inline; margin:0 0 15px 4px; overflow:hidden; position:relative; width:100px; }
+dialog #contents .selected { border:1px solid #f1af73; background:#f0f0f0; cursor:default; }
+dialog #contents .nm { text-align:center; }
+dialog #contents .nm img { vertical-align:bottom; }
 
 /* Widget Insert */
 #widget_window .magento_content { height:auto !important; min-height:450px; }

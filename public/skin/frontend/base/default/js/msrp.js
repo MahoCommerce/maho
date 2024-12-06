@@ -18,7 +18,7 @@ Catalog.Map = {
 
     addHelpLink(linkElement, title, actualPrice, msrpPrice, addToCartLink) {
         if (typeof linkElement === 'string') {
-            linkElement = document.querySelector(linkElement);
+            linkElement = document.getElementById(linkElement);
         }
 
         if (!linkElement) {

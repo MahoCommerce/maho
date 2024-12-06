@@ -5,7 +5,7 @@
  * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -39,7 +39,7 @@ class Mage_Sales_Model_Order_Shipment_Api_V2 extends Mage_Sales_Model_Order_Ship
      * @param string $orderIncrementId
      * @param array $itemsQty
      * @param string $comment
-     * @param bool $email
+     * @param bool $notifyCustomer
      * @param bool $includeComment
      * @return string
      */
@@ -48,7 +48,7 @@ class Mage_Sales_Model_Order_Shipment_Api_V2 extends Mage_Sales_Model_Order_Ship
         $orderIncrementId,
         $itemsQty = [],
         $comment = null,
-        $email = false,
+        $notifyCustomer = false,
         $includeComment = false
     ) {
         $order = Mage::getModel('sales/order')->loadByIncrementId($orderIncrementId);
@@ -71,8 +71,8 @@ class Mage_Sales_Model_Order_Shipment_Api_V2 extends Mage_Sales_Model_Order_Ship
         $shipment = $order->prepareShipment($itemsQty);
         if ($shipment) {
             $shipment->register();
-            $shipment->addComment($comment, $email && $includeComment);
-            if ($email) {
+            $shipment->addComment($comment, $notifyCustomer && $includeComment);
+            if ($notifyCustomer) {
                 $shipment->setEmailSent(true);
             }
             $shipment->getOrder()->setIsInProcess(true);
@@ -81,7 +81,7 @@ class Mage_Sales_Model_Order_Shipment_Api_V2 extends Mage_Sales_Model_Order_Ship
                     ->addObject($shipment)
                     ->addObject($shipment->getOrder())
                     ->save();
-                $shipment->sendEmail($email, ($includeComment ? $comment : ''));
+                $shipment->sendEmail($notifyCustomer, ($includeComment ? $comment : ''));
             } catch (Mage_Core_Exception $e) {
                 $this->_fault('data_invalid', $e->getMessage());
             }
