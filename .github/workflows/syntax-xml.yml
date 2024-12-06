@@ -43,12 +43,10 @@ jobs:
 
       - name: Check changed files
         if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
-        env:
-          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: |
           set +e
           ERROR=0
-          for FILE in ${ALL_CHANGED_FILES}; do
+          for FILE in ${{ steps.changed-files.outputs.all_changed_files }}; do
               MESSAGE=$(xmllint --noout "$FILE" 2>&1)
               if [ $? -ne 0 ]; then
                   ERROR=255
