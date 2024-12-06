@@ -207,6 +207,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     protected $_prototype;
 
     /**
+     * Reference to the Varien_Simplexml_Config object where local.xml was loaded in to
+     */
+    protected Mage_Core_Model_Config_Base $_refLocalConfigObject;
+
+    /**
      * Flag which identify what local configuration is loaded
      *
      * @var bool
@@ -323,6 +328,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     public function loadBase()
     {
+        // Prevent double loading of base config
+        if ($this->getNode() !== false) {
+            return;
+        }
+
         $files = [];
 
         foreach (Maho::getInstalledPackages() as $package => $info) {
@@ -336,15 +346,15 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         }
 
         // Merge all config files
-        $this->loadFile(current($files));
-        while ($file = next($files)) {
+        $this->loadString('<?xml version="1.0"?><config></config>');
+        foreach ($files as $basename => $file) {
             $merge = clone $this->_prototype;
             $merge->loadFile($file);
+            if ($basename === 'local.xml') {
+                $this->_isLocalConfigLoaded = true;
+                $this->_refLocalConfigObject = $merge;
+            }
             $this->extend($merge);
-        }
-
-        if (isset($files['local.xml'])) {
-            $this->_isLocalConfigLoaded = true;
         }
 
         return $this;
@@ -382,13 +392,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $resourceConfig = sprintf('config.%s.xml', $this->_getResourceConnectionModel('core'));
         $this->loadModulesConfiguration(['config.xml', $resourceConfig], $this);
 
-        /**
-         * Prevent local.xml directives overwriting
-         */
-        $mergeConfig = clone $this->_prototype;
-        $this->_isLocalConfigLoaded = $mergeConfig->loadFile($this->getOptions()->getEtcDir() . DS . 'local.xml');
+        // Prevent local.xml directives overwriting
         if ($this->_isLocalConfigLoaded) {
-            $this->extend($mergeConfig);
+            $this->extend($this->_refLocalConfigObject);
         }
 
         $this->applyExtends();
