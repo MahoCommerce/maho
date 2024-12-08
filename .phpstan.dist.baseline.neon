@@ -7,6 +7,12 @@ parameters:
 			path: app/Mage.php
 
 		-
+			message: '#^Method Mage\:\:getBlockSingleton\(\) never returns false so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: app/Mage.php
+
+		-
 			message: '#^Right side of && is always false\.$#'
 			identifier: booleanAnd.rightAlwaysFalse
 			count: 1
@@ -43,6 +49,18 @@ parameters:
 			path: app/code/core/Mage/Admin/Model/Rules.php
 
 		-
+			message: '#^Call to \$this\-\>getLayout\(\)\-\>createBlock\(''adminhtml/api_tab_useredit''\) resulted in invalid type Mage_Adminhtml_Block_Api_Tab_Useredit\.$#'
+			identifier: mage.invalidType
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/Edituser.php
+
+		-
+			message: '#^Cannot call method toHtml\(\) on false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/Edituser.php
+
+		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
 			count: 1
@@ -53,6 +71,24 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Api/Tab/Userroles.php
+
+		-
+			message: '#^Call to \$this\-\>getLayout\(\)\-\>createBlock\(''adminhtml/api_grid_user''\) resulted in invalid type Mage_Adminhtml_Block_Api_Grid_User\.$#'
+			identifier: mage.invalidType
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/Users.php
+
+		-
+			message: '#^Cannot call method toHtml\(\) on false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/Users.php
+
+		-
+			message: '#^Call to an undefined method Varien_Data_Tree_Dbp\:\:addCollectionData\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Catalog/Category/Abstract.php
 
 		-
 			message: '#^Cannot call method addAttributeToSelect\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
@@ -73,6 +109,12 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Super/Settings.php
 
 		-
+			message: '#^Call to an undefined method Varien_Data_Collection\:\:addFieldToFilter\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/Cart.php
+
+		-
 			message: '#^Property Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales\:\:\$_collection \(Mage_Sales_Model_Entity_Sale_Collection\) does not accept Varien_Data_Collection_Db\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -83,6 +125,12 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Wishlist.php
+
+		-
+			message: '#^Method Mage_Core_Model_Website\:\:getStoresIds\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Newsletter/Subscriber/Grid/Filter/Website.php
 
 		-
 			message: '#^Access to an undefined property Mage_Adminhtml_Block_Notification_Window\:\:\$_aclResourcePath\.$#'
@@ -97,8 +145,14 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Page/Menu.php
 
 		-
-			message: '#^Call to method getCollection\(\) on an unknown class Mage_Permissions_Model_Users\.$#'
-			identifier: class.notFound
+			message: '#^Call to Mage\:\:getModel\(''permissions/users''\) resulted in invalid type Mage_Permissions_Model_Users\.$#'
+			identifier: mage.invalidType
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Permissions/Grid/User.php
+
+		-
+			message: '#^Cannot call method getCollection\(\) on false\.$#'
+			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Permissions/Grid/User.php
 
@@ -115,15 +169,21 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Permissions/Tab/Userroles.php
 
 		-
-			message: '#^Call to method getCollection\(\) on an unknown class Mage_Permissions_Model_Roles\.$#'
-			identifier: class.notFound
+			message: '#^Call to Mage\:\:getModel\(''permissions/roles''\) resulted in invalid type Mage_Permissions_Model_Roles\.$#'
+			identifier: mage.invalidType
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Permissions/Usernroles.php
 
 		-
-			message: '#^Call to method getCollection\(\) on an unknown class Mage_Permissions_Model_Users\.$#'
-			identifier: class.notFound
+			message: '#^Call to Mage\:\:getModel\(''permissions/users''\) resulted in invalid type Mage_Permissions_Model_Users\.$#'
+			identifier: mage.invalidType
 			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Permissions/Usernroles.php
+
+		-
+			message: '#^Cannot call method getCollection\(\) on false\.$#'
+			identifier: method.nonObject
+			count: 2
 			path: app/code/core/Mage/Adminhtml/Block/Permissions/Usernroles.php
 
 		-
@@ -157,10 +217,28 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Review/Grid/Filter/Type.php
 
 		-
+			message: '#^Call to \$this\-\>getLayout\(\)\-\>createBlock\(''adminhtml/sales_grid'', ''sales\.grid''\) resulted in invalid type Mage_Adminhtml_Block_Sales_Grid\.$#'
+			identifier: mage.invalidType
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Sales.php
+
+		-
+			message: '#^Call to an undefined method Mage_Core_Block_Abstract\:\:addColumnRender\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Sales/Items/Abstract.php
+
+		-
 			message: '#^Method Mage_Adminhtml_Block_Sales_Order_Create_Billing_Address\:\:getAddress\(\) should return Mage_Customer_Model_Address but returns Mage_Sales_Model_Quote_Address\.$#'
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Billing/Address.php
+
+		-
+			message: '#^Cannot call method getConfigData\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Billing/Method/Form.php
 
 		-
 			message: '#^Method Mage_Adminhtml_Block_Sales_Order_Create_Giftmessage_Form\:\:getEntity\(\) should return Varien_Object but returns Mage_Eav_Model_Entity_Abstract\.$#'
@@ -175,10 +253,22 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Giftmessage/Form.php
 
 		-
-			message: '#^Call to method getIsOldCustomer\(\) on an unknown class Mage_Adminhtml_Model_Quote\.$#'
-			identifier: class.notFound
+			message: '#^Call to Mage\:\:getSingleton\(''adminhtml/quote''\) resulted in invalid type Mage_Adminhtml_Model_Quote\.$#'
+			identifier: mage.invalidType
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Newsletter.php
+
+		-
+			message: '#^Cannot call method getIsOldCustomer\(\) on false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Newsletter.php
+
+		-
+			message: '#^Method Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Address\:\:getIsAsBilling\(\) should return bool but returns int\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Shipping/Address.php
 
 		-
 			message: '#^Method Mage_Catalog_Model_Resource_Product_Compare_Item_Collection\:\:useProductItem\(\) invoked with 1 parameter, 0 required\.$#'
@@ -203,6 +293,12 @@ parameters:
 			identifier: method.notFound
 			count: 3
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Creditmemo/Create/Adjustments.php
+
+		-
+			message: '#^Method Mage_Sales_Model_Order\:\:setCanReturnToStock\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Creditmemo/Create/Items.php
 
 		-
 			message: '#^Return type \(Mage_Sales_Model_Order_Creditmemo\) of method Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Items\:\:getSource\(\) should be compatible with return type \(Mage_Sales_Model_Order_Invoice\) of method Mage_Adminhtml_Block_Sales_Items_Abstract\:\:getSource\(\)$#'
@@ -231,6 +327,12 @@ parameters:
 		-
 			message: '#^Method Mage_Adminhtml_Block_Sales_Order_Shipment_Packaging\:\:getQtyOrderedItem\(\) should return int\|null but empty return statement found\.$#'
 			identifier: return.empty
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Shipment/Packaging.php
+
+		-
+			message: '#^Method Mage_Adminhtml_Block_Sales_Order_Shipment_Packaging\:\:getQtyOrderedItem\(\) should return int\|null but returns float\.$#'
+			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Shipment/Packaging.php
 
@@ -289,10 +391,34 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Edit.php
 
 		-
+			message: '#^Method Varien_Object\:\:getData\(\) invoked with 2 parameters, 0\-1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
+
+		-
+			message: '#^Call to method Varien_Object\:\:getData\(\) with incorrect case\: getExceptions$#'
+			identifier: staticMethod.nameCase
+			count: 2
+			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Profile/Run.php
+
+		-
+			message: '#^Call to method Varien_Object\:\:setData\(\) with incorrect case\: setExceptions$#'
+			identifier: staticMethod.nameCase
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/System/Convert/Profile/Run.php
+
+		-
 			message: '#^Method Mage_Core_Model_Email_Template\:\:getProcessedTemplate\(\) invoked with 2 parameters, 0\-1 required\.$#'
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/System/Email/Template/Preview.php
+
+		-
+			message: '#^Call to \$this\-\>getLayout\(\)\-\>createBlock\(''adminhtml/tag_tab_all'', ''tag\.frame''\) resulted in invalid type Mage_Adminhtml_Block_Tag_Tab_All\.$#'
+			identifier: mage.invalidType
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Tag.php
 
 		-
 			message: '#^Call to an undefined method Mage_Tag_Model_Resource_Tag_Collection\:\:addAttributeToFilter\(\)\.$#'
@@ -307,16 +433,22 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Tax/Rate/Grid/Renderer/Data.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Container\:\:_addButtonChildBlock\(\) should return Mage_Adminhtml_Block_Widget_Button but returns Mage_Core_Block_Abstract\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Container.php
-
-		-
 			message: '#^Method Mage_Eav_Model_Entity_Attribute_Source_Interface\:\:getAllOptions\(\) invoked with 2 parameters, 0 required\.$#'
 			identifier: arguments.count
 			count: 2
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Form.php
+
+		-
+			message: '#^Call to method Varien_Object\:\:getData\(\) with incorrect case\: getRowUrl$#'
+			identifier: staticMethod.nameCase
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid.php
+
+		-
+			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Concat.php
 
 		-
 			message: '#^Binary operation "\*" between string and 1 results in an error\.$#'
@@ -367,6 +499,12 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/Config/Data.php
 
 		-
+			message: '#^Call to an undefined method Varien_Object\:\:save\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Model/Giftmessage/Save.php
+
+		-
 			message: '#^Method Mage_Eav_Model_Entity_Abstract\:\:load\(\) invoked with 1 parameter, 2\-3 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -409,6 +547,30 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Country.php
 
 		-
+			message: '#^Method Mage_Admin_Model_Session\:\:getDeletedPath\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Catalog/CategoryController.php
+
+		-
+			message: '#^Method Mage_Admin_Model_Session\:\:getLastEditedCategory\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Catalog/CategoryController.php
+
+		-
+			message: '#^Method Mage_Admin_Model_Session\:\:getLastViewedStore\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Catalog/CategoryController.php
+
+		-
+			message: '#^Method Varien_Object\:\:getData\(\) invoked with 2 parameters, 0\-1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Catalog/CategoryController.php
+
+		-
 			message: '#^Return type \(Mage_Adminhtml_Helper_Catalog_Product_Edit_Action_Attribute\) of method Mage_Adminhtml_Catalog_Product_Action_AttributeController\:\:_getHelper\(\) should be compatible with return type \(Mage_Adminhtml_Helper_Data\) of method Mage_Adminhtml_Controller_Action\:\:_getHelper\(\)$#'
 			identifier: method.childReturnType
 			count: 1
@@ -427,6 +589,18 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/SearchController.php
 
 		-
+			message: '#^Call to \$this\-\>getLayout\(\)\-\>createBlock\(''adminhtml/customer_config''\) resulted in invalid type Mage_Adminhtml_Block_Customer_Config\.$#'
+			identifier: mage.invalidType
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Customer/ConfigController.php
+
+		-
+			message: '#^Call to \$this\-\>getLayout\(\)\-\>createBlock\(''adminhtml/customer_config_tabs''\) resulted in invalid type Mage_Adminhtml_Block_Customer_Config_Tabs\.$#'
+			identifier: mage.invalidType
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Customer/ConfigController.php
+
+		-
 			message: '#^Property Mage_Adminhtml_Customer_Wishlist_Product_Composite_WishlistController\:\:\$_wishlistItem \(Mage_Wishlist_Model_Wishlist\) does not accept Mage_Wishlist_Model_Item\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -443,6 +617,12 @@ parameters:
 			identifier: isset.variable
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Permissions/VariableController.php
+
+		-
+			message: '#^Call to \$this\-\>getLayout\(\)\-\>createBlock\(\$type\) resulted in invalid type Mage_Adminhtml_Block_Promo_Widget_Chooser_Categories\.$#'
+			identifier: mage.invalidType
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Promo/CatalogController.php
 
 		-
 			message: '#^Cannot call method aggregate\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
@@ -535,6 +715,12 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Tax/RateController.php
 
 		-
+			message: '#^Method Varien_Object\:\:getData\(\) invoked with 3 parameters, 0\-1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/UrlrewriteController.php
+
+		-
 			message: '#^Method Mage_Api_Model_Acl\:\:_getRoleRegistry\(\) should return Mage_Api_Model_Acl_Role_Registry but returns Zend_Acl_Role_Registry\.$#'
 			identifier: return.type
 			count: 1
@@ -593,6 +779,12 @@ parameters:
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Api/Model/Server/Adapter/Soap.php
+
+		-
+			message: '#^Call to an undefined method Varien_Object\:\:init\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Api/Model/Server/V2/Adapter/Soap.php
 
 		-
 			message: '#^Result of method SoapServer\:\:handle\(\) \(void\) is used\.$#'
@@ -673,6 +865,18 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Acl.php
 
 		-
+			message: '#^Method Mage_Api2_Model_Acl_Global_Role\:\:setCreatedAt\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Api2/Model/Acl/Global/Role.php
+
+		-
+			message: '#^Method Mage_Api2_Model_Acl_Global_Role\:\:setUpdatedAt\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Api2/Model/Acl/Global/Role.php
+
+		-
 			message: '#^Variable \$operationName might not be defined\.$#'
 			identifier: variable.undefined
 			count: 2
@@ -689,6 +893,12 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Api2/Model/Multicall.php
+
+		-
+			message: '#^Method Mage_Api2_Model_Acl_Filter_Attribute\:\:setAllowedAttributes\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Api2/Model/Observer.php
 
 		-
 			message: '#^Property Mage_Api2_Model_Request\:\:\$_interpreter \(Mage_Api2_Model_Request_Interpreter_Interface\) does not accept Mage_Core_Model_Abstract\|false\.$#'
@@ -793,6 +1003,36 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Route/ApiType.php
 
 		-
+			message: '#^Method Mage_Api2_Model_Acl_Filter_Attribute\:\:setAllowedAttributes\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/AttributeController.php
+
+		-
+			message: '#^Method Mage_Api2_Model_Acl_Filter_Attribute\:\:setOperation\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/AttributeController.php
+
+		-
+			message: '#^Method Mage_Api2_Model_Acl_Filter_Attribute\:\:setResourceId\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/AttributeController.php
+
+		-
+			message: '#^Method Mage_Api2_Model_Acl_Filter_Attribute\:\:setUserType\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/AttributeController.php
+
+		-
+			message: '#^Method Mage_Api2_Model_Acl_Global_Role\:\:setRoleName\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/RoleController.php
+
+		-
 			message: '#^Call to an undefined method Mage_Catalog_Model_Product_Configuration_Item_Interface\:\:getQty\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -823,6 +1063,12 @@ parameters:
 			path: app/code/core/Mage/Bundle/Model/CatalogIndex/Data/Bundle.php
 
 		-
+			message: '#^Property Mage_Bundle_Model_Option\:\:\$_defaultSelection \(Mage_Bundle_Model_Selection\) does not accept Mage_Catalog_Model_Product\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Bundle/Model/Option.php
+
+		-
 			message: '#^Call to an undefined method Mage_Bundle_Model_Resource_Price_Index\:\:reindexProduct\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -841,9 +1087,9 @@ parameters:
 			path: app/code/core/Mage/Bundle/Model/Product/Price.php
 
 		-
-			message: '#^Offset ''option_id'' does not exist on array\{final_price\: mixed\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 2
+			message: '#^Method Mage_Catalog_Model_Resource_Product_Option_Collection\:\:addPriceToResult\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
 			path: app/code/core/Mage/Bundle/Model/Product/Price.php
 
 		-
@@ -881,6 +1127,24 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/Bundle/Model/Resource/Price/Index.php
+
+		-
+			message: '#^Call to an undefined method Mage_Core_Model_Abstract\:\:apply\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Catalog/Block/Layer/Filter/Abstract.php
+
+		-
+			message: '#^Property Mage_Catalog_Block_Layer_Filter_Abstract\:\:\$_filter \(Mage_Catalog_Model_Layer_Filter_Attribute\) does not accept Mage_Core_Model_Abstract\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Catalog/Block/Layer/Filter/Abstract.php
+
+		-
+			message: '#^Call to an undefined method Mage_Core_Block_Abstract\:\:init\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/code/core/Mage/Catalog/Block/Layer/View.php
 
 		-
 			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
@@ -925,6 +1189,12 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Product/View/Options/Type/Date.php
 
 		-
+			message: '#^Method Mage_Core_Block_Html_Select\:\:setExtraParams\(\) invoked with 0 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Catalog/Block/Product/View/Options/Type/Date.php
+
+		-
 			message: '#^Invalid array key type array\.$#'
 			identifier: offsetAccess.invalidOffset
 			count: 1
@@ -941,12 +1211,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/Widget/Html/Pager.php
-
-		-
-			message: '#^Property Mage_Catalog_Block_Product_Widget_New\:\:\$_pager \(Mage_Catalog_Block_Product_Widget_Html_Pager\) does not accept Mage_Core_Block_Abstract\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/Widget/New.php
 
 		-
 			message: '#^Parameter \#1 \$category \(Mage_Catalog_Model_Category\) of method Mage_Catalog_Block_Seo_Sitemap_Category\:\:getItemUrl\(\) should be compatible with parameter \$item \(Mage_Catalog_Block_Seo_Sitemap_Abstract\) of method Mage_Catalog_Block_Seo_Sitemap_Abstract\:\:getItemUrl\(\)$#'
@@ -1075,6 +1339,18 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Category/Attribute/Api.php
 
 		-
+			message: '#^Call to an undefined method Varien_Object\:\:dataHasChangedFor\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: app/code/core/Mage/Catalog/Model/Category/Indexer/Product.php
+
+		-
+			message: '#^Call to an undefined method Varien_Object\:\:isObjectNew\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Category/Indexer/Product.php
+
+		-
 			message: '#^Call to an undefined method Mage_Catalog_Model_Config\:\:_init\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -1087,8 +1363,32 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Config.php
 
 		-
+			message: '#^Call to Mage\:\:getResourceSingleton\(''catalog_entity/convert''\) resulted in invalid type bool\(false\)\.$#'
+			identifier: mage.invalidType
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Catalog.php
+
+		-
+			message: '#^Property Mage_Dataflow_Model_Convert_Adapter_Abstract\:\:\$_resource \(object\) does not accept false\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Catalog.php
+
+		-
+			message: '#^Call to Mage\:\:getResourceSingleton\(''catalog_entity/convert''\) resulted in invalid type bool\(false\)\.$#'
+			identifier: mage.invalidType
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
+
+		-
 			message: '#^Call to an undefined method Mage_Eav_Model_Entity_Abstract\:\:getStoreId\(\)\.$#'
 			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
+
+		-
+			message: '#^Cannot call method addProductToStore\(\) on false\.$#'
+			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
 
@@ -1117,6 +1417,12 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
 
 		-
+			message: '#^Call to Mage\:\:getResourceSingleton\(''catalog_entity/convert''\) resulted in invalid type bool\(false\)\.$#'
+			identifier: mage.invalidType
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Convert/Parser/Product.php
+
+		-
 			message: '#^Call to an undefined method Mage_Eav_Model_Entity_Abstract\:\:setStore\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -1141,6 +1447,30 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Entity/Product/Attribute/Design/Options/Container.php
 
 		-
+			message: '#^Call to an undefined method Mage_Catalog_Model_Resource_Category\:\:refreshProductIndex\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Index.php
+
+		-
+			message: '#^Call to an undefined method Varien_Object\:\:dataHasChangedFor\(\)\.$#'
+			identifier: method.notFound
+			count: 5
+			path: app/code/core/Mage/Catalog/Model/Indexer/Url.php
+
+		-
+			message: '#^Call to an undefined method Varien_Object\:\:isObjectNew\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Indexer/Url.php
+
+		-
+			message: '#^Call to an undefined method Varien_Object\:\:isValueChanged\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Indexer/Url.php
+
+		-
 			message: '#^Parameter \#2 \$filterBlock \(Varien_Object\) of method Mage_Catalog_Model_Layer_Filter_Attribute\:\:apply\(\) should be compatible with parameter \$filterBlock \(null\) of method Mage_Catalog_Model_Layer_Filter_Abstract\:\:apply\(\)$#'
 			identifier: method.childParameterType
 			count: 1
@@ -1153,6 +1483,12 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Decimal.php
 
 		-
+			message: '#^Call to an undefined method Mage_Catalog_Model_Resource_Category\:\:refreshProductIndex\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Observer.php
+
+		-
 			message: '#^Method Mage_Catalog_Model_Resource_Category_Flat\:\:move\(\) invoked with 3 parameters, 1 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -1162,6 +1498,18 @@ parameters:
 			message: '#^Call to an undefined method Mage_Eav_Model_Entity_Attribute_Backend_Abstract\:\:addImage\(\)\.$#'
 			identifier: method.notFound
 			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product.php
+
+		-
+			message: '#^Call to method Varien_Object\:\:getData\(\) with incorrect case\: getEvent$#'
+			identifier: staticMethod.nameCase
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product.php
+
+		-
+			message: '#^Method Mage_Catalog_Model_Product\:\:getMediaGallery\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 2
 			path: app/code/core/Mage/Catalog/Model/Product.php
 
 		-
@@ -1205,6 +1553,24 @@ parameters:
 			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Indexer/Eav.php
+
+		-
+			message: '#^Call to an undefined method Varien_Object\:\:isObjectNew\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Indexer/Price.php
+
+		-
+			message: '#^Call to an undefined method Varien_Object\:\:isValueChanged\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Indexer/Price.php
+
+		-
+			message: '#^Call to an undefined method Mage_Catalog_Model_Product_Option_Type_Default\:\:copyQuoteToOrder\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Option/Observer.php
 
 		-
 			message: '#^Call to an undefined method Mage_Catalog_Model_Product_Configuration_Item_Option_Interface\:\:getId\(\)\.$#'
@@ -1357,6 +1723,12 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Category/Indexer/Product.php
 
 		-
+			message: '#^Call to an undefined method Mage_Catalog_Model_Resource_Category\:\:move\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
+
+		-
 			message: '#^Call to an undefined method Zend_Db_Adapter_Abstract\:\:getCheckSql\(\)\.$#'
 			identifier: method.notFound
 			count: 2
@@ -1489,6 +1861,12 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Indexer/Price.php
 
 		-
+			message: '#^Property Mage_Catalog_Model_Resource_Product_Link_Collection\:\:\$_linkTypeId \(Mage_Catalog_Model_Product_Type\) does not accept int\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Product/Link/Collection.php
+
+		-
 			message: '#^Left side of && is always true\.$#'
 			identifier: booleanAnd.leftAlwaysTrue
 			count: 1
@@ -1509,6 +1887,18 @@ parameters:
 		-
 			message: '#^Property Mage_Catalog_Model_Url\:\:\$_saveRewritesHistory \(bool\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Url.php
+
+		-
+			message: '#^Static property Mage_Catalog_Model_Url\:\:\$_categoryResourceSingleton \(Mage_Catalog_Model_Category\) does not accept Mage_Catalog_Model_Resource_Category\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Url.php
+
+		-
+			message: '#^Static property Mage_Catalog_Model_Url\:\:\$_productResourceSingleton \(Mage_Catalog_Model_Category\) does not accept Mage_Catalog_Model_Resource_Product\.$#'
+			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Url.php
 
@@ -1573,16 +1963,10 @@ parameters:
 			path: app/code/core/Mage/CatalogIndex/Model/Indexer/Price.php
 
 		-
-			message: '#^Method Mage_CatalogInventory_Block_Adminhtml_Form_Field_Minsaleqty\:\:_getGroupRenderer\(\) should return Mage_CatalogInventory_Block_Adminhtml_Form_Field_Customergroup but returns Mage_Core_Block_Abstract\|false\.$#'
-			identifier: return.type
+			message: '#^Call to an undefined method Varien_Object\:\:isValueChanged\(\)\.$#'
+			identifier: method.notFound
 			count: 1
-			path: app/code/core/Mage/CatalogInventory/Block/Adminhtml/Form/Field/Minsaleqty.php
-
-		-
-			message: '#^Property Mage_CatalogInventory_Block_Adminhtml_Form_Field_Minsaleqty\:\:\$_groupRenderer \(Mage_CatalogInventory_Block_Adminhtml_Form_Field_Customergroup\) does not accept Mage_Core_Block_Abstract\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Block/Adminhtml/Form/Field/Minsaleqty.php
+			path: app/code/core/Mage/CatalogInventory/Model/Indexer/Stock.php
 
 		-
 			message: '#^Method Mage_CatalogInventory_Model_Observer\:\:_getQuoteItemQtyForCheck\(\) should return int but returns float\.$#'
@@ -1663,6 +2047,12 @@ parameters:
 			path: app/code/core/Mage/CatalogSearch/Model/Advanced.php
 
 		-
+			message: '#^Call to an undefined method Varien_Object\:\:isValueChanged\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/CatalogSearch/Model/Indexer/Fulltext.php
+
+		-
 			message: '#^Variable \$select might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -1675,10 +2065,22 @@ parameters:
 			path: app/code/core/Mage/CatalogSearch/Model/Resource/Search/Collection.php
 
 		-
+			message: '#^Method Mage_Checkout_Model_Session\:\:getContinueShoppingUrl\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Checkout/Block/Cart.php
+
+		-
 			message: '#^Cannot call method setItem\(\) on array\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Checkout/Block/Cart/Abstract.php
+
+		-
+			message: '#^Method Mage_Checkout_Model_Session\:\:getLastAddedProductId\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Checkout/Block/Cart/Crosssell.php
 
 		-
 			message: '#^Variable \$ninProductIds in empty\(\) always exists and is not falsy\.$#'
@@ -1693,16 +2095,16 @@ parameters:
 			path: app/code/core/Mage/Checkout/Block/Cart/Shipping.php
 
 		-
-			message: '#^Method Mage_Checkout_Block_Onepage_Billing\:\:_getTaxvat\(\) should return Mage_Customer_Block_Widget_Taxvat but returns Mage_Core_Block_Abstract\|false\.$#'
-			identifier: return.type
+			message: '#^Method Mage_Core_Model_Session\:\:getOrderIds\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
 			count: 1
-			path: app/code/core/Mage/Checkout/Block/Onepage/Billing.php
+			path: app/code/core/Mage/Checkout/Block/Multishipping/Success.php
 
 		-
-			message: '#^Property Mage_Checkout_Block_Onepage_Billing\:\:\$_taxvat \(Mage_Customer_Block_Widget_Taxvat\) does not accept Mage_Core_Block_Abstract\|false\.$#'
-			identifier: assign.propertyType
+			message: '#^Method Mage_Customer_Model_Session\:\:getUsername\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
 			count: 1
-			path: app/code/core/Mage/Checkout/Block/Onepage/Billing.php
+			path: app/code/core/Mage/Checkout/Block/Onepage/Login.php
 
 		-
 			message: '#^Method Mage_Checkout_Block_Onepage_Progress\:\:getShippingPriceInclTax\(\) should return float but returns string\.$#'
@@ -1801,10 +2203,58 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
 
 		-
+			message: '#^Method Mage_Checkout_Model_Session\:\:getNoCartRedirect\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: app/code/core/Mage/Checkout/controllers/CartController.php
+
+		-
+			message: '#^Method Mage_Checkout_Model_Session\:\:getRedirectUrl\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: app/code/core/Mage/Checkout/controllers/CartController.php
+
+		-
+			message: '#^Method Mage_Checkout_Model_Session\:\:getUseNotice\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 3
+			path: app/code/core/Mage/Checkout/controllers/CartController.php
+
+		-
+			message: '#^Method Mage_Checkout_Model_Session\:\:getCartWasUpdated\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
+
+		-
+			message: '#^Method Mage_Checkout_Model_Session\:\:getDisplaySuccess\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
+
+		-
 			message: '#^Call to an undefined method Mage_Sales_Model_Service_Order\:\:register\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Checkout/controllers/OnepageController.php
+
+		-
+			message: '#^Method Mage_Checkout_Model_Session\:\:getCartWasUpdated\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Checkout/controllers/OnepageController.php
+
+		-
+			message: '#^Call to an undefined method Varien_Db_Adapter_Interface\:\:lastInsertId\(\)\.$#'
+			identifier: method.notFound
+			count: 7
+			path: app/code/core/Mage/Checkout/sql/checkout_setup/install-1.6.0.0.php
+
+		-
+			message: '#^Call to method Varien_Object\:\:getData\(\) with incorrect case\: getImageType$#'
+			identifier: staticMethod.nameCase
+			count: 1
+			path: app/code/core/Mage/ConfigurableSwatches/Block/Catalog/Media/Js/Abstract.php
 
 		-
 			message: '#^Method Mage_Eav_Model_Entity_Attribute_Source_Interface\:\:getAllOptions\(\) invoked with 2 parameters, 0 required\.$#'
@@ -1951,6 +2401,12 @@ parameters:
 			path: app/code/core/Mage/Core/Model/App.php
 
 		-
+			message: '#^Call to an undefined method Mage_Core_Model_Abstract\:\:init\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/code/core/Mage/Core/Model/App/Emulation.php
+
+		-
 			message: '#^Return type \(Mage_Core_Model_App\) of method Mage_Core_Model_Config\:\:_saveCache\(\) should be compatible with return type \(bool\) of method Varien_Simplexml_Config\:\:_saveCache\(\)$#'
 			identifier: method.childReturnType
 			count: 1
@@ -2089,12 +2545,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Layout.php
 
 		-
-			message: '#^Method Mage_Core_Model_Layout\:\:getMessagesBlock\(\) should return Mage_Core_Block_Messages but returns Mage_Core_Block_Abstract\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Layout.php
-
-		-
 			message: '#^Call to an undefined method Mage_Core_Model_Resource_Type_Abstract\:\:getConnection\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -2185,6 +2635,12 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Type/Db/Mysqli.php
 
 		-
+			message: '#^Call to Mage\:\:getSingleton\(''cm_redissession/session''\) resulted in invalid type Mage_Cm_Redissession_Model_Session\.$#'
+			identifier: mage.invalidType
+			count: 1
+			path: app/code/core/Mage/Core/Model/Session/Abstract/Varien.php
+
+		-
 			message: '#^Parameter \#2 \$clear \(bool\) of method Mage_Core_Model_Session_Abstract_Varien\:\:getData\(\) should be compatible with parameter \$index \(int\|string\) of method Varien_Object\:\:getData\(\)$#'
 			identifier: method.childParameterType
 			count: 1
@@ -2227,8 +2683,8 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Url.php
 
 		-
-			message: '#^Negated boolean expression is always true\.$#'
-			identifier: booleanNot.alwaysTrue
+			message: '#^Method Mage_Core_Model_Url_Rewrite\:\:setTags\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Core/Model/Url/Rewrite.php
 
@@ -2239,28 +2695,10 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Url/Rewrite.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/code/core/Mage/Core/Model/Url/Rewrite.php
-
-		-
 			message: '#^Variable \$targetUrl might not be defined\.$#'
 			identifier: variable.undefined
 			count: 3
 			path: app/code/core/Mage/Core/Model/Url/Rewrite.php
-
-		-
-			message: '#^Negated boolean expression is always true\.$#'
-			identifier: booleanNot.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Core/Model/Url/Rewrite/Request.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/code/core/Mage/Core/Model/Url/Rewrite/Request.php
 
 		-
 			message: '#^Variable \$arguments might not be defined\.$#'
@@ -2299,14 +2737,32 @@ parameters:
 			path: app/code/core/Mage/Customer/Block/Address/Edit.php
 
 		-
+			message: '#^Method Mage_Customer_Model_Session\:\:getAddressFormData\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Customer/Block/Address/Edit.php
+
+		-
 			message: '#^Return type \(int\) of method Mage_Customer_Block_Address_Edit\:\:getCountryId\(\) should be compatible with return type \(string\) of method Mage_Directory_Block_Data\:\:getCountryId\(\)$#'
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Customer/Block/Address/Edit.php
 
 		-
+			message: '#^Method Mage_Customer_Model_Session\:\:getUsername\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Customer/Block/Form/Login.php
+
+		-
 			message: '#^Method Mage_Customer_Block_Form_Register\:\:getCountryId\(\) should return int but returns string\.$#'
 			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Customer/Block/Form/Register.php
+
+		-
+			message: '#^Method Mage_Customer_Model_Session\:\:getCustomerFormData\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Customer/Block/Form/Register.php
 
@@ -2321,6 +2777,12 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Customer/Block/Newsletter.php
+
+		-
+			message: '#^Method Mage_Customer_Model_Session\:\:getNoReferer\(\) invoked with 0 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Customer/Helper/Data.php
 
 		-
 			message: '#^Property Mage_Customer_Helper_Data\:\:\$_customer \(Mage_Customer_Model_Customer\) in empty\(\) is not falsy\.$#'
@@ -2371,6 +2833,12 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Convert/Adapter/Customer.php
 
 		-
+			message: '#^Call to Mage\:\:getResourceSingleton\(''catalog_entity/convert''\) resulted in invalid type bool\(false\)\.$#'
+			identifier: mage.invalidType
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Convert/Parser/Customer.php
+
+		-
 			message: '#^Call to an undefined method Mage_Eav_Model_Entity_Abstract\:\:setStore\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -2399,6 +2867,42 @@ parameters:
 			identifier: deadCode.unreachable
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Customer/Api/V2.php
+
+		-
+			message: '#^Call to Mage\:\:getResourceSingleton\(''customer/wishlist''\) resulted in invalid type Mage_Customer_Model_Resource_Wishlist\.$#'
+			identifier: mage.invalidType
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Resource/Wishlist/Collection.php
+
+		-
+			message: '#^Method Mage_Customer_Model_Session\:\:getAfterAuthUrl\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: app/code/core/Mage/Customer/controllers/AccountController.php
+
+		-
+			message: '#^Method Mage_Customer_Model_Session\:\:getBeforeAuthUrl\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: app/code/core/Mage/Customer/controllers/AccountController.php
+
+		-
+			message: '#^Method Mage_Customer_Model_Session\:\:getCustomerFormData\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Customer/controllers/AccountController.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: app/code/core/Mage/Customer/sql/customer_setup/mysql4-data-upgrade-1.4.0.0.7-1.4.0.0.8.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between false and false will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: app/code/core/Mage/Customer/sql/customer_setup/mysql4-data-upgrade-1.4.0.0.7-1.4.0.0.8.php
 
 		-
 			message: '#^Method Mage_Dataflow_Model_Batch\:\:setParams\(\) should return Mage_Dataflow_Model_Batch_Abstract but returns \$this\(Mage_Dataflow_Model_Batch\)\.$#'
@@ -2557,10 +3061,22 @@ parameters:
 			path: app/code/core/Mage/Directory/Model/Observer.php
 
 		-
+			message: '#^Call to an undefined method Varien_Db_Adapter_Interface\:\:lastInsertId\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Directory/data/directory_setup/data-install-1.6.0.0.php
+
+		-
 			message: '#^Left side of && is always true\.$#'
 			identifier: booleanAnd.leftAlwaysTrue
 			count: 1
 			path: app/code/core/Mage/Downloadable/Block/Catalog/Product/Links.php
+
+		-
+			message: '#^Method Mage_Checkout_Model_Session\:\:getHasDownloadableProducts\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Downloadable/Block/Checkout/Success.php
 
 		-
 			message: '#^Cannot call method streamRead\(\) on resource\.$#'
@@ -2585,6 +3101,12 @@ parameters:
 			identifier: method.childParameterType
 			count: 1
 			path: app/code/core/Mage/Downloadable/Model/Link/Api/V2.php
+
+		-
+			message: '#^Method Mage_Catalog_Model_Product\:\:setIsCustomOptionChanged\(\) invoked with 0 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Downloadable/Model/Product/Type.php
 
 		-
 			message: '#^If condition is always true\.$#'
@@ -2731,6 +3253,12 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
 
 		-
+			message: '#^Property Mage_Eav_Model_Entity_Attribute_Abstract\:\:\$_backend \(Mage_Eav_Model_Entity_Attribute_Backend_Abstract\) does not accept Mage_Core_Model_Abstract\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
+
+		-
 			message: '#^Property Mage_Eav_Model_Entity_Attribute_Abstract\:\:\$_backend \(Mage_Eav_Model_Entity_Attribute_Backend_Abstract\) in empty\(\) is not falsy\.$#'
 			identifier: empty.property
 			count: 1
@@ -2743,8 +3271,20 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
 
 		-
+			message: '#^Property Mage_Eav_Model_Entity_Attribute_Abstract\:\:\$_frontend \(Mage_Eav_Model_Entity_Attribute_Frontend_Abstract\) does not accept Mage_Core_Model_Abstract\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
+
+		-
 			message: '#^Property Mage_Eav_Model_Entity_Attribute_Abstract\:\:\$_frontend \(Mage_Eav_Model_Entity_Attribute_Frontend_Abstract\) in empty\(\) is not falsy\.$#'
 			identifier: empty.property
+			count: 1
+			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
+
+		-
+			message: '#^Property Mage_Eav_Model_Entity_Attribute_Abstract\:\:\$_source \(Mage_Eav_Model_Entity_Attribute_Source_Abstract\) does not accept Mage_Core_Model_Abstract\.$#'
+			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
 
@@ -2765,6 +3305,12 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Group.php
+
+		-
+			message: '#^Method Mage_Eav_Model_Entity_Attribute_Abstract\:\:getAttributeSetInfo\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Set.php
 
 		-
 			message: '#^Call to an undefined method Mage_Eav_Model_Entity_Collection_Abstract\:\:getStoreId\(\)\.$#'
@@ -2899,10 +3445,22 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Resource/Form/Attribute/Collection.php
 
 		-
+			message: '#^Method Mage_GiftMessage_Block_Adminhtml_Sales_Order_View_Items\:\:canDisplayGiftmessage\(\) should return bool but returns int\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/GiftMessage/Block/Adminhtml/Sales/Order/View/Items.php
+
+		-
 			message: '#^Return type \(stdClass\) of method Mage_GiftMessage_Model_Api_V2\:\:_setGiftMessage\(\) should be compatible with return type \(array\) of method Mage_GiftMessage_Model_Api\:\:_setGiftMessage\(\)$#'
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/GiftMessage/Model/Api/V2.php
+
+		-
+			message: '#^Method Varien_Object\:\:unsetData\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/GiftMessage/Model/Entity/Attribute/Backend/Boolean/Config.php
 
 		-
 			message: '#^Method Mage_GiftMessage_Model_Message\:\:getEntityModelByType\(\) should return Mage_Eav_Model_Entity_Abstract but returns Mage_Core_Model_Abstract\|false\.$#'
@@ -3109,10 +3667,58 @@ parameters:
 			path: app/code/core/Mage/Newsletter/Model/Subscriber.php
 
 		-
+			message: '#^Method Mage_Oauth_Model_Consumer\:\:setCallbackUrl\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Oauth/Model/Consumer.php
+
+		-
+			message: '#^Method Mage_Oauth_Model_Consumer\:\:setRejectedCallbackUrl\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Oauth/Model/Consumer.php
+
+		-
+			message: '#^Method Mage_Oauth_Model_Consumer\:\:setUpdatedAt\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Oauth/Model/Consumer.php
+
+		-
+			message: '#^Method Mage_Oauth_Model_Consumer\:\:setKey\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Oauth/controllers/Adminhtml/Oauth/ConsumerController.php
+
+		-
+			message: '#^Method Mage_Oauth_Model_Consumer\:\:setSecret\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Oauth/controllers/Adminhtml/Oauth/ConsumerController.php
+
+		-
 			message: '#^Call to an undefined method Mage_Payment_Model_Method_Abstract\:\:isPartialAuthorization\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Paygate/Block/Authorizenet/Form/Cc.php
+
+		-
+			message: '#^Method Mage_Paygate_Block_Authorizenet_Form_Cc\:\:getCardsBlock\(\) should return string but returns Mage_Paygate_Block_Authorizenet_Info_Cc\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Paygate/Block/Authorizenet/Form/Cc.php
+
+		-
+			message: '#^Method Mage_Paygate_Block_Authorizenet_Form_Cc\:\:getMethodFormBlock\(\) should return string but returns Mage_Payment_Block_Form_Cc\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Paygate/Block/Authorizenet/Form/Cc.php
+
+		-
+			message: '#^Method Varien_Object\:\:setData\(\) invoked with 2 parameters, 0\-1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Paygate/Model/Authorizenet.php
 
 		-
 			message: '#^Call to an undefined method Mage_Payment_Model_Method_Abstract\:\:cancelPartialAuthorization\(\)\.$#'
@@ -3139,16 +3745,22 @@ parameters:
 			path: app/code/core/Mage/Payment/Helper/Data.php
 
 		-
+			message: '#^Method Varien_Object\:\:getData\(\) invoked with 2 parameters, 0\-1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Payment/Helper/Data.php
+
+		-
 			message: '#^Method Mage_Payment_Model_Config\:\:_getMethod\(\) should return Mage_Payment_Model_Method_Abstract\|false but returns Mage_Core_Model_Abstract\.$#'
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Payment/Model/Config.php
 
 		-
-			message: '#^Comparison operation "\<" between \(array\|float\|int\) and 0\.0001 results in an error\.$#'
-			identifier: smaller.invalid
+			message: '#^Method Varien_Object\:\:getData\(\) invoked with 2 parameters, 0\-1 required\.$#'
+			identifier: arguments.count
 			count: 1
-			path: app/code/core/Mage/Payment/Model/Method/Abstract.php
+			path: app/code/core/Mage/Payment/Model/Config.php
 
 		-
 			message: '#^Method Mage_Payment_Model_Recurring_Profile\:\:exportStartDatetime\(\) should return string\|Zend_Date but empty return statement found\.$#'
@@ -3229,8 +3841,20 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Direct.php
 
 		-
+			message: '#^Call to an undefined method Mage_Paypal_Model_Api_Abstract\:\:callDoExpressCheckoutPayment\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Paypal/Model/Express.php
+
+		-
 			message: '#^If condition is always false\.$#'
 			identifier: if.alwaysFalse
+			count: 1
+			path: app/code/core/Mage/Paypal/Model/Express.php
+
+		-
+			message: '#^Method Varien_Object\:\:setData\(\) invoked with 2 parameters, 0\-1 required\.$#'
+			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Express.php
 
@@ -3250,6 +3874,12 @@ parameters:
 			message: '#^Cannot call method getExportedKeys\(\) on array\.$#'
 			identifier: method.nonObject
 			count: 2
+			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
+
+		-
+			message: '#^Property Mage_Paypal_Model_Express_Checkout\:\:\$_api \(Mage_Paypal_Model_Api_Nvp\) does not accept Mage_Core_Model_Abstract\.$#'
+			identifier: assign.propertyType
+			count: 1
 			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
 
 		-
@@ -3275,6 +3905,18 @@ parameters:
 			identifier: binaryOp.invalid
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Ipn.php
+
+		-
+			message: '#^Call to an undefined method Mage_Paypal_Model_Api_Abstract\:\:callDoReferenceTransaction\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Paypal/Model/Method/Agreement.php
+
+		-
+			message: '#^Call to an undefined method Mage_Paypal_Model_Api_Abstract\:\:callGetTransactionDetails\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Paypal/Model/Method/Agreement.php
 
 		-
 			message: '#^Return type \(bool\) of method Mage_Paypal_Model_Payflowlink\:\:validate\(\) should be compatible with return type \(\$this\(Mage_Payment_Model_Method_Cc\)\) of method Mage_Payment_Model_Method_Cc\:\:validate\(\)$#'
@@ -3311,6 +3953,12 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/System/Config/Source/MerchantCountry.php
+
+		-
+			message: '#^Call to method Varien_Object\:\:getData\(\) with incorrect case\: getIsCentinelValidationEnabled$#'
+			identifier: staticMethod.nameCase
+			count: 1
+			path: app/code/core/Mage/PaypalUk/Model/Direct.php
 
 		-
 			message: '#^Return type \(void\) of method Mage_PaypalUk_Model_Pro\:\:fetchTransactionInfo\(\) should be compatible with return type \(array\) of method Mage_Paypal_Model_Pro\:\:fetchTransactionInfo\(\)$#'
@@ -3359,6 +4007,12 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Rating/Model/Resource/Rating/Entity.php
+
+		-
+			message: '#^Call to an undefined method Varien_Db_Adapter_Interface\:\:lastInsertId\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/code/core/Mage/Rating/data/rating_setup/data-install-1.6.0.0.php
 
 		-
 			message: '#^Cannot call method addAttributeToSelect\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
@@ -3481,10 +4135,28 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Totals.php
 
 		-
+			message: '#^Method Mage_Review_Model_Session\:\:getFormData\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Review/Block/Form.php
+
+		-
 			message: '#^Return type \(string\) of method Mage_Review_Block_Form\:\:getAction\(\) should be compatible with return type \(Mage_Core_Controller_Varien_Action\) of method Mage_Core_Block_Abstract\:\:getAction\(\)$#'
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Review/Block/Form.php
+
+		-
+			message: '#^Method Mage_Review_Block_View\:\:getTotalReviews\(\) should return string but returns int\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Review/Block/View.php
+
+		-
+			message: '#^Method Mage_Review_Block_View\:\:setTotalReviewsCache\(\) invoked with 1 parameter, 3 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Review/Block/View.php
 
 		-
 			message: '#^Method Mage_Review_Model_Resource_Review\:\:getTotalReviews\(\) should return int but returns string\|false\|null\.$#'
@@ -3505,16 +4177,52 @@ parameters:
 			path: app/code/core/Mage/Review/Model/Resource/Review/Product/Collection.php
 
 		-
+			message: '#^Method Mage_Review_Model_Session\:\:getFormData\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Review/controllers/ProductController.php
+
+		-
+			message: '#^Method Mage_Review_Model_Session\:\:getRedirectUrl\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Review/controllers/ProductController.php
+
+		-
 			message: '#^Cannot call method getId\(\) on true\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Rss/Helper/Data.php
 
 		-
+			message: '#^Method Mage_Rule_Model_Action_Collection\:\:loadArray\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Rule/Model/Abstract.php
+
+		-
 			message: '#^Property Mage_Rule_Model_Abstract\:\:\$_conditions \(Mage_Rule_Model_Condition_Combine\) in empty\(\) is not falsy\.$#'
 			identifier: empty.property
 			count: 1
 			path: app/code/core/Mage/Rule/Model/Abstract.php
+
+		-
+			message: '#^Method Mage_Rule_Model_Action_Abstract\:\:getAttributeOption\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Rule/Model/Action/Abstract.php
+
+		-
+			message: '#^Method Mage_Rule_Model_Action_Abstract\:\:getOperatorOption\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Rule/Model/Action/Abstract.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''''\|''0''\|null and 0 will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/code/core/Mage/Rule/Model/Action/Abstract.php
 
 		-
 			message: '#^Call to an undefined method Mage_Rule_Model_Action_Interface\:\:getId\(\)\.$#'
@@ -3547,13 +4255,37 @@ parameters:
 			path: app/code/core/Mage/Rule/Model/Condition/Abstract.php
 
 		-
+			message: '#^Method Mage_Rule_Model_Condition_Abstract\:\:getAttributeOption\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Rule/Model/Condition/Abstract.php
+
+		-
+			message: '#^Method Mage_Rule_Model_Condition_Abstract\:\:getOperatorOption\(\) invoked with 0 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Rule/Model/Condition/Abstract.php
+
+		-
 			message: '#^Property Mage_Rule_Model_Condition_Abstract\:\:\$_inputType \(string\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: app/code/core/Mage/Rule/Model/Condition/Abstract.php
 
 		-
+			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 2
+			path: app/code/core/Mage/Rule/Model/Condition/Combine.php
+
+		-
 			message: '#^Method Mage_Rule_Model_Condition_Abstract\:\:loadArray\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Rule/Model/Condition/Combine.php
+
+		-
+			message: '#^Method Mage_Rule_Model_Condition_Combine\:\:getAggregatorOption\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Rule/Model/Condition/Combine.php
@@ -3571,8 +4303,14 @@ parameters:
 			path: app/code/core/Mage/Rule/Model/Condition/Product/Abstract.php
 
 		-
-			message: '#^Call to method setOrderFilter\(\) on an unknown class Mage_Sales_Model_Resource_Invoice_Collection\.$#'
-			identifier: class.notFound
+			message: '#^Call to Mage\:\:getResourceModel\(''sales/invoice_collection''\) resulted in invalid type Mage_Sales_Model_Resource_Invoice_Collection\.$#'
+			identifier: mage.invalidType
+			count: 1
+			path: app/code/core/Mage/Sales/Block/Order/Details.php
+
+		-
+			message: '#^Cannot call method setOrderFilter\(\) on false\.$#'
+			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Sales/Block/Order/Details.php
 
@@ -3583,16 +4321,58 @@ parameters:
 			path: app/code/core/Mage/Sales/Block/Recurring/Profiles.php
 
 		-
+			message: '#^Method Mage_Sales_Block_Widget_Guest_Form\:\:getTypeSelectHtml\(\) should return array but returns string\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Sales/Block/Widget/Guest/Form.php
+
+		-
+			message: '#^Method Mage_Checkout_Model_Session\:\:getUseNotice\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Sales/Controller/Abstract.php
+
+		-
 			message: '#^Call to an undefined method Varien_Simplexml_Element\:\:getClassName\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Config/Ordered.php
 
 		-
+			message: '#^Method Mage_Sales_Model_Order_Address\:\:getStoreId\(\) invoked with 0 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Convert/Order.php
+
+		-
+			message: '#^Call to an undefined method Mage_Sales_Model_Resource_Order_Item\:\:getTypeId\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Entity/Order/Collection.php
+
+		-
 			message: '#^Call to an undefined method Mage_Sales_Model_Resource_Quote_Collection\:\:addAttributeToSelect\(\)\.$#'
 			identifier: method.notFound
 			count: 2
 			path: app/code/core/Mage/Sales/Model/Entity/Quote.php
+
+		-
+			message: '#^Method Varien_Object\:\:getData\(\) invoked with 2 parameters, 0\-1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Observer.php
+
+		-
+			message: '#^Call to method Varien_Object\:\:getData\(\) with incorrect case\: getShippingMethod$#'
+			identifier: staticMethod.nameCase
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Order.php
+
+		-
+			message: '#^Method Mage_Sales_Model_Order\:\:getStoreName\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Order.php
 
 		-
 			message: '#^Variable \$oldArea might not be defined\.$#'
@@ -3635,6 +4415,12 @@ parameters:
 			identifier: return.missing
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Order/Payment/Transaction.php
+
+		-
+			message: '#^Call to an undefined method Mage_Core_Block_Abstract\:\:toPdf\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Order/Pdf/Abstract.php
 
 		-
 			message: '#^Method Mage_Sales_Model_Order_Pdf_Abstract\:\:getAlignCenter\(\) should return int but returns float\.$#'
@@ -3751,6 +4537,12 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Address.php
 
 		-
+			message: '#^Call to method Mage_Sales_Model_Quote_Item\:\:getOptionByCode\(\) with incorrect case\: getOptionBycode$#'
+			identifier: method.nameCase
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Quote/Address/Item.php
+
+		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
@@ -3793,10 +4585,10 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
 
 		-
-			message: '#^Cannot call method updateOnRelatedRecordChanged\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
-			identifier: method.nonObject
+			message: '#^Method Varien_Object\:\:getData\(\) invoked with 2 parameters, 0\-1 required\.$#'
+			identifier: arguments.count
 			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Address.php
+			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
 
 		-
 			message: '#^Call to an undefined method Mage_Core_Model_Abstract\:\:isFailsafe\(\)\.$#'
@@ -4285,12 +5077,6 @@ parameters:
 			path: app/code/core/Mage/Weee/Model/Total/Quote/Weee.php
 
 		-
-			message: '#^Method Mage_Widget_Block_Adminhtml_Widget_Chooser\:\:getConfig\(\) should return Varien_Object but returns mixed\.$#'
-			identifier: return.type
-			count: 2
-			path: app/code/core/Mage/Widget/Block/Adminhtml/Widget/Chooser.php
-
-		-
 			message: '#^Variable \$options might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -4301,6 +5087,12 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/Widget/Block/Adminhtml/Widget/Instance/Edit/Tab/Main/Layout.php
+
+		-
+			message: '#^Call to an undefined method Mage_Core_Block_Abstract\:\:prepareElementHtml\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Widget/Block/Adminhtml/Widget/Options.php
 
 		-
 			message: '#^Cannot call method toOptionArray\(\) on Mage_Core_Model_Abstract\|false\.$#'
@@ -4315,10 +5107,28 @@ parameters:
 			path: app/code/core/Mage/Widget/Model/Widget/Instance.php
 
 		-
+			message: '#^Call to an undefined method Varien_Db_Adapter_Interface\:\:modifyTables\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Widget/sql/widget_setup/install-1.6.0.0.php
+
+		-
 			message: '#^Parameter \#1 \$item \(Mage_Wishlist_Model_Item\) of method Mage_Wishlist_Block_Share_Email_Items\:\:hasDescription\(\) should be compatible with parameter \$item \(Mage_Catalog_Model_Product\) of method Mage_Wishlist_Block_Abstract\:\:hasDescription\(\)$#'
 			identifier: method.childParameterType
 			count: 1
 			path: app/code/core/Mage/Wishlist/Block/Share/Email/Items.php
+
+		-
+			message: '#^Method Mage_Customer_Model_Session\:\:getDisplayOutOfStockProducts\(\) invoked with 0 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Wishlist/Helper/Data.php
+
+		-
+			message: '#^Method Mage_Customer_Model_Session\:\:setDisplayOutOfStockProducts\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Wishlist/Helper/Data.php
 
 		-
 			message: '#^Method Mage_Wishlist_Helper_Data\:\:getCustomerName\(\) should return string\|null but return statement is missing\.$#'
@@ -4337,6 +5147,12 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/Wishlist/Model/Wishlist.php
+
+		-
+			message: '#^Method Mage_Customer_Model_Session\:\:getAddActionReferer\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Wishlist/controllers/IndexController.php
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
@@ -4423,54 +5239,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/api2/role/users_grid_js.phtml
 
 		-
-			message: '#^Call to protected method _isSelected\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/adminhtml/default/default/template/bundle/product/composite/fieldset/options/type/checkbox.phtml
-
-		-
-			message: '#^Call to protected method _isSelected\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/adminhtml/default/default/template/bundle/product/composite/fieldset/options/type/multi.phtml
-
-		-
-			message: '#^Call to protected method _getDefaultValues\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/adminhtml/default/default/template/bundle/product/composite/fieldset/options/type/radio.phtml
-
-		-
-			message: '#^Call to protected method _isSelected\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/adminhtml/default/default/template/bundle/product/composite/fieldset/options/type/radio.phtml
-
-		-
-			message: '#^Call to protected method _showSingle\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/adminhtml/default/default/template/bundle/product/composite/fieldset/options/type/radio.phtml
-
-		-
-			message: '#^Call to protected method _getDefaultValues\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/adminhtml/default/default/template/bundle/product/composite/fieldset/options/type/select.phtml
-
-		-
-			message: '#^Call to protected method _isSelected\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/adminhtml/default/default/template/bundle/product/composite/fieldset/options/type/select.phtml
-
-		-
-			message: '#^Call to protected method _showSingle\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/adminhtml/default/default/template/bundle/product/composite/fieldset/options/type/select.phtml
-
-		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
 			count: 8
@@ -4507,22 +5275,10 @@ parameters:
 			path: app/design/adminhtml/default/default/template/catalog/product/attribute/new/created.phtml
 
 		-
-			message: '#^Call to protected method _getHeader\(\) of class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/adminhtml/default/default/template/catalog/product/attribute/set/main.phtml
-
-		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
 			count: 5
 			path: app/design/adminhtml/default/default/template/catalog/product/attribute/set/toolbar/add.phtml
-
-		-
-			message: '#^Call to protected method _getHeader\(\) of class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Toolbar_Main\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/adminhtml/default/default/template/catalog/product/attribute/set/toolbar/main.phtml
 
 		-
 			message: '#^Access to an undefined property Mage_Catalog_Model_Product_Option\:\:\$decoratedIsLast\.$#'
@@ -4853,12 +5609,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/design/adminhtml/default/default/template/permissions/role_users_grid_js.phtml
-
-		-
-			message: '#^Call to protected method _getGridHtml\(\) of class Mage_Adminhtml_Block_Permissions_Tab_Rolesusers\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/adminhtml/default/default/template/permissions/rolesusers.phtml
 
 		-
 			message: '#^Call to an undefined method Mage_Core_Block_Abstract\:\:_getSelectedRoles\(\)\.$#'
@@ -5365,54 +6115,6 @@ parameters:
 			path: app/design/frontend/base/default/template/bundle/catalog/product/view/type/bundle.phtml
 
 		-
-			message: '#^Call to protected method _isSelected\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/base/default/template/bundle/catalog/product/view/type/bundle/option/checkbox.phtml
-
-		-
-			message: '#^Call to protected method _isSelected\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/base/default/template/bundle/catalog/product/view/type/bundle/option/multi.phtml
-
-		-
-			message: '#^Call to protected method _getDefaultValues\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/base/default/template/bundle/catalog/product/view/type/bundle/option/radio.phtml
-
-		-
-			message: '#^Call to protected method _isSelected\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 2
-			path: app/design/frontend/base/default/template/bundle/catalog/product/view/type/bundle/option/radio.phtml
-
-		-
-			message: '#^Call to protected method _showSingle\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/base/default/template/bundle/catalog/product/view/type/bundle/option/radio.phtml
-
-		-
-			message: '#^Call to protected method _getDefaultValues\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/base/default/template/bundle/catalog/product/view/type/bundle/option/select.phtml
-
-		-
-			message: '#^Call to protected method _isSelected\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 2
-			path: app/design/frontend/base/default/template/bundle/catalog/product/view/type/bundle/option/select.phtml
-
-		-
-			message: '#^Call to protected method _showSingle\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/base/default/template/bundle/catalog/product/view/type/bundle/option/select.phtml
-
-		-
 			message: '#^Unreachable statement \- code above always terminates\.$#'
 			identifier: deadCode.unreachable
 			count: 1
@@ -5537,12 +6239,6 @@ parameters:
 			identifier: ternary.alwaysTrue
 			count: 1
 			path: app/design/frontend/base/default/template/catalog/product/price.phtml
-
-		-
-			message: '#^Call to protected method _isSecure\(\) of class Mage_Core_Block_Abstract\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/base/default/template/catalog/product/view.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
@@ -5729,12 +6425,6 @@ parameters:
 			identifier: variable.undefined
 			count: 10
 			path: app/design/frontend/base/default/template/checkout/multishipping/success.phtml
-
-		-
-			message: '#^Cannot call method isEnabled\(\) on Mage_Core_Block_Abstract\|false\.$#'
-			identifier: method.nonObject
-			count: 4
-			path: app/design/frontend/base/default/template/checkout/onepage/billing.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
@@ -5941,22 +6631,10 @@ parameters:
 			path: app/design/frontend/base/default/template/customer/form/confirmation.phtml
 
 		-
-			message: '#^Cannot call method isEnabled\(\) on Mage_Core_Block_Abstract\|false\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: app/design/frontend/base/default/template/customer/form/edit.phtml
-
-		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
 			count: 16
 			path: app/design/frontend/base/default/template/customer/form/newsletter.phtml
-
-		-
-			message: '#^Cannot call method isEnabled\(\) on Mage_Core_Block_Abstract\|false\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: app/design/frontend/base/default/template/customer/form/register.phtml
 
 		-
 			message: '#^PHPDoc tag @var contains unresolvable type\.$#'
@@ -6085,6 +6763,12 @@ parameters:
 			path: app/design/frontend/base/default/template/email/order/items/invoice/default.phtml
 
 		-
+			message: '#^Method Mage_Sales_Model_Order\:\:formatPrice\(\) invoked with 3 parameters, 1\-2 required\.$#'
+			identifier: arguments.count
+			count: 6
+			path: app/design/frontend/base/default/template/email/order/items/order/default.phtml
+
+		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
 			count: 8
@@ -6107,18 +6791,6 @@ parameters:
 			identifier: variable.undefined
 			count: 145
 			path: app/design/frontend/base/default/template/giftmessage/inline.phtml
-
-		-
-			message: '#^Call to protected method _getEnhancedEcommerceDataForAnalytics4\(\) of class Mage_GoogleAnalytics_Block_Ga\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/base/default/template/googleanalytics/ga.phtml
-
-		-
-			message: '#^Call to protected method _getPageTrackingCode\(\) of class Mage_GoogleAnalytics_Block_Ga\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/base/default/template/googleanalytics/ga.phtml
 
 		-
 			message: '#^Variable \$crumbs might not be defined\.$#'
@@ -6487,24 +7159,6 @@ parameters:
 			path: app/design/frontend/rwd/default/template/bundle/catalog/product/view/type/bundle/availability.phtml
 
 		-
-			message: '#^Call to protected method _getDefaultValues\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/rwd/default/template/bundle/catalog/product/view/type/bundle/option/select.phtml
-
-		-
-			message: '#^Call to protected method _isSelected\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 2
-			path: app/design/frontend/rwd/default/template/bundle/catalog/product/view/type/bundle/option/select.phtml
-
-		-
-			message: '#^Call to protected method _showSingle\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/rwd/default/template/bundle/catalog/product/view/type/bundle/option/select.phtml
-
-		-
 			message: '#^Cannot call method setFilter\(\) on class\-string\|object\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -6527,12 +7181,6 @@ parameters:
 			identifier: ternary.alwaysTrue
 			count: 1
 			path: app/design/frontend/rwd/default/template/catalog/product/price.phtml
-
-		-
-			message: '#^Call to protected method _isSecure\(\) of class Mage_Core_Block_Abstract\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/rwd/default/template/catalog/product/view.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
@@ -6697,12 +7345,6 @@ parameters:
 			path: app/design/frontend/rwd/default/template/customer/form/confirmation.phtml
 
 		-
-			message: '#^Cannot call method isEnabled\(\) on Mage_Core_Block_Abstract\|false\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: app/design/frontend/rwd/default/template/customer/form/edit.phtml
-
-		-
 			message: '#^Method Mage_Checkout_Helper_Data\:\:formatPrice\(\) invoked with 3 parameters, 1 required\.$#'
 			identifier: arguments.count
 			count: 12
@@ -6739,6 +7381,12 @@ parameters:
 			path: app/design/frontend/rwd/default/template/downloadable/email/order/items/invoice/downloadable.phtml
 
 		-
+			message: '#^Method Mage_Sales_Model_Order\:\:formatPrice\(\) invoked with 3 parameters, 1\-2 required\.$#'
+			identifier: arguments.count
+			count: 6
+			path: app/design/frontend/rwd/default/template/downloadable/email/order/items/order/downloadable.phtml
+
+		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
 			count: 10
@@ -6767,6 +7415,12 @@ parameters:
 			identifier: variable.undefined
 			count: 17
 			path: app/design/frontend/rwd/default/template/email/order/items/invoice/default.phtml
+
+		-
+			message: '#^Method Mage_Sales_Model_Order\:\:formatPrice\(\) invoked with 3 parameters, 1\-2 required\.$#'
+			identifier: arguments.count
+			count: 6
+			path: app/design/frontend/rwd/default/template/email/order/items/order/default.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
@@ -7031,6 +7685,12 @@ parameters:
 			identifier: empty.property
 			count: 1
 			path: lib/Varien/Data/Form/Abstract.php
+
+		-
+			message: '#^Method Varien_Data_Form_Element_Abstract\:\:getValue\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: lib/Varien/Data/Form/Element/Abstract.php
 
 		-
 			message: '#^Access to an undefined property Varien_Data_Form_Element_Fieldset\:\:\$_sortDirection\.$#'
