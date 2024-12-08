@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4506ffa474bba19a96a5f333495e73bb",
+    "content-hash": "eb3b0d126d768c32aea7ef7bd90fa7cc",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -1688,37 +1688,39 @@
         },
         {
             "name": "mahocommerce/maho-phpstan-plugin",
-            "version": "v2.4.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/MahoCommerce/maho-phpstan-plugin.git",
-                "reference": "71dbdaa6c53274ef5d5fd3ab0ec2867a79118f23"
-            },
+            "version": "dev-topic-v3",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/71dbdaa6c53274ef5d5fd3ab0ec2867a79118f23",
-                "reference": "71dbdaa6c53274ef5d5fd3ab0ec2867a79118f23",
-                "shasum": ""
+                "type": "path",
+                "url": "../maho-phpstan-plugin",
+                "reference": "cb9876c04832834c71c0e9be7642d70aa16b1d16"
             },
             "require": {
-                "php": ">= 8.2",
-                "phpstan/phpstan": "^2.0"
+                "php": ">= 8.2"
             },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "PHPStanMagento1\\": "src/"
+            "require-dev": {
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0"
+            },
+            "type": "phpstan-extension",
+            "extra": {
+                "phpstan": {
+                    "includes": [
+                        "extension.neon"
+                    ]
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload": {
+                "psr-4": {
+                    "Maho\\PHPStanPlugin\\": "src/"
+                }
+            },
             "license": [
                 "MIT"
             ],
-            "description": "Extension for PHPStan to allow analysis of Maho platform.",
-            "support": {
-                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v2.4.0"
-            },
-            "time": "2024-11-11T17:12:14+00:00"
+            "description": "Extension for PHPStan to allow static analysis of Maho projects.",
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "phpstan/phpstan",
