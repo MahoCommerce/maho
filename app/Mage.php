@@ -663,8 +663,8 @@ final class Mage
      */
     protected static function _setIsInstalled($options = [])
     {
-        if (isset($options['is_installed']) && $options['is_installed']) {
-            self::$_isInstalled = true;
+        if (isset($options['is_installed'])) {
+            self::$_isInstalled = (bool) $options['is_installed'];
         }
     }
 
