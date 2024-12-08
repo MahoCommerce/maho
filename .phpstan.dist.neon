@@ -1,17 +1,15 @@
 includes:
     - vendor/mahocommerce/maho-phpstan-plugin/extension.neon
-    - .phpstan.baseline.neon
+    - .phpstan.dist.baseline.neon
 parameters:
-    magentoRootPath: %currentWorkingDirectory%
-    phpVersion: 80200
+    phpVersion:
+        min: 80200
+        max: 80400
     fileExtensions:
         - php
         - phtml
     paths:
-        - app/bootstrap.php
-        - app/Mage.php
-        - app/code/core/Mage
-        - app/design
+        - app
         - lib
         - maho
         - public
@@ -47,10 +45,6 @@ parameters:
         # Dataflow/Model/Convert/Iterator.php
         - app/code/core/Mage/Dataflow/Model/Convert/Iterator.php
 
-        # Too much noise from "Variable $this might not be defined"
-        - app/code/core/*/*/data/*
-        - app/code/core/*/*/sql/*
-
         # requires Mycrypt
         - lib/Varien/Crypt/Mcrypt.php
 
@@ -59,7 +53,12 @@ parameters:
     level: 4
     checkFunctionNameCase: true
     checkInternalClassCaseSensitivity: true
+    checkMissingOverrideMethodAttribute: true
     treatPhpDocTypesAsCertain: false
+    # checkFunctionArgumentTypes: true
+    # reportWrongPhpDocTypeInVarTag: true
+    # reportAnyTypeWideningInVarTag: true
+    # reportUnmatchedIgnoredErrors: false
     typeAliases:
         Cm_RedisSession_Model_Session: 'Mage_Core_Model_Resource_Session'
     tmpDir: var
