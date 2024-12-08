@@ -85,7 +85,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     /**
      * Configuration xml
      *
-     * @var Mage_Core_Model_Config_Element
+     * @var Mage_Core_Model_Config_Element|null
      */
     protected $_xml = null;
 
@@ -207,6 +207,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     protected $_prototype;
 
     /**
+     * Reference to the Varien_Simplexml_Config object where local.xml was loaded in to
+     */
+    protected Mage_Core_Model_Config_Base $_refLocalConfigObject;
+
+    /**
      * Flag which identify what local configuration is loaded
      *
      * @var bool
@@ -323,34 +328,33 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     public function loadBase()
     {
+        // Prevent double loading of base config
+        if ($this->getNode() !== false) {
+            return $this;
+        }
+
         $files = [];
 
-        // Include Maho core and 3rd party module files
-        $modules = \Maho\MahoAutoload::getInstalledModules(BP);
-        foreach ($modules as $module => $info) {
+        foreach (Maho::getInstalledPackages() as $package => $info) {
             foreach (glob($info['path'] . '/app/etc/*.xml') as $file) {
-                $files[basename($file)] = $file;
+                $basename = basename($file);
+                if ($basename === 'local.xml' && $package !== 'root') {
+                    continue;
+                }
+                $files[$basename] = $file;
             }
         }
 
-        // Prevent any module from defining a local.xml
-        unset($files['local.xml']);
-
-        // Include local files, overriding core and 3rd party module files
-        foreach (glob($this->getOptions()->getEtcDir() . '/*.xml') as $file) {
-            $files[basename($file)] = $file;
-        }
-
         // Merge all config files
-        $this->loadFile(current($files));
-        while ($file = next($files)) {
+        $this->loadString('<?xml version="1.0"?><config></config>');
+        foreach ($files as $basename => $file) {
             $merge = clone $this->_prototype;
             $merge->loadFile($file);
+            if ($basename === 'local.xml') {
+                $this->_isLocalConfigLoaded = true;
+                $this->_refLocalConfigObject = $merge;
+            }
             $this->extend($merge);
-        }
-
-        if (isset($files['local.xml'])) {
-            $this->_isLocalConfigLoaded = true;
         }
 
         return $this;
@@ -388,13 +392,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $resourceConfig = sprintf('config.%s.xml', $this->_getResourceConnectionModel('core'));
         $this->loadModulesConfiguration(['config.xml', $resourceConfig], $this);
 
-        /**
-         * Prevent local.xml directives overwriting
-         */
-        $mergeConfig = clone $this->_prototype;
-        $this->_isLocalConfigLoaded = $mergeConfig->loadFile($this->getOptions()->getEtcDir() . DS . 'local.xml');
+        // Prevent local.xml directives overwriting
         if ($this->_isLocalConfigLoaded) {
-            $this->extend($mergeConfig);
+            $this->extend($this->_refLocalConfigObject);
         }
 
         $this->applyExtends();
@@ -451,6 +451,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     public function reinit($options = [])
     {
+        $this->_xml = null;
+        $this->_isLocalConfigLoaded = false;
         $this->_allowCacheForInit = false;
         $this->_useCache = false;
         return $this->init($options);
@@ -503,7 +505,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                 throw new Exception('Could not get lock on cache save operation.');
             } else {
                 Mage::log(sprintf('Failed to get cache save lock in %d seconds.', $waitTime), Zend_Log::NOTICE);
-                mahoErrorReport();
+                Maho::errorReport();
                 die();
             }
         }
@@ -780,20 +782,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         $moduleFiles = [];
 
-        // Include Maho core and 3rd party module files
-        $modules = \Maho\MahoAutoload::getInstalledModules(BP);
-        foreach ($modules as $module => $info) {
-            foreach (glob($info['path'] . '/app/etc/modules/*.xml') as $file) {
-                $moduleFiles[basename($file)] = $file;
-            }
-        }
-
-        // Include local files, overriding core and 3rd party module files
-        foreach (glob($this->getOptions()->getEtcDir() . '/modules/*.xml') as $file) {
+        foreach (Maho::globPackages('/app/etc/modules/*.xml') as $file) {
             $moduleFiles[basename($file)] = $file;
         }
 
-        if (!$moduleFiles) {
+        if (empty($moduleFiles)) {
             return false;
         }
 
@@ -803,9 +796,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         ];
 
         foreach ($moduleFiles as $v) {
-            $name = explode(DIRECTORY_SEPARATOR, $v);
-            $name = substr($name[count($name) - 1], 0, -4);
-
+            $name = pathinfo($v, PATHINFO_FILENAME);
             if (array_key_exists($name, self::MAGE_MODULES)) {
                 $collectModuleFiles['mage'][self::MAGE_MODULES[$name]] = $v;
             } else {
@@ -1037,6 +1028,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if ($mergeModel === null) {
             $mergeModel = clone $this->_prototype;
         }
+
         $modules = $this->getNode('modules')->children();
         foreach ($modules as $modName => $module) {
             if ($module->is('active')) {
@@ -1046,7 +1038,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
                 foreach ($fileName as $configFile) {
                     $moduleDir = $this->getModuleDir('etc', $modName);
-                    $configFile = mahoFindFileInIncludePath("$moduleDir/$configFile");
+                    $configFile = Maho::findFile("$moduleDir/$configFile");
 
                     if ($mergeModel->loadFile($configFile)) {
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_GLOBAL, $mergeModel);
