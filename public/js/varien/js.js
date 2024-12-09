@@ -660,4 +660,69 @@ Calendar.initialize = async function(event) {
         // Clean up the stored config
         delete input.dataset.calendarConfig;
     } catch (error) {}
-};
+}
+
+class Template
+{
+    static #DEFAULT_PATTERN = /(?:^|.|\r|\n)(#\{(.*?)\})/g;
+
+    /**
+     * Creates a Template object for string interpolation
+     * @param {string} template - The template string
+     * @param {RegExp} pattern - Optional custom pattern for replaceable symbols
+     */
+    constructor(template, pattern = Template.#DEFAULT_PATTERN) {
+        this.template = String(template);
+        this.pattern = pattern;
+    }
+
+    /**
+     * Evaluates the template with the provided data
+     * @param {Record<string, any>} data - Object containing values for interpolation
+     * @throws {Error} If data is null or undefined
+     * @returns {string} Interpolated string
+     */
+    evaluate(data) {
+        if (data == null) {
+            throw new TypeError('Data object cannot be null or undefined');
+        }
+
+        return this.template.replaceAll(this.pattern, (match, prefix = '', expr) => {
+            try {
+                // Handle escape sequences
+                if (prefix === '\\') return match;
+
+                // Parse nested properties using optional chaining
+                const value = expr.split('.')
+                    .reduce((obj, prop) => {
+                        // Handle array notation [index]
+                        const arrayMatch = prop.match(/(\w+)\[(\d+)\]/);
+                        if (arrayMatch) {
+                            const [, propName, index] = arrayMatch;
+                            return obj?.[propName]?.[index];
+                        }
+                        return obj?.[prop];
+                    }, data);
+
+                return `${prefix}${value ?? ''}`;
+            } catch (error) {
+                return `${prefix}`;
+            }
+        });
+    }
+
+    /**
+     * Creates a template using template literals
+     * @param {string} template - Template string
+     * @returns {Function} Template function
+     */
+    static create(template) {
+        return (data) => {
+            return new Function('data', `
+        with (data) {
+          return \`${template}\`;
+        }
+      `)(data);
+        };
+    }
+}
