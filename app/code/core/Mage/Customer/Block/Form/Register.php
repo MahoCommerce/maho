@@ -183,7 +183,7 @@ class Mage_Customer_Block_Form_Register extends Mage_Core_Block_Template
     public function getCountryHtmlSelect()
     {
         return $this->getLayout()->createBlock('directory/data')
-                    ->getCountryHtmlSelect($this->getCountryId());
+            ->getCountryHtmlSelect($this->getCountryId());
     }
 
     /**
@@ -205,7 +205,7 @@ class Mage_Customer_Block_Form_Register extends Mage_Core_Block_Template
      */
     public function isNewsletterEnabled()
     {
-        return Mage::helper('core')->isModuleOutputEnabled('Mage_Newsletter');
+        return $this->isModuleOutputEnabled('Mage_Newsletter');
     }
 
     /**

@@ -46,11 +46,9 @@ $oneMethod = count($methods) <= 1;
 <?php endif ?>
 <?= $this->getChildChildHtml('additional') ?>
 <script type="text/javascript">
-//<![CDATA[
 <?= $this->getChildChildHtml('scripts') ?>
 payment.init();
 <?php if (is_string($oneMethod)): ?>
 payment.switchMethod('<?= $oneMethod ?>');
 <?php endif ?>
-//]]>
 </script>

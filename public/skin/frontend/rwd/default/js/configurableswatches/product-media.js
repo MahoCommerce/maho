@@ -14,33 +14,29 @@ var ConfigurableMediaImages = {
     productImages: {},
     imageObjects: {},
 
-    // deprecated - use Array.prototype.intersect instead
     arrayIntersect: function(a, b) {
-        return a.intersect(b);
+        return a.filter(value => b.includes(value));
     },
 
     getCompatibleProductImages: function(productFallback, selectedLabels) {
-        //find compatible products
-        var compatibleProducts = [];
-        var compatibleProductSets = [];
-        selectedLabels.each(function(selectedLabel) {
-            if(typeof(productFallback['option_labels']) != 'undefined') {
-                if (!productFallback['option_labels'][selectedLabel]) {
-                    return;
-                }
+        // Find compatible products
+        let compatibleProducts = [];
+        let compatibleProductSets = [];
 
-                var optionProducts = productFallback['option_labels'][selectedLabel]['products'];
+        selectedLabels.forEach(function(selectedLabel) {
+            if (productFallback['option_labels'] && productFallback['option_labels'][selectedLabel]) {
+                let optionProducts = productFallback['option_labels'][selectedLabel]['products'];
                 compatibleProductSets.push(optionProducts);
 
-                //optimistically push all products
-                optionProducts.each(function (productId) {
+                // Optimistically push all products
+                optionProducts.forEach(function (productId) {
                     compatibleProducts.push(productId);
                 });
             }
         });
 
-        //intersect compatible products
-        compatibleProductSets.each(function(productSet) {
+        // Intersect compatible products
+        compatibleProductSets.forEach(function(productSet) {
             compatibleProducts = ConfigurableMediaImages.arrayIntersect(compatibleProducts, productSet);
         });
 
@@ -48,35 +44,31 @@ var ConfigurableMediaImages = {
     },
 
     isValidImage: function(fallbackImageUrl) {
-        if(!fallbackImageUrl) {
-            return false;
-        }
-
-        return true;
+        return !!fallbackImageUrl;
     },
 
     getSwatchImage: function(productId, optionLabel, selectedLabels) {
         var fallback = ConfigurableMediaImages.productImages[productId];
-        if(!fallback) {
+        if (!fallback) {
             return null;
         }
 
-        //first, try to get label-matching image on config product for this option's label
-        if(typeof(fallback['option_labels']) != 'undefined') {
+        // First, try to get label-matching image on config product for this option's label
+        if (fallback['option_labels'] && fallback['option_labels'][optionLabel]) {
             var currentLabelImage = fallback['option_labels'][optionLabel];
             if (currentLabelImage && fallback['option_labels'][optionLabel]['configurable_product'][ConfigurableMediaImages.imageType]) {
-                //found label image on configurable product
+                // Found label image on configurable product
                 return fallback['option_labels'][optionLabel]['configurable_product'][ConfigurableMediaImages.imageType];
             }
         }
 
         var compatibleProducts = ConfigurableMediaImages.getCompatibleProductImages(fallback, selectedLabels);
 
-        if(compatibleProducts.length == 0) { //no compatible products
-            return null; //bail
+        if (compatibleProducts.length === 0) { // No compatible products
+            return null; // Bail
         }
 
-        //second, get any product which is compatible with currently selected option(s)
+        // Second, get any product which is compatible with currently selected option(s)
         var optionLabels = fallback['option_labels'];
         for (var key in optionLabels) {
             if (optionLabels.hasOwnProperty(key)) {
@@ -84,11 +76,11 @@ var ConfigurableMediaImages = {
                 var image = value['configurable_product'][ConfigurableMediaImages.imageType];
                 var products = value['products'];
 
-                if (image) { //configurable product has image in the first place
-                    //if intersection between compatible products and this label's products, we found a match
-                    var isCompatibleProduct = products.filter(function(productId) {
+                if (image) { // Configurable product has image in the first place
+                    // If intersection between compatible products and this label's products, we found a match
+                    var isCompatibleProduct = products.some(function(productId) {
                         return compatibleProducts.includes(productId);
-                    }).length > 0;
+                    });
 
                     if (isCompatibleProduct) {
                         return image;
@@ -97,31 +89,35 @@ var ConfigurableMediaImages = {
             }
         }
 
-        //third, get image off of child product which is compatible
+        // Third, get image off of child product which is compatible
         var childSwatchImage = null;
         var childProductImages = fallback[ConfigurableMediaImages.imageType];
-        compatibleProducts.each(function(productId) {
-            if(childProductImages[productId] && ConfigurableMediaImages.isValidImage(childProductImages[productId])) {
+
+        // Replace .each with .some for early breaking
+        compatibleProducts.some(function(productId) {
+            if (childProductImages[productId] && ConfigurableMediaImages.isValidImage(childProductImages[productId])) {
                 childSwatchImage = childProductImages[productId];
-                return false; //break "loop"
+                return true; // Break the loop
             }
+            return false;
         });
+
         if (childSwatchImage) {
             return childSwatchImage;
         }
 
-        //fourth, get base image off parent product
+        // Fourth, get base image off parent product
         if (childProductImages[productId] && ConfigurableMediaImages.isValidImage(childProductImages[productId])) {
             return childProductImages[productId];
         }
 
-        //no fallback image found
+        // No fallback image found
         return null;
     },
 
     getImageObject: function(productId, imageUrl) {
-        var key = productId+'-'+imageUrl;
-        if(!ConfigurableMediaImages.imageObjects[key]) {
+        var key = productId + '-' + imageUrl;
+        if (!ConfigurableMediaImages.imageObjects[key]) {
             var image = document.createElement('img');
             image.src = imageUrl;
             ConfigurableMediaImages.imageObjects[key] = image;
@@ -129,12 +125,12 @@ var ConfigurableMediaImages = {
         return ConfigurableMediaImages.imageObjects[key];
     },
 
-    updateImage(el) {
+    updateImage: function(el) {
         var select = el;
         var label = select.options[select.selectedIndex].getAttribute('data-label');
-        var productId = optionsPrice.productId; //get product ID from options price object
+        var productId = optionsPrice.productId; // Get product ID from options price object
 
-        //find all selected labels
+        // Find all selected labels
         var selectedLabels = [];
 
         var superAttributeSelects = document.querySelectorAll('.product-options .super-attribute-select');
@@ -146,12 +142,11 @@ var ConfigurableMediaImages = {
 
         var swatchImageUrl = ConfigurableMediaImages.getSwatchImage(productId, label, selectedLabels);
         if (!ConfigurableMediaImages.isValidImage(swatchImageUrl)) {
-            console.log('no image found');
+            // no image found
             return;
         }
 
         var swatchImage = ConfigurableMediaImages.getImageObject(productId, swatchImageUrl);
-
         this.swapImage(swatchImage);
     },
 
@@ -160,36 +155,36 @@ var ConfigurableMediaImages = {
 
         var imageGallery = document.querySelector('.product-image-gallery');
 
-        if (targetImage.complete) { // image already loaded -- swap immediately
+        if (targetImage.complete) { // Image already loaded -- swap immediately
             var galleryImages = imageGallery.querySelectorAll('.gallery-image');
             galleryImages.forEach(function(image) {
                 image.classList.remove('visible');
             });
 
-            // move target image to correct place, in case it's necessary
+            // Move target image to correct place, in case it's necessary
             imageGallery.appendChild(targetImage);
 
-            // reveal new image
+            // Reveal new image
             targetImage.classList.add('visible');
-        } else { // need to wait for image to load
-            // add spinner
+        } else { // Need to wait for image to load
+            // Add spinner
             imageGallery.classList.add('loading');
 
-            // move target image to correct place, in case it's necessary
+            // Move target image to correct place, in case it's necessary
             imageGallery.appendChild(targetImage);
 
-            // wait until image is loaded
+            // Wait until image is loaded
             targetImage.addEventListener('load', function() {
-                // remove spinner
+                // Remove spinner
                 imageGallery.classList.remove('loading');
 
-                // hide old image
+                // Hide old image
                 var galleryImages = imageGallery.querySelectorAll('.gallery-image');
                 galleryImages.forEach(function(image) {
                     image.classList.remove('visible');
                 });
 
-                // reveal new image
+                // Reveal new image
                 targetImage.classList.add('visible');
             });
         }
@@ -207,45 +202,41 @@ var ConfigurableMediaImages = {
     swapListImage: function(productId, imageObject) {
         var originalImage = document.querySelector('#product-collection-image-' + productId);
 
-        if (imageObject.complete) { // swap image immediately
-
-            // remove old image
+        if (imageObject.complete) { // Swap image immediately
+            // Remove old image
             originalImage.classList.add('hidden');
             document.querySelectorAll('.product-collection-image-' + productId).forEach(function (image) {
                 image.remove();
             });
 
-            // add new image
+            // Add new image
             originalImage.parentNode.insertBefore(imageObject, originalImage.nextSibling);
-
-        } else { // need to load image
-
+        } else { // Need to load image
             var wrapper = originalImage.parentNode;
 
-            // add spinner
+            // Add spinner
             wrapper.classList.add('loading');
 
-            // wait until image is loaded
+            // Wait until image is loaded
             imageObject.addEventListener('load', function () {
-                // remove spinner
+                // Remove spinner
                 wrapper.classList.remove('loading');
 
-                // remove old image
+                // Remove old image
                 originalImage.classList.add('hidden');
                 document.querySelectorAll('.product-collection-image-' + productId).forEach(function (image) {
                     image.remove();
                 });
 
-                // add new image
+                // Add new image
                 originalImage.parentNode.insertBefore(imageObject, originalImage.nextSibling);
             });
-
         }
     },
 
     swapListImageByOption: function(productId, optionLabel) {
         var swatchImageUrl = ConfigurableMediaImages.getSwatchImage(productId, optionLabel, [optionLabel]);
-        if(!swatchImageUrl) {
+        if (!swatchImageUrl) {
             return;
         }
 

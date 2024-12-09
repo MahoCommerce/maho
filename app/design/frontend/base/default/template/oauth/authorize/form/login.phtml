@@ -55,9 +55,7 @@ $rejectJs = "document.location.href='{$this->getRejectUrl()}';";
             <input type="hidden" name="oauth_token" value="<?= $this->escapeHtml($this->getToken()) ?>"/>
         </form>
         <script type="text/javascript">
-        //<![CDATA[
             var dataForm = new VarienForm('login-form', true);
-        //]]>
         </script>
     <?php endif ?>
 </div>

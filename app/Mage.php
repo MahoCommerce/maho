@@ -166,7 +166,7 @@ final class Mage
 
     public static function getMahoVersion(): string
     {
-        return '24.11.0';
+        return '25.1.0';
     }
 
     /**
@@ -367,7 +367,7 @@ final class Mage
     /**
      * Get base URL path by type
      *
-     * @param string $type
+     * @param Mage_Core_Model_Store::URL_TYPE_* $type
      * @param null|bool $secure
      * @return string
      */

@@ -32,6 +32,6 @@ return RectorConfig::configure()
     ])
     ->withConfiguredRule(Rector\Php82\Rector\Param\AddSensitiveParameterAttributeRector::class, [
         'sensitive_parameters' => [
-            'password'
+            'apiKey', 'email', 'useremail', 'username', 'password'
         ],
     ]);

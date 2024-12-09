@@ -10,19 +10,27 @@
  */
 
 var windowLoaded = false;
-Event.observe(window, 'load', function() { windowLoaded = true; });
+window.addEventListener('load', function() {
+    windowLoaded = true;
+});
 
-// rewrite the fillselect method from /js/varien/configurable.js
+if (typeof Product === 'undefined') {
+    var Product = {};
+}
+
+if (typeof Product.Config === 'undefined') {
+    Product.Config = function() {};
+}
+
 Product.Config.prototype.fillSelect = function (element) {
     return;
 };
-// rewrite the resetChildren method from /js/varien/configurable.js; it would reset the third attribute when selecting a swatch in the first attribute
+
 Product.Config.prototype.resetChildren = function (element) {
     return;
 };
-// rewrite the configureForValues method from /js/varien/configurable.js; it tries to select the options when a product has been selected (e.g. editing product from cart page), but we have our own method for that
-// @see: Product.ConfigurableSwatches.run()
-Product.Config.prototype.configureForValues = function(){
+
+Product.Config.prototype.configureForValues = function() {
     return;
 };
 
@@ -36,7 +44,7 @@ Product.Config.prototype.initialize = function(config)
 
 Product.Config.prototype.handleSelectChange = function(element) {
     this.configureElement(element);
-    this.configureObservers.each(function(funct) {
+    this.configureObservers.forEach(function(funct) {
         funct(element);
     });
 };
@@ -44,8 +52,8 @@ Product.Config.prototype.handleSelectChange = function(element) {
 Product.Config.prototype.origConfigure = Product.Config.prototype.configure;
 Product.Config.prototype.configure = function(event) {
     this.origConfigure(event);
-    var element = Event.element(event);
-    this.configureObservers.each(function(funct) {
+    var element = event.target;
+    this.configureObservers.forEach(function(funct) {
         funct(element);
     });
 };
@@ -56,126 +64,95 @@ Product.Config.prototype.configureSubscribe = function(funct)
 };
 
 /**
- *
  * Load ALL the options into the selects
  * Uses global var spConfig declared in template/configurableswatches/catalog/product/view/type/configurable.phtml
- **/
+ */
 Product.Config.prototype.loadOptions = function() {
-    this.settings.each(function(element){
+    this.settings.forEach(function(element){
         element.disabled = false;
         element.options[0] = new Option(this.config.chooseText, '');
         var attributeId = element.id.replace(/[a-z]*/, '');
         var options = this.getAttributeOptions(attributeId);
         if(options) {
             var index = 1;
-            for(var i=0;i<options.length;i++){
-                options[i].allowedProducts = options[i].products.clone();
-                element.options[index] = new Option(this.getOptionLabel(options[i], options[i].price), options[i].id);
-                if (typeof options[i].price != 'undefined') {
-                    element.options[index].setAttribute('price', options[i].price);
+            options.forEach(function(option){
+                option.allowedProducts = [...option.products];
+                element.options[index] = new Option(this.getOptionLabel(option, option.price), option.id);
+                if (typeof option.price != 'undefined') {
+                    element.options[index].setAttribute('price', option.price);
                 }
-                element.options[index].setAttribute('data-label', options[i].label.toLowerCase());
-                element.options[index].config = options[i];
+                element.options[index].setAttribute('data-label', option.label.toLowerCase());
+                element.options[index].config = option;
                 index++;
-            }
+            }.bind(this));
         }
         this.reloadOptionLabels(element);
     }.bind(this));
-},
+}
 
+class ProductConfigurableSwatches {
+    constructor(productConfig) {
+        this.productConfig = false;
+        this.configurableAttributes = {};
 
-Product.ConfigurableSwatches = Class.create();
-Product.ConfigurableSwatches.prototype = {
-    productConfig: false,
-    configurableAttributes: {},
-    // Options
-    _O: {
-        selectFirstOption: false // select the first option of the first configurable attribute (or first custom option if no configurable attributes exist)
-    },
-    // Flags
-    _F: {
-        currentAction: false,
-        firstOptionSelected: false,
-        nativeSelectChange: true
-    },
-    // Namespaces
-    _N: {
-        resetTimeout: false
-    },
-    // Elements
-    _E: {
-        cartBtn: {
-            btn: false,
-            txt: ['Add to Cart'],
-            onclick: function() { return false; }
-        },
-        availability: false,
-        optionOver: false,
-        optionOut: false,
-        _last: {
-            optionOver: false
-        },
-        activeConfigurableOptions: [],
-        allConfigurableOptions: []
-    },
-    /**
-     *
-     * Gather configurable or custom option data (configurableAttributes),
-     * load the selects with options, and start to run everything that needs to be done
-     *
-     * @var configurableAttributes -
-     * For configurable options: a JSON created/modified in template/configurableswatches/catalog/product/view/type/configurable.phtml
-     * originally from Mage_Catalog_Block_Product_View_Type_Configurable::getJsonConfig()
-     * For custom options: a JSON created/modified in template/configurableswatches/catalog/product/view/options.phtml
-     * which comes from Mage_ConfigurableSwatches_Block_Catalog_Product_View_Options::getOptionJsonConfig()
-     **/
-    initialize: function(productConfig, config) {
-        // redefine some default options if configured
-        if (config && typeof(config) == 'object') {
-            this.setConfig(config);
-        }
+        // Options
+        this._O = {
+            selectFirstOption: false // select the first option of the first configurable attribute
+        };
+
+        // Flags
+        this._F = {
+            currentAction: false,
+            firstOptionSelected: false,
+            nativeSelectChange: true
+        };
+
+        // Namespaces
+        this._N = {
+            resetTimeout: false
+        };
+
+        // Elements
+        this._E = {
+            cartBtn: {
+                btn: false,
+                txt: ['Add to Cart'],
+                onclick: function() { return false; }
+            },
+            availability: false,
+            optionOver: false,
+            optionOut: false,
+            _last: {
+                optionOver: false
+            },
+            activeConfigurableOptions: [],
+            allConfigurableOptions: []
+        };
+
         this.productConfig = productConfig;
-        // Store configurable attribute data
-        var attributes = [];
-        for (var i in productConfig.config.attributes) {
-            attributes.push(productConfig.config.attributes[i]);
-        }
-        this.configurableAttributes = attributes;
-        // Run it
+        this.configurableAttributes = Object.values(productConfig.config.attributes);
+
         this.run();
-        return this;
-    },
+    }
+
     /**
-     *
-     * redefine some default options if configured
-     **/
-    setConfig: function(config) {
-        this._O = Object.extend( this._O, config );
-    },
-    /**
-     *
      * Sets the stage for configurable swatches, including attaching all the data and events needed in the process to all attributes and options
-     **/
-    run: function() {
+     */
+    run() {
         // Set some dom dependent flags
         this._F.hasPresetValues = (typeof spConfig != "undefined" && typeof spConfig.values != "undefined");
 
-        // Store stock status related items
         this.setStockData();
 
         // Set and store additional data on attributes and options and attach events to them
-        this.configurableAttributes.each(function(attr, i){
-            // set attribute data
+        this.configurableAttributes.forEach((attr, i) => {
             this.setAttrData(attr, i);
-            attr.options.each(function(opt, j){
-                // set option data
+            attr.options.forEach((opt, j) => {
                 this.setOptData(opt, attr, j);
-                // add option to allConfigurableOptions
-                this._E.allConfigurableOptions.push( opt );
-                // attach option events
+                this._E.allConfigurableOptions.push(opt);
                 this.attachOptEvents(opt);
-            }.bind(this));
-        }.bind(this));
+            });
+        });
 
         this.productConfig.configureSubscribe(this.onSelectChange.bind(this));
 
@@ -183,112 +160,103 @@ Product.ConfigurableSwatches.prototype = {
             // store values
             this.values = spConfig.values;
             // find the options
-            this.configurableAttributes.each(function(attr){
+            this.configurableAttributes.forEach((attr) => {
                 var optId = this.values[attr.id];
-                // Make new break so I don't break both loops using prototypes $break; This is so I don't have to loop through ALL options
-                var $break2 = {};
-                try {
-                    attr.options.each(function(opt){
-                        if (optId == opt.id) {
-                            this.selectOption(opt);
-                            throw $break2;
-                        };
-                    }.bind(this));
-                } catch(e) {};
-            }.bind(this));
+                var foundOption = attr.options.find((opt) => opt.id === optId);
+                if (foundOption) {
+                    this.selectOption(foundOption);
+                }
+            });
             this._F.presetValuesSelected = true;
         } else if (this._O.selectFirstOption) {
             this.selectFirstOption();
         }
         return this;
-    },
+    }
+
     /**
-     *
      * Enables/Disables the add to cart button to prevent the user from selecting an out of stock item.
      * This also makes the necessary visual cues to show in stock/out of stock.
-     **/
-    setStockData: function() {
-        var cartBtn = $$('.add-to-cart button.button');
+     */
+    setStockData() {
+        var cartBtn = document.querySelectorAll('.add-to-cart button.button');
         this._E.cartBtn = {
             btn: cartBtn,
-            txt: cartBtn.invoke('readAttribute', 'title'),
+            txt: cartBtn.length ? cartBtn[0].getAttribute('title') : '',
             onclick: cartBtn.length ? cartBtn[0].getAttribute('onclick') : ''
         };
-        this._E.availability = $$('p.availability');
+        this._E.availability = document.querySelectorAll('p.availability');
         // Set cart button event
-        this._E.cartBtn.btn.invoke('up').invoke('observe','mouseenter',function(){
-            clearTimeout(this._N.resetTimeout);
-            this.resetAvailableOptions();
-        }.bind(this));
-    },
+        cartBtn.forEach((btn) => {
+            btn.addEventListener('mouseenter', () => {
+                clearTimeout(this._N.resetTimeout);
+                this.resetAvailableOptions();
+            });
+        });
+    }
+
     /**
-     *
      * Sets the necessary flags on the attribute and stores the DOM elements related to the attribute
      *
      * @var attr - an object with options
      * @var i - index of attr in `configurableAttributes`
-     **/
-    setAttrData: function(attr, i) {
-        var optionSelect = $('attribute' + attr.id);
+     */
+    setAttrData(attr, i) {
+        var optionSelect = document.getElementById('attribute' + attr.id);
         // Flags
         attr._f = {};
         // FIXME for Custom Option Support
         attr._f.isCustomOption = false;
-        attr._f.isSwatch = optionSelect.hasClassName('swatch-select');
+        attr._f.isSwatch = optionSelect.classList.contains('swatch-select');
         // Elements
         attr._e = {
             optionSelect: optionSelect,
-            attrLabel: this._u.getAttrLabelElement( attr.code ),
+            attrLabel: this._u_getAttrLabelElement(attr.code),
             selectedOption: false,
             _last: {
                 selectedOption: false
             }
-        };
-        attr._e.optionSelect.attr = attr;
+        }
+        optionSelect.attr = attr;
         if (attr._f.isSwatch) {
-            attr._e.ul = $('configurable_swatch_' + attr.code);
-        };
+            attr._e.ul = document.getElementById('configurable_swatch_' + attr.code);
+        }
         return attr;
-    },
+    }
+
     /**
-     *
      * Set necessary flags and related DOM elements at an option level
      *
      * @var opt - object being looped through
      * @var attr - the object from which the `opt` came from
      * @var j - index of `opt` in `attr`
-     **/
-    setOptData: function(opt, attr, j) {
-        // Store Attribute on option
+     */
+    setOptData(opt, attr, j) {
         opt.attr = attr;
-        // Flags
         opt._f = {
             isSwatch: attr._f.isSwatch,
             enabled: true,
             active: false
         };
-        // Elements
         opt._e = {
-            option: this._u.getOptionElement(opt, attr, j)
+            option: this._u_getOptionElement(opt, attr, j)
         };
         opt._e.option.opt = opt;
         if (attr._f.isSwatch) {
-            opt._e.a = $('swatch'+opt.id);
-            opt._e.li = $('option'+opt.id);
+            opt._e.a = document.getElementById('swatch'+opt.id);
+            opt._e.li = document.getElementById('option'+opt.id);
             opt._e.ul = attr._e.ul;
         }
         return opt;
-    },
-    /**
-     *
-     * Attach click, mouseenter, and mouseleave events for each option/swatch
-     **/
-    attachOptEvents: function(opt) {
-        var attr = opt.attr;
+    }
+
+    attachOptEvents(opt) {
+        const attr = opt.attr;
+
         // Swatch Events
         if (opt._f.isSwatch) {
-            opt._e.a.observe('click', function(event) {
-                Event.stop(event);
+            opt._e.a.addEventListener('click', (event) => {
+                event.stopPropagation();
                 this._F.currentAction = "click";
                 // set new last option
                 attr._e._last.selectedOption = attr._e.selectedOption;
@@ -297,26 +265,26 @@ Product.ConfigurableSwatches.prototype = {
 
                 // Run the event
                 this.onOptionClick( attr );
-                return false;
-            }.bind(this)).observe('mouseenter', function(){
+            });
+
+            opt._e.a.addEventListener('mouseenter', () => {
                 this._F.currentAction = "over-swatch";
                 // set active over option to this option
                 this._E.optionOver = opt;
                 this.onOptionOver();
                 // set the new last option
                 this._E._last.optionOver = this._E.optionOver;
-            }.bind(this)).observe('mouseleave', function(){
+            });
+
+            opt._e.a.addEventListener('mouseleave', () => {
                 this._F.currentAction = "out-swatch";
                 this._E.optionOut = opt;
                 this.onOptionOut();
-            }.bind(this));
-        };
-    },
-    /**
-     *
-     * An optional method to select the first option on page load
-     **/
-    selectFirstOption: function() {
+            });
+        }
+    }
+
+    selectFirstOption() {
         if (this.configurableAttributes.length) {
             var attr = this.configurableAttributes[0];
             if (attr.options.length) {
@@ -324,15 +292,15 @@ Product.ConfigurableSwatches.prototype = {
                 this.selectOption(opt);
             };
         };
-    },
+    }
+
     /**
-     *
      * Initialize the selecting of an option: set necessary flags,
      * store active options, and remove last active options
      * Send to onOptionClick method
-     **/
-    selectOption: function(opt) {
-        var attr = opt.attr;
+     */
+    selectOption(opt) {
+        const attr = opt.attr;
 
         this._F.currentAction = "click";
         // set new last option
@@ -342,131 +310,114 @@ Product.ConfigurableSwatches.prototype = {
 
         // Run the event
         this.onOptionClick( attr );
-    },
-    onSelectChange: function(select)
-    {
-        var attr = select.attr;
+    }
+
+    onSelectChange(select) {
+        var attr = select;
 
         if (this._F.nativeSelectChange) {
             this._F.currentAction = 'change';
             var option = select.options[select.selectedIndex];
+
             if (option.opt) {
-                attr._e._last.selectedOption = attr._e.selectedOption;
+                const previousOption = attr._e.selectedOption;
                 attr._e.selectedOption = option.opt;
 
-                // Mark last option as no longer active
-                if (attr._e._last.selectedOption) attr._e._last.selectedOption._f.active = false;
-                // Mark this option as active
+                if (previousOption) {
+                    previousOption._f.active = false;
+                }
                 option.opt._f.active = true;
 
-                // remove last active option from activeConfigurableOptions
-                var pos = this._E.activeConfigurableOptions.indexOf( attr._e._last.selectedOption );
+                const pos = this._E.activeConfigurableOptions.indexOf(previousOption);
                 if (pos !== -1) this._E.activeConfigurableOptions.splice(pos, 1);
 
-                // add active option to activeConfigurableOptions
-                this._E.activeConfigurableOptions.push( option.opt );
-
-            } else { // opt is null (e.g. the first option in a select "--Please Select--")
-                // remove last active option from activeConfigurableOptions
-                var pos = this._E.activeConfigurableOptions.indexOf( attr._e._last.selectedOption );
-                if (pos !== -1) this._E.activeConfigurableOptions.splice(pos, 1);
-                // Make last option no longer active
-                if (attr._e._last.selectedOption) attr._e._last.selectedOption._f.active = false;
+                this._E.activeConfigurableOptions.push(option.opt);
+            } else {
+                const previousOption = attr._e.selectedOption;
+                this._E.activeConfigurableOptions = this._E.activeConfigurableOptions.filter(opt => opt !== previousOption);
+                if (previousOption) {
+                    previousOption._f.active = false;
+                }
             }
+
             this.setAvailableOptions();
             this.checkStockStatus();
         }
-    },
+    }
+
     /**
-     *
      * Run everything that needs to happen (visually and functionally) when an option is clicked
-     **/
-    onOptionClick: function(attr) {
+     */
+    onOptionClick(attr) {
         var opt = attr._e.selectedOption;
         if (opt) {
-            if (opt != attr._e._last.selectedOption) {
-                // Set the attribute's label
+            if (opt !== attr._e._last.selectedOption) {
                 attr._e.attrLabel.innerHTML = this.getOptionLabel(opt);
 
                 if (opt._f.isSwatch) {
-                    // Clear .selected from any other li for this attr
-                    opt._e.ul.select('li').invoke('removeClassName','selected');
-                    // Add selected class to swatch's li
-                    opt._e.li.addClassName('selected');
-                    // Add validation styling to label
-                    var inputBox = attr._e.optionSelect.up();
-                    if (inputBox.hasClassName('validation-error')) {
-                        inputBox.removeClassName('validation-error');
-                        inputBox.down('.validation-advice').remove();
+                    opt._e.ul.querySelectorAll('li').forEach(li => li.classList.remove('selected'));
+                    opt._e.li.classList.add('selected');
+                    var inputBox = attr._e.optionSelect.parentElement;
+                    if (inputBox.classList.contains('validation-error')) {
+                        inputBox.classList.remove('validation-error');
+                        inputBox.querySelector('.validation-advice').remove();
                     }
                 };
 
-                // Mark last option as no longer active
                 if (attr._e._last.selectedOption) attr._e._last.selectedOption._f.active = false;
-                // Mark this option as active
                 opt._f.active = true;
 
-                // remove last active option from activeConfigurableOptions
-                var pos = this._E.activeConfigurableOptions.indexOf( attr._e._last.selectedOption );
+                var pos = this._E.activeConfigurableOptions.indexOf(attr._e._last.selectedOption);
                 if (pos !== -1) this._E.activeConfigurableOptions.splice(pos, 1);
 
-                // add active option to activeConfigurableOptions
-                this._E.activeConfigurableOptions.push( opt );
+                this._E.activeConfigurableOptions.push(opt);
 
-                // Set what other configurable options are available now this option was selected
                 this.setAvailableOptions();
-                // preview available after clicking to show the mouseover state
                 if (opt._f.isSwatch && !attr._f.isCustomOption && this._F.firstOptionSelected) {
                     this.previewAvailableOptions();
                 };
             };
-        } else { // opt is null (e.g. the first option in a select "--Please Select--")
-            // remove last active option from activeConfigurableOptions
-            var pos = this._E.activeConfigurableOptions.indexOf( attr._e._last.selectedOption );
+        } else {
+            var pos = this._E.activeConfigurableOptions.indexOf(attr._e._last.selectedOption);
             if (pos !== -1) this._E.activeConfigurableOptions.splice(pos, 1);
-            // Make last option no longer active
             if (attr._e._last.selectedOption) attr._e._last.selectedOption._f.active = false;
-            // loop through all options and set available
             this.setAvailableOptions();
         }
-        // check and set stock status
         this.checkStockStatus();
 
-        // Make sure all the selected options are actually selected in their hidden select elements
-        this._E.activeConfigurableOptions.each(function(selectedOpt){
+        this._E.activeConfigurableOptions.forEach(selectedOpt => {
             var oldDisabledValue = selectedOpt._e.option.disabled;
             selectedOpt._e.option.disabled = false;
             selectedOpt._e.option.selected = true;
             selectedOpt._e.option.disabled = oldDisabledValue;
         });
 
-        // update select
         if ((this._O.selectFirstOption && !this._F.firstOptionSelected) ||
             (this._F.hasPresetValues && !this._F.presetValuesSelected) ||
             (!windowLoaded)) {
-            Event.observe(window, 'load', function() {
-                window.setTimeout(function() {
-                    this.updateSelect( attr );
+            window.addEventListener('load', () => {
+                setTimeout(() => {
+                    this.updateSelect(attr);
                     this._F.firstOptionSelected = true;
-                }.bind(this), 200);
-            }.bind(this));
+                }, 200);
+            });
         } else {
             this.updateSelect(attr);
             this._F.firstOptionSelected = true;
         }
-    },
+    }
+
     /**
-     *
      * Visual cues if you were to click on the option/swatch you're hovering over
      * - Show enabled/disabled state of other options/swatches
      * - Preview label of hovered swatch
      * - Preview the stock status
-     **/
-    onOptionOver: function() {
+     */
+    onOptionOver() {
         // Since browsers like Safari on iOS will emulate a hover event, use custom event detection to determine
         // whether if input is touch. If event *is* touch, then don't run this code so that the onOptionClick
         // method will be triggered.
-        if(PointerManager.getPointer() == PointerManager.TOUCH_POINTER_TYPE) {
+        if (PointerManager.getPointer() == PointerManager.TOUCH_POINTER_TYPE) {
             return;
         }
 
@@ -479,15 +430,15 @@ Product.ConfigurableSwatches.prototype = {
 
         // Remove last hover class
         if (lastOpt && lastOpt._f.isSwatch) {
-            lastOpt._e.li.removeClassName('hover');
+            lastOpt._e.li.classList.remove('hover');
         }
         // Set new hover class
         if (opt._f.isSwatch) {
-            opt._e.li.addClassName('hover');
+            opt._e.li.classList.add('hover');
         }
 
         // Change label
-        attr._e.attrLabel.innerHTML = this.getOptionLabel(opt);
+        attr._e.attrLabel.textContent = this.getOptionLabel(opt);
 
         // run setAvailable before previewAvailable and reset last label if
         // 1) the timeout has not been run (which means lastOpt != false) and
@@ -495,7 +446,7 @@ Product.ConfigurableSwatches.prototype = {
         this.setAvailableOptions();
         if(lastOpt && lastOpt.attr.id != opt.attr.id) {
             // reset last hover swatch's attribute
-            lastOpt.attr._e.attrLabel.innerHTML = lastOpt.attr._e.selectedOption ? this.getOptionLabel(lastOpt.attr._e.selectedOption) : '';
+            lastOpt.attr._e.attrLabel.textContent = lastOpt.attr._e.selectedOption ? this.getOptionLabel(lastOpt.attr._e.selectedOption) : '';
         }
 
         // Preview available
@@ -507,102 +458,92 @@ Product.ConfigurableSwatches.prototype = {
             var stockCheckOptions = this._E.activeConfigurableOptions;
             if (!opt._f.active) {
                 // Remove the attribute's selected option (if applicable)
-                stockCheckOptions = stockCheckOptions.without( attr._e.selectedOption );
+                stockCheckOptions = stockCheckOptions.filter(option => option !== attr._e.selectedOption);
                 // Add the currently hovered option
                 stockCheckOptions.push(opt);
             };
-            this.checkStockStatus( stockCheckOptions );
-        };
-    },
+            this.checkStockStatus(stockCheckOptions);
+        }
+    }
+
     /**
-     *
      * Reset all visual cues from onOptionOver
-     **/
-    onOptionOut: function() {
+     */
+    onOptionOut() {
         // Since browsers like Safari on iOS will emulate a hover event, use custom event detection to determine
         // whether if input is touch. If event *is* touch, then don't run this code so that the onOptionClick
         // method will be triggered.
-        if (PointerManager.getPointer() == PointerManager.TOUCH_POINTER_TYPE) {
-            return;
-        }
+        if (PointerManager.getPointer() === PointerManager.TOUCH_POINTER_TYPE) return;
 
-        var opt = this._E.optionOver;
-
-        // Set timeout
-        this._N.resetTimeout = setTimeout(function(){
+        const opt = this._E.optionOver;
+        this._N.resetTimeout = setTimeout(() => {
             this.resetAvailableOptions();
-        }.bind(this), 300);
+        }, 300);
 
         if (opt && opt._f.isSwatch) {
-            opt._e.li.removeClassName('hover');
-        };
-    },
+            opt._e.li.classList.remove('hover');
+        }
+    }
+
     /**
-     *
      * Loop through each option across all attributes to set them as available or not
      * and set necessary flags as such
-     **/
-    setAvailableOptions: function() {
-        var args = arguments;
-        // Allows to check one specific option instead of having to loop through all of them
-        var loopThroughOptions = args.length ? args[0] : this._E.allConfigurableOptions;
-        loopThroughOptions.each( function(loopingOption) {
-            var productArrays = [ loopingOption.products ];
-            // If the attr of the looping swatch has a selection
+     */
+    setAvailableOptions() {
+        const args = arguments;
+        const loopThroughOptions = args.length ? args[0] : this._E.allConfigurableOptions;
+        loopThroughOptions.forEach(loopingOption => {
+            const productArrays = [loopingOption.products];
             if (loopingOption.attr._e.selectedOption) {
-                this._E.activeConfigurableOptions.without( loopingOption.attr._e.selectedOption ).each(function(selectedOpt) {
-                    productArrays.push( selectedOpt.products );
+                this._E.activeConfigurableOptions.filter(opt => opt !== loopingOption.attr._e.selectedOption).forEach(selectedOpt => {
+                    productArrays.push(selectedOpt.products);
                 });
             } else {
-                this._E.activeConfigurableOptions.each(function(selectedOpt){
-                    productArrays.push( selectedOpt.products );
+                this._E.activeConfigurableOptions.forEach(selectedOpt => {
+                    productArrays.push(selectedOpt.products);
                 });
             }
-            var result = this._u.intersectAll( productArrays );
+            const result = this._u_intersectAll(productArrays);
             this.setOptionStatus(loopingOption, result.length);
-        }.bind(this));
-    },
+        });
+    }
+
     /**
-     *
      * Loop though each option across all attributes to preview their availability if the
      * option being hovered were to be selected
-     **/
-    previewAvailableOptions: function() {
-        var opt = this._E.optionOver;
-        if (!opt) {
-            return; // Exit if there is no option currently being hovered
-        }
+     */
+    previewAvailableOptions() {
+        const opt = this._E.optionOver;
+        if (!opt) return;
 
-        var attr = opt.attr;
+        const attr = opt.attr;
 
-        this._E.allConfigurableOptions.each( function(loopingOption, i) {
-            var productArrays = [ loopingOption.products, opt.products ];
+        this._E.allConfigurableOptions.forEach(loopingOption => {
+            const productArrays = [loopingOption.products, opt.products];
 
-            // keep all swatches in the same attribute as they were
-            if (attr.id == loopingOption.attr.id) {
-                return;
-            }
-            // if loop attribute has no selection, then add selected swatches that are not in the hover swatch's attribute
+            if (attr.id === loopingOption.attr.id) return;
+
             if (!loopingOption.attr._e.selectedOption) {
-                this._E.activeConfigurableOptions.each(function(selectedOpt){
-                    if (selectedOpt.attr.id != opt.attr.id) {
-                        productArrays.push( selectedOpt.products );
-                    };
+                this._E.activeConfigurableOptions.forEach(selectedOpt => {
+                    if (selectedOpt.attr.id !== opt.attr.id) {
+                        productArrays.push(selectedOpt.products);
+                    }
                 });
-            };
-            var result = this._u.intersectAll( productArrays );
+            }
+
+            const result = this._u_intersectAll(productArrays);
             this.setOptionStatus(loopingOption, result.length);
-        }.bind(this));
-    },
+        });
+    }
+
     /**
-     *
      * Reset all the options and their availability, the attribute labels, and the stock status
-     **/
-    resetAvailableOptions: function() {
-        var opt = this._E.optionOver;
+     */
+    resetAvailableOptions() {
+        const opt = this._E.optionOver;
 
         if (opt) {
-            var attr = opt.attr;
+            const attr = opt.attr;
 
             // Reset last label
             attr._e.attrLabel.innerHTML = attr._e.selectedOption ? this.getOptionLabel(attr._e.selectedOption) : '';
@@ -621,90 +562,70 @@ Product.ConfigurableSwatches.prototype = {
             // reset the last optionOver
             this._E._last.optionOver = false;
         };
-    },
+    }
+
     /**
-     *
      * Run a check though all the selected options and set the stock status if any are disabled
-     **/
-    checkStockStatus: function() {
-        var inStock = true;
+     */
+    checkStockStatus() {
         var checkOptions = arguments.length ? arguments[0] : this._E.activeConfigurableOptions;
-        // Set out of stock if any selected item is not enabled
-        checkOptions.each( function(selectedOpt) {
-            if (!selectedOpt._f.enabled) {
-                inStock = false;
-                throw $break;
-            }
-        });
-        this.setStockStatus( inStock );
-    },
+        var inStock = !checkOptions.some(selectedOpt => !selectedOpt._f.enabled);
+        this.setStockStatus(inStock);
+    }
+
     /**
-     *
      * Do all the visual changes and enable/disable add to cart button depending on the stock status
      *
      * @var inStock - boolean
-     **/
-    setStockStatus: function(inStock) {
-        if (inStock) {
-            this._E.availability.each(function(el) {
-                var el = $(el);
-                el.addClassName('in-stock').removeClassName('out-of-stock');
-                el.select('span').invoke('update', Translator.translate('In Stock'));
-            });
+     */
+    setStockStatus(inStock) {
+        const statusClass = inStock ? 'in-stock' : 'out-of-stock';
+        const statusText = inStock ? 'In Stock' : 'Out of Stock';
 
-            this._E.cartBtn.btn.each(function(el, index) {
-                var el = $(el);
-                el.disabled = false;
-                el.removeClassName('out-of-stock');
-                el.writeAttribute('onclick', this._E.cartBtn.onclick);
-                el.title = '' + Translator.translate(this._E.cartBtn.txt[index]);
-                el.select('span span').invoke('update', Translator.translate(this._E.cartBtn.txt[index]));
-            }.bind(this));
-        } else {
-            this._E.availability.each(function(el) {
-                var el = $(el);
-                el.addClassName('out-of-stock').removeClassName('in-stock');
-                el.select('span').invoke('update', Translator.translate('Out of Stock'));
-            });
-            this._E.cartBtn.btn.each(function(el) {
-                var el = $(el);
-                el.addClassName('out-of-stock');
-                el.disabled = true;
-                el.removeAttribute('onclick');
-                el.observe('click', function(event) {
-                    Event.stop(event);
-                    return false;
-                });
-                el.writeAttribute('title', Translator.translate('Out of Stock'));
-                el.select('span span').invoke('update', Translator.translate('Out of Stock'));
-            });
-        }
-    },
+        this._E.availability.forEach(el => {
+            el.classList.toggle('in-stock', inStock);
+            el.classList.toggle('out-of-stock', !inStock);
+            el.querySelector('span').textContent = Translator.translate(statusText);
+        });
+
+        this._E.cartBtn.btn.forEach((el, index) => {
+            el.disabled = !inStock;
+            el.classList.toggle('out-of-stock', !inStock);
+            if (inStock) {
+                el.onclick = this._E.cartBtn.onclick;
+                el.title = Translator.translate(this._E.cartBtn.txt[index]);
+                el.querySelector('span span').textContent = Translator.translate(this._E.cartBtn.txt[index]);
+            } else {
+                el.onclick = null;
+                el.title = Translator.translate('Out of Stock');
+                el.querySelector('span span').textContent = Translator.translate('Out of Stock');
+                el.addEventListener('click', event => event.preventDefault());
+            }
+        });
+    }
+
     /**
-     *
      * Enable/disable a specific option
-     **/
-    setOptionStatus: function(opt, enabled) {
-        var attr = opt.attr;
-        var enabled = enabled > 0;
+     */
+    setOptionStatus(opt, enabled) {
+        const attr = opt.attr;
+        const enabledBool = enabled > 0;
 
         // Set enabled flag on option
-        opt._f.enabled = enabled;
+        opt._f.enabled = enabledBool;
         if (opt._f.isSwatch) {
-            var method = enabled ? 'removeClassName' : 'addClassName';
-            opt._e.li[method]('not-available');
-        } else if (this._F.currentAction == "click" || this._F.currentAction == "change") {
+            opt._e.li.classList.toggle('not-available', !enabledBool);
+        } else if (this._F.currentAction === "click" || this._F.currentAction === "change") {
             // Set disabled and selected if action is permanent, ONLY for non-swatch selects
-            var attrDisable = enabled ? 'removeAttribute' : 'writeAttribute';
-            $(opt._e.option)[attrDisable]('disabled');
+            opt._e.option.disabled = !enabledBool;
         }
-        return enabled;
-    },
+        return enabledBool;
+    }
+
     /**
-     *
      * Make sure all events related to the select being updated are fired appropriately
-     **/
-    updateSelect: function(attr) {
+     */
+    updateSelect(attr) {
         // fire select change event
         // this will trigger the validation of the select
         // only fire if this attribute has had a selected option at one time
@@ -713,76 +634,59 @@ Product.ConfigurableSwatches.prototype = {
             ConfigurableMediaImages.updateImage(attr._e.optionSelect);
             this.productConfig.handleSelectChange(attr._e.optionSelect);
             this._F.nativeSelectChange = true;
-        };
-    },
+        }
+    }
+
     /**
      * Return text that should be displayed in attribute label for a certain option
      *
      * @param {object} option
      * return {string}
      */
-    getOptionLabel: function(option) {
+    getOptionLabel(option) {
         return this.productConfig.getOptionLabel(option, option.price);
-    },
+    }
+
+    _u_getAttrLabelElement(attrCode) {
+        let spanLabel = document.querySelector('#select_label_' + attrCode);
+        if (spanLabel) {
+            return spanLabel;
+        } else {
+            let label = document.querySelector('#' + attrCode + '_label');
+            if (label) {
+                return label.insertAdjacentHTML('beforeend', ' <span id="select_label_' + attrCode + '" class="select-label"></span>').querySelector('span.select-label');
+            }
+        }
+        return false;
+    }
+
+    _u_getOptionElement(opt, attr, idx) {
+        var indexedOption = attr._e.optionSelect.options[idx+1];
+        if (indexedOption && indexedOption.value == opt.id) {
+            return indexedOption;
+        };
+        var optionElement = false;
+        var optionsLen = attr._e.optionSelect.options.length;
+        var option;
+        for (var i=0; i<optionsLen; i++) {
+            option = attr._e.optionSelect.options[i];
+            if (option.value == opt.id) {
+                optionElement = option;
+                throw $break;
+            };
+        }
+        return optionElement;
+    }
 
     /**
-     * Utility methods - none of these require more information than what is sent to them in the params or any outside methods
+     * Returns the intersection of all arrays in the given list.
+     *
+     * @param {array} lists - A list of arrays.
+     * @returns {array} The intersection of all arrays.
      */
-    _u: {
-        /**
-         *
-         * Find (or else, make) the attribute's label
-         **/
-        getAttrLabelElement: function(attrCode) {
-            var spanLabel = $$('#select_label_'+attrCode);
-            if (spanLabel.length) {
-                return spanLabel[0];
-            } else {
-                var label = $$('#'+attrCode+'_label');
-                if (label.length) {
-                    return label[0].insert({ 'bottom': ' <span id="select_label_'+attrCode+'" class="select-label"></span>'}).select('span.select-label')[0];
-                };
-            };
-            return false;
-        },
-        /**
-         *
-         * Find the DOM element option relating to the option object in configurableAttributes
-         **/
-        getOptionElement: function(opt, attr, idx) {
-            var indexedOption = attr._e.optionSelect.options[idx+1];
-            if (indexedOption && indexedOption.value == opt.id) {
-                return indexedOption;
-            };
-            var optionElement = false;
-            var optionsLen = attr._e.optionSelect.options.length;
-            var option;
-            for (var i=0; i<optionsLen; i++) {
-                option = attr._e.optionSelect.options[i];
-                if (option.value == opt.id) {
-                    optionElement = option;
-                    throw $break;
-                };
-            }
-            return optionElement;
-        },
-        /**
-         *
-         * Find intersecting items from an array of arrays
-         *
-         * @var lists - array
-         * Example: intersectAll([ [1,2,3], [2,3,4] ]); returns [2,3]
-         **/
-        intersectAll: function(lists) {
-            if (lists.length == 0) return [];
-            else if (lists.length == 1) return lists[0];
-
-            var result = lists[0];
-            for (var i = 1; i < lists.length; i++) {
-                if (!result.length) break;
-                result = result.intersect(lists[i]);
-            }
-            return result;
-        }
+    _u_intersectAll(lists) {
+        if (lists.length === 0) return [];
+        if (lists.length === 1) return lists[0];
+        return lists.reduce((a, b) => a.filter(c => b.includes(c)));
     }
-};
+}

@@ -12,75 +12,132 @@
 ?>
 <?php if(!$this->getDontDisplayContainer()): ?>
 <script type="text/javascript">
-//<![CDATA[
-if(!window.toogleVisibilityOnObjects) {
-    var toogleVisibilityOnObjects = function(source, objects) {
-        if($(source) && $(source).checked) {
-            objects.each(function(item){
-                $(item).show();
-                $$('#' + item + ' .input-text').each(function(item) {
-                    item.removeClassName('validation-passed');
+    if (!window.toogleVisibilityOnObjects) {
+        var toogleVisibilityOnObjects = function(source, objects) {
+            if (typeof source == 'string') {
+                source = document.getElementById(source);
+            }
+
+            if (source && source.checked) {
+                // Show elements
+                objects.forEach(function(item) {
+                    const element = document.getElementById(item);
+                    if (element) {
+                        element.style.display = 'block';
+                        // Remove validation-passed from input fields
+                        element.querySelectorAll('.input-text').forEach(function(input) {
+                            input.classList.remove('validation-passed');
+                        });
+                    }
                 });
-            });
-        } else {
-            objects.each(function(item){
-                if ($(item)) {
-                    $(item).hide();
-                    $$('#' + item + ' .input-text').each(function(sitem) {
-                        sitem.addClassName('validation-passed');
-                    });
-                    $$('#' + item + ' .giftmessage-area').each(function(sitem) {
-                        sitem.value = '';
-                    });
-                    $$('#' + item + ' .checkbox').each(function(sitem) {
-                        sitem.checked = false;
-                    });
-                    $$('#' + item + ' .select').each(function(sitem) {
-                        sitem.value = '';
-                    });
-                    $$('#' + item + ' .price-box').each(function(sitem) {
-                        sitem.addClassName('no-display');
-                    });
-                }
-            });
+            } else {
+                // Hide elements
+                objects.forEach(function(item) {
+                    const element = document.getElementById(item);
+                    if (element) {
+                        element.style.display = 'none';
+
+                        // Add validation-passed to input fields
+                        element.querySelectorAll('.input-text').forEach(function(input) {
+                            input.classList.add('validation-passed');
+                        });
+
+                        // Clear textarea values
+                        element.querySelectorAll('.giftmessage-area').forEach(function(textarea) {
+                            textarea.value = '';
+                        });
+
+                        // Uncheck checkboxes
+                        element.querySelectorAll('.checkbox').forEach(function(checkbox) {
+                            checkbox.checked = false;
+                        });
+
+                        // Clear select values
+                        element.querySelectorAll('.select').forEach(function(select) {
+                            select.value = '';
+                        });
+
+                        // Add no-display class to price boxes
+                        element.querySelectorAll('.price-box').forEach(function(priceBox) {
+                            priceBox.classList.add('no-display');
+                        });
+                    }
+                });
+            }
         }
     }
-}
 
-if(!window.toogleRequired) {
-    var toogleRequired = function (source, objects)
-    {
-        if(!$(source).value.blank()) {
-            objects.each(function(item) {
-               $(item).addClassName('required-entry');
-            });
-        } else {
-            objects.each(function(item) {
-                if (typeof shippingMethod != 'undefined' && shippingMethod.validator) {
-                   shippingMethod.validator.reset(item);
-                }
-                $(item).removeClassName('required-entry');
-            });
-
+    if (!window.toogleRequired) {
+        var toogleRequired = function (source, objects) {
+            source = document.getElementById(source);
+            if (source && source.value.trim() !== '') {
+                objects.forEach(function(item) {
+                    const element = document.getElementById(item);
+                    if (element) {
+                        element.classList.add('required-entry');
+                    }
+                });
+            } else {
+                objects.forEach(function(item) {
+                    const element = document.getElementById(item);
+                    if (element) {
+                        if (typeof shippingMethod !== 'undefined' && shippingMethod.validator) {
+                            shippingMethod.validator.reset(item);
+                        }
+                        element.classList.remove('required-entry');
+                    }
+                });
+            }
         }
     }
-}
-if(window.shipping) {
 
-shipping.onSave = function(evt){
-    new Ajax.Updater('onepage-checkout-shipping-method-additional-load', '<?= $this->getAdditionalUrl() ?>', {onSuccess: function() {
-          this.nextStep(evt);
-    }.bind(this), evalScripts:true});
-}.bindAsEventListener(shipping);
+    if (window.shipping) {
+        shipping.onSave = function(evt) {
+            fetch('<?= $this->getAdditionalUrl() ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+                .then(response => response.text())
+                .then(html => {
+                    const container = document.getElementById('onepage-checkout-shipping-method-additional-load');
+                    container.innerHTML = html;
 
-billing.onSave = function(evt){
-    new Ajax.Updater('onepage-checkout-shipping-method-additional-load', '<?= $this->getAdditionalUrl() ?>', {onSuccess: function() {
-          this.nextStep(evt);
-    }.bind(this), evalScripts:true});
-}.bindAsEventListener(billing);
+                    // Execute any scripts in the response
+                    const scripts = container.getElementsByTagName('script');
+                    for (let script of scripts) {
+                        eval(script.innerHTML);
+                    }
 
-}
-//]]>
+                    this.nextStep(evt);
+                })
+                .catch(error => console.error('Error:', error));
+        }.bind(shipping);
+
+        billing.onSave = function(evt) {
+            fetch('<?= $this->getAdditionalUrl() ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+                .then(response => response.text())
+                .then(html => {
+                    const container = document.getElementById('onepage-checkout-shipping-method-additional-load');
+                    container.innerHTML = html;
+
+                    // Execute any scripts in the response
+                    const scripts = container.getElementsByTagName('script');
+                    for (let script of scripts) {
+                        eval(script.innerHTML);
+                    }
+
+                    this.nextStep(evt);
+                })
+                .catch(error => console.error('Error:', error));
+        }.bind(billing);
+    }
 </script>
 <?php endif ?>
 <?php if ($this->isMessagesAvailable() || $this->isItemsAvailable()): ?>
@@ -127,9 +184,7 @@ billing.onSave = function(evt){
                         </li>
                     </ul>
                     <script type="text/javascript">
-                    //<![CDATA[
                         toogleRequired('gift-message-whole-message', ['gift-message-whole-from','gift-message-whole-to']);
-                    //]]>
                     </script>
                 </div>
              <?php endif ?>
@@ -178,9 +233,7 @@ billing.onSave = function(evt){
                                  </li>
                              </ul>
                              <script type="text/javascript">
-                             //<![CDATA[
                                 toogleRequired('gift-message-<?= $_item->getId() ?>-message', ['gift-message-<?= $_item->getId() ?>-from','gift-message-<?= $_item->getId() ?>-to']);
-                             //]]>
                              </script>
                          </div>
                      </div>
@@ -192,11 +245,9 @@ billing.onSave = function(evt){
         </div>
     </div>
     <script type="text/javascript">
-    //<![CDATA[
         toogleVisibilityOnObjects('allow_gift_messages', ['allow-gift-message-container']);
         toogleVisibilityOnObjects('allow_gift_messages_for_order', ['allow-gift-messages-for-order-container']);
         toogleVisibilityOnObjects('allow_gift_messages_for_items', ['allow-gift-messages-for-items-container']);
-    //]]>
     </script>
 <?php break ?>
 <?php case 'multishipping_adress_checkbox': ?>
@@ -244,10 +295,8 @@ billing.onSave = function(evt){
                     </li>
                 </ul>
                 <script type="text/javascript">
-                //<![CDATA[
                     var shippingMethod = new VarienForm('shipping_method_form');
                     toogleRequired('gift-message-<?= $this->getEntity()->getId() ?>-message', ['gift-message-<?= $this->getEntity()->getId() ?>-from','gift-message-<?= $this->getEntity()->getId() ?>-to']);
-                //]]>
                 </script>
             </div>
             <?php endif ?>
@@ -295,9 +344,7 @@ billing.onSave = function(evt){
                                  </li>
                              </ul>
                              <script type="text/javascript">
-                             //<![CDATA[
                                  toogleRequired('gift-message-<?= $_item->getId() ?>-message', ['gift-message-<?= $_item->getId() ?>-from','gift-message-<?= $_item->getId() ?>-to']);
-                             //]]>
                              </script>
                          </div>
                      </div>
@@ -309,11 +356,9 @@ billing.onSave = function(evt){
         </div>
     </div>
     <script type="text/javascript">
-    //<![CDATA[
         toogleVisibilityOnObjects('allow_gift_messages_<?= $this->getEntity()->getId() ?>', ['allow-gift-message-container-<?= $this->getEntity()->getId() ?>']);
         toogleVisibilityOnObjects('allow_gift_messages_for_order_<?= $this->getEntity()->getId() ?>', ['allow-gift-messages-for-order-container-<?= $this->getEntity()->getId() ?>']);
         toogleVisibilityOnObjects('allow_gift_messages_for_items_<?= $this->getEntity()->getId() ?>', ['allow-gift-messages-for-items-container-<?= $this->getEntity()->getId() ?>']);
-    //]]>
     </script>
     <?php break ?>
 <?php endswitch ?>

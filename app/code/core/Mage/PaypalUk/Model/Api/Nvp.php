@@ -581,7 +581,7 @@ class Mage_PaypalUk_Model_Api_Nvp extends Mage_Paypal_Model_Api_Nvp
      * Checking negative line items
      *
      * @param int $i
-     * @return null|true
+     * @return bool|void
      */
     #[\Override]
     protected function _exportLineItems(array &$request, $i = 0)

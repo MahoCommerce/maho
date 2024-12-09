@@ -36,9 +36,7 @@
                         <?php $_showAddButtonFlag = true ?>
                         <input type="checkbox" name="order_items[]" id="reorder-item-<?= $_item->getId() ?>" value="<?= $_item->getId() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Add to Cart')) ?>" class="checkbox validate-one-required-by-name" />
                         <script type="text/javascript">
-                        //<![CDATA[
-                            $('reorder-item-<?= $_item->getId() ?>').advaiceContainer = 'cart-sidebar-reorder-advice-container';
-                        //]]>
+                            document.getElementById('reorder-item-<?= $_item->getId() ?>').advaiceContainer = 'cart-sidebar-reorder-advice-container';
                         </script>
                     <?php endif ?>
                     <p class="product-name"><a href="<?= $_item->getProduct()->getProductUrl() ?>"><?= $this->escapeHtml($_item->getName()) ?></a></p>
@@ -57,8 +55,6 @@
 </div>
 <?= $this->getPagerHtml() ?>
 <script type="text/javascript">
-//<![CDATA[
     var reorderFormDetail = new VarienForm('reorder-validate-detail');
-//]]>
 </script>
 <?php endif ?>

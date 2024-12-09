@@ -30,10 +30,12 @@
             flex-direction: column;
         }
         .dialog-header {
+            display: flex;
             padding: 15px 20px;
             border-bottom: 1px solid #e0e0e0;
         }
         .dialog-header h2 {
+            flex-grow: 1;
             margin: 0;
             font-size: 1.25em;
         }
@@ -82,6 +84,7 @@
         dialog.innerHTML = `
             <div class="dialog-header">
                 <h2>${options.title || ''}</h2>
+                <button title="Close">&times;</button>
             </div>
             <div class="dialog-content">${options.content || ''}</div>
         `;
@@ -125,6 +128,7 @@
             dialog.querySelector(`#${dialog.id}-cancel`).addEventListener('click', () => closeDialog('cancel'));
         }
 
+        dialog.querySelector('.dialog-header button').addEventListener('click', () => closeDialog('cancel'));
         dialog.addEventListener('close', () => {
             if (!dialog.returnValue) {
                 closeDialog('cancel');

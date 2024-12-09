@@ -9,6 +9,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Catalog_Block_Product_View $this */
 ?>
 <div class="page-title">
     <h1><?= $this->__('Share Your Wishlist') ?></h1>
@@ -49,25 +51,25 @@
     </div>
 </form>
 <script type="text/javascript">
-//<![CDATA[
-Validation.addAllThese([
-    ['validate-emails', '<?= Mage::helper('core')->jsQuoteEscape($this->__('Please enter a valid email addresses, separated by commas. For example johndoe@domain.com, johnsmith@domain.com.')) ?>', function (v) {
-    if(Validation.get('IsEmpty').test(v)) {
-        return true;
-    }
+    Validation.add('validate-emails',
+        '<?= Mage::helper('core')->jsQuoteEscape($this->__('Please enter a valid email addresses, separated by commas. For example johndoe@domain.com, johnsmith@domain.com.')) ?>',
+        function (v) {
+            if(Validation.get('IsEmpty').test(v)) {
+                return true;
+            }
 
-    var valid_regexp = /^[a-z0-9\._-]{1,30}@([a-z0-9_-]{1,30}\.){1,5}[a-z]{2,4}$/i;
-    var emails = v.split(',');
+            const valid_regexp = /^[a-z0-9\._-]{1,30}@([a-z0-9_-]{1,30}\.){1,5}[a-z]{2,4}$/i;
+            const emails = v.split(',');
 
-    for (var i=0; i<emails.length; i++) {
-        if(!valid_regexp.test(emails[i].strip())) {
-            return false;
+            for (let i = 0; i < emails.length; i++) {
+                if(!valid_regexp.test(emails[i].trim())) {
+                    return false;
+                }
+            }
+
+            return true;
         }
-    }
+    );
 
-    return true;
-    }]
-]);
-var dataForm = new VarienForm('form-validate', true);
-//]]>
+    var dataForm = new VarienForm('form-validate', true);
 </script>

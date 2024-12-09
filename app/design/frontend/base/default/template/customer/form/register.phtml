@@ -87,9 +87,9 @@
     <?php endif ?>
     </form>
     <script type="text/javascript">
-        const countryRegions = <?= Mage::helper('directory')->getRegionJsonByStore() ?>;
         const dataForm = new VarienForm('form-validate', true);
         <?php if($this->getShowAddressFields()): ?>
+        const countryRegions = <?= Mage::helper('directory')->getRegionJsonByStore() ?>;
         new RegionUpdater('country', 'region', 'region_id', countryRegions, undefined, 'zip');
         <?php endif ?>
     </script>
