@@ -183,7 +183,7 @@ class Mage_CatalogSearch_Model_Advanced extends Mage_Core_Model_Abstract
                     }
                 }
             } else {
-                $condition = $this->_prepareCondition($attribute, $value);
+                $condition = $this->_getResource()->_prepareCondition($this->getProductCollection(), $attribute, $value);
                 if ($condition === false) {
                     continue;
                 }
