@@ -1,0 +1,38 @@
+<?php
+/**
+ * Maho
+ *
+ * @category   design
+ * @package    default_default
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Mage_Adminhtml_Block_Template $this */
+$entityTypeCode = Mage::registry('entity_type')->getEntityTypeCode();
+?>
+<script>
+const inputTypeDefs = <?= Mage::helper('core')->jsonEncode(Mage::helper('eav')->getInputTypes($entityTypeCode)) ?>;
+
+function saveAndContinueEdit() {
+    const activeTab = eav_attribute_tabsJsTabs.activeTab.id;
+    const action = document.getElementById(editForm.formId).action;
+    saveAttribute(`${action}back/edit/tab/${activeTab}`);
+}
+
+function saveAttribute(url = null) {
+    disableElements('save');
+    if (editForm.submit(url) == false) {
+        enableElements('save');
+    }
+    varienGlobalEvents.attachEventHandler('formValidateAjaxComplete', () => {
+        enableElements('save');
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new EavAttributeEditForm(editForm.formId, inputTypeDefs);
+});
+</script>

@@ -7,6 +7,7 @@
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
@@ -87,6 +88,11 @@
                 </setup>
             </eav_setup>
         </resources>
+        <blocks>
+            <eav>
+                <class>Mage_Eav_Block</class>
+            </eav>
+        </blocks>
         <cache>
             <types>
                 <eav translate="label,description" module="eav">
@@ -96,10 +102,95 @@
                 </eav>
             </types>
         </cache>
+        <eav_attributes/>
+        <eav_forms/>
         <eav_frontendclasses>
+            <default>
+                <validate_number translate="label" module="eav">
+                    <label>Decimal Number</label>
+                    <value>validate-number</value>
+                </validate_number>
+                <validate_digits translate="label" module="eav">
+                    <label>Integer Number</label>
+                    <value>validate-digits</value>
+                </validate_digits>
+                <validate_email translate="label" module="eav">
+                    <label>Email</label>
+                    <value>validate-email</value>
+                </validate_email>
+                <validate_url translate="label" module="eav">
+                    <label>URL</label>
+                    <value>validate-url</value>
+                </validate_url>
+                <validate_alpha translate="label" module="eav">
+                    <label>Letters</label>
+                    <value>validate-alpha</value>
+                </validate_alpha>
+                <validate_alphanum translate="label" module="eav">
+                    <label>Letters (a-z, A-Z) or Numbers (0-9)</label>
+                    <value>validate-alphanum</value>
+                </validate_alphanum>
+            </default>
         </eav_frontendclasses>
-        <eav_attributes>
-        </eav_attributes>
+        <eav_inputtypes>
+            <!--
+                /**
+                * Return information array of attribute by input type
+                * Only a small number of settings returned, so we won't break anything in current dataflow
+                * As soon as development process goes on we need to add there all possible settings
+                * @todo specify there all relations for properties depending on input type
+                */
+            -->
+            <default>
+                <text translate="label" module="eav">
+                    <label>Text Field</label>
+                    <value>text</value>
+                    <backend_type>varchar</backend_type>
+                    <default_value_field>default_value_text</default_value_field>
+                </text>
+                <textarea translate="label" module="eav">
+                    <label>Text Area</label>
+                    <value>textarea</value>
+                    <backend_type>text</backend_type>
+                    <default_value_field>default_value_textarea</default_value_field>
+                </textarea>
+                <date translate="label" module="eav">
+                    <label>Date</label>
+                    <value>date</value>
+                    <backend_type>datetime</backend_type>
+                    <backend_model>eav/entity_attribute_backend_datetime</backend_model>
+                    <frontend_model>eav/entity_attribute_frontend_datetime</frontend_model>
+                    <default_value_field>default_value_date</default_value_field>
+                </date>
+                <boolean translate="label" module="eav">
+                    <label>Yes/No</label>
+                    <value>boolean</value>
+                    <backend_type>int</backend_type>
+                    <source_model>eav/entity_attribute_source_boolean</source_model>
+                    <default_value_field>default_value_yesno</default_value_field>
+                </boolean>
+                <multiselect translate="label" module="eav">
+                    <label>Multiple Select</label>
+                    <value>multiselect</value>
+                    <backend_type>text</backend_type>
+                    <backend_model>eav/entity_attribute_backend_array</backend_model>
+                    <options_panel><intype>checkbox</intype></options_panel>
+                </multiselect>
+                <select translate="label" module="eav">
+                    <label>Dropdown</label>
+                    <value>select</value>
+                    <backend_type>int</backend_type>
+                    <options_panel><intype>radio</intype></options_panel>
+                </select>
+                <customselect translate="label" module="eav">
+                    <label>Dropdown with Other Option</label>
+                    <value>customselect</value>
+                    <backend_type>varchar</backend_type>
+                    <source_model>eav/entity_attribute_source_table</source_model>
+                    <options_panel><intype>radio</intype></options_panel>
+                </customselect>
+            </default>
+        </eav_inputtypes>
         <events>
             <controller_action_predispatch>
                 <observers>
@@ -112,6 +203,13 @@
         </events>
     </global>
     <adminhtml>
+        <layout>
+            <updates>
+                <eav>
+                    <file>eav.xml</file>
+                </eav>
+            </updates>
+        </layout>
         <translate>
             <modules>
                 <Mage_Eav>
@@ -133,18 +231,4 @@
             </modules>
         </translate>
     </frontend>
-    <default>
-        <general>
-            <validator_data>
-                <input_types>
-                    <text>text</text>
-                    <textarea>textarea</textarea>
-                    <date>date</date>
-                    <boolean>boolean</boolean>
-                    <multiselect>multiselect</multiselect>
-                    <select>select</select>
-                </input_types>
-            </validator_data>
-        </general>
-    </default>
 </config>

@@ -1,0 +1,20 @@
+<?php
+/**
+ * Maho
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Eav_Block_Widget_Form_Element_Region $this */
+?>
+<label for="<?= $this->getFieldId()?>_id" class="<?= $this->getLabelClass() ?>"><em>*</em><?= $this->getLabel() ?></label>
+<div class="input-box">
+    <select id="<?= $this->getFieldId() ?>_id" name="<?= $this->getFieldName() ?>_id" title="<?= $this->quoteEscape($this->getLabel()) ?>"<?= $this->isRequired() ? ' class="validate-select"' : '' ?> <?= $this->getFieldParams() ?> data-default-value="<?= $this->escapeHtml($this->getRegionId()) ?>" style="display:none;">
+       <option value=""><?= $this->__('Please select region, state or province') ?></option>
+    </select>
+    <input type="text" id="<?= $this->getFieldId() ?>" name="<?= $this->getFieldName() ?>" value="<?= $this->escapeHtml($this->getValue()) ?>" title="<?= $this->quoteEscape($this->getLabel()) ?>" class="input-text <?= $this->getClass() ?>" <?= $this->getFieldParams() ?> />
+</div>

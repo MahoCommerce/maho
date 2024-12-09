@@ -97,7 +97,9 @@
  * @method string getSuffix()
  *
  * @method int getTagId()
- * @method $this setTaxClassId(bool $value)
+ * @method $this setAttributeSetId(int $value)
+ * @method $this setAddressAttributeSetId(int $value)
+ * @method $this setTaxClassId(int $value)
  * @method string getTaxvat()
  * @method $this setTotal(float $value)
  *
@@ -106,6 +108,8 @@
  */
 class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 {
+    public const ENTITY = 'customer';
+
     /**
      * Configuration paths for email templates and identities
      */
@@ -139,7 +143,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     public const SUBSCRIBED_YES = 'yes';
     public const SUBSCRIBED_NO  = 'no';
 
-    public const CACHE_TAG = 'customer';
+    public const CACHE_TAG = self::ENTITY;
 
     /**
      * Minimum Password Length
@@ -162,14 +166,14 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      *
      * @var string
      */
-    protected $_eventPrefix = 'customer';
+    protected $_eventPrefix = self::ENTITY;
 
     /**
      * Name of the event object
      *
      * @var string
      */
-    protected $_eventObject = 'customer';
+    protected $_eventObject = self::ENTITY;
 
     /**
      * List of errors
@@ -932,7 +936,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      * Retrieve customer tax class identifier
      *
      * @return int
-     * @throws Mage_Core_Model_Store_Exception
      */
     public function getTaxClassId()
     {
@@ -940,6 +943,32 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             $this->setTaxClassId(Mage::getModel('customer/group')->getTaxClassId($this->getGroupId()));
         }
         return $this->getData('tax_class_id');
+    }
+
+    /**
+     * Retrieve customer attribute set identifier
+     *
+     * @return int
+     */
+    public function getAttributeSetId()
+    {
+        if (!$this->getData('attribute_set_id')) {
+            $this->setAttributeSetId(Mage::getModel('customer/group')->getCustomerAttributeSetId($this->getGroupId()));
+        }
+        return $this->getData('attribute_set_id');
+    }
+
+    /**
+     * Retrieve customer address attribute set identifier
+     *
+     * @return int
+     */
+    public function getAddressAttributeSetId()
+    {
+        if (!$this->getData('address_attribute_set_id')) {
+            $this->setAddressAttributeSetId(Mage::getModel('customer/group')->getCustomerAddressAttributeSetId($this->getGroupId()));
+        }
+        return $this->getData('address_attribute_set_id');
     }
 
     /**
@@ -1074,15 +1103,15 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 
         $entityType = Mage::getSingleton('eav/config')->getEntityType('customer');
         $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'dob');
-        if ($attribute->getIsRequired() && trim($this->getDob()) == '') {
+        if ($attribute->getIsVisible() && $attribute->getIsRequired() && trim($this->getDob()) == '') {
             $errors[] = Mage::helper('customer')->__('The Date of Birth is required.');
         }
         $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'taxvat');
-        if ($attribute->getIsRequired() && trim($this->getTaxvat()) == '') {
+        if ($attribute->getIsVisible() && $attribute->getIsRequired() && trim($this->getTaxvat()) == '') {
             $errors[] = Mage::helper('customer')->__('The TAX/VAT number is required.');
         }
         $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'gender');
-        if ($attribute->getIsRequired() && trim($this->getGender()) == '') {
+        if ($attribute->getIsVisible() && $attribute->getIsRequired() && trim($this->getGender()) == '') {
             $errors[] = Mage::helper('customer')->__('Gender is required.');
         }
 

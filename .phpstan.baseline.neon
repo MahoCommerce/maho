@@ -415,12 +415,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/Product/Action/AttributeController.php
 
 		-
-			message: '#^Ternary operator condition is always true\.$#'
-			identifier: ternary.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/Product/SetController.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Controller_Action\:\:_setForcedFormKeyActions\(\) invoked with 2 parameters, 1 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -2287,34 +2281,22 @@ parameters:
 			path: app/code/core/Mage/Customer/Block/Account/Navigation.php
 
 		-
-			message: '#^Method Mage_Customer_Block_Address_Edit\:\:getCountryId\(\) should return int but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Customer/Block/Address/Edit.php
-
-		-
-			message: '#^Return type \(int\) of method Mage_Customer_Block_Address_Edit\:\:getCountryId\(\) should be compatible with return type \(string\) of method Mage_Directory_Block_Data\:\:getCountryId\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/Customer/Block/Address/Edit.php
-
-		-
-			message: '#^Method Mage_Customer_Block_Form_Register\:\:getCountryId\(\) should return int but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Customer/Block/Form/Register.php
-
-		-
-			message: '#^Return type \(int\) of method Mage_Customer_Block_Form_Register\:\:getCountryId\(\) should be compatible with return type \(string\) of method Mage_Directory_Block_Data\:\:getCountryId\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/Customer/Block/Form/Register.php
-
-		-
 			message: '#^Method Mage_Customer_Block_Newsletter\:\:getAction\(\) should return Mage_Core_Controller_Varien_Action but returns string\.$#'
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Customer/Block/Newsletter.php
+
+		-
+			message: '#^Method Mage_Eav_Model_Entity_Attribute_Source_Interface\:\:getAllOptions\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: app/code/core/Mage/Customer/Helper/Address.php
+
+		-
+			message: '#^Method Mage_Eav_Model_Entity_Attribute_Source_Interface\:\:getAllOptions\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: app/code/core/Mage/Customer/Helper/Data.php
 
 		-
 			message: '#^Property Mage_Customer_Helper_Data\:\:\$_customer \(Mage_Customer_Model_Customer\) in empty\(\) is not falsy\.$#'
@@ -4495,24 +4477,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/catalog/category/widget/tree.phtml
 
 		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 2
-			path: app/design/adminhtml/default/default/template/catalog/product/attribute/new/created.phtml
-
-		-
-			message: '#^Call to protected method _getHeader\(\) of class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/adminhtml/default/default/template/catalog/product/attribute/set/main.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 5
-			path: app/design/adminhtml/default/default/template/catalog/product/attribute/set/toolbar/add.phtml
-
-		-
 			message: '#^Call to protected method _getHeader\(\) of class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Toolbar_Main\.$#'
 			identifier: method.protected
 			count: 1
@@ -4667,6 +4631,18 @@ parameters:
 			identifier: variable.undefined
 			count: 63
 			path: app/design/adminhtml/default/default/template/downloadable/sales/order/view/items/renderer/downloadable.phtml
+
+		-
+			message: '#^Call to protected method _getHeader\(\) of class Mage_Eav_Block_Adminhtml_Attribute_Set_Add\.$#'
+			identifier: method.protected
+			count: 1
+			path: app/design/adminhtml/default/default/template/eav/attribute/set/add.phtml
+
+		-
+			message: '#^Call to protected method _getHeader\(\) of class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit\.$#'
+			identifier: method.protected
+			count: 1
+			path: app/design/adminhtml/default/default/template/eav/attribute/set/edit.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
@@ -5725,12 +5701,6 @@ parameters:
 			path: app/design/frontend/base/default/template/checkout/multishipping/success.phtml
 
 		-
-			message: '#^Cannot call method isEnabled\(\) on Mage_Core_Block_Abstract\|false\.$#'
-			identifier: method.nonObject
-			count: 4
-			path: app/design/frontend/base/default/template/checkout/onepage/billing.phtml
-
-		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
 			count: 7
@@ -5884,42 +5854,6 @@ parameters:
 			message: '#^Variable \$action might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$address might not be defined\.$#'
-			identifier: variable.undefined
-			count: 2
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$countries might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$data might not be defined\.$#'
-			identifier: variable.undefined
-			count: 12
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$primaryTypes might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 50
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$action might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
 			path: app/design/frontend/base/default/template/customer/form/changepassword.phtml
 
 		-
@@ -5935,22 +5869,10 @@ parameters:
 			path: app/design/frontend/base/default/template/customer/form/confirmation.phtml
 
 		-
-			message: '#^Cannot call method isEnabled\(\) on Mage_Core_Block_Abstract\|false\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: app/design/frontend/base/default/template/customer/form/edit.phtml
-
-		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
 			count: 16
 			path: app/design/frontend/base/default/template/customer/form/newsletter.phtml
-
-		-
-			message: '#^Cannot call method isEnabled\(\) on Mage_Core_Block_Abstract\|false\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: app/design/frontend/base/default/template/customer/form/register.phtml
 
 		-
 			message: '#^PHPDoc tag @var contains unresolvable type\.$#'
@@ -6640,42 +6562,6 @@ parameters:
 			message: '#^Variable \$action might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$address might not be defined\.$#'
-			identifier: variable.undefined
-			count: 2
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$countries might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$data might not be defined\.$#'
-			identifier: variable.undefined
-			count: 12
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$primaryTypes might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 51
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$action might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
 			path: app/design/frontend/rwd/default/template/customer/form/changepassword.phtml
 
 		-
@@ -6689,12 +6575,6 @@ parameters:
 			identifier: variable.undefined
 			count: 13
 			path: app/design/frontend/rwd/default/template/customer/form/confirmation.phtml
-
-		-
-			message: '#^Cannot call method isEnabled\(\) on Mage_Core_Block_Abstract\|false\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: app/design/frontend/rwd/default/template/customer/form/edit.phtml
 
 		-
 			message: '#^Method Mage_Checkout_Helper_Data\:\:formatPrice\(\) invoked with 3 parameters, 1 required\.$#'

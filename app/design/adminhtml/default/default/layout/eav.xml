@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category    design
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2016-2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+-->
+
+<layout>
+    <!--
+        Layout handles for managing generic EAV attributes
+    -->
+    <adminhtml_eav_attribute_index>
+        <reference name="content">
+            <block type="eav/adminhtml_attribute" name="attribute_grid"></block>
+        </reference>
+    </adminhtml_eav_attribute_index>
+
+    <adminhtml_eav_attribute_edit>
+        <reference name="head">
+            <action method="addJs">
+                <script>mage/adminhtml/eav/attribute.js</script>
+            </action>
+            <action method="addJs">
+                <script>mage/adminhtml/eav/options.js</script>
+            </action>
+        </reference>
+        <reference name="left">
+            <block type="eav/adminhtml_attribute_edit_tabs" name="attribute_edit_tabs">
+                <action method="addTab"><name>main</name><block>eav/adminhtml_attribute_edit_tab_main</block></action>
+                <action method="addTab"><name>labels</name><block>eav/adminhtml_attribute_edit_tab_options</block></action>
+            </block>
+        </reference>
+        <reference name="content">
+            <block type="eav/adminhtml_attribute_edit" name="attribute_edit_content"></block>
+        </reference>
+        <reference name="js">
+            <block type="adminhtml/template" name="attribute_edit_js" template="eav/attribute/js.phtml"></block>
+        </reference>
+    </adminhtml_eav_attribute_edit>
+
+    <!--
+        Layout handles for managing generic EAV attribute sets
+    -->
+    <adminhtml_eav_set_index>
+        <reference name="content">
+            <block type="eav/adminhtml_attribute_set" name="attribute_set"></block>
+        </reference>
+    </adminhtml_eav_set_index>
+
+    <adminhtml_eav_set_setgrid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="eav/adminhtml_attribute_set_grid" name="eav/adminhtml_attribute_set_grid"/>
+        </block>
+    </adminhtml_eav_set_setgrid>
+
+    <adminhtml_eav_set_add>
+        <reference name="content">
+            <block type="eav/adminhtml_attribute_set_add" name="attribute_set_add">
+                <block type="eav/adminhtml_attribute_set_edit_formset" name="set_form"></block>
+            </block>
+        </reference>
+    </adminhtml_eav_set_add>
+
+    <adminhtml_eav_set_edit>
+        <reference name="head">
+            <action method="setCanLoadExtJs"><flag>1</flag></action>
+        </reference>
+        <reference name="content">
+            <block type="eav/adminhtml_attribute_set_edit" name="attribute_set_edit">
+                <block type="eav/adminhtml_attribute_set_edit_formset" name="set_form"></block>
+                <block type="eav/adminhtml_attribute_set_edit_tree_group" name="group_tree"></block>
+            </block>
+        </reference>
+    </adminhtml_eav_set_edit>
+</layout>

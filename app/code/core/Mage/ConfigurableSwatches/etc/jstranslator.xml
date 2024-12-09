@@ -23,4 +23,10 @@
             <message>Out of Stock</message>
         </out-of-stock>
     </script>
+
+    <script path="mage/adminhtml/eav/options.js" type="js" module="configurableswatches">
+        <delete-msg translate="message" module="configurableswatches">
+            <message>Are you sure to delete this fallback color?</message>
+        </delete-msg>
+    </script>
 </jstranslator>

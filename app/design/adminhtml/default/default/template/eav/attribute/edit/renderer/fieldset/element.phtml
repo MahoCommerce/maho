@@ -1,0 +1,44 @@
+<?php
+/**
+ * Maho
+ *
+ * @category    design
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Eav_Block_Adminhtml_Attribute_Edit_Renderer_Fieldset_Element $this */
+
+$element = $this->getElement();
+$note    = $element->getNote();
+$trId    = $element->getHtmlContainerId();
+$class   = $element->getFieldsetHtmlClass();
+
+$this->checkFieldDisable();
+$elementToggleCode = $element->getToggleCode() ?: 'toggleValueElements(this, this.parentNode.parentNode)';
+?>
+<?php if (!$element->getNoDisplay()): ?>
+<tr<?php if($trId): ?> id="<?= $trId ?>"<?php endif ?>>
+    <?php if ($element->getType()=='hidden'): ?>
+    <td colspan="2" class="hidden"><?= trim($element->getElementHtml()) ?></td>
+    <?php else: ?>
+    <td class="label<?= $class ? " {$class}-label" : ''?>"><?= trim($element->getLabelHtml()) ?></td>
+    <td class="<?= $element->hasValueClass() ? $element->getValueClass() : 'value' ?><?= $class ? " {$class}-value" : '' ?>">
+        <?= trim($element->getElementHtml()) ?>
+        <?php if ($note): ?>
+            <p class="note<?= $class ? " {$class}-note" : ''?>" id="note_<?= $element->getId() ?>"><span><?= $note ?></span></p>
+        <?php endif ?>
+    </td>
+    <td class="scope-label"><span class="nobr"><?= $this->getScopeLabel() ?></span></td>
+    <?php if ($this->canDisplayUseDefault()): ?>
+    <td class="value use-default">
+        <input <?php if($element->getReadonly()):?> disabled="disabled"<?php endif ?> type="checkbox" name="use_default[]" id="<?= $element->getHtmlId() ?>_default"<?php if ($this->usedDefault()): ?> checked="checked"<?php endif ?> onclick="<?= $elementToggleCode ?>" value="<?= $element->getName() ?>"/>
+        <label for="<?= $element->getHtmlId() ?>_default" class="normal"><?= $this->__('Use Default Value') ?></label>
+    </td>
+    <?php endif ?>
+    <?php endif ?>
+</tr>
+<?php endif ?>

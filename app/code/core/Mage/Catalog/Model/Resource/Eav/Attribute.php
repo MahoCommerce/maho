@@ -60,28 +60,28 @@
  */
 class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_Attribute
 {
-    public const SCOPE_STORE                           = 0;
-    public const SCOPE_GLOBAL                          = 1;
-    public const SCOPE_WEBSITE                         = 2;
+    public const SCOPE_STORE   = 0;
+    public const SCOPE_GLOBAL  = 1;
+    public const SCOPE_WEBSITE = 2;
 
-    public const MODULE_NAME                           = 'Mage_Catalog';
-    public const ENTITY                                = 'catalog_eav_attribute';
+    public const MODULE_NAME   = 'Mage_Catalog';
+    public const ENTITY        = 'catalog_eav_attribute';
 
     /**
      * @var string
      */
-    protected $_eventPrefix                     = 'catalog_entity_attribute';
+    protected $_eventPrefix = 'catalog_entity_attribute';
     /**
      * @var string
      */
-    protected $_eventObject                     = 'attribute';
+    protected $_eventObject = 'attribute';
 
     /**
      * Array with labels
      *
      * @var array|null
      */
-    protected static $_labels                   = null;
+    protected static $_labels = null;
 
     #[\Override]
     protected function _construct()
