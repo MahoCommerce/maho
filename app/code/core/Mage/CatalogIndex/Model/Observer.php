@@ -6,7 +6,7 @@
  * @package    Mage_CatalogIndex
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -86,15 +86,6 @@ class Mage_CatalogIndex_Model_Observer extends Mage_Core_Model_Abstract
             $this->_getIndexer()->plainReindex($eventProduct);
         } else {
             $this->_productIdsMassupdate[] = $eventProduct->getId();
-        }
-
-        $eventProduct->loadParentProductIds();
-        $parentProductIds = $eventProduct->getParentProductIds();
-        if ($parentProductIds && !$eventProduct->getIsMassupdate()) {
-            $this->_getIndexer()->plainReindex($parentProductIds);
-        } elseif ($parentProductIds) {
-            $this->_productIdsMassupdate = array_merge($this->_productIdsMassupdate, $parentProductIds);
-            $productIds = array_merge($productIds, $parentProductIds);
         }
         $this->_getAggregator()->clearProductData($productIds);
         return $this;
@@ -295,10 +286,7 @@ class Mage_CatalogIndex_Model_Observer extends Mage_Core_Model_Abstract
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product = $observer->getEvent()->getProduct();
-        $product->loadParentProductIds();
-        $productIds = [$product->getId()];
-        $productIds = array_merge($productIds, $product->getParentProductIds());
-        $this->_getAggregator()->clearProductData($productIds);
+        $this->_getAggregator()->clearProductData([$product->getId()]);
         return $this;
     }
 
