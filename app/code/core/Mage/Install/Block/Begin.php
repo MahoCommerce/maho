@@ -52,6 +52,6 @@ class Mage_Install_Block_Begin extends Mage_Install_Block_Abstract
      */
     public function getLicenseHtml()
     {
-        return nl2br(file_get_contents(mahoFindFileInIncludePath((string)Mage::getConfig()->getNode('install/eula_file'))));
+        return nl2br(file_get_contents(Maho::findFile((string)Mage::getConfig()->getNode('install/eula_file'))));
     }
 }
