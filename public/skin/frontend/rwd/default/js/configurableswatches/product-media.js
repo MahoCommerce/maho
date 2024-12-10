@@ -142,12 +142,11 @@ var ConfigurableMediaImages = {
 
         var swatchImageUrl = ConfigurableMediaImages.getSwatchImage(productId, label, selectedLabels);
         if (!ConfigurableMediaImages.isValidImage(swatchImageUrl)) {
-            console.log('no image found');
+            // no image found
             return;
         }
 
         var swatchImage = ConfigurableMediaImages.getImageObject(productId, swatchImageUrl);
-
         this.swapImage(swatchImage);
     },
 
