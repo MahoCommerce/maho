@@ -576,29 +576,40 @@ class ProductConfigurableSwatches
      * @var inStock - boolean
      */
     setStockStatus(inStock) {
-        const statusClass = inStock ? 'in-stock' : 'out-of-stock';
-        const statusText = inStock ? 'In Stock' : 'Out of Stock';
+        if (inStock) {
+            this._E.availability.forEach(function(el) {
+                el.classList.add('in-stock');
+                el.classList.remove('out-of-stock');
+                let spanEl = el.querySelector('span');
+                if (spanEl) spanEl.textContent = Translator.translate('In Stock');
+            });
 
-        this._E.availability.forEach(el => {
-            el.classList.toggle('in-stock', inStock);
-            el.classList.toggle('out-of-stock', !inStock);
-            el.querySelector('span').textContent = Translator.translate(statusText);
-        });
-
-        this._E.cartBtn.btn.forEach((el, index) => {
-            el.disabled = !inStock;
-            el.classList.toggle('out-of-stock', !inStock);
-            if (inStock) {
-                el.onclick = this._E.cartBtn.onclick;
+            this._E.cartBtn.btn.forEach((el, index) => {
+                el.disabled = false;
+                el.classList.remove('out-of-stock');
+                el.setAttribute('onclick', this._E.cartBtn.onclick);
                 el.title = Translator.translate(this._E.cartBtn.txt);
                 el.textContent = Translator.translate(this._E.cartBtn.txt);
-            } else {
-                el.onclick = null;
-                el.title = Translator.translate('Out of Stock');
+            });
+        } else {
+            this._E.availability.forEach(function(el) {
+                el.classList.add('out-of-stock');
+                el.classList.remove('in-stock');
                 el.textContent = Translator.translate('Out of Stock');
-                el.addEventListener('click', event => event.preventDefault());
-            }
-        });
+            });
+
+            this._E.cartBtn.btn.forEach((el) => {
+                el.classList.add('out-of-stock');
+                el.disabled = true;
+                el.removeAttribute('onclick');
+                el.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    return false;
+                });
+                el.setAttribute('title', Translator.translate('Out of Stock'));
+                el.textContent = Translator.translate('Out of Stock');
+            });
+        }
     }
 
     /**
