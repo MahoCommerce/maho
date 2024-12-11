@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -101,7 +102,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
         }
         if (preg_match('~^([1-9][0-9]*)[\s]*(k|m|g)b?$~i', $memoryValue, $matches)) {
             $option = strtolower($matches[2]);
-            $memoryValue = (int)$matches[1];
+            $memoryValue = (int) $matches[1];
             switch ($option) {
                 case 'g':
                     $memoryValue *= 1024;
@@ -116,7 +117,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
                     break;
             }
         }
-        $memoryValue = (int)$memoryValue;
+        $memoryValue = (int) $memoryValue;
 
         return $memoryValue > 0 ? $memoryValue : 0;
     }
@@ -172,7 +173,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
                     0,
                     0,
                     $this->_imageSrcWidth,
-                    $this->_imageSrcHeight
+                    $this->_imageSrcHeight,
                 );
                 $this->_imageHandler = $newImage;
             }
@@ -260,7 +261,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
                     $transparentColor = false;
                     if ($transparentIndex >= 0 && $transparentIndex < imagecolorstotal($this->_imageHandler)) {
                         list($r, $g, $b)  = array_values(imagecolorsforindex($this->_imageHandler, $transparentIndex));
-                        $transparentColor = imagecolorallocate($imageResourceTo, (int)$r, (int)$g, (int)$b);
+                        $transparentColor = imagecolorallocate($imageResourceTo, (int) $r, (int) $g, (int) $b);
                     }
                     if (false === $transparentColor) {
                         throw new Exception('Failed to allocate transparent color for image.');
@@ -276,7 +277,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
             }
         }
         list($r, $g, $b) = $this->_backgroundColor;
-        $color = imagecolorallocate($imageResourceTo, (int)$r, (int)$g, (int)$b);
+        $color = imagecolorallocate($imageResourceTo, (int) $r, (int) $g, (int) $b);
         if (!imagefill($imageResourceTo, 0, 0, $color)) {
             throw new Exception("Failed to fill image background with color {$r} {$g} {$b}. File: {$this->_fileName}");
         }
@@ -403,7 +404,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
             $dstWidth,
             $dstHeight,
             $this->_imageSrcWidth,
-            $this->_imageSrcHeight
+            $this->_imageSrcHeight,
         );
         $this->_imageHandler = $newImage;
         $this->refreshImageDimensions();
@@ -425,7 +426,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
         $watermark = call_user_func($this->_getCallback(
             'create',
             $watermarkFileType,
-            'Unsupported watermark image format.'
+            'Unsupported watermark image format.',
         ), $watermarkImage);
 
         if ($this->getWatermarkWidth() &&
@@ -449,7 +450,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
                 $this->getWatermarkWidth(),
                 $this->getWatermarkHeigth(),
                 imagesx($watermark),
-                imagesy($watermark)
+                imagesy($watermark),
             );
             $watermark = $newWatermark;
         }
@@ -474,7 +475,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
                 $this->_imageSrcWidth,
                 $this->_imageSrcHeight,
                 imagesx($watermark),
-                imagesy($watermark)
+                imagesy($watermark),
             );
             $watermark = $newWatermark;
         } elseif ($this->getWatermarkPosition() == self::POSITION_CENTER) {
@@ -489,7 +490,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
                 0,
                 imagesx($watermark),
                 imagesy($watermark),
-                $this->getWatermarkImageOpacity()
+                $this->getWatermarkImageOpacity(),
             );
         } elseif ($this->getWatermarkPosition() == self::POSITION_TOP_RIGHT) {
             $positionX = ($this->_imageSrcWidth - imagesx($watermark));
@@ -502,7 +503,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
                 0,
                 imagesx($watermark),
                 imagesy($watermark),
-                $this->getWatermarkImageOpacity()
+                $this->getWatermarkImageOpacity(),
             );
         } elseif ($this->getWatermarkPosition() == self::POSITION_TOP_LEFT) {
             imagecopymerge(
@@ -514,7 +515,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
                 0,
                 imagesx($watermark),
                 imagesy($watermark),
-                $this->getWatermarkImageOpacity()
+                $this->getWatermarkImageOpacity(),
             );
         } elseif ($this->getWatermarkPosition() == self::POSITION_BOTTOM_RIGHT) {
             $positionX = ($this->_imageSrcWidth - imagesx($watermark));
@@ -528,7 +529,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
                 0,
                 imagesx($watermark),
                 imagesy($watermark),
-                $this->getWatermarkImageOpacity()
+                $this->getWatermarkImageOpacity(),
             );
         } elseif ($this->getWatermarkPosition() == self::POSITION_BOTTOM_LEFT) {
             $positionY = ($this->_imageSrcHeight - imagesy($watermark));
@@ -541,7 +542,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
                 0,
                 imagesx($watermark),
                 imagesy($watermark),
-                $this->getWatermarkImageOpacity()
+                $this->getWatermarkImageOpacity(),
             );
         }
 
@@ -555,7 +556,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
                 0,
                 imagesx($watermark),
                 imagesy($watermark),
-                $this->getWatermarkImageOpacity()
+                $this->getWatermarkImageOpacity(),
             );
         } else {
             $offsetX = $positionX;
@@ -571,7 +572,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
                         0,
                         imagesx($watermark),
                         imagesy($watermark),
-                        $this->getWatermarkImageOpacity()
+                        $this->getWatermarkImageOpacity(),
                     );
                     $offsetX += imagesx($watermark);
                 }
@@ -610,7 +611,7 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
             $newWidth,
             $newHeight,
             $newWidth,
-            $newHeight
+            $newHeight,
         );
 
         $this->_imageHandler = $canvas;

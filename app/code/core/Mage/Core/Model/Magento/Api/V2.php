@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -17,6 +18,4 @@
  * @package    Mage_Core
  * @deprecated
  */
-class Mage_Core_Model_Magento_Api_V2 extends Mage_Core_Model_Magento_Api
-{
-}
+class Mage_Core_Model_Magento_Api_V2 extends Mage_Core_Model_Magento_Api {}

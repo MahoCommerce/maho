@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -37,7 +38,7 @@ class Mage_Install_Block_Db_Main extends Mage_Core_Block_Template
         $this->_databases[$type] = [
             'block'     => $block,
             'template'  => $template,
-            'instance'  => null
+            'instance'  => null,
         ];
 
         return $this;

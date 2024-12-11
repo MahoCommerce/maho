@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -42,7 +43,7 @@ class Mage_Rss_Helper_Order extends Mage_Core_Helper_Abstract
     {
         return $this->_getUrl(
             'rss/order/status',
-            ['_secure' => true, '_query' => ['data' => $this->getStatusUrlKey($order)]]
+            ['_secure' => true, '_query' => ['data' => $this->getStatusUrlKey($order)]],
         );
     }
 
@@ -57,7 +58,7 @@ class Mage_Rss_Helper_Order extends Mage_Core_Helper_Abstract
         $data = [
             'order_id' => $order->getId(),
             'increment_id' => $order->getIncrementId(),
-            'customer_id' => $order->getCustomerId()
+            'customer_id' => $order->getCustomerId(),
         ];
         return base64_encode(json_encode($data));
     }

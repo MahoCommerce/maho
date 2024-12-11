@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -126,6 +127,4 @@
  * @method int getWebsiteId()
  * @method $this setWebsiteId(int $value)
  */
-class Mage_Shipping_Model_Rate_Request extends Varien_Object
-{
-}
+class Mage_Shipping_Model_Rate_Request extends Varien_Object {}

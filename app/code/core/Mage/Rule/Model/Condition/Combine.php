@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -363,7 +364,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
         }
 
         $all    = $this->getAggregator() === 'all';
-        $true   = (bool)$this->getValue();
+        $true   = (bool) $this->getValue();
 
         foreach ($this->getConditions() as $cond) {
             $validated = $cond->validate($object);

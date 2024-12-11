@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -45,7 +46,7 @@ class Mage_Catalog_Model_Product_Website extends Mage_Core_Model_Abstract
             $this->_getResource()->removeProducts($websiteIds, $productIds);
         } catch (Exception $e) {
             Mage::throwException(
-                Mage::helper('catalog')->__('An error occurred while removing products from websites.')
+                Mage::helper('catalog')->__('An error occurred while removing products from websites.'),
             );
         }
         return $this;
@@ -64,7 +65,7 @@ class Mage_Catalog_Model_Product_Website extends Mage_Core_Model_Abstract
             $this->_getResource()->addProducts($websiteIds, $productIds);
         } catch (Exception $e) {
             Mage::throwException(
-                Mage::helper('catalog')->__('An error occurred while adding products to websites.')
+                Mage::helper('catalog')->__('An error occurred while adding products to websites.'),
             );
         }
         return $this;

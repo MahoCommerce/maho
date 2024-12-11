@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -86,8 +87,8 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
             'rss/catalog/category',
             [
                 'cid' => $this->getCurrentCategory()->getId(),
-                'store_id' => Mage::app()->getStore()->getId()
-            ]
+                'store_id' => Mage::app()->getStore()->getId(),
+            ],
         );
     }
 

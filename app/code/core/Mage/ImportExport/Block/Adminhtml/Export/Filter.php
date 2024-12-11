@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -63,7 +64,7 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
             'id'           => $this->getFilterElementId($attribute->getAttributeCode()),
             'class'        => 'input-text',
             'format'       => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
-            'extra_params' => 'style="width:85px !important"'
+            'extra_params' => 'style="width:85px !important"',
         ]);
         return '<strong>' . Mage::helper('importexport')->__('From') . ':</strong>&nbsp;' . $dateBlock->getHtml()
              . '&nbsp;<strong>' . Mage::helper('importexport')->__('To') . ':</strong>&nbsp;'
@@ -108,7 +109,7 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
                 'id'           => $this->getFilterElementId($attribute->getAttributeCode()),
                 'class'        => 'multiselect',
                 'extra_params' => 'multiple="multiple" size="' . ($size > 5 ? 5 : ($size < 2 ? 2 : $size))
-                                . '" style="width:280px"'
+                                . '" style="width:280px"',
             ]);
             return $selectBlock->setOptions($options)->getHtml();
         } else {
@@ -162,7 +163,7 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
                 'name'         => $this->getFilterElementName($attribute->getAttributeCode()),
                 'id'           => $this->getFilterElementId($attribute->getAttributeCode()),
                 'class'        => 'select',
-                'extra_params' => 'style="width:280px"'
+                'extra_params' => 'style="width:280px"',
             ]);
             return $selectBlock->setOptions($options)->getHtml();
         } else {
@@ -182,7 +183,7 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
             'name'         => $this->getFilterElementName($attribute->getAttributeCode()) . '[]',
             'id'           => $this->getFilterElementId($attribute->getAttributeCode()),
             'class'        => 'input-text input-text-range-date',
-            'format'       => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT)
+            'format'       => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
         ]);
         $fromValue = null;
         $toValue   = null;
@@ -239,7 +240,7 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
                 'name'         => $this->getFilterElementName($attribute->getAttributeCode()) . '[]',
                 'id'           => $this->getFilterElementId($attribute->getAttributeCode()),
                 'class'        => 'multiselect multiselect-export-filter',
-                'extra_params' => 'multiple="multiple" size="' . ($size > 5 ? 5 : ($size < 2 ? 2 : $size))
+                'extra_params' => 'multiple="multiple" size="' . ($size > 5 ? 5 : ($size < 2 ? 2 : $size)),
             ]);
             return $selectBlock->setOptions($options)
                 ->setValue($value)
@@ -302,7 +303,7 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
             $selectBlock = new Mage_Core_Block_Html_Select([
                 'name'         => $this->getFilterElementName($attribute->getAttributeCode()),
                 'id'           => $this->getFilterElementId($attribute->getAttributeCode()),
-                'class'        => 'select select-export-filter'
+                'class'        => 'select select-export-filter',
             ]);
             return $selectBlock->setOptions($options)
                 ->setValue($value)
@@ -330,21 +331,21 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
             'filter'     => false,
             'sortable'   => false,
             'align'      => 'center',
-            'index'      => 'attribute_id'
+            'index'      => 'attribute_id',
         ]);
         $this->addColumn('frontend_label', [
             'header'   => Mage::helper('importexport')->__('Attribute Label'),
-            'index'    => 'frontend_label'
+            'index'    => 'frontend_label',
         ]);
         $this->addColumn('attribute_code', [
             'header' => Mage::helper('importexport')->__('Attribute Code'),
-            'index'  => 'attribute_code'
+            'index'  => 'attribute_code',
         ]);
         $this->addColumn('filter', [
             'header'         => Mage::helper('importexport')->__('Filter'),
             'sortable'       => false,
             'filter'         => false,
-            'frame_callback' => [$this, 'decorateFilter']
+            'frame_callback' => [$this, 'decorateFilter'],
         ]);
 
         if ($this->hasOperation()) {

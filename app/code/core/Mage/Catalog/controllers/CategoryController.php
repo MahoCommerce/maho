@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -48,8 +49,8 @@ class Mage_Catalog_CategoryController extends Mage_Core_Controller_Front_Action
                 'catalog_controller_category_init_after',
                 [
                     'category' => $category,
-                    'controller_action' => $this
-                ]
+                    'controller_action' => $this,
+                ],
             );
         } catch (Mage_Core_Exception $e) {
             Mage::logException($e);

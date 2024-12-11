@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -19,7 +20,5 @@
 class Mage_Dataflow_Model_Convert_Validator_Column extends Mage_Dataflow_Model_Convert_Validator_Abstract
 {
     #[\Override]
-    public function validate()
-    {
-    }
+    public function validate() {}
 }

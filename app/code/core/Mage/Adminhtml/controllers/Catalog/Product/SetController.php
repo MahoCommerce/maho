@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -38,7 +39,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         $this->_addBreadcrumb(Mage::helper('catalog')->__('Catalog'), Mage::helper('catalog')->__('Catalog'));
         $this->_addBreadcrumb(
             Mage::helper('catalog')->__('Manage Attribute Sets'),
-            Mage::helper('catalog')->__('Manage Attribute Sets')
+            Mage::helper('catalog')->__('Manage Attribute Sets'),
         );
 
         $this->_addContent($this->getLayout()->createBlock('adminhtml/catalog_product_attribute_set_toolbar_main'));
@@ -73,7 +74,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         $this->_addBreadcrumb(Mage::helper('catalog')->__('Catalog'), Mage::helper('catalog')->__('Catalog'));
         $this->_addBreadcrumb(
             Mage::helper('catalog')->__('Manage Product Sets'),
-            Mage::helper('catalog')->__('Manage Product Sets')
+            Mage::helper('catalog')->__('Manage Product Sets'),
         );
 
         $this->_addContent($this->getLayout()->createBlock('adminhtml/catalog_product_attribute_set_main'));
@@ -87,7 +88,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         $this->getResponse()->setBody(
             $this->getLayout()
                 ->createBlock('adminhtml/catalog_product_attribute_set_grid')
-            ->toHtml()
+            ->toHtml(),
         );
     }
 
@@ -145,7 +146,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         } catch (Exception $e) {
             $this->_getSession()->addException(
                 $e,
-                Mage::helper('catalog')->__('An error occurred while saving the attribute set.')
+                Mage::helper('catalog')->__('An error occurred while saving the attribute set.'),
             );
             $hasError = true;
         }
@@ -223,7 +224,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
     {
         Mage::register(
             'entityType',
-            Mage::getModel('catalog/product')->getResource()->getTypeId()
+            Mage::getModel('catalog/product')->getResource()->getTypeId(),
         );
     }
 

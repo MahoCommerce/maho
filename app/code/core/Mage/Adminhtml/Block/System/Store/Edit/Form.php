@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -61,7 +62,7 @@ class Mage_Adminhtml_Block_System_Store_Edit_Form extends Mage_Adminhtml_Block_W
         $form = new Varien_Data_Form([
             'id'        => 'edit_form',
             'action'    => $this->getData('action'),
-            'method'    => 'post'
+            'method'    => 'post',
         ]);
 
         if ($showWebsiteFieldset) {
@@ -69,7 +70,7 @@ class Mage_Adminhtml_Block_System_Store_Edit_Form extends Mage_Adminhtml_Block_W
                 $websiteModel->setData($postData['website']);
             }
             $fieldset = $form->addFieldset('website_fieldset', [
-                'legend' => Mage::helper('core')->__('Website Information')
+                'legend' => Mage::helper('core')->__('Website Information'),
             ]);
             /** @var Varien_Data_Form $fieldset */
 
@@ -123,13 +124,13 @@ class Mage_Adminhtml_Block_System_Store_Edit_Form extends Mage_Adminhtml_Block_W
             } else {
                 $fieldset->addField('is_default', 'hidden', [
                     'name'      => 'website[is_default]',
-                    'value'     => $websiteModel->getIsDefault()
+                    'value'     => $websiteModel->getIsDefault(),
                 ]);
             }
 
             $fieldset->addField('website_website_id', 'hidden', [
                 'name'  => 'website[website_id]',
-                'value' => $websiteModel->getId()
+                'value' => $websiteModel->getId(),
             ]);
         }
 
@@ -138,7 +139,7 @@ class Mage_Adminhtml_Block_System_Store_Edit_Form extends Mage_Adminhtml_Block_W
                 $groupModel->setData($postData['group']);
             }
             $fieldset = $form->addFieldset('group_fieldset', [
-                'legend' => Mage::helper('core')->__('Store Information')
+                'legend' => Mage::helper('core')->__('Store Information'),
             ]);
 
             if (Mage::registry('store_action') == 'edit'
@@ -161,13 +162,13 @@ class Mage_Adminhtml_Block_System_Store_Edit_Form extends Mage_Adminhtml_Block_W
                         $fieldset->addField('group_hidden_website_id', 'hidden', [
                             'name'      => 'group[website_id]',
                             'no_span'   => true,
-                            'value'     => $groupModel->getWebsiteId()
+                            'value'     => $groupModel->getWebsiteId(),
                         ]);
                     } else {
                         $fieldset->addField('group_original_website_id', 'hidden', [
                             'name'      => 'group[original_website_id]',
                             'no_span'   => true,
-                            'value'     => $groupModel->getWebsiteId()
+                            'value'     => $groupModel->getWebsiteId(),
                         ]);
                     }
                 }
@@ -209,7 +210,7 @@ class Mage_Adminhtml_Block_System_Store_Edit_Form extends Mage_Adminhtml_Block_W
             $fieldset->addField('group_group_id', 'hidden', [
                 'name'      => 'group[group_id]',
                 'no_span'   => true,
-                'value'     => $groupModel->getId()
+                'value'     => $groupModel->getId(),
             ]);
         }
 
@@ -218,7 +219,7 @@ class Mage_Adminhtml_Block_System_Store_Edit_Form extends Mage_Adminhtml_Block_W
                 $storeModel->setData($postData['store']);
             }
             $fieldset = $form->addFieldset('store_fieldset', [
-                'legend' => Mage::helper('core')->__('Store View Information')
+                'legend' => Mage::helper('core')->__('Store View Information'),
             ]);
 
             if (Mage::registry('store_action') == 'edit'
@@ -251,13 +252,13 @@ class Mage_Adminhtml_Block_System_Store_Edit_Form extends Mage_Adminhtml_Block_W
                         $fieldset->addField('store_hidden_group_id', 'hidden', [
                             'name'      => 'store[group_id]',
                             'no_span'   => true,
-                            'value'     => $storeModel->getGroupId()
+                            'value'     => $storeModel->getGroupId(),
                         ]);
                     } else {
                         $fieldset->addField('store_original_group_id', 'hidden', [
                             'name'      => 'store[original_group_id]',
                             'no_span'   => true,
-                            'value'     => $storeModel->getGroupId()
+                            'value'     => $storeModel->getGroupId(),
                         ]);
                     }
                 }
@@ -314,13 +315,13 @@ class Mage_Adminhtml_Block_System_Store_Edit_Form extends Mage_Adminhtml_Block_W
         $form->addField('store_type', 'hidden', [
             'name'      => 'store_type',
             'no_span'   => true,
-            'value'     => Mage::registry('store_type')
+            'value'     => Mage::registry('store_type'),
         ]);
 
         $form->addField('store_action', 'hidden', [
             'name'      => 'store_action',
             'no_span'   => true,
-            'value'     => Mage::registry('store_action')
+            'value'     => Mage::registry('store_action'),
         ]);
 
         $form->setAction($this->getUrl('*/*/save'));

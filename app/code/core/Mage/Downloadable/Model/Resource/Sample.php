@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -36,7 +37,7 @@ class Mage_Downloadable_Model_Resource_Sample extends Mage_Core_Model_Resource_D
         $sampleTitleTable = $this->getTable('downloadable/sample_title');
         $bind = [
             ':sample_id' => $sampleObject->getId(),
-            ':store_id'  => (int)$sampleObject->getStoreId()
+            ':store_id'  => (int) $sampleObject->getStoreId(),
         ];
         $select = $writeAdapter->select()
             ->from($sampleTitleTable)
@@ -44,18 +45,18 @@ class Mage_Downloadable_Model_Resource_Sample extends Mage_Core_Model_Resource_D
         if ($writeAdapter->fetchOne($select, $bind)) {
             $where = [
                 'sample_id = ?' => $sampleObject->getId(),
-                'store_id = ?'  => (int)$sampleObject->getStoreId()
+                'store_id = ?'  => (int) $sampleObject->getStoreId(),
             ];
             if ($sampleObject->getUseDefaultTitle()) {
                 $writeAdapter->delete(
                     $sampleTitleTable,
-                    $where
+                    $where,
                 );
             } else {
                 $writeAdapter->update(
                     $sampleTitleTable,
                     ['title' => $sampleObject->getTitle()],
-                    $where
+                    $where,
                 );
             }
         } else {
@@ -64,9 +65,9 @@ class Mage_Downloadable_Model_Resource_Sample extends Mage_Core_Model_Resource_D
                     $sampleTitleTable,
                     [
                         'sample_id' => $sampleObject->getId(),
-                        'store_id'  => (int)$sampleObject->getStoreId(),
+                        'store_id'  => (int) $sampleObject->getStoreId(),
                         'title'     => $sampleObject->getTitle(),
-                    ]
+                    ],
                 );
             }
         }
@@ -91,11 +92,11 @@ class Mage_Downloadable_Model_Resource_Sample extends Mage_Core_Model_Resource_D
         if ($where) {
             $writeAdapter->delete(
                 $this->getMainTable(),
-                $where
+                $where,
             );
             $writeAdapter->delete(
                 $this->getTable('downloadable/sample_title'),
-                $where
+                $where,
             );
         }
         return $this;
@@ -117,17 +118,17 @@ class Mage_Downloadable_Model_Resource_Sample extends Mage_Core_Model_Resource_D
             ->join(
                 ['d' => $this->getTable('downloadable/sample_title')],
                 'd.sample_id=m.sample_id AND d.store_id=0',
-                []
+                [],
             )
             ->joinLeft(
                 ['st' => $this->getTable('downloadable/sample_title')],
                 'st.sample_id=m.sample_id AND st.store_id=:store_id',
-                ['title' => $ifNullDefaultTitle]
+                ['title' => $ifNullDefaultTitle],
             )
             ->where('m.product_id=:product_id', $productId);
         $bind = [
-            ':store_id'   => (int)$storeId,
-            ':product_id' => $productId
+            ':store_id'   => (int) $storeId,
+            ':product_id' => $productId,
         ];
 
         return $adapter->fetchCol($select, $bind);

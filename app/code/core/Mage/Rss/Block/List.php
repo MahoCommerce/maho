@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -72,8 +73,8 @@ class Mage_Rss_Block_List extends Mage_Core_Block_Template
         $this->_rssFeeds[] = new Varien_Object(
             [
                 'url'   => Mage::getUrl($url, $param),
-                'label' => $label
-            ]
+                'label' => $label,
+            ],
         );
         return $this;
     }

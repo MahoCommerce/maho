@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -59,7 +60,7 @@ class Mage_Core_Model_Design_Source_Design extends Mage_Eav_Model_Entity_Attribu
                 foreach ($themes as $theme) {
                     $themeOptions[] = [
                         'label' => ($this->getIsFullLabel() ? $package . ' / ' : '') . $theme,
-                        'value' => $package . '/' . $theme
+                        'value' => $package . '/' . $theme,
                     ];
                 }
                 asort($themeOptions);

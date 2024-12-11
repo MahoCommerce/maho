@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -30,7 +31,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Catalog_Search_Type extends Mag
         $oldValue = Mage::getConfig()->getNode(
             Mage_CatalogSearch_Model_Fulltext::XML_PATH_CATALOG_SEARCH_TYPE,
             $this->getScope(),
-            $this->getScopeId()
+            $this->getScopeId(),
         );
         if ($newValue != $oldValue) {
             Mage::getSingleton('catalogsearch/fulltext')->resetSearchResults();

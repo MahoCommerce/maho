@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -110,9 +111,9 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
         'ADDRESSID' => 'address_id',
         'ADDRESSSTATUS' => 'address_status',
         'EMAIL'         => 'email',
-            // backwards compatibility
-            'FIRSTNAME'     => 'firstname',
-            'LASTNAME'      => 'lastname',
+        // backwards compatibility
+        'FIRSTNAME'     => 'firstname',
+        'LASTNAME'      => 'lastname',
 
         // shipping rate
         'SHIPPINGOPTIONNAME' => 'shipping_rate_code',
@@ -137,7 +138,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
         'ECISUBMITTED3DS' => 'centinel_eci_result',
 
         // recurring payment profiles
-//'TOKEN' => 'token',
+        //'TOKEN' => 'token',
         'SUBSCRIBERNAME'    => 'subscriber_name',
         'PROFILESTARTDATE'  => 'start_datetime',
         'PROFILEREFERENCE'  => 'internal_reference_id',
@@ -147,12 +148,12 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
         'BILLINGPERIOD'     => 'period_unit',
         'BILLINGFREQUENCY'    => 'period_frequency',
         'TOTALBILLINGCYCLES'  => 'period_max_cycles',
-//'AMT' => 'billing_amount', // have to use 'amount', see above
+        //'AMT' => 'billing_amount', // have to use 'amount', see above
         'TRIALBILLINGPERIOD'      => 'trial_period_unit',
         'TRIALBILLINGFREQUENCY'   => 'trial_period_frequency',
         'TRIALTOTALBILLINGCYCLES' => 'trial_period_max_cycles',
         'TRIALAMT'            => 'trial_billing_amount',
-// 'CURRENCYCODE' => 'currency_code',
+        // 'CURRENCYCODE' => 'currency_code',
         'SHIPPINGAMT'         => 'shipping_amount',
         'TAXAMT'              => 'tax_amount',
         'INITAMT'             => 'init_amount',
@@ -219,7 +220,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
         'GIROPAYCANCELURL', 'GIROPAYSUCCESSURL', 'BANKTXNPENDINGURL',
         'PAGESTYLE', 'HDRIMG', 'HDRBORDERCOLOR', 'HDRBACKCOLOR', 'PAYFLOWCOLOR', 'LOCALECODE',
         'BILLINGTYPE', 'SUBJECT', 'ITEMAMT', 'SHIPPINGAMT', 'TAXAMT', 'REQBILLINGADDRESS',
-        'USERSELECTEDFUNDINGSOURCE'
+        'USERSELECTEDFUNDINGSOURCE',
     ];
     protected $_setExpressCheckoutResponse = ['TOKEN'];
 
@@ -238,7 +239,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
         'RETURNFMFDETAILS', 'SUBJECT', 'ITEMAMT', 'SHIPPINGAMT', 'TAXAMT',
     ];
     protected $_doExpressCheckoutPaymentResponse = [
-        'TRANSACTIONID', 'AMT', 'PAYMENTSTATUS', 'PENDINGREASON', 'REDIRECTREQUIRED'
+        'TRANSACTIONID', 'AMT', 'PAYMENTSTATUS', 'PENDINGREASON', 'REDIRECTREQUIRED',
     ];
 
     /**
@@ -252,7 +253,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
         'AUTHSTATUS3DS', 'MPIVENDOR3DS', 'CAVV', 'ECI3DS', 'XID',
     ];
     protected $_doDirectPaymentResponse = [
-        'TRANSACTIONID', 'AMT', 'AVSCODE', 'CVV2MATCH', 'VPAS', 'ECISUBMITTED3DS'
+        'TRANSACTIONID', 'AMT', 'AVSCODE', 'CVV2MATCH', 'VPAS', 'ECISUBMITTED3DS',
     ];
 
     /**
@@ -261,7 +262,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
      */
     protected $_doReauthorizationRequest = ['AUTHORIZATIONID', 'AMT', 'CURRENCYCODE'];
     protected $_doReauthorizationResponse = [
-        'AUTHORIZATIONID', 'PAYMENTSTATUS', 'PENDINGREASON', 'PROTECTIONELIGIBILITY'
+        'AUTHORIZATIONID', 'PAYMENTSTATUS', 'PENDINGREASON', 'PROTECTIONELIGIBILITY',
     ];
 
     /**
@@ -321,10 +322,10 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
     protected $_createRecurringPaymentsProfileRequest = [
         'TOKEN', 'SUBSCRIBERNAME', 'PROFILESTARTDATE', 'PROFILEREFERENCE', 'DESC', 'MAXFAILEDPAYMENTS', 'AUTOBILLAMT',
         'BILLINGPERIOD', 'BILLINGFREQUENCY', 'TOTALBILLINGCYCLES', 'AMT', 'TRIALBILLINGPERIOD', 'TRIALBILLINGFREQUENCY',
-        'TRIALTOTALBILLINGCYCLES', 'TRIALAMT', 'CURRENCYCODE', 'SHIPPINGAMT', 'TAXAMT', 'INITAMT', 'FAILEDINITAMTACTION'
+        'TRIALTOTALBILLINGCYCLES', 'TRIALAMT', 'CURRENCYCODE', 'SHIPPINGAMT', 'TAXAMT', 'INITAMT', 'FAILEDINITAMTACTION',
     ];
     protected $_createRecurringPaymentsProfileResponse = [
-        'PROFILEID', 'PROFILESTATUS'
+        'PROFILEID', 'PROFILESTATUS',
     ];
 
     /**
@@ -333,7 +334,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
      * @var array
      */
     protected $_manageRecurringPaymentsProfileStatusRequest = ['PROFILEID', 'ACTION'];
-//    protected $_manageRecurringPaymentsProfileStatusResponse = array('PROFILEID');
+    //    protected $_manageRecurringPaymentsProfileStatusResponse = array('PROFILEID');
 
     /**
      * Request/response for GetRecurringPaymentsProfileDetails
@@ -399,7 +400,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
         'SHIPTOCITY'    => 'city',
         'SHIPTOSTREET'  => 'street',
         'SHIPTOSTREET2' => 'street2',
-        'SHIPTOZIP' => 'postcode'
+        'SHIPTOZIP' => 'postcode',
     ];
 
     /**
@@ -408,7 +409,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
      */
     protected $_paymentInformationResponse = [
         'PAYERID', 'PAYERSTATUS', 'CORRELATIONID', 'ADDRESSID', 'ADDRESSSTATUS',
-        'PAYMENTSTATUS', 'PENDINGREASON', 'PROTECTIONELIGIBILITY', 'EMAIL', 'SHIPPINGOPTIONNAME', 'TAXID', 'TAXIDTYPE'
+        'PAYMENTSTATUS', 'PENDINGREASON', 'PROTECTIONELIGIBILITY', 'EMAIL', 'SHIPPINGOPTIONNAME', 'TAXID', 'TAXIDTYPE',
     ];
 
     /**
@@ -452,7 +453,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
      */
     protected $_billingAgreementCustomerDetailsRequest = ['TOKEN'];
     protected $_billingAgreementCustomerDetailsResponse = ['EMAIL', 'PAYERID', 'PAYERSTATUS', 'SHIPTOCOUNTRYCODE',
-        'PAYERBUSINESS'
+        'PAYERBUSINESS',
     ];
 
     /**
@@ -467,10 +468,10 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
      * @var array
      */
     protected $_updateBillingAgreementRequest = [
-        'REFERENCEID', 'BILLINGAGREEMENTDESCRIPTION', 'BILLINGAGREEMENTSTATUS', 'BILLINGAGREEMENTCUSTOM'
+        'REFERENCEID', 'BILLINGAGREEMENTDESCRIPTION', 'BILLINGAGREEMENTSTATUS', 'BILLINGAGREEMENTCUSTOM',
     ];
     protected $_updateBillingAgreementResponse = [
-        'REFERENCEID', 'BILLINGAGREEMENTDESCRIPTION', 'BILLINGAGREEMENTSTATUS', 'BILLINGAGREEMENTCUSTOM'
+        'REFERENCEID', 'BILLINGAGREEMENTDESCRIPTION', 'BILLINGAGREEMENTSTATUS', 'BILLINGAGREEMENTCUSTOM',
     ];
 
     /**
@@ -491,7 +492,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
      */
     protected $_debugReplacePrivateDataKeys = [
 
-        'ACCT', 'EXPDATE', 'CVV2', 'CARDISSUE', 'CARDSTART', 'CREDITCARDTYPE', 'USER', 'PWD', 'SIGNATURE'
+        'ACCT', 'EXPDATE', 'CVV2', 'CARDISSUE', 'CARDSTART', 'CREDITCARDTYPE', 'USER', 'PWD', 'SIGNATURE',
 
     ];
 
@@ -932,7 +933,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
             $http = new Varien_Http_Adapter_Curl();
             $config = [
                 'timeout'    => 60,
-                'verifypeer' => $this->_config->verifyPeer
+                'verifypeer' => $this->_config->verifyPeer,
             ];
 
             if ($this->getUseProxy()) {
@@ -947,7 +948,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
                 $this->getApiEndpoint(),
                 '1.1',
                 $this->_headers,
-                $this->_buildQuery($request)
+                $this->_buildQuery($request),
             );
             $response = $http->read();
         } catch (Exception $e) {
@@ -967,7 +968,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
         // handle transport error
         if ($http->getErrno()) {
             Mage::logException(new Exception(
-                sprintf('PayPal NVP CURL connection error #%s: %s', $http->getErrno(), $http->getError())
+                sprintf('PayPal NVP CURL connection error #%s: %s', $http->getErrno(), $http->getError()),
             ));
             $http->close();
 
@@ -979,7 +980,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
 
         if (!$this->_validateResponse($methodName, $response)) {
             Mage::logException(new Exception(
-                Mage::helper('paypal')->__("PayPal response hasn't required fields.")
+                Mage::helper('paypal')->__("PayPal response hasn't required fields."),
             ));
             Mage::throwException(Mage::helper('paypal')->__('There was an error processing your order. Please contact us or try again later.'));
         }
@@ -1043,7 +1044,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
             'PayPal NVP gateway errors: %s Correlation ID: %s. Version: %s.',
             $errorMessages,
             $response['CORRELATIONID'] ?? '',
-            $response['VERSION'] ?? ''
+            $response['VERSION'] ?? '',
         );
 
         $exception = new $exceptionClass($exceptionLogMessage, $exceptionCode);
@@ -1103,11 +1104,11 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
             $errorMessage = $this->_formatErrorMessage(
                 $errorCode,
                 $response["L_SHORTMESSAGE{$i}"],
-                $response["L_LONGMESSAGE{$i}"]
+                $response["L_LONGMESSAGE{$i}"],
             );
             $errors[] = [
                 'code'    => $errorCode,
-                'message' => $errorMessage
+                'message' => $errorMessage,
             ];
         }
 
@@ -1291,7 +1292,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
         $to = Varien_Object_Mapper::accumulateByMap(
             $billingAddress,
             $to,
-            array_merge(array_flip($this->_billingAddressMap), $this->_billingAddressMapRequest)
+            array_merge(array_flip($this->_billingAddressMap), $this->_billingAddressMapRequest),
         );
         if ($regionCode = $this->_lookupRegionCodeFromAddress($billingAddress)) {
             $to['STATE'] = $regionCode;
@@ -1519,7 +1520,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
     protected function _prepareEachCallRequest($methodName)
     {
         $expressCheckooutMetods = [
-            self::SET_EXPRESS_CHECKOUT, self::GET_EXPRESS_CHECKOUT_DETAILS, self::DO_EXPRESS_CHECKOUT_PAYMENT
+            self::SET_EXPRESS_CHECKOUT, self::GET_EXPRESS_CHECKOUT_DETAILS, self::DO_EXPRESS_CHECKOUT_PAYMENT,
         ];
         if (!in_array($methodName, $expressCheckooutMetods) || !$this->_config->shouldUseUnilateralPayments()) {
             return $this->_eachCallRequest;

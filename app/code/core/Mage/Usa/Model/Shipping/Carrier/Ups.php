@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -186,7 +187,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         } else {
             $origCountry = Mage::getStoreConfig(
                 Mage_Shipping_Model_Shipping::XML_PATH_STORE_COUNTRY_ID,
-                $request->getStoreId()
+                $request->getStoreId(),
             );
         }
         $r->setOrigCountry(Mage::getModel('directory/country')->load($origCountry)->getIso2Code());
@@ -196,7 +197,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         } else {
             $origRegionCode = Mage::getStoreConfig(
                 Mage_Shipping_Model_Shipping::XML_PATH_STORE_REGION_ID,
-                $request->getStoreId()
+                $request->getStoreId(),
             );
         }
         if (is_numeric($origRegionCode)) {
@@ -209,7 +210,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         } else {
             $r->setOrigPostal(Mage::getStoreConfig(
                 Mage_Shipping_Model_Shipping::XML_PATH_STORE_ZIP,
-                $request->getStoreId()
+                $request->getStoreId(),
             ));
         }
 
@@ -218,7 +219,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         } else {
             $r->setOrigCity(Mage::getStoreConfig(
                 Mage_Shipping_Model_Shipping::XML_PATH_STORE_CITY,
-                $request->getStoreId()
+                $request->getStoreId(),
             ));
         }
 
@@ -567,7 +568,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
                                 '03', // Ground
                                 '14', // Next Day Air Early AM
                                 '02', // 2nd Day Air
-                            ]
+                            ],
                         ],
                         'from_us' => [
                             'method' => [
@@ -576,9 +577,9 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
                                 '08', // Worldwide Expedited
                                 '65', // Worldwide Saver
                                 '11', // Standard
-                            ]
-                        ]
-                    ]
+                            ],
+                        ],
+                    ],
                 ],
                 [
                     // Small Express Box, Medium Express Box, Large Express Box, UPS Tube
@@ -592,7 +593,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
                                 '02', // 2nd Day Air
                                 '59', // 2nd Day Air AM
                                 '13', // Next Day Air Saver
-                            ]
+                            ],
                         ],
                         'from_us' => [
                             'method' => [
@@ -600,24 +601,24 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
                                 '54', // Worldwide Express Plus
                                 '08', // Worldwide Expedited
                                 '65', // Worldwide Saver
-                            ]
-                        ]
-                    ]
+                            ],
+                        ],
+                    ],
                 ],
                 [
                     'containers' => ['24', '25'], // UPS Worldwide 25 kilo, UPS Worldwide 10 kilo
                     'filters'    => [
                         'within_us' => [
-                            'method' => []
+                            'method' => [],
                         ],
                         'from_us' => [
                             'method' => [
                                 '07', // Worldwide Express
                                 '54', // Worldwide Express Plus
                                 '65', // Worldwide Saver
-                            ]
-                        ]
-                    ]
+                            ],
+                        ],
+                    ],
                 ],
                 [
                     'containers' => ['01', '04'], // UPS Letter, UPS PAK
@@ -629,31 +630,31 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
                                 '02', // 2nd Day Air
                                 '59', // 2nd Day Air AM
                                 '13', // Next Day Air Saver
-                            ]
+                            ],
                         ],
                         'from_us' => [
                             'method' => [
                                 '07', // Worldwide Express
                                 '54', // Worldwide Express Plus
                                 '65', // Worldwide Saver
-                            ]
-                        ]
-                    ]
+                            ],
+                        ],
+                    ],
                 ],
                 [
                     'containers' => ['04'], // UPS PAK
                     'filters'    => [
                         'within_us' => [
-                            'method' => []
+                            'method' => [],
                         ],
                         'from_us' => [
                             'method' => [
                                 '08', // Worldwide Expedited
-                            ]
-                        ]
-                    ]
+                            ],
+                        ],
+                    ],
                 ],
-            ]
+            ],
         ];
 
         if (!isset($codes[$type])) {
@@ -842,7 +843,7 @@ XMLRequest;
             $xml = new Varien_Simplexml_Config();
             $xml->loadString($xmlResponse);
             $arr = $xml->getXpath('//RatingServiceSelectionResponse/Response/ResponseStatusCode/text()');
-            $success = (int)$arr[0];
+            $success = (int) $arr[0];
             if ($success === 1) {
                 $arr = $xml->getXpath('//RatingServiceSelectionResponse/RatedShipment');
                 $allowedMethods = explode(',', $this->getConfigData('allowed_methods'));
@@ -856,7 +857,7 @@ XMLRequest;
                 $allowedCurrencies = Mage::getModel('directory/currency')->getConfigAllowCurrencies();
 
                 foreach ($arr as $shipElement) {
-                    $code = (string)$shipElement->Service->Code;
+                    $code = (string) $shipElement->Service->Code;
                     if (in_array($code, $allowedMethods)) {
                         if ($negotiatedActive) {
                             $cost = $shipElement->NegotiatedRates->NetSummaryCharges->GrandTotal->MonetaryValue;
@@ -888,7 +889,7 @@ XMLRequest;
                 }
             } else {
                 $arr = $xml->getXpath('//RatingServiceSelectionResponse/Response/Error/ErrorDescription/text()');
-                $errorTitle = (string)$arr[0][0];
+                $errorTitle = (string) $arr[0][0];
                 $error = Mage::getModel('shipping/rate_result_error');
                 $error->setCarrier('ups');
                 $error->setCarrierTitle($this->getConfigData('title'));
@@ -1042,20 +1043,20 @@ XMLAuth;
             $xml = new Varien_Simplexml_Config();
             $xml->loadString($xmlResponse);
             $arr = $xml->getXpath('//TrackResponse/Response/ResponseStatusCode/text()');
-            $success = (int)$arr[0][0];
+            $success = (int) $arr[0][0];
 
             if ($success === 1) {
                 $arr = $xml->getXpath('//TrackResponse/Shipment/Service/Description/text()');
-                $resultArr['service'] = (string)$arr[0];
+                $resultArr['service'] = (string) $arr[0];
 
                 $arr = $xml->getXpath('//TrackResponse/Shipment/PickupDate/text()');
-                $resultArr['shippeddate'] = (string)$arr[0];
+                $resultArr['shippeddate'] = (string) $arr[0];
 
                 $arr = $xml->getXpath('//TrackResponse/Shipment/Package/PackageWeight/Weight/text()');
-                $weight = (string)$arr[0];
+                $weight = (string) $arr[0];
 
                 $arr = $xml->getXpath('//TrackResponse/Shipment/Package/PackageWeight/UnitOfMeasurement/Code/text()');
-                $unit = (string)$arr[0];
+                $unit = (string) $arr[0];
 
                 $resultArr['weight'] = "{$weight} {$unit}";
 
@@ -1065,38 +1066,38 @@ XMLAuth;
                     foreach ($activityTags as $activityTag) {
                         $addArr = [];
                         if (isset($activityTag->ActivityLocation->Address->City)) {
-                            $addArr[] = (string)$activityTag->ActivityLocation->Address->City;
+                            $addArr[] = (string) $activityTag->ActivityLocation->Address->City;
                         }
                         if (isset($activityTag->ActivityLocation->Address->StateProvinceCode)) {
-                            $addArr[] = (string)$activityTag->ActivityLocation->Address->StateProvinceCode;
+                            $addArr[] = (string) $activityTag->ActivityLocation->Address->StateProvinceCode;
                         }
                         if (isset($activityTag->ActivityLocation->Address->CountryCode)) {
-                            $addArr[] = (string)$activityTag->ActivityLocation->Address->CountryCode;
+                            $addArr[] = (string) $activityTag->ActivityLocation->Address->CountryCode;
                         }
                         $dateArr = [];
-                        $date = (string)$activityTag->Date;//YYYYMMDD
+                        $date = (string) $activityTag->Date;//YYYYMMDD
                         $dateArr[] = substr($date, 0, 4);
                         $dateArr[] = substr($date, 4, 2);
                         $dateArr[] = substr($date, -2, 2);
 
                         $timeArr = [];
-                        $time = (string)$activityTag->Time;//HHMMSS
+                        $time = (string) $activityTag->Time;//HHMMSS
                         $timeArr[] = substr($time, 0, 2);
                         $timeArr[] = substr($time, 2, 2);
                         $timeArr[] = substr($time, -2, 2);
 
                         if ($i == 1) {
-                            $resultArr['status'] = (string)$activityTag->Status->StatusType->Description;
+                            $resultArr['status'] = (string) $activityTag->Status->StatusType->Description;
                             $resultArr['deliverydate'] = implode('-', $dateArr);//YYYY-MM-DD
                             $resultArr['deliverytime'] = implode(':', $timeArr);//HH:MM:SS
-                            $resultArr['deliverylocation'] = (string)$activityTag->ActivityLocation->Description;
-                            $resultArr['signedby'] = (string)$activityTag->ActivityLocation->SignedForByName;
+                            $resultArr['deliverylocation'] = (string) $activityTag->ActivityLocation->Description;
+                            $resultArr['signedby'] = (string) $activityTag->ActivityLocation->SignedForByName;
                             if ($addArr) {
                                 $resultArr['deliveryto'] = implode(', ', $addArr);
                             }
                         } else {
                             $tempArr = [];
-                            $tempArr['activity'] = (string)$activityTag->Status->StatusType->Description;
+                            $tempArr['activity'] = (string) $activityTag->Status->StatusType->Description;
                             $tempArr['deliverydate'] = implode('-', $dateArr);//YYYY-MM-DD
                             $tempArr['deliverytime'] = implode(':', $timeArr);//HH:MM:SS
                             if ($addArr) {
@@ -1110,7 +1111,7 @@ XMLAuth;
                 }
             } else {
                 $arr = $xml->getXpath('//TrackResponse/Response/Error/ErrorDescription/text()');
-                $errorTitle = (string)$arr[0][0];
+                $errorTitle = (string) $arr[0][0];
             }
         }
 
@@ -1148,13 +1149,13 @@ XMLAuth;
             'locale' => 'en_US',
             'returnSignature' => 'false',
             'returnMilestones' => 'false',
-            'returnPOD' => 'false'
+            'returnPOD' => 'false',
         ]);
         $headers = [
             "Authorization: Bearer $accessToken",
             'Content-Type: application/json',
             'transId: track' . uniqid(),
-            'transactionSrc: Maho'
+            'transactionSrc: Maho',
         ];
 
         $ch = curl_init();
@@ -1208,28 +1209,28 @@ XMLAuth;
                     foreach ($activityTags as $activityTag) {
                         $addressArr = [];
                         if (isset($activityTag['location']['address']['city'])) {
-                            $addressArr[] = (string)$activityTag['location']['address']['city'];
+                            $addressArr[] = (string) $activityTag['location']['address']['city'];
                         }
                         if (isset($activityTag['location']['address']['stateProvince'])) {
-                            $addressArr[] = (string)$activityTag['location']['address']['stateProvince'];
+                            $addressArr[] = (string) $activityTag['location']['address']['stateProvince'];
                         }
                         if (isset($activityTag['location']['address']['countryCode'])) {
-                            $addressArr[] = (string)$activityTag['location']['address']['countryCode'];
+                            $addressArr[] = (string) $activityTag['location']['address']['countryCode'];
                         }
                         $dateArr = [];
-                        $date = (string)$activityTag['date'];
+                        $date = (string) $activityTag['date'];
                         $dateArr[] = substr($date, 0, 4);
                         $dateArr[] = substr($date, 4, 2);
                         $dateArr[] = substr($date, -2, 2);
 
                         $timeArr = [];
-                        $time = (string)$activityTag['time'];
+                        $time = (string) $activityTag['time'];
                         $timeArr[] = substr($time, 0, 2);
                         $timeArr[] = substr($time, 2, 2);
                         $timeArr[] = substr($time, -2, 2);
 
                         if ($index === 1) {
-                            $resultArr['status'] = (string)$activityTag['status']['description'];
+                            $resultArr['status'] = (string) $activityTag['status']['description'];
                             $resultArr['deliverydate'] = implode('-', $dateArr); //YYYY-MM-DD
                             $resultArr['deliverytime'] = implode(':', $timeArr); //HH:MM:SS
                             if ($addressArr) {
@@ -1237,7 +1238,7 @@ XMLAuth;
                             }
                         } else {
                             $tempArr = [];
-                            $tempArr['activity'] = (string)$activityTag['status']['description'];
+                            $tempArr['activity'] = (string) $activityTag['status']['description'];
                             $tempArr['deliverydate'] = implode('-', $dateArr); //YYYY-MM-DD
                             $tempArr['deliverytime'] = implode(':', $timeArr); //HH:MM:SS
                             if ($addressArr) {
@@ -1326,7 +1327,7 @@ XMLAuth;
     #[\Override]
     public function getAllowedMethods()
     {
-        $allowedMethods = explode(',', (string)$this->getConfigData('allowed_methods'));
+        $allowedMethods = explode(',', (string) $this->getConfigData('allowed_methods'));
         $availableByTypeMethods = $this->getCode('originShipment', $this->getConfigData('origin_shipment'));
 
         $methods = [];
@@ -1578,10 +1579,10 @@ XMLAuth;
         try {
             $response = new SimpleXMLElement($xmlResponse);
             if (isset($response->Error)) {
-                $result->setErrors((string)$response->Error->ErrorDescription);
+                $result->setErrors((string) $response->Error->ErrorDescription);
             } else {
-                $shippingLabelContent = (string)$response->ShipmentResults->PackageResults->LabelImage->GraphicImage;
-                $trackingNumber       = (string)$response->ShipmentResults->PackageResults->TrackingNumber;
+                $shippingLabelContent = (string) $response->ShipmentResults->PackageResults->LabelImage->GraphicImage;
+                $trackingNumber       = (string) $response->ShipmentResults->PackageResults->TrackingNumber;
 
                 $result->setShippingLabelContent(base64_decode($shippingLabelContent));
                 $result->setTrackingNumber($trackingNumber);
@@ -1616,7 +1617,7 @@ XMLAuth;
                 $request->getShipperAddressCountryCode(),
                 $request->getShipperAddressStateOrProvinceCode(),
                 $request->getShipperAddressPostalCode(),
-            )
+            ),
         );
 
         $request->setRecipientAddressCountryCode(
@@ -1624,7 +1625,7 @@ XMLAuth;
                 $request->getRecipientAddressCountryCode(),
                 $request->getRecipientAddressStateOrProvinceCode(),
                 $request->getRecipientAddressPostalCode(),
-            )
+            ),
         );
 
         $result = new Varien_Object();
@@ -1650,10 +1651,10 @@ XMLAuth;
         /** Rest API Payload */
         $headers = [
             "Authorization: Bearer $accessToken",
-            'Content-Type: application/json'
+            'Content-Type: application/json',
         ];
         $debugData = [
-            'request' => $rawJsonRequest
+            'request' => $rawJsonRequest,
         ];
 
         $ch = curl_init();
@@ -1678,7 +1679,7 @@ XMLAuth;
         if (!$responseData) {
             $result->setErrors(Mage::helper('usa')->__('Empty response'));
         } elseif (isset($responseData->response->errors)) {
-            $result->setErrors((string)$responseData->response->errors[0]->message);
+            $result->setErrors((string) $responseData->response->errors[0]->message);
         }
 
         if ($result->hasErrors() || empty($responseData)) {
@@ -1699,7 +1700,7 @@ XMLAuth;
         } else {
             Mage::log(
                 'Unexpected response shape from UPS REST API /shipments endpoint for .ShipmentResults.PackageResults',
-                Zend_Log::WARN
+                Zend_Log::WARN,
             );
             $result->setErrors(Mage::helper('usa')->__('Error reading response from UPS'));
             $this->_debug($debugData);
@@ -1764,8 +1765,8 @@ XMLAuth;
                     'SubVersion' => '1801',
                     'RequestOption' => 'nonvalidate',
                     'TransactionReference' => [
-                        'CustomerContext' => 'Shipment Request'
-                    ]
+                        'CustomerContext' => 'Shipment Request',
+                    ],
                 ],
                 'Shipment' => [
                     'Description' => $shipmentDescription,
@@ -1775,10 +1776,10 @@ XMLAuth;
                     'PaymentInformation' => [],
                     'Service' => [],
                     'Package' => [],
-                    'ShipmentServiceOptions' => []
+                    'ShipmentServiceOptions' => [],
                 ],
-                'LabelSpecification' => []
-            ]
+                'LabelSpecification' => [],
+            ],
         ];
         if ($request->getIsReturn()) {
             $returnPart = &$shipParams['ShipmentRequest']['Shipment'];
@@ -1859,7 +1860,7 @@ XMLAuth;
         $shipParams['ShipmentRequest']['Shipment']['Service']['Code'] = $request->getShippingMethod();
 
         $deliveryConfirmationLevel = $this->_getDeliveryConfirmationLevel(
-            $request->getRecipientAddressCountryCode()
+            $request->getRecipientAddressCountryCode(),
         );
 
         $packagePart = &$shipParams['ShipmentRequest']['Shipment']['Package'];
@@ -1992,7 +1993,7 @@ XMLAuth;
         if (isset($response->Response->Error)
             && in_array($response->Response->Error->ErrorSeverity, ['Hard', 'Transient'])
         ) {
-            $result->setErrors((string)$response->Response->Error->ErrorDescription);
+            $result->setErrors((string) $response->Response->Error->ErrorDescription);
         }
 
         $this->_debug($debugData);
@@ -2203,8 +2204,8 @@ XMLAuth;
             'RateRequest' => [
                 'Request' => [
                     'TransactionReference' => [
-                        'CustomerContext' => 'Rating and Service'
-                    ]
+                        'CustomerContext' => 'Rating and Service',
+                    ],
                 ],
                 'Shipment' => [
                     'Shipper' => [
@@ -2215,27 +2216,27 @@ XMLAuth;
                             'City' => "{$shipperCity}",
                             'StateProvinceCode' => "{$shipperStateProvince}",
                             'PostalCode' => "{$shipperPostalCode}",
-                            'CountryCode' => "{$shipperCountryCode}"
-                        ]
+                            'CountryCode' => "{$shipperCountryCode}",
+                        ],
                     ],
                     'ShipTo' => [
                         'Address' => [
                             'AddressLine' => ["{$params['49_residential']}"],
                             'StateProvinceCode' => "{$params['destRegionCode']}",
                             'PostalCode' => "{$params['19_destPostal']}",
-                            'CountryCode' => "{$params['22_destCountry']}"
-                        ]
+                            'CountryCode' => "{$params['22_destCountry']}",
+                        ],
                     ],
                     'ShipFrom' => [
                         'Address' => [
                             'AddressLine' => [],
                             'StateProvinceCode' => "{$params['origRegionCode']}",
                             'PostalCode' => "{$params['15_origPostal']}",
-                            'CountryCode' => "{$params['14_origCountry']}"
-                        ]
+                            'CountryCode' => "{$params['14_origCountry']}",
+                        ],
                     ],
-                ]
-            ]
+                ],
+            ],
         ];
 
         if ($params['49_residential'] === '01') {
@@ -2258,23 +2259,23 @@ XMLAuth;
         $rateParams['RateRequest']['Shipment']['Package'][] = [
             'PackagingType' => [
                 'Code' => "{$params['48_container']}",
-                'Description' => 'Packaging'
+                'Description' => 'Packaging',
             ],
             'Dimensions' => [
                 'UnitOfMeasurement' => [
                     'Code' => $rowRequest->getUnitDimensions(),
-                    'Description' => $rowRequest->getUnitDimensionsDescription()
+                    'Description' => $rowRequest->getUnitDimensionsDescription(),
                 ],
                 'Length' => '5',
                 'Width' => '5',
-                'Height' => '5'
+                'Height' => '5',
             ],
             'PackageWeight' => [
                 'UnitOfMeasurement' => [
-                    'Code' => "{$rowRequest->getUnitMeasure()}"
+                    'Code' => "{$rowRequest->getUnitMeasure()}",
                 ],
-                'Weight' => "{$params['23_weight']}"
-            ]
+                'Weight' => "{$params['23_weight']}",
+            ],
         ];
 
         $ratePayload = json_encode($rateParams, JSON_PRETTY_PRINT);
@@ -2283,10 +2284,10 @@ XMLAuth;
         $requestOption = $params['10_action'];
         $headers = [
             "Authorization: Bearer $accessToken",
-            'Content-Type: application/json'
+            'Content-Type: application/json',
         ];
         $debugData = [
-            'request' => $ratePayload
+            'request' => $ratePayload,
         ];
 
         $ch = curl_init();
@@ -2342,7 +2343,7 @@ XMLAuth;
                         $allowedCurrencies,
                         $costArr,
                         $priceArr,
-                        $negotiatedActive
+                        $negotiatedActive,
                     );
                 }
             } else {
@@ -2414,12 +2415,12 @@ XMLAuth;
                     $cost = $shipElement['NegotiatedRateCharges']['TotalChargesWithTaxes']['MonetaryValue'];
 
                     $responseCurrencyCode = $this->mapCurrencyCode(
-                        (string)$shipElement['NegotiatedRateCharges']['TotalChargesWithTaxes']['CurrencyCode']
+                        (string) $shipElement['NegotiatedRateCharges']['TotalChargesWithTaxes']['CurrencyCode'],
                     );
                 } else {
                     $cost = $shipElement['NegotiatedRateCharges']['TotalCharge']['MonetaryValue'];
                     $responseCurrencyCode = $this->mapCurrencyCode(
-                        (string)$shipElement['NegotiatedRateCharges']['TotalCharge']['CurrencyCode']
+                        (string) $shipElement['NegotiatedRateCharges']['TotalCharge']['CurrencyCode'],
                     );
                 }
             } else {
@@ -2428,12 +2429,12 @@ XMLAuth;
                 if ($includeTaxesActive) {
                     $cost = $shipElement['TotalChargesWithTaxes']['MonetaryValue'];
                     $responseCurrencyCode = $this->mapCurrencyCode(
-                        (string)$shipElement['TotalChargesWithTaxes']['CurrencyCode']
+                        (string) $shipElement['TotalChargesWithTaxes']['CurrencyCode'],
                     );
                 } else {
                     $cost = $shipElement['TotalCharges']['MonetaryValue'];
                     $responseCurrencyCode = $this->mapCurrencyCode(
-                        (string)$shipElement['TotalCharges']['CurrencyCode']
+                        (string) $shipElement['TotalCharges']['CurrencyCode'],
                     );
                 }
             }
@@ -2442,12 +2443,12 @@ XMLAuth;
             $successConversion = true;
             if ($responseCurrencyCode) {
                 if (in_array($responseCurrencyCode, $allowedCurrencies)) {
-                    $cost = (float)$cost * $this->_getBaseCurrencyRate($responseCurrencyCode);
+                    $cost = (float) $cost * $this->_getBaseCurrencyRate($responseCurrencyCode);
                 } else {
                     $errorTitle = Mage::helper('usa')->__(
                         'We can\'t convert a rate from "%1-%2".',
                         $responseCurrencyCode,
-                        $this->_request->getPackageCurrency()->getCode()
+                        $this->_request->getPackageCurrency()->getCode(),
                     );
                     $error = Mage::getModel('shipping/rate_result_error');
                     $error->setCarrier('ups');
@@ -2459,7 +2460,7 @@ XMLAuth;
 
             if ($successConversion) {
                 $costArr[$code] = $cost;
-                $priceArr[$code] = $this->getMethodPrice((float)$cost, $code);
+                $priceArr[$code] = $this->getMethodPrice((float) $cost, $code);
             }
         }
     }
@@ -2488,7 +2489,7 @@ XMLAuth;
     private function setQuoteRequestData(Varien_Object $rowRequest): array
     {
         if (self::USA_COUNTRY_ID == $rowRequest->getDestCountry()) {
-            $destPostal = substr((string)$rowRequest->getDestPostal(), 0, 5);
+            $destPostal = substr((string) $rowRequest->getDestPostal(), 0, 5);
         } else {
             $destPostal = $rowRequest->getDestPostal();
         }
@@ -2523,7 +2524,7 @@ XMLAuth;
     {
         $currencyMapping = [
             'RMB' => 'CNY',
-            'CNH' => 'CNY'
+            'CNH' => 'CNY',
         ];
 
         return $currencyMapping[$code] ?? $code;

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -95,7 +96,7 @@ class Mage_Core_Model_Resource
             return $this->_connections[$origName];
         }
 
-        $connection = $this->_newConnection((string)$connConfig->type, $connConfig);
+        $connection = $this->_newConnection((string) $connConfig->type, $connConfig);
         if ($connection) {
             if (Mage::app()->getIsCacheLocked()) {
                 $this->_skippedConnections[$name] = true;
@@ -132,7 +133,7 @@ class Mage_Core_Model_Resource
     {
         $config = Mage::getConfig()->getResourceTypeConfig($type);
         if (!empty($config->adapter)) {
-            return (string)$config->adapter;
+            return (string) $config->adapter;
         }
         return false;
     }
@@ -245,12 +246,12 @@ class Mage_Core_Model_Resource
             list($model, $entity) = $parts;
             $entityConfig = false;
             if (!empty(Mage::getConfig()->getNode()->global->models->{$model}->resourceModel)) {
-                $resourceModel = (string)Mage::getConfig()->getNode()->global->models->{$model}->resourceModel;
+                $resourceModel = (string) Mage::getConfig()->getNode()->global->models->{$model}->resourceModel;
                 $entityConfig  = $this->getEntity($resourceModel, $entity);
             }
 
             if ($entityConfig && !empty($entityConfig->table)) {
-                $tableName = (string)$entityConfig->table;
+                $tableName = (string) $entityConfig->table;
             } else {
                 Mage::throwException(Mage::helper('core')->__('Can\'t retrieve entity config: %s', $modelEntity));
             }
@@ -262,14 +263,14 @@ class Mage_Core_Model_Resource
             'resource'      => $this,
             'model_entity'  => $modelEntity,
             'table_name'    => $tableName,
-            'table_suffix'  => $tableSuffix
+            'table_suffix'  => $tableSuffix,
         ]);
 
         $mappedTableName = $this->getMappedTableName($tableName);
         if ($mappedTableName) {
             $tableName = $mappedTableName;
         } else {
-            $tablePrefix = (string)Mage::getConfig()->getTablePrefix();
+            $tablePrefix = (string) Mage::getConfig()->getTablePrefix();
             $tableName = $tablePrefix . $tableName;
         }
 
@@ -395,7 +396,7 @@ class Mage_Core_Model_Resource
                 $this->getTableName($priTableName),
                 $priColumnName,
                 $this->getTableName($refTableName),
-                $refColumnName
+                $refColumnName,
             );
     }
 }

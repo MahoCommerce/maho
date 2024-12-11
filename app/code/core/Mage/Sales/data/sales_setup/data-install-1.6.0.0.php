@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -21,13 +22,13 @@ $statuses = Mage::getConfig()->getNode('global/sales/order/statuses')->asArray()
 foreach ($statuses as $code => $info) {
     $data[] = [
         'status' => $code,
-        'label'  => $info['label']
+        'label'  => $info['label'],
     ];
 }
 $installer->getConnection()->insertArray(
     $installer->getTable('sales/order_status'),
     ['status', 'label'],
-    $data
+    $data,
 );
 
 /**
@@ -42,7 +43,7 @@ foreach ($states as $code => $info) {
             $data[] = [
                 'status'     => $status,
                 'state'      => $code,
-                'is_default' => is_array($statusInfo) && isset($statusInfo['@']['default']) ? 1 : 0
+                'is_default' => is_array($statusInfo) && isset($statusInfo['@']['default']) ? 1 : 0,
             ];
         }
     }
@@ -50,5 +51,5 @@ foreach ($states as $code => $info) {
 $installer->getConnection()->insertArray(
     $installer->getTable('sales/order_status_state'),
     ['status', 'state', 'is_default'],
-    $data
+    $data,
 );

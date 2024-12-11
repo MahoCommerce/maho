@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -145,7 +146,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
         Mage::getSingleton('index/indexer')->logEvent(
             $this,
             self::ENTITY,
-            Mage_Index_Model_Event::TYPE_DELETE
+            Mage_Index_Model_Event::TYPE_DELETE,
         );
         return parent::_beforeDelete();
     }
@@ -161,7 +162,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
         parent::_afterDeleteCommit();
         Mage::getSingleton('index/indexer')->indexEvents(
             self::ENTITY,
-            Mage_Index_Model_Event::TYPE_DELETE
+            Mage_Index_Model_Event::TYPE_DELETE,
         );
         return $this;
     }
@@ -218,7 +219,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
         if ($dataObject) {
             return $dataObject->getStoreId();
         }
-        return (int)$this->getData('store_id');
+        return (int) $this->getData('store_id');
     }
 
     /**

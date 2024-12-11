@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -116,7 +117,7 @@ class Mage_Catalog_Block_Layer_View extends Mage_Core_Block_Template
                 $this->getLayout()->createBlock($filterBlockName)
                     ->setLayer($this->getLayer())
                     ->setAttributeModel($attribute)
-                ->init()
+                ->init(),
             );
         }
 

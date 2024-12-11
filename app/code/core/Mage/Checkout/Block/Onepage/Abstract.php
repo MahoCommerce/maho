@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -118,7 +119,7 @@ abstract class Mage_Checkout_Block_Onepage_Abstract extends Mage_Core_Block_Temp
             foreach ($this->getCustomer()->getAddresses() as $address) {
                 $options[] = [
                     'value' => $address->getId(),
-                    'label' => $address->format('oneline')
+                    'label' => $address->format('oneline'),
                 ];
             }
 

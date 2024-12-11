@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -68,7 +69,7 @@ class Mage_Directory_Model_Observer
             $mailTemplate = Mage::getModel('core/email_template');
             $mailTemplate
                 ->setDesignConfig([
-                    'area' => Mage_Core_Model_App_Area::AREA_FRONTEND
+                    'area' => Mage_Core_Model_App_Area::AREA_FRONTEND,
                 ])
                 ->sendTransactional(
                     Mage::getStoreConfig(self::XML_PATH_ERROR_TEMPLATE),
@@ -77,7 +78,7 @@ class Mage_Directory_Model_Observer
                     null,
                     [
                         'warnings' => implode("\n", $importWarnings),
-                    ]
+                    ],
                 );
 
             $translate->setTranslateInline(true);

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -22,7 +23,7 @@ use Varien_Db_Adapter_Pdo_Mysql;
 
 #[AsCommand(
     name: 'cron:run',
-    description: 'Run a group of cron processes (default/always) or a single job_code (eg: newsletter_send_all)'
+    description: 'Run a group of cron processes (default/always) or a single job_code (eg: newsletter_send_all)',
 )]
 class CronRun extends BaseMahoCommand
 {
@@ -68,7 +69,7 @@ class CronRun extends BaseMahoCommand
             $output->writeln("<error>Invalid model definition for {$jobCode}</error>");
             return Command::FAILURE;
         }
-        if (!preg_match(Mage_Cron_Model_Observer::REGEX_RUN_MODEL, (string)$runConfig['model'], $run)) {
+        if (!preg_match(Mage_Cron_Model_Observer::REGEX_RUN_MODEL, (string) $runConfig['model'], $run)) {
             $output->writeln('<error>Invalid model/method definition, expecting "model/class::method"</error>');
             return Command::FAILURE;
         }

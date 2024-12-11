@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -95,7 +96,7 @@ class Mage_Sales_Model_Quote_Address_Total_Subtotal extends Mage_Sales_Model_Quo
                 $quoteItem->getParentItem()->getProduct(),
                 $quoteItem->getParentItem()->getQty(),
                 $quoteItem->getProduct(),
-                $quoteItem->getQty()
+                $quoteItem->getQty(),
             );
             $item->setPrice($finalPrice)
                 ->setBaseOriginalPrice($finalPrice);
@@ -148,7 +149,7 @@ class Mage_Sales_Model_Quote_Address_Total_Subtotal extends Mage_Sales_Model_Quo
         $address->addTotal([
             'code'  => $this->getCode(),
             'title' => Mage::helper('sales')->__('Subtotal'),
-            'value' => $address->getSubtotal()
+            'value' => $address->getSubtotal(),
         ]);
         return $this;
     }

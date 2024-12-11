@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -25,7 +26,7 @@ $dataflowData = [
         'direction'    => 'export',
         'entity_type'  => 'product',
         'store_id'     => 0,
-        'data_transfer' => 'file'
+        'data_transfer' => 'file',
     ],
     [
         'name'         => 'Export Product Stocks',
@@ -34,7 +35,7 @@ $dataflowData = [
         'direction'    => 'export',
         'entity_type'  => 'product',
         'store_id'     => 0,
-        'data_transfer' => 'file'
+        'data_transfer' => 'file',
     ],
     [
         'name'         => 'Import All Products',
@@ -43,7 +44,7 @@ $dataflowData = [
         'direction'    => 'import',
         'entity_type'  => 'product',
         'store_id'     => 0,
-        'data_transfer' => 'interactive'
+        'data_transfer' => 'interactive',
     ],
     [
         'name'         => 'Import Product Stocks',
@@ -52,7 +53,7 @@ $dataflowData = [
         'direction'    => 'import',
         'entity_type'  => 'product',
         'store_id'     => 0,
-        'data_transfer' => 'interactive'
+        'data_transfer' => 'interactive',
     ],
     [
         'name'         => 'Export Customers',
@@ -61,7 +62,7 @@ $dataflowData = [
         'direction'    => 'export',
         'entity_type'  => 'customer',
         'store_id'     => 0,
-        'data_transfer' => 'file'
+        'data_transfer' => 'file',
     ],
     [
         'name'         => 'Import Customers',
@@ -70,7 +71,7 @@ $dataflowData = [
         'direction'    => 'import',
         'entity_type'  => 'customer',
         'store_id'     => 0,
-        'data_transfer' => 'interactive'
+        'data_transfer' => 'interactive',
     ],
 ];
 

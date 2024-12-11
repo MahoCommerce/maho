@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -38,9 +39,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer_Abstract extends Mage_Core_Model_
      *
      */
     #[\Override]
-    protected function _construct()
-    {
-    }
+    protected function _construct() {}
 
     /**
      * @param array $data

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -21,7 +22,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Product_Options_Price
     {
         return [
             ['value' => 'fixed', 'label' => Mage::helper('adminhtml')->__('Fixed')],
-            ['value' => 'percent', 'label' => Mage::helper('adminhtml')->__('Percent')]
+            ['value' => 'percent', 'label' => Mage::helper('adminhtml')->__('Percent')],
         ];
     }
 }

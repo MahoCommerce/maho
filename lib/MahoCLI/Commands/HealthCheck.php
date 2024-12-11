@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'health-check',
-    description: 'Health check your Maho project'
+    description: 'Health check your Maho project',
 )]
 class HealthCheck extends BaseMahoCommand
 {
@@ -60,7 +61,7 @@ class HealthCheck extends BaseMahoCommand
         $folders = [
             'app/bootstrap.php',
             'app/Mage.php',
-            'app/code/core'
+            'app/code/core',
         ];
         $existingFolders = [];
         foreach ($folders as $folder) {
@@ -110,7 +111,7 @@ class HealthCheck extends BaseMahoCommand
             'lib/Pelago',
             'lib/phpseclib',
             'lib/Zend',
-            'skin'
+            'skin',
         ];
         $existingFolders = [];
         foreach ($folders as $folder) {

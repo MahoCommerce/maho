@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -23,5 +24,5 @@ $connection = $installer->getConnection();
 
 $connection->changeTableEngine(
     $installer->getTable('downloadable/product_price_indexer_tmp'),
-    Varien_Db_Adapter_Pdo_Mysql::ENGINE_MEMORY
+    Varien_Db_Adapter_Pdo_Mysql::ENGINE_MEMORY,
 );

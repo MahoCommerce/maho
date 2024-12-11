@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -27,7 +28,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Shipping_Allmethods
         $methods = [['value' => '', 'label' => '']];
         $carriers = Mage::getSingleton('shipping/config')->getAllCarriers();
         foreach ($carriers as $carrierCode => $carrierModel) {
-            if (!$carrierModel->isActive() && (bool)$isActiveOnlyFlag === true) {
+            if (!$carrierModel->isActive() && (bool) $isActiveOnlyFlag === true) {
                 continue;
             }
             $carrierMethods = $carrierModel->getAllowedMethods();

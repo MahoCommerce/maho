@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -15,6 +16,4 @@
  * @category   Mage
  * @package    Mage_Api2
  */
-class Mage_Api2_Model_Route_Rest extends Mage_Api2_Model_Route_Abstract implements Mage_Api2_Model_Route_Interface
-{
-}
+class Mage_Api2_Model_Route_Rest extends Mage_Api2_Model_Route_Abstract implements Mage_Api2_Model_Route_Interface {}

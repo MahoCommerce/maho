@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -103,7 +104,7 @@ class Mage_Sales_Model_Quote_Address_Total_Collector extends Mage_Sales_Model_Co
         $model = Mage::getModel($class);
         if (!$model instanceof Mage_Sales_Model_Quote_Address_Total_Abstract) {
             Mage::throwException(
-                Mage::helper('sales')->__('The address total model should be extended from Mage_Sales_Model_Quote_Address_Total_Abstract.')
+                Mage::helper('sales')->__('The address total model should be extended from Mage_Sales_Model_Quote_Address_Total_Abstract.'),
             );
         }
 
@@ -111,7 +112,7 @@ class Mage_Sales_Model_Quote_Address_Total_Collector extends Mage_Sales_Model_Co
         $this->_modelsConfig[$totalCode] = $this->_prepareConfigArray($totalCode, $totalConfig);
         $this->_modelsConfig[$totalCode] = $model->processConfigArray(
             $this->_modelsConfig[$totalCode],
-            $this->_store
+            $this->_store,
         );
 
         return $model;

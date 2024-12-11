@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -104,7 +105,7 @@ class Mage_Core_Model_Email_Template_Filter extends Varien_Filter_Template
      */
     public function setPlainTemplateMode($plainTemplateMode)
     {
-        $this->_plainTemplateMode = (bool)$plainTemplateMode;
+        $this->_plainTemplateMode = (bool) $plainTemplateMode;
         return $this;
     }
 

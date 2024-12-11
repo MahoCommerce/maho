@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -34,7 +35,7 @@ class Mage_Cms_Model_Template_Filter extends Mage_Core_Model_Email_Template_Filt
     #[\Override]
     public function setUseSessionInUrl($flag)
     {
-        $this->_useSessionInUrl = (bool)$flag;
+        $this->_useSessionInUrl = (bool) $flag;
         return $this;
     }
 }

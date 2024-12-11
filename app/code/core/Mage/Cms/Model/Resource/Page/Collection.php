@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -159,7 +160,7 @@ class Mage_Cms_Model_Resource_Page_Collection extends Mage_Core_Model_Resource_D
             $this->getSelect()->join(
                 ['store_table' => $this->getTable('cms/page_store')],
                 'main_table.page_id = store_table.page_id',
-                []
+                [],
             )->group('main_table.page_id');
 
             /*

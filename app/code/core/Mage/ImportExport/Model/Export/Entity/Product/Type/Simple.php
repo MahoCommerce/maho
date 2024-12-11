@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -26,7 +27,7 @@ class Mage_ImportExport_Model_Export_Entity_Product_Type_Simple extends Mage_Imp
         'has_options'      => ['source_model' => 'eav/entity_attribute_source_boolean'],
         'required_options' => ['source_model' => 'eav/entity_attribute_source_boolean'],
         'created_at'       => ['backend_type' => 'datetime'],
-        'updated_at'       => ['backend_type' => 'datetime']
+        'updated_at'       => ['backend_type' => 'datetime'],
     ];
 
     /**
@@ -40,6 +41,6 @@ class Mage_ImportExport_Model_Export_Entity_Product_Type_Simple extends Mage_Imp
         'is_recurring',
         'tier_price',
         'group_price',
-        'category_ids'
+        'category_ids',
     ];
 }

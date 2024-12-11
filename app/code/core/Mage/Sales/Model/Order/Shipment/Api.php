@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -293,7 +294,7 @@ class Mage_Sales_Model_Order_Shipment_Api extends Mage_Sales_Model_Api_Resource
      * @return bool
      */
     public function addComment($shipmentIncrementId, $comment, #[\SensitiveParameter]
-    $email = false, $includeInEmail = false)
+        $email = false, $includeInEmail = false)
     {
         $shipment = Mage::getModel('sales/order_shipment')->loadByIncrementId($shipmentIncrementId);
 
@@ -342,7 +343,7 @@ class Mage_Sales_Model_Order_Shipment_Api extends Mage_Sales_Model_Api_Resource
     {
         $carriers = [];
         $carrierInstances = Mage::getSingleton('shipping/config')->getAllCarriers(
-            $object->getStoreId()
+            $object->getStoreId(),
         );
 
         $carriers['custom'] = Mage::helper('sales')->__('Custom Value');

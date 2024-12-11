@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -28,7 +29,7 @@ class Mage_Core_Model_Variable_Config
         $variableConfig = [];
         $onclickParts = [
             'search' => ['html_id'],
-            'subject' => 'OpenmagevariablePlugin.loadChooser(\'' . $this->getVariablesWysiwygActionUrl() . '\', \'{{html_id}}\');'
+            'subject' => 'OpenmagevariablePlugin.loadChooser(\'' . $this->getVariablesWysiwygActionUrl() . '\', \'{{html_id}}\');',
         ];
         $variableWysiwygPlugin = [['name' => 'openmagevariable',
             'src' => $this->getWysiwygJsPluginSrc(),
@@ -36,7 +37,7 @@ class Mage_Core_Model_Variable_Config
                 'title' => Mage::helper('adminhtml')->__('Insert Variable...'),
                 'url' => $this->getVariablesWysiwygActionUrl(),
                 'onclick' => $onclickParts,
-                'class'   => 'add-variable plugin'
+                'class'   => 'add-variable plugin',
             ]]];
         $configPlugins = $config->getData('plugins');
         $variableConfig['plugins'] = array_merge($configPlugins, $variableWysiwygPlugin);

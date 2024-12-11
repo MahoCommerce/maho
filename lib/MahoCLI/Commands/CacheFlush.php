@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -18,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'cache:flush',
-    description: 'Flush cache'
+    description: 'Flush cache',
 )]
 class CacheFlush extends BaseMahoCommand
 {

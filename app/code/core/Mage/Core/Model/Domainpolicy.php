@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -84,7 +85,7 @@ class Mage_Core_Model_Domainpolicy
      */
     public function getBackendPolicy()
     {
-        return $this->_getDomainPolicyByCode((int)(string)$this->_store->getConfig(self::XML_DOMAIN_POLICY_BACKEND));
+        return $this->_getDomainPolicyByCode((int) (string) $this->_store->getConfig(self::XML_DOMAIN_POLICY_BACKEND));
     }
 
     /**
@@ -94,7 +95,7 @@ class Mage_Core_Model_Domainpolicy
      */
     public function getFrontendPolicy()
     {
-        return $this->_getDomainPolicyByCode((int)(string)$this->_store->getConfig(self::XML_DOMAIN_POLICY_FRONTEND));
+        return $this->_getDomainPolicyByCode((int) (string) $this->_store->getConfig(self::XML_DOMAIN_POLICY_FRONTEND));
     }
 
     /**

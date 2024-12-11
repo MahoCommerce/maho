@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -91,9 +92,7 @@ abstract class Mage_ImportExport_Model_Export_Adapter_Abstract
     /**
      * Destruct method on shutdown
      */
-    public function destruct()
-    {
-    }
+    public function destruct() {}
 
     /**
      * Method called as last step of object instance creation. Can be overridden in child classes.

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -21,7 +22,7 @@ use Symfony\Component\Console\Question\Question;
 
 #[AsCommand(
     name: 'customer:delete',
-    description: 'Delete customers'
+    description: 'Delete customers',
 )]
 class CustomerDelete extends BaseMahoCommand
 {
@@ -70,7 +71,7 @@ class CustomerDelete extends BaseMahoCommand
                 $customer->getWebsiteId(),
                 $customer->getEmail(),
                 $customer->getFirstname(),
-                $customer->getLastname()
+                $customer->getLastname(),
             ]);
         }
         $table->render();

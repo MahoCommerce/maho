@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -41,7 +42,7 @@ class Mage_Sales_Helper_Data extends Mage_Core_Helper_Data
         if (!$quote->getHasError() && ($amount >= self::MAXIMUM_AVAILABLE_NUMBER)) {
             $quote->setHasError(true);
             $quote->addMessage(
-                $this->__('Items maximum quantity or price do not allow checkout.')
+                $this->__('Items maximum quantity or price do not allow checkout.'),
             );
         }
         return $this;

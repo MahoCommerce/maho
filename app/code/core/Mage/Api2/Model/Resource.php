@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -395,7 +396,7 @@ abstract class Mage_Api2_Model_Resource
      */
     public function setVersion($version)
     {
-        $this->_version = (int)$version;
+        $this->_version = (int) $version;
     }
 
     /**
@@ -613,7 +614,7 @@ abstract class Mage_Api2_Model_Resource
             if (!isset($errors[$message])) {
                 throw new Exception(
                     sprintf('Invalid error "%s" or error code missed.', $message),
-                    Mage_Api2_Model_Server::HTTP_INTERNAL_ERROR
+                    Mage_Api2_Model_Server::HTTP_INTERNAL_ERROR,
                 );
             }
             $code = $errors[$message];
@@ -794,7 +795,7 @@ abstract class Mage_Api2_Model_Resource
             $this->getConfig()->getResourceModel($resourceId),
             $this->getApiType(),
             $this->getUserType(),
-            $this->getVersion()
+            $this->getVersion(),
         );
 
         /** @var Mage_Api2_Model_Request $request */
@@ -856,11 +857,11 @@ abstract class Mage_Api2_Model_Resource
         $apiTypeRoute = Mage::getModel('api2/route_apiType');
 
         $chain = $apiTypeRoute->chain(
-            new Zend_Controller_Router_Route($this->getConfig()->getRouteWithEntityTypeAction($this->getResourceType()))
+            new Zend_Controller_Router_Route($this->getConfig()->getRouteWithEntityTypeAction($this->getResourceType())),
         );
         $params = [
             'api_type' => $this->getRequest()->getApiType(),
-            'id'       => $resource->getId()
+            'id'       => $resource->getId(),
         ];
         $uri = $chain->assemble($params);
 

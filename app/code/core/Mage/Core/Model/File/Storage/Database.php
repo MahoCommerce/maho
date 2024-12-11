@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -65,7 +66,7 @@ class Mage_Core_Model_File_Storage_Database extends Mage_Core_Model_File_Storage
         if (is_null($this->_directoryModel)) {
             $this->_directoryModel = Mage::getModel(
                 'core/file_storage_directory_database',
-                ['connection' => $this->getConnectionName()]
+                ['connection' => $this->getConnectionName()],
             );
         }
 
@@ -197,7 +198,7 @@ class Mage_Core_Model_File_Storage_Database extends Mage_Core_Model_File_Storage
                 $file['directory_id'] = (isset($file['directory']) && strlen($file['directory']))
                     ? Mage::getModel(
                         'core/file_storage_directory_database',
-                        ['connection' => $this->getConnectionName()]
+                        ['connection' => $this->getConnectionName()],
                     )
                             ->loadByPath($file['directory'])->getId()
                     : null;
@@ -259,7 +260,7 @@ class Mage_Core_Model_File_Storage_Database extends Mage_Core_Model_File_Storage
             basename($oldFilePath),
             dirname($oldFilePath),
             basename($newFilePath),
-            dirname($newFilePath)
+            dirname($newFilePath),
         );
 
         return $this;
@@ -278,7 +279,7 @@ class Mage_Core_Model_File_Storage_Database extends Mage_Core_Model_File_Storage
             basename($oldFilePath),
             dirname($oldFilePath),
             basename($newFilePath),
-            dirname($newFilePath)
+            dirname($newFilePath),
         );
 
         $newPath = dirname($newFilePath);

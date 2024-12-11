@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -65,9 +66,9 @@ $select = $connection->select()
         ->where(
             'path IN (?)',
             [
-                    'carriers/usps/free_method',
-                    'carriers/usps/allowed_methods'
-                ]
+                'carriers/usps/free_method',
+                'carriers/usps/allowed_methods',
+            ],
         );
 $oldConfigValues = $connection->fetchAll($select);
 
@@ -91,7 +92,7 @@ foreach ($oldConfigValues as $oldValue) {
         $connection->update(
             $configDataTable,
             ['value' => $newValue],
-            $whereConfigId
+            $whereConfigId,
         );
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -48,7 +49,7 @@ foreach ($emails as $data) {
         $conn->update(
             $this->getTable('customer/entity'),
             ['email' => $changedEmail],
-            ['entity_id =?' => $row['entity_id']]
+            ['entity_id =?' => $row['entity_id']],
         );
     }
 }
@@ -61,8 +62,8 @@ $conn->addIndex(
     $this->getIdxName(
         'customer/entity',
         ['email', 'website_id'],
-        Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE
+        Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
     ),
     ['email', 'website_id'],
-    Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE
+    Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
 );

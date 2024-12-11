@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -27,7 +28,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Passwordlength extends Mage_Cor
     #[\Override]
     protected function _beforeSave()
     {
-        if ((int)$this->getValue() < Mage_Core_Model_App::ABSOLUTE_MIN_PASSWORD_LENGTH) {
+        if ((int) $this->getValue() < Mage_Core_Model_App::ABSOLUTE_MIN_PASSWORD_LENGTH) {
             Mage::throwException(Mage::helper('adminhtml')
                 ->__('Password must be at least of %d characters.', Mage_Core_Model_App::ABSOLUTE_MIN_PASSWORD_LENGTH));
         }

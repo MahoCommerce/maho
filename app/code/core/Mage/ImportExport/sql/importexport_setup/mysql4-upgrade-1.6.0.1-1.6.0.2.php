@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -20,6 +21,6 @@ $installer->getConnection()->modifyColumn(
         'type' => Varien_Db_Ddl_Table::TYPE_TEXT,
         'length' => '4G',
         'default' => '',
-        'comment' => 'Data'
-    ]
+        'comment' => 'Data',
+    ],
 );

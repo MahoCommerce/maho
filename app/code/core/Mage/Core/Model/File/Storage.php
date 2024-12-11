@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -132,8 +133,8 @@ class Mage_Core_Model_File_Storage extends Mage_Core_Model_Abstract
                 $storageDest,
                 [
                     'connection'    => $connection,
-                    'init'          => true
-                ]
+                    'init'          => true,
+                ],
             );
 
             if (!$sourceModel || !$destinationModel) {
@@ -148,7 +149,7 @@ class Mage_Core_Model_File_Storage extends Mage_Core_Model_Abstract
                 'destination_storage_type'      => $storageDest,
                 'destination_connection_name'   => (string) $destinationModel->getConfigConnectionName(),
                 'has_errors'                    => false,
-                'timeout_reached'               => false
+                'timeout_reached'               => false,
             ];
             $flag->setFlagData($flagData);
 

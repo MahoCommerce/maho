@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -195,7 +196,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
                 'name'          => $name,
                 'short_name'    => $this->getHelper()->getShortFilename($name),
                 'path'          => $newPath,
-                'id'            => $this->getHelper()->convertPathToId($newPath)
+                'id'            => $this->getHelper()->convertPathToId($newPath),
             ];
         }
         Mage::throwException(Mage::helper('cms')->__('Cannot create new directory.'));
@@ -217,7 +218,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
         if ($rootCmp == $pathCmp) {
             Mage::throwException(Mage::helper('cms')->__(
                 'Cannot delete root directory %s.',
-                $io->getFilteredPath($path)
+                $io->getFilteredPath($path),
             ));
         }
         if (str_contains($pathCmp, chr(0))
@@ -278,7 +279,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
             $uploader->addValidateCallback(
                 Mage_Core_Model_File_Validator_Image::NAME,
                 Mage::getModel('core/file_validator_image'),
-                'validate'
+                'validate',
             );
         }
         $result = $uploader->save($targetPath);
@@ -296,7 +297,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
             'value'    => $this->getSession()->getSessionId(),
             'lifetime' => $this->getSession()->getCookieLifetime(),
             'path'     => $this->getSession()->getCookiePath(),
-            'domain'   => $this->getSession()->getCookieDomain()
+            'domain'   => $this->getSession()->getCookieDomain(),
         ];
 
         return $result;

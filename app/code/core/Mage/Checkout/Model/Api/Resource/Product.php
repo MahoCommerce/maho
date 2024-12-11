@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -38,7 +39,7 @@ class Mage_Checkout_Model_Api_Resource_Product extends Mage_Checkout_Model_Api_R
         return Mage::helper('catalog/product')->getProduct(
             $productId,
             $this->_getStoreId($store),
-            $identifierType
+            $identifierType,
         );
     }
 
@@ -80,7 +81,7 @@ class Mage_Checkout_Model_Api_Resource_Product extends Mage_Checkout_Model_Api_R
                         ->prepareForCartAdvanced(
                             $requestInfo,
                             $product,
-                            Mage_Catalog_Model_Product_Type_Abstract::PROCESS_MODE_FULL
+                            Mage_Catalog_Model_Product_Type_Abstract::PROCESS_MODE_FULL,
                         );
 
         /**

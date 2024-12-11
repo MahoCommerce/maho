@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -51,7 +52,7 @@ class Mage_Adminhtml_Block_Promo_Widget_Chooser extends Mage_Adminhtml_Block_Wid
             ->setUniqId($uniqId);
 
         if ($element->getValue()) {
-            $rule = Mage::getModel('salesrule/rule')->load((int)$element->getValue());
+            $rule = Mage::getModel('salesrule/rule')->load((int) $element->getValue());
             if ($rule->getId()) {
                 $chooser->setLabel($rule->getName());
             }
@@ -93,7 +94,7 @@ class Mage_Adminhtml_Block_Promo_Widget_Chooser extends Mage_Adminhtml_Block_Wid
         $this->setCollection($collection);
 
         Mage::dispatchEvent('adminhtml_block_promo_widget_chooser_prepare_collection', [
-            'collection' => $collection
+            'collection' => $collection,
         ]);
 
         return parent::_prepareCollection();

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -32,7 +33,7 @@ class Mage_Adminhtml_Block_Tax_Class_Edit_Form extends Mage_Adminhtml_Block_Widg
         $form   = new Varien_Data_Form([
             'id'        => 'edit_form',
             'action'    => $this->getData('action'),
-            'method'    => 'post'
+            'method'    => 'post',
         ]);
 
         $classType  = $this->getClassType();
@@ -44,7 +45,7 @@ class Mage_Adminhtml_Block_Tax_Class_Edit_Form extends Mage_Adminhtml_Block_Widg
         $fieldset   = $form->addFieldset('base_fieldset', [
             'legend'    => $classType == Mage_Tax_Model_Class::TAX_CLASS_TYPE_CUSTOMER
                 ? Mage::helper('tax')->__('Customer Tax Class Information')
-                : Mage::helper('tax')->__('Product Tax Class Information')
+                : Mage::helper('tax')->__('Product Tax Class Information'),
         ]);
 
         $fieldset->addField(
@@ -56,7 +57,7 @@ class Mage_Adminhtml_Block_Tax_Class_Edit_Form extends Mage_Adminhtml_Block_Widg
                 'class' => 'required-entry',
                 'value' => $model->getClassName(),
                 'required' => true,
-            ]
+            ],
         );
 
         $fieldset->addField(
@@ -65,8 +66,8 @@ class Mage_Adminhtml_Block_Tax_Class_Edit_Form extends Mage_Adminhtml_Block_Widg
             [
                 'name'      => 'class_type',
                 'value'     => $classType,
-                'no_span'   => true
-            ]
+                'no_span'   => true,
+            ],
         );
 
         if ($model->getId()) {
@@ -76,8 +77,8 @@ class Mage_Adminhtml_Block_Tax_Class_Edit_Form extends Mage_Adminhtml_Block_Widg
                 [
                     'name'      => 'class_id',
                     'value'     => $model->getId(),
-                    'no_span'   => true
-                ]
+                    'no_span'   => true,
+                ],
             );
         }
 

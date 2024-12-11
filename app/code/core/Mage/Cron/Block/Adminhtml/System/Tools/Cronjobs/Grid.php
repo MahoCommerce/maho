@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -60,7 +61,7 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
                 Mage_Cron_Model_Schedule::STATUS_MISSED  => Mage::helper('cron')->__('Missed'),
                 Mage_Cron_Model_Schedule::STATUS_ERROR   => Mage::helper('cron')->__('Error'),
             ],
-            'frame_callback' => [$this, 'decorateStatus']
+            'frame_callback' => [$this, 'decorateStatus'],
         ]);
 
         $this->addColumn('messages', [
@@ -109,7 +110,7 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
         $this->getMassactionBlock()->addItem('delete', [
             'label'    => Mage::helper('cron')->__('Delete'),
             'url'      => $this->getUrl('*/*/massDelete'),
-            'confirm'  => Mage::helper('cron')->__('Are you sure?')
+            'confirm'  => Mage::helper('cron')->__('Are you sure?'),
         ]);
 
         return $this;

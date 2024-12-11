@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -115,7 +116,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection extends Mag
      */
     public function addOrderIdFilter($orderId)
     {
-        $this->_orderId = (int)$orderId;
+        $this->_orderId = (int) $orderId;
         return $this;
     }
 
@@ -132,7 +133,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection extends Mag
         if (is_object($payment)) {
             $id = $payment->getId();
         }
-        $this->_paymentId = (int)$id;
+        $this->_paymentId = (int) $id;
         return $this;
     }
 
@@ -144,7 +145,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection extends Mag
      */
     public function addParentIdFilter($parentId)
     {
-        $this->_parentId = (int)$parentId;
+        $this->_parentId = (int) $parentId;
         return $this;
     }
 
@@ -207,7 +208,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection extends Mag
             $this->getSelect()->joinInner(
                 ['sop' => $this->getTable('sales/order_payment')],
                 'main_table.payment_id = sop.entity_id',
-                $this->_addPaymentInformation
+                $this->_addPaymentInformation,
             );
         }
         if ($this->_storeIds) {
@@ -218,7 +219,7 @@ class Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection extends Mag
             $this->getSelect()->joinInner(
                 ['so' => $this->getTable('sales/order')],
                 'main_table.order_id = so.entity_id',
-                $this->_addOrderInformation
+                $this->_addOrderInformation,
             );
         }
         return $this;

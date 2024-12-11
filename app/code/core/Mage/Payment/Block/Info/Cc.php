@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -37,7 +38,7 @@ class Mage_Payment_Block_Info_Cc extends Mage_Payment_Block_Info
      */
     public function hasCcExpDate()
     {
-        return (int)$this->getInfo()->getCcExpMonth() || (int)$this->getInfo()->getCcExpYear();
+        return (int) $this->getInfo()->getCcExpMonth() || (int) $this->getInfo()->getCcExpYear();
     }
 
     /**

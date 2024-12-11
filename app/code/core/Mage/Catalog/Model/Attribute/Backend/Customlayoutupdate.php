@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -30,7 +31,7 @@ class Mage_Catalog_Model_Attribute_Backend_Customlayoutupdate extends Mage_Eav_M
     public function validate($object)
     {
         $attributeName = $this->getAttribute()->getName();
-        $xml = trim((string)$object->getData($attributeName));
+        $xml = trim((string) $object->getData($attributeName));
 
         if (!$this->getAttribute()->getIsRequired() && empty($xml)) {
             return true;

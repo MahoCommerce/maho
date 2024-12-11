@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -19,9 +20,7 @@
 class Mage_Sales_Model_Resource_Report extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
-    protected function _construct()
-    {
-    }
+    protected function _construct() {}
 
     /**
      * Set main table and idField

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -46,7 +47,7 @@ class Mage_Adminhtml_Block_Cms_Block_Grid extends Mage_Adminhtml_Block_Widget_Gr
         $this->addColumn('identifier', [
             'header'    => Mage::helper('cms')->__('Identifier'),
             'align'     => 'left',
-            'index'     => 'identifier'
+            'index'     => 'identifier',
         ]);
 
         if (!Mage::app()->isSingleStoreMode()) {
@@ -68,7 +69,7 @@ class Mage_Adminhtml_Block_Cms_Block_Grid extends Mage_Adminhtml_Block_Widget_Gr
             'type'      => 'options',
             'options'   => [
                 0 => Mage::helper('cms')->__('Disabled'),
-                1 => Mage::helper('cms')->__('Enabled')
+                1 => Mage::helper('cms')->__('Enabled'),
             ],
         ]);
 

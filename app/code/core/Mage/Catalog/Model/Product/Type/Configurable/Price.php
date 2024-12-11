@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -72,7 +73,7 @@ class Mage_Catalog_Model_Product_Type_Configurable_Price extends Mage_Catalog_Mo
             $attributeId = $attribute->getProductAttribute()->getId();
             $value = $this->_getValueByIndex(
                 $attribute->getPrices() ? $attribute->getPrices() : [],
-                $selectedAttributes[$attributeId] ?? null
+                $selectedAttributes[$attributeId] ?? null,
             );
             $product->setParentId(true);
             if ($value) {
@@ -80,7 +81,7 @@ class Mage_Catalog_Model_Product_Type_Configurable_Price extends Mage_Catalog_Mo
                     $product->setConfigurablePrice($this->_calcSelectionPrice($value, $finalPrice));
                     Mage::dispatchEvent(
                         'catalog_product_type_configurable_price',
-                        ['product' => $product]
+                        ['product' => $product],
                     );
                     $price += $product->getConfigurablePrice();
                 }

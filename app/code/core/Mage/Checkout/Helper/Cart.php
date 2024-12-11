@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -72,7 +73,7 @@ class Mage_Checkout_Helper_Cart extends Mage_Core_Helper_Url
     {
         $params = [
             'id' => $item->getId(),
-            Mage_Core_Controller_Front_Action::PARAM_NAME_BASE64_URL => $this->getCurrentBase64Url()
+            Mage_Core_Controller_Front_Action::PARAM_NAME_BASE64_URL => $this->getCurrentBase64Url(),
         ];
         return $this->_getUrl('checkout/cart/delete', $params);
     }

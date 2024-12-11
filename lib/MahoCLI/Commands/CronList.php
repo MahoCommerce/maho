@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'cron:list',
-    description: 'List cron jobs configured in the XML files'
+    description: 'List cron jobs configured in the XML files',
 )]
 class CronList extends BaseMahoCommand
 {
@@ -41,7 +42,7 @@ class CronList extends BaseMahoCommand
             $table->addRow([
                 $jobName,
                 $jobConfiguration['run']['model'],
-                $jobConfiguration['schedule']['cron_expr'] ?? ''
+                $jobConfiguration['schedule']['cron_expr'] ?? '',
             ]);
         }
         $table->render();

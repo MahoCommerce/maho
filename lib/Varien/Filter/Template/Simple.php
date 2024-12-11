@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -66,7 +67,7 @@ class Varien_Filter_Template_Simple extends Varien_Object implements Zend_Filter
         return preg_replace_callback(
             '#' . $this->_startTag . '(.*?)' . $this->_endTag . '#',
             [$this, '_filterDataItem'],
-            $value
+            $value,
         );
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -103,9 +104,9 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
          * to single store mode. We should load correct values
          */
         if (Mage::app()->isSingleStoreMode()) {
-            $storeId = (int)Mage::app()->getStore(true)->getId();
+            $storeId = (int) Mage::app()->getStore(true)->getId();
         } else {
-            $storeId = (int)$object->getStoreId();
+            $storeId = (int) $object->getStoreId();
         }
 
         $setId  = $object->getAttributeSetId();
@@ -126,7 +127,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
                 ['set_table' => $this->getTable('eav/entity_attribute')],
                 $this->_getReadAdapter()->quoteInto('attr_table.attribute_id = set_table.attribute_id' .
                 ' AND set_table.attribute_set_id = ?', $setId),
-                []
+                [],
             );
         }
         return $select;
@@ -146,7 +147,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
         /** @var Mage_Catalog_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('catalog');
         $select->columns(
-            $helper->attributeSelectFields('attr_table', $type)
+            $helper->attributeSelectFields('attr_table', $type),
         );
         return $select;
     }
@@ -184,7 +185,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
                 } else {
                     $object->setAttributeDefaultValue(
                         $attributeCode,
-                        $this->_attributes[$valueRow['attribute_id']]['value']
+                        $this->_attributes[$valueRow['attribute_id']]['value'],
                     );
                 }
             } else {
@@ -215,7 +216,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     protected function _saveAttributeValue($object, $attribute, $value)
     {
         $write   = $this->_getWriteAdapter();
-        $storeId = (int)Mage::app()->getStore($object->getStoreId())->getId();
+        $storeId = (int) Mage::app()->getStore($object->getStoreId())->getId();
         $table   = $attribute->getBackend()->getTable();
 
         /**
@@ -228,7 +229,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
             $write->delete($table, [
                 'attribute_id = ?' => $attribute->getAttributeId(),
                 'entity_id = ?'    => $object->getEntityId(),
-                'store_id <> ?'    => $storeId
+                'store_id <> ?'    => $storeId,
             ]);
         }
 
@@ -237,7 +238,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
             'attribute_id'      => $attribute->getAttributeId(),
             'store_id'          => $storeId,
             'entity_id'         => $object->getEntityId(),
-            'value'             => $this->_prepareValueForSave($value, $attribute)
+            'value'             => $this->_prepareValueForSave($value, $attribute),
         ]);
         $bind = $this->_prepareDataForTable($data, $table);
 
@@ -252,7 +253,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
              */
             $storeIds = Mage::app()->getStore($storeId)->getWebsite()->getStoreIds(true);
             foreach ($storeIds as $storeId) {
-                $bind['store_id'] = (int)$storeId;
+                $bind['store_id'] = (int) $storeId;
                 $this->_attributeValuesToSave[$table][] = $bind;
             }
         } else {
@@ -280,7 +281,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
         /**
          * save required attributes in global scope every time if store id different from default
          */
-        $storeId = (int)Mage::app()->getStore($object->getStoreId())->getId();
+        $storeId = (int) Mage::app()->getStore($object->getStoreId())->getId();
         if ($attribute->getIsRequired() && $this->getDefaultStoreId() != $storeId) {
             $table = $attribute->getBackend()->getTable();
 
@@ -298,7 +299,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
                     'attribute_id'      => $attribute->getAttributeId(),
                     'store_id'          => $this->getDefaultStoreId(),
                     'entity_id'         => $object->getEntityId(),
-                    'value'             => $this->_prepareValueForSave($value, $attribute)
+                    'value'             => $this->_prepareValueForSave($value, $attribute),
                 ]);
                 $bind  = $this->_prepareDataForTable($data, $table);
                 $this->_getWriteAdapter()->insertOnDuplicate($table, $bind, ['value']);
@@ -350,7 +351,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
             'entity_type_id'  => $object->getEntityTypeId(),
             'entity_field_id' => $object->getId(),
             'store_id'        => $storeId,
-            'attribute_id'    => $attribute->getId()
+            'attribute_id'    => $attribute->getId(),
         ];
         $valueId = $adapter->fetchOne($select, $bind);
         /**
@@ -358,16 +359,16 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
          */
         if ($valueId) {
             $bind  = ['value' => $this->_prepareValueForSave($value, $attribute)];
-            $where = ['value_id = ?' => (int)$valueId];
+            $where = ['value_id = ?' => (int) $valueId];
 
             $adapter->update($table, $bind, $where);
         } else {
             $bind  = [
-                'entity_field_id'   => (int)$object->getId(),
-                'entity_type_id'    => (int)$object->getEntityTypeId(),
-                'attribute_id'      => (int)$attribute->getId(),
+                'entity_field_id'   => (int) $object->getId(),
+                'entity_type_id'    => (int) $object->getEntityTypeId(),
+                'attribute_id'      => (int) $attribute->getId(),
                 'value'             => $this->_prepareValueForSave($value, $attribute),
-                'store_id'          => (int)$storeId
+                'store_id'          => (int) $storeId,
             ];
 
             $adapter->insert($table, $bind);
@@ -399,11 +400,11 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
         foreach ($info as $itemData) {
             $attribute = $this->getAttribute($itemData['attribute_id']);
             if ($attribute->isScopeStore()) {
-                $storeAttributes[] = (int)$itemData['attribute_id'];
+                $storeAttributes[] = (int) $itemData['attribute_id'];
             } elseif ($attribute->isScopeWebsite()) {
-                $websiteAttributes[] = (int)$itemData['attribute_id'];
+                $websiteAttributes[] = (int) $itemData['attribute_id'];
             } else {
-                $globalValues[] = (int)$itemData['value_id'];
+                $globalValues[] = (int) $itemData['value_id'];
             }
         }
 
@@ -416,7 +417,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
 
         $condition = [
             $entityIdField . ' = ?' => $object->getId(),
-            'entity_type_id = ?'  => $object->getEntityTypeId()
+            'entity_type_id = ?'  => $object->getEntityTypeId(),
         ];
 
         /**
@@ -439,7 +440,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
         if (!empty($storeAttributes)) {
             $delCondition = $condition;
             $delCondition['attribute_id IN(?)'] = $storeAttributes;
-            $delCondition['store_id = ?']       = (int)$object->getStoreId();
+            $delCondition['store_id = ?']       = (int) $object->getStoreId();
 
             $adapter->delete($table, $delCondition);
         }
@@ -586,7 +587,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
         }
 
         $returnArray = false;
-        $entityId = (int)$entityId;
+        $entityId = (int) $entityId;
 
         if (!is_array($attribute)) {
             $attribute = [$attribute];
@@ -642,7 +643,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
                 $store = $store->getId();
             }
 
-            $store = (int)$store;
+            $store = (int) $store;
 
             foreach ($typedAttributes as $table => $attributes) {
                 // see also Mage_Catalog_Model_Resource_Collection_Abstract::_getLoadAttributesSelect()
@@ -659,7 +660,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
                             'attr.store_id IN (' . $this->getDefaultStoreId() . ', ' . $store . ')',
                             'attr.entity_type_id = ' . $this->getTypeId(),
                         ]),
-                        []
+                        [],
                     );
                     // default_value join
                     $select->joinLeft(
@@ -669,18 +670,18 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
                             'default_value.attribute_id = attr.attribute_id',
                             'default_value.store_id = ' . $this->getDefaultStoreId(),
                         ]),
-                        []
+                        [],
                     );
                     // store_value join
                     $valueExpr = $adapter->getCheckSql(
                         'store_value.attribute_id IS NULL',
                         'default_value.value',
-                        'store_value.value'
+                        'store_value.value',
                     );
                     $attributeIdExpr = $adapter->getCheckSql(
                         'store_value.attribute_id IS NULL',
                         'default_value.attribute_id',
-                        'store_value.attribute_id'
+                        'store_value.attribute_id',
                     );
                     $select->joinLeft(
                         ['store_value' => $table],
@@ -689,7 +690,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
                             'store_value.attribute_id = attr.attribute_id',
                             'store_value.store_id = ' . $store,
                         ]),
-                        ['attribute_id' => $attributeIdExpr, 'attr_value' => $valueExpr]
+                        ['attribute_id' => $attributeIdExpr, 'attr_value' => $valueExpr],
                     );
                     $select->group('attr.attribute_id');
                 } else {
@@ -736,7 +737,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
             $store = $store->getId();
         }
 
-        $store = (int)$store;
+        $store = (int) $store;
         $attribute = is_array($attribute) ? $attribute : [$attribute];
         $value = $this->getAttributeRawValue($entityId, $attribute, $store);
 

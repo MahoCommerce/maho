@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -61,7 +62,7 @@ $table = $installer->getConnection()
     ], 'Updated at')
     ->addIndex(
         $installer->getIdxName('catalogsearch/search_query', ['query_text','store_id','popularity']),
-        ['query_text','store_id','popularity']
+        ['query_text','store_id','popularity'],
     )
     ->addIndex($installer->getIdxName('catalogsearch/search_query', 'store_id'), 'store_id')
     ->addForeignKey(
@@ -70,7 +71,7 @@ $table = $installer->getConnection()
         $installer->getTable('core/store'),
         'store_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Catalog search query table');
 $installer->getConnection()->createTable($table);
@@ -92,7 +93,7 @@ $table = $installer->getConnection()
     ], 'Product ID')
     ->addColumn('relevance', Varien_Db_Ddl_Table::TYPE_DECIMAL, '20,4', [
         'nullable'  => false,
-        'default'   => '0.0000'
+        'default'   => '0.0000',
     ], 'Relevance')
     ->addIndex($installer->getIdxName('catalogsearch/result', 'query_id'), 'query_id')
     ->addForeignKey(
@@ -101,7 +102,7 @@ $table = $installer->getConnection()
         $installer->getTable('catalogsearch/search_query'),
         'query_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->addIndex($installer->getIdxName('catalogsearch/result', 'product_id'), 'product_id')
     ->addForeignKey(
@@ -110,7 +111,7 @@ $table = $installer->getConnection()
         $installer->getTable('catalog/product'),
         'entity_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Catalog search result table');
 $installer->getConnection()->createTable($table);
@@ -140,19 +141,19 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             'catalogsearch/fulltext',
             ['product_id', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE
+            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
         ),
         ['product_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE]
+        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName(
             'catalogsearch/fulltext',
             'data_index',
-            Varien_Db_Adapter_Interface::INDEX_TYPE_FULLTEXT
+            Varien_Db_Adapter_Interface::INDEX_TYPE_FULLTEXT,
         ),
         'data_index',
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_FULLTEXT]
+        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_FULLTEXT],
     )
     ->setOption('type', 'MyISAM')
     ->setComment('Catalog search result table');

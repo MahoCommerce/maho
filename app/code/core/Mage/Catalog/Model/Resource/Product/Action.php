@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -29,7 +30,7 @@ class Mage_Catalog_Model_Resource_Product_Action extends Mage_Catalog_Model_Reso
         $this->setType(Mage_Catalog_Model_Product::ENTITY)
             ->setConnection(
                 $resource->getConnection('catalog_read'),
-                $resource->getConnection('catalog_write')
+                $resource->getConnection('catalog_write'),
             );
     }
 
@@ -96,7 +97,7 @@ class Mage_Catalog_Model_Resource_Product_Action extends Mage_Catalog_Model_Reso
         $entityIdsChunks = array_chunk($entityIds, 1000);
         foreach ($entityIdsChunks as $entityIdsChunk) {
             $adapter->update($catalogProductTable, [
-                'updated_at' => $updatedAt
+                'updated_at' => $updatedAt,
             ], $adapter->quoteInto('entity_id IN (?)', $entityIdsChunk));
         }
     }

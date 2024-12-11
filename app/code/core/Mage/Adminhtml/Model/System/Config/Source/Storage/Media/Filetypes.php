@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -21,23 +22,23 @@ class Mage_Adminhtml_Model_System_Config_Source_Storage_Media_Filetypes
         return [
             [
                 'value' => IMAGETYPE_AVIF,
-                'label' => 'AVIF'
+                'label' => 'AVIF',
             ],
             [
                 'value' => IMAGETYPE_GIF,
-                'label' => 'GIF'
+                'label' => 'GIF',
             ],
             [
                 'value' => IMAGETYPE_JPEG,
-                'label' => 'JPG'
+                'label' => 'JPG',
             ],
             [
                 'value' => IMAGETYPE_PNG,
-                'label' => 'PNG'
+                'label' => 'PNG',
             ],
             [
                 'value' => IMAGETYPE_WEBP,
-                'label' => 'WebP'
+                'label' => 'WebP',
             ],
         ];
     }

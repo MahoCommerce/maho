@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -165,7 +166,7 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
             'type'         => self::TYPE_REQUEST,
             'token'        => $helper->generateToken(),
             'secret'       => $helper->generateTokenSecret(),
-            'callback_url' => $callbackUrl
+            'callback_url' => $callbackUrl,
         ]);
         $this->save();
 
@@ -238,7 +239,7 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
 
         /** @var Mage_Oauth_Model_Consumer_Validator_KeyLength $validatorLength */
         $validatorLength = Mage::getModel(
-            'oauth/consumer_validator_keyLength'
+            'oauth/consumer_validator_keyLength',
         );
         $validatorLength->setLength(self::LENGTH_SECRET);
         $validatorLength->setName('Token Secret Key');

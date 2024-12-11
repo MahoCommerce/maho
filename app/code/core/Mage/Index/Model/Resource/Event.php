@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -76,7 +77,7 @@ class Mage_Index_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abstra
                     $data = [
                         'process_id' => $processId,
                         'event_id'   => $object->getId(),
-                        'status'     => $processStatus
+                        'status'     => $processStatus,
                     ];
                     $this->_getWriteAdapter()->insertOnDuplicate($processTable, $data, ['status']);
                 }
@@ -105,7 +106,7 @@ class Mage_Index_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abstra
         $this->_getWriteAdapter()->update(
             $this->getTable('index/process_event'),
             ['status' => $status],
-            $whereCondition
+            $whereCondition,
         );
         return $this;
     }

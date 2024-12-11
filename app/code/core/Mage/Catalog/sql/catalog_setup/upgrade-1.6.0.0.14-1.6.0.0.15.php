@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -18,6 +19,6 @@ foreach (['news_from_date', 'custom_design_from'] as $attributeCode) {
         Mage_Catalog_Model_Product::ENTITY,
         $attributeCode,
         'backend_model',
-        'catalog/product_attribute_backend_startdate'
+        'catalog/product_attribute_backend_startdate',
     );
 }

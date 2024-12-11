@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -15,6 +16,4 @@
  * @category   Mage
  * @package    Mage_Dataflow
  */
-class Mage_Dataflow_Model_Convert_Action extends Mage_Dataflow_Model_Convert_Action_Abstract
-{
-}
+class Mage_Dataflow_Model_Convert_Action extends Mage_Dataflow_Model_Convert_Action_Abstract {}

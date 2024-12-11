@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -44,6 +45,6 @@ class Mage_Adminhtml_Model_Email_PathValidator extends Zend_Validate_Abstract
         /** @var Mage_Adminhtml_Model_Config $configModel */
         $configModel = Mage::getSingleton('adminhtml/config');
 
-        return in_array((string)$path, $configModel->getEncryptedNodeEntriesPaths());
+        return in_array((string) $path, $configModel->getEncryptedNodeEntriesPaths());
     }
 }

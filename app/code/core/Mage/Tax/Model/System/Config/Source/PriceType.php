@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -22,11 +23,11 @@ class Mage_Tax_Model_System_Config_Source_PriceType
         $this->_options = [
             [
                 'value' => 0,
-                'label' => Mage::helper('tax')->__('Excluding Tax')
+                'label' => Mage::helper('tax')->__('Excluding Tax'),
             ],
             [
                 'value' => 1,
-                'label' => Mage::helper('tax')->__('Including Tax')
+                'label' => Mage::helper('tax')->__('Including Tax'),
             ],
         ];
     }

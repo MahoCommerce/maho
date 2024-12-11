@@ -43,7 +43,7 @@ class Mage_Core_Model_Security_HtmlEscapedString implements Stringable
     {
         return (string) Mage::helper('core')->escapeHtml(
             $this->originalValue,
-            $this->allowedTags
+            $this->allowedTags,
         );
     }
 

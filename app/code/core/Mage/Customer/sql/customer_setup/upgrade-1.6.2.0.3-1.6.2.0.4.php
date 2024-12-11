@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -23,7 +24,7 @@ $installer->addAttribute('customer', $middlenameAttributeCode, [
     'sort_order' => 50,
     'is_visible' => 1,
     'is_system'  => 0,
-    'position'   => 50
+    'position'   => 50,
 ]);
 
 $middlenameAttribute = Mage::getSingleton('eav/config')
@@ -33,7 +34,7 @@ $middlenameAttribute->setData('used_in_forms', [
     'customer_account_edit',
     'checkout_register',
     'adminhtml_customer',
-    'adminhtml_checkout'
+    'adminhtml_checkout',
 ]);
 $middlenameAttribute->save();
 
@@ -45,7 +46,7 @@ $installer->addAttribute('customer_address', $middlenameAttributeCode, [
     'sort_order' => 30,
     'is_visible' => 1,
     'is_system'  => 0,
-    'position'   => 30
+    'position'   => 30,
 ]);
 
 $middlenameAttribute = Mage::getSingleton('eav/config')
@@ -53,6 +54,6 @@ $middlenameAttribute = Mage::getSingleton('eav/config')
 $middlenameAttribute->setData('used_in_forms', [
     'adminhtml_customer_address',
     'customer_address_edit',
-    'customer_register_address'
+    'customer_register_address',
 ]);
 $middlenameAttribute->save();

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -456,7 +457,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
             $res = [
                 'expire' => $data['expire_time'],
                 'mtime' => $data['update_time'],
-                'tags'  => $tags
+                'tags'  => $tags,
             ];
         }
         return $res;
@@ -476,7 +477,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
             return $this->_getAdapter()->update(
                 $this->_getDataTable(),
                 ['expire_time' => new Zend_Db_Expr('expire_time+' . $extraLifetime)],
-                ['id=?' => $id, 'expire_time = 0 OR expire_time>?' => time()]
+                ['id=?' => $id, 'expire_time = 0 OR expire_time>?' => time()],
             );
         } else {
             return true;
@@ -506,7 +507,7 @@ class Varien_Cache_Backend_Database extends Zend_Cache_Backend implements Zend_C
             'expired_read' => true,
             'priority' => false,
             'infinite_lifetime' => true,
-            'get_list' => true
+            'get_list' => true,
         ];
     }
 

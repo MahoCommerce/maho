@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -22,7 +23,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Product_Options_Type
     public function toOptionArray()
     {
         $groups = [
-            ['value' => '', 'label' => Mage::helper('adminhtml')->__('-- Please select --')]
+            ['value' => '', 'label' => Mage::helper('adminhtml')->__('-- Please select --')],
         ];
 
         $helper = Mage::helper('catalog');
@@ -35,7 +36,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Product_Options_Type
                     . '/label';
                 $types[] = [
                     'label' => $helper->__((string) Mage::getConfig()->getNode($labelPath)),
-                    'value' => $type->getName()
+                    'value' => $type->getName(),
                 ];
             }
 
@@ -43,7 +44,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Product_Options_Type
 
             $groups[] = [
                 'label' => $helper->__((string) Mage::getConfig()->getNode($labelPath)),
-                'value' => $types
+                'value' => $types,
             ];
         }
 

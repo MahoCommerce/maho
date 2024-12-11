@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -81,7 +82,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Shipping extends Mage_Sales_Model_Quote_A
             $address,
             $address->getQuote()->getBillingAddress(),
             $address->getQuote()->getCustomerTaxClassId(),
-            $store
+            $store,
         );
 
         $shippingTaxClass = $this->_config->getShippingTaxClass($store);
@@ -108,7 +109,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Shipping extends Mage_Sales_Model_Quote_A
                     $calc->calcTaxAmount($baseShipping, $rate, true, false),
                     $rate,
                     true,
-                    'base'
+                    'base',
                 );
                 $taxShipping    = $shipping;
                 $baseTaxShipping = $baseShipping;
@@ -130,7 +131,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Shipping extends Mage_Sales_Model_Quote_A
                     $calc->calcTaxAmount($baseShipping, $rate, false, false),
                     $rate,
                     true,
-                    'base'
+                    'base',
                 );
                 $taxShipping    = $shipping + $tax;
                 $baseTaxShipping = $baseShipping + $baseTax;
@@ -152,7 +153,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Shipping extends Mage_Sales_Model_Quote_A
                     $calc->calcTaxAmount($baseShipping, $taxRate, false, false),
                     $taxId,
                     false,
-                    'base'
+                    'base',
                 );
             }
             $tax            = array_sum($taxes);
@@ -227,7 +228,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Shipping extends Mage_Sales_Model_Quote_A
             $address,
             $address->getQuote()->getBillingAddress(),
             $address->getQuote()->getCustomerTaxClassId(),
-            $address->getQuote()->getStore()
+            $address->getQuote()->getStore(),
         );
     }
 
@@ -253,7 +254,5 @@ class Mage_Tax_Model_Sales_Total_Quote_Shipping extends Mage_Sales_Model_Quote_A
      * @param Mage_Sales_Model_Quote_Address $address
      * @deprecated after 1.4.0.0
      */
-    protected function _processShippingAmount($address)
-    {
-    }
+    protected function _processShippingAmount($address) {}
 }

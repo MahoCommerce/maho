@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -42,7 +43,7 @@ class Mage_CatalogInventory_Model_Stock_Item_Api_V2 extends Mage_CatalogInventor
             $this->_fault('not_exists');
         }
 
-        $stockData = array_replace($stockItem->getData(), (array)$data);
+        $stockData = array_replace($stockItem->getData(), (array) $data);
         $stockItem->setData($stockData);
 
         try {
@@ -67,7 +68,7 @@ class Mage_CatalogInventory_Model_Stock_Item_Api_V2 extends Mage_CatalogInventor
             $this->_fault('multi_update_not_match');
         }
 
-        $productData = (array)$productData;
+        $productData = (array) $productData;
 
         foreach ($productIds as $index => $productId) {
             $this->update($productId, $productData[$index]);

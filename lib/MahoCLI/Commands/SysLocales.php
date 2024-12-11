@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'sys:locales',
-    description: 'Get all available locales'
+    description: 'Get all available locales',
 )]
 class SysLocales extends BaseMahoCommand
 {
@@ -35,7 +36,7 @@ class SysLocales extends BaseMahoCommand
         foreach ($locales as $locale) {
             $table->addRow([
                 $locale['value'],
-                $locale['label']
+                $locale['label'],
             ]);
         }
         $table->render();

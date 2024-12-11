@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -88,7 +89,7 @@ class Mage_CatalogIndex_Model_Resource_Data_Grouped extends Mage_CatalogIndex_Mo
                 $result[] = [
                     'customer_group_id' => $customerGroup,
                     'minimal_value'     => $resultMinimal,
-                    'tax_class_id'      => $taxClassId
+                    'tax_class_id'      => $taxClassId,
                 ];
             }
         }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -199,7 +200,7 @@ abstract class Varien_Data_Form_Element_Abstract extends Varien_Data_Form_Abstra
      */
     protected function _escape($string)
     {
-        return htmlspecialchars((string)$string, ENT_COMPAT);
+        return htmlspecialchars((string) $string, ENT_COMPAT);
     }
 
     /**
@@ -213,7 +214,7 @@ abstract class Varien_Data_Form_Element_Abstract extends Varien_Data_Form_Abstra
         if ($filter = $this->getValueFilter()) {
             $value = $filter->filter($value);
         }
-        return $this->_escape((string)$value);
+        return $this->_escape((string) $value);
     }
 
     /**

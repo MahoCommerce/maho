@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -41,14 +42,14 @@ class Mage_Api2_Model_Dispatcher
         if (!$request->getModel() || !$request->getApiType()) {
             throw new Mage_Api2_Exception(
                 'Request does not contains all necessary data',
-                Mage_Api2_Model_Server::HTTP_BAD_REQUEST
+                Mage_Api2_Model_Server::HTTP_BAD_REQUEST,
             );
         }
         $model = self::loadResourceModel(
             $request->getModel(),
             $request->getApiType(),
             $this->getApiUser()->getType(),
-            $this->getVersion($request->getResourceType(), $request->getVersion())
+            $this->getVersion($request->getResourceType(), $request->getVersion()),
         );
 
         $model->setRequest($request);
@@ -74,7 +75,7 @@ class Mage_Api2_Model_Dispatcher
     {
         $class = strtr(
             self::RESOURCE_CLASS_TEMPLATE,
-            [':resource' => $model, ':api' => $apiType, ':user' => $userType, ':version' => $version]
+            [':resource' => $model, ':api' => $apiType, ':user' => $userType, ':version' => $version],
         );
 
         try {
@@ -128,7 +129,7 @@ class Mage_Api2_Model_Dispatcher
         if ($requestedVersion !== false && !preg_match('/^[1-9]\d*$/', $requestedVersion)) {
             throw new Mage_Api2_Exception(
                 sprintf('Invalid version "%s" requested.', htmlspecialchars($requestedVersion)),
-                Mage_Api2_Model_Server::HTTP_BAD_REQUEST
+                Mage_Api2_Model_Server::HTTP_BAD_REQUEST,
             );
         }
         return $this->getConfig()->getResourceLastVersion($resourceType, $requestedVersion);

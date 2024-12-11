@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'sys:timezones',
-    description: 'Get all available timezones'
+    description: 'Get all available timezones',
 )]
 class SysTimezones extends BaseMahoCommand
 {
@@ -35,7 +36,7 @@ class SysTimezones extends BaseMahoCommand
         foreach ($timezones as $timezone) {
             $table->addRow([
                 $timezone['value'],
-                $timezone['label']
+                $timezone['label'],
             ]);
         }
         $table->render();

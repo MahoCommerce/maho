@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -36,9 +37,9 @@ class Mage_Adminhtml_Block_Review_Edit extends Mage_Adminhtml_Block_Widget_Form_
                 Mage::helper('core/js')->getSetLocationJs(
                     $this->getUrl(
                         '*/catalog_product/edit',
-                        ['id' => $this->getRequest()->getParam('productId', false)]
-                    )
-                )
+                        ['id' => $this->getRequest()->getParam('productId', false)],
+                    ),
+                ),
             );
         }
 
@@ -49,9 +50,9 @@ class Mage_Adminhtml_Block_Review_Edit extends Mage_Adminhtml_Block_Widget_Form_
                 Mage::helper('core/js')->getSetLocationJs(
                     $this->getUrl(
                         '*/customer/edit',
-                        ['id' => $this->getRequest()->getParam('customerId', false)]
-                    )
-                )
+                        ['id' => $this->getRequest()->getParam('customerId', false)],
+                    ),
+                ),
             );
         }
 
@@ -59,7 +60,7 @@ class Mage_Adminhtml_Block_Review_Edit extends Mage_Adminhtml_Block_Widget_Form_
             $this->_updateButton(
                 'back',
                 'onclick',
-                Mage::helper('core/js')->getSetLocationJs($this->getUrl('*/*/pending'))
+                Mage::helper('core/js')->getSetLocationJs($this->getUrl('*/*/pending')),
             );
             $this->_updateButton(
                 'delete',
@@ -70,9 +71,9 @@ class Mage_Adminhtml_Block_Review_Edit extends Mage_Adminhtml_Block_Widget_Form_
                         [
                             $this->_objectId => $this->getRequest()->getParam($this->_objectId),
                             'ret'           => 'pending',
-                        ]
-                    )
-                )
+                        ],
+                    ),
+                ),
             );
             Mage::register('ret', 'pending');
         }

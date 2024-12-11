@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -36,7 +37,7 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
      */
     public function setLoadDefault($loadDefault)
     {
-        $this->setFlag('load_default_store', (bool)$loadDefault);
+        $this->setFlag('load_default_store', (bool) $loadDefault);
         return $this;
     }
 
@@ -170,7 +171,7 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
             $this->getSelect()->join(
                 ['group_table' => $this->getTable('core/store_group')],
                 'main_table.group_id = group_table.group_id',
-                ['root_category_id']
+                ['root_category_id'],
             );
             $this->setFlag('core_store_group_table_joined', true);
         }

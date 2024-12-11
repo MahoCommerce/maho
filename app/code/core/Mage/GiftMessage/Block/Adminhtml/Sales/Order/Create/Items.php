@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -45,7 +46,7 @@ class Mage_GiftMessage_Block_Adminhtml_Sales_Order_Create_Items extends Mage_Adm
         return $helper->getIsMessagesAvailable(
             $helper::TYPE_ITEM,
             $item,
-            $item->getStoreId()
+            $item->getStoreId(),
         );
     }
 

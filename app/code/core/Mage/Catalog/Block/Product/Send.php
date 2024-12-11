@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -33,7 +34,7 @@ class Mage_Catalog_Block_Product_Send extends Mage_Catalog_Block_Product_Abstrac
      */
     public function getEmail()
     {
-        return (string)Mage::getSingleton('customer/session')->getCustomer()->getEmail();
+        return (string) Mage::getSingleton('customer/session')->getCustomer()->getEmail();
     }
 
     /**

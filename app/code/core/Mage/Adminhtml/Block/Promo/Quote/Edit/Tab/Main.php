@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -75,7 +76,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main extends Mage_Adminhtml_Bloc
 
         $fieldset = $form->addFieldset(
             'base_fieldset',
-            ['legend' => Mage::helper('salesrule')->__('General Information')]
+            ['legend' => Mage::helper('salesrule')->__('General Information')],
         );
 
         if ($model->getId()) {
@@ -121,7 +122,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main extends Mage_Adminhtml_Bloc
             $websiteId = Mage::app()->getStore(true)->getWebsiteId();
             $fieldset->addField('website_ids', 'hidden', [
                 'name'     => 'website_ids[]',
-                'value'    => $websiteId
+                'value'    => $websiteId,
             ]);
             $model->setWebsiteIds($websiteId);
         } else {
@@ -130,7 +131,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main extends Mage_Adminhtml_Bloc
                 'label'     => Mage::helper('salesrule')->__('Websites'),
                 'title'     => Mage::helper('salesrule')->__('Websites'),
                 'required' => true,
-                'values'   => Mage::getSingleton('adminhtml/system_store')->getWebsiteValuesForForm()
+                'values'   => Mage::getSingleton('adminhtml/system_store')->getWebsiteValuesForForm(),
             ]);
             $renderer = $this->getStoreSwitcherRenderer();
             $field->setRenderer($renderer);
@@ -176,11 +177,11 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main extends Mage_Adminhtml_Bloc
             'label' => Mage::helper('salesrule')->__('Use Auto Generation'),
             'note'  => Mage::helper('salesrule')->__('If you select and save the rule you will be able to generate multiple coupon codes.'),
             'onclick' => 'handleCouponsTabContentActivity()',
-            'checked' => (int)$model->getUseAutoGeneration() > 0 ? 'checked' : ''
+            'checked' => (int) $model->getUseAutoGeneration() > 0 ? 'checked' : '',
         ]);
 
         $autoGenerationCheckbox->setRenderer(
-            $this->getLayout()->createBlock('adminhtml/promo_quote_edit_tab_main_renderer_checkbox')
+            $this->getLayout()->createBlock('adminhtml/promo_quote_edit_tab_main_renderer_checkbox'),
         );
 
         $usesPerCouponFiled = $fieldset->addField('uses_per_coupon', 'text', [
@@ -200,14 +201,14 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main extends Mage_Adminhtml_Bloc
             'label'  => Mage::helper('salesrule')->__('From Date'),
             'title'  => Mage::helper('salesrule')->__('From Date'),
             'input_format' => Varien_Date::DATE_INTERNAL_FORMAT,
-            'format'       => $dateFormatIso
+            'format'       => $dateFormatIso,
         ]);
         $fieldset->addField('to_date', 'date', [
             'name'   => 'to_date',
             'label'  => Mage::helper('salesrule')->__('To Date'),
             'title'  => Mage::helper('salesrule')->__('To Date'),
             'input_format' => Varien_Date::DATE_INTERNAL_FORMAT,
-            'format'       => $dateFormatIso
+            'format'       => $dateFormatIso,
         ]);
 
         $fieldset->addField('sort_order', 'text', [
@@ -253,17 +254,17 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main extends Mage_Adminhtml_Bloc
             ->addFieldDependence(
                 $couponCodeFiled->getName(),
                 $couponTypeFiled->getName(),
-                Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC
+                Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC,
             )
             ->addFieldDependence(
                 $autoGenerationCheckbox->getName(),
                 $couponTypeFiled->getName(),
-                Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC
+                Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC,
             )
             ->addFieldDependence(
                 $usesPerCouponFiled->getName(),
                 $couponTypeFiled->getName(),
-                Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC
+                Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC,
             ));
 
         Mage::dispatchEvent('adminhtml_promo_quote_edit_tab_main_prepare_form', ['form' => $form]);

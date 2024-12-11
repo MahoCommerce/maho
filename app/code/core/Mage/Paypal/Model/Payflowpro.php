@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -290,7 +291,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
         $request = $this->_buildBasicRequest($payment);
         $request->setTrxtype(self::TRXTYPE_CREDIT);
         $request->setOrigid($payment->getParentTransactionId());
-        $request->setAmt(round((float)$amount, 2));
+        $request->setAmt(round((float) $amount, 2));
         $response = $this->_postRequest($request);
         $this->_processErrors($response);
 
@@ -354,7 +355,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      */
     protected function _getTransactionUrl($testMode = null)
     {
-        $testMode = is_null($testMode) ? $this->getConfigData('sandbox_flag') : (bool)$testMode;
+        $testMode = is_null($testMode) ? $this->getConfigData('sandbox_flag') : (bool) $testMode;
         if ($testMode) {
             return self::TRANSACTION_URL_TEST_MODE;
         }
@@ -376,7 +377,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
         $_config = [
             'maxredirects' => 5,
             'timeout'    => 30,
-            'verifypeer' => $this->getConfigData('verify_peer')
+            'verifypeer' => $this->getConfigData('verify_peer'),
         ];
 
         //checking proxy

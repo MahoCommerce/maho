@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -39,9 +40,9 @@ class Mage_Rss_Block_Order_Status extends Mage_Core_Block_Template
         $title = Mage::helper('rss')->__('Order # %s Notification(s)', $order->getIncrementId());
         $newurl = Mage::getUrl('sales/order/view', ['order_id' => $order->getId()]);
         $data = ['title' => $title,
-                'description' => $title,
-                'link'        => $newurl,
-                'charset'     => 'UTF-8',
+            'description' => $title,
+            'link'        => $newurl,
+            'charset'     => 'UTF-8',
         ];
         $rssObj->_addHeader($data);
         $resourceModel = Mage::getResourceModel('rss/order');
@@ -78,9 +79,9 @@ class Mage_Rss_Block_Order_Status extends Mage_Core_Block_Template
             '</p>'
         ;
         $data = [
-                    'title'         => $title,
-                    'link'          => $url,
-                    'description'   => $description,
+            'title'         => $title,
+            'link'          => $url,
+            'description'   => $description,
         ];
         $rssObj->_addEntry($data);
         return $rssObj->createRssXml();

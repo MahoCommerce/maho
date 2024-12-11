@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -42,7 +43,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Dhl_Abstract extends Mage_Usa_Mod
     {
         return $this->_determineShippingDay(
             $this->getConfigData($domestic ? 'shipment_days' : 'intl_shipment_days'),
-            date(self::REQUEST_DATE_FORMAT)
+            date(self::REQUEST_DATE_FORMAT),
         );
     }
 

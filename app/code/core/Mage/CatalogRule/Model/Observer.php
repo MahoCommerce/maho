@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -288,7 +289,7 @@ class Mage_CatalogRule_Model_Observer
                 $customerGroupId,
                 $websiteId,
                 $updateFields,
-                $websiteDate
+                $websiteDate,
             );
 
         return $this;
@@ -322,7 +323,7 @@ class Mage_CatalogRule_Model_Observer
         if ($disabledRulesCount) {
             Mage::getModel('catalogrule/rule')->applyAll();
             Mage::getSingleton('adminhtml/session')->addWarning(
-                Mage::helper('catalogrule')->__('%d Catalog Price Rules based on "%s" attribute have been disabled.', $disabledRulesCount, $attributeCode)
+                Mage::helper('catalogrule')->__('%d Catalog Price Rules based on "%s" attribute have been disabled.', $disabledRulesCount, $attributeCode),
             );
         }
 

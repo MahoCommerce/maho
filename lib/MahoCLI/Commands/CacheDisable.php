@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -18,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'cache:disable',
-    description: 'Disable all caches'
+    description: 'Disable all caches',
 )]
 class CacheDisable extends BaseMahoCommand
 {

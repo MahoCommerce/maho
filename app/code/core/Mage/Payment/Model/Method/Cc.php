@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -124,7 +125,7 @@ class Mage_Payment_Model_Method_Cc extends Mage_Payment_Model_Method_Abstract
                     . '|(^(6011)\d{13,16}$)|(^(65)\d{11,13}$)|(^(65)\d{15,18}$)'
                     . '|(^(49030)[2-9](\d{10}$|\d{12,13}$))|(^(49033)[5-9](\d{10}$|\d{12,13}$))'
                     . '|(^(49110)[1-2](\d{10}$|\d{12,13}$))|(^(49117)[4-9](\d{10}$|\d{12,13}$))'
-                    . '|(^(49118)[0-2](\d{10}$|\d{12,13}$))|(^(4936)(\d{12}$|\d{14,15}$))/'
+                    . '|(^(49118)[0-2](\d{10}$|\d{12,13}$))|(^(4936)(\d{12}$|\d{14,15}$))/',
                 ];
 
                 $specifiedCCType = $info->getCcType();
@@ -187,7 +188,7 @@ class Mage_Payment_Model_Method_Cc extends Mage_Payment_Model_Method_Abstract
             'SM' => '/^[0-9]{3,4}$/', // Switch or Maestro
             'SO' => '/^[0-9]{3,4}$/', // Solo
             'OT' => '/^[0-9]{3,4}$/',
-            'JCB' => '/^[0-9]{3,4}$/' //JCB
+            'JCB' => '/^[0-9]{3,4}$/', //JCB
         ];
     }
 
@@ -229,7 +230,7 @@ class Mage_Payment_Model_Method_Cc extends Mage_Payment_Model_Method_Abstract
         $numSum = 0;
 
         for ($i = 0; $i < strlen($cardNumber); $i++) {
-            $currentNum = (int)substr($cardNumber, $i, 1);
+            $currentNum = (int) substr($cardNumber, $i, 1);
 
             /**
              * Double every second digit

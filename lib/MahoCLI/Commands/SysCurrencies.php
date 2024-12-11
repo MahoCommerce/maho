@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'sys:currencies',
-    description: 'Get all available currencies'
+    description: 'Get all available currencies',
 )]
 class SysCurrencies extends BaseMahoCommand
 {
@@ -35,7 +36,7 @@ class SysCurrencies extends BaseMahoCommand
         foreach ($currencies as $currency) {
             $table->addRow([
                 $currency['value'],
-                $currency['label']
+                $currency['label'],
             ]);
         }
         $table->render();

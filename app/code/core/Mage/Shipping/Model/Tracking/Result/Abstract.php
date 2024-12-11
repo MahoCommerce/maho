@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -13,6 +14,4 @@
  * @category   Mage
  * @package    Mage_Shipping
  */
-class Mage_Shipping_Model_Tracking_Result_Abstract extends Varien_Object
-{
-}
+class Mage_Shipping_Model_Tracking_Result_Abstract extends Varien_Object {}

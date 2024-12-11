@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -240,9 +241,7 @@ class Mage_Core_Model_App
      */
     protected $_isInstalled = null;
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * Initialize application without request processing
@@ -460,12 +459,12 @@ class Mage_Core_Model_App
             return false;
         }
 
-        $ignoreDevelopmentMode = (bool)(string)$this->_config->getNode(self::XML_PATH_IGNORE_DEV_MODE);
+        $ignoreDevelopmentMode = (bool) (string) $this->_config->getNode(self::XML_PATH_IGNORE_DEV_MODE);
         if (Mage::getIsDeveloperMode() && !$ignoreDevelopmentMode) {
             return false;
         }
 
-        return (bool)(string)$this->_config->getNode(self::XML_PATH_SKIP_PROCESS_MODULES_UPDATES);
+        return (bool) (string) $this->_config->getNode(self::XML_PATH_SKIP_PROCESS_MODULES_UPDATES);
     }
 
     /**
@@ -515,7 +514,7 @@ class Mage_Core_Model_App
             $this->_checkGetStore($scopeType);
         }
         $this->_useSessionInUrl = $this->getStore()->getConfig(
-            Mage_Core_Model_Session_Abstract::XML_PATH_USE_FRONTEND_SID
+            Mage_Core_Model_Session_Abstract::XML_PATH_USE_FRONTEND_SID,
         );
         return $this;
     }
@@ -1385,10 +1384,10 @@ class Mage_Core_Model_App
                  */
                 foreach ($eventConfig->observers->children() as $obsName => $obsConfig) {
                     $observers[$obsName] = [
-                        'type'  => (string)$obsConfig->type,
-                        'model' => $obsConfig->class ? (string)$obsConfig->class : $obsConfig->getClassName(),
-                        'method' => (string)$obsConfig->method,
-                        'args'  => (array)$obsConfig->args,
+                        'type'  => (string) $obsConfig->type,
+                        'model' => $obsConfig->class ? (string) $obsConfig->class : $obsConfig->getClassName(),
+                        'method' => (string) $obsConfig->method,
+                        'args'  => (array) $obsConfig->args,
                     ];
                 }
                 $events[$eventName]['observers'] = $observers;
@@ -1487,7 +1486,7 @@ class Mage_Core_Model_App
      */
     public function setUseSessionVar($var)
     {
-        $this->_useSessionVar = (bool)$var;
+        $this->_useSessionVar = (bool) $var;
         return $this;
     }
 
@@ -1525,7 +1524,7 @@ class Mage_Core_Model_App
      */
     public function setUseSessionInUrl($flag = true)
     {
-        $this->_useSessionInUrl = (bool)$flag;
+        $this->_useSessionInUrl = (bool) $flag;
         return $this;
     }
 
@@ -1547,7 +1546,7 @@ class Mage_Core_Model_App
      */
     public function setIsSingleStoreModeAllowed($value)
     {
-        $this->_isSingleStoreAllowed = (bool)$value;
+        $this->_isSingleStoreAllowed = (bool) $value;
         return $this;
     }
 
@@ -1652,7 +1651,7 @@ class Mage_Core_Model_App
      */
     public function getIsCacheLocked()
     {
-        return (bool)$this->_isCacheLocked;
+        return (bool) $this->_isCacheLocked;
     }
 
     /**

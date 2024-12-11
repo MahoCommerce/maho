@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -20,7 +21,7 @@ $installer->getConnection()->addColumn($installer->getTable('admin/user'), 'rp_t
     'length' => 256,
     'nullable' => true,
     'default' => null,
-    'comment' => 'Reset Password Link Token'
+    'comment' => 'Reset Password Link Token',
 ]);
 
 // Add reset password link token creation date column
@@ -28,7 +29,7 @@ $installer->getConnection()->addColumn($installer->getTable('admin/user'), 'rp_t
     'type' => Varien_Db_Ddl_Table::TYPE_TIMESTAMP,
     'nullable' => true,
     'default' => null,
-    'comment' => 'Reset Password Link Token Creation Date'
+    'comment' => 'Reset Password Link Token Creation Date',
 ]);
 
 $installer->endSetup();

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -33,7 +34,7 @@ class Mage_Adminhtml_Block_Api_User_Edit_Tabs extends Mage_Adminhtml_Block_Widge
             'label'     => Mage::helper('adminhtml')->__('User Info'),
             'title'     => Mage::helper('adminhtml')->__('User Info'),
             'content'   => $this->getLayout()->createBlock('adminhtml/api_user_edit_tab_main')->toHtml(),
-            'active'    => true
+            'active'    => true,
         ]);
 
         $this->addTab('roles_section', [

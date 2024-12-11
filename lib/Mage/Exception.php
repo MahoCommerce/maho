@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -14,6 +15,4 @@
  * @category   Mage
  * @package    Mage
  */
-class Mage_Exception extends Exception
-{
-}
+class Mage_Exception extends Exception {}

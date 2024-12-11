@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -72,7 +73,7 @@ class Mage_Adminhtml_Block_System_Config_Switcher extends Mage_Adminhtml_Block_T
                             'is_group'  => true,
                             'is_close'  => false,
                             'label'     => $group->getName(),
-                            'style'     => 'padding-left:32px;'
+                            'style'     => 'padding-left:32px;',
                         ];
                     }
                     $storeCode = $store->getCode();

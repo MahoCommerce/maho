@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -60,7 +61,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Grid extends Mage_Adminhtml_Bl
             'align'     => 'left',
             'index'     => 'instance_type',
             'type'      => 'options',
-            'options'   => $this->getTypesOptionsArray()
+            'options'   => $this->getTypesOptionsArray(),
         ]);
 
         $this->addColumn('package_theme', [

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -37,8 +38,8 @@ class Mage_Sales_Model_Resource_Billing_Agreement extends Mage_Core_Model_Resour
             $this->getTable('sales/billing_agreement_order'),
             [
                 'agreement_id'  => $agreementId,
-                'order_id'      => $orderId
-            ]
+                'order_id'      => $orderId,
+            ],
         );
         return $this;
     }

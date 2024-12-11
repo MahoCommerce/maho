@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -50,7 +51,7 @@ class Mage_Adminhtml_Block_Sales_Order_Totalbar extends Mage_Adminhtml_Block_Sal
         $this->_totals[] = [
             'label' => $label,
             'value' => $value,
-            'grand' => $grand
+            'grand' => $grand,
         ];
         return $this;
     }

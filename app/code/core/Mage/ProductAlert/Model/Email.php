@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -263,7 +264,7 @@ class Mage_ProductAlert_Model_Email extends Mage_Core_Model_Abstract
         Mage::getModel('core/email_template')
             ->setDesignConfig([
                 'area'  => Mage_Core_Model_App_Area::AREA_FRONTEND,
-                'store' => $storeId
+                'store' => $storeId,
             ])
             ->sendTransactional(
                 $templateId,
@@ -272,8 +273,8 @@ class Mage_ProductAlert_Model_Email extends Mage_Core_Model_Abstract
                 $this->_customer->getName(),
                 [
                     'customerName'  => $this->_customer->getName(),
-                    'alertGrid'     => $block
-                ]
+                    'alertGrid'     => $block,
+                ],
             );
 
         return true;

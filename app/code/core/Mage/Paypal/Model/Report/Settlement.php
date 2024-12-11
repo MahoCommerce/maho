@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -86,7 +87,7 @@ class Mage_Paypal_Model_Report_Settlement extends Mage_Core_Model_Abstract
                 'FeeAmount' => 12,
                 'FeeCurrency' => 13,
                 'CustomField' => 14,
-                'ConsumerID' => 15
+                'ConsumerID' => 15,
             ],
             'rowmap' => [
                 'TransactionID' => 'transaction_id',
@@ -103,8 +104,8 @@ class Mage_Paypal_Model_Report_Settlement extends Mage_Core_Model_Abstract
                 'FeeAmount' => 'fee_amount',
                 'FeeCurrency' => 'fee_currency',
                 'CustomField' => 'custom_field',
-                'ConsumerID' => 'consumer_id'
-            ]
+                'ConsumerID' => 'consumer_id',
+            ],
         ],
         'new' => [
             'section_columns' => [
@@ -144,9 +145,9 @@ class Mage_Paypal_Model_Report_Settlement extends Mage_Core_Model_Abstract
                 'Custom Field' => 'custom_field',
                 'Consumer ID' => 'consumer_id',
                 'Payment Tracking ID' => 'payment_tracking_id',
-                'Store ID' => 'store_id'
-            ]
-        ]
+                'Store ID' => 'store_id',
+            ],
+        ],
     ];
 
     #[\Override]
@@ -186,7 +187,7 @@ class Mage_Paypal_Model_Report_Settlement extends Mage_Core_Model_Abstract
         $connection->open([
             'host'     => $config['hostname'],
             'username' => $config['username'],
-            'password' => $config['password']
+            'password' => $config['password'],
         ]);
         $connection->cd($config['path']);
         $fetched = 0;
@@ -373,7 +374,7 @@ class Mage_Paypal_Model_Report_Settlement extends Mage_Core_Model_Abstract
         $uniques = [];
         foreach (Mage::app()->getStores() as $store) {
             /*@var $store Mage_Core_Model_Store */
-            $active = (bool)$store->getConfig('paypal/fetch_reports/active');
+            $active = (bool) $store->getConfig('paypal/fetch_reports/active');
             if (!$active && $automaticMode) {
                 continue;
             }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -14,5 +15,5 @@
 $installer = $this;
 $connection = $installer->getConnection();
 $connection->update($installer->getTable('core/translate'), [
-    'crc_string' => new Zend_Db_Expr('CRC32(' . $connection->quoteIdentifier('string') . ')')
+    'crc_string' => new Zend_Db_Expr('CRC32(' . $connection->quoteIdentifier('string') . ')'),
 ]);

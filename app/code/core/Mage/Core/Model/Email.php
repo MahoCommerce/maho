@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -139,7 +140,7 @@ class Mage_Core_Model_Email extends Varien_Object
             'mail'      => $mail,
             'template'  => $this->getTemplate(),
             'transport' => $transport,
-            'variables' => $this->getTemplateVars()
+            'variables' => $this->getTemplateVars(),
         ]);
 
         if ($transport->getTransport()) {
@@ -151,7 +152,7 @@ class Mage_Core_Model_Email extends Varien_Object
         Mage::dispatchEvent('email_send_after', [
             'to'         => $this->getToEmail(),
             'subject'    => $this->getSubject(),
-            'email_body' => $this->getBody()
+            'email_body' => $this->getBody(),
         ]);
 
         return $this;

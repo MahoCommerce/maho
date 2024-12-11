@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -55,7 +56,7 @@ class Mage_Log_Model_Cron extends Mage_Core_Model_Abstract
                 Mage::getStoreConfig(self::XML_PATH_EMAIL_LOG_CLEAN_IDENTITY),
                 Mage::getStoreConfig(self::XML_PATH_EMAIL_LOG_CLEAN_RECIPIENT),
                 null,
-                ['warnings' => implode("\n", $this->_errors)]
+                ['warnings' => implode("\n", $this->_errors)],
             );
 
         $translate->setTranslateInline(true);

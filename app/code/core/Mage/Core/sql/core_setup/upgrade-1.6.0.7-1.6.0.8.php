@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -18,8 +19,8 @@ $connection = $installer->getConnection();
 $connection->delete(
     $this->getTable('core_config_data'),
     $connection->prepareSqlCondition('path', [
-        'like' => 'system/backup/enabled'
-    ])
+        'like' => 'system/backup/enabled',
+    ]),
 );
 $installer->setConfigData('advanced/modules_disable_output/Mage_Backup', 1);
 

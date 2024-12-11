@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -55,10 +56,10 @@ class Mage_CatalogSearch_Block_Result extends Mage_Core_Block_Template
             $breadcrumbs->addCrumb('home', [
                 'label' => $this->__('Home'),
                 'title' => $this->__('Go to Home Page'),
-                'link'  => Mage::getBaseUrl()
+                'link'  => Mage::getBaseUrl(),
             ])->addCrumb('search', [
                 'label' => $title,
-                'title' => $title
+                'title' => $title,
             ]);
         }
 
@@ -102,7 +103,7 @@ class Mage_CatalogSearch_Block_Result extends Mage_Core_Block_Template
         $availableOrders = $category->getAvailableSortByOptions();
         unset($availableOrders['position']);
         $availableOrders = array_merge([
-            'relevance' => $this->__('Relevance')
+            'relevance' => $this->__('Relevance'),
         ], $availableOrders);
 
         $this->getListBlock()
@@ -186,7 +187,7 @@ class Mage_CatalogSearch_Block_Result extends Mage_Core_Block_Template
         if (Mage::helper('catalogsearch')->isMinQueryLength()) {
             return Mage::helper('catalogsearch')->__(
                 'Minimum Search query length is %s',
-                $this->_getQuery()->getMinQueryLength()
+                $this->_getQuery()->getMinQueryLength(),
             );
         }
         return $this->_getData('no_result_text');

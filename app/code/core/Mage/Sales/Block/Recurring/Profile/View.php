@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -100,7 +101,7 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
         foreach (['name' => Mage::helper('catalog')->__('Product Name'),
             'sku'  => Mage::helper('catalog')->__('SKU'),
             'qty'  => Mage::helper('catalog')->__('Quantity'),
-                 ] as $itemKey => $label
+        ] as $itemKey => $label
         ) {
             $value = $this->_profile->getInfoValue($key, $itemKey);
             if ($value) {
@@ -143,7 +144,7 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
                 $downloadParams = [
                     'id'  => $this->_profile->getId(),
                     'option_id' => $option->getId(),
-                    'key' => $request['options'][$option->getId()]['secret_key']
+                    'key' => $request['options'][$option->getId()]['secret_key'],
                 ];
                 $group->setCustomOptionDownloadUrl('sales/download/downloadProfileCustomOption')
                     ->setCustomOptionUrlParams($downloadParams);
@@ -154,7 +155,7 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
             $this->_addInfo([
                 'label' => $option->getTitle(),
                 'value' => $group->getFormattedOptionValue($optionValue),
-                'skip_html_escaping' => $skipHtmlEscaping
+                'skip_html_escaping' => $skipHtmlEscaping,
             ]);
         }
     }
@@ -190,15 +191,15 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
 
         $this->_addInfo([
             'label' => $this->_profile->getFieldLabel('currency_code'),
-            'value' => $this->_profile->getCurrencyCode()
+            'value' => $this->_profile->getCurrencyCode(),
         ]);
         foreach ([
-                'init_amount',
-                'trial_billing_amount',
-                'billing_amount',
-                'tax_amount',
-                'shipping_amount'
-                 ] as $key
+            'init_amount',
+            'trial_billing_amount',
+            'billing_amount',
+            'tax_amount',
+            'shipping_amount',
+        ] as $key
         ) {
             $value = $this->_profile->getData($key);
             if ($value) {
@@ -246,10 +247,10 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
             'customer_middlename',
             'customer_lastname',
             'base_grand_total',
-            'status'
+            'status',
         ]);
         $this->_relatedOrders->addFieldToFilter('state', [
-            'in' => Mage::getSingleton('sales/order_config')->getVisibleOnFrontStates()
+            'in' => Mage::getSingleton('sales/order_config')->getVisibleOnFrontStates(),
         ]);
 
         $pager = $this->getLayout()->createBlock('page/html_pager')
@@ -383,7 +384,7 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
         if ($this->hasShouldPrepareInfoTabs()) {
             foreach ($this->getChildGroup('info_tabs') as $block) {
                 $block->setViewUrl(
-                    $this->getUrl("*/*/{$block->getViewAction()}", ['profile' => $this->_profile->getId()])
+                    $this->getUrl("*/*/{$block->getViewAction()}", ['profile' => $this->_profile->getId()]),
                 );
             }
         }

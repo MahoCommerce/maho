@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -60,11 +61,11 @@ class Mage_Api_Model_Server_Wsi_Adapter_Soap extends Mage_Api_Model_Server_Adapt
                                 preg_replace(
                                     '/<\?xml version="([^\"]+)"([^\>]+)>/i',
                                     '<?xml version="$1" encoding="' . $apiConfigCharset . '"?>',
-                                    $this->wsdlConfig->getWsdlContent()
-                                )
-                            )
-                        )
-                    )
+                                    $this->wsdlConfig->getWsdlContent(),
+                                ),
+                            ),
+                        ),
+                    ),
                 );
         } else {
             try {
@@ -82,10 +83,10 @@ class Mage_Api_Model_Server_Wsi_Adapter_Soap extends Mage_Api_Model_Server_Adapt
                             preg_replace(
                                 '/<\?xml version="([^\"]+)"([^\>]+)>/i',
                                 '<?xml version="$1" encoding="' . $apiConfigCharset . '"?>',
-                                $this->_soap->handle()
-                            )
-                        )
-                    )
+                                $this->_soap->handle(),
+                            ),
+                        ),
+                    ),
                 );
 
                 $this->getController()->getResponse()
