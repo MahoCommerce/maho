@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -247,7 +248,7 @@ function mageParseCsv($string, $delimiter = ',', $enclosure = '"', $escape = '\\
                         $elements,
                         $i,
                         $j - $i + 1,
-                        implode($delimiter, array_slice($elements, $i, $j - $i + 1))
+                        implode($delimiter, array_slice($elements, $i, $j - $i + 1)),
                     );
                     break;
                 }
@@ -255,7 +256,7 @@ function mageParseCsv($string, $delimiter = ',', $enclosure = '"', $escape = '\\
         }
         if ($nquotes > 0) {
             // Remove first and last quotes, then merge pairs of quotes
-            $qstr =& $elements[$i];
+            $qstr = & $elements[$i];
             $qstr = substr_replace($qstr, '', strpos($qstr, $enclosure), 1);
             $qstr = substr_replace($qstr, '', strrpos($qstr, $enclosure), 1);
             $qstr = str_replace($enclosure . $enclosure, $enclosure, $qstr);
@@ -347,7 +348,7 @@ function mahoErrorReport(array $reportData = [], int $httpResponseCode = 503): v
 {
     $reportIdMessage = '';
     if ($reportData) {
-        $reportId   = abs((int)(microtime(true) * random_int(100, 1000)));
+        $reportId   = abs((int) (microtime(true) * random_int(100, 1000)));
         $reportIdMessage = "<p>Error log record number: {$reportId}</p>";
         $reportDir = Mage::getBaseDir('var') . '/report';
         if (!file_exists($reportDir)) {

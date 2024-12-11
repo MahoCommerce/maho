@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -92,7 +93,7 @@ class Mage_Cms_Model_Resource_Block_Collection extends Mage_Core_Model_Resource_
             $this->getSelect()->join(
                 ['store_table' => $this->getTable('cms/block_store')],
                 'main_table.block_id = store_table.block_id',
-                []
+                [],
             )->group('main_table.block_id');
 
             /*

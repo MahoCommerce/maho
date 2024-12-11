@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -369,12 +370,12 @@ class Varien_Db_Ddl_Table
             $default = $options['default'];
         }
         if (array_key_exists('nullable', $options)) {
-            $nullable = (bool)$options['nullable'];
+            $nullable = (bool) $options['nullable'];
         }
         if (!empty($options['primary'])) {
             $primary = true;
             if (isset($options['primary_position'])) {
-                $primaryPosition = (int)$options['primary_position'];
+                $primaryPosition = (int) $options['primary_position'];
             } else {
                 $primaryPosition = 0;
                 foreach ($this->_columns as $v) {
@@ -407,7 +408,7 @@ class Varien_Db_Ddl_Table
             'PRIMARY'           => $primary,
             'PRIMARY_POSITION'  => $primaryPosition,
             'IDENTITY'          => $identity,
-            'COMMENT'           => $comment
+            'COMMENT'           => $comment,
         ];
 
         return $this;
@@ -460,7 +461,7 @@ class Varien_Db_Ddl_Table
             'REF_TABLE_NAME'    => $refTable,
             'REF_COLUMN_NAME'   => $refColumn,
             'ON_DELETE'         => $onDelete,
-            'ON_UPDATE'         => $onUpdate
+            'ON_UPDATE'         => $onUpdate,
         ];
 
         return $this;
@@ -495,10 +496,10 @@ class Varien_Db_Ddl_Table
 
                 $columnName = $columnData['name'];
                 if (!empty($columnData['size'])) {
-                    $columnSize = (int)$columnData['size'];
+                    $columnSize = (int) $columnData['size'];
                 }
                 if (!empty($columnData['position'])) {
-                    $columnPos = (int)$columnData['position'];
+                    $columnPos = (int) $columnData['position'];
                 }
             } else {
                 continue;
@@ -507,7 +508,7 @@ class Varien_Db_Ddl_Table
             $columns[strtoupper($columnName)] = [
                 'NAME'      => $columnName,
                 'SIZE'      => $columnSize,
-                'POSITION'  => $columnPos
+                'POSITION'  => $columnPos,
             ];
 
             $position++;
@@ -524,7 +525,7 @@ class Varien_Db_Ddl_Table
         $this->_indexes[strtoupper($indexName)] = [
             'INDEX_NAME'    => $indexName,
             'COLUMNS'       => $this->_normalizeIndexColumnPosition($columns),
-            'TYPE'          => $idxType
+            'TYPE'          => $idxType,
         ];
 
         return $this;

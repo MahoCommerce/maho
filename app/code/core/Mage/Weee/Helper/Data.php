@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -313,7 +314,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
                 $shipping,
                 $billing,
                 $website,
-                $calculateTaxes ? $calculateTaxes : $this->typeOfDisplay($product, 1)
+                $calculateTaxes ? $calculateTaxes : $this->typeOfDisplay($product, 1),
             );
         }
         return [];
@@ -333,7 +334,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
                 null,
                 null,
                 null,
-                true
+                true,
             );
 
             if (is_array($attributes)) {
@@ -362,7 +363,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
                 null,
                 null,
                 null,
-                true
+                true,
             );
             return $this->getAmountInclTaxes($attributes);
         }
@@ -399,11 +400,11 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
         foreach ($tierPrices as $index => &$tier) {
             $spanTag = '<span class="price tier-' . ($includeIndex ? $index : 'fixed');
             $html = $store->formatPrice($store->convertPrice(
-                Mage::helper('tax')->getPrice($product, $tier['website_price'], true) + $weeeAmountInclTax
+                Mage::helper('tax')->getPrice($product, $tier['website_price'], true) + $weeeAmountInclTax,
             ), false);
             $tier['formated_price_incl_weee'] = $spanTag . '-incl-tax">' . $html . '</span>';
             $html = $store->formatPrice($store->convertPrice(
-                Mage::helper('tax')->getPrice($product, $tier['website_price']) + $weeeAmount
+                Mage::helper('tax')->getPrice($product, $tier['website_price']) + $weeeAmount,
             ), false);
             $tier['formated_price_incl_weee_only'] = $spanTag . '">' . $html . '</span>';
             $tier['formated_weee'] = $store->formatPrice($store->convertPrice($weeeAmount));
@@ -455,7 +456,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
             throw new Mage_Core_Exception('$attributes must be an array');
         }
 
-        return (float)$amount;
+        return (float) $amount;
     }
 
     /**

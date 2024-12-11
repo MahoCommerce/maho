@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -364,7 +365,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     public function getStoreId()
     {
         if ($this->hasData('store_id')) {
-            return (int)$this->getData('store_id');
+            return (int) $this->getData('store_id');
         }
         return Mage::app()->getStore()->getId();
     }
@@ -685,7 +686,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      */
     public function getLinksTitle()
     {
-        return (string)$this->_getData('links_title');
+        return (string) $this->_getData('links_title');
     }
 
     /**
@@ -766,9 +767,9 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
          * Set true, if any
          * Set false, ONLY if options have been affected by Options tab and Type instance tab
          */
-        if ($hasOptions || (bool)$this->getTypeHasOptions()) {
+        if ($hasOptions || (bool) $this->getTypeHasOptions()) {
             $this->setHasOptions(true);
-            if ($hasRequiredOptions || (bool)$this->getTypeHasRequiredOptions()) {
+            if ($hasRequiredOptions || (bool) $this->getTypeHasRequiredOptions()) {
                 $this->setRequiredOptions(true);
             } elseif ($this->canAffectOptions()) {
                 $this->setRequiredOptions(false);
@@ -790,7 +791,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     public function canAffectOptions($value = null)
     {
         if ($value !== null) {
-            $this->_canAffectOptions = (bool)$value;
+            $this->_canAffectOptions = (bool) $value;
         }
         return $this->_canAffectOptions;
     }
@@ -1328,7 +1329,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
         Mage::dispatchEvent(
             'catalog_model_product_duplicate',
-            ['current_product' => $this, 'new_product' => $newProduct]
+            ['current_product' => $this, 'new_product' => $newProduct],
         );
 
         /* Prepare Related*/
@@ -1537,18 +1538,18 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     public function isSalable()
     {
         Mage::dispatchEvent('catalog_product_is_salable_before', [
-            'product'   => $this
+            'product'   => $this,
         ]);
 
         $salable = $this->isAvailable();
 
         $object = new Varien_Object([
             'product'    => $this,
-            'is_salable' => $salable
+            'is_salable' => $salable,
         ]);
         Mage::dispatchEvent('catalog_product_is_salable_after', [
             'product'   => $this,
-            'salable'   => $object
+            'salable'   => $object,
         ]);
         return $object->getIsSalable();
     }
@@ -2032,7 +2033,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      */
     public function getImageUrl()
     {
-        return (string)$this->_getImageHelper()->init($this, 'image')->resize(265);
+        return (string) $this->_getImageHelper()->init($this, 'image')->resize(265);
     }
 
     /**
@@ -2045,7 +2046,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      */
     public function getSmallImageUrl($width = 88, $height = 77)
     {
-        return (string)$this->_getImageHelper()->init($this, 'small_image')->resize($width, $height);
+        return (string) $this->_getImageHelper()->init($this, 'small_image')->resize($width, $height);
     }
 
     /**
@@ -2058,7 +2059,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      */
     public function getThumbnailUrl($width = 75, $height = 75)
     {
-        return (string)$this->_getImageHelper()->init($this, 'thumbnail')->resize($width, $height);
+        return (string) $this->_getImageHelper()->init($this, 'thumbnail')->resize($width, $height);
     }
 
     /**
@@ -2079,7 +2080,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
                 }
             }
             $_allowed = [
-                'type_id','calculated_final_price','request_path','rating_summary'
+                'type_id','calculated_final_price','request_path','rating_summary',
             ];
             $this->_reservedAttributes = array_diff($_reserved, $_allowed);
         }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -461,7 +462,7 @@ abstract class Mage_Paypal_Model_Api_Abstract extends Varien_Object
      */
     protected function _filterInt($value)
     {
-        return (int)$value;
+        return (int) $value;
     }
 
     /**
@@ -573,6 +574,6 @@ abstract class Mage_Paypal_Model_Api_Abstract extends Varien_Object
      */
     public function getUseCertAuthentication()
     {
-        return (bool)$this->_config->apiAuthentication;
+        return (bool) $this->_config->apiAuthentication;
     }
 }

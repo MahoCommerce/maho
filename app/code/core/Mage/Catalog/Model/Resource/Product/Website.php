@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -53,7 +54,7 @@ class Mage_Catalog_Model_Resource_Product_Website extends Mage_Core_Model_Resour
         $adapter   = $this->_getWriteAdapter();
         $whereCond = [
             $adapter->quoteInto('website_id IN(?)', $websiteIds),
-            $adapter->quoteInto('product_id IN(?)', $productIds)
+            $adapter->quoteInto('product_id IN(?)', $productIds),
         ];
         $whereCond = implode(' AND ', $whereCond);
 
@@ -98,7 +99,7 @@ class Mage_Catalog_Model_Resource_Product_Website extends Mage_Core_Model_Resour
                     }
                     $this->_getWriteAdapter()->insert($this->getMainTable(), [
                         'product_id' => (int) $productId,
-                        'website_id' => (int) $websiteId
+                        'website_id' => (int) $websiteId,
                     ]);
                 }
 

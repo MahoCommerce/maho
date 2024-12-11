@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,10 +7,11 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Mage_Catalog_Model_Resource_Setup  $installer */
+/** @var Mage_Catalog_Model_Resource_Setup $this */
 $installer = $this;
 
 // Create Root Catalog Node
@@ -53,13 +55,13 @@ $groups = [
     'display'   => [
         'name'  => 'Display Settings',
         'sort'  => 20,
-        'id'    => null
+        'id'    => null,
     ],
     'design'    => [
         'name'  => 'Custom Design',
         'sort'  => 30,
-        'id'    => null
-    ]
+        'id'    => null,
+    ],
 ];
 
 foreach ($groups as $k => $groupProp) {
@@ -71,43 +73,43 @@ foreach ($groups as $k => $groupProp) {
 $attributes = [
     'custom_design'         => [
         'group' => 'design',
-        'sort'  => 10
+        'sort'  => 10,
     ],
     'custom_design_from'    => [
         'group' => 'design',
-        'sort'  => 30
+        'sort'  => 30,
     ],
     'custom_design_to'      => [
         'group' => 'design',
-        'sort'  => 40
+        'sort'  => 40,
     ],
     'page_layout'           => [
         'group' => 'design',
-        'sort'  => 50
+        'sort'  => 50,
     ],
     'custom_layout_update'  => [
         'group' => 'design',
-        'sort'  => 60
+        'sort'  => 60,
     ],
     'display_mode'          => [
         'group' => 'display',
-        'sort'  => 10
+        'sort'  => 10,
     ],
     'landing_page'          => [
         'group' => 'display',
-        'sort'  => 20
+        'sort'  => 20,
     ],
     'is_anchor'             => [
         'group' => 'display',
-        'sort'  => 30
+        'sort'  => 30,
     ],
     'available_sort_by'     => [
         'group' => 'display',
-        'sort'  => 40
+        'sort'  => 40,
     ],
     'default_sort_by'       => [
         'group' => 'display',
-        'sort'  => 50
+        'sort'  => 50,
     ],
 ];
 
@@ -117,7 +119,7 @@ foreach ($attributes as $attributeCode => $attributeProp) {
         $attributeSetId,
         $groups[$attributeProp['group']]['id'],
         $attributeCode,
-        $attributeProp['sort']
+        $attributeProp['sort'],
     );
 }
 
@@ -127,19 +129,19 @@ foreach ($attributes as $attributeCode => $attributeProp) {
 $data = [
     [
         'link_type_id'  => Mage_Catalog_Model_Product_Link::LINK_TYPE_RELATED,
-        'code'          => 'relation'
+        'code'          => 'relation',
     ],
     [
         'link_type_id'  => Mage_Catalog_Model_Product_Link::LINK_TYPE_GROUPED,
-        'code'  => 'super'
+        'code'  => 'super',
     ],
     [
         'link_type_id'  => Mage_Catalog_Model_Product_Link::LINK_TYPE_UPSELL,
-        'code'  => 'up_sell'
+        'code'  => 'up_sell',
     ],
     [
         'link_type_id'  => Mage_Catalog_Model_Product_Link::LINK_TYPE_CROSSSELL,
-        'code'  => 'cross_sell'
+        'code'  => 'cross_sell',
     ],
 ];
 
@@ -154,27 +156,27 @@ $data = [
     [
         'link_type_id'                  => Mage_Catalog_Model_Product_Link::LINK_TYPE_RELATED,
         'product_link_attribute_code'   => 'position',
-        'data_type'                     => 'int'
+        'data_type'                     => 'int',
     ],
     [
         'link_type_id'                  => Mage_Catalog_Model_Product_Link::LINK_TYPE_GROUPED,
         'product_link_attribute_code'   => 'position',
-        'data_type'                     => 'int'
+        'data_type'                     => 'int',
     ],
     [
         'link_type_id'                  => Mage_Catalog_Model_Product_Link::LINK_TYPE_GROUPED,
         'product_link_attribute_code'   => 'qty',
-        'data_type'                     => 'decimal'
+        'data_type'                     => 'decimal',
     ],
     [
         'link_type_id'                  => Mage_Catalog_Model_Product_Link::LINK_TYPE_UPSELL,
         'product_link_attribute_code'   => 'position',
-        'data_type'                     => 'int'
+        'data_type'                     => 'int',
     ],
     [
         'link_type_id'                  => Mage_Catalog_Model_Product_Link::LINK_TYPE_CROSSSELL,
         'product_link_attribute_code'   => 'position',
-        'data_type'                     => 'int'
+        'data_type'                     => 'int',
     ],
 ];
 

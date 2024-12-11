@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -29,7 +30,7 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Preview_Form extends Mage_Adminhtml_
         $form = new Varien_Data_Form([
             'id' => 'preview_form',
             'action' => $this->getUrl('*/*/drop', ['_current' => true]),
-            'method' => 'post'
+            'method' => 'post',
         ]);
 
         if ($data = $this->getFormData()) {

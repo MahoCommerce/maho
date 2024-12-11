@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -60,7 +61,7 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
         self::ENDPOINT_AUTHORIZE_CUSTOMER_SIMPLE,
         self::ENDPOINT_AUTHORIZE_ADMIN_SIMPLE,
         self::ENDPOINT_INITIATE,
-        self::ENDPOINT_TOKEN
+        self::ENDPOINT_TOKEN,
     ];
 
     /**
@@ -73,7 +74,7 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
     {
         if (function_exists('openssl_random_pseudo_bytes')) {
             // use openssl lib if it is install. It provides a better randomness
-            $bytes = openssl_random_pseudo_bytes((int)ceil($length / 2), $strong);
+            $bytes = openssl_random_pseudo_bytes((int) ceil($length / 2), $strong);
             $hex = bin2hex($bytes); // hex() doubles the length of the string
             $randomString = substr($hex, 0, $length); // we truncate at most 1 char if length parameter is an odd number
         } else {
@@ -82,7 +83,7 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
             $helper = Mage::helper('core');
             $randomString = $helper->getRandomString(
                 $length,
-                Mage_Core_Helper_Data::CHARS_DIGITS . Mage_Core_Helper_Data::CHARS_LOWERS
+                Mage_Core_Helper_Data::CHARS_DIGITS . Mage_Core_Helper_Data::CHARS_LOWERS,
             );
         }
 
@@ -232,7 +233,7 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
                 'applicationName'   => $applicationName,
                 'status'            => $status,
 
-            ]
+            ],
         );
     }
 

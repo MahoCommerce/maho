@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -82,7 +83,7 @@ abstract class Mage_Install_Model_Installer_Db_Abstract
                 'username'  => $this->_configData['db_user'],
                 'password'  => $this->_configData['db_pass'],
                 'dbname'    => $this->_configData['db_name'],
-                'pdoType'   => $this->getPdoType()
+                'pdoType'   => $this->getPdoType(),
             ];
             $this->_connectionData = $connectionData;
         }
@@ -130,7 +131,7 @@ abstract class Mage_Install_Model_Installer_Db_Abstract
     public function getRequiredExtensions()
     {
         $extensions = [];
-        $configExt = (array)Mage::getConfig()->getNode(sprintf('install/databases/%s/extensions', $this->getModel()));
+        $configExt = (array) Mage::getConfig()->getNode(sprintf('install/databases/%s/extensions', $this->getModel()));
         foreach (array_keys($configExt) as $name) {
             $extensions[] = $name;
         }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,10 +7,11 @@
  * @package    Mage_Widget
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Mage_Core_Model_Resource_Setup $installer */
+/** @var Mage_Core_Model_Resource_Setup $this */
 $installer = $this;
 $installer->startSetup();
 
@@ -38,7 +40,7 @@ if (!$installer->getConnection()->isTableExists($installer->getTable('widget/wid
 } else {
     $installer->getConnection()->dropIndex(
         $installer->getTable('widget/widget'),
-        'IDX_CODE'
+        'IDX_CODE',
     );
 
     $tables = [
@@ -50,16 +52,16 @@ if (!$installer->getConnection()->isTableExists($installer->getTable('widget/wid
                     'unsigned'  => true,
                     'nullable'  => false,
                     'primary'   => true,
-                    'comment'   => 'Widget Id'
+                    'comment'   => 'Widget Id',
                 ],
                 'parameters' => [
                     'type'      => Varien_Db_Ddl_Table::TYPE_TEXT,
                     'length'    => '64K',
-                    'comment'   => 'Parameters'
-                ]
+                    'comment'   => 'Parameters',
+                ],
             ],
-            'comment' => 'Preconfigured Widgets'
-        ]
+            'comment' => 'Preconfigured Widgets',
+        ],
     ];
 
     $installer->getConnection()->modifyTables($tables);
@@ -71,8 +73,8 @@ if (!$installer->getConnection()->isTableExists($installer->getTable('widget/wid
         [
             'type'      => Varien_Db_Ddl_Table::TYPE_TEXT,
             'length'    => 255,
-            'comment'   => 'Widget code for template directive'
-        ]
+            'comment'   => 'Widget code for template directive',
+        ],
     );
 
     $installer->getConnection()->changeColumn(
@@ -82,14 +84,14 @@ if (!$installer->getConnection()->isTableExists($installer->getTable('widget/wid
         [
             'type'      => Varien_Db_Ddl_Table::TYPE_TEXT,
             'length'    => 255,
-            'comment'   => 'Widget Type'
-        ]
+            'comment'   => 'Widget Type',
+        ],
     );
 
     $installer->getConnection()->addIndex(
         $installer->getTable('widget/widget'),
         $installer->getIdxName('widget/widget', ['widget_code']),
-        ['widget_code']
+        ['widget_code'],
     );
 }
 
@@ -159,7 +161,7 @@ $table = $installer->getConnection()
         $installer->getTable('widget/widget_instance'),
         'instance_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Instance of Widget on Page');
 $installer->getConnection()->createTable($table);
@@ -184,7 +186,7 @@ $table = $installer->getConnection()
     ->addIndex(
         $installer->getIdxName('widget/widget_instance_page_layout', ['layout_update_id', 'page_id'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
         ['layout_update_id', 'page_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE]
+        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
     )
     ->addForeignKey(
         $installer->getFkName('widget/widget_instance_page_layout', 'page_id', 'widget/widget_instance_page', 'page_id'),
@@ -192,7 +194,7 @@ $table = $installer->getConnection()
         $installer->getTable('widget/widget_instance_page'),
         'page_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('widget/widget_instance_page_layout', 'layout_update_id', 'core/layout_update', 'layout_update_id'),
@@ -200,7 +202,7 @@ $table = $installer->getConnection()
         $installer->getTable('core/layout_update'),
         'layout_update_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Layout updates');
 $installer->getConnection()->createTable($table);

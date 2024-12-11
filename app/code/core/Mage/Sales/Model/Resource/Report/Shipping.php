@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -68,7 +69,7 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
             $this->_clearTableByDateRange($table, $from, $to, $subSelect);
             // convert dates from UTC to current admin timezone
             $periodExpr = $adapter->getDatePartSql(
-                $this->getStoreTZOffsetQuery($sourceTable, 'created_at', $from, $to)
+                $this->getStoreTZOffsetQuery($sourceTable, 'created_at', $from, $to),
             );
             $ifnullBaseShippingCanceled = $adapter->getIfNullSql('base_shipping_canceled', 0);
             $ifnullBaseShippingRefunded = $adapter->getIfNullSql('base_shipping_refunded', 0);
@@ -79,18 +80,18 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                 'shipping_description'  => 'shipping_description',
                 'orders_count'          => new Zend_Db_Expr('COUNT(entity_id)'),
                 'total_shipping'        => new Zend_Db_Expr(
-                    "SUM((base_shipping_amount - {$ifnullBaseShippingCanceled}) * base_to_global_rate)"
+                    "SUM((base_shipping_amount - {$ifnullBaseShippingCanceled}) * base_to_global_rate)",
                 ),
                 'total_shipping_actual' => new Zend_Db_Expr(
-                    "SUM((base_shipping_invoiced - {$ifnullBaseShippingRefunded}) * base_to_global_rate)"
+                    "SUM((base_shipping_invoiced - {$ifnullBaseShippingRefunded}) * base_to_global_rate)",
                 ),
             ];
 
             $select = $adapter->select();
             $select->from($sourceTable, $columns)
                  ->where('state NOT IN (?)', [
-                    Mage_Sales_Model_Order::STATE_PENDING_PAYMENT,
-                    Mage_Sales_Model_Order::STATE_NEW
+                     Mage_Sales_Model_Order::STATE_PENDING_PAYMENT,
+                     Mage_Sales_Model_Order::STATE_NEW,
                  ])
                 ->where('is_virtual = 0');
 
@@ -102,7 +103,7 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                 $periodExpr,
                 'store_id',
                 'status',
-                'shipping_description'
+                'shipping_description',
             ]);
 
             $select->having('orders_count > 0');
@@ -135,7 +136,7 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
             $select->group([
                 'period',
                 'order_status',
-                'shipping_description'
+                'shipping_description',
             ]);
 
             $insertQuery = $helper->getInsertFromSelectUsingAnalytic($select, $table, array_keys($columns));
@@ -172,7 +173,7 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                     'created_at',
                     'updated_at',
                     $from,
-                    $to
+                    $to,
                 );
             } else {
                 $subSelect = null;
@@ -185,8 +186,8 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                     ['source_table' => $sourceTable],
                     'source_table.created_at',
                     $from,
-                    $to
-                )
+                    $to,
+                ),
             );
             $ifnullBaseShippingCanceled = $adapter->getIfNullSql('order_table.base_shipping_canceled', 0);
             $ifnullBaseShippingRefunded = $adapter->getIfNullSql('order_table.base_shipping_refunded', 0);
@@ -208,9 +209,9 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                     ['order_table' => $orderTable],
                     $adapter->quoteInto(
                         'source_table.order_id = order_table.entity_id AND order_table.state != ?',
-                        Mage_Sales_Model_Order::STATE_CANCELED
+                        Mage_Sales_Model_Order::STATE_CANCELED,
                     ),
-                    []
+                    [],
                 )
                 ->useStraightJoin();
 
@@ -229,7 +230,7 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                 $periodExpr,
                 'order_table.store_id',
                 'order_table.status',
-                'order_table.shipping_description'
+                'order_table.shipping_description',
             ]);
 
             /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
@@ -260,7 +261,7 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
             $select->group([
                 'period',
                 'order_status',
-                'shipping_description'
+                'shipping_description',
             ]);
             $insertQuery = $helper->getInsertFromSelectUsingAnalytic($select, $table, array_keys($columns));
             $adapter->query($insertQuery);

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'index:list',
-    description: 'List all indexes'
+    description: 'List all indexes',
 )]
 class IndexList extends BaseMahoCommand
 {

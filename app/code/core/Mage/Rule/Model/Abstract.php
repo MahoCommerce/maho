@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -109,7 +110,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     {
         // Check if discount amount not negative
         if ($this->hasDiscountAmount()) {
-            if ((int)$this->getDiscountAmount() < 0) {
+            if ((int) $this->getDiscountAmount() < 0) {
                 Mage::throwException(Mage::helper('rule')->__('Invalid discount amount.'));
             }
         }
@@ -313,9 +314,9 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
             if (($key === 'conditions' || $key === 'actions') && is_array($value)) {
                 foreach ($value as $id => $data) {
                     $path = explode('--', $id);
-                    $node =& $arr;
+                    $node = & $arr;
                     for ($i = 0, $l = count($path); $i < $l; $i++) {
-                        $node =& $node[$key][$path[$i]] ?? [];
+                        $node = & $node[$key][$path[$i]] ?? [];
                     }
                     foreach ($data as $k => $v) {
                         $node[$k] = $v;
@@ -330,7 +331,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
                         $value,
                         Varien_Date::DATE_INTERNAL_FORMAT,
                         null,
-                        false
+                        false,
                     );
                 }
                 $this->setData($key, $value);
@@ -447,7 +448,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     {
         if (!$this->hasWebsiteIds()) {
             $websiteIds = $this->_getResource()->getWebsiteIds($this->getId());
-            $this->setData('website_ids', (array)$websiteIds);
+            $this->setData('website_ids', (array) $websiteIds);
         }
         return $this->_getData('website_ids');
     }

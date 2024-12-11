@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -15,6 +16,4 @@
  * @category   Mage
  * @package    Mage_Checkout
  */
-class Mage_Checkout_Model_Cart_Shipping_Api_V2 extends Mage_Checkout_Model_Cart_Shipping_Api
-{
-}
+class Mage_Checkout_Model_Cart_Shipping_Api_V2 extends Mage_Checkout_Model_Cart_Shipping_Api {}

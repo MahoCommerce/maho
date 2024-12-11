@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -22,9 +23,7 @@ class Mage_ImportExport_Model_Import_Proxy_Product extends Mage_Catalog_Model_Pr
      * DO NOT Initialize resources.
      */
     #[\Override]
-    protected function _construct()
-    {
-    }
+    protected function _construct() {}
 
     /**
      * Retrieve object id

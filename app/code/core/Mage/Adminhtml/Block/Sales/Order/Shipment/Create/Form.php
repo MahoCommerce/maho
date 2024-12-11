@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -54,11 +55,11 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_Create_Form extends Mage_Adminht
     {
         $this->setChild(
             'items',
-            $this->getLayout()->createBlock('adminhtml/sales_order_shipment_create_items')
+            $this->getLayout()->createBlock('adminhtml/sales_order_shipment_create_items'),
         );
         $this->setChild(
             'tracking',
-            $this->getLayout()->createBlock('adminhtml/sales_order_shipment_create_tracking')
+            $this->getLayout()->createBlock('adminhtml/sales_order_shipment_create_tracking'),
         );
 
         return $this;

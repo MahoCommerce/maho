@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,10 +7,11 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Mage_Core_Model_Resource_Setup $installer */
+/** @var Mage_Core_Model_Resource_Setup $this */
 $installer = $this;
 
 /**
@@ -44,24 +46,24 @@ $table = $installer->getConnection()
     ->addIndex(
         $installer->getIdxName('reports/compared_product_index', ['visitor_id', 'product_id'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
         ['visitor_id', 'product_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE]
+        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('reports/compared_product_index', ['customer_id', 'product_id'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
         ['customer_id', 'product_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE]
+        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('reports/compared_product_index', ['store_id']),
-        ['store_id']
+        ['store_id'],
     )
     ->addIndex(
         $installer->getIdxName('reports/compared_product_index', ['added_at']),
-        ['added_at']
+        ['added_at'],
     )
     ->addIndex(
         $installer->getIdxName('reports/compared_product_index', ['product_id']),
-        ['product_id']
+        ['product_id'],
     )
     ->addForeignKey(
         $installer->getFkName('reports/compared_product_index', 'customer_id', 'customer/entity', 'entity_id'),
@@ -69,7 +71,7 @@ $table = $installer->getConnection()
         $installer->getTable('customer/entity'),
         'entity_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('reports/compared_product_index', 'product_id', 'catalog/product', 'entity_id'),
@@ -77,7 +79,7 @@ $table = $installer->getConnection()
         $installer->getTable('catalog/product'),
         'entity_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('reports/compared_product_index', 'store_id', 'core/store', 'store_id'),
@@ -85,7 +87,7 @@ $table = $installer->getConnection()
         $installer->getTable('core/store'),
         'store_id',
         Varien_Db_Ddl_Table::ACTION_SET_NULL,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Reports Compared Product Index Table');
 $installer->getConnection()->createTable($table);
@@ -122,24 +124,24 @@ $table = $installer->getConnection()
     ->addIndex(
         $installer->getIdxName('reports/viewed_product_index', ['visitor_id', 'product_id'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
         ['visitor_id', 'product_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE]
+        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('reports/viewed_product_index', ['customer_id', 'product_id'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
         ['customer_id', 'product_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE]
+        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
         $installer->getIdxName('reports/viewed_product_index', ['store_id']),
-        ['store_id']
+        ['store_id'],
     )
     ->addIndex(
         $installer->getIdxName('reports/viewed_product_index', ['added_at']),
-        ['added_at']
+        ['added_at'],
     )
     ->addIndex(
         $installer->getIdxName('reports/viewed_product_index', ['product_id']),
-        ['product_id']
+        ['product_id'],
     )
     ->addForeignKey(
         $installer->getFkName('reports/viewed_product_index', 'customer_id', 'customer/entity', 'entity_id'),
@@ -147,7 +149,7 @@ $table = $installer->getConnection()
         $installer->getTable('customer/entity'),
         'entity_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('reports/viewed_product_index', 'product_id', 'catalog/product', 'entity_id'),
@@ -155,7 +157,7 @@ $table = $installer->getConnection()
         $installer->getTable('catalog/product'),
         'entity_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('reports/viewed_product_index', 'store_id', 'core/store', 'store_id'),
@@ -163,7 +165,7 @@ $table = $installer->getConnection()
         $installer->getTable('core/store'),
         'store_id',
         Varien_Db_Ddl_Table::ACTION_SET_NULL,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Reports Viewed Product Index Table');
 $installer->getConnection()->createTable($table);

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -21,8 +22,8 @@ class Mage_Adminhtml_Model_System_Config_Source_Payment_Cctype
 
         foreach (Mage::getSingleton('payment/config')->getCcTypes() as $code => $name) {
             $options[] = [
-               'value' => $code,
-               'label' => $name
+                'value' => $code,
+                'label' => $name,
             ];
         }
 

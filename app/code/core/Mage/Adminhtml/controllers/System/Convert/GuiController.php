@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -49,7 +50,7 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
          * Append profiles block to content
          */
         $this->_addContent(
-            $this->getLayout()->createBlock('adminhtml/system_convert_gui', 'convert_profile')
+            $this->getLayout()->createBlock('adminhtml/system_convert_gui', 'convert_profile'),
         );
 
         /**
@@ -90,7 +91,7 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
         $this->_setActiveMenu('system/convert/gui');
 
         $this->_addContent(
-            $this->getLayout()->createBlock('adminhtml/system_convert_gui_edit')
+            $this->getLayout()->createBlock('adminhtml/system_convert_gui_edit'),
         );
 
         /**

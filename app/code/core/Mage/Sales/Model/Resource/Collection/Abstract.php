@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -127,7 +128,7 @@ abstract class Mage_Sales_Model_Resource_Collection_Abstract extends Mage_Core_M
     {
         return $this->getConnection()->fetchCol(
             $this->_getAllIdsSelect($limit, $offset),
-            $this->_bindParams
+            $this->_bindParams,
         );
     }
 

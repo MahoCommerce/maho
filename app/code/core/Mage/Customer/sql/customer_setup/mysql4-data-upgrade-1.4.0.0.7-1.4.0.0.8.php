@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,10 +7,11 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Mage_Customer_Model_Entity_Setup $installer */
+/** @var Mage_Customer_Model_Resource_Setup $this */
 $installer = $this;
 
 /** @var Mage_Customer_Helper_Address $addressHelper */
@@ -25,32 +27,32 @@ $attributes = [
         'is_user_defined'   => 0,
         'is_system'         => 1,
         'is_visible'        => 0,
-        'sort_order'        => 0
+        'sort_order'        => 0,
     ],
     'default_billing'   => [
         'is_user_defined'   => 0,
         'is_system'         => 1,
         'is_visible'        => 0,
-        'sort_order'        => 0
+        'sort_order'        => 0,
     ],
     'default_shipping'  => [
         'is_user_defined'   => 0,
         'is_system'         => 1,
         'is_visible'        => 0,
-        'sort_order'        => 0
+        'sort_order'        => 0,
     ],
     'password_hash'     => [
         'is_user_defined'   => 0,
         'is_system'         => 1,
         'is_visible'        => 0,
-        'sort_order'        => 0
+        'sort_order'        => 0,
     ],
     'website_id'        => [
         'is_user_defined'   => 0,
         'is_system'         => 1,
         'is_visible'        => 1,
         'sort_order'        => 10,
-        'adminhtml_only'    => 1
+        'adminhtml_only'    => 1,
     ],
     'created_in'        => [
         'is_user_defined'   => 0,
@@ -58,13 +60,13 @@ $attributes = [
         'is_visible'        => 1,
         'sort_order'        => 20,
         'is_required'       => 0,
-        'adminhtml_only'    => 1
+        'adminhtml_only'    => 1,
     ],
     'store_id'          => [
         'is_user_defined'   => 0,
         'is_system'         => 1,
         'is_visible'        => 0,
-        'sort_order'        => 0
+        'sort_order'        => 0,
     ],
     'group_id'          => [
         'is_user_defined'   => 0,
@@ -72,14 +74,14 @@ $attributes = [
         'is_visible'        => 1,
         'sort_order'        => 25,
         'adminhtml_only'    => 1,
-        'admin_checkout'    => 1
+        'admin_checkout'    => 1,
     ],
     'prefix'            => [
         'is_user_defined'   => 0,
         'is_system'         => 0,
         'is_visible'        => $addressHelper->getConfig('prefix_show', $store) == '' ? 0 : 1,
         'sort_order'        => 30,
-        'is_required'       => $addressHelper->getConfig('prefix_show', $store) == 'req' ? 1 : 0
+        'is_required'       => $addressHelper->getConfig('prefix_show', $store) == 'req' ? 1 : 0,
     ],
     'firstname'         => [
         'is_user_defined'   => 0,
@@ -89,7 +91,7 @@ $attributes = [
         'is_required'       => 1,
         'validate_rules'    => [
             'max_text_length'   => 255,
-            'min_text_length'   => 1
+            'min_text_length'   => 1,
         ],
     ],
     'middlename'        => [
@@ -97,7 +99,7 @@ $attributes = [
         'is_system'         => 0,
         'is_visible'        => $addressHelper->getConfig('middlename_show', $store) == '' ? 0 : 1,
         'sort_order'        => 50,
-        'is_required'       => $addressHelper->getConfig('middlename_show', $store) == 'req' ? 1 : 0
+        'is_required'       => $addressHelper->getConfig('middlename_show', $store) == 'req' ? 1 : 0,
     ],
     'lastname'          => [
         'is_user_defined'   => 0,
@@ -107,7 +109,7 @@ $attributes = [
         'is_required'       => 1,
         'validate_rules'    => [
             'max_text_length'   => 255,
-            'min_text_length'   => 1
+            'min_text_length'   => 1,
         ],
     ],
     'suffix'            => [
@@ -115,7 +117,7 @@ $attributes = [
         'is_system'         => 0,
         'is_visible'        => $addressHelper->getConfig('suffix_show', $store) == '' ? 0 : 1,
         'sort_order'        => 70,
-        'is_required'       => $addressHelper->getConfig('suffix_show', $store) == 'req' ? 1 : 0
+        'is_required'       => $addressHelper->getConfig('suffix_show', $store) == 'req' ? 1 : 0,
     ],
     'email'             => [
         'is_user_defined'   => 0,
@@ -124,9 +126,9 @@ $attributes = [
         'sort_order'        => 80,
         'is_required'       => 1,
         'validate_rules'    => [
-            'input_validation'  => 'email'
+            'input_validation'  => 'email',
         ],
-        'admin_checkout'    => 1
+        'admin_checkout'    => 1,
     ],
     'dob'               => [
         'is_user_defined'   => 0,
@@ -135,10 +137,10 @@ $attributes = [
         'sort_order'        => 90,
         'is_required'       => $addressHelper->getConfig('dob_show', $store) == 'req' ? 1 : 0,
         'validate_rules'    => [
-            'input_validation'  => 'date'
+            'input_validation'  => 'date',
         ],
         'input_filter'      => 'date',
-        'admin_checkout'    => 1
+        'admin_checkout'    => 1,
     ],
     'taxvat'            => [
         'is_user_defined'   => 0,
@@ -149,7 +151,7 @@ $attributes = [
         'validate_rules'    => [
             'max_text_length'   => 255,
         ],
-        'admin_checkout'    => 1
+        'admin_checkout'    => 1,
     ],
     'gender'            => [
         'is_user_defined'   => 0,
@@ -158,7 +160,7 @@ $attributes = [
         'sort_order'        => 110,
         'is_required'       => $addressHelper->getConfig('gender_show', $store) == 'req' ? 1 : 0,
         'validate_rules'    => [],
-        'admin_checkout'    => 1
+        'admin_checkout'    => 1,
     ],
 ];
 
@@ -207,7 +209,7 @@ $attributes = [
         'is_required'       => 1,
         'validate_rules'    => [
             'max_text_length'   => 255,
-            'min_text_length'   => 1
+            'min_text_length'   => 1,
         ],
     ],
     'middlename'        => [
@@ -225,7 +227,7 @@ $attributes = [
         'is_required'       => 1,
         'validate_rules'    => [
             'max_text_length'   => 255,
-            'min_text_length'   => 1
+            'min_text_length'   => 1,
         ],
     ],
     'suffix'            => [
@@ -243,7 +245,7 @@ $attributes = [
         'is_required'       => 0,
         'validate_rules'    => [
             'max_text_length'   => 255,
-            'min_text_length'   => 1
+            'min_text_length'   => 1,
         ],
     ],
     'street'           => [
@@ -255,7 +257,7 @@ $attributes = [
         'is_required'       => 1,
         'validate_rules'    => [
             'max_text_length'   => 255,
-            'min_text_length'   => 1
+            'min_text_length'   => 1,
         ],
     ],
     'city'              => [
@@ -266,7 +268,7 @@ $attributes = [
         'is_required'       => 1,
         'validate_rules'    => [
             'max_text_length'   => 255,
-            'min_text_length'   => 1
+            'min_text_length'   => 1,
         ],
     ],
     'country_id'        => [
@@ -307,7 +309,7 @@ $attributes = [
         'is_required'       => 1,
         'validate_rules'    => [
             'max_text_length'   => 255,
-            'min_text_length'   => 1
+            'min_text_length'   => 1,
         ],
     ],
     'fax'               => [
@@ -318,7 +320,7 @@ $attributes = [
         'is_required'       => 0,
         'validate_rules'    => [
             'max_text_length'   => 255,
-            'min_text_length'   => 1
+            'min_text_length'   => 1,
         ],
     ],
 ];
@@ -334,7 +336,7 @@ foreach ($attributes as $attributeCode => $data) {
         $usedInForms = [
             'adminhtml_customer_address',
             'customer_address_edit',
-            'customer_register_address'
+            'customer_register_address',
         ];
         $attribute->setData('used_in_forms', $usedInForms);
     }

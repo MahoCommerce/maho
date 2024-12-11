@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -152,7 +153,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
 
         if (!$role->getId() && $id) {
             $this->_getSession()->addError(
-                $this->__('Role "%s" no longer exists', $role->getData('role_name'))
+                $this->__('Role "%s" no longer exists', $role->getData('role_name')),
             );
             $this->_redirect('*/*/');
             return;
@@ -215,7 +216,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
             /** @var Mage_Api2_Model_Acl_Global_Rule_Tree $ruleTree */
             $ruleTree = Mage::getSingleton(
                 'api2/acl_global_rule_tree',
-                ['type' => Mage_Api2_Model_Acl_Global_Rule_Tree::TYPE_PRIVILEGE]
+                ['type' => Mage_Api2_Model_Acl_Global_Rule_Tree::TYPE_PRIVILEGE],
             );
             $resources = $ruleTree->getPostResources();
             $id = $role->getId();

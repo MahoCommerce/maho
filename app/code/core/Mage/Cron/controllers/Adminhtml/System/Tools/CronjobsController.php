@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -20,15 +21,15 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $this->_setActiveMenu('system/tools/cronjobs');
         $this->_addBreadcrumb(
             Mage::helper('cron')->__('System'),
-            Mage::helper('cron')->__('System')
+            Mage::helper('cron')->__('System'),
         );
         $this->_addBreadcrumb(
             Mage::helper('cron')->__('Tools'),
-            Mage::helper('cron')->__('Tools')
+            Mage::helper('cron')->__('Tools'),
         );
         $this->_addBreadcrumb(
             Mage::helper('cron')->__('Cron Jobs'),
-            Mage::helper('cron')->__('Cron Jobs')
+            Mage::helper('cron')->__('Cron Jobs'),
         );
         $this->_addContent($this->getLayout()->createBlock('cron/adminhtml_system_tools_cronjobs'));
         $this->renderLayout();
@@ -38,7 +39,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
     {
         $this->loadLayout();
         $this->getResponse()->setBody(
-            $this->getLayout()->createBlock('cron/adminhtml_system_tools_cronjobs_grid')->toHtml()
+            $this->getLayout()->createBlock('cron/adminhtml_system_tools_cronjobs_grid')->toHtml(),
         );
     }
 

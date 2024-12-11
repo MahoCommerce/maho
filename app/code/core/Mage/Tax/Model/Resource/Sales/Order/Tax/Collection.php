@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -36,7 +37,7 @@ class Mage_Tax_Model_Resource_Sales_Order_Tax_Collection extends Mage_Core_Model
     {
         $orderId = $order->getId();
         $this->getSelect()
-            ->where('main_table.order_id = ?', (int)$orderId)
+            ->where('main_table.order_id = ?', (int) $orderId)
             ->order('process');
         return $this->load();
     }

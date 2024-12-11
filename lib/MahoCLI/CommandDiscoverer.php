@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -48,7 +49,7 @@ class CommandDiscoverer
         $className = str_replace(
             [$this->baseDir, '.php', '/'],
             ['', '', '\\'],
-            realpath($file)
+            realpath($file),
         );
 
         $parts = explode('lib\\MahoCLI\\Commands\\', $className);

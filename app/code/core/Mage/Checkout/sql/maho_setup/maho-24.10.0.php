@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -13,7 +14,7 @@ const XML_PATH_GUEST_CHECKOUT          = 'checkout/options/guest_checkout';
 const XML_PATH_REDIRECT_REGISTER       = 'checkout/options/redirect_register';
 const XML_PATH_CUSTOMER_MUST_BE_LOGGED = 'checkout/options/customer_must_be_logged';
 
-/** @var Mage_Checkout_Model_Resource_Setup $installer */
+/** @var Mage_Checkout_Model_Resource_Setup $this */
 $installer = $this;
 
 $defaultConfigValue = false;

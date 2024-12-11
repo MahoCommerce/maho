@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -54,7 +55,7 @@ class Mage_Catalog_Model_Resource_Attribute extends Mage_Eav_Model_Resource_Enti
                 $delCondition = [
                     'entity_type_id=?' => $object->getEntityTypeId(),
                     'attribute_id = ?' => $object->getId(),
-                    'store_id IN(?)'   => $attributeStoreIds
+                    'store_id IN(?)'   => $attributeStoreIds,
                 ];
                 $this->_getWriteAdapter()->delete($object->getBackendTable(), $delCondition);
             }
@@ -77,7 +78,7 @@ class Mage_Catalog_Model_Resource_Attribute extends Mage_Eav_Model_Resource_Enti
 
         $select = $this->_getReadAdapter()->select()
             ->from($this->getTable('eav/entity_attribute'))
-            ->where('entity_attribute_id = ?', (int)$object->getEntityAttributeId());
+            ->where('entity_attribute_id = ?', (int) $object->getEntityAttributeId());
         $result = $this->_getReadAdapter()->fetchRow($select);
 
         if ($result) {
@@ -96,7 +97,7 @@ class Mage_Catalog_Model_Resource_Attribute extends Mage_Eav_Model_Resource_Enti
                 $clearCondition = [
                     'entity_type_id =?' => $attribute->getEntityTypeId(),
                     'attribute_id =?'   => $attribute->getId(),
-                    'entity_id IN (?)'  => $select
+                    'entity_id IN (?)'  => $select,
                 ];
                 $this->_getWriteAdapter()->delete($backendTable, $clearCondition);
             }

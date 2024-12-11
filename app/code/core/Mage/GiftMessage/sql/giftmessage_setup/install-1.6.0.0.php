@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,10 +7,11 @@
  * @package    Mage_GiftMessage
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Mage_GiftMessage_Model_Resource_Setup $installer */
+/** @var Mage_GiftMessage_Model_Resource_Setup $this */
 $installer = $this;
 $installer->startSetup();
 
@@ -48,12 +50,12 @@ $entities = [
     'quote_item',
     'quote_address_item',
     'order',
-    'order_item'
+    'order_item',
 ];
 $options = [
     'type'     => Varien_Db_Ddl_Table::TYPE_INTEGER,
     'visible'  => false,
-    'required' => false
+    'required' => false,
 ];
 foreach ($entities as $entity) {
     $installer->addAttribute($entity, 'gift_message_id', $options);
@@ -82,8 +84,8 @@ Mage::getResourceModel('catalog/setup', 'catalog_setup')->addAttribute(
         'apply_to'      => '',
         'input_renderer'   => 'giftmessage/adminhtml_product_helper_form_config',
         'is_configurable'  => 0,
-        'visible_on_front' => false
-    ]
+        'visible_on_front' => false,
+    ],
 );
 
 $installer->endSetup();

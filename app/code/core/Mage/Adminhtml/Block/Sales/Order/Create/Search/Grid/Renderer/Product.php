@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -35,7 +36,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Search_Grid_Renderer_Product exten
             '<a href="javascript:void(0)" %s class="f-right" %s>%s</a>',
             $style,
             $prodAttributes,
-            Mage::helper('sales')->__('Configure')
+            Mage::helper('sales')->__('Configure'),
         ) . $rendered;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -268,7 +269,7 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
     public function getConfigureUrl($item)
     {
         return $this->_getUrl('wishlist/index/configure', [
-            'item' => $item->getWishlistItemId()
+            'item' => $item->getWishlistItemId(),
         ]);
     }
 
@@ -383,7 +384,7 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
         $params = [
             'item' => is_string($item) ? $item : $item->getWishlistItemId(),
             'code' => $this->getWishlist()->getSharingCode(),
-            Mage_Core_Controller_Front_Action::PARAM_NAME_URL_ENCODED => $continueUrl
+            Mage_Core_Controller_Front_Action::PARAM_NAME_URL_ENCODED => $continueUrl,
         ];
         return $this->_getUrlStore($item)->getUrl('wishlist/shared/cart', $params);
     }
@@ -472,7 +473,7 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
         }
         return $this->_getUrl(
             'rss/index/wishlist',
-            $params
+            $params,
         );
     }
 
@@ -526,7 +527,7 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
             }
             $session->setWishlistDisplayType(Mage::getStoreConfig(self::XML_PATH_WISHLIST_LINK_USE_QTY));
             $session->setDisplayOutOfStockProducts(
-                Mage::getStoreConfig(self::XML_PATH_CATALOGINVENTORY_SHOW_OUT_OF_STOCK)
+                Mage::getStoreConfig(self::XML_PATH_CATALOGINVENTORY_SHOW_OUT_OF_STOCK),
             );
         }
         $session->setWishlistItemCount($count);
@@ -582,7 +583,7 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
     public function getRemoveUrlCustom($item, $addFormKey = true)
     {
         $params = [
-            'item' => $item->getWishlistItemId()
+            'item' => $item->getWishlistItemId(),
         ];
         if ($addFormKey) {
             $params[Mage_Core_Model_Url::FORM_KEY] = $this->_getSingletonModel('core/session')->getFormKey();
@@ -605,7 +606,7 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
                 '_current'      => true,
                 '_use_rewrite'  => true,
                 '_store_to_url' => true,
-            ])
+            ]),
         );
         $params = [
             'item' => is_string($item) ? $item : $item->getWishlistItemId(),

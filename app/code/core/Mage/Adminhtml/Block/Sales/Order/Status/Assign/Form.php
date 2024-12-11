@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -34,11 +35,11 @@ class Mage_Adminhtml_Block_Sales_Order_Status_Assign_Form extends Mage_Adminhtml
     {
         $form   = new Varien_Data_Form([
             'id'        => 'edit_form',
-            'method'    => 'post'
+            'method'    => 'post',
         ]);
 
         $fieldset   = $form->addFieldset('base_fieldset', [
-            'legend'    => Mage::helper('sales')->__('Assignment Information')
+            'legend'    => Mage::helper('sales')->__('Assignment Information'),
         ]);
 
         $statuses = Mage::getResourceModel('sales/order_status_collection')
@@ -57,7 +58,7 @@ class Mage_Adminhtml_Block_Sales_Order_Status_Assign_Form extends Mage_Adminhtml
                 'class'     => 'required-entry',
                 'values'    => $statuses,
                 'required'  => true,
-            ]
+            ],
         );
 
         $fieldset->addField(
@@ -69,7 +70,7 @@ class Mage_Adminhtml_Block_Sales_Order_Status_Assign_Form extends Mage_Adminhtml
                 'class'     => 'required-entry',
                 'values'    => $states,
                 'required'  => true,
-            ]
+            ],
         );
 
         $fieldset->addField(
@@ -79,7 +80,7 @@ class Mage_Adminhtml_Block_Sales_Order_Status_Assign_Form extends Mage_Adminhtml
                 'name'      => 'is_default',
                 'label'     => Mage::helper('sales')->__('Use Order Status As Default'),
                 'value'     => 1,
-            ]
+            ],
         );
 
         $form->setAction($this->getUrl('*/sales_order_status/assignPost'));

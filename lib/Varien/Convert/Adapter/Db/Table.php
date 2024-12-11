@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -28,12 +29,8 @@ class Varien_Convert_Adapter_Db_Table extends Varien_Convert_Adapter_Abstract
     }
 
     #[\Override]
-    public function load()
-    {
-    }
+    public function load() {}
 
     #[\Override]
-    public function save()
-    {
-    }
+    public function save() {}
 }

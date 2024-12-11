@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,10 +7,11 @@
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Mage_Core_Model_Resource_Setup $installer */
+/** @var Mage_Core_Model_Resource_Setup $this */
 $installer = $this;
 $installer->startSetup();
 
@@ -70,11 +72,11 @@ $table = $installer->getConnection()
     ], 'Role name')
     ->addIndex(
         $installer->getIdxName('api/role', ['parent_id', 'sort_order']),
-        ['parent_id', 'sort_order']
+        ['parent_id', 'sort_order'],
     )
     ->addIndex(
         $installer->getIdxName('api/role', ['tree_level']),
-        ['tree_level']
+        ['tree_level'],
     )
     ->setComment('Api ACL Roles');
 $installer->getConnection()->createTable($table);
@@ -110,11 +112,11 @@ $table = $installer->getConnection()
     ], 'Permission')
     ->addIndex(
         $installer->getIdxName('api/rule', ['resource_id', 'role_id']),
-        ['resource_id', 'role_id']
+        ['resource_id', 'role_id'],
     )
     ->addIndex(
         $installer->getIdxName('api/rule', ['role_id', 'resource_id']),
-        ['role_id', 'resource_id']
+        ['role_id', 'resource_id'],
     )
     ->addForeignKey(
         $installer->getFkName('api/rule', 'role_id', 'api/role', 'role_id'),
@@ -122,7 +124,7 @@ $table = $installer->getConnection()
         $installer->getTable('api/role'),
         'role_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Api ACL Rules');
 $installer->getConnection()->createTable($table);
@@ -185,11 +187,11 @@ $table = $installer->getConnection()
     ], 'Sessioin id')
     ->addIndex(
         $installer->getIdxName('api/session', ['user_id']),
-        ['user_id']
+        ['user_id'],
     )
     ->addIndex(
         $installer->getIdxName('api/session', ['sessid']),
-        ['sessid']
+        ['sessid'],
     )
     ->addForeignKey(
         $installer->getFkName('api/session', 'user_id', 'api/user', 'user_id'),
@@ -197,7 +199,7 @@ $table = $installer->getConnection()
         $installer->getTable('api/user'),
         'user_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Api Sessions');
 $installer->getConnection()->createTable($table);

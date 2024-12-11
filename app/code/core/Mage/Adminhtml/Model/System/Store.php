@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -107,13 +108,13 @@ class Mage_Adminhtml_Model_System_Store extends Varien_Object
         if ($empty) {
             $options[] = [
                 'label' => '',
-                'value' => ''
+                'value' => '',
             ];
         }
         if ($all && $this->_isAdminScopeAllowed) {
             $options[] = [
                 'label' => Mage::helper('adminhtml')->__('All Store Views'),
-                'value' => 0
+                'value' => 0,
             ];
         }
 
@@ -134,7 +135,7 @@ class Mage_Adminhtml_Model_System_Store extends Varien_Object
                     if (!$websiteShow) {
                         $options[] = [
                             'label' => Mage::helper('core')->escapeHtml($website->getName()),
-                            'value' => []
+                            'value' => [],
                         ];
                         $websiteShow = true;
                     }
@@ -145,14 +146,14 @@ class Mage_Adminhtml_Model_System_Store extends Varien_Object
                     $values[] = [
                         'label' => str_repeat($nonEscapableNbspChar, 4) .
                             Mage::helper('core')->escapeHtml($store->getName()),
-                        'value' => $store->getId()
+                        'value' => $store->getId(),
                     ];
                 }
                 if ($groupShow) {
                     $options[] = [
                         'label' => str_repeat($nonEscapableNbspChar, 4) .
                             Mage::helper('core')->escapeHtml($group->getName()),
-                        'value' => $values
+                        'value' => $values,
                     ];
                 }
             }
@@ -177,7 +178,7 @@ class Mage_Adminhtml_Model_System_Store extends Varien_Object
         if ($isAll) {
             $out[] = [
                 'value' => 0,
-                'label' => Mage::helper('adminhtml')->__('All Store Views')
+                'label' => Mage::helper('adminhtml')->__('All Store Views'),
             ];
         }
 
@@ -188,7 +189,7 @@ class Mage_Adminhtml_Model_System_Store extends Varien_Object
             }
             $out[$websiteId] = [
                 'value' => $websiteId,
-                'label' => $website->getName()
+                'label' => $website->getName(),
             ];
 
             foreach ($website->getGroups() as $group) {
@@ -198,7 +199,7 @@ class Mage_Adminhtml_Model_System_Store extends Varien_Object
                 }
                 $out[$websiteId]['children'][$groupId] = [
                     'value' => $groupId,
-                    'label' => $group->getName()
+                    'label' => $group->getName(),
                 ];
 
                 foreach ($group->getStores() as $store) {
@@ -208,7 +209,7 @@ class Mage_Adminhtml_Model_System_Store extends Varien_Object
                     }
                     $out[$websiteId]['children'][$groupId]['children'][$storeId] = [
                         'value' => $storeId,
-                        'label' => $store->getName()
+                        'label' => $store->getName(),
                     ];
                 }
                 if (empty($out[$websiteId]['children'][$groupId]['children'])) {
@@ -235,13 +236,13 @@ class Mage_Adminhtml_Model_System_Store extends Varien_Object
         if ($empty) {
             $options[] = [
                 'label' => Mage::helper('adminhtml')->__('-- Please Select --'),
-                'value' => ''
+                'value' => '',
             ];
         }
         if ($all && $this->_isAdminScopeAllowed) {
             $options[] = [
                 'label' => Mage::helper('adminhtml')->__('Admin'),
-                'value' => 0
+                'value' => 0,
             ];
         }
 
@@ -264,7 +265,7 @@ class Mage_Adminhtml_Model_System_Store extends Varien_Object
     public function getWebsiteOptionHash($withDefault = false, $attribute = 'name')
     {
         $options = [];
-        foreach (Mage::app()->getWebsites((bool)$withDefault && $this->_isAdminScopeAllowed) as $website) {
+        foreach (Mage::app()->getWebsites((bool) $withDefault && $this->_isAdminScopeAllowed) as $website) {
             $options[$website->getId()] = $website->getDataUsingMethod($attribute);
         }
         return $options;
@@ -280,7 +281,7 @@ class Mage_Adminhtml_Model_System_Store extends Varien_Object
     public function getStoreOptionHash($withDefault = false, $attribute = 'name')
     {
         $options = [];
-        foreach (Mage::app()->getStores((bool)$withDefault && $this->_isAdminScopeAllowed) as $store) {
+        foreach (Mage::app()->getStores((bool) $withDefault && $this->_isAdminScopeAllowed) as $store) {
             $options[$store->getId()] = $store->getDataUsingMethod($attribute);
         }
         return $options;
@@ -478,7 +479,7 @@ class Mage_Adminhtml_Model_System_Store extends Varien_Object
      */
     public function setIsAdminScopeAllowed($value)
     {
-        $this->_isAdminScopeAllowed = (bool)$value;
+        $this->_isAdminScopeAllowed = (bool) $value;
         return $this;
     }
 }

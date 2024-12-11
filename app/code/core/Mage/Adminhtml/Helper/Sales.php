@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -33,7 +34,7 @@ class Mage_Adminhtml_Helper_Sales extends Mage_Core_Helper_Abstract
             $dataObject->getData('base_' . $code),
             $dataObject->getData($code),
             $strong,
-            $separator
+            $separator,
         );
     }
 
@@ -135,7 +136,7 @@ class Mage_Adminhtml_Helper_Sales extends Mage_Core_Helper_Abstract
                 $links[] = sprintf(
                     '<a href="%s">%s</a>',
                     htmlspecialchars($url, ENT_QUOTES, 'UTF-8', false),
-                    parent::escapeHtml($text)
+                    parent::escapeHtml($text),
                 );
                 $data = str_replace($matches[0], '%' . $i . '$s', $data);
                 ++$i;

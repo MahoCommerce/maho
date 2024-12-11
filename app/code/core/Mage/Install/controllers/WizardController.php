@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -104,7 +105,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->_initLayoutMessages('install/session');
 
         $this->getLayout()->getBlock('content')->append(
-            $this->getLayout()->createBlock('install/begin', 'install.begin')
+            $this->getLayout()->createBlock('install/begin', 'install.begin'),
         );
 
         $this->renderLayout();
@@ -137,7 +138,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->_prepareLayout();
         $this->_initLayoutMessages('install/session');
         $this->getLayout()->getBlock('content')->append(
-            $this->getLayout()->createBlock('install/locale', 'install.locale')
+            $this->getLayout()->createBlock('install/locale', 'install.locale'),
         );
 
         $this->renderLayout();
@@ -195,7 +196,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->_prepareLayout();
         $this->_initLayoutMessages('install/session');
         $this->getLayout()->getBlock('content')->append(
-            $this->getLayout()->createBlock('install/config', 'install.config')
+            $this->getLayout()->createBlock('install/config', 'install.config'),
         );
 
         $this->renderLayout();
@@ -267,7 +268,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->_initLayoutMessages('install/session');
 
         $this->getLayout()->getBlock('content')->append(
-            $this->getLayout()->createBlock('install/admin', 'install.administrator')
+            $this->getLayout()->createBlock('install/admin', 'install.administrator'),
         );
         $this->renderLayout();
     }
@@ -325,7 +326,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     {
         $this->_checkIfInstalled();
 
-        $date = (string)Mage::getConfig()->getNode('global/install/date');
+        $date = (string) Mage::getConfig()->getNode('global/install/date');
         if ($date !== Mage_Install_Model_Installer_Config::TMP_INSTALL_DATE_VALUE) {
             $this->_redirect('*/*');
             return;
@@ -337,7 +338,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->_initLayoutMessages('install/session');
 
         $this->getLayout()->getBlock('content')->append(
-            $this->getLayout()->createBlock('install/end', 'install.end')
+            $this->getLayout()->createBlock('install/end', 'install.end'),
         );
         $this->renderLayout();
         Mage::getSingleton('install/session')->clear();

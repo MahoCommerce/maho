@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -21,7 +22,7 @@ use Symfony\Component\Console\Question\Question;
 
 #[AsCommand(
     name: 'customer:change-password',
-    description: 'Change password of a customers'
+    description: 'Change password of a customers',
 )]
 class CustomerChangepassword extends BaseMahoCommand
 {
@@ -79,7 +80,7 @@ class CustomerChangepassword extends BaseMahoCommand
                 $customer->getWebsiteId(),
                 $customer->getEmail(),
                 $customer->getFirstname(),
-                $customer->getLastname()
+                $customer->getLastname(),
             ]);
         }
         $table->render();

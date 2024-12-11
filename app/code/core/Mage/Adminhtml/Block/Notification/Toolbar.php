@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -23,9 +24,7 @@ class Mage_Adminhtml_Block_Notification_Toolbar extends Mage_Adminhtml_Block_Tem
      *
      */
     #[\Override]
-    protected function _construct()
-    {
-    }
+    protected function _construct() {}
 
     /**
      * Retrieve helper

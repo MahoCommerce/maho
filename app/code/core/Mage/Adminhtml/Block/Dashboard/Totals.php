@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -50,7 +51,7 @@ class Mage_Adminhtml_Block_Dashboard_Totals extends Mage_Adminhtml_Block_Dashboa
         } elseif (!$collection->isLive()) {
             $collection->addFieldToFilter(
                 'store_id',
-                ['eq' => Mage::app()->getStore(Mage_Core_Model_Store::ADMIN_CODE)->getId()]
+                ['eq' => Mage::app()->getStore(Mage_Core_Model_Store::ADMIN_CODE)->getId()],
             );
         }
 

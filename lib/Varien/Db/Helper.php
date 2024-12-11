@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -66,7 +67,7 @@ class Varien_Db_Helper
         'shipping'      => 'shpp',
         'calculation'   => 'calc',
         'search'        => 'srch',
-        'query'         => 'qr'
+        'query'         => 'qr',
     ];
 
     /**

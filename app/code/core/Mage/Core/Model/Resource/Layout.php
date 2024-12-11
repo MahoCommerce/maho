@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -37,7 +38,7 @@ class Mage_Core_Model_Resource_Layout extends Mage_Core_Model_Resource_Db_Abstra
             'store_id'  => Mage::app()->getStore()->getId(),
             'area'      => Mage::getSingleton('core/design_package')->getArea(),
             'package'   => Mage::getSingleton('core/design_package')->getPackageName(),
-            'theme'     => Mage::getSingleton('core/design_package')->getTheme('layout')
+            'theme'     => Mage::getSingleton('core/design_package')->getTheme('layout'),
         ];
 
         foreach ($params as $key => $value) {
@@ -55,7 +56,7 @@ class Mage_Core_Model_Resource_Layout extends Mage_Core_Model_Resource_Db_Abstra
                 ->join(
                     ['link' => $this->getTable('core/layout_link')],
                     'link.layout_update_id=layout_update.layout_update_id',
-                    ''
+                    '',
                 )
                 ->where('link.store_id IN (0, :store_id)')
                 ->where('link.area = :area')

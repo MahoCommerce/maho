@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -33,7 +34,7 @@ class Mage_Adminhtml_Newsletter_ProblemController extends Mage_Adminhtml_Control
         }
 
         $this->getLayout()->getMessagesBlock()->setMessages(
-            Mage::getSingleton('adminhtml/session')->getMessages(true)
+            Mage::getSingleton('adminhtml/session')->getMessages(true),
         );
         $this->loadLayout();
 
@@ -42,7 +43,7 @@ class Mage_Adminhtml_Newsletter_ProblemController extends Mage_Adminhtml_Control
         $this->_addBreadcrumb(Mage::helper('newsletter')->__('Newsletter Problem Reports'), Mage::helper('newsletter')->__('Newsletter Problem Reports'));
 
         $this->_addContent(
-            $this->getLayout()->createBlock('adminhtml/newsletter_problem', 'problem')
+            $this->getLayout()->createBlock('adminhtml/newsletter_problem', 'problem'),
         );
 
         $this->renderLayout();
@@ -58,7 +59,7 @@ class Mage_Adminhtml_Newsletter_ProblemController extends Mage_Adminhtml_Control
                     ->addSubscriberInfo()
                     ->addFieldToFilter(
                         $collection->getResource()->getIdFieldName(),
-                        ['in' => $problems]
+                        ['in' => $problems],
                     )
                     ->load();
 
@@ -76,7 +77,7 @@ class Mage_Adminhtml_Newsletter_ProblemController extends Mage_Adminhtml_Control
                 $collection
                     ->addFieldToFilter(
                         $collection->getResource()->getIdFieldName(),
-                        ['in' => $problems]
+                        ['in' => $problems],
                     )
                     ->load();
                 $collection->walk('delete');

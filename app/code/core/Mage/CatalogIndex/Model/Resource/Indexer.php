@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -182,7 +183,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
         $attribute = Mage::getSingleton('eav/entity_attribute')->getIdByCode(Mage_Catalog_Model_Product::ENTITY, 'tier_price');
         $this->_beginInsert(
             'catalogindex/price',
-            ['entity_id', 'attribute_id', 'value', 'website_id', 'customer_group_id', 'qty']
+            ['entity_id', 'attribute_id', 'value', 'website_id', 'customer_group_id', 'qty'],
         );
 
         /**
@@ -219,7 +220,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
                             $index['value'],
                             $websiteId,
                             (int) $group->getId(),
-                            (int) $index['qty']
+                            (int) $index['qty'],
                         ]);
                     }
                 } else {
@@ -229,7 +230,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
                         $index['value'],
                         $websiteId,
                         (int) $index['customer_group_id'],
-                        (int) $index['qty']
+                        (int) $index['qty'],
                     ]);
                 }
             }
@@ -269,7 +270,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
             'customer_group_id',
             'value',
             'attribute_id',
-            'tax_class_id'
+            'tax_class_id',
         ]);
 
         $productTypes = Mage::getSingleton('catalogindex/retreiver')->assignProductTypes($products);
@@ -299,7 +300,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
                             $group->getId(),
                             $finalPrice,
                             $priceAttribute,
-                            $taxClassId
+                            $taxClassId,
                         ]);
                     }
                 }
@@ -323,7 +324,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
             'entity_id',
             'customer_group_id',
             'value',
-            'tax_class_id'
+            'tax_class_id',
         ]);
         $this->clear(false, false, true, false, false, $products, $store);
         $products = Mage::getSingleton('catalogindex/retreiver')->assignProductTypes($products);
@@ -352,7 +353,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
                             $id,
                             $price['customer_group_id'],
                             $price['minimal_value'],
-                            $price['tax_class_id']
+                            $price['tax_class_id'],
                         ]);
                     }
                 }
@@ -428,7 +429,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
                             $id,
                             $index['attribute_id'],
                             $value,
-                            (is_null($websiteId) ? $store->getId() : $websiteId)
+                            (is_null($websiteId) ? $store->getId() : $websiteId),
                         ]);
                     }
                 } else {
@@ -436,7 +437,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
                         $id,
                         $index['attribute_id'],
                         $index['value'],
-                        (is_null($websiteId) ? $store->getId() : $websiteId)
+                        (is_null($websiteId) ? $store->getId() : $websiteId),
                     ]);
                 }
             }
@@ -574,7 +575,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
                 'nullable'   => true,
                 'default'   => null,
                 'extra'     => null,
-                'comment'   => $columnName . ' column'
+                'comment'   => $columnName . ' column',
             ];
         }
 
@@ -597,7 +598,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
             $indexName  = 'IDX_DISPLAY_PRICE_GROUP_' . $group->getId();
             $indexes[$indexName] = [
                 'type'   => 'index',
-                'fields' => [$columnName]
+                'fields' => [$columnName],
             ];
         }
 
@@ -638,7 +639,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
                         . " AND `p`.`attribute_id`={$priceAttribute}"
                         . " AND `p`.`customer_group_id`={$group->getId()}"
                         . " AND `p`.`website_id`={$websiteId}",
-                    [$columnName => 'value']
+                    [$columnName => 'value'],
                 );
             if ($addChildData) {
                 $select->where('e.is_child=?', 0);
@@ -664,7 +665,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
                             . " AND `p`.`attribute_id`={$priceAttribute}"
                             . " AND `p`.`customer_group_id`={$group->getId()}"
                             . " AND `p`.`website_id`={$websiteId}",
-                        [$columnName => 'value']
+                        [$columnName => 'value'],
                     )
                     ->where('e.is_child=?', 1);
 

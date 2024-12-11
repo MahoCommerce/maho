@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -47,7 +48,7 @@ class Mage_Adminhtml_Block_Notification_Grid_Renderer_Actions extends Mage_Admin
                 'id' => $row->getId(),
                 Mage_Core_Controller_Front_Action::PARAM_NAME_URL_ENCODED => $helper->getEncodedUrl()]),
             Mage::helper('adminnotification')->__('Are you sure?'),
-            Mage::helper('adminnotification')->__('Remove')
+            Mage::helper('adminnotification')->__('Remove'),
         );
     }
 }

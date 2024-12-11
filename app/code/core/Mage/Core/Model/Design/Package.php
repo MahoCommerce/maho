@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -352,7 +353,7 @@ class Mage_Core_Model_Design_Package
     {
         $params['_type'] = 'skin';
         $this->updateParamDefaults($params);
-        return Mage::getBaseUrl('skin', isset($params['_secure']) ? (bool)$params['_secure'] : null)
+        return Mage::getBaseUrl('skin', isset($params['_secure']) ? (bool) $params['_secure'] : null)
             . $params['_area'] . '/' . $params['_package'] . '/' . $params['_theme'] . '/';
     }
 
@@ -453,8 +454,8 @@ class Mage_Core_Model_Design_Package
             $this->_fallback->getFallbackScheme(
                 $params['_area'],
                 $params['_package'],
-                $params['_theme']
-            )
+                $params['_theme'],
+            ),
         );
         Varien_Profiler::stop(__METHOD__);
         return $result;
@@ -502,7 +503,7 @@ class Mage_Core_Model_Design_Package
         Varien_Profiler::start(__METHOD__);
 
         // Prevent reading files outside of the proper directory while still allowing symlinked files
-        if (str_contains((string)$file, '..')) {
+        if (str_contains((string) $file, '..')) {
             Mage::log(sprintf('Invalid path requested: %s (params: %s)', $file, json_encode($params)), Zend_Log::ERR);
             throw new Exception('Invalid path requested.');
         }
@@ -521,8 +522,8 @@ class Mage_Core_Model_Design_Package
                 $this->_fallback->getFallbackScheme(
                     $params['_area'],
                     $params['_package'],
-                    $params['_theme']
-                )
+                    $params['_theme'],
+                ),
             );
         }
         $result = $this->getSkinBaseUrl($params) . (empty($file) ? '' : $file);

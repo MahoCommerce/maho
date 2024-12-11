@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -33,8 +34,8 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_View_Tracking extends Mage_Admin
                 ->setData([
                     'label'   => Mage::helper('sales')->__('Add'),
                     'class'   => 'save',
-                    'onclick' => $onclick
-                ])
+                    'onclick' => $onclick,
+                ]),
         );
         return $this;
     }
@@ -78,7 +79,7 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_View_Tracking extends Mage_Admin
     {
         return $this->getUrl('*/*/removeTrack/', [
             'shipment_id' => $this->getShipment()->getId(),
-            'track_id' => $track->getId()
+            'track_id' => $track->getId(),
         ]);
     }
 
@@ -91,7 +92,7 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_View_Tracking extends Mage_Admin
     {
         return $this->getUrl('*/*/viewTrack/', [
             'shipment_id' => $this->getShipment()->getId(),
-            'track_id' => $track->getId()
+            'track_id' => $track->getId(),
         ]);
     }
 
@@ -104,7 +105,7 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_View_Tracking extends Mage_Admin
     {
         $carriers = [];
         $carrierInstances = Mage::getSingleton('shipping/config')->getAllCarriers(
-            $this->getShipment()->getStoreId()
+            $this->getShipment()->getStoreId(),
         );
         $carriers['custom'] = Mage::helper('sales')->__('Custom Value');
         foreach ($carrierInstances as $code => $carrier) {

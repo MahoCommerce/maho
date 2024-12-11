@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -29,7 +30,7 @@ class Mage_SalesRule_Model_System_Config_Source_Coupon_Format
         foreach ($formatsList as $formatId => $formatTitle) {
             $result[] = [
                 'value' => $formatId,
-                'label' => $formatTitle
+                'label' => $formatTitle,
             ];
         }
 

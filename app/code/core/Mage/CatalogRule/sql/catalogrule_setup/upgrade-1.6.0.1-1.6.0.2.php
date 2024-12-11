@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,10 +7,11 @@
  * @package    Mage_CatalogRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Mage_Core_Model_Resource_Setup $installer */
+/** @var Mage_Core_Model_Resource_Setup $this */
 $installer           = $this;
 $connection          = $installer->getConnection();
 
@@ -31,30 +33,30 @@ if (!$connection->isTableExists($rulesWebsitesTable)) {
             Varien_Db_Ddl_Table::TYPE_INTEGER,
             null,
             [
-            'unsigned'  => true,
-            'nullable'  => false,
-            'primary'   => true
+                'unsigned'  => true,
+                'nullable'  => false,
+                'primary'   => true,
             ],
-            'Rule Id'
+            'Rule Id',
         )
         ->addColumn(
             'website_id',
             Varien_Db_Ddl_Table::TYPE_SMALLINT,
             null,
             [
-            'unsigned'  => true,
-            'nullable'  => false,
-            'primary'   => true
+                'unsigned'  => true,
+                'nullable'  => false,
+                'primary'   => true,
             ],
-            'Website Id'
+            'Website Id',
         )
         ->addIndex(
             $installer->getIdxName('catalogrule/website', ['rule_id']),
-            ['rule_id']
+            ['rule_id'],
         )
         ->addIndex(
             $installer->getIdxName('catalogrule/website', ['website_id']),
-            ['website_id']
+            ['website_id'],
         )
         ->addForeignKey(
             $installer->getFkName('catalogrule/website', 'rule_id', 'catalogrule/rule', 'rule_id'),
@@ -62,7 +64,7 @@ if (!$connection->isTableExists($rulesWebsitesTable)) {
             $rulesTable,
             'rule_id',
             Varien_Db_Ddl_Table::ACTION_CASCADE,
-            Varien_Db_Ddl_Table::ACTION_CASCADE
+            Varien_Db_Ddl_Table::ACTION_CASCADE,
         )
         ->addForeignKey(
             $installer->getFkName('catalogrule/website', 'website_id', 'core/website', 'website_id'),
@@ -70,7 +72,7 @@ if (!$connection->isTableExists($rulesWebsitesTable)) {
             $websitesTable,
             'website_id',
             Varien_Db_Ddl_Table::ACTION_CASCADE,
-            Varien_Db_Ddl_Table::ACTION_CASCADE
+            Varien_Db_Ddl_Table::ACTION_CASCADE,
         )
         ->setComment('Catalog Rules To Websites Relations');
 
@@ -88,30 +90,30 @@ if (!$connection->isTableExists($rulesCustomerGroupsTable)) {
             Varien_Db_Ddl_Table::TYPE_INTEGER,
             null,
             [
-            'unsigned'  => true,
-            'nullable'  => false,
-            'primary'   => true
+                'unsigned'  => true,
+                'nullable'  => false,
+                'primary'   => true,
             ],
-            'Rule Id'
+            'Rule Id',
         )
         ->addColumn(
             'customer_group_id',
             Varien_Db_Ddl_Table::TYPE_SMALLINT,
             null,
             [
-            'unsigned'  => true,
-            'nullable'  => false,
-            'primary'   => true
+                'unsigned'  => true,
+                'nullable'  => false,
+                'primary'   => true,
             ],
-            'Customer Group Id'
+            'Customer Group Id',
         )
         ->addIndex(
             $installer->getIdxName('catalogrule/customer_group', ['rule_id']),
-            ['rule_id']
+            ['rule_id'],
         )
         ->addIndex(
             $installer->getIdxName('catalogrule/customer_group', ['customer_group_id']),
-            ['customer_group_id']
+            ['customer_group_id'],
         )
         ->addForeignKey(
             $installer->getFkName('catalogrule/customer_group', 'rule_id', 'catalogrule/rule', 'rule_id'),
@@ -119,20 +121,20 @@ if (!$connection->isTableExists($rulesCustomerGroupsTable)) {
             $rulesTable,
             'rule_id',
             Varien_Db_Ddl_Table::ACTION_CASCADE,
-            Varien_Db_Ddl_Table::ACTION_CASCADE
+            Varien_Db_Ddl_Table::ACTION_CASCADE,
         )
         ->addForeignKey(
             $installer->getFkName(
                 'catalogrule/customer_group',
                 'customer_group_id',
                 'customer/customer_group',
-                'customer_group_id'
+                'customer_group_id',
             ),
             'customer_group_id',
             $customerGroupsTable,
             'customer_group_id',
             Varien_Db_Ddl_Table::ACTION_CASCADE,
-            Varien_Db_Ddl_Table::ACTION_CASCADE
+            Varien_Db_Ddl_Table::ACTION_CASCADE,
         )
         ->setComment('Catalog Rules To Customer Groups Relations');
 
@@ -149,9 +151,9 @@ if ($connection->tableColumnExists($rulesTable, 'website_ids')) {
             ['cw' => $websitesTable],
             $connection->prepareSqlCondition(
                 'sr.website_ids',
-                ['finset' =>  new Zend_Db_Expr('cw.website_id')]
+                ['finset' =>  new Zend_Db_Expr('cw.website_id')],
             ),
-            []
+            [],
         );
     $query = $select->insertFromSelect($rulesWebsitesTable, ['rule_id', 'website_id']);
     $connection->query($query);
@@ -167,9 +169,9 @@ if ($connection->tableColumnExists($rulesTable, 'customer_group_ids')) {
             ['cg' => $customerGroupsTable],
             $connection->prepareSqlCondition(
                 'sr.customer_group_ids',
-                ['finset' =>  new Zend_Db_Expr('cg.customer_group_id')]
+                ['finset' =>  new Zend_Db_Expr('cg.customer_group_id')],
             ),
-            []
+            [],
         );
     $query = $select->insertFromSelect($rulesCustomerGroupsTable, ['rule_id', 'customer_group_id']);
     $connection->query($query);

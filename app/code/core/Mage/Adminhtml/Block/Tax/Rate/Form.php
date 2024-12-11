@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -66,7 +67,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Form extends Mage_Adminhtml_Block_Widget_For
         if ($rateObject->getTaxCalculationRateId() > 0) {
             $fieldset->addField('tax_calculation_rate_id', 'hidden', [
                 'name'  => 'tax_calculation_rate_id',
-                'value' => $rateObject->getTaxCalculationRateId()
+                'value' => $rateObject->getTaxCalculationRateId(),
             ]);
         }
 
@@ -82,13 +83,13 @@ class Mage_Adminhtml_Block_Tax_Rate_Form extends Mage_Adminhtml_Block_Widget_For
             'name'     => 'tax_country_id',
             'label'    => Mage::helper('tax')->__('Country'),
             'required' => true,
-            'values'   => $countries
+            'values'   => $countries,
         ]);
 
         $fieldset->addField('tax_region_id', 'select', [
             'name'   => 'tax_region_id',
             'label'  => Mage::helper('tax')->__('State'),
-            'values' => $regions
+            'values' => $regions,
         ]);
 
         $fieldset->addField('zip_is_range', 'select', [
@@ -97,7 +98,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Form extends Mage_Adminhtml_Block_Widget_For
             'options' => [
                 '0' => Mage::helper('tax')->__('No'),
                 '1' => Mage::helper('tax')->__('Yes'),
-            ]
+            ],
         ]);
 
         if (!$rateObject->hasTaxPostcode()) {
@@ -115,7 +116,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Form extends Mage_Adminhtml_Block_Widget_For
             'label'     => Mage::helper('tax')->__('Range From'),
             'required'  => true,
             'maxlength' => 9,
-            'class'     => 'validate-digits'
+            'class'     => 'validate-digits',
         ]);
 
         $fieldset->addField('zip_to', 'text', [
@@ -123,7 +124,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Form extends Mage_Adminhtml_Block_Widget_For
             'label'     => Mage::helper('tax')->__('Range To'),
             'required'  => true,
             'maxlength' => 9,
-            'class'     => 'validate-digits'
+            'class'     => 'validate-digits',
         ]);
 
         $fieldset->addField('rate', 'text', [
@@ -131,7 +132,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Form extends Mage_Adminhtml_Block_Widget_For
             'label'    => Mage::helper('tax')->__('Rate Percent'),
             'title'    => Mage::helper('tax')->__('Rate Percent'),
             'required' => true,
-            'class'    => 'validate-not-negative-number'
+            'class'    => 'validate-not-negative-number',
         ]);
 
         $form->setAction($this->getUrl('*/tax_rate/save'));

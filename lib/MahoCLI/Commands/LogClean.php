@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'log:clean',
-    description: 'Clean log tables in the database'
+    description: 'Clean log tables in the database',
 )]
 class LogClean extends BaseMahoCommand
 {

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -29,7 +30,5 @@ class Mage_Sales_Model_Quote_Config
         return array_keys($attributes);
     }
 
-    public function getTotalModels()
-    {
-    }
+    public function getTotalModels() {}
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -31,9 +32,9 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
     protected $_filters = [];
 
     protected $_defaultFilters = [
-            'report_from' => '',
-            'report_to' => '',
-            'report_period' => 'day'
+        'report_from' => '',
+        'report_to' => '',
+        'report_period' => 'day',
     ];
 
     protected $_subReportSize = 5;
@@ -79,7 +80,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
             $this->getLayout()->createBlock('adminhtml/store_switcher')
                 ->setUseConfirm(false)
                 ->setSwitchUrl($this->getUrl('*/*/*', ['store' => null]))
-                ->setTemplate('report/store/switcher.phtml')
+                ->setTemplate('report/store/switcher.phtml'),
         );
 
         $this->setChild(
@@ -88,8 +89,8 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
                 ->setData([
                     'label'     => Mage::helper('adminhtml')->__('Refresh'),
                     'onclick'   => $this->getRefreshButtonCallback(),
-                    'class'   => 'task'
-                ])
+                    'class'   => 'task',
+                ]),
         );
         parent::_prepareLayout();
         return $this;
@@ -192,7 +193,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
 
         Mage::dispatchEvent(
             'adminhtml_widget_grid_filter_collection',
-            ['collection' => $this->getCollection(), 'filter_values' => $this->_filterValues]
+            ['collection' => $this->getCollection(), 'filter_values' => $this->_filterValues],
         );
 
         return $this;
@@ -375,11 +376,11 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
                     $url,
                     [
                         '_current' => true,
-                        'filter' => $this->getParam($this->getVarNameFilter(), null)
-                    ]
+                        'filter' => $this->getParam($this->getVarNameFilter(), null),
+                    ],
                 ),
-                'label' => $label
-            ]
+                'label' => $label,
+            ],
         );
         return $this;
     }
@@ -416,7 +417,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
                 if ($this->getGrandTotals()->getData($t2) != 0) {
                     $this->getGrandTotals()->setData(
                         $key,
-                        (float)$this->getGrandTotals()->getData($t1) / $this->getGrandTotals()->getData($t2)
+                        (float) $this->getGrandTotals()->getData($t1) / $this->getGrandTotals()->getData($t2),
                     );
                 }
             }
@@ -471,7 +472,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
                         $data[] = '"' . str_replace(
                             ['"', '\\'],
                             ['""', '\\\\'],
-                            $column->getRowField($_subItem)
+                            $column->getRowField($_subItem),
                         ) . '"';
                     }
                 }

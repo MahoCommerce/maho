@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -74,7 +75,7 @@ class Varien_Data_Form_Element_Editor extends Varien_Data_Form_Element_Textarea
             $translatedString = [
                 'Insert Image...' => $this->translate('Insert Image...'),
                 'Insert Media...' => $this->translate('Insert Media...'),
-                'Insert File...'  => $this->translate('Insert File...')
+                'Insert File...'  => $this->translate('Insert File...'),
             ];
 
             $jsSetupObject = 'wysiwyg' . $this->getHtmlId();

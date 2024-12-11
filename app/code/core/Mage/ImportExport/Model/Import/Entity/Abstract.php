@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -537,7 +538,7 @@ abstract class Mage_ImportExport_Model_Import_Entity_Abstract
                 break;
             case 'decimal':
                 $val   = trim($rowData[$attrCode]);
-                $valid = (float)$val == $val;
+                $valid = (float) $val == $val;
                 break;
             case 'select':
             case 'multiselect':
@@ -545,7 +546,7 @@ abstract class Mage_ImportExport_Model_Import_Entity_Abstract
                 break;
             case 'int':
                 $val   = trim($rowData[$attrCode]);
-                $valid = (int)$val == $val;
+                $valid = (int) $val == $val;
                 break;
             case 'datetime':
                 $val   = trim($rowData[$attrCode]);
@@ -650,7 +651,7 @@ abstract class Mage_ImportExport_Model_Import_Entity_Abstract
             if (($colsAbsent = array_diff($this->_permanentAttributes, $this->_getSource()->getColNames()))) {
                 file_put_contents($this->_getSource()->getSource(), '');
                 Mage::throwException(
-                    Mage::helper('importexport')->__('Can not find required columns: %s', implode(', ', $colsAbsent))
+                    Mage::helper('importexport')->__('Can not find required columns: %s', implode(', ', $colsAbsent)),
                 );
             }
 
@@ -668,7 +669,7 @@ abstract class Mage_ImportExport_Model_Import_Entity_Abstract
             }
             if ($invalidColumns) {
                 Mage::throwException(
-                    Mage::helper('importexport')->__('Column names: "%s" are invalid', implode('", "', $invalidColumns))
+                    Mage::helper('importexport')->__('Column names: "%s" are invalid', implode('", "', $invalidColumns)),
                 );
             }
             $this->_saveValidatedBunches();

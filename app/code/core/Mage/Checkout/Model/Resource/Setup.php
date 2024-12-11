@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -15,6 +16,4 @@
  * @category   Mage
  * @package    Mage_Checkout
  */
-class Mage_Checkout_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
-{
-}
+class Mage_Checkout_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup {}

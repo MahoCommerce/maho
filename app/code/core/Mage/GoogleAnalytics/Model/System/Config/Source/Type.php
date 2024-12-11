@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -27,8 +28,8 @@ class Mage_GoogleAnalytics_Model_System_Config_Source_Type
         return [
             [
                 'value' => Mage_GoogleAnalytics_Helper_Data::TYPE_ANALYTICS4,
-                'label' => Mage::helper('googleanalytics')->__('Google Analytics 4')
-            ]
+                'label' => Mage::helper('googleanalytics')->__('Google Analytics 4'),
+            ],
         ];
     }
 }

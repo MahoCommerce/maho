@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -83,7 +84,7 @@ class Mage_Checkout_Block_Multishipping_Addresses extends Mage_Sales_Block_Items
             foreach ($this->getCustomer()->getAddresses() as $address) {
                 $options[] = [
                     'value' => $address->getId(),
-                    'label' => $address->format('oneline')
+                    'label' => $address->format('oneline'),
                 ];
             }
             $this->setData('address_options', $options);

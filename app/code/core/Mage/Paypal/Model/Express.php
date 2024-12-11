@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -93,8 +94,8 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
                 Mage_Paypal_Model_Api_ProcessableException::API_MAX_PAYMENT_ATTEMPTS_EXCEEDED,
                 Mage_Paypal_Model_Api_ProcessableException::API_COUNTRY_FILTER_DECLINE,
                 Mage_Paypal_Model_Api_ProcessableException::API_MAXIMUM_AMOUNT_FILTER_DECLINE,
-                Mage_Paypal_Model_Api_ProcessableException::API_OTHER_FILTER_DECLINE
-            ]
+                Mage_Paypal_Model_Api_ProcessableException::API_OTHER_FILTER_DECLINE,
+            ],
         );
     }
 
@@ -244,7 +245,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
             Mage_Sales_Model_Order_Payment_Transaction::TYPE_AUTH,
             null,
             false,
-            $message
+            $message,
         );
 
         $order->setState($state, $status);
@@ -281,7 +282,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
         ) {
             $orderTransaction = $payment->lookupTransaction(
                 false,
-                Mage_Sales_Model_Order_Payment_Transaction::TYPE_ORDER
+                Mage_Sales_Model_Order_Payment_Transaction::TYPE_ORDER,
             );
             if ($orderTransaction) {
                 $payment->setParentTransactionId($orderTransaction->getTxnId());
@@ -336,7 +337,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
                 $api = $this->_callDoAuthorize(
                     $amount,
                     $payment,
-                    $authorizationTransaction->getParentTxnId()
+                    $authorizationTransaction->getParentTxnId(),
                 );
 
                 //Adding authorization transaction
@@ -357,7 +358,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
                     Mage_Sales_Model_Order_Payment_Transaction::TYPE_AUTH,
                     null,
                     true,
-                    $message
+                    $message,
                 );
 
                 $payment->setParentTransactionId($api->getTransactionId());
@@ -367,7 +368,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
             if ($payment->getShouldCloseParentTransaction()) {
                 $orderTransaction = $payment->lookupTransaction(
                     false,
-                    Mage_Sales_Model_Order_Payment_Transaction::TYPE_ORDER
+                    Mage_Sales_Model_Order_Payment_Transaction::TYPE_ORDER,
                 );
 
                 if ($orderTransaction) {
@@ -594,13 +595,13 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
         $payment->setTransactionId($api->getTransactionId())->setIsTransactionClosed(0)
             ->setAdditionalInformation(
                 Mage_Paypal_Model_Express_Checkout::PAYMENT_INFO_TRANSPORT_REDIRECT,
-                $api->getRedirectRequired()
+                $api->getRedirectRequired(),
             );
 
         if ($api->getBillingAgreementId()) {
             $payment->setBillingAgreementData([
                 'billing_agreement_id'  => $api->getBillingAgreementId(),
-                'method_code'           => Mage_Paypal_Model_Config::METHOD_BILLING_AGREEMENT
+                'method_code'           => Mage_Paypal_Model_Config::METHOD_BILLING_AGREEMENT,
             ]);
         }
 
@@ -624,7 +625,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
         if ($info->getAdditionalInformation($this->_isOrderPaymentActionKey)) {
             $orderTransaction = $info->lookupTransaction(
                 false,
-                Mage_Sales_Model_Order_Payment_Transaction::TYPE_ORDER
+                Mage_Sales_Model_Order_Payment_Transaction::TYPE_ORDER,
             );
             if ($orderTransaction) {
                 $info->setParentTransactionId($orderTransaction->getTxnId());
@@ -648,7 +649,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
         if ($payment->getAdditionalInformation($this->_isOrderPaymentActionKey)) {
             $orderTransaction = $payment->lookupTransaction(
                 false,
-                Mage_Sales_Model_Order_Payment_Transaction::TYPE_ORDER
+                Mage_Sales_Model_Order_Payment_Transaction::TYPE_ORDER,
             );
             if ($orderTransaction->getIsClosed()) {
                 return false;
@@ -694,7 +695,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
 
         $payment->setAdditionalInformation(
             $this->_authorizationCountKey,
-            $payment->getAdditionalInformation($this->_authorizationCountKey) + 1
+            $payment->getAdditionalInformation($this->_authorizationCountKey) + 1,
         );
 
         return $api;

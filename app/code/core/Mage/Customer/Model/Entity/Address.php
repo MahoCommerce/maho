@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -15,6 +16,4 @@
  * @category   Mage
  * @package    Mage_Customer
  */
-class Mage_Customer_Model_Entity_Address extends Mage_Customer_Model_Resource_Address
-{
-}
+class Mage_Customer_Model_Entity_Address extends Mage_Customer_Model_Resource_Address {}

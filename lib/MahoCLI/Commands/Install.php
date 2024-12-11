@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -21,7 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'install',
-    description: 'Install Maho'
+    description: 'Install Maho',
 )]
 class Install extends BaseMahoCommand
 {

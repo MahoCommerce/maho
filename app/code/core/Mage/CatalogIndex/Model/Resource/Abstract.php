@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -27,9 +28,7 @@ class Mage_CatalogIndex_Model_Resource_Abstract extends Mage_Core_Model_Resource
      *
      */
     #[\Override]
-    protected function _construct()
-    {
-    }
+    protected function _construct() {}
 
     /**
      * storeId setter

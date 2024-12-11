@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -15,6 +16,4 @@
  * @category   Mage
  * @package    Mage_Api
  */
-class Mage_Api_Model_Acl_Resource extends Zend_Acl_Resource
-{
-}
+class Mage_Api_Model_Acl_Resource extends Zend_Acl_Resource {}

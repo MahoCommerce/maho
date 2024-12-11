@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -334,7 +335,7 @@ class Mage_Sales_Model_Service_Order
     {
         $this->updateLocaleNumbers($data);
         if (isset($data['shipping_amount'])) {
-            $creditmemo->setBaseShippingAmount((float)$data['shipping_amount']);
+            $creditmemo->setBaseShippingAmount((float) $data['shipping_amount']);
         }
 
         if (isset($data['adjustment_positive'])) {

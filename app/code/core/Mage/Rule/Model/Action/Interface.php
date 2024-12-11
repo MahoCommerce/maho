@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -13,6 +14,4 @@
  * @category   Mage
  * @package    Mage_Rule
  */
-interface Mage_Rule_Model_Action_Interface
-{
-}
+interface Mage_Rule_Model_Action_Interface {}

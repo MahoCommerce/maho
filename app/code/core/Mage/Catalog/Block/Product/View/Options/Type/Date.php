@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -112,7 +113,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
         $translations = [
             'd' => $daysHtml,
             'm' => $monthsHtml,
-            'y' => $yearsHtml
+            'y' => $yearsHtml,
         ];
         return strtr($fieldsOrder, $translations);
     }
@@ -134,7 +135,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
             $dayPartHtml = $this->_getHtmlSelect('day_part')
                 ->setOptions([
                     'am' => Mage::helper('catalog')->__('AM'),
-                    'pm' => Mage::helper('catalog')->__('PM')
+                    'pm' => Mage::helper('catalog')->__('PM'),
                 ])
                 ->getHtml();
         }
@@ -156,7 +157,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
     protected function _getSelectFromToHtml($name, $from, $to, $value = null)
     {
         $options = [
-            ['value' => '', 'label' => '-']
+            ['value' => '', 'label' => '-'],
         ];
         for ($i = $from; $i <= $to; $i++) {
             $options[] = ['value' => $i, 'label' => $this->_getValueWithLeadingZeros($i)];

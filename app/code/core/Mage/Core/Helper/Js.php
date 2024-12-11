@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -148,7 +149,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
         // Get current area, i.e. "adminhtml" or "frontend" plus "global"
         $areas = [
             Mage_Core_Model_App_Area::AREA_GLOBAL,
-            Mage::app()->getTranslator()->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA)
+            Mage::app()->getTranslator()->getConfig(Mage_Core_Model_Translate::CONFIG_KEY_AREA),
         ];
         // Get current layout handles
         $handles = $this->getLayout()->getUpdate()->getHandles();
@@ -162,7 +163,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
             if (in_array($node->getName(), $areas) && !isset($node['translate'])) {
                 foreach ($node->children() as $child) {
                     $module = $child->xpath('ancestor-or-self::*/@module')[0]['module'] ?? null;
-                    $this->addTranslateData((string)$child->message, (string)$module);
+                    $this->addTranslateData((string) $child->message, (string) $module);
                 }
                 continue;
             }
@@ -178,7 +179,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
                 if (array_intersect(explode($separator, $node['handle']), $handles)) {
                     foreach ($node->children() as $child) {
                         $module = $child->xpath('ancestor-or-self::*/@module')[0]['module'] ?? null;
-                        $this->addTranslateData((string)$child->message, (string)$module);
+                        $this->addTranslateData((string) $child->message, (string) $module);
                     }
                 }
                 continue;
@@ -186,18 +187,18 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
             // Check for <script> nodes and if we have loaded the JS file
             if ($node->getName() === 'script' && isset($node['path'])) {
                 $type = $node['type'] ?? 'js';
-                $paths = array_map(fn ($path) => "$type/$path", explode($separator, $node['path']));
+                $paths = array_map(fn($path) => "$type/$path", explode($separator, $node['path']));
                 if (array_intersect($paths, $scripts)) {
                     foreach ($node->children() as $child) {
                         $module = $child->xpath('ancestor-or-self::*/@module')[0]['module'] ?? null;
-                        $this->addTranslateData((string)$child->message, (string)$module);
+                        $this->addTranslateData((string) $child->message, (string) $module);
                     }
                 }
                 continue;
             }
             // Default to original behavior
             if (isset($node->message)) {
-                $this->addTranslateData((string)$node->message, (string)$node['module']);
+                $this->addTranslateData((string) $node->message, (string) $node['module']);
             }
         }
         return $this->_translateData;
@@ -226,7 +227,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
                     Mage::app()->saveCache(
                         $xmlConfig->getXmlString(),
                         self::JAVASCRIPT_TRANSLATE_CONFIG_KEY,
-                        [Mage_Core_Model_Config::CACHE_TAG]
+                        [Mage_Core_Model_Config::CACHE_TAG],
                     );
                 }
             }

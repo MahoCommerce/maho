@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -66,7 +67,7 @@ class Mage_Tax_Model_Resource_Report_Collection extends Mage_Sales_Model_Resourc
                 'code'                  => 'code',
                 'percent'               => 'percent',
                 'orders_count'          => 'SUM(orders_count)',
-                'tax_base_amount_sum'   => 'SUM(tax_base_amount_sum)'
+                'tax_base_amount_sum'   => 'SUM(tax_base_amount_sum)',
             ];
         }
 
@@ -96,7 +97,7 @@ class Mage_Tax_Model_Resource_Report_Collection extends Mage_Sales_Model_Resourc
 
         if ($this->isSubTotals()) {
             $this->getSelect()->group([
-                $this->_periodFormat
+                $this->_periodFormat,
             ]);
         }
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'cron:history',
-    description: 'List cron jobs executions stored in the database'
+    description: 'List cron jobs executions stored in the database',
 )]
 class CronHistory extends BaseMahoCommand
 {
@@ -41,7 +42,7 @@ class CronHistory extends BaseMahoCommand
                 $job->getCreatedAt(),
                 $job->getScheduledAt(),
                 $job->getExecutedAt(),
-                $job->getFinishedAt()
+                $job->getFinishedAt(),
             ]);
         }
 

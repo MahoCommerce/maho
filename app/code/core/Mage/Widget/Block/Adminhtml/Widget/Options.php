@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -137,7 +138,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Options extends Mage_Adminhtml_Block_Wi
             $data['value'] = $parameter->getValue();
             //prepare unique id value
             if ($fieldName == 'unique_id' && $data['value'] == '') {
-                $data['value'] = md5((string)microtime(true));
+                $data['value'] = md5((string) microtime(true));
             }
         }
 
@@ -148,7 +149,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Options extends Mage_Adminhtml_Block_Wi
             foreach ($values as $option) {
                 $data['values'][] = [
                     'label' => $this->__($option['label']),
-                    'value' => $option['value']
+                    'value' => $option['value'],
                 ];
             }
         } elseif ($sourceModel = $parameter->getSourceModel()) { // otherwise, a source model is specified
@@ -188,7 +189,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Options extends Mage_Adminhtml_Block_Wi
         $dependenceBlock->addFieldMap($field->getId(), $fieldName);
         if ($parameter->getDepends()) {
             foreach ($parameter->getDepends() as $from => $row) {
-                $values = isset($row['values']) ? array_values($row['values']) : (string)$row['value'];
+                $values = isset($row['values']) ? array_values($row['values']) : (string) $row['value'];
                 $dependenceBlock->addFieldDependence($fieldName, $from, $values);
             }
         }

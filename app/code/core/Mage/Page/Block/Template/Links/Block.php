@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -126,7 +127,7 @@ class Mage_Page_Block_Template_Links_Block extends Mage_Core_Block_Template
      */
     public function setIsFirst($value)
     {
-        $this->_isFirst = (bool)$value;
+        $this->_isFirst = (bool) $value;
         return $this;
     }
 
@@ -149,7 +150,7 @@ class Mage_Page_Block_Template_Links_Block extends Mage_Core_Block_Template
      */
     public function setIsLast($value)
     {
-        $this->_isLast = (bool)$value;
+        $this->_isLast = (bool) $value;
         return $this;
     }
 

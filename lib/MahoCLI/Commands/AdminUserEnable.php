@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -20,7 +21,7 @@ use Symfony\Component\Console\Question\Question;
 
 #[AsCommand(
     name: 'admin:user:enable',
-    description: 'Enable an admin user'
+    description: 'Enable an admin user',
 )]
 class AdminUserEnable extends BaseMahoCommand
 {

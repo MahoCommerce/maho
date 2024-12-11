@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -33,8 +34,8 @@ class Mage_Adminhtml_Block_System_Design_Edit extends Mage_Adminhtml_Block_Widge
                 ->setData([
                     'label'     => Mage::helper('core')->__('Back'),
                     'onclick'   => Mage::helper('core/js')->getSetLocationJs($this->getUrl('*/*/')),
-                    'class'     => 'back'
-                ])
+                    'class'     => 'back',
+                ]),
         );
 
         $this->setChild(
@@ -43,8 +44,8 @@ class Mage_Adminhtml_Block_System_Design_Edit extends Mage_Adminhtml_Block_Widge
                 ->setData([
                     'label'     => Mage::helper('core')->__('Save'),
                     'onclick'   => 'designForm.submit()',
-                    'class'     => 'save'
-                ])
+                    'class'     => 'save',
+                ]),
         );
 
         $this->setChild(
@@ -53,8 +54,8 @@ class Mage_Adminhtml_Block_System_Design_Edit extends Mage_Adminhtml_Block_Widge
                 ->setData([
                     'label'     => Mage::helper('core')->__('Delete'),
                     'onclick'   => Mage::helper('core/js')->getConfirmSetLocationJs($this->getDeleteUrl()),
-                    'class'     => 'delete'
-                ])
+                    'class'     => 'delete',
+                ]),
         );
         return parent::_prepareLayout();
     }
@@ -71,7 +72,7 @@ class Mage_Adminhtml_Block_System_Design_Edit extends Mage_Adminhtml_Block_Widge
     {
         return $this->getUrlSecure('*/*/delete', [
             'id' => $this->getDesignChangeId(),
-            Mage_Core_Model_Url::FORM_KEY => $this->getFormKey()
+            Mage_Core_Model_Url::FORM_KEY => $this->getFormKey(),
         ]);
     }
 

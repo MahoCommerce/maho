@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -29,7 +30,7 @@ class Mage_Adminhtml_Block_Sales_Items_Column_Name extends Mage_Adminhtml_Block_
         $value = Mage::helper('core/string')->truncate($value, 55, '', $remainder);
         return [
             'value' => nl2br($value),
-            'remainder' => nl2br($remainder)
+            'remainder' => nl2br($remainder),
         ];
     }
 }

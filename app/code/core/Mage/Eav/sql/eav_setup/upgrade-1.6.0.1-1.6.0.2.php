@@ -1,14 +1,16 @@
 <?php
+
 /**
  * Maho
  *
  * @category   Mage
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Mage_Eav_Model_Entity_Setup $installer */
+/** @var Mage_Eav_Model_Entity_Setup $this */
 $installer = $this;
 $installer->startSetup();
 
@@ -39,7 +41,7 @@ $table = $installer->getConnection()
     ->addIndex(
         $installer->getIdxName('eav/attribute_option_value', ['option_id']),
         ['option_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE]
+        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
     )
     ->addForeignKey(
         $installer->getFkName('eav/attribute_option_swatch', 'option_id', 'eav/attribute_option', 'option_id'),
@@ -47,7 +49,7 @@ $table = $installer->getConnection()
         $installer->getTable('eav/attribute_option'),
         'option_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Eav Attribute Option Swatch');
 $installer->getConnection()->createTable($table);

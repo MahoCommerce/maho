@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -53,7 +54,7 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
      */
     protected function _toTimestamp($value)
     {
-        $value = (int)$value;
+        $value = (int) $value;
         if ($value > 3155760000) {
             $value = 0;
         }
@@ -161,13 +162,13 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
             $this->getImage(),
             $this->getHtmlId(),
             'Select Date',
-            ($this->getDisabled() ? 'display:none;' : '')
+            ($this->getDisabled() ? 'display:none;' : ''),
         );
         $outputFormat = $this->getFormat();
         if (empty($outputFormat)) {
             throw new Exception('Output format is not specified. Please, specify "format" key in constructor, or set it using setFormat().');
         }
-        $displayFormat = Varien_Date::convertZendToStrftime($outputFormat, true, (bool)$this->getTime());
+        $displayFormat = Varien_Date::convertZendToStrftime($outputFormat, true, (bool) $this->getTime());
 
         $html .= sprintf(
             '

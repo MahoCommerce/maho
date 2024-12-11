@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -138,7 +139,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
             if (count($listSwatchValues)) {
                 $listSwatchValues = array_replace(
                     array_intersect_key($optionLabels, $listSwatchValues),
-                    $listSwatchValues
+                    $listSwatchValues,
                 );
             }
             $parentProduct->setChildAttributeLabelMapping($mapping)
@@ -284,7 +285,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
             if (is_numeric($size)) {
                 $helper->constrainOnly(true)->resize($size);
             }
-            return (string)$helper;
+            return (string) $helper;
         }
         return false;
     }
@@ -376,7 +377,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
             if (!$value) {
                 $value = [
                     'images' => [],
-                    'value' => []
+                    'value' => [],
                 ];
             }
 
@@ -418,7 +419,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
         }
 
         $collection = Mage::getResourceModel(
-            'configurableswatches/catalog_product_type_configurable_product_collection'
+            'configurableswatches/catalog_product_type_configurable_product_collection',
         );
 
         $collection->setFlag('product_children', true)

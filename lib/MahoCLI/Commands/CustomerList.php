@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'customer:list',
-    description: 'List all customers'
+    description: 'List all customers',
 )]
 class CustomerList extends BaseMahoCommand
 {
@@ -45,7 +46,7 @@ class CustomerList extends BaseMahoCommand
                 $customer->getWebsiteId(),
                 $customer->getEmail(),
                 $customer->getFirstname(),
-                $customer->getLastname()
+                $customer->getLastname(),
             ]);
         }
         $table->render();

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,10 +7,11 @@
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Mage_Core_Model_Resource_Setup $installer */
+/** @var Mage_Sales_Model_Resource_Setup $this */
 $installer           = $this;
 $connection          = $installer->getConnection();
 
@@ -30,30 +32,30 @@ $table = $connection->newTable($rulesWebsitesTable)
         Varien_Db_Ddl_Table::TYPE_INTEGER,
         null,
         [
-        'unsigned'  => true,
-        'nullable'  => false,
-        'primary'   => true
+            'unsigned'  => true,
+            'nullable'  => false,
+            'primary'   => true,
         ],
-        'Rule Id'
+        'Rule Id',
     )
     ->addColumn(
         'website_id',
         Varien_Db_Ddl_Table::TYPE_SMALLINT,
         null,
         [
-        'unsigned'  => true,
-        'nullable'  => false,
-        'primary'   => true
+            'unsigned'  => true,
+            'nullable'  => false,
+            'primary'   => true,
         ],
-        'Website Id'
+        'Website Id',
     )
     ->addIndex(
         $installer->getIdxName('salesrule/website', ['rule_id']),
-        ['rule_id']
+        ['rule_id'],
     )
     ->addIndex(
         $installer->getIdxName('salesrule/website', ['website_id']),
-        ['website_id']
+        ['website_id'],
     )
     ->addForeignKey(
         $installer->getFkName('salesrule/website', 'rule_id', 'salesrule/rule', 'rule_id'),
@@ -61,7 +63,7 @@ $table = $connection->newTable($rulesWebsitesTable)
         $rulesTable,
         'rule_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('salesrule/website', 'website_id', 'core/website', 'website_id'),
@@ -69,7 +71,7 @@ $table = $connection->newTable($rulesWebsitesTable)
         $websitesTable,
         'website_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Sales Rules To Websites Relations');
 
@@ -85,30 +87,30 @@ $table = $connection->newTable($rulesCustomerGroupsTable)
         Varien_Db_Ddl_Table::TYPE_INTEGER,
         null,
         [
-        'unsigned'  => true,
-        'nullable'  => false,
-        'primary'   => true
+            'unsigned'  => true,
+            'nullable'  => false,
+            'primary'   => true,
         ],
-        'Rule Id'
+        'Rule Id',
     )
     ->addColumn(
         'customer_group_id',
         Varien_Db_Ddl_Table::TYPE_SMALLINT,
         null,
         [
-        'unsigned'  => true,
-        'nullable'  => false,
-        'primary'   => true
+            'unsigned'  => true,
+            'nullable'  => false,
+            'primary'   => true,
         ],
-        'Customer Group Id'
+        'Customer Group Id',
     )
     ->addIndex(
         $installer->getIdxName('salesrule/customer_group', ['rule_id']),
-        ['rule_id']
+        ['rule_id'],
     )
     ->addIndex(
         $installer->getIdxName('salesrule/customer_group', ['customer_group_id']),
-        ['customer_group_id']
+        ['customer_group_id'],
     )
     ->addForeignKey(
         $installer->getFkName('salesrule/customer_group', 'rule_id', 'salesrule/rule', 'rule_id'),
@@ -116,20 +118,20 @@ $table = $connection->newTable($rulesCustomerGroupsTable)
         $rulesTable,
         'rule_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
             'salesrule/customer_group',
             'customer_group_id',
             'customer/customer_group',
-            'customer_group_id'
+            'customer_group_id',
         ),
         'customer_group_id',
         $customerGroupsTable,
         'customer_group_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Sales Rules To Customer Groups Relations');
 
@@ -144,9 +146,9 @@ $select = $connection->select()
         ['cw' => $websitesTable],
         $connection->prepareSqlCondition(
             'sr.website_ids',
-            ['finset' =>  new Zend_Db_Expr('cw.website_id')]
+            ['finset' =>  new Zend_Db_Expr('cw.website_id')],
         ),
-        []
+        [],
     );
 $query = $select->insertFromSelect($rulesWebsitesTable, ['rule_id', 'website_id']);
 $connection->query($query);
@@ -161,9 +163,9 @@ $select = $connection->select()
         ['cg' => $customerGroupsTable],
         $connection->prepareSqlCondition(
             'sr.customer_group_ids',
-            ['finset' =>  new Zend_Db_Expr('cg.customer_group_id')]
+            ['finset' =>  new Zend_Db_Expr('cg.customer_group_id')],
         ),
-        []
+        [],
     );
 $query = $select->insertFromSelect($rulesCustomerGroupsTable, ['rule_id', 'customer_group_id']);
 $connection->query($query);
@@ -183,8 +185,8 @@ $connection->modifyColumn(
     [
         'type'      => Varien_Db_Ddl_Table::TYPE_DATE,
         'nullable'  => true,
-        'default'   => null
-    ]
+        'default'   => null,
+    ],
 );
 
 $connection->modifyColumn(
@@ -193,8 +195,8 @@ $connection->modifyColumn(
     [
         'type'      => Varien_Db_Ddl_Table::TYPE_DATE,
         'nullable'  => true,
-        'default'   => null
-    ]
+        'default'   => null,
+    ],
 );
 
 $installer->endSetup();

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -58,8 +59,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Container extends Mage_Adminhtml_Block_Wi
             'grid',
             $this->getLayout()->createBlock(
                 $this->_blockGroup . '/' . $this->_controller . '_grid',
-                $this->_controller . '.grid'
-            )->setSaveParametersInSession(true)
+                $this->_controller . '.grid',
+            )->setSaveParametersInSession(true),
         );
         return parent::_prepareLayout();
     }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -147,7 +148,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
         }
         $template = Mage::getModel('newsletter/template');
 
-        if ($id = (int)$request->getParam('id')) {
+        if ($id = (int) $request->getParam('id')) {
             $template->load($id);
         }
 
@@ -182,7 +183,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
             $this->_getSession()->addError(nl2br($e->getMessage()));
             $this->_getSession()->setData(
                 'newsletter_template_form_data',
-                $this->getRequest()->getParams()
+                $this->getRequest()->getParams(),
             );
         } catch (Exception $e) {
             $this->_getSession()->addException($e, Mage::helper('adminhtml')->__('An error occurred while saving this template.'));

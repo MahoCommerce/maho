@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -35,7 +36,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminht
                 'class'     => 'update-button',
                 'label'     => Mage::helper('sales')->__('Update Qty\'s'),
                 'onclick'   => $onclick,
-            ])
+            ]),
         );
         $this->_disableSubmitButton = true;
         $submitButtonClass = ' disabled';
@@ -60,8 +61,8 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Items extends Mage_Adminht
                 'label'     => $submitLabel,
                 'class'     => 'save submit-button' . $submitButtonClass,
                 'onclick'   => 'disableElements(\'submit-button\');$(\'edit_form\').submit()',
-                'disabled'  => $this->_disableSubmitButton
-            ])
+                'disabled'  => $this->_disableSubmitButton,
+            ]),
         );
 
         return parent::_prepareLayout();

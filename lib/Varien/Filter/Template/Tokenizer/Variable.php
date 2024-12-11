@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -41,18 +42,18 @@ class Varien_Filter_Template_Tokenizer_Variable extends Varien_Filter_Template_T
                 // Method declaration
                 $methodArgs = $this->getMethodArgs();
                 $actions[] = ['type' => 'method',
-                                   'name' => $parameterName,
-                                   'args' => $methodArgs];
+                    'name' => $parameterName,
+                    'args' => $methodArgs];
                 $parameterName = '';
             } elseif ($parameterName != '') {
                 // Property or variable declaration
                 if ($variableSet) {
                     $actions[] = ['type' => 'property',
-                                       'name' => $parameterName];
+                        'name' => $parameterName];
                 } else {
                     $variableSet = true;
                     $actions[] = ['type' => 'variable',
-                                       'name' => $parameterName];
+                        'name' => $parameterName];
                 }
                 $parameterName = '';
             }
@@ -61,10 +62,10 @@ class Varien_Filter_Template_Tokenizer_Variable extends Varien_Filter_Template_T
         if ($parameterName != '') {
             if ($variableSet) {
                 $actions[] = ['type' => 'property',
-                                       'name' => $parameterName];
+                    'name' => $parameterName];
             } else {
                 $actions[] = ['type' => 'variable',
-                                   'name' => $parameterName];
+                    'name' => $parameterName];
             }
         }
 

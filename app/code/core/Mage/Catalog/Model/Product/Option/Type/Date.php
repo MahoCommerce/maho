@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -65,7 +66,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                     'minute' => isset($value['minute']) ? (int) $value['minute'] : 0,
                     'day_part' => $value['day_part'] ?? '',
                     'date_internal' => $value['date_internal'] ?? '',
-                ]
+                ],
             );
         } elseif (!$isValid && $option->getIsRequire() && !$this->getSkipCheckRequiredOption()) {
             $this->setIsValid(false);
@@ -244,7 +245,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      */
     public function useCalendar()
     {
-        return (bool)$this->getConfigData('use_calendar');
+        return (bool) $this->getConfigData('use_calendar');
     }
 
     /**
@@ -254,7 +255,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      */
     public function is24hTimeFormat()
     {
-        return (bool)($this->getConfigData('time_format') == '24h');
+        return (bool) ($this->getConfigData('time_format') == '24h');
     }
 
     /**
@@ -312,7 +313,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
     {
         return in_array($this->getOption()->getType(), [
             Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE,
-            Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME
+            Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME,
         ]);
     }
 
@@ -325,7 +326,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
     {
         return in_array($this->getOption()->getType(), [
             Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME,
-            Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME
+            Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME,
         ]);
     }
 }

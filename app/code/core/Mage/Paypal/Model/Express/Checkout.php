@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -188,7 +189,7 @@ class Mage_Paypal_Model_Express_Checkout
         return $this->_config->getExpressCheckoutShortcutImageUrl(
             Mage::app()->getLocale()->getLocaleCode(),
             $this->_quote->getBaseGrandTotal(),
-            $pal
+            $pal,
         );
     }
 
@@ -332,7 +333,7 @@ class Mage_Paypal_Model_Express_Checkout
             }
             $this->_quote->getPayment()->setAdditionalInformation(
                 self::PAYMENT_INFO_TRANSPORT_SHIPPING_OVERRIDEN,
-                $isOverriden
+                $isOverriden,
             );
             $this->_quote->getPayment()->save();
         }
@@ -348,7 +349,7 @@ class Mage_Paypal_Model_Express_Checkout
             if (!$this->_quote->getIsVirtual() && !$this->_quote->hasNominalItems()) {
                 if ($options = $this->_prepareShippingOptions($address, true)) {
                     $this->_api->setShippingOptionsCallbackUrl(
-                        Mage::getUrl('*/*/shippingOptionsCallback', ['quote_id' => $this->_quote->getId()])
+                        Mage::getUrl('*/*/shippingOptionsCallback', ['quote_id' => $this->_quote->getId()]),
                     )->setShippingOptions($options);
                 }
             }
@@ -445,7 +446,7 @@ class Mage_Paypal_Model_Express_Checkout
                 }
                 $quote->getPayment()->setAdditionalInformation(
                     self::PAYMENT_INFO_TRANSPORT_SHIPPING_METHOD,
-                    $code
+                    $code,
                 );
             }
         }
@@ -493,10 +494,10 @@ class Mage_Paypal_Model_Express_Checkout
             Mage::throwException(Mage::helper('paypal')->__('Payer is not identified.'));
         }
         $this->_quote->setMayEditShippingAddress(
-            $this->_quote->getPayment()->getAdditionalInformation(self::PAYMENT_INFO_TRANSPORT_SHIPPING_OVERRIDEN) != 1
+            $this->_quote->getPayment()->getAdditionalInformation(self::PAYMENT_INFO_TRANSPORT_SHIPPING_OVERRIDEN) != 1,
         );
         $this->_quote->setMayEditShippingMethod(
-            $this->_quote->getPayment()->getAdditionalInformation(self::PAYMENT_INFO_TRANSPORT_SHIPPING_METHOD) == ''
+            $this->_quote->getPayment()->getAdditionalInformation(self::PAYMENT_INFO_TRANSPORT_SHIPPING_METHOD) == '',
         );
         $this->_ignoreAddressValidation();
         $this->_quote->collectTotals()->save();
@@ -709,7 +710,7 @@ class Mage_Paypal_Model_Express_Checkout
     protected function _setExportedAddressData($address, $exportedAddress)
     {
         // Exported data is more priority if we came from Express Checkout button
-        $isButton  = (bool)$this->_quote->getPayment()->getAdditionalInformation(self::PAYMENT_INFO_BUTTON);
+        $isButton  = (bool) $this->_quote->getPayment()->getAdditionalInformation(self::PAYMENT_INFO_BUTTON);
         if (!$isButton) {
             foreach ($exportedAddress->getExportedKeys() as $key) {
                 $oldData = $address->getDataUsingMethod($key);
@@ -796,7 +797,7 @@ class Mage_Paypal_Model_Express_Checkout
 
         foreach ($address->getGroupedAllShippingRates() as $group) {
             foreach ($group as $rate) {
-                $amount = (float)$rate->getPrice();
+                $amount = (float) $rate->getPrice();
                 if ($rate->getErrorMessage()) {
                     continue;
                 }
@@ -813,7 +814,7 @@ class Mage_Paypal_Model_Express_Checkout
                 if ($calculateTax) {
                     $options[$i]->setTaxAmount(
                         $amountInclTax - $amountExclTax
-                            + $address->getTaxAmount() - $address->getShippingTaxAmount()
+                            + $address->getTaxAmount() - $address->getShippingTaxAmount(),
                     );
                 }
                 if ($isDefault) {
@@ -1036,7 +1037,7 @@ class Mage_Paypal_Model_Express_Checkout
             $customer->sendNewAccountEmail('confirmation', '', $this->_quote->getStoreId());
             $url = Mage::helper('customer')->getEmailConfirmationUrl($customer->getEmail());
             $this->getCustomerSession()->addSuccess(
-                Mage::helper('customer')->__('Account confirmation is required. Please, check your e-mail for confirmation link. To resend confirmation email please <a href="%s">click here</a>.', $url)
+                Mage::helper('customer')->__('Account confirmation is required. Please, check your e-mail for confirmation link. To resend confirmation email please <a href="%s">click here</a>.', $url),
             );
         } else {
             $customer->sendNewAccountEmail('registered', '', $this->_quote->getStoreId());

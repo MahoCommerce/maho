@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,10 +7,11 @@
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Mage_Catalog_Model_Resource_Setup $installer */
+/** @var Mage_Catalog_Model_Resource_Setup $this */
 $installer = $this;
 $installer->startSetup();
 
@@ -57,7 +59,7 @@ $table = $installer->getConnection()
     ->addIndex($installer->getIdxName('downloadable/link', 'product_id'), 'product_id')
     ->addIndex(
         $installer->getIdxName('downloadable/link', ['product_id','sort_order']),
-        ['product_id','sort_order']
+        ['product_id','sort_order'],
     )
     ->addForeignKey(
         $installer->getFkName('downloadable/link', 'product_id', 'catalog/product', 'entity_id'),
@@ -65,7 +67,7 @@ $table = $installer->getConnection()
         $installer->getTable('catalog/product'),
         'entity_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Downloadable Link Table');
 $installer->getConnection()->createTable($table);
@@ -102,7 +104,7 @@ $table = $installer->getConnection()
         $installer->getTable('downloadable/link'),
         'link_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->addIndex($installer->getIdxName('downloadable/link_price', 'website_id'), 'website_id')
     ->addForeignKey(
@@ -111,7 +113,7 @@ $table = $installer->getConnection()
         $installer->getTable('core/website'),
         'website_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Downloadable Link Price Table');
 $installer->getConnection()->createTable($table);
@@ -164,7 +166,7 @@ $table = $installer->getConnection()
         $installer->getTable('customer/entity'),
         'entity_id',
         Varien_Db_Ddl_Table::ACTION_SET_NULL,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName('downloadable/link_purchased', 'order_id', 'sales/order', 'entity_id'),
@@ -172,7 +174,7 @@ $table = $installer->getConnection()
         $installer->getTable('sales/order'),
         'entity_id',
         Varien_Db_Ddl_Table::ACTION_SET_NULL,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Downloadable Link Purchased Table');
 $installer->getConnection()->createTable($table);
@@ -248,26 +250,26 @@ $table = $installer->getConnection()
             'downloadable/link_purchased_item',
             'purchased_id',
             'downloadable/link_purchased',
-            'purchased_id'
+            'purchased_id',
         ),
         'purchased_id',
         $installer->getTable('downloadable/link_purchased'),
         'purchased_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
             'downloadable/link_purchased_item',
             'order_item_id',
             'sales/order_item',
-            'item_id'
+            'item_id',
         ),
         'order_item_id',
         $installer->getTable('sales/order_item'),
         'item_id',
         Varien_Db_Ddl_Table::ACTION_SET_NULL,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Downloadable Link Purchased Item Table');
 $installer->getConnection()->createTable($table);
@@ -299,10 +301,10 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             'downloadable/link_title',
             ['link_id', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE
+            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
         ),
         ['link_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE]
+        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex($installer->getIdxName('downloadable/link_title', 'link_id'), 'link_id')
     ->addForeignKey(
@@ -311,7 +313,7 @@ $table = $installer->getConnection()
         $installer->getTable('downloadable/link'),
         'link_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->addIndex($installer->getIdxName('downloadable/link_title', 'store_id'), 'store_id')
     ->addForeignKey(
@@ -320,7 +322,7 @@ $table = $installer->getConnection()
         $installer->getTable('core/store'),
         'store_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Link Title Table');
 $installer->getConnection()->createTable($table);
@@ -359,7 +361,7 @@ $table = $installer->getConnection()
         $installer->getTable('catalog/product'),
         'entity_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Downloadable Sample Table');
 $installer->getConnection()->createTable($table);
@@ -391,10 +393,10 @@ $table = $installer->getConnection()
         $installer->getIdxName(
             'downloadable/sample_title',
             ['sample_id', 'store_id'],
-            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE
+            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
         ),
         ['sample_id', 'store_id'],
-        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE]
+        ['type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex($installer->getIdxName('downloadable/sample_title', 'sample_id'), 'sample_id')
     ->addForeignKey(
@@ -403,7 +405,7 @@ $table = $installer->getConnection()
         $installer->getTable('downloadable/sample'),
         'sample_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->addIndex($installer->getIdxName('downloadable/sample_title', 'store_id'), 'store_id')
     ->addForeignKey(
@@ -412,7 +414,7 @@ $table = $installer->getConnection()
         $installer->getTable('core/store'),
         'store_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Downloadable Sample Title Table');
 $installer->getConnection()->createTable($table);
@@ -503,7 +505,7 @@ $installer->addAttribute(Mage_Catalog_Model_Product::ENTITY, 'links_purchased_se
     'unique'                  => false,
     'apply_to'                => 'downloadable',
     'is_configurable'         => false,
-    'used_in_product_listing' => true
+    'used_in_product_listing' => true,
 ]);
 
 $installer->addAttribute(Mage_Catalog_Model_Product::ENTITY, 'samples_title', [
@@ -525,7 +527,7 @@ $installer->addAttribute(Mage_Catalog_Model_Product::ENTITY, 'samples_title', [
     'visible_on_front'  => false,
     'unique'            => false,
     'apply_to'          => 'downloadable',
-    'is_configurable'   => false
+    'is_configurable'   => false,
 ]);
 
 $installer->addAttribute(Mage_Catalog_Model_Product::ENTITY, 'links_title', [
@@ -547,7 +549,7 @@ $installer->addAttribute(Mage_Catalog_Model_Product::ENTITY, 'links_title', [
     'visible_on_front'  => false,
     'unique'            => false,
     'apply_to'          => 'downloadable',
-    'is_configurable'   => false
+    'is_configurable'   => false,
 ]);
 
 $installer->addAttribute(Mage_Catalog_Model_Product::ENTITY, 'links_exist', [
@@ -570,7 +572,7 @@ $installer->addAttribute(Mage_Catalog_Model_Product::ENTITY, 'links_exist', [
     'unique'                    => false,
     'apply_to'                  => 'downloadable',
     'is_configurable'           => false,
-    'used_in_product_listing'   => 1
+    'used_in_product_listing'   => 1,
 ]);
 
 $installer->endSetup();

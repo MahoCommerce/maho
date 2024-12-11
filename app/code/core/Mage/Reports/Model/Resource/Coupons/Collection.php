@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -81,33 +82,33 @@ class Mage_Reports_Model_Resource_Coupons_Collection extends Mage_Sales_Model_En
             $this->addExpressionAttributeToSelect(
                 'subtotal',
                 'SUM({{base_subtotal}})',
-                ['base_subtotal']
+                ['base_subtotal'],
             )
             ->addExpressionAttributeToSelect(
                 'discount',
                 'SUM({{base_discount_amount}})',
-                ['base_discount_amount']
+                ['base_discount_amount'],
             )
             ->addExpressionAttributeToSelect(
                 'total',
                 'SUM({{base_subtotal}}-{{base_discount_amount}})',
-                ['base_subtotal', 'base_discount_amount']
+                ['base_subtotal', 'base_discount_amount'],
             );
         } else {
             $this->addExpressionAttributeToSelect(
                 'subtotal',
                 'SUM({{base_subtotal}}*{{base_to_global_rate}})',
-                ['base_subtotal', 'base_to_global_rate']
+                ['base_subtotal', 'base_to_global_rate'],
             )
             ->addExpressionAttributeToSelect(
                 'discount',
                 'SUM({{base_discount_amount}}*{{base_to_global_rate}})',
-                ['base_discount_amount', 'base_to_global_rate']
+                ['base_discount_amount', 'base_to_global_rate'],
             )
             ->addExpressionAttributeToSelect(
                 'total',
                 'SUM(({{base_subtotal}}-{{base_discount_amount}})*{{base_to_global_rate}})',
-                ['base_subtotal', 'base_discount_amount', 'base_to_global_rate']
+                ['base_subtotal', 'base_discount_amount', 'base_to_global_rate'],
             );
         }
     }

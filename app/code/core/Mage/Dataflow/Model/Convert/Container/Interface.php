@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -15,6 +16,4 @@
  * @category   Mage
  * @package    Mage_Dataflow
  */
-interface Mage_Dataflow_Model_Convert_Container_Interface
-{
-}
+interface Mage_Dataflow_Model_Convert_Container_Interface {}

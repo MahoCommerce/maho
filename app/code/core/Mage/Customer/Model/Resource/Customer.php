@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -39,7 +40,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
             'updated_at',
             'increment_id',
             'store_id',
-            'website_id'
+            'website_id',
         ];
     }
 
@@ -66,11 +67,11 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
             ->from($this->getEntityTable(), [$this->getEntityIdField()])
             ->where('email = :email');
         if ($customer->getSharingConfig()->isWebsiteScope()) {
-            $bind['website_id'] = (int)$customer->getWebsiteId();
+            $bind['website_id'] = (int) $customer->getWebsiteId();
             $select->where('website_id = :website_id');
         }
         if ($customer->getId()) {
-            $bind['entity_id'] = (int)$customer->getId();
+            $bind['entity_id'] = (int) $customer->getId();
             $select->where('entity_id != :entity_id');
         }
 
@@ -79,7 +80,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
             throw Mage::exception(
                 'Mage_Customer',
                 Mage::helper('customer')->__('This customer email already exists'),
-                Mage_Customer_Model_Customer::EXCEPTION_EMAIL_EXISTS
+                Mage_Customer_Model_Customer::EXCEPTION_EMAIL_EXISTS,
             );
         }
 
@@ -175,7 +176,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
     {
         $select = parent::_getLoadRowSelect($object, $rowId);
         if ($object->getWebsiteId() && $object->getSharingConfig()->isWebsiteScope()) {
-            $select->where('website_id =?', (int)$object->getWebsiteId());
+            $select->where('website_id =?', (int) $object->getWebsiteId());
         }
 
         return $select;
@@ -201,10 +202,10 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
         if ($customer->getSharingConfig()->isWebsiteScope()) {
             if (!$customer->hasData('website_id')) {
                 Mage::throwException(
-                    Mage::helper('customer')->__('Customer website ID must be specified when using the website scope')
+                    Mage::helper('customer')->__('Customer website ID must be specified when using the website scope'),
                 );
             }
-            $bind['website_id'] = (int)$customer->getWebsiteId();
+            $bind['website_id'] = (int) $customer->getWebsiteId();
             $select->where('website_id = :website_id');
         }
 
@@ -261,7 +262,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
     public function checkCustomerId($customerId)
     {
         $adapter = $this->_getReadAdapter();
-        $bind    = ['entity_id' => (int)$customerId];
+        $bind    = ['entity_id' => (int) $customerId];
         $select  = $adapter->select()
             ->from($this->getTable('customer/entity'), 'entity_id')
             ->where('entity_id = :entity_id')
@@ -283,7 +284,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
     public function getWebsiteId($customerId)
     {
         $adapter = $this->_getReadAdapter();
-        $bind    = ['entity_id' => (int)$customerId];
+        $bind    = ['entity_id' => (int) $customerId];
         $select  = $adapter->select()
             ->from($this->getTable('customer/entity'), 'website_id')
             ->where('entity_id = :entity_id');
@@ -360,12 +361,12 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
             ->joinLeft(
                 ['t1' => $this->getTable('eav/attribute')],
                 't0.entity_type_id = t1.entity_type_id',
-                []
+                [],
             )
             ->joinLeft(
                 ['t2' => $this->getTable(['customer/entity', 'int'])],
                 't1.attribute_id = t2.attribute_id AND t2.entity_id = t0.entity_id',
-                []
+                [],
             )
             ->where('t0.entity_id = ?', $customerId)
             ->where('t1.attribute_code = ?', 'password_created_at');

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -35,11 +36,11 @@ class Mage_Adminhtml_Block_Rating_Edit_Tab_Options extends Mage_Adminhtml_Block_
                     'option_code_' . $item->getId(),
                     'text',
                     [
-                                        'label'     => Mage::helper('rating')->__('Option Label'),
-                                        'required'  => true,
-                                        'name'      => 'option_title[' . $item->getId() . ']',
-                                        'value'     => ($item->getCode()) ? $item->getCode() : $i,
-                    ]
+                        'label'     => Mage::helper('rating')->__('Option Label'),
+                        'required'  => true,
+                        'name'      => 'option_title[' . $item->getId() . ']',
+                        'value'     => ($item->getCode()) ? $item->getCode() : $i,
+                    ],
                 );
                 $i++;
             }
@@ -49,11 +50,11 @@ class Mage_Adminhtml_Block_Rating_Edit_Tab_Options extends Mage_Adminhtml_Block_
                     'option_code_' . $i,
                     'text',
                     [
-                                        'label'     => Mage::helper('rating')->__('Option Title'),
-                                        'required'  => true,
-                                        'name'      => 'option_title[add_' . $i . ']',
-                                        'value'     => $i,
-                    ]
+                        'label'     => Mage::helper('rating')->__('Option Title'),
+                        'required'  => true,
+                        'name'      => 'option_title[add_' . $i . ']',
+                        'value'     => $i,
+                    ],
                 );
             }
         }

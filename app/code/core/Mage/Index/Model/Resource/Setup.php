@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -60,7 +61,7 @@ class Mage_Index_Model_Resource_Setup extends Mage_Core_Model_Resource_Setup
             foreach ($insert as $code) {
                 $insertData[] = [
                     'indexer_code' => $code,
-                    'status' => Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX
+                    'status' => Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX,
                 ];
             }
             if (method_exists($connection, 'insertArray')) {

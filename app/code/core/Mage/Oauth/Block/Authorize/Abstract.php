@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -83,7 +84,7 @@ abstract class Mage_Oauth_Block_Authorize_Abstract extends Mage_Core_Block_Templ
         $params = [
             '_relative' => true,
             '_area'     => 'adminhtml',
-            '_package'  => 'default'
+            '_package'  => 'default',
         ];
         return Mage::getDesign()->getTemplateFilename($this->getTemplate(), $params);
     }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -41,8 +42,8 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
                 }
             }
             $this->_prepareDownloadResponse($info['title'], [
-               'value' => $filePath,
-               'type'  => 'filename'
+                'value' => $filePath,
+                'type'  => 'filename',
             ]);
         } catch (Exception $e) {
             $this->_forward('noRoute');

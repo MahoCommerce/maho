@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -159,7 +160,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
                 $this->_addError(sprintf(
                     'Attribute "%s" is not applicable for product type "%s"',
                     $attributeCode,
-                    $productTypes[$data['type_id']]['label']
+                    $productTypes[$data['type_id']]['label'],
                 ));
             }
 
@@ -182,7 +183,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
                             $this->_addError(sprintf(
                                 'Invalid value "%s" for attribute "%s".',
                                 $selectValue,
-                                $attributeCode
+                                $attributeCode,
                             ));
                         }
                     }
@@ -274,7 +275,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
         if ($this->_isUpdate() && !isset($data['sku'])) {
             return true;
         }
-        if (!Zend_Validate::is((string)$data['sku'], 'StringLength', ['min' => 0, 'max' => 64])) {
+        if (!Zend_Validate::is((string) $data['sku'], 'StringLength', ['min' => 0, 'max' => 64])) {
             $this->_addError('SKU length should be 64 characters maximum.');
         }
     }
@@ -345,7 +346,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
             $catalogHelper = Mage::helper('catalog');
             $website = Mage::getModel('core/website')->load($data['website_id']);
             $isAllWebsitesValue = is_numeric($data['website_id']) && ($data['website_id'] == 0);
-            $isGlobalPriceScope = (int)$catalogHelper->getPriceScope() == Mage_Catalog_Helper_Data::PRICE_SCOPE_GLOBAL;
+            $isGlobalPriceScope = (int) $catalogHelper->getPriceScope() == Mage_Catalog_Helper_Data::PRICE_SCOPE_GLOBAL;
             if (is_null($website->getId()) || ($isGlobalPriceScope && !$isAllWebsitesValue)) {
                 $this->_addError(sprintf('Invalid "website_id" value in the "%s" set.', $fieldSet));
             }
@@ -383,7 +384,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
                         $fieldSet,
                         'backorders',
                         'cataloginventory/source_backorders',
-                        true
+                        true,
                     );
                     $this->_validateSource($stockData, $fieldSet, 'is_in_stock', 'cataloginventory/source_stock');
                 }
@@ -406,7 +407,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
             $manageStock = isset($stockData['manage_stock']) && $stockData['manage_stock'];
         } else {
             $manageStock = Mage::getStoreConfig(
-                Mage_CatalogInventory_Model_Stock_Item::XML_PATH_ITEM . 'manage_stock'
+                Mage_CatalogInventory_Model_Stock_Item::XML_PATH_ITEM . 'manage_stock',
             );
         }
         return (bool) $manageStock;
@@ -520,7 +521,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
                 $this->_addError(sprintf(
                     'Please enter a valid number in the "%s" field in the "%s" set.',
                     $field,
-                    $fieldSet
+                    $fieldSet,
                 ));
             }
         }
@@ -566,7 +567,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
         if (!($skipIfConfigValueUsed && $this->_isConfigValueUsed($data, $field))) {
             if (isset($data[$field])) {
                 $allowedValues = $this->_getAttributeAllowedValues(
-                    Mage::getSingleton('eav/entity_attribute_source_boolean')->getAllOptions()
+                    Mage::getSingleton('eav/entity_attribute_source_boolean')->getAllOptions(),
                 );
                 $useStrictMode = !is_numeric($data[$field]);
                 if (!in_array($data[$field], $allowedValues, $useStrictMode)) {

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -47,9 +48,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
      * @param string $timestamp
      */
     #[\Override]
-    protected function _prepareGroupWebsite($timestamp)
-    {
-    }
+    protected function _prepareGroupWebsite($timestamp) {}
 
     /**
      * Prepare temporary data
@@ -75,8 +74,8 @@ class Mage_CatalogRule_Model_Action_Index_Refresh_Row extends Mage_CatalogRule_M
                     ->from($this->_resource->getTable('catalogrule/rule_product_price'))
                     ->where('product_id IN (?)', $this->_productId)
                     ->where('website_id = ?', $website->getId()),
-                $this->_resource->getTable('catalogrule/rule_product_price')
-            )
+                $this->_resource->getTable('catalogrule/rule_product_price'),
+            ),
         );
     }
 

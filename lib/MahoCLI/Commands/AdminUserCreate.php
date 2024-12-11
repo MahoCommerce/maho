@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -20,7 +21,7 @@ use Symfony\Component\Console\Question\Question;
 
 #[AsCommand(
     name: 'admin:user:create',
-    description: 'Create an admin user'
+    description: 'Create an admin user',
 )]
 class AdminUserCreate extends BaseMahoCommand
 {

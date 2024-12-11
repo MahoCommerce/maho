@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -95,7 +96,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Category extends Mage_Catalog_Block_Se
             if (($children + $count) >= $linesPerPage) {
                 $categories[$page][$item->getId()] = [
                     'path' => $item->getPath(),
-                    'children_count' => $this->_total
+                    'children_count' => $this->_total,
                 ];
                 $page++;
                 $count = 0;
@@ -103,7 +104,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Category extends Mage_Catalog_Block_Se
             }
             $categories[$page][$item->getId()] = [
                 'path' => $item->getPath(),
-                'children_count' => $this->_total
+                'children_count' => $this->_total,
             ];
             $count += $children;
         }

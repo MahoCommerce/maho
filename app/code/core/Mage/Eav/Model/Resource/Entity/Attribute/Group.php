@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -35,7 +36,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Group extends Mage_Core_Model_Res
         $adapter   = $this->_getReadAdapter();
         $bind      = [
             'attribute_set_id'      => $object->getAttributeSetId(),
-            'attribute_group_name'  => $object->getAttributeGroupName()
+            'attribute_group_name'  => $object->getAttributeGroupName(),
         ];
         $select = $adapter->select()
             ->from($this->getMainTable())

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -86,7 +87,7 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
         if ($action == 'index') {
             $checkoutSessionQuote->setIsMultiShipping(true);
             $this->_getCheckoutSession()->setCheckoutState(
-                Mage_Checkout_Model_Session::CHECKOUT_STATE_BEGIN
+                Mage_Checkout_Model_Session::CHECKOUT_STATE_BEGIN,
             );
         } elseif (!$checkoutSessionQuote->getIsMultiShipping() &&
             !in_array($action, ['login', 'register', 'success'])
@@ -199,11 +200,11 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
         }
 
         $this->_getState()->unsCompleteStep(
-            Mage_Checkout_Model_Type_Multishipping_State::STEP_SHIPPING
+            Mage_Checkout_Model_Type_Multishipping_State::STEP_SHIPPING,
         );
 
         $this->_getState()->setActiveStep(
-            Mage_Checkout_Model_Type_Multishipping_State::STEP_SELECT_ADDRESSES
+            Mage_Checkout_Model_Type_Multishipping_State::STEP_SELECT_ADDRESSES,
         );
         if (!$this->_getCheckout()->validateMinimumAmount()) {
             $message = $this->_getCheckout()->getMinimumAmountDescription();
@@ -234,10 +235,10 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
             if ($this->getRequest()->getParam('continue', false)) {
                 $this->_getCheckout()->setCollectRatesFlag(true);
                 $this->_getState()->setActiveStep(
-                    Mage_Checkout_Model_Type_Multishipping_State::STEP_SHIPPING
+                    Mage_Checkout_Model_Type_Multishipping_State::STEP_SHIPPING,
                 );
                 $this->_getState()->setCompleteStep(
-                    Mage_Checkout_Model_Type_Multishipping_State::STEP_SELECT_ADDRESSES
+                    Mage_Checkout_Model_Type_Multishipping_State::STEP_SELECT_ADDRESSES,
                 );
                 $this->_redirect('*/*/shipping');
             } elseif ($this->getRequest()->getParam('new_address')) {
@@ -254,7 +255,7 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
         } catch (Exception $e) {
             $this->_getCheckoutSession()->addException(
                 $e,
-                Mage::helper('checkout')->__('Data saving problem')
+                Mage::helper('checkout')->__('Data saving problem'),
             );
             $this->_redirect('*/*/addresses');
         }
@@ -266,10 +267,10 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
     public function backToAddressesAction()
     {
         $this->_getState()->setActiveStep(
-            Mage_Checkout_Model_Type_Multishipping_State::STEP_SELECT_ADDRESSES
+            Mage_Checkout_Model_Type_Multishipping_State::STEP_SELECT_ADDRESSES,
         );
         $this->_getState()->unsCompleteStep(
-            Mage_Checkout_Model_Type_Multishipping_State::STEP_SHIPPING
+            Mage_Checkout_Model_Type_Multishipping_State::STEP_SHIPPING,
         );
         $this->_redirect('*/*/addresses');
     }
@@ -319,7 +320,7 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
         }
 
         $this->_getState()->setActiveStep(
-            Mage_Checkout_Model_Type_Multishipping_State::STEP_SHIPPING
+            Mage_Checkout_Model_Type_Multishipping_State::STEP_SHIPPING,
         );
         $this->loadLayout();
         $this->_initLayoutMessages('customer/session');
@@ -333,10 +334,10 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
     public function backToShippingAction()
     {
         $this->_getState()->setActiveStep(
-            Mage_Checkout_Model_Type_Multishipping_State::STEP_SHIPPING
+            Mage_Checkout_Model_Type_Multishipping_State::STEP_SHIPPING,
         );
         $this->_getState()->unsCompleteStep(
-            Mage_Checkout_Model_Type_Multishipping_State::STEP_BILLING
+            Mage_Checkout_Model_Type_Multishipping_State::STEP_BILLING,
         );
         $this->_redirect('*/*/shipping');
     }
@@ -355,14 +356,14 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
         try {
             Mage::dispatchEvent(
                 'checkout_controller_multishipping_shipping_post',
-                ['request' => $this->getRequest(), 'quote' => $this->_getCheckout()->getQuote()]
+                ['request' => $this->getRequest(), 'quote' => $this->_getCheckout()->getQuote()],
             );
             $this->_getCheckout()->setShippingMethods($shippingMethods);
             $this->_getState()->setActiveStep(
-                Mage_Checkout_Model_Type_Multishipping_State::STEP_BILLING
+                Mage_Checkout_Model_Type_Multishipping_State::STEP_BILLING,
             );
             $this->_getState()->setCompleteStep(
-                Mage_Checkout_Model_Type_Multishipping_State::STEP_SHIPPING
+                Mage_Checkout_Model_Type_Multishipping_State::STEP_SHIPPING,
             );
             $this->_redirect('*/*/billing');
         } catch (Exception $e) {
@@ -413,7 +414,7 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
         }
 
         $this->_getState()->setActiveStep(
-            Mage_Checkout_Model_Type_Multishipping_State::STEP_BILLING
+            Mage_Checkout_Model_Type_Multishipping_State::STEP_BILLING,
         );
 
         $this->loadLayout();
@@ -442,10 +443,10 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
     public function backToBillingAction()
     {
         $this->_getState()->setActiveStep(
-            Mage_Checkout_Model_Type_Multishipping_State::STEP_BILLING
+            Mage_Checkout_Model_Type_Multishipping_State::STEP_BILLING,
         );
         $this->_getState()->unsCompleteStep(
-            Mage_Checkout_Model_Type_Multishipping_State::STEP_OVERVIEW
+            Mage_Checkout_Model_Type_Multishipping_State::STEP_OVERVIEW,
         );
         $this->_redirect('*/*/billing');
     }
@@ -476,7 +477,7 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
             $this->_getCheckout()->setPaymentMethod($payment);
 
             $this->_getState()->setCompleteStep(
-                Mage_Checkout_Model_Type_Multishipping_State::STEP_BILLING
+                Mage_Checkout_Model_Type_Multishipping_State::STEP_BILLING,
             );
 
             $this->loadLayout();
@@ -527,10 +528,10 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
             }
             $this->_getCheckout()->createOrders();
             $this->_getState()->setActiveStep(
-                Mage_Checkout_Model_Type_Multishipping_State::STEP_SUCCESS
+                Mage_Checkout_Model_Type_Multishipping_State::STEP_SUCCESS,
             );
             $this->_getState()->setCompleteStep(
-                Mage_Checkout_Model_Type_Multishipping_State::STEP_OVERVIEW
+                Mage_Checkout_Model_Type_Multishipping_State::STEP_OVERVIEW,
             );
             $this->_getCheckout()->getCheckoutSession()->clear();
             $this->_getCheckout()->getCheckoutSession()->setDisplaySuccess(true);
@@ -589,8 +590,8 @@ class Mage_Checkout_MultishippingController extends Mage_Checkout_Controller_Act
         $this->getResponse()->setRedirect(
             Mage::helper('core/url')->addRequestParam(
                 $this->_getHelper()->getMSLoginUrl(),
-                ['context' => 'checkout']
-            )
+                ['context' => 'checkout'],
+            ),
         );
 
         $this->setFlag('', 'redirectLogin', true);

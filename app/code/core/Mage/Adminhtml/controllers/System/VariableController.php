@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -47,7 +48,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
         $this->_title($this->__('System'))->_title($this->__('Custom Variables'));
 
         $variableId = $this->getRequest()->getParam('variable_id', null);
-        $storeId = (int)$this->getRequest()->getParam('store', 0);
+        $storeId = (int) $this->getRequest()->getParam('store', 0);
         /** @var Mage_Core_Model_Variable $variable */
         $variable = Mage::getModel('core/variable');
         if ($variableId) {
@@ -91,7 +92,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
         $this->_initLayout()
             ->_addContent($this->getLayout()->createBlock('adminhtml/system_variable_edit'))
             ->_addJs($this->getLayout()->createBlock('core/template', '', [
-                'template' => 'system/variable/js.phtml'
+                'template' => 'system/variable/js.phtml',
             ]))
             ->renderLayout();
     }
@@ -130,7 +131,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
             try {
                 $variable->save();
                 $this->_getSession()->addSuccess(
-                    Mage::helper('adminhtml')->__('The custom variable has been saved.')
+                    Mage::helper('adminhtml')->__('The custom variable has been saved.'),
                 );
                 if ($back) {
                     $this->_redirect('*/*/edit', ['_current' => true, 'variable_id' => $variable->getId()]);
@@ -158,7 +159,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
             try {
                 $variable->delete();
                 $this->_getSession()->addSuccess(
-                    Mage::helper('adminhtml')->__('The custom variable has been deleted.')
+                    Mage::helper('adminhtml')->__('The custom variable has been deleted.'),
                 );
             } catch (Exception $e) {
                 $this->_getSession()->addError($e->getMessage());

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -126,7 +127,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
                 $result = false;
                 $this->addException(
                     'Invalid data, expecting serialized array.',
-                    Mage_Dataflow_Model_Convert_Exception::FATAL
+                    Mage_Dataflow_Model_Convert_Exception::FATAL,
                 );
             }
         }
@@ -167,7 +168,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
             }
             $this->addException(
                 'Invalid data type, expecting 2D grid array.',
-                Mage_Dataflow_Model_Convert_Exception::FATAL
+                Mage_Dataflow_Model_Convert_Exception::FATAL,
             );
         }
         return true;

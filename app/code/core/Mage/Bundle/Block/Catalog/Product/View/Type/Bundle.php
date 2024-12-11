@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -64,13 +65,13 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
 
             $selectionCollection = $typeInstance->getSelectionsCollection(
                 $typeInstance->getOptionsIds($product),
-                $product
+                $product,
             );
 
             $this->_options = $optionCollection->appendSelections(
                 $selectionCollection,
                 false,
-                Mage::helper('catalog/product')->getSkipSaleableCheck()
+                Mage::helper('catalog/product')->getSkipSaleableCheck(),
             );
         }
 
@@ -126,7 +127,7 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
                 'selections' => [],
                 'title'      => $bundleOption->getTitle(),
                 'isMulti'    => in_array($bundleOption->getType(), ['multi', 'checkbox']),
-                'position'   => $position++
+                'position'   => $position++,
             ];
 
             $selectionCount = count($bundleOption->getSelections());
@@ -152,7 +153,7 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
                         null,
                         null,
                         null,
-                        false
+                        false,
                     );
                     $tierPriceInfo['priceExclTax'] = $taxHelper->getPrice(
                         $bundleSelection,
@@ -163,7 +164,7 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
                         null,
                         null,
                         null,
-                        false
+                        false,
                     );
                 }
                 unset($tierPriceInfo); // break the reference with the last element
@@ -174,7 +175,7 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
                     $currentProduct->getQty(),
                     $bundleSelection->getQty(),
                     false,
-                    false
+                    false,
                 );
 
                 $canApplyMAP = false;
@@ -191,7 +192,7 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
                     null,
                     null,
                     null,
-                    false
+                    false,
                 );
                 $_priceExclTax = $taxHelper->getPrice(
                     $bundleSelection,
@@ -202,7 +203,7 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
                     null,
                     null,
                     null,
-                    false
+                    false,
                 );
 
                 if ($currentProduct->getPriceType() == Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED) {
@@ -215,7 +216,7 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
                         null,
                         null,
                         null,
-                        false
+                        false,
                     );
                     $_priceExclTax = $taxHelper->getPrice(
                         $currentProduct,
@@ -226,7 +227,7 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
                         null,
                         null,
                         null,
-                        false
+                        false,
                     );
                 }
 
@@ -283,7 +284,7 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
             'specialPrice'  => $currentProduct->getSpecialPrice(),
             'includeTax'    => Mage::helper('tax')->priceIncludesTax() ? 'true' : 'false',
             'isFixedPrice'  => $this->getProduct()->getPriceType() == Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED,
-            'isMAPAppliedDirectly' => Mage::helper('catalog')->canApplyMsrp($this->getProduct(), null, false)
+            'isMAPAppliedDirectly' => Mage::helper('catalog')->canApplyMsrp($this->getProduct(), null, false),
         ];
 
         if ($preConfiguredFlag && !empty($defaultValues)) {

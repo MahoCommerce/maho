@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -28,7 +29,7 @@ class Mage_Checkout_Block_Multishipping_Overview extends Mage_Sales_Block_Items_
         $this->addItemRender(
             $this->_getRowItemType('default'),
             'checkout/cart_item_renderer',
-            'checkout/multishipping/overview/item.phtml'
+            'checkout/multishipping/overview/item.phtml',
         );
     }
 
@@ -47,7 +48,7 @@ class Mage_Checkout_Block_Multishipping_Overview extends Mage_Sales_Block_Items_
     {
         if ($headBlock = $this->getLayout()->getBlock('head')) {
             $headBlock->setTitle(
-                $this->__('Review Order - %s', $headBlock->getDefaultTitle())
+                $this->__('Review Order - %s', $headBlock->getDefaultTitle()),
             );
         }
         return parent::_prepareLayout();

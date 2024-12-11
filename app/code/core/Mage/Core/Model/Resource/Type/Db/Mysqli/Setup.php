@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -23,6 +24,6 @@ class Mage_Core_Model_Resource_Type_Db_Mysqli_Setup extends Mage_Core_Model_Reso
      */
     public function getConnection($config)
     {
-        return new Varien_Db_Adapter_Mysqli((array)$config);
+        return new Varien_Db_Adapter_Mysqli((array) $config);
     }
 }

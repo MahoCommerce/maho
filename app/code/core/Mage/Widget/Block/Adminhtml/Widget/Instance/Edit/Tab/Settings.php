@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -55,7 +56,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Settings extends Mage
     #[\Override]
     public function canShowTab()
     {
-        return !(bool)$this->getWidgetInstance()->isCompleteToCreate();
+        return !(bool) $this->getWidgetInstance()->isCompleteToCreate();
     }
 
     /**
@@ -86,12 +87,12 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Settings extends Mage
         $form = new Varien_Data_Form([
             'id' => 'edit_form',
             'action' => $this->getData('action'),
-            'method' => 'post'
+            'method' => 'post',
         ]);
 
         $fieldset = $form->addFieldset(
             'base_fieldset',
-            ['legend' => Mage::helper('widget')->__('Settings')]
+            ['legend' => Mage::helper('widget')->__('Settings')],
         );
 
         $this->_addElementTypes($fieldset);
@@ -101,7 +102,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Settings extends Mage
             'label'    => Mage::helper('widget')->__('Type'),
             'title'    => Mage::helper('widget')->__('Type'),
             'required' => true,
-            'values'   => $this->getTypesOptionsArray()
+            'values'   => $this->getTypesOptionsArray(),
         ]);
 
         $fieldset->addField('package_theme', 'select', [
@@ -109,14 +110,14 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Settings extends Mage
             'label'    => Mage::helper('widget')->__('Design Package/Theme'),
             'title'    => Mage::helper('widget')->__('Design Package/Theme'),
             'required' => true,
-            'values'   => $this->getPackegeThemeOptionsArray()
+            'values'   => $this->getPackegeThemeOptionsArray(),
         ]);
         $continueButton = $this->getLayout()
             ->createBlock('adminhtml/widget_button')
             ->setData([
                 'label'     => Mage::helper('widget')->__('Continue'),
                 'onclick'   => "setSettings('" . $this->getContinueUrl() . "', 'type', 'package_theme')",
-                'class'     => 'save'
+                'class'     => 'save',
             ]);
         $fieldset->addField('continue_button', 'note', [
             'text' => $continueButton->toHtml(),
@@ -138,7 +139,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Settings extends Mage
             '_current'  => true,
             'type'      => '{{type}}',
             'package'   => '{{package}}',
-            'theme'     => '{{theme}}'
+            'theme'     => '{{theme}}',
         ]);
     }
 
@@ -152,7 +153,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Settings extends Mage
         $widgets = $this->getWidgetInstance()->getWidgetsOptionArray();
         array_unshift($widgets, [
             'value' => '',
-            'label' => Mage::helper('widget')->__('-- Please Select --')
+            'label' => Mage::helper('widget')->__('-- Please Select --'),
         ]);
         return $widgets;
     }

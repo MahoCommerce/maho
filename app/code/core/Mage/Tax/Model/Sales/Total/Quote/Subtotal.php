@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -603,7 +604,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
                     $calc->calcTaxAmount($baseTaxable, $taxRate, false, false),
                     $taxId,
                     false,
-                    'base'
+                    'base',
                 );
             }
 
@@ -700,7 +701,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
     protected function _deltaRound($price, $rate, $direction, $type = 'regular')
     {
         if ($price) {
-            $rate = (string)$rate;
+            $rate = (string) $rate;
             $type = $type . $direction;
             // initialize the delta to a small number to avoid non-deterministic behavior with rounding of 0.5
             $delta = $this->_roundingDeltas[$type][$rate] ?? 0.000001;
@@ -778,7 +779,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
             $address,
             $address->getQuote()->getBillingAddress(),
             $address->getQuote()->getCustomerTaxClassId(),
-            $address->getQuote()->getStore()
+            $address->getQuote()->getStore(),
         );
     }
 
@@ -798,11 +799,11 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
         } else {
             $address->setTotalAmount(
                 'subtotal',
-                $address->getTotalAmount('subtotal') + $item->getRowTotal()
+                $address->getTotalAmount('subtotal') + $item->getRowTotal(),
             );
             $address->setBaseTotalAmount(
                 'subtotal',
-                $address->getBaseTotalAmount('subtotal') + $item->getBaseRowTotal()
+                $address->getBaseTotalAmount('subtotal') + $item->getBaseRowTotal(),
             );
         }
         $address->setSubtotalInclTax($address->getSubtotalInclTax() + $item->getRowTotalInclTax());

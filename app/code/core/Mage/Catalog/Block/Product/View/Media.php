@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -74,7 +75,7 @@ class Mage_Catalog_Block_Product_View_Media extends Mage_Catalog_Block_Product_V
             if (is_numeric($size)) {
                 $helper->constrainOnly(true)->resize($size);
             }
-            return (string)$helper;
+            return (string) $helper;
         }
         return null;
     }

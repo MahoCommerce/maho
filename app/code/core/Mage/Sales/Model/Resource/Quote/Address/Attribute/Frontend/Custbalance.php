@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -31,7 +32,7 @@ class Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend_Custbalance ext
             $address->addTotal([
                 'code'  => 'custbalance',
                 'title' => Mage::helper('sales')->__('Store Credit'),
-                'value' => -$custbalance
+                'value' => -$custbalance,
             ]);
         }
         return $this;

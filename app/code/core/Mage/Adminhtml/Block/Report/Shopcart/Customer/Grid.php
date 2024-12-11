@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -53,17 +54,17 @@ class Mage_Adminhtml_Block_Report_Shopcart_Customer_Grid extends Mage_Adminhtml_
     {
         $this->addColumn('entity_id', [
             'header'    => Mage::helper('reports')->__('ID'),
-            'index'     => 'entity_id'
+            'index'     => 'entity_id',
         ]);
 
         $this->addColumn('firstname', [
             'header'    => Mage::helper('reports')->__('First Name'),
-            'index'     => 'firstname'
+            'index'     => 'firstname',
         ]);
 
         $this->addColumn('lastname', [
             'header'    => Mage::helper('reports')->__('Last Name'),
-            'index'     => 'lastname'
+            'index'     => 'lastname',
         ]);
 
         $this->addColumn('items', [
@@ -71,7 +72,7 @@ class Mage_Adminhtml_Block_Report_Shopcart_Customer_Grid extends Mage_Adminhtml_
             'width'     => '70px',
             'sortable'  => false,
             'align'     => 'right',
-            'index'     => 'items'
+            'index'     => 'items',
         ]);
 
         $currencyCode = $this->getCurrentCurrencyCode();

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -85,8 +86,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config extends Mage_Ad
             'grid',
             $this->getLayout()->createBlock(
                 'adminhtml/catalog_product_edit_tab_super_config_grid',
-                'admin.product.edit.tab.super.config.grid'
-            )
+                'admin.product.edit.tab.super.config.grid',
+            ),
         );
 
         $this->setChild(
@@ -95,8 +96,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config extends Mage_Ad
                 ->setData([
                     'label' => Mage::helper('catalog')->__('Create Empty'),
                     'class' => 'add',
-                    'onclick' => 'superProduct.createEmptyProduct()'
-                ])
+                    'onclick' => 'superProduct.createEmptyProduct()',
+                ]),
         );
 
         if ($this->_getProduct()->getId()) {
@@ -104,8 +105,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config extends Mage_Ad
                 'simple',
                 $this->getLayout()->createBlock(
                     'adminhtml/catalog_product_edit_tab_super_config_simple',
-                    'catalog.product.edit.tab.super.config.simple'
-                )
+                    'catalog.product.edit.tab.super.config.simple',
+                ),
             );
 
             $this->setChild(
@@ -114,8 +115,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config extends Mage_Ad
                     ->setData([
                         'label' => Mage::helper('catalog')->__('Copy From Configurable'),
                         'class' => 'add',
-                        'onclick' => 'superProduct.createNewProduct()'
-                    ])
+                        'onclick' => 'superProduct.createNewProduct()',
+                    ]),
             );
         }
 
@@ -201,7 +202,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config extends Mage_Ad
             $data[] = [
                 'attribute_id' => $attribute->getId(),
                 'label'        => $product->getAttributeText($attribute->getAttributeCode()),
-                'value_index'  => $product->getData($attribute->getAttributeCode())
+                'value_index'  => $product->getData($attribute->getAttributeCode()),
             ];
         }
 
@@ -241,8 +242,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config extends Mage_Ad
                 'set'      => $this->_getProduct()->getAttributeSetId(),
                 'type'     => Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
                 'required' => $this->_getRequiredAttributesIds(),
-                'popup'    => 1
-            ]
+                'popup'    => 1,
+            ],
         );
     }
 
@@ -260,8 +261,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config extends Mage_Ad
                 'type'     => Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
                 'required' => $this->_getRequiredAttributesIds(),
                 'popup'    => 1,
-                'product'  => $this->_getProduct()->getId()
-            ]
+                'product'  => $this->_getProduct()->getId(),
+            ],
         );
     }
 
@@ -275,8 +276,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config extends Mage_Ad
         return $this->getUrl(
             '*/*/quickCreate',
             [
-                'product'  => $this->_getProduct()->getId()
-            ]
+                'product'  => $this->_getProduct()->getId(),
+            ],
         );
     }
 

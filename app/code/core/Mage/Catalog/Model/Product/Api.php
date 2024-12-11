@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -20,7 +21,7 @@ class Mage_Catalog_Model_Product_Api extends Mage_Catalog_Model_Api_Resource
     protected $_filtersMap = [
         'product_id' => 'entity_id',
         'set'        => 'attribute_set_id',
-        'type'       => 'type_id'
+        'type'       => 'type_id',
     ];
 
     protected $_defaultProductAttributeList = [
@@ -54,7 +55,7 @@ class Mage_Catalog_Model_Product_Api extends Mage_Catalog_Model_Api_Resource
         'small_image_label',
         'thumbnail_label',
         'created_at',
-        'updated_at'
+        'updated_at',
     ];
 
     public function __construct()
@@ -96,7 +97,7 @@ class Mage_Catalog_Model_Product_Api extends Mage_Catalog_Model_Api_Resource
                 'set'        => $product->getAttributeSetId(),
                 'type'       => $product->getTypeId(),
                 'category_ids' => $product->getCategoryIds(),
-                'website_ids'  => $product->getWebsiteIds()
+                'website_ids'  => $product->getWebsiteIds(),
             ];
         }
         return $result;
@@ -126,13 +127,13 @@ class Mage_Catalog_Model_Product_Api extends Mage_Catalog_Model_Api_Resource
             'set'        => $product->getAttributeSetId(),
             'type'       => $product->getTypeId(),
             'categories' => $product->getCategoryIds(),
-            'websites'   => $product->getWebsiteIds()
+            'websites'   => $product->getWebsiteIds(),
         ];
 
         foreach ($product->getTypeInstance(true)->getEditableAttributes($product) as $attribute) {
             if ($this->_isAllowedAttribute($attribute, $attributes)) {
                 $result[$attribute->getAttributeCode()] = $product->getData(
-                    $attribute->getAttributeCode()
+                    $attribute->getAttributeCode(),
                 );
             }
         }
@@ -271,17 +272,17 @@ class Mage_Catalog_Model_Product_Api extends Mage_Catalog_Model_Api_Resource
                 if (isset($productData[$attribute->getAttributeCode()])) {
                     $product->setData(
                         $attribute->getAttributeCode(),
-                        $productData[$attribute->getAttributeCode()]
+                        $productData[$attribute->getAttributeCode()],
                     );
                 } elseif (isset($productData['additional_attributes']['single_data'][$attribute->getAttributeCode()])) {
                     $product->setData(
                         $attribute->getAttributeCode(),
-                        $productData['additional_attributes']['single_data'][$attribute->getAttributeCode()]
+                        $productData['additional_attributes']['single_data'][$attribute->getAttributeCode()],
                     );
                 } elseif (isset($productData['additional_attributes']['multi_data'][$attribute->getAttributeCode()])) {
                     $product->setData(
                         $attribute->getAttributeCode(),
-                        $productData['additional_attributes']['multi_data'][$attribute->getAttributeCode()]
+                        $productData['additional_attributes']['multi_data'][$attribute->getAttributeCode()],
                     );
                 }
             }
@@ -333,7 +334,7 @@ class Mage_Catalog_Model_Product_Api extends Mage_Catalog_Model_Api_Resource
         return $this->update($productId, [
             'special_price'     => $specialPrice,
             'special_from_date' => $fromDate,
-            'special_to_date'   => $toDate
+            'special_to_date'   => $toDate,
         ], $store);
     }
 
@@ -351,7 +352,7 @@ class Mage_Catalog_Model_Product_Api extends Mage_Catalog_Model_Api_Resource
         return [
             'special_price'     => $product->getSpecialPrice(),
             'special_from_date' => $product->getSpecialFromDate(),
-            'special_to_date'   => $product->getSpecialToDate()
+            'special_to_date'   => $product->getSpecialToDate(),
         ];
     }
 
@@ -413,7 +414,7 @@ class Mage_Catalog_Model_Product_Api extends Mage_Catalog_Model_Api_Resource
                     'code' => $attribute->getAttributeCode(),
                     'type' => $attribute->getFrontendInput(),
                     'required' => $attribute->getIsRequired(),
-                    'scope' => $scope
+                    'scope' => $scope,
                 ];
             }
         }

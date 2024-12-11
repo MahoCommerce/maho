@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -47,7 +48,7 @@ class Mage_Catalog_Model_Api2_Product_Website_Validator_Admin_Website extends Ma
             $this->_addError(sprintf(
                 'Product #%d is already assigned to website #%d',
                 $product->getId(),
-                $website->getId()
+                $website->getId(),
             ));
             return false;
         }
@@ -90,7 +91,7 @@ class Mage_Catalog_Model_Api2_Product_Website_Validator_Admin_Website extends Ma
         if (!isset($storeData['store_from']) || !is_numeric($storeData['store_from'])) {
             $this->_addError(sprintf(
                 'Invalid value for "store_from" for the website with ID #%d.',
-                $website->getId()
+                $website->getId(),
             ));
             return $this;
         }
@@ -102,7 +103,7 @@ class Mage_Catalog_Model_Api2_Product_Website_Validator_Admin_Website extends Ma
             $this->_addError(sprintf(
                 'Store not found #%d for website #%d.',
                 $storeData['store_from'],
-                $website->getId()
+                $website->getId(),
             ));
             return $this;
         }
@@ -127,7 +128,7 @@ class Mage_Catalog_Model_Api2_Product_Website_Validator_Admin_Website extends Ma
         if (!isset($storeData['store_to']) || !is_numeric($storeData['store_to'])) {
             $this->_addError(sprintf(
                 'Invalid value for "store_to" for the website with ID #%d.',
-                $website->getId()
+                $website->getId(),
             ));
             return $this;
         }
@@ -139,7 +140,7 @@ class Mage_Catalog_Model_Api2_Product_Website_Validator_Admin_Website extends Ma
             $this->_addError(sprintf(
                 'Store not found #%d for website #%d.',
                 $storeData['store_to'],
-                $website->getId()
+                $website->getId(),
             ));
             return $this;
         }
@@ -166,7 +167,7 @@ class Mage_Catalog_Model_Api2_Product_Website_Validator_Admin_Website extends Ma
             $this->_addError(sprintf(
                 'Product #%d isn\'t assigned to website #%d',
                 $product->getId(),
-                $website->getId()
+                $website->getId(),
             ));
         }
         return !count($this->getErrors());

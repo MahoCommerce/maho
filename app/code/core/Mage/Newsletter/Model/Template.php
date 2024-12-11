@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -80,7 +81,7 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
             'template_code'         => [Zend_Filter_Input::ALLOW_EMPTY => false],
             'template_type'         => 'Int',
             'template_sender_email' => 'EmailAddress',
-            'template_sender_name'  => [Zend_Filter_Input::ALLOW_EMPTY => false]
+            'template_sender_name'  => [Zend_Filter_Input::ALLOW_EMPTY => false],
         ];
         $data = [];
         foreach (array_keys($validators) as $validateField) {
@@ -320,7 +321,7 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
                 'mail'       => $mail,
                 'transport'  => $transport,
                 'template'   => $this,
-                'subscriber' => $subscriber
+                'subscriber' => $subscriber,
             ]);
 
             if ($transport->getTransport()) {
@@ -334,7 +335,7 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
                 'html'       => !$this->isPlain(),
                 'queue'      => $queue,
                 'subject'    => $mail->getSubject(),
-                'email_body' => $text
+                'email_body' => $text,
             ]);
             $this->_mail = null;
             if (!is_null($queue)) {
@@ -405,7 +406,7 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
         if (!$this->getData('template_text') && !$this->getId()) {
             $this->setData(
                 'template_text',
-                Mage::helper('newsletter')->__('Follow this link to unsubscribe <!-- This tag is for unsubscribe link  --><a href="{{var subscriber.getUnsubscriptionLink()}}">{{var subscriber.getUnsubscriptionLink()}}</a>')
+                Mage::helper('newsletter')->__('Follow this link to unsubscribe <!-- This tag is for unsubscribe link  --><a href="{{var subscriber.getUnsubscriptionLink()}}">{{var subscriber.getUnsubscriptionLink()}}</a>'),
             );
         }
 

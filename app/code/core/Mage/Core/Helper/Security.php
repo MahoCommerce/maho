@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -36,7 +37,7 @@ class Mage_Core_Helper_Security
             }
             if ($block instanceof $action['block'] && strtolower($action['method']) === $calledMethod) {
                 Mage::throwException(
-                    sprintf('Action with combination block %s and method %s is forbidden.', get_class($block), $method)
+                    sprintf('Action with combination block %s and method %s is forbidden.', get_class($block), $method),
                 );
             }
         }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -94,7 +95,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
                 'id' => 'error',
                 'type' => Mage::helper('adminhtml')->__('Error'),
                 'name' => Mage::helper('adminhtml')->__('Access Denied'),
-                'description' => Mage::helper('adminhtml')->__('You have not enough permissions to use this functionality.')
+                'description' => Mage::helper('adminhtml')->__('You have not enough permissions to use this functionality.'),
             ];
             $totalCount = 1;
         } else {
@@ -103,7 +104,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
                     'id' => 'error',
                     'type' => Mage::helper('adminhtml')->__('Error'),
                     'name' => Mage::helper('adminhtml')->__('No search modules were registered'),
-                    'description' => Mage::helper('adminhtml')->__('Please make sure that all global admin search modules are installed and activated.')
+                    'description' => Mage::helper('adminhtml')->__('Please make sure that all global admin search modules are installed and activated.'),
                 ];
                 $totalCount = 1;
             } else {
@@ -182,7 +183,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     {
         return Mage::helper('core')->jsonEncode([
             'ajaxExpired' => 1,
-            'ajaxRedirect' => $this->getUrl('*/index/login')
+            'ajaxRedirect' => $this->getUrl('*/index/login'),
         ]);
     }
 
@@ -211,7 +212,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
         $params = $this->getRequest()->getParams();
 
         if (!(empty($params))) {
-            $email = (string)$this->getRequest()->getParam('email');
+            $email = (string) $this->getRequest()->getParam('email');
 
             if ($this->_validateFormKey()) {
                 if (!empty($email)) {
@@ -239,8 +240,8 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
                             ->addSuccess(
                                 $this->__(
                                     'If there is an account associated with %s you will receive an email with a link to reset your password.',
-                                    Mage::helper('adminhtml')->escapeHtml($email)
-                                )
+                                    Mage::helper('adminhtml')->escapeHtml($email),
+                                ),
                             );
                         $this->_redirect('*/*/login');
                         return;
@@ -272,7 +273,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
             $data = [
                 'userId' => $userId,
                 'resetPasswordLinkToken' => $resetPasswordLinkToken,
-                'minAdminPasswordLength' => $this->_getModel('admin/user')->getMinAdminPasswordLength()
+                'minAdminPasswordLength' => $this->_getModel('admin/user')->getMinAdminPasswordLength(),
             ];
             $this->_outTemplate('resetforgottenpassword', $data);
         } catch (Exception $exception) {
@@ -288,10 +289,10 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
      */
     public function resetPasswordPostAction()
     {
-        $resetPasswordLinkToken = (string)$this->getRequest()->getQuery('token');
-        $userId = (int)$this->getRequest()->getQuery('id');
-        $password = (string)$this->getRequest()->getPost('password');
-        $passwordConfirmation = (string)$this->getRequest()->getPost('confirmation');
+        $resetPasswordLinkToken = (string) $this->getRequest()->getQuery('token');
+        $userId = (int) $this->getRequest()->getQuery('id');
+        $password = (string) $this->getRequest()->getPost('password');
+        $passwordConfirmation = (string) $this->getRequest()->getPost('confirmation');
 
         try {
             $this->_validateResetPasswordLinkToken($userId, $resetPasswordLinkToken);
@@ -328,7 +329,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
             $data = [
                 'userId' => $userId,
                 'resetPasswordLinkToken' => $resetPasswordLinkToken,
-                'minAdminPasswordLength' => $this->_getModel('admin/user')->getMinAdminPasswordLength()
+                'minAdminPasswordLength' => $this->_getModel('admin/user')->getMinAdminPasswordLength(),
             ];
             $this->_outTemplate('resetforgottenpassword', $data);
             return;
@@ -346,7 +347,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
             $data = [
                 'userId' => $userId,
                 'resetPasswordLinkToken' => $resetPasswordLinkToken,
-                'minAdminPasswordLength' => $this->_getModel('admin/user')->getMinAdminPasswordLength()
+                'minAdminPasswordLength' => $this->_getModel('admin/user')->getMinAdminPasswordLength(),
             ];
             $this->_outTemplate('resetforgottenpassword', $data);
             return;

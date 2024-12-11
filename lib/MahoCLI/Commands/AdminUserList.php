@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'admin:user:list',
-    description: 'List all admin users'
+    description: 'List all admin users',
 )]
 class AdminUserList extends BaseMahoCommand
 {
@@ -43,7 +44,7 @@ class AdminUserList extends BaseMahoCommand
                 $user->getUserId(),
                 $user->getUsername(),
                 $user->getEmail(),
-                $user->getIsActive() ? 'active' : 'inactive'
+                $user->getIsActive() ? 'active' : 'inactive',
             ]);
         }
         $table->render();

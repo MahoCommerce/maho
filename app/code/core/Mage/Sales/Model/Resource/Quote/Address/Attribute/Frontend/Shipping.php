@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -35,7 +36,7 @@ class Mage_Sales_Model_Resource_Quote_Address_Attribute_Frontend_Shipping extend
             $address->addTotal([
                 'code'  => 'shipping',
                 'title' => $title,
-                'value' => $address->getShippingAmount()
+                'value' => $address->getShippingAmount(),
             ]);
         }
         return $this;
