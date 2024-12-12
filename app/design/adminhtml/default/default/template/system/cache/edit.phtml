@@ -50,7 +50,7 @@
                                 <?php if (isset($_button['warning']) && $_button['warning']): ?>
                                     <?php $clickAction = "if (confirm('".addslashes($_button['warning'])."')) {{$clickAction}}"; ?>
                                 <?php endif ?>
-                                <button <?php if (!isset($_button['disabled']) || !$_button['disabled']):?>onclick="<?= $clickAction ?>"<?php endif ?> id="<?= $_button['name'] ?>" type="button" class="scalable <?php if (isset($_button['disabled']) && $_button['disabled']):?>disabled<?php endif ?>" style=""><span><span><span><?= $_button['action'] ?></span></span></span></button>
+                                <button <?php if (!isset($_button['disabled']) || !$_button['disabled']):?>onclick="<?= $clickAction ?>"<?php endif ?> id="<?= $_button['name'] ?>" type="button" class="scalable <?php if (isset($_button['disabled']) && $_button['disabled']):?>disabled<?php endif ?>" style=""><span><?= $_button['action'] ?></span></button>
                                 <?php if (isset($_button['comment'])): ?> <br /> <small><?= $_button['comment'] ?></small> <?php endif ?>
                             <?php endforeach ?>
                         </td>
@@ -73,7 +73,7 @@
                     <tr>
                         <td class="label"><label><?= $this->__('JavaScript/CSS Cache') ?></label></td>
                         <td class="value">
-                            <button onclick="setCacheAction('jscss_action', this)" id='jscss_action' type="button" class="scalable"><span><span><span><?= $this->__('Clear') ?></span></span></span></button>
+                            <button onclick="setCacheAction('jscss_action', this)" id='jscss_action' type="button" class="scalable"><span><?= $this->__('Clear') ?></span></button>
                         </td>
                     </tr>
                 </tbody>

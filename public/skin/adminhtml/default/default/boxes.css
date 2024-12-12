@@ -431,8 +431,6 @@ button,
 .form-button { border-width:1px; border-style:solid; border-color:#ed6502 #a04300 #a04300 #ed6502; padding:1px 7px 2px 7px; background:#ffac47 url(images/btn_bg.gif) repeat-x 0 100%; color:#fff; font-size: 12px; font-weight: bold; cursor:pointer; text-align:center !important; white-space:nowrap; }
 button:hover                    { background:#f77c16 url(images/btn_over_bg.gif) repeat-x 0 0; }
 button:active                   { background:#f77c16 url(images/btn_on_bg.gif) repeat-x 0 0; }
-button span                     { line-height:1.35em; background-repeat:no-repeat; background-position:0 50%; }
-button span span                { background:none !important; padding:0 !important; margin:0 !important; display:inline !important; }
 button.delete,
 button.save,
 button.add                      { padding-left:6px; }
