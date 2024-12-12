@@ -664,7 +664,7 @@ Calendar.initialize = async function(event) {
 
 class Template
 {
-    static #DEFAULT_PATTERN = /(?:^|.|\r|\n)(#\{(.*?)\})/g;
+    static #DEFAULT_PATTERN = /#\{(.*?)\}/g;
 
     /**
      * Creates a Template object for string interpolation
@@ -687,26 +687,24 @@ class Template
             throw new TypeError('Data object cannot be null or undefined');
         }
 
-        return this.template.replaceAll(this.pattern, (match, prefix = '', expr) => {
+        return this.template.replace(this.pattern, (match, expr) => {
             try {
-                // Handle escape sequences
-                if (prefix === '\\') return match;
+                let value = data;
+                const parts = expr.trim().split('.');
 
-                // Parse nested properties using optional chaining
-                const value = expr.split('.')
-                    .reduce((obj, prop) => {
-                        // Handle array notation [index]
-                        const arrayMatch = prop.match(/(\w+)\[(\d+)\]/);
-                        if (arrayMatch) {
-                            const [, propName, index] = arrayMatch;
-                            return obj?.[propName]?.[index];
-                        }
-                        return obj?.[prop];
-                    }, data);
+                for (const part of parts) {
+                    if (part.includes('[')) {
+                        const [name, index] = part.split('[');
+                        const cleanIndex = parseInt(index.replace(']', ''));
+                        value = value[name][cleanIndex];
+                    } else {
+                        value = value[part];
+                    }
+                }
 
-                return `${prefix}${value ?? ''}`;
+                return value ?? '';
             } catch (error) {
-                return `${prefix}`;
+                return '';
             }
         });
     }
