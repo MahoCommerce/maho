@@ -24,7 +24,7 @@ class ProductConfig
 
         // Add change event listeners to all settings
         this.settings.forEach(element => {
-            element.addEventListener('change', () => this.configure());
+            element.addEventListener('change', (event) => this.configure(event));
         });
 
         // Fill state
