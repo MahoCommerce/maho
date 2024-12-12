@@ -310,7 +310,7 @@ class ProductConfigurableSwatches
     }
 
     onSelectChange(select) {
-        var attr = select;
+        var attr = select.attr;
 
         if (this._F.nativeSelectChange) {
             this._F.currentAction = 'change';
