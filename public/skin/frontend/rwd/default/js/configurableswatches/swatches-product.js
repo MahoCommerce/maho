@@ -30,7 +30,7 @@ class ProductConfigWithSwatches extends ProductConfig
         return;
     }
 
-    onfigureForValues () {
+    configureForValues () {
         return;
     }
 
