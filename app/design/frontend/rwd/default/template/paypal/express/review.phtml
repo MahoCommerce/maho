@@ -55,7 +55,7 @@
                                     </select>
                                 </fieldset>
                                 <p class="actions">
-                                    <button id="update_shipping_method_submit" type="submit" class="button"><span><span><?= $this->__('Update Shipping Method') ?></span></span></button>
+                                    <button id="update_shipping_method_submit" type="submit" class="button"><?= $this->__('Update Shipping Method') ?></button>
                                 </p>
                             <?php else: ?>
                                 <p><strong><?= $this->__('Sorry, no quotes are available for this order at this time.') ?></strong></p>
@@ -95,8 +95,8 @@
 <form method="post" id="order_review_form" action="<?= $this->getPlaceOrderUrl() ?>">
     <?= $this->getChildHtml('agreements') ?>
     <div class="buttons-set buttons-set-order" id="review-buttons-container">
-        <button type="button" id="review_button" value="<?= $this->__('Place Order') ?>" class="button btn-checkout"><span><span><?= $this->__('Place Order') ?></span></span></button>
-        <button type="button" id="review_submit" value="<?= $this->__('Place Order') ?>" class="button btn-checkout"><span><span><?= $this->__('Place Order') ?></span></span></button>
+        <button type="button" id="review_button" value="<?= $this->__('Place Order') ?>" class="button btn-checkout"><?= $this->__('Place Order') ?></button>
+        <button type="button" id="review_submit" value="<?= $this->__('Place Order') ?>" class="button btn-checkout"><?= $this->__('Place Order') ?></button>
         <span class="please-wait" id="review-please-wait" style="display:none;">
             <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Submitting order information...')) ?>" title="<?= $this->quoteEscape($this->__('Submitting order information...')) ?>" class="v-middle" /> <?= $this->__('Submitting order information...') ?>
         </span>

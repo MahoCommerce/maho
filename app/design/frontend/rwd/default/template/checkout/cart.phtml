@@ -85,16 +85,16 @@
                     <td colspan="50" class="a-right cart-footer-actions">
 
                         <!-- Make this button the first responder rather than empty cart -->
-                        <button type="submit" style="visibility:hidden;" data-cart-item-update name="update_cart_action" value="update_qty" title="<?= $this->quoteEscape($this->__('Update Shopping Cart')) ?>" class="button2 btn-update"><span><span><?= $this->__('Update Shopping Cart') ?></span></span></button>
+                        <button type="submit" style="visibility:hidden;" data-cart-item-update name="update_cart_action" value="update_qty" title="<?= $this->quoteEscape($this->__('Update Shopping Cart')) ?>" class="button2 btn-update"><?= $this->__('Update Shopping Cart') ?></button>
 
-                        <button type="submit" name="update_cart_action" data-cart-empty value="empty_cart" title="<?= $this->quoteEscape($this->__('Empty Cart')) ?>" class="button2 btn-empty" id="empty_cart_button"><span><span><?= $this->__('Empty Cart') ?></span></span></button>
+                        <button type="submit" name="update_cart_action" data-cart-empty value="empty_cart" title="<?= $this->quoteEscape($this->__('Empty Cart')) ?>" class="button2 btn-empty" id="empty_cart_button"><?= $this->__('Empty Cart') ?></button>
 
-                        <button type="submit" name="update_cart_action" data-cart-item-update value="update_qty" title="<?= $this->quoteEscape($this->__('Update Shopping Cart')) ?>" class="button2 btn-update"><span><span><?= $this->__('Update Shopping Cart') ?></span></span></button>
+                        <button type="submit" name="update_cart_action" data-cart-item-update value="update_qty" title="<?= $this->quoteEscape($this->__('Update Shopping Cart')) ?>" class="button2 btn-update"><?= $this->__('Update Shopping Cart') ?></button>
 
                         <span class="or">-<?= $this->__('or') ?>-</span>
 
                         <?php if ($this->getContinueShoppingUrl()): ?>
-                            <button type="button" title="<?= $this->quoteEscape($this->__('Continue Shopping')) ?>" class="button2 btn-continue" onclick="setLocation('<?= Mage::helper('core')->quoteEscape($this->getContinueShoppingUrl()) ?>')"><span><span><?= $this->__('Continue Shopping') ?></span></span></button>
+                            <button type="button" title="<?= $this->quoteEscape($this->__('Continue Shopping')) ?>" class="button2 btn-continue" onclick="setLocation('<?= Mage::helper('core')->quoteEscape($this->getContinueShoppingUrl()) ?>')"><?= $this->__('Continue Shopping') ?></button>
                         <?php endif ?>
                     </td>
                 </tr>
