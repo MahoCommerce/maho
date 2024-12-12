@@ -664,16 +664,18 @@ Calendar.initialize = async function(event) {
 
 class Template
 {
-    static #DEFAULT_PATTERN = /#\{(.*?)\}/g;
+    static DEFAULT_PATTERN = /(^|.|\r|\n)(#{(.*?)})/;
+    static JAVASCRIPT_PATTERN = /(^|.|\r|\n)(\${(.*?)})/;
+    static HANDLEBARS_PATTERN = /(^|.|\r|\n)({{(.*?)}})/;
 
     /**
      * Creates a Template object for string interpolation
      * @param {string} template - The template string
      * @param {RegExp} pattern - Optional custom pattern for replaceable symbols
      */
-    constructor(template, pattern = Template.#DEFAULT_PATTERN) {
+    constructor(template, pattern = Template.DEFAULT_PATTERN) {
         this.template = String(template);
-        this.pattern = pattern;
+        this.pattern = new RegExp(pattern, 'g');
     }
 
     /**
@@ -682,30 +684,33 @@ class Template
      * @throws {Error} If data is null or undefined
      * @returns {string} Interpolated string
      */
-    evaluate(data) {
-        if (data == null) {
-            throw new TypeError('Data object cannot be null or undefined');
-        }
+    evaluate(data = {}) {
+        return this.template.replaceAll(this.pattern, function() {
+            const before = arguments[1] ?? '';    // The preceding character
+            const symbol = arguments[2] ?? '';    // The entire symbol, i.e. "#{ foo }"
+            const expr = (arguments[3] ?? '').trim(); // The expression, i.e. "foo"
 
-        return this.template.replace(this.pattern, (match, expr) => {
-            try {
-                let value = data;
-                const parts = expr.trim().split('.');
-
-                for (const part of parts) {
-                    if (part.includes('[')) {
-                        const [name, index] = part.split('[');
-                        const cleanIndex = parseInt(index.replace(/\]/g, ''));
-                        value = value[name][cleanIndex];
-                    } else {
-                        value = value[part];
-                    }
-                }
-
-                return value ?? '';
-            } catch (error) {
-                return '';
+            // Check if symbol was escaped
+            if (before === '\\') {
+                return symbol;
             }
+
+            // Check if expression is empty
+            if (expr === '') {
+                return before;
+            }
+
+            // Convert bracket to dot notation
+            const parts = expr.replaceAll(/\[(.*?)\]/g, '.$1').split('.');
+
+            // Loop through each part and assign with null-safe property access
+            let value = data;
+            for (const part of parts) {
+                value = value?.[part];
+            }
+            value ??= '';
+
+            return before + value;
         });
     }
 
@@ -715,12 +720,7 @@ class Template
      * @returns {Function} Template function
      */
     static create(template) {
-        return (data) => {
-            return new Function('data', `
-        with (data) {
-          return \`${template}\`;
-        }
-      `)(data);
-        };
+        const t = new Template(template, Template.JAVASCRIPT_PATTERN);
+        return t.evaluate.bind(t);
     }
 }
