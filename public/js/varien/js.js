@@ -695,7 +695,7 @@ class Template
                 for (const part of parts) {
                     if (part.includes('[')) {
                         const [name, index] = part.split('[');
-                        const cleanIndex = parseInt(index.replace(']', ''));
+                        const cleanIndex = parseInt(index.replace(/\]/g, ''));
                         value = value[name][cleanIndex];
                     } else {
                         value = value[part];
