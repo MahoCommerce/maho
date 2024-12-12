@@ -349,7 +349,9 @@ class ProductConfigurableSwatches
         var opt = attr._e.selectedOption;
         if (opt) {
             if (opt !== attr._e._last.selectedOption) {
-                attr._e.attrLabel.innerHTML = this.getOptionLabel(opt);
+                if (attr._e.attrLabel !== false) {
+                    attr._e.attrLabel.innerHTML = this.getOptionLabel(opt);
+                }
 
                 if (opt._f.isSwatch) {
                     opt._e.ul.querySelectorAll('li').forEach(li => li.classList.remove('selected'));
