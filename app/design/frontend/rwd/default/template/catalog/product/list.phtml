@@ -81,7 +81,7 @@
                                         title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>"
                                         class="button btn-cart"
                                         onclick="customFormSubmit('<?= $_cartUrl ?>', '<?= $_params ?>', 'post')">
-                                    <span><span><?= $this->__('Add to Cart') ?></span></span>
+                                    <?= $this->__('Add to Cart') ?>
                                 </button>
                             </p>
                         <?php elseif($_product->getStockItem() && $_product->getStockItem()->getIsInStock()): ?>
@@ -164,7 +164,7 @@
                                     title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>"
                                     class="button btn-cart"
                                     onclick="customFormSubmit('<?= $_cartUrl ?>', '<?= $_params ?>', 'post')">
-                            <span><span><?= $this->__('Add to Cart') ?></span></span>
+                                <?= $this->__('Add to Cart') ?>
                             </button>
                         <?php elseif($_product->getStockItem() && $_product->getStockItem()->getIsInStock()): ?>
                             <a title="<?= $this->quoteEscape($this->__('View Details')) ?>" class="button" href="<?= $_product->getProductUrl() ?>"><?= $this->__('View Details') ?></a>

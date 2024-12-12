@@ -78,7 +78,7 @@
         </div>
         <div class="buttons-set">
             <p class="back-link"><a href="<?= $this->getBackUrl() ?>"><small>&laquo; </small><?= $this->__('Back to Shipping Information') ?></a></p>
-            <button id="payment-continue" type="submit" title="<?= Mage::helper('core')->quoteEscape($this->__('Continue to Review Your Order')) ?>" class="button"><span><span><?= $this->__('Continue to Review Your Order') ?></span></span></button>
+            <button id="payment-continue" type="submit" title="<?= Mage::helper('core')->quoteEscape($this->__('Continue to Review Your Order')) ?>" class="button"><?= $this->__('Continue to Review Your Order') ?></button>
         </div>
         <?= $this->getBlockHtml('formkey') ?>
     </form>

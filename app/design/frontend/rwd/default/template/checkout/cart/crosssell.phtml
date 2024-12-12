@@ -39,7 +39,7 @@
                                     '<?= $this->getAddToCartUrlCustom($_item, [], false) ?>',
                                     '<?= $_params ?>',
                                     'post')">
-                        <span><span><?= $this->__('Add to Cart') ?></span></span>
+                        <?= $this->__('Add to Cart') ?>
                     </button>
                     <ul class="add-to-links">
                         <?php if ($this->helper('wishlist')->isAllow()) : ?>

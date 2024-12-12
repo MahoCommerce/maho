@@ -21,9 +21,9 @@
             <div class="field-wrapper">
                 <input class="input-text" type="text" id="coupon_code" name="coupon_code" value="<?= $this->escapeHtml($this->getCouponCode()) ?>" />
                 <div class="button-wrapper">
-                    <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Apply')) ?>" class="button2" onclick="discountForm.submit(false)" value="<?= $this->__('Apply') ?>"><span><span><?= $this->__('Apply') ?></span></span></button>
+                    <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Apply')) ?>" class="button2" onclick="discountForm.submit(false)" value="<?= $this->__('Apply') ?>"><?= $this->__('Apply') ?></button>
                     <?php if(strlen($this->getCouponCode())): ?>
-                        <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Cancel')) ?>" class="button2 cancel-coupon" onclick="discountForm.submit(true)" value="<?= $this->__('Cancel') ?>"><span><span><?= $this->__('Cancel') ?></span></span>
+                        <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Cancel')) ?>" class="button2 cancel-coupon" onclick="discountForm.submit(true)" value="<?= $this->__('Cancel') ?>"><?= $this->__('Cancel') ?>
                         </button>
                     <?php endif ?>
                 </div>

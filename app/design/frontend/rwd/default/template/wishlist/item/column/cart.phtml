@@ -24,7 +24,7 @@ $options = $this->getChild('customer.wishlist.item.options')
             title="<?= Mage::helper('core')->quoteEscape($this->__('Add to Cart')) ?>"
             onclick="addWItemToCartCustom(<?= $item->getId() ?>, false);"
             class="button btn-cart">
-        <span><span><?= $this->__('Add to Cart') ?></span></span>
+        <?= $this->__('Add to Cart') ?>
     </button>
 <?php else: ?>
     <?php if ($product->getIsSalable()): ?>

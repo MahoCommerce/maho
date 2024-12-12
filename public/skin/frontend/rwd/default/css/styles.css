@@ -599,21 +599,6 @@ a.button:hover {
   outline: none;
 }
 
-.button2 span,
-.button2 span span {
-  line-height: 30px;
-  height: 30px;
-  text-decoration: underline;
-  text-transform: uppercase;
-  display: inline-block;
-  color: #0472ad;
-}
-.button2 span:hover,
-.button2 span span:hover {
-  text-decoration: none;
-  color: #246b8f;
-}
-
 @media only screen and (max-width: 770px) {
   .col2-set .buttons-set .button,
   .col2-set .buttons-set .button2 {

@@ -209,7 +209,7 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
            data-cart-item-id="<?= $this->jsQuoteEscape($_item->getSku()) ?>"
            size="4" title="<?= Mage::helper('core')->quoteEscape($this->__('Qty')) ?>" class="input-text qty" maxlength="12" />
 
-    <button type="submit" data-cart-item-update name="update_cart_action" value="update_qty" title="<?= Mage::helper('core')->quoteEscape($this->__('Update')) ?>" class="button btn-update"><span><span><?= $this->__('Update') ?></span></span>
+    <button type="submit" data-cart-item-update name="update_cart_action" value="update_qty" title="<?= Mage::helper('core')->quoteEscape($this->__('Update')) ?>" class="button btn-update"><?= $this->__('Update') ?>
     </button>
 
     <ul class="cart-links">

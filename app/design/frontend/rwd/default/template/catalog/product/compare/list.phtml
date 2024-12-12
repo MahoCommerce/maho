@@ -68,7 +68,7 @@
                                         '<?= $this->helper('catalog/product_compare')->getAddToCartUrlCustom($_item, false) ?>',
                                         '<?= $_params ?>',
                                         'post')">
-                            <span><span><?= $this->__('Add to Cart') ?></span></span>
+                                <?= $this->__('Add to Cart') ?>
                         </button>
                     <?php else: ?>
                         <p class="availability out-of-stock"><span><?= $this->__('Out of stock') ?></span></p>
@@ -139,7 +139,7 @@
                                            '<?= $this->helper('catalog/product_compare')->getAddToCartUrlCustom($_item, false) ?>',
                                            '<?= $_params ?>',
                                            'post')">
-                                <span><span><?= $this->__('Add to Cart') ?></span></span>
+                                    <?= $this->__('Add to Cart') ?>
                             </button>
                         </p>
                     <?php else: ?>
@@ -165,7 +165,7 @@
         </tbody>
     </table>
     <div class="buttons-set">
-        <button type="button" title="<?= $this->quoteEscape($this->__('Close Window')) ?>" class="button" onclick="window.close();"><span><span><?= $this->__('Close Window') ?></span></span></button>
+        <button type="button" title="<?= $this->quoteEscape($this->__('Close Window')) ?>" class="button" onclick="window.close();"><?= $this->__('Close Window') ?></button>
         <span class="please-wait" id="compare-list-please-wait" style="display:none;">
             <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Please wait...')) ?>" title="<?= $this->quoteEscape($this->__('Please wait...')) ?>" class="v-middle" /> <?= $this->__('Please wait...') ?>
         </span>

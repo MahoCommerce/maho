@@ -65,7 +65,7 @@ var groupPriceRowTemplate = '<tr>'
     + '<input type="hidden" name="<?= $_htmlName ?>[{{index}}][is_percent]" value="<?php if ($this->getIsPercent()) : ?>1<?php else: ?>0<?php endif ?>" id="group_price_row_{{index}}_is_percent" /></td>'
     + '<td class="last"><input type="hidden" name="<?= $_htmlName ?>[{{index}}][delete]" class="delete" value="" id="group_price_row_{{index}}_delete" />'
     + '<button title="<?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Delete Group Price')) ?>" type="button" class="scalable delete icon-btn delete-product-option" id="group_price_row_{{index}}_delete_button" onclick="return groupPriceControl.deleteItem(event);">'
-    + '<span><?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Delete')) ?></span></button></td>'
+    + '<?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Delete')) ?></button></td>'
     + '</tr>';
 
 var groupPriceControl = {
