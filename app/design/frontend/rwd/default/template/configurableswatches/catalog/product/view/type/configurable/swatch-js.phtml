@@ -14,7 +14,7 @@
 <?php if ($this->getLayout()->getBlock('head')->getItems('skin_js/js/configurableswatches/swatches-product.js')): ?>
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function() {
-            var swatchesConfig = new ProductConfigurableSwatches(spConfig);
+            new Product.ConfigurableSwatches(spConfig);
         });
     </script>
 <?php endif ?>
