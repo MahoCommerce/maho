@@ -179,9 +179,9 @@
     <?= $this->getChildHtml('checkout.onepage.billing.extra') ?>
     <?php if ($this->canShip()): ?>
         <li class="control">
-            <input type="radio" name="billing[use_for_shipping]" id="billing:use_for_shipping_yes" value="1"<?php if ($this->isUseBillingAddressForShipping()) {?> checked="checked"<?php }?> title="<?= $this->quoteEscape($this->__('Ship to this address')) ?>" onclick="$('shipping:same_as_billing').checked = true;" class="radio" /><label for="billing:use_for_shipping_yes"><?=  $this->__('Ship to this address') ?></label></li>
+            <input type="radio" name="billing[use_for_shipping]" id="billing:use_for_shipping_yes" value="1"<?php if ($this->isUseBillingAddressForShipping()) {?> checked="checked"<?php }?> title="<?= $this->quoteEscape($this->__('Ship to this address')) ?>" onclick="document.getElementById('shipping:same_as_billing').checked = true;" class="radio" /><label for="billing:use_for_shipping_yes"><?=  $this->__('Ship to this address') ?></label></li>
         <li class="control">
-            <input type="radio" name="billing[use_for_shipping]" id="billing:use_for_shipping_no" value="0"<?php if (!$this->isUseBillingAddressForShipping()) {?> checked="checked"<?php }?> title="<?= $this->quoteEscape($this->__('Ship to different address')) ?>" onclick="$('shipping:same_as_billing').checked = false;" class="radio" /><label for="billing:use_for_shipping_no"><?= $this->__('Ship to different address') ?></label>
+            <input type="radio" name="billing[use_for_shipping]" id="billing:use_for_shipping_no" value="0"<?php if (!$this->isUseBillingAddressForShipping()) {?> checked="checked"<?php }?> title="<?= $this->quoteEscape($this->__('Ship to different address')) ?>" onclick="document.getElementById('shipping:same_as_billing').checked = false;" class="radio" /><label for="billing:use_for_shipping_no"><?= $this->__('Ship to different address') ?></label>
         </li>
     <?php endif ?>
     </ul>
