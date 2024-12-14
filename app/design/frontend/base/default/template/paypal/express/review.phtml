@@ -3,7 +3,7 @@
  * Maho
  *
  * @category    design
- * @package     base_default
+ * @package     rwd_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
@@ -72,17 +72,13 @@
 
 <div class="info-set col2-set">
     <h2 class="legend"><?= $this->__('Billing Information') ?></h2>
-    <div class="col-1">
-        <div class="box">
-            <div class="box-title">
-                <h3><?= $this->__('Payment Method') ?> <span class="separator">|</span>
-                    <?php if($this->getEditUrl()):?><a href="<?= $this->getEditUrl() ?>"><?= $this->__('Edit Payment Information') ?></a> <?php endif ?>
-                </h3>
-            </div>
-            <div class="box-content">
-                <?= $this->escapeHtml($this->getPaymentMethodTitle()) ?>
-            </div>
-        </div>
+    <div class="box-title">
+        <h3><?= $this->__('Payment Method') ?> <span class="separator">|</span>
+            <?php if($this->getEditUrl()):?><a href="<?= $this->getEditUrl() ?>"><?= $this->__('Edit Payment Information') ?></a> <?php endif ?>
+        </h3>
+    </div>
+    <div class="box-content">
+        <?= $this->escapeHtml($this->getPaymentMethodTitle()) ?>
     </div>
 </div>
 
@@ -95,10 +91,10 @@
 <form method="post" id="order_review_form" action="<?= $this->getPlaceOrderUrl() ?>">
     <?= $this->getChildHtml('agreements') ?>
     <div class="buttons-set buttons-set-order" id="review-buttons-container">
-        <button type="button" id="review_button" value="<?= Mage::helper('core')->quoteEscape($this->__('Place Order')) ?>" class="button btn-checkout"><?= $this->__('Place Order') ?></button>
-        <button type="button" id="review_submit" value="<?= Mage::helper('core')->quoteEscape($this->__('Place Order')) ?>" class="button btn-checkout"><?= $this->__('Place Order') ?></button>
+        <button type="button" id="review_button" value="<?= $this->__('Place Order') ?>" class="button btn-checkout"><?= $this->__('Place Order') ?></button>
+        <button type="button" id="review_submit" value="<?= $this->__('Place Order') ?>" class="button btn-checkout"><?= $this->__('Place Order') ?></button>
         <span class="please-wait" id="review-please-wait" style="display:none;">
-            <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= Mage::helper('core')->quoteEscape($this->__('Submitting order information...')) ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Submitting order information...')) ?>" class="v-middle" /> <?= $this->__('Submitting order information...') ?>
+            <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Submitting order information...')) ?>" title="<?= $this->quoteEscape($this->__('Submitting order information...')) ?>" class="v-middle" /> <?= $this->__('Submitting order information...') ?>
         </span>
     </div>
 </form>
