@@ -181,8 +181,8 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
                             "' . $this->getSourceUrl() . '",
                             ' . $configJson . '
                         );
-                        if ($("' . $chooserId . 'value")) {
-                            $("' . $chooserId . 'value").advaiceContainer = "' . $chooserId . 'advice-container";
+                        if (document.getElementById("' . $chooserId . 'value")) {
+                            document.getElementById("' . $chooserId . 'value").advaiceContainer = "' . $chooserId . 'advice-container";
                         }
                     }
 
