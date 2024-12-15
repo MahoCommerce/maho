@@ -197,7 +197,6 @@ class Checkout
             return false;
         }
 
-        // Create and dispatch a custom event
         const event = new CustomEvent('login:setMethod', {
             detail: { method: this.method }
         });
