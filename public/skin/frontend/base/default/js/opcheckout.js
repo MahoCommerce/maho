@@ -377,7 +377,7 @@ class Billing {
                 if (Array.isArray(msg)) {
                     alert(msg.join("\n"));
                 }
-                alert(msg.replace(/<[^>]*>/g, '')); // stripTags equivalent
+                alert(stripTags(msg));
             }
 
             return false;

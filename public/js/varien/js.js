@@ -572,6 +572,12 @@ function buttonDisabler() {
     });
 }
 
+function stripTags(str) {
+    const div = document.createElement('div');
+    div.innerHTML = str;
+    return div.textContent;
+}
+
 const Calendar = {};
 Calendar.setup = function(config) {
     const { inputField = '' } = config;
