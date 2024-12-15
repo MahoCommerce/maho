@@ -912,7 +912,7 @@ class Review
             } else {
                 let msg = response.error_messages;
                 if (Array.isArray(msg)) {
-                    msg = msg.join("\n").replace(/<[^>]*>/g, '');
+                    msg = stripTags(msg.join("\n"));
                 }
                 if (msg) {
                     alert(msg);
