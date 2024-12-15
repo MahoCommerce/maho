@@ -31,7 +31,6 @@
 </div>
 <div class="buttons-set" id="payment-buttons-container">
     <p class="required"><?= $this->__('* Required Fields') ?></p>
-    <p class="back-link"><a href="#" onclick="checkout.back(); return false;"><small>&laquo; </small><?= $this->__('Back') ?></a></p>
     <button type="button" class="button" onclick="payment.save()"><?= $this->__('Continue') ?></button>
     <span class="please-wait" id="payment-please-wait" style="display:none;">
         <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= Mage::helper('core')->quoteEscape($this->__('Loading next step...')) ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Loading next step...')) ?>" class="v-middle" /> <?= $this->__('Loading next step...') ?>
