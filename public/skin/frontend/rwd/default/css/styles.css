@@ -6585,9 +6585,6 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
     width: auto;
   }
 }
-#checkout-step-review .opc-block-progress .block-content .changelink {
-  display: none;
-}
 
 @media only screen and (max-width: 479px) {
   #checkout-review-table thead > tr > th {
