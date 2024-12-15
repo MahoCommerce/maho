@@ -367,7 +367,7 @@ class Billing {
 
         if (response.error) {
             if (typeof response.message === 'string') {
-                alert(response.message.replace(/<[^>]*>/g, '')); // stripTags equivalent
+                alert(stripTags(response.message));
             } else {
                 if (window.billingRegionUpdater) {
                     billingRegionUpdater.update();
@@ -506,7 +506,7 @@ class Shipping {
 
         if (response.error) {
             if (typeof response.message === 'string') {
-                alert(response.message.replace(/<[^>]*>/g, '')); // stripTags equivalent
+                alert(stripTags(response.message));
             } else {
                 if (window.shippingRegionUpdater) {
                     shippingRegionUpdater.update();
@@ -515,7 +515,7 @@ class Shipping {
                 if (Array.isArray(msg)) {
                     alert(msg.join("\n"));
                 }
-                alert(msg.replace(/<[^>]*>/g, '')); // stripTags equivalent
+                alert(stripTags(msg));
             }
             return false;
         }
