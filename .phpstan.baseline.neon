@@ -5353,12 +5353,6 @@ parameters:
 			path: app/design/frontend/base/default/template/bundle/catalog/product/view/price.phtml
 
 		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 9
-			path: app/design/frontend/base/default/template/bundle/catalog/product/view/type/bundle.phtml
-
-		-
 			message: '#^Call to protected method _isSelected\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
 			identifier: method.protected
 			count: 1

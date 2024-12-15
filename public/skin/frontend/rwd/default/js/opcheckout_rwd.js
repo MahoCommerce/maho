@@ -8,6 +8,7 @@
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
 Checkout.prototype.gotoSection = function (section, reloadProgressBlock) {
     // Adds class so that the page can be styled to only show the "Checkout Method" step
     if ((this.currentStep === 'login' || this.currentStep === 'billing') && section === 'billing') {

@@ -42,10 +42,8 @@
                     </span>
                     <?php if ($_isRequired): ?>
                         <script type="text/javascript">
-                            //<![CDATA[
-                            $('links_<?= $_link->getId() ?>').advaiceContainer = 'links-advice-container';
-                            $('links_<?= $_link->getId() ?>').callbackFunction = 'validateDownloadableCallback';
-                            //]]>
+                            document.getElementById('links_<?= $_link->getId() ?>').advaiceContainer = 'links-advice-container';
+                            document.getElementById('links_<?= $_link->getId() ?>').callbackFunction = 'validateDownloadableCallback';
                         </script>
                     <?php endif ?>
                     </li>

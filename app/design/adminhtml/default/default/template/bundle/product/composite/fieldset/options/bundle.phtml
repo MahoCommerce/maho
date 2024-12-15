@@ -28,54 +28,54 @@
 </div>
 
 <script>
-var BundleControl = Class.create();
-BundleControl.prototype = {
-    initialize: function (config) {
-        this.config = config;
-    },
-
-    changeSelection: function (selection) {
-        if (selection.multiple) {
-            return;
+    class BundleControl {
+        constructor(config) {
+            this.config = config;
         }
-        var parts = selection.id.split('-'), optionId = parts[2],
-            showQtyInput = selection.value && selection.value != 'none',
-            options = this.config.options[optionId],
-            selectionOptions = options && options.selections && options.selections[selection.value] || {};
 
-        selectionOptions.can_change_qty = Number(selectionOptions.can_change_qty) && showQtyInput;
-        this.updateQtyInput(optionId, selectionOptions);
-    },
-
-    updateQtyInput: function(optionId, selectionOptions) {
-        var elem = $('bundle-option-' + optionId + '-qty-input'),
-            default_qty = Number(selectionOptions.default_qty);
-        if (!elem) {
-            return;
-        }
-        if (selectionOptions.can_change_qty) {
-            elem.removeClassName('qty-disabled');
-            elem.disabled = false;
-            if (elem.value == '0') {
-                elem.value = default_qty || 1;
+        changeSelection(selection) {
+            if (selection.multiple) {
+                return;
             }
-        } else {
-            elem.addClassName('qty-disabled');
-            elem.disabled = true;
-            elem.value = default_qty || 0;
-        }
-    },
+            const parts = selection.id.split('-');
+            const optionId = parts[2];
+            const showQtyInput = selection.value && selection.value !== 'none';
+            const options = this.config.options[optionId];
+            const selectionOptions = options && options.selections && options.selections[selection.value] || {};
 
-    updateForDefaults: function () {
-        for (var optionId in this.config.options) {
-            var selection = $('bundle-option-' + optionId);
-            if (selection) {
-                this.changeSelection(selection);
+            selectionOptions.can_change_qty = Number(selectionOptions.can_change_qty) && showQtyInput;
+            this.updateQtyInput(optionId, selectionOptions);
+        }
+
+        updateQtyInput(optionId, selectionOptions) {
+            const elem = document.getElementById('bundle-option-' + optionId + '-qty-input');
+            const default_qty = Number(selectionOptions.default_qty);
+            if (!elem) {
+                return;
+            }
+            if (selectionOptions.can_change_qty) {
+                elem.classList.remove('qty-disabled');
+                elem.disabled = false;
+                if (elem.value === '0') {
+                    elem.value = default_qty || 1;
+                }
+            } else {
+                elem.classList.add('qty-disabled');
+                elem.disabled = true;
+                elem.value = default_qty || 0;
+            }
+        }
+
+        updateForDefaults() {
+            for (const optionId in this.config.options) {
+                const selection = document.getElementById('bundle-option-' + optionId);
+                if (selection) {
+                    this.changeSelection(selection);
+                }
             }
         }
     }
-}
-ProductConfigure.bundleControl = new BundleControl(<?= $this->getJsonConfig() ?>);
+    ProductConfigure.bundleControl = new BundleControl(<?= $this->getJsonConfig() ?>);
 </script>
 
 <?php endif ?>

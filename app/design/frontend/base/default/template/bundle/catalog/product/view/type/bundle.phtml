@@ -3,13 +3,14 @@
  * Maho
  *
  * @category    design
- * @package     base_default
+ * @package     rwd_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
+/** @var Mage_Bundle_Block_Catalog_Product_View_Type_Bundle $this */
 ?>
 <?php $_product = $this->getProduct() ?>
 
@@ -23,16 +24,3 @@
         var CACL_TOTAL_BASE = "<?= Mage_Tax_Model_Calculation::CALC_TOTAL_BASE ?>";
     </script>
 <?php endif ?>
-<?php if ($this->displayProductStockStatus()): ?>
-    <?php if ($_product->isAvailable()): ?>
-        <p class="availability in-stock"><?= $this->helper('catalog')->__('Availability:') ?>
-            <span><?= $this->helper('catalog')->__('In stock') ?></span></p>
-    <?php else: ?>
-        <p class="availability out-of-stock"><?= $this->helper('catalog')->__('Availability:') ?>
-            <span><?= $this->helper('catalog')->__('Out of stock') ?></span></p>
-    <?php endif ?>
-<?php endif ?>
-<div class="price-box-bundle">
-    <?= $this->getPriceHtml($_product) ?>
-</div>
-<?= $this->getChildHtml('bundle_prices') ?>
