@@ -21,7 +21,6 @@ Default layout, loads most of the pages
         <block type="page/html" name="root" output="toHtml" template="page/3columns.phtml">
 
             <block type="page/html_head" name="head" as="head">
-                <action method="addJs"><script>prototype/prototype.js</script></action>
                 <action method="addJs"><script>validation.js</script></action>
                 <action method="addJs"><script>maho-autocomplete.js</script></action>
                 <action method="addJs"><script>varien/js.js</script></action>
@@ -97,7 +96,6 @@ Default layout, loads most of the pages
         <block type="page/html" name="root" output="toHtml" template="page/print.phtml">
 
             <block type="page/html_head" name="head" as="head">
-                <action method="addJs"><script>prototype/prototype.js</script></action>
                 <action method="addJs"><script>mage/translate.js</script></action>
                 <action method="addJs"><script>validation.js</script></action>
                 <action method="addJs"><script>varien/js.js</script></action>
