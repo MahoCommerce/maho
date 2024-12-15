@@ -193,7 +193,7 @@ class Checkout
             this.gotoSection('billing', true);
         }
         else {
-            alert(Translator.translate('Please choose to register or to checkout as a guest').replace(/<[^>]*>/g, ''));
+            alert(stripTags(Translator.translate('Please choose to register or to checkout as a guest')));
             return false;
         }
 
