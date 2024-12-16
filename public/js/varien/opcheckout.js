@@ -51,9 +51,8 @@ class Checkout
     }
 
     ajaxFailure(error) {
-        console.log(error);
-        alert(error)
-        //location.href = encodeURI(this.failureUrl);
+        alert(error);
+        location.href = encodeURI(this.failureUrl);
     }
 
     reloadProgressBlock(toStep) {
@@ -64,36 +63,37 @@ class Checkout
         }
     }
 
-    reloadStep(prevStep) {
-        fetch(this.progressUrl + (prevStep ? `?prevStep=${prevStep}` : ''))
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text();
-            })
-            .then(html => {
-                const prevStepDiv = document.getElementById(`${prevStep}-progress-opcheckout`);
-                if (prevStepDiv) {
-                    document.getElementById(`${prevStep}-progress-opcheckout`).innerHTML = html;
-                }
-                this.resetPreviousSteps();
-            })
-            .catch((error) => this.ajaxFailure(error));
+    async reloadStep(prevStep) {
+        try {
+            const response = await fetch(this.progressUrl + (prevStep ? `?prevStep=${prevStep}` : ''));
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const html = await response.text();
+            const prevStepDiv = document.getElementById(`${prevStep}-progress-opcheckout`);
+            if (prevStepDiv) {
+                prevStepDiv.innerHTML = html;
+            }
+
+            this.resetPreviousSteps();
+        } catch (error) {
+            this.ajaxFailure(error);
+        }
     }
 
-    reloadReviewBlock() {
-        fetch(this.reviewUrl)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text();
-            })
-            .then(html => {
-                document.getElementById('checkout-review-load').innerHTML = html;
-            })
-            .catch(() => this.ajaxFailure());
+    async reloadReviewBlock() {
+        try {
+            const response = await fetch(this.reviewUrl);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const html = await response.text();
+            document.getElementById('checkout-review-load').innerHTML = html;
+        } catch (error) {
+            this.ajaxFailure();
+        }
     }
 
     _disableEnableAll(element, isDisabled) {
@@ -166,37 +166,37 @@ class Checkout
         this.gotoSection(changeStep, false);
     }
 
-    setMethod() {
+    async setMethod() {
         const method = document.querySelector('input[name=checkout_method]')?.value;
         if (method === 'guest') {
             this.method = 'guest';
-            fetch(this.saveMethodUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: 'method=guest'
-            })
-                .catch(() => this.ajaxFailure());
+            try {
+                await fetch(this.saveMethodUrl, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'method=guest'
+                });
 
-            document.getElementById('register-customer-password').style.display = 'none';
-            this.gotoSection('billing', true);
-        }
-        else if (method === 'register') {
+                document.getElementById('register-customer-password').style.display = 'none';
+                this.gotoSection('billing', true);
+            } catch (error) {
+                this.ajaxFailure();
+            }
+        } else if (method === 'register') {
             this.method = 'register';
-            fetch(this.saveMethodUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: 'method=register'
-            })
-                .catch(() => this.ajaxFailure());
+            try {
+                await fetch(this.saveMethodUrl, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'method=register'
+                });
 
-            document.getElementById('register-customer-password').style.display = 'block';
-            this.gotoSection('billing', true);
-        }
-        else {
+                document.getElementById('register-customer-password').style.display = 'block';
+                this.gotoSection('billing', true);
+            } catch (error) {
+                this.ajaxFailure();
+            }
+        } else {
             alert(stripTags(Translator.translate('Please choose to register or to checkout as a guest')));
             return false;
         }
@@ -330,32 +330,31 @@ class Billing {
         document.getElementById('shipping:same_as_billing').checked = flag;
     }
 
-    save() {
+    async save() {
         if (checkout.loadWaiting !== false) return;
 
         const validator = new Validation(this.form);
         if (validator.validate()) {
             checkout.setLoadWaiting('billing');
 
-            const formData = new FormData(document.getElementById(this.form));
-            fetch(this.saveUrl, {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    this.onComplete({ responseJSON: data });
-                    this.onSave({ responseJSON: data });
-                })
-                .catch(error => {
-                    checkout.ajaxFailure(error);
+            try {
+                const formData = new FormData(document.getElementById(this.form));
+                const response = await fetch(this.saveUrl, {
+                    method: 'POST',
+                    body: formData
                 });
+
+                const data = await response.json();
+                this.onComplete({ responseJSON: data });
+                this.onSave({ responseJSON: data });
+            } catch (error) {
+                checkout.ajaxFailure(error);
+            }
         }
     }
 
     resetLoadWaiting(transport) {
         checkout.setLoadWaiting(false);
-        // Replace Prototype's custom event with native CustomEvent
         const event = new CustomEvent('billing-request:completed', {
             detail: { transport: transport }
         });
@@ -474,26 +473,26 @@ class Shipping {
         document.getElementById('shipping:region').value = document.getElementById('billing:region').value;
     }
 
-    save() {
+    async save() {
         if (checkout.loadWaiting !== false) return;
 
         const validator = new Validation(this.form);
         if (validator.validate()) {
             checkout.setLoadWaiting('shipping');
 
-            const formData = new FormData(document.getElementById(this.form));
-            fetch(this.saveUrl, {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    this.onComplete();
-                    this.onSave({ responseJSON: data });
-                })
-                .catch(error => {
-                    checkout.ajaxFailure(error);
+            try {
+                const formData = new FormData(document.getElementById(this.form));
+                const response = await fetch(this.saveUrl, {
+                    method: 'POST',
+                    body: formData
                 });
+
+                const data = await response.json();
+                this.onComplete();
+                this.onSave({ responseJSON: data });
+            } catch (error) {
+                checkout.ajaxFailure(error);
+            }
         }
     }
 
@@ -563,19 +562,25 @@ class ShippingMethod {
         return false;
     }
 
-    save() {
+    async save() {
         if (checkout.loadWaiting !== false) return;
 
         if (this.validate()) {
             checkout.setLoadWaiting('shipping-method');
-            fetch(this.saveUrl, {
-                method: 'POST',
-                body: new FormData(this.form)
-            })
-                .then(response => response.json())
-                .then(this.onSave)
-                .catch(error => checkout.ajaxFailure.call(checkout, error))
-                .finally(this.onComplete);
+
+            try {
+                const response = await fetch(this.saveUrl, {
+                    method: 'POST',
+                    body: new FormData(this.form)
+                });
+
+                const data = await response.json();
+                this.onSave(data);
+            } catch (error) {
+                checkout.ajaxFailure.call(checkout, error);
+            } finally {
+                this.onComplete();
+            }
         }
     }
 
@@ -792,30 +797,31 @@ class Payment {
         return hasValidation ? validateResult : false;
     }
 
-    save() {
+    async save() {
         if (checkout.loadWaiting !== false) return;
+
         const validator = new Validation(this.form);
         if (this.validate() && validator.validate()) {
             checkout.setLoadWaiting('payment');
-            const form = document.getElementById(this.form);
-            const formData = new FormData(form);
-            const urlEncodedData = new URLSearchParams(formData).toString();
 
-            fetch(this.saveUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: urlEncodedData
-            })
-                .then(response => response.text())
-                .then(data => {
-                    this.onSave({ responseJSON: null, responseText: data });
-                    this.onComplete();
-                })
-                .catch(error => {
-                    checkout.ajaxFailure.bind(checkout)(error);
+            try {
+                const form = document.getElementById(this.form);
+                const formData = new FormData(form);
+                const urlEncodedData = new URLSearchParams(formData).toString();
+                const response = await fetch(this.saveUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: urlEncodedData
                 });
+
+                const data = await response.text();
+                this.onSave({ responseJSON: null, responseText: data });
+                this.onComplete();
+            } catch (error) {
+                checkout.ajaxFailure.bind(checkout)(error);
+            }
         }
     }
 
@@ -839,8 +845,7 @@ class Payment {
                 }
                 return;
             }
-            alert(typeof response.message === 'string' ?
-                response.message : response.error);
+            alert(typeof response.message === 'string' ? response.message : response.error);
             return;
         }
 
@@ -864,7 +869,7 @@ class Review
         this.onComplete = this.resetLoadWaiting.bind(this);
     }
 
-    save() {
+    async save() {
         if (checkout.loadWaiting !== false) return;
         checkout.setLoadWaiting('review');
 
@@ -878,14 +883,19 @@ class Review
         }
         formData.append('save', true);
 
-        fetch(this.saveUrl, {
-            method: 'POST',
-            body: formData // No Content-Type header needed for FormData
-        })
-            .then(response => response.json())
-            .then(this.onSave)
-            .catch(error => checkout.ajaxFailure.call(checkout, error))
-            .finally(this.onComplete);
+        try {
+            const response = await fetch(this.saveUrl, {
+                method: 'POST',
+                body: formData // No Content-Type header needed for FormData
+            });
+
+            const data = await response.json();
+            this.onSave(data);
+        } catch (error) {
+            checkout.ajaxFailure.call(checkout, error);
+        } finally {
+            this.onComplete();
+        }
     }
 
     resetLoadWaiting() {
