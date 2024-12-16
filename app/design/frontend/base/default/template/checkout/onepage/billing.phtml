@@ -218,7 +218,7 @@
             const billingRememberMe = billingForm.querySelectorAll('.remember-me-box');
 
             if (billingRememberMe.length > 0) {
-                const method = document.querySelector('input[name=checkout_method]')?.value;
+                const method = document.querySelector('input[name=checkout_method]:is(:checked,[type=hidden])')?.value;
                 if (method === 'guest') {
                     billingRememberMe[0].style.display = 'none';
                 } else if (method === 'register') {

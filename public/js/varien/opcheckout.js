@@ -167,7 +167,7 @@ class Checkout
     }
 
     async setMethod() {
-        const method = document.querySelector('input[name=checkout_method]')?.value;
+        const method = document.querySelector('input[name=checkout_method]:is(:checked,[type=hidden])')?.value;
         if (method === 'guest') {
             this.method = 'guest';
             try {

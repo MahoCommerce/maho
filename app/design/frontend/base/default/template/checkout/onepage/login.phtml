@@ -120,9 +120,9 @@ $isAllowedGuestCheckout = $this->helper('checkout')->isAllowedGuestCheckout($thi
         }
     }
 
-    document.getElementById('onepage-guest-register-button').addEventListener('click', onepageRegisterOrGuest);
+    document.getElementById('onepage-guest-register-button')?.addEventListener('click', onepageRegisterOrGuest);
     function onepageRegisterOrGuest() {
-        const method = document.querySelector('input[name=checkout_method]')?.value;
+        const method = document.querySelector('input[name=checkout_method]:is(:checked,[type=hidden])')?.value;
         if (method === 'register') {
             <?php if ($isRedirectRegisterStep): ?>
                 window.location = '<?= $this->quoteEscape($this->helper('checkout/url')->getRegistrationUrl()) ?>';
