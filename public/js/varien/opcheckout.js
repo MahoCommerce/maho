@@ -1,8 +1,8 @@
 /**
  * Maho
  *
- * @category    design
- * @package     base_default
+ * @category    Varien
+ * @package     js
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2015-2022 The OpenMage Contributors (https://openmage.org)
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
