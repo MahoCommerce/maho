@@ -131,6 +131,9 @@ class Checkout
     }
 
     gotoSection(section, reloadProgressBlock) {
+        if ((this.currentStep === 'login' || this.currentStep === 'billing') && section === 'billing') {
+            document.body.classList.add('opc-has-progressed-from-login');
+        }
         if (reloadProgressBlock) {
             this.reloadProgressBlock(this.currentStep);
         }
@@ -141,6 +144,9 @@ class Checkout
         if (!reloadProgressBlock) {
             this.resetPreviousSteps();
         }
+
+        const checkoutSteps = document.getElementById('checkoutSteps');
+        if (checkoutSteps) checkoutSteps.scrollIntoView();
     }
 
     resetPreviousSteps() {
