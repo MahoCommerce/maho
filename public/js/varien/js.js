@@ -578,7 +578,7 @@ function stripTags(str) {
     return div.textContent;
 }
 
-function updateElementHTML(targetEl, html, executeExternalScripts = false) {
+function updateElementHtmlAndExecuteScripts(targetEl, html, executeExternalScripts = false) {
     const range = document.createRange();
     const fragment = range.createContextualFragment(html);
     if (!executeExternalScripts) {

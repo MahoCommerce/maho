@@ -261,7 +261,7 @@ class Checkout
     setStepResponse(response) {
         if (response.update_section) {
             const element = document.getElementById(`checkout-${response.update_section.name}-load`);
-            updateElementHTML(element, response.update_section.html, true);
+            updateElementHtmlAndExecuteScripts(element, response.update_section.html);
         }
 
         if (response.allow_sections) {
@@ -587,7 +587,7 @@ class ShippingMethod {
 
         if (response.update_section) {
             const element = document.getElementById(`checkout-${response.update_section.name}-load`);
-            updateElementHTML(element, response.update_section.html, true);
+            updateElementHtmlAndExecuteScripts(element, response.update_section.html);
         }
 
         payment.initWhatIsCvvListeners();
@@ -911,7 +911,7 @@ class Review
 
             if (response.update_section) {
                 const element = document.getElementById(`checkout-${response.update_section.name}-load`);
-                updateElementHTML(element, response.update_section.html, true);
+                updateElementHtmlAndExecuteScripts(element, response.update_section.html);
             }
 
             if (response.goto_section) {
