@@ -122,13 +122,14 @@ $isAllowedGuestCheckout = $this->helper('checkout')->isAllowedGuestCheckout($thi
 
     document.getElementById('onepage-guest-register-button').addEventListener('click', onepageRegisterOrGuest);
     function onepageRegisterOrGuest() {
-        if (document.getElementById('login:register').checked) {
+        const method = document.querySelector('input[name=checkout_method]')?.value;
+        if (method === 'register') {
             <?php if ($isRedirectRegisterStep): ?>
                 window.location = '<?= $this->quoteEscape($this->helper('checkout/url')->getRegistrationUrl()) ?>';
             <?php else: ?>
                 checkout.setMethod();
             <?php endif; ?>
-        } else if(document.getElementById('login:guest').checked) {
+        } else if(method === 'guest') {
             checkout.setMethod();
         }
     }

@@ -167,10 +167,8 @@ class Checkout
     }
 
     setMethod() {
-        const guestCheckbox = document.getElementById('login:guest');
-        const registerCheckbox = document.getElementById('login:register');
-
-        if (guestCheckbox && guestCheckbox.checked) {
+        const method = document.querySelector('input[name=checkout_method]')?.value;
+        if (method === 'guest') {
             this.method = 'guest';
             fetch(this.saveMethodUrl, {
                 method: 'POST',
@@ -184,7 +182,7 @@ class Checkout
             document.getElementById('register-customer-password').style.display = 'none';
             this.gotoSection('billing', true);
         }
-        else if (registerCheckbox && (registerCheckbox.checked || registerCheckbox.type == 'hidden')) {
+        else if (method === 'register') {
             this.method = 'register';
             fetch(this.saveMethodUrl, {
                 method: 'POST',
