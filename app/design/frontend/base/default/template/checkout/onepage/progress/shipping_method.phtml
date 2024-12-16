@@ -13,11 +13,7 @@
 /** @var Mage_Checkout_Block_Onepage_Progress $this */
 ?>
 <?php if ($this->getCheckout()->getStepData('shipping_method', 'complete')): ?>
-<dt class="complete">
-    <?= $this->__('Shipping Method') ?> <span class="changelink"><span class="separator">|</span> <a
-        href="#shipping_method"
-        onclick="checkout.changeSection('opc-shipping_method'); return false;"><?= $this->__('Change') ?></a></span>
-</dt>
+<dt class="complete"><?= $this->__('Shipping Method') ?></dt>
 <dd class="complete">
     <?php if ($this->getShippingMethod()): ?>
     <?= $this->getShippingDescription() ?>

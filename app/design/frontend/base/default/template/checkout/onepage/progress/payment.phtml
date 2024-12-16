@@ -13,11 +13,7 @@
 /** @var Mage_Checkout_Block_Onepage_Progress $this */
 ?>
 <?php if ($this->getCheckout()->getStepData('payment', 'complete')): ?>
-<dt class="complete">
-    <?= $this->__('Payment Method') ?><span class="changelink"> <span class="separator">|</span> <a
-        href="#payment"
-        onclick="checkout.changeSection('opc-payment'); return false;"><?= $this->__('Change') ?></a></span>
-</dt>
+<dt class="complete"><?= $this->__('Payment Method') ?></dt>
 <dd class="complete">
     <?= $this->getPaymentHtml() ?>
 </dd>
