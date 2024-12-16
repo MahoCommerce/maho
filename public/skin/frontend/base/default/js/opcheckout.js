@@ -527,6 +527,8 @@ class ShippingMethod {
     constructor(form, saveUrl) {
         this.form = typeof form === 'string' ? document.getElementById(form) : form;
         this.saveUrl = saveUrl;
+        this.onSave = this.nextStep.bind(this);
+        this.onComplete = this.resetLoadWaiting.bind(this);
 
         if (this.form) {
             this.form.addEventListener('submit', (event) => {
@@ -570,14 +572,9 @@ class ShippingMethod {
                 body: new FormData(this.form)
             })
                 .then(response => response.json())
-                .then(data => {
-                    this.resetLoadWaiting();
-                    this.nextStep(data);
-                })
-                .catch(error => {
-                    this.resetLoadWaiting();
-                    checkout.ajaxFailure(error);
-                });
+                .then(this.onSave)
+                .catch(error => checkout.ajaxFailure.call(checkout, error))
+                .finally(this.onComplete);
         }
     }
 
@@ -865,9 +862,8 @@ class Review
         this.successUrl = successUrl;
         this.agreementsForm = agreementsForm;
         this.isSuccess = false;
-
-        this.nextStep = this.nextStep.bind(this);
-        this.resetLoadWaiting = this.resetLoadWaiting.bind(this);
+        this.onSave = this.nextStep.bind(this);
+        this.onComplete = this.resetLoadWaiting.bind(this);
     }
 
     save() {
@@ -889,9 +885,9 @@ class Review
             body: formData // No Content-Type header needed for FormData
         })
             .then(response => response.json())
-            .then(this.nextStep)
+            .then(this.onSave)
             .catch(error => checkout.ajaxFailure.call(checkout, error))
-            .finally(this.resetLoadWaiting);
+            .finally(this.onComplete);
     }
 
     resetLoadWaiting() {
