@@ -261,10 +261,7 @@ class Checkout
     setStepResponse(response) {
         if (response.update_section) {
             const element = document.getElementById(`checkout-${response.update_section.name}-load`);
-            const range = document.createRange();
-            const fragment = range.createContextualFragment(response.update_section.html);
-            element.innerHTML = ''; // Clear existing content
-            element.appendChild(fragment);
+            updateElementHTML(element, response.update_section.html, true);
         }
 
         if (response.allow_sections) {
@@ -590,10 +587,7 @@ class ShippingMethod {
 
         if (response.update_section) {
             const element = document.getElementById(`checkout-${response.update_section.name}-load`);
-            const range = document.createRange();
-            const fragment = range.createContextualFragment(response.update_section.html);
-            element.innerHTML = ''; // Clear existing content
-            element.appendChild(fragment);
+            updateElementHTML(element, response.update_section.html, true);
         }
 
         payment.initWhatIsCvvListeners();
@@ -917,10 +911,7 @@ class Review
 
             if (response.update_section) {
                 const element = document.getElementById(`checkout-${response.update_section.name}-load`);
-                const range = document.createRange();
-                const fragment = range.createContextualFragment(response.update_section.html);
-                element.innerHTML = ''; // Clear existing content
-                element.appendChild(fragment);
+                updateElementHTML(element, response.update_section.html, true);
             }
 
             if (response.goto_section) {

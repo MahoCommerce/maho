@@ -578,6 +578,15 @@ function stripTags(str) {
     return div.textContent;
 }
 
+function updateElementHTML(targetEl, html, executeExternalScripts = false) {
+    const range = document.createRange();
+    const fragment = range.createContextualFragment(html);
+    if (!executeExternalScripts) {
+        fragment.querySelectorAll('script[src]').forEach(script => script.remove());
+    }
+    targetEl.replaceChildren(fragment);
+}
+
 const Calendar = {};
 Calendar.setup = function(config) {
     const { inputField = '' } = config;
