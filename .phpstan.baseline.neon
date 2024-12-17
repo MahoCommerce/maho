@@ -6855,7 +6855,7 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 31
+			count: 26
 			path: app/design/frontend/rwd/default/template/review/form.phtml
 
 		-
