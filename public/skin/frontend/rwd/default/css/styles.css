@@ -1611,7 +1611,7 @@ span.weee {
 }
 
 .star-rating__value {
-  position: fixed;
+  width: 0;
   opacity: 0;
   pointer-events: none;
 }
