@@ -291,6 +291,10 @@ One page checkout main layout
         <reference name="root">
             <action method="setTemplate"><template>page/2columns-right.phtml</template></action>
         </reference>
+        <reference name="head">
+            <action method="addJs"><script>varien/accordion.js</script></action>
+            <action method="addJs"><script>varien/opcheckout.js</script></action>
+        </reference>
         <reference name="right">
             <action method="unsetChildren"></action>
             <block type="page/html_wrapper" name="checkout.progress.wrapper" translate="label">

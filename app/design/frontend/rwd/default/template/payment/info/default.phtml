@@ -12,7 +12,7 @@
 
 /** @var Mage_Payment_Block_Info $this */
 ?>
-<p class="subtitle"><strong><?= $this->escapeHtml($this->getMethod()->getTitle()) ?></strong></p>
+<p class="subtitle"><?= $this->escapeHtml($this->getMethod()->getTitle()) ?></p>
 
 <?php if ($_specificInfo = $this->getSpecificInformation()):?>
 <dl class="payment-info">

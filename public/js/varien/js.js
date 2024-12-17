@@ -572,6 +572,21 @@ function buttonDisabler() {
     });
 }
 
+function stripTags(str) {
+    const div = document.createElement('div');
+    div.innerHTML = str;
+    return div.textContent;
+}
+
+function updateElementHtmlAndExecuteScripts(targetEl, html, executeExternalScripts = false) {
+    const range = document.createRange();
+    const fragment = range.createContextualFragment(html);
+    if (!executeExternalScripts) {
+        fragment.querySelectorAll('script[src]').forEach(script => script.remove());
+    }
+    targetEl.replaceChildren(fragment);
+}
+
 const Calendar = {};
 Calendar.setup = function(config) {
     const { inputField = '' } = config;

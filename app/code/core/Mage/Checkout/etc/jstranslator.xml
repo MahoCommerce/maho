@@ -12,8 +12,8 @@
  */
 -->
 <jstranslator>
-    <!-- skin_js/js/opcheckout.js -->
-    <layout handle="checkout_onepage_index" module="checkout">
+    <script path="varien/opcheckout.js" module="checkout">
+
         <validate-guest translate="message">
             <message>Please choose to register or to checkout as a guest</message>
         </validate-guest>
@@ -29,5 +29,5 @@
         <validate-payment-methods-required translate="message">
             <message>Please specify payment method.</message>
         </validate-payment-methods-required>
-    </layout>
+    </script>
 </jstranslator>
