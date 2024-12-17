@@ -33,6 +33,12 @@ class Checkout
         });
 
         this.accordion.disallowAccessToNextSections = true;
+
+        this.initialize(...arguments);
+    }
+
+    initialize() {
+        // Placeholder for 3rd party modules
     }
 
     /**
@@ -315,6 +321,12 @@ class Billing {
         this.saveUrl = saveUrl;
         this.onSave = this.nextStep.bind(this);
         this.onComplete = this.resetLoadWaiting.bind(this);
+
+        this.initialize(...arguments);
+    }
+
+    initialize() {
+        // Placeholder for 3rd party modules
     }
 
     newAddress(isNew) {
@@ -434,6 +446,12 @@ class Shipping {
         this.methodsUrl = methodsUrl;
         this.onSave = this.nextStep.bind(this);
         this.onComplete = this.resetLoadWaiting.bind(this);
+
+        this.initialize(...arguments);
+    }
+
+    initialize() {
+        // Placeholder for 3rd party modules
     }
 
     newAddress(isNew) {
@@ -577,6 +595,12 @@ class ShippingMethod {
 
         // Assuming you have a separate validation library
         this.validator = new Validation(this.form);
+
+        this.initialize(...arguments);
+    }
+
+    initialize() {
+        // Placeholder for 3rd party modules
     }
 
     validate() {
@@ -681,6 +705,12 @@ class Payment {
 
         this.onSave = this.nextStep.bind(this);
         this.onComplete = this.resetLoadWaiting.bind(this);
+
+        this.initialize(...arguments);
+    }
+
+    initialize() {
+        // Placeholder for 3rd party modules
     }
 
     addBeforeInitFunction(code, func) {
@@ -934,6 +964,12 @@ class Review
         this.isSuccess = false;
         this.onSave = this.nextStep.bind(this);
         this.onComplete = this.resetLoadWaiting.bind(this);
+
+        this.initialize(...arguments);
+    }
+
+    initialize() {
+        // Placeholder for 3rd party modules
     }
 
     async save() {
