@@ -67,7 +67,7 @@ class Checkout
         try {
             const response = await fetch(this.progressUrl + (prevStep ? `?prevStep=${prevStep}` : ''));
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error(`Server returned status ${response.status}`);
             }
 
             const html = await response.text();
@@ -86,13 +86,13 @@ class Checkout
         try {
             const response = await fetch(this.reviewUrl);
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error(`Server returned status ${response.status}`);
             }
 
             const html = await response.text();
             document.getElementById('checkout-review-load').innerHTML = html;
         } catch (error) {
-            this.ajaxFailure();
+            this.ajaxFailure(error);
         }
     }
 
@@ -167,38 +167,46 @@ class Checkout
     }
 
     async setMethod() {
-        const method = document.querySelector('input[name=checkout_method]:is(:checked,[type=hidden])')?.value;
-        if (method === 'guest') {
-            this.method = 'guest';
-            try {
-                await fetch(this.saveMethodUrl, {
+        try {
+            const method = document.querySelector('input[name=checkout_method]:is(:checked,[type=hidden])')?.value;
+            if (method === 'guest') {
+                this.method = 'guest';
+
+                const response = await fetch(this.saveMethodUrl, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                     body: 'method=guest'
                 });
 
+                if (!response.ok) {
+                    throw new Error(`Server returned status ${response.status}`);
+                }
+
                 document.getElementById('register-customer-password').style.display = 'none';
                 this.gotoSection('billing', true);
-            } catch (error) {
-                this.ajaxFailure();
-            }
-        } else if (method === 'register') {
-            this.method = 'register';
-            try {
-                await fetch(this.saveMethodUrl, {
+
+            } else if (method === 'register') {
+                this.method = 'register';
+
+                const response = await fetch(this.saveMethodUrl, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                     body: 'method=register'
                 });
 
+                if (!response.ok) {
+                    throw new Error(`Server returned status ${response.status}`);
+                }
+
                 document.getElementById('register-customer-password').style.display = 'block';
                 this.gotoSection('billing', true);
-            } catch (error) {
-                this.ajaxFailure();
+
+            } else {
+                alert(Translator.translate('Please choose to register or to checkout as a guest'));
+                return false;
             }
-        } else {
-            alert(stripTags(Translator.translate('Please choose to register or to checkout as a guest')));
-            return false;
+        } catch (error) {
+            this.ajaxFailure(error);
         }
 
         const event = new CustomEvent('login:setMethod', {
@@ -344,9 +352,24 @@ class Billing {
                     body: formData
                 });
 
-                const data = await response.json();
-                this.onComplete({ responseJSON: data });
-                this.onSave({ responseJSON: data });
+                if (!response.ok) {
+                    throw new Error(`Server returned status ${response.status}`);
+                }
+
+                const callbackObj = {
+                    status: response.status,
+                    responseText: await response.text(),
+                };
+
+                try {
+                    callbackObj.responseJson = JSON.parse(callbackObj.responseText);
+                } catch {
+                    throw new Error('Server returned invalid JSON');
+                }
+
+                this.onSave(callbackObj);
+                this.onComplete(callbackObj);
+
             } catch (error) {
                 checkout.ajaxFailure(error);
             }
@@ -487,9 +510,24 @@ class Shipping {
                     body: formData
                 });
 
-                const data = await response.json();
-                this.onComplete();
-                this.onSave({ responseJSON: data });
+                if (!response.ok) {
+                    throw new Error(`Server returned status ${response.status}`);
+                }
+
+                const callbackObj = {
+                    status: response.status,
+                    responseText: await response.text(),
+                };
+
+                try {
+                    callbackObj.responseJson = JSON.parse(callbackObj.responseText);
+                } catch {
+                    throw new Error('Server returned invalid JSON');
+                }
+
+                this.onSave(callbackObj);
+                this.onComplete(callbackObj);
+
             } catch (error) {
                 checkout.ajaxFailure(error);
             }
@@ -574,12 +612,26 @@ class ShippingMethod {
                     body: new FormData(this.form)
                 });
 
-                const data = await response.json();
-                this.onSave(data);
+                if (!response.ok) {
+                    throw new Error(`Server returned status ${response.status}`);
+                }
+
+                const callbackObj = {
+                    status: response.status,
+                    responseText: await response.text(),
+                };
+
+                try {
+                    callbackObj.responseJson = JSON.parse(callbackObj.responseText);
+                } catch {
+                    throw new Error('Server returned invalid JSON');
+                }
+
+                this.onSave(callbackObj);
+                this.onComplete(callbackObj);
+
             } catch (error) {
-                checkout.ajaxFailure.call(checkout, error);
-            } finally {
-                this.onComplete();
+                checkout.ajaxFailure(error);
             }
         }
     }
@@ -588,7 +640,9 @@ class ShippingMethod {
         checkout.setLoadWaiting(false);
     }
 
-    nextStep(response) {
+    nextStep(transport) {
+        let response = transport.responseJSON || JSON.parse(transport.responseText) || {};
+
         if (response.error) {
             alert(response.message);
             return false;
@@ -816,11 +870,26 @@ class Payment {
                     body: urlEncodedData
                 });
 
-                const data = await response.text();
-                this.onSave({ responseJSON: null, responseText: data });
-                this.onComplete();
+                if (!response.ok) {
+                    throw new Error(`Server returned status ${response.status}`);
+                }
+
+                const callbackObj = {
+                    status: response.status,
+                    responseText: await response.text(),
+                };
+
+                try {
+                    callbackObj.responseJson = JSON.parse(callbackObj.responseText);
+                } catch {
+                    throw new Error('Server returned invalid JSON');
+                }
+
+                this.onSave(callbackObj);
+                this.onComplete(callbackObj);
+
             } catch (error) {
-                checkout.ajaxFailure.bind(checkout)(error);
+                checkout.ajaxFailure(error);
             }
         }
     }
@@ -830,9 +899,7 @@ class Payment {
     }
 
     nextStep(transport) {
-        let response = {};
-        if (transport.responseJSON) response = transport.responseJSON;
-        if (transport.responseText) response = JSON.parse(transport.responseText);
+        let response = transport.responseJSON || JSON.parse(transport.responseText) || {};
 
         if (response.error) {
             if (response.fields) {
@@ -889,12 +956,26 @@ class Review
                 body: formData // No Content-Type header needed for FormData
             });
 
-            const data = await response.json();
-            this.onSave(data);
+            if (!response.ok) {
+                throw new Error(`Server returned status ${response.status}`);
+            }
+
+            const callbackObj = {
+                status: response.status,
+                responseText: await response.text(),
+            };
+
+            try {
+                callbackObj.responseJson = JSON.parse(callbackObj.responseText);
+            } catch {
+                throw new Error('Server returned invalid JSON');
+            }
+
+            this.onSave(callbackObj);
+            this.onComplete(callbackObj);
+
         } catch (error) {
-            checkout.ajaxFailure.call(checkout, error);
-        } finally {
-            this.onComplete();
+            checkout.ajaxFailure(error);
         }
     }
 
@@ -902,8 +983,10 @@ class Review
         checkout.setLoadWaiting(false, this.isSuccess);
     }
 
-    nextStep(response) {
-        if (response) {
+    nextStep(transport) {
+        if (transport) {
+            let response = transport.responseJSON || JSON.parse(transport.responseText) || {};
+
             if (response.redirect) {
                 this.isSuccess = true;
                 location.href = encodeURI(response.redirect);
