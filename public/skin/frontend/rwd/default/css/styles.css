@@ -3803,6 +3803,7 @@ p.product-name a:hover {
 .products-list > li .product-image img {
   width: 100%;
   max-width: 100%;
+  height: auto;
 }
 .products-list > li:last-child {
   padding-bottom: 0;
