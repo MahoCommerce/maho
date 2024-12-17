@@ -6756,7 +6756,7 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
   background: #f4f4f4;
 }
 
-.products-grid .configurable-swatch-list li {
+.configurable-swatch-list li {
   display: inline-block;
   vertical-align: top;
 }
