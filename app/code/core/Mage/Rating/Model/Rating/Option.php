@@ -67,9 +67,6 @@ class Mage_Rating_Model_Rating_Option extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getLabel(): string
     {
         if ($this->getValue() == 1) {
