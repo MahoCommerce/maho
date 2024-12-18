@@ -66,4 +66,15 @@ class Mage_Rating_Model_Rating_Option extends Mage_Core_Model_Abstract
         $this->setOptionId($id);
         return $this;
     }
+
+    /**
+     * @return string
+     */
+    public function getLabel(): string
+    {
+        if ($this->getValue() == 1) {
+            return Mage::helper('rating')->__('%d star', $this->getValue());
+        }
+        return Mage::helper('rating')->__('%d stars', $this->getValue());
+    }
 }

@@ -33,7 +33,7 @@
                             <div class="star-rating">
                             <?php foreach (array_reverse($_rating->getOptions()) as $key=>$_option): ?>
                                 <input required class="star-rating__value" type="radio" id="<?php echo $this->escapeHtml($_rating->getRatingCode()) ?>_<?php echo $_option->getValue() ?>" value="<?php echo $_option->getId() ?>" name="ratings[<?php echo $_rating->getId() ?>]" value="<?php echo $_option->getId() ?>" />
-                                <label for="<?php echo $this->escapeHtml($_rating->getRatingCode()) ?>_<?php echo $_option->getValue() ?>" class="star-rating__label" title="<?php echo $this->__($_option->getValue() . ' star'); ?>"><?php echo $_option->getValue(); ?></label>
+                                <label for="<?php echo $this->escapeHtml($_rating->getRatingCode()) ?>_<?php echo $_option->getValue() ?>" class="star-rating__label" title="<?php echo $_option->getLabel(); ?>"><?php echo $_option->getLabel(); ?></label>
                             <?php endforeach ?>
                             </div>
                         </div>
