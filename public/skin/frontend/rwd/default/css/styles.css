@@ -3847,6 +3847,7 @@ p.product-name a:hover {
 .products-list > li .product-image img {
   width: 100%;
   max-width: 100%;
+  height: auto;
 }
 .products-list > li:last-child {
   padding-bottom: 0;
@@ -4205,13 +4206,6 @@ p.product-name a:hover {
     margin-top: -3px;
   }
 
-  #narrow-by-list,
-  #narrow-by-list2 {
-    padding: 10px;
-    border: 1px solid #cccccc;
-    border-top: 0;
-  }
-
   .block-layered-nav dl ol > li > a,
   .block-layered-nav dl ol > li > span {
     padding: 7px;
@@ -4220,10 +4214,9 @@ p.product-name a:hover {
 
   .block-layered-nav dl ol > li > a {
     color: #636363;
-    background-color: #f4f4f4;
     padding: 5px 10px;
   }
-  .block-layered-nav dl ol > li > a:hover {
+  .block-layered-nav dl ol > li > a:not(.swatch-link):hover {
     text-decoration: none;
     background: #ececec;
   }
@@ -6807,21 +6800,8 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
   background: #f4f4f4;
 }
 
-.configurable-swatch-list {
-  margin-left: -3px;
-  zoom: 1;
-  clear: both;
-  -webkit-transform: translateZ(0px);
-}
 .configurable-swatch-list li {
-  float: left;
-  zoom: 1;
-  margin: 0 0 0 3px;
-}
-.products-grid .configurable-swatch-list li {
   display: inline-block;
-  float: none;
-  margin: 0;
   vertical-align: top;
 }
 .configurable-swatch-list .not-available .x {
@@ -6845,9 +6825,9 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
   outline: 0;
 }
 
-#narrow-by-list dd .configurable-swatch-list li {
-  margin: 0 0 0 3px;
-  width: 47%;
+#narrow-by-list .configurable-swatch-list {
+  display: flex;
+  flex-wrap: wrap;
 }
 #narrow-by-list dd .swatch-link {
   border: none;
@@ -6862,11 +6842,8 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
   border-color: #0472ad;
 }
 #narrow-by-list dd .swatch-label {
-  background: #f4f4f4;
   border: 1px solid #cccccc;
   border-radius: 3px;
-  display: block;
-  float: left;
   line-height: 1.5em;
   margin: 0 5px 0 0;
   padding: 1px 5px;
@@ -6881,11 +6858,6 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
   padding: 0;
 }
 
-@media only screen and (max-width: 770px) {
-  #narrow-by-list dd .configurable-swatch-list li:nth-child(odd) {
-    clear: left;
-  }
-}
 .currently .swatch-current {
   position: relative;
 }
