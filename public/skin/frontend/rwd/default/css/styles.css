@@ -7860,6 +7860,7 @@ div.paypal-logo span > img {
 .review-summary-table {
   border-bottom: 1px solid #cccccc;
   margin: 0 0 10px;
+  padding-bottom: 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
