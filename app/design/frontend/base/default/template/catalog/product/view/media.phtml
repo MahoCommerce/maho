@@ -37,7 +37,6 @@ $_helper = $this->helper('catalog/output');
 
 <?php if (count($this->getGalleryImages()) > 0): ?>
     <div class="more-views">
-        <h2><?= $this->__('More Views') ?></h2>
         <ul class="product-image-thumbs">
             <?php $i=0; foreach ($this->getGalleryImages() as $_image): ?>
                 <?php if ($this->isGalleryImageVisible($_image)): ?>
