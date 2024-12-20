@@ -31,17 +31,15 @@ $_swatchOuterHeight = $_dimHelper->getOuterHeight(Mage_ConfigurableSwatches_Help
         $_label = $_item->getLabel();
         $_swatchUrl = Mage::helper('configurableswatches/productimg')->getGlobalSwatchUrl($_item, $_label, $_swatchInnerWidth, $_swatchInnerHeight);
         $_hasImage = (!empty($_swatchUrl));
-        $_linkCss = 'height:' . $_swatchOuterHeight . 'px; ' . ((!$_hasImage) ? 'min-' : '') . 'width:' . $_swatchOuterWidth . 'px;';
-        $_lineHeight = $_swatchOuterHeight + 2;
         ?>
-        <li<?php if ($_hasImage){ echo ' style="line-height: ' . $_lineHeight . 'px;"'; } ?>>
+        <li>
             <?php if ($_hasItems): ?>
-                <a href="<?= $this->escapeUrl($_item->getUrl()) ?>" class="swatch-link">
+                <a href="<?= $this->escapeUrl($_item->getUrl()) ?>" class="swatch-link" title="<?= $_label ?>">
             <?php else: ?>
                 <span class="swatch-link">
             <?php endif ?>
                 <?php if ($_hasImage): ?>
-                    <img src="<?= $_swatchUrl ?>" alt="<?= $_label ?>" title="<?= $_label ?>" width="<?= $_swatchInnerWidth ?>" height="<?= $_swatchInnerHeight ?>" />
+                    <img src="<?= $_swatchUrl ?>" alt="<?= $_label ?>" alt="<?= $_label ?>" width="<?= $_swatchInnerWidth ?>" height="<?= $_swatchInnerHeight ?>" />
                 <?php else: ?>
                     <?= $_label ?>
                 <?php endif ?>

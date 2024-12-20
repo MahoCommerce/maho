@@ -918,15 +918,11 @@ a.button:hover {
   /* Remove the 15px padding */
   clear: left;
 }
-.col-left img {
-  max-width: 100%;
-}
 
 .col-right {
   float: right;
   width: 25%;
   padding-right: 0;
-  /* Remove the 15px padding */
 }
 .col-right img {
   max-width: 100%;
@@ -6767,10 +6763,6 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 
 .swatch-link {
   border: 1px solid #cccccc;
-  margin: 0 0 3px;
-}
-.swatch-link img {
-  border-radius: 2px;
 }
 .swatch-link:hover {
   cursor: pointer;
@@ -6797,6 +6789,8 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 .configurable-swatch-list li {
   display: inline-block;
   vertical-align: top;
+  overflow: hidden;
+  white-space: nowrap;
 }
 .configurable-swatch-list .not-available .x {
   display: block;
@@ -6820,21 +6814,29 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 }
 
 #narrow-by-list .configurable-swatch-list {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-gap: 1rem;
+  margin: 0;
+  padding: 0;
+  margin-top: 1rem;
+  justify-items: center;
 }
-#narrow-by-list dd .swatch-link {
+#narrow-by-list .configurable-swatch-list li {
+  width: 100%;
+}
+#narrow-by-list dd .swatch-link:has(img) {
   border: none;
-  line-height: 25px;
-  margin-right: 2px;
-  text-align: left;
 }
 #narrow-by-list dd a img {
   outline: 1px solid #cccccc;
   outline-offset: 1px;
   border-radius: 3px;
 }
-#narrow-by-list dd a:not(:has(img)):hover {
+#narrow-by-list dd a.swatch-link:not(:has(img)) {
+  padding: 0;
+}
+#narrow-by-list dd a.swatch-link:not(:has(img)):hover {
   outline: 1px solid #cccccc;
   border-radius: 3px;
 }
@@ -6867,7 +6869,9 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 .swatch-link:hover {
   border-color: #0472ad;
 }
-
+.swatch-link img:hover {
+  outline-color: #0472ad !important;
+}
 .configurable-swatch-box {
   background: none !important;
 }
