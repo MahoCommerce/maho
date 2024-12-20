@@ -6625,12 +6625,6 @@ parameters:
 			path: app/design/frontend/rwd/default/template/checkout/onepage/review/item.phtml
 
 		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 14
-			path: app/design/frontend/rwd/default/template/configurableswatches/catalog/layer/state/swatch.phtml
-
-		-
 			message: '#^Variable \$action might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1

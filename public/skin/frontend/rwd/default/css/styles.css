@@ -783,10 +783,10 @@ a.button:hover {
 
 .btn-remove:after {
   content: 'X';
+  font-family: sans-serif;
   color: #0472ad;
   height: 20px;
   line-height: 20px;
-  width: 100%;
   font-size: 0.625rem;
   font-weight: bold;
 }
@@ -6787,20 +6787,11 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23aaa' transform='rotate(315)' stroke='%23000000' stroke-width='0'%3E%3Cpath d='M23 13H1v-2h22z'/%3E%3Cpath fill='none' d='M0 0h24v24H0z'/%3E%3C/svg%3E") center no-repeat transparent;
   z-index: 10;
 }
-.swatch-link.has-image .swatch-label {
-  position: relative;
-}
-.swatch-link.has-image img {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
 
 .swatch-label {
-  border: 1px solid #fff;
+  border: 1px solid transparent;
   margin: 0;
   white-space: nowrap;
-  background: #f4f4f4;
 }
 
 .configurable-swatch-list li {
@@ -6838,27 +6829,14 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
   margin-right: 2px;
   text-align: left;
 }
-#narrow-by-list dd .swatch-link.has-image {
-  line-height: inherit;
-}
-#narrow-by-list dd .swatch-link:hover .swatch-label {
-  border-color: #0472ad;
-}
-#narrow-by-list dd .swatch-label {
-  border: 1px solid #cccccc;
+#narrow-by-list dd a img {
+  outline: 1px solid #cccccc;
+  outline-offset: 1px;
   border-radius: 3px;
-  line-height: 1.5em;
-  margin: 0 5px 0 0;
-  padding: 1px 5px;
-  white-space: nowrap;
 }
-#narrow-by-list dd .swatch-label img {
-  border: 1px solid #fff;
+#narrow-by-list dd a:not(:has(img)):hover {
+  outline: 1px solid #cccccc;
   border-radius: 3px;
-  box-sizing: content-box;
-}
-#narrow-by-list dd .has-image .swatch-label {
-  padding: 0;
 }
 
 .currently .swatch-current {
