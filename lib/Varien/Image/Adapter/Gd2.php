@@ -200,15 +200,14 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
         if (!is_null($this->quality()) && $this->_fileType == IMAGETYPE_PNG) {
             $functionParameters[] = 9;
         }
-
-        call_user_func_array($this->_getCallback('output'), $functionParameters);
+        call_user_func_array($this->_getCallback('output', $this->targetFileType), $functionParameters);
     }
 
     #[\Override]
     public function display()
     {
         header('Content-type: ' . $this->getMimeTypeWithOutFileType());
-        call_user_func($this->_getCallback('output'), $this->_imageHandler);
+        call_user_func($this->_getCallback('output', $this->targetFileType), $this->_imageHandler);
     }
 
     /**
