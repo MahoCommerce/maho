@@ -2801,6 +2801,8 @@ body {
   }
   .page-header-container .store-language-container select {
     font-size: 0.75rem;
+    padding: 0.1rem 0;
+    margin-bottom: 0.3rem;
   }
 }
 .header-language-background,
@@ -6786,9 +6788,16 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
   white-space: nowrap;
 }
 
+.configurable-swatch-list {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.products-grid .configurable-swatch-list {
+  justify-content: center;
+}
+
 .configurable-swatch-list li {
-  display: inline-block;
-  vertical-align: top;
   overflow: hidden;
   white-space: nowrap;
 }
