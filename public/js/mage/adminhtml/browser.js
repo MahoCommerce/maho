@@ -240,16 +240,16 @@ Mediabrowser.prototype = {
                     this.onAjaxSuccess(transport);
                     if (transport.responseText.isJSON()) {
                         var response = transport.responseText.evalJSON();
-                        var newNode = new Ext.tree.AsyncTreeNode({
+                        var child = new MahoTreeNode(this.tree, {
                             text: response.short_name,
-                            draggable:false,
-                            id:response.id,
-                            expanded: true
+                            id: response.id,
+                            expanded: true,
                         });
-                        var child = this.currentNode.appendChild(newNode);
-                        this.tree.expandPath(child.getPath(), '', function(success, node) {
+                        this.currentNode.appendChild(child);
+                        this.currentNode.sortChildren();
+                        this.tree.expandPath(child.getPath()).then((node) => {
                             this.selectFolder(node);
-                        }.bind(this));
+                        });
                     }
                 } catch (e) {
                     alert(e.message);

@@ -14,13 +14,10 @@
 /**
  * Directories tree template
  *
- * @see Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content
  * @var Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content $this
  */
 ?>
-<script type="text/javascript">
-//<![CDATA[
+<script>
 MediabrowserInstance = new Mediabrowser(<?= $this->getFilebrowserSetupObject() ?>);
 MediabrowserInstance.storeId = '<?= $this->getStoreId() ?>';
-//]]>
 </script>

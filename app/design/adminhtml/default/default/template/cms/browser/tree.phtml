@@ -14,8 +14,7 @@
 /**
  * Directories tree template
  *
- * @see Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Tree
- * @var Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Tree $this 
+ * @var Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Tree $this
  */
 ?>
 <div class="categories-side-col">
@@ -26,44 +25,42 @@
     </div>
 </div>
 
-<div id="tree" style="width:100%; overflow:auto;"></div>
+<div id="tree" class="hor-scroll"></div>
 
-<script type="text/javascript">
-Ext.onReady(function(){
-    var Tree = Ext.tree;
-    var tree = new Tree.TreePanel('tree', {
-        animate:true,
-        loader: new Tree.TreeLoader({
-            dataUrl:'<?= $this->getTreeLoaderUrl() ?>'
-        }),
-        enableDD:false,
-        containerScroll: true
+<script type="module">
+    const tree = new MahoTree('tree', {
+        rootVisible: true,
+        noLeafNodes: true,
+        lazyload: {
+            dataUrl: '<?= $this->getTreeLoaderUrl() ?>',
+        },
+        selectable: {
+            mode: 'radio',
+            hideInputs: true,
+            onSelect: ([node]) => {
+                MediabrowserInstance.selectFolder(node);
+            },
+        },
     });
 
-    // set the root node
-    var root = new Tree.AsyncTreeNode({
+    tree.setRootNode({
+        id: 'root',
         text: '<?= Mage::helper('core')->jsQuoteEscape($this->getRootNodeName()) ?>',
-        draggable:false,
-        id:'root'
-    });
-    tree.setRootNode(root);
-
-    // render the tree
-    tree.render();
-    root.expand();
-
-    Event.observe($('tree_action_collapse'), 'click', function(){
-        tree.collapseAll();
-    });
-
-    Event.observe($('tree_action_expand'), 'click', function(){
-        tree.expandAll();
+        expanded: true,
+        children: <?= $this->getTreeJson() ?>
     });
 
     MediabrowserInstance.setTree(tree);
-    tree.addListener('click', MediabrowserInstance.selectFolder.bind(MediabrowserInstance));
-    tree.expandPath('<?= $this->getTreeCurrentPath() ?>','', function(success, node) {
+
+    document.getElementById('tree_action_collapse').addEventListener('click', () => {
+        tree.collapseAll();
+    });
+
+    document.getElementById('tree_action_expand').addEventListener('click', () => {
+        tree.expandAll();
+    });
+
+    tree.expandPath('<?= $this->getTreeCurrentPath() ?>').then((node) => {
         MediabrowserInstance.selectFolder(node);
     });
-});
 </script>
