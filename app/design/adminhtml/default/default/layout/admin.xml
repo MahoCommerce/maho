@@ -59,6 +59,9 @@
 
     <!-- admin acl roles edit page -->
     <adminhtml_permissions_role_editrole>
+        <reference name="head">
+            <action method="addJs"><name>maho-tree.js</name></action>
+        </reference>
         <reference name="left">
             <block type="adminhtml/permissions_editroles" name="adminhtml.permissions.editroles"/>
         </reference>

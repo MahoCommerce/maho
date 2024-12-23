@@ -99,7 +99,9 @@ class Mage_Adminhtml_Block_Api_Tab_Rolesedit extends Mage_Adminhtml_Block_Widget
                     }
                 }
             }
-            if (!empty($item['children'])) {
+            if (empty($item['children'])) {
+                unset($item['children']);
+            } else {
                 usort($item['children'], [$this, '_sortTree']);
             }
         }
