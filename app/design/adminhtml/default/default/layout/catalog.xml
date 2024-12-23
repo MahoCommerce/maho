@@ -70,6 +70,18 @@
         </block>
     </adminhtml_catalog_product_categories>
 
+    <adminhtml_catalog_product_review_new>
+        <reference name="head">
+            <action method="addJs"><name>mage/adminhtml/catalog/review.js</name></action>
+        </reference>
+    </adminhtml_catalog_product_review_new>
+
+    <adminhtml_catalog_product_review_edit>
+        <reference name="head">
+            <action method="addJs"><name>mage/adminhtml/catalog/review.js</name></action>
+        </reference>
+    </adminhtml_catalog_product_review_edit>
+
     <adminhtml_catalog_product_reviews>
         <block type="core/text_list" name="root" output="toHtml">
             <block type="adminhtml/catalog_product_edit_tab_reviews" name="admin.product.reviews"/>
