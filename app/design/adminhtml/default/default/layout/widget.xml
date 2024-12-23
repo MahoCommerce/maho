@@ -29,9 +29,9 @@
 
     <adminhtml_widget_instance_edit>
         <reference name="head">
-            <action method="setCanLoadExtJs"><flag>1</flag></action>
             <action method="addJs"><script>mage/adminhtml/wysiwyg/widget.js</script></action>
             <action method="addItem"><type>js</type><name>maho-dialog.js</name></action>
+            <action method="addItem"><type>js</type><name>maho-tree.js</name></action>
         </reference>
         <reference name="content">
             <block type="widget/adminhtml_widget_instance_edit" name="widget_instance_edit" />

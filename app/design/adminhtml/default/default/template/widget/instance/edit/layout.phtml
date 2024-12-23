@@ -360,23 +360,9 @@ var WidgetInstance = {
         }
     },
     checkCategory : function(event) {
-        node = event.memo.node;
-        container = event.target.up('div.chooser_container');
-        value = container.down('input[type="text"].entities').value.strip();
-        if (node.attributes.checked) {
-            if (value) ids = value.split(',');
-            else ids = [];
-            if (-1 == ids.indexOf(node.id)) {
-                ids.push(node.id);
-                container.down('input[type="text"].entities').value = ids.join(',');
-            }
-        } else {
-            ids = value.split(',');
-            while (-1 != ids.indexOf(node.id)) {
-                ids.splice(ids.indexOf(node.id), 1);
-                container.down('input[type="text"].entities').value = ids.join(',');
-            }
-        }
+        const containerEl = event.target.closest('div.chooser_container');
+        const inputEl = containerEl.querySelector('input[type=text]');
+        inputEl.value = event.detail.selected.map((obj) => obj.id).join(',');
     },
     togglePageGroupChooser : function(element) {
         element = $(element);
@@ -437,14 +423,15 @@ var WidgetInstance = {
     }
 };
 
-Ext.onReady(function(){
+document.addEventListener('DOMContentLoaded', () => {
     <?php foreach ($this->getPageGroups() as $pageGroup): ?>
         WidgetInstance.addPageGroup(<?= Zend_Json::encode($pageGroup) ?>);
     <?php endforeach ?>
     Event.observe(document, 'product:changed', function(event){
         WidgetInstance.checkProduct(event);
     });
-    Event.observe(document, 'node:changed', function(event){
+
+    document.addEventListener('category:changed', (event) => {
         WidgetInstance.checkCategory(event);
     });
 });

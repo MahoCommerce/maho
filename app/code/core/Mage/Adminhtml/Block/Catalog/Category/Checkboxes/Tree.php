@@ -17,13 +17,11 @@
  * @category   Mage
  * @package    Mage_Adminhtml
  */
-class Mage_Adminhtml_Block_Catalog_Category_Checkboxes_Tree extends Mage_Adminhtml_Block_Catalog_Category_Tree
+class Mage_Adminhtml_Block_Catalog_Category_Checkboxes_Tree extends Mage_Adminhtml_Block_Catalog_Category_Abstract
 {
+    /** @var list<int> */
     protected $_selectedIds = [];
 
-    /**
-     * @return $this
-     */
     #[\Override]
     protected function _prepareLayout()
     {
@@ -31,62 +29,61 @@ class Mage_Adminhtml_Block_Catalog_Category_Checkboxes_Tree extends Mage_Adminht
         return $this;
     }
 
+    /**
+     * @return list<int>
+     */
     public function getCategoryIds()
     {
         return $this->_selectedIds;
     }
 
+    /**
+     * @param array $ids
+     * @return $this
+     */
     public function setCategoryIds($ids)
     {
         if (empty($ids)) {
             $ids = [];
         } elseif (!is_array($ids)) {
-            $ids = [(int) $ids];
+            $ids = [$ids];
         }
-        $this->_selectedIds = $ids;
+        foreach ($ids as $key => &$id) {
+            $id = (int) $id;
+            if ($id <= 0) {
+                unset($ids[$key]);
+            }
+        }
+        $this->_selectedIds = array_unique($ids);
         return $this;
+    }
+
+    #[\Override]
+    public function getRoot($parentNodeCategory = null, $recursionLevel = null)
+    {
+        if ($parentNodeCategory === null && $this->getCategoryIds()) {
+            return $this->getRootByIds($this->getCategoryIds(), $recursionLevel);
+        } else {
+            return parent::getRoot($parentNodeCategory, $recursionLevel);
+        }
     }
 
     #[\Override]
     protected function _getNodeJson($node, $level = 1)
     {
-        $item = [];
-        $item['text'] = $this->escapeHtml($node->getName());
-
-        if ($this->_withProductCount) {
-            $item['text'] .= ' (' . $node->getProductCount() . ')';
-        }
-        $item['id']  = $node->getId();
-        $item['path'] = $node->getData('path');
-        $item['cls'] = 'folder ' . ($node->getIsActive() ? 'active-category' : 'no-active-category');
-        $item['allowDrop'] = false;
-        $item['allowDrag'] = false;
-
-        if ($node->hasChildren()) {
-            $item['children'] = [];
-            foreach ($node->getChildren() as $child) {
-                $item['children'][] = $this->_getNodeJson($child, $level + 1);
-            }
-        }
-
-        if (empty($item['children']) && (int) $node->getChildrenCount() > 0) {
-            $item['children'] = [];
-        }
-
-        if (!empty($item['children'])) {
-            $item['expanded'] = true;
-        }
-
+        $item = parent::_getNodeJson($node, $level);
         if (in_array($node->getId(), $this->getCategoryIds())) {
             $item['checked'] = true;
         }
-
         return $item;
     }
 
     #[\Override]
-    public function getRoot($parentNodeCategory = null, $recursionLevel = 3)
+    protected function _isParentSelectedCategory($node)
     {
-        return $this->getRootByIds($this->getCategoryIds());
+        $allChildrenIds = array_keys($node->getAllChildNodes());
+        $selectedChildren = array_intersect($this->getCategoryIds(), $allChildrenIds);
+
+        return count($selectedChildren) > 0;
     }
 }

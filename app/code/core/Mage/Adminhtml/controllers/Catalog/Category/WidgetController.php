@@ -39,15 +39,26 @@ class Mage_Adminhtml_Catalog_Category_WidgetController extends Mage_Adminhtml_Co
      */
     public function categoriesJsonAction()
     {
-        if ($categoryId = (int) $this->getRequest()->getPost('id')) {
+        try {
+            $categoryId = (int) $this->getRequest()->getPost('id');
             $category = Mage::getModel('catalog/category')->load($categoryId);
-            if ($category->getId()) {
-                Mage::register('category', $category);
-                Mage::register('current_category', $category);
+
+            if (!$category->getId()) {
+                Mage::throwException(Mage::helper('catalog')->__('This category no longer exists.'));
             }
+
+            Mage::register('category', $category);
+            Mage::register('current_category', $category);
+
+            $this->getResponse()->setHeader('Content-type', 'application/json', true);
             $this->getResponse()->setBody(
                 $this->_getCategoryTreeBlock()->getTreeJson($category),
             );
+        } catch (Exception $e) {
+            $this->getResponse()->setHeader('Content-type', 'application/json', true);
+            $this->getResponse()->setBody([
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 
@@ -55,7 +66,9 @@ class Mage_Adminhtml_Catalog_Category_WidgetController extends Mage_Adminhtml_Co
     {
         return $this->getLayout()->createBlock('adminhtml/catalog_category_widget_chooser', '', [
             'id' => $this->getRequest()->getParam('uniq_id'),
+            'is_anchor_only' => $this->getRequest()->getParam('is_anchor_only', false),
             'use_massaction' => $this->getRequest()->getParam('use_massaction', false),
+            'selected_categories' => explode(',', $this->getRequest()->getParam('selected', '')),
         ]);
     }
 }

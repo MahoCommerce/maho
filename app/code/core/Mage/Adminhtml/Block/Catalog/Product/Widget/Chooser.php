@@ -104,7 +104,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Widget_Chooser extends Mage_Adminhtml
     {
         if (!$this->getUseMassaction()) {
             $chooserJsObject = $this->getId();
-            return '
+            return <<<JS
                 function (grid, event) {
                     var trElement = Event.findElement(event, "tr");
                     var productId = trElement.down("td").innerHTML;
@@ -117,11 +117,11 @@ class Mage_Adminhtml_Block_Catalog_Product_Widget_Chooser extends Mage_Adminhtml
                     if (grid.categoryName) {
                         optionLabel = grid.categoryName + " / " + optionLabel;
                     }
-                    ' . $chooserJsObject . '.setElementValue(optionValue);
-                    ' . $chooserJsObject . '.setElementLabel(optionLabel);
-                    ' . $chooserJsObject . '.close();
+                    {$chooserJsObject}.setElementValue(optionValue);
+                    {$chooserJsObject}.setElementLabel(optionLabel);
+                    {$chooserJsObject}.close();
                 }
-            ';
+            JS;
         }
         return '';
     }
@@ -133,16 +133,15 @@ class Mage_Adminhtml_Block_Catalog_Product_Widget_Chooser extends Mage_Adminhtml
      */
     public function getCategoryClickListenerJs()
     {
-        $js = '
-            function (node, e) {
-                {jsObject}.addVarToUrl("category_id", node.attributes.id);
-                {jsObject}.reload({jsObject}.url);
-                {jsObject}.categoryId = node.attributes.id != "none" ? node.attributes.id : false;
-                {jsObject}.categoryName = node.attributes.id != "none" ? node.text : false;
+        $jsObject = $this->getJsObjectName();
+        return <<<JS
+            function ([node]) {
+                {$jsObject}.addVarToUrl("category_id", node.id);
+                {$jsObject}.reload({$jsObject}.url);
+                {$jsObject}.categoryId = node.id !== "none" ? node.id : false;
+                {$jsObject}.categoryName = node.id !== "none" ? node.text : false;
             }
-        ';
-        $js = str_replace('{jsObject}', $this->getJsObjectName(), $js);
-        return $js;
+        JS;
     }
 
     /**

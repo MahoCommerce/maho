@@ -20,8 +20,8 @@
     </adminhtml_promo_catalog_index>
     <adminhtml_promo_catalog_edit>
         <reference name="head">
-            <action method="setCanLoadExtJs"><flag>1</flag></action>
             <action method="setCanLoadRulesJs"><flag>1</flag></action>
+            <action method="addJs"><name>maho-tree.js</name></action>
         </reference>
         <reference name="left">
             <block type="adminhtml/promo_catalog_edit_tabs" name="promo_catalog_edit_tabs">
@@ -49,8 +49,8 @@
     </adminhtml_promo_quote_index>
     <adminhtml_promo_quote_edit>
         <reference name="head">
-            <action method="setCanLoadExtJs"><flag>1</flag></action>
             <action method="setCanLoadRulesJs"><flag>1</flag></action>
+            <action method="addJs"><name>maho-tree.js</name></action>
         </reference>
         <reference name="left">
             <block type="adminhtml/promo_quote_edit_tabs" name="promo_quote_edit_tabs">
