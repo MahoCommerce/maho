@@ -636,17 +636,6 @@ div.autocomplete ul li.selected {
   background-position: left center;
 }
 
-.x-tree-node a {
-  font-size: 12px;
-}
-.x-tree-node a span {
-  color: #2f2f2f;
-}
-.x-tree-node .x-tree-selected a span {
-  background: lightgrey;
-  color: #2f2f2f;
-}
-
 .categories-side-col .tree-holder {
   margin-right: 0;
 }
@@ -895,17 +884,6 @@ table.actions td {
   vertical-align: middle;
 }
 
-.x-dd-drag-ghost a {
-  font-size: 12px;
-}
-.x-dd-drag-ghost a span {
-  color: #2f2f2f;
-}
-
-.no-active-category a span {
-  color: #999 !important;
-}
-
 .dialog table.table_window {
   background: #fff;
   border: 0;
@@ -934,10 +912,6 @@ table.actions td {
 }
 .tier .data input.qty {
   width: 50px !important;
-}
-
-.rule-param .label {
-  font-weight: 600;
 }
 
 a.rule-param-remove img {

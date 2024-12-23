@@ -12,6 +12,12 @@
  */
 -->
 <jstranslator>
+    <global module="core">
+        <error-fetch translate="message">
+            <message>Server returned status %s</message>
+        </error-fetch>
+    </global>
+
     <script path="validation.js" module="core">
         <validate-select translate="message">
             <message>Please select an option.</message>

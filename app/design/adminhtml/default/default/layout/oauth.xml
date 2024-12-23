@@ -77,14 +77,9 @@
 
             <action method="removeItem"><type>css</type><name>print.css</name></action>
             <action method="removeItem"><type>js_css</type><name>flatpickr/flatpickr.min.css</name></action>
-            <action method="removeItem"><type>js_css</type><name>extjs/resources/css/ytheme-magento.css</name></action>
             <action method="removeItem"><type>skin_css</type><name>menu.css</name></action>
 
             <action method="removeItem"><type>js</type><name>flatpickr/flatpickr.min.js</name></action>
-            <action method="removeItem"><type>js</type><name>maho-effects.js</name></action>
-            <action method="removeItem"><type>js</type><name>extjs/ext-tree.min.js</name></action>
-            <action method="removeItem"><type>js</type><name>extjs/fix-defer.js</name></action>
-            <action method="removeItem"><type>js</type><name>extjs/ext-tree-checkbox.js</name></action>
         </reference>
     </oauth_root_handle>
 

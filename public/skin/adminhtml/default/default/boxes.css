@@ -315,9 +315,6 @@ input.validation-failed, textarea.validation-failed { background:#fef0ed; border
 /* FORMS
 *******************************************************************************/
 select.countries option         { background-repeat:no-repeat; }
-.entry-edit .fieldset .tree li,
-.entry-edit .tree li            { margin:0; }
-
 
 /* Entry Edit  */ /* Site-wide form fieldset */
 table.form-edit                         { width:100%; }
@@ -491,7 +488,6 @@ button.icon-btn span { text-indent:-999em; display:block; width:16px; padding:0;
 .side-col .switcher .link-store-scope { float:right; margin-right:-19px; margin-left:3px; }
 .side-col .switcher select { width:100%; float:left; }
 /*.side-col .switcher     { margin-right:20px; margin-bottom:20px; }*/
-.catalog-categories .side-col .switcher { margin-right:0; margin-bottom:15px; }
 .link-store-scope { display:inline-block; vertical-align:middle; margin:0 0 1px; width:16px; height:16px; background:url(images/i_question-mark.png) 0 0 no-repeat; text-decoration:none !important; text-indent:-999em; overflow:hidden; }
 .store-scope .link-store-scope { float:left; margin-right:10px; }
 .store-scope .tree-store-scope { float:left; padding:7px 10px; border:1px dotted #dedede; }
@@ -622,8 +618,6 @@ div.autocomplete ul li { padding:.5em .7em; min-height:32px; cursor:pointer; tex
 /* COLUMNS
 ********************************************************************************************/
 
-.catalog-categories .side-col   { width:25em; padding-right:25px; }  /* Catalog/Categories */
-.catalog-categories .main-col   { padding-left:25px; margin-left:25em; }              /* Catalog/Categories */
 .order-summary .side-col        { padding-right:25px; }             /* Order/Create */
 .order-summary .main-col        { padding-left:25px; }              /* Order/Create */
 
@@ -647,7 +641,6 @@ div.autocomplete ul li { padding:.5em .7em; min-height:32px; cursor:pointer; tex
 .content-header button,
 .filter-actions button          { margin:0 0 0 5px; }
 .side-col .content-header       { border-bottom:0; margin-right:12px; margin-bottom:.6em; }
-.catalog-categories .side-col .content-header { margin-right:0; }  /* Catalog/Categories */
 
 .left-col-block { width:200px; }
 
@@ -975,14 +968,6 @@ ul.item-options li { padding-left:.7em; }
 
 .no-active-category a span                  { color:#aaa !important; }
 
-#tree-div { overflow:auto!important; padding-bottom:15px; width:200px; }
-
-.x-tree-node { margin:0 !important; }
-.x-tree-node .leaf .x-tree-node-icon        { background-image:url(images/fam_leaf.png); }
-.x-tree-node .system-leaf .x-tree-node-icon { background-image:url(images/fam_application_form_delete.png); }
-
-.adminhtml-catalog-category-edit .x-tree-node-ct { overflow: visible; }
-
 /* Product - Websites */
 .website-name .checkbox                 { vertical-align:top; margin-top:2px; }
 .webiste-groups                         { padding:10px 20px; }
@@ -993,7 +978,6 @@ ul.item-options li { padding-left:.7em; }
 .bundle-option-row table tbody td label { float:left; }
 .bundle-option-row input.option-label   { width:50% !important; }
 .bundle-option-row input.option-position{ width:70px !important; }
-.catalog-categories .side-col           { width:240px; }
 
 /* Products - Tier Price */
 .tier-price-input                       { margin-bottom:8px; }
@@ -1044,9 +1028,10 @@ ul.item-options li { padding-left:.7em; }
 
 /* Price Rules */
 .rule-tree ul                   { padding-left:16px !important; border-left:dotted 1px #888; }
-.rule-tree .x-tree ul           { padding-left:0 !important; border-left:none !important; }
+.rule-tree ul.maho-tree,
+.rule-tree ul.maho-tree ul      { padding-left:0 !important; border-left:none !important; }
 .rule-param .label              { font-weight:bold; color:black; }
-.rule-param .label:hover        { font-weight:bold; color:blue; }
+.rule-param .label:hover        { font-weight:bold; color:#0090FF; }
 .rule-param .label-disabled     { color:black; cursor:default; text-decoration:none; }
 .rule-param .label-disabled:hover { color:black;}
 .rule-param .element            { display:none; }
@@ -1055,12 +1040,6 @@ ul.item-options li { padding-left:.7em; }
 .rule-param select.multiselect  { vertical-align:top; }
 .rule-param-edit .label         { display:none; }
 .rule-param-edit .element       { display:inline; }
-.rule-param-add                 { font-weight:normal; color:green; text-decoration:none; }
-.rule-param-add:hover           { font-weight:normal; color:blue; text-decoration:none; }
-.rule-param-apply               { font-weight:normal; color:green; text-decoration:none; }
-.rule-param-apply:hover         { font-weight:normal; color:blue; text-decoration:none; }
-.rule-param-remove              { font-weight:normal; color:red; text-decoration:none; }
-.rule-param-remove:hover        { font-weight:normal; color:blue; text-decoration:none; }
 .rule-chooser                   { border:solid 1px #CCC; margin:5px; padding:5px; display:none; }
 .rule-param-wait                { padding-left:20px; background-image:url(images/loading.svg); background-repeat:no-repeat; background-position:0 50%; }
 
@@ -1521,6 +1500,7 @@ dialog #contents .nm img { vertical-align:bottom; }
 .np                 { padding:0 !important; }
 .no-display         { display:none; }
 .no-show            { display:none; }
+.inline-block       { display:inline-block; }
 .nowrap, .nobr      { white-space:nowrap; }
 .wrap               { white-space:normal !important; }
 .no-float           { float:none !important; }

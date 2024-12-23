@@ -67,12 +67,6 @@ Default layout, loads most of the pages
                 <action method="addItem"><type>js_css</type><name>flatpickr/flatpickr.min.css</name><params/></action>
                 <action method="addItem"><type>js</type><name>flatpickr/flatpickr.min.js</name></action>
 
-                <action method="addItem"><type>js</type><name>maho-effects.js</name><params/><if/><condition>can_load_ext_js</condition></action>
-                <action method="addItem"><type>js</type><name>extjs/ext-tree.min.js</name><params/><if/><condition>can_load_ext_js</condition></action>
-                <action method="addItem"><type>js</type><name>extjs/fix-defer.js</name><params/><if/><condition>can_load_ext_js</condition></action>
-                <action method="addItem"><type>js</type><name>extjs/ext-tree-checkbox.js</name><params/><if/><condition>can_load_ext_js</condition></action>
-                <action method="addItem"><type>js_css</type><name>extjs/resources/css/ytheme-magento.css</name><params/><if/><condition>can_load_ext_js</condition></action>
-
                 <action method="addItem"><type>js</type><name>mage/adminhtml/rules.js</name><params/><if/><condition>can_load_rules_js</condition></action>
 
                 <action method="addItem"><type>js</type><name>mage/adminhtml/wysiwyg/tinymce/setup.js</name><params/><if/><condition>can_load_tiny_mce</condition></action>
@@ -135,14 +129,13 @@ Layout for editor element
 -->
     <editor>
         <reference name="head">
-            <action method="setCanLoadExtJs"><flag>1</flag></action>
             <action method="addJs"><script>mage/adminhtml/variables.js</script></action>
             <action method="addJs"><script>mage/adminhtml/wysiwyg/widget.js</script></action>
             <action method="addJs"><name>flow.min.js</name></action>
             <action method="addJs"><name>mage/adminhtml/uploader/instance.js</name></action>
             <action method="addJs"><script>mage/adminhtml/browser.js</script></action>
             <action method="addJs"><script>maho-dialog.js</script></action>
-            <action method="addJs"><script>maho-effects.js</script></action>
+            <action method="addJs"><script>maho-tree.js</script></action>
         </reference>
     </editor>
 
