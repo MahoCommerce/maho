@@ -997,9 +997,35 @@ ul.item-options li { padding-left:.7em; }
 .image-preview                          { position:absolute; cursor:pointer; }
 
 /* Attributes */
-.edit-attribute-set .form-list td.label { width:105px; }
-.edit-attribute-set  .form-list td.label label { width:105px; }
-.edit-attribute-set .entry-edit fieldset input.input-text { width:200px; }
+.edit-attribute-set {
+    display: flex;
+    gap: 28px;
+    height: 800px;
+}
+.edit-attribute-set > div {
+    flex-shrink: 0;
+}
+.edit-attribute-set-column {
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+    padding-left: 27px;
+    border-left:1px solid #ddd;
+}
+.edit-attribute-set-column > div:last-child {
+    flex-grow: 1;
+}
+.edit-attribute-set .content-header {
+    display: flex;
+    justify-content: space-between;
+}
+.edit-attribute-set .content-header:after {
+    display: none;
+}
+.edit-attribute-set .form-list td.label {
+    width: 105px;
+}
+
 /* Review & Ratings */
 .ratings                        { margin:0; }
 .rating-box {

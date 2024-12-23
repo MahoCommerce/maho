@@ -17,10 +17,6 @@
  */
 class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main_Formset extends Mage_Adminhtml_Block_Widget_Form
 {
-    /**
-     * Prepares attribute set form
-     *
-     */
     #[\Override]
     protected function _prepareForm()
     {
@@ -66,6 +62,18 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main_Formset extends Ma
         $form->setAction($this->getUrl('*/*/save'));
         $form->setOnsubmit('return false;');
         $this->setForm($form);
+        return $this;
+    }
+
+    #[\Override]
+    protected function _initFormValues()
+    {
+        if ($this->getIsReadOnly()) {
+            $fieldset = $this->getForm()->getElement('set_name');
+            foreach ($fieldset->getElements() as $element) {
+                $element->setDisabled(true);
+            }
+        }
         return $this;
     }
 }

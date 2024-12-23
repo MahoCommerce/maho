@@ -287,6 +287,14 @@ Layout handle for configurable products
         </reference>
     </adminhtml_catalog_product_attribute_edit>
 
+    <adminhtml_catalog_product_set_edit>
+        <reference name="head">
+            <action method="addJs"><name>Sortable.min.js</name></action>
+            <action method="addJs"><name>maho-tree.js</name></action>
+            <action method="addJs"><name>mage/adminhtml/eav/set.js</name></action>
+        </reference>
+    </adminhtml_catalog_product_set_edit>
+
     <adminhtml_catalog_category_edit>
         <update handle="editor"/>
         <reference name="head">

@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Mage
+ * @package    Mage_Eav
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<jstranslator>
+    <script path="mage/adminhtml/eav/set.js" module="eav">
+        <new-group translate="message">
+            <message>Please enter a new group name</message>
+        </new-group>
+        <remove-attribute translate="message">
+            <message>Remove attribute from set</message>
+        </remove-attribute>
+        <confirm-delete translate="message">
+            <message>Are you sure you want to delete this set? Type "confirm" to proceed.</message>
+        </confirm-delete>
+        <error-group-exists translate="message">
+            <message>Attribute group with the "%s" name already exists</message>
+        </error-group-exists>
+        <error-cannot-delete-group translate="message">
+            <message>Cannot delete group.</message>
+        </error-cannot-delete-group>
+        <error-cannot-delete-group-system-attributes translate="message">
+            <message>Cannot delete group. Please move system attributes to another group and try again.</message>
+        </error-cannot-delete-group-system-attributes>
+        <error-cannot-unassign-attribute translate="message">
+            <message>Cannot unassign attribute</message>
+        </error-cannot-unassign-attribute>
+        <error-cannot-unassign-group translate="message">
+            <message>Cannot unassign group</message>
+        </error-cannot-unassign-group>
+        <error-cannot-unassign-system-attribute translate="message">
+            <message>Cannot unassign system attribute</message>
+        </error-cannot-unassign-system-attribute>
+    </script>
+</jstranslator>
