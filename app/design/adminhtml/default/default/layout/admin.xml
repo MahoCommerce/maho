@@ -20,6 +20,20 @@
         </reference>
     </adminhtml_input_counter_handle>
 
+    <!-- admin url rewrite edit page -->
+    <adminhtml_urlrewrite_edit>
+        <reference name="head">
+            <action method="addJs"><name>maho-tree.js</name></action>
+        </reference>
+    </adminhtml_urlrewrite_edit>
+
+    <!-- admin api web services roles edit page -->
+    <adminhtml_api_role_editrole>
+        <reference name="head">
+            <action method="addJs"><name>maho-tree.js</name></action>
+        </reference>
+    </adminhtml_api_role_editrole>
+
     <!-- admin acl users edit page -->
     <adminhtml_permissions_user_edit>
         <reference name="left">

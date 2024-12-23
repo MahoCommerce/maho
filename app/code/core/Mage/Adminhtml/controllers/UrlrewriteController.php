@@ -80,7 +80,6 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
         $this->loadLayout();
         $this->_setActiveMenu('catalog/urlrewrite');
         $this->_addContent($this->getLayout()->createBlock('adminhtml/urlrewrite_edit'));
-        $this->getLayout()->getBlock('head')->setCanLoadExtJs(true);
         $this->renderLayout();
     }
 
@@ -99,10 +98,10 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
      */
     public function categoriesJsonAction()
     {
-        $id = $this->getRequest()->getParam('id', null);
+        $this->getResponse()->setHeader('Content-type', 'application/json', true);
         $this->getResponse()->setBody(
             Mage::getBlockSingleton('adminhtml/urlrewrite_category_tree')
-            ->getTreeArray($id, true, 1),
+                ->getTreeArray($this->getRequest()->getParam('id'), true),
         );
     }
 

@@ -35,60 +35,77 @@ class Mage_Adminhtml_Block_Urlrewrite_Category_Tree extends Mage_Adminhtml_Block
     }
 
     /**
+     * Return array with category IDs which the product is assigned to
+     *
+     * @return array
+     */
+    protected function getCategoryIds()
+    {
+        $productId = Mage::app()->getRequest()->getParam('product');
+        if ($productId && $this->_allowedCategoryIds === null) {
+            $this->_allowedCategoryIds = Mage::getModel('catalog/product')->setId($productId)->getCategoryIds();
+        }
+        return $this->_allowedCategoryIds;
+    }
+
+    /**
      * Get categories tree as recursive array
      *
      * @param int $parentId
      * @param bool $asJson
      * @param int $recursionLevel
-     * @return array|string
+     * @return ($asJson is true ? string : array)
      */
-    public function getTreeArray($parentId = null, $asJson = false, $recursionLevel = 3)
+    public function getTreeArray($parentId = null, $asJson = false, $recursionLevel = null)
     {
-        $productId = Mage::app()->getRequest()->getParam('product');
-        if ($productId) {
-            $product = Mage::getModel('catalog/product')->setId($productId);
-            $this->_allowedCategoryIds = $product->getCategoryIds();
-            unset($product);
+        if ($recursionLevel !== null) {
+            $this->setRecursionLevel($recursionLevel);
         }
 
-        $result = [];
-        if ($parentId) {
-            $category = Mage::getModel('catalog/category')->load($parentId);
-            if (!empty($category)) {
-                $tree = $this->_getNodesArray($this->getNode($category, $recursionLevel));
-                if (!empty($tree) && !empty($tree['children'])) {
-                    $result = $tree['children'];
-                }
-            }
-        } else {
-            $result = $this->_getNodesArray($this->getRoot(null, $recursionLevel));
-        }
+        $result = $this->getTree($parentId);
 
         if ($asJson) {
             return Mage::helper('core')->jsonEncode($result);
         }
 
-        $this->_allowedCategoryIds = null;
-
         return $result;
     }
 
-    /**
-     * Get categories collection
-     *
-     * @return Mage_Catalog_Model_Resource_Category_Collection
-     */
-    public function getCategoryCollection()
+    #[\Override]
+    public function getRoot($parentNodeCategory = null, $recursionLevel = null)
     {
-        $collection = $this->_getData('category_collection');
-        if (is_null($collection)) {
-            $collection = Mage::getModel('catalog/category')->getCollection()
-                ->addAttributeToSelect(['name', 'is_active'])
-                ->setLoadProductCount(true);
-            $this->setData('category_collection', $collection);
+        if ($parentNodeCategory === null && $this->getCategoryIds()) {
+            return $this->getRootByIds($this->getCategoryIds(), $recursionLevel);
+        } else {
+            return parent::getRoot($parentNodeCategory, $recursionLevel);
+        }
+    }
+
+    #[\Override]
+    protected function _getNodeJson($node, $level = 1)
+    {
+        $item = parent::_getNodeJson($node, $level);
+        $item['cls'] = str_replace('no-active-category', 'active-category', $item['cls']);
+
+        $categoryIds = $this->getCategoryIds();
+        if ($categoryIds !== null && !in_array($item['id'], $categoryIds)) {
+            $item['disabled'] = true;
+        }
+        if ($categoryIds === null && $node->getLevel() < 3) {
+            $item['expanded'] = true;
         }
 
-        return $collection;
+        return $item;
+    }
+
+    #[\Override]
+    protected function _isParentSelectedCategory($node)
+    {
+        if ($this->getCategoryIds() !== null) {
+            $children = array_keys($node->getAllChildNodes());
+            return !empty(array_intersect($children, $this->getCategoryIds()));
+        }
+        return false;
     }
 
     /**
@@ -96,42 +113,10 @@ class Mage_Adminhtml_Block_Urlrewrite_Category_Tree extends Mage_Adminhtml_Block
      *
      * @param  Varien_Data_Tree_Node $node
      * @return array
+     * @deprecated use self::_getNodeJson()
      */
     protected function _getNodesArray($node)
     {
-        $result = [
-            'id'             => (int) $node->getId(),
-            'parent_id'      => (int) $node->getParentId(),
-            'children_count' => (int) $node->getChildrenCount(),
-            'is_active'      => (bool) $node->getIsActive(),
-            'name'           => $this->escapeHtml($node->getName()),
-            'level'          => (int) $node->getLevel(),
-            'product_count'  => (int) $node->getProductCount(),
-        ];
-
-        if (is_array($this->_allowedCategoryIds) && !in_array($result['id'], $this->_allowedCategoryIds)) {
-            $result['disabled'] = true;
-        }
-
-        if ($node->hasChildren()) {
-            $result['children'] = [];
-            foreach ($node->getChildren() as $childNode) {
-                $result['children'][] = $this->_getNodesArray($childNode);
-            }
-        }
-        $result['cls']      = ($result['is_active'] ? '' : 'no-') . 'active-category';
-        $result['expanded'] = (!empty($result['children']));
-
-        return $result;
-    }
-
-    /**
-     * Get URL for categories tree ajax loader
-     *
-     * @return string
-     */
-    public function getLoadTreeUrl()
-    {
-        return Mage::helper('adminhtml')->getUrl('*/*/categoriesJson');
+        return $this->_getNodeJson($node);
     }
 }
