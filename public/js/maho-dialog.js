@@ -11,7 +11,10 @@
     const style = document.createElement('style');
     style.textContent = `
         dialog::backdrop {
-            background-color: rgba(0, 0, 0, 0.7);
+            background: none;
+        }
+        dialog:last-of-type::backdrop {
+            background: rgba(0, 0, 0, 0.7);
         }
         dialog {
             border: none;
@@ -71,8 +74,6 @@
         #dialog-ok:hover {
             background-color: #45a049;
         }
-        dialog .x-tree-node>div {height:auto!important}
-        dialog .x-tree-node-ct {position:relative !important}
     `;
     document.head.appendChild(style);
 
@@ -89,7 +90,7 @@
             <div class="dialog-content">${options.content || ''}</div>
         `;
         if (options.ok || options.cancel) {
-            dialog.innerHTML = dialog.innerHTML + `
+            dialog.innerHTML += `
             <div class="dialog-buttons">
                 ${options.cancel ? `<button id="${dialog.id}-cancel">Cancel</button>` : ''}
                 ${options.ok ? `<button id="${dialog.id}-ok">${options.okLabel || "OK"}</button>` : ''}
@@ -142,7 +143,7 @@
                 if (openDialogs.length > 0) {
                     const dialog = openDialogs[openDialogs.length - 1];
                     dialog.close();
-                    dialog.remove;
+                    dialog.remove();
                 }
             }
         });
@@ -169,7 +170,7 @@
         if (openDialogs.length > 0) {
             const dialog = openDialogs[openDialogs.length - 1];
             dialog.close();
-            dialog.remove;
+            dialog.remove();
         }
     };
 })();

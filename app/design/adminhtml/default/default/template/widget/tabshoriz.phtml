@@ -22,7 +22,7 @@
 <ul id="<?= $this->getId() ?>" class="tabs-horiz">
 <?php foreach ($tabs as $_tab): ?>
     <li>
-        <a href="<?= $this->getTabUrl($_tab)?>" id="<?= $this->getTabId($_tab) ?>" title="<?= $this->getTabTitle($_tab) ?>" class="tab-item-link <?= $this->getTabClass($_tab) ?><?php if (preg_match('/\s?ajax\s?/', $this->getTabClass($_tab))) {?> notloaded<?php }?>">
+        <a href="<?= $this->getTabUrl($_tab)?>" id="<?= $this->getTabId($_tab) ?>" name="<?= $this->getTabId($_tab, false) ?>" title="<?= $this->getTabTitle($_tab) ?>" class="tab-item-link <?= $this->getTabClass($_tab) ?><?php if (preg_match('/\s?ajax\s?/', $this->getTabClass($_tab))) {?> notloaded<?php }?>">
             <span><span class="changed" title="<?= Mage::helper('core')->quoteEscape($this->__('The information in this tab has been changed.')) ?>"></span><span class="error" title="<?= Mage::helper('core')->quoteEscape($this->__('This tab contains invalid data. Please solve the problem before saving.')) ?>"></span><?= $this->getTabLabel($_tab) ?></span>
         </a>
         <div id="<?= $this->getTabId($_tab) ?>_content" style="display:none"><?= $this->getTabContent($_tab) ?></div>

@@ -135,8 +135,22 @@ class Varien_Data_Tree
     }
 
     /**
+     * Retrieve ids of all nodes in the tree
+     *
+     * @return list<string>
+     */
+    public function getAllIds(): array
+    {
+        $ids = [];
+        foreach ($this->getNodes() as $node) {
+            $ids[] = $node->getId();
+        }
+        return $ids;
+    }
+
+    /**
      * @param int $nodeId
-     * @return Varien_Data_Tree_Node
+     * @return Varien_Data_Tree_Node|null
      */
     public function getNodeById($nodeId)
     {
