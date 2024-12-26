@@ -32,7 +32,8 @@
     <adminhtml_catalog_product_new>
         <update handle="editor"/>
         <reference name="head">
-            <action method="addItem"><type>js</type><name>html5sortable.min.js</name><params/></action>
+            <action method="addJs"><name>Sortable.min.js</name></action>
+            <action method="addJs"><name>maho-tree.js</name></action>
         </reference>
         <reference name="content">
             <block type="adminhtml/catalog_product_edit" name="product_edit"></block>
@@ -49,7 +50,8 @@
     <adminhtml_catalog_product_edit>
         <update handle="editor"/>
         <reference name="head">
-            <action method="addItem"><type>js</type><name>html5sortable.min.js</name><params/></action>
+            <action method="addJs"><name>Sortable.min.js</name></action>
+            <action method="addJs"><name>maho-tree.js</name></action>
         </reference>
         <reference name="content">
             <block type="adminhtml/catalog_product_edit" name="product_edit"></block>

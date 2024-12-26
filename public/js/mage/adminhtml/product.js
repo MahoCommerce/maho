@@ -428,13 +428,12 @@ Product.Configurable.prototype = {
             Event.observe(li.down('.attribute-use-default-label'), 'change', this.onLabelUpdate);
         }.bind(this));
         if (!this.readonly) {
-            sortable(this.container, {
+            new Sortable(this.container, {
                 handle: '.attribute-name-container',
-                items: ':not(.disabled)',
-                forcePlaceholderSize: true
+                filter: '.disabled',
+                animation: 150,
+                onUpdate: this.updatePositions.bind(this),
             });
-
-            this.container.addEventListener('sortupdate', this.updatePositions.bind(this));
         }
         this.updateSaveInput();
     },

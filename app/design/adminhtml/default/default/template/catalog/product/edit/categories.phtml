@@ -16,121 +16,40 @@
     <div class="entry-edit-head">
         <h4><?= Mage::helper('catalog')->__('Product Categories') ?></h4>
     </div>
-    <fieldset id="grop_fields">
+    <fieldset id="group_fields">
         <input type="hidden" name="category_ids" id="product_categories" value="<?= $this->getIdsString() ?>">
-        <div id="product-categories" class="tree"></div>
+        <div id="product-categories" class="hor-scroll"></div>
     </fieldset>
 </div>
-<?php if($this->getRootNode() && $this->getRootNode()->hasChildren()): ?>
-<script type="text/javascript">
-Ext.EventManager.onDocumentReady(function() {
-    var categoryLoader = new Ext.tree.TreeLoader({
-       dataUrl: '<?= $this->getLoadTreeUrl() ?>'
+
+<?php if ($rootNode = $this->getRootNode()): ?>
+<script type="module">
+    // In store view mode, keep a list of categories outside of the store's root category
+    const nonRootIds = <?= Mage::helper('core')->jsonEncode(
+        array_values(array_diff($this->getCategoryIds(), array_keys($rootNode->getAllChildNodes())))
+    ) ?>;
+
+    const tree = new MahoTree('product-categories', {
+        rootVisible: <?= var_export((bool) $rootNode->getIsVisible(), true) ?>,
+        lazyload: {
+            nodeParameter: 'category',
+            dataUrl: '<?= $this->getLoadTreeUrl() ?>',
+        },
+        selectable: {
+            mode: 'simple',
+            onSelect: (selected) => {
+                const selectedIds = selected.map((obj) => obj.id);
+                document.getElementById('product_categories').value = [...selectedIds, nonRootIds].join(',');
+            },
+        },
     });
-
-    categoryLoader.createNode = function(config) {
-        config.uiProvider = Ext.tree.CheckboxNodeUI;
-        var node;
-        if (config.children && !config.children.length) {
-            delete(config.children);
-            node = new Ext.tree.AsyncTreeNode(config);
-
-        } else {
-            node = new Ext.tree.TreeNode(config);
-        }
-        return node;
-    };
-
-    categoryLoader.on("beforeload", function(treeLoader, node) {
-        treeLoader.baseParams.category = node.attributes.id;
+    tree.setRootNode({
+        id: '<?= $rootNode->getId() ?>',
+        text: '<?= $this->jsQuoteEscape($this->buildNodeName($rootNode)) ?>',
+        expanded: true,
+        checked: <?= var_export((bool) $rootNode->getChecked(), true) ?>,
+        disabled: <?= var_export((bool) $rootNode->getDisabled(), true) ?>,
+        children: <?= $this->getTreeJson() ?>
     });
-
-    categoryLoader.on("load", function(treeLoader, node, config) {
-        varienWindowOnload();
-    });
-
-    var tree = new Ext.tree.TreePanel('product-categories', {
-        animate:true,
-        loader: categoryLoader,
-        enableDD:false,
-        containerScroll: true,
-        rootUIProvider: Ext.tree.CheckboxNodeUI,
-        selModel: new Ext.tree.CheckNodeMultiSelectionModel(),
-        rootVisible: '<?= $this->getRootNode()->getIsVisible() ?>'
-    });
-
-    tree.on('check', function(node) {
-        if(node.attributes.checked) {
-            categoryAdd(node.id);
-        } else {
-            categoryRemove(node.id);
-        }
-        varienElementMethods.setHasChanges(node.getUI().checkbox);
-    }, tree);
-
-    // set the root node
-    var root = new Ext.tree.TreeNode({
-        text: '<?= $this->jsQuoteEscape($this->buildNodeName($this->getRootNode())) ?>',
-        draggable:false,
-        checked:'<?= $this->getRootNode()->getChecked() ?>',
-        id:'<?= $this->getRootNode()->getId() ?>',
-        disabled: <?= ($this->getRootNode()->getDisabled() ? 'true' : 'false') ?>,
-        uiProvider: Ext.tree.CheckboxNodeUI
-    });
-
-    tree.setRootNode(root);
-    bildCategoryTree(root, <?= $this->getTreeJson() ?>);
-    tree.addListener('click', categoryClick.createDelegate(this));
-
-    // render the tree
-    tree.render();
-    root.expand();
-    //tree.expandAll();
-});
-
-function bildCategoryTree(parent, config) {
-    if (!config) {
-        return null;
-    }
-    if (parent && config && config.length) {
-        for (var i = 0; i < config.length; i++) {
-            config[i].uiProvider = Ext.tree.CheckboxNodeUI;
-            var node;
-            var _node = Object.clone(config[i]);
-            if (_node.children && !_node.children.length) {
-                delete(_node.children);
-                node = new Ext.tree.AsyncTreeNode(_node);
-
-            } else {
-                node = new Ext.tree.TreeNode(config[i]);
-            }
-            parent.appendChild(node);
-            node.loader = node.getOwnerTree().loader;
-            if (config[i].children) {
-                bildCategoryTree(node, config[i].children);
-            }
-        }
-    }
-}
-
-function categoryClick(node, e) {
-    if (node.disabled) {
-        return;
-    }
-    node.getUI().check(!node.getUI().checked());
-    varienElementMethods.setHasChanges(Event.element(e), e);
-};
-function categoryAdd(id) {
-    var ids = $('product_categories').value.split(',');
-    ids.push(id);
-    $('product_categories').value = ids.join(',');
-}
-function categoryRemove(id) {
-    var ids = $('product_categories').value.split(',');
-    while (-1 != ids.indexOf(id.toString())) {
-        ids.splice(ids.indexOf(id.toString()), 1);
-    }
-    $('product_categories').value = ids.join(',');
-}
 </script>
 <?php endif ?>

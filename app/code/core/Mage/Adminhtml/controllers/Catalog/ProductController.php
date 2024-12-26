@@ -219,8 +219,6 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
             $this->_setActiveMenu('catalog/products');
         }
 
-        $this->getLayout()->getBlock('head')->setCanLoadExtJs(true);
-
         $block = $this->getLayout()->getBlock('catalog.wysiwyg.js');
         if ($block) {
             $block->setStoreId($product->getStoreId());
@@ -271,8 +269,6 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
                     $this->getUrl('*/*/*', ['_current' => true, 'active_tab' => null, 'tab' => null, 'store' => null]),
                 );
         }
-
-        $this->getLayout()->getBlock('head')->setCanLoadExtJs(true);
 
         $block = $this->getLayout()->getBlock('catalog.wysiwyg.js');
         if ($block) {
@@ -710,9 +706,10 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     {
         $product = $this->_initProduct();
 
+        $this->getResponse()->setHeader('Content-type', 'application/json', true);
         $this->getResponse()->setBody(
             $this->getLayout()->createBlock('adminhtml/catalog_product_edit_tab_categories')
-                ->getCategoryChildrenJson($this->getRequest()->getParam('category')),
+                ->getTreeJson($this->getRequest()->getParam('category')),
         );
     }
 
