@@ -230,20 +230,14 @@ class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Ca
         // disallow drag if it's first level and category is root of a store
         $item['allowDrag'] = $allowMove && !($node->getLevel() == 1 && $rootForStores);
 
-        if ((int) $node->getChildrenCount() > 0) {
+        if ($node->hasChildren() || $level < $this->getRecursionLevel() || $this->getRecursionLevel() === 0) {
             $item['children'] = [];
+            foreach ($node->getChildren() as $child) {
+                $item['children'][] = $this->_getNodeJson($child, $level + 1);
+            }
         }
 
         $isParent = $this->_isParentSelectedCategory($node);
-
-        if ($node->hasChildren()) {
-            $item['children'] = [];
-            if (!($this->getUseAjax() && $node->getLevel() > 1 && !$isParent)) {
-                foreach ($node->getChildren() as $child) {
-                    $item['children'][] = $this->_getNodeJson($child, $level + 1);
-                }
-            }
-        }
 
         if ($isParent || $node->getLevel() < 2) {
             $item['expanded'] = true;

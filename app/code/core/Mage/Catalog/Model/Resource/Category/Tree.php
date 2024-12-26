@@ -435,52 +435,57 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
     }
 
     /**
-     * Load whole category tree, that will include specified categories ids.
+     * Load category tree including specified categories ids.
      *
      * @param array $ids
      * @param bool $addCollectionData
      * @param bool $updateAnchorProductCount
+     * @param ?non-negative-int $recursionLevel
      * @return $this|false
      */
-    public function loadByIds($ids, $addCollectionData = true, $updateAnchorProductCount = true)
+    public function loadByIds($ids, $addCollectionData = true, $updateAnchorProductCount = true, $recursionLevel = null)
     {
         $levelField = $this->_conn->quoteIdentifier('level');
         $pathField  = $this->_conn->quoteIdentifier('path');
-        // load first two levels, if no ids specified
-        if (empty($ids)) {
-            $select = $this->_conn->select()
-                ->from($this->_table, 'entity_id')
-                ->where($levelField . ' <= 2');
-            $ids = $this->_conn->fetchCol($select);
-        }
+        $recursionLevel ??= Mage_Adminhtml_Block_Catalog_Category_Abstract::DEFAULT_RECURSION_LEVEL;
+
         if (!is_array($ids)) {
             $ids = [$ids];
         }
-        foreach ($ids as $key => $id) {
-            $ids[$key] = (int) $id;
-        }
-
-        // collect paths of specified IDs and prepare to collect all their parents and neighbours
-        $select = $this->_conn->select()
-            ->from($this->_table, ['path', 'level'])
-            ->where('entity_id IN (?)', $ids);
-        $where = [$levelField . '=0' => true];
-
-        foreach ($this->_conn->fetchAll($select) as $item) {
-            if (!preg_match("#^[0-9\/]+$#", $item['path'])) {
-                $item['path'] = '';
-            }
-            $pathIds  = explode('/', $item['path']);
-            $level = (int) $item['level'];
-            while ($level > 0) {
-                $pathIds[count($pathIds) - 1] = '%';
-                $path = implode('/', $pathIds);
-                $where["$levelField=$level AND $pathField LIKE '$path'"] = true;
-                array_pop($pathIds);
-                $level--;
+        foreach ($ids as $key => &$id) {
+            $id = (int) $id;
+            if ($id <= 0) {
+                unset($ids[$key]);
             }
         }
-        $where = array_keys($where);
+
+        $where = [];
+        if ($recursionLevel !== 0) {
+            $where[] = $this->_conn->quoteInto("$levelField <= ?", $recursionLevel + 1);
+        }
+
+        // collect paths of specified IDs and build query to collect their parents and neighbours
+        if (!empty($ids)) {
+            $select = $this->_conn->select()
+                ->from($this->_table, ['path', 'level'])
+                ->where('entity_id IN (?)', $ids);
+
+            foreach ($this->_conn->fetchAll($select) as $item) {
+                if (!preg_match("#^[0-9\/]+$#", $item['path'])) {
+                    $item['path'] = '';
+                }
+                $pathIds  = explode('/', $item['path']);
+                $level = (int) $item['level'];
+                while ($level > $recursionLevel + 1) {
+                    $pathIds[count($pathIds) - 1] = '%';
+                    $path = implode('/', $pathIds);
+                    $where[] = $this->_conn->quoteInto("$levelField = ?", $level)
+                        . ' AND ' . $this->_conn->quoteInto("$pathField LIKE ?", $path);
+                    array_pop($pathIds);
+                    $level--;
+                }
+            }
+        }
 
         // get all required records
         if ($addCollectionData) {
@@ -489,7 +494,9 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
             $select = clone $this->_select;
             $select->order($this->_orderField . ' ' . Varien_Db_Select::SQL_ASC);
         }
-        $select->where(implode(' OR ', $where));
+        if (count($where)) {
+            $select->where(implode(' OR ', array_unique($where)));
+        }
 
         // get array of records and add them as nodes to the tree
         $arrNodes = $this->_conn->fetchAll($select);

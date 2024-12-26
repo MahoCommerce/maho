@@ -15,9 +15,13 @@
  *
  * @category   Mage
  * @package    Mage_Adminhtml
+ *
+ * @method setRecursionLevel(?int $value)
  */
 class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Block_Template
 {
+    public const DEFAULT_RECURSION_LEVEL = 3;
+
     /**
      * Retrieve current category instance
      *
@@ -64,37 +68,64 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
         return Mage::app()->getStore($storeId);
     }
 
-    public function getRoot($parentNodeCategory = null, $recursionLevel = 3)
+    /**
+     * Return the number of children levels when loading a tree node
+     */
+    public function getRecursionLevel(): int
     {
-        if (!is_null($parentNodeCategory) && $parentNodeCategory->getId()) {
-            return $this->getNode($parentNodeCategory, $recursionLevel);
+        return (int) ($this->getDataByKey('recursion_level') ?? self::DEFAULT_RECURSION_LEVEL);
+    }
+
+    /**
+     * Get and register category tree root
+     *
+     * Root node will be store's root category, or Mage_Catalog_Model_Category::TREE_ROOT_ID if no store is requested
+     * If $parentNodeCategory is given, call will be forwarded to self::getNode() and root will not be registered
+     *
+     * @param Mage_Catalog_Model_Category|int|string $parentNodeCategory
+     * @param int $recursionLevel how many levels to load
+     * @return Varien_Data_Tree_Node|null
+     */
+    public function getRoot($parentNodeCategory = null, $recursionLevel = null)
+    {
+        if (!is_null($recursionLevel)) {
+            $this->setRecursionLevel($recursionLevel);
+        }
+        if (!is_null($parentNodeCategory)) {
+            if (!$parentNodeCategory instanceof Mage_Catalog_Model_Category) {
+                $parentNodeCategory = Mage::getModel('catalog/category')->load($parentNodeCategory);
+            }
+            if ($parentNodeCategory->getId()) {
+                return $this->getNode($parentNodeCategory);
+            }
+        }
+        if ($this->getCategory()) {
+            return $this->getRootByIds([$this->getCategory()->getId()]);
         }
         $root = Mage::registry('root');
         if (is_null($root)) {
-            $storeId = (int) $this->getRequest()->getParam('store');
-
-            if ($storeId) {
-                $store = Mage::app()->getStore($storeId);
+            $store = $this->getStore();
+            if ($store->getId()) {
                 $rootId = $store->getRootCategoryId();
+                if ($this->getRecursionLevel() !== 0) {
+                    $this->setRecursionLevel($this->getRecursionLevel() + 1);
+                }
             } else {
                 $rootId = Mage_Catalog_Model_Category::TREE_ROOT_ID;
             }
 
             $tree = Mage::getResourceSingleton('catalog/category_tree')
-                ->load(null, $recursionLevel);
-
-            if ($this->getCategory()) {
-                $tree->loadEnsuredNodes($this->getCategory(), $tree->getNodeById($rootId));
-            }
+                ->load(null, $this->getRecursionLevel());
 
             $tree->addCollectionData($this->getCategoryCollection());
-
             $root = $tree->getNodeById($rootId);
 
-            if ($root && $rootId != Mage_Catalog_Model_Category::TREE_ROOT_ID) {
-                $root->setIsVisible(true);
-            } elseif ($root && $root->getId() == Mage_Catalog_Model_Category::TREE_ROOT_ID) {
-                $root->setName(Mage::helper('catalog')->__('Root'));
+            if ($root) {
+                if ($rootId == Mage_Catalog_Model_Category::TREE_ROOT_ID) {
+                    $root->setName(Mage::helper('catalog')->__('Root'));
+                } else {
+                    $root->setIsVisible(true);
+                }
             }
 
             Mage::register('root', $root);
@@ -104,49 +135,83 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
     }
 
     /**
-     * Get and register categories root by specified categories IDs
+     * Get and register category tree root by specified category IDs
      *
      * IDs can be arbitrary set of any categories ids.
      * Tree with minimal required nodes (all parents and neighbours) will be built.
-     * If ids are empty, default tree with depth = 2 will be returned.
+     * If ids are empty, default tree with depth = $recursionLevel will be returned.
      *
-     * @param array $ids
-     * @return mixed|Varien_Data_Tree_Node|null
+     * @param array $ids list of category ids
+     * @param int $recursionLevel how many levels to load
+     * @return Varien_Data_Tree_Node|null
      */
-    public function getRootByIds($ids)
+    public function getRootByIds($ids, $recursionLevel = null)
     {
+        if (!is_null($recursionLevel)) {
+            $this->setRecursionLevel($recursionLevel);
+        }
+        if (!is_array($ids) || empty($ids)) {
+            return $this->getRoot();
+        }
         $root = Mage::registry('root');
-        if ($root === null) {
-            $categoryTreeResource = Mage::getResourceSingleton('catalog/category_tree');
-            $ids    = $categoryTreeResource->getExistingCategoryIdsBySpecifiedIds($ids);
-            $tree   = $categoryTreeResource->loadByIds($ids);
-            $rootId = Mage_Catalog_Model_Category::TREE_ROOT_ID;
-            $root   = $tree->getNodeById($rootId);
-            if ($root && $root->getId() == Mage_Catalog_Model_Category::TREE_ROOT_ID) {
-                $root->setName(Mage::helper('catalog')->__('Root'));
+        if (is_null($root)) {
+            $store = $this->getStore();
+            if ($store->getId()) {
+                $rootId = $store->getRootCategoryId();
+                if ($this->getRecursionLevel() !== 0) {
+                    $this->setRecursionLevel($this->getRecursionLevel() + 1);
+                }
+            } else {
+                $rootId = Mage_Catalog_Model_Category::TREE_ROOT_ID;
             }
 
+            $tree = Mage::getResourceSingleton('catalog/category_tree')
+                ->loadByIds($ids, false, false, $this->getRecursionLevel());
+
             $tree->addCollectionData($this->getCategoryCollection());
+            $root = $tree->getNodeById($rootId);
+
+            if ($root) {
+                if ($rootId == Mage_Catalog_Model_Category::TREE_ROOT_ID) {
+                    $root->setName(Mage::helper('catalog')->__('Root'));
+                } else {
+                    $root->setIsVisible(true);
+                }
+            }
+
             Mage::register('root', $root);
         }
         return $root;
     }
 
-    public function getNode($parentNodeCategory, $recursionLevel = 2)
+    /**
+     * Get category tree with specified category as the root
+     *
+     * @param Mage_Catalog_Model_Category $parentNodeCategory
+     * @param int $recursionLevel how many levels to load
+     * @return Varien_Data_Tree_Node|null
+     */
+    public function getNode($parentNodeCategory, $recursionLevel = null)
     {
+        if (!is_null($recursionLevel)) {
+            $this->setRecursionLevel($recursionLevel);
+        }
+
         $tree = Mage::getResourceModel('catalog/category_tree');
 
         $nodeId = $parentNodeCategory->getId();
         $node = $tree->loadNode($nodeId);
-        $node->loadChildren($recursionLevel);
-
-        if ($node && $nodeId != Mage_Catalog_Model_Category::TREE_ROOT_ID) {
-            $node->setIsVisible(true);
-        } elseif ($node && $node->getId() == Mage_Catalog_Model_Category::TREE_ROOT_ID) {
-            $node->setName(Mage::helper('catalog')->__('Root'));
-        }
+        $node->loadChildren($this->getRecursionLevel());
 
         $tree->addCollectionData($this->getCategoryCollection());
+
+        if ($node) {
+            if ($nodeId == Mage_Catalog_Model_Category::TREE_ROOT_ID) {
+                $node->setName(Mage::helper('catalog')->__('Root'));
+            } else {
+                $node->setIsVisible(true);
+            }
+        }
 
         return $node;
     }
