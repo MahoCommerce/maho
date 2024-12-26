@@ -95,7 +95,7 @@ class Mage_Core_Model_Resource_Resource extends Mage_Core_Model_Resource_Db_Abst
      * Get Module version from DB
      *
      * @param string $resName
-     * @return bool|string
+     * @return string|false
      */
     public function getDbVersion($resName)
     {
