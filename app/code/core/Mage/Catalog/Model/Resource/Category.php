@@ -734,16 +734,51 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
     }
 
     /**
-     * Check is category in list of store categories
+     * Check if category is a child of current store root category
      *
      * @param Mage_Catalog_Model_Category $category
      * @return bool
      */
     public function isInRootCategoryList($category)
     {
-        $rootCategoryId = Mage::app()->getStore()->getRootCategoryId();
+        return $this->isInStoreRootCategory($category);
+    }
 
+    /**
+     * Check if category is a child of specific store root category
+     *
+     * @param Mage_Catalog_Model_Category $category
+     * @param null|string|bool|int|Mage_Core_Model_Store $store
+     */
+    public function isInStoreRootCategory($category, $store = null): bool
+    {
+        $rootCategoryId = Mage::app()->getStore($store)->getRootCategoryId();
         return in_array($rootCategoryId, $category->getParentIds());
+    }
+
+    /**
+     * Check if category is a child of specific store root category, or the root category itself
+     *
+     * @param Mage_Catalog_Model_Category $category
+     * @param null|string|bool|int|Mage_Core_Model_Store $store
+     */
+    public function isInStore($category, $store = null): bool
+    {
+        $rootCategoryId = Mage::app()->getStore($store)->getRootCategoryId();
+        return in_array($rootCategoryId, $category->getPathIds());
+    }
+
+    /**
+     * Return ids of root categories as array
+     *
+     * @return list<int>
+     */
+    public function getRootIds(): array
+    {
+        return array_map(
+            fn($store) => (int) $store->getRootCategoryId(),
+            Mage::app()->getGroups(),
+        );
     }
 
     /**
