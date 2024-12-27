@@ -28,11 +28,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Ca
     #[\Override]
     protected function _prepareLayout()
     {
-        $addUrl = $this->getUrl('*/*/add', [
-            '_current' => true,
-            '_query' => false,
-            'id' => null,
-        ]);
+        $addUrl = $this->getUrl('*/*/add', ['_current' => true, '_query' => false, 'id' => null]);
 
         $this->setChild(
             'add_sub_button',

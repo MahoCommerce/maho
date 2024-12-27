@@ -244,17 +244,17 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
 
         if (!$parent->getId()) {
             Mage::throwException(
-                Mage::helper('catalog')->__('Category move operation is not possible: the new parent category was not found.'),
+                Mage::helper('catalog')->__('Parent category was not found.'),
             );
         }
 
         if (!$this->getId()) {
             Mage::throwException(
-                Mage::helper('catalog')->__('Category move operation is not possible: the current category was not found.'),
+                Mage::helper('catalog')->__('Category was not found.'),
             );
         } elseif ($parent->getId() == $this->getId()) {
             Mage::throwException(
-                Mage::helper('catalog')->__('Category move operation is not possible: parent category is equal to child category.'),
+                Mage::helper('catalog')->__('Parent category is equal to child category.'),
             );
         }
 

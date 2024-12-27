@@ -50,7 +50,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Edit_Form extends Mage_Adminhtml_Blo
                 $this->getLayout()->createBlock('adminhtml/widget_button')
                     ->setData([
                         'label'     => Mage::helper('catalog')->__('Save Category'),
-                        'onclick'   => "categorySubmit('" . $this->getSaveUrl() . "', true)",
+                        'onclick'   => "categorySubmit('{$this->getSaveUrl()}')",
                         'class' => 'save',
                     ]),
             );
@@ -63,7 +63,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Edit_Form extends Mage_Adminhtml_Blo
                 $this->getLayout()->createBlock('adminhtml/widget_button')
                     ->setData([
                         'label'     => Mage::helper('catalog')->__('Delete Category'),
-                        'onclick'   => "categoryDelete('" . $this->getUrl('*/*/delete', ['_current' => true]) . "', true, {$categoryId})",
+                        'onclick'   => "categoryDelete('{$this->getDeleteUrl()}')",
                         'class' => 'delete',
                     ]),
             );
@@ -71,13 +71,12 @@ class Mage_Adminhtml_Block_Catalog_Category_Edit_Form extends Mage_Adminhtml_Blo
 
         // Reset button
         if (!$category->isReadonly()) {
-            $resetPath = $categoryId ? '*/*/edit' : '*/*/add';
             $this->setChild(
                 'reset_button',
                 $this->getLayout()->createBlock('adminhtml/widget_button')
                     ->setData([
                         'label'     => Mage::helper('catalog')->__('Reset'),
-                        'onclick'   => "categoryReset('" . $this->getUrl($resetPath, ['_current' => true]) . "',true)",
+                        'onclick'   => "categoryReset('{$this->getResetUrl()}')",
                     ]),
             );
         }
@@ -85,6 +84,9 @@ class Mage_Adminhtml_Block_Catalog_Category_Edit_Form extends Mage_Adminhtml_Blo
         return parent::_prepareLayout();
     }
 
+    /**
+     * @return string
+     */
     public function getStoreConfigurationUrl()
     {
         $storeId = (int) $this->getRequest()->getParam('store');
@@ -98,11 +100,17 @@ class Mage_Adminhtml_Block_Catalog_Category_Edit_Form extends Mage_Adminhtml_Blo
         return $this->getUrl('*/system_store', $params);
     }
 
+    /**
+     * @return string
+     */
     public function getDeleteButtonHtml()
     {
         return $this->getChildHtml('delete_button');
     }
 
+    /**
+     * @return string
+     */
     public function getSaveButtonHtml()
     {
         if ($this->hasStoreRootCategory()) {
@@ -111,6 +119,9 @@ class Mage_Adminhtml_Block_Catalog_Category_Edit_Form extends Mage_Adminhtml_Blo
         return '';
     }
 
+    /**
+     * @return string
+     */
     public function getResetButtonHtml()
     {
         if ($this->hasStoreRootCategory()) {
@@ -169,16 +180,23 @@ class Mage_Adminhtml_Block_Catalog_Category_Edit_Form extends Mage_Adminhtml_Blo
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getTabsHtml()
     {
         return $this->getChildHtml('tabs');
     }
 
+    /**
+     * @return string
+     */
     public function getHeader()
     {
         if ($this->hasStoreRootCategory()) {
             if ($this->getCategoryId()) {
-                return $this->getCategoryName();
+                $categoryIdText = Mage::helper('catalog')->__('ID: %s', $this->getCategoryId());
+                return $this->getCategoryName() . " ($categoryIdText)";
             } else {
                 $parentId = (int) $this->getRequest()->getParam('parent');
                 if ($parentId && ($parentId != Mage_Catalog_Model_Category::TREE_ROOT_ID)) {
@@ -191,11 +209,24 @@ class Mage_Adminhtml_Block_Catalog_Category_Edit_Form extends Mage_Adminhtml_Blo
         return Mage::helper('catalog')->__('Set Root Category for Store');
     }
 
+    /**
+     * @return string
+     */
     public function getDeleteUrl(array $args = [])
     {
-        $params = ['_current' => true];
-        $params = array_merge($params, $args);
-        return $this->getUrl('*/*/delete', $params);
+        return $this->getUrl('*/*/delete', [
+            '_current' => true, '_query' => false, ...$args,
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getResetUrl(array $args = [])
+    {
+        return $this->getUrl($this->getCategory()->getId() ? '*/*/edit' : '*/*/add', [
+            '_current' => true, '_query' => false, ...$args,
+        ]);
     }
 
     /**
@@ -210,17 +241,68 @@ class Mage_Adminhtml_Block_Catalog_Category_Edit_Form extends Mage_Adminhtml_Blo
         return $this->getUrl('*/*/refreshPath', $params);
     }
 
+    /**
+     * @deprecated use self::getProductsInfoJson()
+     */
     public function getProductsJson()
     {
         $products = $this->getCategory()->getProductsPosition();
-        if (!empty($products)) {
-            return Mage::helper('core')->jsonEncode($products);
+        return Mage::helper('core')->jsonEncode((object) $products);
+    }
+
+    /**
+     * Return JSON for category edit product grid
+     *
+     * @return string
+     */
+    public function getProductsInfoJson()
+    {
+        $gridBlock = $this->getLayout()->getBlock('category.product.grid');
+        if ($gridBlock && $gridJsObject = $gridBlock->getJsObjectName()) {
+            $products = $this->getCategory()->getProductsPosition();
+            return Mage::helper('core')->jsonEncode([
+                'gridJsObjectName' => $gridJsObject,
+                'products' => (object) $products,
+            ]);
         }
         return '{}';
     }
 
+    /**
+     * Return JSON for category edit page
+     */
+    public function getCategoryInfoJson(): string
+    {
+        /** @var Mage_Adminhtml_Block_Catalog_Category_Tree */
+        $treeBlock = $this->getLayout()->getBlock('category.tree');
+
+        $categories = Mage::getResourceSingleton('catalog/category_tree')
+            ->setStoreId($this->getCategory()->getStoreId())
+            ->loadBreadcrumbsArray($this->getCategory()->getPath());
+
+        foreach ($categories as $key => $category) {
+            $categories[$key] = $treeBlock->getNodeJson($category);
+        }
+
+        if (($last = array_key_last($categories)) !== null) {
+            $categories[$last]['checked'] = true;
+        }
+
+        return Mage::helper('core')->jsonEncode([
+            'store_id'    => (int) $this->getCategory()->getStoreId(),
+            'category_id' => (int) $this->getCategory()->getId(),
+            'can_add_sub' => (bool) $treeBlock->canAddSubCategory(),
+            'breadcrumbs' => $categories,
+        ]);
+    }
+
+    /**
+     * Check is Request from AJAX
+     *
+     * @return bool
+     */
     public function isAjax()
     {
-        return Mage::app()->getRequest()->isXmlHttpRequest() || Mage::app()->getRequest()->getParam('isAjax');
+        return Mage::app()->getRequest()->isAjax();
     }
 }

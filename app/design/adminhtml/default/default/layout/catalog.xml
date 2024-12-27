@@ -287,11 +287,18 @@ Layout handle for configurable products
 
     <adminhtml_catalog_category_edit>
         <update handle="editor"/>
+        <reference name="head">
+            <action method="addJs"><name>Sortable.min.js</name></action>
+            <action method="addJs"><name>maho-tree.js</name></action>
+            <action method="addJs"><name>mage/adminhtml/catalog/category.js</name></action>
+        </reference>
         <reference name="left">
             <block name="category.tree" type="adminhtml/catalog_category_tree" template="catalog/category/tree.phtml" />
         </reference>
         <reference name="content">
-            <block name="category.edit"  type="adminhtml/catalog_category_edit" template="catalog/category/edit.phtml" />
+            <block name="category.edit" type="adminhtml/catalog_category_edit" template="catalog/category/edit.phtml">
+                <action method="setUseAjax"><flag>1</flag></action>
+            </block>
         </reference>
         <reference name="js">
             <block type="core/template" template="catalog/wysiwyg/js.phtml" name="catalog.wysiwyg.js" />

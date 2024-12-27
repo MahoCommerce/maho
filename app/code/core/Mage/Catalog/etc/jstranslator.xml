@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Mage
+ * @package    Mage_Catalog
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<jstranslator>
+    <script path="mage/adminhtml/catalog/category.js" module="catalog">
+        <confirm-delete translate="message">
+            <message>Are you sure you want to delete this category?</message>
+        </confirm-delete>
+        <confirm-store-switch translate="message" module="adminhtml">
+            <message>Please confirm site switching. All data that hasn't been saved will be lost.</message>
+        </confirm-store-switch>
+        <error-loading-children translate="message">
+            <message>Error loading children: %s</message>
+        </error-loading-children>
+        <error-no-parent translate="message">
+            <message>Please select a parent category before adding a new one.</message>
+        </error-no-parent>
+    </script>
+</jstranslator>
