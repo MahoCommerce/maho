@@ -106,20 +106,19 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
             'label' => Mage::helper('adminhtml')->__('Enable 2FA'),
             'name' => 'twofa_enabled',
             'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
-            'onchange' => 'toggleTwoFactorSetup(this.value)',
         ]);
 
         if (!$user->getTwofaEnabled()) {
             $secret = $user->getTwofaSecret();
-            if (!$user->getTwofaSecret()) {
+            if (!$secret) {
                 $secret = $twoFactorAuthenticationHelper->getSecret();
                 $user->setTwofaSecret($secret)->save();
             }
 
             $twoFactorAuthenticationFieldset->addField('twofa_qr', 'note', [
                 'label' => Mage::helper('adminhtml')->__('QR Code'),
-                'text' => $twoFactorAuthenticationHelper->getQRCode($user->getUsername(), $secret) . '<br/><br/>' .
-                    Mage::helper('adminhtml')->__('Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)'),
+                'text' => $twoFactorAuthenticationHelper->getQRCode($user->getUsername(), $secret),
+                'note' => Mage::helper('adminhtml')->__('Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)'),
             ]);
 
             $twoFactorAuthenticationFieldset->addField('twofa_verification_code', 'text', [
@@ -140,12 +139,12 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
 
         $this->setForm($form);
 
-        $this->setChild(
-            'form_after',
-            $this->getLayout()
-            ->createBlock('adminhtml/template')
-            ->setTemplate('system/account/edit/form/js.phtml'),
-        );
+        /** @var Mage_Adminhtml_Block_Widget_Form_Element_Dependence $block */
+        $block = $this->getLayout()->createBlock('adminhtml/widget_form_element_dependence');
+        $block->addFieldDependence('twofa_qr', 'twofa_enabled', '1')
+            ->addFieldDependence('twofa_verification_code', 'twofa_enabled', '1');
+
+        $this->setChild('form_after', $block);
 
         return parent::_prepareForm();
     }
