@@ -868,6 +868,7 @@ class Mage_Core_Model_Url extends Varien_Object
      */
     public function purgeQueryParams()
     {
+        $this->unsetData('query');
         $this->setData('query_params', []);
         return $this;
     }
@@ -995,7 +996,7 @@ class Mage_Core_Model_Url extends Varien_Object
                 $this->setQueryParams($query);
             }
             if ($query === false) {
-                $this->setQueryParams([]);
+                $this->purgeQueryParams();
             }
         }
 
