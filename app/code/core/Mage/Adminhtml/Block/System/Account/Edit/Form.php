@@ -116,10 +116,9 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
                 $user->setTwofaSecret($secret)->save();
             }
 
-            $qrUrl = $twoFactorAuthenticationHelper->getQRCodeUrl($user->getUsername(), $secret);
             $twoFactorAuthenticationFieldset->addField('twofa_qr', 'note', [
                 'label' => Mage::helper('adminhtml')->__('QR Code'),
-                'text' => '<img src="' . $qrUrl . '" /><br/><br/>' .
+                'text' => $twoFactorAuthenticationHelper->getQRCode($user->getUsername(), $secret) . '<br/><br/>' .
                     Mage::helper('adminhtml')->__('Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)'),
             ]);
 

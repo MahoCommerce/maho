@@ -20,17 +20,20 @@ class Mage_Adminhtml_Helper_TwoFactorAuthentication extends Mage_Core_Helper_Abs
         return \OTPHP\TOTP::create()->getSecret();
     }
 
-    public function getQRCodeUrl(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $secret): string
+    public function getQRCode(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $secret): string
     {
         $storeName = Mage::getStoreConfig('general/store_information/name');
         $otp = \OTPHP\TOTP::create($secret);
         $otp->setLabel($username . '@' . $storeName);
         $otp->setIssuer('Maho Admin');
 
-        return $otp->getQrCodeUri(
-            'https://api.qrserver.com/v1/create-qr-code/?color=000000&bgcolor=FFFFFF&data=[DATA]&qzone=2&margin=0&size=300x300&ecc=M',
-            '[DATA]',
+        $qrWriter = new \BaconQrCode\Writer(
+            new \BaconQrCode\Renderer\ImageRenderer(
+                new \BaconQrCode\Renderer\RendererStyle\RendererStyle(300),
+                new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
+            )
         );
+        return $qrWriter->writeString($otp->getProvisioningUri());
     }
 
     public function verifyCode(string $secret, string $code): bool
