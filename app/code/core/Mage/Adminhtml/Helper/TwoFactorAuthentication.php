@@ -30,8 +30,8 @@ class Mage_Adminhtml_Helper_TwoFactorAuthentication extends Mage_Core_Helper_Abs
         $qrWriter = new \BaconQrCode\Writer(
             new \BaconQrCode\Renderer\ImageRenderer(
                 new \BaconQrCode\Renderer\RendererStyle\RendererStyle(300),
-                new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
-            )
+                new \BaconQrCode\Renderer\Image\SvgImageBackEnd(),
+            ),
         );
         return $qrWriter->writeString($otp->getProvisioningUri());
     }
