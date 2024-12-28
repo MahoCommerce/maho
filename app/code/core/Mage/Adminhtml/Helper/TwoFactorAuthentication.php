@@ -23,11 +23,12 @@ class Mage_Adminhtml_Helper_TwoFactorAuthentication extends Mage_Core_Helper_Abs
     public function getQRCode(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $secret): string
     {
         $otp = \OTPHP\TOTP::create($secret);
-        $otp->setIssuer('Maho Admin');
+        $otp->setLabel($username);
+        $otp->setParameter('image', 'https://mahocommerce.com/assets/maho-logo-square.png');
         if ($storeName = Mage::getStoreConfig('general/store_information/name')) {
-            $otp->setLabel($username . '@' . $storeName);
+            $otp->setIssuer($storeName);
         } else {
-            $otp->setLabel($username);
+            $otp->setIssuer('Maho Admin');
         }
 
         $qrWriter = new \BaconQrCode\Writer(
