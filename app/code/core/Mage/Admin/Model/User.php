@@ -65,6 +65,8 @@
  * @method string getRpTokenCreatedAt()
  * @method $this setRpTokenCreatedAt(string $value)
  * @method $this setUserId(int $value)
+ * @method int getTwofaEnabled()
+ * @method $this setTwofaEnabled(int $value)
  */
 class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 {
@@ -792,5 +794,30 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         $minLength = Mage::getStoreConfigAsInt(self::XML_PATH_MIN_ADMIN_PASSWORD_LENGTH);
         $absoluteMinLength = Mage_Core_Model_App::ABSOLUTE_MIN_PASSWORD_LENGTH;
         return ($minLength < $absoluteMinLength) ? $absoluteMinLength : $minLength;
+    }
+
+    /**
+     * Retrieve unencrypted value of twofa_secret
+     */
+    public function getTwofaSecret(): ?string
+    {
+        if ($this->hasData('twofa_secret')) {
+            return Mage::helper('core')->getEncryptor()->decrypt($this->_getData('twofa_secret'));
+        }
+        return null;
+    }
+
+    /**
+     * Store encrypted value of twofa_secret
+     */
+    public function setTwofaSecret(#[\SensitiveParameter] ?string $secret): self
+    {
+        if ($secret === null) {
+            $this->setData('twofa_secret', null);
+        } else {
+            $encrypted = Mage::helper('core')->getEncryptor()->encrypt($secret);
+            $this->setData('twofa_secret', $encrypted);
+        }
+        return $this;
     }
 }
