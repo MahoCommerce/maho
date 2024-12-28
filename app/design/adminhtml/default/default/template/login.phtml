@@ -43,6 +43,12 @@
                         <label for="login"><?= Mage::helper('adminhtml')->__('Password:') ?></label><br />
                         <input type="password" id="login" name="login[password]" value="" class="required-entry input-text" />
                     </div>
+                    <?php if (Mage::getSingleton('adminhtml/session')->getShowTwofaVerificationCode()): ?>
+                        <div class="input-box input-left">
+                            <label for="twofa_verification_code"><?= Mage::helper('adminhtml')->__('2FA verification code:') ?></label><br />
+                            <input type="text" id="twofa_verification_code" name="login[twofa_verification_code]" value="" class="required-entry input-text validate-number" />
+                        </div>
+                    <?php endif; ?>
                     <?= $this->getChildHtml('form.additional.info') ?>
                     <div class="clear"></div>
                     <div class="form-buttons">

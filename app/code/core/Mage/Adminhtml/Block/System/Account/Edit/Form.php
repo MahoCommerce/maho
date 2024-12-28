@@ -97,6 +97,42 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
             'required' => false,
         ]);
 
+        $twoFactorAuthenticationHelper = Mage::helper('adminhtml/twoFactorAuthentication');
+        $twoFactorAuthenticationFieldset = $form->addFieldset('twofa_fieldset', array(
+            'legend' => Mage::helper('adminhtml')->__('Two-Factor Authentication')
+        ));
+
+        $twoFactorAuthenticationFieldset->addField('twofa_enabled', 'select', [
+            'label' => Mage::helper('adminhtml')->__('Enable 2FA'),
+            'name' => 'twofa_enabled',
+            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
+            'onchange' => 'toggleTwoFactorSetup(this.value)'
+        ]);
+
+        if (!$user->getTwofaEnabled()) {
+            $secret = $user->getTwofaSecret();
+            if (!$user->getTwofaSecret()) {
+                $secret = $twoFactorAuthenticationHelper->getSecret();
+                $user->setTwofaSecret($secret)->save();
+            }
+
+            $qrUrl = $twoFactorAuthenticationHelper->getQRCodeUrl($user->getUsername(), $secret);
+            $twoFactorAuthenticationFieldset->addField('twofa_qr', 'note', [
+                'label' => Mage::helper('adminhtml')->__('QR Code'),
+                'text' => '<img src="' . $qrUrl . '" /><br/><br/>' .
+                    Mage::helper('adminhtml')->__('Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)')
+            ]);
+
+            $twoFactorAuthenticationFieldset->addField('twofa_verification_code', 'text', [
+                'name' => 'twofa_verification_code',
+                'label' => Mage::helper('adminhtml')->__('Verification Code'),
+                'title' => Mage::helper('adminhtml')->__('Verification Code'),
+                'required' => true,
+                'class' => 'validate-number',
+                'note' => Mage::helper('adminhtml')->__('Enter the 6-digit code from your authenticator app')
+            ]);
+        }
+
         $form->setValues($user->getData());
         $form->setAction($this->getUrl('*/system_account/save'));
         $form->setMethod('post');
@@ -104,6 +140,11 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
         $form->setId('edit_form');
 
         $this->setForm($form);
+
+        $this->setChild('form_after', $this->getLayout()
+            ->createBlock('adminhtml/template')
+            ->setTemplate('system/account/edit/form/js.phtml')
+        );
 
         return parent::_prepareForm();
     }

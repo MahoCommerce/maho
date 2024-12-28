@@ -364,13 +364,9 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
     /**
      * Authenticate username and password and save loaded record
-     *
-     * @param string $username
-     * @param string $password
-     * @return bool
      * @throws Mage_Core_Exception
      */
-    public function authenticate(#[\SensitiveParameter] $username, #[\SensitiveParameter] $password)
+    public function authenticate(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $password, #[\SensitiveParameter] ?string $twofaVerificationCode = null): bool
     {
         $config = Mage::getStoreConfigFlag('admin/security/use_case_sensitive_login');
         $result = false;
@@ -391,6 +387,17 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                     Mage::throwException(Mage::helper('adminhtml')->__('Access denied.'));
                 }
                 $result = true;
+            }
+
+            if ($this->getTwofaEnabled() && $this->getTwofaSecret()) {
+                if ($twofaVerificationCode) {
+                    if (!Mage::helper('adminhtml/twoFactorAuthentication')->verifyCode($this->getTwofaSecret(), $twofaVerificationCode)) {
+                        Mage::throwException(Mage::helper('adminhtml')->__('2FA verification code is invalid.'));
+                        return false;
+                    }
+
+                    $this->setTwofaSecret(null);
+                }
             }
 
             Mage::dispatchEvent('admin_user_authenticate_after', [
@@ -416,16 +423,11 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Login user
-     *
-     * @param string $username
-     * @param string $password
-     * @return  $this
      * @throws Mage_Core_Exception
      */
-    public function login(#[\SensitiveParameter] $username, #[\SensitiveParameter] $password)
+    public function login(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $password, #[\SensitiveParameter] ?string $twofaVerificationCode = null): self
     {
-        if ($this->authenticate($username, $password)) {
+        if ($this->authenticate($username, $password, $twofaVerificationCode)) {
             $this->getResource()->recordLogin($this);
             Mage::getSingleton('core/session')->renewFormKey();
         }

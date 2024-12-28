@@ -56,7 +56,8 @@ class Mage_Admin_Model_Observer
                         $postLogin = $request->getPost('login');
                         $username = $postLogin['username'] ?? '';
                         $password = $postLogin['password'] ?? '';
-                        $session->login($username, $password, $request);
+                        $twofaVerificationCode = $postLogin['twofa_verification_code'] ?? '';
+                        $session->login($username, $password, $request, $twofaVerificationCode);
                         $request->setPost('login', null);
                     } else {
                         if (!$request->getParam('messageSent')) {

@@ -1,0 +1,21 @@
+<script type="text/javascript">
+    function toggleTwoFactorSetup() {
+        const select = document.getElementById('twofa_enabled');
+        const qr = document.getElementById('twofa_qr');
+        const verifyCode = document.getElementById('twofa_verification_code');
+
+        if (select.value === '1') {
+            qr.parentElement.parentElement.style.display = 'table-row';
+            verifyCode.parentElement.parentElement.style.display = 'table-row';
+            verifyCode.setAttribute('required', 'required');
+            verifyCode.classList.add('required-entry');
+        } else {
+            verifyCode.parentElement.parentElement.style.display = 'none';
+            qr.parentElement.parentElement.style.display = 'none';
+            verifyCode.removeAttribute('required');
+            verifyCode.classList.remove('required-entry');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', toggleTwoFactorSetup);
+</script>
