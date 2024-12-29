@@ -36,11 +36,11 @@
                     <div id="step1">
                         <div class="input-box input-left">
                             <label for="username"><?= Mage::helper('adminhtml')->__('User Name:') ?></label><br />
-                            <input type="text" id="username" name="login[username]" value="" class="required-entry input-text" autofocus="autofocus" />
+                            <input type="text" id="username" name="login[username]" value="" class="required-entry input-text" autofocus="autofocus" autocomplete="username" />
                         </div>
                         <div class="input-box input-right">
                             <label for="login"><?= Mage::helper('adminhtml')->__('Password:') ?></label><br />
-                            <input type="password" id="login" name="login[password]" value="" class="required-entry input-text" />
+                            <input type="password" id="login" name="login[password]" value="" class="required-entry input-text" autocomplete="current-password" />
                         </div>
                         <?= $this->getChildHtml('form.additional.info') ?>
                         <div class="clear"></div>
@@ -52,7 +52,7 @@
                     <div id="step2" class="no-display">
                         <div class="input-box input-left">
                             <label for="twofa_verification_code"><?= Mage::helper('adminhtml')->__('2FA verification code:') ?></label><br />
-                            <input type="text" id="twofa_verification_code" name="login[twofa_verification_code]" value="" class="required-entry input-text validate-number" disabled />
+                            <input type="text" id="twofa_verification_code" name="login[twofa_verification_code]" value="" class="required-entry input-text validate-number" autocomplete="one-time-code" disabled />
                         </div>
                         <div class="clear"></div>
                         <div class="form-buttons">
