@@ -21,9 +21,7 @@
     <link type="text/css" rel="stylesheet" href="<?= $this->getSkinUrl('login.css') ?>" media="all" />
     <link rel="icon" type="image/svg+xml" href="<?= $this->getSkinUrl('images/favicon.svg') ?>" sizes="any">
     <link rel="icon" type="image/png" href="<?= $this->getSkinUrl('images/favicon.png') ?>">
-    <script type="text/javascript" src="<?= $this->getJsUrl('prototype/prototype.js') ?>"></script>
     <script type="text/javascript" src="<?= $this->getJsUrl('validation.js') ?>"></script>
-    <script type="text/javascript" src="<?= $this->getJsUrl('mage/adminhtml/form.js') ?>"></script>
 </head>
 <body id="page-login">
     <div class="login-container">
@@ -48,7 +46,7 @@
                         <div class="clear"></div>
                         <div class="form-buttons">
                             <a class="left" href="<?= Mage::helper('adminhtml')->getUrl('adminhtml/index/forgotpassword', ['_nosecret' => true]) ?>"><?= Mage::helper('adminhtml')->__('Forgot your password?') ?></a>
-                            <input type="button" onclick="gotoStep(2)" class="form-button" value="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" />
+                            <input type="submit" class="form-button" value="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" />
                         </div>
                     </div>
                     <div id="step2" class="no-display">
@@ -58,7 +56,7 @@
                         </div>
                         <div class="clear"></div>
                         <div class="form-buttons">
-                            <a class="left" href="#" onclick="gotoStep(1); return false;"><?= Mage::helper('adminhtml')->__('Back') ?></a>
+                            <a id="back-button" class="left" href="#"><?= Mage::helper('adminhtml')->__('Back') ?></a>
                             <input type="submit" class="form-button" value="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" />
                         </div>
                     </div>
@@ -66,11 +64,28 @@
                 <p class="legal">Powered by Maho</p>
             </form>
             <div class="bottom"></div>
-            <script type="text/javascript">
-                const loginForm = new varienForm('loginForm');
+            <script type="module">
+                const formEl = document.getElementById('loginForm');
+                const validator = new Validation(formEl);
+
+                formEl.addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    if (!validator.validate()) {
+                        return;
+                    }
+                    if (document.getElementById('step1').classList.contains('no-display')) {
+                        formEl.submit();
+                    } else {
+                        gotoStep(2);
+                    }
+                });
+
+                document.getElementById('back-button').addEventListener('click', (event) => {
+                    event.preventDefault();
+                    gotoStep(1);
+                });
 
                 async function gotoStep(step) {
-                    document.getElementById('messages').textContent = '';
                     if (step === 1) {
                         document.getElementById('step1').classList.remove('no-display');
                         document.getElementById('step2').classList.add('no-display');
@@ -81,7 +96,7 @@
                             const ajaxUrl = "<?= $this->getUrl('adminhtml/index/prelogin', ['_query' => 'isAjax=1']) ?>";
                             const response = await fetch(ajaxUrl, {
                                 method: 'POST',
-                                body: new FormData(document.getElementById(loginForm.formId)),
+                                body: new FormData(formEl),
                             });
                             if (!response.ok) {
                                 throw new Error(
@@ -89,6 +104,7 @@
                                 );
                             }
                             const result = await response.json();
+                            document.getElementById('messages').textContent = '';
                             if (result.redirect) {
                                 window.location = result.redirect;
                             } else if (result.error) {
@@ -99,7 +115,7 @@
                                 document.getElementById('twofa_verification_code').disabled = false;
                                 document.getElementById('twofa_verification_code').focus();
                             } else {
-                                loginForm.submit();
+                                formEl.submit();
                             }
                         } catch (error) {
                             document.getElementById('messages').textContent = error.message;
