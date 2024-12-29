@@ -31,6 +31,8 @@
  * @method bool hasSyncProcessStopWatch()
  * @method bool getSyncProcessStopWatch()
  * @method $this setSyncProcessStopWatch(bool $value)
+ * @method bool getShowTwofaVerificationCode()
+ * @method $this setShowTwofaVerificationCode(bool $value)
  * @method Mage_Admin_Model_User getUser()
  * @method $this setUser(Mage_Admin_Model_User $user)
  */
@@ -125,14 +127,30 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
+     * Check if 2fa is required
+     */
+    public function prelogin(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $password, ?Mage_Core_Controller_Request_Http $request = null): void
+    {
+        try {
+            if (!empty($username) && !empty($password)) {
+                /** @var Mage_Admin_Model_User $user */
+                $user = $this->_factory->getModel('admin/user');
+                $user->authenticate($username, $password);
+            }
+        } catch (Mage_Core_Exception $e) {
+            if ($e->getCode() === Mage_Admin_Model_User::AUTH_ERR_2FA_INVALID) {
+                $this->setRequireTwofa(true);
+            }
+        } catch (Exception $e) {
+            Mage::logException($e);
+        }
+    }
+
+    /**
      * Try to login user in admin
-     *
-     * @param  string $username
-     * @param  string $password
-     * @param  Mage_Core_Controller_Request_Http $request
      * @return Mage_Admin_Model_User|null
      */
-    public function login(#[\SensitiveParameter] $username, #[\SensitiveParameter] $password, $request = null)
+    public function login(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $password, ?Mage_Core_Controller_Request_Http $request = null, #[\SensitiveParameter] ?string $twofaVerificationCode = null)
     {
         if (empty($username) || empty($password)) {
             return null;
@@ -141,7 +159,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
         try {
             /** @var Mage_Admin_Model_User $user */
             $user = $this->_factory->getModel('admin/user');
-            $user->login($username, $password);
+            $user->login($username, $password, $twofaVerificationCode);
             if ($user->getId()) {
                 $this->renewSession();
 

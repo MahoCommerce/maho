@@ -40,7 +40,7 @@ varienForm.prototype = {
     },
 
     submit : function(url){
-        if (typeof varienGlobalEvents != undefined) {
+        if (typeof varienGlobalEvents !== 'undefined') {
             varienGlobalEvents.fireEvent('formSubmit', this.formId);
         }
         this.errorSections = $H({});
@@ -68,7 +68,7 @@ varienForm.prototype = {
     },
 
     _processValidationResult : function(transport){
-        if (typeof varienGlobalEvents != undefined) {
+        if (typeof varienGlobalEvents !== 'undefined') {
             varienGlobalEvents.fireEvent('formValidateAjaxComplete', transport);
         }
         var response = transport.responseText.evalJSON();
