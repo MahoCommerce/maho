@@ -1160,6 +1160,9 @@ ul.tabs a.changed span.changed {
     height: var(--icon-size);
     flex-shrink: 0;
 }
+.maho-tree .icon.no-icon {
+    display: none;
+}
 .maho-tree .icon.folder {
     background-image: url('data:image/svg+xml,<svg width="16" height="16" xmlns="http://www.w3.org/2000/svg"><path d="M1.9 2.1a1 1 0 0 0-1 1V13c0 .5.4 1 1 1H14c.6 0 1-.5 1-1V5.2c0-.6-.4-1-1-1H6.8s-.2 0-.2-.2h-.1l-.1-.2v-.2l-.9-1a1 1 0 0 0-.8-.5Z" fill="%23e2ae10"/><rect x=".8" y="4.2" width="14.3" height="9.7" rx="1" fill="%23f2c94c" ry="1"/></svg>');
 }

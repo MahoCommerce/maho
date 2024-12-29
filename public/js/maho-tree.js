@@ -50,6 +50,7 @@ class MahoTree {
      * @param {LazyloadOpts|boolean|string} [config.lazyload=false] - `true` for default options, string for dataUrl, or object
      * @param {boolean} [config.rootVisible=true] - is the root node visible
      * @param {boolean} [config.noLeafNodes=false] - make all node type folder
+     * @param {boolean} [config.noIcons=false] - make all icons invisible
      * @param {boolean} [config.varienSetHasChanges] - emit event marking the tab as having changes
      * @param {MahoTreeCssVars} [config.cssVars] -
      */
@@ -67,6 +68,7 @@ class MahoTree {
             lazyload: false,
             rootVisible: true,
             noLeafNodes: false,
+            noIcons: false,
             varienSetHasChanges: true,
             cssVars: {},
             ...config,
@@ -343,8 +345,8 @@ class MahoTreeNode {
      * @prop {string} [type] - type of node, can be `folder|leaf`, or blank for auto-detection
      * @prop {string} [text] - label for the node
      * @prop {string} [name] - alias for text
-     * @prop {string} [icon] - icon for the node
-     * @prop {string} [cls] - alias for icon
+     * @prop {string|boolean} [icon] - icon for the node, or false to hide
+     * @prop {string} [cls] - extra classes to add to icon node
      * @prop {boolean} [selectable] - is the node selectable, defaults to tree setting
      * @prop {boolean} [disabled=false] - is the node disabled
      * @prop {boolean} [expanded=false] - if type folder, is the node expanded
@@ -460,7 +462,15 @@ class MahoTreeNode {
 
         this.ui.label.classList.toggle('disabled', this.attributes.disabled ?? false);
 
-        this.icons = (this.attributes.icon ?? this.attributes.cls ?? '').trim().split(/\s+/).filter(Boolean);
+        this.icons = [];
+        if (typeof this.attributes.icon === 'string') {
+            this.icons.push(...this.attributes.icon.trim().split(/\s+/).filter(Boolean));
+        } else if (this.attributes.icon === false || this.tree.config.noIcons) {
+            this.icons.push('no-icon');
+        }
+        if (typeof this.attributes.cls === 'string') {
+            this.icons.push(...this.attributes.cls.trim().split(/\s+/).filter(Boolean));
+        }
         if (this.icons.length === 0) {
             this.icons.push(this.type);
         }
