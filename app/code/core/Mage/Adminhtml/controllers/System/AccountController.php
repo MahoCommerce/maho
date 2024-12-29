@@ -76,6 +76,22 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
             return;
         }
 
+        $twoFactorEnabled = (bool) $this->getRequest()->getParam('twofa_enabled', 0);
+        $twoFactorVerificationCode = (string) $this->getRequest()->getParam('twofa_verification_code', '');
+        if ($twoFactorEnabled && $twoFactorVerificationCode) {
+            $twoFactorAuthenticationHelper = Mage::helper('adminhtml/twoFactorAuthentication');
+            if ($twoFactorAuthenticationHelper->verifyCode($user->getTwofaSecret(), $twoFactorVerificationCode)) {
+                $user->setTwofaEnabled(1);
+            } else {
+                $user->setTwofaEnabled(0);
+                $user->setTwofaSecret(null);
+                Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Invalid 2FA verification code'));
+            }
+        } else {
+            $user->setTwofaEnabled(0);
+            $user->setTwofaSecret(null);
+        }
+
         try {
             $user->save();
             Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('The account has been saved.'));
