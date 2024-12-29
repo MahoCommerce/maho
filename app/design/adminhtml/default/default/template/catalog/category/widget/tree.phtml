@@ -22,7 +22,7 @@
     const useMassaction = <?= var_export((bool) $this->getUseMassaction(), true) ?>;
 
     const tree = new MahoTree('<?= $divId ?>', {
-        rootVisible: false,
+        showRootNode: false,
         lazyload: {
             nodeParameter: 'id',
             dataUrl: '<?= $this->getLoadTreeUrl() ?>',

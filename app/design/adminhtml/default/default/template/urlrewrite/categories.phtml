@@ -29,7 +29,7 @@
 <?php if ($this->getRoot()): ?>
 <script type="module">
     const tree = new MahoTree('tree-div', {
-        rootVisible: false,
+        showRootNode: false,
         lazyload: {
             nodeParameter: 'id',
             dataUrl: '<?= $this->getLoadTreeUrl() ?>',

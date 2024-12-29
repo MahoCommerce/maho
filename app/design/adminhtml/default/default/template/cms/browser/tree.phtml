@@ -29,8 +29,8 @@
 
 <script type="module">
     const tree = new MahoTree('tree', {
-        rootVisible: true,
-        noLeafNodes: true,
+        showRootNode: true,
+        treatAllNodesAsFolders: true,
         lazyload: {
             dataUrl: '<?= $this->getTreeLoaderUrl() ?>',
         },

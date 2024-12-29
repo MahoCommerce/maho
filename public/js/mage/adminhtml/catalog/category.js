@@ -55,8 +55,8 @@ class CategoryEditForm {
         this.initProductsGrid();
 
         this.tree = new MahoTree(this.config.treeDiv, {
-            rootVisible: true,
-            noLeafNodes: true,
+            showRootNode: true,
+            treatAllNodesAsFolders: true,
             selectable: {
                 mode: 'radio',
                 hideInputs: true,

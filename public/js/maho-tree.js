@@ -48,9 +48,9 @@ class MahoTree {
      * @param {SelectableOpts|boolean|string} [config.selectable=false] - `true` for default options, string `radio|single|simple|nested`, or object
      * @param {SortableOpts|boolean|string} [config.sortable=false] - `true` for default options, string for sortable group name, or object
      * @param {LazyloadOpts|boolean|string} [config.lazyload=false] - `true` for default options, string for dataUrl, or object
-     * @param {boolean} [config.rootVisible=true] - is the root node visible
-     * @param {boolean} [config.noLeafNodes=false] - make all node type folder
-     * @param {boolean} [config.noIcons=false] - make all icons invisible
+     * @param {boolean} [config.showRootNode=true] - toggle visibility of the root node
+     * @param {boolean} [config.showIcons=true] - toggle visibility of icons
+     * @param {boolean} [config.treatAllNodesAsFolders=false] - make all node type folder
      * @param {boolean} [config.varienSetHasChanges] - emit event marking the tab as having changes
      * @param {MahoTreeCssVars} [config.cssVars] -
      */
@@ -66,9 +66,9 @@ class MahoTree {
             selectable: false,
             sortable: false,
             lazyload: false,
-            rootVisible: true,
-            noLeafNodes: false,
-            noIcons: false,
+            showRootNode: true,
+            treatAllNodesAsFolders: false,
+            showIcons: true,
             varienSetHasChanges: true,
             cssVars: {},
             ...config,
@@ -156,14 +156,14 @@ class MahoTree {
     }
 
     setRootVisible(flag) {
-        this.config.rootVisible = flag;
+        this.config.showRootNode = flag;
         this.rootEl.classList.toggle('hide-root-node', !flag);
     }
 
     createElement() {
         this.rootEl = document.createElement('ul');
         this.rootEl.classList.add('maho-tree');
-        this.setRootVisible(this.config.rootVisible);
+        this.setRootVisible(this.config.showRootNode);
 
         for (const [cssVar, cssVal] of Object.entries(this.config.cssVars)) {
             this.rootEl.style.setProperty(`--${cssVar}`, cssVal);
@@ -386,7 +386,7 @@ class MahoTreeNode {
 
         if (this.attributes.type) {
             this.type = this.attributes.type;
-        } else if (this.tree.config.noLeafNodes || Array.isArray(children)) {
+        } else if (this.tree.config.treatAllNodesAsFolders || Array.isArray(children)) {
             this.type = 'folder';
         } else {
             this.type = 'leaf';
@@ -465,7 +465,7 @@ class MahoTreeNode {
         this.icons = [];
         if (typeof this.attributes.icon === 'string') {
             this.icons.push(...this.attributes.icon.trim().split(/\s+/).filter(Boolean));
-        } else if (this.attributes.icon === false || this.tree.config.noIcons) {
+        } else if (this.attributes.icon === false || this.tree.config.showIcons === false) {
             this.icons.push('no-icon');
         }
         if (typeof this.attributes.cls === 'string') {
@@ -599,7 +599,7 @@ class MahoTreeNode {
     }
 
     collapseAll() {
-        if (!this.isRoot || this.tree.config.rootVisible) {
+        if (!this.isRoot || this.tree.config.showRootNode) {
             this.collapse();
         }
         this.childNodes.map((child) => child.collapseAll());

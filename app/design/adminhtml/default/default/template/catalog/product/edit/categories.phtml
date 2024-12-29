@@ -30,7 +30,7 @@
     ) ?>;
 
     const tree = new MahoTree('product-categories', {
-        rootVisible: <?= var_export((bool) $rootNode->getIsVisible(), true) ?>,
+        showRootNode: <?= var_export((bool) $rootNode->getIsVisible(), true) ?>,
         lazyload: {
             nodeParameter: 'category',
             dataUrl: '<?= $this->getLoadTreeUrl() ?>',

@@ -79,7 +79,7 @@ class EavAttributeSetForm {
         }
 
         this.tree1 = new MahoTree(this.config.containerGroups, {
-            rootVisible: false,
+            showRootNode: false,
             selectable: this.config.isReadOnly ? false : {
                 mode: 'single',
                 hideInputs: true,
@@ -96,7 +96,7 @@ class EavAttributeSetForm {
             },
         });
         this.tree2 = new MahoTree(this.config.containerAttributes, {
-            rootVisible: false,
+            showRootNode: false,
             sortable: this.config.isReadOnly ? false : {
                 group: {
                     name: 'attributes.2',
