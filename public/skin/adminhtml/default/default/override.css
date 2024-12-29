@@ -1159,7 +1159,6 @@ ul.tabs a.changed span.changed {
     width: var(--icon-size);
     height: var(--icon-size);
     flex-shrink: 0;
-    filter: grayscale(1);
 }
 .maho-tree .icon.no-icon {
     display: none;
