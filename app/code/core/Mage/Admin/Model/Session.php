@@ -135,6 +135,26 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
+     * Check if 2fa is required
+     */
+    public function prelogin(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $password, ?Mage_Core_Controller_Request_Http $request = null): void
+    {
+        try {
+            if (!empty($username) && !empty($password)) {
+                /** @var Mage_Admin_Model_User $user */
+                $user = $this->_factory->getModel('admin/user');
+                $user->authenticate($username, $password);
+            }
+        } catch (Mage_Core_Exception $e) {
+            if ($e->getCode() === Mage_Admin_Model_User::AUTH_ERR_2FA_INVALID) {
+                $this->setRequireTwofa(true);
+            }
+        } catch (Exception $e) {
+            Mage::logException($e);
+        }
+    }
+
+    /**
      * Try to login user in admin
      * @return Mage_Admin_Model_User|null
      */
@@ -149,13 +169,6 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             $user = $this->_factory->getModel('admin/user');
             $user->login($username, $password, $twofaVerificationCode);
             if ($user->getId()) {
-                if ($user->getTwofaEnabled() && $user->getTwofaSecret()) {
-                    Mage::getSingleton('adminhtml/session')
-                        ->setShowTwofaVerificationCode(true)
-                        ->addError(Mage::helper('adminhtml')->__('Enter the 6-digit code from your authenticator app'));
-                    return null;
-                }
-
                 $this->renewSession();
 
                 if (Mage::getSingleton('adminhtml/url')->useSecretKey()) {

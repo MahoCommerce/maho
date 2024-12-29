@@ -35,32 +35,77 @@
                     <div id="messages">
                         <?= $this->getMessagesBlock()->toHtml() ?>
                     </div>
-                    <div class="input-box input-left">
-                        <label for="username"><?= Mage::helper('adminhtml')->__('User Name:') ?></label><br />
-                        <input type="text" id="username" name="login[username]" value="" class="required-entry input-text" autofocus="autofocus" />
+                    <div id="step1">
+                        <div class="input-box input-left">
+                            <label for="username"><?= Mage::helper('adminhtml')->__('User Name:') ?></label><br />
+                            <input type="text" id="username" name="login[username]" value="" class="required-entry input-text" autofocus="autofocus" />
+                        </div>
+                        <div class="input-box input-right">
+                            <label for="login"><?= Mage::helper('adminhtml')->__('Password:') ?></label><br />
+                            <input type="password" id="login" name="login[password]" value="" class="required-entry input-text" />
+                        </div>
+                        <?= $this->getChildHtml('form.additional.info') ?>
+                        <div class="clear"></div>
+                        <div class="form-buttons">
+                            <a class="left" href="<?= Mage::helper('adminhtml')->getUrl('adminhtml/index/forgotpassword', ['_nosecret' => true]) ?>"><?= Mage::helper('adminhtml')->__('Forgot your password?') ?></a>
+                            <input type="button" onclick="gotoStep(2)" class="form-button" value="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" />
+                        </div>
                     </div>
-                    <div class="input-box input-right">
-                        <label for="login"><?= Mage::helper('adminhtml')->__('Password:') ?></label><br />
-                        <input type="password" id="login" name="login[password]" value="" class="required-entry input-text" />
-                    </div>
-                    <?php if (Mage::getSingleton('adminhtml/session')->getShowTwofaVerificationCode()): ?>
+                    <div id="step2" class="no-display">
                         <div class="input-box input-left">
                             <label for="twofa_verification_code"><?= Mage::helper('adminhtml')->__('2FA verification code:') ?></label><br />
-                            <input type="text" id="twofa_verification_code" name="login[twofa_verification_code]" value="" class="required-entry input-text validate-number" />
+                            <input type="text" id="twofa_verification_code" name="login[twofa_verification_code]" value="" class="required-entry input-text validate-number" disabled />
                         </div>
-                    <?php endif; ?>
-                    <?= $this->getChildHtml('form.additional.info') ?>
-                    <div class="clear"></div>
-                    <div class="form-buttons">
-                        <a class="left" href="<?= Mage::helper('adminhtml')->getUrl('adminhtml/index/forgotpassword', ['_nosecret' => true]) ?>"><?= Mage::helper('adminhtml')->__('Forgot your password?') ?></a>
-                        <input type="submit" class="form-button" value="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" />
+                        <div class="clear"></div>
+                        <div class="form-buttons">
+                            <a class="left" href="#" onclick="gotoStep(1); return false;"><?= Mage::helper('adminhtml')->__('Back') ?></a>
+                            <input type="submit" class="form-button" value="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" />
+                        </div>
                     </div>
                 </div>
                 <p class="legal">Powered by Maho</p>
             </form>
             <div class="bottom"></div>
             <script type="text/javascript">
-                var loginForm = new varienForm('loginForm');
+                const loginForm = new varienForm('loginForm');
+
+                async function gotoStep(step) {
+                    document.getElementById('messages').textContent = '';
+                    if (step === 1) {
+                        document.getElementById('step1').classList.remove('no-display');
+                        document.getElementById('step2').classList.add('no-display');
+                        document.getElementById('twofa_verification_code').value = '';
+                        document.getElementById('twofa_verification_code').disabled = true;
+                    } else if (step === 2) {
+                        try {
+                            const ajaxUrl = "<?= $this->getUrl('adminhtml/index/prelogin', ['_query' => 'isAjax=1']) ?>";
+                            const response = await fetch(ajaxUrl, {
+                                method: 'POST',
+                                body: new FormData(document.getElementById(loginForm.formId)),
+                            });
+                            if (!response.ok) {
+                                throw new Error(
+                                    "<?= Mage::helper('adminhtml')->__('Network Error. Please refresh the page.') ?>"
+                                );
+                            }
+                            const result = await response.json();
+                            if (result.redirect) {
+                                window.location = result.redirect;
+                            } else if (result.error) {
+                                throw new Error(result.message);
+                            } else if (result.require_twofa) {
+                                document.getElementById('step1').classList.add('no-display');
+                                document.getElementById('step2').classList.remove('no-display');
+                                document.getElementById('twofa_verification_code').disabled = false;
+                                document.getElementById('twofa_verification_code').focus();
+                            } else {
+                                loginForm.submit();
+                            }
+                        } catch (error) {
+                            document.getElementById('messages').textContent = error.message;
+                        }
+                    }
+                }
             </script>
         </div>
     </div>

@@ -53,6 +53,32 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     }
 
     /**
+     * Administrator prelogin action
+     */
+    public function preloginAction()
+    {
+        /** @var Mage_Admin_Model_Session $adminSession */
+        $adminSession = Mage::getSingleton('admin/session');
+
+        $result = [];
+
+        if (!$adminSession->isLoggedIn() && $this->_validateFormKey()) {
+            $postLogin = $this->getRequest()->getPost('login');
+            $username = $postLogin['username'] ?? '';
+            $password = $postLogin['password'] ?? '';
+
+            $adminSession->prelogin($username, $password, $this->getRequest());
+            if ($adminSession->getRequireTwofa()) {
+                $result['require_twofa'] = true;
+                $adminSession->unsRequireTwofa();
+            }
+        }
+
+        $this->getResponse()->setHeader('Content-type', 'application/json', true)
+            ->setBody(Mage::helper('core')->jsonEncode($result));
+    }
+
+    /**
      * Administrator login action
      */
     public function loginAction()

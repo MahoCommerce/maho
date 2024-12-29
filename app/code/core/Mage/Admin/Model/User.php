@@ -103,6 +103,13 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public const HASH_SALT_EMPTY = null;
 
     /**
+     * Authentication error codes
+     */
+    public const AUTH_ERR_ACCOUNT_INACTIVE = 1;
+    public const AUTH_ERR_ACCESS_DENIED = 2;
+    public const AUTH_ERR_2FA_INVALID = 3;
+
+    /**
      * Model event prefix
      *
      * @var string
@@ -383,22 +390,26 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
             if ($sensitive && $this->getId() && $this->validatePasswordHash($password, $this->getPassword())) {
                 if ($this->getIsActive() != '1') {
-                    Mage::throwException(Mage::helper('adminhtml')->__('This account is inactive.'));
+                    throw new Mage_Core_Exception(
+                        Mage::helper('adminhtml')->__('This account is inactive.'),
+                        self::AUTH_ERR_ACCOUNT_INACTIVE,
+                    );
                 }
                 if (!$this->hasAssigned2Role($this->getId())) {
-                    Mage::throwException(Mage::helper('adminhtml')->__('Access denied.'));
+                    throw new Mage_Core_Exception(
+                        Mage::helper('adminhtml')->__('Access denied.'),
+                        self::AUTH_ERR_ACCESS_DENIED,
+                    );
+                }
+                if ($this->getTwofaEnabled() && $secret = $this->getTwofaSecret()) {
+                    if (!Mage::helper('adminhtml/twoFactorAuthentication')->verifyCode($secret, $twofaVerificationCode ?? '')) {
+                        throw new Mage_Core_Exception(
+                            Mage::helper('adminhtml')->__('2FA verification code is invalid.'),
+                            self::AUTH_ERR_2FA_INVALID,
+                        );
+                    }
                 }
                 $result = true;
-            }
-
-            if ($this->getTwofaEnabled() && $this->getTwofaSecret()) {
-                if ($twofaVerificationCode) {
-                    if (!Mage::helper('adminhtml/twoFactorAuthentication')->verifyCode($this->getTwofaSecret(), $twofaVerificationCode)) {
-                        Mage::throwException(Mage::helper('adminhtml')->__('2FA verification code is invalid.'));
-                    }
-
-                    $this->setTwofaSecret(null);
-                }
             }
 
             Mage::dispatchEvent('admin_user_authenticate_after', [

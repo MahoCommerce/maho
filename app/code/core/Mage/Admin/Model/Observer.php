@@ -39,6 +39,7 @@ class Mage_Admin_Model_Observer
             'forgotpassword',
             'resetpassword',
             'resetpasswordpost',
+            'prelogin',
             'logout',
             'refresh', // captcha refresh
         ];
