@@ -65,6 +65,7 @@
             </form>
             <div class="bottom"></div>
             <script type="module">
+                history.replaceState(null, null, window.location.href);
                 const formEl = document.getElementById('loginForm');
                 const validator = new Validation(formEl);
 
