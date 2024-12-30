@@ -8,6 +8,49 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/**
+ * Custom error with translated message
+ */
+class MahoError extends Error {
+    /**
+     * @param {string} message - original message
+     * @param {Any} ...args - sprintf like replacements
+     */
+    constructor(message, ...args) {
+        const formatted = message.replaceAll(/%[ds]/g, (match) => args.shift() ?? match);
+        if (typeof Translator !== 'undefined') {
+            super(Translator.translate(message, ...args));
+        } else {
+            super(formatted);
+        }
+        this.name = 'MahoError';
+        this.originalMessage = message;
+    }
+}
+
+/**
+ * @param {string} url - fetch url
+ * @param {Object} [options] - fetch options
+ * @param {boolean} [options.json] - parse result as object
+ */
+async function mahoFetch(url, { json = true, ...options }) {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+        throw new MahoError('Server returned status %s', response.status);
+    }
+    if (!json) {
+        return response.text();
+    }
+    const result = await response.json();
+    if (result.error) {
+        throw new MahoError(result.message ?? result.error);
+    } else if (result.ajaxExpired && result.ajaxRedirect) {
+        return setLocation(response.ajaxRedirect);
+    }
+    return result;
+}
+
 function popWin(url,win,para) {
     var win = window.open(url,win,para);
     win.focus();

@@ -172,24 +172,15 @@ class EavAttributeSetForm {
             data.removeGroups = this.removeGroups;
             formData.set('data', JSON.stringify(data));
 
-            const response = await fetch(this.config.saveUrl, {
+            const result = await mahoFetch(this.config.saveUrl, {
                 method: 'POST',
                 body: formData,
             });
 
-            if (!response.ok) {
-                throw new Error(Translator.translate('Server returned status %s', response.status));
-            }
-
-            const result = await response.json();
-            if (result.error) {
-                throw new Error(result.message);
-            }
-
             setLocation(result.url);
 
         } catch (error) {
-            setMessageDiv(error, 'error');
+            setMessageDiv(error.message, 'error');
             hideLoader();
         }
     }

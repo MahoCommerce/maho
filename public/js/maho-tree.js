@@ -695,14 +695,10 @@ class MahoTreeNode {
                 await this.tree.lazyloadOpts.onBeforeLoad(this, params);
             }
 
-            const response = await fetch(this.tree.lazyloadOpts.dataUrl, {
+            const result = await mahoFetch(this.tree.lazyloadOpts.dataUrl, {
                 method: 'POST',
                 body: params,
             });
-
-            if (!response.ok) {
-                throw new Error(Translator.translate('Server returned status %s', response.status));
-            }
 
             const children = await response.json();
 

@@ -217,19 +217,10 @@ class CategoryEditForm {
             const ajaxUrl = setQueryParams(this.formEl.action, { isAjax: true });
             const formData = new FormData(this.formEl);
 
-            const response = await fetch(ajaxUrl, {
+            const result = await mahoFetch(ajaxUrl, {
                 method: 'POST',
                 body: formData,
             });
-
-            if (!response.ok) {
-                throw new Error(Translator.translate('Server returned status %s', response.status));
-            }
-
-            const result = await response.json();
-            if (result.error) {
-                throw new Error(result.error);
-            }
 
             this.updateContent(
                 setRouteParams(this.getEditUrl(), {
@@ -238,7 +229,7 @@ class CategoryEditForm {
                 })
             );
         } catch (error) {
-            setMessageDiv(error, 'error');
+            setMessageDiv(error.message, 'error');
         }
         hideLoader();
     }
@@ -255,27 +246,18 @@ class CategoryEditForm {
         showLoader();
 
         try {
-            const response = await fetch(url, {
+            const result = await mahoFetch(url, {
                 method: 'POST',
                 body: new URLSearchParams({
                     form_key: FORM_KEY,
                 }),
             });
 
-            if (!response.ok) {
-                throw new Error(Translator.translate('Server returned status %s', response.status));
-            }
-
-            const result = await response.json();
-            if (result.error) {
-                throw new Error(result.error);
-            }
-
             this.tree.getNodeById(result.category_id)?.remove();
             this.tree.getNodeById(result.parent_id)?.select();
 
         } catch (error) {
-            setMessageDiv(error, 'error');
+            setMessageDiv(error.message, 'error');
         }
 
         hideLoader();
@@ -308,24 +290,15 @@ class CategoryEditForm {
 
         try {
             const ajaxUrl = setQueryParams(url, { isAjax: true });
-            const response = await fetch(ajaxUrl, {
+            const result = await mahoFetch(ajaxUrl, {
                 method: 'POST',
                 body: new URLSearchParams({
                     form_key: FORM_KEY,
                 }),
             });
 
-            if (!response.ok) {
-                throw new Error(Translator.translate('Server returned status %s', response.status));
-            }
-
-            const result = await response.json();
-
             clearMessageDiv();
 
-            if (result.error) {
-                throw new Error(result.error);
-            }
             if (result.title) {
                 document.title = result.title;
             }
@@ -360,7 +333,7 @@ class CategoryEditForm {
             history.replaceState(null, '', setQueryParams(url, { isAjax: null }));
 
         } catch (error) {
-            setMessageDiv(error, 'error');
+            setMessageDiv(error.message, 'error');
         }
 
         hideLoader();
@@ -395,22 +368,17 @@ class CategoryEditForm {
                 store: storeId > 0 ? storeId: null,
                 id: category?.id,
             });
-            const response = await fetch(url, {
+            const result = await mahoFetch(url, {
                 method: 'POST',
                 body: new URLSearchParams({
                     form_key: FORM_KEY,
                 }),
             });
 
-            if (!response.ok) {
-                throw new Error(Translator.translate('Server returned status %s', response.status));
-            }
-
-            const result = await response.json();
             this.renderTree(result);
 
         } catch (error) {
-            setMessageDiv(error, 'error');
+            setMessageDiv(error.message, 'error');
         }
 
         hideLoader();
@@ -426,7 +394,7 @@ class CategoryEditForm {
 
         try {
             const node = this.tree.getNodeByEl(event.item);
-            const response = await fetch(this.config.moveUrl, {
+            const result = await mahoFetch(this.config.moveUrl, {
                 method: 'POST',
                 body: new URLSearchParams({
                     form_key: FORM_KEY,
@@ -435,17 +403,8 @@ class CategoryEditForm {
                     aid: node.previousNode?.id ?? 0,
                 }),
             });
-
-            if (!response.ok) {
-                throw new Error(Translator.translate('Server returned status %s', response.status));
-            }
-
-            const result = await response.json();
-            if (result.error) {
-                throw new Error(result.error);
-            }
         } catch (error) {
-            setMessageDiv(error, 'error');
+            setMessageDiv(error.message, 'error');
         }
 
         hideLoader();

@@ -113,7 +113,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
 
         if (isset($error)) {
             if ($this->getRequest()->isAjax()) {
-                $this->_prepareDataJSON(['error' => $error]);
+                $this->_prepareDataJSON(['error' => true, 'message' => $error]);
             } else {
                 Mage::getSingleton('adminhtml/session')->addError($error);
                 $this->getResponse()->setRedirect($this->getUrl('*/*/edit', ['_current' => true]));
@@ -192,9 +192,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
 
         $category = $this->_initCategory();
         if (!$category || !$category->getId()) {
-            $this->_prepareDataJSON([
-                'error' => Mage::helper('catalog')->__('Category was not found.'),
-            ]);
+            $this->_prepareDataJSON(['error' => true, 'message' => Mage::helper('catalog')->__('Category was not found.')]);
             return;
         }
 
@@ -213,7 +211,6 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     {
         try {
             $storeId = (int) $this->getRequest()->getParam('store');
-
             if (!$data = $this->getRequest()->getPost()) {
                 Mage::throwException(Mage::helper('catalog')->__('Unable to complete this request.'));
             }
@@ -313,7 +310,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         if (isset($error)) {
             $error = Mage::helper('catalog')->__('Category save error: %s', $error);
             if ($this->getRequest()->isAjax()) {
-                $this->_prepareDataJSON(['error' => $error]);
+                $this->_prepareDataJSON(['error' => true, 'message' => $error]);
                 return;
             }
 
@@ -358,7 +355,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
 
         if (isset($error)) {
             $error = Mage::helper('catalog')->__('Category move error: %s', $error);
-            $this->_prepareDataJSON(['error' => $error]);
+            $this->_prepareDataJSON(['error' => true, 'message' => $error]);
         }
     }
 
@@ -406,7 +403,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         if (isset($error)) {
             $error = Mage::helper('catalog')->__('Category delete error: %s', $error);
             if ($this->getRequest()->isAjax()) {
-                $this->_prepareDataJSON(['error' => $error]);
+                $this->_prepareDataJSON(['error' => true, 'message' => $error]);
                 return;
             }
 
@@ -474,7 +471,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             Mage::logException($e);
         }
         if (isset($error)) {
-            $this->_prepareDataJSON(['error' => $error]);
+            $this->_prepareDataJSON(['error' => true, 'message' => $error]);
         }
     }
 

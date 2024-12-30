@@ -101,7 +101,6 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
     public function saveAction()
     {
         $entityTypeId   = $this->_getEntityTypeId();
-        $hasError       = false;
         $attributeSetId = $this->getRequest()->getParam('id', false);
         $isNewSet       = $this->getRequest()->getParam('gotoEdit', false) == '1';
 
@@ -139,35 +138,26 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
             }
             $model->save();
             $this->_getSession()->addSuccess(Mage::helper('catalog')->__('The attribute set has been saved.'));
+
+            if ($isNewSet) {
+                $this->_redirect('*/*/edit', ['id' => $model->getId()]);
+            } else {
+                $this->_prepareDataJSON(['url' => $this->getUrl('*/*/')]);
+            }
         } catch (Mage_Core_Exception $e) {
-            $this->_getSession()->addError($e->getMessage());
-            $hasError = true;
+            $error = $e->getMessage();
         } catch (Exception $e) {
-            $this->_getSession()->addException(
-                $e,
-                Mage::helper('catalog')->__('An error occurred while saving the attribute set.'),
-            );
-            $hasError = true;
+            $error = Mage::helper('catalog')->__('An error occurred while saving the attribute set.');
+            Mage::logException($e);
         }
 
-        if ($isNewSet) {
-            if ($hasError) {
+        if (isset($error)) {
+            if ($isNewSet) {
+                Mage::getSingleton('adminhtml/session')->addError($error);
                 $this->_redirect('*/*/add');
             } else {
-                $this->_redirect('*/*/edit', ['id' => $model->getId()]);
+                $this->_prepareDataJSON(['error' => true, 'message' => $error]);
             }
-        } else {
-            $response = [];
-            if ($hasError) {
-                $this->_initLayoutMessages('adminhtml/session');
-                $response['error']   = 1;
-                $response['message'] = $this->getLayout()->getMessagesBlock()->getGroupedHtml();
-            } else {
-                $response['error']   = 0;
-                $response['url']     = $this->getUrl('*/*/');
-            }
-            $this->getResponse()->setHeader('Content-type', 'application/json', true);
-            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($response));
         }
     }
 
@@ -239,5 +229,17 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
             $this->_setTypeId();
         }
         return Mage::registry('entityType');
+    }
+
+    /**
+     * Prepare JSON formatted data for response to client
+     *
+     * @param mixed $response
+     * @return Zend_Controller_Response_Abstract
+     */
+    protected function _prepareDataJSON($response)
+    {
+        $this->getResponse()->setHeader('Content-type', 'application/json', true);
+        return $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($response));
     }
 }

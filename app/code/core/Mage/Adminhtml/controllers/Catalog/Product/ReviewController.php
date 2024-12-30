@@ -289,18 +289,17 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
     public function jsonProductInfoAction()
     {
         $response = new Varien_Object();
-        $id = $this->getRequest()->getParam('id');
-        if ((int) $id > 0) {
-            $product = Mage::getModel('catalog/product')
-                ->load($id);
+        $product = Mage::getModel('catalog/product')
+            ->load((int) $this->getRequest()->getParam('id'));
 
-            $response->setId($id);
+        if ($product->getId()) {
+            $response->setId($product->getId());
             $response->addData($product->getData());
-            $response->setError(0);
         } else {
             $response->setError(1);
             $response->setMessage(Mage::helper('catalog')->__('Unable to get the product ID.'));
         }
+        $this->getResponse()->setHeader('Content-type', 'application/json', true);
         $this->getResponse()->setBody($response->toJson());
     }
 

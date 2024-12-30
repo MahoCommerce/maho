@@ -72,37 +72,28 @@ class ReviewEditForm {
                 throw new Error('Product info URL not found');
             }
 
-            const response = await fetch(url, {
+            const result = await mahoFetch(url, {
                 method: 'POST',
                 body: new URLSearchParams({
                     form_key: FORM_KEY,
                 }),
             });
 
-            if (!response.ok) {
-                throw new Error(Translator.translate('Server returned status %s', response.status));
-            }
-
-            const data = await response.json();
-            if (data.error || !data.id) {
-                throw new Error(data.message);
-            }
-
             if (this.config.productEditUrl) {
                 const linkEl = document.createElement('a');
-                linkEl.setAttribute('href', this.config.productEditUrl + `id/${data.id}`);
+                linkEl.setAttribute('href', this.config.productEditUrl + `id/${result.id}`);
                 linkEl.setAttribute('target', '_blank');
-                linkEl.textContent = data.name;
+                linkEl.textContent = result.name;
                 document.getElementById('product_name').replaceChildren(linkEl);
             } else {
-                document.getElementById('product_name').textContent = data.name;
+                document.getElementById('product_name').textContent = result.name;
             }
 
-            document.getElementById('product_id').value = data.id;
+            document.getElementById('product_id').value = result.id;
             success = true;
 
         } catch (error) {
-            console.error(`Error loading product: ${error}`);
+            setMessageDiv(`Error loading product: ${error.message}`, 'error');
         }
 
         hideLoader();
@@ -127,16 +118,11 @@ class ReviewEditForm {
                 body.append(el.name, el.value);
             });
 
-            const response = await fetch(this.config.ratingItemsUrl, { method: 'POST', body });
-            if (!response.ok) {
-                throw new Error(Translator.translate('Server returned status %s', response.status));
-            }
-
-            const html = await response.text();
+            const html = await mahoFetch(this.config.ratingItemsUrl, { json: false, method: 'POST', body });
             updateElementHtmlAndExecuteScripts(document.getElementById('rating_detail'), html);
 
         } catch (error) {
-            console.error(`Error loading rating details: ${error}`);
+            setMessageDiv(`Error loading rating details: ${error.message}`, 'error');
         }
 
         this.toggleSaveButton(true);
