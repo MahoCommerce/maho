@@ -93,7 +93,7 @@ class ReviewEditForm {
             success = true;
 
         } catch (error) {
-            setMessageDiv(`Error loading product: ${error.message}`, 'error');
+            setMessagesDiv(`Error loading product: ${error.message}`, 'error');
         }
 
         hideLoader();
@@ -122,7 +122,7 @@ class ReviewEditForm {
             updateElementHtmlAndExecuteScripts(document.getElementById('rating_detail'), html);
 
         } catch (error) {
-            setMessageDiv(`Error loading rating details: ${error.message}`, 'error');
+            setMessagesDiv(`Error loading rating details: ${error.message}`, 'error');
         }
 
         this.toggleSaveButton(true);

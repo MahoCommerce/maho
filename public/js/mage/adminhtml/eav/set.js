@@ -180,7 +180,7 @@ class EavAttributeSetForm {
             setLocation(result.url);
 
         } catch (error) {
-            setMessageDiv(error.message, 'error');
+            setMessagesDiv(error.message, 'error');
             hideLoader();
         }
     }

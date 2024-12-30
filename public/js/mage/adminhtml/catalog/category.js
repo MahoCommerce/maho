@@ -74,7 +74,7 @@ class CategoryEditForm {
                     }
                 },
                 onLoadException: (node, error) => {
-                    setMessageDiv(Translator.translate('Error loading children: %s', error), 'error');
+                    setMessagesDiv(Translator.translate('Error loading children: %s', error), 'error');
                 }
             }
         });
@@ -229,7 +229,7 @@ class CategoryEditForm {
                 })
             );
         } catch (error) {
-            setMessageDiv(error.message, 'error');
+            setMessagesDiv(error.message, 'error');
         }
         hideLoader();
     }
@@ -257,7 +257,7 @@ class CategoryEditForm {
             this.tree.getNodeById(result.parent_id)?.select();
 
         } catch (error) {
-            setMessageDiv(error.message, 'error');
+            setMessagesDiv(error.message, 'error');
         }
 
         hideLoader();
@@ -297,7 +297,7 @@ class CategoryEditForm {
                 }),
             });
 
-            clearMessageDiv();
+            clearMessagesDiv();
 
             if (result.title) {
                 document.title = result.title;
@@ -306,7 +306,7 @@ class CategoryEditForm {
                 updateElementHtmlAndExecuteScripts(this.containerEl, result.content);
             }
             if (result.messages) {
-                setMessageDivHtml(result.messages);
+                setMessagesDivHtml(result.messages);
             }
 
             if (window.categoryInfo) {
@@ -333,7 +333,7 @@ class CategoryEditForm {
             history.replaceState(null, '', setQueryParams(url, { isAjax: null }));
 
         } catch (error) {
-            setMessageDiv(error.message, 'error');
+            setMessagesDiv(error.message, 'error');
         }
 
         hideLoader();
@@ -378,7 +378,7 @@ class CategoryEditForm {
             this.renderTree(result);
 
         } catch (error) {
-            setMessageDiv(error.message, 'error');
+            setMessagesDiv(error.message, 'error');
         }
 
         hideLoader();
@@ -404,7 +404,7 @@ class CategoryEditForm {
                 }),
             });
         } catch (error) {
-            setMessageDiv(error.message, 'error');
+            setMessagesDiv(error.message, 'error');
         }
 
         hideLoader();

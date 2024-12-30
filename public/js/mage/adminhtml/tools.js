@@ -759,8 +759,8 @@ function copyText(event) {
 /**
  * Clear <div id="messages"></div>
  */
-function clearMessageDiv() {
-    setMessageDivHtml('');
+function clearMessagesDiv() {
+    setMessagesDivHtml('');
 }
 
 /**
@@ -769,8 +769,8 @@ function clearMessageDiv() {
  * @param {string} message - text value of the message to display
  * @param {string} type - one of `success|error|notice`
  */
-function setMessageDiv(message, type = 'success') {
-    setMessageDivHtml(`<ul class="messages"><li class="${type}-msg"><ul><li><span>${message}</span></li></ul></li></ul>`);
+function setMessagesDiv(message, type = 'success') {
+    setMessagesDivHtml(`<ul class="messages"><li class="${type}-msg"><ul><li><span>${message}</span></li></ul></li></ul>`);
 }
 
 /**
@@ -778,7 +778,7 @@ function setMessageDiv(message, type = 'success') {
  *
  * @param {string} html
 */
-function setMessageDivHtml(html) {
+function setMessagesDivHtml(html) {
     const div = document.getElementById('messages');
     if (div) {
         div.innerHTML = html;
