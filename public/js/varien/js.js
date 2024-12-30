@@ -46,7 +46,8 @@ async function mahoFetch(url, { json = true, ...options }) {
     if (result.error) {
         throw new MahoError(result.message ?? result.error);
     } else if (result.ajaxExpired && result.ajaxRedirect) {
-        return setLocation(response.ajaxRedirect);
+        setLocation(result.ajaxRedirect);
+        await new Promise((resolve) => {});
     }
     return result;
 }

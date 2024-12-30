@@ -695,12 +695,10 @@ class MahoTreeNode {
                 await this.tree.lazyloadOpts.onBeforeLoad(this, params);
             }
 
-            const result = await mahoFetch(this.tree.lazyloadOpts.dataUrl, {
+            const children = await mahoFetch(this.tree.lazyloadOpts.dataUrl, {
                 method: 'POST',
                 body: params,
             });
-
-            const children = await response.json();
 
             for (const child of this.childNodes) {
                 if (child.isNew && !children.some((node) => node.id === child.id)) {
