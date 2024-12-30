@@ -32,7 +32,7 @@
     <adminhtml_catalog_product_new>
         <update handle="editor"/>
         <reference name="head">
-            <action method="addJs"><name>Sortable.min.js</name></action>
+            <action method="addJs"><name>sortable.min.js</name></action>
             <action method="addJs"><name>maho-tree.js</name></action>
         </reference>
         <reference name="content">
@@ -50,7 +50,7 @@
     <adminhtml_catalog_product_edit>
         <update handle="editor"/>
         <reference name="head">
-            <action method="addJs"><name>Sortable.min.js</name></action>
+            <action method="addJs"><name>sortable.min.js</name></action>
             <action method="addJs"><name>maho-tree.js</name></action>
         </reference>
         <reference name="content">
@@ -289,7 +289,7 @@ Layout handle for configurable products
 
     <adminhtml_catalog_product_set_edit>
         <reference name="head">
-            <action method="addJs"><name>Sortable.min.js</name></action>
+            <action method="addJs"><name>sortable.min.js</name></action>
             <action method="addJs"><name>maho-tree.js</name></action>
             <action method="addJs"><name>mage/adminhtml/eav/set.js</name></action>
         </reference>
@@ -298,7 +298,7 @@ Layout handle for configurable products
     <adminhtml_catalog_category_edit>
         <update handle="editor"/>
         <reference name="head">
-            <action method="addJs"><name>Sortable.min.js</name></action>
+            <action method="addJs"><name>sortable.min.js</name></action>
             <action method="addJs"><name>maho-tree.js</name></action>
             <action method="addJs"><name>mage/adminhtml/catalog/category.js</name></action>
         </reference>
