@@ -74,8 +74,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
             }
         }
 
-        $this->getResponse()->setHeader('Content-type', 'application/json', true)
-            ->setBody(Mage::helper('core')->jsonEncode($result));
+        $this->getResponse()->setBodyJson($result);
     }
 
     /**

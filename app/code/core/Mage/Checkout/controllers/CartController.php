@@ -655,8 +655,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             }
         }
 
-        $this->getResponse()->setHeader('Content-type', 'application/json');
-        $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
+        $this->getResponse()->setBodyJson($result);
     }
 
     /**
@@ -708,8 +707,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             }
         }
 
-        $this->getResponse()->setHeader('Content-type', 'application/json');
-        $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
+        $this->getResponse()->setBodyJson($result);
     }
 
     /**
