@@ -99,4 +99,14 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
         $this->sendHeaders();
         exit;
     }
+
+    /**
+     * Prepare JSON formatted data for response to client
+     */
+    public function setBodyJson($response): self
+    {
+        $this->setHeader('Content-type', 'application/json', true);
+        $this->setBody(Mage::helper('core')->jsonEncode($response));
+        return $this;
+    }
 }

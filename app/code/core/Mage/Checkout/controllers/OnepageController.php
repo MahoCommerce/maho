@@ -680,7 +680,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
      */
     protected function _prepareDataJSON($response)
     {
-        $this->getResponse()->setHeader('Content-type', 'application/json', true);
-        return $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($response));
+        return $this->getResponse()->setBodyJson($response);
     }
 }
