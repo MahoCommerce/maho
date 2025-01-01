@@ -687,7 +687,6 @@ class MahoTreeNode {
 
         try {
             const params = new URLSearchParams({
-                form_key: FORM_KEY,
                 [this.tree.lazyloadOpts.nodeParameter]: this.id,
             });
 

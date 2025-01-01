@@ -63,8 +63,6 @@ class ReviewEditForm {
 
     async loadProductData(url) {
         let success = false;
-        showLoader();
-
         try {
             // Backwards compatibility: old code would store URL in `this.productInfoUrl`
             // from `gridRowClick()` and then call this function with no parameters
@@ -72,12 +70,7 @@ class ReviewEditForm {
                 throw new Error('Product info URL not found');
             }
 
-            const result = await mahoFetch(url, {
-                method: 'POST',
-                body: new URLSearchParams({
-                    form_key: FORM_KEY,
-                }),
-            });
+            const result = await mahoFetch(url, { method: 'POST' });
 
             if (this.config.productEditUrl) {
                 const linkEl = document.createElement('a');
@@ -95,8 +88,6 @@ class ReviewEditForm {
         } catch (error) {
             setMessagesDiv(`Error loading product: ${error.message}`, 'error');
         }
-
-        hideLoader();
         return success;
     }
 
@@ -109,7 +100,6 @@ class ReviewEditForm {
             }
 
             const body = new URLSearchParams({
-                isAjax: 'true',
                 form_key: FORM_KEY,
                 stores: [...document.getElementById('select_stores').selectedOptions].map((opt) => opt.value),
             });
@@ -118,7 +108,7 @@ class ReviewEditForm {
                 body.append(el.name, el.value);
             });
 
-            const html = await mahoFetch(this.config.ratingItemsUrl, { json: false, method: 'POST', body });
+            const html = await mahoFetch(this.config.ratingItemsUrl, { method: 'POST', body });
             updateElementHtmlAndExecuteScripts(document.getElementById('rating_detail'), html);
 
         } catch (error) {

@@ -8,54 +8,58 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-MediabrowserUtility = {
-    openDialog: function(url, width, height, title, options) {
-        if ($('browser_window') && typeof(Windows) != 'undefined') {
-            Windows.focus('browser_window');
+
+const MediabrowserUtility = {
+
+    dialogWindow: null,
+    dialogWindowId: 'browser_window',
+
+    async openDialog(url, width, height, title, options) {
+        if (document.getElementById(this.dialogWindowId)) {
             return;
         }
-        this.dialogWindow = Dialog.info(null, Object.extend({
-            closable:     true,
-            resizable:    false,
-            draggable:    true,
-            className:    'magento',
-            windowClassName:    'popup-window',
-            title:        title || 'Insert File...',
-            top:          50,
-            width:        width || 950,
-            height:       height || 600,
-            zIndex:       options && options.zIndex || 1000,
-            recenterAuto: false,
-            hideEffect:   Element.hide,
-            showEffect:   Element.show,
-            id:           'browser_window',
-            onClose: this.closeDialog.bind(this)
-        }, options || {}));
-        new Ajax.Updater(document.querySelector('#' + this.dialogWindow.id + ' .dialog-content'), url, {evalScripts: true});
+        try {
+            const result = await mahoFetch(url);
+
+            this.dialogWindow = Dialog.info(result, {
+                id: this.dialogWindowId,
+                title: title || 'Insert File...',
+                className: 'magento',
+                windowClassName: 'popup-window',
+                width: width || 950,
+                height: height || 600,
+                onClose: this.closeDialog.bind(this),
+                ...options,
+            });
+        } catch (error) {
+            alert(error.message);
+        }
     },
-    closeDialog: function(window) {
-        if (!window) {
-            window = this.dialogWindow;
-        }
-        if (window) {
-            window.close();
-        }
-    }
+
+    closeDialog(window) {
+        window ??= this.dialogWindow;
+        window?.close();
+    },
 };
 
-Mediabrowser = Class.create();
-Mediabrowser.prototype = {
-    targetElementId: null,
-    contentsUrl: null,
-    onInsertUrl: null,
-    newFolderUrl: null,
-    deleteFolderUrl: null,
-    deleteFilesUrl: null,
-    headerText: null,
-    tree: null,
-    currentNode: null,
-    storeId: null,
-    initialize: function (setup) {
+class Mediabrowser {
+
+    targetElementId = null;
+    contentsUrl = null;
+    onInsertUrl = null;
+    newFolderUrl = null;
+    deleteFolderUrl = null;
+    deleteFilesUrl = null;
+    headerText = null;
+    tree = null;
+    currentNode = null;
+    storeId = null;
+
+    constructor() {
+        this.initialize(...arguments);
+    }
+
+    initialize(setup) {
         this.newFolderPrompt = setup.newFolderPrompt;
         this.deleteFolderConfirmationMessage = setup.deleteFolderConfirmationMessage;
         this.deleteFileConfirmationMessage = setup.deleteFileConfirmationMessage;
@@ -66,22 +70,29 @@ Mediabrowser.prototype = {
         this.deleteFolderUrl = setup.deleteFolderUrl;
         this.deleteFilesUrl = setup.deleteFilesUrl;
         this.headerText = setup.headerText;
-    },
-    setTree: function (tree) {
+    }
+
+    setTree(tree) {
         this.tree = tree;
         this.currentNode = tree.getRootNode();
-    },
+    }
 
-    getTree: function (tree) {
+    getTree(tree) {
         return this.tree;
-    },
+    }
 
-    selectFolder: function (node, event) {
+    selectFolder(node) {
+        if (this.currentNode === node) {
+            return;
+        }
+
         this.currentNode = node;
+        this.currentNode.select();
+
         this.hideFileButtons();
         this.activateBlock('contents');
 
-        if(node.id == 'root') {
+        if (node.id === 'root') {
             this.hideElement('button_delete_folder');
         } else {
             this.showElement('button_delete_folder');
@@ -90,112 +101,115 @@ Mediabrowser.prototype = {
         this.updateHeader(this.currentNode);
         this.drawBreadcrumbs(this.currentNode);
 
-        this.showElement('loading-mask');
-        new Ajax.Request(this.contentsUrl, {
-            parameters: {node: this.currentNode.id},
-            evalJS: true,
-            onSuccess: function(transport) {
-                try {
-                    this.currentNode.select();
-                    this.onAjaxSuccess(transport);
-                    this.hideElement('loading-mask');
-                    if ($('contents') != undefined) {
-                        $('contents').update(transport.responseText);
-                        $$('div.filecnt').each(function(s) {
-                            Event.observe(s.id, 'click', this.selectFile.bind(this));
-                            Event.observe(s.id, 'dblclick', this.insert.bind(this));
-                        }.bind(this));
-                    }
-                } catch(e) {
-                    alert(e.message);
-                }
-            }.bind(this)
-        });
-    },
+        this.updateContent();
+    }
 
-    selectFolderById: function (nodeId) {
-        var node = this.tree.getNodeById(nodeId);
-        if (node.id) {
-            this.selectFolder(node);
+    async updateContent() {
+        try {
+            const html = await mahoFetch(this.contentsUrl, {
+                method: 'POST',
+                body: new URLSearchParams({
+                    node: this.currentNode.id,
+                }),
+            });
+
+            const contentsEl = document.getElementById('contents');
+            if (contentsEl) {
+                updateElementHtmlAndExecuteScripts(contentsEl, html);
+                contentsEl.querySelectorAll('div.filecnt').forEach((el) => {
+                    el.addEventListener('click', this.selectFile.bind(this));
+                    el.addEventListener('dblclick', this.insert.bind(this));
+                });
+            }
+        } catch(error) {
+            alert(error.message);
         }
-    },
+    }
 
-    selectFile: function (event) {
-        var div = Event.findElement(event, 'DIV');
-        $$('div.filecnt.selected[id!="' + div.id + '"]').each(function(e) {
-            e.removeClassName('selected');
-        });
-        div.toggleClassName('selected');
-        if(div.hasClassName('selected')) {
+    selectFolderById(nodeId) {
+        this.tree.getNodeById(nodeId)?.select();
+    }
+
+    selectFile(event) {
+        const div = event.target.closest('div.filecnt');
+        const selected = !div.classList.contains('selected');
+
+        document.querySelectorAll('div.filecnt.selected').forEach((el) => el.classList.remove('selected'));
+        div.classList.toggle('selected', selected);
+
+        if (selected) {
             this.showFileButtons();
         } else {
             this.hideFileButtons();
         }
-    },
+    }
 
-    showFileButtons: function () {
+    showFileButtons() {
         this.showElement('button_delete_files');
         this.showElement('button_insert_files');
-    },
+    }
 
-    hideFileButtons: function () {
+    hideFileButtons() {
         this.hideElement('button_delete_files');
         this.hideElement('button_insert_files');
-    },
+    }
 
-    handleUploadComplete: function(files) {
-        $$('div[class*="file-row complete"]').each(function(e) {
-            $(e.id).remove();
+    handleUploadComplete(files) {
+        document.querySelectorAll('div[class*="file-row complete"]').forEach((el) => {
+            document.getElementById(el.id)?.remove();
         });
-        this.selectFolder(this.currentNode);
-    },
+        this.updateContent();
+    }
 
-    insert: function(event) {
-        var div;
-        if (event != undefined) {
-            div = Event.findElement(event, 'DIV');
-        } else {
-            $$('div.selected').each(function (e) {
-                div = $(e.id);
-            });
-        }
-        if ($(div.id) == undefined) {
+    async insert(event) {
+        const div = event
+              ? event.target.closest('div.filecnt')
+              : Array.from(document.querySelectorAll('div.filecnt.selected')).pop();
+
+        if (!div) {
             return false;
         }
-        var targetEl = this.getTargetElement();
+
+        const targetEl = this.getTargetElement();
         if (!targetEl) {
-            alert("Target element not found for content update");
-            Windows.close('browser_window');
+            alert('Target element not found for content update');
+            MediabrowserUtility.closeDialog();
             return;
         }
 
-        var params = {filename:div.id, node:this.currentNode.id, store:this.storeId};
-        if (targetEl.tagName && targetEl.tagName.toLowerCase() == 'textarea') {
-            params.as_is = 1;
-        }
+        try {
+            const params = new URLSearchParams({
+                filename: div.id,
+                node: this.currentNode.id,
+                store: this.storeId
+            });
 
-        new Ajax.Request(this.onInsertUrl, {
-            parameters: params,
-            onSuccess: function(transport) {
-                try {
-                    this.onAjaxSuccess(transport);
-                    if (this.getMediaBrowserCallback()) {
-                        self.blur();
-                    }
-                    Windows.close('browser_window');
-                    if (targetEl.tagName && targetEl.tagName.toLowerCase() == 'input') {
-                        targetEl.value = transport.responseText;
-                    } else if (targetEl.tagName && targetEl.tagName.toLowerCase() == 'textarea') {
-                        updateElementAtCursor(targetEl, transport.responseText);
-                    } else {
-                        targetEl(transport.responseText);
-                    }
-                } catch (e) {
-                    alert(e.message);
-                }
-            }.bind(this)
-        });
-    },
+            if (targetEl.tagName && targetEl.tagName === 'TEXTAREA') {
+                params.set('as_is', 1);
+            }
+
+            const text = await mahoFetch(this.onInsertUrl, {
+                method: 'POST',
+                body: params,
+            })
+
+            if (this.getMediaBrowserCallback()) {
+                window.blur();
+            }
+            MediabrowserUtility.closeDialog();
+
+            if (targetEl.tagName === 'INPUT') {
+                targetEl.value = text;
+            } else if (targetEl.tagName === 'TEXTAREA') {
+                updateElementAtCursor(targetEl, text);
+            } else {
+                targetEl(text);
+            }
+
+        } catch (error) {
+            alert(error.message);
+        }
+    }
 
     /**
      * Find document target element in next order:
@@ -207,164 +221,132 @@ Mediabrowser.prototype = {
      *
      * return HTMLelement | null
      */
-    getTargetElement: function() {
-        if (typeof(tinyMCE) != 'undefined' && tinyMCE.get(this.targetElementId)) {
-            if ((callbak = this.getMediaBrowserCallback())) {
-                return callbak;
-            } else {
-                return null;
-            }
+    getTargetElement() {
+        if (typeof tinyMCE !== 'undefined' && tinyMCE.get(this.targetElementId)) {
+            return this.getMediaBrowserCallback();
         } else {
             return document.getElementById(this.targetElementId);
         }
-    },
+    }
 
     /**
      * return object|null
      */
-    getMediaBrowserCallback: function() {
-        if (typeof(tinyMCE) != 'undefined' && tinyMCE.get(this.targetElementId) && typeof(tinyMceEditors) != 'undefined') {
+    getMediaBrowserCallback() {
+        if (typeof tinyMCE !== 'undefined' && tinyMCE.get(this.targetElementId) && typeof tinyMceEditors !== 'undefined') {
             return tinyMceEditors.get(this.targetElementId).getMediaBrowserCallback();
         }
         return null;
-    },
+    }
 
-    newFolder: function() {
-        var folderName = prompt(this.newFolderPrompt);
+    async newFolder() {
+        const folderName = prompt(this.newFolderPrompt);
         if (!folderName) {
             return false;
         }
-        new Ajax.Request(this.newFolderUrl, {
-            parameters: {name: folderName},
-            onSuccess: function(transport) {
-                try {
-                    this.onAjaxSuccess(transport);
-                    if (transport.responseText.isJSON()) {
-                        var response = transport.responseText.evalJSON();
-                        var child = new MahoTreeNode(this.tree, {
-                            text: response.short_name,
-                            id: response.id,
-                            expanded: true,
-                        });
-                        this.currentNode.appendChild(child);
-                        this.currentNode.sortChildren();
-                        this.tree.expandPath(child.getPath()).then((node) => {
-                            this.selectFolder(node);
-                        });
-                    }
-                } catch (e) {
-                    alert(e.message);
-                }
-            }.bind(this)
-        });
-    },
+        try {
+            const result = await mahoFetch(this.newFolderUrl, {
+                method: 'POST',
+                body: new URLSearchParams({
+                    name: folderName,
+                }),
+            });
 
-    deleteFolder: function() {
+            const child = new MahoTreeNode(this.tree, {
+                text: result.short_name,
+                id: result.id,
+                expanded: true,
+            });
+
+            this.currentNode.appendChild(child);
+            this.currentNode.sortChildren();
+            this.tree.expandPath(this.currentNode.getPath()).then((node) => {
+                this.selectFolder(child);
+            });
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    async deleteFolder() {
         if (!confirm(this.deleteFolderConfirmationMessage)) {
             return false;
         }
-        new Ajax.Request(this.deleteFolderUrl, {
-            onSuccess: function(transport) {
-                try {
-                    this.onAjaxSuccess(transport);
-                    var parent = this.currentNode.parentNode;
-                    parent.removeChild(this.currentNode);
-                    this.selectFolder(parent);
-                }
-                catch (e) {
-                    alert(e.message);
-                }
-            }.bind(this)
-        });
-    },
+        try {
+            await mahoFetch(this.deleteFolderUrl, { method: 'POST' });
 
-    deleteFiles: function() {
+            const parent = this.currentNode.parentNode;
+            parent.removeChild(this.currentNode);
+            this.selectFolder(parent);
+
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    async deleteFiles() {
         if (!confirm(this.deleteFileConfirmationMessage)) {
             return false;
         }
-        var ids = [];
-        var i = 0;
-        $$('div.selected').each(function (e) {
-            ids[i] = e.id;
-            i++;
-        });
-        new Ajax.Request(this.deleteFilesUrl, {
-            parameters: {files: Object.toJSON(ids)},
-            onSuccess: function(transport) {
-                try {
-                    this.onAjaxSuccess(transport);
-                    this.selectFolder(this.currentNode);
-                } catch(e) {
-                    alert(e.message);
-                }
-            }.bind(this)
-        });
-    },
 
-    drawBreadcrumbs: function(node) {
-        if ($('breadcrumbs') != undefined) {
-            $('breadcrumbs').remove();
+        const ids = [];
+        for (const el of document.querySelectorAll('div.selected')) {
+            ids.push(el.id);
         }
-        if (node.id == 'root') {
+
+        try {
+            await mahoFetch(this.deleteFilesUrl, {
+                method: 'POST',
+                body: new URLSearchParams({
+                    files: JSON.stringify(ids),
+                }),
+            });
+
+            this.updateContent();
+
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    drawBreadcrumbs(node) {
+        let breadcrumbsEl = document.getElementById('breadcrumbs');
+        if (!breadcrumbsEl) {
+            breadcrumbsEl = document.createElement('ul');
+            breadcrumbsEl.id = 'breadcrumbs';
+            breadcrumbsEl.className = 'breadcrumbs';
+            document.getElementById('content_header')?.after(breadcrumbsEl);
+        }
+
+        if (node.id === 'root') {
+            breadcrumbsEl.innerHTML = '';
             return;
         }
-        var path = node.getPath().split('/');
-        var breadcrumbs = '';
-        for(var i = 0, length = path.length; i < length; i++) {
-            if (path[i] == '') {
-                continue;
-            }
-            var currNode = this.tree.getNodeById(path[i]);
-            if (currNode.id) {
-                breadcrumbs += '<li>';
-                breadcrumbs += '<a href="#" onclick="MediabrowserInstance.selectFolderById(\'' + currNode.id + '\');">' + currNode.text + '</a>';
-                if(i < (length - 1)) {
-                    breadcrumbs += ' <span>/</span>';
-                }
-                breadcrumbs += '</li>';
-            }
-        }
 
-        if (breadcrumbs != '') {
-            breadcrumbs = '<ul class="breadcrumbs" id="breadcrumbs">' + breadcrumbs + '</ul>';
-            $('content_header').insert({after: breadcrumbs});
-        }
-    },
+        const crumbs = node.getPath().split('/').map((id) => {
+            const currNode = this.tree.getNodeById(id);
+            return `<li><a href="#" onclick="MediabrowserInstance.selectFolderById('${currNode.id}');">${currNode.text}</a></li>`;
+        });
 
-    updateHeader: function(node) {
-        var header = (node.id == 'root' ? this.headerText : node.text);
-        if ($('content_header_text') != undefined) {
-            $('content_header_text').innerHTML = header;
-        }
-    },
+        breadcrumbsEl.innerHTML = crumbs.join(' <span>/</span> ');
+    }
 
-    activateBlock: function(id) {
-        //$$('div [id^=contents]').each(this.hideElement);
+    updateHeader(node) {
+        const headerEl = document.getElementById('content_header_text');
+        if (headerEl) {
+            headerEl.textContent = node.id === 'root' ? this.headerText : node.text;
+        }
+    }
+
+    activateBlock(id) {
         this.showElement(id);
-    },
+    }
 
-    hideElement: function(id) {
-        if ($(id) != undefined) {
-            $(id).addClassName('no-display');
-            $(id).hide();
-        }
-    },
+    hideElement(id) {
+        document.getElementById(id)?.classList.add('no-display');
+    }
 
-    showElement: function(id) {
-        if ($(id) != undefined) {
-            $(id).removeClassName('no-display');
-            $(id).show();
-        }
-    },
-
-    onAjaxSuccess: function(transport) {
-        if (transport.responseText.isJSON()) {
-            var response = transport.responseText.evalJSON();
-            if (response.error) {
-                throw response;
-            } else if (response.ajaxExpired && response.ajaxRedirect) {
-                setLocation(response.ajaxRedirect);
-            }
-        }
+    showElement(id) {
+        document.getElementById(id)?.classList.remove('no-display');
     }
 };

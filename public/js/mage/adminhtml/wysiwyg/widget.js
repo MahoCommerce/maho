@@ -9,381 +9,371 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-var widgetTools = {
-    getDivHtml: function(id, html) {
+const widgetTools = {
+    dialogWindow: null,
+    dialogWindowId: 'widget_window',
+
+    getDivHtml(id, html) {
         if (!html) html = '';
-        return '<div id="' + id + '">' + html + '</div>';
+        return `<div id="${id}">${html}</div>`;
     },
 
-    onAjaxSuccess: function(transport) {
-        if (transport.responseText.isJSON()) {
-            var response = transport.responseText.evalJSON();
-            if (response.error) {
-                throw response;
-            } else if (response.ajaxExpired && response.ajaxRedirect) {
-                setLocation(response.ajaxRedirect);
-            }
-        }
+    appendHtml(targetEl, html) {
+        const fragment = document.createRange().createContextualFragment(html);
+        fragment.querySelectorAll('script[src]').forEach(script => script.remove());
+        targetEl.append(...fragment.children);
     },
 
-    openDialog: function(widgetUrl) {
-        if ($('widget_window') && typeof(Windows) != 'undefined') {
-            Windows.focus('widget_window');
+    async openDialog(widgetUrl) {
+        if (document.getElementById(this.dialogWindowId)) {
             return;
         }
-        this.dialogWindow = Dialog.info(null, {
-            draggable:true,
-            resizable:false,
-            closable:true,
-            className:'magento',
-            windowClassName:"popup-window",
-            title:Translator.translate('Insert Widget...'),
-            top:50,
-            width:950,
-            zIndex:9000,
-            recenterAuto:false,
-            hideEffect:Element.hide,
-            showEffect:Element.show,
-            id:'widget_window',
-            onClose: this.closeDialog.bind(this)
-        });
-        new Ajax.Updater(document.querySelector('#' + this.dialogWindow.id + ' .dialog-content'), widgetUrl, {evalScripts: true});
+        try {
+            const result = await mahoFetch(widgetUrl);
+
+            this.dialogWindow = Dialog.info(result, {
+                id: this.dialogWindowId,
+                title: 'Insert Widget...',
+                className: 'magento',
+                windowClassName: 'popup-window',
+                width: 950,
+                onClose: this.closeDialog.bind(this)
+            });
+        } catch (error) {
+            console.error(error);
+            alert(error.message);
+        }
     },
-    closeDialog: function(window) {
-        if (!window) {
-            window = this.dialogWindow;
-        }
-        if (window) {
-            window.close();
-        }
-    }
+
+    closeDialog(window) {
+        window ??= this.dialogWindow;
+        window?.close();
+    },
 };
 
-var WysiwygWidget = {};
-WysiwygWidget.Widget = Class.create();
-WysiwygWidget.Widget.prototype = {
+const WysiwygWidget = {}
 
-    initialize: function(formEl, widgetEl, widgetOptionsEl, optionsSourceUrl, widgetTargetId) {
-        $(formEl).insert({bottom: widgetTools.getDivHtml(widgetOptionsEl)});
-        this.formEl = formEl;
-        this.widgetEl = $(widgetEl);
-        this.widgetOptionsEl = $(widgetOptionsEl);
+WysiwygWidget.Widget = class {
+    constructor() {
+        this.initialize(...arguments);
+    }
+
+    initialize(formId, widgetId, widgetOptionsId, optionsSourceUrl, widgetTargetId) {
+        this.formEl = document.getElementById(formId);
+        widgetTools.appendHtml(this.formEl, widgetTools.getDivHtml(widgetOptionsId))
+
+        this.widgetEl = document.getElementById(widgetId);
+        this.widgetOptionsEl = document.getElementById(widgetOptionsId);
         this.optionsUrl = optionsSourceUrl;
-        this.optionValues = new Hash({});
+        this.optionValues = new Map();
         this.widgetTargetId = widgetTargetId;
-        if (typeof(tinyMCE) != "undefined" && tinyMCE.activeEditor) {
+
+        if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor) {
             this.bMark = tinyMCE.activeEditor.selection.getBookmark();
         }
 
-        Event.observe(this.widgetEl, "change", this.loadOptions.bind(this));
-
+        this.widgetEl.addEventListener('change', this.loadOptions.bind(this));
         this.initOptionValues();
-    },
+    }
 
-    getOptionsContainerId: function() {
-        return this.widgetOptionsEl.id + '_' + this.widgetEl.value.gsub(/\//, '_');
-    },
+    getOptionsContainerId() {
+        return this.widgetOptionsEl.id + '_' + this.widgetEl.value.replaceAll(/\//g, '_');
+    }
 
-    switchOptionsContainer: function(containerId) {
-        $$('#' + this.widgetOptionsEl.id + ' div[id^=' + this.widgetOptionsEl.id + ']').each(function(e) {
-            this.disableOptionsContainer(e.id);
-        }.bind(this));
-        if(containerId != undefined) {
+    switchOptionsContainer(containerId) {
+        this.widgetOptionsEl.querySelectorAll(`div[id^=${this.widgetOptionsEl.id}]`).forEach((el) => {
+            this.disableOptionsContainer(el.id);
+        });
+
+        if (containerId != undefined) {
             this.enableOptionsContainer(containerId);
         }
         this._showWidgetDescription();
-    },
+    }
 
-    enableOptionsContainer: function(containerId) {
-        $$('#' + containerId + ' .widget-option').each(function(e) {
-            e.removeClassName('skip-submit');
-            if (e.hasClassName('obligatory')) {
-                e.removeClassName('obligatory');
-                e.addClassName('required-entry');
-            }
-        });
-        $(containerId).removeClassName('no-display');
-    },
-
-    disableOptionsContainer: function(containerId) {
-        if ($(containerId).hasClassName('no-display')) {
+    enableOptionsContainer(containerId) {
+        const containerEl = document.getElementById(containerId);
+        if (!containerEl) {
             return;
         }
-        $$('#' + containerId + ' .widget-option').each(function(e) {
-            // Avoid submitting fields of unactive container
-            if (!e.hasClassName('skip-submit')) {
-                e.addClassName('skip-submit');
-            }
-            // Form validation workaround for unactive container
-            if (e.hasClassName('required-entry')) {
-                e.removeClassName('required-entry');
-                e.addClassName('obligatory');
+        containerEl.querySelectorAll(`.widgetOption`).forEach((el) => {
+            el.classList.remove('skip-submit');
+            if (el.classList.contains('obligatory')) {
+                el.classList.remove('obligatory');
+                el.classList.add('required-entry');
             }
         });
-        $(containerId).addClassName('no-display');
-    },
+        containerEl.classList.remove('no-display');
+    }
+
+    disableOptionsContainer(containerId) {
+        const containerEl = document.getElementById(containerId);
+        if (!containerEl || containerEl.classList.contains('no-display')) {
+            return;
+        }
+        containerEl.querySelectorAll(`.widgetOption`).forEach((el) => {
+            // Avoid submitting fields of unactive container
+            el.classList.add('skip-submit');
+
+            // Form validation workaround for unactive container
+            if (el.classList.contains('required-entry')) {
+                el.classList.remove('required-entry');
+                el.classList.add('obligatory');
+            }
+        });
+        containerEl.classList.add('no-display');
+    }
 
     // Assign widget options values when existing widget selected in WYSIWYG
-    initOptionValues: function() {
-
+    initOptionValues() {
         if (!this.wysiwygExists()) {
             return false;
         }
 
-        var e = this.getWysiwygNode();
-        if (e != undefined && e.id) {
-            var widgetCode = Base64.idDecode(e.id);
-            if (widgetCode.indexOf('{{widget') != -1) {
-                this.optionValues = new Hash({});
-                widgetCode.gsub(/([a-z0-9\_]+)\s*\=\s*[\"]{1}([^\"]+)[\"]{1}/i, function(match){
-                    if (match[1] == 'type') {
-                        this.widgetEl.value = match[2];
-                    } else {
-                        this.optionValues.set(match[1], match[2]);
-                    }
-                }.bind(this));
-
-                this.loadOptions();
-            }
+        const el = this.getWysiwygNode();
+        if (!el || !el.id) {
+            return;
         }
-    },
 
-    loadOptions: function() {
+        const widgetCode = Base64.idDecode(e.id);
+        if (widgetCode.indexOf('{{widget') === -1) {
+            return;
+        }
+
+        this.optionValues = new Map();
+
+        widgetCode.replaceAll(/([a-z0-9\_]+)\s*\=\s*[\"]{1}([^\"]+)[\"]{1}/gi, (...match) => {
+            if (match[1] == 'type') {
+                this.widgetEl.value = match[2];
+            } else {
+                this.optionValues.set(match[1], match[2]);
+            }
+        });
+
+        this.loadOptions();
+    }
+
+    async loadOptions() {
         if (!this.widgetEl.value) {
             this.switchOptionsContainer();
             return;
         }
 
-        var optionsContainerId = this.getOptionsContainerId();
-        if ($(optionsContainerId) != undefined) {
-            this.switchOptionsContainer(optionsContainerId);
+        const containerId = this.getOptionsContainerId();
+        const containerEl = document.getElementById(containerId);
+
+        if (containerEl) {
+            this.switchOptionsContainer(containerId);
             return;
         }
 
         this._showWidgetDescription();
 
-        var params = {widget_type: this.widgetEl.value, values: this.optionValues};
-        new Ajax.Request(this.optionsUrl,
-            {
-                parameters: {widget: Object.toJSON(params)},
-                onSuccess: function(transport) {
-                    try {
-                        widgetTools.onAjaxSuccess(transport);
-                        this.switchOptionsContainer();
-                        if ($(optionsContainerId) == undefined) {
-                            this.widgetOptionsEl.insert({bottom: widgetTools.getDivHtml(optionsContainerId, transport.responseText)});
-                        } else {
-                            this.switchOptionsContainer(optionsContainerId);
-                        }
-                    } catch(e) {
-                        alert(e.message);
-                    }
-                }.bind(this)
+        try {
+            const params = {
+                widget_type: this.widgetEl.value,
+                values: Object.fromEntries(this.optionValues),
+            };
+
+            const html = await mahoFetch(this.optionsUrl, {
+                method: 'POST',
+                body: new URLSearchParams({
+                    widget: JSON.stringify(params),
+                }),
+            });
+
+            this.switchOptionsContainer();
+
+            if (containerEl) {
+                this.switchOptionsContainer(containerId);
+            } else {
+                widgetTools.appendHtml(this.widgetOptionsEl, widgetTools.getDivHtml(containerId, html));
             }
-        );
-    },
 
-    _showWidgetDescription: function() {
-        var noteCnt = this.widgetEl.next().down('small');
-        var descrCnt = $('widget-description-' + this.widgetEl.selectedIndex);
-        if(noteCnt != undefined) {
-            var description = (descrCnt != undefined ? descrCnt.innerHTML : '');
-            noteCnt.update(descrCnt.innerHTML);
+        } catch(error) {
+            console.error(error);
+            alert(error.message);
         }
-    },
+    }
 
-    insertWidget: function() {
-        widgetOptionsForm = new varienForm(this.formEl);
-        if(widgetOptionsForm.validator && widgetOptionsForm.validator.validate() || !widgetOptionsForm.validator){
-            var formElements = [];
-            var i = 0;
-            Form.getElements($(this.formEl)).each(function(e) {
-                if(!e.hasClassName('skip-submit')) {
-                    formElements[i] = e;
-                    i++;
+    _showWidgetDescription() {
+        const noteEl = this.widgetEl.nextElementSibling?.querySelector('small');
+        const descEl = document.getElementById(`widget-description-${this.widgetEl.selectedIndex}`);
+        if (noteEl) {
+            noteEl.textContent = descEl?.textContent;
+        }
+    }
+
+    async insertWidget() {
+        const widgetOptionsForm = new varienForm(this.formEl);
+        if (widgetOptionsForm.validator && widgetOptionsForm.validator.validate() || !widgetOptionsForm.validator) {
+            try {
+                const formData = new FormData();
+                for (const el of this.formEl.elements) {
+                    if (!el.classList.contains('skip-submit')) {
+                        formData.append(el.name, el.value);
+                    }
                 }
-            });
 
-            // Add as_is flag to parameters if wysiwyg editor doesn't exist
-            var params = Form.serializeElements(formElements);
-            if (!this.wysiwygExists()) {
-                params = params + '&as_is=1';
-            }
+                // Add as_is flag to parameters if wysiwyg editor doesn't exist
+                if (!this.wysiwygExists()) {
+                    formData.set('as_is', 1);
+                }
 
-            new Ajax.Request($(this.formEl).action,
-            {
-                parameters: params,
-                onComplete: function(transport) {
-                    try {
-                        widgetTools.onAjaxSuccess(transport);
-                        Windows.close("widget_window");
+                const html = await mahoFetch(this.formEl.action, {
+                    method: 'POST',
+                    body: formData,
+                })
 
-                        if (typeof(tinyMCE) != "undefined" && tinyMCE.activeEditor) {
-                            tinyMCE.activeEditor.focus();
-                            if (this.bMark) {
-                                tinyMCE.activeEditor.selection.moveToBookmark(this.bMark);
-                            }
-                        }
+                Windows.close('widget_window');
 
-                        this.updateContent(transport.responseText);
-                    } catch(e) {
-                        alert(e.message);
+                if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor) {
+                    tinyMCE.activeEditor.focus();
+                    if (this.bMark) {
+                        tinyMCE.activeEditor.selection.moveToBookmark(this.bMark);
                     }
-                }.bind(this)
-            });
-        }
-    },
+                }
 
-    updateContent: function(content) {
+                this.updateContent(html);
+
+            } catch(error) {
+                console.error(error);
+                alert(error.message);
+            }
+        }
+    }
+
+    updateContent(content) {
         if (this.wysiwygExists()) {
-            this.getWysiwyg().execCommand("mceInsertContent", false, content);
+            this.getWysiwyg().execCommand('mceInsertContent', false, content);
         } else {
-            var textarea = document.getElementById(this.widgetTargetId);
+            const textarea = document.getElementById(this.widgetTargetId);
             updateElementAtCursor(textarea, content);
             varienGlobalEvents.fireEvent('tinymceChange');
         }
-    },
+    }
 
-    wysiwygExists: function() {
-        return (typeof tinyMCE != 'undefined') && tinyMCE.get(this.widgetTargetId);
-    },
+    wysiwygExists() {
+        return typeof tinyMCE !== 'undefined' && tinyMCE.get(this.widgetTargetId);
+    }
 
-    getWysiwyg: function() {
+    getWysiwyg() {
         return tinyMCE.activeEditor;
-    },
+    }
 
-    getWysiwygNode: function() {
+    getWysiwygNode() {
         return tinyMCE.activeEditor.selection.getNode();
     }
 };
 
-WysiwygWidget.chooser = Class.create();
-WysiwygWidget.chooser.prototype = {
+WysiwygWidget.chooser = class {
 
     // HTML element A, on which click event fired when choose a selection
-    chooserId: null,
+    chooserId = null;
 
     // Source URL for Ajax requests
-    chooserUrl: null,
+    chooserUrl = null;
 
     // Chooser config
-    config: null,
+    config = null;
 
     // Chooser dialog window
-    dialogWindow: null,
+    dialogWindow = null;
 
     // Chooser content for dialog window
-    dialogContent: null,
+    dialogContent = null;
 
-    overlayShowEffectOptions: null,
-    overlayHideEffectOptions: null,
+    constructor() {
+        this.initialize(...arguments);
+    }
 
-    initialize: function(chooserId, chooserUrl, config) {
+    initialize(chooserId, chooserUrl, config) {
         this.chooserId = chooserId;
         this.chooserUrl = chooserUrl;
         this.config = config;
-    },
+    }
 
-    getResponseContainerId: function() {
+    getResponseContainerId() {
         return 'responseCnt' + this.chooserId;
-    },
+    }
 
-    getChooserControl: function() {
-        return $(this.chooserId + 'control');
-    },
+    getChooserControl() {
+        return document.getElementById(this.chooserId + 'control');
+    }
 
-    getElement: function() {
-        return $(this.chooserId + 'value');
-    },
+    getElement() {
+        return document.getElementById(this.chooserId + 'value');
+    }
 
-    getElementLabel: function() {
-        return $(this.chooserId + 'label');
-    },
+    getElementLabel() {
+        return document.getElementById(this.chooserId + 'label');
+    }
 
-    open: function() {
-        $(this.getResponseContainerId()).show();
-    },
+    open() {
+        document.getElementById(this.getResponseContainerId())?.classList.remove('no-display');
+    }
 
-    close: function() {
-        $(this.getResponseContainerId()).hide();
+    close() {
+        document.getElementById(this.getResponseContainerId())?.classList.add('no-display');
         this.closeDialogWindow();
-    },
+    }
 
-    choose: function(event) {
+    async choose(event) {
         // Open dialog window with previously loaded dialog content
         if (this.dialogContent) {
             this.openDialogWindow(this.dialogContent);
             return;
         }
-        // Show or hide chooser content if it was already loaded
-        var responseContainerId = this.getResponseContainerId();
+        try {
+            const html = await mahoFetch(this.chooserUrl, {
+                method: 'POST',
+                body: new URLSearchParams({
+                    element_value: this.getElementValue(),
+                    element_label: this.getElementLabelText(),
+                }),
+            });
 
-        // Otherwise load content from server
-        new Ajax.Request(this.chooserUrl,
-            {
-                parameters: {element_value: this.getElementValue(), element_label: this.getElementLabelText()},
-                onSuccess: function(transport) {
-                    try {
-                        widgetTools.onAjaxSuccess(transport);
-                        this.dialogContent = widgetTools.getDivHtml(responseContainerId, transport.responseText);
-                        this.openDialogWindow(this.dialogContent);
-                    } catch(e) {
-                        alert(e.message);
-                    }
-                }.bind(this)
-            }
-        );
-    },
+            this.dialogContent = widgetTools.getDivHtml(this.getResponseContainerId(), html);
+            this.openDialogWindow(this.dialogContent);
 
-    openDialogWindow: function(content) {
-        this.overlayShowEffectOptions = Windows.overlayShowEffectOptions;
-        this.overlayHideEffectOptions = Windows.overlayHideEffectOptions;
-        Windows.overlayShowEffectOptions = {duration:0};
-        Windows.overlayHideEffectOptions = {duration:0};
+        } catch (error) {
+            console.error(error);
+            alert(error.message);
+        }
+    }
+
+    openDialogWindow(content) {
         this.dialogWindow = Dialog.info(content, {
-            draggable:true,
-            resizable:true,
-            closable:true,
-            className:"magento",
-            windowClassName:"popup-window",
-            title:this.config.buttons.open,
-            top:50,
+            id: 'widget-chooser',
+            title: this.config.buttons.open,
+            className: 'magento',
+            windowClassName: 'popup-window',
             width:950,
-            zIndex:9000,
-            recenterAuto:false,
-            hideEffect:Element.hide,
-            showEffect:Element.show,
-            id:"widget-chooser",
             onClose: this.closeDialogWindow.bind(this)
         });
-        content.evalScripts.bind(content).defer();
-    },
+    }
 
-    closeDialogWindow: function(dialogWindow) {
-        if (!dialogWindow) {
-            dialogWindow = this.dialogWindow;
-        }
+    closeDialogWindow(dialogWindow) {
+        dialogWindow ??= this.dialogWindow;
         if (dialogWindow) {
             dialogWindow.close();
-            Windows.overlayShowEffectOptions = this.overlayShowEffectOptions;
-            Windows.overlayHideEffectOptions = this.overlayHideEffectOptions;
         }
         this.dialogWindow = null;
-    },
+    }
 
-    getElementValue: function(value) {
+    getElementValue(value) {
         return this.getElement().value;
-    },
+    }
 
-    getElementLabelText: function(value) {
+    getElementLabelText(value) {
         return this.getElementLabel().innerHTML;
-    },
+    }
 
-    setElementValue: function(value) {
+    setElementValue(value) {
         this.getElement().value = value;
-    },
+    }
 
-    setElementLabel: function(value) {
+    setElementLabel(value) {
         this.getElementLabel().innerHTML = value;
     }
 };
