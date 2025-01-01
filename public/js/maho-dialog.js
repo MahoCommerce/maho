@@ -10,6 +10,9 @@
     // Insert CSS for backdrop and dialog layout
     const style = document.createElement('style');
     style.textContent = `
+        body:has(dialog) {
+            overflow: hidden;
+        }
         dialog::backdrop {
             background: none;
         }
@@ -31,9 +34,11 @@
             height: 80vh;
             display: flex;
             flex-direction: column;
+            overflow: visible;
         }
         .dialog-header {
             display: flex;
+            align-items: center;
             padding: 15px 20px;
             border-bottom: 1px solid #e0e0e0;
         }
@@ -53,26 +58,27 @@
         .dialog-buttons {
             display: flex;
             justify-content: flex-end;
+            gap: 10px;
             padding: 15px 20px;
             border-top: 1px solid #e0e0e0;
         }
         .dialog-buttons button {
-            margin-left: 10px;
             padding: 8px 16px;
             border: none;
             border-radius: 4px;
+            color: black;
             background-color: #f0f0f0;
             cursor: pointer;
         }
         .dialog-buttons button:hover {
             background-color: #e0e0e0;
         }
-        #dialog-ok {
-            background-color: #4CAF50;
+        .dialog-buttons button[id$=-ok] {
+            background-color: #0090ff;
             color: white;
         }
-        #dialog-ok:hover {
-            background-color: #45a049;
+        .dialog-buttons button[id$=-ok]:hover {
+            background-color: #1a9bff;
         }
     `;
     document.head.appendChild(style);
@@ -80,14 +86,15 @@
     function createDialog(options) {
         const dialogCount = document.querySelectorAll('dialog').length;
         const dialog = document.createElement('dialog');
-        dialog.id = `dialog-${dialogCount + 1}`;
+        dialog.id = options.id ?? `dialog-${dialogCount + 1}`;
         dialog.options = options;
+
         dialog.innerHTML = `
             <div class="dialog-header">
                 <h2>${options.title || ''}</h2>
                 <button title="Close">&times;</button>
             </div>
-            <div class="dialog-content">${options.content || ''}</div>
+            <div class="dialog-content"></div>
         `;
         if (options.ok || options.cancel) {
             dialog.innerHTML += `
@@ -97,7 +104,10 @@
             </div>
         `;
         }
-        document.body.appendChild(dialog);
+
+        if (options.content) {
+            updateElementHtmlAndExecuteScripts(dialog.querySelector('.dialog-content'), options.content);
+        }
 
         // Set width and height if provided
         if (options.width) {
@@ -106,6 +116,8 @@
         if (options.height) {
             dialog.style.height = `${options.height}px`;
         }
+
+        document.body.appendChild(dialog);
 
         function closeDialog(action) {
             if (action === 'ok' && typeof options.ok === 'function') {
