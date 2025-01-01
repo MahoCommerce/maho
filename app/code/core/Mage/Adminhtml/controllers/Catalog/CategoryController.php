@@ -113,7 +113,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
 
         if (isset($error)) {
             if ($this->getRequest()->isAjax()) {
-                $this->_prepareDataJSON(['error' => true, 'message' => $error]);
+                $this->getResponse()->setBodyJson(['error' => true, 'message' => $error]);
             } else {
                 Mage::getSingleton('adminhtml/session')->addError($error);
                 $this->getResponse()->setRedirect($this->getUrl('*/*/edit', ['_current' => true]));
@@ -157,7 +157,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
                 'controller' => $this,
             ]);
 
-            $this->_prepareDataJSON($eventResponse->getData());
+            $this->getResponse()->setBodyJson($eventResponse->getData());
             return;
         }
 
@@ -192,7 +192,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
 
         $category = $this->_initCategory();
         if (!$category || !$category->getId()) {
-            $this->_prepareDataJSON(['error' => true, 'message' => Mage::helper('catalog')->__('Category was not found.')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => Mage::helper('catalog')->__('Category was not found.')]);
             return;
         }
 
@@ -289,7 +289,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('catalog')->__('The category has been saved.'));
 
             if ($this->getRequest()->isAjax()) {
-                $this->_prepareDataJSON([
+                $this->getResponse()->setBodyJson([
                     'success' => true,
                     'category_id' => (int) $category->getId(),
                 ]);
@@ -310,7 +310,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         if (isset($error)) {
             $error = Mage::helper('catalog')->__('Category save error: %s', $error);
             if ($this->getRequest()->isAjax()) {
-                $this->_prepareDataJSON(['error' => true, 'message' => $error]);
+                $this->getResponse()->setBodyJson(['error' => true, 'message' => $error]);
                 return;
             }
 
@@ -343,7 +343,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
 
             $category->move($parentNodeId, $prevNodeId);
 
-            $this->_prepareDataJSON([
+            $this->getResponse()->setBodyJson([
                 'success' => true,
             ]);
         } catch (Mage_Core_Exception $e) {
@@ -355,7 +355,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
 
         if (isset($error)) {
             $error = Mage::helper('catalog')->__('Category move error: %s', $error);
-            $this->_prepareDataJSON(['error' => true, 'message' => $error]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $error]);
         }
     }
 
@@ -381,7 +381,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             );
 
             if ($this->getRequest()->isAjax()) {
-                $this->_prepareDataJSON([
+                $this->getResponse()->setBodyJson([
                     'success' => true,
                     'category_id' => (int) $category->getId(),
                     'parent_id' => (int) $category->getParentId(),
@@ -403,7 +403,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         if (isset($error)) {
             $error = Mage::helper('catalog')->__('Category delete error: %s', $error);
             if ($this->getRequest()->isAjax()) {
-                $this->_prepareDataJSON(['error' => true, 'message' => $error]);
+                $this->getResponse()->setBodyJson(['error' => true, 'message' => $error]);
                 return;
             }
 
@@ -445,7 +445,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         $block = $this->getLayout()->createBlock('adminhtml/catalog_category_tree');
         $block->setRecursionLevel($recursionLevel);
 
-        $this->_prepareDataJSON($block->getRootTreeParameters());
+        $this->getResponse()->setBodyJson($block->getRootTreeParameters());
     }
 
     /**
@@ -460,7 +460,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
                     Mage::helper('catalog')->__('Category was not found.'),
                 );
             }
-            $this->_prepareDataJSON([
+            $this->getResponse()->setBodyJson([
                 'id'   => (int) $category->getId(),
                 'path' => $category->getPath(),
             ]);
@@ -471,7 +471,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             Mage::logException($e);
         }
         if (isset($error)) {
-            $this->_prepareDataJSON(['error' => true, 'message' => $error]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $error]);
         }
     }
 
@@ -485,17 +485,5 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     {
         $this->_setForcedFormKeyActions('delete');
         return parent::preDispatch();
-    }
-
-    /**
-     * Prepare JSON formatted data for response to client
-     *
-     * @param mixed $response
-     * @return Zend_Controller_Response_Abstract
-     */
-    protected function _prepareDataJSON($response)
-    {
-        $this->getResponse()->setHeader('Content-type', 'application/json', true);
-        return $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($response));
     }
 }

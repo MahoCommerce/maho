@@ -56,10 +56,7 @@ class Mage_Adminhtml_Catalog_Category_WidgetController extends Mage_Adminhtml_Co
                 $this->_getCategoryTreeBlock()->getTreeJson($category),
             );
         } catch (Exception $e) {
-            $this->getResponse()->setHeader('Content-type', 'application/json', true);
-            $this->getResponse()->setBody([
-                'error' => $e->getMessage(),
-            ]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 

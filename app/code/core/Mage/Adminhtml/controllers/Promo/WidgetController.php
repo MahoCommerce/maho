@@ -80,10 +80,7 @@ class Mage_Adminhtml_Promo_WidgetController extends Mage_Adminhtml_Controller_Ac
                     ->getTreeJson($category),
             );
         } catch (Exception $e) {
-            $this->getResponse()->setHeader('Content-type', 'application/json', true);
-            $this->getResponse()->setBody([
-                'error' => $e->getMessage(),
-            ]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 

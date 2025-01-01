@@ -60,8 +60,7 @@ class Mage_Widget_Adminhtml_WidgetController extends Mage_Adminhtml_Controller_A
                 $this->renderLayout();
             }
         } catch (Mage_Core_Exception $e) {
-            $result = ['error' => true, 'message' => $e->getMessage()];
-            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 

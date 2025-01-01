@@ -559,6 +559,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
             $response->setMessage($this->getLayout()->getMessagesBlock()->getGroupedHtml());
         }
 
+        $this->getResponse()->setHeader('Content-type', 'application/json', true);
         $this->getResponse()->setBody($response->toJson());
     }
 
@@ -1034,10 +1035,9 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
 
         $productSku = $product->getSku();
         if ($productSku && $productSku != Mage::helper('core')->stripTags($productSku)) {
-            $result['error'] = [
-                'message' => $this->__('HTML tags are not allowed in SKU attribute.'),
-            ];
-            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
+            $this->getResponse()->setBodyJson([
+                'error' => ['message' => $this->__('HTML tags are not allowed in SKU attribute.')],
+            ]);
             return;
         }
 
@@ -1106,7 +1106,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
             ];
         }
 
-        $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
+        $this->getResponse()->setBodyJson($result);
     }
 
     /**

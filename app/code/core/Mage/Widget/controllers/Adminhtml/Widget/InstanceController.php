@@ -141,17 +141,15 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
      */
     public function validateAction()
     {
-        $response = new Varien_Object();
-        $response->setError(false);
-        $widgetInstance = $this->_initWidgetInstance();
-        $result = $widgetInstance->validate();
+        $result = $this->_initWidgetInstance()->validate();
         if ($result !== true && is_string($result)) {
             $this->_getSession()->addError($result);
             $this->_initLayoutMessages('adminhtml/session');
-            $response->setError(true);
-            $response->setMessage($this->getLayout()->getMessagesBlock()->getGroupedHtml());
+            $errorHtml = $this->getLayout()->getMessagesBlock()->getGroupedHtml();
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $errorHtml]);
+        } else {
+            $this->getResponse()->setBodyJson(['error' => false]);
         }
-        $this->setBody($response->toJson());
     }
 
     /**
