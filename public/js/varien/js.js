@@ -32,24 +32,53 @@ class MahoError extends Error {
 /**
  * @param {string} url - fetch url
  * @param {Object} [options] - fetch options
- * @param {boolean} [options.json] - parse result as object
+ * @param {Object} [options.loaderArea] - parameter to pass to showLoader(), false to disable
  */
-async function mahoFetch(url, { json = true, ...options }) {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-        throw new MahoError('Server returned status %s', response.status);
+async function mahoFetch(url, options) {
+    const { loaderArea, ...fetchOptions } = options ?? {};
+    try {
+        if (loaderArea !== false && typeof showLoader === 'function') {
+            showLoader(loaderArea)
+        }
+        if (fetchOptions?.method?.toUpperCase() === 'POST') {
+            fetchOptions.body ??= new URLSearchParams();
+            if (fetchOptions.body instanceof URLSearchParams || fetchOptions.body instanceof FormData) {
+                fetchOptions.body.set('form_key', fetchOptions.body.get('form_key') ?? FORM_KEY);
+            }
+        }
+
+        url = new URL(url);
+        url.searchParams.set('isAjax', true);
+
+        const response = await fetch(url, fetchOptions);
+        if (!response.ok) {
+            throw new MahoError('Server returned status %s', response.status);
+        }
+
+        const result = response.headers.get('Content-Type') === 'application/json'
+              ? await response.json()
+              : await response.text();
+
+        if (typeof result === 'object' && result !== null) {
+            if (result.error) {
+                throw new MahoError(result.message ?? result.error);
+            } else if (result.ajaxExpired && result.ajaxRedirect) {
+                setLocation(result.ajaxRedirect);
+                await new Promise((resolve) => {});
+            }
+        }
+        if (loaderArea !== false && typeof hideLoader === 'function') {
+            hideLoader();
+        }
+        return result;
+
+    } catch (error) {
+        console.error('mahoFetch error:', error);
+        if (loaderArea && typeof hideLoader === 'function') {
+            hideLoader();
+        }
+        throw error;
     }
-    if (!json) {
-        return response.text();
-    }
-    const result = await response.json();
-    if (result.error) {
-        throw new MahoError(result.message ?? result.error);
-    } else if (result.ajaxExpired && result.ajaxRedirect) {
-        setLocation(result.ajaxRedirect);
-        await new Promise((resolve) => {});
-    }
-    return result;
 }
 
 function popWin(url,win,para) {
