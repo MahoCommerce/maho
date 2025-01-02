@@ -7,7 +7,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -98,5 +98,15 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
     {
         $this->sendHeaders();
         exit;
+    }
+
+    /**
+     * Prepare JSON formatted data for response to client
+     */
+    public function setBodyJson(mixed $response): self
+    {
+        $this->setHeader('Content-type', 'application/json', true);
+        $this->setBody(Mage::helper('core')->jsonEncode($response));
+        return $this;
     }
 }
