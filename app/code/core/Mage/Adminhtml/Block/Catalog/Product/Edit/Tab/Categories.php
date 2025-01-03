@@ -162,6 +162,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Categories extends Mage_Admi
      * @param null $expanded deprecated
      * @return string
      */
+    #[\Override]
     public function getLoadTreeUrl($expanded = null)
     {
         return $this->getUrl('*/*/categoriesJson', ['_current' => ['id', 'store']]);

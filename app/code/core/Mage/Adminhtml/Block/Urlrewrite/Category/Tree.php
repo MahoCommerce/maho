@@ -127,6 +127,7 @@ class Mage_Adminhtml_Block_Urlrewrite_Category_Tree extends Mage_Adminhtml_Block
      * @param null $expanded deprecated
      * @return string
      */
+    #[\Override]
     public function getLoadTreeUrl($expanded = null)
     {
         return $this->getUrl('*/*/categoriesJson', ['_current' => ['product']]);

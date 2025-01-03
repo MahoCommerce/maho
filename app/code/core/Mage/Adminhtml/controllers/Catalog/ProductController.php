@@ -559,8 +559,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
             $response->setMessage($this->getLayout()->getMessagesBlock()->getGroupedHtml());
         }
 
-        $this->getResponse()->setHeader('Content-type', 'application/json', true);
-        $this->getResponse()->setBody($response->toJson());
+        $this->getResponse()->setBodyJson($response);
     }
 
     /**
