@@ -74,7 +74,7 @@ async function mahoFetch(url, options) {
 
     } catch (error) {
         console.error('mahoFetch error:', error);
-        if (loaderArea && typeof hideLoader === 'function') {
+        if (loaderArea !== false && typeof hideLoader === 'function') {
             hideLoader();
         }
         throw error;

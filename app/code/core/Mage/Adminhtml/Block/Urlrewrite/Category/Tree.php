@@ -120,4 +120,15 @@ class Mage_Adminhtml_Block_Urlrewrite_Category_Tree extends Mage_Adminhtml_Block
     {
         return $this->_getNodeJson($node);
     }
+
+    /**
+     * Returns URL for loading tree
+     *
+     * @param null $expanded deprecated
+     * @return string
+     */
+    public function getLoadTreeUrl($expanded = null)
+    {
+        return $this->getUrl('*/*/categoriesJson', ['_current' => ['product']]);
+    }
 }

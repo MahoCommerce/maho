@@ -128,7 +128,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Ca
      */
     public function getRootTreeParameters(): array
     {
-        $root = $this->getRoot();
+        $root = $this->getRootNode();
         return [
             'data' => $this->getTree(),
             'parameters' => [

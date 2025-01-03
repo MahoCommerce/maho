@@ -255,13 +255,12 @@ class Mediabrowser {
             const child = new MahoTreeNode(this.tree, {
                 text: result.short_name,
                 id: result.id,
-                expanded: true,
             });
 
             this.currentNode.appendChild(child);
             this.currentNode.sortChildren();
             this.tree.expandPath(this.currentNode.getPath()).then((node) => {
-                this.selectFolder(child);
+                this.selectFolderById(result.id);
             });
         } catch (error) {
             alert(error.message);

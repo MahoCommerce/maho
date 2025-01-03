@@ -342,6 +342,7 @@ class CategoryEditForm {
 
             const result = await mahoFetch(url, { method: 'POST' });
             this.renderTree(result);
+            this.changeCategory();
 
         } catch (error) {
             setMessagesDiv(error.message, 'error');
