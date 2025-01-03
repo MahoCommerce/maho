@@ -14,8 +14,7 @@ const widgetTools = {
     dialogWindowId: 'widget_window',
 
     getDivHtml(id, html) {
-        if (!html) html = '';
-        return `<div id="${id}">${html}</div>`;
+        return `<div id="${escapeHtml(id, true)}">${html ?? ''}</div>`;
     },
 
     appendHtml(targetEl, html) {
