@@ -7,6 +7,7 @@
  * @package    Varien_Data
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -135,8 +136,22 @@ class Varien_Data_Tree
     }
 
     /**
+     * Retrieve ids of all nodes in the tree
+     *
+     * @return list<string>
+     */
+    public function getAllIds(): array
+    {
+        $ids = [];
+        foreach ($this->getNodes() as $node) {
+            $ids[] = $node->getId();
+        }
+        return $ids;
+    }
+
+    /**
      * @param int $nodeId
-     * @return Varien_Data_Tree_Node
+     * @return Varien_Data_Tree_Node|null
      */
     public function getNodeById($nodeId)
     {

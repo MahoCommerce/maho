@@ -5,9 +5,82 @@
  * @package     js
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/**
+ * Custom error with translated message
+ */
+class MahoError extends Error {
+    /**
+     * @param {string} message - original message
+     * @param {Any} ...args - sprintf like replacements
+     */
+    constructor(message, ...args) {
+        const formatted = message.replaceAll(/%[ds]/g, (match) => args.shift() ?? match);
+        if (typeof Translator !== 'undefined') {
+            super(Translator.translate(message, ...args));
+        } else {
+            super(formatted);
+        }
+        this.name = 'MahoError';
+        this.originalMessage = message;
+    }
+}
+
+/**
+ * @param {string} url - fetch url
+ * @param {Object} [options] - fetch options
+ * @param {Object} [options.loaderArea] - parameter to pass to showLoader(), false to disable
+ */
+async function mahoFetch(url, options) {
+    const { loaderArea, ...fetchOptions } = options ?? {};
+    try {
+        if (loaderArea !== false && typeof showLoader === 'function') {
+            showLoader(loaderArea)
+        }
+        if (fetchOptions?.method?.toUpperCase() === 'POST') {
+            fetchOptions.body ??= new URLSearchParams();
+            if (fetchOptions.body instanceof URLSearchParams || fetchOptions.body instanceof FormData) {
+                fetchOptions.body.set('form_key', fetchOptions.body.get('form_key') ?? FORM_KEY);
+            }
+        }
+
+        url = new URL(url);
+        url.searchParams.set('isAjax', true);
+
+        const response = await fetch(url, fetchOptions);
+        if (!response.ok) {
+            throw new MahoError('Server returned status %s', response.status);
+        }
+
+        const result = response.headers.get('Content-Type') === 'application/json'
+              ? await response.json()
+              : await response.text();
+
+        if (typeof result === 'object' && result !== null) {
+            if (result.error) {
+                throw new MahoError(result.message ?? result.error);
+            } else if (result.ajaxExpired && result.ajaxRedirect) {
+                setLocation(result.ajaxRedirect);
+                await new Promise((resolve) => {});
+            }
+        }
+        if (loaderArea !== false && typeof hideLoader === 'function') {
+            hideLoader();
+        }
+        return result;
+
+    } catch (error) {
+        console.error('mahoFetch error:', error);
+        if (loaderArea !== false && typeof hideLoader === 'function') {
+            hideLoader();
+        }
+        throw error;
+    }
+}
+
 function popWin(url,win,para) {
     var win = window.open(url,win,para);
     win.focus();
@@ -35,6 +108,66 @@ function parseSidUrl(baseUrl, urlExt) {
     }
 
     return baseUrl+urlExt+sid;
+}
+
+/**
+ * Generate a random string format [a-z0-9]
+ *
+ * @see {@link https://stackoverflow.com/a/47496558}
+ */
+function generateRandomString(length) {
+    if (length > 0) {
+        return [...Array(length)].map(() => Math.random().toString(36)[2]).join('');
+    }
+    return '';
+}
+
+/**
+ * Alternative to PrototypeJS's string.escapeHTML() method
+ */
+function escapeHtml(str, escapeQuotes = false) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return escapeQuotes
+        ? div.innerHTML.replaceAll('"', '&quot;').replaceAll("'", '&#039;')
+        : div.innerHTML;
+}
+
+/**
+ * Alternative to PrototypeJS's string.unescapeHTML() method
+ */
+function unescapeHtml(str) {
+    const doc = new DOMParser().parseFromString(str, 'text/html');
+    return doc.documentElement.textContent;
+}
+
+/**
+ * Alternative to PrototypeJS's string.stripTags() method
+ */
+function stripTags(str) {
+    const div = document.createElement('div');
+    div.innerHTML = str;
+    return div.textContent;
+}
+
+/**
+ * Alternative to PrototypeJS's evalScripts option for Ajax.Updater
+ *
+ * Note that unlike Prototype, scripts will executed in the global scope
+ *
+ * @param {HTMLElement} targetEl - The element to update
+ * @param {string} html - The element's new HTML
+ * @param {boolean} executeExternalScripts - Whether to execute `<script src=""></script>` tags
+ * @see {@link https://stackoverflow.com/a/47614491}
+ * @see {@link http://api.prototypejs.org/ajax/Ajax/Updater/index.html}
+*/
+function updateElementHtmlAndExecuteScripts(targetEl, html, executeExternalScripts = false) {
+    const range = document.createRange();
+    const fragment = range.createContextualFragment(html);
+    if (!executeExternalScripts) {
+        fragment.querySelectorAll('script[src]').forEach(script => script.remove());
+    }
+    targetEl.replaceChildren(fragment);
 }
 
 /**
@@ -570,21 +703,6 @@ function buttonDisabler() {
     buttons.forEach(function(button) {
         button.disabled = true;
     });
-}
-
-function stripTags(str) {
-    const div = document.createElement('div');
-    div.innerHTML = str;
-    return div.textContent;
-}
-
-function updateElementHtmlAndExecuteScripts(targetEl, html, executeExternalScripts = false) {
-    const range = document.createRange();
-    const fragment = range.createContextualFragment(html);
-    if (!executeExternalScripts) {
-        fragment.querySelectorAll('script[src]').forEach(script => script.remove());
-    }
-    targetEl.replaceChildren(fragment);
 }
 
 const Calendar = {};

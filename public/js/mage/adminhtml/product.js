@@ -5,6 +5,7 @@
  * @package     Mage_Adminhtml
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -428,13 +429,12 @@ Product.Configurable.prototype = {
             Event.observe(li.down('.attribute-use-default-label'), 'change', this.onLabelUpdate);
         }.bind(this));
         if (!this.readonly) {
-            sortable(this.container, {
+            new Sortable(this.container, {
                 handle: '.attribute-name-container',
-                items: ':not(.disabled)',
-                forcePlaceholderSize: true
+                filter: '.disabled',
+                animation: 150,
+                onUpdate: this.updatePositions.bind(this),
             });
-
-            this.container.addEventListener('sortupdate', this.updatePositions.bind(this));
         }
         this.updateSaveInput();
     },

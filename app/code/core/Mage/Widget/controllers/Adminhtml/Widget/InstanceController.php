@@ -7,7 +7,7 @@
  * @package    Mage_Widget
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -141,17 +141,15 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
      */
     public function validateAction()
     {
-        $response = new Varien_Object();
-        $response->setError(false);
-        $widgetInstance = $this->_initWidgetInstance();
-        $result = $widgetInstance->validate();
+        $result = $this->_initWidgetInstance()->validate();
         if ($result !== true && is_string($result)) {
             $this->_getSession()->addError($result);
             $this->_initLayoutMessages('adminhtml/session');
-            $response->setError(true);
-            $response->setMessage($this->getLayout()->getMessagesBlock()->getGroupedHtml());
+            $errorHtml = $this->getLayout()->getMessagesBlock()->getGroupedHtml();
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $errorHtml]);
+        } else {
+            $this->getResponse()->setBodyJson(['error' => false]);
         }
-        $this->setBody($response->toJson());
     }
 
     /**
