@@ -206,20 +206,16 @@ class Validation {
         }
         elm.advices.set(adviceName, advice);
 
-        if (typeof Effect === 'undefined') {
+        if (!advice._adviceAbsolutize) {
             advice.style.display = 'block';
         } else {
-            if (!advice._adviceAbsolutize) {
-                advice.style.display = 'block';
-            } else {
-                advice.style.position = 'absolute';
-                advice.style.display = 'block';
-                advice.style.top = advice._adviceTop;
-                advice.style.left = advice._adviceLeft;
-                advice.style.width = advice._adviceWidth;
-                advice.style.zIndex = '1000';
-                advice.classList.add('advice-absolute');
-            }
+            advice.style.position = 'absolute';
+            advice.style.display = 'block';
+            advice.style.top = advice._adviceTop;
+            advice.style.left = advice._adviceLeft;
+            advice.style.width = advice._adviceWidth;
+            advice.style.zIndex = '1000';
+            advice.classList.add('advice-absolute');
         }
     }
 
