@@ -106,7 +106,13 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
     public function setBodyJson(mixed $response): self
     {
         $this->setHeader('Content-type', 'application/json', true);
-        $this->setBody(Mage::helper('core')->jsonEncode($response));
+
+        if (is_string($response) && json_validate($response)) {
+            $this->setBody($response);
+        } else {
+            $this->setBody(Mage::helper('core')->jsonEncode($response));
+        }
+
         return $this;
     }
 }

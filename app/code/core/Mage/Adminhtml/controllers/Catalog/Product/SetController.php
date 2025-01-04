@@ -142,7 +142,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
             if ($isNewSet) {
                 $this->_redirect('*/*/edit', ['id' => $model->getId()]);
             } else {
-                $this->_prepareDataJSON(['url' => $this->getUrl('*/*/')]);
+                $this->getResponse()->setBodyJson(['url' => $this->getUrl('*/*/')]);
             }
         } catch (Mage_Core_Exception $e) {
             $error = $e->getMessage();
@@ -156,7 +156,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
                 Mage::getSingleton('adminhtml/session')->addError($error);
                 $this->_redirect('*/*/add');
             } else {
-                $this->_prepareDataJSON(['error' => true, 'message' => $error]);
+                $this->getResponse()->setBodyJson(['error' => true, 'message' => $error]);
             }
         }
     }
@@ -229,17 +229,5 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
             $this->_setTypeId();
         }
         return Mage::registry('entityType');
-    }
-
-    /**
-     * Prepare JSON formatted data for response to client
-     *
-     * @param mixed $response
-     * @return Zend_Controller_Response_Abstract
-     */
-    protected function _prepareDataJSON($response)
-    {
-        $this->getResponse()->setHeader('Content-type', 'application/json', true);
-        return $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($response));
     }
 }
