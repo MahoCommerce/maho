@@ -40,7 +40,7 @@ async function mahoFetch(url, options) {
         if (loaderArea !== false && typeof showLoader === 'function') {
             showLoader(loaderArea)
         }
-        if (fetchOptions?.method?.toUpperCase() === 'POST') {
+        if (fetchOptions?.method?.toUpperCase() === 'POST' && typeof FORM_KEY !== 'undefined') {
             fetchOptions.body ??= new URLSearchParams();
             if (fetchOptions.body instanceof URLSearchParams || fetchOptions.body instanceof FormData) {
                 fetchOptions.body.set('form_key', fetchOptions.body.get('form_key') ?? FORM_KEY);

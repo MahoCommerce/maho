@@ -34,6 +34,7 @@
         <reference name="head">
             <action method="addJs"><name>sortable.min.js</name></action>
             <action method="addJs"><name>maho-tree.js</name></action>
+            <action method="addJs"><name>mage/adminhtml/wysiwyg/catalog.js</name></action>
         </reference>
         <reference name="content">
             <block type="adminhtml/catalog_product_edit" name="product_edit"></block>
@@ -52,6 +53,7 @@
         <reference name="head">
             <action method="addJs"><name>sortable.min.js</name></action>
             <action method="addJs"><name>maho-tree.js</name></action>
+            <action method="addJs"><name>mage/adminhtml/wysiwyg/catalog.js</name></action>
         </reference>
         <reference name="content">
             <block type="adminhtml/catalog_product_edit" name="product_edit"></block>
@@ -301,6 +303,7 @@ Layout handle for configurable products
             <action method="addJs"><name>sortable.min.js</name></action>
             <action method="addJs"><name>maho-tree.js</name></action>
             <action method="addJs"><name>mage/adminhtml/catalog/category.js</name></action>
+            <action method="addJs"><name>mage/adminhtml/wysiwyg/catalog.js</name></action>
         </reference>
         <reference name="left">
             <block name="category.tree" type="adminhtml/catalog_category_tree" template="catalog/category/tree.phtml" />
