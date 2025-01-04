@@ -4353,12 +4353,6 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 9
-			path: app/design/adminhtml/default/default/template/api/rolesedit.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
 			count: 2
 			path: app/design/adminhtml/default/default/template/api/rolesusers.phtml
 
@@ -4403,12 +4397,6 @@ parameters:
 			identifier: variable.undefined
 			count: 4
 			path: app/design/adminhtml/default/default/template/api/users.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 11
-			path: app/design/adminhtml/default/default/template/api2/attribute/resource.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
@@ -4487,18 +4475,6 @@ parameters:
 			identifier: variable.undefined
 			count: 5
 			path: app/design/adminhtml/default/default/template/bundle/product/edit/bundle/option/search.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 12
-			path: app/design/adminhtml/default/default/template/catalog/category/checkboxes/tree.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 19
-			path: app/design/adminhtml/default/default/template/catalog/category/widget/tree.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
@@ -4961,12 +4937,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/design/adminhtml/default/default/template/resetforgottenpassword.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 5
-			path: app/design/adminhtml/default/default/template/review/add.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'

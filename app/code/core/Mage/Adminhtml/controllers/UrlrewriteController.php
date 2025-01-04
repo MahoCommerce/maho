@@ -7,6 +7,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -80,7 +81,6 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
         $this->loadLayout();
         $this->_setActiveMenu('catalog/urlrewrite');
         $this->_addContent($this->getLayout()->createBlock('adminhtml/urlrewrite_edit'));
-        $this->getLayout()->getBlock('head')->setCanLoadExtJs(true);
         $this->renderLayout();
     }
 
@@ -99,10 +99,10 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
      */
     public function categoriesJsonAction()
     {
-        $id = $this->getRequest()->getParam('id', null);
+        $this->getResponse()->setHeader('Content-type', 'application/json', true);
         $this->getResponse()->setBody(
             Mage::getBlockSingleton('adminhtml/urlrewrite_category_tree')
-            ->getTreeArray($id, true, 1),
+                ->getTreeArray($this->getRequest()->getParam('id'), true),
         );
     }
 

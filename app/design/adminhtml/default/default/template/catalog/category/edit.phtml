@@ -6,178 +6,54 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
-/**
- * Template for Mage_Adminhtml_Block_Catalog_Category_Container
- *
- * @var Mage_Adminhtml_Block_Catalog_Category_Edit $this
- */
+
+/** @var Mage_Adminhtml_Block_Catalog_Category_Edit $this */
+
+$formBlock = $this->getChild('form');
+$tabsBlock = $this->getLayout()->getBlock('tabs');
+$treeBlock = $this->getLayout()->getBlock('category.tree');
 ?>
 
 <div id="category-edit-container" class="category-content">
     <?= $this->getChildHtml('form') ?>
 </div>
-<script type="text/javascript">
-//<![CDATA[
 
-    function categoryReset(url,useAjax){
-        if(useAjax){
-            var params = {active_tab_id:false};
-            updateContent(url, params);
-        }else{
-            location.href = url;
-        }
-    }
+<script type="module">
+    document.addEventListener('DOMContentLoaded', () => {
+        const categoryForm = new CategoryEditForm({
+            editUrl: '<?= $formBlock->getEditUrl() ?>',
+            moveUrl: '<?= $treeBlock->getMoveUrl() ?>',
+            switchTreeUrl: '<?= $treeBlock->getSwitchTreeUrl() ?>',
+            loadTreeUrl: '<?= $treeBlock->getLoadTreeUrl() ?>',
 
-    /**
-    * Delete some category
-    * This routine get categoryId explicitly, so even if currently selected tree node is out of sync
-    * with this form, we surely delete same category in the tree and at backend
-    */
-    function categoryDelete(url, useAjax, categoryId) {
-        if (confirm('<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('catalog')->__('Are you sure you want to delete this category?')) ?>')){
-            if (useAjax){
-                tree.nodeForDelete = categoryId;
-                updateContent(url, {}, true);
-            } else {
-                location.href = url;
-            }
-        }
-    }
+            treeDiv: 'tree-div',
+            containerDiv: 'category-edit-container',
+            addRootCategoryBtn: 'add_root_category_button',
+            addSubCategoryBtn: 'add_subcategory_button',
+            categoryProductsEl: 'in_category_products',
 
-    /**
-     * Update category content area
-     */
-    function updateContent(url, params, refreshTree) {
-        if (!params) {
-            params = {};
-        }
-        if (!params.form_key) {
-            params.form_key = FORM_KEY;
-        }
-
-        toolbarToggle.stop();
-
-       /*if(params.node_name)
-       {
-           var currentNode = tree.getNodeById(tree.currentNodeId);
-           currentNode.setText(params.node_name);
-       }*/
-
-        var categoryContainer = $('category-edit-container');
-        var messagesContainer = $('messages');
-        var thisObj = this;
-        new Ajax.Request(url + (url.match(new RegExp('\\?')) ? '&isAjax=true' : '?isAjax=true' ), {
-            parameters:  params,
-            evalScripts: true,
-            onComplete: function () {
-                /**
-                 * This func depends on variables, that came in response, and were eval'ed in onSuccess() callback.
-                 * Since prototype's Element.update() evals javascripts in 10 msec, we should exec our func after it.
-                 */
-                setTimeout(function() {
-                    try {
-                        if (refreshTree) {
-                            thisObj.refreshTreeArea();
-                        }
-                        toolbarToggle.start();
-                    } catch (e) {
-                        alert(e.message);
-                    };
-                }, 25);
-            },
-            onSuccess: function(transport) {
-                try {
-                    if (transport.responseText.isJSON()) {
-                        var response = transport.responseText.evalJSON();
-                        var needUpdate = true;
-                        if (response.error) {
-                            alert(response.message);
-                            needUpdate = false;
-                        }
-                        if(response.ajaxExpired && response.ajaxRedirect) {
-                            setLocation(response.ajaxRedirect);
-                            needUpdate = false;
-                        }
-                        if (needUpdate){
-                            if (response.content){
-                                $(categoryContainer).update(response.content);
-                            }
-                            if (response.messages){
-                                $(messagesContainer).update(response.messages);
-                            }
-                        }
-                    } else {
-                        $(categoryContainer).update(transport.responseText);
-                    }
-                }
-                catch (e) {
-                    $(categoryContainer).update(transport.responseText);
-                }
-            }
+            tabsJsObjectName: '<?= $tabsBlock->getJsObjectName() ?>',
+            useAjax: <?= var_export((bool) $this->getUseAjax(), true) ?>,
         });
-    }
 
-    /**
-     * Refresh tree nodes after saving or deleting a category
-     */
-    function refreshTreeArea(transport)
-    {
-        if (tree && window.editingCategoryBreadcrumbs) {
-            // category deleted - delete its node
-            if (tree.nodeForDelete) {
-                var node = tree.getNodeById(tree.nodeForDelete);
-                tree.nodeForDelete = false;
+    <?php if ($treeBlock->getRootNode()): ?>
+        categoryForm.renderTree(<?= Mage::helper('core')->jsonEncode($treeBlock->getRootTreeParameters()) ?>);
+    <?php endif ?>
 
-                if (node) { // Check maybe tree became somehow not synced with ajax and we're trying to delete unknown node
-                    node.parentNode.removeChild(node);
-                    tree.currentNodeId = false;
-                }
-            }
-            // category created - add its node
-            else if (tree.addNodeTo) {
-                var parent = tree.getNodeById(tree.addNodeTo);
-                tree.addNodeTo = false;
-
-                if (parent) { // Check maybe tree became somehow not synced with ajax and we're trying to add to unknown node
-                    var node = new Ext.tree.AsyncTreeNode(editingCategoryBreadcrumbs[editingCategoryBreadcrumbs.length - 1]);
-                    node.loaded = true;
-                    tree.currentNodeId = node.id;
-                    parent.appendChild(node);
-
-                    if (parent.expanded) {
-                        tree.selectCurrentNode();
-                    } else {
-                        var timer;
-                        parent.expand();
-                        var f = function(){
-                            if(parent.expanded){ // done expanding
-                                clearInterval(timer);
-                                tree.selectCurrentNode();
-                            }
-                        };
-                        timer = setInterval(f, 200);
-                    }
-                }
-            }
-
-            // update all affected categories nodes names
-            for (var i = 0; i < editingCategoryBreadcrumbs.length; i++) {
-                var node = tree.getNodeById(editingCategoryBreadcrumbs[i].id);
-                if (node) {
-                    node.setText(editingCategoryBreadcrumbs[i].text);
-                }
-            }
+        // Expose global functions called by form buttons to instance methods
+        if (typeof window.varienStoreSwitcher !== 'undefined') {
+            window.varienStoreSwitcher.storeSelectorClickCallback = categoryForm.switchStore.bind(categoryForm);
         }
-    }
-
-    function displayLoadingMask()
-    {
-        showLoader();
-    }
-//]]>
+        window.tree = {
+            collapseTree: categoryForm.collapseTree.bind(categoryForm),
+            expandTree: categoryForm.expandTree.bind(categoryForm),
+        }
+        window.addNew = categoryForm.addCategory.bind(categoryForm);
+        window.categoryReset = categoryForm.resetCategory.bind(categoryForm);
+        window.categoryDelete = categoryForm.deleteCategory.bind(categoryForm);
+        window.categorySubmit = categoryForm.saveCategory.bind(categoryForm);
+    });
 </script>

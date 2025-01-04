@@ -7,7 +7,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -110,8 +110,6 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
 
         $this->loadLayout();
         $this->_setActiveMenu('catalog/reviews_ratings/reviews/all');
-
-        $this->getLayout()->getBlock('head')->setCanLoadExtJs(true);
 
         $this->_addContent($this->getLayout()->createBlock('adminhtml/review_add'));
         $this->_addContent($this->getLayout()->createBlock('adminhtml/review_product_grid'));
@@ -291,18 +289,17 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
     public function jsonProductInfoAction()
     {
         $response = new Varien_Object();
-        $id = $this->getRequest()->getParam('id');
-        if ((int) $id > 0) {
-            $product = Mage::getModel('catalog/product')
-                ->load($id);
+        $product = Mage::getModel('catalog/product')
+            ->load((int) $this->getRequest()->getParam('id'));
 
-            $response->setId($id);
+        if ($product->getId()) {
+            $response->setId($product->getId());
             $response->addData($product->getData());
-            $response->setError(0);
         } else {
             $response->setError(1);
             $response->setMessage(Mage::helper('catalog')->__('Unable to get the product ID.'));
         }
+        $this->getResponse()->setHeader('Content-type', 'application/json', true);
         $this->getResponse()->setBody($response->toJson());
     }
 

@@ -3,6 +3,7 @@
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/license/mit.php
  */
+
 class Validator {
     constructor(className, error, test, options = {}) {
         if (typeof test === 'function') {

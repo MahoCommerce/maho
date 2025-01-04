@@ -7,6 +7,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 -->
@@ -19,6 +20,20 @@
             </action>
         </reference>
     </adminhtml_input_counter_handle>
+
+    <!-- admin url rewrite edit page -->
+    <adminhtml_urlrewrite_edit>
+        <reference name="head">
+            <action method="addJs"><name>maho-tree.js</name></action>
+        </reference>
+    </adminhtml_urlrewrite_edit>
+
+    <!-- admin api web services roles edit page -->
+    <adminhtml_api_role_editrole>
+        <reference name="head">
+            <action method="addJs"><name>maho-tree.js</name></action>
+        </reference>
+    </adminhtml_api_role_editrole>
 
     <!-- admin acl users edit page -->
     <adminhtml_permissions_user_edit>
@@ -59,6 +74,9 @@
 
     <!-- admin acl roles edit page -->
     <adminhtml_permissions_role_editrole>
+        <reference name="head">
+            <action method="addJs"><name>maho-tree.js</name></action>
+        </reference>
         <reference name="left">
             <block type="adminhtml/permissions_editroles" name="adminhtml.permissions.editroles"/>
         </reference>

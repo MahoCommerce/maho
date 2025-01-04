@@ -7,7 +7,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -63,10 +63,8 @@ class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_A
             ->loadLayout()
             ->_setActiveMenu('system/design');
 
-        $this->getLayout()->getBlock('head')->setCanLoadExtJs(true);
-
-        $id  = (int) $this->getRequest()->getParam('id');
-        $design    = Mage::getModel('core/design');
+        $id = (int) $this->getRequest()->getParam('id');
+        $design = Mage::getModel('core/design');
 
         if ($id) {
             $design->load($id);

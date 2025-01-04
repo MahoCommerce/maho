@@ -7,7 +7,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 -->
@@ -77,14 +77,9 @@
 
             <action method="removeItem"><type>css</type><name>print.css</name></action>
             <action method="removeItem"><type>js_css</type><name>flatpickr/flatpickr.min.css</name></action>
-            <action method="removeItem"><type>js_css</type><name>extjs/resources/css/ytheme-magento.css</name></action>
             <action method="removeItem"><type>skin_css</type><name>menu.css</name></action>
 
             <action method="removeItem"><type>js</type><name>flatpickr/flatpickr.min.js</name></action>
-            <action method="removeItem"><type>js</type><name>maho-effects.js</name></action>
-            <action method="removeItem"><type>js</type><name>extjs/ext-tree.min.js</name></action>
-            <action method="removeItem"><type>js</type><name>extjs/fix-defer.js</name></action>
-            <action method="removeItem"><type>js</type><name>extjs/ext-tree-checkbox.js</name></action>
         </reference>
     </oauth_root_handle>
 

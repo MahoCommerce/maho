@@ -7,7 +7,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2016-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 -->
@@ -32,7 +32,8 @@
     <adminhtml_catalog_product_new>
         <update handle="editor"/>
         <reference name="head">
-            <action method="addItem"><type>js</type><name>html5sortable.min.js</name><params/></action>
+            <action method="addJs"><name>sortable.min.js</name></action>
+            <action method="addJs"><name>maho-tree.js</name></action>
         </reference>
         <reference name="content">
             <block type="adminhtml/catalog_product_edit" name="product_edit"></block>
@@ -49,7 +50,8 @@
     <adminhtml_catalog_product_edit>
         <update handle="editor"/>
         <reference name="head">
-            <action method="addItem"><type>js</type><name>html5sortable.min.js</name><params/></action>
+            <action method="addJs"><name>sortable.min.js</name></action>
+            <action method="addJs"><name>maho-tree.js</name></action>
         </reference>
         <reference name="content">
             <block type="adminhtml/catalog_product_edit" name="product_edit"></block>
@@ -69,6 +71,18 @@
             <block type="adminhtml/catalog_product_edit_tab_categories" name="catalog.product.edit.tab.categories"/>
         </block>
     </adminhtml_catalog_product_categories>
+
+    <adminhtml_catalog_product_review_new>
+        <reference name="head">
+            <action method="addJs"><name>mage/adminhtml/catalog/review.js</name></action>
+        </reference>
+    </adminhtml_catalog_product_review_new>
+
+    <adminhtml_catalog_product_review_edit>
+        <reference name="head">
+            <action method="addJs"><name>mage/adminhtml/catalog/review.js</name></action>
+        </reference>
+    </adminhtml_catalog_product_review_edit>
 
     <adminhtml_catalog_product_reviews>
         <block type="core/text_list" name="root" output="toHtml">
@@ -273,13 +287,28 @@ Layout handle for configurable products
         </reference>
     </adminhtml_catalog_product_attribute_edit>
 
+    <adminhtml_catalog_product_set_edit>
+        <reference name="head">
+            <action method="addJs"><name>sortable.min.js</name></action>
+            <action method="addJs"><name>maho-tree.js</name></action>
+            <action method="addJs"><name>mage/adminhtml/eav/set.js</name></action>
+        </reference>
+    </adminhtml_catalog_product_set_edit>
+
     <adminhtml_catalog_category_edit>
         <update handle="editor"/>
+        <reference name="head">
+            <action method="addJs"><name>sortable.min.js</name></action>
+            <action method="addJs"><name>maho-tree.js</name></action>
+            <action method="addJs"><name>mage/adminhtml/catalog/category.js</name></action>
+        </reference>
         <reference name="left">
             <block name="category.tree" type="adminhtml/catalog_category_tree" template="catalog/category/tree.phtml" />
         </reference>
         <reference name="content">
-            <block name="category.edit"  type="adminhtml/catalog_category_edit" template="catalog/category/edit.phtml" />
+            <block name="category.edit" type="adminhtml/catalog_category_edit" template="catalog/category/edit.phtml">
+                <action method="setUseAjax"><flag>1</flag></action>
+            </block>
         </reference>
         <reference name="js">
             <block type="core/template" template="catalog/wysiwyg/js.phtml" name="catalog.wysiwyg.js" />
