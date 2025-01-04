@@ -5,19 +5,18 @@
  * @package     Mage_Adminhtml
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-var Variables = {
+const Variables = {
     textareaElementId: null,
     variablesContent: null,
     dialogWindow: null,
     dialogWindowId: 'variables-chooser',
-    overlayShowEffectOptions: null,
-    overlayHideEffectOptions: null,
     insertFunction: 'Variables.insertVariable',
 
-    init: function(textareaElementId, insertFunction) {
+    init(textareaElementId, insertFunction) {
         if (document.getElementById(textareaElementId)) {
             this.textareaElementId = textareaElementId;
         }
@@ -26,25 +25,27 @@ var Variables = {
         }
     },
 
-    resetData: function() {
+    resetData() {
         this.variablesContent = null;
         this.dialogWindow = null;
     },
 
-    openVariableChooser: function(variables) {
-        if (this.variablesContent == null && variables) {
+    openVariableChooser(variables) {
+        if (this.variablesContent === null && Array.isArray(variables)) {
             this.variablesContent = '<ul>';
-            variables.forEach(function(variableGroup) {
-                if (variableGroup.label && variableGroup.value) {
-                    this.variablesContent += '<li><b>' + variableGroup.label + '</b></li>';
-                    variableGroup.value.forEach(function(variable) {
-                        if (variable.value && variable.label) {
-                            this.variablesContent += '<li style="padding-left: 20px;">' +
-                                this.prepareVariableRow(variable.value, variable.label) + '</li>';
-                        }
-                    }.bind(this));
+            for (const group of variables) {
+                if (!group.label || !Array.isArray(group.value)) {
+                    continue;
                 }
-            }.bind(this));
+                this.variablesContent += `<li><strong>${group.label}</strong></li>`;
+                for (const variable of group.value) {
+                    if (!variable.value || !variable.label) {
+                        continue;
+                    }
+                    const row = this.prepareVariableRow(variable.value, variable.label);
+                    this.variablesContent += `<li style="padding-left: 20px;">${row}</li>`;
+                }
+            }
             this.variablesContent += '</ul>';
         }
         if (this.variablesContent) {
@@ -52,102 +53,67 @@ var Variables = {
         }
     },
 
-    openDialogWindow: function(variablesContent) {
-        if (document.getElementById(this.dialogWindowId) && typeof Windows !== 'undefined') {
-            Windows.focus(this.dialogWindowId);
+    openDialogWindow(variablesContent) {
+        if (document.getElementById(this.dialogWindowId)) {
             return;
         }
-
-        this.overlayShowEffectOptions = Windows.overlayShowEffectOptions;
-        this.overlayHideEffectOptions = Windows.overlayHideEffectOptions;
-        Windows.overlayShowEffectOptions = { duration: 0 };
-        Windows.overlayHideEffectOptions = { duration: 0 };
-
         this.dialogWindow = Dialog.info(variablesContent, {
-            draggable: true,
-            resizable: true,
-            closable: true,
-            className: "magento",
-            windowClassName: "popup-window",
+            id: this.dialogWindowId,
             title: 'Insert Variable...',
+            className: 'magento',
+            windowClassName: 'popup-window',
             width: 700,
-            //height:270,
-            zIndex: 9000,
-            recenterAuto: false,
-            hideEffect: Element.hide,
-            showEffect: Element.show,
-            id:this.dialogWindowId,
             onClose: this.closeDialogWindow.bind(this)
         });
-        variablesContent.evalScripts.bind(variablesContent).defer();
     },
 
-    closeDialogWindow: function(window) {
-        if (!window) {
-            window = this.dialogWindow;
-        }
-        if (window) {
-            window.close();
-            Windows.overlayShowEffectOptions = this.overlayShowEffectOptions;
-            Windows.overlayHideEffectOptions = this.overlayHideEffectOptions;
-        }
+    closeDialogWindow(window) {
+        window ??= this.dialogWindow;
+        window?.close();
     },
 
-    prepareVariableRow: function(varValue, varLabel) {
-        var value = (varValue).replace(/"/g, '&quot;').replace(/\\/g, '\\\\').replace(/'/g, '\\&#39;');
-        var content = '<a href="#" onclick="' + this.insertFunction + '(\'' + value + '\');return false;">' + varLabel + '</a>';
-        return content;
+    prepareVariableRow(value, label) {
+        value = escapeHtml(value, true).replace(/\\/g, '\\\\');
+        return `<a href="#" onclick="${this.insertFunction}('${value}');return false;">${label}</a>`;
     },
 
-    insertVariable: function(value) {
-        this.closeDialogWindow(this.dialogWindow);
-        var textareaElm = document.getElementById(this.textareaElementId);
+    insertVariable(value) {
+        this.closeDialogWindow();
+        const textareaElm = document.getElementById(this.textareaElementId);
         if (textareaElm) {
-            var scrollPos = textareaElm.scrollTop;
             updateElementAtCursor(textareaElm, value);
-            textareaElm.focus();
-            textareaElm.scrollTop = scrollPos;
-            textareaElm = null;
         }
-        return;
     }
 };
 
-var OpenmagevariablePlugin = {
+const OpenmagevariablePlugin = {
     editor: null,
     variables: null,
     textareaId: null,
 
-    setEditor: function(editor) {
+    setEditor(editor) {
         this.editor = editor;
     },
 
-    loadChooser: function(url, textareaId) {
+    async loadChooser(url, textareaId) {
         this.textareaId = textareaId;
-        if (this.variables == null) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", url, true);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    if (xhr.responseText.isJSON()) {
-                        Variables.init(null, 'OpenmagevariablePlugin.insertVariable');
-                        this.variables = JSON.parse(xhr.responseText);
-                        this.openChooser(this.variables);
-                    }
-                }
-            }.bind(this);
-            xhr.send();
-        } else {
+        try {
+            if (this.variables === null) {
+                this.variables = await mahoFetch(url);
+            }
+            Variables.init(null, 'OpenmagevariablePlugin.insertVariable');
             this.openChooser(this.variables);
+        } catch (error) {
+            console.error(error);
+            alert(error.message);
         }
-        return;
     },
 
-    openChooser: function(variables) {
+    openChooser(variables) {
         Variables.openVariableChooser(variables);
     },
 
-    insertVariable: function(value) {
+    insertVariable(value) {
         if (this.textareaId) {
             Variables.init(this.textareaId);
             Variables.insertVariable(value);
@@ -155,6 +121,5 @@ var OpenmagevariablePlugin = {
             Variables.closeDialogWindow();
             this.editor.execCommand('mceInsertContent', false, value);
         }
-        return;
-    }
+    },
 };

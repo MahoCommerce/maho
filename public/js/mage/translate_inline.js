@@ -8,189 +8,163 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-var TranslateInline = Class.create();
-TranslateInline.prototype = {
-    initialize: function(trigEl, ajaxUrl, area) {
+class TranslateInline {
+
+    constructor() {
+        this.initialize(...arguments);
+    }
+
+    initialize(trigId, ajaxUrl, area) {
+        this.trigEl = document.getElementById(trigId);
         this.ajaxUrl = ajaxUrl;
         this.area = area;
 
         this.trigTimer = null;
         this.trigContentEl = null;
-        this.trigEl = $(trigEl);
-        this.trigEl.observe('click', this.formShow.bind(this));
 
-        Event.observe(document.body, 'mousemove', function(e) {
-            var target = Event.element(e);
-            if (!$(target).match('*[data-translate]')) {
-                target = target.up('*[data-translate]');
-            }
-
-            if (target && $(target).match('*[data-translate]')) {
-                this.trigShow(target, e);
-            } else {
-                if (Event.element(e).match('#' + trigEl)) {
-                    this.trigHideClear();
-                } else {
-                    this.trigHideDelayed();
-                }
-            }
-        }.bind(this));
+        this.bindEventListeners();
 
         this.helperDiv = document.createElement('div');
-    },
+    }
 
-    initializeElement: function(el) {
+    bindEventListeners() {
+        this.trigEl.addEventListener('click', this.formShow.bind(this));
+
+        document.addEventListener('mousemove', (event) => {
+            const target = event.target.closest('[data-translate]');
+            if (target) {
+                this.trigShow(target, event);
+            } else if (event.target === this.trigEl) {
+                this.trigHideClear();
+            } else {
+                this.trigHideDelayed();
+            }
+        });
+    }
+
+    initializeElement(el) {
         if (!el.initializedTranslate) {
-            el.addClassName('translate-inline');
+            el.classList.add('translate-inline');
             el.initializedTranslate = true;
         }
-    },
+    }
 
-    reinitElements: function(el) {
-        $$('*[data-translate]').each(this.initializeElement.bind(this));
-    },
+    reinitElements(el) {
+        document.querySelectorAll('[data-translate]').forEach((el) => this.initializeElement(el));
+    }
 
-    trigShow: function(el, event) {
-        if (this.trigContentEl != el) {
-            this.trigHideClear();
-            this.trigContentEl = el;
-            var p = Element.cumulativeOffset(el);
+    trigShow(el, event) {
+        if (this.trigContentEl === el) {
+            return;
+        }
 
-            this.trigEl.style.left = p[0] + 'px';
-            this.trigEl.style.top = p[1] + 'px';
-            this.trigEl.style.display = 'block';
+        this.trigHideClear();
+        this.trigContentEl = el;
+        const pos = el.getBoundingClientRect();
 
-            Event.stop(event);
-        };
-    },
+        this.trigEl.style.left = pos.left + 'px';
+        this.trigEl.style.top = pos.top + 'px';
+        this.trigEl.style.display = 'block';
 
-    trigHide: function() {
+        event.preventDefault();
+    }
+
+    trigHide() {
         this.trigEl.style.display = 'none';
         this.trigContentEl = null;
-    },
+    }
 
-    trigHideDelayed: function() {
-        if (this.trigTimer === null) {
-            this.trigTimer = window.setTimeout(this.trigHide.bind(this), 2000);
-        }
-    },
+    trigHideDelayed() {
+        this.trigTimer ??= window.setTimeout(this.trigHide.bind(this), 2000);
+    }
 
-    trigHideClear: function() {
+    trigHideClear() {
         clearInterval(this.trigTimer);
         this.trigTimer = null;
-    },
+    }
 
-    formShow: function() {
+    formShow() {
         if (this.formIsShown) {
             return;
         }
         this.formIsShown = true;
 
-        var el = this.trigContentEl;
+        const el = this.trigContentEl;
         if (!el) {
             return;
         }
+
         this.trigHideClear();
-        eval('var data = ' + el.getAttribute('data-translate'));
 
-        var content = '<form id="translate-inline-form">';
-        var t = new Template(
-            '<div class="magento_table_container"><table cellspacing="0">' +
-                '<tr><th class="label">Location:</th><td class="value">#{location}</td></tr>' +
-                '<tr><th class="label">Scope:</th><td class="value">#{scope}</td></tr>' +
-                '<tr><th class="label">Shown:</th><td class="value">#{shown_escape}</td></tr>' +
-                '<tr><th class="label">Original:</th><td class="value">#{original_escape}</td></tr>' +
-                '<tr><th class="label">Translated:</th><td class="value">#{translated_escape}</td></tr>' +
-                '<tr><th class="label"><label for="perstore_#{i}">Store View Specific:</label></th><td class="value">' +
-                    '<input id="perstore_#{i}" name="translate[#{i}][perstore]" type="checkbox" value="1"/>' +
-                '</td></tr>' +
-                '<tr><th class="label"><label for="custom_#{i}">Custom:</label></th><td class="value">' +
-                    '<input name="translate[#{i}][original]" type="hidden" value="#{scope}::#{original_escape}"/>' +
-                    '<input id="custom_#{i}" name="translate[#{i}][custom]" class="input-text" value="#{translated_escape}" />' +
-                '</td></tr>' +
-            '</table></div>'
-        );
-        for (i = 0; i < data.length; i++) {
-            data[i]['i'] = i;
-            data[i]['shown_escape'] = this.escapeHTML(data[i]['shown']);
-            data[i]['translated_escape'] = this.escapeHTML(data[i]['translated']);
-            data[i]['original_escape'] = this.escapeHTML(data[i]['original']);
-            content += t.evaluate(data[i]);
-        }
-        content += '</form><p class="a-center accent">Please refresh the page to see your changes after submitting this form.</p>';
+        const t = new Template(`
+            <div class="magento_table_container"><table cellspacing="0">
+                <tr><th class="label">Location:</th><td class="value">#{location}</td></tr>
+                <tr><th class="label">Scope:</th><td class="value">#{scope}</td></tr>
+                <tr><th class="label">Shown:</th><td class="value">#{shown_escape}</td></tr>
+                <tr><th class="label">Original:</th><td class="value">#{original_escape}</td></tr>
+                <tr><th class="label">Translated:</th><td class="value">#{translated_escape}</td></tr>
+                <tr><th class="label"><label for="perstore_#{i}">Store View Specific:</label></th><td class="value">
+                    <input id="perstore_#{i}" name="translate[#{i}][perstore]" type="checkbox" value="1"/>
+                </td></tr>
+                <tr><th class="label"><label for="custom_#{i}">Custom:</label></th><td class="value">
+                    <input name="translate[#{i}][original]" type="hidden" value="#{scope}::#{original_escape}"/>
+                    <input id="custom_#{i}" name="translate[#{i}][custom]" class="input-text" value="#{translated_escape}" />
+                </td></tr>
+            </table></div>
+        `);
 
-        this.overlayShowEffectOptions = Windows.overlayShowEffectOptions;
-        this.overlayHideEffectOptions = Windows.overlayHideEffectOptions;
-        Windows.overlayShowEffectOptions = {duration: 0};
-        Windows.overlayHideEffectOptions = {duration: 0};
+        const fragments = JSON.parse(this.trigContentEl.dataset.translate).map((data, i) => {
+            data['i'] = i;
+            data['shown_escape'] = escapeHtml(data['shown'], true);
+            data['translated_escape'] = escapeHtml(data['translated'], true);
+            data['original_escape'] = escapeHtml(data['original'], true);
+            return t.evaluate(data);
+        });
 
+        const content = `
+            <form id="translate-inline-form">
+                ${fragments.join('\\n')}
+            </form>
+            <p class="a-center accent">Please refresh the page to see your changes after submitting this form.</p>
+        `
         Dialog.confirm(content, {
-            draggable: true,
-            resizable: true,
-            closable: true,
-            className: "magento",
-            title: "Translation",
+            id: 'translate-inline',
+            title: 'Translation',
+            className: 'magento',
             width: 650,
             height: 470,
-            zIndex: 2100,
-            recenterAuto: false,
-            hideEffect: Element.hide,
-            showEffect: Element.show,
-            id: "translate-inline",
-            buttonClass: "form-button button",
-            okLabel: "Submit",
+            okLabel: 'Submit',
             ok: this.formOk.bind(this),
             cancel: this.formClose.bind(this),
             onClose: this.formClose.bind(this)
         });
-        this.trigHide();
-    },
 
-    formOk: function(win) {
+        this.trigHide();
+    }
+
+    async formOk(win) {
         if (this.formIsSubmitted) {
             return;
         }
         this.formIsSubmitted = true;
+        try {
+            const params = new FormData(document.getElementById('translate-inline-form'));
+            params.set('area', this.area);
 
-        var inputs = $('translate-inline-form').getInputs(), parameters = {};
-        for (var i = 0; i < inputs.length; i++) {
-            if (inputs[i].type == 'checkbox') {
-                if (inputs[i].checked) {
-                    parameters[inputs[i].name] = inputs[i].value;
-                }
-            }
-            else {
-                parameters[inputs[i].name] = inputs[i].value;
-            }
+            await mahoFetch(this.ajaxUrl, {
+                method: 'POST',
+                body: params,
+            });
+
+            win.close();
+            this.formClose(win);
+        } catch (error) {
+
         }
-        parameters['area'] = this.area;
-
-        new Ajax.Request(this.ajaxUrl, {
-            method: 'post',
-            parameters: parameters,
-            onComplete: this.ajaxComplete.bind(this, win)
-        });
-
         this.formIsSubmitted = false;
-    },
+    }
 
-    ajaxComplete: function(win, transport) {
-        win.close();
-        this.formClose(win);
-    },
-
-    formClose: function(win) {
-        Windows.overlayShowEffectOptions = this.overlayShowEffectOptions;
-        Windows.overlayHideEffectOptions = this.overlayHideEffectOptions;
+    formClose() {
         this.formIsShown = false;
-    },
-
-    escapeHTML: function(str) {
-        this.helperDiv.innerHTML = '';
-        var text = document.createTextNode(str);
-        this.helperDiv.appendChild(text);
-        var escaped = this.helperDiv.innerHTML;
-        escaped = escaped.replace(/"/g, '&quot;');
-        return escaped;
     }
 };

@@ -26,7 +26,6 @@ class Mage_Core_AjaxController extends Mage_Core_Controller_Front_Action
         $translation = $this->getRequest()->getPost('translate');
         $area = $this->getRequest()->getPost('area');
 
-        //filtering
         /** @var Mage_Core_Model_Input_Filter_MaliciousCode $filter */
         $filter = Mage::getModel('core/input_filter_maliciousCode');
         foreach ($translation as &$item) {
@@ -34,6 +33,7 @@ class Mage_Core_AjaxController extends Mage_Core_Controller_Front_Action
         }
 
         $response = Mage::helper('core/translate')->apply($translation, $area);
+        $this->getResponse()->setHeader('Content-type', 'application/json', true);
         $this->getResponse()->setBody($response);
         $this->setFlag('', self::FLAG_NO_POST_DISPATCH, true);
     }

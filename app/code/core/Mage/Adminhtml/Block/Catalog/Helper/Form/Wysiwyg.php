@@ -29,14 +29,16 @@ class Mage_Adminhtml_Block_Catalog_Helper_Form_Wysiwyg extends Varien_Data_Form_
     {
         $html = parent::getAfterElementHtml();
         if ($this->getIsWysiwygEnabled()) {
-            $disabled = ($this->getDisabled() || $this->getReadonly());
+            $wysiwygUrl = Mage::helper('adminhtml')->getUrl('*/*/wysiwyg', [
+                'store_id' => Mage::getSingleton('cms/wysiwyg_config')->getStoreId(),
+            ]);
             $html .= Mage::getSingleton('core/layout')
                 ->createBlock('adminhtml/widget_button', '', [
-                    'label'   => Mage::helper('catalog')->__('WYSIWYG Editor'),
-                    'type'    => 'button',
-                    'disabled' => $disabled,
-                    'class' => 'btn-wysiwyg',
-                    'onclick' => 'catalogWysiwygEditor.open(\'' . Mage::helper('adminhtml')->getUrl('*/*/wysiwyg') . '\', \'' . $this->getHtmlId() . '\')',
+                    'label'    => Mage::helper('catalog')->__('WYSIWYG Editor'),
+                    'type'     => 'button',
+                    'disabled' => $this->getDisabled() || $this->getReadonly(),
+                    'class'    => 'btn-wysiwyg',
+                    'onclick'  => "catalogWysiwygEditor.open('$wysiwygUrl', '{$this->getHtmlId()}')",
                 ])->toHtml();
         }
         return $html;

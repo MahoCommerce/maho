@@ -103,17 +103,17 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
      */
     public function validateAction()
     {
-        $response = new Varien_Object(['error' => false]);
         $variable = $this->_initVariable();
         $variable->addData($this->getRequest()->getPost('variable'));
         $result = $variable->validate();
         if ($result !== true && is_string($result)) {
             $this->_getSession()->addError($result);
             $this->_initLayoutMessages('adminhtml/session');
-            $response->setError(true);
-            $response->setMessage($this->getLayout()->getMessagesBlock()->getGroupedHtml());
+            $errorHtml = $this->getLayout()->getMessagesBlock()->getGroupedHtml();
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $errorHtml]);
+        } else {
+            $this->getResponse()->setBodyJson(['error' => false]);
         }
-        $this->getResponse()->setBody($response->toJson());
     }
 
     /**
@@ -178,7 +178,6 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
     {
         $customVariables = Mage::getModel('core/variable')->getVariablesOptionArray(true);
         $storeContactVariabls = Mage::getModel('core/source_email_variables')->toOptionArray(true);
-        $variables = [$storeContactVariabls, $customVariables];
-        $this->getResponse()->setBody(Zend_Json::encode($variables));
+        $this->getResponse()->setBodyJson([$storeContactVariabls, $customVariables]);
     }
 }

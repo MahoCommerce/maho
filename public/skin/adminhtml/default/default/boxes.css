@@ -456,7 +456,6 @@ button.cancel span,
 button.delete span { background-image:url(images/cancel_btn_icon.gif); }
 button.add span     { background-image:url(images/add_btn_icon.gif); }
 button.save span    { background-image:url(images/save_btn_icon.gif); }
-button.show-hide span { background-image:url(images/btn_show-hide_icon.gif); padding-left:26px; }
 button.add-image span { background-image:url(images/btn_add-image_icon.gif); }
 button.add-widget span { background-image:url(images/btn_add-widget_icon2.gif); padding-left:24px; }
 button.add-variable span { background-image:url(images/btn_add-variable_icon.gif); padding-left:26px; }
@@ -1467,8 +1466,8 @@ ul.super-product-attributes { padding-left:15px; }
 dialog .uploader .file-row { margin:16px 0; width:auto; }
 dialog #contents-uploader { margin-bottom:10px; background:#d7e5ef; padding:5px 10px; }
 dialog #contents-uploader .flex { font-size:0; line-height:0; height:20px; }
-dialog #contents { margin-left:-3px; height:400px; overflow:auto; position:relative; }
-dialog #contents .filecnt { float:left; border:1px solid #ccc; cursor:pointer; padding:3px; display:inline; margin:0 0 15px 4px; overflow:hidden; position:relative; width:100px; }
+dialog #contents { margin-left:-3px; overflow:auto; display: flex; flex-wrap: wrap; }
+dialog #contents .filecnt { border:1px solid #ccc; cursor:pointer; padding:3px; margin:0 0 15px 4px; overflow:hidden; width:100px; }
 dialog #contents .selected { border:1px solid #f1af73; background:#f0f0f0; cursor:default; }
 dialog #contents .nm { text-align:center; }
 dialog #contents .nm img { vertical-align:bottom; }
