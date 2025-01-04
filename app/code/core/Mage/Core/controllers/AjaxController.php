@@ -34,8 +34,7 @@ class Mage_Core_AjaxController extends Mage_Core_Controller_Front_Action
         }
 
         $response = Mage::helper('core/translate')->apply($translation, $area);
-        $this->getResponse()->setHeader('Content-type', 'application/json', true);
-        $this->getResponse()->setBody($response);
+        $this->getResponse()->setBodyJson($response);
         $this->setFlag('', self::FLAG_NO_POST_DISPATCH, true);
     }
 }

@@ -706,8 +706,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     {
         $product = $this->_initProduct();
 
-        $this->getResponse()->setHeader('Content-type', 'application/json', true);
-        $this->getResponse()->setBody(
+        $this->getResponse()->setBodyJson(
             $this->getLayout()->createBlock('adminhtml/catalog_product_edit_tab_categories')
                 ->getTreeJson($this->getRequest()->getParam('category')),
         );
