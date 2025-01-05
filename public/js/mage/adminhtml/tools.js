@@ -182,18 +182,9 @@ function syncOnchangeValue(baseElem, distElem){
 }
 
 // Insert some content to the cursor position of input element
-function updateElementAtCursor(el, value, win) {
-    if (win == undefined) {
-        win = window.self;
-    }
-    if (document.selection) {
-        el.focus();
-        sel = win.document.selection.createRange();
-        sel.text = value;
-    } else if (el.selectionStart || el.selectionStart == '0') {
-        var startPos = el.selectionStart;
-        var endPos = el.selectionEnd;
-        el.value = el.value.substring(0, startPos) + value + el.value.substring(endPos, el.value.length);
+function updateElementAtCursor(el, value) {
+    if (el.selectionStart !== null) {
+        el.setRangeText(value, el.selectionStart, el.selectionEnd);
     } else {
         el.value += value;
     }

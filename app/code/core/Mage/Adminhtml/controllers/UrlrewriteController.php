@@ -99,8 +99,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
      */
     public function categoriesJsonAction()
     {
-        $this->getResponse()->setHeader('Content-type', 'application/json', true);
-        $this->getResponse()->setBody(
+        $this->getResponse()->setBodyJson(
             Mage::getBlockSingleton('adminhtml/urlrewrite_category_tree')
                 ->getTreeArray($this->getRequest()->getParam('id'), true),
         );

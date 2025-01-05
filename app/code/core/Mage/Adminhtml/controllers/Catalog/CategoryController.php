@@ -196,8 +196,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             return;
         }
 
-        $this->getResponse()->setHeader('Content-type', 'application/json', true);
-        $this->getResponse()->setBody(
+        $this->getResponse()->setBodyJson(
             $this->getLayout()->createBlock('adminhtml/catalog_category_tree')
                 ->setRecursionLevel($recursionLevel)
                 ->getTreeJson($category),

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Mage
+ * @package    Mage_Cms
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<jstranslator>
+    <script path="mage/adminhtml/wysiwyg/tinymce/setup.js" module="cms">
+        <insert-image translate="message">
+            <message>Insert Image...</message>
+        </insert-image>
+        <insert-media translate="message">
+            <message>Insert Media...</message>
+        </insert-media>
+        <insert-file translate="message">
+            <message>Insert File...</message>
+        </insert-file>
+    </script>
+</jstranslator>

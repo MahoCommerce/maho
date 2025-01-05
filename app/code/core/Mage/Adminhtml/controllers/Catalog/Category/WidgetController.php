@@ -51,8 +51,7 @@ class Mage_Adminhtml_Catalog_Category_WidgetController extends Mage_Adminhtml_Co
             Mage::register('category', $category);
             Mage::register('current_category', $category);
 
-            $this->getResponse()->setHeader('Content-type', 'application/json', true);
-            $this->getResponse()->setBody(
+            $this->getResponse()->setBodyJson(
                 $this->_getCategoryTreeBlock()->getTreeJson($category),
             );
         } catch (Exception $e) {

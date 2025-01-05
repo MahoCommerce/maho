@@ -74,8 +74,7 @@ class Mage_Adminhtml_Promo_WidgetController extends Mage_Adminhtml_Controller_Ac
                 Mage::throwException(Mage::helper('catalog')->__('This category no longer exists.'));
             }
 
-            $this->getResponse()->setHeader('Content-type', 'application/json', true);
-            $this->getResponse()->setBody(
+            $this->getResponse()->setBodyJson(
                 $this->getLayout()->createBlock('adminhtml/catalog_category_checkboxes_tree')
                     ->getTreeJson($category),
             );
