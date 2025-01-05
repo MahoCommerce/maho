@@ -1146,6 +1146,10 @@ ul.tabs a.changed span.changed {
     background-size: contain;
     user-select: none;
 }
+.maho-tree details:not(:has(ul > li)) summary::before {
+    background: none !important;
+}
+
 .maho-tree li:first-child > details > summary::before {
     top: calc(2 * var(--spacing) + 0.5rem - var(--marker-size) / 2);
 }
