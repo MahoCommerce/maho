@@ -9,8 +9,8 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
-<script type="text/javascript">
-//<![CDATA[
-    document.on('uploader:success', MediabrowserInstance.handleUploadComplete.bind(MediabrowserInstance));
-//]]>
+<script>
+    document.addEventListener('uploader:success', (event) => {
+        MediabrowserInstance.handleUploadComplete(event.detail.files);
+    });
 </script>

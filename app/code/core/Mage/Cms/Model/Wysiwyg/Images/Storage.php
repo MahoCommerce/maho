@@ -292,13 +292,6 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
         if ($type == 'image') {
             $this->resizeFile($targetPath . DS . $uploader->getUploadedFileName(), true);
         }
-        $result['cookie'] = [
-            'name'     => session_name(),
-            'value'    => $this->getSession()->getSessionId(),
-            'lifetime' => $this->getSession()->getCookieLifetime(),
-            'path'     => $this->getSession()->getCookiePath(),
-            'domain'   => $this->getSession()->getCookieDomain(),
-        ];
 
         return $result;
     }
