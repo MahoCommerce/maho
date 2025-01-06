@@ -12,6 +12,8 @@
  */
 
 /**
+ * File Input Config Parameters
+ *
  * @category   Mage
  * @package    Mage_Uploader
  *
