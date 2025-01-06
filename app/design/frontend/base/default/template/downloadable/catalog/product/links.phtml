@@ -17,7 +17,7 @@
         <?php $_links = $this->getLinks(); ?>
         <?php $_isRequired = $this->getLinkSelectionRequired(); ?>
         <dt><label<?php if ($_isRequired) echo ' class="required"' ?>><?php if ($_isRequired) echo '<em>*</em>' ?><?= $this->escapeHtml($this->getLinksTitle()) ?></label></dt>
-        <dd<?php /* if ($_option->decoratedIsLast){?> class="last"<?php } */ ?>>
+        <dd>
             <ul id="downloadable-links-list" class="options-list">
             <?php foreach ($_links as $_link): ?>
                 <li>
@@ -28,7 +28,7 @@
                         <label for="links_<?= $_link->getId() ?>">
                             <?= $this->escapeHtml($_link->getTitle()) ?>
                         </label>
-                            <?php if ($_link->getSampleFile() || $_link->getSampleUrl()): ?>
+                            <?php if ($this->getLinkHasSample($_link)): ?>
                                 &nbsp;(<a href="<?= $this->getLinkSamlpeUrl($_link) ?>" <?= $this->getIsOpenInNewWindow()?'onclick="this.target=\'_blank\'"':'' ?>><?= Mage::helper('downloadable')->__('sample') ?></a>)
                             <?php endif ?>
                             <?php if ($_linksPurchasedSeparately): ?>
