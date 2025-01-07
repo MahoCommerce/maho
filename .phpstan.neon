@@ -21,7 +21,6 @@ parameters:
         - app/code/core/Mage/Admin/Model/Acl/Assert/Time.php
         - app/code/core/Mage/Api/Model/Acl/Assert/Ip.php
         - app/code/core/Mage/Api/Model/Acl/Assert/Time.php
-        - app/code/core/Mage/Adminhtml/Block/Widget/Grid/Block.php
         - lib/Varien/Directory/Collection.php
         - lib/Varien/Directory/Factory.php
         - lib/Varien/File/Object.php
