@@ -118,7 +118,7 @@ Downloadable.FileUploader = class {
                 varienGlobalEvents.attachEventHandler('tabChangeBefore', uploader.onContainerHideBefore);
             }
 
-            new Downloadable.FileList(idName, uploader);
+            new Downloadable.FileList(idName, uploader, fileValue);
         }
     }
 }
@@ -130,12 +130,11 @@ Downloadable.FileList = class {
     uploader = null;
     listTemplate = null;
 
-    constructor(containerId, uploader) {
+    constructor(containerId, uploader, file = []) {
         this.containerId = containerId,
         this.container = document.getElementById(this.containerId);
         this.uploader = uploader;
-
-        this.file = JSON.parse(this.getElement('save').value);
+        this.file = file;
 
         this.listTemplate = new Template(
             document.getElementById('downloadable-filelist-template').innerHTML,
