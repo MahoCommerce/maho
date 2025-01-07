@@ -13,12 +13,13 @@
 /** @var Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Samples $this */
 ?>
 <?php $product = $this->getProduct() ?>
+<?php $helper = Mage::helper('downloadable') ?>
 <div class="fieldset">
 <table cellspacing="0" class="form-list">
     <tbody>
         <tr class="headings">
             <td class="label">
-                <label for="name"><?= Mage::helper('downloadable')->__('Title') ?></label>
+                <label for="name"><?= $helper->__('Title') ?></label>
             </td>
             <td class="value">
                 <input type="text" class="input-text" name="product[samples_title]" value="<?= $this->escapeHtml($product->getId() ? $product->getSamplesTitle() : $this->getSamplesTitle()) ?>" <?= ($product->getStoreId() && $this->getUsedDefault()) ? 'disabled' : '' ?> />
@@ -31,13 +32,13 @@
             <td class="value use-default">
             <?php if($product->getStoreId()): ?>
                 <input id="sample_title_default" type="checkbox" name="use_default[]" value="samples_title" onclick="toggleValueElements(this, this.parentNode.parentNode)" <?= $this->getUsedDefault() ? 'checked' : '' ?> />
-                <label class="normal" for="sample_title_default">Use Default Value</label>
+                <label class="normal" for="sample_title_default"><?= $helper->__('Use Default Value') ?></label>
             <?php endif ?>
             </td>
         </tr>
     </tbody>
 </table>
-<br />
+<br>
 <div class="grid">
     <div class="hor-scroll">
         <table cellspacing="0" id="downloadable_sample_table" class="data border">
@@ -47,9 +48,9 @@
             <col width="1" />
             <thead>
                 <tr class="headings">
-                    <th><?= Mage::helper('downloadable')->__('Title') ?> <span class="required">*</span></th>
-                    <th><?= Mage::helper('downloadable')->__('File') ?></th>
-                    <th><span class="nobr"><?= Mage::helper('downloadable')->__('Sort Order') ?></span></th>
+                    <th><?= $helper->__('Title') ?> <span class="required">*</span></th>
+                    <th><?= $helper->__('File') ?></th>
+                    <th><span class="nobr"><?= $helper->__('Sort Order') ?></span></th>
                     <th>&nbsp;</th>
                 </tr>
             </thead>
@@ -72,14 +73,18 @@
             <input type="hidden" name="downloadable[sample][{{id}}][sample_id]" value="{{sample_id}}" />
             <input type="text" class="required-entry input-text" name="downloadable[sample][{{id}}][title]" value="{{title}}" />
             <?php if ($product->getStoreId()): ?>
-            <br />
-            <input type="checkbox" id="downloadable_sample_{{id}}_title" name="downloadable[sample][{{id}}][use_default_title]" value="1" /> <label class="normal" for="downloadable_sample_{{id}}_title">Use Default Value</label>
+            <br>
+            <input type="checkbox" id="downloadable_sample_{{id}}_title" name="downloadable[sample][{{id}}][use_default_title]" value="1" />
+            <label class="normal" for="downloadable_sample_{{id}}_title"><?= $helper->__('Use Default Value') ?></label>
             <?php endif ?>
         </td>
         <td>
             <div class="files-wide">
                 <div class="row a-right">
-                    <label for="downloadable_sample_{{id}}_file_type" class="a-left"><input type="radio" class="radio validate-one-required-by-name" id="downloadable_sample_{{id}}_file_type" name="downloadable[sample][{{id}}][type]" value="file" /> File:</label>
+                    <label for="downloadable_sample_{{id}}_file_type" class="a-left">
+                        <input type="radio" class="radio validate-one-required-by-name" id="downloadable_sample_{{id}}_file_type" name="downloadable[sample][{{id}}][type]" value="file" />
+                        <?= $helper->__('File:') ?>
+                    </label>
                     <input type="hidden" class="validate-downloadable-file" id="downloadable_sample_{{id}}_file_save" name="downloadable[sample][{{id}}][file]" value="{{file_save}}" />
                     <?= $this->getBrowseButtonHtml() ?>
                     <?= $this->getDeleteButtonHtml() ?>
@@ -90,7 +95,10 @@
                     </div>
                 </div>
                 <div class="row">
-                    <label for="downloadable_sample_{{id}}_url_type"><input type="radio" class="radio validate-one-required-by-name" id="downloadable_sample_{{id}}_url_type" name="downloadable[sample][{{id}}][type]" value="url" /> URL:</label>
+                    <label for="downloadable_sample_{{id}}_url_type">
+                        <input type="radio" class="radio validate-one-required-by-name" id="downloadable_sample_{{id}}_url_type" name="downloadable[sample][{{id}}][type]" value="url" />
+                        <?= $helper->__('URL:') ?>
+                    </label>
                     <input type="text" class="validate-downloadable-url input-text" id="downloadable_sample_{{id}}_url_save" name="downloadable[sample][{{id}}][sample_url]" value="{{sample_url}}" />
                 </div>
             </div>
@@ -102,7 +110,7 @@
             <input type="text" name="downloadable[sample][{{id}}][sort_order]" value="{{sort_order}}" class="input-text sort" />
         </td>
         <td>
-            <button type="button" class="scalable delete icon-btn delete-sample-item"><span>Delete</span></button>
+            <button id="downloadable_link_{{id}}_delete_button" type="button" class="scalable delete icon-btn delete-sample-item"><span><?= $helper->__('Delete') ?></span></button>
         </td>
     </tr>
 </template>
