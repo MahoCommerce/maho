@@ -131,8 +131,7 @@ Layout for editor element
         <reference name="head">
             <action method="addJs"><script>mage/adminhtml/variables.js</script></action>
             <action method="addJs"><script>mage/adminhtml/wysiwyg/widget.js</script></action>
-            <action method="addJs"><name>flow.min.js</name></action>
-            <action method="addJs"><name>mage/adminhtml/uploader/instance.js</name></action>
+            <action method="addJs"><script>mage/adminhtml/uploader/instance.js</script></action>
             <action method="addJs"><script>mage/adminhtml/browser.js</script></action>
             <action method="addJs"><script>maho-dialog.js</script></action>
             <action method="addJs"><script>maho-tree.js</script></action>

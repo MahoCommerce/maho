@@ -173,10 +173,12 @@ class Validation {
             container.insertAdjacentElement('afterend', div);
         } else if (elm.closest('td.value')) {
             elm.closest('td.value').insertAdjacentElement('beforeend', div);  // corrected from appendChild
-        } else if (elm.adviceContainer && document.getElementById(elm.adviceContainer)) {
-            const adviceContainer = document.getElementById(elm.adviceContainer);
-            adviceContainer.textContent = '';
-            adviceContainer.insertAdjacentElement('beforeend', div);
+        } else if (elm.adviceContainer || elm.advaiceContainer) {
+            let adviceContainer = elm.adviceContainer || elm.advaiceContainer;
+            if (typeof adviceContainer === 'string' || adviceContainer instanceof String) {
+                adviceContainer = document.getElementById(adviceContainer);
+            }
+            adviceContainer.replaceChildren(div);
         } else {
             switch (elm.type.toLowerCase()) {
                 case 'checkbox':
@@ -270,7 +272,7 @@ class Validation {
                 Validation.updateCallback(elm, 'failed');
 
                 elm[prop] = 1;
-                if (!elm.advaiceContainer) {
+                if (!elm.adviceContainer || !elm.advaiceContainer) {
                     elm.classList.remove('validation-passed');
                     elm.classList.add('validation-failed');
                 }

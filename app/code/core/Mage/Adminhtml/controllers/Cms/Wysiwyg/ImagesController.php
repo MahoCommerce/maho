@@ -140,7 +140,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $result = $this->getStorage()->uploadFile($targetPath, $this->getRequest()->getParam('type'));
             $this->getResponse()->setBodyJson($result);
         } catch (Exception $e) {
-            $this->getResponse()->setBodyJson(['error' => $e->getMessage(), 'errorcode' => $e->getCode()]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 

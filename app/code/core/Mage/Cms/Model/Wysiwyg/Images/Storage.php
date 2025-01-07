@@ -7,6 +7,7 @@
  * @package    Mage_Cms
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -292,13 +293,6 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
         if ($type == 'image') {
             $this->resizeFile($targetPath . DS . $uploader->getUploadedFileName(), true);
         }
-        $result['cookie'] = [
-            'name'     => session_name(),
-            'value'    => $this->getSession()->getSessionId(),
-            'lifetime' => $this->getSession()->getCookieLifetime(),
-            'path'     => $this->getSession()->getCookiePath(),
-            'domain'   => $this->getSession()->getCookieDomain(),
-        ];
 
         return $result;
     }

@@ -6,202 +6,121 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Samples $this */
 ?>
-<?php $_product = $this->getProduct() ?>
+<?php $product = $this->getProduct() ?>
+<?php $helper = Mage::helper('downloadable') ?>
 <div class="fieldset">
-    <table cellspacing="0" class="form-list">
-        <tbody>
-            <tr class="headings">
-                <td class="label"><label for="name"><?= Mage::helper('downloadable')->__('Title') ?></label>
-                </td>
-                <td class="value">
-                    <input type="text" class="input-text" name="product[samples_title]" value="<?= $_product->getId()?$_product->getSamplesTitle():$this->getSamplesTitle() ?>" <?= ($_product->getStoreId() && $this->getUsedDefault())?'disabled="disabled"':'' ?> />
-                </td>
-                <td class="scope-label"><?= !Mage::app()->isSingleStoreMode() ? Mage::helper('adminhtml')->__('[STORE VIEW]') : '' ?></td>
-                <td class="value use-default">
-                <?php if($_product->getStoreId()): ?>
-                    <input id="sample_title_default" type="checkbox" name="use_default[]" value="samples_title" onclick="toggleValueElements(this, this.parentNode.parentNode)" <?= $this->getUsedDefault()?'checked="checked"':'' ?> />
-                    <label class="normal" for="sample_title_default">Use Default Value</label>
-                <?php endif ?>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <br />
-    <div class="grid">
-        <div class="hor-scroll">
-            <table cellspacing="0" class="data border">
-                <col />
-                <col width="1" />
-                <col width="1" />
-                <col width="1" />
-                <thead>
-                    <tr class="headings">
-                        <th><?= Mage::helper('downloadable')->__('Title') ?> <span class="required">*</span></th>
-                        <th><?= Mage::helper('downloadable')->__('File') ?></th>
-                        <th><span class="nobr"><?= Mage::helper('downloadable')->__('Sort Order') ?></span></th>
-                        <th>&nbsp;</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <td colspan="4" class="a-right"><?= $this->getAddButtonHtml() ?>&nbsp;<?= $this->getUploadButtonHtml() ?></td>
-                    </tr>
-                </tfoot>
-                <tbody id="sample_items_body">
-                </tbody>
-            </table>
-            <div><small><?= Mage::helper('downloadable')->__('Alphanumeric, dash and underscore characters are recommended for filenames. Improper characters are replaced with \'_\'.') ?></small></div>
-        </div>
+<table cellspacing="0" class="form-list">
+    <tbody>
+        <tr class="headings">
+            <td class="label">
+                <label for="name"><?= $helper->__('Title') ?></label>
+            </td>
+            <td class="value">
+                <input type="text" class="input-text" name="product[samples_title]" value="<?= $this->escapeHtml($product->getId() ? $product->getSamplesTitle() : $this->getSamplesTitle()) ?>" <?= ($product->getStoreId() && $this->getUsedDefault()) ? 'disabled' : '' ?> />
+            </td>
+            <td class="scope-label">
+            <?php if (!Mage::app()->isSingleStoreMode()): ?>
+                <?= Mage::helper('adminhtml')->__('[STORE VIEW]') ?>
+            <?php endif ?>
+            </td>
+            <td class="value use-default">
+            <?php if($product->getStoreId()): ?>
+                <input id="sample_title_default" type="checkbox" name="use_default[]" value="samples_title" onclick="toggleValueElements(this, this.parentNode.parentNode)" <?= $this->getUsedDefault() ? 'checked' : '' ?> />
+                <label class="normal" for="sample_title_default"><?= $helper->__('Use Default Value') ?></label>
+            <?php endif ?>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<br>
+<div class="grid">
+    <div class="hor-scroll">
+        <table cellspacing="0" id="downloadable_sample_table" class="data border">
+            <col />
+            <col width="1" />
+            <col width="1" />
+            <col width="1" />
+            <thead>
+                <tr class="headings">
+                    <th><?= $helper->__('Title') ?> <span class="required">*</span></th>
+                    <th><?= $helper->__('File') ?></th>
+                    <th><span class="nobr"><?= $helper->__('Sort Order') ?></span></th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <td colspan="4" class="a-right"><?= $this->getAddButtonHtml() ?>&nbsp;<?= $this->getUploadButtonHtml() ?></td>
+                </tr>
+            </tfoot>
+            <tbody id="sample_items_body">
+            </tbody>
+        </table>
     </div>
 </div>
-<script type="text/javascript">
-//<![CDATA[>
-var sampleTemplate = '<tr id="downloadable_sample_{{id}}">'+
-                        '<td>'+
-                            '<input type="hidden" class="__delete__" name="downloadable[sample][{{id}}][is_delete]" value="" />'+
-                            '<input type="hidden" name="downloadable[sample][{{id}}][sample_id]" value="{{sample_id}}" />'+
-                            '<input type="text" class="required-entry input-text" name="downloadable[sample][{{id}}][title]" value="{{title}}" />'+
-                            '<?= $_product->getStoreId()?'<br /><input type="checkbox" id="downloadable_sample_{{id}}_title" name="downloadable[sample][{{id}}][use_default_title]" value="1" /><label class="normal" for="downloadable_sample_{{id}}_title">Use Default Value</label>':'' ?>'+
-                        '</td>'+
-                        '<td>'+
-                            '<div class="files-wide">'+
-                                '<div class="row a-right">'+
-                                    '<label for="downloadable_sample_{{id}}_file_type" class="a-left"><input type="radio" class="radio validate-one-required-by-name" id="downloadable_sample_{{id}}_file_type" name="downloadable[sample][{{id}}][type]" value="file"{{file_checked}} /> File:</label>'+
-                                    '<input type="hidden" class="validate-downloadable-file" id="downloadable_sample_{{id}}_file_save" name="downloadable[sample][{{id}}][file]" value="{{file_save}}" />'+
-                                    '<?= $this->getBrowseButtonHtml() ?>'+
-                                    '<?= $this->getDeleteButtonHtml() ?>'+
-                                    '<div id="downloadable_sample_{{id}}_file" class="uploader a-left">' +
-                                        '<div id="downloadable_sample_{{id}}_file-old" class="file-row-info"></div>'+
-                                        '<div id="downloadable_sample_{{id}}_file-new" class="file-row-info new-file"></div>'+
-                                        '<div class="clear"></div>'+
-                                    '</div>'+
-                                '</div>'+
-                                '<div class="row">'+
-                                    '<label for="downloadable_sample_{{id}}_url_type"><input type="radio" class="radio validate-one-required-by-name" id="downloadable_sample_{{id}}_url_type" name="downloadable[sample][{{id}}][type]" value="url"{{url_checked}} /> URL:</label> <input type="text" class="validate-downloadable-url input-text" name="downloadable[sample][{{id}}][sample_url]" value="{{sample_url}}" />'+
-                                '</div>'+
-                                '<div>'+
-                                    '<span id="downloadable_sample_{{id}}_container"></span>'+
-                                '</div>'+
-                            '</div>'+
+</div>
 
-                        '</td>'+
-                        '<td class="a-center"><input type="text" name="downloadable[sample][{{id}}][sort_order]" value="{{sort_order}}" class="input-text sort" /></td>'+
-                        '<td>'+
-                            '<button type="button" class="scalable delete icon-btn delete-sample-item"><span>Delete</span></button>'+
-                        '</td>'+
-                    '</tr>';
-var sampleItems = {
-    tbody : $('sample_items_body'),
-    templateSyntax : /(^|.|\r|\n)({{(\w+)}})/,
-    templateText : sampleTemplate,
-    itemCount : 0,
-    add : function(data) {
-        alertAlreadyDisplayed = false;
-        this.template = new Template(this.templateText, this.templateSyntax);
+<template id="downloadable-sample-template">
+    <tr id="downloadable_sample_{{id}}">
+        <td>
+            <input type="hidden" class="__delete__" name="downloadable[sample][{{id}}][is_delete]" value="" />
+            <input type="hidden" name="downloadable[sample][{{id}}][sample_id]" value="{{sample_id}}" />
+            <input type="text" class="required-entry input-text" name="downloadable[sample][{{id}}][title]" value="{{title}}" />
+            <?php if ($product->getStoreId()): ?>
+            <br>
+            <input type="checkbox" id="downloadable_sample_{{id}}_title" name="downloadable[sample][{{id}}][use_default_title]" value="1" />
+            <label class="normal" for="downloadable_sample_{{id}}_title"><?= $helper->__('Use Default Value') ?></label>
+            <?php endif ?>
+        </td>
+        <td>
+            <div class="files-wide">
+                <div class="row a-right">
+                    <label for="downloadable_sample_{{id}}_file_type" class="a-left">
+                        <input type="radio" class="radio validate-one-required-by-name" id="downloadable_sample_{{id}}_file_type" name="downloadable[sample][{{id}}][type]" value="file" />
+                        <?= $helper->__('File:') ?>
+                    </label>
+                    <input type="hidden" class="validate-downloadable-file" id="downloadable_sample_{{id}}_file_save" name="downloadable[sample][{{id}}][file]" value="{{file_save}}" />
+                    <?= $this->getBrowseButtonHtml() ?>
+                    <?= $this->getDeleteButtonHtml() ?>
+                    <div id="downloadable_sample_{{id}}_file" class="uploader a-left">
+                        <div id="downloadable_sample_{{id}}_file-old" class="file-row-info"></div>
+                        <div id="downloadable_sample_{{id}}_file-new" class="file-row-info new-file"></div>
+                        <div class="clear"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <label for="downloadable_sample_{{id}}_url_type">
+                        <input type="radio" class="radio validate-one-required-by-name" id="downloadable_sample_{{id}}_url_type" name="downloadable[sample][{{id}}][type]" value="url" />
+                        <?= $helper->__('URL:') ?>
+                    </label>
+                    <input type="text" class="validate-downloadable-url input-text" id="downloadable_sample_{{id}}_url_save" name="downloadable[sample][{{id}}][sample_url]" value="{{sample_url}}" />
+                </div>
+            </div>
+            <div>
+                <span id="downloadable_sample_{{id}}_container"></span>
+            </div>
+        </td>
+        <td class="a-center">
+            <input type="text" name="downloadable[sample][{{id}}][sort_order]" value="{{sort_order}}" class="input-text sort" />
+        </td>
+        <td>
+            <button id="downloadable_link_{{id}}_delete_button" type="button" class="scalable delete icon-btn delete-sample-item"><span><?= $helper->__('Delete') ?></span></button>
+        </td>
+    </tr>
+</template>
 
-        if(!data.sample_id){
-            data = {};
-            data.sample_type = 'file';
-            data.sample_id  = 0;
-        }
-
-        data.id = this.itemCount;
-
-        if (data.sample_type == 'url') {
-            data.url_checked = ' checked="checked"';
-        } else if (data.sample_type == 'file') {
-            data.file_checked = ' checked="checked"';
-        }
-
-        Element.insert(this.tbody, {'bottom':this.template.evaluate(data)});
-
-        scopeTitle = $('downloadable_sample_'+data.id+'_title');
-        if (scopeTitle) {
-            Event.observe(scopeTitle, 'click', function(event){
-                scopeElm = $(Event.findElement(event, 'input'));
-                titleField = scopeElm.up(0).down('input[type="text"]');
-                if (scopeElm.checked == true) {
-                    titleField.disabled = true;
-                } else {
-                    titleField.disabled = false;
-                }
-            });
-        }
-        if (!data.store_title && scopeTitle) {
-            scopeTitle.up(0).down('input[type="text"]').disabled = true;
-            scopeTitle.checked = true;
-        }
-
-        sampleUrl = $('downloadable_sample_'+data.id+'_url_type');
-
-        var UploaderConfig = <?= $this->getConfigJson() ?>.replace(
-            new RegExp('<?= $this->getId() ?>', 'g'),
-            'downloadable_sample_'+data.id+'_file');
-
-        if (!data.file_save) {
-            data.file_save = [];
-        }
-        new Downloadable.FileUploader(
-            'samples',
-            data.id,
-            sampleUrl.up('td').down('div.uploader'),
-            'downloadable[sample]['+data.id+']',
-            data.file_save,
-            'downloadable_sample_'+data.id+'_file',
-            UploaderConfig
-        );
-        sampleUrl.advaiceContainer = 'downloadable_sample_'+data.id+'_container';
-        sampleFile = $('downloadable_sample_'+data.id+'_file_type');
-        sampleFile.advaiceContainer = 'downloadable_sample_'+data.id+'_container';
-        $('downloadable_sample_'+data.id+'_file_save').advaiceContainer = 'downloadable_sample_'+data.id+'_container';
-
-        this.itemCount++;
-        this.bindRemoveButtons();
-
-        var inputs = $$('#downloadable_sample_' + data.id + ' input');
-        inputs.each(function(el) { Event.observe(el, 'change', el.setHasChanges.bind(el));  } )
-        var inputs = $$('#downloadable_sample_' + data.id + ' button.delete');
-        inputs.each(function(el) { Event.observe(el, 'click', el.setHasChanges.bind(el));  } )
-    },
-    remove : function(event){
-        var element = $(Event.findElement(event, 'tr'));
-        alertAlreadyDisplayed = false;
-        if(element){
-            element.down('input[type="hidden"].__delete__').value = '1';
-            Element.select(element, 'div.flex').each(function(elm){
-                elm.remove();
-            });
-            element.addClassName('no-display');
-            element.addClassName('ignore-validate');
-            element.hide();
-        }
-    },
-    bindRemoveButtons : function(){
-        var buttons = $$('tbody#sample_items_body .delete-sample-item');
-        for(var i=0;i<buttons.length;i++){
-            if(!$(buttons[i]).binded){
-                $(buttons[i]).binded = true;
-                Event.observe(buttons[i], 'click', this.remove.bind(this));
-            }
-        }
-    }
-}
-
-sampleItems.bindRemoveButtons();
-
-if($('add_sample_item')){
-    Event.observe('add_sample_item', 'click', sampleItems.add.bind(sampleItems));
-}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    window.sampleItems =  new Downloadable.SampleItems('downloadable_sample_table', 'downloadable-sample-template', '<?= $this->getId() ?>', <?= $this->getConfigJson() ?>);
 
 <?php foreach ($this->getSampleData() as $item): ?>
     sampleItems.add(<?= $item->toJson() ?>);
 <?php endforeach ?>
-
-//]]>
+});
 </script>

@@ -7,6 +7,7 @@
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,43 +31,27 @@ class Mage_Downloadable_Adminhtml_Downloadable_FileController extends Mage_Admin
     public function uploadAction()
     {
         $type = $this->getRequest()->getParam('type');
-        $tmpPath = '';
-        if ($type == 'samples') {
-            $tmpPath = Mage_Downloadable_Model_Sample::getBaseTmpPath();
-        } elseif ($type == 'links') {
-            $tmpPath = Mage_Downloadable_Model_Link::getBaseTmpPath();
-        } elseif ($type == 'link_samples') {
-            $tmpPath = Mage_Downloadable_Model_Link::getBaseSampleTmpPath();
-        }
-        $result = [];
+        $tmpPath = match ($type) {
+            'samples' => Mage_Downloadable_Model_Sample::getBaseTmpPath(),
+            'links' => Mage_Downloadable_Model_Link::getBaseTmpPath(),
+            'link_samples' => Mage_Downloadable_Model_Link::getBaseSampleTmpPath(),
+            default => '',
+        };
+
         try {
             $uploader = Mage::getModel('core/file_uploader', $type);
             $uploader->setAllowRenameFiles(true);
             $uploader->setFilesDispersion(true);
             $result = $uploader->save($tmpPath);
 
-            /**
-             * Workaround for prototype 1.7 methods "isJSON", "evalJSON" on Windows OS
-             */
-            $result['tmp_name'] = str_replace(DS, '/', $result['tmp_name']);
-            $result['path'] = str_replace(DS, '/', $result['path']);
-
             if (isset($result['file'])) {
                 $fullPath = rtrim($tmpPath, DS) . DS . ltrim($result['file'], DS);
                 Mage::helper('core/file_storage_database')->saveFile($fullPath);
             }
 
-            $result['cookie'] = [
-                'name'     => session_name(),
-                'value'    => $this->_getSession()->getSessionId(),
-                'lifetime' => $this->_getSession()->getCookieLifetime(),
-                'path'     => $this->_getSession()->getCookiePath(),
-                'domain'   => $this->_getSession()->getCookieDomain(),
-            ];
+            $this->getResponse()->setBodyJson($result);
         } catch (Exception $e) {
-            $result = ['error' => $e->getMessage(), 'errorcode' => $e->getCode()];
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
-
-        $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
     }
 }
