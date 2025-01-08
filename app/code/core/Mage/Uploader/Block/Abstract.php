@@ -7,7 +7,7 @@
  * @package    Mage_Uploader
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -58,9 +58,6 @@ abstract class Mage_Uploader_Block_Abstract extends Mage_Adminhtml_Block_Widget
 
     /**
      * Constructor for uploader block
-     *
-     * @see https://github.com/flowjs/flow.js/tree/v2.9.0#configuration
-     * @description Set unique id for block
      */
     public function __construct()
     {
@@ -83,9 +80,7 @@ abstract class Mage_Uploader_Block_Abstract extends Mage_Adminhtml_Block_Widget
      */
     public function getJsonConfig()
     {
-        /** @var Mage_Core_Helper_Data $helper */
-        $helper = $this->helper('core');
-        return $helper->jsonEncode([
+        return $this->helper('core')->jsonEncode([
             'uploaderConfig'    => $this->getUploaderConfig()->getData(),
             'elementIds'        => $this->_getElementIdsMapping(),
             'browseConfig'      => $this->getButtonConfig()->getData(),
@@ -128,13 +123,7 @@ abstract class Mage_Uploader_Block_Abstract extends Mage_Adminhtml_Block_Widget
             'browse_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->addData([
-                    // Workaround for IE9
-                    'before_html'   => sprintf(
-                        '<div style="display:inline-block;" id="%s">',
-                        $this->getElementId(self::DEFAULT_BROWSE_BUTTON_ID_SUFFIX),
-                    ),
-                    'after_html'    => '</div>',
-                    'id'            => $this->getElementId(self::DEFAULT_BROWSE_BUTTON_ID_SUFFIX . '_button'),
+                    'id'            => $this->getElementId(self::DEFAULT_BROWSE_BUTTON_ID_SUFFIX),
                     'label'         => Mage::helper('uploader')->__('Browse Files...'),
                     'type'          => 'button',
                 ]),

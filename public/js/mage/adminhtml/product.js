@@ -25,12 +25,12 @@ Product.Gallery.prototype = {
         this.containerId = containerId, this.container = $(this.containerId);
         this.imageTypes = imageTypes;
 
-        document.on('uploader:fileSuccess', function (event) {
-            var memo = event.memo;
+        document.addEventListener('uploader:fileSuccess', (event) => {
+            const memo = event.detail;
             if (memo && this._checkCurrentContainer(memo.containerId)) {
                 this.handleUploadComplete([{response: memo.response}]);
             }
-        }.bind(this));
+        });
 
         this.images = this.getElement('save').value.evalJSON();
         this.imagesValues = this.getElement('save_image').value.evalJSON();
@@ -82,18 +82,7 @@ Product.Gallery.prototype = {
     },
     handleUploadComplete: function (files) {
         files.each(function (item) {
-            if (!item.response.isJSON()) {
-                try {
-                    console.log(item.response);
-                } catch (e2) {
-                    alert(item.response);
-                }
-                return;
-            }
-            var response = item.response.evalJSON();
-            if (response.error) {
-                return;
-            }
+            var response = item.response;
             var newImage = {};
             newImage.url = response.url;
             newImage.file = response.file;

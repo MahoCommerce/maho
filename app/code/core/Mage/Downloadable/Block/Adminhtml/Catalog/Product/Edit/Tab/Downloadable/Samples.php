@@ -7,7 +7,7 @@
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -92,13 +92,19 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
                 Mage::helper('core/file_storage_database')->saveFileToFilesystem($file);
             }
             if ($item->getSampleFile() && is_file($file)) {
-                $tmpSampleItem['file_save'] = [
-                    [
-                        'file' => $item->getSampleFile(),
-                        'name' => Mage::helper('downloadable/file')->getFileFromPathFile($item->getSampleFile()),
-                        'size' => filesize($file),
-                        'status' => 'old',
-                    ]];
+                $url = $this->getUrl('*/downloadable_product_edit/link', [
+                    'id' => $item->getId(),
+                    'type' => 'samples',
+                    'resource_type' => Mage_Downloadable_Helper_Download::LINK_TYPE_FILE,
+                    '_secure' => true,
+                ]);
+                $path = Mage::helper('downloadable/file')->getFileFromPathFile($item->getSampleFile());
+                $tmpSampleItem['file_save'] = [[
+                    'file' => $item->getSampleFile(),
+                    'name' => "<a href=\"$url\">$path</a>",
+                    'size' => filesize($file),
+                    'status' => 'old',
+                ]];
             }
             if ($this->getProduct() && $item->getStoreTitle()) {
                 $tmpSampleItem['store_title'] = $item->getStoreTitle();
@@ -179,8 +185,8 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
                     ->getUrl('*/downloadable_file/upload', ['type' => 'samples', '_secure' => true]),
             );
         $this->getMiscConfig()
-            ->setReplaceBrowseWithRemove(true)
-        ;
+            ->setReplaceBrowseWithRemove(true);
+
         return Mage::helper('core')->jsonEncode(parent::getJsonConfig());
     }
 
@@ -191,10 +197,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
     public function getBrowseButtonHtml()
     {
         return $this->getChild('browse_button')
-            // Workaround for IE9
-            ->setBeforeHtml('<div style="display:inline-block; " id="downloadable_sample_{{id}}_file-browse">')
-            ->setAfterHtml('</div>')
-            ->setId('downloadable_sample_{{id}}_file-browse_button')
+            ->setId('downloadable_sample_{{id}}_file-browse')
             ->toHtml();
     }
 
@@ -205,9 +208,9 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
     public function getDeleteButtonHtml()
     {
         return $this->getChild('delete_button')
-            ->setLabel('')
+            ->setLabel('&times;')
             ->setId('downloadable_sample_{{id}}_file-delete')
-            ->setStyle('display:none; width:31px;')
+            ->setStyle('display:none')
             ->toHtml();
     }
 

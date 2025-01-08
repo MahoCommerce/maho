@@ -29,46 +29,62 @@ function setElementDisable(element, disable){
     }
 }
 
-function toggleParentVis(obj) {
-    obj = $(obj).parentNode;
-    if( obj.style.display == 'none' ) {
-        obj.style.display = '';
-    } else {
-        obj.style.display = 'none';
+function toggleParentVis(element, force = null) {
+    if (typeof element === 'string' || element instanceof String) {
+        element = document.getElementById(element);
     }
+    if (!element instanceof Element) {
+        throw new TypeError('Argument must be type of String or Element');
+    }
+    toggleVis(element.parentNode, force);
 }
 
 // to fix new app/design/adminhtml/default/default/template/widget/form/renderer/fieldset.phtml
 // with toggleParentVis
-function toggleFieldsetVis(obj) {
-    id = obj;
-    obj = $(obj);
-    if( obj.style.display == 'none' ) {
-        obj.style.display = '';
-    } else {
-        obj.style.display = 'none';
+function toggleFieldsetVis(element, force = null) {
+    if (typeof element === 'string' || element instanceof String) {
+        element = document.getElementById(element);
     }
-    obj = obj.parentNode.childElements();
-    for (var i = 0; i < obj.length; i++) {
-        if (obj[i].id != undefined
-            && obj[i].id == id
-            && obj[(i-1)].classNames() == 'entry-edit-head')
-        {
-            if (obj[i-1].style.display == 'none') {
-                obj[i-1].style.display = '';
-            } else {
-                obj[i-1].style.display = 'none';
-            }
-        }
+    if (!element instanceof Element) {
+        throw new TypeError('Argument must be type of String or Element');
+    }
+    toggleVis(element, force);
+
+    const previousElement = element.previousElementSibling;
+    if (previousElement && previousElement.classList.contains('entry-edit-head')) {
+        toggleVis(previousElement, force);
     }
 }
 
-function toggleVis(obj) {
-    obj = $(obj);
-    if( obj.style.display == 'none' ) {
-        obj.style.display = '';
+function toggleVis(element, force = null) {
+    if (typeof element === 'string' || element instanceof String) {
+        element = document.getElementById(element);
+    }
+    if (!element instanceof Element) {
+        throw new TypeError('Argument must be type of String or Element');
+    }
+    if (element.style.display === 'none') {
+        element.style.display = '';
+        element.classList.add('no-display')
+    }
+    if (force === null) {
+        element.classList.toggle('no-display');
     } else {
-        obj.style.display = 'none';
+        element.classList.toggle('no-display', !force);
+    }
+}
+
+function checkVisibility(element) {
+    if (typeof element === 'string' || element instanceof String) {
+        element = document.getElementById(element);
+    }
+    if (!element instanceof Element) {
+        throw new TypeError('Argument must be type of String or Element');
+    }
+    if (element.checkVisibility) {
+        return element.checkVisibility();
+    } else {
+        return element.style.display !== 'none' && !element.classList.contains('no-display');
     }
 }
 

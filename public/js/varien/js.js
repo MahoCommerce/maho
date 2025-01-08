@@ -151,6 +151,22 @@ function stripTags(str) {
 }
 
 /**
+ * Alternative to PrototypeJS's string.stripScripts() method that also removes event attributes
+ */
+function xssFilter(str) {
+    const doc = new DOMParser().parseFromString(str, 'text/html');
+    doc.querySelectorAll('script').forEach(script => script.remove());
+    doc.querySelectorAll('*').forEach((el) => {
+        for (const attr of el.attributes) {
+            if (attr.name.toLowerCase().startsWith('on') || attr.value.toLowerCase().includes('javascript:')) {
+                el.attributes.removeNamedItem(attr.name);
+            }
+        }
+    });
+    return doc.body.innerHTML;
+}
+
+/**
  * Alternative to PrototypeJS's evalScripts option for Ajax.Updater
  *
  * Note that unlike Prototype, scripts will executed in the global scope
@@ -800,6 +816,7 @@ class Template
     static DEFAULT_PATTERN = /(^|.|\r|\n)(#{(.*?)})/;
     static JAVASCRIPT_PATTERN = /(^|.|\r|\n)(\${(.*?)})/;
     static HANDLEBARS_PATTERN = /(^|.|\r|\n)({{(.*?)}})/;
+    static SQUARE_PATTERN = /(^|.|\r|\n)(\[\[(.*?)\]\])/;
 
     /**
      * Creates a Template object for string interpolation

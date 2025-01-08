@@ -7,7 +7,7 @@
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -172,19 +172,18 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
                     Mage::helper('core/file_storage_database')->saveFileToFilesystem($file);
                 }
                 if (is_file($file)) {
-                    $name = '<a href="'
-                        . $this->getUrl('*/downloadable_product_edit/link', [
-                            'id' => $item->getId(),
-                            '_secure' => true,
-                        ]) . '">' . Mage::helper('downloadable/file')->getFileFromPathFile($item->getLinkFile()) . '</a>';
-                    $tmpLinkItem['file_save'] = [
-                        [
-                            'file' => $item->getLinkFile(),
-                            'name' => $name,
-                            'size' => filesize($file),
-                            'status' => 'old',
-                        ],
-                    ];
+                    $url = $this->getUrl('*/downloadable_product_edit/link', [
+                        'id' => $item->getId(),
+                        'resource_type' => Mage_Downloadable_Helper_Download::LINK_TYPE_FILE,
+                        '_secure' => true,
+                    ]);
+                    $path = Mage::helper('downloadable/file')->getFileFromPathFile($item->getLinkFile());
+                    $tmpLinkItem['file_save'] = [[
+                        'file' => $item->getLinkFile(),
+                        'name' => "<a href=\"$url\">$path</a>",
+                        'size' => filesize($file),
+                        'status' => 'old',
+                    ]];
                 }
             }
             if ($item->getSampleFile()) {
@@ -193,14 +192,19 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
                     $item->getSampleFile(),
                 );
                 if (is_file($sampleFile)) {
-                    $tmpLinkItem['sample_file_save'] = [
-                        [
-                            'file' => $item->getSampleFile(),
-                            'name' => Mage::helper('downloadable/file')->getFileFromPathFile($item->getSampleFile()),
-                            'size' => filesize($sampleFile),
-                            'status' => 'old',
-                        ],
-                    ];
+                    $url = $this->getUrl('*/downloadable_product_edit/link', [
+                        'id' => $item->getId(),
+                        'type' => 'link_samples',
+                        'resource_type' => Mage_Downloadable_Helper_Download::LINK_TYPE_FILE,
+                        '_secure' => true,
+                    ]);
+                    $path = Mage::helper('downloadable/file')->getFileFromPathFile($item->getSampleFile());
+                    $tmpLinkItem['sample_file_save'] = [[
+                        'file' => $item->getSampleFile(),
+                        'name' => "<a href=\"$url\">$path</a>",
+                        'size' => filesize($sampleFile),
+                        'status' => 'old',
+                    ]];
                 }
             }
             if ($item->getNumberOfDownloads() == '0') {
@@ -235,7 +239,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
      */
     public function getConfigMaxDownloads()
     {
-        return Mage::getStoreConfig(Mage_Downloadable_Model_Link::XML_PATH_DEFAULT_DOWNLOADS_NUMBER);
+        return Mage::getStoreConfigAsInt(Mage_Downloadable_Model_Link::XML_PATH_DEFAULT_DOWNLOADS_NUMBER);
     }
 
     /**
@@ -287,8 +291,8 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
                     ->getUrl('*/downloadable_file/upload', ['type' => $type, '_secure' => true]),
             );
         $this->getMiscConfig()
-            ->setReplaceBrowseWithRemove(true)
-        ;
+            ->setReplaceBrowseWithRemove(true);
+
         return Mage::helper('core')->jsonEncode(parent::getJsonConfig());
     }
 
@@ -300,12 +304,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
     public function getBrowseButtonHtml($type = '')
     {
         return $this->getChild('browse_button')
-            // Workaround for IE9
-            ->setBeforeHtml(
-                '<div style="display:inline-block; " id="downloadable_link_{{id}}_' . $type . 'file-browse">',
-            )
-            ->setAfterHtml('</div>')
-            ->setId('downloadable_link_{{id}}_' . $type . 'file-browse_button')
+            ->setId("downloadable_link_{{id}}_{$type}file-browse")
             ->toHtml();
     }
 
@@ -317,9 +316,9 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
     public function getDeleteButtonHtml($type = '')
     {
         return $this->getChild('delete_button')
-            ->setLabel('')
-            ->setId('downloadable_link_{{id}}_' . $type . 'file-delete')
-            ->setStyle('display:none; width:31px;')
+            ->setLabel('&times;')
+            ->setId("downloadable_link_{{id}}_{$type}file-delete")
+            ->setStyle('display:none')
             ->toHtml();
     }
 
