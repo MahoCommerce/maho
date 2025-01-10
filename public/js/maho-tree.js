@@ -676,6 +676,18 @@ class MahoTreeNode {
         });
     }
 
+    get hasLoadedChildren() {
+        return this.ui.wrap.hasAttribute('data-loaded');
+    }
+
+    set hasLoadedChildren(value) {
+        if (value) {
+            this.ui.wrap.setAttribute('data-loaded', '');
+        } else {
+            this.ui.wrap.removeAttribute('data-loaded');
+        }
+    }
+
     async loadChildren() {
         if (!this.tree.lazyloadOpts.dataUrl) {
             return;

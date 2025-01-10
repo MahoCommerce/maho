@@ -361,11 +361,12 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
 
         $item['cls'] .= $node->getIsActive() ? ' active-category' : ' no-active-category';
 
-        if ($node->hasChildren() || $level < $this->getRecursionLevel() || $this->getRecursionLevel() === 0) {
+        if ($node->getChildrenCount() == 0 || $node->hasChildren()) {
             $item['children'] = [];
-            foreach ($node->getChildren() as $child) {
-                $item['children'][] = $this->_getNodeJson($child, $level + 1);
-            }
+        }
+
+        foreach ($node->getChildren() as $child) {
+            $item['children'][] = $this->_getNodeJson($child, $level + 1);
         }
 
         if ($this->getCategory() && $this->getCategoryId() === (int) $node->getId()) {

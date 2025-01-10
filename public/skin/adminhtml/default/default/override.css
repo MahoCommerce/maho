@@ -1152,6 +1152,9 @@ ul.tabs a.changed span.changed {
 .maho-tree details[open] > summary::before {
     background-image: url('data:image/svg+xml,<svg width="10" height="10" xmlns="http://www.w3.org/2000/svg"><rect style="fill:%23f6f6f6;stroke:%234a4a4a;stroke-width:1" width="9" height="9" x=".5" y=".5" rx="2" ry="2"/><path style="fill:%234a4a4a" d="M2 4.5h6v1H2z"/></svg>');
 }
+.maho-tree li[data-loaded] > details:has(> ul:empty) summary::before {
+    background: none !important;
+}
 
 .maho-tree .icon {
     background-size: contain;
@@ -1166,7 +1169,7 @@ ul.tabs a.changed span.changed {
 .maho-tree .icon.folder {
     background-image: url('data:image/svg+xml,<svg width="16" height="16" xmlns="http://www.w3.org/2000/svg"><path d="M1.9 2.1a1 1 0 0 0-1 1V13c0 .5.4 1 1 1H14c.6 0 1-.5 1-1V5.2c0-.6-.4-1-1-1H6.8s-.2 0-.2-.2h-.1l-.1-.2v-.2l-.9-1a1 1 0 0 0-.8-.5Z" fill="%23e2ae10"/><rect x=".8" y="4.2" width="14.3" height="9.7" rx="1" fill="%23f2c94c" ry="1"/></svg>');
 }
-.maho-tree details[open] > summary .icon.folder {
+.maho-tree details[open]:has(> ul > li) > summary .icon.folder {
     background-image: url('data:image/svg+xml,<svg width="16" height="16" xmlns="http://www.w3.org/2000/svg"><path d="M1 2.1a1 1 0 0 0-1 1V13c0 .5.5 1 1 1h12.3c.6 0 1-.5 1-1V5.2c0-.6-.4-1-1-1H6c-.1 0-.2 0-.2-.2h-.1l-.1-.2-.1-.2-.8-1a1 1 0 0 0-.9-.5Z" fill="%23e2ae10"/><path d="M2.9 6.8h12.3c.5 0 .9.3.8.7l-1.6 5.6c-.2.5-.7.8-1.3.8H.8c-.5 0-.9-.3-.8-.8l1.6-5.6c.2-.4.7-.7 1.3-.7Z" fill="%23f2c94c"/></svg>');
 }
 .maho-tree .icon.leaf, .maho-tree .icon.paper {
