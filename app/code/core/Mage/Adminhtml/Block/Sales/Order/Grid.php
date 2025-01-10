@@ -108,6 +108,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
             'type'  => 'options',
             'width' => '150px',
             'options' => Mage::getSingleton('sales/order_config')->getStatuses(),
+            'frame_callback' => [$this, 'decorateStatus'],
         ]);
 
         if (Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/view')) {
@@ -243,5 +244,30 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
     public function getGridUrl()
     {
         return $this->getUrl('*/*/grid', ['_current' => true]);
+    }
+
+    public function decorateStatus($value, $row, $column, $isExport): string
+    {
+        $colors = Mage::registry('order_status_colors');
+        if ($colors === null) {
+            $orderStatusCollection = Mage::getResourceModel('sales/order_status_collection')->getItems();
+            foreach ($orderStatusCollection as $orderStatus) {
+                $color = $orderStatus->getColor();
+                if ($color) {
+                    $colors[$orderStatus->getStatus()] = $color;
+                }
+            }
+
+            if ($colors) {
+                Mage::register('order_status_colors', $colors);
+            }
+        }
+
+        if ($colors) {
+            $color = $colors[$row['status']] ?? '';
+            return "<span style='display:inline-block;width:15px;height:15px;vertical-align:text-bottom;background:{$color}'></span> {$value}";
+        }
+
+        return $value;
     }
 }

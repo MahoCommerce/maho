@@ -45,6 +45,7 @@ class Mage_Adminhtml_Block_Sales_Order_Status_Grid extends Mage_Adminhtml_Block_
         $this->addColumn('label', [
             'header' => Mage::helper('sales')->__('Status'),
             'index' => 'label',
+            'frame_callback' => [$this, 'decorateLabel'],
         ]);
 
         $this->addColumn('status', [
@@ -83,6 +84,11 @@ class Mage_Adminhtml_Block_Sales_Order_Status_Grid extends Mage_Adminhtml_Block_
         ]);
 
         return parent::_prepareColumns();
+    }
+
+    public function decorateLabel($value, $row, $column, $isExport): string
+    {
+        return "<span style='display:inline-block;width:15px;height:15px;vertical-align:text-bottom;background:{$row['color']}'></span> {$value}";
     }
 
     /**

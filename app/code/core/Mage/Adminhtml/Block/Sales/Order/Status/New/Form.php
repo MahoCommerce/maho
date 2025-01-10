@@ -70,6 +70,15 @@ class Mage_Adminhtml_Block_Sales_Order_Status_New_Form extends Mage_Adminhtml_Bl
             ],
         );
 
+        $fieldset->addField(
+            'color',
+            'color',
+            [
+                'name'      => 'color',
+                'label'     => Mage::helper('sales')->__('Status Color'),
+            ],
+        );
+
         $fieldset = $form->addFieldset('store_labels_fieldset', [
             'legend'       => Mage::helper('sales')->__('Store View Specific Labels'),
             'table_class'  => 'form-list stores-tree',
