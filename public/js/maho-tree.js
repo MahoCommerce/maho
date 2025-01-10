@@ -498,15 +498,15 @@ class MahoTreeNode {
                 window.varienElementMethods?.setHasChanges(this.ui.checkbox);
             }
         });
-        this.ui.label?.addEventListener('dblclick', () => {
-            if (this.ui.details) {
-                if (this.ui.details.open) {
+        this.ui.label?.addEventListener('click', (event) => {
+            if (event.srcElement.tagName === 'INPUT') {
+                return;
+            }
+            if (this.ui.details && this.ui.checkbox?.type === 'radio') {
+                if (this.ui.details.open && this.ui.checkbox.checked) {
                     this.collapse()
                 } else {
                     this.expand();
-                }
-                if (this.ui.checkbox && this.ui.checkbox.type !== 'radio') {
-                    this.ui.checkbox.checked ? this.deselect() : this.select();
                 }
             }
         });
