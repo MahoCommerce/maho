@@ -16,7 +16,7 @@ class MahoTree {
     /**
      * @typedef {Object} SelectableOpts
      * @prop {string} [mode='nested'] - `radio|single|simple|nested`
-     * @prop {boolean} [hideInputs=false] - hide radio / checkbox inputs and show outline around selected nodes
+     * @prop {boolean} [showInputs=true] - `false` to hide radio / checkbox inputs and show outline around selected nodes
      * @prop {string} [radioName] - if radio mode, then form name of the radio elements
      * @prop {function(Array<MahoTreeNode>):null} [onSelect] - callback when a node is selected
      *
@@ -36,7 +36,7 @@ class MahoTree {
      * @prop {string} [indent='1.25rem'] - length to indent each node level
      * @prop {string} [spacing='0.25rem'] - length to space in between each node
      * @prop {string} [line-style='1px dotted #aaa'] - border style for connecting lines
-     * @prop {string} [outline-style='2px solid #0090FF'] - outline style for selected nodes when `config.selectable.hideInputs=true`
+     * @prop {string} [outline-style='2px solid #0090FF'] - outline style for selected nodes when `config.selectable.showInputs=false`
      * @prop {string} [marker-size='10px'] - size for the [+] and [-] expand icon
      * @prop {string} [icon-size='16px'] - size for the folder or leaf node icons
      * @prop {string} [label-gap='0.25rem'] - length between icon, checkbox, and label
@@ -76,7 +76,7 @@ class MahoTree {
 
         this.selectableOpts = {
             mode: 'nested',
-            hideInputs: false,
+            showInputs: true,
             radioName: this.uniqId,
             onSelect: null,
         };
@@ -168,7 +168,7 @@ class MahoTree {
         for (const [cssVar, cssVal] of Object.entries(this.config.cssVars)) {
             this.rootEl.style.setProperty(`--${cssVar}`, cssVal);
         }
-        if (this.selectableOpts.hideInputs === true) {
+        if (!this.selectableOpts.showInputs) {
             this.rootEl.classList.add('hide-checkbox');
         }
     }

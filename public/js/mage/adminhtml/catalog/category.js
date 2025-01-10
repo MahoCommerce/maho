@@ -59,7 +59,7 @@ class CategoryEditForm {
             treatAllNodesAsFolders: true,
             selectable: {
                 mode: 'radio',
-                hideInputs: true,
+                showInputs: false,
                 onSelect: this.changeCategory.bind(this),
             },
             sortable: {

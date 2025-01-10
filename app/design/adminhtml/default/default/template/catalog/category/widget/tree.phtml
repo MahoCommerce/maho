@@ -32,7 +32,7 @@
         },
         selectable: {
             mode: useMassaction ? 'simple' : 'radio',
-            hideInputs: !useMassaction,
+            showInputs: useMassaction,
             allowDeselect: false,
             onSelect: <?= $this->getNodeClickListener() ?? 'null' ?>,
         },
