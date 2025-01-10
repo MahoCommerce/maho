@@ -22,12 +22,8 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage_Collection extends Varien_Data_Colle
     #[\Override]
     protected function _generateRow($filename)
     {
-        $filename = preg_replace('~[/\\\]+~', DIRECTORY_SEPARATOR, $filename);
-
-        return [
-            'filename' => $filename,
-            'basename' => basename($filename),
-            'mtime'    => filemtime($filename),
-        ];
+        $row = parent::_generateRow($filename);
+        $row['filename'] = preg_replace('~[/\\\]+~', DIRECTORY_SEPARATOR, $row['filename']);
+        return $row;
     }
 }

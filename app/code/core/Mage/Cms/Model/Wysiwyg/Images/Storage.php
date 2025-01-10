@@ -69,7 +69,8 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
         $collection = $this->getCollection($path)
             ->setCollectDirs(true)
             ->setCollectFiles(false)
-            ->setCollectRecursively(false);
+            ->setCollectRecursively(false)
+            ->setCollectSubdirCount(true);
         $storageRootLength = strlen($this->getHelper()->getStorageRoot());
 
         foreach ($collection as $key => $value) {

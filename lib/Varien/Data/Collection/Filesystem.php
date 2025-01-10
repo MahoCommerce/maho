@@ -64,6 +64,13 @@ class Varien_Data_Collection_Filesystem extends Varien_Data_Collection
     protected $_collectDirs = false;
 
     /**
+     * Whether to collect children directory count
+     *
+     * @var bool
+     */
+    protected $_collectSubdirCount = false;
+
+    /**
      * Directory names regex pre-filter
      *
      * @var string
@@ -174,6 +181,18 @@ class Varien_Data_Collection_Filesystem extends Varien_Data_Collection
     public function setCollectRecursively($value)
     {
         $this->_collectRecursively = (bool) $value;
+        return $this;
+    }
+
+    /**
+     * Set whether to collect children directory count
+     *
+     * @param bool $value
+     * @return $this
+     */
+    public function setCollectSubdirCount($value)
+    {
+        $this->_collectSubdirCount = (bool) $value;
         return $this;
     }
 
@@ -369,10 +388,20 @@ class Varien_Data_Collection_Filesystem extends Varien_Data_Collection
      */
     protected function _generateRow($filename)
     {
-        return [
+        $row = [
             'filename' => $filename,
             'basename' => basename($filename),
+            'mtime'    => filemtime($filename),
         ];
+
+        if ($this->_collectSubdirCount && is_dir($filename)) {
+            $children = glob($filename . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR);
+            if ($children !== false) {
+                $row['subdir_count'] = count($children);
+            }
+        }
+
+        return $row;
     }
 
     /**
