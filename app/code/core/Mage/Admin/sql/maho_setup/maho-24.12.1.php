@@ -16,7 +16,7 @@ $installer->startSetup();
 
 $installer->run("
     ALTER TABLE {$this->getTable('sales/order_status')}
-    ADD COLUMN `color` VARCHAR(20) NULL,
+    ADD COLUMN `color` VARCHAR(20) NULL
 ");
 
 $installer->endSetup();
