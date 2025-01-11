@@ -88,7 +88,7 @@ class Mage_Adminhtml_Block_Sales_Order_Status_Grid extends Mage_Adminhtml_Block_
 
     public function decorateLabel($value, $row, $column, $isExport): string
     {
-        return "<span style='display:inline-block;width:15px;height:15px;vertical-align:text-bottom;background:{$row['color']}'></span> {$value}";
+        return "<span class='order-status-color-marker' style='background:{$row['color']}'></span> {$value}";
     }
 
     /**

@@ -263,7 +263,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
 
         if ($this->orderStatusColors) {
             $color = $this->orderStatusColors[$row['status']] ?? '';
-            return "<span style='display:inline-block;width:15px;height:15px;vertical-align:text-bottom;background:{$color}'></span> {$value}";
+            return "<span class='order-status-color-marker' style='background:{$color}'></span> {$value}";
         }
 
         return $value;
