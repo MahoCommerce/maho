@@ -435,7 +435,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
     }
 
     /**
-     * Load category tree including specified categories ids.
+     * Load category tree including specified categories ids, their parents, children, and siblings.
      *
      * @param array $ids
      * @param bool $addCollectionData
@@ -464,7 +464,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
             $where[] = $this->_conn->quoteInto("$levelField <= ?", $recursionLevel + 1);
         }
 
-        // collect paths of specified IDs and build query to collect their parents and neighbours
+        // collect paths of specified IDs and build query to collect their parents, children, and siblings
         if (!empty($ids)) {
             $select = $this->_conn->select()
                 ->from($this->_table, ['path', 'level'])
@@ -476,10 +476,9 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
                 }
                 $pathIds  = explode('/', $item['path']);
                 $level = (int) $item['level'];
-                while ($level > $recursionLevel + 1) {
-                    $pathIds[count($pathIds) - 1] = '%';
-                    $path = implode('/', $pathIds);
-                    $where[] = $this->_conn->quoteInto("$levelField = ?", $level)
+                while ($level > $recursionLevel) {
+                    $path = implode('/', $pathIds) . '/%';
+                    $where[] = $this->_conn->quoteInto("$levelField = ?", $level + 1)
                         . ' AND ' . $this->_conn->quoteInto("$pathField LIKE ?", $path);
                     array_pop($pathIds);
                     $level--;
