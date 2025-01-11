@@ -21,6 +21,8 @@ use Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract as MassAction;
  */
 class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
+    protected ?array $orderStatusColors = null;
+
     public function __construct()
     {
         parent::__construct();
@@ -248,23 +250,19 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
 
     public function decorateStatus($value, $row, $column, $isExport): string
     {
-        $colors = Mage::registry('order_status_colors');
-        if ($colors === null) {
+        if ($this->orderStatusColors === null) {
+            $this->orderStatusColors = [];
             $orderStatusCollection = Mage::getResourceModel('sales/order_status_collection')->getItems();
             foreach ($orderStatusCollection as $orderStatus) {
                 $color = $orderStatus->getColor();
                 if ($color) {
-                    $colors[$orderStatus->getStatus()] = $color;
+                    $this->orderStatusColors[$orderStatus->getStatus()] = $color;
                 }
-            }
-
-            if ($colors) {
-                Mage::register('order_status_colors', $colors);
             }
         }
 
-        if ($colors) {
-            $color = $colors[$row['status']] ?? '';
+        if ($this->orderStatusColors) {
+            $color = $this->orderStatusColors[$row['status']] ?? '';
             return "<span style='display:inline-block;width:15px;height:15px;vertical-align:text-bottom;background:{$color}'></span> {$value}";
         }
 
