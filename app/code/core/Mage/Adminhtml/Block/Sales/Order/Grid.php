@@ -7,7 +7,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,6 +21,8 @@ use Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract as MassAction;
  */
 class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
+    protected ?array $orderStatusColors = null;
+
     public function __construct()
     {
         parent::__construct();
@@ -108,6 +110,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
             'type'  => 'options',
             'width' => '150px',
             'options' => Mage::getSingleton('sales/order_config')->getStatuses(),
+            'frame_callback' => [$this, 'decorateStatus'],
         ]);
 
         if (Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/view')) {
@@ -243,5 +246,26 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
     public function getGridUrl()
     {
         return $this->getUrl('*/*/grid', ['_current' => true]);
+    }
+
+    public function decorateStatus($value, $row, $column, $isExport): string
+    {
+        if ($this->orderStatusColors === null) {
+            $this->orderStatusColors = [];
+            $orderStatusCollection = Mage::getResourceModel('sales/order_status_collection')->getItems();
+            foreach ($orderStatusCollection as $orderStatus) {
+                $color = $orderStatus->getColor();
+                if ($color) {
+                    $this->orderStatusColors[$orderStatus->getStatus()] = $color;
+                }
+            }
+        }
+
+        if ($this->orderStatusColors) {
+            $color = $this->orderStatusColors[$row['status']] ?? '';
+            return "<span class='order-status-color-marker' style='background:{$color}'></span> {$value}";
+        }
+
+        return $value;
     }
 }

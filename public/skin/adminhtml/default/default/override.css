@@ -257,6 +257,13 @@ small {
   border: none;
 }
 
+.order-status-color-marker {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  vertical-align: text-bottom;
+}
+
 .entry-edit {
   margin-top: 10px;
 }
