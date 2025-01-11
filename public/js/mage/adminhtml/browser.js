@@ -255,6 +255,7 @@ class Mediabrowser {
             const child = new MahoTreeNode(this.tree, {
                 text: result.short_name,
                 id: result.id,
+                children: [],
             });
 
             this.currentNode.appendChild(child);

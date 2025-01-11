@@ -82,7 +82,7 @@ class EavAttributeSetForm {
             showRootNode: false,
             selectable: this.config.isReadOnly ? false : {
                 mode: 'single',
-                hideInputs: true,
+                showInputs: false,
                 onSelect: this.onSelectGroup.bind(this),
             },
             sortable: this.config.isReadOnly ? false : {
