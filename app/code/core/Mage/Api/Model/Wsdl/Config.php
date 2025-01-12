@@ -7,7 +7,7 @@
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -121,10 +121,10 @@ class Mage_Api_Model_Wsdl_Config extends Mage_Api_Model_Wsdl_Config_Base
              * Exclude Mage_Api wsdl xml file because it used for previous version
              * of API wsdl declaration
              */
-            $mergeWsdl->addLoadedFile(mahoFindFileInIncludePath("$moduleDir/wsi.xml"));
+            $mergeWsdl->addLoadedFile(Maho::findFile("$moduleDir/wsi.xml"));
 
             // Base wsi file
-            $this->loadFile(mahoFindFileInIncludePath("$moduleDir/wsi.xml"));
+            $this->loadFile(Maho::findFile("$moduleDir/wsi.xml"));
 
             Mage::getConfig()->loadModulesConfiguration('wsi.xml', $this, $mergeWsdl);
         } else {
@@ -132,10 +132,10 @@ class Mage_Api_Model_Wsdl_Config extends Mage_Api_Model_Wsdl_Config_Base
              * Exclude Mage_Api wsdl xml file because it used for previous version
              * of API wsdl declaration
              */
-            $mergeWsdl->addLoadedFile(mahoFindFileInIncludePath("$moduleDir/wsdl.xml"));
+            $mergeWsdl->addLoadedFile(Maho::findFile("$moduleDir/wsdl.xml"));
 
             // Base wsdl file
-            $this->loadFile(mahoFindFileInIncludePath("$moduleDir/wsdl2.xml"));
+            $this->loadFile(Maho::findFile("$moduleDir/wsdl2.xml"));
 
             Mage::getConfig()->loadModulesConfiguration('wsdl.xml', $this, $mergeWsdl);
         }

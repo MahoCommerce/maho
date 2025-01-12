@@ -7,22 +7,14 @@
  * @package    Mage
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @deprecated Use MAHO_ROOT_DIR instead. */
-define('MAGENTO_ROOT', dirname(__DIR__));
 define('MAHO_ROOT_DIR', dirname(__DIR__));
 define('MAHO_PUBLIC_DIR', __DIR__);
 
-if (file_exists(MAHO_ROOT_DIR . '/app/bootstrap.php')) {
-    require MAHO_ROOT_DIR . '/app/bootstrap.php';
-    require MAHO_ROOT_DIR . '/app/Mage.php';
-} else {
-    require MAHO_ROOT_DIR . '/vendor/mahocommerce/maho/app/bootstrap.php';
-    require MAHO_ROOT_DIR . '/vendor/mahocommerce/maho/app/Mage.php';
-}
+require MAHO_ROOT_DIR . '/vendor/autoload.php';
 
 if (!Mage::isInstalled()) {
     echo 'Application is not installed yet.';

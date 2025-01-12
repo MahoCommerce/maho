@@ -33,7 +33,7 @@
         "composer-runtime-api": "^2",
         "cweagans/composer-patches": "^1.7",
         "ezyang/htmlpurifier": "^4.17",
-        "mahocommerce/maho-composer-plugin": "^2",
+        "mahocommerce/maho-composer-plugin": "^3",
         "pelago/emogrifier": "^7.0",
         "phpseclib/mcrypt_compat": "^2.0.3",
         "phpseclib/phpseclib": "^3.0.14",
@@ -91,6 +91,7 @@
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "cweagans/composer-patches": true,
+            "magento-hackathon/magento-composer-installer": false,
             "mahocommerce/maho-composer-plugin": true
         },
         "platform": {

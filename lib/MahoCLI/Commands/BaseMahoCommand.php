@@ -5,7 +5,7 @@
  *
  * @category   Maho
  * @package    MahoCLI
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,15 +18,6 @@ abstract class BaseMahoCommand extends Command
 {
     protected function initMaho(): void
     {
-        $cwd = getcwd();
-        if (file_exists("$cwd/app/bootstrap.php")) {
-            require "$cwd/app/bootstrap.php";
-            require "$cwd/app/Mage.php";
-        } else {
-            require "$cwd/vendor/mahocommerce/maho/app/bootstrap.php";
-            require "$cwd/vendor/mahocommerce/maho/app/Mage.php";
-        }
-
         Mage::register('isSecureArea', true);
         Mage::app();
     }

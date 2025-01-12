@@ -7,7 +7,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -374,7 +374,7 @@ class Mage_Core_Model_Design_Package
     {
         $fileName = $this->_renderFilename($file, $params);
         $fileName = (empty($params['_relative']) ? '' : Mage::getBaseDir('design') . DS) . $fileName;
-        $fileName = mahoFindFileInIncludePath($fileName);
+        $fileName = Maho::findFile($fileName);
         return $fileName;
     }
 
@@ -539,7 +539,7 @@ class Mage_Core_Model_Design_Package
     public function getPackageList()
     {
         $directory = Mage::getBaseDir('design') . DS . 'frontend';
-        return mahoListDirectories($directory);
+        return Maho::listDirectories($directory);
     }
 
     /**
@@ -557,7 +557,7 @@ class Mage_Core_Model_Design_Package
             }
         } else {
             $directory = Mage::getBaseDir('design') . DS . 'frontend' . DS . $package;
-            $result = mahoListDirectories($directory);
+            $result = Maho::listDirectories($directory);
         }
 
         return $result;

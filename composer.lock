@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "063e36fe9a502ea0b32c431071419b08",
+    "content-hash": "6ff6ebe26302dee1381f12fb9c17e7b6",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -221,36 +221,51 @@
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
-            "version": "v2.1.0",
+            "version": "v3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
-                "reference": "f27036354a10aa699718c9e3828fb2b2720eb94e"
+                "reference": "abab924df44909094c7ab98ca68d55bf48dd62d9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/f27036354a10aa699718c9e3828fb2b2720eb94e",
-                "reference": "f27036354a10aa699718c9e3828fb2b2720eb94e",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/abab924df44909094c7ab98ca68d55bf48dd62d9",
+                "reference": "abab924df44909094c7ab98ca68d55bf48dd62d9",
                 "shasum": ""
             },
             "require": {
-                "composer-plugin-api": "^2.0"
+                "composer-plugin-api": "^2.1",
+                "composer-runtime-api": "^2"
+            },
+            "require-dev": {
+                "composer/composer": "^2.8",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0"
             },
             "type": "composer-plugin",
             "extra": {
-                "class": "Maho\\MahoComposerPlugin"
+                "class": [
+                    "Maho\\ComposerPlugin\\AutoloadPlugin",
+                    "Maho\\ComposerPlugin\\FileCopyPlugin",
+                    "Maho\\ComposerPlugin\\ModmanPlugin"
+                ]
             },
             "autoload": {
                 "psr-4": {
-                    "Maho\\": "src/"
+                    "Maho\\ComposerPlugin\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Extension for Composer to copy assets and enable autoloading for Maho projects.",
             "support": {
                 "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
-                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v2.1.0"
+                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v3.0.0"
             },
-            "time": "2024-11-15T10:31:25+00:00"
+            "time": "2025-01-12T22:09:45+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",

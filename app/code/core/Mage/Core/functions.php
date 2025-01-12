@@ -7,7 +7,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -72,9 +72,7 @@ function is_empty_date($date)
  */
 function mageFindClassFile($class)
 {
-    /** @var \Composer\Autoload\ClassLoader $composerClassLoader */
-    $composerClassLoader = require BP . '/vendor/autoload.php';
-    return $composerClassLoader->findFile($class);
+    return Maho::findClassFile($class);
 }
 
 /**
@@ -295,77 +293,4 @@ function isDirWriteable(string $dir): bool
 function is_dir_writeable($dir)
 {
     return isDirWriteable($dir);
-}
-
-function mahoFindFileInIncludePath(string $path): string|false
-{
-    $paths = [];
-    $paths[] = BP;
-
-    $modules = \Maho\MahoAutoload::getInstalledModules(BP);
-    foreach ($modules as $module => $info) {
-        if ($module === 'mahocommerce/maho') {
-            continue;
-        }
-        $paths[] = $info['path'];
-    }
-    if ($modules['mahocommerce/maho']['isChildProject']) {
-        $paths[] = $modules['mahocommerce/maho']['path'];
-    }
-
-    $relativePath = str_replace(array_reverse($paths), '', $path);
-    $relativePath = ltrim($relativePath, '/');
-
-    // Temporarily set include paths, then revert
-    $oldPaths = get_include_path();
-    set_include_path(implode(PS, $paths));
-    $file = stream_resolve_include_path($relativePath);
-    set_include_path($oldPaths);
-
-    return $file;
-}
-
-function mahoListDirectories(string $path): array
-{
-    $results = [];
-    $relativePath = str_replace(BP . '/', '', $path);
-
-    foreach (glob("$path/*", GLOB_ONLYDIR) as $folder) {
-        $results[] = basename($folder);
-    }
-
-    $modules = \Maho\MahoAutoload::getInstalledModules(BP);
-    foreach ($modules as $module => $info) {
-        foreach (glob($info['path'] . "/$relativePath/*", GLOB_ONLYDIR) as $folder) {
-            $results[] = basename($folder);
-        }
-    }
-
-    return array_unique($results);
-}
-
-function mahoErrorReport(array $reportData = [], int $httpResponseCode = 503): void
-{
-    $reportIdMessage = '';
-    if ($reportData) {
-        $reportId   = abs((int) (microtime(true) * random_int(100, 1000)));
-        $reportIdMessage = "<p>Error log record number: {$reportId}</p>";
-        $reportDir = Mage::getBaseDir('var') . '/report';
-        if (!file_exists($reportDir)) {
-            @mkdir($reportDir, 0750, true);
-        }
-
-        $reportFile = "{$reportDir}/$reportId";
-        $reportData = array_map('strip_tags', $reportData);
-        @file_put_contents($reportFile, serialize($reportData));
-        @chmod($reportFile, 0640);
-    }
-
-    $description = match ($httpResponseCode) {
-        404 => 'Not Found',
-        503 => 'Service Unavailable',
-        default => '',
-    };
-    header("HTTP/1.1 {$httpResponseCode} {$description}", true, $httpResponseCode);
-    echo "<html><body><h1>There has been an error processing your request</h1>{$reportIdMessage}</body></html>";
 }

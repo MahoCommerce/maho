@@ -7,7 +7,7 @@
  * @package    Varien_Simplexml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -22,7 +22,7 @@ class Varien_Simplexml_Config
     /**
      * Configuration xml
      *
-     * @var Varien_Simplexml_Element|SimpleXMLElement
+     * @var Varien_Simplexml_Element|SimpleXMLElement|null
      */
     protected $_xml = null;
 
@@ -423,10 +423,10 @@ class Varien_Simplexml_Config
 
         /**
          * All calls from core will be an absolute path, but for compatibility with
-         * 3rd party modules we will alternatively use mahoFindFileInIncludePath()
+         * 3rd party modules we will alternatively use Maho::findFile()
          */
         if (!is_readable($filePath)) {
-            $filePath = mahoFindFileInIncludePath($filePath);
+            $filePath = Maho::findFile($filePath);
             if (!is_readable($filePath)) {
                 //throw new Exception('Can not read xml file '.$filePath);
                 return false;

@@ -7,7 +7,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -513,26 +513,20 @@ class Mage_Core_Model_Resource_Setup
         $resModel   = (string) $this->_connectionConfig->model;
         $modName    = (string) $this->_moduleConfig[0]->getName();
 
-        $filesDir   = Mage::getModuleDir('sql', $modName) . DS . $this->_resourceName;
-        $filesDir   = mahoFindFileInIncludePath($filesDir);
-        if (!is_dir($filesDir) || !is_readable($filesDir)) {
-            return [];
-        }
-
         $dbFiles    = [];
         $typeFiles  = [];
         $regExpDb   = sprintf('#^%s-(.*)\.(php|sql)$#i', $actionType);
         $regExpType = sprintf('#^%s-%s-(.*)\.(php|sql)$#i', $resModel, $actionType);
-        $handlerDir = dir($filesDir);
-        while (($file = $handlerDir->read()) !== false) {
+
+        $filesDir   = Mage::getModuleDir('sql', $modName) . DS . $this->_resourceName;
+        foreach (Maho::globPackages("$filesDir/*") as $file) {
             $matches = [];
-            if (preg_match($regExpDb, $file, $matches)) {
-                $dbFiles[$matches[1]] = $filesDir . DS . $file;
-            } elseif (preg_match($regExpType, $file, $matches)) {
-                $typeFiles[$matches[1]] = $filesDir . DS . $file;
+            if (preg_match($regExpDb, basename($file), $matches) === 1) {
+                $dbFiles[$matches[1]] = $file;
+            } elseif (preg_match($regExpType, basename($file), $matches) === 1) {
+                $typeFiles[$matches[1]] = $file;
             }
         }
-        $handlerDir->close();
 
         if (empty($typeFiles) && empty($dbFiles)) {
             return [];
@@ -558,33 +552,24 @@ class Mage_Core_Model_Resource_Setup
         $modName    = (string) $this->_moduleConfig[0]->getName();
         $files      = [];
 
+        $regExp     = sprintf('#^%s-(.*)\.php$#i', $actionType);
+        $regExpOld  = sprintf('#^%s-%s-(.*)\.php$#i', $this->_connectionConfig->model, $actionType);
+
         $filesDir   = Mage::getModuleDir('data', $modName) . DS . $this->_resourceName;
-        $filesDir   = mahoFindFileInIncludePath($filesDir);
-        if (is_dir($filesDir) && is_readable($filesDir)) {
-            $regExp     = sprintf('#^%s-(.*)\.php$#i', $actionType);
-            $handlerDir = dir($filesDir);
-            while (($file = $handlerDir->read()) !== false) {
-                $matches = [];
-                if (preg_match($regExp, $file, $matches)) {
-                    $files[$matches[1]] = $filesDir . DS . $file;
-                }
+        foreach (Maho::globPackages("$filesDir/*") as $file) {
+            $matches = [];
+            if (preg_match($regExp, basename($file), $matches) === 1) {
+                $files[$matches[1]] = $file;
             }
-            $handlerDir->close();
         }
 
         // search data files in old location
         $filesDir   = Mage::getModuleDir('sql', $modName) . DS . $this->_resourceName;
-        if (is_dir($filesDir) && is_readable($filesDir)) {
-            $regExp     = sprintf('#^%s-%s-(.*)\.php$#i', $this->_connectionConfig->model, $actionType);
-            $handlerDir = dir($filesDir);
-
-            while (($file = $handlerDir->read()) !== false) {
-                $matches = [];
-                if (preg_match($regExp, $file, $matches)) {
-                    $files[$matches[1]] = $filesDir . DS . $file;
-                }
+        foreach (Maho::globPackages("$filesDir/*") as $file) {
+            $matches = [];
+            if (preg_match($regExpOld, basename($file), $matches) === 1) {
+                $files[$matches[1]] = $file;
             }
-            $handlerDir->close();
         }
 
         if (empty($files)) {
@@ -602,18 +587,14 @@ class Mage_Core_Model_Resource_Setup
         $modName    = (string) $this->_moduleConfig[0]->getName();
         $files      = [];
 
+        $regExp     = sprintf('#^%s-(.*)\.php$#i', $actionType);
+
         $filesDir   = Mage::getModuleDir('sql', $modName) . DS . 'maho_setup';
-        $filesDir   = mahoFindFileInIncludePath($filesDir);
-        if (is_dir($filesDir) && is_readable($filesDir)) {
-            $regExp     = sprintf('#^%s-(.*)\.php$#i', $actionType);
-            $handlerDir = dir($filesDir);
-            while (($file = $handlerDir->read()) !== false) {
-                $matches = [];
-                if (preg_match($regExp, $file, $matches)) {
-                    $files[$matches[1]] = $filesDir . DS . $file;
-                }
+        foreach (Maho::globPackages("$filesDir/*") as $file) {
+            $matches = [];
+            if (preg_match($regExp, basename($file), $matches) === 1) {
+                $files[$matches[1]] = $file;
             }
-            $handlerDir->close();
         }
 
         if (empty($files)) {
