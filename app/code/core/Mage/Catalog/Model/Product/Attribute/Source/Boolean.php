@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -30,16 +31,16 @@ class Mage_Catalog_Model_Product_Attribute_Source_Boolean extends Mage_Eav_Model
             $this->_options = [
                 [
                     'label' => Mage::helper('catalog')->__('Yes'),
-                    'value' => 1
+                    'value' => 1,
                 ],
                 [
                     'label' => Mage::helper('catalog')->__('No'),
-                    'value' => 0
+                    'value' => 0,
                 ],
                 [
                     'label' => Mage::helper('catalog')->__('Use config'),
-                    'value' => 2
-                ]
+                    'value' => 2,
+                ],
             ];
         }
         return $this->_options;

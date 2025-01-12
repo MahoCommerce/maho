@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -106,7 +107,7 @@ class Mage_Catalog_Model_Design extends Mage_Core_Model_Abstract
                 case self::APPLY_FOR_PRODUCT:
                     $validApplyTo = [
                         self::CATEGORY_APPLY_CATEGORY_AND_PRODUCT_RECURSIVE,
-                        self::CATEGORY_APPLY_CATEGORY_AND_PRODUCT_ONLY
+                        self::CATEGORY_APPLY_CATEGORY_AND_PRODUCT_ONLY,
                     ];
                     if ($applyTo && !in_array($applyTo, $validApplyTo)) {
                         $hasError = true;
@@ -121,7 +122,7 @@ class Mage_Catalog_Model_Design extends Mage_Core_Model_Abstract
                 case self::APPLY_FOR_CATEGORY:
                     $validApplyTo = [
                         self::CATEGORY_APPLY_CATEGORY_AND_PRODUCT_RECURSIVE,
-                        self::CATEGORY_APPLY_CATEGORY_RECURSIVE
+                        self::CATEGORY_APPLY_CATEGORY_RECURSIVE,
                     ];
                     if ($applyTo && !in_array($applyTo, $validApplyTo)) {
                         $hasError = true;
@@ -129,7 +130,7 @@ class Mage_Catalog_Model_Design extends Mage_Core_Model_Abstract
                     break;
                 case self::APPLY_FOR_PRODUCT:
                     $validApplyTo = [
-                        self::CATEGORY_APPLY_CATEGORY_AND_PRODUCT_RECURSIVE
+                        self::CATEGORY_APPLY_CATEGORY_AND_PRODUCT_RECURSIVE,
                     ];
                     if ($applyTo && !in_array($applyTo, $validApplyTo)) {
                         $hasError = true;
@@ -302,7 +303,7 @@ class Mage_Catalog_Model_Design extends Mage_Core_Model_Abstract
                 $_category = $designUpdateData->getCategory();
                 $_designUpdateData = array_merge(
                     $_designUpdateData,
-                    [$_category]
+                    [$_category],
                 );
                 $pass--;
             } elseif ($designUpdateData instanceof Mage_Catalog_Model_Category) {
@@ -311,7 +312,7 @@ class Mage_Catalog_Model_Design extends Mage_Core_Model_Abstract
             if ($_category && $_category->getId()) {
                 $_designUpdateData = array_merge(
                     $_designUpdateData,
-                    $_category->getResource()->getDesignUpdateData($_category)
+                    $_category->getResource()->getDesignUpdateData($_category),
                 );
                 $this->_applyDesign($_designUpdateData, $calledFrom, true, $pass);
             }
@@ -377,7 +378,7 @@ class Mage_Catalog_Model_Design extends Mage_Core_Model_Abstract
             }
             $settings->setCustomDesign($object->getCustomDesign())
                 ->setPageLayout($object->getPageLayout())
-                ->setLayoutUpdates((array)$customLayout);
+                ->setLayoutUpdates((array) $customLayout);
         }
         return $settings;
     }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,7 +7,7 @@
  * @package    Varien_Data
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -63,6 +64,13 @@ class Varien_Data_Collection_Filesystem extends Varien_Data_Collection
     protected $_collectDirs = false;
 
     /**
+     * Whether to collect children directory count
+     *
+     * @var bool
+     */
+    protected $_collectSubdirCount = false;
+
+    /**
      * Directory names regex pre-filter
      *
      * @var string
@@ -110,7 +118,7 @@ class Varien_Data_Collection_Filesystem extends Varien_Data_Collection
      */
     public function setDirsFilter($regex)
     {
-        $this->_allowedDirsMask = (string)$regex;
+        $this->_allowedDirsMask = (string) $regex;
         return $this;
     }
 
@@ -123,7 +131,7 @@ class Varien_Data_Collection_Filesystem extends Varien_Data_Collection
      */
     public function setFilesFilter($regex)
     {
-        $this->_allowedFilesMask = (string)$regex;
+        $this->_allowedFilesMask = (string) $regex;
         return $this;
     }
 
@@ -136,7 +144,7 @@ class Varien_Data_Collection_Filesystem extends Varien_Data_Collection
      */
     public function setDisallowedFilesFilter($regex)
     {
-        $this->_disallowedFilesMask = (string)$regex;
+        $this->_disallowedFilesMask = (string) $regex;
         return $this;
     }
 
@@ -148,7 +156,7 @@ class Varien_Data_Collection_Filesystem extends Varien_Data_Collection
      */
     public function setCollectDirs($value)
     {
-        $this->_collectDirs = (bool)$value;
+        $this->_collectDirs = (bool) $value;
         return $this;
     }
 
@@ -160,7 +168,7 @@ class Varien_Data_Collection_Filesystem extends Varien_Data_Collection
      */
     public function setCollectFiles($value)
     {
-        $this->_collectFiles = (bool)$value;
+        $this->_collectFiles = (bool) $value;
         return $this;
     }
 
@@ -172,7 +180,19 @@ class Varien_Data_Collection_Filesystem extends Varien_Data_Collection
      */
     public function setCollectRecursively($value)
     {
-        $this->_collectRecursively = (bool)$value;
+        $this->_collectRecursively = (bool) $value;
+        return $this;
+    }
+
+    /**
+     * Set whether to collect children directory count
+     *
+     * @param bool $value
+     * @return $this
+     */
+    public function setCollectSubdirCount($value)
+    {
+        $this->_collectSubdirCount = (bool) $value;
         return $this;
     }
 
@@ -184,7 +204,7 @@ class Varien_Data_Collection_Filesystem extends Varien_Data_Collection
      */
     public function addTargetDir($value)
     {
-        $value = (string)$value;
+        $value = (string) $value;
         if (!is_dir($value)) {
             throw new Exception('Unable to set target directory.');
         }
@@ -201,7 +221,7 @@ class Varien_Data_Collection_Filesystem extends Varien_Data_Collection
      */
     public function setDirsFirst($value)
     {
-        $this->_dirsFirst = (bool)$value;
+        $this->_dirsFirst = (bool) $value;
         return $this;
     }
 
@@ -368,10 +388,20 @@ class Varien_Data_Collection_Filesystem extends Varien_Data_Collection
      */
     protected function _generateRow($filename)
     {
-        return [
+        $row = [
             'filename' => $filename,
             'basename' => basename($filename),
+            'mtime'    => filemtime($filename),
         ];
+
+        if ($this->_collectSubdirCount && is_dir($filename)) {
+            $children = glob($filename . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR);
+            if ($children !== false) {
+                $row['subdir_count'] = count($children);
+            }
+        }
+
+        return $row;
     }
 
     /**
@@ -395,7 +425,7 @@ class Varien_Data_Collection_Filesystem extends Varien_Data_Collection
             'value'       => $value,
             'is_and'      => 'and' === $type,
             'callback'    => $callback,
-            'is_inverted' => $isInverted
+            'is_inverted' => $isInverted,
         ];
         $this->_filterIncrement++;
         return $this;
@@ -611,7 +641,7 @@ class Varien_Data_Collection_Filesystem extends Varien_Data_Collection
     public function filterCallbackLike($field, $filterValue, $row)
     {
         $filterValueRegex = str_replace('%', '(.*?)', preg_quote($filterValue, '/'));
-        return (bool)preg_match("/^{$filterValueRegex}$/i", $row[$field]);
+        return (bool) preg_match("/^{$filterValueRegex}$/i", $row[$field]);
     }
 
     /**

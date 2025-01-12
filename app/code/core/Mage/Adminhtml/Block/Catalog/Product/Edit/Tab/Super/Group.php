@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -119,21 +120,21 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Group extends Mage_Adm
             'name'      => 'in_products',
             'values'    => $this->_getSelectedProducts(),
             'align'     => 'center',
-            'index'     => 'entity_id'
+            'index'     => 'entity_id',
         ]);
 
         $this->addColumn('entity_id', [
             'header'    => Mage::helper('catalog')->__('ID'),
-            'index'     => 'entity_id'
+            'index'     => 'entity_id',
         ]);
         $this->addColumn('name', [
             'header'    => Mage::helper('catalog')->__('Name'),
-            'index'     => 'name'
+            'index'     => 'name',
         ]);
         $this->addColumn('sku', [
             'header'    => Mage::helper('catalog')->__('SKU'),
             'width'     => '80px',
-            'index'     => 'sku'
+            'index'     => 'sku',
         ]);
         $this->addColumn('price', [
             'type'      => 'currency',
@@ -147,7 +148,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Group extends Mage_Adm
             'validate_class' => 'validate-number',
             'index'     => 'qty',
             'editable'  => true,
-            'filter_condition_callback' => [$this, '_addLinkModelFilterCallback']
+            'filter_condition_callback' => [$this, '_addLinkModelFilterCallback'],
         ]);
 
         $this->addColumn('position', [
@@ -159,7 +160,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Group extends Mage_Adm
             'width'     => '1',
             'editable'  => true,
             'edit_only' => !$this->_getProduct()->getId(),
-            'filter_condition_callback' => [$this, '_addLinkModelFilterCallback']
+            'filter_condition_callback' => [$this, '_addLinkModelFilterCallback'],
         ]);
 
         $this->addColumn('action', [
@@ -175,7 +176,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Group extends Mage_Adm
                         'base'   => 'adminhtml/catalog_product/edit',
                         'params' => [
                             'store' => $this->getRequest()->getParam('store'),
-                            'popup' => 1
+                            'popup' => 1,
                         ],
                     ],
                 ],
@@ -224,7 +225,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Group extends Mage_Adm
         foreach ($associatedProducts as $product) {
             $products[$product->getId()] = [
                 'qty'       => $product->getQty(),
-                'position'  => $product->getPosition()
+                'position'  => $product->getPosition(),
             ];
         }
         return $products;

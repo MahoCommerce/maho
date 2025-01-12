@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -111,7 +112,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
         $refValues = is_array($refValues) ? $refValues : [$refValues];
         if (isset($this->_depends[$targetField][$dependentField])) {
             $this->_depends[$targetField][$dependentField] = array_unique(
-                array_merge($this->_depends[$targetField][$dependentField], $refValues)
+                array_merge($this->_depends[$targetField][$dependentField], $refValues),
             );
         } else {
             $this->_depends[$targetField][$dependentField] = $refValues;

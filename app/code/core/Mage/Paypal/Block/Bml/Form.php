@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -41,7 +42,7 @@ class Mage_Paypal_Block_Bml_Form extends Mage_Paypal_Block_Express_Form
             ->setPaymentWhatIs('See terms');
         $this->setTemplate('paypal/payment/redirect.phtml')
             ->setRedirectMessage(
-                Mage::helper('paypal')->__('You will be redirected to the PayPal website.')
+                Mage::helper('paypal')->__('You will be redirected to the PayPal website.'),
             )
             ->setMethodTitle('') // Output PayPal mark, omit title
             ->setMethodLabelAfterHtml($mark->toHtml());

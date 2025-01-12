@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -27,7 +28,7 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
         $this->getFront()->setDefault([
             'module'     => !empty($d[0]) ? $d[0] : '',
             'controller' => !empty($d[1]) ? $d[1] : 'index',
-            'action'     => !empty($d[2]) ? $d[2] : 'index'
+            'action'     => !empty($d[2]) ? $d[2] : 'index',
         ]);
     }
 
@@ -38,7 +39,7 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
     #[\Override]
     protected function _getDefaultPath()
     {
-        return (string)Mage::getConfig()->getNode('default/web/default/admin');
+        return (string) Mage::getConfig()->getNode('default/web/default/admin');
     }
 
     /**
@@ -90,9 +91,9 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
     #[\Override]
     protected function _shouldBeSecure($path)
     {
-        return substr((string)Mage::getConfig()->getNode('default/web/unsecure/base_url'), 0, 5) === 'https'
+        return substr((string) Mage::getConfig()->getNode('default/web/unsecure/base_url'), 0, 5) === 'https'
             || Mage::getStoreConfigFlag(Mage_Core_Model_Store::XML_PATH_SECURE_IN_ADMINHTML, Mage_Core_Model_App::ADMIN_STORE_ID)
-                && substr((string)Mage::getConfig()->getNode('default/web/secure/base_url'), 0, 5) === 'https';
+                && substr((string) Mage::getConfig()->getNode('default/web/secure/base_url'), 0, 5) === 'https';
     }
 
     /**
@@ -117,10 +118,10 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
     #[\Override]
     public function collectRoutes($configArea, $useRouterName)
     {
-        if ((string)Mage::getConfig()->getNode(Mage_Adminhtml_Helper_Data::XML_PATH_USE_CUSTOM_ADMIN_PATH)) {
-            $customUrl = (string)Mage::getConfig()->getNode(Mage_Adminhtml_Helper_Data::XML_PATH_CUSTOM_ADMIN_PATH);
+        if ((string) Mage::getConfig()->getNode(Mage_Adminhtml_Helper_Data::XML_PATH_USE_CUSTOM_ADMIN_PATH)) {
+            $customUrl = (string) Mage::getConfig()->getNode(Mage_Adminhtml_Helper_Data::XML_PATH_CUSTOM_ADMIN_PATH);
             $xmlPath = Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_ROUTER_FRONTNAME;
-            if ((string)Mage::getConfig()->getNode($xmlPath) != $customUrl) {
+            if ((string) Mage::getConfig()->getNode($xmlPath) != $customUrl) {
                 Mage::getConfig()->setNode($xmlPath, $customUrl, true);
             }
         }
@@ -133,8 +134,8 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
     #[\Override]
     public function addModule($frontName, $moduleName, $routeName)
     {
-        $configRouterFrontName = (string)Mage::getConfig()->getNode(
-            Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_ROUTER_FRONTNAME
+        $configRouterFrontName = (string) Mage::getConfig()->getNode(
+            Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_ROUTER_FRONTNAME,
         );
         if ($frontName == $configRouterFrontName) {
             return parent::addModule($frontName, $moduleName, $routeName);

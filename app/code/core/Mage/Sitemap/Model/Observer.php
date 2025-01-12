@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -81,7 +82,7 @@ class Mage_Sitemap_Model_Observer
                     Mage::getStoreConfig(self::XML_PATH_ERROR_IDENTITY),
                     Mage::getStoreConfig(self::XML_PATH_ERROR_RECIPIENT),
                     null,
-                    ['warnings' => implode("\n", $errors)]
+                    ['warnings' => implode("\n", $errors)],
                 );
 
             $translate->setTranslateInline(true);

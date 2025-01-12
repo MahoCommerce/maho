@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -122,7 +123,7 @@ class Mage_Core_Model_Resource_Setup
             $this->_connectionConfig = $config->getResourceConnectionConfig(self::DEFAULT_SETUP_CONNECTION);
         }
 
-        $modName = (string)$this->_resourceConfig->setup->module;
+        $modName = (string) $this->_resourceConfig->setup->module;
         $this->_moduleConfig = $config->getModuleConfig($modName);
         $connection = Mage::getSingleton('core/resource')->getConnection($this->_resourceName);
         /**
@@ -259,7 +260,7 @@ class Mage_Core_Model_Resource_Setup
     public function applyDataUpdates()
     {
         $dataVer = $this->_getResource()->getDataVersion($this->_resourceName);
-        $configVer = (string)$this->_moduleConfig->version;
+        $configVer = (string) $this->_moduleConfig->version;
         if ($dataVer !== false) {
             $status = version_compare($configVer, $dataVer);
             if ($status == self::VERSION_COMPARE_GREATER) {
@@ -314,13 +315,13 @@ class Mage_Core_Model_Resource_Setup
     public function applyUpdates()
     {
         $dbVer = $this->_getResource()->getDbVersion($this->_resourceName);
-        $configVer = (string)$this->_moduleConfig->version;
+        $configVer = (string) $this->_moduleConfig->version;
 
         /**
          * Hook queries in adapter, so that in MySQL compatibility mode extensions and custom modules will avoid
          * errors due to changes in database structure
          */
-        if (((string)$this->_moduleConfig->codePool != 'core') && Mage::helper('core')->useDbCompatibleMode()) {
+        if (((string) $this->_moduleConfig->codePool != 'core') && Mage::helper('core')->useDbCompatibleMode()) {
             $this->_hookQueries();
         }
 
@@ -509,8 +510,8 @@ class Mage_Core_Model_Resource_Setup
      */
     protected function _getAvailableDbFiles($actionType, $fromVersion, $toVersion)
     {
-        $resModel   = (string)$this->_connectionConfig->model;
-        $modName    = (string)$this->_moduleConfig[0]->getName();
+        $resModel   = (string) $this->_connectionConfig->model;
+        $modName    = (string) $this->_moduleConfig[0]->getName();
 
         $dbFiles    = [];
         $typeFiles  = [];
@@ -548,7 +549,7 @@ class Mage_Core_Model_Resource_Setup
      */
     protected function _getAvailableDataFiles($actionType, $fromVersion, $toVersion)
     {
-        $modName    = (string)$this->_moduleConfig[0]->getName();
+        $modName    = (string) $this->_moduleConfig[0]->getName();
         $files      = [];
 
         $regExp     = sprintf('#^%s-(.*)\.php$#i', $actionType);
@@ -583,7 +584,7 @@ class Mage_Core_Model_Resource_Setup
      */
     protected function _getAvailableMahoFiles(string $actionType, string $fromVersion, string $toVersion): array
     {
-        $modName    = (string)$this->_moduleConfig[0]->getName();
+        $modName    = (string) $this->_moduleConfig[0]->getName();
         $files      = [];
 
         $regExp     = sprintf('#^%s-(.*)\.php$#i', $actionType);
@@ -714,7 +715,7 @@ class Mage_Core_Model_Resource_Setup
                     if (version_compare($version, $toVersion) !== self::VERSION_COMPARE_GREATER) {
                         $arrRes[0] = [
                             'toVersion' => $version,
-                            'fileName'  => $file
+                            'fileName'  => $file,
                         ];
                     }
                 }
@@ -737,7 +738,7 @@ class Mage_Core_Model_Resource_Setup
                     ) {
                         $arrRes[] = [
                             'toVersion' => $infoTo,
-                            'fileName'  => $file
+                            'fileName'  => $file,
                         ];
                     }
                 }
@@ -751,7 +752,7 @@ class Mage_Core_Model_Resource_Setup
                     ) {
                         $arrRes[] = [
                             'toVersion' => $version,
-                            'fileName'  => $file
+                            'fileName'  => $file,
                         ];
                     }
                 }
@@ -890,7 +891,7 @@ class Mage_Core_Model_Resource_Setup
             'UPDATE %s SET %s WHERE %s',
             $this->getConnection()->quoteIdentifier($table),
             $conditionExpr,
-            $valueExpr
+            $valueExpr,
         );
 
         $this->getConnection()->query($query);
@@ -948,7 +949,7 @@ class Mage_Core_Model_Resource_Setup
             'scope'     => $scope,
             'scope_id'  => $scopeId,
             'path'      => $path,
-            'value'     => $value
+            'value'     => $value,
         ];
         $this->getConnection()->insertOnDuplicate($table, $data, ['value']);
         return $this;

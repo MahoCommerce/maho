@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,7 +7,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -56,7 +57,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $this->setType(Mage_Catalog_Model_Category::ENTITY)
             ->setConnection(
                 $resource->getConnection('catalog_read'),
-                $resource->getConnection('catalog_write')
+                $resource->getConnection('catalog_write'),
             );
         $this->_categoryProductTable = $this->getTable('catalog/category_product');
     }
@@ -142,7 +143,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         if (!empty($childrenIds)) {
             $adapter->delete(
                 $this->getEntityTable(),
-                ['entity_id IN (?)' => $childrenIds]
+                ['entity_id IN (?)' => $childrenIds],
             );
         }
 
@@ -187,7 +188,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
             $this->_getWriteAdapter()->update(
                 $this->getEntityTable(),
                 ['children_count'  => new Zend_Db_Expr('children_count+1')],
-                ['entity_id IN(?)' => $toUpdateChild]
+                ['entity_id IN(?)' => $toUpdateChild],
             );
         }
         return $this;
@@ -226,7 +227,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
             $this->_getWriteAdapter()->update(
                 $this->getEntityTable(),
                 ['path' => $object->getPath()],
-                ['entity_id = ?' => $object->getId()]
+                ['entity_id = ?' => $object->getId()],
             );
         }
         return $this;
@@ -245,7 +246,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $level   = count(explode('/', $path));
         $bind = [
             'c_level' => $level,
-            'c_path'  => $path . '/%'
+            'c_path'  => $path . '/%',
         ];
         $select  = $adapter->select()
             ->from($this->getTable('catalog/category'), 'MAX(' . $positionField . ')')
@@ -304,7 +305,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         if (!empty($delete)) {
             $cond = [
                 'product_id IN(?)' => array_keys($delete),
-                'category_id=?' => $id
+                'category_id=?' => $id,
             ];
             $adapter->delete($this->_categoryProductTable, $cond);
         }
@@ -316,9 +317,9 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
             $data = [];
             foreach ($insert as $productId => $position) {
                 $data[] = [
-                    'category_id' => (int)$id,
-                    'product_id'  => (int)$productId,
-                    'position'    => (int)$position
+                    'category_id' => (int) $id,
+                    'product_id'  => (int) $productId,
+                    'position'    => (int) $position,
                 ];
             }
             $adapter->insertMultiple($this->_categoryProductTable, $data);
@@ -330,10 +331,10 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         if (!empty($update)) {
             foreach ($update as $productId => $position) {
                 $where = [
-                    'category_id = ?' => (int)$id,
-                    'product_id = ?' => (int)$productId
+                    'category_id = ?' => (int) $id,
+                    'product_id = ?' => (int) $productId,
                 ];
-                $bind  = ['position' => (int)$position];
+                $bind  = ['position' => (int) $position];
                 $adapter->update($this->_categoryProductTable, $bind, $where);
             }
         }
@@ -342,7 +343,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
             $productIds = array_unique(array_merge(array_keys($insert), array_keys($delete)));
             Mage::dispatchEvent('catalog_category_change_products', [
                 'category'      => $category,
-                'product_ids'   => $productIds
+                'product_ids'   => $productIds,
             ]);
         }
 
@@ -369,7 +370,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $select = $this->_getWriteAdapter()->select()
             ->from($this->_categoryProductTable, ['product_id', 'position'])
             ->where('category_id = :category_id');
-        $bind = ['category_id' => (int)$category->getId()];
+        $bind = ['category_id' => (int) $category->getId()];
 
         return $this->_getWriteAdapter()->fetchPairs($select, $bind);
     }
@@ -443,19 +444,19 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
             'attribute_id' => $attributeId,
             'store_id'     => $storeId,
             'active_flag'  => $isActiveFlag,
-            'c_path'       => $category->getPath() . '/%'
+            'c_path'       => $category->getPath() . '/%',
         ];
         $select = $adapter->select()
             ->from(['m' => $this->getEntityTable()], ['COUNT(m.entity_id)'])
             ->joinLeft(
                 ['d' => $table],
                 'd.attribute_id = :attribute_id AND d.store_id = 0 AND d.entity_id = m.entity_id',
-                []
+                [],
             )
             ->joinLeft(
                 ['c' => $table],
                 'c.attribute_id = :attribute_id AND c.store_id = :store_id AND c.entity_id = m.entity_id',
-                []
+                [],
             )
             ->where('m.path LIKE :c_path')
             ->where($checkSql . ' = :active_flag');
@@ -495,7 +496,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
     {
         $bind = [
             'attribute_id' => $attribute->getId(),
-            'value'        => $expectedValue
+            'value'        => $expectedValue,
         ];
         $select = $this->_getReadAdapter()->select()
             ->from($attribute->getBackend()->getTable(), ['entity_id'])
@@ -519,11 +520,11 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $select = $this->getReadConnection()->select()
             ->from(
                 ['main_table' => $productTable],
-                [new Zend_Db_Expr('COUNT(main_table.product_id)')]
+                [new Zend_Db_Expr('COUNT(main_table.product_id)')],
             )
             ->where('main_table.category_id = :category_id');
 
-        $bind = ['category_id' => (int)$category->getId()];
+        $bind = ['category_id' => (int) $category->getId()];
         $counts = $this->getReadConnection()->fetchOne($select, $bind);
 
         return (int) $counts;
@@ -677,7 +678,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      */
     public function getChildren($category, $recursive = true)
     {
-        $attributeId  = (int)$this->_getIsActiveAttributeId();
+        $attributeId  = (int) $this->_getIsActiveAttributeId();
         $backendTable = $this->getTable([$this->getEntityTablePrefix(), 'int']);
         $adapter      = $this->_getReadAdapter();
         $checkSql     = $adapter->getCheckSql('c.value_id > 0', 'c.value', 'd.value');
@@ -691,12 +692,12 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
             ->joinLeft(
                 ['d' => $backendTable],
                 'd.attribute_id = :attribute_id AND d.store_id = 0 AND d.entity_id = m.entity_id',
-                []
+                [],
             )
             ->joinLeft(
                 ['c' => $backendTable],
                 'c.attribute_id = :attribute_id AND c.store_id = :store_id AND c.entity_id = m.entity_id',
-                []
+                [],
             )
             ->where($checkSql . ' = :scope')
             ->order('m.position ASC');
@@ -733,16 +734,51 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
     }
 
     /**
-     * Check is category in list of store categories
+     * Check if category is a child of current store root category
      *
      * @param Mage_Catalog_Model_Category $category
      * @return bool
      */
     public function isInRootCategoryList($category)
     {
-        $rootCategoryId = Mage::app()->getStore()->getRootCategoryId();
+        return $this->isInStoreRootCategory($category);
+    }
 
+    /**
+     * Check if category is a child of specific store root category
+     *
+     * @param Mage_Catalog_Model_Category $category
+     * @param null|string|bool|int|Mage_Core_Model_Store $store
+     */
+    public function isInStoreRootCategory($category, $store = null): bool
+    {
+        $rootCategoryId = Mage::app()->getStore($store)->getRootCategoryId();
         return in_array($rootCategoryId, $category->getParentIds());
+    }
+
+    /**
+     * Check if category is a child of specific store root category, or the root category itself
+     *
+     * @param Mage_Catalog_Model_Category $category
+     * @param null|string|bool|int|Mage_Core_Model_Store $store
+     */
+    public function isInStore($category, $store = null): bool
+    {
+        $rootCategoryId = Mage::app()->getStore($store)->getRootCategoryId();
+        return in_array($rootCategoryId, $category->getPathIds());
+    }
+
+    /**
+     * Return ids of root categories as array
+     *
+     * @return list<int>
+     */
+    public function getRootIds(): array
+    {
+        return array_map(
+            fn($store) => (int) $store->getRootCategoryId(),
+            Mage::app()->getGroups(),
+        );
     }
 
     /**
@@ -776,7 +812,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $select = $this->getReadConnection()->select()
             ->from($this->getEntityTable(), ['path'])
             ->where('entity_id = :entity_id');
-        $bind = ['entity_id' => (int)$categoryId];
+        $bind = ['entity_id' => (int) $categoryId];
 
         return $this->getReadConnection()->fetchOne($select, $bind);
     }
@@ -792,7 +828,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         Mage_Catalog_Model_Category $newParent,
         $afterCategoryId = null
     ) {
-        $childrenCount  = (int)$this->getChildrenCount($category->getId()) + 1;
+        $childrenCount  = (int) $this->getChildrenCount($category->getId()) + 1;
         $table          = $this->getEntityTable();
         $adapter        = $this->_getWriteAdapter();
         $levelFiled     = $adapter->quoteIdentifier('level');
@@ -804,7 +840,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $adapter->update(
             $table,
             ['children_count' => new Zend_Db_Expr('children_count - ' . $childrenCount)],
-            ['entity_id IN(?)' => $category->getParentIds()]
+            ['entity_id IN(?)' => $category->getParentIds()],
         );
 
         /**
@@ -813,7 +849,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $adapter->update(
             $table,
             ['children_count' => new Zend_Db_Expr('children_count + ' . $childrenCount)],
-            ['entity_id IN(?)' => $newParent->getPathIds()]
+            ['entity_id IN(?)' => $newParent->getPathIds()],
         );
 
         $position = $this->_processPositions($category, $newParent, $afterCategoryId);
@@ -830,9 +866,9 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
             [
                 'path' => new Zend_Db_Expr('REPLACE(' . $pathField . ',' .
                     $adapter->quote($category->getPath() . '/') . ', ' . $adapter->quote($newPath . '/') . ')'),
-                'level' => new Zend_Db_Expr($levelFiled . ' + ' . $levelDisposition)
+                'level' => new Zend_Db_Expr($levelFiled . ' + ' . $levelDisposition),
             ],
-            [$pathField . ' LIKE ?' => $category->getPath() . '/%']
+            [$pathField . ' LIKE ?' => $category->getPath() . '/%'],
         );
         /**
          * Update moved category data
@@ -841,7 +877,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
             'path'      => $newPath,
             'level'     => $newLevel,
             'position'  => $position,
-            'parent_id' => $newParent->getId()
+            'parent_id' => $newParent->getId(),
         ];
         $adapter->update($table, $data, ['entity_id = ?' => $category->getId()]);
 
@@ -867,11 +903,11 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $positionField  = $adapter->quoteIdentifier('position');
 
         $bind = [
-            'position' => new Zend_Db_Expr($positionField . ' - 1')
+            'position' => new Zend_Db_Expr($positionField . ' - 1'),
         ];
         $where = [
             'parent_id = ?'         => $category->getParentId(),
-            $positionField . ' > ?' => $category->getPosition()
+            $positionField . ' > ?' => $category->getPosition(),
         ];
         $adapter->update($table, $bind, $where);
 
@@ -885,21 +921,21 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
             $position = $adapter->fetchOne($select, ['entity_id' => $afterCategoryId]);
 
             $bind = [
-                'position' => new Zend_Db_Expr($positionField . ' + 1')
+                'position' => new Zend_Db_Expr($positionField . ' + 1'),
             ];
             $where = [
                 'parent_id = ?' => $newParent->getId(),
-                $positionField . ' > ?' => $position
+                $positionField . ' > ?' => $position,
             ];
             $adapter->update($table, $bind, $where);
         } elseif ($afterCategoryId !== null) {
             $position = 0;
             $bind = [
-                'position' => new Zend_Db_Expr($positionField . ' + 1')
+                'position' => new Zend_Db_Expr($positionField . ' + 1'),
             ];
             $where = [
                 'parent_id = ?' => $newParent->getId(),
-                $positionField . ' > ?' => $position
+                $positionField . ' > ?' => $position,
             ];
             $adapter->update($table, $bind, $where);
         } else {

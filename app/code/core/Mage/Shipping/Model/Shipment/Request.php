@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -75,6 +76,4 @@
  * @method $this setBaseCurrencyCode(string $value)
  * @method $this setStoreId(int $value)
  */
-class Mage_Shipping_Model_Shipment_Request extends Varien_Object
-{
-}
+class Mage_Shipping_Model_Shipment_Request extends Varien_Object {}

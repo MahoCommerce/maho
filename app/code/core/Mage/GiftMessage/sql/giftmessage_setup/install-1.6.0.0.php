@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -49,12 +50,12 @@ $entities = [
     'quote_item',
     'quote_address_item',
     'order',
-    'order_item'
+    'order_item',
 ];
 $options = [
     'type'     => Varien_Db_Ddl_Table::TYPE_INTEGER,
     'visible'  => false,
-    'required' => false
+    'required' => false,
 ];
 foreach ($entities as $entity) {
     $installer->addAttribute($entity, 'gift_message_id', $options);
@@ -83,8 +84,8 @@ Mage::getResourceModel('catalog/setup', 'catalog_setup')->addAttribute(
         'apply_to'      => '',
         'input_renderer'   => 'giftmessage/adminhtml_product_helper_form_config',
         'is_configurable'  => 0,
-        'visible_on_front' => false
-    ]
+        'visible_on_front' => false,
+    ],
 );
 
 $installer->endSetup();

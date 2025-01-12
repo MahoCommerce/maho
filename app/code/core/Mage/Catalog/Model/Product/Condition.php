@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -34,7 +35,7 @@ class Mage_Catalog_Model_Product_Condition extends Varien_Object implements Mage
             $collection->joinTable(
                 $this->getTable(),
                 $this->getPkFieldName() . '=entity_id',
-                ['affected_product_id' => $this->getPkFieldName()]
+                ['affected_product_id' => $this->getPkFieldName()],
             );
         }
         return $this;

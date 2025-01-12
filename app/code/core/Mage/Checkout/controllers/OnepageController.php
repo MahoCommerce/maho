@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,7 +7,7 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -370,13 +371,13 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                     $result['goto_section'] = 'payment';
                     $result['update_section'] = [
                         'name' => 'payment-method',
-                        'html' => $this->_getPaymentMethodsHtml()
+                        'html' => $this->_getPaymentMethodsHtml(),
                     ];
                 } elseif (isset($data['use_for_shipping']) && $data['use_for_shipping'] == 1) {
                     $result['goto_section'] = 'shipping_method';
                     $result['update_section'] = [
                         'name' => 'shipping-method',
-                        'html' => $this->_getShippingMethodsHtml()
+                        'html' => $this->_getShippingMethodsHtml(),
                     ];
 
                     $result['allow_sections'] = ['shipping'];
@@ -388,7 +389,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
 
             /** @var Mage_Checkout_Model_Session */
             $session = Mage::getSingleton('checkout/session');
-            $session->setRememberMe((bool)$this->getRequest()->getPost('remember_me'));
+            $session->setRememberMe((bool) $this->getRequest()->getPost('remember_me'));
 
             $this->_prepareDataJSON($result);
         }
@@ -416,7 +417,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                 $result['goto_section'] = 'shipping_method';
                 $result['update_section'] = [
                     'name' => 'shipping-method',
-                    'html' => $this->_getShippingMethodsHtml()
+                    'html' => $this->_getShippingMethodsHtml(),
                 ];
             }
             $this->_prepareDataJSON($result);
@@ -444,8 +445,8 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                 Mage::dispatchEvent(
                     'checkout_controller_onepage_save_shipping_method',
                     [
-                          'request' => $this->getRequest(),
-                    'quote'   => $this->getOnepage()->getQuote()]
+                        'request' => $this->getRequest(),
+                        'quote'   => $this->getOnepage()->getQuote()],
                 );
                 $this->getOnepage()->getQuote()->collectTotals();
                 $this->_prepareDataJSON($result);
@@ -453,7 +454,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                 $result['goto_section'] = 'payment';
                 $result['update_section'] = [
                     'name' => 'payment-method',
-                    'html' => $this->_getPaymentMethodsHtml()
+                    'html' => $this->_getPaymentMethodsHtml(),
                 ];
             }
             $this->getOnepage()->getQuote()->collectTotals()->save();
@@ -492,7 +493,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                 $result['goto_section'] = 'review';
                 $result['update_section'] = [
                     'name' => 'review',
-                    'html' => $this->_getReviewHtml()
+                    'html' => $this->_getReviewHtml(),
                 ];
             }
             if ($redirectUrl) {
@@ -602,7 +603,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
             $result['goto_section'] = 'payment';
             $result['update_section'] = [
                 'name' => 'payment-method',
-                'html' => $this->_getPaymentMethodsHtml()
+                'html' => $this->_getPaymentMethodsHtml(),
             ];
         } catch (Mage_Core_Exception $e) {
             Mage::logException($e);
@@ -622,7 +623,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
                     $updateSectionFunction = $this->_sectionUpdateFunctions[$updateSection];
                     $result['update_section'] = [
                         'name' => $updateSection,
-                        'html' => $this->$updateSectionFunction()
+                        'html' => $this->$updateSectionFunction(),
                     ];
                 }
                 $this->getOnepage()->getCheckout()->setUpdateSection(null);
@@ -679,7 +680,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
      */
     protected function _prepareDataJSON($response)
     {
-        $this->getResponse()->setHeader('Content-type', 'application/json', true);
-        return $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($response));
+        return $this->getResponse()->setBodyJson($response);
     }
 }

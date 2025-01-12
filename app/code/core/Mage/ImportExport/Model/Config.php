@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -35,7 +36,7 @@ class Mage_ImportExport_Model_Config
             }
             $entities[$entityType] = [
                 'model' => $entityParams['model_token'],
-                'label' => empty($entityParams['label']) ? $entityType : $entityParams['label']
+                'label' => empty($entityParams['label']) ? $entityType : $entityParams['label'],
             ];
         }
         return $entities;

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -33,9 +34,7 @@ class Mage_AdminNotification_Model_Feed extends Mage_Core_Model_Abstract
      *
      */
     #[\Override]
-    protected function _construct()
-    {
-    }
+    protected function _construct() {}
 
     /**
      * Retrieve feed url
@@ -66,11 +65,11 @@ class Mage_AdminNotification_Model_Feed extends Mage_Core_Model_Abstract
         if ($feedXml && $feedXml->channel && $feedXml->channel->item) {
             foreach ($feedXml->channel->item as $item) {
                 $feedData[] = [
-                    'severity'      => (int)$item->severity,
-                    'date_added'    => $this->getDate((string)$item->pubDate),
-                    'title'         => (string)$item->title,
-                    'description'   => (string)$item->description,
-                    'url'           => (string)$item->link,
+                    'severity'      => (int) $item->severity,
+                    'date_added'    => $this->getDate((string) $item->pubDate),
+                    'title'         => (string) $item->title,
+                    'description'   => (string) $item->description,
+                    'url'           => (string) $item->link,
                 ];
             }
 
@@ -134,7 +133,7 @@ class Mage_AdminNotification_Model_Feed extends Mage_Core_Model_Abstract
     {
         $curl = new Varien_Http_Adapter_Curl();
         $curl->setConfig([
-            'timeout'   => 2
+            'timeout'   => 2,
         ]);
         $curl->write(Zend_Http_Client::GET, $this->getFeedUrl(), '1.0');
         $data = $curl->read();

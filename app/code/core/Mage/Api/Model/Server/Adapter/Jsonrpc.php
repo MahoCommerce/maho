@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -66,7 +67,7 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mag
 
         if (null === $controller) {
             $controller = new Varien_Object(
-                ['request' => Mage::app()->getRequest(), 'response' => Mage::app()->getResponse()]
+                ['request' => Mage::app()->getRequest(), 'response' => Mage::app()->getResponse()],
             );
 
             $this->setData('controller', $controller);
@@ -108,7 +109,7 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mag
         Mage::dispatchEvent('api_server_adapter_jsonrpc_run_after', [
             'method' => $method,
             'request' => $request,
-            'response' => $this->_jsonRpc->getResponse()
+            'response' => $this->_jsonRpc->getResponse(),
         ]);
 
         return $this;

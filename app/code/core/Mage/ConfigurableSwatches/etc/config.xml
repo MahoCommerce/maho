@@ -126,12 +126,12 @@
                 <height>21</height>
             </product_detail_dimensions>
             <product_listing_dimensions>
-                <width>15</width>
-                <height>15</height>
+                <width>18</width>
+                <height>18</height>
             </product_listing_dimensions>
             <layered_nav_dimensions>
-                <width>15</width>
-                <height>15</height>
+                <width>18</width>
+                <height>18</height>
             </layered_nav_dimensions>
         </configswatches>
     </default>

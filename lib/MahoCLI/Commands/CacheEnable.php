@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -18,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'cache:enable',
-    description: 'Enable all caches'
+    description: 'Enable all caches',
 )]
 class CacheEnable extends BaseMahoCommand
 {

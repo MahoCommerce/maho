@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -18,7 +19,7 @@ $installer->addAttribute('customer', 'password_created_at', [
     'label'    => 'Password created at',
     'visible'  => false,
     'required' => false,
-    'type'     => 'int'
+    'type'     => 'int',
 ]);
 
 $installer->endSetup();

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,6 +7,7 @@
  * @package    Mage_ConfigurableSwatches
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -138,7 +140,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
                 if ($imageKeys[$swatchLabel] === false && isset($mapping[$label]['default_label'])) {
                     $imageKeys[$swatchLabel] = array_search(
                         $mapping[$label]['default_label'] . self::SWATCH_LABEL_SUFFIX,
-                        $imageHaystack
+                        $imageHaystack,
                     );
                 }
 
@@ -296,7 +298,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
 
         $newImage = imagecreatetruecolor($width, $height);
         list($r, $g, $b) = sscanf($optionSwatch->getValue(), '#%02x%02x%02x');
-        $backgroundColor = imagecolorallocate($newImage, (int)$r, (int)$g, (int)$b);
+        $backgroundColor = imagecolorallocate($newImage, (int) $r, (int) $g, (int) $b);
         imagefill($newImage, 0, 0, $backgroundColor);
         imagepng($newImage, Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . $destPath);
         imagedestroy($newImage);
@@ -378,17 +380,17 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         }
 
         if (!isset($this->_productImageFilters[$product->getId()])) {
-            $mapping = call_user_func_array('array_merge_recursive', array_values($product->getChildAttributeLabelMapping()));
-            $filters = array_unique($mapping['labels']);
-            $filters = array_merge($filters, array_map(function ($label) {
-                return $label . Mage_ConfigurableSwatches_Helper_Productimg::SWATCH_LABEL_SUFFIX;
-            }, $filters));
+            $mapping = array_merge_recursive(...array_values($product->getChildAttributeLabelMapping()));
+            $filters = array_unique($mapping['labels'] ?? []);
+            foreach ($filters as $label) {
+                $filters[] = $label . Mage_ConfigurableSwatches_Helper_Productimg::SWATCH_LABEL_SUFFIX;
+            }
             $this->_productImageFilters[$product->getId()] = $filters;
         }
 
         return !in_array(
             Mage_ConfigurableSwatches_Helper_Data::normalizeKey($image->getLabel()),
-            $this->_productImageFilters[$product->getId()]
+            $this->_productImageFilters[$product->getId()],
         );
     }
 }

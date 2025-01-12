@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -39,7 +40,7 @@ class Mage_CatalogRule_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
         $result = $this->_validateProduct($object);
         $this->_restoreOldAttrValue($object, $oldAttrValue);
 
-        return (bool)$result;
+        return (bool) $result;
     }
 
     /**

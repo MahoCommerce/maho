@@ -14,11 +14,7 @@
 ?>
 <?php if ($this->getCheckout()->getStepData('shipping', 'complete')): ?>
 <?php $completeClass = $this->getCheckout()->getStepData('shipping', 'complete') ? 'complete' : ''; ?>
-<dt class="<?= $completeClass ?>">
-    <?= $this->__('Shipping Address') ?> <span class="changelink"><span class="separator">|</span> <a
-        href="#payment"
-        onclick="checkout.changeSection('opc-shipping');return false;"><?= $this->__('Change') ?></a></span>
-</dt>
+<dt class="<?= $completeClass ?>"><?= $this->__('Shipping Address') ?></dt>
 <dd class="<?= $completeClass ?>">
     <?php if ($this->getCheckout()->getStepData('shipping', 'complete')): ?>
     <address><?= $this->getShipping()->format('html') ?></address>

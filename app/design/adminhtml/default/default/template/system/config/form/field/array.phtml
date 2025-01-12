@@ -36,7 +36,7 @@ $_colspan = $_colspan > 1 ? 'colspan="' . $_colspan . '"' : '';
                 <td colspan="<?= count($this->_columns) ?>"></td>
                 <td <?= $_colspan ?>>
                     <button style="" onclick="" class="scalable add" type="button" id="addToEndBtn<?= $_htmlId ?>">
-                        <span><span><span><?= $this->_addButtonLabel ?></span></span></span>
+                        <span><?= $this->_addButtonLabel ?></span>
                     </button>
                 </td>
             </tr>
@@ -47,7 +47,7 @@ $_colspan = $_colspan > 1 ? 'colspan="' . $_colspan . '"' : '';
 </div>
 <div id="empty<?= $_htmlId ?>">
     <button style="" onclick="" class="scalable add" type="button" id="emptyAddBtn<?= $_htmlId ?>">
-        <span><span><span><?= $this->_addButtonLabel ?></span></span></span>
+        <span><?= $this->_addButtonLabel ?></span>
     </button>
 </div>
 
@@ -64,9 +64,9 @@ var arrayRow<?= $_htmlId ?> = {
             +'<\/td>'
 <?php endforeach ?>
 <?php if ($this->_addAfter):?>
-            +'<td><button onclick="" class="scalable add" type="button" id="addAfterBtn#{_id}"><span><span><span><?= Mage::helper('core')->jsQuoteEscape(Mage::helper('adminhtml')->__('Add after')) ?><\/span><\/span><\/span><\/button><\/td>'
+            +'<td><button onclick="" class="scalable add" type="button" id="addAfterBtn#{_id}"><span><?= Mage::helper('core')->jsQuoteEscape(Mage::helper('adminhtml')->__('Add after')) ?><\/span><\/span><\/span><\/button><\/td>'
 <?php endif ?>
-            +'<td><button onclick="arrayRow<?= $_htmlId ?>.del(\'#{_id}\')" class="scalable delete" type="button"><span><span><span><?= Mage::helper('core')->jsQuoteEscape(Mage::helper('adminhtml')->__('Delete')) ?><\/span><\/span><\/span><\/button><\/td>'
+            +'<td><button onclick="arrayRow<?= $_htmlId ?>.del(\'#{_id}\')" class="scalable delete" type="button"><span><?= Mage::helper('core')->jsQuoteEscape(Mage::helper('adminhtml')->__('Delete')) ?><\/span><\/span><\/span><\/button><\/td>'
         +'<\/tr>'
     ),
 

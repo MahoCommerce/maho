@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -24,7 +25,7 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Preview extends Mage_Adminhtml_Block
         /** @var Mage_Newsletter_Model_Template $template */
         $template = Mage::getModel('newsletter/template');
 
-        if ($id = (int)$this->getRequest()->getParam('id')) {
+        if ($id = (int) $this->getRequest()->getParam('id')) {
             $queue = Mage::getModel('newsletter/queue');
             $queue->load($id);
             $template->setTemplateType($queue->getNewsletterType());
@@ -36,13 +37,13 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Preview extends Mage_Adminhtml_Block
             $template->setTemplateStyles($this->getRequest()->getParam('styles'));
         }
         $template->setTemplateStyles(
-            $this->maliciousCodeFilter($template->getTemplateStyles())
+            $this->maliciousCodeFilter($template->getTemplateStyles()),
         );
         $template->setTemplateText(
-            $this->maliciousCodeFilter($template->getTemplateText())
+            $this->maliciousCodeFilter($template->getTemplateText()),
         );
 
-        $storeId = (int)$this->getRequest()->getParam('store_id');
+        $storeId = (int) $this->getRequest()->getParam('store_id');
         if (!$storeId) {
             $storeId = Mage::app()->getAnyStoreView()->getId();
         }

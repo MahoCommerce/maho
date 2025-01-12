@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -15,6 +16,4 @@
  * @category   Mage
  * @package    Mage_Eav
  */
-class Mage_Eav_Model_Attribute_Data_Hidden extends Mage_Eav_Model_Attribute_Data_Text
-{
-}
+class Mage_Eav_Model_Attribute_Data_Hidden extends Mage_Eav_Model_Attribute_Data_Text {}

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -25,20 +26,20 @@ class Mage_Api2_Model_Acl_Global_Rule_Privilege
         return [
             [
                 'value' => Mage_Api2_Model_Resource::OPERATION_CREATE,
-                'label' => Mage::helper('api2')->__('Create')
+                'label' => Mage::helper('api2')->__('Create'),
             ],
             [
                 'value' => Mage_Api2_Model_Resource::OPERATION_RETRIEVE,
-                'label' => Mage::helper('api2')->__('Retrieve')
+                'label' => Mage::helper('api2')->__('Retrieve'),
             ],
             [
                 'value' => Mage_Api2_Model_Resource::OPERATION_UPDATE,
-                'label' => Mage::helper('api2')->__('Update')
+                'label' => Mage::helper('api2')->__('Update'),
             ],
             [
                 'value' => Mage_Api2_Model_Resource::OPERATION_DELETE,
-                'label' => Mage::helper('api2')->__('Delete')
-            ]
+                'label' => Mage::helper('api2')->__('Delete'),
+            ],
         ];
     }
 
@@ -53,7 +54,7 @@ class Mage_Api2_Model_Acl_Global_Rule_Privilege
             Mage_Api2_Model_Resource::OPERATION_CREATE   => Mage::helper('api2')->__('Create'),
             Mage_Api2_Model_Resource::OPERATION_RETRIEVE => Mage::helper('api2')->__('Retrieve'),
             Mage_Api2_Model_Resource::OPERATION_UPDATE   => Mage::helper('api2')->__('Update'),
-            Mage_Api2_Model_Resource::OPERATION_DELETE   => Mage::helper('api2')->__('Delete')
+            Mage_Api2_Model_Resource::OPERATION_DELETE   => Mage::helper('api2')->__('Delete'),
         ];
     }
 }

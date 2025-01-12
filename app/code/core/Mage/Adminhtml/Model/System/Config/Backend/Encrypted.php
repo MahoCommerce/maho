@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -24,7 +25,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Encrypted extends Mage_Core_Mod
     #[\Override]
     protected function _afterLoad()
     {
-        $value = (string)$this->getValue();
+        $value = (string) $this->getValue();
         if (!empty($value) && ($decrypted = Mage::helper('core')->decrypt($value))) {
             $this->setValue($decrypted);
         }
@@ -38,7 +39,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Encrypted extends Mage_Core_Mod
     #[\Override]
     protected function _beforeSave()
     {
-        $value = (string)$this->getValue();
+        $value = (string) $this->getValue();
         // don't change value, if an obscured value came
         if (preg_match('/^\*+$/', $this->getValue())) {
             $value = $this->getOldValue();

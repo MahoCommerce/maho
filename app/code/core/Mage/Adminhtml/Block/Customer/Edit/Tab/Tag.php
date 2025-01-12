@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -109,7 +110,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Tag extends Mage_Adminhtml_Block_Wi
     {
         return $this->getUrl('*/customer/tagGrid', [
             '_current' => true,
-            'id'       => $this->getCustomerId()
+            'id'       => $this->getCustomerId(),
         ]);
     }
 }

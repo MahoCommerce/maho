@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -50,7 +51,7 @@ class Mage_Catalog_Block_Product_Price_Template extends Mage_Core_Block_Abstract
         if ($type) {
             $this->_priceBlockTypes[$type] = [
                 'block'     => $block,
-                'template'  => $template
+                'template'  => $template,
             ];
         }
 

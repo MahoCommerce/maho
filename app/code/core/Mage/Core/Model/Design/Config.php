@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -103,7 +104,7 @@ class Mage_Core_Model_Design_Config extends Varien_Simplexml_Config
      */
     protected function _canUseCache()
     {
-        return (bool)Mage::app()->useCache('config');
+        return (bool) Mage::app()->useCache('config');
     }
 
     /**

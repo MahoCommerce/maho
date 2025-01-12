@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -144,7 +145,7 @@ class Mage_Adminhtml_Block_Review_Grid extends Mage_Adminhtml_Block_Widget_Grid
             'type'      => 'select',
             'index'     => 'type',
             'filter'    => 'adminhtml/review_grid_filter_type',
-            'renderer'  => 'adminhtml/review_grid_renderer_type'
+            'renderer'  => 'adminhtml/review_grid_renderer_type',
         ]);
 
         $this->addColumn('name', [
@@ -152,7 +153,7 @@ class Mage_Adminhtml_Block_Review_Grid extends Mage_Adminhtml_Block_Widget_Grid
             'align'     => 'left',
             'type'      => 'text',
             'index'     => 'name',
-            'escape'    => true
+            'escape'    => true,
         ]);
 
         $this->addColumn('sku', [
@@ -161,7 +162,7 @@ class Mage_Adminhtml_Block_Review_Grid extends Mage_Adminhtml_Block_Widget_Grid
             'type'      => 'text',
             'width'     => '50px',
             'index'     => 'sku',
-            'escape'    => true
+            'escape'    => true,
         ]);
 
         $this->addColumn(
@@ -177,13 +178,13 @@ class Mage_Adminhtml_Block_Review_Grid extends Mage_Adminhtml_Block_Widget_Grid
                             'params' => [
                                 'productId' => $this->getProductId(),
                                 'customerId' => $this->getCustomerId(),
-                                'ret'       => (Mage::registry('usePendingFilter')) ? 'pending' : null
-                            ]
+                                'ret'       => (Mage::registry('usePendingFilter')) ? 'pending' : null,
+                            ],
                         ],
-                        'field'   => 'id'
-                    ]
+                        'field'   => 'id',
+                    ],
                 ],
-            ]
+            ],
         );
 
         if ($this->isModuleEnabled('Mage_Rss', 'catalog') &&
@@ -208,9 +209,9 @@ class Mage_Adminhtml_Block_Review_Grid extends Mage_Adminhtml_Block_Widget_Grid
             'label' => Mage::helper('review')->__('Delete'),
             'url'  => $this->getUrl(
                 '*/*/massDelete',
-                ['ret' => Mage::registry('usePendingFilter') ? 'pending' : 'index']
+                ['ret' => Mage::registry('usePendingFilter') ? 'pending' : 'index'],
             ),
-            'confirm' => Mage::helper('review')->__('Are you sure?')
+            'confirm' => Mage::helper('review')->__('Are you sure?'),
         ]);
 
         $statuses = Mage::helper('review')->getReviewStatusesOptionArray();
@@ -219,7 +220,7 @@ class Mage_Adminhtml_Block_Review_Grid extends Mage_Adminhtml_Block_Widget_Grid
             'label'         => Mage::helper('review')->__('Update Status'),
             'url'           => $this->getUrl(
                 '*/*/massUpdateStatus',
-                ['ret' => Mage::registry('usePendingFilter') ? 'pending' : 'index']
+                ['ret' => Mage::registry('usePendingFilter') ? 'pending' : 'index'],
             ),
             'additional'    => [
                 'status'    => [
@@ -227,9 +228,9 @@ class Mage_Adminhtml_Block_Review_Grid extends Mage_Adminhtml_Block_Widget_Grid
                     'type'      => 'select',
                     'class'     => 'required-entry',
                     'label'     => Mage::helper('review')->__('Status'),
-                    'values'    => $statuses
-                ]
-            ]
+                    'values'    => $statuses,
+                ],
+            ],
         ]);
         return parent::_prepareMassaction();
     }
@@ -257,7 +258,7 @@ class Mage_Adminhtml_Block_Review_Grid extends Mage_Adminhtml_Block_Widget_Grid
                 [
                     'productId' => $this->getProductId(),
                     'customerId' => $this->getCustomerId(),
-                ]
+                ],
             );
         }
         return $this->getCurrentUrl();

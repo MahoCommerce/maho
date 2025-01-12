@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -58,7 +59,7 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Invoice extends Mage_Bundle_Model_
             if (!isset($drawItems[$optionId])) {
                 $drawItems[$optionId] = [
                     'lines'  => [],
-                    'height' => 15
+                    'height' => 15,
                 ];
             }
 
@@ -67,12 +68,12 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Invoice extends Mage_Bundle_Model_
                     $line[0] = [
                         'font' => 'italic',
                         'text' => $stringHelper->str_split($attributes['option_label'], 45, true, true),
-                        'feed' => 35
+                        'feed' => 35,
                     ];
 
                     $drawItems[$optionId] = [
                         'lines'  => [$line],
-                        'height' => 15
+                        'height' => 15,
                     ];
 
                     $line = [];
@@ -91,7 +92,7 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Invoice extends Mage_Bundle_Model_
             }
             $line[] = [
                 'text'  => $stringHelper->str_split($name, 35, true, true),
-                'feed'  => $feed
+                'feed'  => $feed,
             ];
 
             // draw SKUs
@@ -102,7 +103,7 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Invoice extends Mage_Bundle_Model_
                 }
                 $line[] = [
                     'text'  => $text,
-                    'feed'  => 255
+                    'feed'  => 255,
                 ];
             }
 
@@ -117,7 +118,7 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Invoice extends Mage_Bundle_Model_
                     'text'  => $price,
                     'feed'  => 395,
                     'font'  => 'bold',
-                    'align' => 'right'
+                    'align' => 'right',
                 ];
                 $line[] = [
                     'text'  => $orderItem->getQty() * 1,
@@ -130,7 +131,7 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Invoice extends Mage_Bundle_Model_
                     'text'  => $tax,
                     'feed'  => 495,
                     'font'  => 'bold',
-                    'align' => 'right'
+                    'align' => 'right',
                 ];
 
                 if ($taxHelper->displaySalesPriceInclTax()) {
@@ -142,7 +143,7 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Invoice extends Mage_Bundle_Model_
                     'text'  => $rowTotal,
                     'feed'  => 565,
                     'font'  => 'bold',
-                    'align' => 'right'
+                    'align' => 'right',
                 ];
             }
 
@@ -158,7 +159,7 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Invoice extends Mage_Bundle_Model_
                     $lines[][] = [
                         'text'  => $stringHelper->str_split(strip_tags($option['label']), 40, true, true),
                         'font'  => 'italic',
-                        'feed'  => 35
+                        'feed'  => 35,
                     ];
 
                     if ($option['value']) {
@@ -173,13 +174,13 @@ class Mage_Bundle_Model_Sales_Order_Pdf_Items_Invoice extends Mage_Bundle_Model_
 
                         $lines[][] = [
                             'text'  => $text,
-                            'feed'  => 40
+                            'feed'  => 40,
                         ];
                     }
 
                     $drawItems[] = [
                         'lines'  => $lines,
-                        'height' => 15
+                        'height' => 15,
                     ];
                 }
             }

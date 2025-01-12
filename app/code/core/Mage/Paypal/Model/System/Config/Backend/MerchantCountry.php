@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -32,7 +33,7 @@ class Mage_Paypal_Model_System_Config_Backend_MerchantCountry extends Mage_Core_
     #[\Override]
     protected function _afterLoad()
     {
-        $value = (string)$this->getValue();
+        $value = (string) $this->getValue();
         if (empty($value)) {
             if ($this->getWebsite()) {
                 $defaultCountry = Mage::app()->getWebsite($this->getWebsite())

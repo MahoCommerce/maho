@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -265,7 +266,7 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
      */
     public function getEntityTablePrefix()
     {
-        $tablePrefix = trim((string)$this->_data['value_table_prefix']);
+        $tablePrefix = trim((string) $this->_data['value_table_prefix']);
 
         if (empty($tablePrefix)) {
             $tablePrefix = $this->getEntityTable();
@@ -281,7 +282,7 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
      */
     public function getDefaultAttributeSetId()
     {
-        return isset($this->_data['default_attribute_set_id']) ? (int)$this->_data['default_attribute_set_id'] : null;
+        return isset($this->_data['default_attribute_set_id']) ? (int) $this->_data['default_attribute_set_id'] : null;
     }
 
     /**
@@ -291,7 +292,7 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
      */
     public function getEntityTypeId()
     {
-        return isset($this->_data['entity_type_id']) ? (int)$this->_data['entity_type_id'] : null;
+        return isset($this->_data['entity_type_id']) ? (int) $this->_data['entity_type_id'] : null;
     }
 
     /**

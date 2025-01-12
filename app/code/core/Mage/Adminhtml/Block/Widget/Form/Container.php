@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -49,7 +50,7 @@ class Mage_Adminhtml_Block_Widget_Form_Container extends Mage_Adminhtml_Block_Wi
             $this->_addButton('delete', [
                 'label'     => Mage::helper('adminhtml')->__('Delete'),
                 'class'     => 'delete',
-                'onclick'   => Mage::helper('core/js')->getDeleteConfirmJs($this->getDeleteUrl())
+                'onclick'   => Mage::helper('core/js')->getDeleteConfirmJs($this->getDeleteUrl()),
             ]);
         }
 
@@ -92,7 +93,7 @@ class Mage_Adminhtml_Block_Widget_Form_Container extends Mage_Adminhtml_Block_Wi
     {
         return $this->getUrl('*/*/delete', [
             $this->_objectId => $this->getRequest()->getParam($this->_objectId),
-            Mage_Core_Model_Url::FORM_KEY => $this->getFormKey()
+            Mage_Core_Model_Url::FORM_KEY => $this->getFormKey(),
         ]);
     }
 

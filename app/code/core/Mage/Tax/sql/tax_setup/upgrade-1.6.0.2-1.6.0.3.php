@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -26,5 +27,5 @@ $installer->getConnection()
             'PRECISION' => 12,
             'NULLABLE'  => false,
             'COMMENT'   => 'Real Tax Percent For Item',
-        ]
+        ],
     );

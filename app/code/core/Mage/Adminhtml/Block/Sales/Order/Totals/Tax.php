@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -60,7 +61,7 @@ class Mage_Adminhtml_Block_Sales_Order_Totals_Tax extends Mage_Tax_Block_Sales_O
             $baseAmount,
             $amount,
             false,
-            '<br />'
+            '<br />',
         );
     }
 

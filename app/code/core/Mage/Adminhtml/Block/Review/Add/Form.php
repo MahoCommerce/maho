@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,7 +7,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,7 +24,7 @@ class Mage_Adminhtml_Block_Review_Add_Form extends Mage_Adminhtml_Block_Widget_F
     {
         $form = new Varien_Data_Form();
 
-        $fieldset = $form->addFieldset('add_review_form', ['legend' => Mage::helper('review')->__('Review Details')]);
+        $fieldset = $form->addFieldset('add_review_form', ['legend' => Mage::helper('review')->__('Review Details'), 'class' => 'fieldset-wide']);
 
         $fieldset->addField('product_name', 'note', [
             'label'     => Mage::helper('review')->__('Product'),
@@ -78,18 +79,13 @@ class Mage_Adminhtml_Block_Review_Add_Form extends Mage_Adminhtml_Block_Widget_F
             'name'      => 'detail',
             'title'     => Mage::helper('review')->__('Review'),
             'label'     => Mage::helper('review')->__('Review'),
-            'style'     => 'height: 600px;',
+            'style'     => 'height:24em;',
             'required'  => true,
         ]);
 
         $fieldset->addField('product_id', 'hidden', [
             'name'      => 'product_id',
         ]);
-
-        /*$gridFieldset = $form->addFieldset('add_review_grid', array('legend' => Mage::helper('review')->__('Please select a product')));
-        $gridFieldset->addField('products_grid', 'note', array(
-            'text' => $this->getLayout()->createBlock('adminhtml/review_product_grid')->toHtml(),
-        ));*/
 
         $form->setMethod('post');
         $form->setUseContainer(true);

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -24,7 +25,7 @@ class Mage_Api2_Block_Adminhtml_Attribute_Edit_Form extends Mage_Adminhtml_Block
         $form   = new Varien_Data_Form([
             'id'        => 'edit_form',
             'action'    => $this->getData('action'),
-            'method'    => 'post'
+            'method'    => 'post',
         ]);
 
         $form->setAction($this->getUrl('*/*/save', ['type' => $this->getRequest()->getParam('type')]))

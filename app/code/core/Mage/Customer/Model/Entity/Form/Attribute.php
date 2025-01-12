@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -15,6 +16,4 @@
  * @category   Mage
  * @package    Mage_Customer
  */
-class Mage_Customer_Model_Entity_Form_Attribute extends Mage_Customer_Model_Resource_Form_Attribute
-{
-}
+class Mage_Customer_Model_Entity_Form_Attribute extends Mage_Customer_Model_Resource_Form_Attribute {}

@@ -1,439 +1,401 @@
 /**
  * Maho
  *
- * @category    design
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * @category   design
+ * @package    base_default
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/**
- * Controller of order review form that may select shipping method
- */
-OrderReviewController = Class.create();
-OrderReviewController.prototype = {
-    _canSubmitOrder : false,
-    _pleaseWait : false,
-    shippingSelect : false,
-    reloadByShippingSelect : false,
-    _copyElement : false,
-    onSubmitShippingSuccess : false,
-    shippingMethodsUpdateUrl : false,
-    _updateShippingMethods: false,
-    _ubpdateOrderButton : false,
-    shippingMethodsContainer: false,
-    _submitUpdateOrderUrl : false,
-    _itemsGrid : false,
+class OrderReviewController {
+    constructor(orderForm, orderFormSubmit, shippingSelect, shippingSubmitForm, shippingResultId, shippingSubmit) {
+        this._canSubmitOrder = false;
+        this._pleaseWait = false;
+        this.shippingSelect = false;
+        this.reloadByShippingSelect = false;
+        this._copyElement = false;
+        this.onSubmitShippingSuccess = false;
+        this.shippingMethodsUpdateUrl = false;
+        this._updateShippingMethods = false;
+        this._ubpdateOrderButton = false;
+        this.shippingMethodsContainer = false;
+        this._submitUpdateOrderUrl = false;
+        this._itemsGrid = false;
 
-    /**
-     * Add listeners to provided objects, if any
-     * @param orderForm - form of the order submission
-     * @param orderFormSubmit - element for the order form submission (optional)
-     * @param shippingSelect - dropdown with available shipping methods (optional)
-     * @param shippingSubmitForm - form of shipping method submission (optional, requires shippingSelect)
-     * @param shippingResultId - element where to update results of shipping ajax submission (optional, requires shippingSubmitForm)
-     */
-    initialize : function(orderForm, orderFormSubmit, shippingSelect, shippingSubmitForm, shippingResultId, shippingSubmit)
-    {
-        if (!orderForm) {
-            return;
-        }
+        if (!orderForm) return;
+
         this.form = orderForm;
+
         if (orderFormSubmit) {
             this.formSubmit = orderFormSubmit;
-            Event.observe(orderFormSubmit, 'click', this._submitOrder.bind(this));
+            orderFormSubmit.addEventListener('click', this._submitOrder.bind(this));
         }
 
         if (shippingSubmitForm) {
             this.reloadByShippingSelect = true;
             if (shippingSubmitForm && shippingSelect) {
                 this.shippingSelect = shippingSelect;
-                Event.observe(
-                    shippingSelect,
-                    'change',
-                    this._submitShipping.bindAsEventListener(this, shippingSubmitForm.action, shippingResultId)
+                shippingSelect.addEventListener('change',
+                    (e) => this._submitShipping(e, shippingSubmitForm.action, shippingResultId)
                 );
                 this._updateOrderSubmit(false);
             } else {
                 this._canSubmitOrder = true;
             }
         } else {
-            Form.getElements(this.form).each(this._bindElementChange, this);
+            Array.from(this.form.elements).forEach(element => this._bindElementChange(element));
 
-            if (shippingSelect && $(shippingSelect)) {
-                this.shippingSelect = $(shippingSelect).id;
-                this.shippingMethodsContainer = $(this.shippingSelect).up();
+            if (shippingSelect && document.getElementById(shippingSelect)) {
+                this.shippingSelect = document.getElementById(shippingSelect).id;
+                this.shippingMethodsContainer = document.getElementById(this.shippingSelect).closest('div');
             } else {
                 this.shippingSelect = shippingSelect;
             }
             this._updateOrderSubmit(false);
         }
-    },
+    }
 
-    /**
-     * Register element that should show up when ajax request is in progress
-     * @param element
-     */
-    addPleaseWait : function(element)
-    {
+    addPleaseWait(element) {
         if (element) {
             this._pleaseWait = element;
         }
-    },
+    }
 
-    /**
-     * Dispatch an ajax request of shipping method submission
-     * @param event
-     * @param url - url where to submit shipping method
-     * @param resultId - id of element to be updated
-     */
-    _submitShipping : function(event, url, resultId)
-    {
+    async _submitShipping(event, url, resultId) {
         if (this.shippingSelect && url && resultId) {
             this._updateOrderSubmit(true);
+
             if (this._pleaseWait) {
-                this._pleaseWait.show();
+                this._pleaseWait.style.display = 'block';
             }
-            if ('' != this.shippingSelect.value) {
-                new Ajax.Updater(resultId, url, {
-                    parameters: {isAjax:true, shipping_method:this.shippingSelect.value},
-                    onComplete: function() {
-                        if (this._pleaseWait) {
-                            this._pleaseWait.hide();
-                        }
-                    }.bind(this),
-                    onSuccess: this._onSubmitShippingSuccess.bind(this),
-                    evalScripts: true
-                });
+
+            if (this.shippingSelect.value !== '') {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            isAjax: true,
+                            shipping_method: this.shippingSelect.value
+                        })
+                    });
+
+                    const html = await response.text();
+                    document.getElementById(resultId).innerHTML = html;
+
+                    if (this._pleaseWait) {
+                        this._pleaseWait.style.display = 'none';
+                    }
+
+                    this._onSubmitShippingSuccess();
+                } catch (error) {
+                    console.error('Shipping submission error:', error);
+                }
             }
         }
-    },
+    }
 
-    /**
-     * Set event observer to Update Order button
-     * @param element
-     * @param url - url to submit on Update button
-     * @param resultId - id of element to be updated
-     */
-    setUpdateButton : function(element, url, resultId)
-    {
+    setUpdateButton(element, url, resultId) {
         if (element) {
             this._ubpdateOrderButton = element;
             this._submitUpdateOrderUrl = url;
             this._itemsGrid = resultId;
-            Event.observe(element, 'click', this._submitUpdateOrder.bindAsEventListener(this, url, resultId));
+
+            element.addEventListener('click',
+                (e) => this._submitUpdateOrder(e, url, resultId)
+            );
+
             if(this.shippingSelect) {
                 this._updateShipping();
             }
+
             this._updateOrderSubmit(!this._validateForm());
             this.formValidator.reset();
             this._clearValidation('');
         }
-    },
+    }
 
-    /**
-     * Set event observer to copy data from shipping address to billing
-     * @param element
-     */
-    setCopyElement : function(element)
-    {
+    setCopyElement(element) {
         if (element) {
             this._copyElement = element;
-            Event.observe(element, 'click', this._copyShippingToBilling.bind(this));
+            element.addEventListener('click', this._copyShippingToBilling.bind(this));
             this._copyShippingToBilling();
         }
-    },
+    }
 
-    /**
-     * Set observers to Shipping Address elements
-     * @param element Container of Shipping Address elements
-     */
-    setShippingAddressContainer: function(element)
-    {
+    setShippingAddressContainer(element) {
         if (element) {
-            Form.getElements(element).each(function(input) {
-                if (input.type.toLowerCase() == 'radio' || input.type.toLowerCase() == 'checkbox') {
-                    Event.observe(input, 'click', this._onShippingChange.bindAsEventListener(this));
+            Array.from(element.elements).forEach(input => {
+                if (input.type.toLowerCase() === 'radio' || input.type.toLowerCase() === 'checkbox') {
+                    input.addEventListener('click', this._onShippingChange.bind(this));
                 } else {
-                    Event.observe(input, 'change', this._onShippingChange.bindAsEventListener(this));
+                    input.addEventListener('change', this._onShippingChange.bind(this));
                 }
-            }, this);
+            });
         }
-    },
+    }
 
-    /**
-     * Sets Container element of Shipping Method
-     * @param element Container element of Shipping Method
-     */
-    setShippingMethodContainer: function(element)
-    {
+    setShippingMethodContainer(element) {
         if (element) {
             this.shippingMethodsContainer = element;
         }
-    },
+    }
 
-    /**
-     * Copy element value from shipping to billing address
-     * @param el
-     */
-    _copyElementValue: function(el)
-    {
-        var newId = el.id.replace('shipping:','billing:');
-        if (newId && $(newId) && $(newId).type != 'hidden') {
-            $(newId).value = el.value;
-            $(newId).setAttribute('readOnly', 'readonly');
-            $(newId).addClassName('local-validation');
-            $(newId).setStyle({opacity:.5});
-            $(newId).disable();
-        }
-    },
+    _copyElementValue(el) {
+        const newId = el.id.replace('shipping:', 'billing:');
+        const newElement = document.getElementById(newId);
 
-    /**
-     * Copy data from shipping address to billing
-     */
-    _copyShippingToBilling : function (event)
-    {
-        if (!this._copyElement) {
-            return;
+        if (newId && newElement && newElement.type !== 'hidden') {
+            newElement.value = el.value;
+            newElement.setAttribute('readonly', 'readonly');
+            newElement.classList.add('local-validation');
+            newElement.style.opacity = 0.5;
+            newElement.disabled = true;
         }
+    }
+
+    _copyShippingToBilling(event) {
+        if (!this._copyElement) return;
+
         if (this._copyElement.checked) {
-            this._copyElementValue($('shipping:country_id'));
+            this._copyElementValue(document.getElementById('shipping:country_id'));
             billingRegionUpdater.update();
-            $$('[id^="shipping:"]').each(this._copyElementValue);
+
+            document.querySelectorAll('[id^="shipping:"]')
+                .forEach(el => this._copyElementValue(el));
+
             this._clearValidation('billing');
         } else {
-            $$('[id^="billing:"]').invoke('enable');
-            $$('[id^="billing:"]').each(function(el){el.removeAttribute("readOnly");});
-            $$('[id^="billing:"]').invoke('removeClassName', 'local-validation');
-            $$('[id^="billing:"]').invoke('setStyle', {opacity:1});
+            const billingElements = document.querySelectorAll('[id^="billing:"]');
+            billingElements.forEach(el => {
+                el.disabled = false;
+                el.removeAttribute('readonly');
+                el.classList.remove('local-validation');
+                el.style.opacity = 1;
+            });
         }
+
         if (event) {
             this._updateOrderSubmit(true);
         }
-    },
+    }
 
-    /**
-     * Dispatch an ajax request of Update Order submission
-     * @param url - url where to submit shipping method
-     * @param resultId - id of element to be updated
-     */
-    _submitUpdateOrder : function(event, url, resultId)
-    {
+    async _submitUpdateOrder(event, url, resultId) {
         this._copyShippingToBilling();
+
         if (url && resultId && this._validateForm()) {
-            if (this._copyElement && this._copyElement.checked) {
+            if (this._copyElement?.checked) {
                 this._clearValidation('billing');
             }
+
             this._updateOrderSubmit(true);
+
             if (this._pleaseWait) {
-                this._pleaseWait.show();
+                this._pleaseWait.style.display = 'block';
             }
+
             this._toggleButton(this._ubpdateOrderButton, true);
 
-            arr = $$('[id^="billing:"]').invoke('enable');
-            var formData = this.form.serialize(true);
+            document.querySelectorAll('[id^="billing:"]').forEach(el => el.disabled = false);
+
+            const formData = new FormData(this.form);
+            const formObject = Object.fromEntries(formData);
+            formObject.isAjax = true;
+
             if (this._copyElement.checked) {
-                $$('[id^="billing:"]').invoke('disable');
-                this._copyElement.enable();
+                document.querySelectorAll('[id^="billing:"]').forEach(el => el.disabled = true);
+                this._copyElement.disabled = false;
             }
-            formData.isAjax = true;
-            new Ajax.Updater(resultId, url, {
-                parameters: formData,
-                onComplete: function() {
-                    if (this._pleaseWait && !this._updateShippingMethods) {
-                        this._pleaseWait.hide();
-                    }
-                    this._toggleButton(this._ubpdateOrderButton, false);
-                }.bind(this),
-                onSuccess: this._updateShippingMethodsElement.bind(this),
-                evalScripts: true
-            });
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formObject)
+                });
+
+                const html = await response.text();
+                document.getElementById(resultId).innerHTML = html;
+
+                if (this._pleaseWait && !this._updateShippingMethods) {
+                    this._pleaseWait.style.display = 'none';
+                }
+
+                this._toggleButton(this._ubpdateOrderButton, false);
+                this._updateShippingMethodsElement();
+            } catch (error) {
+                console.error('Update order error:', error);
+            }
         } else {
-            if (this._copyElement && this._copyElement.checked) {
+            if (this._copyElement?.checked) {
                 this._clearValidation('billing');
             }
         }
-    },
+    }
 
-    /**
-     * Update Shipping Methods Element from server
-     */
-    _updateShippingMethodsElement : function (){
-        if (this._updateShippingMethods ) {
-            new Ajax.Updater($(this.shippingMethodsContainer).up(), this.shippingMethodsUpdateUrl, {
-                onComplete: this._updateShipping.bind(this),
-                onSuccess: this._onSubmitShippingSuccess.bind(this),
-                evalScripts: false
-            });
+    async _updateShippingMethodsElement() {
+        if (this._updateShippingMethods) {
+            try {
+                const response = await fetch(this.shippingMethodsUpdateUrl);
+                const html = await response.text();
+                const container = document.getElementById(this.shippingMethodsContainer).parentElement;
+                container.innerHTML = html;
+                this._updateShipping();
+                this._onSubmitShippingSuccess();
+            } catch (error) {
+                console.error('Shipping methods update error:', error);
+            }
         } else {
             this._onSubmitShippingSuccess();
         }
-    },
+    }
 
-    /**
-     * Update Shipping Method select element and bind events
-     */
-    _updateShipping : function () {
-        if ($(this.shippingSelect)) {
-            $(this.shippingSelect).enable();
-            Event.stopObserving($(this.shippingSelect), 'change');
+    _updateShipping() {
+        const shippingSelectElement = document.getElementById(this.shippingSelect);
+        if (shippingSelectElement) {
+            shippingSelectElement.disabled = false;
 
-            this._bindElementChange($(this.shippingSelect));
-            Event.observe(
-                $(this.shippingSelect),
-                'change',
-                this._submitUpdateOrder.bindAsEventListener(this, this._submitUpdateOrderUrl, this._itemsGrid)
+            // Remove old event listeners
+            const newElement = shippingSelectElement.cloneNode(true);
+            shippingSelectElement.parentNode.replaceChild(newElement, shippingSelectElement);
+
+            this._bindElementChange(newElement);
+            newElement.addEventListener('change',
+                (e) => this._submitUpdateOrder(e, this._submitUpdateOrderUrl, this._itemsGrid)
             );
 
-            $(this.shippingSelect + '_update').hide();
-            $(this.shippingSelect).show();
+            document.getElementById(`${this.shippingSelect}_update`).style.display = 'none';
+            newElement.style.display = 'block';
         }
-        this._updateShippingMethods = false;
-        if (this._pleaseWait) {
-            this._pleaseWait.hide();
-        }
-    },
 
-    /**
-     * Validate Order form
-     */
-    _validateForm : function()
-    {
-        if (!this.form) {
-            return false;
+        this._updateShippingMethods = false;
+
+        if (this._pleaseWait) {
+            this._pleaseWait.style.display = 'none';
         }
+    }
+
+    _validateForm() {
+        if (!this.form) return false;
         if (!this.formValidator) {
             this.formValidator = new Validation(this.form);
         }
-
         return this.formValidator.validate();
-    },
+    }
 
-    /**
-     * Actions on change Shipping Address data
-     * @param event
-     */
-    _onShippingChange : function(event){
-        var element = Event.element(event);
-        if (element != $(this.shippingSelect) && !($(this.shippingSelect) && $(this.shippingSelect).disabled)) {
-            if ($(this.shippingSelect)) {
-                $(this.shippingSelect).disable();
-                $(this.shippingSelect).hide();
-                if ($('advice-required-entry-' + this.shippingSelect)) {
-                    $('advice-required-entry-' + this.shippingSelect).hide();
+    _onShippingChange(event) {
+        const element = event.target;
+        const shippingSelectElement = document.getElementById(this.shippingSelect);
+
+        if (element !== shippingSelectElement && !(shippingSelectElement?.disabled)) {
+            if (shippingSelectElement) {
+                shippingSelectElement.disabled = true;
+                shippingSelectElement.style.display = 'none';
+
+                const advice = document.getElementById(`advice-required-entry-${this.shippingSelect}`);
+                if (advice) {
+                    advice.style.display = 'none';
                 }
             }
-            if (this.shippingMethodsContainer && $(this.shippingMethodsContainer)) {
-                $(this.shippingMethodsContainer).hide();
+
+            if (this.shippingMethodsContainer) {
+                const container = document.getElementById(this.shippingMethodsContainer);
+                if (container) container.style.display = 'none';
             }
 
-            if (this.shippingSelect && $(this.shippingSelect + '_update')) {
-                $(this.shippingSelect + '_update').show();
+            const updateElement = document.getElementById(`${this.shippingSelect}_update`);
+            if (this.shippingSelect && updateElement) {
+                updateElement.style.display = 'block';
             }
+
             this._updateShippingMethods = true;
         }
-    },
+    }
 
-    /**
-     * Bind onChange event listener to elements for update Submit Order button state
-     * @param input
-     */
-    _bindElementChange : function(input){
-        Event.observe(input, 'change', this._onElementChange.bindAsEventListener(this));
-    },
+    _bindElementChange(input) {
+        input.addEventListener('change', this._onElementChange.bind(this));
+    }
 
-    /**
-     * Disable Submit Order button
-     */
-    _onElementChange : function(){
+    _onElementChange() {
         this._updateOrderSubmit(true);
-    },
+    }
 
-    /**
-     * Clear validation result for all form elements or for elements with id prefix
-     * @param idprefix
-     */
-    _clearValidation : function(idprefix)
-    {
-        var prefix = '';
+    _clearValidation(idprefix) {
         if (idprefix) {
-            prefix = '[id*="' + idprefix + ':"]';
-            $$(prefix).each(function(el){
-                el.up().removeClassName('validation-failed')
-                    .removeClassName('validation-passed')
-                    .removeClassName('validation-error');
+            document.querySelectorAll(`[id*="${idprefix}:"]`).forEach(el => {
+                const parent = el.parentElement;
+                parent.classList.remove('validation-failed', 'validation-passed', 'validation-error');
             });
         } else {
             this.formValidator.reset();
         }
-        $$('.validation-advice' + prefix).invoke('remove');
-        $$('.validation-failed' + prefix).invoke('removeClassName', 'validation-failed');
-        $$('.validation-passed' + prefix).invoke('removeClassName', 'validation-passed');
-        $$('.validation-error' + prefix).invoke('removeClassName', 'validation-error');
-    },
 
-    /**
-     * Attempt to submit order
-     */
-    _submitOrder : function()
-    {
+        const selector = idprefix ? `.validation-advice[id*="${idprefix}:"]` : '.validation-advice';
+        document.querySelectorAll(selector).forEach(el => el.remove());
+
+        document.querySelectorAll(`.validation-failed${idprefix}`).forEach(el =>
+            el.classList.remove('validation-failed')
+        );
+        document.querySelectorAll(`.validation-passed${idprefix}`).forEach(el =>
+            el.classList.remove('validation-passed')
+        );
+        document.querySelectorAll(`.validation-error${idprefix}`).forEach(el =>
+            el.classList.remove('validation-error')
+        );
+    }
+
+    _submitOrder() {
         if (this._canSubmitOrder && (this.reloadByShippingSelect || this._validateForm())) {
             this.form.submit();
             this._updateOrderSubmit(true);
+
             if (this._ubpdateOrderButton) {
-                this._ubpdateOrderButton.addClassName('no-checkout');
-                this._ubpdateOrderButton.setStyle({opacity:.5});
+                this._ubpdateOrderButton.classList.add('no-checkout');
+                this._ubpdateOrderButton.style.opacity = 0.5;
             }
+
             if (this._pleaseWait) {
-                this._pleaseWait.show();
+                this._pleaseWait.style.display = 'block';
             }
             return;
         }
         this._updateOrderSubmit(true);
-    },
+    }
 
-    /**
-     * Explicitly enable order submission
-     */
-    _onSubmitShippingSuccess : function()
-    {
+    _onSubmitShippingSuccess() {
         this._updateOrderSubmit(false);
         if (this.onSubmitShippingSuccess) {
             this.onSubmitShippingSuccess();
         }
-    },
+    }
 
-    /**
-     * Check/Set whether order can be submitted
-     * Also disables form submission element, if any
-     * @param shouldDisable - whether should prevent order submission explicitly
-     */
-    _updateOrderSubmit : function(shouldDisable)
-    {
-        var isDisabled = shouldDisable || (
-            this.reloadByShippingSelect && (!this.shippingSelect || '' == this.shippingSelect.value)
+    _updateOrderSubmit(shouldDisable) {
+        const isDisabled = shouldDisable || (
+            this.reloadByShippingSelect &&
+            (!this.shippingSelect || this.shippingSelect.value === '')
         );
+
         this._canSubmitOrder = !isDisabled;
+
         if (this.formSubmit) {
             this._toggleButton(this.formSubmit, isDisabled);
         }
-    },
+    }
 
-    /**
-     * Enable/Disable button
-     *
-     * @param button
-     * @param disable
-     */
-    _toggleButton : function(button, disable)
-    {
+    _toggleButton(button, disable) {
         button.disabled = disable;
-        button.removeClassName('no-checkout');
-        button.setStyle({opacity:1});
+        button.classList.remove('no-checkout');
+        button.style.opacity = 1;
+
         if (disable) {
-            button.addClassName('no-checkout');
-            button.setStyle({opacity:.5});
+            button.classList.add('no-checkout');
+            button.style.opacity = 0.5;
         }
     }
-};
+}

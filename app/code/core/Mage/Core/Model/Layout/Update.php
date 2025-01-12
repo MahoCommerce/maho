@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -320,7 +321,7 @@ class Mage_Core_Model_Layout_Update
                 $design->getArea(),
                 $design->getPackageName(),
                 $design->getTheme('layout'),
-                $storeId
+                $storeId,
             );
             if (Mage::app()->useCache('layout')) {
                 Mage::app()->saveCache($this->_packageLayout->asXML(), $cacheKey, $cacheTags, null);
@@ -396,13 +397,13 @@ class Mage_Core_Model_Layout_Update
         foreach ($updateXml->children() as $child) {
             if ((strtolower($child->getName()) == 'update') && isset($child['handle'])) {
                 $allow = true;
-                if (isset($child['ifconfig']) && ($configPath = (string)$child['ifconfig'])) {
+                if (isset($child['ifconfig']) && ($configPath = (string) $child['ifconfig'])) {
                     $allow = Mage::getStoreConfigFlag($configPath);
                 }
                 if ($allow) {
-                    $this->merge((string)$child['handle']);
+                    $this->merge((string) $child['handle']);
                     // Adding merged layout handle to the list of applied handles
-                    $this->addHandle((string)$child['handle']);
+                    $this->addHandle((string) $child['handle']);
                 }
             }
         }
@@ -452,7 +453,7 @@ class Mage_Core_Model_Layout_Update
             $filename = $design->getLayoutFilename($file, [
                 '_area'    => $area,
                 '_package' => $package,
-                '_theme'   => $theme
+                '_theme'   => $theme,
             ]);
             if (!is_readable($filename)) {
                 continue;

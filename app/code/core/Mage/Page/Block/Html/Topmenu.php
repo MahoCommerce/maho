@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -57,7 +58,7 @@ class Mage_Page_Block_Html_Topmenu extends Mage_Core_Block_Template
     {
         Mage::dispatchEvent('page_block_html_topmenu_gethtml_before', [
             'menu' => $this->_menu,
-            'block' => $this
+            'block' => $this,
         ]);
 
         $this->_menu->setOutermostClass($outermostClass);
@@ -72,7 +73,7 @@ class Mage_Page_Block_Html_Topmenu extends Mage_Core_Block_Template
 
         Mage::dispatchEvent('page_block_html_topmenu_gethtml_after', [
             'menu' => $this->_menu,
-            'html' => $html
+            'html' => $html,
         ]);
 
         return $html;
@@ -163,7 +164,7 @@ class Mage_Page_Block_Html_Topmenu extends Mage_Core_Block_Template
     {
         $menuItemClasses = $this->_getMenuItemClasses($item);
         return [
-            'class' => implode(' ', $menuItemClasses)
+            'class' => implode(' ', $menuItemClasses),
         ];
     }
 
@@ -218,7 +219,7 @@ class Mage_Page_Block_Html_Topmenu extends Mage_Core_Block_Template
             Mage::getSingleton('customer/session')->getCustomerGroupId(),
             'template' => $this->getTemplate(),
             'name' => $this->getNameInLayout(),
-            $this->getCurrentEntityKey()
+            $this->getCurrentEntityKey(),
         ];
         $cacheId = $shortCacheId;
 

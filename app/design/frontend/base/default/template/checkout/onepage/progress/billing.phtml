@@ -13,11 +13,7 @@
 /** @var Mage_Checkout_Block_Onepage_Progress $this */
 ?>
 <?php if ($this->getCheckout()->getStepData('billing', 'complete')): ?>
-<dt class="complete">
-    <?= $this->__('Billing Address') ?><span class="changelink"> <span class="separator">|</span> <a
-        href="#billing"
-        onclick="checkout.changeSection('opc-billing'); return false;"><?= $this->__('Change') ?></a></span>
-</dt>
+<dt class="complete"><?= $this->__('Billing Address') ?></dt>
 <dd class="complete">
     <address><?= $this->getBilling()->format('html') ?></address>
 </dd>

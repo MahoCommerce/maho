@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,7 +7,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -38,7 +39,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         $this->_addBreadcrumb(Mage::helper('catalog')->__('Catalog'), Mage::helper('catalog')->__('Catalog'));
         $this->_addBreadcrumb(
             Mage::helper('catalog')->__('Manage Attribute Sets'),
-            Mage::helper('catalog')->__('Manage Attribute Sets')
+            Mage::helper('catalog')->__('Manage Attribute Sets'),
         );
 
         $this->_addContent($this->getLayout()->createBlock('adminhtml/catalog_product_attribute_set_toolbar_main'));
@@ -68,12 +69,11 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
 
         $this->loadLayout();
         $this->_setActiveMenu('catalog/attributes/sets');
-        $this->getLayout()->getBlock('head')->setCanLoadExtJs(true);
 
         $this->_addBreadcrumb(Mage::helper('catalog')->__('Catalog'), Mage::helper('catalog')->__('Catalog'));
         $this->_addBreadcrumb(
             Mage::helper('catalog')->__('Manage Product Sets'),
-            Mage::helper('catalog')->__('Manage Product Sets')
+            Mage::helper('catalog')->__('Manage Product Sets'),
         );
 
         $this->_addContent($this->getLayout()->createBlock('adminhtml/catalog_product_attribute_set_main'));
@@ -87,7 +87,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         $this->getResponse()->setBody(
             $this->getLayout()
                 ->createBlock('adminhtml/catalog_product_attribute_set_grid')
-            ->toHtml()
+            ->toHtml(),
         );
     }
 
@@ -101,7 +101,6 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
     public function saveAction()
     {
         $entityTypeId   = $this->_getEntityTypeId();
-        $hasError       = false;
         $attributeSetId = $this->getRequest()->getParam('id', false);
         $isNewSet       = $this->getRequest()->getParam('gotoEdit', false) == '1';
 
@@ -139,34 +138,26 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
             }
             $model->save();
             $this->_getSession()->addSuccess(Mage::helper('catalog')->__('The attribute set has been saved.'));
+
+            if ($isNewSet) {
+                $this->_redirect('*/*/edit', ['id' => $model->getId()]);
+            } else {
+                $this->getResponse()->setBodyJson(['url' => $this->getUrl('*/*/')]);
+            }
         } catch (Mage_Core_Exception $e) {
-            $this->_getSession()->addError($e->getMessage());
-            $hasError = true;
+            $error = $e->getMessage();
         } catch (Exception $e) {
-            $this->_getSession()->addException(
-                $e,
-                Mage::helper('catalog')->__('An error occurred while saving the attribute set.')
-            );
-            $hasError = true;
+            $error = Mage::helper('catalog')->__('An error occurred while saving the attribute set.');
+            Mage::logException($e);
         }
 
-        if ($isNewSet) {
-            if ($hasError) {
+        if (isset($error)) {
+            if ($isNewSet) {
+                Mage::getSingleton('adminhtml/session')->addError($error);
                 $this->_redirect('*/*/add');
             } else {
-                $this->_redirect('*/*/edit', ['id' => $model->getId()]);
+                $this->getResponse()->setBodyJson(['error' => true, 'message' => $error]);
             }
-        } else {
-            $response = [];
-            if ($hasError) {
-                $this->_initLayoutMessages('adminhtml/session');
-                $response['error']   = 1;
-                $response['message'] = $this->getLayout()->getMessagesBlock()->getGroupedHtml();
-            } else {
-                $response['error']   = 0;
-                $response['url']     = $this->getUrl('*/*/');
-            }
-            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($response));
         }
     }
 
@@ -223,7 +214,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
     {
         Mage::register(
             'entityType',
-            Mage::getModel('catalog/product')->getResource()->getTypeId()
+            Mage::getModel('catalog/product')->getResource()->getTypeId(),
         );
     }
 

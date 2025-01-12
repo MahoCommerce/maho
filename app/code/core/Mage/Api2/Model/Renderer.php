@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -52,7 +53,7 @@ abstract class Mage_Api2_Model_Renderer
         if ($adapterPath === null) {
             throw new Mage_Api2_Exception(
                 'Server can not understand Accept HTTP header media type.',
-                Mage_Api2_Model_Server::HTTP_NOT_ACCEPTABLE
+                Mage_Api2_Model_Server::HTTP_NOT_ACCEPTABLE,
             );
         }
 

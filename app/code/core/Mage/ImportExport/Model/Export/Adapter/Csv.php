@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -119,7 +120,7 @@ class Mage_ImportExport_Model_Export_Adapter_Csv extends Mage_ImportExport_Model
             $data,
             $this->_delimiter,
             $this->_enclosure,
-            $this->_escape
+            $this->_escape,
         );
 
         $this->_rowsCount++;

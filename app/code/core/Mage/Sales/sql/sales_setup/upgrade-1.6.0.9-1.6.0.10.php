@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -28,8 +29,8 @@ foreach ($bestsellersTables as $table) {
             'default'  => Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
             'nullable' => false,
             'after'    => 'product_id',
-            'comment'  => 'Product Type Id'
-        ]
+            'comment'  => 'Product Type Id',
+        ],
     );
 }
 

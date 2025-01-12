@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,7 +7,7 @@
  * @package    Mage_Admin
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -22,22 +23,16 @@
  * @method $this setActiveTabId(int $value)
  * @method $this unsActiveTabId()
  * @method $this setAttributeData(array|false $data)
- * @method string getDeletedPath()
- * @method $this setDeletedPath(string $value)
  * @method bool getIndirectLogin()
  * @method $this setIndirectLogin(bool $value)
  * @method $this setIsFirstVisit(bool $value)
- * @method bool getIsTreeWasExpanded()
- * @method $this setIsTreeWasExpanded(bool $value)
- * @method int getLastEditedCategory()
- * @method $this setLastEditedCategory(int $value)
- * @method string getLastViewedStore()
- * @method $this setLastViewedStore(string $value)
  * @method bool getUserPasswordChanged()
  * @method $this setUserPasswordChanged(bool $value)
  * @method bool hasSyncProcessStopWatch()
  * @method bool getSyncProcessStopWatch()
  * @method $this setSyncProcessStopWatch(bool $value)
+ * @method bool getShowTwofaVerificationCode()
+ * @method $this setShowTwofaVerificationCode(bool $value)
  * @method Mage_Admin_Model_User getUser()
  * @method $this setUser(Mage_Admin_Model_User $user)
  */
@@ -132,14 +127,30 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
+     * Check if 2fa is required
+     */
+    public function prelogin(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $password, ?Mage_Core_Controller_Request_Http $request = null): void
+    {
+        try {
+            if (!empty($username) && !empty($password)) {
+                /** @var Mage_Admin_Model_User $user */
+                $user = $this->_factory->getModel('admin/user');
+                $user->authenticate($username, $password);
+            }
+        } catch (Mage_Core_Exception $e) {
+            if ($e->getCode() === Mage_Admin_Model_User::AUTH_ERR_2FA_INVALID) {
+                $this->setRequireTwofa(true);
+            }
+        } catch (Exception $e) {
+            Mage::logException($e);
+        }
+    }
+
+    /**
      * Try to login user in admin
-     *
-     * @param  string $username
-     * @param  string $password
-     * @param  Mage_Core_Controller_Request_Http $request
      * @return Mage_Admin_Model_User|null
      */
-    public function login(#[\SensitiveParameter] $username, #[\SensitiveParameter] $password, $request = null)
+    public function login(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $password, ?Mage_Core_Controller_Request_Http $request = null, #[\SensitiveParameter] ?string $twofaVerificationCode = null)
     {
         if (empty($username) || empty($password)) {
             return null;
@@ -148,7 +159,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
         try {
             /** @var Mage_Admin_Model_User $user */
             $user = $this->_factory->getModel('admin/user');
-            $user->login($username, $password);
+            $user->login($username, $password, $twofaVerificationCode);
             if ($user->getId()) {
                 $this->renewSession();
 
@@ -175,7 +186,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             }
         } catch (Mage_Core_Exception $e) {
             $e->setMessage(
-                Mage::helper('adminhtml')->__('You did not sign in correctly or your account is temporarily disabled.')
+                Mage::helper('adminhtml')->__('You did not sign in correctly or your account is temporarily disabled.'),
             );
             $this->_loginFailed($e, $request, $username, $e->getMessage());
         } catch (Exception $e) {
@@ -274,7 +285,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
      */
     public function setIsFirstPageAfterLogin($value)
     {
-        $this->_isFirstPageAfterLogin = (bool)$value;
+        $this->_isFirstPageAfterLogin = (bool) $value;
         return $this->setIsFirstVisit($this->_isFirstPageAfterLogin);
     }
 
@@ -308,7 +319,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
         try {
             Mage::dispatchEvent('admin_session_user_login_failed', [
                 'user_name' => $username,
-                'exception' => $e
+                'exception' => $e,
             ]);
         } catch (Exception $e) {
         }

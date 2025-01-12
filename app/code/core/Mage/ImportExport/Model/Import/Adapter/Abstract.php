@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -88,9 +89,7 @@ abstract class Mage_ImportExport_Model_Import_Adapter_Abstract implements Seekab
     /**
      * Destruct method on shutdown
      */
-    public function destruct()
-    {
-    }
+    public function destruct() {}
 
     /**
      * Method called as last step of object instance creation. Can be overridden in child classes.
@@ -115,7 +114,7 @@ abstract class Mage_ImportExport_Model_Import_Adapter_Abstract implements Seekab
             $this->_colNames,
             count($this->_currentRow) != $this->_colQuantity
                     ? array_pad($this->_currentRow, $this->_colQuantity, '')
-                    : $this->_currentRow
+                    : $this->_currentRow,
         );
     }
 

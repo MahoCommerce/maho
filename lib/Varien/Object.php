@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -16,7 +17,7 @@
  * @category   Varien
  * @package    Varien_Object
  */
-class Varien_Object implements ArrayAccess, JsonSerializable
+class Varien_Object implements ArrayAccess
 {
     /**
      * Object attributes
@@ -108,9 +109,7 @@ class Varien_Object implements ArrayAccess, JsonSerializable
      * Inits mapping array of object's previously used fields to new fields.
      * Must be overloaded by descendants to set concrete fields map.
      */
-    protected function _initOldFieldsMap()
-    {
-    }
+    protected function _initOldFieldsMap() {}
 
     /**
      * Called after old fields are inited. Forms synchronization map to sync old fields and new fields
@@ -131,9 +130,7 @@ class Varien_Object implements ArrayAccess, JsonSerializable
      *
      * @return void
      */
-    protected function _construct()
-    {
-    }
+    protected function _construct() {}
 
     /**
      * Set _isDeleted flag value (if $isDeleted param is defined) and return current flag value
@@ -325,7 +322,7 @@ class Varien_Object implements ArrayAccess, JsonSerializable
         }
 
         if ($index !== null) {
-            if ($data === (array)$data) {
+            if ($data === (array) $data) {
                 $data = $data[$index] ?? null;
             } elseif (is_string($data)) {
                 $data = explode(PHP_EOL, $data);
@@ -349,11 +346,11 @@ class Varien_Object implements ArrayAccess, JsonSerializable
      */
     public function getDataByPath($path)
     {
-        $keys = explode('/', (string)$path);
+        $keys = explode('/', (string) $path);
 
         $data = $this->_data;
         foreach ($keys as $key) {
-            if ((array)$data === $data && isset($data[$key])) {
+            if ((array) $data === $data && isset($data[$key])) {
                 $data = $data[$key];
             } elseif ($data instanceof Varien_Object) {
                 $data = $data->getDataByKey($key);
@@ -563,17 +560,6 @@ class Varien_Object implements ArrayAccess, JsonSerializable
     }
 
     /**
-     * Implementation of JsonSerializable::jsonSerialize()
-     *
-     * @link https://www.php.net/manual/en/jsonserializable.jsonserialize.php
-     */
-    #[\Override]
-    public function jsonSerialize(): array
-    {
-        return $this->__toArray();
-    }
-
-    /**
      * Public wrapper for __toString
      *
      * Will use $format as an template and substitute {{key}} for attributes
@@ -633,7 +619,7 @@ class Varien_Object implements ArrayAccess, JsonSerializable
                 return isset($this->_data[$key]);
         }
         throw new Varien_Exception(
-            'Invalid method ' . get_class($this) . '::' . $method . '(' . print_r($args, true) . ')'
+            'Invalid method ' . get_class($this) . '::' . $method . '(' . print_r($args, true) . ')',
         );
     }
 
@@ -736,7 +722,7 @@ class Varien_Object implements ArrayAccess, JsonSerializable
      */
     public function setDataChanges($value)
     {
-        $this->_hasDataChanges = (bool)$value;
+        $this->_hasDataChanges = (bool) $value;
         return $this;
     }
 

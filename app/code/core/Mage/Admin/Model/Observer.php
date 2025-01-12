@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,6 +7,7 @@
  * @package    Mage_Admin
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -37,8 +39,9 @@ class Mage_Admin_Model_Observer
             'forgotpassword',
             'resetpassword',
             'resetpasswordpost',
+            'prelogin',
             'logout',
-            'refresh' // captcha refresh
+            'refresh', // captcha refresh
         ];
         if (in_array($requestedActionName, $openActions)) {
             $request->setDispatched(true);
@@ -55,12 +58,13 @@ class Mage_Admin_Model_Observer
                         $postLogin = $request->getPost('login');
                         $username = $postLogin['username'] ?? '';
                         $password = $postLogin['password'] ?? '';
-                        $session->login($username, $password, $request);
+                        $twofaVerificationCode = $postLogin['twofa_verification_code'] ?? '';
+                        $session->login($username, $password, $request, $twofaVerificationCode);
                         $request->setPost('login', null);
                     } else {
                         if (!$request->getParam('messageSent')) {
                             Mage::getSingleton('adminhtml/session')->addError(
-                                Mage::helper('adminhtml')->__('Invalid Form Key. Please refresh the page.')
+                                Mage::helper('adminhtml')->__('Invalid Form Key. Please refresh the page.'),
                             );
                             $request->setParam('messageSent', true);
                         }
@@ -101,9 +105,7 @@ class Mage_Admin_Model_Observer
      * @deprecated after 1.4.0.1, logic moved to admin session
      * @param Varien_Event_Observer $event
      */
-    public function actionPostDispatchAdmin($event)
-    {
-    }
+    public function actionPostDispatchAdmin($event) {}
 
     /**
      * Validate admin password and upgrade hash version
@@ -124,7 +126,7 @@ class Mage_Admin_Model_Observer
             && !Mage::helper('core')->getEncryptor()->validateHashByVersion(
                 $password,
                 $user->getPassword(),
-                Mage_Core_Model_Encryption::HASH_VERSION_SHA256
+                Mage_Core_Model_Encryption::HASH_VERSION_SHA256,
             )
         ) {
             $user

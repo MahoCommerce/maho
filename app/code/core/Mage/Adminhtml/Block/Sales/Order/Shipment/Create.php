@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -48,7 +49,7 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_Create extends Mage_Adminhtml_Bl
     {
         return Mage::helper('sales')->__(
             'New Shipment for Order #%s',
-            $this->escapeHtml($this->getShipment()->getOrder()->getRealOrderId())
+            $this->escapeHtml($this->getShipment()->getOrder()->getRealOrderId()),
         );
     }
 

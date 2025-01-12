@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -37,7 +38,7 @@ class Mage_Eav_Model_Entity_Increment_Alphanum extends Mage_Eav_Model_Entity_Inc
             $lastId = substr($lastId, strlen($this->getPrefix()));
         }
 
-        $lastId = str_pad((string)$lastId, $this->getPadLength(), $this->getPadChar(), STR_PAD_LEFT);
+        $lastId = str_pad((string) $lastId, $this->getPadLength(), $this->getPadChar(), STR_PAD_LEFT);
 
         $nextId = '';
         $bumpNextChar = true;

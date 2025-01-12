@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -86,7 +87,7 @@ class Mage_Bundle_Model_Option extends Mage_Core_Model_Abstract
                     $saleable++;
                 }
             }
-            return (bool)$saleable;
+            return (bool) $saleable;
         } else {
             return false;
         }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -36,13 +37,13 @@ class Mage_Adminhtml_Model_System_Config_Source_Order_Status
         }
         $options = [];
         $options[] = [
-               'value' => '',
-               'label' => Mage::helper('adminhtml')->__('-- Please Select --')
+            'value' => '',
+            'label' => Mage::helper('adminhtml')->__('-- Please Select --'),
         ];
         foreach ($statuses as $code => $label) {
             $options[] = [
-               'value' => $code,
-               'label' => $label
+                'value' => $code,
+                'label' => $label,
             ];
         }
         return $options;

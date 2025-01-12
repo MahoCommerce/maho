@@ -1,8 +1,9 @@
 /*
  * @copyright  Copyright (c) 2007 Andrew Tetlaw
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/license/mit.php
  */
+
 class Validator {
     constructor(className, error, test, options = {}) {
         if (typeof test === 'function') {
@@ -172,10 +173,12 @@ class Validation {
             container.insertAdjacentElement('afterend', div);
         } else if (elm.closest('td.value')) {
             elm.closest('td.value').insertAdjacentElement('beforeend', div);  // corrected from appendChild
-        } else if (elm.adviceContainer && document.getElementById(elm.adviceContainer)) {
-            const adviceContainer = document.getElementById(elm.adviceContainer);
-            adviceContainer.textContent = '';
-            adviceContainer.insertAdjacentElement('beforeend', div);
+        } else if (elm.adviceContainer || elm.advaiceContainer) {
+            let adviceContainer = elm.adviceContainer || elm.advaiceContainer;
+            if (typeof adviceContainer === 'string' || adviceContainer instanceof String) {
+                adviceContainer = document.getElementById(adviceContainer);
+            }
+            adviceContainer.replaceChildren(div);
         } else {
             switch (elm.type.toLowerCase()) {
                 case 'checkbox':
@@ -205,20 +208,16 @@ class Validation {
         }
         elm.advices.set(adviceName, advice);
 
-        if (typeof Effect === 'undefined') {
+        if (!advice._adviceAbsolutize) {
             advice.style.display = 'block';
         } else {
-            if (!advice._adviceAbsolutize) {
-                advice.style.display = 'block';
-            } else {
-                advice.style.position = 'absolute';
-                advice.style.display = 'block';
-                advice.style.top = advice._adviceTop;
-                advice.style.left = advice._adviceLeft;
-                advice.style.width = advice._adviceWidth;
-                advice.style.zIndex = '1000';
-                advice.classList.add('advice-absolute');
-            }
+            advice.style.position = 'absolute';
+            advice.style.display = 'block';
+            advice.style.top = advice._adviceTop;
+            advice.style.left = advice._adviceLeft;
+            advice.style.width = advice._adviceWidth;
+            advice.style.zIndex = '1000';
+            advice.classList.add('advice-absolute');
         }
     }
 
@@ -273,7 +272,7 @@ class Validation {
                 Validation.updateCallback(elm, 'failed');
 
                 elm[prop] = 1;
-                if (!elm.advaiceContainer) {
+                if (!elm.adviceContainer || !elm.advaiceContainer) {
                     elm.classList.remove('validation-passed');
                     elm.classList.add('validation-failed');
                 }

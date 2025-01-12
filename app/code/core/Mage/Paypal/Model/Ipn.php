@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -129,7 +130,7 @@ class Mage_Paypal_Model_Ipn
             $postbackUrl,
             '1.1',
             ['Connection: close'],
-            $postbackQuery
+            $postbackQuery,
         );
 
         try {
@@ -210,14 +211,14 @@ class Mage_Paypal_Model_Ipn
                 ->loadByInternalReferenceId($internalReferenceId);
             if (!$this->_recurringProfile->getId()) {
                 throw new Exception(
-                    sprintf('Wrong recurring profile INTERNAL_REFERENCE_ID: "%s".', $internalReferenceId)
+                    sprintf('Wrong recurring profile INTERNAL_REFERENCE_ID: "%s".', $internalReferenceId),
                 );
             }
             // re-initialize config with the method code and store id
             $methodCode = $this->_recurringProfile->getMethodCode();
             $this->_config = Mage::getModel(
                 'paypal/config',
-                [$methodCode, $this->_recurringProfile->getStoreId()]
+                [$methodCode, $this->_recurringProfile->getStoreId()],
             );
             if (!$this->_config->isMethodActive($methodCode) || !$this->_config->isMethodAvailable()) {
                 throw new Exception(sprintf('Method "%s" is not available.', $methodCode));
@@ -246,8 +247,8 @@ class Mage_Paypal_Model_Ipn
                     sprintf(
                         'Requested %s and configured %s merchant emails do not match.',
                         $receiverEmail,
-                        $merchantEmail
-                    )
+                        $merchantEmail,
+                    ),
                 );
             }
         }
@@ -368,7 +369,7 @@ class Mage_Paypal_Model_Ipn
                     $this->_registerPaymentRefund();
                     break;
 
-                // authorization expire/void
+                    // authorization expire/void
                 case Mage_Paypal_Model_Info::PAYMENTSTATUS_EXPIRED: // break is intentionally omitted
                 case Mage_Paypal_Model_Info::PAYMENTSTATUS_VOIDED:
                     $this->_registerPaymentVoid();
@@ -470,7 +471,7 @@ class Mage_Paypal_Model_Ipn
             ->setIsTransactionClosed(0)
             ->registerCaptureNotification(
                 $this->getRequestData('mc_gross'),
-                $skipFraudDetection && $parentTransactionId
+                $skipFraudDetection && $parentTransactionId,
             );
         $this->_order->save();
 
@@ -478,7 +479,7 @@ class Mage_Paypal_Model_Ipn
         $invoice = $payment->getCreatedInvoice();
         if ($invoice && !$this->_order->getEmailSent()) {
             $this->_order->queueNewOrderEmail()->addStatusHistoryComment(
-                Mage::helper('paypal')->__('Notified customer about invoice #%s.', $invoice->getIncrementId())
+                Mage::helper('paypal')->__('Notified customer about invoice #%s.', $invoice->getIncrementId()),
             )
             ->setIsCustomerNotified(true)
             ->save();
@@ -502,7 +503,7 @@ class Mage_Paypal_Model_Ipn
         } else {
             $transactionId = Mage::helper('paypal')->getHtmlTransactionId(
                 $payment->getMethodInstance()->getCode(),
-                $this->getRequestData('txn_id')
+                $this->getRequestData('txn_id'),
             );
             $comment = Mage::helper('paypal')->__('Transaction ID: "%s"', $transactionId);
             $this->_order->addStatusHistoryComment($this->_createIpnComment($comment), false);
@@ -543,7 +544,7 @@ class Mage_Paypal_Model_Ipn
 
         $transactionId = Mage::helper('paypal')->getHtmlTransactionId(
             $payment->getMethodInstance()->getCode(),
-            $this->getRequestData('txn_id')
+            $this->getRequestData('txn_id'),
         );
         $comment = $this->_createIpnComment($this->_info::explainReasonCode($reason))
             . ' '
@@ -553,7 +554,7 @@ class Mage_Paypal_Model_Ipn
             ->setTransactionId($this->getRequestData('txn_id'))
             ->setParentTransactionId($this->getRequestData('parent_txn_id'))
             ->setIsTransactionClosed($isRefundFinal)
-            ->registerRefundNotification(-1 * (float)$this->getRequestData('mc_gross'));
+            ->registerRefundNotification(-1 * (float) $this->getRequestData('mc_gross'));
         $this->_order->addStatusHistoryComment($comment, false);
         $this->_order->save();
 
@@ -562,7 +563,7 @@ class Mage_Paypal_Model_Ipn
         if ($creditmemo) {
             $creditmemo->sendEmail();
             $this->_order->addStatusHistoryComment(
-                Mage::helper('paypal')->__('Notified customer about creditmemo #%s.', $creditmemo->getIncrementId())
+                Mage::helper('paypal')->__('Notified customer about creditmemo #%s.', $creditmemo->getIncrementId()),
             )
             ->setIsCustomerNotified(true)
             ->save();
@@ -588,7 +589,7 @@ class Mage_Paypal_Model_Ipn
          */
         $transactionId = Mage::helper('paypal')->getHtmlTransactionId(
             $this->_config->getMethodCode(),
-            $this->_request['txn_id']
+            $this->_request['txn_id'],
         );
         $message = Mage::helper('paypal')->__('IPN "%s". %s Transaction amount %s. Transaction ID: "%s"', $this->_request['payment_status'], $reasonComment, $notificationAmount, $transactionId);
         $this->_order->setStatus($orderStatus);
@@ -724,7 +725,7 @@ class Mage_Paypal_Model_Ipn
             Mage_Paypal_Model_Info::PROTECTION_EL,
             Mage_Paypal_Model_Info::PAYMENT_STATUS,
             Mage_Paypal_Model_Info::PENDING_REASON,
-                 ] as $privateKey => $publicKey
+        ] as $privateKey => $publicKey
         ) {
             if (is_int($privateKey)) {
                 $privateKey = $publicKey;

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -65,7 +66,7 @@ abstract class Mage_CatalogInventory_Model_Api2_Stock_Item_Rest extends Mage_Cat
 
         /** @var Mage_CatalogInventory_Model_Api2_Stock_Item_Validator_Item $validator */
         $validator = Mage::getModel('cataloginventory/api2_stock_item_validator_item', [
-            'resource' => $this
+            'resource' => $this,
         ]);
 
         if (!$validator->isValidData($data)) {
@@ -100,12 +101,12 @@ abstract class Mage_CatalogInventory_Model_Api2_Stock_Item_Rest extends Mage_Cat
 
                 /** @var Mage_CatalogInventory_Model_Api2_Stock_Item_Validator_Item $validator */
                 $validator = Mage::getModel('cataloginventory/api2_stock_item_validator_item', [
-                    'resource' => $this
+                    'resource' => $this,
                 ]);
                 if (!$validator->isValidSingleItemDataForMultiUpdate($itemData)) {
                     foreach ($validator->getErrors() as $error) {
                         $this->_errorMessage($error, Mage_Api2_Model_Server::HTTP_BAD_REQUEST, [
-                            'item_id' => $itemData['item_id'] ?? null
+                            'item_id' => $itemData['item_id'] ?? null,
                         ]);
                     }
                     $this->_critical(self::RESOURCE_DATA_PRE_VALIDATION_ERROR);
@@ -119,13 +120,13 @@ abstract class Mage_CatalogInventory_Model_Api2_Stock_Item_Rest extends Mage_Cat
                 $stockItem->save();
 
                 $this->_successMessage(self::RESOURCE_UPDATED_SUCCESSFUL, Mage_Api2_Model_Server::HTTP_OK, [
-                    'item_id' => $stockItem->getId()
+                    'item_id' => $stockItem->getId(),
                 ]);
             } catch (Mage_Api2_Exception $e) {
                 // pre-validation errors are already added
                 if ($e->getMessage() != self::RESOURCE_DATA_PRE_VALIDATION_ERROR) {
                     $this->_errorMessage($e->getMessage(), $e->getCode(), [
-                        'item_id' => $itemData['item_id'] ?? null
+                        'item_id' => $itemData['item_id'] ?? null,
                     ]);
                 }
             } catch (Exception $e) {
@@ -133,8 +134,8 @@ abstract class Mage_CatalogInventory_Model_Api2_Stock_Item_Rest extends Mage_Cat
                     Mage_Api2_Model_Resource::RESOURCE_INTERNAL_ERROR,
                     Mage_Api2_Model_Server::HTTP_INTERNAL_ERROR,
                     [
-                        'item_id' => $itemData['item_id'] ?? null
-                    ]
+                        'item_id' => $itemData['item_id'] ?? null,
+                    ],
                 );
             }
         }

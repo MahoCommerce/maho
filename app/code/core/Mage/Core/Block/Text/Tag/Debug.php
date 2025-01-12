@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -23,7 +24,7 @@ class Mage_Core_Block_Text_Tag_Debug extends Mage_Core_Block_Text_Tag
     {
         parent::_construct();
         $this->setAttribute([
-          'tagName' => 'xmp',
+            'tagName' => 'xmp',
         ]);
     }
 

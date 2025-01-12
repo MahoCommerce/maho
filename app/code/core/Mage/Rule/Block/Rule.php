@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -13,6 +14,4 @@
  * @category   Mage
  * @package    Mage_Rule
  */
-class Mage_Rule_Block_Rule extends Mage_Core_Block_Abstract
-{
-}
+class Mage_Rule_Block_Rule extends Mage_Core_Block_Abstract {}

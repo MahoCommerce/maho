@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -235,7 +236,7 @@ class Mage_Adminhtml_Model_Giftmessage_Save extends Varien_Object
         return Mage::helper('giftmessage/message')->getIsMessagesAvailable(
             'item',
             $item,
-            $item->getStore()
+            $item->getStore(),
         );
     }
 
@@ -317,7 +318,7 @@ class Mage_Adminhtml_Model_Giftmessage_Save extends Varien_Object
             'main'          =>  'quote',
             'item'          =>  'quote_item',
             'order'         =>  'order',
-            'order_item'    =>  'order_item'
+            'order_item'    =>  'order_item',
         ];
 
         return $map[$type] ?? null;

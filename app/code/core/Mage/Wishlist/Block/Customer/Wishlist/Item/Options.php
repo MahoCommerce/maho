@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -28,7 +29,7 @@ class Mage_Wishlist_Block_Customer_Wishlist_Item_Options extends Mage_Wishlist_B
      */
     protected $_optionsCfg = ['default' => [
         'helper' => 'catalog/product_configuration',
-        'template' => 'wishlist/options_list.phtml'
+        'template' => 'wishlist/options_list.phtml',
     ]];
 
     /**

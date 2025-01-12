@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -76,7 +77,7 @@ class Mage_Sales_Model_Convert_Quote extends Varien_Object
 
         Mage::dispatchEvent(
             'sales_convert_quote_address_to_order_address',
-            ['address' => $address, 'order_address' => $orderAddress]
+            ['address' => $address, 'order_address' => $orderAddress],
         );
 
         return $orderAddress;
@@ -96,7 +97,7 @@ class Mage_Sales_Model_Convert_Quote extends Varien_Object
 
         Mage::dispatchEvent(
             'sales_convert_quote_payment_to_order_payment',
-            ['order_payment' => $orderPayment, 'quote_payment' => $payment]
+            ['order_payment' => $orderPayment, 'quote_payment' => $payment],
         );
 
         return $orderPayment;
@@ -137,7 +138,7 @@ class Mage_Sales_Model_Convert_Quote extends Varien_Object
 
         Mage::dispatchEvent(
             'sales_convert_quote_item_to_order_item',
-            ['order_item' => $orderItem, 'item' => $item]
+            ['order_item' => $orderItem, 'item' => $item],
         );
         return $orderItem;
     }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -48,12 +49,12 @@ class Mage_SalesRule_Model_Resource_Coupon_Usage extends Mage_Core_Model_Resourc
                 $this->_getWriteAdapter()->update(
                     $this->getMainTable(),
                     [
-                        'times_used' => $timesUsed
+                        'times_used' => $timesUsed,
                     ],
                     [
                         'coupon_id = ?' => $couponId,
                         'customer_id = ?' => $customerId,
-                    ]
+                    ],
                 );
             }
         } else {
@@ -62,8 +63,8 @@ class Mage_SalesRule_Model_Resource_Coupon_Usage extends Mage_Core_Model_Resourc
                 [
                     'coupon_id' => $couponId,
                     'customer_id' => $customerId,
-                    'times_used' => 1
-                ]
+                    'times_used' => 1,
+                ],
             );
         }
     }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -35,7 +36,7 @@ class Mage_Paypal_Adminhtml_Paypal_ReportsController extends Mage_Adminhtml_Cont
     {
         $this->loadLayout();
         $this->getResponse()->setBody(
-            $this->getLayout()->createBlock('paypal/adminhtml_settlement_report_grid')->toHtml()
+            $this->getLayout()->createBlock('paypal/adminhtml_settlement_report_grid')->toHtml(),
         );
     }
 
@@ -73,11 +74,11 @@ class Mage_Paypal_Adminhtml_Paypal_ReportsController extends Mage_Adminhtml_Cont
                 try {
                     $fetched = $reports->fetchAndSave($config);
                     $this->_getSession()->addSuccess(
-                        Mage::helper('paypal')->__("Fetched %s report rows from '%s@%s'.", $fetched, $config['username'], $config['hostname'])
+                        Mage::helper('paypal')->__("Fetched %s report rows from '%s@%s'.", $fetched, $config['username'], $config['hostname']),
                     );
                 } catch (Exception $e) {
                     $this->_getSession()->addError(
-                        Mage::helper('paypal')->__("Failed to fetch reports from '%s@%s'.", $config['username'], $config['hostname'])
+                        Mage::helper('paypal')->__("Failed to fetch reports from '%s@%s'.", $config['username'], $config['hostname']),
                     );
                     Mage::logException($e);
                 }

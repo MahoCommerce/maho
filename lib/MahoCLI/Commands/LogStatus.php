@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'log:status',
-    description: 'Show status for log tables in the database'
+    description: 'Show status for log tables in the database',
 )]
 class LogStatus extends BaseMahoCommand
 {
@@ -32,7 +33,7 @@ class LogStatus extends BaseMahoCommand
             'Table name',
             'Row count',
             'Data size',
-            'Index size'
+            'Index size',
         ]);
 
         $logResource = Mage::getModel('log/log')->getResource();
@@ -74,7 +75,7 @@ class LogStatus extends BaseMahoCommand
             'TOTAL',
             number_format($totalRows),
             $this->humanReadableSize($totalDataLength),
-            $this->humanReadableSize($totalIndexLength)
+            $this->humanReadableSize($totalIndexLength),
         ]);
 
         $table->render();

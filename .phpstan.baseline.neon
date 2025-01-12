@@ -3145,6 +3145,12 @@ parameters:
 			path: app/code/core/Mage/Payment/Model/Method/Abstract.php
 
 		-
+			message: '#^Loose comparison using \!\= between ''''\|''OT'' and ''SS'' will always evaluate to true\.$#'
+			identifier: notEqual.alwaysTrue
+			count: 1
+			path: app/code/core/Mage/Payment/Model/Method/Cc.php
+
+		-
 			message: '#^Method Mage_Payment_Model_Recurring_Profile\:\:exportStartDatetime\(\) should return string\|Zend_Date but empty return statement found\.$#'
 			identifier: return.empty
 			count: 1
@@ -4347,12 +4353,6 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 9
-			path: app/design/adminhtml/default/default/template/api/rolesedit.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
 			count: 2
 			path: app/design/adminhtml/default/default/template/api/rolesusers.phtml
 
@@ -4397,12 +4397,6 @@ parameters:
 			identifier: variable.undefined
 			count: 4
 			path: app/design/adminhtml/default/default/template/api/users.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 11
-			path: app/design/adminhtml/default/default/template/api2/attribute/resource.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
@@ -4481,18 +4475,6 @@ parameters:
 			identifier: variable.undefined
 			count: 5
 			path: app/design/adminhtml/default/default/template/bundle/product/edit/bundle/option/search.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 12
-			path: app/design/adminhtml/default/default/template/catalog/category/checkboxes/tree.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 19
-			path: app/design/adminhtml/default/default/template/catalog/category/widget/tree.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
@@ -4589,12 +4571,6 @@ parameters:
 			identifier: variable.undefined
 			count: 2
 			path: app/design/adminhtml/default/default/template/catalog/product/tab/alert.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/catalog/wysiwyg/js.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
@@ -4955,12 +4931,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/design/adminhtml/default/default/template/resetforgottenpassword.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 5
-			path: app/design/adminhtml/default/default/template/review/add.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
@@ -5351,12 +5321,6 @@ parameters:
 			identifier: variable.undefined
 			count: 8
 			path: app/design/frontend/base/default/template/bundle/catalog/product/view/price.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 9
-			path: app/design/frontend/base/default/template/bundle/catalog/product/view/type/bundle.phtml
 
 		-
 			message: '#^Call to protected method _isSelected\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
@@ -6631,12 +6595,6 @@ parameters:
 			path: app/design/frontend/rwd/default/template/checkout/onepage/review/item.phtml
 
 		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 14
-			path: app/design/frontend/rwd/default/template/configurableswatches/catalog/layer/state/swatch.phtml
-
-		-
 			message: '#^Variable \$action might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -6856,12 +6814,6 @@ parameters:
 			message: '#^Variable \$data might not be defined\.$#'
 			identifier: variable.undefined
 			count: 3
-			path: app/design/frontend/rwd/default/template/review/form.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 31
 			path: app/design/frontend/rwd/default/template/review/form.phtml
 
 		-

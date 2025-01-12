@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -49,7 +50,7 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
         if ($storeId instanceof Mage_Core_Model_Store) {
             $storeId = $storeId->getId();
         }
-        $this->_storeId = (int)$storeId;
+        $this->_storeId = (int) $storeId;
         return $this;
     }
 
@@ -109,7 +110,7 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
                     'attr.store_id IN (' . $this->getDefaultStoreId() . ', ' . $storeId . ')',
                     'attr.entity_type_id = ' . $entity->getTypeId(),
                 ]),
-                []
+                [],
             );
             // t_d join
             $select->joinLeft(
@@ -119,13 +120,13 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
                     't_d.attribute_id = attr.attribute_id',
                     't_d.store_id = ' . $this->getDefaultStoreId(),
                 ]),
-                []
+                [],
             );
             // t_s join
             $attributeIdExpr = $adapter->getCheckSql(
                 't_s.attribute_id IS NULL',
                 't_d.attribute_id',
-                't_s.attribute_id'
+                't_s.attribute_id',
             );
             $select->joinLeft(
                 ['t_s' => $table],
@@ -134,7 +135,7 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
                     't_s.attribute_id = attr.attribute_id',
                     't_s.store_id = ' . $storeId,
                 ]),
-                ['e.entity_id', 'attribute_id' => $attributeIdExpr]
+                ['e.entity_id', 'attribute_id' => $attributeIdExpr],
             );
             $select->group('e.entity_id')->group('attr.attribute_id');
         } else {
@@ -162,13 +163,13 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
             $valueExpr      = $adapter->getCheckSql(
                 't_s.value_id IS NULL',
                 $helper->prepareEavAttributeValue('t_d.value', $type),
-                $helper->prepareEavAttributeValue('t_s.value', $type)
+                $helper->prepareEavAttributeValue('t_s.value', $type),
             );
 
             $select->columns([
                 'default_value' => $helper->prepareEavAttributeValue('t_d.value', $type),
                 'store_value'   => $helper->prepareEavAttributeValue('t_s.value', $type),
-                'value'         => $valueExpr
+                'value'         => $valueExpr,
             ]);
         } else {
             $select = parent::_addLoadAttributesSelectValues($select, $table, $type);
@@ -208,20 +209,20 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
             $defCondition = str_replace($tableAlias, $defAlias, $defCondition);
             $defCondition .= $adapter->quoteInto(
                 ' AND ' . $adapter->quoteColumnAs("$defAlias.store_id", null) . ' = ?',
-                $this->getDefaultStoreId()
+                $this->getDefaultStoreId(),
             );
 
             $this->getSelect()->$method(
                 [$defAlias => $attribute->getBackend()->getTable()],
                 $defCondition,
-                []
+                [],
             );
 
             $method = 'joinLeft';
             $fieldAlias = $this->getConnection()->getCheckSql(
                 "{$tableAlias}.value_id > 0",
                 $fieldAlias,
-                $defFieldAlias
+                $defFieldAlias,
             );
             $this->_joinAttributes[$fieldCode]['condition_alias'] = $fieldAlias;
             $this->_joinAttributes[$fieldCode]['attribute']       = $attribute;
@@ -230,7 +231,7 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
         }
         $condition[] = $adapter->quoteInto(
             $adapter->quoteColumnAs("$tableAlias.store_id", null) . ' = ?',
-            $storeId
+            $storeId,
         );
         return parent::_joinAttributeToSelect($method, $attribute, $tableAlias, $condition, $fieldCode, $fieldAlias);
     }

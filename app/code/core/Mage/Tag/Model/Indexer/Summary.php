@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -47,11 +48,11 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
             Mage_Index_Model_Event::TYPE_MASS_ACTION,
         ],
         Mage_Tag_Model_Tag::ENTITY => [
-            Mage_Index_Model_Event::TYPE_SAVE
+            Mage_Index_Model_Event::TYPE_SAVE,
         ],
         Mage_Tag_Model_Tag_Relation::ENTITY => [
-            Mage_Index_Model_Event::TYPE_SAVE
-        ]
+            Mage_Index_Model_Event::TYPE_SAVE,
+        ],
     ];
 
     #[\Override]
@@ -92,7 +93,7 @@ class Mage_Tag_Model_Indexer_Summary extends Mage_Index_Model_Indexer_Abstract
         return [
             'visibility',
             'status',
-            'website_ids'
+            'website_ids',
         ];
     }
 

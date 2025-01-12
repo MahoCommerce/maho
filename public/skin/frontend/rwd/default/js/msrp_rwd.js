@@ -8,6 +8,7 @@
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
 const originalShowHelp = Catalog.Map.showHelp;
 Catalog.Map.showHelp = function(event) {
     const helpBox = document.getElementById('map-popup');

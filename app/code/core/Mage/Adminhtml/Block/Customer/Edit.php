@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -102,7 +103,7 @@ class Mage_Adminhtml_Block_Customer_Edit extends Mage_Adminhtml_Block_Widget_For
             $this->_addButton('save_and_continue', [
                 'label'     => Mage::helper('customer')->__('Save and Continue Edit'),
                 'onclick'   => Mage::helper('core/js')->getSaveAndContinueEditJs($this->_getSaveAndContinueUrl()),
-                'class'     => 'save'
+                'class'     => 'save',
             ], 10);
         }
 
@@ -117,7 +118,7 @@ class Mage_Adminhtml_Block_Customer_Edit extends Mage_Adminhtml_Block_Widget_For
         return $this->getUrl('*/*/save', [
             '_current'  => true,
             'back'      => 'edit',
-            'tab'       => '{{tab_id}}'
+            'tab'       => '{{tab_id}}',
         ]);
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -78,7 +79,7 @@ class Mage_Adminhtml_Block_Tag_Product_Grid extends Mage_Adminhtml_Block_Widget_
             'header'        => Mage::helper('tag')->__('# of Uses'),
             'width'         => '50px',
             'index'         => 'popularity',
-            'type'          => 'number'
+            'type'          => 'number',
         ]);
 
         $this->addColumn('sku', [

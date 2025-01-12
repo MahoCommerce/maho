@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -130,7 +131,7 @@ class Mage_Catalog_Helper_Output extends Mage_Core_Helper_Abstract
 
         $attributeHtml = $this->process('productAttribute', $attributeHtml, [
             'product'   => $product,
-            'attribute' => $attributeName
+            'attribute' => $attributeName,
         ]);
 
         return $attributeHtml;
@@ -161,7 +162,7 @@ class Mage_Catalog_Helper_Output extends Mage_Core_Helper_Abstract
         }
         $attributeHtml = $this->process('categoryAttribute', $attributeHtml, [
             'category'  => $category,
-            'attribute' => $attributeName
+            'attribute' => $attributeName,
         ]);
         return $attributeHtml;
     }

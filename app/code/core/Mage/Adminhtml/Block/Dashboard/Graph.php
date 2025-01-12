@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -96,7 +97,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
      */
     public function setDataRows($rows)
     {
-        $this->_dataRows = (array)$rows;
+        $this->_dataRows = (array) $rows;
     }
 
     /**
@@ -174,7 +175,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
             }
             foreach (array_keys($this->getAllSeries()) as $index) {
                 if (in_array($d, $this->_axisLabels['x'])) {
-                    $datas[$index][] = (float)array_shift($this->_allSeries[$index]);
+                    $datas[$index][] = (float) array_shift($this->_allSeries[$index]);
                 } else {
                     $datas[$index][] = 0;
                 }
@@ -277,13 +278,13 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
                                 case '24h':
                                     $this->_axisLabels[$idx][$_index] = $this->formatTime(
                                         new Zend_Date($_label, 'yyyy-MM-dd HH:00'),
-                                        'short'
+                                        'short',
                                     );
                                     break;
                                 case '7d':
                                 case '1m':
                                     $this->_axisLabels[$idx][$_index] = $this->formatDate(
-                                        new Zend_Date($_label, 'yyyy-MM-dd')
+                                        new Zend_Date($_label, 'yyyy-MM-dd'),
                                     );
                                     break;
                                 case '1y':
@@ -338,7 +339,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
             if ($single) {
                 $options[] = max(0, $item->getData($attributes));
             } else {
-                foreach ((array)$attributes as $attr) {
+                foreach ((array) $attributes as $attr) {
                     $options[$attr][] = max(0, $item->getData($attr));
                 }
             }
@@ -430,7 +431,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
 
         $this->getDataHelper()->setParam(
             'period',
-            ($period && in_array($period, $availablePeriods)) ? $period : '24h'
+            ($period && in_array($period, $availablePeriods)) ? $period : '24h',
         );
     }
 }

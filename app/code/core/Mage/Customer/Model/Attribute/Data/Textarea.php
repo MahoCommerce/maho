@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -15,6 +16,4 @@
  * @category   Mage
  * @package    Mage_Customer
  */
-class Mage_Customer_Model_Attribute_Data_Textarea extends Mage_Eav_Model_Attribute_Data_Textarea
-{
-}
+class Mage_Customer_Model_Attribute_Data_Textarea extends Mage_Eav_Model_Attribute_Data_Textarea {}

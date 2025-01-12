@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -54,7 +55,7 @@ class Mage_Sitemap_Model_Resource_Catalog_Category extends Mage_Sitemap_Model_Re
             ->from(['main_table' => $this->getMainTable()], [$this->getIdFieldName()])
             ->where('main_table.path LIKE ?', $categoryRow['path'] . '/%');
 
-        $storeId = (int)$store->getId();
+        $storeId = (int) $store->getId();
 
         $urlRewrite = $this->_factory->getCategoryUrlRewriteHelper();
         $urlRewrite->joinTableToSelect($this->_select, $storeId);
@@ -105,7 +106,7 @@ class Mage_Sitemap_Model_Resource_Catalog_Category extends Mage_Sitemap_Model_Re
             'attribute_id'   => $attribute->getId(),
             'table'          => $attribute->getBackend()->getTable(),
             'is_global'      => $attribute->getIsGlobal(),
-            'backend_type'   => $attribute->getBackendType()
+            'backend_type'   => $attribute->getBackendType(),
         ];
         return $this;
     }

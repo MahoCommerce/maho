@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -62,7 +63,7 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
             $agreementModel->load($id);
             if (!$agreementModel->getId()) {
                 Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('checkout')->__('This condition no longer exists.')
+                    Mage::helper('checkout')->__('This condition no longer exists.'),
                 );
                 $this->_redirect('*/*/');
                 return;
@@ -110,7 +111,7 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
 
     public function deleteAction()
     {
-        $id = (int)$this->getRequest()->getParam('id');
+        $id = (int) $this->getRequest()->getParam('id');
         $model = Mage::getSingleton('checkout/agreement')
             ->load($id);
         if (!$model->getId()) {

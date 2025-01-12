@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -150,7 +151,7 @@ class Mage_Checkout_Multishipping_AddressController extends Mage_Core_Controller
     public function editBillingAction()
     {
         $this->_getState()->setActiveStep(
-            Mage_Checkout_Model_Type_Multishipping_State::STEP_BILLING
+            Mage_Checkout_Model_Type_Multishipping_State::STEP_BILLING,
         );
         $this->loadLayout();
         $this->_initLayoutMessages('customer/session');

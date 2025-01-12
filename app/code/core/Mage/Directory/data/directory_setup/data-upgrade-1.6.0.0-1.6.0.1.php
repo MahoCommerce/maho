@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -14,11 +15,11 @@ $installer = $this;
 $installer->getConnection()->insert(
     $installer->getTable('core/config_data'),
     [
-       'scope'    => 'default',
-       'scope_id' => 0,
-       'path'     => Mage_Directory_Helper_Data::XML_PATH_DISPLAY_ALL_STATES,
-       'value'    => 1
-    ]
+        'scope'    => 'default',
+        'scope_id' => 0,
+        'path'     => Mage_Directory_Helper_Data::XML_PATH_DISPLAY_ALL_STATES,
+        'value'    => 1,
+    ],
 );
 
 $countries = [];
@@ -34,6 +35,6 @@ $installer->getConnection()->insert(
         'scope'    => 'default',
         'scope_id' => 0,
         'path'     => Mage_Directory_Helper_Data::XML_PATH_STATES_REQUIRED,
-        'value'    => implode(',', $countries)
-    ]
+        'value'    => implode(',', $countries),
+    ],
 );

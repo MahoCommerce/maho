@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -33,8 +34,8 @@ class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator extends 
 
         //parent construct with options
         parent::__construct([
-             'haystack' => $haystack,
-             'strict'   => true,
+            'haystack' => $haystack,
+            'strict'   => true,
         ]);
     }
 

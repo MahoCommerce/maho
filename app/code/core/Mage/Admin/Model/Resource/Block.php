@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -68,7 +69,7 @@ class Mage_Admin_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstra
         Mage::app()->saveCache(
             Mage::helper('core')->jsonEncode($data),
             self::CACHE_ID,
-            [Mage_Core_Model_Resource_Db_Collection_Abstract::CACHE_TAG]
+            [Mage_Core_Model_Resource_Db_Collection_Abstract::CACHE_TAG],
         );
     }
 

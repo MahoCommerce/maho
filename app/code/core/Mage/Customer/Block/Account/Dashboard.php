@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -82,9 +83,7 @@ class Mage_Customer_Block_Account_Dashboard extends Mage_Core_Block_Template
     /**
      * @todo LTS add tags URL
      */
-    public function getTagsUrl()
-    {
-    }
+    public function getTagsUrl() {}
 
     /**
      * @return Mage_Newsletter_Model_Subscriber

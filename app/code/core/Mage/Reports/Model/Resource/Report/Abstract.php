@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -163,8 +164,8 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
             ->from(
                 [$alias => $table],
                 $adapter->getDatePartSql(
-                    $this->getStoreTZOffsetQuery([$alias => $table], $alias . '.' . $column, $from, $to)
-                )
+                    $this->getStoreTZOffsetQuery([$alias => $table], $alias . '.' . $column, $from, $to),
+                ),
             )
             ->distinct(true);
 
@@ -203,7 +204,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
     protected function _makeConditionFromDateRangeSelect($select, $periodColumn)
     {
         static $selectResultCache = [];
-        $cacheKey = (string)$select;
+        $cacheKey = (string) $select;
 
         if (!array_key_exists($cacheKey, $selectResultCache)) {
             try {
@@ -275,13 +276,13 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
             ->from(
                 [$alias => $table],
                 $adapter->getDatePartSql(
-                    $adapter->quoteIdentifier($alias . '.' . $column)
-                )
+                    $adapter->quoteIdentifier($alias . '.' . $column),
+                ),
             )
             ->joinInner(
                 [$relatedAlias => $relatedTable],
                 implode(' AND ', $joinConditionSql),
-                []
+                [],
             )
             ->distinct(true);
 
@@ -304,9 +305,9 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
                     ['{{table}}', '{{related_table}}'],
                     [
                         $adapter->quoteIdentifier($alias),
-                        $adapter->quoteIdentifier($relatedAlias)
+                        $adapter->quoteIdentifier($relatedAlias),
                     ],
-                    $condition
+                    $condition,
                 );
                 $select->where($condition);
             }
@@ -353,7 +354,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
             $selectOldest = $this->_getWriteAdapter()->select()
                 ->from(
                     $table,
-                    ["MIN($column)"]
+                    ["MIN($column)"],
                 );
             $from = $this->_getWriteAdapter()->fetchOne($selectOldest);
         }
@@ -361,7 +362,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
         $periods = $this->_getTZOffsetTransitions(
             Mage::app()->getLocale()->storeDate($store)->toString(Zend_Date::TIMEZONE_NAME),
             $from,
-            $to
+            $to,
         );
         if (empty($periods)) {
             return $column;

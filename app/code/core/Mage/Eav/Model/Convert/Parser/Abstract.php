@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -38,7 +39,7 @@ abstract class Mage_Eav_Model_Convert_Parser_Abstract extends Mage_Dataflow_Mode
                     if (!$storeNode) {
                         return false;
                     }
-                    $storeIds[] = (int)$storeNode->system->store->id;
+                    $storeIds[] = (int) $storeNode->system->store->id;
                 }
             }
         }

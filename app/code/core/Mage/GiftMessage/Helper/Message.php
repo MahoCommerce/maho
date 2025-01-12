@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -120,12 +121,12 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
             case self::TYPE_ITEM:
                 return $this->_getDependenceFromStoreConfig(
                     $entity->getProduct()->getGiftMessageAvailable(),
-                    $store
+                    $store,
                 );
             case self::TYPE_ORDER_ITEM:
                 return $this->_getDependenceFromStoreConfig(
                     $entity->getGiftMessageAvailable(),
-                    $store
+                    $store,
                 );
             case self::TYPE_ADDRESS_ITEM:
                 $storeId = is_numeric($store) ? $store : Mage::app()->getStore($store)->getId();
@@ -137,12 +138,12 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
                         Mage::getModel('catalog/product')
                             ->setStoreId($storeId)
                             ->load($entity->getProductId())
-                            ->getGiftMessageAvailable()
+                            ->getGiftMessageAvailable(),
                     );
                 }
                 return $this->_getDependenceFromStoreConfig(
                     $this->getCached($cacheId),
-                    $store
+                    $store,
                 );
             default:
                 return Mage::getStoreConfigFlag(self::XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ORDER, $store);

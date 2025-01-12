@@ -5,6 +5,7 @@
  * @package     Mage_Adminhtml
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 function setLocation(url){
@@ -28,46 +29,62 @@ function setElementDisable(element, disable){
     }
 }
 
-function toggleParentVis(obj) {
-    obj = $(obj).parentNode;
-    if( obj.style.display == 'none' ) {
-        obj.style.display = '';
-    } else {
-        obj.style.display = 'none';
+function toggleParentVis(element, force = null) {
+    if (typeof element === 'string' || element instanceof String) {
+        element = document.getElementById(element);
     }
+    if (!element instanceof Element) {
+        throw new TypeError('Argument must be type of String or Element');
+    }
+    toggleVis(element.parentNode, force);
 }
 
 // to fix new app/design/adminhtml/default/default/template/widget/form/renderer/fieldset.phtml
 // with toggleParentVis
-function toggleFieldsetVis(obj) {
-    id = obj;
-    obj = $(obj);
-    if( obj.style.display == 'none' ) {
-        obj.style.display = '';
-    } else {
-        obj.style.display = 'none';
+function toggleFieldsetVis(element, force = null) {
+    if (typeof element === 'string' || element instanceof String) {
+        element = document.getElementById(element);
     }
-    obj = obj.parentNode.childElements();
-    for (var i = 0; i < obj.length; i++) {
-        if (obj[i].id != undefined
-            && obj[i].id == id
-            && obj[(i-1)].classNames() == 'entry-edit-head')
-        {
-            if (obj[i-1].style.display == 'none') {
-                obj[i-1].style.display = '';
-            } else {
-                obj[i-1].style.display = 'none';
-            }
-        }
+    if (!element instanceof Element) {
+        throw new TypeError('Argument must be type of String or Element');
+    }
+    toggleVis(element, force);
+
+    const previousElement = element.previousElementSibling;
+    if (previousElement && previousElement.classList.contains('entry-edit-head')) {
+        toggleVis(previousElement, force);
     }
 }
 
-function toggleVis(obj) {
-    obj = $(obj);
-    if( obj.style.display == 'none' ) {
-        obj.style.display = '';
+function toggleVis(element, force = null) {
+    if (typeof element === 'string' || element instanceof String) {
+        element = document.getElementById(element);
+    }
+    if (!element instanceof Element) {
+        throw new TypeError('Argument must be type of String or Element');
+    }
+    if (element.style.display === 'none') {
+        element.style.display = '';
+        element.classList.add('no-display')
+    }
+    if (force === null) {
+        element.classList.toggle('no-display');
     } else {
-        obj.style.display = 'none';
+        element.classList.toggle('no-display', !force);
+    }
+}
+
+function checkVisibility(element) {
+    if (typeof element === 'string' || element instanceof String) {
+        element = document.getElementById(element);
+    }
+    if (!element instanceof Element) {
+        throw new TypeError('Argument must be type of String or Element');
+    }
+    if (element.checkVisibility) {
+        return element.checkVisibility();
+    } else {
+        return element.style.display !== 'none' && !element.classList.contains('no-display');
     }
 }
 
@@ -181,18 +198,9 @@ function syncOnchangeValue(baseElem, distElem){
 }
 
 // Insert some content to the cursor position of input element
-function updateElementAtCursor(el, value, win) {
-    if (win == undefined) {
-        win = window.self;
-    }
-    if (document.selection) {
-        el.focus();
-        sel = win.document.selection.createRange();
-        sel.text = value;
-    } else if (el.selectionStart || el.selectionStart == '0') {
-        var startPos = el.selectionStart;
-        var endPos = el.selectionEnd;
-        el.value = el.value.substring(0, startPos) + value + el.value.substring(endPos, el.value.length);
+function updateElementAtCursor(el, value) {
+    if (el.selectionStart !== null) {
+        el.setRangeText(value, el.selectionStart, el.selectionEnd);
     } else {
         el.value += value;
     }
@@ -753,4 +761,75 @@ function copyText(event) {
     setTimeout(() => {
         copyIcon.classList.remove('icon-copy-copied');
     }, 1000);
+}
+
+/**
+ * Clear <div id="messages"></div>
+ */
+function clearMessagesDiv() {
+    setMessagesDivHtml('');
+}
+
+/**
+ * Set a message in <div id="messages"></div>
+ *
+ * @param {string} message - text value of the message to display
+ * @param {string} type - one of `success|error|notice`
+ */
+function setMessagesDiv(message, type = 'success') {
+    setMessagesDivHtml(`<ul class="messages"><li class="${type}-msg"><ul><li><span>${message}</span></li></ul></li></ul>`);
+}
+
+/**
+ * Raw function to update <div id="messages"></div>
+ *
+ * @param {string} html
+*/
+function setMessagesDivHtml(html) {
+    const div = document.getElementById('messages');
+    if (div) {
+        div.innerHTML = html;
+    }
+}
+
+/**
+ * Set Varien type route params, i.e. /id/1/
+ *
+ * @param {string} url - the base URL
+ * @param {Object} params - key value pairs to add, update, or remove
+ */
+function setRouteParams(url, params = {}) {
+    url = new URL(url);
+    if (!url.pathname.endsWith('/')) {
+        url.pathname += '/';
+    }
+    for (const [ key, val ] of Object.entries(params)) {
+        const regex = new RegExp(String.raw`\/${key}\/\w+\/`);
+        if (val === null || val === false) {
+            url.pathname = url.pathname.replace(regex, '/');
+        } else if (url.pathname.match(regex)) {
+            url.pathname = url.pathname.replace(regex, `/${key}/${val}/`);
+        } else {
+            url.pathname += `${key}/${val}/`;
+        }
+    }
+    return url.toString();
+}
+
+/**
+ * Set query params, i.e. ?id=1
+ *
+ * @param {string} url - the base URL
+ * @param {Object} params - key value pairs to add, update, or remove
+ */
+function setQueryParams(url, params = {}) {
+    url = new URL(url);
+    for (const [ key, val ] of Object.entries(params)) {
+        if (val === null || val === false) {
+            url.searchParams.delete(key);
+        } else {
+            url.searchParams.set(key, val);
+        }
+    }
+    return url.toString();
 }

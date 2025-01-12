@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'create-command',
-    description: 'Create a new command that will integrate into your project\'s Maho CLI set of commands'
+    description: 'Create a new command that will integrate into your project\'s Maho CLI set of commands',
 )]
 class CreateCommand extends BaseMahoCommand
 {
@@ -40,7 +41,7 @@ class CreateCommand extends BaseMahoCommand
                     throw new \RuntimeException('The command name should be in lowercase with optional colons (e.g., cache:clean)');
                 }
                 return $name;
-            }
+            },
         );
 
         // Interactive description input
@@ -52,7 +53,7 @@ class CreateCommand extends BaseMahoCommand
                     throw new \RuntimeException('The command description cannot be empty');
                 }
                 return $desc;
-            }
+            },
         );
 
         // Convert command name to class name (e.g., cache:clean -> CacheCleanCommand)
@@ -62,7 +63,7 @@ class CreateCommand extends BaseMahoCommand
         $content = $this->generateCommandContent(
             $className,
             $commandName,
-            $description
+            $description,
         );
 
         // Get the commands directory path
@@ -94,7 +95,7 @@ class CreateCommand extends BaseMahoCommand
         $io->success([
             'Command created successfully!',
             "File location: $filePath",
-            "Use it with: php bin/maho $commandName"
+            "Use it with: php bin/maho $commandName",
         ]);
 
         return Command::SUCCESS;

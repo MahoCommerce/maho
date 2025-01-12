@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -101,7 +102,7 @@ class Mage_Core_Model_Cookie
      */
     public function getConfigDomain()
     {
-        return (string)Mage::getStoreConfig(self::XML_PATH_COOKIE_DOMAIN, $this->getStore());
+        return (string) Mage::getStoreConfig(self::XML_PATH_COOKIE_DOMAIN, $this->getStore());
     }
 
     /**
@@ -136,7 +137,7 @@ class Mage_Core_Model_Cookie
      */
     public function setLifetime($lifetime)
     {
-        $this->_lifetime = (int)$lifetime;
+        $this->_lifetime = (int) $lifetime;
         return $this;
     }
 
@@ -217,7 +218,7 @@ class Mage_Core_Model_Cookie
 
         setcookie(
             $name,
-            (string)$value,
+            (string) $value,
             [
                 'expires'  => $expires,
                 'path'     => $path ?? $this->getPath(),
@@ -225,7 +226,7 @@ class Mage_Core_Model_Cookie
                 'secure'   => $secure ?? $this->isSecure(),
                 'httponly' => $httponly ?? $this->getHttponly(),
                 'samesite' => $sameSite ?? $this->getSameSite(),
-            ]
+            ],
         );
 
         return $this;

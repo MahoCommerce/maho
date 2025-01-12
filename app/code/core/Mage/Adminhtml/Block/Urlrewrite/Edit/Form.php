@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -45,8 +46,8 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit_Form extends Mage_Adminhtml_Block_Wid
             [
                 'id' => 'edit_form',
                 'action' => $this->getData('action'),
-                'method' => 'post'
-            ]
+                'method' => 'post',
+            ],
         );
 
         // set form data either from model values or from session
@@ -67,7 +68,7 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit_Form extends Mage_Adminhtml_Block_Wid
         }
 
         $fieldset = $form->addFieldset('base_fieldset', [
-            'legend'    => Mage::helper('adminhtml')->__('URL Rewrite Information')
+            'legend'    => Mage::helper('adminhtml')->__('URL Rewrite Information'),
         ]);
 
         $fieldset->addField('is_system', 'select', [
@@ -77,10 +78,10 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit_Form extends Mage_Adminhtml_Block_Wid
             'required'  => true,
             'options'   => [
                 1 => Mage::helper('adminhtml')->__('System'),
-                0 => Mage::helper('adminhtml')->__('Custom')
+                0 => Mage::helper('adminhtml')->__('Custom'),
             ],
             'disabled'  => true,
-            'value'     => $model->getIsSystem()
+            'value'     => $model->getIsSystem(),
         ]);
 
         $isFilterAllowed = false;
@@ -154,7 +155,7 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit_Form extends Mage_Adminhtml_Block_Wid
         } else {
             $fieldset->addField('store_id', 'hidden', [
                 'name'      => 'store_id',
-                'value'     => Mage::app()->getStore(true)->getId()
+                'value'     => Mage::app()->getStore(true)->getId(),
             ]);
         }
 
@@ -164,7 +165,7 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit_Form extends Mage_Adminhtml_Block_Wid
             'name'      => 'id_path',
             'required'  => true,
             'disabled'  => true,
-            'value'     => $formValues['id_path']
+            'value'     => $formValues['id_path'],
         ]);
 
         $requestPath = $fieldset->addField('request_path', 'text', [
@@ -172,7 +173,7 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit_Form extends Mage_Adminhtml_Block_Wid
             'title'     => Mage::helper('adminhtml')->__('Request Path'),
             'name'      => 'request_path',
             'required'  => true,
-            'value'     => $formValues['request_path']
+            'value'     => $formValues['request_path'],
         ]);
 
         $targetPath = $fieldset->addField('target_path', 'text', [
@@ -223,7 +224,7 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit_Form extends Mage_Adminhtml_Block_Wid
                 'R'  => Mage::helper('adminhtml')->__('Temporary (302)'),
                 'RP' => Mage::helper('adminhtml')->__('Permanent (301)'),
             ],
-            'value'     => $formValues['options']
+            'value'     => $formValues['options'],
         ]);
 
         $fieldset->addField('description', 'textarea', [
@@ -233,7 +234,7 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit_Form extends Mage_Adminhtml_Block_Wid
             'cols'      => 20,
             'rows'      => 5,
             'value'     => $formValues['description'],
-            'wrap'      => 'soft'
+            'wrap'      => 'soft',
         ]);
 
         $form->setUseContainer(true);

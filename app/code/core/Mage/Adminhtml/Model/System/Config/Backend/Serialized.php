@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -28,7 +29,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Serialized extends Mage_Core_Mo
             if (!empty($serializedValue)) {
                 try {
                     $unserializedValue = Mage::helper('core/unserializeArray')
-                        ->unserialize((string)$serializedValue);
+                        ->unserialize((string) $serializedValue);
                 } catch (Exception $e) {
                     Mage::logException($e);
                 }

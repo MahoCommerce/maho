@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -18,5 +19,5 @@ $installer->getConnection()->addColumn($installer->getTable('customer/entity'), 
     'unsigned' => true,
     'nullable' => false,
     'default' => '0',
-    'comment' => 'Disable automatic group change based on VAT ID'
+    'comment' => 'Disable automatic group change based on VAT ID',
 ]);

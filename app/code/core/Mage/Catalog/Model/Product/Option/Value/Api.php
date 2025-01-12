@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -36,7 +37,7 @@ class Mage_Catalog_Model_Product_Option_Value_Api extends Mage_Catalog_Model_Api
                 'price' => $value->getPrice(),
                 'price_type' => $value->getPriceType(),
                 'sku' => $value->getSku(),
-                'sort_order' => $value->getSortOrder()
+                'sort_order' => $value->getSortOrder(),
             ];
         }
         return $result;
@@ -61,7 +62,7 @@ class Mage_Catalog_Model_Product_Option_Value_Api extends Mage_Catalog_Model_Api
                 ->getValuesByOption(
                     [$valueId],
                     $productOptionValue->getOptionId(),
-                    $storeId
+                    $storeId,
                 )
                 ->addTitleToResult($storeId)
                 ->addPriceToResult($storeId);

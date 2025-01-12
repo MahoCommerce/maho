@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -107,7 +108,7 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
         $url = str_replace(
             ['{{ACCESS_KEY}}', '{{CURRENCY_FROM}}', '{{CURRENCY_TO}}'],
             [$accessKey, $currencyFrom, $currenciesImploded],
-            $this->_url
+            $this->_url,
         );
 
         $timeLimitCalculated = 2 * Mage::getStoreConfigAsInt(self::XML_PATH_FIXERIO_TIMEOUT)

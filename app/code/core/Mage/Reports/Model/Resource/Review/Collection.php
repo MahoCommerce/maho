@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -30,7 +31,7 @@ class Mage_Reports_Model_Resource_Review_Collection extends Mage_Review_Model_Re
      */
     public function addProductFilter($productId)
     {
-        $this->addFieldToFilter('entity_pk_value', ['eq' => (int)$productId]);
+        $this->addFieldToFilter('entity_pk_value', ['eq' => (int) $productId]);
 
         return $this;
     }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -113,7 +114,7 @@ class Mage_Checkout_Model_Cart_Product_Api extends Mage_Checkout_Model_Api_Resou
             $quoteItem = $this->_getQuoteItemByProduct(
                 $quote,
                 $productByItem,
-                $this->_getProductRequest($productItem)
+                $this->_getProductRequest($productItem),
             );
             if (is_null($quoteItem->getId())) {
                 $errors[] = Mage::helper('checkout')->__('One item of products is not belong any of quote item');
@@ -171,7 +172,7 @@ class Mage_Checkout_Model_Cart_Product_Api extends Mage_Checkout_Model_Api_Resou
                 $quoteItem = $this->_getQuoteItemByProduct(
                     $quote,
                     $productByItem,
-                    $this->_getProductRequest($productItem)
+                    $this->_getProductRequest($productItem),
                 );
                 if (is_null($quoteItem->getId())) {
                     $errors[] = Mage::helper('checkout')->__('One item of products is not belong any of quote item');
@@ -222,7 +223,7 @@ class Mage_Checkout_Model_Cart_Product_Api extends Mage_Checkout_Model_Api_Resou
                 'set'          => $product->getAttributeSetId(),
                 'type'         => $product->getTypeId(),
                 'category_ids' => $product->getCategoryIds(),
-                'website_ids'  => $product->getWebsiteIds()
+                'website_ids'  => $product->getWebsiteIds(),
             ];
         }
 
@@ -281,7 +282,7 @@ class Mage_Checkout_Model_Cart_Product_Api extends Mage_Checkout_Model_Api_Resou
                 $quoteItem = $this->_getQuoteItemByProduct(
                     $quote,
                     $productByItem,
-                    $this->_getProductRequest($productItem)
+                    $this->_getProductRequest($productItem),
                 );
                 if ($quoteItem && $quoteItem->getId()) {
                     $newQuoteItem = clone $quoteItem;

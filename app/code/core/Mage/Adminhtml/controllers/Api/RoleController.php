@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,7 +7,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -87,20 +88,18 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
         }
         $this->_addBreadcrumb($breadCrumb, $breadCrumbTitle);
 
-        $this->getLayout()->getBlock('head')->setCanLoadExtJs(true);
-
         $this->_addLeft(
-            $this->getLayout()->createBlock('adminhtml/api_editroles')
+            $this->getLayout()->createBlock('adminhtml/api_editroles'),
         );
         $resources = Mage::getModel('api/roles')->getResourcesList();
         $this->_addContent(
             $this->getLayout()->createBlock('adminhtml/api_buttons')
                 ->setRoleId($roleId)
                 ->setRoleInfo(Mage::getModel('api/roles')->load($roleId))
-                ->setTemplate('api/roleinfo.phtml')
+                ->setTemplate('api/roleinfo.phtml'),
         );
         $this->_addJs(
-            $this->getLayout()->createBlock('adminhtml/template')->setTemplate('api/role_users_grid_js.phtml')
+            $this->getLayout()->createBlock('adminhtml/template')->setTemplate('api/role_users_grid_js.phtml'),
         );
         $this->renderLayout();
     }

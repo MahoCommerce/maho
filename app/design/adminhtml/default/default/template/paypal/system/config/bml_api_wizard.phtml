@@ -14,6 +14,6 @@
 ?>
 <div class="pp-buttons-container">
     <button onclick="javascript:window.open('<?= $this->getButtonUrl()?>', 'bmlapiwizard','toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, ,left=100, top=100, width=550, height=550'); return false;" class="scalable" type="button" id="<?= $this->getHtmlId() ?>">
-        <span><span><span><?= $this->escapeHtml($this->getButtonLabel()) ?></span></span></span>
+        <span><?= $this->escapeHtml($this->getButtonLabel()) ?></span>
     </button>
 </div>

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,15 +7,13 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
- * Product options text type block
- *
  * @category   Mage
  * @package    Mage_Catalog
- *
  * @method bool getSkipJsReloadPrice()
  */
 class Mage_Catalog_Block_Product_View_Options_Type_Select extends Mage_Catalog_Block_Product_View_Options_Abstract
@@ -39,7 +38,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Select extends Mage_Catalog_B
             $block = $this->getLayout()->createBlock('core/html_select');
             $select = $block->setData([
                 'id' => 'select_' . $option->getId(),
-                'class' => $require . ' product-custom-option'
+                'class' => $require . ' product-custom-option',
             ]);
             if ($option->getType() === Mage_Catalog_Model_Product_Option::OPTION_TYPE_DROP_DOWN) {
                 $select->setName('options[' . $option->getId() . ']')
@@ -55,12 +54,12 @@ class Mage_Catalog_Block_Product_View_Options_Type_Select extends Mage_Catalog_B
             foreach ($option->getValues() as $value) {
                 $priceStr = $this->_formatPrice([
                     'is_percent'    => ($value->getPriceType() === 'percent'),
-                    'pricing_value' => $value->getPrice(($value->getPriceType() === 'percent'))
+                    'pricing_value' => $value->getPrice(($value->getPriceType() === 'percent')),
                 ], false);
                 $select->addOption(
                     $value->getOptionTypeId(),
                     $value->getTitle() . ' ' . $priceStr . '',
-                    ['price' => $helper::currencyByStore($value->getPrice(true), $store, false)]
+                    ['price' => $helper::currencyByStore($value->getPrice(true), $store, false)],
                 );
             }
             if ($option->getType() === Mage_Catalog_Model_Product_Option::OPTION_TYPE_MULTIPLE) {
@@ -108,7 +107,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Select extends Mage_Catalog_B
 
                 $priceStr = $this->_formatPrice([
                     'is_percent'    => ($value->getPriceType() === 'percent'),
-                    'pricing_value' => $value->getPrice($value->getPriceType() === 'percent')
+                    'pricing_value' => $value->getPrice($value->getPriceType() === 'percent'),
                 ]);
 
                 $htmlValue = $value->getOptionTypeId();
@@ -130,9 +129,9 @@ class Mage_Catalog_Block_Product_View_Options_Type_Select extends Mage_Catalog_B
                     . '<span class="label"><label for="options_' . $option->getId() . '_' . $count . '">'
                     . $this->escapeHtml($value->getTitle()) . ' ' . $priceStr . '</label></span>';
                 if ($option->getIsRequire()) {
-                    $selectHtml .= '<script type="text/javascript">' . '$(\'options_' . $option->getId() . '_'
+                    $selectHtml .= '<script type="text/javascript">' . 'document.getElementById(\'options_' . $option->getId() . '_'
                     . $count . '\').advaiceContainer = \'options-' . $option->getId() . '-container\';'
-                    . '$(\'options_' . $option->getId() . '_' . $count
+                    . 'document.getElementById(\'options_' . $option->getId() . '_' . $count
                     . '\').callbackFunction = \'validateOptionsCallback\';' . '</script>';
                 }
                 $selectHtml .= '</li>';

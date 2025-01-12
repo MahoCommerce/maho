@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -53,21 +54,13 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     /**
      * Addresses url
      */
-    public function getBookUrl()
-    {
-    }
+    public function getBookUrl() {}
 
-    public function getEditUrl()
-    {
-    }
+    public function getEditUrl() {}
 
-    public function getDeleteUrl()
-    {
-    }
+    public function getDeleteUrl() {}
 
-    public function getCreateUrl()
-    {
-    }
+    public function getCreateUrl() {}
 
     /**
      * @param mixed $renderer
@@ -96,7 +89,7 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
         if (!isset($this->_config[$websiteId])) {
             $this->_config[$websiteId] = Mage::getStoreConfig('customer/address', $store);
         }
-        return isset($this->_config[$websiteId][$key]) ? (string)$this->_config[$websiteId][$key] : null;
+        return isset($this->_config[$websiteId][$key]) ? (string) $this->_config[$websiteId][$key] : null;
     }
 
     /**
@@ -111,7 +104,7 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
         if (!isset($this->_streetLines[$websiteId])) {
             /** @var Mage_Eav_Model_Attribute $attribute */
             $attribute = Mage::getSingleton('eav/config')->getAttribute('customer_address', 'street');
-            $lines = (int)$attribute->getMultilineCount();
+            $lines = (int) $attribute->getMultilineCount();
             if ($lines <= 0) {
                 $lines = 2;
             }
@@ -139,7 +132,7 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
      */
     public function canShowConfig($key)
     {
-        return (bool)$this->getConfig($key);
+        return (bool) $this->getConfig($key);
     }
 
     /**
@@ -206,7 +199,7 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     {
         $lines = [];
         if (!empty($origStreets) && $toCount > 0) {
-            $countArgs = (int)floor(count($origStreets) / $toCount);
+            $countArgs = (int) floor(count($origStreets) / $toCount);
             $modulo = count($origStreets) % $toCount;
             $offset = 0;
             $neededLinesCount = 0;
@@ -265,7 +258,7 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
      */
     public function getTaxCalculationAddressType($store = null)
     {
-        return (string)Mage::getStoreConfig(self::XML_PATH_VIV_TAX_CALCULATION_ADDRESS_TYPE, $store);
+        return (string) Mage::getStoreConfig(self::XML_PATH_VIV_TAX_CALCULATION_ADDRESS_TYPE, $store);
     }
 
     /**

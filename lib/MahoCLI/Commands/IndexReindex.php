@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'index:reindex',
-    description: 'Reindex a single index'
+    description: 'Reindex a single index',
 )]
 class IndexReindex extends BaseMahoCommand
 {

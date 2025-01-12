@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -46,7 +47,7 @@ class Mage_Adminhtml_Block_Sales_Order_Totals_Item extends Mage_Adminhtml_Block_
             'code'      => $this->getNameInLayout(),
             'block_name' => $this->getNameInLayout(),
             'area'      => $this->getDisplayArea(),
-            'strong'    => $this->getStrong()
+            'strong'    => $this->getStrong(),
         ]);
         if ($this->getBeforeCondition()) {
             $this->getParentBlock()->addTotalBefore($total, $this->getBeforeCondition());

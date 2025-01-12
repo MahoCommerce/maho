@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,7 +7,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -38,11 +39,11 @@ class Mage_Adminhtml_Block_Sales_Order_Status_New_Form extends Mage_Adminhtml_Bl
         $form   = new Varien_Data_Form([
             'id'        => 'edit_form',
             'action'    => $this->getData('action'),
-            'method'    => 'post'
+            'method'    => 'post',
         ]);
 
         $fieldset   = $form->addFieldset('base_fieldset', [
-            'legend'    => Mage::helper('sales')->__('Order Status Information')
+            'legend'    => Mage::helper('sales')->__('Order Status Information'),
         ]);
 
         $fieldset->addField('is_new', 'hidden', ['name' => 'is_new', 'value' => 1]);
@@ -55,7 +56,7 @@ class Mage_Adminhtml_Block_Sales_Order_Status_New_Form extends Mage_Adminhtml_Bl
                 'label'     => Mage::helper('sales')->__('Status Code'),
                 'class'     => 'required-entry validate-code',
                 'required'  => true,
-            ]
+            ],
         );
 
         $fieldset->addField(
@@ -66,7 +67,16 @@ class Mage_Adminhtml_Block_Sales_Order_Status_New_Form extends Mage_Adminhtml_Bl
                 'label'     => Mage::helper('sales')->__('Status Label'),
                 'class'     => 'required-entry',
                 'required'  => true,
-            ]
+            ],
+        );
+
+        $fieldset->addField(
+            'color',
+            'color',
+            [
+                'name'      => 'color',
+                'label'     => Mage::helper('sales')->__('Status Color'),
+            ],
         );
 
         $fieldset = $form->addFieldset('store_labels_fieldset', [

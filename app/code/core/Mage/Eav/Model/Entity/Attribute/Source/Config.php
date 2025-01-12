@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -51,8 +52,8 @@ class Mage_Eav_Model_Entity_Attribute_Source_Config extends Mage_Eav_Model_Entit
             }
             foreach ($options as $option) {
                 $this->_options[] = [
-                    'value' => (string)$option->value,
-                    'label' => Mage::helper('eav')->__((string)$option->label)
+                    'value' => (string) $option->value,
+                    'label' => Mage::helper('eav')->__((string) $option->label),
                 ];
             }
         }

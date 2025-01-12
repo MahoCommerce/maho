@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -64,6 +65,8 @@
  * @method string getRpTokenCreatedAt()
  * @method $this setRpTokenCreatedAt(string $value)
  * @method $this setUserId(int $value)
+ * @method int getTwofaEnabled()
+ * @method $this setTwofaEnabled(int $value)
  */
 class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 {
@@ -98,6 +101,13 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
      * Empty hash salt
      */
     public const HASH_SALT_EMPTY = null;
+
+    /**
+     * Authentication error codes
+     */
+    public const AUTH_ERR_ACCOUNT_INACTIVE = 1;
+    public const AUTH_ERR_ACCESS_DENIED = 2;
+    public const AUTH_ERR_2FA_INVALID = 3;
 
     /**
      * Model event prefix
@@ -137,7 +147,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             'lastname'  => $this->getLastname(),
             'email'     => $this->getEmail(),
             'modified'  => $this->_getDateNow(),
-            'extra'     => serialize($this->getExtra())
+            'extra'     => serialize($this->getExtra()),
         ];
 
         if ($this->getId() > 0) {
@@ -322,7 +332,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         $mailer->setStoreId(0);
         $mailer->setTemplateId(Mage::getStoreConfig(self::XML_PATH_FORGOT_EMAIL_TEMPLATE));
         $mailer->setTemplateParams([
-            'user' => $this
+            'user' => $this,
         ]);
         $mailer->send();
 
@@ -363,13 +373,9 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
     /**
      * Authenticate username and password and save loaded record
-     *
-     * @param string $username
-     * @param string $password
-     * @return bool
      * @throws Mage_Core_Exception
      */
-    public function authenticate(#[\SensitiveParameter] $username, #[\SensitiveParameter] $password)
+    public function authenticate(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $password, #[\SensitiveParameter] ?string $twofaVerificationCode = null): bool
     {
         $config = Mage::getStoreConfigFlag('admin/security/use_case_sensitive_login');
         $result = false;
@@ -377,17 +383,31 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         try {
             Mage::dispatchEvent('admin_user_authenticate_before', [
                 'username' => $username,
-                'user'     => $this
+                'user'     => $this,
             ]);
             $this->loadByUsername($username);
             $sensitive = ($config) ? $username == $this->getUsername() : true;
 
             if ($sensitive && $this->getId() && $this->validatePasswordHash($password, $this->getPassword())) {
                 if ($this->getIsActive() != '1') {
-                    Mage::throwException(Mage::helper('adminhtml')->__('This account is inactive.'));
+                    throw new Mage_Core_Exception(
+                        Mage::helper('adminhtml')->__('This account is inactive.'),
+                        self::AUTH_ERR_ACCOUNT_INACTIVE,
+                    );
                 }
                 if (!$this->hasAssigned2Role($this->getId())) {
-                    Mage::throwException(Mage::helper('adminhtml')->__('Access denied.'));
+                    throw new Mage_Core_Exception(
+                        Mage::helper('adminhtml')->__('Access denied.'),
+                        self::AUTH_ERR_ACCESS_DENIED,
+                    );
+                }
+                if ($this->getTwofaEnabled() && $secret = $this->getTwofaSecret()) {
+                    if (!Mage::helper('adminhtml/twoFactorAuthentication')->verifyCode($secret, $twofaVerificationCode ?? '')) {
+                        throw new Mage_Core_Exception(
+                            Mage::helper('adminhtml')->__('2FA verification code is invalid.'),
+                            self::AUTH_ERR_2FA_INVALID,
+                        );
+                    }
                 }
                 $result = true;
             }
@@ -415,16 +435,11 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Login user
-     *
-     * @param string $username
-     * @param string $password
-     * @return  $this
      * @throws Mage_Core_Exception
      */
-    public function login(#[\SensitiveParameter] $username, #[\SensitiveParameter] $password)
+    public function login(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $password, #[\SensitiveParameter] ?string $twofaVerificationCode = null): self
     {
-        if ($this->authenticate($username, $password)) {
+        if ($this->authenticate($username, $password, $twofaVerificationCode)) {
             $this->getResource()->recordLogin($this);
             Mage::getSingleton('core/session')->renewFormKey();
         }
@@ -513,10 +528,10 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             $aclResource = 'admin/' . $path . $childName;
             if (Mage::getSingleton('admin/session')->isAllowed($aclResource)) {
                 if (!$child->children) {
-                    return (string)$child->action;
+                    return (string) $child->action;
                 } elseif ($child->children) {
                     $action = $this->findFirstAvailableMenu($child->children, $path . $childName . '/', $level + 1);
-                    return $action ? $action : (string)$child->action;
+                    return $action ? $action : (string) $child->action;
                 }
             }
         }
@@ -557,7 +572,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         $aclResource = 'admin/' . $startupPage;
         if (Mage::getSingleton('admin/session')->isAllowed($aclResource)) {
             $nodePath = 'menu/' . implode('/children/', explode('/', $startupPage)) . '/action';
-            $url = (string)Mage::getSingleton('admin/config')->getAdminhtmlConfig()->getNode($nodePath);
+            $url = (string) Mage::getSingleton('admin/config')->getAdminhtmlConfig()->getNode($nodePath);
             if ($url) {
                 return $url;
             }
@@ -790,5 +805,30 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         $minLength = Mage::getStoreConfigAsInt(self::XML_PATH_MIN_ADMIN_PASSWORD_LENGTH);
         $absoluteMinLength = Mage_Core_Model_App::ABSOLUTE_MIN_PASSWORD_LENGTH;
         return ($minLength < $absoluteMinLength) ? $absoluteMinLength : $minLength;
+    }
+
+    /**
+     * Retrieve unencrypted value of twofa_secret
+     */
+    public function getTwofaSecret(): ?string
+    {
+        if ($this->hasData('twofa_secret')) {
+            return Mage::helper('core')->getEncryptor()->decrypt($this->_getData('twofa_secret'));
+        }
+        return null;
+    }
+
+    /**
+     * Store encrypted value of twofa_secret
+     */
+    public function setTwofaSecret(#[\SensitiveParameter] ?string $secret): self
+    {
+        if ($secret === null) {
+            $this->setData('twofa_secret', null);
+        } else {
+            $encrypted = Mage::helper('core')->getEncryptor()->encrypt($secret);
+            $this->setData('twofa_secret', $encrypted);
+        }
+        return $this;
     }
 }

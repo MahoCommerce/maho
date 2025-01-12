@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -44,7 +45,7 @@ abstract class Mage_Checkout_Block_Cart_Abstract extends Mage_Core_Block_Templat
         $this->_itemRenders[$productType] = [
             'block' => $blockType,
             'template' => $template,
-            'blockInstance' => null
+            'blockInstance' => null,
         ];
         return $this;
     }

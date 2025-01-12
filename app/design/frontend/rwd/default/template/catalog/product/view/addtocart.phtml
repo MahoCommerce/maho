@@ -23,7 +23,7 @@
         </div>
         <?php endif ?>
         <div class="add-to-cart-buttons">
-            <button type="button" title="<?= $buttonTitle ?>" class="button btn-cart" onclick="productAddToCartForm.submit(this)"><span><span><?= $buttonTitle ?></span></span></button>
+            <button type="button" title="<?= $buttonTitle ?>" class="button btn-cart" onclick="productAddToCartForm.submit(this)"><?= $buttonTitle ?></button>
             <?= $this->getChildHtml('', true, true) ?>
         </div>
     </div>

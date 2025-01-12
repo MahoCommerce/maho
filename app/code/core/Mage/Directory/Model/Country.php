@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -159,7 +160,7 @@ T: {{telephone}}';
         if (!$this->getData('name')) {
             $this->setData(
                 'name',
-                Mage::app()->getLocale()->getCountryTranslation($this->getId())
+                Mage::app()->getLocale()->getCountryTranslation($this->getId()),
             );
         }
         return $this->getData('name');

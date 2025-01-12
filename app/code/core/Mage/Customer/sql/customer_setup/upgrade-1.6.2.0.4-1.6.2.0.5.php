@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -34,15 +35,15 @@ $table = $installer->getConnection()
     ], 'Requested date for change')
     ->addIndex(
         $installer->getIdxName('customer/flowpassword', ['email']),
-        ['email']
+        ['email'],
     )
     ->addIndex(
         $installer->getIdxName('customer/flowpassword', ['ip']),
-        ['ip']
+        ['ip'],
     )
     ->addIndex(
         $installer->getIdxName('customer/flowpassword', ['requested_date']),
-        ['requested_date']
+        ['requested_date'],
     )
     ->setComment('Customer flow password');
 $installer->getConnection()->createTable($table);

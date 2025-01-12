@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -125,9 +126,7 @@ abstract class Mage_Core_Controller_Varien_Action
     /**
      * @return void
      */
-    protected function _construct()
-    {
-    }
+    protected function _construct() {}
 
     /**
      * @param string $action
@@ -268,7 +267,7 @@ abstract class Mage_Core_Controller_Varien_Action
         // load theme handle
         $package = Mage::getSingleton('core/design_package');
         $update->addHandle(
-            'THEME_' . $package->getArea() . '_' . $package->getPackageName() . '_' . $package->getTheme('layout')
+            'THEME_' . $package->getArea() . '_' . $package->getPackageName() . '_' . $package->getTheme('layout'),
         );
 
         // load action handle
@@ -288,7 +287,7 @@ abstract class Mage_Core_Controller_Varien_Action
         // dispatch event for adding handles to layout update
         Mage::dispatchEvent(
             'controller_action_layout_load_before',
-            ['action' => $this, 'layout' => $this->getLayout()]
+            ['action' => $this, 'layout' => $this->getLayout()],
         );
 
         // load layout updates by specified handles
@@ -309,7 +308,7 @@ abstract class Mage_Core_Controller_Varien_Action
         if (!$this->getFlag('', self::FLAG_NO_DISPATCH_BLOCK_EVENT)) {
             Mage::dispatchEvent(
                 'controller_action_layout_generate_xml_before',
-                ['action' => $this, 'layout' => $this->getLayout()]
+                ['action' => $this, 'layout' => $this->getLayout()],
             );
         }
 
@@ -331,7 +330,7 @@ abstract class Mage_Core_Controller_Varien_Action
         if (!$this->getFlag('', self::FLAG_NO_DISPATCH_BLOCK_EVENT)) {
             Mage::dispatchEvent(
                 'controller_action_layout_generate_blocks_before',
-                ['action' => $this, 'layout' => $this->getLayout()]
+                ['action' => $this, 'layout' => $this->getLayout()],
             );
         }
 
@@ -343,7 +342,7 @@ abstract class Mage_Core_Controller_Varien_Action
         if (!$this->getFlag('', self::FLAG_NO_DISPATCH_BLOCK_EVENT)) {
             Mage::dispatchEvent(
                 'controller_action_layout_generate_blocks_after',
-                ['action' => $this, 'layout' => $this->getLayout()]
+                ['action' => $this, 'layout' => $this->getLayout()],
             );
         }
 
@@ -522,15 +521,15 @@ abstract class Mage_Core_Controller_Varien_Action
         Mage::dispatchEvent('controller_action_predispatch', ['controller_action' => $this]);
         Mage::dispatchEvent(
             'controller_action_predispatch_' . $this->getRequest()->getRouteName(),
-            ['controller_action' => $this]
+            ['controller_action' => $this],
         );
         Mage::dispatchEvent(
             'controller_action_predispatch_' . $this->getRequest()->getRouteName() . '_' . $this->getRequest()->getControllerName(),
-            ['controller_action' => $this]
+            ['controller_action' => $this],
         );
         Mage::dispatchEvent(
             'controller_action_predispatch_' . $this->getFullActionName(),
-            ['controller_action' => $this]
+            ['controller_action' => $this],
         );
     }
 
@@ -545,15 +544,15 @@ abstract class Mage_Core_Controller_Varien_Action
 
         Mage::dispatchEvent(
             'controller_action_postdispatch_' . $this->getFullActionName(),
-            ['controller_action' => $this]
+            ['controller_action' => $this],
         );
         Mage::dispatchEvent(
             'controller_action_postdispatch_' . $this->getRequest()->getRouteName() . '_' . $this->getRequest()->getControllerName(),
-            ['controller_action' => $this]
+            ['controller_action' => $this],
         );
         Mage::dispatchEvent(
             'controller_action_postdispatch_' . $this->getRequest()->getRouteName(),
-            ['controller_action' => $this]
+            ['controller_action' => $this],
         );
         Mage::dispatchEvent('controller_action_postdispatch', ['controller_action' => $this]);
     }
@@ -580,7 +579,7 @@ abstract class Mage_Core_Controller_Varien_Action
                 $status->getForwardAction(),
                 $status->getForwardController(),
                 $status->getForwardModule(),
-                ['__status__' => $status]
+                ['__status__' => $status],
             );
         }
     }
@@ -590,7 +589,7 @@ abstract class Mage_Core_Controller_Varien_Action
         $redirect = new Varien_Object();
         Mage::dispatchEvent('controller_action_nocookies', [
             'action'    => $this,
-            'redirect'  => $redirect
+            'redirect'  => $redirect,
         ]);
 
         if ($url = $redirect->getRedirectUrl()) {
@@ -655,7 +654,7 @@ abstract class Mage_Core_Controller_Varien_Action
                 $block->addStorageType($storageName);
             } else {
                 Mage::throwException(
-                    Mage::helper('core')->__('Invalid messages storage "%s" for layout messages initialization', (string) $storageName)
+                    Mage::helper('core')->__('Invalid messages storage "%s" for layout messages initialization', (string) $storageName),
                 );
             }
         }
@@ -712,7 +711,7 @@ abstract class Mage_Core_Controller_Varien_Action
             && $this->_sessionNamespace != Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE
         ) {
             $arguments += ['_query' => [
-                $session->getSessionIdQueryParam() => $session->getSessionId()
+                $session->getSessionIdQueryParam() => $session->getSessionId(),
             ]];
         }
         $this->getResponse()->setRedirect(Mage::getUrl($path, $arguments));
@@ -830,7 +829,7 @@ abstract class Mage_Core_Controller_Varien_Action
             $this->_realModuleName = substr(
                 $class,
                 0,
-                strpos(strtolower($class), '_' . strtolower($this->getRequest()->getControllerName() . 'Controller'))
+                strpos(strtolower($class), '_' . strtolower($this->getRequest()->getControllerName() . 'Controller')),
             );
         }
         return $this->_realModuleName;
@@ -874,13 +873,13 @@ abstract class Mage_Core_Controller_Varien_Action
         }
 
         if (!($rewrite->actions && $rewrite->actions->$action) || $rewrite->is('override_actions')) {
-            $t = explode('/', (string)$rewrite->to);
+            $t = explode('/', (string) $rewrite->to);
             if (count($t) !== 2 || empty($t[0]) || empty($t[1])) {
                 return false;
             }
             $t[2] = $action;
         } else {
-            $t = explode('/', (string)$rewrite->actions->$action->to);
+            $t = explode('/', (string) $rewrite->actions->$action->to);
             if (count($t) !== 3 || empty($t[0]) || empty($t[1]) || empty($t[2])) {
                 return false;
             }
@@ -889,7 +888,7 @@ abstract class Mage_Core_Controller_Varien_Action
         $this->_forward(
             $t[2] === '*' ? $action : $t[2],
             $t[1] === '*' ? $controller : $t[1],
-            $t[0] === '*' ? $route : $t[0]
+            $t[0] === '*' ? $route : $t[0],
         );
 
         return true;
@@ -987,10 +986,10 @@ abstract class Mage_Core_Controller_Varien_Action
             return $array;
         }
         $filterInput = new Zend_Filter_LocalizedToNormalized([
-            'date_format' => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT)
+            'date_format' => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
         ]);
         $filterInternal = new Zend_Filter_NormalizedToLocalized([
-            'date_format' => Varien_Date::DATE_INTERNAL_FORMAT
+            'date_format' => Varien_Date::DATE_INTERNAL_FORMAT,
         ]);
 
         foreach ($dateFields as $dateField) {
@@ -1015,10 +1014,10 @@ abstract class Mage_Core_Controller_Varien_Action
             return $array;
         }
         $filterInput = new Zend_Filter_LocalizedToNormalized([
-            'date_format' => Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT)
+            'date_format' => Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
         ]);
         $filterInternal = new Zend_Filter_NormalizedToLocalized([
-            'date_format' => Varien_Date::DATETIME_INTERNAL_FORMAT
+            'date_format' => Varien_Date::DATETIME_INTERNAL_FORMAT,
         ]);
 
         foreach ($dateFields as $dateField) {

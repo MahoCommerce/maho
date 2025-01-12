@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -108,7 +109,7 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
                     $model->loadByQueryText($queryText);
                     if ($model->getId() && $model->getId() != $queryId) {
                         Mage::throwException(
-                            Mage::helper('catalog')->__('Search Term with such search query already exists.')
+                            Mage::helper('catalog')->__('Search Term with such search query already exists.'),
                         );
                     } elseif (!$model->getId() && $queryId) {
                         $model->load($queryId);
@@ -121,7 +122,7 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
                 $model->setIsProcessed(0);
                 $model->save();
                 $this->_getSession()->addSuccess(
-                    Mage::helper('catalog')->__('You saved the search term.')
+                    Mage::helper('catalog')->__('You saved the search term.'),
                 );
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
@@ -129,7 +130,7 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
             } catch (Exception $e) {
                 $this->_getSession()->addException(
                     $e,
-                    Mage::helper('catalog')->__('An error occurred while saving the search query.')
+                    Mage::helper('catalog')->__('An error occurred while saving the search query.'),
                 );
                 $hasError = true;
             }
@@ -175,7 +176,7 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
                     $model->delete();
                 }
                 Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('adminhtml')->__('Total of %d record(s) were deleted', count($searchIds))
+                    Mage::helper('adminhtml')->__('Total of %d record(s) were deleted', count($searchIds)),
                 );
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());

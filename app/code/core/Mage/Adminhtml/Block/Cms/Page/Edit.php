@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -83,7 +84,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit extends Mage_Adminhtml_Block_Widget_For
         return $this->getUrl('*/*/save', [
             '_current'   => true,
             'back'       => 'edit',
-            'active_tab' => '{{tab_id}}'
+            'active_tab' => '{{tab_id}}',
         ]);
     }
 

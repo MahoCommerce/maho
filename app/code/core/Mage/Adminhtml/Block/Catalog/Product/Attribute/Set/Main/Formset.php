@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,7 +7,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -16,10 +17,6 @@
  */
 class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main_Formset extends Mage_Adminhtml_Block_Widget_Form
 {
-    /**
-     * Prepares attribute set form
-     *
-     */
     #[\Override]
     protected function _prepareForm()
     {
@@ -34,13 +31,13 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main_Formset extends Ma
             'name' => 'attribute_set_name',
             'required' => true,
             'class' => 'required-entry validate-no-html-tags',
-            'value' => $data->getAttributeSetName()
+            'value' => $data->getAttributeSetName(),
         ]);
 
         if (!$this->getRequest()->getParam('id', false)) {
             $fieldset->addField('gotoEdit', 'hidden', [
                 'name' => 'gotoEdit',
-                'value' => '1'
+                'value' => '1',
             ]);
 
             $sets = Mage::getModel('eav/entity_attribute_set')
@@ -65,6 +62,18 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main_Formset extends Ma
         $form->setAction($this->getUrl('*/*/save'));
         $form->setOnsubmit('return false;');
         $this->setForm($form);
+        return $this;
+    }
+
+    #[\Override]
+    protected function _initFormValues()
+    {
+        if ($this->getIsReadOnly()) {
+            $fieldset = $this->getForm()->getElement('set_name');
+            foreach ($fieldset->getElements() as $element) {
+                $element->setDisabled(true);
+            }
+        }
         return $this;
     }
 }

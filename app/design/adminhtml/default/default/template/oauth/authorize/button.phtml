@@ -31,11 +31,11 @@
                 <p><?= $this->__('After authorization application will have access to you account.') ?></p>
                 <form id="oauth_authorize_confirm" action="<?= $this->getConfirmUrl() ?>" method="get">
                     <input type="hidden" name="oauth_token" value="<?= $this->escapeHtml($this->getToken()) ?>">
-                    <button type="submit" class="button" title="<?= $this->quoteEscape($this->__('Authorize')) ?>"><span><span><?= $this->__('Authorize') ?></span></span></button>
+                    <button type="submit" class="button" title="<?= $this->quoteEscape($this->__('Authorize')) ?>"><?= $this->__('Authorize') ?></button>
                 </form>
                 <form id="oauth_authorize_reject" action="<?= $this->getRejectUrl() ?>" method="get">
                     <input type="hidden" name="oauth_token" value="<?= $this->escapeHtml($this->getToken()) ?>">
-                    <button type="submit" class="button" title="<?= $this->quoteEscape($this->__('Reject')) ?>"><span><span><?= $this->__('Reject') ?></span></span></button>
+                    <button type="submit" class="button" title="<?= $this->quoteEscape($this->__('Reject')) ?>"><?= $this->__('Reject') ?></button>
                 </form>
             <?php endif ?>
         </div>

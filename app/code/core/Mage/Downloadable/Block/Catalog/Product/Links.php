@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,6 +7,7 @@
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -46,13 +48,25 @@ class Mage_Downloadable_Block_Catalog_Product_Links extends Mage_Catalog_Block_P
     }
 
     /**
-     * @return array
+     * @return list<Mage_Downloadable_Model_Link>
      */
     public function getLinks()
     {
         /** @var Mage_Downloadable_Model_Product_Type $productType */
         $productType = $this->getProduct()->getTypeInstance(true);
         return $productType->getLinks($this->getProduct());
+    }
+
+    /**
+     * Check if link has sample
+     */
+    public function getLinkHasSample(Mage_Downloadable_Model_Link $link): bool
+    {
+        return match ($link->getSampleType()) {
+            Mage_Downloadable_Helper_Download::LINK_TYPE_URL => true,
+            Mage_Downloadable_Helper_Download::LINK_TYPE_FILE => true,
+            default => false,
+        };
     }
 
     /**

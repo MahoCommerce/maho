@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -59,7 +60,7 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
     protected function _getLoadSelect($field, $value, $object)
     {
         $select     = parent::_getLoadSelect($field, $value, $object);
-        $websiteId  = (int)$object->getWebsite()->getId();
+        $websiteId  = (int) $object->getWebsite()->getId();
         if ($websiteId) {
             $adapter    = $this->_getReadAdapter();
             $columns    = [];
@@ -71,12 +72,12 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
             }
             $conditionSql = $adapter->quoteInto(
                 $this->getMainTable() . '.attribute_id = scope_table.attribute_id AND scope_table.website_id =?',
-                $websiteId
+                $websiteId,
             );
             $select->joinLeft(
                 ['scope_table' => $scopeTable],
                 $conditionSql,
-                $columns
+                $columns,
             );
         }
 
@@ -101,7 +102,7 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
             foreach ($forms as $formCode) {
                 $data[] = [
                     'form_code'     => $formCode,
-                    'attribute_id'  => (int)$object->getId()
+                    'attribute_id'  => (int) $object->getId(),
                 ];
             }
 
@@ -113,12 +114,12 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
         // update sort order
         if (!$object->isObjectNew() && $object->dataHasChangedFor('sort_order')) {
             $data  = ['sort_order' => $object->getSortOrder()];
-            $where = ['attribute_id=?' => (int)$object->getId()];
+            $where = ['attribute_id=?' => (int) $object->getId()];
             $adapter->update($this->getTable('eav/entity_attribute'), $data, $where);
         }
 
         // save scope attributes
-        $websiteId = (int)$object->getWebsite()->getId();
+        $websiteId = (int) $object->getWebsite()->getId();
         if ($websiteId) {
             $table      = $this->_getEavWebsiteTable();
             $describe   = $this->_getReadAdapter()->describeTable($table);
@@ -127,8 +128,8 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
                 $data = $this->getScopeValues($object);
             }
 
-            $data['attribute_id']   = (int)$object->getId();
-            $data['website_id']     = (int)$websiteId;
+            $data['attribute_id']   = (int) $object->getId();
+            $data['website_id']     = (int) $websiteId;
             unset($describe['attribute_id']);
             unset($describe['website_id']);
 
@@ -153,8 +154,8 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
     {
         $adapter = $this->_getReadAdapter();
         $bind    = [
-            'attribute_id' => (int)$object->getId(),
-            'website_id'   => (int)$object->getWebsite()->getId()
+            'attribute_id' => (int) $object->getId(),
+            'website_id'   => (int) $object->getWebsite()->getId(),
         ];
         $select = $adapter->select()
             ->from($this->_getEavWebsiteTable())
@@ -178,7 +179,7 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
     public function getUsedInForms(Mage_Core_Model_Abstract $object)
     {
         $adapter = $this->_getReadAdapter();
-        $bind    = ['attribute_id' => (int)$object->getId()];
+        $bind    = ['attribute_id' => (int) $object->getId()];
         $select  = $adapter->select()
             ->from($this->_getFormAttributeTable(), 'form_code')
             ->where('attribute_id = :attribute_id');

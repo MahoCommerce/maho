@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,203 +7,146 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
- * Categories tree block
+ * Manage Categories tree block
  *
  * @category   Mage
  * @package    Mage_Adminhtml
  */
 class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Catalog_Category_Abstract
 {
-    protected $_withProductCount;
-
     public function __construct()
     {
         parent::__construct();
         $this->setTemplate('catalog/category/tree.phtml');
-        $this->setUseAjax(true);
-        $this->_withProductCount = true;
     }
 
     #[\Override]
     protected function _prepareLayout()
     {
-        $addUrl = $this->getUrl('*/*/add', [
-            '_current' => true,
-            'id' => null,
-            '_query' => false
-        ]);
+        $addUrl = $this->getUrl('*/*/add', ['_current' => true, '_query' => false, 'id' => null]);
 
         $this->setChild(
             'add_sub_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
                     'label'     => Mage::helper('catalog')->__('Add Subcategory'),
-                    'onclick'   => "addNew('" . $addUrl . "', false)",
+                    'onclick'   => "addNew('$addUrl', false)",
                     'class'     => 'add',
                     'id'        => 'add_subcategory_button',
-                    'style'     => $this->canAddSubCategory() ? '' : 'display: none;'
-                ])
+                    'disabled'  =>  !$this->canAddSubCategory(),
+                ]),
         );
 
-        if ($this->canAddRootCategory()) {
-            $this->setChild(
-                'add_root_button',
-                $this->getLayout()->createBlock('adminhtml/widget_button')
-                    ->setData([
-                        'label'     => Mage::helper('catalog')->__('Add Root Category'),
-                        'onclick'   => "addNew('" . $addUrl . "', true)",
-                        'class'     => 'add',
-                        'id'        => 'add_root_category_button'
-                    ])
-            );
-        }
+        $this->setChild(
+            'add_root_button',
+            $this->getLayout()->createBlock('adminhtml/widget_button')
+                ->setData([
+                    'label'     => Mage::helper('catalog')->__('Add Root Category'),
+                    'onclick'   => "addNew('$addUrl', true)",
+                    'class'     => 'add' . ($this->canAddRootCategory() ? '' : ' no-display'),
+                    'id'        => 'add_root_category_button',
+                ]),
+        );
 
         $this->setChild(
             'store_switcher',
             $this->getLayout()->createBlock('adminhtml/store_switcher')
                 ->setSwitchUrl($this->getUrl('*/*/*', ['_current' => true, '_query' => false, 'store' => null]))
-                ->setTemplate('store/switcher/enhanced.phtml')
+                ->setTemplate('store/switcher/enhanced.phtml'),
         );
         return parent::_prepareLayout();
     }
 
-    protected function _getDefaultStoreId()
-    {
-        return Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID;
-    }
-
-    public function getCategoryCollection()
-    {
-        $storeId = $this->getRequest()->getParam('store', $this->_getDefaultStoreId());
-        $collection = $this->getData('category_collection');
-        if (is_null($collection)) {
-            $collection = Mage::getModel('catalog/category')->getCollection();
-
-            /** @var Mage_Catalog_Model_Resource_Category_Collection $collection */
-            $collection->addAttributeToSelect('name')
-                ->addAttributeToSelect('is_active')
-                ->setProductStoreId($storeId)
-                ->setLoadProductCount($this->_withProductCount)
-                ->setStoreId($storeId);
-
-            $this->setData('category_collection', $collection);
-        }
-        return $collection;
-    }
-
+    /**
+     * @return string
+     */
     public function getAddRootButtonHtml()
     {
         return $this->getChildHtml('add_root_button');
     }
 
+    /**
+     * @return string
+     */
     public function getAddSubButtonHtml()
     {
         return $this->getChildHtml('add_sub_button');
     }
 
-    public function getExpandButtonHtml()
-    {
-        return $this->getChildHtml('expand_button');
-    }
-
-    public function getCollapseButtonHtml()
-    {
-        return $this->getChildHtml('collapse_button');
-    }
-
+    /**
+     * @return string
+     */
     public function getStoreSwitcherHtml()
     {
         return $this->getChildHtml('store_switcher');
     }
 
-    public function getLoadTreeUrl($expanded = null)
-    {
-        $params = ['_current' => true, 'id' => null,'store' => null];
-        if ((is_null($expanded) && Mage::getSingleton('admin/session')->getIsTreeWasExpanded())
-            || $expanded == true
-        ) {
-            $params['expand_all'] = true;
-        }
-        return $this->getUrl('*/*/categoriesJson', $params);
-    }
-
-    public function getNodesUrl()
-    {
-        return $this->getUrl('*/catalog_category/jsonTree');
-    }
-
+    /**
+     * @return string
+     */
     public function getSwitchTreeUrl()
     {
         return $this->getUrl(
             '*/catalog_category/tree',
-            ['_current' => true, 'store' => null, '_query' => false, 'id' => null, 'parent' => null]
+            ['_current' => true, 'store' => null, '_query' => false, 'id' => null, 'parent' => null],
         );
     }
 
-    public function getIsWasExpanded()
-    {
-        return Mage::getSingleton('admin/session')->getIsTreeWasExpanded();
-    }
-
+    /**
+     * @return string
+     */
     public function getMoveUrl()
     {
         return $this->getUrl('*/catalog_category/move', ['store' => $this->getRequest()->getParam('store')]);
     }
 
-    public function getTree($parenNodeCategory = null)
+    /**
+     * Returns root node and sets 'checked' flag (if necessary)
+     *
+     * @return Varien_Data_Tree_Node
+     */
+    public function getRootNode()
     {
-        $rootArray = $this->_getNodeJson($this->getRoot($parenNodeCategory));
-        return $rootArray['children'] ?? [];
-    }
-
-    public function getTreeJson($parenNodeCategory = null)
-    {
-        $rootArray = $this->_getNodeJson($this->getRoot($parenNodeCategory));
-        return Mage::helper('core')->jsonEncode($rootArray['children'] ?? []);
+        $root = $this->getRoot();
+        if ($root && $this->getCategory()) {
+            if ($selected = $root->getTree()->getNodeById($this->getCategoryId())) {
+                $selected->setChecked(true);
+            } elseif ($parent = $root->getTree()->getNodeById($this->getCategory()->getParentId())) {
+                $parent->setChecked(true);
+            }
+        }
+        return $root;
     }
 
     /**
-     * Get JSON of array of categories, that are breadcrumbs for specified category path
-     *
-     * @param string $path
-     * @param string $javascriptVarName
-     * @return string
+     * Get root category information
      */
-    public function getBreadcrumbsJavascript($path, $javascriptVarName)
+    public function getRootTreeParameters(): array
     {
-        if (empty($path)) {
-            return '';
-        }
-
-        $categories = Mage::getResourceSingleton('catalog/category_tree')
-            ->setStoreId($this->getStore()->getId())->loadBreadcrumbsArray($path);
-        if (empty($categories)) {
-            return '';
-        }
-        foreach ($categories as $key => $category) {
-            $categories[$key] = $this->_getNodeJson($category);
-        }
-        return
-            '<script type="text/javascript">'
-            . $javascriptVarName . ' = ' . Mage::helper('core')->jsonEncode($categories) . ';'
-            . ($this->canAddSubCategory()
-                ? '$("add_subcategory_button").show();'
-                : '$("add_subcategory_button").hide();')
-            . '</script>';
+        $root = $this->getRootNode();
+        return [
+            'data' => $this->getTree(),
+            'parameters' => [
+                'text'         => $this->buildNodeName($root),
+                'allowDrag'    => false,
+                'allowDrop'    => (bool) $root->getIsVisible(),
+                'id'           => (int) $root->getId(),
+                'store_id'     => (int) $this->getStore()->getId(),
+                'category_id'  => (int) $this->getCategory()->getId(),
+                'checked'      => (bool) $root->getChecked(),
+                'root_visible' => (bool) $root->getIsVisible(),
+                'can_add_root' => (bool) $this->canAddRootCategory(),
+                'expanded'     => $this->getRecursionLevel() === 0,
+            ],
+        ];
     }
 
-    /**
-     * Get JSON of a tree node or an associative array
-     *
-     * @param Varien_Data_Tree_Node|array $node
-     * @param int $level
-     * @return array
-     */
+    #[\Override]
     protected function _getNodeJson($node, $level = 0)
     {
         // create a node from data array
@@ -210,97 +154,36 @@ class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Ca
             $node = new Varien_Data_Tree_Node($node, 'entity_id', new Varien_Data_Tree());
         }
 
-        $item = [];
-        $item['text'] = $this->buildNodeName($node);
+        $item = parent::_getNodeJson($node, $level);
 
-        /* $rootForStores = Mage::getModel('core/store')
-            ->getCollection()
-            ->loadByCategoryIds(array($node->getEntityId())); */
-        $rootForStores = in_array($node->getEntityId(), $this->getRootIds());
+        $allowMove = (bool) $this->_isCategoryMoveable($node);
+        $isRoot = in_array($node->getEntityId(), $this->getRootIds());
 
-        $item['id']  = $node->getId();
-        $item['store']  = (int) $this->getStore()->getId();
-        $item['path'] = $node->getData('path');
-
-        $item['cls'] = 'folder ' . ($node->getIsActive() ? 'active-category' : 'no-active-category');
-        //$item['allowDrop'] = ($level<3) ? true : false;
-        $allowMove = $this->_isCategoryMoveable($node);
-        $item['allowDrop'] = $allowMove;
         // disallow drag if it's first level and category is root of a store
-        $item['allowDrag'] = $allowMove && !($node->getLevel() == 1 && $rootForStores);
-
-        if ((int)$node->getChildrenCount() > 0) {
-            $item['children'] = [];
-        }
-
-        $isParent = $this->_isParentSelectedCategory($node);
-
-        if ($node->hasChildren()) {
-            $item['children'] = [];
-            if (!($this->getUseAjax() && $node->getLevel() > 1 && !$isParent)) {
-                foreach ($node->getChildren() as $child) {
-                    $item['children'][] = $this->_getNodeJson($child, $level + 1);
-                }
-            }
-        }
-
-        if ($isParent || $node->getLevel() < 2) {
-            $item['expanded'] = true;
-        }
+        $item['allowDrag'] = $allowMove && !$isRoot && $node->getLevel() > 1;
 
         return $item;
     }
 
     /**
-     * Get category name
+     * Check if the node can be moved
      *
      * @param Varien_Object $node
-     * @return string
+     * @return bool
      */
-    public function buildNodeName($node)
-    {
-        $result = $this->escapeHtml($node->getName());
-        if ($this->_withProductCount) {
-            $result .= ' (' . $node->getProductCount() . ')';
-        }
-        return $result;
-    }
-
     protected function _isCategoryMoveable($node)
     {
         $options = new Varien_Object([
             'is_moveable' => true,
-            'category' => $node
+            'category' => $node,
         ]);
 
         Mage::dispatchEvent(
             'adminhtml_catalog_category_tree_is_moveable',
-            ['options' => $options]
+            ['options' => $options],
         );
 
         return $options->getIsMoveable();
-    }
-
-    protected function _isParentSelectedCategory($node)
-    {
-        if ($node && $this->getCategory()) {
-            $pathIds = $this->getCategory()->getPathIds();
-            if (in_array($node->getId(), $pathIds)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Check if page loaded by outside link to category edit
-     *
-     * @return bool
-     */
-    public function isClearEdit()
-    {
-        return (bool) $this->getRequest()->getParam('clear');
     }
 
     /**
@@ -310,17 +193,18 @@ class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Ca
      */
     public function canAddRootCategory()
     {
-        $options = new Varien_Object(['is_allow' => true]);
-        Mage::dispatchEvent(
-            'adminhtml_catalog_category_tree_can_add_root_category',
-            [
-                'category' => $this->getCategory(),
-                'options'   => $options,
-                'store'    => $this->getStore()->getId()
-            ]
-        );
+        if ($this->getStore()->getId() !== 0) {
+            return false;
+        }
 
-        return $options->getIsAllow();
+        $options = new Varien_Object(['is_allow' => true]);
+        Mage::dispatchEvent('adminhtml_catalog_category_tree_can_add_root_category', [
+            'category' => $this->getCategory(),
+            'options'  => $options,
+            'store'    => $this->getStore()->getId(),
+        ]);
+
+        return (bool) $options->getIsAllow();
     }
 
     /**
@@ -331,15 +215,23 @@ class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Ca
     public function canAddSubCategory()
     {
         $options = new Varien_Object(['is_allow' => true]);
-        Mage::dispatchEvent(
-            'adminhtml_catalog_category_tree_can_add_sub_category',
-            [
-                'category' => $this->getCategory(),
-                'options'   => $options,
-                'store'    => $this->getStore()->getId()
-            ]
-        );
+        Mage::dispatchEvent('adminhtml_catalog_category_tree_can_add_sub_category', [
+            'category' => $this->getCategory(),
+            'options'  => $options,
+            'store'    => $this->getStore()->getId(),
+        ]);
 
-        return $options->getIsAllow();
+        return (bool) $options->getIsAllow();
+    }
+
+    /**
+     * Check if page loaded by outside link to category edit
+     *
+     * @return bool
+     * @deprecated
+     */
+    public function isClearEdit()
+    {
+        return (bool) $this->getRequest()->getParam('clear');
     }
 }

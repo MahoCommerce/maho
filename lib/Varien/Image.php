@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -219,9 +220,7 @@ class Varien_Image
      * @access public
      * @return void
      */
-    public function process()
-    {
-    }
+    public function process() {}
 
     /**
      * instruction
@@ -229,9 +228,7 @@ class Varien_Image
      * @access public
      * @return void
      */
-    public function instruction()
-    {
-    }
+    public function instruction() {}
 
     /**
      * Set image background color

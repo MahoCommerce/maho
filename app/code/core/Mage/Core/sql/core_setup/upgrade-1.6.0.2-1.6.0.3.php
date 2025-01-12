@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -20,7 +21,7 @@ $table = $installer->getTable('core/translate');
 $connection->dropIndex($table, $installer->getIdxName(
     'core/translate',
     ['store_id', 'locale', 'string'],
-    Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE
+    Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
 ));
 
 $connection->addColumn($table, 'crc_string', [
@@ -33,7 +34,7 @@ $connection->addColumn($table, 'crc_string', [
 $connection->addIndex($table, $installer->getIdxName(
     'core/translate',
     ['store_id', 'locale', 'crc_string', 'string'],
-    Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE
+    Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
 ), ['store_id', 'locale', 'crc_string', 'string'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE);
 
 $installer->endSetup();

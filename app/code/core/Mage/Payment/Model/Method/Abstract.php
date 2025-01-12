@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -93,9 +94,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      */
     protected $_debugReplacePrivateDataKeys = [];
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * Check order availability
@@ -639,7 +638,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     public function isAvailable($quote = null)
     {
         $checkResult = new stdClass();
-        $isActive = (bool)(int)$this->getConfigData('active', $quote ? $quote->getStoreId() : null);
+        $isActive = (bool) (int) $this->getConfigData('active', $quote ? $quote->getStoreId() : null);
         $checkResult->isAvailable = $isActive;
         $checkResult->isDeniedInConfig = !$isActive; // for future use in observers
         Mage::dispatchEvent('payment_method_is_active', [

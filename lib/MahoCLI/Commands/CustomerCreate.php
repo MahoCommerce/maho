@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -22,7 +23,7 @@ use Symfony\Component\Console\Question\Question;
 
 #[AsCommand(
     name: 'customer:create',
-    description: 'Create a customer'
+    description: 'Create a customer',
 )]
 class CustomerCreate extends BaseMahoCommand
 {

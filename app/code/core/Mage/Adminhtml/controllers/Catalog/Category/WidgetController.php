@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,6 +7,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -29,7 +31,7 @@ class Mage_Adminhtml_Catalog_Category_WidgetController extends Mage_Adminhtml_Co
     public function chooserAction()
     {
         $this->getResponse()->setBody(
-            $this->_getCategoryTreeBlock()->toHtml()
+            $this->_getCategoryTreeBlock()->toHtml(),
         );
     }
 
@@ -38,15 +40,22 @@ class Mage_Adminhtml_Catalog_Category_WidgetController extends Mage_Adminhtml_Co
      */
     public function categoriesJsonAction()
     {
-        if ($categoryId = (int) $this->getRequest()->getPost('id')) {
+        try {
+            $categoryId = (int) $this->getRequest()->getPost('id');
             $category = Mage::getModel('catalog/category')->load($categoryId);
-            if ($category->getId()) {
-                Mage::register('category', $category);
-                Mage::register('current_category', $category);
+
+            if (!$category->getId()) {
+                Mage::throwException(Mage::helper('catalog')->__('This category no longer exists.'));
             }
-            $this->getResponse()->setBody(
-                $this->_getCategoryTreeBlock()->getTreeJson($category)
+
+            Mage::register('category', $category);
+            Mage::register('current_category', $category);
+
+            $this->getResponse()->setBodyJson(
+                $this->_getCategoryTreeBlock()->getTreeJson($category),
             );
+        } catch (Exception $e) {
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 
@@ -54,7 +63,9 @@ class Mage_Adminhtml_Catalog_Category_WidgetController extends Mage_Adminhtml_Co
     {
         return $this->getLayout()->createBlock('adminhtml/catalog_category_widget_chooser', '', [
             'id' => $this->getRequest()->getParam('uniq_id'),
-            'use_massaction' => $this->getRequest()->getParam('use_massaction', false)
+            'is_anchor_only' => $this->getRequest()->getParam('is_anchor_only', false),
+            'use_massaction' => $this->getRequest()->getParam('use_massaction', false),
+            'selected_categories' => explode(',', $this->getRequest()->getParam('selected', '')),
         ]);
     }
 }

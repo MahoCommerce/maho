@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -86,12 +87,12 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main extends Mage_Adm
         $form = new Varien_Data_Form([
             'id' => 'edit_form',
             'action' => $this->getData('action'),
-            'method' => 'post'
+            'method' => 'post',
         ]);
 
         $fieldset = $form->addFieldset(
             'base_fieldset',
-            ['legend' => Mage::helper('widget')->__('Frontend Properties')]
+            ['legend' => Mage::helper('widget')->__('Frontend Properties')],
         );
 
         if ($widgetInstance->getId()) {
@@ -108,7 +109,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main extends Mage_Adm
             'title' => Mage::helper('widget')->__('Type'),
             'class' => '',
             'values' => $this->getTypesOptionsArray(),
-            'disabled' => true
+            'disabled' => true,
         ]);
 
         $fieldset->addField('package_theme', 'select', [
@@ -117,7 +118,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main extends Mage_Adm
             'title' => Mage::helper('widget')->__('Design Package/Theme'),
             'required' => false,
             'values'   => $this->getPackegeThemeOptionsArray(),
-            'disabled' => true
+            'disabled' => true,
         ]);
 
         $fieldset->addField('title', 'text', [
@@ -146,7 +147,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main extends Mage_Adm
             'title' => Mage::helper('widget')->__('Sort Order'),
             'class' => '',
             'required' => false,
-            'note' => Mage::helper('widget')->__('Sort Order of widget instances in the same block reference')
+            'note' => Mage::helper('widget')->__('Sort Order of widget instances in the same block reference'),
         ]);
 
         $layoutBlock = $this->getLayout()
@@ -154,7 +155,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main extends Mage_Adm
             ->setWidgetInstance($widgetInstance);
         $fieldset = $form->addFieldset(
             'layout_updates_fieldset',
-            ['legend' => Mage::helper('widget')->__('Layout Updates')]
+            ['legend' => Mage::helper('widget')->__('Layout Updates')],
         );
         $fieldset->addField('layout_updates', 'note', [
         ]);

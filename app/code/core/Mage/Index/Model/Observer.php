@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -42,7 +43,7 @@ class Mage_Index_Model_Observer
         $this->_indexer->processEntityAction(
             $store,
             Mage_Core_Model_Store::ENTITY,
-            Mage_Index_Model_Event::TYPE_SAVE
+            Mage_Index_Model_Event::TYPE_SAVE,
         );
     }
 
@@ -57,7 +58,7 @@ class Mage_Index_Model_Observer
         $this->_indexer->processEntityAction(
             $storeGroup,
             Mage_Core_Model_Store_Group::ENTITY,
-            Mage_Index_Model_Event::TYPE_SAVE
+            Mage_Index_Model_Event::TYPE_SAVE,
         );
     }
 
@@ -72,7 +73,7 @@ class Mage_Index_Model_Observer
         $this->_indexer->processEntityAction(
             $website,
             Mage_Core_Model_Website::ENTITY,
-            Mage_Index_Model_Event::TYPE_SAVE
+            Mage_Index_Model_Event::TYPE_SAVE,
         );
     }
 
@@ -87,7 +88,7 @@ class Mage_Index_Model_Observer
         $this->_indexer->processEntityAction(
             $store,
             Mage_Core_Model_Store::ENTITY,
-            Mage_Index_Model_Event::TYPE_DELETE
+            Mage_Index_Model_Event::TYPE_DELETE,
         );
     }
 
@@ -102,7 +103,7 @@ class Mage_Index_Model_Observer
         $this->_indexer->processEntityAction(
             $storeGroup,
             Mage_Core_Model_Store_Group::ENTITY,
-            Mage_Index_Model_Event::TYPE_DELETE
+            Mage_Index_Model_Event::TYPE_DELETE,
         );
     }
 
@@ -117,7 +118,7 @@ class Mage_Index_Model_Observer
         $this->_indexer->processEntityAction(
             $website,
             Mage_Core_Model_Website::ENTITY,
-            Mage_Index_Model_Event::TYPE_DELETE
+            Mage_Index_Model_Event::TYPE_DELETE,
         );
     }
 
@@ -132,7 +133,7 @@ class Mage_Index_Model_Observer
         $this->_indexer->processEntityAction(
             $configData,
             Mage_Core_Model_Config_Data::ENTITY,
-            Mage_Index_Model_Event::TYPE_SAVE
+            Mage_Index_Model_Event::TYPE_SAVE,
         );
     }
 
@@ -181,8 +182,8 @@ class Mage_Index_Model_Observer
                 $where = new Zend_Db_Expr(
                     sprintf(
                         'event_id in (%s)',
-                        implode(',', $eventList)
-                    )
+                        implode(',', $eventList),
+                    ),
                 );
                 $writeConnection->delete($indexEventTableName, $where);
             }

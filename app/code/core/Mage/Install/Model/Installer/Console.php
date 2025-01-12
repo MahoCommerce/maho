@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -141,7 +142,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
          */
         if (!$this->_checkFlag($args['license_agreement_accepted'])) {
             $this->addError(
-                'ERROR: You have to accept Maho license agreement terms and conditions to continue installation'
+                'ERROR: You have to accept Maho license agreement terms and conditions to continue installation',
             );
             return false;
         }

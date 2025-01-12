@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -75,10 +76,10 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
     {
         $this->_beforeSave();
         $data = [
-                'firstname' => $this->getFirstname(),
-                'lastname'  => $this->getLastname(),
-                'email'     => $this->getEmail(),
-                'modified'  => Mage::getSingleton('core/date')->gmtDate()
+            'firstname' => $this->getFirstname(),
+            'lastname'  => $this->getLastname(),
+            'email'     => $this->getEmail(),
+            'modified'  => Mage::getSingleton('core/date')->gmtDate(),
         ];
 
         if ($this->getId() > 0) {
@@ -271,8 +272,8 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
                 ->recordLogin($this)
                 ->recordSession($this);
             Mage::dispatchEvent('api_user_authenticated', [
-               'model'    => $this,
-               'api_key'  => $apiKey,
+                'model'    => $this,
+                'api_key'  => $apiKey,
             ]);
         }
 

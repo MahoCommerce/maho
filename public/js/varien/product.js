@@ -5,310 +5,335 @@
  * @package     js
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-if(typeof Product=='undefined') {
-    var Product = {};
-}
+
+var Product = Product ?? {};
 
 /**************************** CONFIGURABLE PRODUCT **************************/
-Product.Config = Class.create();
-Product.Config.prototype = {
-    initialize: function(config){
-        this.config     = config;
-        this.taxConfig  = this.config.taxConfig;
-        this.settings   = $$('.super-attribute-select');
-        this.state      = new Hash();
+class ProductConfig
+{
+    constructor(config) {
+        this.config = config;
+        this.taxConfig = this.config.taxConfig;
+        this.settings = Array.from(document.querySelectorAll('.super-attribute-select'));
+        this.state = new Map();
         this.priceTemplate = new Template(this.config.template);
-        this.prices     = config.prices;
+        this.prices = config.prices;
 
-        this.settings.each(function(element){
-            Event.observe(element, 'change', this.configure.bind(this));
-        }.bind(this));
+        // Add change event listeners to all settings
+        this.settings.forEach(element => {
+            element.addEventListener('change', (event) => this.configure(event));
+        });
 
-        // fill state
-        this.settings.each(function(element){
-            var attributeId = element.id.replace(/[a-z]*/, '');
-            if(attributeId && this.config.attributes[attributeId]) {
+        // Fill state
+        this.settings.forEach(element => {
+            const attributeId = element.id.replace(/[a-z]*/, '');
+            if (attributeId && this.config.attributes[attributeId]) {
                 element.config = this.config.attributes[attributeId];
                 element.attributeId = attributeId;
-                this.state[attributeId] = false;
+                this.state.set(attributeId, false);
             }
-        }.bind(this));
+        });
 
         // Init settings dropdown
-        var childSettings = [];
-        for(var i=this.settings.length-1;i>=0;i--){
-            var prevSetting = this.settings[i-1] ? this.settings[i-1] : false;
-            var nextSetting = this.settings[i+1] ? this.settings[i+1] : false;
-            if(i==0){
+        const childSettings = [];
+        for (let i = this.settings.length - 1; i >= 0; i--) {
+            const prevSetting = this.settings[i - 1] || false;
+            const nextSetting = this.settings[i + 1] || false;
+
+            if (i === 0) {
                 this.fillSelect(this.settings[i]);
+            } else {
+                this.settings[i].disabled = true;
             }
-            else {
-                this.settings[i].disabled=true;
-            }
-            $(this.settings[i]).childSettings = childSettings.clone();
-            $(this.settings[i]).prevSetting   = prevSetting;
-            $(this.settings[i]).nextSetting   = nextSetting;
+
+            this.settings[i].childSettings = [...childSettings];
+            this.settings[i].prevSetting = prevSetting;
+            this.settings[i].nextSetting = nextSetting;
             childSettings.push(this.settings[i]);
         }
 
-        // Set default values - from config and overwrite them by url values
+        // Set default values
         if (config.defaultValues) {
             this.values = config.defaultValues;
         }
 
-        var separatorIndex = window.location.href.indexOf('#');
-        if (separatorIndex != -1) {
-            var paramsStr = window.location.href.substr(separatorIndex+1);
-            var urlValues = paramsStr.toQueryParams();
+        // Parse URL parameters
+        const separatorIndex = window.location.href.indexOf('#');
+        if (separatorIndex !== -1) {
+            const paramsStr = window.location.href.substr(separatorIndex + 1);
+            const urlValues = new URLSearchParams(paramsStr);
             if (!this.values) {
                 this.values = {};
             }
-            for (var i in urlValues) {
-                this.values[i] = urlValues[i];
+            for (const [key, value] of urlValues) {
+                this.values[key] = value;
             }
         }
 
         this.configureForValues();
-        document.observe("dom:loaded", this.configureForValues.bind(this));
-    },
+        document.addEventListener('DOMContentLoaded', () => this.configureForValues());
+    }
 
-    configureForValues: function () {
+    configureForValues() {
         if (this.values) {
-            this.settings.each(function(element){
-                var attributeId = element.attributeId;
-                element.value = (typeof(this.values[attributeId]) == 'undefined')? '' : this.values[attributeId];
+            this.settings.forEach(element => {
+                const attributeId = element.attributeId;
+                element.value = (typeof(this.values[attributeId]) === 'undefined') ? '' : this.values[attributeId];
                 this.configureElement(element);
-            }.bind(this));
+            });
         }
-    },
+    }
 
-    configure: function(event){
-        var element = Event.element(event);
+    configure(event) {
+        const element = event.target;
         this.configureElement(element);
-    },
+    }
 
-    configureElement : function(element) {
+    configureElement(element) {
         this.reloadOptionLabels(element);
-        if(element.value){
-            this.state[element.config.id] = element.value;
-            if(element.nextSetting){
+        if (element.value) {
+            this.state.set(element.config.id, element.value);
+            if (element.nextSetting) {
                 element.nextSetting.disabled = false;
                 this.fillSelect(element.nextSetting);
                 this.resetChildren(element.nextSetting);
             }
-        }
-        else {
+        } else {
             this.resetChildren(element);
         }
         this.reloadPrice();
-    },
+    }
 
-    reloadOptionLabels: function(element){
-        var selectedPrice;
-        if(element.options[element.selectedIndex].config){
+    reloadOptionLabels(element) {
+        let selectedPrice;
+        if (element.options[element.selectedIndex]?.config) {
             selectedPrice = parseFloat(element.options[element.selectedIndex].config.price);
-        }
-        else{
+        } else {
             selectedPrice = 0;
         }
-        for(var i=0;i<element.options.length;i++){
-            if(element.options[i].config){
-                element.options[i].text = this.getOptionLabel(element.options[i].config, element.options[i].config.price-selectedPrice);
-            }
-        }
-    },
 
-    resetChildren : function(element){
-        if(element.childSettings) {
-            for(var i=0;i<element.childSettings.length;i++){
-                element.childSettings[i].selectedIndex = 0;
-                element.childSettings[i].disabled = true;
-                if(element.config){
-                    this.state[element.config.id] = false;
+        Array.from(element.options).forEach(option => {
+            if (option.config) {
+                option.text = this.getOptionLabel(
+                    option.config,
+                    option.config.price - selectedPrice
+                );
+            }
+        });
+    }
+
+    resetChildren(element) {
+        if (element.childSettings) {
+            element.childSettings.forEach(child => {
+                child.selectedIndex = 0;
+                child.disabled = true;
+                if (element.config) {
+                    this.state.set(element.config.id, false);
                 }
-            }
+            });
         }
-    },
+    }
 
-    fillSelect: function(element){
-        var attributeId = element.id.replace(/[a-z]*/, '');
-        var options = this.getAttributeOptions(attributeId);
+    fillSelect(element) {
+        const attributeId = element.id.replace(/[a-z]*/, '');
+        const options = this.getAttributeOptions(attributeId);
         this.clearSelect(element);
+
+        // Add default empty option
         element.options[0] = new Option('', '');
         element.options[0].innerHTML = this.config.chooseText;
 
-        var prevConfig = false;
-        if(element.prevSetting){
+        let prevConfig = false;
+        if (element.prevSetting) {
             prevConfig = element.prevSetting.options[element.prevSetting.selectedIndex];
         }
 
-        if(options) {
-            var index = 1;
-            for(var i=0;i<options.length;i++){
-                var allowedProducts = [];
-                if(prevConfig) {
-                    for(var j=0;j<options[i].products.length;j++){
-                        if(prevConfig.config.allowedProducts
-                            && prevConfig.config.allowedProducts.indexOf(options[i].products[j])>-1){
-                            allowedProducts.push(options[i].products[j]);
-                        }
-                    }
+        if (options) {
+            let index = 1;
+            options.forEach(option => {
+                let allowedProducts = [];
+
+                if (prevConfig) {
+                    allowedProducts = option.products.filter(productId =>
+                        prevConfig.config.allowedProducts &&
+                        prevConfig.config.allowedProducts.includes(productId)
+                    );
                 } else {
-                    allowedProducts = options[i].products.clone();
+                    allowedProducts = [...option.products]; // Create a copy of the array
                 }
 
-                if(allowedProducts.size()>0){
-                    options[i].allowedProducts = allowedProducts;
-                    element.options[index] = new Option(this.getOptionLabel(options[i], options[i].price), options[i].id);
-                    element.options[index].config = options[i];
+                if (allowedProducts.length > 0) {
+                    option.allowedProducts = allowedProducts;
+                    element.options[index] = new Option(
+                        this.getOptionLabel(option, option.price),
+                        option.id
+                    );
+                    element.options[index].config = option;
                     index++;
                 }
-            }
+            });
         }
-    },
+    }
 
-    getOptionLabel: function(option, price){
-        var price = parseFloat(price);
+    getOptionLabel(option, price) {
+        price = parseFloat(price);
+        let tax, excl, incl;
+
         if (this.taxConfig.includeTax) {
-            var tax = price / (100 + this.taxConfig.defaultTax) * this.taxConfig.defaultTax;
-            var excl = price - tax;
-            var incl = excl*(1+(this.taxConfig.currentTax/100));
+            tax = price / (100 + this.taxConfig.defaultTax) * this.taxConfig.defaultTax;
+            excl = price - tax;
+            incl = excl * (1 + (this.taxConfig.currentTax / 100));
         } else {
-            var tax = price * (this.taxConfig.currentTax / 100);
-            var excl = price;
-            var incl = excl + tax;
+            tax = price * (this.taxConfig.currentTax / 100);
+            excl = price;
+            incl = excl + tax;
         }
 
-        if (this.taxConfig.showIncludeTax || this.taxConfig.showBothPrices) {
-            price = incl;
-        } else {
-            price = excl;
-        }
+        // Determine final price based on tax configuration
+        price = this.taxConfig.showIncludeTax || this.taxConfig.showBothPrices
+            ? incl
+            : excl;
 
-        var str = option.label;
-        if(price){
+        let str = option.label;
+        if (price) {
             if (this.taxConfig.showBothPrices) {
-                str+= ' ' + this.formatPrice(excl, true) + ' (' + this.formatPrice(price, true) + ' ' + this.taxConfig.inclTaxTitle + ')';
+                str += ` ${this.formatPrice(excl, true)} (${this.formatPrice(price, true)} ${this.taxConfig.inclTaxTitle})`;
             } else {
-                str+= ' ' + this.formatPrice(price, true);
+                str += ` ${this.formatPrice(price, true)}`;
             }
         }
         return str;
-    },
+    }
 
-    formatPrice: function(price, showSign){
-        var str = '';
+    formatPrice(price, showSign) {
         price = parseFloat(price);
-        if(showSign){
-            if(price<0){
-                str+= '-';
-                price = -price;
-            }
-            else{
-                str+= '+';
-            }
+        let str = '';
+
+        if (showSign) {
+            str += price < 0 ? '-' : '+';
+            price = Math.abs(price);
         }
 
-        var roundedPrice = (Math.round(price*100)/100).toString();
+        const roundedPrice = (Math.round(price * 100) / 100).toString();
 
         if (this.prices && this.prices[roundedPrice]) {
-            str+= this.prices[roundedPrice];
+            str += this.prices[roundedPrice];
+        } else {
+            // Keep original priceTemplate evaluation
+            str += this.priceTemplate.evaluate({price: price.toFixed(2)});
         }
-        else {
-            str+= this.priceTemplate.evaluate({price:price.toFixed(2)});
-        }
+
         return str;
-    },
+    }
 
-    clearSelect: function(element){
-        for(var i=element.options.length-1;i>=0;i--){
-            element.remove(i);
+    clearSelect(element) {
+        while (element.options.length > 0) {
+            element.remove(0);
         }
-    },
+    }
 
-    getAttributeOptions: function(attributeId){
-        if(this.config.attributes[attributeId]){
-            return this.config.attributes[attributeId].options;
-        }
-    },
+    getAttributeOptions(attributeId) {
+        return this.config.attributes[attributeId]?.options;
+    }
 
-    reloadPrice: function(){
-        var price    = 0;
-        var oldPrice = 0;
-        for(var i=this.settings.length-1;i>=0;i--){
-            var selected = this.settings[i].options[this.settings[i].selectedIndex];
-            if(selected.config){
-                price    += parseFloat(selected.config.price);
+    reloadPrice() {
+        let price = 0;
+        let oldPrice = 0;
+
+        for (let i = this.settings.length - 1; i >= 0; i--) {
+            const selected = this.settings[i].options[this.settings[i].selectedIndex];
+            if (selected?.config) {
+                price += parseFloat(selected.config.price);
                 oldPrice += parseFloat(selected.config.oldPrice);
             }
         }
 
-        optionsPrice.changePrice('config', {'price': price, 'oldPrice': oldPrice});
+        // Assuming optionsPrice is a global object
+        optionsPrice.changePrice('config', {
+            price: price,
+            oldPrice: oldPrice
+        });
         optionsPrice.reload();
 
         return price;
-    },
-
-    reloadOldPrice: function(){
-        if ($('old-price-'+this.config.productId)) {
-
-            var price = parseFloat(this.config.oldPrice);
-            for(var i=this.settings.length-1;i>=0;i--){
-                var selected = this.settings[i].options[this.settings[i].selectedIndex];
-                if(selected.config){
-                    var parsedOldPrice = parseFloat(selected.config.oldPrice);
-                    price += isNaN(parsedOldPrice) ? 0 : parsedOldPrice;
-                }
-            }
-            if (price < 0)
-                price = 0;
-            price = this.formatPrice(price);
-
-            if($('old-price-'+this.config.productId)){
-                $('old-price-'+this.config.productId).innerHTML = price;
-            }
-
-        }
     }
-};
 
+    reloadOldPrice() {
+        const oldPriceElement = document.getElementById(`old-price-${this.config.productId}`);
+        if (!oldPriceElement) return;
+
+        let price = parseFloat(this.config.oldPrice);
+
+        for (let i = this.settings.length - 1; i >= 0; i--) {
+            const selected = this.settings[i].options[this.settings[i].selectedIndex];
+            if (selected?.config) {
+                const parsedOldPrice = parseFloat(selected.config.oldPrice);
+                price += isNaN(parsedOldPrice) ? 0 : parsedOldPrice;
+            }
+        }
+
+        price = Math.max(0, price);
+        const formattedPrice = this.formatPrice(price);
+        oldPriceElement.innerHTML = formattedPrice;
+    }
+}
 
 /**************************** SUPER PRODUCTS ********************************/
 
-Product.Super = {};
-Product.Super.Configurable = Class.create();
-
-Product.Super.Configurable.prototype = {
-    initialize: function(container, observeCss, updateUrl, updatePriceUrl, priceContainerId) {
-        this.container = $(container);
+class ProductSuperConfigurable
+{
+    constructor(container, observeCss, updateUrl, updatePriceUrl, priceContainerId) {
+        this.container = document.getElementById(container);
         this.observeCss = observeCss;
         this.updateUrl = updateUrl;
         this.updatePriceUrl = updatePriceUrl;
         this.priceContainerId = priceContainerId;
         this.registerObservers();
-    },
-    registerObservers: function() {
-        var elements = this.container.getElementsByClassName(this.observeCss);
-        elements.each(function(element){
-            Event.observe(element, 'change', this.update.bindAsEventListener(this));
-        }.bind(this));
-        return this;
-    },
-    update: function(event) {
-        var elements = this.container.getElementsByClassName(this.observeCss);
-        var parameters = Form.serializeElements(elements, true);
+    }
 
-        new Ajax.Updater(this.container, this.updateUrl + '?ajax=1', {
-                parameters:parameters,
-                onComplete:this.registerObservers.bind(this)
+    registerObservers() {
+        const elements = this.container.getElementsByClassName(this.observeCss);
+        Array.from(elements).forEach(element => {
+            element.addEventListener('change', (event) => this.update(event));
         });
-        var priceContainer = $(this.priceContainerId);
-        if(priceContainer) {
-            new Ajax.Updater(priceContainer, this.updatePriceUrl + '?ajax=1', {
-                parameters:parameters
+        return this;
+    }
+
+    update(event) {
+        const elements = this.container.getElementsByClassName(this.observeCss);
+        const parameters = new FormData();
+        Array.from(elements).forEach(element => {
+            parameters.append(element.name, element.value);
+        });
+
+        // Update main container
+        fetch(`${this.updateUrl}?ajax=1`, {
+            method: 'POST',
+            body: parameters
+        })
+            .then(response => response.text())
+            .then(html => {
+                this.container.innerHTML = html;
+                this.registerObservers();
             });
+
+        // Update price container if it exists
+        const priceContainer = document.getElementById(this.priceContainerId);
+        if (priceContainer) {
+            fetch(`${this.updatePriceUrl}?ajax=1`, {
+                method: 'POST',
+                body: parameters
+            })
+                .then(response => response.text())
+                .then(html => {
+                    priceContainer.innerHTML = html;
+                });
         }
     }
-};
+}
+
+Product.Super = {};
+Product.Super.Configurable = ProductSuperConfigurable;

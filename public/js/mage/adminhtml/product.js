@@ -5,6 +5,7 @@
  * @package     Mage_Adminhtml
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -24,12 +25,12 @@ Product.Gallery.prototype = {
         this.containerId = containerId, this.container = $(this.containerId);
         this.imageTypes = imageTypes;
 
-        document.on('uploader:fileSuccess', function (event) {
-            var memo = event.memo;
+        document.addEventListener('uploader:fileSuccess', (event) => {
+            const memo = event.detail;
             if (memo && this._checkCurrentContainer(memo.containerId)) {
                 this.handleUploadComplete([{response: memo.response}]);
             }
-        }.bind(this));
+        });
 
         this.images = this.getElement('save').value.evalJSON();
         this.imagesValues = this.getElement('save_image').value.evalJSON();
@@ -81,18 +82,7 @@ Product.Gallery.prototype = {
     },
     handleUploadComplete: function (files) {
         files.each(function (item) {
-            if (!item.response.isJSON()) {
-                try {
-                    console.log(item.response);
-                } catch (e2) {
-                    alert(item.response);
-                }
-                return;
-            }
-            var response = item.response.evalJSON();
-            if (response.error) {
-                return;
-            }
+            var response = item.response;
             var newImage = {};
             newImage.url = response.url;
             newImage.file = response.file;
@@ -428,13 +418,12 @@ Product.Configurable.prototype = {
             Event.observe(li.down('.attribute-use-default-label'), 'change', this.onLabelUpdate);
         }.bind(this));
         if (!this.readonly) {
-            sortable(this.container, {
+            new Sortable(this.container, {
                 handle: '.attribute-name-container',
-                items: ':not(.disabled)',
-                forcePlaceholderSize: true
+                filter: '.disabled',
+                animation: 150,
+                onUpdate: this.updatePositions.bind(this),
             });
-
-            this.container.addEventListener('sortupdate', this.updatePositions.bind(this));
         }
         this.updateSaveInput();
     },

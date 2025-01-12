@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -24,7 +25,7 @@ class Mage_Eav_Model_Resource_Form_Element extends Mage_Core_Model_Resource_Db_A
         $this->_init('eav/form_element', 'element_id');
         $this->addUniqueField([
             'field' => ['type_id', 'attribute_id'],
-            'title' => Mage::helper('eav')->__('Form Element with the same attribute')
+            'title' => Mage::helper('eav')->__('Form Element with the same attribute'),
         ]);
     }
 
@@ -43,7 +44,7 @@ class Mage_Eav_Model_Resource_Form_Element extends Mage_Core_Model_Resource_Db_A
         $select->join(
             $this->getTable('eav/attribute'),
             $this->getTable('eav/attribute') . '.attribute_id = ' . $this->getMainTable() . '.attribute_id',
-            ['attribute_code', 'entity_type_id']
+            ['attribute_code', 'entity_type_id'],
         );
 
         return $select;

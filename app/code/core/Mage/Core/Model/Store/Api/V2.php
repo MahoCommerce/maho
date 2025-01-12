@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -15,6 +16,4 @@
  * @category   Mage
  * @package    Mage_Core
  */
-class Mage_Core_Model_Store_Api_V2 extends Mage_Core_Model_Store_Api
-{
-}
+class Mage_Core_Model_Store_Api_V2 extends Mage_Core_Model_Store_Api {}

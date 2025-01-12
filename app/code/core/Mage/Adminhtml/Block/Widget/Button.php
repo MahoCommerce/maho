@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -46,6 +47,6 @@ class Mage_Adminhtml_Block_Widget_Button extends Mage_Adminhtml_Block_Widget
             . ' style="' . $this->getStyle() . '"'
             . ($this->getValue() ? ' value="' . $this->getValue() . '"' : '')
             . ($this->getDisabled() ? ' disabled="disabled"' : '')
-            . '><span><span><span>' . $this->getLabel() . '</span></span></span></button>' . $this->getAfterHtml();
+            . '>' . $this->getLabel() . '</button>' . $this->getAfterHtml();
     }
 }

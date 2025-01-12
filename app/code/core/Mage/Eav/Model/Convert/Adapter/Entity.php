@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -107,9 +108,9 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
                 if (isset($filters[$exp[1]])) {
                     $val = $filters[$exp[1]];
                     $this->setJoinAttr([
-                       'attribute' => $keyDB,
-                       'bind' => $bind,
-                       'joinType' => $joinType
+                        'attribute' => $keyDB,
+                        'bind' => $bind,
+                        'joinType' => $joinType,
                     ]);
                 } else {
                     $val = null;
@@ -126,26 +127,26 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
                 case 'eq':
                     $attr = [
                         'attribute' => $keyDB,
-                        'eq'        => $val
+                        'eq'        => $val,
                     ];
                     break;
                 case 'like':
                     $attr = [
                         'attribute' => $keyDB,
-                        'like'      => '%' . $val . '%'
+                        'like'      => '%' . $val . '%',
                     ];
                     break;
                 case 'startsWith':
                     $attr = [
                         'attribute' => $keyDB,
-                        'like'      => $val . '%'
+                        'like'      => $val . '%',
                     ];
                     break;
                 case 'fromTo':
                     $attr = [
                         'attribute' => $keyDB,
                         'from'      => $val['from'],
-                        'to'        => $val['to']
+                        'to'        => $val['to'],
                     ];
                     break;
                 case 'dateFromTo':
@@ -153,7 +154,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
                         'attribute' => $keyDB,
                         'from'      => $val['from'],
                         'to'        => $val['to'],
-                        'date'      => true
+                        'date'      => true,
                     ];
                     break;
                 case 'datetimeFromTo':
@@ -161,7 +162,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
                         'attribute' => $keyDB,
                         'from'      => $val['from'] ?? null,
                         'to'        => $val['to'] ?? null,
-                        'datetime'  => true
+                        'datetime'  => true,
                     ];
                     break;
                 default:
@@ -269,7 +270,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
                         $val['bind'],
                         null,
                         strtolower($val['joinType']),
-                        $val['storeId']
+                        $val['storeId'],
                     );
                 }
             }
@@ -290,7 +291,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
                         $field['field'],
                         $field['bind'],
                         $field['cond'],
-                        $field['joinType']
+                        $field['joinType'],
                     );
                 }
             }
@@ -356,7 +357,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
         } catch (Exception $e) {
             $this->addException(
                 Mage::helper('eav')->__('Problem saving the collection, aborting. Error: %s', $e->getMessage()),
-                Varien_Convert_Exception::FATAL
+                Varien_Convert_Exception::FATAL,
             );
         }
         return $this;

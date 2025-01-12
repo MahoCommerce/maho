@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -76,7 +77,7 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
             Mage::dispatchEvent('review_controller_product_init', ['product' => $product]);
             Mage::dispatchEvent('review_controller_product_init_after', [
                 'product'           => $product,
-                'controller_action' => $this
+                'controller_action' => $this,
             ]);
         } catch (Mage_Core_Exception $e) {
             Mage::logException($e);

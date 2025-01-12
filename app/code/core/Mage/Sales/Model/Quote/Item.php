@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -423,7 +424,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
 
         Mage::dispatchEvent('sales_quote_item_set_product', [
             'product' => $product,
-            'quote_item' => $this
+            'quote_item' => $this,
         ]);
 
         return $this;

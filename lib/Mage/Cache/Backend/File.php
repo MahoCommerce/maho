@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -141,7 +142,7 @@ class Mage_Cache_Backend_File extends Zend_Cache_Backend_File
             $hashControl = $metadatas['hash'];
             if ($hashData != $hashControl) {
                 $this->_log(
-                    'Zend_Cache_Backend_File::load() / read_control : stored hash and computed hash do not match'
+                    'Zend_Cache_Backend_File::load() / read_control : stored hash and computed hash do not match',
                 );
                 $this->remove($id);
 
@@ -361,7 +362,7 @@ class Mage_Cache_Backend_File extends Zend_Cache_Backend_File
             'hash'   => $metadatas['hash'],
             'mtime'  => time(),
             'expire' => $metadatas['expire'] + $extraLifetime,
-            'tags'   => $metadatas['tags']
+            'tags'   => $metadatas['tags'],
         ];
 
         return (bool) $this->_filePutContents($file, serialize($newMetadatas) . "\n" . $data);

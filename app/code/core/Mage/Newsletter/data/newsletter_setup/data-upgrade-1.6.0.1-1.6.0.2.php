@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -261,7 +262,7 @@ $data = [
     'template_sender_email' => Mage::getStoreConfig('trans_email/ident_general/email'),
     'template_actual' => 1,
     'added_at' => Mage::getSingleton('core/date')->gmtDate(),
-    'modified_at' => Mage::getSingleton('core/date')->gmtDate()
+    'modified_at' => Mage::getSingleton('core/date')->gmtDate(),
 ];
 
 $model = Mage::getModel('newsletter/template')->setData($data);

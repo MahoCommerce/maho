@@ -60,7 +60,7 @@
             </ul>
             <div class="buttons-set">
                 <button type="button" title="<?= $this->quoteEscape($this->__('Estimate')) ?>" onclick="coShippingMethodForm.submit()" class="button2">
-                    <span><span><?= $this->__('Estimate') ?></span></span>
+                    <?= $this->__('Estimate') ?>
                 </button>
             </div>
         </form>
@@ -99,7 +99,7 @@
             </dl>
             <div class="buttons-set">
                 <button type="submit" title="<?= $this->quoteEscape($this->__('Update Total')) ?>" class="button" name="do" value="<?= $this->__('Update Total') ?>">
-                    <span><span><?= $this->__('Update Total') ?></span></span>
+                    <?= $this->__('Update Total') ?>
                 </button>
             </div>
             <?= $this->getBlockHtml('formkey') ?>

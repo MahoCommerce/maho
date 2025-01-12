@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -315,9 +315,6 @@ input.validation-failed, textarea.validation-failed { background:#fef0ed; border
 /* FORMS
 *******************************************************************************/
 select.countries option         { background-repeat:no-repeat; }
-.entry-edit .fieldset .tree li,
-.entry-edit .tree li            { margin:0; }
-
 
 /* Entry Edit  */ /* Site-wide form fieldset */
 table.form-edit                         { width:100%; }
@@ -431,8 +428,6 @@ button,
 .form-button { border-width:1px; border-style:solid; border-color:#ed6502 #a04300 #a04300 #ed6502; padding:1px 7px 2px 7px; background:#ffac47 url(images/btn_bg.gif) repeat-x 0 100%; color:#fff; font-size: 12px; font-weight: bold; cursor:pointer; text-align:center !important; white-space:nowrap; }
 button:hover                    { background:#f77c16 url(images/btn_over_bg.gif) repeat-x 0 0; }
 button:active                   { background:#f77c16 url(images/btn_on_bg.gif) repeat-x 0 0; }
-button span                     { line-height:1.35em; background-repeat:no-repeat; background-position:0 50%; }
-button span span                { background:none !important; padding:0 !important; margin:0 !important; display:inline !important; }
 button.delete,
 button.save,
 button.add                      { padding-left:6px; }
@@ -461,7 +456,6 @@ button.cancel span,
 button.delete span { background-image:url(images/cancel_btn_icon.gif); }
 button.add span     { background-image:url(images/add_btn_icon.gif); }
 button.save span    { background-image:url(images/save_btn_icon.gif); }
-button.show-hide span { background-image:url(images/btn_show-hide_icon.gif); padding-left:26px; }
 button.add-image span { background-image:url(images/btn_add-image_icon.gif); }
 button.add-widget span { background-image:url(images/btn_add-widget_icon2.gif); padding-left:24px; }
 button.add-variable span { background-image:url(images/btn_add-variable_icon.gif); padding-left:26px; }
@@ -493,7 +487,6 @@ button.icon-btn span { text-indent:-999em; display:block; width:16px; padding:0;
 .side-col .switcher .link-store-scope { float:right; margin-right:-19px; margin-left:3px; }
 .side-col .switcher select { width:100%; float:left; }
 /*.side-col .switcher     { margin-right:20px; margin-bottom:20px; }*/
-.catalog-categories .side-col .switcher { margin-right:0; margin-bottom:15px; }
 .link-store-scope { display:inline-block; vertical-align:middle; margin:0 0 1px; width:16px; height:16px; background:url(images/i_question-mark.png) 0 0 no-repeat; text-decoration:none !important; text-indent:-999em; overflow:hidden; }
 .store-scope .link-store-scope { float:left; margin-right:10px; }
 .store-scope .tree-store-scope { float:left; padding:7px 10px; border:1px dotted #dedede; }
@@ -624,8 +617,6 @@ div.autocomplete ul li { padding:.5em .7em; min-height:32px; cursor:pointer; tex
 /* COLUMNS
 ********************************************************************************************/
 
-.catalog-categories .side-col   { width:25em; padding-right:25px; }  /* Catalog/Categories */
-.catalog-categories .main-col   { padding-left:25px; margin-left:25em; }              /* Catalog/Categories */
 .order-summary .side-col        { padding-right:25px; }             /* Order/Create */
 .order-summary .main-col        { padding-left:25px; }              /* Order/Create */
 
@@ -649,7 +640,6 @@ div.autocomplete ul li { padding:.5em .7em; min-height:32px; cursor:pointer; tex
 .content-header button,
 .filter-actions button          { margin:0 0 0 5px; }
 .side-col .content-header       { border-bottom:0; margin-right:12px; margin-bottom:.6em; }
-.catalog-categories .side-col .content-header { margin-right:0; }  /* Catalog/Categories */
 
 .left-col-block { width:200px; }
 
@@ -977,14 +967,6 @@ ul.item-options li { padding-left:.7em; }
 
 .no-active-category a span                  { color:#aaa !important; }
 
-#tree-div { overflow:auto!important; padding-bottom:15px; width:200px; }
-
-.x-tree-node { margin:0 !important; }
-.x-tree-node .leaf .x-tree-node-icon        { background-image:url(images/fam_leaf.png); }
-.x-tree-node .system-leaf .x-tree-node-icon { background-image:url(images/fam_application_form_delete.png); }
-
-.adminhtml-catalog-category-edit .x-tree-node-ct { overflow: visible; }
-
 /* Product - Websites */
 .website-name .checkbox                 { vertical-align:top; margin-top:2px; }
 .webiste-groups                         { padding:10px 20px; }
@@ -995,7 +977,6 @@ ul.item-options li { padding-left:.7em; }
 .bundle-option-row table tbody td label { float:left; }
 .bundle-option-row input.option-label   { width:50% !important; }
 .bundle-option-row input.option-position{ width:70px !important; }
-.catalog-categories .side-col           { width:240px; }
 
 /* Products - Tier Price */
 .tier-price-input                       { margin-bottom:8px; }
@@ -1015,9 +996,35 @@ ul.item-options li { padding-left:.7em; }
 .image-preview                          { position:absolute; cursor:pointer; }
 
 /* Attributes */
-.edit-attribute-set .form-list td.label { width:105px; }
-.edit-attribute-set  .form-list td.label label { width:105px; }
-.edit-attribute-set .entry-edit fieldset input.input-text { width:200px; }
+.edit-attribute-set {
+    display: flex;
+    gap: 28px;
+    height: 800px;
+}
+.edit-attribute-set > div {
+    flex-shrink: 0;
+}
+.edit-attribute-set-column {
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+    padding-left: 27px;
+    border-left:1px solid #ddd;
+}
+.edit-attribute-set-column > div:last-child {
+    flex-grow: 1;
+}
+.edit-attribute-set .content-header {
+    display: flex;
+    justify-content: space-between;
+}
+.edit-attribute-set .content-header:after {
+    display: none;
+}
+.edit-attribute-set .form-list td.label {
+    width: 105px;
+}
+
 /* Review & Ratings */
 .ratings                        { margin:0; }
 .rating-box {
@@ -1046,9 +1053,10 @@ ul.item-options li { padding-left:.7em; }
 
 /* Price Rules */
 .rule-tree ul                   { padding-left:16px !important; border-left:dotted 1px #888; }
-.rule-tree .x-tree ul           { padding-left:0 !important; border-left:none !important; }
+.rule-tree ul.maho-tree,
+.rule-tree ul.maho-tree ul      { padding-left:0 !important; border-left:none !important; }
 .rule-param .label              { font-weight:bold; color:black; }
-.rule-param .label:hover        { font-weight:bold; color:blue; }
+.rule-param .label:hover        { font-weight:bold; color:#0090FF; }
 .rule-param .label-disabled     { color:black; cursor:default; text-decoration:none; }
 .rule-param .label-disabled:hover { color:black;}
 .rule-param .element            { display:none; }
@@ -1057,12 +1065,6 @@ ul.item-options li { padding-left:.7em; }
 .rule-param select.multiselect  { vertical-align:top; }
 .rule-param-edit .label         { display:none; }
 .rule-param-edit .element       { display:inline; }
-.rule-param-add                 { font-weight:normal; color:green; text-decoration:none; }
-.rule-param-add:hover           { font-weight:normal; color:blue; text-decoration:none; }
-.rule-param-apply               { font-weight:normal; color:green; text-decoration:none; }
-.rule-param-apply:hover         { font-weight:normal; color:blue; text-decoration:none; }
-.rule-param-remove              { font-weight:normal; color:red; text-decoration:none; }
-.rule-param-remove:hover        { font-weight:normal; color:blue; text-decoration:none; }
 .rule-chooser                   { border:solid 1px #CCC; margin:5px; padding:5px; display:none; }
 .rule-param-wait                { padding-left:20px; background-image:url(images/loading.svg); background-repeat:no-repeat; background-position:0 50%; }
 
@@ -1464,8 +1466,8 @@ ul.super-product-attributes { padding-left:15px; }
 dialog .uploader .file-row { margin:16px 0; width:auto; }
 dialog #contents-uploader { margin-bottom:10px; background:#d7e5ef; padding:5px 10px; }
 dialog #contents-uploader .flex { font-size:0; line-height:0; height:20px; }
-dialog #contents { margin-left:-3px; height:400px; overflow:auto; position:relative; }
-dialog #contents .filecnt { float:left; border:1px solid #ccc; cursor:pointer; padding:3px; display:inline; margin:0 0 15px 4px; overflow:hidden; position:relative; width:100px; }
+dialog #contents { margin-left:-3px; overflow:auto; display: flex; flex-wrap: wrap; }
+dialog #contents .filecnt { border:1px solid #ccc; cursor:pointer; padding:3px; margin:0 0 15px 4px; overflow:hidden; width:100px; }
 dialog #contents .selected { border:1px solid #f1af73; background:#f0f0f0; cursor:default; }
 dialog #contents .nm { text-align:center; }
 dialog #contents .nm img { vertical-align:bottom; }
@@ -1523,6 +1525,7 @@ dialog #contents .nm img { vertical-align:bottom; }
 .np                 { padding:0 !important; }
 .no-display         { display:none; }
 .no-show            { display:none; }
+.inline-block       { display:inline-block; }
 .nowrap, .nobr      { white-space:nowrap; }
 .wrap               { white-space:normal !important; }
 .no-float           { float:none !important; }

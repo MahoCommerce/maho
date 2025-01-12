@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -62,7 +63,7 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_Create_Items extends Mage_Adminh
                 'label'     => Mage::helper('sales')->__('Submit Shipment'),
                 'class'     => 'save submit-button',
                 'onclick'   => 'submitShipment(this);',
-            ])
+            ]),
         );
 
         return parent::_beforeToHtml();

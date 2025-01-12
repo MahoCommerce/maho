@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -30,7 +31,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Info extends Mage_Adminhtml_Block_Widg
         $form = new Varien_Data_Form();
 
         $fieldset = $form->addFieldset('base_fieldset', [
-            'legend'    => Mage::helper('adminhtml')->__('Role Information')
+            'legend'    => Mage::helper('adminhtml')->__('Role Information'),
         ]);
 
         $data = [
@@ -55,7 +56,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Info extends Mage_Adminhtml_Block_Widg
             'hidden',
             [
                 'name'  => 'id',
-            ]
+            ],
         );
 
         $fieldset->addField(
@@ -64,7 +65,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Info extends Mage_Adminhtml_Block_Widg
             [
                 'name'  => 'in_role_users',
                 'id'    => 'in_role_userz',
-            ]
+            ],
         );
 
         $fieldset->addField(
@@ -74,8 +75,8 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Info extends Mage_Adminhtml_Block_Widg
                 'name'  => 'current_password',
                 'label' => Mage::helper('adminhtml')->__('Current Admin Password'),
                 'title' => Mage::helper('adminhtml')->__('Current Admin Password'),
-                'required' => true
-            ]
+                'required' => true,
+            ],
         );
 
         $fieldset->addField('in_role_users_old', 'hidden', ['name' => 'in_role_users_old']);

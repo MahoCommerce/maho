@@ -14,84 +14,78 @@ window.addEventListener('load', function() {
     windowLoaded = true;
 });
 
-if (typeof Product === 'undefined') {
-    var Product = {};
-}
-
-if (typeof Product.Config === 'undefined') {
-    Product.Config = function() {};
-}
-
-Product.Config.prototype.fillSelect = function (element) {
-    return;
-};
-
-Product.Config.prototype.resetChildren = function (element) {
-    return;
-};
-
-Product.Config.prototype.configureForValues = function() {
-    return;
-};
-
-Product.Config.prototype.origInitialize = Product.Config.prototype.initialize;
-Product.Config.prototype.initialize = function(config)
+class ProductConfigWithSwatches extends ProductConfig
 {
-    this.origInitialize(config);
-    this.configureObservers = [];
-    this.loadOptions();
-};
+    constructor (config) {
+        super(config);
+        this.configureObservers = [];
+        this.loadOptions();
+    }
 
-Product.Config.prototype.handleSelectChange = function(element) {
-    this.configureElement(element);
-    this.configureObservers.forEach(function(funct) {
-        funct(element);
-    });
-};
+    fillSelect (element) {
+        return;
+    }
 
-Product.Config.prototype.origConfigure = Product.Config.prototype.configure;
-Product.Config.prototype.configure = function(event) {
-    this.origConfigure(event);
-    var element = event.target;
-    this.configureObservers.forEach(function(funct) {
-        funct(element);
-    });
-};
+    resetChildren (element) {
+        return;
+    }
 
-Product.Config.prototype.configureSubscribe = function(funct)
-{
-    this.configureObservers.push(funct);
-};
+    configureForValues () {
+        return;
+    }
 
-/**
- * Load ALL the options into the selects
- * Uses global var spConfig declared in template/configurableswatches/catalog/product/view/type/configurable.phtml
- */
-Product.Config.prototype.loadOptions = function() {
-    this.settings.forEach(function(element){
-        element.disabled = false;
-        element.options[0] = new Option(this.config.chooseText, '');
-        var attributeId = element.id.replace(/[a-z]*/, '');
-        var options = this.getAttributeOptions(attributeId);
-        if(options) {
-            var index = 1;
-            options.forEach(function(option){
-                option.allowedProducts = [...option.products];
-                element.options[index] = new Option(this.getOptionLabel(option, option.price), option.id);
-                if (typeof option.price != 'undefined') {
-                    element.options[index].setAttribute('price', option.price);
+    handleSelectChange (element) {
+        this.configureElement(element);
+        this.configureObservers.forEach(function(funct) {
+            funct(element);
+        });
+    }
+
+    configure (event) {
+        super.configure(event);
+        var element = event.target;
+        this.configureObservers.forEach(function(funct) {
+            funct(element);
+        });
+    }
+
+    configureSubscribe (funct) {
+        this.configureObservers.push(funct);
+    }
+
+    /**
+     * Load ALL the options into the selects
+     * Uses global var spConfig declared in template/configurableswatches/catalog/product/view/type/configurable.phtml
+     */
+    loadOptions () {
+        this.settings.forEach(function(element){
+            element.disabled = false;
+            element.options[0] = new Option(this.config.chooseText, '');
+            var attributeId = element.id.replace(/[a-z]*/, '');
+            var options = this.getAttributeOptions(attributeId);
+            if(options) {
+                var index = 1;
+                for(var i=0;i<options.length;i++){
+                    options[i].allowedProducts = structuredClone(options[i].products);
+                    element.options[index] = new Option(this.getOptionLabel(options[i], options[i].price), options[i].id);
+                    if (typeof options[i].price != 'undefined') {
+                        element.options[index].setAttribute('price', options[i].price);
+                    }
+                    element.options[index].setAttribute('data-label', options[i].label.toLowerCase());
+                    element.options[index].config = options[i];
+                    index++;
                 }
-                element.options[index].setAttribute('data-label', option.label.toLowerCase());
-                element.options[index].config = option;
-                index++;
-            }.bind(this));
-        }
-        this.reloadOptionLabels(element);
-    }.bind(this));
+            }
+            this.reloadOptionLabels(element);
+        }.bind(this));
+    }
 }
 
-class ProductConfigurableSwatches {
-    constructor(productConfig) {
+Product.Config = ProductConfigWithSwatches;
+
+class ProductConfigurableSwatches
+{
+    constructor(productConfig, config) {
         this.productConfig = false;
         this.configurableAttributes = {};
 
@@ -129,6 +123,9 @@ class ProductConfigurableSwatches {
             allConfigurableOptions: []
         };
 
+        if (config && typeof(config) == 'object') {
+            this.setConfig(config);
+        }
         this.productConfig = productConfig;
         this.configurableAttributes = Object.values(productConfig.config.attributes);
 
@@ -313,7 +310,7 @@ class ProductConfigurableSwatches {
     }
 
     onSelectChange(select) {
-        var attr = select;
+        var attr = select.attr;
 
         if (this._F.nativeSelectChange) {
             this._F.currentAction = 'change';
@@ -352,7 +349,9 @@ class ProductConfigurableSwatches {
         var opt = attr._e.selectedOption;
         if (opt) {
             if (opt !== attr._e._last.selectedOption) {
-                attr._e.attrLabel.innerHTML = this.getOptionLabel(opt);
+                if (attr._e.attrLabel !== false) {
+                    attr._e.attrLabel.innerHTML = this.getOptionLabel(opt);
+                }
 
                 if (opt._f.isSwatch) {
                     opt._e.ul.querySelectorAll('li').forEach(li => li.classList.remove('selected'));
@@ -579,29 +578,40 @@ class ProductConfigurableSwatches {
      * @var inStock - boolean
      */
     setStockStatus(inStock) {
-        const statusClass = inStock ? 'in-stock' : 'out-of-stock';
-        const statusText = inStock ? 'In Stock' : 'Out of Stock';
+        if (inStock) {
+            this._E.availability.forEach(function(el) {
+                el.classList.add('in-stock');
+                el.classList.remove('out-of-stock');
+                let spanEl = el.querySelector('span');
+                if (spanEl) spanEl.textContent = Translator.translate('In Stock');
+            });
 
-        this._E.availability.forEach(el => {
-            el.classList.toggle('in-stock', inStock);
-            el.classList.toggle('out-of-stock', !inStock);
-            el.querySelector('span').textContent = Translator.translate(statusText);
-        });
+            this._E.cartBtn.btn.forEach((el, index) => {
+                el.disabled = false;
+                el.classList.remove('out-of-stock');
+                el.setAttribute('onclick', this._E.cartBtn.onclick);
+                el.title = Translator.translate(this._E.cartBtn.txt);
+                el.textContent = Translator.translate(this._E.cartBtn.txt);
+            });
+        } else {
+            this._E.availability.forEach(function(el) {
+                el.classList.add('out-of-stock');
+                el.classList.remove('in-stock');
+                el.textContent = Translator.translate('Out of Stock');
+            });
 
-        this._E.cartBtn.btn.forEach((el, index) => {
-            el.disabled = !inStock;
-            el.classList.toggle('out-of-stock', !inStock);
-            if (inStock) {
-                el.onclick = this._E.cartBtn.onclick;
-                el.title = Translator.translate(this._E.cartBtn.txt[index]);
-                el.querySelector('span span').textContent = Translator.translate(this._E.cartBtn.txt[index]);
-            } else {
-                el.onclick = null;
-                el.title = Translator.translate('Out of Stock');
-                el.querySelector('span span').textContent = Translator.translate('Out of Stock');
-                el.addEventListener('click', event => event.preventDefault());
-            }
-        });
+            this._E.cartBtn.btn.forEach((el) => {
+                el.classList.add('out-of-stock');
+                el.disabled = true;
+                el.removeAttribute('onclick');
+                el.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    return false;
+                });
+                el.setAttribute('title', Translator.translate('Out of Stock'));
+                el.textContent = Translator.translate('Out of Stock');
+            });
+        }
     }
 
     /**
@@ -690,3 +700,5 @@ class ProductConfigurableSwatches {
         return lists.reduce((a, b) => a.filter(c => b.includes(c)));
     }
 }
+
+Product.ConfigurableSwatches = ProductConfigurableSwatches;

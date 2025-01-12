@@ -149,17 +149,6 @@ button:hover, .form-button:hover {
 button:active, .form-button:active {
     background: url("./images/btn_on_bg.gif") repeat-x scroll 0 0 #F77C16;
 }
-button span {
-    background-position: 0 50%;
-    background-repeat: no-repeat;
-    line-height: 1.35em;
-}
-button span span {
-    background: none repeat scroll 0 0 transparent !important;
-    display: inline !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
 
 
 input.input-text, textarea, select {

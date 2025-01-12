@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -73,7 +74,7 @@ class Varien_File_Object extends SplFileObject implements IFactory
     public function getFilesPaths(&$paths)
     {
         if ($this->_isCorrect) {
-            $paths[] = (string)$this->_path;
+            $paths[] = (string) $this->_path;
         }
     }
     /**

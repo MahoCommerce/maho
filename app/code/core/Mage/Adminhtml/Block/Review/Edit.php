@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,7 +7,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -34,11 +35,10 @@ class Mage_Adminhtml_Block_Review_Edit extends Mage_Adminhtml_Block_Widget_Form_
                 'back',
                 'onclick',
                 Mage::helper('core/js')->getSetLocationJs(
-                    $this->getUrl(
-                        '*/catalog_product/edit',
-                        ['id' => $this->getRequest()->getParam('productId', false)]
-                    )
-                )
+                    $this->getUrl('*/catalog_product/edit', [
+                        'id' => $this->getRequest()->getParam('productId', false),
+                    ]),
+                ),
             );
         }
 
@@ -47,11 +47,10 @@ class Mage_Adminhtml_Block_Review_Edit extends Mage_Adminhtml_Block_Widget_Form_
                 'back',
                 'onclick',
                 Mage::helper('core/js')->getSetLocationJs(
-                    $this->getUrl(
-                        '*/customer/edit',
-                        ['id' => $this->getRequest()->getParam('customerId', false)]
-                    )
-                )
+                    $this->getUrl('*/customer/edit', [
+                        'id' => $this->getRequest()->getParam('customerId', false),
+                    ]),
+                ),
             );
         }
 
@@ -59,20 +58,17 @@ class Mage_Adminhtml_Block_Review_Edit extends Mage_Adminhtml_Block_Widget_Form_
             $this->_updateButton(
                 'back',
                 'onclick',
-                Mage::helper('core/js')->getSetLocationJs($this->getUrl('*/*/pending'))
+                Mage::helper('core/js')->getSetLocationJs($this->getUrl('*/*/pending')),
             );
             $this->_updateButton(
                 'delete',
                 'onclick',
                 Mage::helper('core/js')->getDeleteConfirmJs(
-                    $this->getUrl(
-                        '*/*/delete',
-                        [
-                            $this->_objectId => $this->getRequest()->getParam($this->_objectId),
-                            'ret'           => 'pending',
-                        ]
-                    )
-                )
+                    $this->getUrl('*/*/delete', [
+                        $this->_objectId => $this->getRequest()->getParam($this->_objectId),
+                        'ret' => 'pending',
+                    ]),
+                ),
             );
             Mage::register('ret', 'pending');
         }
@@ -83,29 +79,11 @@ class Mage_Adminhtml_Block_Review_Edit extends Mage_Adminhtml_Block_Widget_Form_
             Mage::register('review_data', $reviewData);
         }
 
-        $this->_formInitScripts[] = '
-            var review = {
-                updateRating: function() {
-                        elements = [
-                            $("select_stores"),
-                            $("rating_detail").getElementsBySelector("input[type=\'radio\']")
-                        ].flatten();
-                        $(\'save_button\').disabled = true;
-                        new Ajax.Updater(
-                            "rating_detail",
-                            "' . $this->getUrl('*/*/ratingItems', ['_current' => true]) . '",
-                            {
-                                parameters:Form.serializeElements(elements),
-                                evalScripts:true,
-                                onComplete:function(){ $(\'save_button\').disabled = false; }
-                            }
-                        );
-                    }
-           }
-           Event.observe(window, \'load\', function(){
-                 Event.observe($("select_stores"), \'change\', review.updateRating);
-           });
-        ';
+        $this->_formInitScripts[] = <<<JS
+            const review = new ReviewEditForm({
+                ratingItemsUrl: '{$this->getUrl('*/*/ratingItems', ['_current' => true])}',
+            });
+        JS;
     }
 
     /**

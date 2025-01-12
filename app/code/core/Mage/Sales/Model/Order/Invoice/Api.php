@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -167,7 +168,7 @@ class Mage_Sales_Model_Order_Invoice_Api extends Mage_Sales_Model_Api_Resource
      * @return bool
      */
     public function addComment($invoiceIncrementId, $comment, #[\SensitiveParameter]
-    $email = false, $includeComment = false)
+        $email = false, $includeComment = false)
     {
         $invoice = Mage::getModel('sales/order_invoice')->loadByIncrementId($invoiceIncrementId);
 

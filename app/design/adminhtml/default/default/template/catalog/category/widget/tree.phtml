@@ -6,183 +6,46 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Adminhtml_Block_Catalog_Category_Widget_Chooser $this */
 ?>
 
-<?php $_divId = 'tree' . $this->getId() ?>
-<div id="<?= $_divId ?>" class="tree"></div>
+<?php $divId = 'tree' . $this->getId() ?>
+<div id="<?= $divId ?>" class="hor-scroll"></div>
 
-<script type="text/javascript">
-//<![CDATA[
+<?php if ($this->getRoot()): ?>
+<script type="module">
+    const selected = '<?= implode(',', $this->getSelectedCategories()) ?>';
+    const useMassaction = <?= var_export((bool) $this->getUseMassaction(), true) ?>;
 
-var tree<?= $this->getId() ?>;
-
-var useMassaction = <?= $this->getUseMassaction()?1:0 ?>;
-
-var isAnchorOnly = <?= $this->getIsAnchorOnly()?1:0 ?>;
-
-Ext.tree.TreePanel.Enhanced = function(el, config)
-{
-    Ext.tree.TreePanel.Enhanced.superclass.constructor.call(this, el, config);
-};
-
-Ext.extend(Ext.tree.TreePanel.Enhanced, Ext.tree.TreePanel, {
-
-    loadTree : function(config, firstLoad)
-    {
-        var parameters = config['parameters'];
-        var data = config['data'];
-
-        if ((typeof parameters['root_visible']) != 'undefined') {
-            this.rootVisible = parameters['root_visible']*1;
-        }
-
-        var root = new Ext.tree.TreeNode(parameters);
-
-        this.nodeHash = {};
-        this.setRootNode(root);
-
-        if (firstLoad) {
-            <?php if ($this->getNodeClickListener()): ?>
-                this.addListener('click', <?= $this->getNodeClickListener() ?>.createDelegate(this));
-            <?php endif ?>
-        }
-
-        this.loader.buildCategoryTree(root, data);
-        this.el.dom.innerHTML = '';
-        // render the tree
-        this.render();
-    }
-});
-
-Ext.onReady(function()
-{
-    var emptyNodeAdded = <?= ($this->getWithEmptyNode() ? 'false' : 'true') ?>;
-
-    var categoryLoader = new Ext.tree.TreeLoader({
-       dataUrl: '<?= $this->getLoadTreeUrl() ?>'
+    const tree = new MahoTree('<?= $divId ?>', {
+        showRootNode: false,
+        lazyload: {
+            nodeParameter: 'id',
+            dataUrl: '<?= $this->getLoadTreeUrl() ?>',
+            onBeforeLoad: (tree, params) => {
+                params.set('selected', selected);
+            },
+        },
+        selectable: {
+            mode: useMassaction ? 'simple' : 'radio',
+            showInputs: useMassaction,
+            allowDeselect: false,
+            onSelect: <?= $this->getNodeClickListener() ?? 'null' ?>,
+        },
     });
+    tree.setRootNode(<?= $this->getTreeJson() ?>);
 
-    categoryLoader.buildCategoryTree = function(parent, config)
-    {
-        if (!config) return null;
-
-
-        if (parent && config && config.length){
-            for (var i = 0; i < config.length; i++) {
-                var node;
-                if (useMassaction && config[i].is_anchor == isAnchorOnly) {
-                    config[i].uiProvider = Ext.tree.CheckboxNodeUI;
-                }
-                var _node = Object.clone(config[i]);
-
-                // Add empty node to reset category filter
-                if(!emptyNodeAdded) {
-                    var empty = Object.clone(_node);
-                    empty.text = '<?= Mage::helper('core')->jsQuoteEscape($this->__('None')) ?>';
-                    empty.children = [];
-                    empty.id = 'none';
-                    empty.path = '1/none';
-                    empty.cls = 'leaf';
-                    parent.appendChild(new Ext.tree.TreeNode(empty));
-                    emptyNodeAdded = true;
-                }
-
-                if (_node.children && !_node.children.length) {
-                    delete(_node.children);
-                    node = new Ext.tree.AsyncTreeNode(_node);
-                } else {
-                    node = new Ext.tree.TreeNode(config[i]);
-                }
-                parent.appendChild(node);
-                node.loader = node.getOwnerTree().loader;
-                node.loader = node.getOwnerTree().loader;
-                if (_node.children) {
-                    this.buildCategoryTree(node, _node.children);
-                }
-            }
-        }
-    };
-
-    categoryLoader.createNode = function(config) {
-        var node;
-        if (useMassaction && config.is_anchor == isAnchorOnly) {
-            config.uiProvider = Ext.tree.CheckboxNodeUI;
-        }
-        var _node = Object.clone(config);
-        if (config.children && !config.children.length) {
-            delete(config.children);
-            node = new Ext.tree.AsyncTreeNode(config);
-        } else {
-            node = new Ext.tree.TreeNode(config);
-        }
-        return node;
-    };
-
-    categoryLoader.buildHash = function(node)
-    {
-        var hash = {};
-
-        hash = this.toArray(node.attributes);
-
-        if (node.childNodes.length>0 || (node.loaded==false && node.loading==false)) {
-            hash['children'] = new Array;
-
-            for (var i = 0, len = node.childNodes.length; i < len; i++) {
-                if (!hash['children']) {
-                    hash['children'] = new Array;
-                }
-                hash['children'].push(this.buildHash(node.childNodes[i]));
-            }
-        }
-
-        return hash;
-    };
-
-    categoryLoader.toArray = function(attributes) {
-        var data = {};
-        for (var key in attributes) {
-            var value = attributes[key];
-            data[key] = value;
-        }
-
-        return data;
-    };
-
-    categoryLoader.on("beforeload", function(treeLoader, node) {
-        treeLoader.baseParams.id = node.attributes.id;
+<?php if ($this->getWithEmptyNode()): ?>
+    const emptyNode = new MahoTreeNode(tree, {
+        id: 'none',
+        text: '<?= Mage::helper('core')->jsQuoteEscape($this->__('View All Products')) ?>',
+        cls: 'leaf',
     });
-
-    tree<?= $this->getId() ?> = new Ext.tree.TreePanel.Enhanced('<?= $_divId ?>', {
-        animate:          false,
-        loader:           categoryLoader,
-        enableDD:         false,
-        containerScroll:  true,
-        rootVisible:      '<?= $this->getRoot()->getIsVisible() ?>',
-        useAjax:          true,
-        currentNodeId:    <?= (int) $this->getCategoryId() ?>,
-        addNodeTo:        false
-    });
-
-    if (useMassaction) {
-        tree<?= $this->getId() ?>.on('check', function(node) {
-            $('<?= $_divId ?>').fire('node:changed', {node:node});
-        }, tree<?= $this->getId() ?>);
-    }
-
-    // set the root node
-    var parameters = {
-        text:        'Psw',
-        draggable:   false,
-        id:          <?= (int) $this->getRoot()->getId() ?>,
-        expanded:    <?= (int) $this->getIsWasExpanded() ?>,
-        category_id: <?= (int) $this->getCategoryId() ?>
-    };
-
-    tree<?= $this->getId() ?>.loadTree({parameters:parameters, data:<?= $this->getTreeJson() ?>},true);
-
-});
-//]]>
+    tree.rootNode.prependChild(emptyNode);
+<?php endif ?>
 </script>
+<?php endif ?>

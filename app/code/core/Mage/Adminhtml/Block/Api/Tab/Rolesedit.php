@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -6,6 +7,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -69,9 +71,9 @@ class Mage_Adminhtml_Block_Api_Tab_Rolesedit extends Mage_Adminhtml_Block_Widget
         $selres = $this->getSelectedResources();
 
         if ($level != 0) {
-            $item['text'] = (string)$node->title;
-            $item['sort_order'] = isset($node->sort_order) ? (string)$node->sort_order : 0;
-            $item['id']  = (string)$node->attributes()->aclpath;
+            $item['text'] = (string) $node->title;
+            $item['sort_order'] = isset($node->sort_order) ? (string) $node->sort_order : 0;
+            $item['id']  = (string) $node->attributes()->aclpath;
 
             if (in_array($item['id'], $selres)) {
                 $item['checked'] = true;
@@ -98,7 +100,9 @@ class Mage_Adminhtml_Block_Api_Tab_Rolesedit extends Mage_Adminhtml_Block_Widget
                     }
                 }
             }
-            if (!empty($item['children'])) {
+            if (empty($item['children'])) {
+                unset($item['children']);
+            } else {
                 usort($item['children'], [$this, '_sortTree']);
             }
         }

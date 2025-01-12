@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -68,7 +69,7 @@ class Mage_Core_Model_Resource_Setup_Query_Modifier
 
                 $result = [
                     'type' => $type,
-                    'unsigned' => $unsigned
+                    'unsigned' => $unsigned,
                 ];
                 break;
             }
@@ -211,7 +212,7 @@ class Mage_Core_Model_Resource_Setup_Query_Modifier
 
         return [
             'type' => $this->_prepareIdentifier($description[$column]['DATA_TYPE']),
-            'unsigned' => (bool) $description[$column]['UNSIGNED']
+            'unsigned' => (bool) $description[$column]['UNSIGNED'],
         ];
     }
 

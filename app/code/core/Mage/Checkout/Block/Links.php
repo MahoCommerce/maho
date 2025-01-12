@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -70,7 +71,7 @@ class Mage_Checkout_Block_Links extends Mage_Core_Block_Template
                 ['_secure' => true],
                 60,
                 null,
-                'class="top-link-checkout"'
+                'class="top-link-checkout"',
             );
         }
         return $this;

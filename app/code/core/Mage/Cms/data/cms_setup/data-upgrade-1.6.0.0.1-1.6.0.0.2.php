@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -19,7 +20,7 @@ $cmsBlock = [
     'identifier'    => 'cookie_restriction_notice_block',
     'content'       => $content,
     'is_active'     => 1,
-    'stores'        => 0
+    'stores'        => 0,
 ];
 
 Mage::getModel('cms/block')->setData($cmsBlock)->save();
