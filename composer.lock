@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a2959cb7a55215575700e007ae67ed2d",
+    "content-hash": "6ff6ebe26302dee1381f12fb9c17e7b6",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -221,11 +221,17 @@
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
-            "version": "dev-topic-v3",
+            "version": "v3.0.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/justinbeaty/maho-composer-plugin.git",
-                "reference": "85a0b626acaf0fde43d5a194ddc2f6aee135a773"
+                "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
+                "reference": "abab924df44909094c7ab98ca68d55bf48dd62d9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/abab924df44909094c7ab98ca68d55bf48dd62d9",
+                "reference": "abab924df44909094c7ab98ca68d55bf48dd62d9",
+                "shasum": ""
             },
             "require": {
                 "composer-plugin-api": "^2.1",
@@ -250,11 +256,16 @@
                     "Maho\\ComposerPlugin\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
             "description": "Extension for Composer to copy assets and enable autoloading for Maho projects.",
-            "time": "2025-01-12T21:33:37+00:00"
+            "support": {
+                "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
+                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v3.0.0"
+            },
+            "time": "2025-01-12T22:09:45+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
@@ -3340,9 +3351,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "mahocommerce/maho-composer-plugin": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
