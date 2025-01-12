@@ -225,7 +225,7 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/justinbeaty/maho-composer-plugin.git",
-                "reference": "423467ef43d8a18a7ac04a9831ef3479e848a83d"
+                "reference": "85a0b626acaf0fde43d5a194ddc2f6aee135a773"
             },
             "require": {
                 "composer-plugin-api": "^2.1",
@@ -254,7 +254,7 @@
                 "MIT"
             ],
             "description": "Extension for Composer to copy assets and enable autoloading for Maho projects.",
-            "time": "2024-12-07T15:46:02+00:00"
+            "time": "2025-01-12T21:33:37+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
