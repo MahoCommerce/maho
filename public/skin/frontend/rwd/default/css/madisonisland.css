@@ -8,66 +8,17 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
 /* ============================================ *
  * Homepage
  * ============================================ */
-/* -------------------------------------------- *
- * Primary Banner
- */
+
+/* Primary Banner */
 body.cms-home .main-container {
   padding-top: 0;
 }
 
-.slideshow .banner-msg {
-  position: absolute;
-  text-align: center;
-  text-transform: uppercase;
-  width: 100%;
-  top: 30%;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -webkit-user-select: none;
-  -o-user-select: none;
-  user-select: none;
-}
-
-.slideshow .banner-msg h2 {
-  color: #FFFFFF;
-  font-size: 1.5rem;
-  text-shadow: 1px 1px 3px #555555;
-}
-
-.slideshow .banner-msg h2 strong {
-  font-weight: bold;
-  display: block;
-  font-size: 2.25rem;
-}
-
-@media only screen and (max-width: 770px) {
-  .slideshow .banner-msg h2 {
-    font-size: 1.25rem;
-  }
-
-  .slideshow .banner-msg h2 strong {
-    font-size: 1.5rem;
-  }
-}
-@media only screen and (max-width: 479px) {
-  .slideshow .banner-msg {
-    top: 20%;
-  }
-
-  .slideshow .banner-msg h2 {
-    font-size: 0.875rem;
-  }
-
-  .slideshow .banner-msg h2 strong {
-    font-size: 1rem;
-  }
-}
-/* -------------------------------------------- *
- * Promotion Banner Section
- */
+/* Promotion Banner Section */
 .promos {
   margin: 0 0 10px 0;
   padding: 0;
@@ -86,7 +37,7 @@ body .promos > li {
   list-style: none;
   text-align: center;
   position: relative;
-  border: 1px solid #cccccc;
+  border: 1px solid var(--maho-color-border);
   -moz-user-select: none;
   -ms-user-select: none;
   -webkit-user-select: none;
@@ -108,34 +59,7 @@ body .promos > li {
   display: block;
 }
 
-.promos span {
-  color: #FFFFFF;
-  text-transform: uppercase;
-  position: absolute;
-  display: block;
-  width: 100%;
-  top: 10%;
-  font-weight: 500;
-  font-size: 1.25rem;
-  text-shadow: 1px 1px 3px #555555;
-}
-
-.promos strong {
-  font-weight: 600;
-  font-size: 1.625rem;
-  display: block;
-}
-
 @media only screen and (min-width: 771px) {
-  .promos span {
-    font-size: 1rem;
-  }
-
-  .promos strong {
-    font-size: 1.063rem;
-  }
-
-  /* Config: Three columns + flexible gutter */
   body .promos > li {
     float: left;
     width: 31.74603%;
@@ -146,18 +70,8 @@ body .promos > li {
     margin-right: 0;
   }
 }
-@media only screen and (min-width: 880px) {
-  .promos span {
-    font-size: 1.125rem;
-  }
 
-  .promos strong {
-    font-size: 1.5rem;
-  }
-}
-/* -------------------------------------------- *
- * New Products Section
- */
+/* New Products Section */
 /* Hiding the reviews content via CSS because we can't modify the template, */
 /* since it may be used in other places where those elements are needed */
 .cms-index-index .products-grid .ratings,
@@ -170,10 +84,10 @@ body .promos > li {
 .cms-index-index h2.subtitle {
   padding: 6px 0;
   text-align: center;
-  color: #0472ad;
+  color: var(--maho-color-primary);
   font-weight: 600;
-  border-bottom: 1px solid #cccccc;
-  border-top: 1px solid #cccccc;
+  border-bottom: 1px solid var(--maho-color-border);
+  border-top: 1px solid var(--maho-color-border);
 }
 
 .cms-index-noroute h2.subtitle {
@@ -183,13 +97,9 @@ body .promos > li {
 /* ============================================ *
  * Category Landing Pages
  * ============================================ */
+
 .category-image {
   position: relative;
-}
-
-.categorylandingMainblock {
-  border: 1px solid #E2E2E2;
-  padding: 7px;
 }
 
 .catblocks {
@@ -204,11 +114,11 @@ body .promos > li {
   width: 23% !important;
   margin-right: 2.66667% !important;
   margin-bottom: 10px;
-  border: 1px solid #cccccc;
+  border: 1px solid var(--maho-color-border);
 }
 
 .catblocks li:hover {
-  border-color: #0472ad;
+  border-color: var(--maho-color-primary);
 }
 
 @media only screen and (max-width: 770px) {
@@ -238,9 +148,9 @@ body .promos > li {
 }
 
 .catblocks li a span {
-  color: #FFFFFF;
+  color: var(--maho-color-background);
   position: absolute;
-  background-color: #7B7C7B;
+  background-color: var(--maho-color-background-dark);
   font-size: 1.063rem;
   font-weight: bold;
   text-transform: uppercase;
@@ -250,71 +160,4 @@ body .promos > li {
   width: 100%;
   padding: 5px 10px;
   margin-right: 10px;
-}
-
-.catblocklinks a {
-  color: #FFFFFF;
-  text-decoration: none;
-}
-
-.catlandingbottomPromoblock {
-  float: left;
-  width: 100%;
-  border: 1px solid #E2E2E2;
-  margin-bottom: 100px;
-}
-
-.catalog-category-view div.categoryland-caption {
-  display: block;
-  margin: 0;
-  position: absolute;
-  color: #000000;
-  font-size: 1.875rem;
-  font-weight: 500;
-  line-height: 36px;
-  text-align: center;
-}
-
-.catalog-category-view div.categoryland-caption span.blue-big-text {
-  color: #0472ad;
-  font-size: 3.125rem;
-  font-weight: 800;
-  padding: 0 0 0 8px;
-}
-
-.catalog-category-view div.categoryland-caption span.blue-big-text {
-  padding: 0 !important;
-}
-
-.catalog-category-view div.categoryland-caption span.three-dots {
-  background: url(../images/bg_threeDots.png) no-repeat center center;
-  display: block;
-  height: 20px;
-}
-
-.catalog-category-view div.categoryland-caption p.desc,
-.cms-home #homepage-main-slides div.slides_control div div.slideshow-caption p.desc,
-.catalog-category-view div.categoryland-caption p.desc {
-  color: #656565;
-  font-style: italic;
-  font-size: 1.125rem;
-  line-height: 28px;
-}
-
-.cms-home #homepage-main-slides div.slides_control div div.slideshow-caption a.link:hover,
-.cms-home #homepage-main-slides div.slides_control div div.slideshow-caption span.link:hover {
-  text-decoration: underline;
-  color: #1189C5;
-}
-
-.cms-home #homepage-main-slides div.slides_control div div.slideshow-caption span.blue-big-text,
-.catalog-category-view div.categoryland-caption span.blue-big-text {
-  color: #0472ad;
-  font-size: 3.125rem;
-  font-weight: 800;
-  padding: 0 0 0 8px;
-}
-
-.catalog-category-view div.categoryland-caption span.blue-big-text {
-  padding: 0 !important;
 }
