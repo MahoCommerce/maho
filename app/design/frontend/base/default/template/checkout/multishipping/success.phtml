@@ -9,6 +9,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Checkout_Block_Multishipping_Success $this */
 ?>
 <div class="multiple-checkout">
     <div class="page-title">
@@ -20,7 +22,7 @@
     <p data-role="order-numbers">
         <?php $flag = false ?>
         <?= $this->__('Your order number is ') ?>
-        <?php foreach ($_orderIds as $orderId=>$incrementId): ?>
+        <?php foreach ($_orderIds as $orderId => $incrementId): ?>
             <?php if ($flag): ?>
                 <?= ', ' ?>
             <?php endif ?>

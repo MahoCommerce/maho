@@ -9,8 +9,10 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Catalog_Block_Product_Gallery $this */
 ?>
-<?php $_width=$this->getImageWidth() ?>
+<?php $_width = $this->getImageWidth() ?>
 <div class="product-image-popup" style="width:<?= $_width ?>px;">
     <div class="buttons-set"><a href="#" onclick="window.close(); return false;" class="button"><span><?= $this->__('Close Window') ?></span></a></div>
     <?php if($this->getPreviusImageUrl() || $this->getNextImageUrl()): ?>

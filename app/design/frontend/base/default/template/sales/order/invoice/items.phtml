@@ -9,6 +9,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Sales_Block_Order_Invoice_Items $this */
 ?>
 <?php  $_order = $this->getOrder() ?>
 <p class="order-links"><a href="<?= $this->getPrintAllInvoicesUrl($_order) ?>" onclick="this.target='_blank'" class="link-print"><?= $this->__('Print All Invoices') ?></a></p>

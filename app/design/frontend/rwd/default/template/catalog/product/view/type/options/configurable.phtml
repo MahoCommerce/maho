@@ -36,9 +36,9 @@ $_renderers = $this->getChild('attr_renderers')->getSortedChildren();
         endforeach;
 
         if (!$_rendered):
-        ?>
+            ?>
         <dt><label class="required"><em>*</em><?= $_attribute->getLabel() ?></label></dt>
-        <dd<?php if ($_attribute->decoratedIsLast){?> class="last"<?php }?>>
+        <dd<?php if ($_attribute->decoratedIsLast) {?> class="last"<?php }?>>
             <div class="input-box">
                 <select name="super_attribute[<?= $_attribute->getAttributeId() ?>]" id="attribute<?= $_attribute->getAttributeId() ?>" class="required-entry super-attribute-select">
                     <option><?= $this->__('Choose an Option...') ?></option>

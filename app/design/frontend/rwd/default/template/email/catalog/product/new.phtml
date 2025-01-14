@@ -9,13 +9,16 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Catalog_Block_Product_New $this */
 ?>
 <?php if (($_products = $this->getProductCollection()) && $_products->getSize()): ?>
 <h2 class="subtitle products"><?= $this->__('New Products') ?></h2>
 <?php $_columnCount = $this->getColumnCount(); ?>
     <table class="products-grid">
-    <?php $i=0; foreach ($_products->getItems() as $_product): ?>
-        <?php if ($i++%$_columnCount==0): ?>
+    <?php $i = 0;
+    foreach ($_products->getItems() as $_product): ?>
+        <?php if ($i++ % $_columnCount == 0): ?>
         <tr>
         <?php endif ?>
             <td>
@@ -28,7 +31,7 @@
                     <?= $this->getPriceHtml($_product, true, '-new') ?>
                 </div>
             </td>
-        <?php if ($i%$_columnCount==0 || $i==count($_products)): ?>
+        <?php if ($i % $_columnCount == 0 || $i == count($_products)): ?>
         <tr>
         <?php endif ?>
     <?php endforeach ?>

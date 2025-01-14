@@ -9,6 +9,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Adminhtml_Block_System_Convert_Profile_Run $this */
 ?>
 <style type="text/css" >
     ul { list-style-type:none; padding:0; margin:0; }
@@ -47,14 +49,14 @@
         <?php endforeach ?>
         <?php if($this->getProfile()->getEntityType() == 'product' && $this->getProfile()->getDirection() == 'import'):?>
             <li id="liBeforeFinish" style="background-color:#FFD; display:none;">
-                <img src="<?= $this->getSkinUrl('images/fam_bullet_error.gif') ?>" class="v-middle" style="margin-right:5px"/>
-                <?= $this->__("Please wait while the indexes are being refreshed.") ?>
-                <img id="before-finish-wait-img" src="<?= $this->getSkinUrl('images/loading.svg') ?>" class="v-middle" style="margin-right:5px"/>
+                <img src="<?php echo $this->getSkinUrl('images/fam_bullet_error.gif');?>" class="v-middle" style="margin-right:5px"/>
+                <?php echo $this->__("Please wait while the indexes are being refreshed.");?>
+                <img id="before-finish-wait-img" src="<?php echo $this->getSkinUrl('images/rule-ajax-loader.gif');?>" class="v-middle" style="margin-right:5px"/>
             </li>
         <?php endif ?>
             <li id="liFinished" style="display:none;">
-            <img src="<?= $this->getSkinUrl('images/note_msg_icon.gif') ?>" class="v-middle" style="margin-right:5px"/>
-            <?= $this->__("Finished profile execution.") ?>
+            <img src="<?php echo $this->getSkinUrl('images/note_msg_icon.gif');?>" class="v-middle" style="margin-right:5px"/>
+            <?php echo $this->__("Finished profile execution.");?>
             </li>
             </ul>
             <?php if ($batchId = $this->getBatchModel()->getId()):?>

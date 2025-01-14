@@ -9,14 +9,16 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Adminhtml_Block_Widget_Breadcrumbs $this */
 ?>
 <?php if(!empty($links)): ?>
 <ul class="breadcrumbs">
-    <?php $_size=count($links); ?>
-    <?php foreach ($links as $_index=>$_link): ?>
+    <?php $_size = count($links); ?>
+    <?php foreach ($links as $_index => $_link): ?>
     <li>
         <?php if(empty($_link['url'])): ?>
-            <?php if($_index!=$_size-1): ?>
+            <?php if($_index != $_size - 1): ?>
                 <span><?= $this->escapeHtml($_link['label']) ?></span>
             <?php else: ?>
                 <strong><?= $this->escapeHtml($_link['label']) ?></strong>
@@ -24,7 +26,7 @@
         <?php else: ?>
             <a href="<?= $_link['url'] ?>" title="<?= $this->escapeHtml($_link['title']) ?>"><?= $this->escapeHtml($_link['label']) ?></a>
         <?php endif ?>
-        <?php if($_index!=$_size-1): ?>
+        <?php if($_index != $_size - 1): ?>
             &raquo;
         <?php endif ?>
     </li>

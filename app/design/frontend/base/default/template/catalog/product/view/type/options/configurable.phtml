@@ -9,6 +9,8 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Catalog_Block_Product_View_Type_Configurable $this */
 ?>
 
 <?php
@@ -19,7 +21,7 @@ $_attributes = Mage::helper('core')->decorateArray($this->getAllowAttributes());
     <dl>
     <?php foreach($_attributes as $_attribute): ?>
         <dt><label class="required"><em>*</em><?= $_attribute->getLabel() ?></label></dt>
-        <dd<?php if ($_attribute->decoratedIsLast){?> class="last"<?php }?>>
+        <dd<?php if ($_attribute->decoratedIsLast) {?> class="last"<?php }?>>
             <div class="input-box">
                 <select name="super_attribute[<?= $_attribute->getAttributeId() ?>]" id="attribute<?= $_attribute->getAttributeId() ?>" class="required-entry super-attribute-select">
                     <option><?= $this->__('Choose an Option...') ?></option>
