@@ -386,8 +386,17 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                 'user'     => $this,
             ]);
             $this->loadByUsername($username);
-            $sensitive = ($config) ? $username == $this->getUsername() : true;
 
+            if ($this->getPasskeyCredentialIdHash() && $this->getPasskeyPublicKey() && json_validate($password)) {
+                $passkeyData = json_decode($password, true);
+                if ($this->getPasskeyCredentialIdHash() == $passkeyData['id'] ?? '') {
+                    return true;
+                }
+
+                return false;
+            }
+
+            $sensitive = ($config) ? $username == $this->getUsername() : true;
             if ($sensitive && $this->getId() && $this->validatePasswordHash($password, $this->getPassword())) {
                 if ($this->getIsActive() != '1') {
                     throw new Mage_Core_Exception(
