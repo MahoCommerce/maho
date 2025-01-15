@@ -8,7 +8,7 @@ on:
 
 jobs:
   phpstan:
-    name: Analyze PHP ${{ matrix.php-versions }} (${{ matrix.refs == 'pr-head' && github.head_ref || github.base_ref || github.ref_name }})
+    name: Analyze ${{ matrix.refs == 'pr-head' && github.head_ref || github.base_ref || github.ref_name }}
     runs-on: [ubuntu-latest]
     strategy:
       fail-fast: false
@@ -16,13 +16,12 @@ jobs:
         refs: ['target-branch', 'pr-head']
         exclude:
           - refs: ${{ github.event_name != 'pull_request' && 'pr-head' }}
-        php-versions: ['8.2', '8.3', '8.4']
 
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-versions }}
+          php-version: latest
 
       - uses: actions/checkout@v4
         with:
@@ -47,10 +46,10 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: var
-          key: phpstan-result-cache-${{ matrix.php-versions }}-${{ matrix.refs }}-${{ github.ref_name }}-${{ github.run_id }}
+          key: phpstan-result-cache-${{ matrix.refs }}-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
-            phpstan-result-cache-${{ matrix.php-versions }}-${{ matrix.refs }}-${{ github.ref_name }}
-            phpstan-result-cache-${{ matrix.php-versions }}-target-branch-main
+            phpstan-result-cache-${{ matrix.refs }}-${{ github.ref_name }}
+            phpstan-result-cache-target-branch-main
 
       - name: PHPStan Static Analysis
         run: XDEBUG_MODE=off php vendor/bin/phpstan.phar analyze -vvv

@@ -3,7 +3,10 @@ includes:
     - .phpstan.baseline.neon
 parameters:
     magentoRootPath: %currentWorkingDirectory%
-    phpVersion: 80200
+    phpVersion:
+        min: 80200
+        max: 80499
+
     fileExtensions:
         - php
         - phtml
