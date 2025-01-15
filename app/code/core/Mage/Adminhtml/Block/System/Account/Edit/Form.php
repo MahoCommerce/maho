@@ -97,27 +97,27 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
             'required' => false,
         ]);
 
-        $fieldset = $form->addFieldset('passkey_fieldset', array(
-            'legend' => Mage::helper('adminhtml')->__('Passkey Authentication')
-        ));
+        $fieldset = $form->addFieldset('passkey_fieldset', [
+            'legend' => Mage::helper('adminhtml')->__('Passkey Authentication'),
+        ]);
 
         if ($user->getPasskeyCredentialIdHash()) {
-            $fieldset->addField('passkey_status', 'note', array(
+            $fieldset->addField('passkey_status', 'note', [
                 'label'     => Mage::helper('adminhtml')->__('Status'),
                 'text'      => '<span class="grid-severity-notice"><span>' .
                     Mage::helper('adminhtml')->__('Passkey Registered') . '</span></span>' .
                     '<br/><button type="button" id="remove-passkey-btn" class="scalable delete">' .
-                    '<span>' . Mage::helper('adminhtml')->__('Remove Passkey') . '</span></button>'
-            ));
+                    '<span>' . Mage::helper('adminhtml')->__('Remove Passkey') . '</span></button>',
+            ]);
         } else {
-            $fieldset->addField('passkey_register', 'note', array(
+            $fieldset->addField('passkey_register', 'note', [
                 'label'     => Mage::helper('adminhtml')->__('Register a passkey to enable passwordless login'),
                 'text'      => '<button type="button" id="register-passkey-btn" class="scalable add" onclick="MahoPasskey.startRegistration()">' .
-                    '<span>' . Mage::helper('adminhtml')->__('Register Passkey') . '</span></button>'
-            ));
+                    '<span>' . Mage::helper('adminhtml')->__('Register Passkey') . '</span></button>',
+            ]);
         }
 
-        $fieldset->addField('passkey_script', 'note', array(
+        $fieldset->addField('passkey_script', 'note', [
             'text' => '
             <script type="text/javascript">
 var MahoPasskey = {
@@ -183,8 +183,8 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
-            </script>'
-        ));
+            </script>',
+        ]);
 
         $twoFactorAuthenticationHelper = Mage::helper('adminhtml/twoFactorAuthentication');
         $twoFactorAuthenticationFieldset = $form->addFieldset('twofa_fieldset', [

@@ -131,7 +131,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
                     'displayName' => $user->getName(),
                 ],
                 'pubKeyCredParams' => [
-                    ['type' => 'public-key', 'alg' => -7] // ES256
+                    ['type' => 'public-key', 'alg' => -7], // ES256
                 ],
                 'timeout' => 60000,
                 'attestation' => 'none',
@@ -210,7 +210,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
 
                 $this->getResponse()->setBodyJson([
                     'success' => true,
-                    'message' => Mage::helper('adminhtml')->__('Passkey registered successfully')
+                    'message' => Mage::helper('adminhtml')->__('Passkey registered successfully'),
                 ]);
             } catch (Exception $e) {
                 throw new Exception('Failed to save credential: ' . $e->getMessage());
@@ -220,7 +220,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
                 ->setHttpResponseCode(400)
                 ->setBodyJson([
                     'success' => false,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
         }
     }
@@ -237,13 +237,13 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
 
             $credentials = $user->getResource()->getReadConnection()->fetchAll(
                 "SELECT credential_id_hash FROM {$user->getResource()->getTable('admin/user_credentials')} WHERE user_id = ?",
-                [$user->getId()]
+                [$user->getId()],
             );
 
-            $allowCredentials = array_map(function($cred) {
+            $allowCredentials = array_map(function ($cred) {
                 return [
                     'type' => 'public-key',
-                    'id' => $cred['credential_id_hash']
+                    'id' => $cred['credential_id_hash'],
                 ];
             }, $credentials);
 
@@ -251,11 +251,12 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
                 'rpId' => parse_url(Mage::getBaseUrl(), PHP_URL_HOST),
                 'timeout' => 60000,
                 'allowCredentials' => $allowCredentials,
-                'userVerification' => 'required'
+                'userVerification' => 'required',
             ];
 
             $this->getResponse()
-                ->setBodyJson($options);;
+                ->setBodyJson($options);
+            ;
         } catch (Exception $e) {
             $this->getResponse()
                 ->setHttpResponseCode(400)
