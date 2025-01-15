@@ -62,7 +62,8 @@
         "colinmollenhour/cache-backend-redis": "Redis support for Maho's backend cache",
         "colinmollenhour/magento-redis-session": "Redis support for PHP sessions",
         "fballiano/openmage-cssjs-minify":  "Minification support for CSS/JS",
-        "fballiano/openmage-defer-javascripts":  "Move all javascripts to the end of all pages, preserving execution order"
+        "fballiano/openmage-defer-javascripts":  "Move all javascripts to the end of all pages, preserving execution order",
+        "fballiano/openmage-cloudflare-turnstile": "Turnstile: Cloudflare captcha-like antispam solution"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
