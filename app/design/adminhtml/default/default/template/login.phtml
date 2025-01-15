@@ -47,6 +47,10 @@
                         <div class="form-buttons">
                             <a class="left" href="<?= Mage::helper('adminhtml')->getUrl('adminhtml/index/forgotpassword', ['_nosecret' => true]) ?>"><?= Mage::helper('adminhtml')->__('Forgot your password?') ?></a>
                             <input type="submit" class="form-button" value="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" />
+
+                            <button type="button" id="passkey-login-btn" class="scalable" style="margin-left:15px;" onclick="MahoPasskey.startAuthentication()">
+                                <?php echo $this->__('Login with Passkey') ?>
+                            </button>
                         </div>
                     </div>
                     <div id="step2" class="no-display">

@@ -25,6 +25,11 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
      */
     public const ADMIN_RESOURCE = 'system/myaccount';
 
+    protected $_publicActions = [
+        'passkeyregisterstart',
+        'passkeyregistersave',
+    ];
+
     public function indexAction()
     {
         $this->_title($this->__('System'))->_title($this->__('My Account'));
@@ -91,6 +96,196 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
             $user->setTwofaEnabled(0);
             $user->setTwofaSecret(null);
         }
+
+        try {
+            $user->save();
+            Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('The account has been saved.'));
+        } catch (Mage_Core_Exception $e) {
+            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+        } catch (Exception $e) {
+            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('An error occurred while saving account.'));
+        }
+        $this->getResponse()->setRedirect($this->getUrl('*/*/'));
+    }
+
+    public function passkeyregisterstartAction()
+    {
+        try {
+            $user = Mage::getSingleton('admin/session')->getUser();
+            if (!$user) {
+                throw new Exception('Not authenticated');
+            }
+
+            $challenge = strtr(base64_encode(random_bytes(32)), '+/', '-_');
+            $this->_getSession()->setPasskeyChallenge($challenge);
+
+            $options = [
+                'challenge' => $challenge,
+                'rp' => [
+                    'name' => Mage::getStoreConfig('web/secure/name'),
+                    'id' => parse_url(Mage::getBaseUrl(), PHP_URL_HOST),
+                ],
+                'user' => [
+                    'id' => base64_encode($user->getId()),
+                    'name' => $user->getUsername(),
+                    'displayName' => $user->getName(),
+                ],
+                'pubKeyCredParams' => [
+                    ['type' => 'public-key', 'alg' => -7] // ES256
+                ],
+                'timeout' => 60000,
+                'attestation' => 'none',
+                'authenticatorSelection' => [
+                    'userVerification' => 'required',
+                ],
+            ];
+
+            $this->getResponse()->setBodyJson($options);
+        } catch (Exception $e) {
+            $this->_getSession()->addError($e->getMessage());
+            $this->getResponse()
+                ->setHttpResponseCode(400)
+                ->setBodyJson(['error' => $e->getMessage()]);
+        }
+    }
+
+    public function passkeyregistersaveAction()
+    {
+        try {
+            if (!$this->getRequest()->isPost()) {
+                throw new Exception('Invalid request method');
+            }
+
+            $user = Mage::getSingleton('admin/session')->getUser();
+            if (!$user) {
+                throw new Exception('Not authenticated');
+            }
+
+            // Get POST parameters
+            $credentialId = $this->getRequest()->getPost('passkey_credential_id');
+            $publicKey = $this->getRequest()->getPost('passkey_credential_public_key');
+            $attestationObject = $this->getRequest()->getPost('attestation_object');
+            $clientDataJSON = $this->getRequest()->getPost('client_data_json');
+
+            // Verify required fields
+            if (!$credentialId || !$publicKey || !$attestationObject || !$clientDataJSON) {
+                throw new Exception('Missing required fields');
+            }
+
+            // Decode the client data JSON
+            $clientData = json_decode(base64_decode($clientDataJSON), true);
+
+            // Verify challenge
+            $expectedChallenge = $this->_getSession()->getPasskeyChallenge() ?? '';
+            $expectedChallenge = rtrim($expectedChallenge, '=');
+            $clientData['challenge'] = rtrim($clientData['challenge'], '=');
+
+            if (!$expectedChallenge || $clientData['challenge'] !== $expectedChallenge) {
+                throw new Exception('Invalid challenge');
+            }
+
+            // Verify origin
+            $expectedOrigin = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
+            if ($clientData['origin'] !== rtrim($expectedOrigin, '/')) {
+                throw new Exception('Invalid origin');
+            }
+
+            // Check if another user already has this credential
+            $existingUser = Mage::getModel('admin/user')->getCollection()
+                ->addFieldToFilter('passkey_credential_id_hash', $credentialId)
+                ->getFirstItem();
+
+            if ($existingUser->getId() && $existingUser->getId() != $user->getId()) {
+                throw new Exception('Credential already registered to another user');
+            }
+
+            try {
+                // Update the user with the new credential data
+                $user->setPasskeyCredentialIdHash($credentialId)
+                    ->setPasskeyPublicKey($publicKey)
+                    ->save();
+
+                // Clear the challenge from session
+                $this->_getSession()->unsPasskeyChallenge();
+
+                $this->getResponse()->setBodyJson([
+                    'success' => true,
+                    'message' => Mage::helper('adminhtml')->__('Passkey registered successfully')
+                ]);
+            } catch (Exception $e) {
+                throw new Exception('Failed to save credential: ' . $e->getMessage());
+            }
+        } catch (Exception $e) {
+            $this->getResponse()
+                ->setHttpResponseCode(400)
+                ->setBodyJson([
+                    'success' => false,
+                    'error' => $e->getMessage()
+                ]);
+        }
+    }
+
+    public function passkeyauthenticateAction()
+    {
+        try {
+            $username = $this->getRequest()->getPost('username');
+            $user = Mage::getModel('admin/user')->loadByUsername($username);
+
+            if (!$user->getId()) {
+                throw new Exception('User not found');
+            }
+
+            $credentials = $user->getResource()->getReadConnection()->fetchAll(
+                "SELECT credential_id_hash FROM {$user->getResource()->getTable('admin/user_credentials')} WHERE user_id = ?",
+                [$user->getId()]
+            );
+
+            $allowCredentials = array_map(function($cred) {
+                return [
+                    'type' => 'public-key',
+                    'id' => $cred['credential_id_hash']
+                ];
+            }, $credentials);
+
+            $options = [
+                'rpId' => parse_url(Mage::getBaseUrl(), PHP_URL_HOST),
+                'timeout' => 60000,
+                'allowCredentials' => $allowCredentials,
+                'userVerification' => 'required'
+            ];
+
+            $this->getResponse()
+                ->setBodyJson($options);;
+        } catch (Exception $e) {
+            $this->getResponse()
+                ->setHttpResponseCode(400)
+                ->setBody(json_encode(['error' => $e->getMessage()]));
+        }
+    }
+
+    public function removepasskeyAction()
+    {
+        $userId = Mage::getSingleton('admin/session')->getUser()->getId();
+        $user = Mage::getModel('admin/user')->load($userId);
+
+        //Validate current admin password
+        $currentPassword = $this->getRequest()->getParam('current_password', null);
+        $this->getRequest()->setParam('current_password', null);
+        $result = $this->_validateCurrentPassword($currentPassword);
+
+        if (!is_array($result)) {
+            $result = $user->validate();
+        }
+        if (is_array($result)) {
+            foreach ($result as $error) {
+                Mage::getSingleton('adminhtml/session')->addError($error);
+            }
+            $this->getResponse()->setRedirect($this->getUrl('*/*/'));
+            return;
+        }
+
+        $user->setPasskeyCredentialIdHash(null);
+        $user->setPasskeyPublicKey(null);
 
         try {
             $user->save();

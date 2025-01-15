@@ -97,6 +97,164 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
             'required' => false,
         ]);
 
+        $fieldset = $form->addFieldset('passkey_fieldset', array(
+            'legend' => Mage::helper('adminhtml')->__('Passkey Authentication')
+        ));
+
+        if ($user->getPasskeyCredentialIdHash()) {
+            $fieldset->addField('passkey_status', 'note', array(
+                'label'     => Mage::helper('adminhtml')->__('Status'),
+                'text'      => '<span class="grid-severity-notice"><span>' .
+                    Mage::helper('adminhtml')->__('Passkey Registered') . '</span></span>' .
+                    '<br/><button type="button" id="remove-passkey-btn" class="scalable delete">' .
+                    '<span>' . Mage::helper('adminhtml')->__('Remove Passkey') . '</span></button>'
+            ));
+        } else {
+            $fieldset->addField('passkey_register', 'note', array(
+                'label'     => Mage::helper('adminhtml')->__('Register a passkey to enable passwordless login'),
+                'text'      => '<button type="button" id="register-passkey-btn" class="scalable add" onclick="MahoPasskey.startRegistration()">' .
+                    '<span>' . Mage::helper('adminhtml')->__('Register Passkey') . '</span></button>'
+            ));
+        }
+
+        $fieldset->addField('passkey_script', 'note', array(
+            'text' => '
+            <script type="text/javascript">
+var MahoPasskey = {
+    init: function() {
+        if (!window.PublicKeyCredential) {
+            $("passkey-login-btn").hide();
+            return;
+        }
+        
+        $("passkey-login-btn").observe("click", this.startAuthentication.bind(this));
+    },
+
+    startAuthentication: async function() {
+        try {
+            const username = $("username").value;
+            if (!username) {
+                alert("Please enter your username first");
+                return;
+            }
+
+            const response = await fetch("/index.php/admin/index/passkeyauthenticate", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                body: "username=" + encodeURIComponent(username)
+            });
+
+            if (!response.ok) throw new Error("Failed to start authentication");
+
+            const options = await response.json();
+            
+            // Convert base64 to ArrayBuffer for credential IDs
+            options.allowCredentials = options.allowCredentials.map(cred => ({
+                ...cred,
+                id: this.base64ToArrayBuffer(cred.id)
+            }));
+
+            const assertion = await navigator.credentials.get({
+                publicKey: options
+            });
+
+            const assertionData = {
+                passkey_credential_id: this.arrayBufferToBase64(assertion.rawId),
+                authenticator_data: this.arrayBufferToBase64(assertion.response.authenticatorData),
+                client_data_json: this.arrayBufferToBase64(assertion.response.clientDataJSON),
+                signature: this.arrayBufferToBase64(assertion.response.signature),
+                username: username
+            };
+
+            const verifyResponse = await fetch("/admin/index/passkeyverify", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(assertionData)
+            });
+
+            if (verifyResponse.ok) {
+                window.location.reload();
+            } else {
+                const error = await verifyResponse.json();
+                throw new Error(error.error || "Authentication failed");
+            }
+        } catch (error) {
+            console.error("Authentication error:", error);
+            alert("Authentication failed: " + error.message);
+        }
+    },
+
+    startRegistration: async function() {
+        try {
+            const options = await mahoFetch("https://maho.ddev.site/index.php/admin/system_account/passkeyregisterstart/key/" + FORM_KEY, {
+                method: "GET"
+            });
+            options.challenge = this.base64ToArrayBuffer(options.challenge);
+            options.user.id = this.base64ToArrayBuffer(options.user.id);
+            
+            const credential = await navigator.credentials.create({
+                publicKey: options
+            });
+
+            const registrationData = {
+                passkey_credential_id: this.arrayBufferToBase64(credential.rawId),
+                passkey_credential_public_key: this.arrayBufferToBase64(credential.response.getPublicKey()),
+                attestation_object: this.arrayBufferToBase64(credential.response.attestationObject),
+                client_data_json: this.arrayBufferToBase64(credential.response.clientDataJSON)
+            };
+            const formData = new FormData();
+            for (const [key, value] of Object.entries(registrationData)) {
+                formData.append(key, value);
+            }
+            
+            const verifyResponse = await mahoFetch("https://maho.ddev.site/index.php/admin/system_account/passkeyregistersave", {
+                method: "POST",
+                body: formData
+            });
+
+            alert("Passkey registered successfully!");
+        } catch (error) {
+            console.error("Registration error:", error);
+            alert("Failed to register passkey: " + error.message);
+        }
+    },
+
+    base64ToArrayBuffer: function(base64) {
+        const binaryString = window.atob(base64.replace(/-/g, "+").replace(/_/g, "/"));
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes.buffer;
+    },
+
+    arrayBufferToBase64: function(buffer) {
+        const bytes = new Uint8Array(buffer);
+        let binary = "";
+        for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+    }
+};
+                        
+document.addEventListener("DOMContentLoaded", function() {
+    const removePasskeyBtn = document.getElementById("remove-passkey-btn");
+    if (removePasskeyBtn) {
+        removePasskeyBtn.addEventListener("click", function() {
+            const form = document.getElementById("edit_form");
+            if (form && editForm && editForm.validate && editForm.validate() && confirm(Translator.translate("Are you sure you want to remove your passkey?"))) {
+                form.action = form.action.replace("save", "removepasskey");
+                form.submit();
+            }
+        });
+    }
+});
+            </script>'
+        ));
+
         $twoFactorAuthenticationHelper = Mage::helper('adminhtml/twoFactorAuthentication');
         $twoFactorAuthenticationFieldset = $form->addFieldset('twofa_fieldset', [
             'legend' => Mage::helper('adminhtml')->__('Two-Factor Authentication'),
