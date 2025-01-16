@@ -390,8 +390,11 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             if ($this->getPasskeyCredentialIdHash() && $this->getPasskeyPublicKey()) {
                 if (json_validate($password)) {
                     $passkeyData = json_decode($password, true);
-                    $passkeyId = $passkeyData['id'] ?? '';
+                    $passkeyId = str_replace(['-', '_', '='], ['+', '/', ''], $passkeyData['id'] ?? '');
+                    Mage::log($this->getPasskeyCredentialIdHash());
+                    Mage::log($passkeyId);
                     if ($this->getPasskeyCredentialIdHash() === $passkeyId) {
+                        Mage::log("oh!");
                         return $this->verifyPasskeySignature(
                             $this->getPasskeyPublicKey(),
                             $passkeyData['signature'] ?? '',

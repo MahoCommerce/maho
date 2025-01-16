@@ -185,6 +185,9 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
                 Mage::throwException(Mage::helper('adminhtml')->__('Missing required fields'));
             }
 
+            $credentialId = rtrim($credentialId, '=');
+            $credentialId = str_replace(['-', '_', '='], ['+', '/', ''], $credentialId);
+
             // Decode the client data JSON
             $clientData = json_decode($clientDataJSON, true);
 
