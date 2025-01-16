@@ -387,11 +387,13 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             ]);
             $this->loadByUsername($username);
 
-            if ($this->getPasskeyCredentialIdHash() && $this->getPasskeyPublicKey() && json_validate($password)) {
-                $passkeyData = json_decode($password, true);
-                $passkeyId = $passkeyData['id'] ?? '';
-                if ($this->getPasskeyCredentialIdHash() == $passkeyId) {
-                    return true;
+            if ($this->getPasskeyCredentialIdHash() && $this->getPasskeyPublicKey()) {
+                if (json_validate($password)) {
+                    $passkeyData = json_decode($password, true);
+                    $passkeyId = $passkeyData['id'] ?? '';
+                    if ($this->getPasskeyCredentialIdHash() == $passkeyId) {
+                        return true;
+                    }
                 }
 
                 return false;
