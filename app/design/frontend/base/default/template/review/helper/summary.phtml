@@ -20,7 +20,7 @@
             </div>
         <?php endif ?>
         <p class="rating-links">
-            <a href=""><?= $this->__('%d Review(s)', $this->getReviewsCount()) ?></a>
+            <a href="#product-tab-reviews" onclick="document.querySelector(this.getAttribute('href')).click()"><?= $this->__('%d Review(s)', $this->getReviewsCount()) ?></a>
             <span class="separator">|</span>
             <a href="<?= $this->getReviewsUrl() ?>#review-form"><?= $this->__('Add Your Review') ?></a>
         </p>

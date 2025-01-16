@@ -5455,12 +5455,6 @@ parameters:
 			path: app/design/frontend/base/default/template/review/helper/summary_short.phtml
 
 		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 13
-			path: app/design/frontend/base/default/template/review/product/view/list.phtml
-
-		-
 			message: '#^Access to an undefined property Mage_Core_Block_Template\:\:\$trackingInfo\.$#'
 			identifier: property.notFound
 			count: 1
