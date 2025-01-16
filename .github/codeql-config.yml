@@ -1,6 +1,0 @@
-
-paths-ignore:
-  - 'js/prototype/prototype.js'
-  - 'js/mage/adminhtml/wysiwyg/tiny_mce/setup.js'
-  - 'js/validation.js'
-  - '**/*.test.js'

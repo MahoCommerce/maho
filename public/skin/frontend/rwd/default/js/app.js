@@ -630,6 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ul.className = 'toggle-tabs';
             dts.forEach(dt => {
                 const li = document.createElement('li');
+                li.id = dt.id;
                 li.innerHTML = dt.innerHTML;
                 ul.appendChild(li);
             });

@@ -168,7 +168,7 @@
         <?php if ($detailedInfoGroup = $this->getChildGroup('detailed_info', 'getChildHtml')):?>
             <dl id="collateral-tabs" class="collateral-tabs">
                 <?php foreach ($detailedInfoGroup as $alias => $html):?>
-                    <dt class="tab"><span><?= $this->escapeHtml($this->getChildData($alias, 'title')) ?></span></dt>
+                    <dt class="tab" id="product-tab-<?= $alias ?>"><span><?= $this->escapeHtml($this->getChildData($alias, 'title')) ?></span></dt>
                     <dd class="tab-container">
                         <div class="tab-content"><?= $html ?></div>
                     </dd>
