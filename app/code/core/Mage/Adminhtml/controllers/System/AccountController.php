@@ -186,13 +186,12 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
             }
 
             // Decode the client data JSON
-            $clientData = json_decode(base64_decode($clientDataJSON), true);
+            $clientData = json_decode($clientDataJSON, true);
 
             // Verify challenge
             $expectedChallenge = $this->_getSession()->getPasskeyChallenge() ?? '';
             $expectedChallenge = rtrim($expectedChallenge, '=');
-            $clientData['challenge'] = rtrim($clientData['challenge'], '=');
-            $clientData['challenge'] = str_replace(['-', '_'], ['+', '/'], $clientData['challenge']);
+            $clientData['challenge'] = str_replace(['-', '_', '='], ['+', '/', ''], $clientData['challenge']);
 
             if (!$expectedChallenge || $clientData['challenge'] !== $expectedChallenge) {
                 Mage::throwException(Mage::helper('adminhtml')->__('Invalid challenge'));

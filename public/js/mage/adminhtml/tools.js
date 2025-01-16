@@ -713,8 +713,7 @@ var Base64 = {
     },
 
     fromArrayBuffer: function(buffer) {
-        return btoa(String.fromCharCode(...new Uint8Array(buffer)))
-            .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+        return btoa(String.fromCharCode(...new Uint8Array(buffer)));
     },
 };
 

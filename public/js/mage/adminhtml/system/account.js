@@ -38,7 +38,7 @@ class MahoPasskeyController
                 passkey_credential_id: Base64.fromArrayBuffer(credential.rawId),
                 passkey_credential_public_key: Base64.fromArrayBuffer(credential.response.getPublicKey()),
                 attestation_object: Base64.fromArrayBuffer(credential.response.attestationObject),
-                client_data_json: Base64.fromArrayBuffer(credential.response.clientDataJSON)
+                client_data_json: new TextDecoder().decode(credential.response.clientDataJSON)
             };
 
             const formData = new FormData();
