@@ -107,11 +107,11 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
                 'text'  => '<span class="grid-severity-notice"><span>' .
                     Mage::helper('adminhtml')->__('Passkey Registered') . '</span></span>',
             ]);
-            $fieldset->addField('passkey_status', 'note', [
+            $fieldset->addField('passkey_remove_btn', 'note', [
                 'text'  => $this->getButtonHtml($this->__('Remove Passkey'), null, 'delete', 'remove-passkey-btn'),
             ]);
         } else {
-            $fieldset->addField('passkey_register', 'note', [
+            $fieldset->addField('passkey_register_btn', 'note', [
                 'label' => Mage::helper('adminhtml')->__('Register a passkey to enable passwordless login'),
                 'text'  => $this->getButtonHtml($this->__('Register Passkey'), null, 'add', 'register-passkey-btn'),
             ]);
