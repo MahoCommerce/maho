@@ -224,46 +224,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
                 ]);
         }
     }
-
-    public function passkeyauthenticateAction()
-    {
-        try {
-            $username = $this->getRequest()->getPost('username');
-            $user = Mage::getModel('admin/user')->loadByUsername($username);
-
-            if (!$user->getId()) {
-                throw new Exception('User not found');
-            }
-
-            $credentials = $user->getResource()->getReadConnection()->fetchAll(
-                "SELECT credential_id_hash FROM {$user->getResource()->getTable('admin/user_credentials')} WHERE user_id = ?",
-                [$user->getId()],
-            );
-
-            $allowCredentials = array_map(function ($cred) {
-                return [
-                    'type' => 'public-key',
-                    'id' => $cred['credential_id_hash'],
-                ];
-            }, $credentials);
-
-            $options = [
-                'rpId' => parse_url(Mage::getBaseUrl(), PHP_URL_HOST),
-                'timeout' => 60000,
-                'allowCredentials' => $allowCredentials,
-                'userVerification' => 'required',
-            ];
-
-            $this->getResponse()
-                ->setBodyJson($options);
-            ;
-        } catch (Exception $e) {
-            $this->getResponse()
-                ->setHttpResponseCode(400)
-                ->setBody(json_encode(['error' => $e->getMessage()]));
-        }
-    }
-
+    
     public function removepasskeyAction()
     {
         $userId = Mage::getSingleton('admin/session')->getUser()->getId();
