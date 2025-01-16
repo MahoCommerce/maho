@@ -50,4 +50,16 @@
             <message>Add Products</message>
         </sales-order-create-addproducts>
     </script>
+
+    <script path="mage/adminhtml/system/account.js" module="adminhtml">
+        <register-success translate="message">
+            <message>Passkey registered successfully!</message>
+        </register-success>
+        <register-error translate="message">
+            <message>Failed to register passkey: %s</message>
+        </register-error>
+        <remove-confirm translate="message">
+            <message>Are you sure you want to remove your passkey?</message>
+        </remove-confirm>
+    </script>
 </jstranslator>

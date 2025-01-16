@@ -103,87 +103,30 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
 
         if ($user->getPasskeyCredentialIdHash()) {
             $fieldset->addField('passkey_status', 'note', [
-                'label'     => Mage::helper('adminhtml')->__('Status'),
-                'text'      => '<span class="grid-severity-notice"><span>' .
-                    Mage::helper('adminhtml')->__('Passkey Registered') . '</span></span>' .
-                    '<br/><button type="button" id="remove-passkey-btn" class="scalable delete">' .
-                    '<span>' . Mage::helper('adminhtml')->__('Remove Passkey') . '</span></button>',
+                'label' => Mage::helper('adminhtml')->__('Status'),
+                'text'  => '<span class="grid-severity-notice"><span>' .
+                    Mage::helper('adminhtml')->__('Passkey Registered') . '</span></span>',
+            ]);
+            $fieldset->addField('passkey_status', 'note', [
+                'text'  => $this->getButtonHtml($this->__('Remove Passkey'), null, 'delete', 'remove-passkey-btn'),
             ]);
         } else {
             $fieldset->addField('passkey_register', 'note', [
-                'label'     => Mage::helper('adminhtml')->__('Register a passkey to enable passwordless login'),
-                'text'      => '<button type="button" id="register-passkey-btn" class="scalable add" onclick="MahoPasskey.startRegistration()">' .
-                    '<span>' . Mage::helper('adminhtml')->__('Register Passkey') . '</span></button>',
+                'label' => Mage::helper('adminhtml')->__('Register a passkey to enable passwordless login'),
+                'text'  => $this->getButtonHtml($this->__('Register Passkey'), null, 'add', 'register-passkey-btn'),
             ]);
         }
 
         $fieldset->addField('passkey_script', 'note', [
-            'text' => '
-            <script type="text/javascript">
-var MahoPasskey = {
-    startRegistration: async function() {
-        try {
-            const options = await mahoFetch("https://maho.ddev.site/index.php/admin/system_account/passkeyregisterstart/key/" + FORM_KEY, {
-                method: "GET"
-            });
-            options.challenge = this.base64ToArrayBuffer(options.challenge);
-            options.user.id = this.base64ToArrayBuffer(options.user.id);
-            
-            const credential = await navigator.credentials.create({
-                publicKey: options
-            });
-
-            const registrationData = {
-                passkey_credential_id: this.arrayBufferToBase64(credential.rawId),
-                passkey_credential_public_key: this.arrayBufferToBase64(credential.response.getPublicKey()),
-                attestation_object: this.arrayBufferToBase64(credential.response.attestationObject),
-                client_data_json: this.arrayBufferToBase64(credential.response.clientDataJSON)
-            };
-            const formData = new FormData();
-            for (const [key, value] of Object.entries(registrationData)) {
-                formData.append(key, value);
-            }
-            
-            const verifyResponse = await mahoFetch("https://maho.ddev.site/index.php/admin/system_account/passkeyregistersave", {
-                method: "POST",
-                body: formData
-            });
-
-            alert("Passkey registered successfully!");
-        } catch (error) {
-            console.error("Registration error:", error);
-            alert("Failed to register passkey: " + error.message);
-        }
-    },
-
-    base64ToArrayBuffer: function(base64) {
-        const binaryString = atob(base64);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-        }
-        return bytes.buffer;
-    },
-
-    arrayBufferToBase64: function(buffer) {
-        return btoa(String.fromCharCode(...new Uint8Array(buffer)))
-            .replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
-    }
-};
-                        
-document.addEventListener("DOMContentLoaded", function() {
-    const removePasskeyBtn = document.getElementById("remove-passkey-btn");
-    if (removePasskeyBtn) {
-        removePasskeyBtn.addEventListener("click", function() {
-            const form = document.getElementById("edit_form");
-            if (form && editForm && editForm.validate && editForm.validate() && confirm(Translator.translate("Are you sure you want to remove your passkey?"))) {
-                form.action = form.action.replace("save", "removepasskey");
-                form.submit();
-            }
-        });
-    }
-});
-            </script>',
+            'text' => <<<JS
+                <script>
+                    new MahoPasskeyController({
+                        registerStartUrl: '{$this->getUrl('*/*/passkeyregisterstart')}',
+                        registerSaveUrl: '{$this->getUrl('*/*/passkeyregistersave')}',
+                        removePasskeyUrl: '{$this->getUrl('*/*/removepasskey')}',
+                    });
+                </script>
+            JS,
         ]);
 
         $twoFactorAuthenticationHelper = Mage::helper('adminhtml/twoFactorAuthentication');

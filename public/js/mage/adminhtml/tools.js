@@ -701,7 +701,21 @@ var Base64 = {
             }
         }
         return string;
-    }
+    },
+
+    toArrayBuffer: function(base64) {
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes.buffer;
+    },
+
+    fromArrayBuffer: function(buffer) {
+        return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+            .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    },
 };
 
 /**
