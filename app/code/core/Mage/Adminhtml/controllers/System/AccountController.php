@@ -116,7 +116,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
                 throw new Exception('Not authenticated');
             }
 
-            $challenge = strtr(base64_encode(random_bytes(32)), '+/', '-_');
+            $challenge = base64_encode(random_bytes(32));
             $this->_getSession()->setPasskeyChallenge($challenge);
 
             $options = [
