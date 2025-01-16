@@ -394,12 +394,12 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                     Mage::log($this->getPasskeyCredentialIdHash());
                     Mage::log($passkeyId);
                     if ($this->getPasskeyCredentialIdHash() === $passkeyId) {
-                        Mage::log("oh!");
+                        Mage::log("verify signature");
                         return $this->verifyPasskeySignature(
                             $this->getPasskeyPublicKey(),
                             $passkeyData['signature'] ?? '',
                             $passkeyData['authenticatorData'] ?? '',
-                            $passkeyData['clientDataJSON'] ?? ''
+                            $passkeyData['clientDataJSON'] ?? '',
                         );
                     }
                 }
@@ -474,7 +474,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                 $signedData,
                 base64_decode($signature),
                 $publicKey,
-                OPENSSL_ALGO_SHA256
+                OPENSSL_ALGO_SHA256,
             );
 
             return $result === 1;
