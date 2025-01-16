@@ -1620,21 +1620,21 @@ span.weee {
 .ratings .rating-links {
   margin: 5px 0;
 }
-.ratings .rating-box, .ratings-table .rating-box {
+.rating-box {
   width: 65px;
   height: 13px;
-  background-repeat: repeat-x;
+  background-repeat: repeat-x !important;
   background-image: var(--star-rating__icon-inactive);
-  background-size: 13px;
+  background-size: 13px !important;;
   overflow: hidden;
 }
-.ratings .rating-box .rating, .ratings-table .rating-box .rating {
+.rating-box .rating {
   float: left;
   height: 13px;
-  background-repeat: repeat-x;
+  background-repeat: repeat-x !important;
   background-image: var(--star-rating__icon-active);
-  background-size: 13px;
-  background-position: left;
+  background-size: 13px !important;
+  background-position: left !important;
 }
 .ratings .amount {
   display: block;
@@ -3301,7 +3301,8 @@ a.skip-link {
 /* ============================================ *
  * Header - Account
  * ============================================ */
-.skip-account .icon {
+.skip-account .icon,
+#customer-reviews dt {
   background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23999" class="size-6"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd" /></svg>');
 }
 
@@ -7738,39 +7739,6 @@ div.paypal-logo span > img {
 /* ============================================ *
  * Review - Customer
  * ============================================ */
-#customer-reviews {
-  width: auto;
-  float: none;
-}
-#customer-reviews .review-heading {
-  border-top: 1px solid var(--maho-color-border);
-  border-bottom: 1px solid var(--maho-color-border);
-  padding: 10px 0 5px;
-}
-#customer-reviews .review-heading:after {
-  content: '';
-  display: table;
-  clear: both;
-}
-#customer-reviews .review-heading h2 {
-  float: left;
-  display: block;
-}
-#customer-reviews .review-heading .pager {
-  clear: none;
-  float: right;
-  width: auto;
-}
-#customer-reviews .review-heading .pager .count-container .limiter {
-  margin-bottom: 0;
-}
-#customer-reviews .review-heading .pager .count-container .limiter label {
-  font-size: 0.625rem;
-  text-transform: uppercase;
-}
-#customer-reviews .review-heading .pager .amount {
-  display: none;
-}
 #customer-reviews h2 {
   color: var(--maho-color-primary);
   font-size: 0.75rem;
@@ -7836,39 +7804,33 @@ div.paypal-logo span > img {
   width: 470px;
 }
 #customer-reviews dl {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: normal;
   margin-bottom: 10px;
 }
 #customer-reviews dl dt {
-  margin: 10px 0;
-  text-transform: uppercase;
+  background-size: 20px;
+  background-repeat: no-repeat;
+  padding-inline-start: 25px;
+  line-height: 22px;
 }
 #customer-reviews dl dd {
   font-size: 0.875rem;
-  margin: 10px 0;
+  margin: 10px 0 15px;
+  padding: 0 0 15px 25px;
+  border-bottom: 1px solid var(--maho-color-border);
 }
-#customer-reviews dl dd .ratings-table {
-  font-size: 0.75rem;
-  width: 100%;
+#customer-reviews dl dd:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
 #customer-reviews dl dd .ratings-table tr {
   margin-right: 15px;
 }
-#customer-reviews dl dd .ratings-table .review-label {
-  width: 300px;
-  max-width: 70%;
-}
 #customer-reviews dl dd table {
-  margin: 15px 0;
+  margin-top: 15px;
 }
-#customer-reviews dl dd .review-meta {
-  color: var(--maho-color-primary);
-  font-size: 0.625rem;
-  font-weight: normal;
-  text-transform: uppercase;
-}
-
 .review-summary-table {
   border-bottom: 1px solid var(--maho-color-border);
   margin: 0 0 10px;
