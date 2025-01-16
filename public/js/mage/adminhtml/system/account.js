@@ -51,9 +51,10 @@ class MahoPasskeyController
                 body: formData
             });
 
-            alert(Translator.translate('Passkey registered successfully!'));
+            alert(verifyResponse.message);
+
         } catch (error) {
-            alert(Translator.translate('Failed to register passkey: %s', error.message));
+            alert(error.message);
             console.error('Registration error:', error);
         }
     }

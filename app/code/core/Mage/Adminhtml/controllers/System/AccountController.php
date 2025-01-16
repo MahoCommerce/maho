@@ -111,9 +111,13 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
     public function passkeyregisterstartAction()
     {
         try {
+            if (!$this->getRequest()->isPost()) {
+                Mage::throwException(Mage::helper('adminhtml')->__('Invalid request method'));
+            }
+
             $user = Mage::getSingleton('admin/session')->getUser();
             if (!$user) {
-                throw new Exception('Not authenticated');
+                Mage::throwException(Mage::helper('adminhtml')->__('Not authenticated'));
             }
 
             $challenge = base64_encode(random_bytes(32));
@@ -141,11 +145,20 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
             ];
 
             $this->getResponse()->setBodyJson($options);
+            return;
+
+        } catch (Mage_Core_Exception $e) {
+            $error = $e->getMessage();
         } catch (Exception $e) {
-            $this->_getSession()->addError($e->getMessage());
+            $error = Mage::helper('adminhtml')->__('Internal Error');
+            Mage::logException($e);
+        }
+
+        if (isset($error)) {
+            $error = Mage::helper('adminhtml')->__('Failed to register passkey: %s', $error);
             $this->getResponse()
                 ->setHttpResponseCode(400)
-                ->setBodyJson(['error' => $e->getMessage()]);
+                ->setBodyJson(['error' => true, 'message' => $error]);
         }
     }
 
@@ -153,12 +166,12 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
     {
         try {
             if (!$this->getRequest()->isPost()) {
-                throw new Exception('Invalid request method');
+                Mage::throwException(Mage::helper('adminhtml')->__('Invalid request method'));
             }
 
             $user = Mage::getSingleton('admin/session')->getUser();
             if (!$user) {
-                throw new Exception('Not authenticated');
+                Mage::throwException(Mage::helper('adminhtml')->__('Not authenticated'));
             }
 
             // Get POST parameters
@@ -169,7 +182,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
 
             // Verify required fields
             if (!$credentialId || !$publicKey || !$attestationObject || !$clientDataJSON) {
-                throw new Exception('Missing required fields');
+                Mage::throwException(Mage::helper('adminhtml')->__('Missing required fields'));
             }
 
             // Decode the client data JSON
@@ -180,14 +193,17 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
             $expectedChallenge = rtrim($expectedChallenge, '=');
             $clientData['challenge'] = rtrim($clientData['challenge'], '=');
 
+            Mage::log($clientData['challenge']);
+            Mage::log($expectedChallenge);
+
             if (!$expectedChallenge || $clientData['challenge'] !== $expectedChallenge) {
-                throw new Exception('Invalid challenge');
+                Mage::throwException(Mage::helper('adminhtml')->__('Invalid challenge'));
             }
 
             // Verify origin
             $expectedOrigin = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
             if ($clientData['origin'] !== rtrim($expectedOrigin, '/')) {
-                throw new Exception('Invalid origin');
+                Mage::throwException(Mage::helper('adminhtml')->__('Invalid origin'));
             }
 
             // Check if another user already has this credential
@@ -196,35 +212,38 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
                 ->getFirstItem();
 
             if ($existingUser->getId() && $existingUser->getId() != $user->getId()) {
-                throw new Exception('Credential already registered to another user');
+                Mage::throwException(Mage::helper('adminhtml')->__('Credential already registered to another user'));
             }
 
-            try {
-                // Update the user with the new credential data
-                $user->setPasskeyCredentialIdHash($credentialId)
-                    ->setPasskeyPublicKey($publicKey)
-                    ->save();
+            // Update the user with the new credential data
+            $user->setPasskeyCredentialIdHash($credentialId)
+                ->setPasskeyPublicKey($publicKey)
+                ->save();
 
-                // Clear the challenge from session
-                $this->_getSession()->unsPasskeyChallenge();
+            // Clear the challenge from session
+            $this->_getSession()->unsPasskeyChallenge();
 
-                $this->getResponse()->setBodyJson([
-                    'success' => true,
-                    'message' => Mage::helper('adminhtml')->__('Passkey registered successfully'),
-                ]);
-            } catch (Exception $e) {
-                throw new Exception('Failed to save credential: ' . $e->getMessage());
-            }
+            $this->getResponse()->setBodyJson([
+                'success' => true,
+                'message' => Mage::helper('adminhtml')->__('Passkey registered successfully!'),
+            ]);
+            return;
+
+        } catch (Mage_Core_Exception $e) {
+            $error = $e->getMessage();
         } catch (Exception $e) {
+            $error = Mage::helper('adminhtml')->__('Internal Error');
+            Mage::logException($e);
+        }
+
+        if (isset($error)) {
+            $error = Mage::helper('adminhtml')->__('Failed to save credential: %s', $error);
             $this->getResponse()
                 ->setHttpResponseCode(400)
-                ->setBodyJson([
-                    'success' => false,
-                    'error' => $e->getMessage(),
-                ]);
+                ->setBodyJson(['error' => true, 'message' => $error]);
         }
     }
-    
+
     public function removepasskeyAction()
     {
         $userId = Mage::getSingleton('admin/session')->getUser()->getId();
