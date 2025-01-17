@@ -39,12 +39,12 @@ $mainImage = $this->helper('catalog/image')->init($_product, 'image');
     </div>
 
 <?php if (count($this->getGalleryImages()) > 0): ?>
-    <div class="more-views" aria-hidden="true">
+    <div class="more-views">
         <ul class="product-image-thumbs">
             <?php $i=0; foreach ($this->getGalleryImages() as $_image): ?>
                 <?php if ($this->isGalleryImageVisible($_image)): ?>
                     <li>
-                        <a class="thumb-link" href="#" title="<?= $this->escapeHtml($_image->getLabel()) ?>" data-image-index="<?= $i ?>">
+                        <a class="thumb-link" href="#" title="<?= $this->escapeHtml($_image->getLabel() ?: $this->__('Image') . ' ' . ($i+1)) ?>" data-image-index="<?= $i ?>">
                             <img src="<?= $this->helper('catalog/image')->init($this->getProduct(), 'thumbnail', $_image->getFile())->resize(75) ?>"
                                  width="75" height="75" alt="<?= $this->escapeHtml($_image->getLabel()) ?>" />
                         </a>
