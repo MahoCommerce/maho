@@ -84,23 +84,19 @@ class Mage_Page_Block_Html_Header extends Mage_Core_Block_Template
         return $this->_data['logo_alt'];
     }
 
-    /**
-     * Retrieve page welcome message
-     *
-     * @deprecated after 1.7.0.2
-     * @see Mage_Page_Block_Html_Welcome
-     * @return mixed
-     */
-    public function getWelcome()
+    public function getLogoWitdh(): string
     {
-        if (empty($this->_data['welcome'])) {
-            if (Mage::isInstalled() && Mage::getSingleton('customer/session')->isLoggedIn()) {
-                $this->_data['welcome'] = $this->__('Welcome, %s!', $this->escapeHtml(Mage::getSingleton('customer/session')->getCustomer()->getName()));
-            } else {
-                $this->_data['welcome'] = $this->escapeHtmlAsObject((string) Mage::getStoreConfig('design/header/welcome'));
-            }
+        if (empty($this->_data['logo_width'])) {
+            $this->_data['logo_width'] = $this->escapeHtmlAsObject((string) Mage::getStoreConfig('design/header/logo_width'));
         }
+        return $this->_data['logo_width'];
+    }
 
-        return $this->_data['welcome'];
+    public function getLogoHeight(): string
+    {
+        if (empty($this->_data['logo_height'])) {
+            $this->_data['logo_height'] = $this->escapeHtmlAsObject((string) Mage::getStoreConfig('design/header/logo_height'));
+        }
+        return $this->_data['logo_height'];
     }
 }

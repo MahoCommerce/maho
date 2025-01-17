@@ -6,12 +6,11 @@
  * @package     rwd_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-/**
- * @var Mage_Page_Block_Html_Header $this
- */
+
+/** @var Mage_Page_Block_Html_Header $this */
 ?>
 
 <div class="header-language-background">
@@ -29,14 +28,13 @@
 <header id="header" class="page-header">
     <div class="page-header-container">
         <a class="logo" href="<?= $this->getUrl('') ?>" title="<?= $this->__('Go to Home Page') ?>">
-            <img src="<?= $this->getLogoSrc() ?>" alt="<?= $this->getLogoAlt() ?>" />
+            <img src="<?= $this->getLogoSrc() ?>" alt="<?= $this->getLogoAlt() ?>" width="<?= $this->getLogoWidth() ?>" height="<?= $this->getLogoHeight() ?>" />
         </a>
 
         <?php // In order for the language switcher to display next to logo on smaller viewports, it will be moved here.
               // See app.js for details ?>
         <div class="store-language-container"></div>
 
-        <!-- Skip Links -->
         <div class="skip-links">
             <a href="#header-nav" class="skip-link skip-nav">
                 <span class="icon"></span>
@@ -54,29 +52,24 @@
                     <span class="label"><?= $this->__('Account') ?></span>
                 </a>
 
-                <!-- Cart -->
                 <div class="header-minicart">
                     <?= $this->getChildHtml('minicart_head') ?>
                 </div>
             </div>
         </div>
 
-        <!-- Navigation -->
         <div id="header-nav" class="skip-content">
             <?= $this->getChildHtml('topMenu') ?>
         </div>
 
-        <!-- Search -->
         <div id="header-search" class="skip-content">
             <?= $this->getChildHtml('topSearch') ?>
         </div>
 
-        <!-- Account -->
         <div id="header-account" class="skip-content">
             <?= $this->getChildHtml('topLinks') ?>
         </div>
     </div>
 </header>
-
 
 <?= $this->getChildHtml('topContainer') ?>

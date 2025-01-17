@@ -128,6 +128,20 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </logo_src>
+                        <logo_width translate="label">
+                            <label>Logo Width (in px)</label>
+                            <sort_order>12</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </logo_width>
+                        <logo_height translate="label">
+                            <label>Logo Height (in px)</label>
+                            <sort_order>14</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </logo_height>
                         <logo_alt translate="label">
                             <label>Logo Image Alt</label>
                             <sort_order>20</sort_order>
@@ -135,12 +149,13 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </logo_alt>
-                        <logo_src_small translate="label">
+                        <logo_src_small translate="label comment">
                             <label>Small Logo Image Src</label>
                             <sort_order>25</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <comment>Deprecated: Use SVG or srcset</comment>
                         </logo_src_small>
                         <welcome translate="label">
                             <label>Welcome Text</label>
