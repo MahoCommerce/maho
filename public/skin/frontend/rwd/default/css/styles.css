@@ -5,7 +5,7 @@
  * @package     rwd_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -4445,14 +4445,8 @@ p.product-name a:hover {
 }
 .product-img-box .product-image img {
   max-width: 100%;
-  max-height: 750px;
+  height: auto;
   margin: 0px auto;
-}
-
-@media only screen and (max-width: 479px) {
-  .product-img-box .product-image img {
-    max-height: 450px;
-  }
 }
 .product-image-gallery {
   position: relative;
