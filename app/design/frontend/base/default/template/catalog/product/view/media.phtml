@@ -39,7 +39,7 @@ $mainImage = $this->helper('catalog/image')->init($_product, 'image');
     </div>
 
 <?php if (count($this->getGalleryImages()) > 0): ?>
-    <div class="more-views">
+    <div class="more-views" aria-hidden="true">
         <ul class="product-image-thumbs">
             <?php $i=0; foreach ($this->getGalleryImages() as $_image): ?>
                 <?php if ($this->isGalleryImageVisible($_image)): ?>
