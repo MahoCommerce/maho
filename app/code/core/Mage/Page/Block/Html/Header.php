@@ -86,7 +86,7 @@ class Mage_Page_Block_Html_Header extends Mage_Core_Block_Template
         return $this->_data['logo_alt'];
     }
 
-    public function getLogoWitdh(): string
+    public function getLogoWidth(): string
     {
         if (empty($this->_data['logo_width'])) {
             $this->_data['logo_width'] = $this->escapeHtmlAsObject((string) Mage::getStoreConfig('design/header/logo_width'));
