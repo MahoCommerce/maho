@@ -7982,12 +7982,16 @@ div.paypal-logo span > img {
   .review-product-view .product-review .product-img-box {
     max-width: 100%;
   }
+  .slideshow {
+    min-height: 200px;
+  }
 }
 /* ============================================ *
  * Slideshow
  * ============================================ */
 
 .slideshow {
+  min-height: 607px;
   width: 100%;
   overflow-x: auto;
   scroll-behavior: smooth;
