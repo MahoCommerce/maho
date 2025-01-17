@@ -6,23 +6,25 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
-/**
- * Category view template
- *
- * @var Mage_Catalog_Block_Category_View $this
- */
+
+/** @var Mage_Catalog_Block_Category_View $this */
 ?>
 <?php
     $_helper    = $this->helper('catalog/output');
     $_category  = $this->getCurrentCategory();
     $_imgHtml   = '';
     if ($_imgUrl = $_category->getImageUrl()) {
-        $_imgHtml = '<p class="category-image"><img src="'.$_imgUrl.'" alt="'.$this->escapeHtml($_category->getName()).'" title="'.$this->escapeHtml($_category->getName()).'" /></p>';
+        $imageWidth = $imageHeight = '';
+        $imagePath = $_category->getImagePath();
+        $imageSize = getimagesize($imagePath);
+        if ($imageSize) {
+            $imageWidth = $imageSize[0];
+            $imageHeight = $imageSize[1];
+        }
+        $_imgHtml = '<p class="category-image"><img src="'.$_imgUrl.'" width="' . $imageWidth . '" height="' . $imageHeight . '" alt="'.$this->escapeHtml($_category->getName()).'" title="'.$this->escapeHtml($_category->getName()).'" /></p>';
         $_imgHtml = $_helper->categoryAttribute($_category, $_imgHtml, 'image');
     }
 ?>

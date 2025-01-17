@@ -4007,6 +4007,7 @@ p.product-name a:hover {
 .category-image img {
   width: 100%;
   max-width: 100%;
+  height: auto;
 }
 .category-image img:hidden {
   display: none;
