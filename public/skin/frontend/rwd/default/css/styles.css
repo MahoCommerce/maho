@@ -4457,6 +4457,10 @@ p.product-name a:hover {
 .product-image-gallery {
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 450px;
 }
 .product-image-gallery .gallery-image {
   display: none;
@@ -4885,6 +4889,7 @@ p.product-name a:hover {
   .product-view .block-related,
   .product-img-box,
   .product-collateral {
+    min-height: 587px;
     width: 100%;
     float: none;
     padding-right: 0;
