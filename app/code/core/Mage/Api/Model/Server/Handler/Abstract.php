@@ -200,7 +200,7 @@ abstract class Mage_Api_Model_Server_Handler_Abstract
      * Login user and Retrieve session id
      *
      * @param string $username
-     * @param string|null $apiKey
+     * @param string $apiKey
      * @return stdClass|string|void
      */
     public function login(#[\SensitiveParameter] $username, #[\SensitiveParameter] $apiKey = null)
