@@ -389,22 +389,21 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
             if ($this->getPasskeyCredentialIdHash() && $this->getPasskeyPublicKey()) {
                 if (json_validate($password)) {
-                    $passkeyData = json_decode($password, true);
-                    $passkeyId = str_replace(['-', '_', '='], ['+', '/', ''], $passkeyData['id'] ?? '');
-                    Mage::log($this->getPasskeyCredentialIdHash());
-                    Mage::log($passkeyId);
-                    if ($this->getPasskeyCredentialIdHash() === $passkeyId) {
-                        Mage::log('verify signature');
-                        return $this->verifyPasskeySignature(
-                            $this->getPasskeyPublicKey(),
-                            $passkeyData['signature'] ?? '',
-                            $passkeyData['authenticatorData'] ?? '',
-                            $passkeyData['clientDataJSON'] ?? '',
-                        );
+                    $passkeyData = json_decode($password);
+                    $clientDataJSON = !empty($passkeyData->clientDataJSON) ? base64_decode($passkeyData->clientDataJSON) : null;
+                    $authenticatorData = !empty($passkeyData->authenticatorData) ? base64_decode($passkeyData->authenticatorData) : null;
+                    $signature = !empty($passkeyData->signature) ? base64_decode($passkeyData->signature) : null;
+                    $userHandle = !empty($passkeyData->userHandle) ? base64_decode($passkeyData->userHandle) : null;
+                    $id = !empty($passkeyData->id) ? base64_decode($passkeyData->id) : null;
+                    $challenge = Mage::getSingleton('adminhtml/session')->getPasskeyChallange();
+
+                    $webAuthn = Mage::helper('adminhtml')->getWebAuthn();
+                    $passkeyVerified = $webAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $this->getPasskeyPublicKey(), $challenge);
+                    if ($passkeyVerified) {
+                        return true;
                     }
                 }
 
-                return false;
                 throw new Mage_Core_Exception(
                     Mage::helper('adminhtml')->__('Access denied.'),
                     self::AUTH_ERR_ACCESS_DENIED,
@@ -456,31 +455,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public function validatePasswordHash(string $string1, string $string2): bool
     {
         return Mage::helper('core')->validateHash($string1, $string2);
-    }
-
-    private function verifyPasskeySignature(
-        string $publicKey,
-        string $signature,
-        string $authenticatorData,
-        string $clientDataJSON
-    ): bool {
-        try {
-            // Concatenate authenticator data and client data hash
-            $clientDataHash = hash('sha256', $clientDataJSON, true);
-            $signedData = $authenticatorData . $clientDataHash;
-
-            // Verify the signature using the stored public key
-            $result = openssl_verify(
-                $signedData,
-                base64_decode($signature),
-                $publicKey,
-                OPENSSL_ALGO_SHA256,
-            );
-
-            return $result === 1;
-        } catch (Exception $e) {
-            return false;
-        }
     }
 
     /**

@@ -36,6 +36,7 @@ class Mage_Admin_Model_Observer
 
         $requestedActionName = strtolower($request->getActionName());
         $openActions = [
+            'passkeyloginstart',
             'forgotpassword',
             'resetpassword',
             'resetpasswordpost',

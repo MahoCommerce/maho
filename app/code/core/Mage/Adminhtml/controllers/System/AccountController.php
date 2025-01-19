@@ -28,6 +28,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
     protected $_publicActions = [
         'passkeyregisterstart',
         'passkeyregistersave',
+        'passkeyloginstart',
     ];
 
     public function indexAction()
@@ -120,11 +121,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
                 Mage::throwException(Mage::helper('adminhtml')->__('Not authenticated'));
             }
 
-            $webAuthn = new \lbuchs\WebAuthn\WebAuthn(
-                Mage::getStoreConfig('web/secure/name') ?: 'Maho',
-                parse_url(Mage::getBaseUrl(), PHP_URL_HOST),
-            );
-
+            $webAuthn = Mage::helper('adminhtml')->getWebAuthn();
             $userId = decbin($user->getId());
             $userName = $user->getUsername();
             $userDisplayName = $user->getName();
@@ -178,11 +175,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
                 Mage::throwException(Mage::helper('adminhtml')->__('Missing required fields'));
             }
 
-            $webAuthn = new \lbuchs\WebAuthn\WebAuthn(
-                Mage::getStoreConfig('web/secure/name') ?: 'Maho',
-                parse_url(Mage::getBaseUrl(), PHP_URL_HOST),
-            );
-
+            $webAuthn = Mage::helper('adminhtml')->getWebAuthn();
             $data = $webAuthn->processCreate(
                 $clientDataJSON,
                 $attestationObject,
@@ -190,7 +183,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
             );
 
             // Store credential data in database
-            $credentialId = $data->credentialId;
+            $credentialId = base64_encode($data->credentialId);
             $publicKey = $data->credentialPublicKey;
 
             // Check if another user already has this credential

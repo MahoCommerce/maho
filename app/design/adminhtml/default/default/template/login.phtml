@@ -68,6 +68,52 @@
                 <p class="legal">Powered by Maho</p>
             </form>
             <div class="bottom"></div>
+            <script>
+                /**
+                 * convert RFC 1342-like base64 strings to array buffer
+                 * @param {mixed} obj
+                 * @returns {undefined}
+                 */
+                function recursiveBase64StrToArrayBuffer(obj) {
+                    let prefix = '=?BINARY?B?';
+                    let suffix = '?=';
+                    if (typeof obj === 'object') {
+                        for (let key in obj) {
+                            if (typeof obj[key] === 'string') {
+                                let str = obj[key];
+                                if (str.substring(0, prefix.length) === prefix && str.substring(str.length - suffix.length) === suffix) {
+                                    str = str.substring(prefix.length, str.length - suffix.length);
+
+                                    let binary_string = window.atob(str);
+                                    let len = binary_string.length;
+                                    let bytes = new Uint8Array(len);
+                                    for (let i = 0; i < len; i++)        {
+                                        bytes[i] = binary_string.charCodeAt(i);
+                                    }
+                                    obj[key] = bytes.buffer;
+                                }
+                            } else {
+                                recursiveBase64StrToArrayBuffer(obj[key]);
+                            }
+                        }
+                    }
+                }
+
+                /**
+                 * Convert a ArrayBuffer to Base64
+                 * @param {ArrayBuffer} buffer
+                 * @returns {String}
+                 */
+                function arrayBufferToBase64(buffer) {
+                    let binary = '';
+                    let bytes = new Uint8Array(buffer);
+                    let len = bytes.byteLength;
+                    for (let i = 0; i < len; i++) {
+                        binary += String.fromCharCode( bytes[ i ] );
+                    }
+                    return window.btoa(binary);
+                }
+            </script>
             <script type="module">
                 history.replaceState(null, null, window.location.href);
                 const formEl = document.getElementById('loginForm');
@@ -129,31 +175,31 @@
                 }
 
                 async function startPasskeyAuthentication() {
-                    const username = document.getElementById('username').value;
-                    if (!username) {
-                        alert('Please enter your username first');
-                        return;
-                    }
-
                     try {
-                        const credential = await navigator.credentials.get({
-                            publicKey: {
-                                challenge: new Uint8Array(32),
-                                rpId: window.location.hostname,
-                                userVerification: 'required',
-                            }
-                        });
+                        const username = document.getElementById('username').value;
+                        if (!username) {
+                            alert('Please enter your username first');
+                            return;
+                        }
 
-                        const passkeyResponse = {
-                            id: credential.id,
-                            response: {
-                                authenticatorData: btoa(String.fromCharCode(...new Uint8Array(credential.response.authenticatorData))),
-                                clientDataJSON: btoa(String.fromCharCode(...new Uint8Array(credential.response.clientDataJSON))),
-                                signature: btoa(String.fromCharCode(...new Uint8Array(credential.response.signature)))
-                            }
+                        let getArgs = await window.fetch('/index.php/admin/index/passkeyloginstart/?username=' + username, {method:'GET',cache:'no-cache'});
+                        getArgs = await getArgs.json();
+                        if (getArgs.error) {
+                            alert(getArgs.message);
+                            return;
+                        }
+                        recursiveBase64StrToArrayBuffer(getArgs);
+
+                        const cred = await navigator.credentials.get(getArgs);
+                        const authenticatorAttestationResponse = {
+                            id: cred.rawId ? arrayBufferToBase64(cred.rawId) : null,
+                            clientDataJSON: cred.response.clientDataJSON  ? arrayBufferToBase64(cred.response.clientDataJSON) : null,
+                            authenticatorData: cred.response.authenticatorData ? arrayBufferToBase64(cred.response.authenticatorData) : null,
+                            signature: cred.response.signature ? arrayBufferToBase64(cred.response.signature) : null,
+                            userHandle: cred.response.userHandle ? arrayBufferToBase64(cred.response.userHandle) : null
                         };
 
-                        document.getElementById('login').value = JSON.stringify(passkeyResponse);
+                        document.getElementById('login').value = JSON.stringify(authenticatorAttestationResponse);
                         document.getElementById('loginForm').submit();
                     } catch (err) {
                         alert('Passkey authentication failed: ' + err.message);

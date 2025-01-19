@@ -379,6 +379,33 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
         }
     }
 
+    public function passkeyloginstartAction()
+    {
+        try {
+            $username = $this->getRequest()->getParam('username');
+            $user = Mage::getModel('admin/user')->loadByUsername($username);
+            if (!$user->getId() || !$user->getPasskeyCredentialIdHash() || !$user->getPasskeyPublicKey()) {
+                Mage::throwException(Mage::helper('adminhtml')->__('User not found'));
+            }
+
+            $webAuthn = Mage::helper('adminhtml')->getWebAuthn();
+            $getArgs = $webAuthn->getGetArgs([base64_decode($user->getPasskeyCredentialIdHash())]);
+            $this->_getSession()->setPasskeyChallange($webAuthn->getChallenge());
+            $this->getResponse()->setBodyJson($getArgs);
+        } catch (Mage_Core_Exception $e) {
+            $error = Mage::helper('adminhtml')->__('Internal Error');
+        } catch (Exception $e) {
+            $error = Mage::helper('adminhtml')->__('Internal Error');
+            Mage::logException($e);
+        }
+
+        if (isset($error)) {
+            $this->getResponse()
+                ->setHttpResponseCode(400)
+                ->setBodyJson(['error' => true, 'message' => $error]);
+        }
+    }
+
     /**
      * Check if password reset token is valid
      *
