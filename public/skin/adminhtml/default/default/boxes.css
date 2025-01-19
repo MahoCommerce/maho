@@ -204,7 +204,7 @@ table.actions td.pager          { display: flex; align-items: center; gap: 4px; 
 .grid tr.filter select,
 .grid tr.filter input,
 .grid tr.filter textarea         { padding: 4px 6px !important; box-shadow: none; }
-.grid tr.filter .range .range-line { margin-bottom:4px; width:100px; }
+.grid tr.filter .range .range-line { margin-bottom:4px; width:100px; display: flex; align-items: center; }
 .grid tr.filter .range div.date  { min-width:121px; }
 .grid tr.filter .range input     { width:60px !important; margin-top:0; }
 .grid tr.filter .range select    { float:right; width:65px !important; margin-top:0; }
