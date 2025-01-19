@@ -27,32 +27,22 @@ class MahoPasskeyController
     async startRegistration() {
         try {
             const options = await mahoFetch(this.config.registerStartUrl, { method: 'POST' });
-            options.challenge = Base64.toArrayBuffer(options.challenge);
-            options.user.id = Base64.toArrayBuffer(options.user.id);
+            recursiveBase64StrToArrayBuffer(options);
 
-            const credential = await navigator.credentials.create({
-                publicKey: options
-            });
-
-            const registrationData = {
-                passkey_credential_id: Base64.fromArrayBuffer(credential.rawId),
-                passkey_credential_public_key: Base64.fromArrayBuffer(credential.response.getPublicKey()),
-                attestation_object: Base64.fromArrayBuffer(credential.response.attestationObject),
-                client_data_json: new TextDecoder().decode(credential.response.clientDataJSON)
+            const cred = await navigator.credentials.create(options);
+            const authenticatorAttestationResponse = {
+                transports: cred.response.getTransports  ? cred.response.getTransports() : null,
+                clientDataJSON: cred.response.clientDataJSON  ? arrayBufferToBase64(cred.response.clientDataJSON) : null,
+                attestationObject: cred.response.attestationObject ? arrayBufferToBase64(cred.response.attestationObject) : null
             };
 
-            const formData = new FormData();
-            for (const [ key, value ] of Object.entries(registrationData)) {
-                formData.append(key, value);
-            }
-
-            const verifyResponse = await mahoFetch(this.config.registerSaveUrl, {
+            const verifyResponse = await mahoFetch(this.config.registerSaveUrl + '?form_key=' + FORM_KEY, {
                 method: 'POST',
-                body: formData
+                body: JSON.stringify(authenticatorAttestationResponse),
             });
 
             alert(verifyResponse.message);
-
+            location.reload();
         } catch (error) {
             alert(error.message);
             console.error('Registration error:', error);
@@ -67,3 +57,48 @@ class MahoPasskeyController
         }
     }
 };
+
+/**
+ * convert RFC 1342-like base64 strings to array buffer
+ * @param {mixed} obj
+ * @returns {undefined}
+ */
+function recursiveBase64StrToArrayBuffer(obj) {
+    let prefix = '=?BINARY?B?';
+    let suffix = '?=';
+    if (typeof obj === 'object') {
+        for (let key in obj) {
+            if (typeof obj[key] === 'string') {
+                let str = obj[key];
+                if (str.substring(0, prefix.length) === prefix && str.substring(str.length - suffix.length) === suffix) {
+                    str = str.substring(prefix.length, str.length - suffix.length);
+
+                    let binary_string = window.atob(str);
+                    let len = binary_string.length;
+                    let bytes = new Uint8Array(len);
+                    for (let i = 0; i < len; i++)        {
+                        bytes[i] = binary_string.charCodeAt(i);
+                    }
+                    obj[key] = bytes.buffer;
+                }
+            } else {
+                recursiveBase64StrToArrayBuffer(obj[key]);
+            }
+        }
+    }
+}
+
+/**
+ * Convert a ArrayBuffer to Base64
+ * @param {ArrayBuffer} buffer
+ * @returns {String}
+ */
+function arrayBufferToBase64(buffer) {
+    let binary = '';
+    let bytes = new Uint8Array(buffer);
+    let len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode( bytes[ i ] );
+    }
+    return window.btoa(binary);
+}

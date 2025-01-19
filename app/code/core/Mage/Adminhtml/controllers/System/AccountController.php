@@ -120,33 +120,24 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
                 Mage::throwException(Mage::helper('adminhtml')->__('Not authenticated'));
             }
 
-            $challenge = base64_encode(random_bytes(32));
-            $this->_getSession()->setPasskeyChallenge($challenge);
+            $webAuthn = new \lbuchs\WebAuthn\WebAuthn(
+                Mage::getStoreConfig('web/secure/name') ?: 'Maho',
+                parse_url(Mage::getBaseUrl(), PHP_URL_HOST)
+            );
 
-            $options = [
-                'challenge' => $challenge,
-                'rp' => [
-                    'name' => Mage::getStoreConfig('web/secure/name'),
-                    'id' => parse_url(Mage::getBaseUrl(), PHP_URL_HOST),
-                ],
-                'user' => [
-                    'id' => base64_encode($user->getId()),
-                    'name' => $user->getUsername(),
-                    'displayName' => $user->getName(),
-                ],
-                'pubKeyCredParams' => [
-                    ['type' => 'public-key', 'alg' => -7], // ES256
-                ],
-                'timeout' => 60000,
-                'attestation' => 'none',
-                'authenticatorSelection' => [
-                    'userVerification' => 'required',
-                ],
-            ];
+            $userId = decbin($user->getId());
+            $userName = $user->getUsername();
+            $userDisplayName = $user->getName();
+            $createArgs = $webAuthn->getCreateArgs(
+                $userId,
+                $userName,
+                $userDisplayName,
+                60000,
+            );
 
-            $this->getResponse()->setBodyJson($options);
+            $this->_getSession()->setPasskeyChallange($webAuthn->getChallenge());
+            $this->getResponse()->setBodyJson($createArgs);
             return;
-
         } catch (Mage_Core_Exception $e) {
             $error = $e->getMessage();
         } catch (Exception $e) {
@@ -174,61 +165,52 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
                 Mage::throwException(Mage::helper('adminhtml')->__('Not authenticated'));
             }
 
-            // Get POST parameters
-            $credentialId = $this->getRequest()->getPost('passkey_credential_id');
-            $publicKey = $this->getRequest()->getPost('passkey_credential_public_key');
-            $attestationObject = $this->getRequest()->getPost('attestation_object');
-            $clientDataJSON = $this->getRequest()->getPost('client_data_json');
+            if (!json_validate($this->getRequest()->getRawBody())) {
+                Mage::throwException(Mage::helper('adminhtml')->__('Invalid request body'));
+            }
 
-            // Verify required fields
-            if (!$credentialId || !$publicKey || !$attestationObject || !$clientDataJSON) {
+            $body = json_decode($this->getRequest()->getRawBody(), true);
+            $attestationObject = base64_decode($body['attestationObject']);
+            $clientDataJSON = base64_decode($body['clientDataJSON']);
+            $challenge = Mage::getSingleton('adminhtml/session')->getPasskeyChallange();
+
+            if (!$attestationObject || !$clientDataJSON || !$challenge) {
                 Mage::throwException(Mage::helper('adminhtml')->__('Missing required fields'));
             }
 
-            $credentialId = rtrim($credentialId, '=');
-            $credentialId = str_replace(['-', '_', '='], ['+', '/', ''], $credentialId);
+            $webAuthn = new \lbuchs\WebAuthn\WebAuthn(
+                Mage::getStoreConfig('web/secure/name') ?: 'Maho',
+                parse_url(Mage::getBaseUrl(), PHP_URL_HOST)
+            );
 
-            // Decode the client data JSON
-            $clientData = json_decode($clientDataJSON, true);
+            $data = $webAuthn->processCreate(
+                $clientDataJSON,
+                $attestationObject,
+                $challenge
+            );
 
-            // Verify challenge
-            $expectedChallenge = $this->_getSession()->getPasskeyChallenge() ?? '';
-            $expectedChallenge = rtrim($expectedChallenge, '=');
-            $clientData['challenge'] = str_replace(['-', '_', '='], ['+', '/', ''], $clientData['challenge']);
-
-            if (!$expectedChallenge || $clientData['challenge'] !== $expectedChallenge) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Invalid challenge'));
-            }
-
-            // Verify origin
-            $expectedOrigin = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
-            if ($clientData['origin'] !== rtrim($expectedOrigin, '/')) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Invalid origin'));
-            }
+            // Store credential data in database
+            $credentialId = $data->credentialId;
+            $publicKey = $data->credentialPublicKey;
 
             // Check if another user already has this credential
             $existingUser = Mage::getModel('admin/user')->getCollection()
                 ->addFieldToFilter('passkey_credential_id_hash', $credentialId)
                 ->getFirstItem();
-
             if ($existingUser->getId() && $existingUser->getId() != $user->getId()) {
                 Mage::throwException(Mage::helper('adminhtml')->__('Credential already registered to another user'));
             }
 
-            // Update the user with the new credential data
+            // Save the credential
             $user->setPasskeyCredentialIdHash($credentialId)
                 ->setPasskeyPublicKey($publicKey)
                 ->save();
 
-            // Clear the challenge from session
             $this->_getSession()->unsPasskeyChallenge();
-
             $this->getResponse()->setBodyJson([
                 'success' => true,
                 'message' => Mage::helper('adminhtml')->__('Passkey registered successfully!'),
             ]);
-            return;
-
         } catch (Mage_Core_Exception $e) {
             $error = $e->getMessage();
         } catch (Exception $e) {
