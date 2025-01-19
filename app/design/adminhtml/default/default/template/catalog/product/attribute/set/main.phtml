@@ -34,7 +34,7 @@
         <div class="content-header">
             <h3><?= Mage::helper('catalog')->__('Groups') ?></h3>
             <?php if (!$this->getIsReadOnly()): ?>
-            <div>
+            <div class="content-buttons form-buttons">
                 <?= $this->getAddGroupButton() ?><?= $this->getRenameButton() ?><?= $this->getDeleteGroupButton() ?>
             </div>
             <?php endif ?>

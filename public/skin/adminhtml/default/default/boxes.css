@@ -1231,6 +1231,7 @@ ul.item-options li { padding-left:.7em; }
 .edit-attribute-set .content-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 .edit-attribute-set .content-header:after {
     display: none;
