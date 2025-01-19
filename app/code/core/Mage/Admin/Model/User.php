@@ -394,7 +394,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                     Mage::log($this->getPasskeyCredentialIdHash());
                     Mage::log($passkeyId);
                     if ($this->getPasskeyCredentialIdHash() === $passkeyId) {
-                        Mage::log("verify signature");
+                        Mage::log('verify signature');
                         return $this->verifyPasskeySignature(
                             $this->getPasskeyPublicKey(),
                             $passkeyData['signature'] ?? '',

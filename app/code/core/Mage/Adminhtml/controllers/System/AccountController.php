@@ -122,7 +122,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
 
             $webAuthn = new \lbuchs\WebAuthn\WebAuthn(
                 Mage::getStoreConfig('web/secure/name') ?: 'Maho',
-                parse_url(Mage::getBaseUrl(), PHP_URL_HOST)
+                parse_url(Mage::getBaseUrl(), PHP_URL_HOST),
             );
 
             $userId = decbin($user->getId());
@@ -180,13 +180,13 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
 
             $webAuthn = new \lbuchs\WebAuthn\WebAuthn(
                 Mage::getStoreConfig('web/secure/name') ?: 'Maho',
-                parse_url(Mage::getBaseUrl(), PHP_URL_HOST)
+                parse_url(Mage::getBaseUrl(), PHP_URL_HOST),
             );
 
             $data = $webAuthn->processCreate(
                 $clientDataJSON,
                 $attestationObject,
-                $challenge
+                $challenge,
             );
 
             // Store credential data in database
