@@ -954,6 +954,7 @@ img[src$="grid-cal.gif"] {
 }
 .maho-tree.hide-checkbox .label:has(input:is([type=checkbox], [type=radio])) {
   cursor: pointer;
+  line-height: 1;
 }
 .maho-tree.hide-checkbox .label input:is([type=checkbox], [type=radio]) {
   display: none;
