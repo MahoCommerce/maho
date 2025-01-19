@@ -1,16 +1,3 @@
-/* ! Do not edit css files !
-   Edit scss version and compile with sass from scss folder like this:
-   $ sass menu.scss ../menu.css
- */
-/*
- 205 = default,
-   0 = red,
-  60 = yellow,
- 120 = green,
- 180 = turquoise,
- 240 = blue,
- 300 = purple
-*/
 #nav ul li.active, #nav ul li {
   float: none;
   height: auto;
@@ -26,8 +13,8 @@
 }
 
 .nav-bar {
-  background: black;
-  padding: 0 350px 0 70px;
+  background: transparent;
+  padding: 8px 350px 8px 60px;
 }
 .nav-bar:after {
   content: ".";
@@ -60,8 +47,7 @@
   left: -10000px;
 }
 #nav li:hover ul a {
-  color: #202856;
-  font-size: 12px;
+  color: #222f3e;
 }
 #nav li:hover ul li:hover ul {
   left: 100px;
@@ -74,7 +60,7 @@
 }
 #nav li.active {
   margin-left: -1px;
-  color: #fff;
+  color: #222f3e;
   font-weight: bold;
 }
 #nav li.active em {
@@ -88,31 +74,33 @@
 #nav li.active li {
   font-weight: normal;
 }
+#nav li.level0 {
+  margin-inline: 2px;
+}
 #nav li.level0 > a {
   text-transform: none;
   font-weight: 400;
   color: #fff;
-  height: 38px;
   line-height: 38px;
 }
 #nav li.level0 > a:hover {
-  background: #2c3878;
+  background: #e6e6e6;
   color: #fff;
 }
 #nav li.level0 li.parent > a:after {
   content: "";
-  position: absolute;
+  /* position: absolute; */
   right: 12px;
   bottom: 9px;
   width: 0;
   height: 0;
   border-style: solid;
   border-width: 5px 0 5px 6px;
-  border-color: transparent transparent transparent #c8c8c8;
+  border-color: transparent transparent transparent #222f3e;
 }
 #nav li.level0:hover > a {
-  background: #293470;
-  color: #fff;
+  background: white;
+  color: #222f3e;
 }
 #nav li.parent a {
   cursor: default;
@@ -145,11 +133,14 @@
   text-decoration: none;
   float: left;
   padding: 0 12px;
-  color: #fff;
+  color: #222f3e;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  place-content: space-between;
 }
 #nav a:hover {
-  display: block;
+  display: flex;
   text-decoration: none;
 }
 #nav ul {
@@ -163,21 +154,19 @@
   padding: 0;
 }
 #nav ul li.active a {
-  color: #202856;
-  font-size: 12px;
+  color: #222f3e;
 }
 #nav ul li a {
   background: #fff;
-  padding: 9px 12px;
-  color: #202856;
-  font-size: 12px;
+  padding: 10px 12px;
+  color: #222f3e;
 }
 #nav ul li a.active {
   text-decoration: underline;
 }
 #nav ul li a:hover {
-  background: #202856;
-  color: #fff;
+  background: #feffd8;
+  color: #222f3e;
 }
 #nav ul li.parent a {
   background-position: 100% 100%;
@@ -226,7 +215,15 @@
 }
 #nav .level0.active > a {
   font-weight: 600;
-  background: #273169;
+  background: white;
+  color: #222f3e;
+  background: linear-gradient(to bottom, #fff, #fafafa);
+  color: var(--body-color) !important;
+  border-radius: 6px;
+  box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px;
+}
+#nav .level0:hover > a {
+  border-radius: 6px 6px 0 0;
 }
 
 #usermenu {
@@ -237,14 +234,18 @@
 #usermenu ul {
   position: absolute;
   width: 220px;
-  top: 40px;
+  /* top: 40px; */
   right: -10000px;
   display: none;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.207843), 0 0 5px rgba(0, 0, 0, 0.207843);
-  background: #fff;
+  box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+  background: #fefefe;
+  /* padding: 8px 12px; */
+  border: 1px solid lightgray;
+  border-radius: 6px;
+  overflow: hidden;
 }
 #usermenu ul li a:hover {
-  background: #202856;
+  background: #000;
 }
 #usermenu ul li.last span {
   border-bottom: none;
@@ -254,28 +255,29 @@
   display: block;
 }
 #usermenu li ul span {
-  border-bottom: 1px dotted hsl(205, 40%, 75%);
-  display: block;
-  line-height: 31px;
-  padding: 0 10px;
+    display: block;
+    /* border-bottom: 1px dotted hsl(205, 40%, 75%); */
 }
 #usermenu li:hover ul {
-  right: 27px;
-  display: block;
+    right: 15px;
+    display: block;
 }
 #usermenu li:hover ul a {
-  color: #000537;
+    padding: 10px 12px;
+  color: #222f3e;
   text-decoration: none;
-  background: hsl(205, 52%, 95%);
+  background: #fff;
   display: block;
 }
+#usermenu li:hover ul a:hover {
+  background: #feffd8;
+}
 #usermenu > li > a {
-  padding: 0 27px 0 20px;
+  padding: 0 14px;
   display: block;
 }
 #usermenu > li > a svg {
   height: 40px;
   width: auto;
+  border-radius: 6px;
 }
-
-/*# sourceMappingURL=menu.css.map */

@@ -1,4 +1,3 @@
-@charset "UTF-8";
 /* ! Do not edit css files !
    Edit scss version and compile with sass from scss folder like this:
    $ sass form.scss ../form.css
@@ -12,105 +11,167 @@
  240 = blue,
  300 = purple
 */
-input.input-text, textarea, select {
-  font: 400 12px/1.33 ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+select, textarea, input.input-text {
+  font-weight: 400;
+  font-family: var(--font-family-sans);
+  font-size: 14px;
   display: inline-block;
-  padding: 1px 3px;
+  padding: 6px 8px !important;
   margin: 0;
   background-color: #fff;
-  height: 26px;
-  color: #202856;
+  color: #000;
   border: 1px solid #c8c8c8;
-  box-sizing: border-box; }
+  border-radius: 4px;
+  box-sizing: border-box;
+  box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+}
 
-.form-list td.label, .form-list td.label label {
-  font-size: 12px;
-  font-weight: 400;
-  color: #202856; }
+.form-list td.label label, .form-list td.label {
+  /* font-size: 12px; */
+  /* font-weight: 600; */
+  /* color: #2f2f2f; */
+}
 
-button, .form-button {
+.form-button, button {
   background-image: none;
-  background-color: #71798e;
-  padding: 0 13px;
-  color: #fff;
-  border: 0;
+  color: #32333c;
+  background: #fff;
+  border: 1px solid lightgray;
+  /* outline-color: darken($white, 10);
+  outline-style: solid;
+  outline-width: 2px; */
+  /* outline-offset: 2px; */
+  padding: 4px 8px;
+  border-radius: 4px;
   cursor: pointer;
   display: inline-block;
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 26px;
+  font-family: var(--font-family-sans);
+  font-size: 12px;
+  font-weight: 600;
   box-sizing: border-box;
   margin: 0;
   vertical-align: middle; }
 
-button:focus, button:active, .form-button:focus, .form-button:active {
-  background: #888;
-  border: 0;
-  outline: thin dotted;
-  outline-offset: -2px; }
+.btn-wysiwyg,
+.btn-wysiwyg:hover {
+  background: #d23879;
+  color: #fff;
+  margin-top: 4px;
+}
 
-button.disabled, .form-button.disabled, button[disabled], .form-button[disabled] fieldset[disabled] button {
+.form-button:active, .form-button:focus, button:active, button:focus {
+  background: #fafafa;
+  /* border-color: #fafafa; */
+  transition: all ease-in 200ms;
+}
+
+.form-button[disabled] fieldset[disabled] button, button[disabled], .form-button.disabled, button.disabled {
   cursor: default;
   pointer-events: none;
   opacity: 0.5; }
 
-button.save, button.ok_button, button.add, .form-button.ok_button {
-  background-image: none;
-  background-color: #0090FF;
-  padding: 0 13px;
-  color: #fff;
-  border: 0;
+.form-button.ok_button, button.add, button.ok_button, button.save, button.go {
+  background: linear-gradient(var(--button-primary-bg), #0053e3);
+  color: var(--button-primary-color);
+  border-color: var(--button-primary-bg);
+  border-color: #4d8af4 #184fac #184fac #4d8af4;
+  /* outline-color: darken($color_action, 10);
+  outline-style: solid;
+  outline-width: 2px; */
+  /* outline-offset: 2px; */
+  border-radius: 4px;
   cursor: pointer;
   display: inline-block;
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 26px;
+  font-size: 12px;
+  font-weight: 600;
   box-sizing: border-box;
-  vertical-align: middle; }
+  vertical-align: middle;
+  box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px;
+}
 
-button.save:focus, button.save:active, button.ok_button:focus, button.ok_button:active, button.add:focus, button.add:active, .form-button.ok_button:focus, .form-button.ok_button:active {
-  background-color: #026294;
-  outline: thin dotted;
-  outline-offset: -2px;
-  color: #fff; }
+.form-button.ok_button:active, .form-button.ok_button:focus, button:hover, button:active, button:focus, button.add:hover, button.add:active, button.add:focus, button.ok_button:hover, button.ok_button:active, button.ok_button:focus, button.save:hover, button.save:active, button.save:focus, button.go:hover, button.go:active, button.go:focus {
+  background: #0073cc;
+  outline: 1px solid var(--input-highlight);
+  transition: outline ease-in 100ms;
+}
 
-button.save.disabled, button.ok_button.disabled, button.add.disabled, button.save[disabled], button.add[disabled], button.ok_button[disabled], fieldset[disabled] button.save, fieldset[disabled] button.add, fieldset[disabled] button.ok_button {
+fieldset[disabled] button.ok_button, fieldset[disabled] button.add, fieldset[disabled] button.save, button.ok_button[disabled], button.add[disabled], button.save[disabled], button.add.disabled, button.ok_button.disabled, button.save.disabled, button.go.disabled  {
   cursor: default;
   pointer-events: none;
   opacity: 0.5; }
 
-.field-100 textarea, .field-100 input.input-text {
+.field-100 input.input-text, .field-100 textarea, .field-100 select {
   float: none;
   border: 1px solid #c8c8c8 !important;
-  padding: 1px 3px !important; }
+  padding: 2px 4px !important; }
 
 input {
-  vertical-align: middle; }
-
+  vertical-align: middle;
+}
 textarea {
-  margin: 0; }
-  textarea:disabled {
-    background: #f6f6f6; }
-  textarea.disabled {
-    background: #f6f6f6; }
+  margin: 0;
+}
+textarea:disabled {
+  background: #fafafa;
+  color: gray;
+}
+textarea.disabled {
+  background: #fafafa;
+  color: gray;
+}
 
 select {
-  height: 26px;
+  /* height: 26px; */
   border: 1px solid #c8c8c8;
   box-sizing: border-box;
   text-transform: none;
-  margin: 0; }
-  select.disabled {
-    background: #f6f6f6; }
-  select:disabled {
-    background: #f6f6f6; }
-  select optgroup {
-    font-weight: 600; }
+  margin: 0;
+}
+select option:disabled, select:disabled option {
+  text-shadow: none;
+}
+select.disabled {
+  background: #fafafa;
+  color: gray;
+}
+select:disabled {
+  background: #fafafa;
+  color: gray;
+}
+select optgroup {
+  font-weight: 600;
+}
+
+input,
+textarea,
+select,
+.field-100 textarea,
+.field-100 input.input-text {
+  transition: border-color 100ms ease-in;
+}
+input:hover,
+textarea:hover,
+select:hover,
+.field-100 textarea:hover,
+.field-100 input.input-text:hover {
+  border-color: gray !important;
+}
+input:focus,
+textarea:focus,
+select:focus,
+.field-100 textarea:focus,
+.field-100 input.input-text:focus {
+  border-color: var(--body-color) !important;
+}
 
 input[type=text].disabled {
-  background: #f6f6f6; }
+  background: #fafafa;
+  color: gray;
+}
 input[type=text]:disabled {
-  background: #f6f6f6; }
+  background: #fafafa;
+  color: gray;
+}
 
 select[multiple] {
   height: auto; }
@@ -125,7 +186,7 @@ button {
   button.cancel {
     background: #e63a3a;
     color: #fff;
-    padding: 0 13px; }
+     }
     button.cancel span {
       background: none;
       padding: 0; }
@@ -134,43 +195,62 @@ button {
   button.delete {
     background: #e63a3a;
     color: #fff;
-    padding: 0 13px; }
+     }
     button.delete span {
       background: none;
       padding: 0; }
     button.delete:hover {
       background: #fa4545; }
-  button.save {
-    padding: 0 13px; }
-    button.save span {
-      background: none;
-      padding: 0; }
-    button.save:hover {
-      background-color: #0090FF; }
+      button.save {
+      }
+     button.save span {
+       background: none;
+       padding: 0; }
+     button.save:hover {
+       background-color: var(--button-primary-bg); }
+       button.go {
+      }
+     button.go span {
+       background: none;
+       padding: 0; }
+     button.go:hover {
+       background-color: var(--button-primary-bg); }
   button.ok_button {
-    padding: 0 13px; }
+     }
     button.ok_button span {
       background: none;
       padding: 0; }
     button.ok_button:hover {
-      background-color: #0090FF; }
+      background-color: var(--button-primary-bg); }
   button.add {
-    padding: 0 13px; }
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+     }
+     button.add:before {
+      content: url('data:image/svg+xml,%3Csvg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" %3E%3Cpath d="M7.49991 0.876892C3.84222 0.876892 0.877075 3.84204 0.877075 7.49972C0.877075 11.1574 3.84222 14.1226 7.49991 14.1226C11.1576 14.1226 14.1227 11.1574 14.1227 7.49972C14.1227 3.84204 11.1576 0.876892 7.49991 0.876892ZM1.82707 7.49972C1.82707 4.36671 4.36689 1.82689 7.49991 1.82689C10.6329 1.82689 13.1727 4.36671 13.1727 7.49972C13.1727 10.6327 10.6329 13.1726 7.49991 13.1726C4.36689 13.1726 1.82707 10.6327 1.82707 7.49972ZM7.50003 4C7.77617 4 8.00003 4.22386 8.00003 4.5V7H10.5C10.7762 7 11 7.22386 11 7.5C11 7.77614 10.7762 8 10.5 8H8.00003V10.5C8.00003 10.7761 7.77617 11 7.50003 11C7.22389 11 7.00003 10.7761 7.00003 10.5V8H4.50003C4.22389 8 4.00003 7.77614 4.00003 7.5C4.00003 7.22386 4.22389 7 4.50003 7H7.00003V4.5C7.00003 4.22386 7.22389 4 7.50003 4Z" fill="white" fill-rule="evenodd" clip-rule="evenodd"%3E%3C/path%3E%3C/svg%3E');
+      width: 18px;
+      height: 18px; 
+     }
     button.add span {
       background: none;
       padding: 0; }
     button.add:hover {
-      background-color: #0090FF; }
+      background-color: var(--button-primary-bg); }
     button.add.disabled span {
       background: none; }
   button.back {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     background: none; }
     button.back span {
       background: none;
       padding: 0; }
     button.back:before {
-      content: "«";
-      padding-right: 4px; }
+      content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23555' d='M22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12M14,7L9,12L14,17V7Z' /%3E%3C/svg%3E");
+      width: 18px;
+      height: 18px; }
   button:hover {
     background: #888; }
   button.disabled {
@@ -182,13 +262,13 @@ button {
   button.fail {
     background: #e63a3a;
     color: #fff;
-    padding: 0 13px; }
+     }
     button.fail:hover {
       background: #fa4545; }
   button.cancel_button {
     background: #e63a3a;
     color: #fff;
-    padding: 0 13px; }
+     }
     button.cancel_button:hover {
       background: #fa4545; }
   button.icon-btn {
@@ -212,11 +292,126 @@ button {
   button.add-variable span {
     background: none;
     padding: 0; }
+  text-transform: none;
+}
+button span {
+  padding: 0;
+}
+button.cancel {
+  background: #e63a3a;
+  color: #fff;
+}
+button.cancel span {
+  background: none;
+  padding: 0;
+}
+button.cancel:hover {
+  background: #fa4545;
+}
+button.delete {
+  background: #e63a3a !important;
+  color: #fff;
+  border-color: #d24403 #a92000 #a92000 #d24403;
+}
+button.delete span {
+  background: none;
+  padding: 0;
+}
+button.delete:hover {
+  background: #fa4545;
+}
+button.save span {
+  background: none;
+  padding: 0;
+}
+button.ok_button span {
+  background: none;
+  padding: 0;
+}
+button.add span {
+  background: none;
+  padding: 0;
+}
+button.add.disabled span {
+  background: none;
+}
+button.back {
+  background: none !important;
+  border: 0;
+  outline: none;
+  text-shadow: none !important;
+}
+button:hover {
+  background: inherit;
+}
+button.disabled {
+  background: #888;
+}
+button.disabled:hover {
+  background: #888;
+}
+button.disabled:active {
+  background: #888;
+}
+button.fail {
+  background: #e63a3a;
+  color: #fff;
+}
+button.fail:hover {
+  background: #fa4545;
+}
+button.cancel_button {
+  background: #e63a3a;
+  color: #fff;
+}
+button.cancel_button:hover {
+  background: #fa4545;
+}
+button.icon-btn {
+  width: auto !important;
+}
+button.icon-btn span {
+  text-indent: 0;
+  width: auto;
+  display: inline;
+}
+button.large {
+  font-size: 22px;
+  padding: 14px 22px 16px;
+}
+button.add-image span {
+  background: none;
+  padding: 0;
+}
+button.add-widget span {
+  background: none;
+  padding: 0;
+}
+button.go span {
+  background: none;
+  padding: 0;
+}
+button.add-variable span {
+  background: none;
+  padding: 0;
+}
+
+.content-header button {
+  padding: 8px 14px !important;
+  font-size: 14px;
+}
+
+button.task {
+  background: #32333c;
+  border-color: #32333c;
+  color: #fff;
+}
 
 .form-button:hover {
   background: #888; }
 .form-button.ok_button:hover {
-  background-color: #0090FF; }
+  background-color: var(--button-primary-bg);
+}
 .form-button.large {
   font-size: 22px;
   padding: 14px 22px 16px; }
@@ -224,21 +419,40 @@ button {
 .field-100 {
   background: none;
   border: 0;
-  padding: 0; }
-
+  padding: 0;
+}
 .form-list td.label label {
-  padding: 0 15px 0 0; }
-.form-list td.scope-label {
+  padding: 6px 8px 6px 0 !important }
+.form-list td.scope-label,
+.form-list td.use-default {
   color: #999;
-  font-size: 11px; }
+  font-size: 12px;
+  vertical-align: top;
+  padding: 14px 12px 8px 0 !important;
+}
 .form-list td.value {
-  padding-left: 0 !important; }
-  .form-list td.value input.input-text, .form-list td.value textarea, .form-list td.value select {
-    width: 330px; }
-  .form-list td.value p.note {
-    color: #202856;
-    font-size: 11px;
-    font-weight: 400; }
+  /* padding-left: 0 !important; */
+}
+.form-list td.value textarea {
+  width: min(324px, 100%);
+}
+.form-list td.value select {
+  width: min(100%, 330px);
+}
+.form-list td.value p.note {
+  /* color: $color_dorado_approx; */
+  font-size: 11px;
+  font-weight: 400;
+}
+.form-list td.value input.input-text {
+  width: 324px;
+}
+
+.entry-edit-head button,
+table.data button:not(.delete), {
+  background: #32333c;
+  border-color: #32333c;
+}
 
 .input-text.large {
   padding: 12px 12px 14px;
@@ -277,5 +491,3 @@ td:has(input.swatch-disabled) {
     opacity: 0; }
   td:has(input.swatch-disabled) .swatch-delete {
     display: none; }
-
-/*# sourceMappingURL=form.css.map */
