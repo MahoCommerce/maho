@@ -67,6 +67,10 @@
  * @method $this setUserId(int $value)
  * @method int getTwofaEnabled()
  * @method $this setTwofaEnabled(int $value)
+ * @method string getPasskeyCredentialIdHash()
+ * @method $this setPasskeyCredentialIdHash(string $value)
+ * @method string getPasskeyPublicKey()
+ * @method $this setPasskeyPublicKey(string $value)
  */
 class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 {
