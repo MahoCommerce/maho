@@ -379,21 +379,23 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
         }
     }
 
+    /**
+     * Administrator get passkey options action
+     */
     public function passkeyloginstartAction()
     {
         try {
-            $username = $this->getRequest()->getParam('username');
-            $user = Mage::getModel('admin/user')->loadByUsername($username);
-            if (!$user->getId() || !$user->getPasskeyCredentialIdHash() || !$user->getPasskeyPublicKey()) {
-                Mage::throwException(Mage::helper('adminhtml')->__('User not found'));
+            if (!$this->_validateFormKey()) {
+                Mage::throwException(Mage::helper('adminhtml')->__('Invalid Form Key. Please refresh the page.'));
             }
 
-            $webAuthn = Mage::helper('adminhtml')->getWebAuthn();
-            $getArgs = $webAuthn->getGetArgs([base64_decode($user->getPasskeyCredentialIdHash())]);
-            $this->_getSession()->setPasskeyChallange($webAuthn->getChallenge());
-            $this->getResponse()->setBodyJson($getArgs);
+            $postLogin = $this->getRequest()->getPost('login');
+            $username = $postLogin['username'] ?? '';
+            $user = Mage::getModel('admin/user')->loadByUsername($username);
+
+            $this->getResponse()->setBodyJson($user->getPasskeyGetArgs());
         } catch (Mage_Core_Exception $e) {
-            $error = Mage::helper('adminhtml')->__('Internal Error');
+            $error = $e->getMessage();
         } catch (Exception $e) {
             $error = Mage::helper('adminhtml')->__('Internal Error');
             Mage::logException($e);

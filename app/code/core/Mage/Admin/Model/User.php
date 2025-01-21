@@ -395,7 +395,8 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                     $signature = !empty($passkeyData->signature) ? base64_decode($passkeyData->signature) : null;
                     $userHandle = !empty($passkeyData->userHandle) ? base64_decode($passkeyData->userHandle) : null;
                     $id = !empty($passkeyData->id) ? base64_decode($passkeyData->id) : null;
-                    $challenge = Mage::getSingleton('adminhtml/session')->getPasskeyChallange();
+                    $challenge = $this->getSession()->getPasskeyChallenge();
+                    $this->getSession()->unsPasskeyChallange();
 
                     $webAuthn = Mage::helper('adminhtml')->getWebAuthn();
                     $passkeyVerified = $webAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $this->getPasskeyPublicKey(), $challenge);
@@ -450,6 +451,23 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             $this->unsetData();
         }
         return $result;
+    }
+
+    /**
+     * Get passkey authentication options
+     * @throws Mage_Core_Exception
+     */
+    public function getPasskeyGetArgs(): stdClass
+    {
+        if (!$this->getPasskeyCredentialIdHash() || !$this->getPasskeyPublicKey()) {
+            Mage::throwException(Mage::helper('adminhtml')->__('Passkey is not enabled for this account.'));
+        }
+
+        $webAuthn = Mage::helper('adminhtml')->getWebAuthn();
+        $getArgs = $webAuthn->getGetArgs([ base64_decode($this->getPasskeyCredentialIdHash()) ]);
+        $this->getSession()->setPasskeyChallenge($webAuthn->getChallenge());
+
+        return $getArgs;
     }
 
     public function validatePasswordHash(string $string1, string $string2): bool
