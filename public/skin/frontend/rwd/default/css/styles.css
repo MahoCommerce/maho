@@ -3234,7 +3234,7 @@ a.skip-link {
  * Search - Skip Content
  * ============================================ */
 #header-search {
-  padding: 20px;
+  padding: 10px;
 }
 
 @media only screen and (min-width: 771px) {
@@ -8362,7 +8362,6 @@ div.paypal-logo span > img {
 }
 .header-minicart .block-subtitle {
   color: var(--maho-color-primary-hover);
-  font-size: 0.625rem;
   font-weight: bold;
   line-height: 1.4;
   padding: 5px;
