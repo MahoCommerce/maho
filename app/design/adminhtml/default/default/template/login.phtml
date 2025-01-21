@@ -49,7 +49,7 @@
                             <a class="left" href="<?= Mage::helper('adminhtml')->getUrl('adminhtml/index/forgotpassword', ['_nosecret' => true]) ?>"><?= Mage::helper('adminhtml')->__('Forgot your password?') ?></a>
                             <input type="submit" class="form-button" value="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" />
 
-                            <button type="button" id="passkey-login-btn" class="form-button" style="width:100%;margin-top:10px">
+                            <button type="button" id="passkey-login-button" class="form-button">
                                 <?php echo $this->__('Login with Passkey') ?>
                             </button>
                         </div>
@@ -73,9 +73,11 @@
                 history.replaceState(null, null, window.location.href);
                 const formEl = document.getElementById('loginForm');
                 const validator = new Validation(formEl);
+                const messagesEl = document.getElementById('messages');
 
                 formEl.addEventListener('submit', (event) => {
                     event.preventDefault();
+                    messagesEl.textContent = '';
                     if (!validator.validate()) {
                         return;
                     }
@@ -88,8 +90,39 @@
 
                 document.getElementById('back-button').addEventListener('click', (event) => {
                     event.preventDefault();
+                    messagesEl.textContent = '';
                     gotoStep(1);
                 });
+
+                document.getElementById('passkey-login-button').addEventListener('click', (event) => {
+                    validator.reset();
+                    messagesEl.textContent = '';
+                    if (!Validation.validate(document.getElementById('username'))) {
+                        return;
+                    }
+                    startPasskeyAuthentication();
+                });
+
+                async function mahoFetch(url, options) {
+                    const ajaxUrl = new URL(url);
+                    ajaxUrl.searchParams.set('isAjax', true);
+
+                    const response = await fetch(ajaxUrl, options);
+                    const result = await response.json();
+
+                    if (result.redirect) {
+                        window.location = result.redirect;
+                        await new Promise((resolve) => {});
+                    } else if (result.error) {
+                        throw new Error(result.message);
+                    }
+                    if (!response.ok) {
+                        throw new Error(
+                            "<?= Mage::helper('adminhtml')->__('Network Error. Please refresh the page.') ?>"
+                        );
+                    }
+                    return result;
+                }
 
                 async function gotoStep(step) {
                     if (step === 1) {
@@ -99,23 +132,12 @@
                         document.getElementById('twofa_verification_code').disabled = true;
                     } else if (step === 2) {
                         try {
-                            const ajaxUrl = "<?= $this->getUrl('adminhtml/index/prelogin', ['_query' => 'isAjax=1']) ?>";
-                            const response = await fetch(ajaxUrl, {
+                            const result = await mahoFetch("<?= $this->getUrl('adminhtml/index/prelogin') ?>", {
                                 method: 'POST',
                                 body: new FormData(formEl),
                             });
-                            if (!response.ok) {
-                                throw new Error(
-                                    "<?= Mage::helper('adminhtml')->__('Network Error. Please refresh the page.') ?>"
-                                );
-                            }
-                            const result = await response.json();
-                            document.getElementById('messages').textContent = '';
-                            if (result.redirect) {
-                                window.location = result.redirect;
-                            } else if (result.error) {
-                                throw new Error(result.message);
-                            } else if (result.require_twofa) {
+
+                            if (result.require_twofa) {
                                 document.getElementById('step1').classList.add('no-display');
                                 document.getElementById('step2').classList.remove('no-display');
                                 document.getElementById('twofa_verification_code').disabled = false;
@@ -124,43 +146,34 @@
                                 formEl.submit();
                             }
                         } catch (error) {
-                            document.getElementById('messages').textContent = error.message;
+                            messagesEl.textContent = error.message;
                         }
                     }
                 }
 
                 async function startPasskeyAuthentication() {
                     try {
-                        const username = document.getElementById('username').value;
-                        if (!username) {
-                            alert('Please enter your username first');
-                            return;
-                        }
+                        const result = await mahoFetch("<?= $this->getUrl('adminhtml/index/passkeyloginstart') ?>", {
+                            method: 'POST',
+                            body: new FormData(formEl),
+                        });
 
-                        let getArgs = await window.fetch('/index.php/admin/index/passkeyloginstart/?username=' + username, {method:'GET',cache:'no-cache'});
-                        getArgs = await getArgs.json();
-                        if (getArgs.error) {
-                            alert(getArgs.message);
-                            return;
-                        }
-                        recursiveBase64StrToArrayBuffer(getArgs);
+                        recursiveBase64StrToArrayBuffer(result);
 
-                        const cred = await navigator.credentials.get(getArgs);
-                        const authenticatorAttestationResponse = {
+                        const cred = await navigator.credentials.get(result);
+                        const passkeyData = {
                             id: cred.rawId ? arrayBufferToBase64(cred.rawId) : null,
-                            clientDataJSON: cred.response.clientDataJSON  ? arrayBufferToBase64(cred.response.clientDataJSON) : null,
-                            authenticatorData: cred.response.authenticatorData ? arrayBufferToBase64(cred.response.authenticatorData) : null,
-                            signature: cred.response.signature ? arrayBufferToBase64(cred.response.signature) : null,
-                            userHandle: cred.response.userHandle ? arrayBufferToBase64(cred.response.userHandle) : null
-                        };
+                        }
+                        for (const [ key, val ] of Object.entries(cred.response)) {
+                            passkeyData[key] = val ? arrayBufferToBase64(val) : null;
+                        }
 
-                        document.getElementById('login').value = JSON.stringify(authenticatorAttestationResponse);
-                        document.getElementById('loginForm').submit();
-                    } catch (err) {
-                        alert('Passkey authentication failed: ' + err.message);
+                        document.getElementById('login').value = JSON.stringify(passkeyData);
+                        formEl.submit();
+                    } catch (error) {
+                        messagesEl.textContent = error.message;
                     }
                 }
-                document.getElementById('passkey-login-btn').addEventListener('click', startPasskeyAuthentication);
             </script>
         </div>
     </div>
