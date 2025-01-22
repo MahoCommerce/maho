@@ -12,64 +12,75 @@
 
 /** @var Mage_Page_Block_Html_Header $this */
 ?>
-
-<div class="header-language-background">
-    <div class="header-language-container">
-        <div class="store-language-container">
-            <?= $this->getChildHtml('store_language') ?>
-        </div>
-
-        <?= $this->getChildHtml('currency_switcher') ?>
-
-        <p class="welcome-msg"><?= $this->getChildHtml('welcome') ?> <?= $this->getAdditionalHtml() ?></p>
-    </div>
-</div>
-
 <header id="header" class="page-header">
-    <div class="page-header-container">
-        <a class="logo" href="<?= $this->getUrl('') ?>" title="<?= $this->__('Go to Home Page') ?>">
-            <img src="<?= $this->getLogoSrc() ?>" alt="<?= $this->getLogoAlt() ?>" width="<?= $this->getLogoWidth() ?>" height="<?= $this->getLogoHeight() ?>" />
-        </a>
-
-        <?php // In order for the language switcher to display next to logo on smaller viewports, it will be moved here.
-              // See app.js for details ?>
-        <div class="store-language-container"></div>
-
-        <div class="skip-links">
+    <div class="page-header-container" style="display: flex; place-items: center; gap: 0.5rem">
+        <div>
             <a href="#header-nav" class="skip-link skip-nav">
                 <span class="icon"></span>
                 <span class="label"><?= $this->__('Menu') ?></span>
             </a>
 
-            <a href="#header-search" class="skip-link skip-search" title="<?= $this->__('Search') ?>">
+            <a class="logo" href="<?= $this->getUrl('') ?>" title="<?= $this->__('Go to Home Page') ?>">
+                <img src="<?= $this->getLogoSrc() ?>" alt="<?= $this->getLogoAlt() ?>" width="<?= $this->getLogoWidth() ?>" height="<?= $this->getLogoHeight() ?>" />
+            </a>
+        </div>
+
+        <?= $this->getChildHtml('topSearch') ?>
+
+        <div>
+            <?= $this->getChildHtml('store_language') ?>
+            <?= $this->getChildHtml('currency_switcher') ?>
+
+            <a href="<?= $this->helper('customer')->getAccountUrl() ?>" data-target-element="#header-account" class="skip-link skip-account" title="<?= $this->__('Account') ?>">
                 <span class="icon"></span>
-                <span class="label"><?= $this->__('Search') ?></span>
+                <span class="label"><?= $this->__('Account') ?></span>
             </a>
 
-            <div class="account-cart-wrapper">
-                <a href="<?= $this->helper('customer')->getAccountUrl() ?>" data-target-element="#header-account" class="skip-link skip-account" title="<?= $this->__('Account') ?>">
-                    <span class="icon"></span>
-                    <span class="label"><?= $this->__('Account') ?></span>
-                </a>
-
-                <div class="header-minicart">
-                    <?= $this->getChildHtml('minicart_head') ?>
-                </div>
+            <div class="header-minicart">
+                <?= $this->getChildHtml('minicart_head') ?>
             </div>
         </div>
+    </div>
 
-        <div id="header-nav" class="skip-content">
-            <?= $this->getChildHtml('topMenu') ?>
-        </div>
-
-        <div id="header-search" class="skip-content">
-            <?= $this->getChildHtml('topSearch') ?>
-        </div>
-
-        <div id="header-account" class="skip-content">
-            <?= $this->getChildHtml('topLinks') ?>
-        </div>
+    <div id="header-nav" class="skip-content">
+        <?= $this->getChildHtml('topMenu') ?>
     </div>
 </header>
 
+<div id="header-account" class="skip-content">
+    <?= $this->getChildHtml('topLinks') ?>
+</div>
+
 <?= $this->getChildHtml('topContainer') ?>
+
+<style>
+    .page-header-container div {display: flex; place-items: center;}
+    .currency-switcher label, .form-language label {display: none}
+    #search_mini_form {flex-grow: 1;}
+    .skip-account, .skip-cart {
+        display: grid;
+        grid-auto-flow: row;
+        justify-items: center;
+        padding: 0;
+        gap: 0.5rem;
+        border: none;
+    }
+    .skip-link {float: none}
+    .skip-link .icon {width:30px; height:30px;background-size: 30px;}
+    .skip-link * {margin:0 !important; text-transform: none; line-height:normal}
+
+    @media (max-width: 770px) {
+        .skip-link .label {display: none}
+        .page-header-container {
+            display: grid !important;
+            place-items: normal !important;
+            grid-template-areas:
+                "logo links"
+                "search search";
+        }
+
+        .page-header-container > *:nth-child(1) {grid-area: logo}
+        .page-header-container > *:nth-child(2) {grid-area: search; width: 100%; margin-bottom: 10px}
+        .page-header-container > *:nth-child(3) {grid-area: links}
+    }
+</style>
