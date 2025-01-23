@@ -8481,15 +8481,14 @@ div.paypal-logo span > img {
     width: 100%;
   }
 }
+
 /* ============================================ *
  * Search - Auto Suggest
  * ============================================ */
 .search-autocomplete {
-  left: 0 !important;
+  position: absolute !important;
   overflow: visible !important;
-  position: relative !important;
-  top: 8px !important;
-  width: 100% !important;
+  margin-top: 8px;
   z-index: 200;
   display: none;
 }
