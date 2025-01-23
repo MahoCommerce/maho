@@ -610,7 +610,13 @@ class FormElementDependenceController {
                 let dependentValues = [];
                 const dependentEl = document.getElementById(this.mapFieldId(dependentField));
                 if (dependentEl) {
-                    dependentValues = dependentEl.tagName === 'SELECT' ? this.getSelectValues(dependentEl) : [dependentEl.value];
+                    if (dependentEl.tagName === 'SELECT') {
+                        dependentValues = this.getSelectValues(dependentEl);
+                    } else if (dependentEl.tagName === 'INPUT' && ['radio', 'checkbox'].includes(dependentEl.type)) {
+                        dependentValues.push(dependentEl.checked);
+                    } else {
+                        dependentValues.push(dependentEl.value);
+                    }
                 } else {
                     const fallbackValues = this.config.field_values?.[this.mapFieldId(dependentField)];
                     if (fallbackValues) {
