@@ -495,32 +495,6 @@ document.addEventListener('DOMContentLoaded', () => {
     preventMenuSpill();
     window.addEventListener('delayed-resize', preventMenuSpill);
 
-
-    // ==============================================
-    // Language Switcher
-    // ==============================================
-
-    // In order to display the language switcher next to the logo, we are moving the content at different viewports,
-    // rather than having duplicate markup or changing the design
-    const repositionLanguageSwitcher = (mq) => {
-        const currencySwitcher = document.querySelector('.currency-switcher');
-        const formLanguage = document.querySelector('.form-language');
-
-        if (mq.matches) {
-            const targetContainer = document.querySelector('.page-header-container .store-language-container');
-            if (currencySwitcher) targetContainer.prepend(currencySwitcher);
-            if (formLanguage) targetContainer.prepend(formLanguage);
-        } else {
-            const targetContainer = document.querySelector('.header-language-container .store-language-container');
-            if (currencySwitcher) targetContainer.prepend(currencySwitcher);
-            if (formLanguage) targetContainer.prepend(formLanguage);
-        }
-    };
-    let maxWidthLargeMediaQuery = window.matchMedia('(max-width: ' + bp.large + 'px)');
-    let maxWidthMediumMediaQuery = window.matchMedia('(max-width: ' + bp.medium + 'px)');
-    maxWidthMediumMediaQuery.addEventListener('change', repositionLanguageSwitcher);
-    repositionLanguageSwitcher(maxWidthMediumMediaQuery);
-
     // ==============================================
     // Menu State
     // ==============================================
@@ -530,6 +504,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.sub-menu-active').forEach(el => el.classList.remove('sub-menu-active'));
         document.querySelectorAll('.skip-active').forEach(el => el.classList.remove('skip-active'));
     };
+
+    let maxWidthLargeMediaQuery = window.matchMedia('(max-width: ' + bp.large + 'px)');
+    let maxWidthMediumMediaQuery = window.matchMedia('(max-width: ' + bp.medium + 'px)');
     maxWidthMediumMediaQuery.addEventListener('change', resetMenuState);
     resetMenuState(maxWidthMediumMediaQuery);
 

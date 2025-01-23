@@ -127,20 +127,6 @@ q:after {
   content: '';
 }
 
-input:focus,
-input[type="search"]:focus {
-  outline-offset: -2px;
-}
-
-input[type="search"] {
-  -webkit-appearance: none;
-  /* 1 */
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  /* 2 */
-  box-sizing: border-box;
-}
-
 /* ============================================ *
  * Base Styles
  * ============================================ */
@@ -917,7 +903,7 @@ a.button:hover {
   position: relative;
   max-width: 1260px;
   margin: 0 auto;
-  padding: 15px;
+  padding-inline: 15px;
 }
 .main-container:after,
 .footer-container:after {
@@ -926,7 +912,7 @@ a.button:hover {
   clear: both;
 }
 
-@media only screen and (min-width: 480px) {
+@media only screen and (min-width: 771px) {
   .main-container,
   .footer-container {
     padding: 30px;
@@ -2771,10 +2757,6 @@ body {
     margin: 0 auto;
     padding: 0 30px;
   }
-
-  .page-header-container {
-    position: relative;
-  }
 }
 
 /* ============================================ *
@@ -2839,29 +2821,16 @@ body {
 /* ============================================ *
  * Logo
  * ============================================ */
-.logo {
-  display: block;
-  float: left;
-  width: 65%;
-  min-width: 100px;
-  min-height: 44px;
-  text-align: center;
-  padding: 10px;
-}
+
 .logo img {
-  max-width: 100%;
+  width: 100%;
+  height: auto;
 }
 
 .logo:hover {
   opacity: 0.8;
 }
 
-@media only screen and (min-width: 771px) {
-  .logo {
-    max-width: 300px;
-    min-height: 90px;
-  }
-}
 /* ============================================ *
  * Skip Links
  * ============================================ */
@@ -2880,39 +2849,10 @@ body {
 /* -------------------------------------------- *
  * Skip - Link
  */
-.skip-link {
-  position: relative;
-  float: left;
-  width: 20%;
-  height: 44px;
-  background: var(--maho-color-background);
-  color: var(--maho-color-text-primary);
-  line-height: 42px;
-  text-align: center;
-}
-
-a.skip-link {
-  text-decoration: none;
-}
-
 .skip-link:not(.skip-active):hover {
   opacity: 0.8;
 }
 
-@media only screen and (max-width: 770px) {
-  .skip-link {
-    border-right: 1px solid var(--maho-color-border-light);
-  }
-
-  .skip-link:last-child {
-    border-right: 0;
-  }
-}
-@media only screen and (min-width: 500px) {
-  .skip-link {
-    width: 25%;
-  }
-}
 /* -------------------------------------------- *
  * Skip Link - Active
  */
@@ -2931,21 +2871,8 @@ a.skip-link {
  */
 .skip-link .icon {
   display: inline-block;
-  width: 20px;
-  height: 20px;
-  vertical-align: sub;
 }
 
-.skip-link.skip-nav .icon,
-.skip-link.skip-cart:not(.no-count) .icon {
-  margin-right: 3px;
-}
-
-@media only screen and (min-width: 500px) {
-  .skip-link .icon {
-    margin-right: 3px;
-  }
-}
 /* -------------------------------------------- *
  * Skip Link - Label
  */
@@ -3009,28 +2936,10 @@ a.skip-link {
 /* ============================================ *
  * Nav - Skip Link
  * ============================================ */
-.skip-nav {
-  width: 40%;
-}
-
-.skip-nav .label {
-  display: inline;
-}
-
 .skip-nav .icon {
   background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>');
 }
 
-@media only screen and (min-width: 500px) {
-  .skip-nav {
-    width: 25%;
-  }
-}
-@media only screen and (min-width: 771px) {
-  .skip-nav {
-    display: none;
-  }
-}
 /* ============================================ *
  * Nav - Skip Content
  * ============================================ */
@@ -3146,7 +3055,10 @@ a.skip-link {
     /* Level 1+ */
   }
   .nav-primary a.level0 {
-    padding: 0 25px;
+    padding-inline: 25px;
+  }
+  .nav-primary > li:first-child > a.level0 {
+    padding-inline-start: 0;
   }
   .nav-primary li.level0,
   .nav-primary a.level0 {
@@ -3262,7 +3174,7 @@ a.skip-link {
 
 #search {
   width: 100%;
-  height: 40px;
+  height: 35px;
   padding-right: 40px;
 }
 
@@ -3280,12 +3192,10 @@ a.skip-link {
 #search_mini_form .search-button:before, .skip-search .icon {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 2px;
+  right: 2px;
   width: 30px;
   height: 30px;
-  margin-top: -15px;
-  margin-left: -15px;
   background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="%23999" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>');
 }
 
@@ -3303,7 +3213,8 @@ a.skip-link {
  * ============================================ */
 .skip-account .icon,
 #customer-reviews dt {
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23999" class="size-6"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd" /></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="%23999" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>');
+  background-color: var(--maho-color-text-secondary);
 }
 
 @media only screen and (min-width: 771px) {
@@ -3361,7 +3272,8 @@ a.skip-link {
  * Header - Cart
  * ============================================ */
 .skip-cart .icon {
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23999" class="size-6"><path d="M2.25 2.25a.75.75 0 0 0 0 1.5h1.386c.17 0 .318.114.362.278l2.558 9.592a3.752 3.752 0 0 0-2.806 3.63c0 .414.336.75.75.75h15.75a.75.75 0 0 0 0-1.5H5.378A2.25 2.25 0 0 1 7.5 15h11.218a.75.75 0 0 0 .674-.421 60.358 60.358 0 0 0 2.96-7.228.75.75 0 0 0-.525-.965A60.864 60.864 0 0 0 5.68 4.509l-.232-.867A1.875 1.875 0 0 0 3.636 2.25H2.25ZM3.75 20.25a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM16.5 20.25a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" /></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="%23999" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" /></svg>');
+  background-color: var(--maho-color-text-secondary);
 }
 
 @media only screen and (min-width: 771px) {
@@ -8576,7 +8488,7 @@ div.paypal-logo span > img {
   left: 0 !important;
   overflow: visible !important;
   position: relative !important;
-  top: 15px !important;
+  top: 8px !important;
   width: 100% !important;
   z-index: 200;
   display: none;
