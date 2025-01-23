@@ -61,6 +61,7 @@
     #search_mini_form {flex-grow: 1; width: 100%}
     .skip-account, .skip-cart {
         display: grid;
+        position: relative;
         grid-auto-flow: row;
         justify-items: center;
         padding: 0;
@@ -70,6 +71,19 @@
     }
     .skip-link .icon {width:30px; height:30px;background-size: 30px;}
     .skip-link * {margin:0 !important; text-transform: none; line-height:normal; font-size: 0.688rem}
+
+    .skip-cart .count {
+        border-radius: 50%;
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        color: var(--maho-color-background);
+        background: var(--maho-color-primary);
+        display: block;
+        padding: 2px;
+        min-width: 17px;
+        text-align: center;
+    }
 
     #select-language, #select-currency {border:none; height: 30px;}
     #search_mini_form .input-box {text-align: right}
