@@ -128,12 +128,4 @@ class Mage_Adminhtml_Helper_Data extends Mage_Adminhtml_Helper_Help_Mapping
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_ADMINHTML_SECURITY_USE_FORM_KEY);
     }
-
-    public function getWebAuthn(): \lbuchs\WebAuthn\WebAuthn
-    {
-        return new \lbuchs\WebAuthn\WebAuthn(
-            Mage::getStoreConfig('web/secure/name') ?: 'Maho',
-            parse_url(Mage::getBaseUrl(), PHP_URL_HOST),
-        );
-    }
 }
