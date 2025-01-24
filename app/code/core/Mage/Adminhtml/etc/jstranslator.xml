@@ -52,8 +52,14 @@
     </script>
 
     <script path="mage/adminhtml/system/account.js" module="adminhtml">
-        <remove-confirm translate="message">
-            <message>Are you sure you want to remove your passkey?</message>
-        </remove-confirm>
+        <validate-login-method-enabled translate="message">
+            <message>Enable at least one authentication method.</message>
+        </validate-login-method-enabled>
+        <passkey-registered translate="message">
+            <message>Passkey Registered</message>
+        </passkey-registered>
+        <passkey-deleted translate="message">
+            <message>Passkey Deleted</message>
+        </passkey-deleted>
     </script>
 </jstranslator>

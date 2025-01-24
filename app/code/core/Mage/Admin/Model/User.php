@@ -549,7 +549,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             ->addFieldToFilter('passkey_credential_id_hash', $credentialId)
             ->getFirstItem();
         if ($existingUser->getId() && $existingUser->getId() != $this->getId()) {
-            Mage::throwException(Mage::helper('adminhtml')->__('Credential already registered to another user'));
+            Mage::throwException(Mage::helper('adminhtml')->__('Passkey credential already registered to another user.'));
         }
 
         // Store the credential and public key, pending save
