@@ -411,11 +411,11 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             if ($this->getPasskeyEnabled()) {
                 if (json_validate($password)) {
                     $passkeyData = json_decode($password);
-                    $clientDataJSON = base64_decode($passkeyData?->clientDataJSON ?? '');
-                    $authenticatorData = base64_decode($passkeyData?->authenticatorData ?? '');
-                    $signature = base64_decode($passkeyData?->signature ?? '');
-                    $userHandle = base64_decode($passkeyData?->userHandle ?? '');
-                    $id = base64_decode($passkeyData?->id ?? '');
+                    $clientDataJSON = base64_decode($passkeyData->clientDataJSON ?? '');
+                    $authenticatorData = base64_decode($passkeyData->authenticatorData ?? '');
+                    $signature = base64_decode($passkeyData->signature ?? '');
+                    $userHandle = base64_decode($passkeyData->userHandle ?? '');
+                    $id = base64_decode($passkeyData->id ?? '');
 
                     $publicKey = $this->getPasskeyPublicKey();
                     $challenge = $this->getSession()->getPasskeyChallenge();
