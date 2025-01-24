@@ -25,12 +25,6 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
      */
     public const ADMIN_RESOURCE = 'system/myaccount';
 
-    protected $_publicActions = [
-        'passkeyregisterstart',
-        'passkeyregistersave',
-        'passkeyloginstart',
-    ];
-
     public function indexAction()
     {
         $this->_title($this->__('System'))->_title($this->__('My Account'));
@@ -50,24 +44,26 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
         $user = Mage::getModel('admin/user')->load($userId);
 
         $user->setId($userId)
-            ->setUsername($this->getRequest()->getParam('username', false))
-            ->setFirstname($this->getRequest()->getParam('firstname', false))
-            ->setLastname($this->getRequest()->getParam('lastname', false))
-            ->setEmail(strtolower($this->getRequest()->getParam('email', false)));
-        if ($this->getRequest()->getParam('new_password', false)) {
-            $user->setNewPassword($this->getRequest()->getParam('new_password', false));
+            ->setUsername($this->getRequest()->getPost('username', false))
+            ->setFirstname($this->getRequest()->getPost('firstname', false))
+            ->setLastname($this->getRequest()->getPost('lastname', false))
+            ->setEmail(strtolower($this->getRequest()->getPost('email', false)));
+
+        if ($this->getRequest()->getPost('password_enabled') && $this->getRequest()->getPost('password_change') !== null) {
+            if ($this->getRequest()->getPost('new_password', false)) {
+                $user->setNewPassword($this->getRequest()->getPost('new_password', false));
+            }
+            if ($this->getRequest()->getPost('password_confirmation', false)) {
+                $user->setPasswordConfirmation($this->getRequest()->getPost('password_confirmation', false));
+            }
         }
 
-        if ($this->getRequest()->getParam('password_confirmation', false)) {
-            $user->setPasswordConfirmation($this->getRequest()->getParam('password_confirmation', false));
-        }
-
-        $backendLocale = $this->getRequest()->getParam('backend_locale', false);
+        $backendLocale = $this->getRequest()->getPost('backend_locale', false);
         $backendLocale = $backendLocale == 0 ? null : $backendLocale;
         $user->setBackendLocale($backendLocale);
 
-        //Validate current admin password
-        $currentPassword = $this->getRequest()->getParam('current_password', null);
+        // Validate current admin password
+        $currentPassword = $this->getRequest()->getPost('current_password', null);
         $this->getRequest()->setParam('current_password', null);
         $result = $this->_validateCurrentPassword($currentPassword);
 
@@ -82,168 +78,30 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
             return;
         }
 
-        $twoFactorEnabled = (bool) $this->getRequest()->getParam('twofa_enabled', 0);
-        $twoFactorVerificationCode = (string) $this->getRequest()->getParam('twofa_verification_code', '');
-        if ($twoFactorEnabled && $twoFactorVerificationCode) {
-            $twoFactorAuthenticationHelper = Mage::helper('adminhtml/twoFactorAuthentication');
-            if ($twoFactorAuthenticationHelper->verifyCode($user->getTwofaSecret(), $twoFactorVerificationCode)) {
-                $user->setTwofaEnabled(1);
-            } else {
-                $user->setTwofaEnabled(0);
-                $user->setTwofaSecret(null);
-                Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Invalid 2FA verification code'));
-            }
-        } else {
-            $user->setTwofaEnabled(0);
-            $user->setTwofaSecret(null);
-        }
-
         try {
-            $user->save();
-            Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('The account has been saved.'));
-        } catch (Mage_Core_Exception $e) {
-            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-        } catch (Exception $e) {
-            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('An error occurred while saving account.'));
-        }
-        $this->getResponse()->setRedirect($this->getUrl('*/*/'));
-    }
+            $user->setPasswordEnabled((bool) $this->getRequest()->getPost('password_enabled'))
+                ->setPasskeyEnabled((bool) $this->getRequest()->getPost('passkey_enabled'))
+                ->setTwofaEnabled((bool) $this->getRequest()->getPost('twofa_enabled'));
 
-    public function passkeyregisterstartAction()
-    {
-        try {
-            if (!$this->getRequest()->isPost()) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Invalid request method'));
+            if (!$user->getPasswordEnabled() && !$user->getPasskeyEnabled()) {
+                Mage::throwException(Mage::helper('adminhtml')->__('Enable at least one authentication method.'));
             }
 
-            $user = Mage::getSingleton('admin/session')->getUser();
-            if (!$user) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Not authenticated'));
+            $passkeyValue = $this->getRequest()->getPost('passkey_value');
+            if ($user->getPasskeyEnabled() && json_validate($passkeyValue)) {
+                $user->setPasskeyData(json_decode($passkeyValue, true));
+            } elseif ($passkeyValue === 'deleted') {
+                $user->setPasskeyCredentialIdHash(null);
+                $user->setPasskeyPublicKey(null);
             }
 
-            $webAuthn = Mage::helper('adminhtml')->getWebAuthn();
-            $userId = decbin($user->getId());
-            $userName = $user->getUsername();
-            $userDisplayName = $user->getName();
-            $createArgs = $webAuthn->getCreateArgs(
-                $userId,
-                $userName,
-                $userDisplayName,
-                60000,
-            );
-
-            $this->_getSession()->setPasskeyChallange($webAuthn->getChallenge());
-            $this->getResponse()->setBodyJson($createArgs);
-            return;
-        } catch (Mage_Core_Exception $e) {
-            $error = $e->getMessage();
-        } catch (Exception $e) {
-            $error = Mage::helper('adminhtml')->__('Internal Error');
-            Mage::logException($e);
-        }
-
-        if (isset($error)) {
-            $error = Mage::helper('adminhtml')->__('Failed to register passkey: %s', $error);
-            $this->getResponse()
-                ->setHttpResponseCode(400)
-                ->setBodyJson(['error' => true, 'message' => $error]);
-        }
-    }
-
-    public function passkeyregistersaveAction()
-    {
-        try {
-            if (!$this->getRequest()->isPost()) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Invalid request method'));
+            $twofaCode = $this->getRequest()->getPost('twofa_verification_code', '');
+            if ($user->getTwofaEnabled() && $twofaCode) {
+                if (!Mage::helper('admin/auth')->verifyTwofaCode($user->getTwofaSecret(), $twofaCode)) {
+                    Mage::throwException(Mage::helper('adminhtml')->__('Invalid 2FA verification code'));
+                }
             }
 
-            $user = Mage::getSingleton('admin/session')->getUser();
-            if (!$user) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Not authenticated'));
-            }
-
-            if (!json_validate($this->getRequest()->getRawBody())) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Invalid request body'));
-            }
-
-            $body = json_decode($this->getRequest()->getRawBody(), true);
-            $attestationObject = base64_decode($body['attestationObject']);
-            $clientDataJSON = base64_decode($body['clientDataJSON']);
-            $challenge = Mage::getSingleton('adminhtml/session')->getPasskeyChallange();
-
-            if (!$attestationObject || !$clientDataJSON || !$challenge) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Missing required fields'));
-            }
-
-            $webAuthn = Mage::helper('adminhtml')->getWebAuthn();
-            $data = $webAuthn->processCreate(
-                $clientDataJSON,
-                $attestationObject,
-                $challenge,
-            );
-
-            // Store credential data in database
-            $credentialId = base64_encode($data->credentialId);
-            $publicKey = $data->credentialPublicKey;
-
-            // Check if another user already has this credential
-            $existingUser = Mage::getModel('admin/user')->getCollection()
-                ->addFieldToFilter('passkey_credential_id_hash', $credentialId)
-                ->getFirstItem();
-            if ($existingUser->getId() && $existingUser->getId() != $user->getId()) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Credential already registered to another user'));
-            }
-
-            // Save the credential
-            $user->setPasskeyCredentialIdHash($credentialId)
-                ->setPasskeyPublicKey($publicKey)
-                ->save();
-
-            $this->_getSession()->unsPasskeyChallenge();
-            $this->getResponse()->setBodyJson([
-                'success' => true,
-                'message' => Mage::helper('adminhtml')->__('Passkey registered successfully!'),
-            ]);
-        } catch (Mage_Core_Exception $e) {
-            $error = $e->getMessage();
-        } catch (Exception $e) {
-            $error = Mage::helper('adminhtml')->__('Internal Error');
-            Mage::logException($e);
-        }
-
-        if (isset($error)) {
-            $error = Mage::helper('adminhtml')->__('Failed to save credential: %s', $error);
-            $this->getResponse()
-                ->setHttpResponseCode(400)
-                ->setBodyJson(['error' => true, 'message' => $error]);
-        }
-    }
-
-    public function removepasskeyAction()
-    {
-        $userId = Mage::getSingleton('admin/session')->getUser()->getId();
-        $user = Mage::getModel('admin/user')->load($userId);
-
-        //Validate current admin password
-        $currentPassword = $this->getRequest()->getParam('current_password', null);
-        $this->getRequest()->setParam('current_password', null);
-        $result = $this->_validateCurrentPassword($currentPassword);
-
-        if (!is_array($result)) {
-            $result = $user->validate();
-        }
-        if (is_array($result)) {
-            foreach ($result as $error) {
-                Mage::getSingleton('adminhtml/session')->addError($error);
-            }
-            $this->getResponse()->setRedirect($this->getUrl('*/*/'));
-            return;
-        }
-
-        $user->setPasskeyCredentialIdHash(null);
-        $user->setPasskeyPublicKey(null);
-
-        try {
             $user->save();
             Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('The account has been saved.'));
         } catch (Mage_Core_Exception $e) {

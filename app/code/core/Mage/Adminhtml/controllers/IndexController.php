@@ -380,11 +380,47 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     }
 
     /**
-     * Administrator get passkey options action
+     * Administrator passkey register start action
+     */
+    public function passkeyregisterstartAction()
+    {
+        try {
+            if (!$this->getRequest()->isPost()) {
+                Mage::throwException(Mage::helper('adminhtml')->__('Invalid request method'));
+            }
+            if (!$this->_validateFormKey()) {
+                Mage::throwException(Mage::helper('adminhtml')->__('Invalid Form Key. Please refresh the page.'));
+            }
+
+            $user = Mage::getSingleton('admin/session')->getUser();
+            if (!$user) {
+                Mage::throwException(Mage::helper('adminhtml')->__('Not authenticated'));
+            }
+            $this->getResponse()->setBodyJson($user->getPasskeyCreateArgs());
+
+        } catch (Mage_Core_Exception $e) {
+            $error = $e->getMessage();
+        } catch (Exception $e) {
+            $error = Mage::helper('adminhtml')->__('Internal Error');
+            Mage::logException($e);
+        }
+
+        if (isset($error)) {
+            $this->getResponse()
+                ->setHttpResponseCode(400)
+                ->setBodyJson(['error' => true, 'message' => $error]);
+        }
+    }
+
+    /**
+     * Administrator passkey login start action
      */
     public function passkeyloginstartAction()
     {
         try {
+            if (!$this->getRequest()->isPost()) {
+                Mage::throwException(Mage::helper('adminhtml')->__('Invalid request method'));
+            }
             if (!$this->_validateFormKey()) {
                 Mage::throwException(Mage::helper('adminhtml')->__('Invalid Form Key. Please refresh the page.'));
             }
@@ -392,8 +428,8 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
             $postLogin = $this->getRequest()->getPost('login');
             $username = $postLogin['username'] ?? '';
             $user = Mage::getModel('admin/user')->loadByUsername($username);
-
             $this->getResponse()->setBodyJson($user->getPasskeyGetArgs());
+
         } catch (Mage_Core_Exception $e) {
             $error = $e->getMessage();
         } catch (Exception $e) {

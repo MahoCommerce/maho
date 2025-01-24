@@ -169,7 +169,7 @@
                         }
 
                         document.getElementById('login').value = JSON.stringify(passkeyData);
-                        formEl.submit();
+                        gotoStep(2);
                     } catch (error) {
                         messagesEl.textContent = error.message;
                     }

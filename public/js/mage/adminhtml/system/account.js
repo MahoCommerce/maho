@@ -7,16 +7,23 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-class MahoPasskeyController
+class MahoAdminhtmlSystemAccountController
 {
     constructor(config = {}) {
         this.config = config;
-
-        if (!this.config.registerStartUrl || !this.config.registerSaveUrl || !this.config.removePasskeyUrl) {
-            throw new Error('Invalid passkey configuration');
+        if (!this.config.passkeyRegisterStartUrl) {
+            throw new Error('Missing Passkey Register Start URL');
         }
 
+        this.initForm();
         this.bindEventListeners();
+    }
+
+    initForm() {
+        Validation.add('validate-login-method-enabled', 'Enable at least one authentication method.', (v) => {
+            return document.getElementById('password_enabled').value == '1'
+                || document.getElementById('passkey_enabled').value == '1';
+        });
     }
 
     bindEventListeners() {
@@ -26,7 +33,7 @@ class MahoPasskeyController
 
     async startRegistration() {
         try {
-            const options = await mahoFetch(this.config.registerStartUrl, { method: 'POST' });
+            const options = await mahoFetch(this.config.passkeyRegisterStartUrl, { method: 'POST' });
             recursiveBase64StrToArrayBuffer(options);
 
             const cred = await navigator.credentials.create(options);
@@ -36,24 +43,19 @@ class MahoPasskeyController
                 attestationObject: cred.response.attestationObject ? arrayBufferToBase64(cred.response.attestationObject) : null
             };
 
-            const verifyResponse = await mahoFetch(this.config.registerSaveUrl + '?form_key=' + FORM_KEY, {
-                method: 'POST',
-                body: JSON.stringify(authenticatorAttestationResponse),
-            });
-
-            alert(verifyResponse.message);
-            location.reload();
+            document.getElementById('passkey_status').innerHTML = '<em>Passkey Registered</em>';
+            document.getElementById('passkey_value').value = JSON.stringify(authenticatorAttestationResponse);
+            document.getElementById('remove-passkey-btn').classList.remove('no-display');
         } catch (error) {
-            alert(error.message);
-            console.error('Registration error:', error);
+            document.getElementById('passkey_status').innerHTML = `<span class="error">${escapeHtml(error.message)}</span>`;
+            document.getElementById('passkey_value').value = '';
+            document.getElementById('remove-passkey-btn').classList.add('no-display');
         }
     }
 
     removePasskey() {
-        const form = document.getElementById('edit_form');
-        if (form && editForm?.validate() && confirm(Translator.translate('Are you sure you want to remove your passkey?'))) {
-            form.action = this.config.removePasskeyUrl;
-            form.submit();
-        }
+        document.getElementById('passkey_status').innerHTML = `<em>Passkey Deleted</em>`;
+        document.getElementById('passkey_value').value = 'deleted';
+        document.getElementById('remove-passkey-btn').classList.add('no-display');
     }
 };

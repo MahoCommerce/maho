@@ -15,6 +15,8 @@ $installer->startSetup();
 
 $installer->run("
     ALTER TABLE {$this->getTable('admin/user')}
+    ADD COLUMN `password_enabled` TINYINT(1) NOT NULL DEFAULT 1,
+    ADD COLUMN `passkey_enabled` TINYINT(1) NOT NULL DEFAULT 0,
     ADD COLUMN `passkey_credential_id_hash` varchar(255) NULL,
     ADD COLUMN `passkey_public_key` VARCHAR(255) NULL
 ");

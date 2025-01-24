@@ -381,7 +381,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
      */
     public function authenticate(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $password, #[\SensitiveParameter] ?string $twofaVerificationCode = null): bool
     {
-        $config = Mage::getStoreConfigFlag('admin/security/use_case_sensitive_login');
         $result = false;
 
         try {
@@ -391,55 +390,84 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             ]);
             $this->loadByUsername($username);
 
-            if ($this->getPasskeyCredentialIdHash() && $this->getPasskeyPublicKey()) {
-                if (json_validate($password)) {
-                    $passkeyData = json_decode($password);
-                    $clientDataJSON = !empty($passkeyData->clientDataJSON) ? base64_decode($passkeyData->clientDataJSON) : null;
-                    $authenticatorData = !empty($passkeyData->authenticatorData) ? base64_decode($passkeyData->authenticatorData) : null;
-                    $signature = !empty($passkeyData->signature) ? base64_decode($passkeyData->signature) : null;
-                    $userHandle = !empty($passkeyData->userHandle) ? base64_decode($passkeyData->userHandle) : null;
-                    $id = !empty($passkeyData->id) ? base64_decode($passkeyData->id) : null;
-                    $challenge = $this->getSession()->getPasskeyChallenge();
-                    $this->getSession()->unsPasskeyChallange();
-
-                    $webAuthn = Mage::helper('adminhtml')->getWebAuthn();
-                    $passkeyVerified = $webAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $this->getPasskeyPublicKey(), $challenge);
-                    if ($passkeyVerified) {
-                        return true;
-                    }
-                }
-
+            if (!$this->getId()) {
                 throw new Mage_Core_Exception(
                     Mage::helper('adminhtml')->__('Access denied.'),
                     self::AUTH_ERR_ACCESS_DENIED,
                 );
             }
 
-            $sensitive = ($config) ? $username == $this->getUsername() : true;
-            if ($sensitive && $this->getId() && $this->validatePasswordHash($password, $this->getPassword())) {
-                if ($this->getIsActive() != '1') {
-                    throw new Mage_Core_Exception(
-                        Mage::helper('adminhtml')->__('This account is inactive.'),
-                        self::AUTH_ERR_ACCOUNT_INACTIVE,
-                    );
-                }
-                if (!$this->hasAssigned2Role($this->getId())) {
-                    throw new Mage_Core_Exception(
-                        Mage::helper('adminhtml')->__('Access denied.'),
-                        self::AUTH_ERR_ACCESS_DENIED,
-                    );
-                }
-                if ($this->getTwofaEnabled() && $secret = $this->getTwofaSecret()) {
-                    if (!Mage::helper('adminhtml/twoFactorAuthentication')->verifyCode($secret, $twofaVerificationCode ?? '')) {
-                        throw new Mage_Core_Exception(
-                            Mage::helper('adminhtml')->__('2FA verification code is invalid.'),
-                            self::AUTH_ERR_2FA_INVALID,
-                        );
-                    }
-                }
-                $result = true;
+            $useCaseSensitiveLogin = Mage::getStoreConfigFlag('admin/security/use_case_sensitive_login');
+            if ($useCaseSensitiveLogin && $this->getUsername() !== $username) {
+                throw new Mage_Core_Exception(
+                    Mage::helper('adminhtml')->__('Access denied.'),
+                    self::AUTH_ERR_ACCESS_DENIED,
+                );
             }
 
+            $usedPasskey = false;
+            $needsTwofa = true;
+
+            if ($this->getPasskeyEnabled()) {
+                if (json_validate($password)) {
+                    $passkeyData = json_decode($password);
+                    $clientDataJSON = base64_decode($passkeyData?->clientDataJSON ?? '');
+                    $authenticatorData = base64_decode($passkeyData?->authenticatorData ?? '');
+                    $signature = base64_decode($passkeyData?->signature ?? '');
+                    $userHandle = base64_decode($passkeyData?->userHandle ?? '');
+                    $id = base64_decode($passkeyData?->id ?? '');
+
+                    $publicKey = $this->getPasskeyPublicKey();
+                    $challenge = $this->getSession()->getPasskeyChallenge();
+                    $this->getSession()->unsPasskeyChallange();
+
+                    $webAuthn = Mage::helper('admin/auth')->getWebAuthn();
+                    $usedPasskey = $webAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $publicKey, $challenge);
+
+                    $authenticatorObj = Mage::helper('admin/auth')->getWebAuthnAttestationAuthenticatorData($authenticatorData);
+                    $needsTwofa = !$authenticatorObj->getUserVerified();
+                }
+            }
+
+            if (!$usedPasskey && !$this->getPasswordEnabled()) {
+                throw new Mage_Core_Exception(
+                    Mage::helper('adminhtml')->__('Access denied.'),
+                    self::AUTH_ERR_ACCESS_DENIED,
+                );
+            }
+
+            if (!$usedPasskey && !$this->validatePasswordHash($password, $this->getPassword())) {
+                throw new Mage_Core_Exception(
+                    Mage::helper('adminhtml')->__('Access denied.'),
+                    self::AUTH_ERR_ACCESS_DENIED,
+                );
+            }
+
+            if ($needsTwofa && $this->getTwofaEnabled()) {
+                $secret = $this->getTwofaSecret();
+                if (!Mage::helper('admin/auth')->verifyTwofaCode($secret, $twofaVerificationCode ?? '')) {
+                    throw new Mage_Core_Exception(
+                        Mage::helper('adminhtml')->__('2FA verification code is invalid.'),
+                        self::AUTH_ERR_2FA_INVALID,
+                    );
+                }
+            }
+
+            if ($this->getIsActive() != '1') {
+                throw new Mage_Core_Exception(
+                    Mage::helper('adminhtml')->__('This account is inactive.'),
+                    self::AUTH_ERR_ACCOUNT_INACTIVE,
+                );
+            }
+
+            if (!$this->hasAssigned2Role($this->getId())) {
+                throw new Mage_Core_Exception(
+                    Mage::helper('adminhtml')->__('Access denied.'),
+                    self::AUTH_ERR_ACCESS_DENIED,
+                );
+            }
+
+            $result = true;
             Mage::dispatchEvent('admin_user_authenticate_after', [
                 'username' => $username,
                 'password' => $password,
@@ -458,7 +486,25 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Get passkey authentication options
+     * Get Passkey CreateArgs object
+     * @throws Mage_Core_Exception
+     */
+    public function getPasskeyCreateArgs(): stdClass
+    {
+        $webAuthn = Mage::helper('admin/auth')->getWebAuthn();
+        $createArgs = $webAuthn->getCreateArgs(
+            decbin($this->getId()), // User ID
+            $this->getUsername(),   // User Name
+            $this->getName(),       // Display Name
+            60000,                  // Timeout
+        );
+        $this->getSession()->setPasskeyChallenge($webAuthn->getChallenge());
+
+        return $createArgs;
+    }
+
+    /**
+     * Get Passkey GetArgs object
      * @throws Mage_Core_Exception
      */
     public function getPasskeyGetArgs(): stdClass
@@ -467,11 +513,48 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             Mage::throwException(Mage::helper('adminhtml')->__('Passkey is not enabled for this account.'));
         }
 
-        $webAuthn = Mage::helper('adminhtml')->getWebAuthn();
+        $webAuthn = Mage::helper('admin/auth')->getWebAuthn();
         $getArgs = $webAuthn->getGetArgs([ base64_decode($this->getPasskeyCredentialIdHash()) ]);
         $this->getSession()->setPasskeyChallenge($webAuthn->getChallenge());
 
         return $getArgs;
+    }
+
+    /**
+     * Validate and set new passkey data
+     * @throws Mage_Core_Exception
+     */
+    public function setPasskeyData($data)
+    {
+        $challenge = $this->getSession()->getPasskeyChallenge();
+        $attestationObject = base64_decode($data['attestationObject']);
+        $clientDataJSON = base64_decode($data['clientDataJSON']);
+
+        if (!$challenge || !$attestationObject || !$clientDataJSON) {
+            Mage::throwException(Mage::helper('adminhtml')->__('Missing required fields'));
+        }
+
+        $webAuthn = Mage::helper('admin/auth')->getWebAuthn();
+        $result = $webAuthn->processCreate(
+            $clientDataJSON,
+            $attestationObject,
+            $challenge,
+        );
+
+        $credentialId = base64_encode($result->credentialId);
+        $publicKey = $result->credentialPublicKey;
+
+        // Check if another user already has this credential
+        $existingUser = Mage::getModel('admin/user')->getCollection()
+            ->addFieldToFilter('passkey_credential_id_hash', $credentialId)
+            ->getFirstItem();
+        if ($existingUser->getId() && $existingUser->getId() != $this->getId()) {
+            Mage::throwException(Mage::helper('adminhtml')->__('Credential already registered to another user'));
+        }
+
+        // Store the credential and public key, pending save
+        $this->setPasskeyCredentialIdHash($credentialId)
+            ->setPasskeyPublicKey($publicKey);
     }
 
     public function validatePasswordHash(string $string1, string $string2): bool
