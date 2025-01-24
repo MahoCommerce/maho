@@ -47,6 +47,8 @@
   --maho-color-input-border: var(--maho-color-border-dark);
   --maho-color-input-focus: var(--maho-color-primary);
   --maho-color-input-error: var(--maho-color-error);
+
+  accent-color: var(--maho-color-primary);
 }
 
 /* ============================================ *
@@ -3211,10 +3213,18 @@ body {
 /* ============================================ *
  * Header - Account
  * ============================================ */
-.skip-account .icon,
-#customer-reviews dt {
+.skip-account .icon, #customer-reviews dt:before {
   mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="%23999" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>');
+  mask-repeat: no-repeat;
   background-color: var(--maho-color-text-secondary);
+}
+
+#customer-reviews dt:before {
+  content: '';
+  position: absolute;
+  margin-left: -25px;
+  width: 20px;
+  height: 20px;
 }
 
 @media only screen and (min-width: 771px) {
