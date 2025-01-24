@@ -381,8 +381,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
      */
     public function authenticate(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $password, #[\SensitiveParameter] ?string $twofaVerificationCode = null): bool
     {
-        $result = false;
-
         try {
             Mage::dispatchEvent('admin_user_authenticate_before', [
                 'username' => $username,
@@ -467,22 +465,19 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                 );
             }
 
-            $result = true;
             Mage::dispatchEvent('admin_user_authenticate_after', [
                 'username' => $username,
                 'password' => $password,
                 'user'     => $this,
-                'result'   => $result,
+                'result'   => true,
             ]);
-        } catch (Mage_Core_Exception $e) {
+
+            return true;
+
+        } catch (Exception $e) {
             $this->unsetData();
             throw $e;
         }
-
-        if (!$result) {
-            $this->unsetData();
-        }
-        return $result;
     }
 
     /**
