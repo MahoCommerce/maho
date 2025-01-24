@@ -427,18 +427,28 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                 }
             }
 
-            if (!$usedPasskey && !$this->getPasswordEnabled()) {
-                throw new Mage_Core_Exception(
-                    Mage::helper('adminhtml')->__('Access denied.'),
-                    self::AUTH_ERR_ACCESS_DENIED,
-                );
-            }
+            if (!$usedPasskey) {
+                if (!$this->getPasswordEnabled()) {
+                    throw new Mage_Core_Exception(
+                        Mage::helper('adminhtml')->__('Access denied.'),
+                        self::AUTH_ERR_ACCESS_DENIED,
+                    );
+                }
 
-            if (!$usedPasskey && !$this->validatePasswordHash($password, $this->getPassword())) {
-                throw new Mage_Core_Exception(
-                    Mage::helper('adminhtml')->__('Access denied.'),
-                    self::AUTH_ERR_ACCESS_DENIED,
-                );
+                if (!$this->validatePasswordHash($password, $this->getPassword())) {
+                    throw new Mage_Core_Exception(
+                        Mage::helper('adminhtml')->__('Access denied.'),
+                        self::AUTH_ERR_ACCESS_DENIED,
+                    );
+                }
+
+                // Upgrade hash version
+                if (!$this->getPasswordUpgraded() && !$this->validatePasswordHashSha256($password, $this->getPassword())) {
+                    $this->setNewPassword($password)
+                        ->setForceNewPassword(true)
+                        ->setPasswordUpgraded(true)
+                        ->save();
+                }
             }
 
             if ($needsTwofa && $this->getTwofaEnabled()) {
@@ -552,9 +562,14 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             ->setPasskeyPublicKey($publicKey);
     }
 
-    public function validatePasswordHash(string $string1, string $string2): bool
+    public function validatePasswordHash(#[\SensitiveParameter] string $string1, string $string2): bool
     {
         return Mage::helper('core')->validateHash($string1, $string2);
+    }
+
+    public function validatePasswordHashSha256(#[\SensitiveParameter] string $string1, string $string2): bool
+    {
+        return Mage::helper('core')->getEncryptor()->validateHashByVersion($string1, $string2, Mage_Core_Model_Encryption::HASH_VERSION_SHA256);
     }
 
     /**
