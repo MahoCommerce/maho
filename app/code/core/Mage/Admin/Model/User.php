@@ -495,10 +495,9 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             return true;
 
         } catch (Exception $e) {
-            Mage::dispatchEvent('admin_user_authenticate_after', [
+            Mage::dispatchEvent('admin_user_authenticate_failed', [
                 'username' => $username,
                 'user'     => $this,
-                'result'   => false,
             ]);
 
             $this->unsetData();
