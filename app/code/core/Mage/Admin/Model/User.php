@@ -488,13 +488,20 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
             Mage::dispatchEvent('admin_user_authenticate_after', [
                 'username' => $username,
-                'password' => $password,
                 'user'     => $this,
                 'result'   => true,
             ]);
 
             return true;
 
+        } catch (Mage_Core_Exception $e) {
+            Mage::dispatchEvent('admin_user_authenticate_failed', [
+                'username' => $username,
+                'user'     => $this,
+                'error'    => $e,
+            ]);
+            $this->unsetData();
+            throw $e;
         } catch (Exception $e) {
             $this->unsetData();
             throw $e;
