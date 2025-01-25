@@ -14,8 +14,10 @@ $installer = $this;
 $installer->startSetup();
 
 $installer->run("
-    ALTER TABLE {$this->getTable('sales/order_status')}
-    ADD COLUMN `color` VARCHAR(20) NULL
+    ALTER TABLE {$this->getTable('admin/user')}
+    ADD COLUMN `passkey_credential_id_hash` varchar(255) NULL,
+    ADD COLUMN `passkey_public_key` VARCHAR(255) NULL,
+    ADD COLUMN `password_enabled` TINYINT(1) NOT NULL DEFAULT 1
 ");
 
 $installer->endSetup();

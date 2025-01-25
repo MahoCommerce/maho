@@ -35,8 +35,10 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
         $this->_init('sales/order');
         $this
             ->addFilterToMap('entity_id', 'main_table.entity_id')
+            ->addFilterToMap('store_id', 'main_table.store_id')
             ->addFilterToMap('customer_id', 'main_table.customer_id')
-            ->addFilterToMap('quote_address_id', 'main_table.quote_address_id');
+            ->addFilterToMap('quote_address_id', 'main_table.quote_address_id')
+            ->addFilterToMap('created_at', 'main_table.created_at');
     }
 
     /**

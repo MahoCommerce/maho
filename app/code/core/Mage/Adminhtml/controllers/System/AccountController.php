@@ -7,7 +7,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -44,24 +44,26 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
         $user = Mage::getModel('admin/user')->load($userId);
 
         $user->setId($userId)
-            ->setUsername($this->getRequest()->getParam('username', false))
-            ->setFirstname($this->getRequest()->getParam('firstname', false))
-            ->setLastname($this->getRequest()->getParam('lastname', false))
-            ->setEmail(strtolower($this->getRequest()->getParam('email', false)));
-        if ($this->getRequest()->getParam('new_password', false)) {
-            $user->setNewPassword($this->getRequest()->getParam('new_password', false));
+            ->setUsername($this->getRequest()->getPost('username', false))
+            ->setFirstname($this->getRequest()->getPost('firstname', false))
+            ->setLastname($this->getRequest()->getPost('lastname', false))
+            ->setEmail(strtolower($this->getRequest()->getPost('email', false)));
+
+        if ($this->getRequest()->getPost('password_change') !== null) {
+            if ($this->getRequest()->getPost('new_password', false)) {
+                $user->setNewPassword($this->getRequest()->getPost('new_password', false));
+            }
+            if ($this->getRequest()->getPost('password_confirmation', false)) {
+                $user->setPasswordConfirmation($this->getRequest()->getPost('password_confirmation', false));
+            }
         }
 
-        if ($this->getRequest()->getParam('password_confirmation', false)) {
-            $user->setPasswordConfirmation($this->getRequest()->getParam('password_confirmation', false));
-        }
-
-        $backendLocale = $this->getRequest()->getParam('backend_locale', false);
+        $backendLocale = $this->getRequest()->getPost('backend_locale', false);
         $backendLocale = $backendLocale == 0 ? null : $backendLocale;
         $user->setBackendLocale($backendLocale);
 
-        //Validate current admin password
-        $currentPassword = $this->getRequest()->getParam('current_password', null);
+        // Validate current admin password
+        $currentPassword = $this->getRequest()->getPost('current_password', null);
         $this->getRequest()->setParam('current_password', null);
         $result = $this->_validateCurrentPassword($currentPassword);
 
@@ -76,23 +78,29 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
             return;
         }
 
-        $twoFactorEnabled = (bool) $this->getRequest()->getParam('twofa_enabled', 0);
-        $twoFactorVerificationCode = (string) $this->getRequest()->getParam('twofa_verification_code', '');
-        if ($twoFactorEnabled && $twoFactorVerificationCode) {
-            $twoFactorAuthenticationHelper = Mage::helper('adminhtml/twoFactorAuthentication');
-            if ($twoFactorAuthenticationHelper->verifyCode($user->getTwofaSecret(), $twoFactorVerificationCode)) {
-                $user->setTwofaEnabled(1);
-            } else {
-                $user->setTwofaEnabled(0);
-                $user->setTwofaSecret(null);
-                Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Invalid 2FA verification code'));
-            }
-        } else {
-            $user->setTwofaEnabled(0);
-            $user->setTwofaSecret(null);
-        }
-
         try {
+            $passkeyValue = $this->getRequest()->getPost('passkey_value');
+            if (json_validate($passkeyValue)) {
+                $user->setPasskeyData(json_decode($passkeyValue, true));
+            } elseif ($passkeyValue === 'deleted') {
+                $user->setPasskeyCredentialIdHash(null);
+                $user->setPasskeyPublicKey(null);
+            }
+
+            if ($user->getPasskeyCredentialIdHash()) {
+                $user->setPasswordEnabled((bool) $this->getRequest()->getPost('password_enabled'));
+            } else {
+                $user->setPasswordEnabled(true);
+            }
+
+            $user->setTwofaEnabled((bool) $this->getRequest()->getPost('twofa_enabled'));
+            $twofaCode = $this->getRequest()->getPost('twofa_verification_code', '');
+            if ($user->getTwofaEnabled() && $twofaCode) {
+                if (!Mage::helper('admin/auth')->verifyTwofaCode($user->getTwofaSecret(), $twofaCode)) {
+                    Mage::throwException(Mage::helper('adminhtml')->__('Invalid 2FA verification code'));
+                }
+            }
+
             $user->save();
             Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('The account has been saved.'));
         } catch (Mage_Core_Exception $e) {

@@ -35,7 +35,7 @@ class Mage_Eav_Model_Attribute_Data_Text extends Mage_Eav_Model_Attribute_Data_A
      * Validate data
      * Return true or array of errors
      *
-     * @param array|string $value
+     * @param string|bool|null $value
      * @return bool|array
      */
     #[\Override]
@@ -50,7 +50,7 @@ class Mage_Eav_Model_Attribute_Data_Text extends Mage_Eav_Model_Attribute_Data_A
             $value = $this->getEntity()->getDataUsingMethod($attribute->getAttributeCode());
         }
 
-        if ($attribute->getIsRequired() && strlen($value) == 0) {
+        if ($attribute->getIsRequired() && (string) $value === '') {
             $errors[] = Mage::helper('eav')->__('"%s" is a required value.', $label);
         }
 
@@ -59,7 +59,7 @@ class Mage_Eav_Model_Attribute_Data_Text extends Mage_Eav_Model_Attribute_Data_A
         }
 
         // validate length
-        $length = Mage::helper('core/string')->strlen(trim($value));
+        $length = Mage::helper('core/string')->strlen(trim((string) $value));
 
         $validateRules = $attribute->getValidateRules();
         if (!empty($validateRules['min_text_length']) && $length < $validateRules['min_text_length']) {

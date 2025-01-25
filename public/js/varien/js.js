@@ -18,10 +18,10 @@ class MahoError extends Error {
      * @param {Any} ...args - sprintf like replacements
      */
     constructor(message, ...args) {
-        const formatted = message.replaceAll(/%[ds]/g, (match) => args.shift() ?? match);
         if (typeof Translator !== 'undefined') {
             super(Translator.translate(message, ...args));
         } else {
+            const formatted = message.replaceAll(/%[ds]/g, (match) => args.shift() ?? match);
             super(formatted);
         }
         this.name = 'MahoError';
@@ -51,10 +51,6 @@ async function mahoFetch(url, options) {
         url.searchParams.set('isAjax', true);
 
         const response = await fetch(url, fetchOptions);
-        if (!response.ok) {
-            throw new MahoError('Server returned status %s', response.status);
-        }
-
         const result = response.headers.get('Content-Type') === 'application/json'
               ? await response.json()
               : await response.text();
@@ -67,9 +63,13 @@ async function mahoFetch(url, options) {
                 await new Promise((resolve) => {});
             }
         }
+        if (!response.ok) {
+            throw new MahoError('Server returned status %s', response.status);
+        }
         if (loaderArea !== false && typeof hideLoader === 'function') {
             hideLoader();
         }
+
         return result;
 
     } catch (error) {

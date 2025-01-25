@@ -41,7 +41,8 @@
         "symfony/console": "^7.1",
         "spomky-labs/otphp": "^11.3",
         "bacon/bacon-qr-code": "^3.0",
-        "symfony/polyfill-php83": "^1.31"
+        "symfony/polyfill-php83": "^1.31",
+        "lbuchs/webauthn": "^2.2"
     },
     "replace": {
         "symfony/polyfill-ctype": "*",
