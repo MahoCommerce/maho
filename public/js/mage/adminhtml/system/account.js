@@ -15,20 +15,27 @@ class MahoAdminhtmlSystemAccountController
             throw new Error('Missing Passkey Register Start URL');
         }
 
-        this.initForm();
         this.bindEventListeners();
-    }
-
-    initForm() {
-        Validation.add('validate-login-method-enabled', 'Enable at least one authentication method.', (v) => {
-            return document.getElementById('password_enabled').value == '1'
-                || document.getElementById('passkey_enabled').value == '1';
-        });
     }
 
     bindEventListeners() {
         document.getElementById('register-passkey-btn')?.addEventListener('click', this.startRegistration.bind(this));
         document.getElementById('remove-passkey-btn')?.addEventListener('click', this.removePasskey.bind(this));
+    }
+
+    submitForm() {
+        window.editForm.submit();
+        if (document.querySelector('input[name=current_password].validation-failed')) {
+            setMessagesDiv(
+                Translator.translate('Enter current password and press "Save Account" to confirm passkey change.'), 'notice'
+            );
+        }
+    }
+
+    setPasskeyEnabled(flag) {
+        document.getElementById('password_enabled').value = flag ? 0 : 1;
+        document.getElementById('passkey_enabled').value = flag ? 1 : 0;
+        document.getElementById('passkey_enabled').dispatchEvent(new FormElementDependenceEvent());
     }
 
     async startRegistration() {
@@ -46,6 +53,8 @@ class MahoAdminhtmlSystemAccountController
             document.getElementById('passkey_status').innerHTML = '<em>' + Translator.translate('Passkey Registered') + '</em>';
             document.getElementById('passkey_value').value = JSON.stringify(authenticatorAttestationResponse);
             document.getElementById('remove-passkey-btn').classList.remove('no-display');
+            this.setPasskeyEnabled(true);
+            this.submitForm();
         } catch (error) {
             document.getElementById('passkey_status').innerHTML = `<span class="error">${escapeHtml(error.message)}</span>`;
             document.getElementById('passkey_value').value = '';
@@ -57,5 +66,7 @@ class MahoAdminhtmlSystemAccountController
         document.getElementById('passkey_status').innerHTML = '<em>' + Translator.translate('Passkey Deleted') + '</em>';
         document.getElementById('passkey_value').value = 'deleted';
         document.getElementById('remove-passkey-btn').classList.add('no-display');
+        this.setPasskeyEnabled(false);
+        this.submitForm();
     }
 };

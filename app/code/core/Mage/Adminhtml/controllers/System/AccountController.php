@@ -49,7 +49,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
             ->setLastname($this->getRequest()->getPost('lastname', false))
             ->setEmail(strtolower($this->getRequest()->getPost('email', false)));
 
-        if ($this->getRequest()->getPost('password_enabled') && $this->getRequest()->getPost('password_change') !== null) {
+        if ($this->getRequest()->getPost('password_change') !== null) {
             if ($this->getRequest()->getPost('new_password', false)) {
                 $user->setNewPassword($this->getRequest()->getPost('new_password', false));
             }
@@ -79,14 +79,6 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
         }
 
         try {
-            $user
-                ->setPasswordEnabled((bool) $this->getRequest()->getPost('password_enabled'))
-                ->setTwofaEnabled((bool) $this->getRequest()->getPost('twofa_enabled'));
-
-            if (!$user->getPasswordEnabled() && !$user->getPasskeyEnabled()) {
-                Mage::throwException(Mage::helper('adminhtml')->__('Enable at least one authentication method.'));
-            }
-
             $passkeyValue = $this->getRequest()->getPost('passkey_value');
             if (json_validate($passkeyValue)) {
                 $user->setPasskeyData(json_decode($passkeyValue, true));
@@ -95,6 +87,13 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
                 $user->setPasskeyPublicKey(null);
             }
 
+            if ($user->getPasskeyCredentialIdHash()) {
+                $user->setPasswordEnabled((bool) $this->getRequest()->getPost('password_enabled'));
+            } else {
+                $user->setPasswordEnabled(true);
+            }
+
+            $user->setTwofaEnabled((bool) $this->getRequest()->getPost('twofa_enabled'));
             $twofaCode = $this->getRequest()->getPost('twofa_verification_code', '');
             if ($user->getTwofaEnabled() && $twofaCode) {
                 if (!Mage::helper('admin/auth')->verifyTwofaCode($user->getTwofaSecret(), $twofaCode)) {

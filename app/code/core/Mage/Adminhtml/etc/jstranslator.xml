@@ -52,9 +52,9 @@
     </script>
 
     <script path="mage/adminhtml/system/account.js" module="adminhtml">
-        <validate-login-method-enabled translate="message">
-            <message>Enable at least one authentication method.</message>
-        </validate-login-method-enabled>
+        <confirm-current-password translate="message">
+            <message>Enter current password and press "Save Account" to confirm passkey change.</message>
+        </confirm-current-password>
         <passkey-registered translate="message">
             <message>Passkey Registered</message>
         </passkey-registered>
