@@ -526,7 +526,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public function getPasskeyGetArgs(): stdClass
     {
         if (!$this->getPasskeyCredentialIdHash() || !$this->getPasskeyPublicKey()) {
-            Mage::throwException(Mage::helper('adminhtml')->__('Passkey is not enabled for this account.'));
+            Mage::throwException(Mage::helper('adminhtml')->__('You did not sign in correctly or your account is temporarily disabled.'));
         }
 
         $webAuthn = Mage::helper('admin/auth')->getWebAuthn();
