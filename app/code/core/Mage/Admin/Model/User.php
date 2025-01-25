@@ -418,25 +418,24 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             $usedPasskey = false;
             $needsTwofa = true;
 
-            if ($this->getPasskeyEnabled()) {
-                if (json_validate($password)) {
-                    $passkeyData = json_decode($password);
-                    $clientDataJSON = base64_decode($passkeyData->clientDataJSON ?? '');
-                    $authenticatorData = base64_decode($passkeyData->authenticatorData ?? '');
-                    $signature = base64_decode($passkeyData->signature ?? '');
-                    $userHandle = base64_decode($passkeyData->userHandle ?? '');
-                    $id = base64_decode($passkeyData->id ?? '');
+            $passkeyEnabled = $this->getPasskeyCredentialIdHash() !== null;
+            if ($passkeyEnabled && json_validate($password)) {
+                $passkeyData = json_decode($password);
+                $clientDataJSON = base64_decode($passkeyData->clientDataJSON ?? '');
+                $authenticatorData = base64_decode($passkeyData->authenticatorData ?? '');
+                $signature = base64_decode($passkeyData->signature ?? '');
+                $userHandle = base64_decode($passkeyData->userHandle ?? '');
+                $id = base64_decode($passkeyData->id ?? '');
 
-                    $publicKey = $this->getPasskeyPublicKey();
-                    $challenge = $this->getSession()->getPasskeyChallenge();
-                    $this->getSession()->unsPasskeyChallange();
+                $publicKey = $this->getPasskeyPublicKey();
+                $challenge = $this->getSession()->getPasskeyChallenge();
+                $this->getSession()->unsPasskeyChallange();
 
-                    $webAuthn = Mage::helper('admin/auth')->getWebAuthn();
-                    $usedPasskey = $webAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $publicKey, $challenge);
+                $webAuthn = Mage::helper('admin/auth')->getWebAuthn();
+                $usedPasskey = $webAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $publicKey, $challenge);
 
-                    $authenticatorObj = Mage::helper('admin/auth')->getWebAuthnAttestationAuthenticatorData($authenticatorData);
-                    $needsTwofa = !$authenticatorObj->getUserVerified();
-                }
+                $authenticatorObj = Mage::helper('admin/auth')->getWebAuthnAttestationAuthenticatorData($authenticatorData);
+                $needsTwofa = !$authenticatorObj->getUserVerified();
             }
 
             if (!$usedPasskey) {
