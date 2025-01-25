@@ -418,7 +418,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             $usedPasskey = false;
             $needsTwofa = true;
 
-            $passkeyEnabled = $this->getPasskeyCredentialIdHash() !== null;
+            $passkeyEnabled = $this->isPasskeyEnabled();
             if ($passkeyEnabled && json_validate($password)) {
                 $passkeyData = json_decode($password);
                 $clientDataJSON = base64_decode($passkeyData->clientDataJSON ?? '');
@@ -574,6 +574,11 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         if ($this->getPasswordEnabled() === null) {
             $this->setPasswordEnabled(0);
         }
+    }
+
+    public function isPasskeyEnabled(): bool
+    {
+        return $this->getPasskeyCredentialIdHash() && $this->getPasskeyPublicKey();
     }
 
     public function validatePasswordHash(#[\SensitiveParameter] string $string1, string $string2): bool

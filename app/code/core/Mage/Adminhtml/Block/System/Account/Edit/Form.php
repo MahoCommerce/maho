@@ -111,7 +111,7 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
             'legend' => Mage::helper('adminhtml')->__('Passkey Authentication'),
         ]);
 
-        $passkeyEnabled = $user->getPasskeyCredentialIdHash() !== null;
+        $passkeyEnabled = $user->isPasskeyEnabled();
         if ($passkeyEnabled) {
             $passkeyStatusHtml = '<strong>' . Mage::helper('adminhtml')->__('Passkey Active') . '</strong>';
             $passkeyExtraHtml = [
