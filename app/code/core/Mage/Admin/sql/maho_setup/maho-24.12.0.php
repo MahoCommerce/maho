@@ -11,7 +11,6 @@
 
 /** @var Mage_Checkout_Model_Resource_Setup $this */
 $installer = $this;
-
 $installer->startSetup();
 
 $installer->run("

@@ -705,10 +705,6 @@ var Base64 = {
 };
 
 /**
- * Array functions
- */
-
-/**
  * Callback function for sort numeric values
  *
  * @param val1

@@ -7,7 +7,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -212,66 +212,12 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
             && !$this->_getSession()->getIsUrlNotice(true)
             && !Mage::getConfig()->getNode('global/can_use_base_url')
         ) {
-            //$this->_checkUrlSettings();
             $this->setFlag('', self::FLAG_IS_URLS_CHECKED, true);
         }
         if (is_null(Mage::getSingleton('adminhtml/session')->getLocale())) {
             Mage::getSingleton('adminhtml/session')->setLocale(Mage::app()->getLocale()->getLocaleCode());
         }
 
-        return $this;
-    }
-
-    /**
-     * @deprecated after 1.4.0.0 alpha, logic moved to Mage_Adminhtml_Block_Notification_Baseurl
-     * @return $this
-     */
-    protected function _checkUrlSettings()
-    {
-        /**
-         * Don't check for data saving actions
-         */
-        if ($this->getRequest()->getPost() || $this->getRequest()->getQuery('isAjax')) {
-            return $this;
-        }
-
-        $configData = Mage::getModel('core/config_data');
-
-        $defaultUnsecure = (string) Mage::getConfig()->getNode(
-            'default/' . Mage_Core_Model_Store::XML_PATH_UNSECURE_BASE_URL,
-        );
-        $defaultSecure = (string) Mage::getConfig()->getNode(
-            'default/' . Mage_Core_Model_Store::XML_PATH_SECURE_BASE_URL,
-        );
-
-        if ($defaultSecure == '{{base_url}}' || $defaultUnsecure == '{{base_url}}') {
-            $this->_getSession()->addNotice(
-                $this->__('{{base_url}} is not recommended to use in a production environment to declare the Base Unsecure URL / Base Secure URL. It is highly recommended to change this value in your Magento <a href="%s">configuration</a>.', $this->getUrl('adminhtml/system_config/edit', ['section' => 'web'])),
-            );
-            return $this;
-        }
-
-        $dataCollection = $configData->getCollection()
-            ->addValueFilter('{{base_url}}');
-
-        $url = false;
-        foreach ($dataCollection as $data) {
-            if ($data->getScope() == 'stores') {
-                $code = Mage::app()->getStore($data->getScopeId())->getCode();
-                $url = $this->getUrl('adminhtml/system_config/edit', ['section' => 'web', 'store' => $code]);
-            }
-            if ($data->getScope() == 'websites') {
-                $code = Mage::app()->getWebsite($data->getScopeId())->getCode();
-                $url = $this->getUrl('adminhtml/system_config/edit', ['section' => 'web', 'website' => $code]);
-            }
-
-            if ($url) {
-                $this->_getSession()->addNotice(
-                    $this->__('{{base_url}} is not recommended to use in a production environment to declare the Base Unsecure URL / Base Secure URL. It is highly recommended to change this value in your Magento <a href="%s">configuration</a>.', $url),
-                );
-                return $this;
-            }
-        }
         return $this;
     }
 

@@ -21,6 +21,14 @@
         </reference>
     </adminhtml_input_counter_handle>
 
+    <!-- admin account edit page -->
+    <adminhtml_system_account_index>
+        <reference name="head">
+            <action method="addJs"><name>maho-passkey-tools.js</name></action>
+            <action method="addJs"><name>mage/adminhtml/system/account.js</name></action>
+        </reference>
+    </adminhtml_system_account_index>
+
     <!-- admin url rewrite edit page -->
     <adminhtml_urlrewrite_edit>
         <reference name="head">

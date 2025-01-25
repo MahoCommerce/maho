@@ -5,22 +5,38 @@
  *
  * @category   Mage
  * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+use lbuchs\WebAuthn\WebAuthn;
+use lbuchs\WebAuthn\Attestation\AuthenticatorData;
 
 /**
  * @category   Mage
  * @package    Mage_Adminhtml
  */
-class Mage_Adminhtml_Helper_TwoFactorAuthentication extends Mage_Core_Helper_Abstract
+class Mage_Admin_Helper_Auth extends Mage_Core_Helper_Abstract
 {
-    public function getSecret(): string
+    public function getWebAuthn(): WebAuthn
+    {
+        return new WebAuthn(
+            Mage::getStoreConfig('web/secure/name') ?: 'Maho',
+            parse_url(Mage::getBaseUrl(), PHP_URL_HOST),
+        );
+    }
+
+    public function getWebAuthnAttestationAuthenticatorData(#[\SensitiveParameter] string $authenticatorData): AuthenticatorData
+    {
+        return new AuthenticatorData($authenticatorData);
+    }
+
+    public function getTwofaSecret(): string
     {
         return \OTPHP\TOTP::create()->getSecret();
     }
 
-    public function getQRCode(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $secret): string
+    public function getTwofaQRCode(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $secret): string
     {
         $otp = \OTPHP\TOTP::create($secret);
         $otp->setLabel($username);
@@ -40,7 +56,7 @@ class Mage_Adminhtml_Helper_TwoFactorAuthentication extends Mage_Core_Helper_Abs
         return $qrWriter->writeString($otp->getProvisioningUri());
     }
 
-    public function verifyCode(string $secret, string $code): bool
+    public function verifyTwofaCode(#[\SensitiveParameter] string $secret, #[\SensitiveParameter] string $code): bool
     {
         $otp = \OTPHP\TOTP::create($secret);
         return $otp->verify($code);
