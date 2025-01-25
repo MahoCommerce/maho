@@ -50,7 +50,7 @@ class MahoAdminhtmlSystemAccountController
                 attestationObject: cred.response.attestationObject ? arrayBufferToBase64(cred.response.attestationObject) : null
             };
 
-            document.getElementById('passkey_status').innerHTML = '<em>' + Translator.translate('Passkey Registered') + '</em>';
+            document.getElementById('passkey_status').innerHTML = '<em>' + Translator.translate('Passkey will be registered upon saving') + '</em>';
             document.getElementById('passkey_value').value = JSON.stringify(authenticatorAttestationResponse);
             document.getElementById('remove-passkey-btn').classList.remove('no-display');
             this.setPasskeyEnabled(true);
@@ -63,7 +63,7 @@ class MahoAdminhtmlSystemAccountController
     }
 
     removePasskey() {
-        document.getElementById('passkey_status').innerHTML = '<em>' + Translator.translate('Passkey Deleted') + '</em>';
+        document.getElementById('passkey_status').innerHTML = '<em>' + Translator.translate('Passkey will be deleted upon saving') + '</em>';
         document.getElementById('passkey_value').value = 'deleted';
         document.getElementById('remove-passkey-btn').classList.add('no-display');
         this.setPasskeyEnabled(false);
