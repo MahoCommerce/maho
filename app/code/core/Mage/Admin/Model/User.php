@@ -71,6 +71,8 @@
  * @method $this setPasskeyCredentialIdHash(string $value)
  * @method string getPasskeyPublicKey()
  * @method $this setPasskeyPublicKey(string $value)
+ * @method int getPasswordEnabled()
+ * @method $this setPasswordEnabled(int $value)
  */
 class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 {
@@ -192,10 +194,20 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
     /**
      * @return Mage_Admin_Model_Session
-*/
+     */
     protected function getSession()
     {
         return  Mage::getSingleton('admin/session');
+    }
+
+    #[\Override]
+    public function save()
+    {
+        if (!$this->getPasswordEnabled() && !($this->getPasskeyPublicKey() || $this->getPasskeyCredentialIdHash())) {
+            // Forcing password-enabled if there's no passkey
+            $this->setPasswordEnabled(1);
+        }
+        return parent::save();
     }
 
     /**
@@ -560,6 +572,9 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         // Store the credential and public key, pending save
         $this->setPasskeyCredentialIdHash($credentialId)
             ->setPasskeyPublicKey($publicKey);
+        if ($this->getPasswordEnabled() === null) {
+            $this->setPasswordEnabled(0);
+        }
     }
 
     public function validatePasswordHash(#[\SensitiveParameter] string $string1, string $string2): bool

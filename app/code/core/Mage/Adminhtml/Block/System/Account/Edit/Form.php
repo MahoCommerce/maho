@@ -65,14 +65,6 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
             'required' => true,
         ]);
 
-        $fieldset->addField('current_password', 'obscure', [
-            'name' => 'current_password',
-            'label' => Mage::helper('adminhtml')->__('Current Admin Password'),
-            'title' => Mage::helper('adminhtml')->__('Current Admin Password'),
-            'autocomplete' => 'current-password',
-            'required' => true,
-        ]);
-
         $locales = Mage::app()->getLocale()->getTranslatedOptionLocales();
         $locales = array_column($locales, 'label', 'value');
         array_unshift($locales, '');
@@ -84,16 +76,14 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
             'required' => false,
         ]);
 
+        $fieldset->addField('current_password', 'obscure', [
+            'name' => 'current_password',
+            'label' => Mage::helper('adminhtml')->__('Current Admin Password'),
+            'title' => Mage::helper('adminhtml')->__('Current Admin Password'),
+            'autocomplete' => 'current-password',
+            'required' => true,
+        ]);
 
-        $fieldset = $form->addFieldset('password_fieldset', [
-            'legend' => Mage::helper('adminhtml')->__('Password Authentication'),
-        ]);
-        $fieldset->addField('password_enabled', 'select', [
-            'label' => Mage::helper('adminhtml')->__('Enable Password Authentication'),
-            'name' => 'password_enabled',
-            'class' => 'validate-login-method-enabled',
-            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
-        ]);
         $fieldset->addField('password_change', 'checkbox', [
             'label' => Mage::helper('adminhtml')->__('Change Password'),
             'name' => 'password_change',
@@ -117,26 +107,25 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
             'autocomplete' => 'new-password',
         ]);
 
-
         $fieldset = $form->addFieldset('passkey_fieldset', [
             'legend' => Mage::helper('adminhtml')->__('Passkey Authentication'),
         ]);
 
         $passkeyEnabled = $user->getPasskeyCredentialIdHash() !== null;
-        $fieldset->addField('passkey_enabled', 'select', [
-            'label' => Mage::helper('adminhtml')->__('Enable Passkey Authentication'),
-            'name' => 'passkey_enabled',
-            'class' => 'validate-login-method-enabled',
-            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
-            'value' => $passkeyEnabled ? 1 : 0,
-        ]);
-
         if ($passkeyEnabled) {
             $passkeyStatusHtml = '<strong>' . Mage::helper('adminhtml')->__('Passkey Active') . '</strong>';
             $passkeyExtraHtml = [
                 $this->getButtonHtml($this->__('Register New Passkey'), null, '', 'register-passkey-btn'),
                 $this->getButtonHtml($this->__('Remove Passkey'), null, '', 'remove-passkey-btn'),
             ];
+
+            $fieldset->addField('password_enabled', 'select', [
+                'label' => Mage::helper('adminhtml')->__('Enable Password Authentication'),
+                'note' => Mage::helper('adminhtml')->__('Registering a passkey automatically disables password authentication. For security reasons, we recommend keeping it disabled, though you can re-enable it if necessary.'),
+                'name' => 'password_enabled',
+                'class' => 'validate-login-method-enabled',
+                'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
+            ]);
         } else {
             $passkeyStatusHtml = Mage::helper('adminhtml')->__('No Passkey Created');
             $passkeyExtraHtml = [
@@ -155,7 +144,6 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
         $fieldset->addField('passkey_value', 'hidden', [
             'name'  => 'passkey_value',
         ]);
-
 
         $fieldset = $form->addFieldset('twofa_fieldset', [
             'legend' => Mage::helper('adminhtml')->__('Two-Factor Authentication'),
@@ -216,8 +204,6 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
                 'password_enabled' => '1',
                 'password_change' => true,
             ])
-            ->addFieldDependence('passkey_status', 'passkey_enabled', '1')
-            ->addFieldDependence('passkey_extra', 'passkey_enabled', '1')
             ->addFieldDependence('twofa_qr', 'twofa_enabled', '1')
             ->addFieldDependence('twofa_verification_code', 'twofa_enabled', '1');
 

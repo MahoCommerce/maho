@@ -79,8 +79,8 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
         }
 
         try {
-            $user->setPasswordEnabled((bool) $this->getRequest()->getPost('password_enabled'))
-                ->setPasskeyEnabled((bool) $this->getRequest()->getPost('passkey_enabled'))
+            $user
+                ->setPasswordEnabled((bool) $this->getRequest()->getPost('password_enabled'))
                 ->setTwofaEnabled((bool) $this->getRequest()->getPost('twofa_enabled'));
 
             if (!$user->getPasswordEnabled() && !$user->getPasskeyEnabled()) {
@@ -88,7 +88,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
             }
 
             $passkeyValue = $this->getRequest()->getPost('passkey_value');
-            if ($user->getPasskeyEnabled() && json_validate($passkeyValue)) {
+            if (json_validate($passkeyValue)) {
                 $user->setPasskeyData(json_decode($passkeyValue, true));
             } elseif ($passkeyValue === 'deleted') {
                 $user->setPasskeyCredentialIdHash(null);

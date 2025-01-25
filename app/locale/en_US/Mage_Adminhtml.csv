@@ -879,6 +879,7 @@
 "Region/State","Region/State"
 "Register New Passkey","Register New Passkey"
 "Register Passkey","Register Passkey"
+"Registering a passkey automatically disables password authentication. For security reasons, we recommend keeping it disabled, though you can re-enable it if necessary.","Registering a passkey automatically disables password authentication. For security reasons, we recommend keeping it disabled, though you can re-enable it if necessary."
 "Regular Price:","Regular Price:"
 "Reject","Reject"
 "Reject token authorization Pop Up for admin","Reject token authorization Pop Up for admin"
