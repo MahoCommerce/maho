@@ -488,7 +488,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
             Mage::dispatchEvent('admin_user_authenticate_after', [
                 'username' => $username,
-                'password' => $password,
                 'user'     => $this,
                 'result'   => true,
             ]);
