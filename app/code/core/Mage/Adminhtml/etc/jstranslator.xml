@@ -56,10 +56,10 @@
             <message>Enter current password and press "Save Account" to confirm passkey change.</message>
         </confirm-current-password>
         <passkey-registered translate="message">
-            <message>Passkey will be registered upon saving</message>
+            <message>Passkey will be registered upon saving.</message>
         </passkey-registered>
         <passkey-deleted translate="message">
-            <message>Passkey will be deleted upon saving</message>
+            <message>Passkey will be deleted upon saving.</message>
         </passkey-deleted>
     </script>
 </jstranslator>
