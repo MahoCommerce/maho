@@ -36,6 +36,11 @@
                 <span class="label"><?= $this->__('Account') ?></span>
             </a>
 
+            <a href="" class="skip-link skip-wishlist" title="<?= $this->__('Wishlist') ?>">
+                <span class="icon"></span>
+                <span class="label"><?= $this->__('Wishlist') ?></span>
+            </a>
+
             <div class="header-minicart">
                 <?= $this->getChildHtml('minicart_head') ?>
             </div>
@@ -59,7 +64,7 @@
     .page-header-container > div:first-of-type > a:first-of-type {display: none}
     .currency-switcher label, .form-language label {display: none}
     #search_mini_form {flex-grow: 1; width: 100%}
-    .skip-account, .skip-cart {
+    .skip-account, .skip-cart, .skip-wishlist {
         display: grid;
         position: relative;
         grid-auto-flow: row;
