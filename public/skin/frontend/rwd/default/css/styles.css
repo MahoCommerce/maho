@@ -8043,7 +8043,8 @@ div.paypal-logo span > img {
 /* ============================================ *
  * Checkout - Mini cart
  * ============================================ */
-.header-minicart, #cart-sidebar.mini-products-list .product-details .truncated {
+
+#cart-sidebar.mini-products-list .product-details .truncated {
   display: inline-block;
 }
 @media only screen and (max-width: 770px) {
