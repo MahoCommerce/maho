@@ -36,10 +36,12 @@
                 <span class="label"><?= $this->__('Account') ?></span>
             </a>
 
+            <?php if ($this->isModuleOutputEnabled('Mage_Wishlist') && Mage::getConfig('wishlist/general/active')): ?>
             <a href="" class="skip-link skip-wishlist" title="<?= $this->__('Wishlist') ?>">
                 <span class="icon"></span>
                 <span class="label"><?= $this->__('Wishlist') ?></span>
             </a>
+            <?php endif ?>
 
             <div class="header-minicart">
                 <?= $this->getChildHtml('minicart_head') ?>
