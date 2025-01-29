@@ -49,70 +49,10 @@
         </div>
     </div>
 
+    <div id="minicart-container-mobile" class="header-minicart"></div>
     <div id="header-nav" class="skip-content">
         <?= $this->getChildHtml('topMenu') ?>
     </div>
-
-    <div id="minicart-container-mobile" class="header-minicart"></div>
 </header>
 
 <?= $this->getChildHtml('topContainer') ?>
-
-<style>
-    .page-header-container {display: flex; place-items: center; gap: 0.5rem;padding-top:0.5rem}
-    .page-header-container > div {display: flex; place-items: center; gap: 0.5rem}
-    .page-header-container > div:first-of-type > a:first-of-type {display: none}
-    .currency-switcher label, .form-language label {display: none}
-    #search_mini_form {flex-grow: 1; width: 100%}
-    .skip-account, .skip-cart, .skip-wishlist {
-        display: grid;
-        position: relative;
-        grid-auto-flow: row;
-        justify-items: center;
-        padding: 0;
-        gap: 0.1rem;
-        border: none;
-        color: var(--maho-color-text-primary)
-    }
-    .skip-link .icon {width:30px; height:30px;background-size: 30px;}
-    .skip-link * {margin:0 !important; text-transform: none; line-height:normal; font-size: 0.688rem}
-
-    .skip-cart .count {
-        border-radius: 50%;
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        color: var(--maho-color-background);
-        background: var(--maho-color-primary);
-        display: block;
-        padding: 2px;
-        min-width: 17px;
-        text-align: center;
-    }
-    .skip-cart .count-0 {display: none}
-
-    #select-language, #select-currency {border:none; height: 30px;}
-    #search_mini_form .input-box {text-align: right}
-    #search_mini_form .input-box input {max-width: 450px}
-
-    @media (max-width: 770px) {
-        #search_mini_form .input-box input {max-width: none}
-        .logo img {max-height: 50px}
-        .skip-link .label {display: none}
-        .page-header-container {
-            display: grid !important;
-            place-items: normal !important;
-            grid-template-columns: auto min-content;
-            grid-template-areas:
-                "logo links"
-                "search search";
-            margin-inline: 0.5rem;
-        }
-
-        .page-header-container > div:first-of-type a:first-of-type {display: block}
-        .page-header-container > *:nth-child(1) {grid-area: logo}
-        .page-header-container > *:nth-child(2) {grid-area: search; width: 100%}
-        .page-header-container > *:nth-child(3) {grid-area: links}
-        .main-container {margin-top: 0.5rem}
-    }
-</style>

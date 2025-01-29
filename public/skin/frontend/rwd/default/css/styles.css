@@ -2720,6 +2720,29 @@ body {
 /* ============================================ *
  * Header
  * ============================================ */
+
+.page-header-container {display: flex; place-items: center; gap: 0.5rem;padding-top:0.5rem}
+.page-header-container > div {display: flex; place-items: center; gap: 0.5rem}
+.page-header-container > div:first-of-type > a:first-of-type {display: none}
+.currency-switcher label, .form-language label {display: none}
+
+@media (max-width: 770px) {
+  .page-header-container > div:first-of-type a:first-of-type {display: block}
+  .page-header-container > *:nth-child(1) {grid-area: logo}
+  .page-header-container > *:nth-child(2) {grid-area: search; width: 100%}
+  .page-header-container > *:nth-child(3) {grid-area: links}
+  .main-container {margin-top: 0.5rem}
+  .page-header-container {
+    display: grid !important;
+    place-items: normal !important;
+    grid-template-columns: auto min-content;
+    grid-template-areas:
+                "logo links"
+                "search search";
+    margin-inline: 0.5rem;
+  }
+}
+
 @media only screen and (min-width: 771px) {
   .page-header {
     max-width: 1260px;
@@ -2741,6 +2764,10 @@ body {
   opacity: 0.8;
 }
 
+@media (max-width: 770px) {
+  .logo img {max-height: 50px}
+}
+
 /* -------------------------------------------- *
  * Skip - Link
  */
@@ -2748,24 +2775,16 @@ body {
   opacity: 0.8;
 }
 
-/* -------------------------------------------- *
- * Skip Link - Icon
- */
+.skip-link * {margin:0 !important; text-transform: none; line-height:normal; font-size: 0.688rem}
 .skip-link .icon {
   display: inline-block;
+  width:30px;
+  height:30px;
+  background-size: 30px;
 }
 
-/* -------------------------------------------- *
- * Skip Link - Label
- */
-.skip-link .label {
-  display: none;
-}
-
-@media only screen and (min-width: 500px) {
-  .skip-link .label {
-    display: inline;
-  }
+@media (max-width: 770px) {
+  .skip-link .label {display: none}
 }
 /* ============================================ *
  * Skip Content
@@ -3042,12 +3061,22 @@ body {
     padding: 0;
   }
 }
+
+#select-language, #select-currency {border:none; height: 30px;}
+
 /* ============================================ *
  * Search Input
  * ============================================ */
+#search_mini_form {flex-grow: 1; width: 100%}
 #search_mini_form .input-box {
   position: relative;
   padding-top: 0;
+  text-align: right;
+}
+
+#search_mini_form .input-box input {max-width: 450px}
+@media (max-width: 770px) {
+  #search_mini_form .input-box input {max-width: none}
 }
 
 #search_mini_form label {
@@ -3145,6 +3174,33 @@ body {
     color: var(--maho-color-primary);
   }
 }
+
+.skip-account, .skip-cart, .skip-wishlist {
+  display: grid;
+  position: relative;
+  grid-auto-flow: row;
+  justify-items: center;
+  padding: 0;
+  gap: 0.1rem;
+  border: none;
+  color: var(--maho-color-text-primary)
+}
+
+.skip-cart .count {
+  border-radius: 50%;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  color: var(--maho-color-background);
+  background: var(--maho-color-primary);
+  display: block;
+  padding: 2px;
+  min-width: 17px;
+  text-align: center;
+}
+.skip-cart .count-0 {display: none}
+
+
 /* -------------------------------------------- *
  * Account Links
  */
