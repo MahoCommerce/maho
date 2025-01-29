@@ -500,9 +500,9 @@ body:not(.customer-account) .block:first-child .block-title {
   text-transform: uppercase;
   margin: 7px 0;
 }
-.block-account li strong,
+.block-account li.current a,
 .block-cms-menu li strong {
-  font-weight: 400;
+  font-weight: bold;
   color: var(--maho-color-primary);
 }
 .block-account li a,

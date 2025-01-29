@@ -18,13 +18,11 @@
     </div>
     <div class="block-content">
         <ul>
-            <?php $_links = $this->getLinks(); ?>
-            <?php foreach ($_links as $_link): ?>
-                <?php if ($this->isActive($_link)): ?>
-                    <li class="current"><a href="<?= $_link->getUrl() ?>"><strong><?= $_link->getLabel() ?></strong></a></li>
-                <?php else: ?>
-                    <li><a href="<?= $_link->getUrl() ?>"><?= $_link->getLabel() ?></a></li>
-                <?php endif ?>
+            <?php $links = $this->getLinks(); ?>
+            <?php foreach ($links as $link): ?>
+                <li <?= $this->isActive($link) ? 'class="current"' : '' ?>>
+                    <a href="<?= $link->getUrl() ?>"><?= $link->getLabel() ?></a>
+                </li>
             <?php endforeach ?>
         </ul>
     </div>
