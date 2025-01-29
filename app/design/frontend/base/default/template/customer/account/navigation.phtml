@@ -24,6 +24,9 @@
                     <a href="<?= $link->getUrl() ?>"><?= $link->getLabel() ?></a>
                 </li>
             <?php endforeach ?>
+            <li>
+                <a href="<?= Mage::helper('customer')->getLogoutUrl() ?>"><?= $this->__('Logout') ?></a>
+            </li>
         </ul>
     </div>
 </div>
