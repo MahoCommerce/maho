@@ -13,7 +13,7 @@
 /** @var Mage_Page_Block_Html_Header $this */
 ?>
 <header id="header" class="page-header">
-    <div class="page-header-container" style="display: flex; place-items: center; gap: 0.5rem">
+    <div class="page-header-container skip-links">
         <div>
             <a href="#header-nav" class="skip-link skip-nav">
                 <span class="icon"></span>
@@ -55,7 +55,7 @@
 </header>
 
 <style>
-    .page-header-container {padding-top:0.5rem}
+    .page-header-container {display: flex; place-items: center; gap: 0.5rem;padding-top:0.5rem}
     .page-header-container > div {display: flex; place-items: center; gap: 0.5rem}
     .page-header-container > div:first-of-type > a:first-of-type {display: none}
     .currency-switcher label, .form-language label {display: none}
@@ -101,12 +101,13 @@
             grid-template-areas:
                 "logo links"
                 "search search";
-            margin-inline: 1rem;
+            margin-inline: 0.5rem;
         }
 
         .page-header-container > div:first-of-type a:first-of-type {display: block}
         .page-header-container > *:nth-child(1) {grid-area: logo}
-        .page-header-container > *:nth-child(2) {grid-area: search; width: 100%; padding-bottom: 20px}
+        .page-header-container > *:nth-child(2) {grid-area: search; width: 100%}
         .page-header-container > *:nth-child(3) {grid-area: links}
+        .main-container {margin-top: 0.5rem}
     }
 </style>

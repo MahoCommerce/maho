@@ -905,7 +905,7 @@ a.button:hover {
   position: relative;
   max-width: 1260px;
   margin: 0 auto;
-  padding-inline: 15px;
+  padding-inline: 0.5rem;
 }
 .main-container:after,
 .footer-container:after {
@@ -2833,21 +2833,6 @@ body {
   opacity: 0.8;
 }
 
-/* ============================================ *
- * Skip Links
- * ============================================ */
-.skip-links {
-  clear: both;
-  overflow: hidden;
-  border-top: 1px solid var(--maho-color-border-light);
-  border-bottom: 1px solid var(--maho-color-border-light);
-}
-
-@media only screen and (min-width: 771px) {
-  .skip-links {
-    border: 0;
-  }
-}
 /* -------------------------------------------- *
  * Skip - Link
  */
@@ -2855,19 +2840,6 @@ body {
   opacity: 0.8;
 }
 
-/* -------------------------------------------- *
- * Skip Link - Active
- */
-@media only screen and (max-width: 770px) {
-  .skip-link.skip-active {
-    background: var(--maho-color-border-light);
-    color: inherit;
-  }
-
-  .skip-link.skip-active span {
-    color: inherit;
-  }
-}
 /* -------------------------------------------- *
  * Skip Link - Icon
  */
@@ -2896,7 +2868,6 @@ body {
 
 .skip-content.skip-active {
   display: block;
-  background: var(--maho-color-border-light);
 }
 
 /* ============================================ *
@@ -2947,7 +2918,7 @@ body {
  * ============================================ */
 @media only screen and (max-width: 770px) {
   #header-nav {
-    padding: 5px 0;
+    padding-top: 0.5rem;
   }
 }
 @media only screen and (min-width: 771px) {
