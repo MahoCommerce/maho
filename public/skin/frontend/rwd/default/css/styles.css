@@ -57,8 +57,6 @@
 *,
 *:before,
 *:after {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -400,10 +398,6 @@ body:not(.customer-account) .block:first-child .block-title {
     line-height: 1.4;
     text-rendering: optimizeSpeed;
     text-transform: uppercase;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
-    -o-user-select: none;
     user-select: none;
     font-weight: normal;
     margin-bottom: 0px;
@@ -445,10 +439,6 @@ body:not(.customer-account) .block:first-child .block-title {
     line-height: 1.4;
     text-rendering: optimizeSpeed;
     text-transform: uppercase;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
-    -o-user-select: none;
     user-select: none;
     font-weight: normal;
     margin-bottom: 0px;
@@ -2185,10 +2175,6 @@ label {
   display: inline-block;
   font-size: 0.813rem;
   font-weight: 600;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -webkit-user-select: none;
-  -o-user-select: none;
   user-select: none;
 }
 
@@ -2235,8 +2221,6 @@ select[multiple] {
  * Textarea
  */
 textarea {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
   width: 100%;
   max-width: 450px;
@@ -2247,13 +2231,7 @@ textarea {
  * Inputs
  */
 .input-text {
-  -webkit-appearance: none;
-  -moz-appearance: none;
   appearance: none;
-  -webkit-border-radius: 2px;
-  -moz-border-radius: 2px;
-  -ms-border-radius: 2px;
-  -o-border-radius: 2px;
   border-radius: 2px;
   border: 1px solid var(--maho-color-border-dark);
   background: var(--maho-color-background);
@@ -2313,17 +2291,6 @@ input[type=text].qty {
   width: 3em;
   text-align: center;
   vertical-align: middle;
-}
-
-/* -------------------------------------------- *
- * Placeholder
- */
-::-webkit-input-placeholder {
-  color: var(--maho-color-text-secondary);
-}
-
-input:-moz-placeholder {
-  color: var(--maho-color-text-secondary);
 }
 
 /* -------------------------------------------- *
@@ -3367,10 +3334,6 @@ body {
 .footer .block-subscribe .input-text {
   width: 100%;
   border-right: 0;
-  -webkit-border-radius: 0;
-  -moz-border-radius: 0;
-  -ms-border-radius: 0;
-  -o-border-radius: 0;
   border-radius: 0;
 }
 .footer .block-subscribe .block-content {
@@ -3783,10 +3746,6 @@ p.product-name a:hover {
   line-height: 1.4;
   text-rendering: optimizeSpeed;
   text-transform: uppercase;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -webkit-user-select: none;
-  -o-user-select: none;
   user-select: none;
   font-weight: normal;
   margin-bottom: 0px;
@@ -3829,10 +3788,6 @@ p.product-name a:hover {
   line-height: 1.4;
   text-rendering: optimizeSpeed;
   text-transform: uppercase;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -webkit-user-select: none;
-  -o-user-select: none;
   user-select: none;
   font-weight: normal;
   margin-bottom: 0px;
@@ -4480,10 +4435,6 @@ p.product-name a:hover {
     border-left: 1px solid transparent;
   }
   .product-collateral .toggle-tabs li > span {
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
-    -o-user-select: none;
     user-select: none;
     display: inline-block;
     padding: 0 30px;
@@ -4546,10 +4497,6 @@ p.product-name a:hover {
     line-height: 1.4;
     text-rendering: optimizeSpeed;
     text-transform: uppercase;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
-    -o-user-select: none;
     user-select: none;
     font-weight: normal;
     margin-bottom: 0px;
@@ -4794,7 +4741,6 @@ p.product-name a:hover {
 }
 
 .product-options dd .time-picker {
-  display: -moz-inline-stack;
   display: inline-block;
   vertical-align: middle;
   *vertical-align: auto;
@@ -5991,10 +5937,6 @@ p.product-name a:hover {
   width: 100%;
   border-top: 1px solid var(--maho-color-background-hover);
   position: relative;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -webkit-user-select: none;
-  -o-user-select: none;
   user-select: none;
 }
 .opc .section .step-title:after {
@@ -6149,26 +6091,14 @@ p.product-name a:hover {
  */
 .opc.opc-firststep-login .section:not(#opc-login) .step-title,
 .opc-block-progress-step-login {
-  -webkit-transition: opacity 300ms linear;
-  -webkit-transition-delay: 0;
-  -moz-transition: opacity 300ms linear 0;
-  -o-transition: opacity 300ms linear 0;
   transition: opacity 300ms linear 0;
 }
 
 .opc.opc-firststep-login .section#opc-login .step-title .number {
-  -webkit-transition: width 80ms linear;
-  -webkit-transition-delay: 0;
-  -moz-transition: width 80ms linear 0;
-  -o-transition: width 80ms linear 0;
   transition: width 80ms linear 0;
 }
 
 .opc.opc-firststep-login .section#opc-login .step-title h2 {
-  -webkit-transition: margin-left 80ms linear;
-  -webkit-transition-delay: 0;
-  -moz-transition: margin-left 80ms linear 0;
-  -o-transition: margin-left 80ms linear 0;
   transition: margin-left 80ms linear 0;
 }
 
@@ -7543,7 +7473,6 @@ div.paypal-logo span > img {
   border: 1px solid var(--maho-color-border);
   border-radius: 0;
   min-width: 100%;
-  -webkit-appearance: none;
 }
 #customer-reviews .fieldset .form-list input {
   border: 1px solid var(--maho-color-border);
@@ -7820,18 +7749,6 @@ div.paypal-logo span > img {
   width: 100%;
   height: 45px;
   font-size: 0.688rem;
-}
-#wishlist-table textarea::-webkit-input-placeholder {
-  text-transform: uppercase;
-}
-#wishlist-table textarea:-moz-placeholder {
-  text-transform: uppercase;
-}
-#wishlist-table textarea::-moz-placeholder {
-  text-transform: uppercase;
-}
-#wishlist-table textarea:-ms-input-placeholder {
-  text-transform: uppercase;
 }
 #wishlist-table textarea:focus {
   border: 1px solid var(--maho-color-primary);
@@ -8187,13 +8104,7 @@ div.paypal-logo span > img {
 }
 .header-minicart .info-wrapper .quantity-button {
   opacity: 0;
-  -webkit-transition-property: opacity;
-  -moz-transition-property: opacity;
-  -o-transition-property: opacity;
   transition-property: opacity;
-  -webkit-transition-duration: 100ms;
-  -moz-transition-duration: 100ms;
-  -o-transition-duration: 100ms;
   transition-duration: 100ms;
 }
 .header-minicart .info-wrapper .quantity-button[disabled] {
@@ -8340,10 +8251,6 @@ div.paypal-logo span > img {
   display: none;
 }
 .search-autocomplete ul {
-  -webkit-border-radius: 2px;
-  -moz-border-radius: 2px;
-  -ms-border-radius: 2px;
-  -o-border-radius: 2px;
   border-radius: 2px;
   background-color: var(--maho-color-background);
   border: 1px solid var(--maho-color-primary);
@@ -8546,10 +8453,6 @@ div.paypal-logo span > img {
   line-height: 1.4;
   text-rendering: optimizeSpeed;
   text-transform: uppercase;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -webkit-user-select: none;
-  -o-user-select: none;
   user-select: none;
   font-weight: normal;
   margin-bottom: 0px;
