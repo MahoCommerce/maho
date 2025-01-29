@@ -3271,6 +3271,7 @@ body {
 
   #header-cart.skip-active {
     border: solid 1px var(--maho-color-border);
+    background: var(--maho-color-background);
     display: block;
     position: absolute;
     z-index: 200;

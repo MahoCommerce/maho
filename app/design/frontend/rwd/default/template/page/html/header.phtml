@@ -54,6 +54,8 @@
     </div>
 </header>
 
+<?= $this->getChildHtml('topContainer') ?>
+
 <style>
     .page-header-container {display: flex; place-items: center; gap: 0.5rem;padding-top:0.5rem}
     .page-header-container > div {display: flex; place-items: center; gap: 0.5rem}
@@ -85,6 +87,7 @@
         min-width: 17px;
         text-align: center;
     }
+    .skip-cart .count-0 {display: none}
 
     #select-language, #select-currency {border:none; height: 30px;}
     #search_mini_form .input-box {text-align: right}

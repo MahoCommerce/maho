@@ -10,26 +10,14 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/**
- * Shoping cart sidebar
- *
- * @see Mage_Checkout_Block_Cart_Sidebar
- * @var Mage_Checkout_Block_Cart_Sidebar $this 
- */
-
+/** @var Mage_Checkout_Block_Cart_Sidebar $this */
 ?>
 
-<?php
-    $_cartQty = $this->getSummaryCount();
-    if(empty($_cartQty)) {
-        $_cartQty = 0;
-    }
-?>
-
-<a href="<?= $this->helper('checkout/cart')->getCartUrl() ?>" data-target-element="#header-cart" class="skip-link skip-cart <?php if($_cartQty <= 0): ?> no-count<?php endif ?>" title="<?= $this->__('Cart') ?>">
+<?php $qty = $this->getSummaryCount() ?: 0 ?>
+<a href="<?= $this->helper('checkout/cart')->getCartUrl() ?>" data-target-element="#header-cart" class="skip-link skip-cart" title="<?= $this->__('Cart') ?>">
     <span class="icon"></span>
     <span class="label"><?= $this->__('Cart') ?></span>
-    <span class="count"><?= $_cartQty ?></span>
+    <span class="count count-<?= $qty ?>"><?= $qty ?></span>
 </a>
 
 <div id="header-cart" class="block block-cart skip-content">
