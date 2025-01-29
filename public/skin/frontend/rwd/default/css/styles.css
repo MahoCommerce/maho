@@ -2868,6 +2868,7 @@ body {
 
 .skip-content.skip-active {
   display: block;
+  border-bottom: 1px solid var(--maho-color-border);
 }
 
 /* ============================================ *

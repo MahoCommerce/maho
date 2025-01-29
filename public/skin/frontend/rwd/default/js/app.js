@@ -455,14 +455,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        skipLinks.addEventListener('click', (e) => {
-            if (e.target.matches('#header-cart .skip-link-close')) {
-                const parent = e.target.closest('.skip-content');
-                const link = parent.parentElement.querySelector('.skip-link');
-                parent.classList.remove('skip-active');
-                link.classList.remove('skip-active');
-                e.preventDefault();
-            }
+
+        document.querySelector('#header-cart .skip-link-close').addEventListener('click', (e) => {
+            const parent = e.target.closest('.skip-content');
+            const link = parent.parentElement.querySelector('.skip-link');
+            parent.classList.remove('skip-active');
+            link.classList.remove('skip-active');
+            e.preventDefault();
         });
     }
 
@@ -503,6 +502,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.menu-active').forEach(el => el.classList.remove('menu-active'));
         document.querySelectorAll('.sub-menu-active').forEach(el => el.classList.remove('sub-menu-active'));
         document.querySelectorAll('.skip-active').forEach(el => el.classList.remove('skip-active'));
+
+        let minicart = document.getElementById('header-cart');
+        let mobileContainer = document.getElementById('minicart-container-mobile');
+        if (mq.matches) {
+            mobileContainer.appendChild(minicart);
+        } else {
+            document.querySelector('.skip-cart').after(minicart);
+        }
     };
 
     let maxWidthLargeMediaQuery = window.matchMedia('(max-width: ' + bp.large + 'px)');
