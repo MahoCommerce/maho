@@ -2762,65 +2762,6 @@ body {
 }
 
 /* ============================================ *
- * Language switcher + welcome message
- * ============================================ */
-.header-language-background {
-  padding: 10px;
-  background-color: var(--maho-color-primary);
-  text-transform: uppercase;
-}
-.header-language-background .header-language-container {
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.header-language-background:after {
-  content: '';
-  display: table;
-  clear: both;
-}
-.header-language-background .form-language,
-.header-language-background .currency-switcher {
-  float: left;
-  margin-right: 10px;
-}
-.header-language-background .welcome-msg {
-  float: right;
-}
-
-.page-header-container .store-language-container {
-  float: right;
-  max-width: 35%;
-  padding: 13px 15px 10px 10px;
-}
-.page-header-container .store-language-container label {
-  display: none;
-}
-.page-header-container .store-language-container select {
-  width: 100%;
-}
-
-@media only screen and (max-width: 479px) {
-  .page-header-container .store-language-container {
-    padding-top: 8px;
-  }
-  .page-header-container .store-language-container select {
-    font-size: 0.75rem;
-    padding: 0.1rem 0;
-    margin-bottom: 0.3rem;
-  }
-}
-.header-language-background,
-.header-language-background a {
-  color: var(--maho-color-background);
-}
-
-@media only screen and (max-width: 770px) {
-  .header-language-background {
-    display: none;
-  }
-}
-/* ============================================ *
  * Logo
  * ============================================ */
 
@@ -3450,22 +3391,8 @@ body {
   line-height: 17px;
   float: left;
 }
-.footer .bugs,
 .footer address {
   clear: both;
-}
-.footer .bugs {
-  display: none;
-}
-.footer .form-language,
-.footer .currency-switcher,
-.footer .store-switcher {
-  clear: both;
-  margin-bottom: 10px;
-}
-.footer .form-language,
-.footer .currency-switcher {
-  display: none;
 }
 .footer address {
   border-top: 1px solid var(--maho-color-border);
