@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<layout>
+    <adminhtml_blog_post_index>
+        <reference name="head">
+            <action method="setTitle" translate="title"><title>Blog Posts</title></action>
+        </reference>
+        <reference name="content">
+            <block type="blog/adminhtml_post" name="posts">
+                <block type="adminhtml/store_switcher" name="store_switcher" as="store_switcher">
+                    <action method="setUseConfirm"><params>0</params></action>
+                </block>
+            </block>
+        </reference>
+    </adminhtml_blog_post_index>
+
+    <adminhtml_blog_post_edit>
+        <reference name="content">
+            <block type="blog/adminhtml_post_edit" name="posts_edit"/>
+        </reference>
+        <reference name="left">
+            <block type="adminhtml/store_switcher" name="store_switcher" before="-"></block>
+            <!--<block type="adminhtml/catalog_product_edit_tabs" name="product_tabs"></block>-->
+        </reference>
+    </adminhtml_blog_post_edit>
+</layout>

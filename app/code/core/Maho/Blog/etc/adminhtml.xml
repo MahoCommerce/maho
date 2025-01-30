@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<config>
+    <menu>
+        <cms>
+            <children>
+                <blog_posts module="blog">
+                    <title>Blog Posts</title>
+                    <action>adminhtml/blog_post</action>
+                    <sort_order>10</sort_order>
+                </blog_posts>
+            </children>
+        </cms>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <cms>
+                        <children>
+                            <blog_posts>
+                                <title>Blog Posts Management</title>
+                            </blog_posts>
+                        </children>
+                    </cms>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

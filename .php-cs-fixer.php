@@ -26,7 +26,7 @@ return $config
     ->setFinder(
         PhpCsFixer\Finder::create()
             ->in([
-                'app/code/core/Mage/',
+                'app/code/core/',
                 'lib/Mage/',
                 'lib/MahoCLI/',
                 'lib/Varien/',

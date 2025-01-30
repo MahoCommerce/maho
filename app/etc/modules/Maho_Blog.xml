@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Maho_Blog>
+            <active>true</active>
+            <codePool>core</codePool>
+        </Maho_Blog>
+    </modules>
+</config>
