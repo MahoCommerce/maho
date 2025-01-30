@@ -433,11 +433,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const skipLink = e.target.closest('.skip-link');
             if (!skipLink) return;
 
-            e.preventDefault();
-
-            const target = skipLink.getAttribute('data-target-element') || skipLink.getAttribute('href');
+            const target = skipLink.getAttribute('data-target-element');
+            if (!target) return;
             const elem = document.querySelector(target);
             if (!elem) return;
+
+            e.preventDefault();
 
             const isSkipContentOpen = elem.classList.contains('skip-active');
             document.querySelectorAll('.skip-active').forEach(el => el.classList.remove('skip-active'));
@@ -455,14 +456,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        skipLinks.addEventListener('click', (e) => {
-            if (e.target.matches('#header-cart .skip-link-close')) {
-                const parent = e.target.closest('.skip-content');
-                const link = parent.parentElement.querySelector('.skip-link');
-                parent.classList.remove('skip-active');
-                link.classList.remove('skip-active');
-                e.preventDefault();
-            }
+
+        document.querySelector('#header-cart .skip-link-close').addEventListener('click', (e) => {
+            const parent = e.target.closest('.skip-content');
+            const link = parent.parentElement.querySelector('.skip-link');
+            parent.classList.remove('skip-active');
+            link.classList.remove('skip-active');
+            e.preventDefault();
         });
     }
 
@@ -495,32 +495,6 @@ document.addEventListener('DOMContentLoaded', () => {
     preventMenuSpill();
     window.addEventListener('delayed-resize', preventMenuSpill);
 
-
-    // ==============================================
-    // Language Switcher
-    // ==============================================
-
-    // In order to display the language switcher next to the logo, we are moving the content at different viewports,
-    // rather than having duplicate markup or changing the design
-    const repositionLanguageSwitcher = (mq) => {
-        const currencySwitcher = document.querySelector('.currency-switcher');
-        const formLanguage = document.querySelector('.form-language');
-
-        if (mq.matches) {
-            const targetContainer = document.querySelector('.page-header-container .store-language-container');
-            if (currencySwitcher) targetContainer.prepend(currencySwitcher);
-            if (formLanguage) targetContainer.prepend(formLanguage);
-        } else {
-            const targetContainer = document.querySelector('.header-language-container .store-language-container');
-            if (currencySwitcher) targetContainer.prepend(currencySwitcher);
-            if (formLanguage) targetContainer.prepend(formLanguage);
-        }
-    };
-    let maxWidthLargeMediaQuery = window.matchMedia('(max-width: ' + bp.large + 'px)');
-    let maxWidthMediumMediaQuery = window.matchMedia('(max-width: ' + bp.medium + 'px)');
-    maxWidthMediumMediaQuery.addEventListener('change', repositionLanguageSwitcher);
-    repositionLanguageSwitcher(maxWidthMediumMediaQuery);
-
     // ==============================================
     // Menu State
     // ==============================================
@@ -529,7 +503,18 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.menu-active').forEach(el => el.classList.remove('menu-active'));
         document.querySelectorAll('.sub-menu-active').forEach(el => el.classList.remove('sub-menu-active'));
         document.querySelectorAll('.skip-active').forEach(el => el.classList.remove('skip-active'));
+
+        let minicart = document.getElementById('header-cart');
+        let mobileContainer = document.getElementById('minicart-container-mobile');
+        if (mq.matches) {
+            mobileContainer.appendChild(minicart);
+        } else {
+            document.querySelector('.skip-cart').after(minicart);
+        }
     };
+
+    let maxWidthLargeMediaQuery = window.matchMedia('(max-width: ' + bp.large + 'px)');
+    let maxWidthMediumMediaQuery = window.matchMedia('(max-width: ' + bp.medium + 'px)');
     maxWidthMediumMediaQuery.addEventListener('change', resetMenuState);
     resetMenuState(maxWidthMediumMediaQuery);
 
