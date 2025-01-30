@@ -62,23 +62,5 @@
                 </entities>
             </catalogindex_resource>
         </models>
-        <resources>
-            <catalogindex_setup>
-                <setup>
-                    <module>Mage_CatalogIndex</module>
-                    <class>Mage_CatalogIndex_Model_Resource_Setup</class>
-                </setup>
-            </catalogindex_setup>
-        </resources>
-        <events>
-        </events>
     </global>
-    <adminhtml>
-        <events>
-        </events>
-    </adminhtml>
-    <crontab>
-        <jobs>
-        </jobs>
-    </crontab>
 </config>
