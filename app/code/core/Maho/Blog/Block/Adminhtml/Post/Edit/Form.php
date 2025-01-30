@@ -11,6 +11,7 @@
 
 class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
 {
+    #[\Override]
     protected function _prepareForm()
     {
         $form = new Varien_Data_Form([

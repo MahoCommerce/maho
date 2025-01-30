@@ -20,6 +20,7 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
         $this->setSaveParametersInSession(true);
     }
 
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getModel('blog/post')->getCollection();
@@ -27,6 +28,7 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns()
     {
         $this->addColumn('entity_id', [
@@ -72,6 +74,7 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
         return parent::_prepareColumns();
     }
 
+    #[\Override]
     protected function _prepareMassaction()
     {
         $this->setMassactionIdField('entity_id');
@@ -86,6 +89,7 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
         return $this;
     }
 
+    #[\Override]
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);

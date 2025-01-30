@@ -145,6 +145,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
         $this->_redirect('*/*/index');
     }
 
+    #[\Override]
     protected function _isAllowed()
     {
         return Mage::getSingleton('admin/session')->isAllowed('cms/blog_posts');

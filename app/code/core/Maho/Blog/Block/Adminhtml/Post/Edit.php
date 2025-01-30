@@ -23,6 +23,7 @@ class Maho_Blog_Block_Adminhtml_Post_Edit extends Mage_Adminhtml_Block_Widget_Fo
         $this->_updateButton('delete', 'label', Mage::helper('blog')->__('Delete Post'));
     }
 
+    #[\Override]
     public function getHeaderText()
     {
         if (Mage::registry('blog_post')->getId()) {
