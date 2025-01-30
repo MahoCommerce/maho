@@ -31,13 +31,13 @@
             <?= $this->getChildHtml('store_language') ?>
             <?= $this->getChildHtml('currency_switcher') ?>
 
-            <a href="<?= $this->helper('customer')->getAccountUrl() ?>" data-target-element="#header-account" class="skip-link skip-account" title="<?= $this->__('Account') ?>">
+            <a href="<?= $this->helper('customer')->getAccountUrl() ?>" class="skip-link skip-account" title="<?= $this->__('Account') ?>">
                 <span class="icon"></span>
                 <span class="label"><?= $this->__('Account') ?></span>
             </a>
 
             <?php if ($this->isModuleOutputEnabled('Mage_Wishlist') && Mage::getStoreConfig('wishlist/general/active')): ?>
-            <a href="" class="skip-link skip-wishlist" title="<?= $this->__('Wishlist') ?>">
+            <a href="<?= $this->helper('customer')->getWishlistUrl() ?>" class="skip-link skip-wishlist" title="<?= $this->__('Wishlist') ?>">
                 <span class="icon"></span>
                 <span class="label"><?= $this->__('Wishlist') ?></span>
             </a>

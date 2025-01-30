@@ -77,7 +77,7 @@ class Mage_Customer_Block_Account_Dashboard extends Mage_Core_Block_Template
      */
     public function getWishlistUrl()
     {
-        return Mage::getUrl('customer/wishlist/index', ['_secure' => true]);
+        return Mage::helper('customer')->getWishlistUrl();
     }
 
     /**

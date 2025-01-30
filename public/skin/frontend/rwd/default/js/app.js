@@ -433,11 +433,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const skipLink = e.target.closest('.skip-link');
             if (!skipLink) return;
 
-            e.preventDefault();
-
-            const target = skipLink.getAttribute('data-target-element') || skipLink.getAttribute('href');
+            const target = skipLink.getAttribute('data-target-element');
+            if (!target) return;
             const elem = document.querySelector(target);
             if (!elem) return;
+
+            e.preventDefault();
 
             const isSkipContentOpen = elem.classList.contains('skip-active');
             document.querySelectorAll('.skip-active').forEach(el => el.classList.remove('skip-active'));
