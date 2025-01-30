@@ -15,6 +15,8 @@
 
 <?php $_items = $this->getReviewsCollection()->getItems() ?>
 <div class="box-collateral box-reviews" id="customer-reviews">
+    <a href="<?= $this->getReviewsUrl() ?>#review-form"><?= $this->__('Add Your Review') ?></a>
+
     <?php if (count($_items)):?>
         <dl>
         <?php foreach ($_items as $_review):?>

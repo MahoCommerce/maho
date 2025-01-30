@@ -6,7 +6,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -18,17 +18,15 @@
     </div>
     <div class="block-content">
         <ul>
-            <?php $_links = $this->getLinks(); ?>
-            <?php $_index = 1; ?>
-            <?php $_count = count($_links); ?>
-            <?php foreach ($_links as $_link): ?>
-                <?php $_last = ($_index++ >= $_count); ?>
-                <?php if ($this->isActive($_link)): ?>
-                    <li class="current<?= ($_last ? ' last' : '') ?>"><strong><?= $_link->getLabel() ?></strong></li>
-                <?php else: ?>
-                    <li<?= ($_last ? ' class="last"' : '') ?>><a href="<?= $_link->getUrl() ?>"><?= $_link->getLabel() ?></a></li>
-                <?php endif ?>
+            <?php $links = $this->getLinks(); ?>
+            <?php foreach ($links as $link): ?>
+                <li <?= $this->isActive($link) ? 'class="current"' : '' ?>>
+                    <a href="<?= $link->getUrl() ?>"><?= $link->getLabel() ?></a>
+                </li>
             <?php endforeach ?>
+            <li>
+                <a href="<?= Mage::helper('customer')->getLogoutUrl() ?>"><?= $this->__('Logout') ?></a>
+            </li>
         </ul>
     </div>
 </div>
