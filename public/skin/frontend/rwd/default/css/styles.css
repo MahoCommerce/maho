@@ -6748,6 +6748,9 @@ div.paypal-logo span > img {
 #cart-sidebar.mini-products-list .product-details .truncated {
   display: inline-block;
 }
+.header-minicart {
+  position: relative;
+}
 @media only screen and (max-width: 770px) {
   .header-minicart {
     display: block;
