@@ -37,26 +37,33 @@ $attributes = [
         'required' => true,
         'sort_order' => 10,
     ],
+    'url_key' => [
+        'type' => 'varchar',
+        'label' => 'URL Key',
+        'input' => 'text',
+        'required' => true,
+        'sort_order' => 20,
+    ],
     'content' => [
         'type' => 'text',
         'label' => 'Content',
         'input' => 'textarea',
         'required' => true,
-        'sort_order' => 20,
+        'sort_order' => 30,
     ],
     'publish_date' => [
         'type' => 'datetime',
         'label' => 'Publish Date',
         'input' => 'date',
         'required' => false,
-        'sort_order' => 30,
+        'sort_order' => 40,
     ],
     'created_at' => [
         'type' => 'datetime',
         'label' => 'Creation Time',
         'input' => 'date',
         'required' => true,
-        'sort_order' => 40,
+        'sort_order' => 50,
     ],
 ];
 
