@@ -19,7 +19,7 @@
         </reference>
         <reference name="left">
             <block type="adminhtml/store_switcher" name="store_switcher" before="-"></block>
-            <!--<block type="adminhtml/catalog_product_edit_tabs" name="product_tabs"></block>-->
+            <block type="blog/adminhtml_post_edit_tabs" name="post_tabs"></block>
         </reference>
     </adminhtml_blog_post_edit>
 </layout>
