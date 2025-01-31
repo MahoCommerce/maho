@@ -14,7 +14,7 @@
 ?>
 
 <?php $qty = $this->getSummaryCount() ?: 0 ?>
-<a href="<?= $this->helper('checkout/cart')->getCartUrl() ?>" data-target-element="#header-cart" class="skip-link skip-cart" title="<?= $this->__('Cart') ?>">
+<a href="<?= $this->helper('checkout/cart')->getCartUrl() ?>" data-target-element="header-cart" class="skip-link skip-cart" title="<?= $this->__('Cart') ?>">
     <span class="icon"></span>
     <span class="label"><?= $this->__('Cart') ?></span>
     <span class="count count-<?= $qty ?>"><?= $qty ?></span>

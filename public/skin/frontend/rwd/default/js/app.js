@@ -435,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const target = skipLink.getAttribute('data-target-element');
             if (!target) return;
-            const elem = document.querySelector(target);
+            const elem = document.getElementById(target);
             if (!elem) return;
 
             e.preventDefault();
