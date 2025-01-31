@@ -2756,16 +2756,12 @@ body {
  * ============================================ */
 
 .logo img {
-  width: 100%;
-  height: auto;
+  width: auto;
+  max-height: 50px
 }
 
 .logo:hover {
   opacity: 0.8;
-}
-
-@media (max-width: 770px) {
-  .logo img {max-height: 50px}
 }
 
 /* -------------------------------------------- *
@@ -3062,7 +3058,7 @@ body {
   }
 }
 
-#select-language, #select-currency {border:none; height: 30px;}
+#select-language, #select-currency {background:none;border:none; height: 30px;}
 
 /* ============================================ *
  * Search Input
