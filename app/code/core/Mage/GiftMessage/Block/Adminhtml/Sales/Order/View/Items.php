@@ -6,6 +6,7 @@
  * @package    Mage_GiftMessage
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -24,7 +25,7 @@ class Mage_GiftMessage_Block_Adminhtml_Sales_Order_View_Items extends Mage_Admin
     protected $_giftMessage = [];
 
     /**
-     * Get Order Item
+     * Get order item object from parent block
      *
      * @return Mage_Sales_Model_Order_Item
      */

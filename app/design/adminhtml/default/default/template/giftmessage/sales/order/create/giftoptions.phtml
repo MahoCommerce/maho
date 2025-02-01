@@ -5,36 +5,36 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_GiftMessage_Block_Adminhtml_Sales_Order_Create_Giftoptions $this */
 ?>
 
-<?php $_item = $this->getItem() ?>
-<?php if ($_item): ?>
-    <?php $_childHtml = trim($this->getChildHtml('', false));?>
-    <?php if ($_childHtml): ?>
-        <tr class="border">
-            <td class="first">
-                <div>
-                    <strong><a class="action-link" href="#" id="gift_options_link_<?= $_item->getId() ?>"><?= Mage::helper('sales')->__('Gift Options') ?></a></strong><br/>
-                </div>
-                <script type="text/javascript">
-                    giftOptionsTooltip.addTargetLink('gift_options_link_<?= $_item->getId() ?>', <?= $_item->getId() ?>);
-                </script>
-                <div id="gift_options_data_<?= $_item->getId() ?>">
-                    <?= $_childHtml ?>
-                </div>
-            </td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td class="last"></td>
-        </tr>
-    <?php endif ?>
+<?php if ($item = $this->getItem()): ?>
+<?php if ($childHtml = trim($this->getChildHtml('', false))): ?>
+<tr class="border">
+    <td class="first">
+        <div>
+            <strong>
+                <?php $tooltip = $this->getMessageText() ? $this->__('Gift Message') . ': ' . $this->getMessageText() : '' ?>
+                <a id="gift_options_link_<?= $item->getId() ?>" href="#" title="<?= $tooltip ?>">
+                    <?= Mage::helper('sales')->__('Gift Options') ?>
+                </a>
+            </strong>
+        </div>
+        <div id="gift_options_data_<?= $item->getId() ?>">
+            <?= $childHtml ?>
+        </div>
+    </td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="last"></td>
+</tr>
+<?php endif ?>
 <?php endif ?>
