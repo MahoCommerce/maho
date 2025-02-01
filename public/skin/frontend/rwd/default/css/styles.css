@@ -6242,7 +6242,7 @@ div.paypal-logo span > img {
 #customer-reviews dl {
   font-size: 0.875rem;
   font-weight: normal;
-  margin-bottom: 10px;
+  margin-block: 1.5rem 0;
 }
 #customer-reviews dl dt {
   background-size: 20px;
