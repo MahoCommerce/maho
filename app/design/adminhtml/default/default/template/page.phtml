@@ -31,41 +31,33 @@
 </head>
 
 <body id="html-body"<?= $this->getBodyClass() ? ' class="' . $this->getBodyClass() . '"' : '' ?>>
-<?= $this->getChildHtml('notification_window') ?>
-<div class="wrapper">
-    <?= $this->getChildHtml('global_notices') ?>
-        <div class="header">
+    <?= $this->getChildHtml('notification_window') ?>
+
+    <div class="wrapper">
+        <?= $this->getChildHtml('global_notices') ?>
+        <header class="header">
             <?= $this->getChildHtml('header') ?>
-        <div class="clear"></div>
             <?= $this->getChildHtml('menu') ?>
-        </div>
+        </header>
         <?= $this->getChildHtml('notifications') ?>
-        <div class="middle" id="anchor-content">
+        <div id="anchor-content" class="middle">
             <div id="page:main-container">
-            <?php if($this->getChildHtml('left')): ?>
-
-                <div class="columns <?= $this->getContainerCssClass() ?>">
-                    <div class="side-col" id="page:left">
+                <div id="page:container" class="columns <?php echo $this->getContainerCssClass() ?>">
+                    <aside id="page:left" class="side-col">
                         <?= $this->getChildHtml('left') ?>
-                    </div>
-                    <div class="main-col" id="content">
-                        <div class="main-col-inner">
-                            <div id="messages"><?= $this->getMessagesBlock()->toHtml() ?></div>
-                            <?= $this->getChildHtml('content') ?>
-                        </div>
-                    </div>
+                    </aside>
+                    <main id="content" class="main-col">
+                        <div id="messages"><?= $this->getMessagesBlock()->toHtml() ?></div>
+                        <?= $this->getChildHtml('content') ?>
+                    </main>
                 </div>
-
-            <?php else: ?>
-                <div id="messages"><?= $this->getMessagesBlock()->toHtml() ?></div>
-                <?= $this->getChildHtml('content') ?>
-            <?php endif ?>
             </div>
         </div>
-        <div class="footer">
+        <footer class="footer">
             <?= $this->getChildHtml('footer') ?>
-        </div>
+        </footer>
     </div>
+
     <?= $this->getChildHtml('js') ?>
     <?= $this->getChildHtml('profiler') ?>
 <div id="loading-mask" style="display:none">

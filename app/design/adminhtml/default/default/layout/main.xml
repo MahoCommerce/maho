@@ -56,12 +56,9 @@ Default layout, loads most of the pages
                 <action method="addJs"><script>mage/adminhtml/uploader.js</script></action>
                 <action method="addJs"><script>mage/adminhtml/product.js</script></action>
 
-                <action method="addCss"><name>reset.css</name></action>
-                <action method="addCss"><name>boxes.css</name></action>
+                <action method="addCss"><name>styles.css</name></action>
+                <action method="addCss"><name>override.css</name></action>
                 <action method="addCss"><name>print.css</name><params>media="print"</params></action>
-                <action method="addItem"><type>skin_css</type><name>menu.css</name><params>media="screen, projection"</params></action>
-                <action method="addItem"><type>skin_css</type><name>override.css</name></action>
-                <action method="addItem"><type>skin_css</type><name>form.css</name></action>
 
                 <action method="addItem"><type>js_css</type><name>flatpickr/flatpickr.min.css</name><params/></action>
                 <action method="addItem"><type>js</type><name>flatpickr/flatpickr.min.js</name></action>
@@ -72,7 +69,9 @@ Default layout, loads most of the pages
             </block>
 
             <block type="adminhtml/page_notices" name="global_notices" as="global_notices" template="page/notices.phtml" />
-            <block type="adminhtml/page_header" name="header" as="header"></block>
+            <block type="adminhtml/page_header" name="header" as="header">
+                <block type="core/template" name="globalsearch" as="globalsearch" template="page/globalsearch.phtml"/>
+            </block>
             <block type="adminhtml/page_menu" name="menu" as="menu"></block>
             <block type="core/text_list" name="notifications" as="notifications">
                 <block type="adminhtml/notification_baseurl" name="notification_baseurl" as="notification_baseurl" template="notification/baseurl.phtml"></block>

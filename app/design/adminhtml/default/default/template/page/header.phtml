@@ -13,72 +13,22 @@
 ?>
 <div class="header-top">
     <a href="<?= $this->getHomeLink() ?>" class="logo" title="Maho <?= Mage::getMahoVersion() ?>">
-        <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 242 237" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2"><g transform="matrix(.710571 0 0 .710571 -564.814 315.583)"><clipPath id="A"><path d="M844.242-396.422h241.346v236.975H844.242z"/></clipPath><g clip-path="url(#A)"><path d="M1075.34-395.845c5.8 0 10.49 4.654 10.49 10.392v109.133c0 64.867-53.09 117.45-118.569 117.45h-112.28c-5.796 0-10.496-4.654-10.496-10.396v-115.717c0-61.225 50.113-110.863 111.929-110.863h118.926v.001zm-111.229 40.954c-42.454 0-76.871 34.088-76.871 76.142s34.417 76.138 76.871 76.138c42.459 0 76.869-34.088 76.869-76.138s-34.41-76.142-76.869-76.142z" fill="#d7df22"/></g></g></svg>
-	</a>
-    <div class="header-right">
-        <ul id="usermenu">
-        	<li onmouseover="Element.addClassName(this,'over')" onmouseout="Element.removeClassName(this,'over')" class="parent level0 usermenulabel">
-        		<a href="#" onclick="return false" title="<?= $this->__('User Menu') ?>">
-                    <svg version="1.1" id="burger" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="40px" height="40px" viewBox="0 0 40 40" enable-background="new 0 0 40 40" xml:space="preserve">
-                        <rect opacity="0.25" fill="#FFFFFF" width="40" height="40"></rect>
-                        <path fill="#FFFFFF" d="M31,21H9v-2h22V21z M31,17H9v-2h22V17z M31,25H9v-2h22V25z"></path>
-                    </svg>
-                </a>
-			    <ul>
-                    <li><a href="<?= Mage::helper("adminhtml")->getUrl("adminhtml/system_account") ?>"><span><?= $this->__("Logged in as %s", $this->escapeHtml($this->getUser()->getUsername())) ?></span></a></li>
-			    	<li><a href="<?= Mage::getBaseUrl() ?>" target="_blank"><span><?= $this->__('View') . ': ' . $this->escapeHtml(Mage::app()->getStore()->getFrontendName()) ?></span></a></li>
-			    	<li class="last"><a href="<?= $this->getLogoutLink() ?>"><span><?= $this->__('Log Out') ?></span></a></li>
-		        </ul>
-		    </li>
-		</ul>
-        <?php if (Mage::getStoreConfigFlag('admin/global_search/enable') && Mage::getSingleton('admin/session')->isAllowed('admin/global_search')): ?>
-        <fieldset>
-            <legend>Search</legend>
-            <span id="global_search_indicator" class="autocomplete-indicator" style="display: none">
-                <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading...')) ?>" class="v-middle"/>
-            </span>
-            <?php $defSearch = $this->__('Global Record Search') ?>
-            <input id="global_search" name="query" type="text" class="input-text" value="<?php if(!empty($query)): ?><?= $query ?><?php else: ?><?= $this->quoteEscape($defSearch) ?><?php endif ?>" onfocus="if(this.value=='<?= $this->quoteEscape($defSearch, true) ?>')this.value=''; " onblur="if(this.value=='')this.value='<?= $defSearch ?>';" autocomplete="off" />
-            <div id="global_search_autocomplete" class="autocomplete" style="display:none"></div>
-            <script type="text/javascript">
-                document.getElementById('global_search').addEventListener('input', function() {
-                    let query = this.value;
-                    if (query.length < 2) {
-                        document.getElementById('global_search_autocomplete').style.display = 'none';
-                        return;
-                    }
-
-                    document.getElementById('global_search_indicator').style.display = 'inline-block';
-                    fetch('<?= $this->getUrl('adminhtml/index/globalSearch') ?>?isAjax=true', {
-                        method: 'POST',
-                        headers:{
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: new URLSearchParams({
-                            'query': query,
-                            'form_key': FORM_KEY
-                        })
-                    })
-                    .then(response => {
-                        return response.text();
-                    })
-                    .then(htmlString => {
-                        let autocomplete = document.getElementById('global_search_autocomplete');
-                        autocomplete.style.display = 'block';
-                        autocomplete.innerHTML = htmlString;
-                        Array.from(document.querySelectorAll('#global_search_autocomplete li')).forEach(li => {
-                            li.addEventListener('click', function() {
-                                location.href = this.getAttribute('url');
-                            });
-                        });
-                        document.getElementById('global_search_indicator').style.display = 'none';
-                    })
-                    .catch(error => {
-                        alert(error);
-                    });
-                });
-            </script>
-        </fieldset>
-        <?php endif ?>
-    </div>
+        <svg viewBox="0 0 242 237" xmlns="http://www.w3.org/2000/svg"><path d="M199 34c4 0 8 4 8 8v77c0 46-38 84-85 84H43c-4 0-8-4-8-8v-82c0-43 36-79 80-79h84zm-79 29c-30 0-54 25-54 55a54 54 0 0 0 109 0c0-30-25-55-55-55z" fill="#d7df22"/></svg>
+    </a>
+    <ul id="usermenu">
+        <li class="parent level0 usermenulabel">
+            <a href="#" onclick="return false" title="<?= $this->__('User Menu') ?>"></a>
+            <ul>
+            <?php if ($this->displayGlobalSearch()): ?>
+                <li><a href="#" onclick="return openGlobalSearch()"><span><?= $this->__('Global Record Search') ?></span></a></li>
+            <?php endif ?>
+                <li><a href="<?= Mage::helper('adminhtml')->getUrl('adminhtml/system_account') ?>"><span><?= $this->__('Logged in as %s', $this->escapeHtml($this->getUser()->getUsername())) ?></span></a></li>
+                <li><a href="<?= Mage::getBaseUrl() ?>" target="_blank"><span><?= $this->__('View') . ': ' . $this->escapeHtml(Mage::app()->getStore()->getFrontendName()) ?></span></a></li>
+                <li><a href="<?= $this->getLogoutLink() ?>"><span><?= $this->__('Log Out') ?></span></a></li>
+            </ul>
+        </li>
+    </ul>
+    <?php if ($this->displayGlobalSearch()): ?>
+        <?= $this->getChildHtml('globalsearch') ?>
+    <?php endif ?>
 </div>

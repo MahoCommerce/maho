@@ -1,0 +1,74 @@
+<?php
+/**
+ * Maho
+ *
+ * @category    design
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2018 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Core_Block_Abstract $this */
+?>
+<template id="global-search-dialog">
+    <div id="global-search-input-box">
+        <input name="query" autocomplete="off" autofocus>
+        <span class="icon loading no-display"></span>
+    </div>
+    <div id="global-search-results"></div>
+</template>
+
+<script>
+    function openGlobalSearch() {
+        const templateEl = document.getElementById('global-search-dialog');
+        const dialog = Dialog.info(templateEl.innerHTML, {
+            id: templateEl.id,
+            title: '<?= $this->__('Global Record Search') ?>',
+            width: 700,
+        });
+
+        const inputEl = dialog.querySelector('#global-search-input-box input');
+        const loadingEl = dialog.querySelector('#global-search-input-box .icon');
+        const resultsEl = dialog.querySelector('#global-search-results');
+
+        let controller;
+
+        inputEl.addEventListener('input', async () => {
+            controller?.abort();
+            controller = new AbortController();
+
+            const query = inputEl.value;
+            if (query.length < 2) {
+                return toggleVis(loadingEl, false);
+            }
+
+            toggleVis(loadingEl, true);
+
+            try {
+                const html = await mahoFetch('<?= $this->getUrl('adminhtml/index/globalSearch') ?>', {
+                    method: 'POST',
+                    body: new URLSearchParams({ query }),
+                    signal: controller.signal,
+                });
+
+                resultsEl.innerHTML = html;
+                const ulEl = resultsEl.querySelector('ul');
+
+                if (ulEl.children.length === 0) {
+                    resultsEl.innerHTML = '<?= $this->__('No records found.') ?>';
+                } else {
+                    ulEl.children.forEach((li) => {
+                        li.addEventListener('click', () => setLocation(li.getAttribute('url')));
+                    });
+                }
+            } catch {
+            }
+
+            toggleVis(loadingEl, false);
+        })
+
+        return false;
+    }
+</script>

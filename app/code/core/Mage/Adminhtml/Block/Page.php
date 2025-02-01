@@ -6,6 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -50,5 +51,14 @@ class Mage_Adminhtml_Block_Page extends Mage_Adminhtml_Block_Template
         $className = preg_replace('#[^a-z0-9]+#', '-', strtolower($className));
         $this->setBodyClass($this->getBodyClass() . ' ' . $className);
         return $this;
+    }
+
+    public function getContainerCssClass(): string
+    {
+        $blockLeft = $this->getLayout()->getBlock('left');
+        if ($blockLeft->getIsCollapsed() || $blockLeft->countChildren() === 0) {
+            return 'container-collapsed';
+        }
+        return 'container';
     }
 }

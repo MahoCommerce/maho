@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -261,28 +261,56 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      */
     public function getMenuLevel($menu, $level = 0)
     {
-        $html = '<ul ' . (!$level ? 'id="nav"' : '') . '>' . PHP_EOL;
+        // Helper function to indent lines
+        $indent = function ($line, $count = 0) use ($level) {
+            return str_repeat('    ', 2 * $level + $count) . $line . "\n";
+        };
+
+        $html = $indent($level === 0 ? '<ul id="nav">' : '<ul>');
         foreach ($menu as $item) {
-            if ((empty($item['url']) || ($item['url'] == '#')) && empty($item['children'])) {
+            if ((empty($item['url']) || ($item['url'] === '#')) && empty($item['children'])) {
                 continue; // for example hide System/Tools when empty
             }
-            $html .= '<li class="'
-                . (!$level && !empty($item['active']) ? ' active' : '') . ' '
-                . (!empty($item['children']) ? ' parent' : '')
-                . (!empty($level) && !empty($item['last']) ? ' last' : '')
-                . ' level' . $level . '"> <a href="' . $item['url'] . '" '
-                . (!empty($item['id']) ? 'id="nav-' . $item['id'] . '"' : '') . ' '
-                . (!empty($item['title']) ? 'title="' . $item['title'] . '"' : '') . ' '
-                . (!empty($item['target']) ? 'target="' . $item['target'] . '"' : '') . ' '
-                . (!empty($item['click']) ? 'onclick="' . $item['click'] . '"' : '') . ' class="'
-                . (!empty($item['active']) ? 'active' : '') . '"><span>'
-                . $this->escapeHtml($item['label']) . '</span></a>' . PHP_EOL;
+
+            // Build <li> classes
+            $classes = ["level{$level}"];
+            if ($level > 0) {
+                if (!empty($item['active'])) {
+                    $classes[] = 'active';
+                }
+                if (!empty($item['last'])) {
+                    $classes[] = 'last';
+                }
+            }
+            if (!empty($item['children'])) {
+                $classes[] = 'parent';
+            }
+            $classes = implode(' ', $classes);
+
+            // Build <a> attributes
+            $attrs = new Varien_Object([ 'href' => $item['url'] ]);
+            if (!empty($item['id'])) {
+                $attrs['id'] = 'nav-' . $item['id'];
+            }
+            if (!empty($item['title'])) {
+                $attrs['title'] = $item['title'];
+            }
+            if (!empty($item['click'])) {
+                $attrs['onclick'] = $item['click'];
+            }
+            if (!empty($item['active'])) {
+                $attrs['class'] = 'active';
+            }
+
+            $html .= $indent("<li class=\"{$classes}\">", 1);
+            $html .= $indent("<a {$attrs->serialize()}><span>" . $this->escapeHtml($item['label']) . '</span></a>', 2);
+
             if (!empty($item['children'])) {
                 $html .= $this->getMenuLevel($item['children'], $level + 1);
             }
-            $html .= '</li>' . PHP_EOL;
+            $html .= $indent('</li>', 1);
         }
-        $html .= '</ul>' . PHP_EOL;
+        $html .= $indent('</ul>');
 
         return $html;
     }
