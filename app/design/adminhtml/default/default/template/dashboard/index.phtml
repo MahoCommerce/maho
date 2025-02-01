@@ -5,116 +5,78 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Dashboard $this */
 ?>
 
-<?php if (is_array($this->getChild('diagrams')->getTabsIds())) : ?>
-<script type="text/javascript">
-//<![CDATA[
-function changeDiagramsPeriod(periodObj) {
-    periodParam = periodObj.value ? 'period/' + periodObj.value + '/' : '';
-<?php foreach ($this->getChild('diagrams')->getTabsIds() as $tabId): ?>
-    ajaxBlockParam = 'block/tab_<?= $tabId ?>/';
-    ajaxBlockUrl = '<?= $this->getUrl('*/*/ajaxBlock', ['_current' => true, 'block' => '', 'period' => '']) ?>' + ajaxBlockParam + periodParam;
-    new Ajax.Request(ajaxBlockUrl, {
-        parameters: {isAjax: 'true', form_key: FORM_KEY},
-        onSuccess: function(transport) {
-            tabContentElementId = '<?= $this->getChild('diagrams')->getId() ?>_<?= $tabId ?>_content';
-            try {
-                if (transport.responseText.isJSON()) {
-                    var response = transport.responseText.evalJSON()
-                    if (response.error) {
-                        alert(response.message);
-                    }
-                    if(response.ajaxExpired && response.ajaxRedirect) {
-                        setLocation(response.ajaxRedirect);
-                    }
-                } else {
-                    $(tabContentElementId).update(transport.responseText);
-                }
-            }
-            catch (e) {
-                $(tabContentElementId).update(transport.responseText);
-            }
-        }
-    });
-<?php endforeach ?>
-    ajaxBlockUrl = '<?= $this->getUrl('*/*/ajaxBlock', ['_current' => true, 'block' => 'totals', 'period' => '']) ?>' + periodParam;
-    new Ajax.Request(ajaxBlockUrl, {
-        parameters: {isAjax: 'true', form_key: FORM_KEY},
-        onSuccess: function(transport) {
-            tabContentElementId = 'dashboard_diagram_totals';
-            try {
-                if (transport.responseText.isJSON()) {
-                    var response = transport.responseText.evalJSON()
-                    if (response.error) {
-                        alert(response.message);
-                    }
-                    if(response.ajaxExpired && response.ajaxRedirect) {
-                        setLocation(response.ajaxRedirect);
-                    }
-                } else {
-                    $(tabContentElementId).replace(transport.responseText);
-                }
-            }
-            catch (e) {
-                $(tabContentElementId).replace(transport.responseText);
-            }
-        }
-    });
-}
-
-function toggleCal(id) {
-    $('dashboard_'+id+'_cal_div').toggle();
-    $('dashboard_'+id+'_range_div').toggle();
-}
-//]]>
-</script>
-<?php endif ?>
 <div class="content-header">
-    <table cellspacing="0">
-        <tr>
-            <td><h3 class="head-dashboard"><?= $this->__('Dashboard') ?></h3></td>
-        </tr>
-    </table>
+    <h3 class="head-dashboard"><?= $this->__('Dashboard') ?></h3>
 </div>
+
+<?= $this->getChildHtml('store_switcher') ?>
+
+<script>
+    const dashboard = new MahoDashboard({
+        diagrams: {
+            htmlId: <?= json_encode($this->getChild('diagrams')->getId()) ?>,
+            tabs: <?= json_encode($this->getChild('diagrams')->getTabsIds()) ?>,
+            switcherId: <?= json_encode("order_{$this->getHtmlId()}_period") ?>,
+            ajaxUrl: <?= json_encode($this->getUrl('*/*/ajaxBlock')) ?>,
+        },
+    });
+</script>
+
 <div class="dashboard-container">
-    <?= $this->getChildHtml('store_switcher') ?>
-    <table cellspacing="25" width="100%">
-        <tr>
-            <td><?= $this->getChildHtml('sales') ?>
-                <div class="entry-edit">
-                    <div class="entry-edit-head"><h4><?= $this->__('Last 5 Orders') ?></h4></div>
-                    <fieldset class="np"><?= $this->getChildHtml('lastOrders') ?></fieldset>
-                </div>
-                <div class="entry-edit">
-                    <div class="entry-edit-head"><h4><?= $this->__('Last 5 Search Terms') ?></h4></div>
-                    <fieldset class="np"><?= $this->getChildHtml('lastSearches') ?></fieldset>
-                </div>
-                <div class="entry-edit">
-                    <div class="entry-edit-head"><h4><?= $this->__('Top 5 Search Terms') ?></h4></div>
-                    <fieldset class="np"><?= $this->getChildHtml('topSearches') ?></fieldset>
-                </div>
-            </td>
-            <td>
-                <div class="entry-edit" style="border:1px solid #ccc;">
-                    <?= $this->getChildHtml('diagrams') ?>
-                    <?php if (is_array($this->getChild('diagrams')->getTabsIds())) : ?>
-                        <div id="diagram_tab_content"></div>
-                    <?php endif ?>
-                    <div style="margin:20px;">
-                        <?= $this->getChildHtml('totals') ?>
-                    </div>
-                    <div style="margin:20px;">
-                        <?= $this->getChildHtml('grids') ?>
-                        <div id="grid_tab_content"></div>
-                    </div>
-                </div>
-            </td>
-        </tr>
-    </table>
+    <div>
+        <?= $this->getChildHtml('sales') ?>
+        <div class="entry-edit">
+            <div class="entry-edit-head"><h4><?= $this->__('Last 5 Orders') ?></h4></div>
+            <fieldset><?= $this->getChildHtml('lastOrders') ?></fieldset>
+        </div>
+        <div class="entry-edit">
+            <div class="entry-edit-head"><h4><?= $this->__('Last 5 Search Terms') ?></h4></div>
+            <fieldset><?= $this->getChildHtml('lastSearches') ?></fieldset>
+        </div>
+        <div class="entry-edit">
+            <div class="entry-edit-head"><h4><?= $this->__('Top 5 Search Terms') ?></h4></div>
+            <fieldset><?= $this->getChildHtml('topSearches') ?></fieldset>
+        </div>
+    </div>
+
+    <div>
+
+    <?php if (is_array($this->getChild('diagrams')->getTabsIds())) : ?>
+        <div>
+            <div id="diagram_tabs">
+                <?= $this->getChildHtml('diagrams') ?>
+                <div>
+                    <?= $this->__('Select Range') ?>:
+                    <select name="period" id="order_<?= $this->getHtmlId() ?>_period">
+                    <?php $selected = $this->getRequest()->getParam('period') ?>
+                    <?php foreach ($this->helper('adminhtml/dashboard_data')->getDatePeriods() as $value => $label): ?>
+                        <?php if (in_array($value, ['custom'])) continue ?>
+                        <option value="<?= $value ?>"<?= $selected === $value ? ' selected="selected"' : '' ?>>
+                            <?= $label ?>
+                        </option>
+                    <?php endforeach ?>
+                    </select>
+               </div>
+            </div>
+            <div id="diagram_tab_content" class="box"></div>
+        </div>
+    <?php else: ?>
+        <?= $this->getChildHtml('diagrams') ?>
+    <?php endif ?>
+
+        <?= $this->getChildHtml('totals') ?>
+
+        <div>
+            <?= $this->getChildHtml('grids') ?>
+            <div id="grid_tab_content"></div>
+        </div>
+
+    </div>
 </div>
