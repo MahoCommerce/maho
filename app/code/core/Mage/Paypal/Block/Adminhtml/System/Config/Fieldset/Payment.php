@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -78,7 +78,9 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Payment extends Mage_Ad
     #[\Override]
     protected function _getHeaderTitleHtml($element)
     {
-        $html = '<div class="config-heading" ><div class="heading"><strong>' . $element->getLegend();
+        $html = '<summary class="entry-edit-head">';
+
+        $html .= '<div><h4>' . $element->getLegend() . '</h4>';
 
         $groupConfig = $this->getGroup($element)->asArray();
         if (!empty($groupConfig['learn_more_link'])) {
@@ -89,12 +91,12 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Payment extends Mage_Ad
             $html .= '<a class="link-demo" href="' . $groupConfig['demo_link'] . '" target="_blank">'
                 . $this->__('View Demo') . '</a>';
         }
-        $html .= '</strong>';
 
         if ($element->getComment()) {
             $html .= '<span class="heading-intro">' . $element->getComment() . '</span>';
         }
-        $html .= '</div>';
+
+        $html .= '</div><span class="flex-space"></span>';
 
         $html .= '<div class="button-container"><button type="button"'
             . ($this->_isPaymentEnabled($element) ? '' : ' disabled="disabled"') . ' class="button'
@@ -103,7 +105,9 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Payment extends Mage_Ad
             . '-head" onclick="paypalToggleSolution.call(this, \'' . $element->getHtmlId() . '\', \''
             . $this->getUrl('*/*/state') . '\'); return false;"><span class="state-closed">'
             . $this->__('Configure') . '</span><span class="state-opened">'
-            . $this->__('Close') . '</span></button></div></div>';
+            . $this->__('Close') . '</span></button>';
+
+        $html .= '</summary>';
 
         return $html;
     }
