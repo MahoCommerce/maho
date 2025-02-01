@@ -5,19 +5,19 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Tag_Pending $this */
 ?>
 <div class="content-header">
-<table cellspacing="0">
-    <tr>
-        <td style="width:80%;"><h3 class="<?= $this->getHeaderCssClass() ?>"><?= $this->getHeaderHtml() ?></h3></td>
-        <td class="form-buttons"><?= $this->getCreateButtonHtml() ?></td>
-    </tr>
-</table>
+    <h3 class="<?= $this->getHeaderCssClass() ?>">
+        <?= $this->getHeaderHtml() ?>
+    </div>
+    <div class="form-buttons">
+        <?= $this->getCreateButtonHtml() ?>
+    </div>
 </div>
 <div id="tag_frame">
     <?= $this->getGridHtml() ?>

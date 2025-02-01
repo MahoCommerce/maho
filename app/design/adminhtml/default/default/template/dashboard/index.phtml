@@ -14,9 +14,8 @@
 
 <div class="content-header">
     <h3 class="head-dashboard"><?= $this->__('Dashboard') ?></h3>
+    <?= $this->getChildHtml('store_switcher') ?>
 </div>
-
-<?= $this->getChildHtml('store_switcher') ?>
 
 <script>
     const dashboard = new MahoDashboard({

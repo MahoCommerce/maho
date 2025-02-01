@@ -28,7 +28,7 @@
                 <?= Mage::helper('adminhtml')->__('[STORE VIEW]') ?>
             <?php endif ?>
             </td>
-            <td class="value use-default">
+            <td class="use-default">
             <?php if($product->getStoreId()): ?>
                 <input id="link_title_default" type="checkbox" name="use_default[]" value="links_title" onclick="toggleValueElements(this, this.parentNode.parentNode)" <?= $this->getUsedDefault() ? 'checked' : '' ?> />
                 <label class="normal" for="link_title_default"><?= $helper->__('Use Default Value') ?></label>

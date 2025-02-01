@@ -15,52 +15,37 @@
 <html lang="<?= $this->getLang() ?>">
 <head>
 <?= $this->getChildHtml('head') ?>
-<style type="text/css">
-    html,body { height:100%; }
+<style>
+    html, body { height: 100%; background: white; }
 </style>
 </head>
-<body id="html-body" style="background:#fff;">
+<body id="html-body">
 <div id="preview" class="cms-revision-preview">
     <div class="toolbar">
-        <?php if (!Mage::app()->isSingleStoreMode()) :?>
-        <p class="switcher">
+        <?php if (!Mage::app()->isSingleStoreMode()): ?>
+        <div class="switcher">
             <?= $this->getChildHtml('store_switcher') ?>
-            <button class="button" onclick="preview();"><span><?= $this->__('Preview') ?></span></button>
-        </p>
+            <button class="button"><?= $this->__('Preview') ?></button>
+        </div>
         <?php endif ?>
     </div>
     <iframe name="preview_iframe" id="preview_iframe" frameborder="0"></iframe>
     <?= $this->getChildHtml('preview_form') ?>
 </div>
-<div id="loading-mask" style="display:none">
-    <div class="backdrop"></div>
-    <p class="loader" id="loading_mask_loader">
-        <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Loading...')) ?>"/><br/><?= Mage::helper('adminhtml')->__('Please wait...') ?>
-    </p>
-</div>
 
-<script type="text/javascript">
-//<![CDATA[
-var previewForm = $('preview_form');
-var previewIframe = $('preview_iframe');
+<script type="module">
+    const previewEl = document.getElementById('preview');
+    const previewForm = document.getElementById('preview_form');
+    const previewIframe = document.getElementById('preview_iframe');
 
-function preview() {
-    previewForm.writeAttribute('target', previewIframe.readAttribute('id'));
-    blockPreview();
-    previewForm.submit();
-}
-
-function blockPreview() {
-    showLoader($('preview'));
-}
-
-function unBlockPreview() {
-    hideLoader();
-}
-
-Event.observe(window, 'load', preview);
-Event.observe(previewIframe, 'load', unBlockPreview);
-//]]>
+    previewEl.querySelector('.toolbar .switcher .button').addEventListener('click', () => {
+        window.showLoader(previewEl);
+        previewForm.target = previewIframe.id
+        previewForm.submit();
+    });
+    previewIframe.addEventListener('load', () => {
+        window.hideLoader();
+    });
 </script>
 </body>
 </html>

@@ -12,14 +12,10 @@
 /** @var Mage_CurrencySymbol_Block_Adminhtml_System_Currencysymbol $this*/
 ?>
 <div class="content-header">
-    <table cellspacing="0">
-        <tr>
-            <td style="width:50%;"><h3><?= $this->getHeader() ?></h3></td>
-            <td class="form-buttons">
-                <?= $this->getSaveButtonHtml() ?>
-            </td>
-        </tr>
-    </table>
+    <h3><?= $this->getHeader() ?></h3>
+    <div class="form-buttons">
+        <?= $this->getSaveButtonHtml() ?>
+    </div>
 </div>
 
 <?php $this->getCurrencySymbolsData();?>
@@ -77,4 +73,3 @@
         }
     }
 </script>
-

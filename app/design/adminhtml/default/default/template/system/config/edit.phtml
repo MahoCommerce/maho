@@ -13,14 +13,12 @@
 ?>
 
 <div class="content-header">
-    <table cellspacing="0">
-        <tr>
-            <td>
-                <h3<?php if($this->getHeaderCss()): ?> class="<?= $this->getHeaderCss()?>"<?php endif ?>><?= Mage::helper('adminhtml')->__($this->getTitle()) ?></h3>
-            </td>
-            <td class="form-buttons"><?= $this->getSaveButtonHtml() ?></td>
-         </tr>
-    </table>
+     <h3 <?= $this->getHeaderCss() ? " class=\"{$this->getHeaderCss()}\"" : '' ?>>
+         <?= Mage::helper('adminhtml')->__($this->getTitle()) ?>
+     </h3>
+     <div class="form-buttons">
+         <?= $this->getSaveButtonHtml() ?>
+     </div>
 </div>
 <form action="<?= $this->getSaveUrl() ?>" method="post" id="config_edit_form" enctype="multipart/form-data">
     <?= $this->getBlockHtml('formkey') ?>
