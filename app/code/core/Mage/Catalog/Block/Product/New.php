@@ -63,6 +63,7 @@ class Mage_Catalog_Block_Product_New extends Mage_Catalog_Block_Product_Abstract
             Mage::getSingleton('customer/session')->getCustomerGroupId(),
             'template' => $this->getTemplate(),
             $this->getProductsCount(),
+            Mage::app()->getStore()->getCurrentCurrencyCode(),
         ];
     }
 
