@@ -5443,6 +5443,18 @@ parameters:
 			path: app/design/frontend/base/default/template/review/form.phtml
 
 		-
+			message: '#^Parameter \#1 \(non\-empty\-array\) of echo cannot be converted to string\.$#'
+			identifier: echo.nonString
+			count: 1
+			path: app/design/frontend/base/default/template/review/helper/summary.phtml
+
+		-
+			message: '#^Parameter \#1 \(non\-empty\-array\) of echo cannot be converted to string\.$#'
+			identifier: echo.nonString
+			count: 1
+			path: app/design/frontend/base/default/template/review/helper/summary_short.phtml
+
+		-
 			message: '#^Access to an undefined property Mage_Core_Block_Template\:\:\$trackingInfo\.$#'
 			identifier: property.notFound
 			count: 1
