@@ -6,7 +6,7 @@
  * @package    Mage_Rule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -281,23 +281,12 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      */
     public function getValueAfterElementHtml()
     {
-        $html = '';
+        if (in_array($this->getAttribute(), ['sku', 'category_ids'], true)) {
+            $title = Mage::helper('core')->quoteEscape(Mage::helper('rule')->__('Open Chooser'));
+            return '<a href="javascript:void(0)" class="rule-chooser-trigger icon-dots" title="' . $title . '"></a>';
 
-        switch ($this->getAttribute()) {
-            case 'sku':
-            case 'category_ids':
-                $image = Mage::getDesign()->getSkinUrl('images/rule_chooser_trigger.gif');
-                break;
         }
-
-        if (!empty($image)) {
-            $html = '<a href="javascript:void(0)" class="rule-chooser-trigger"><img src="'
-                . $image
-                . '" alt="" class="v-middle rule-chooser-trigger" title="'
-                . Mage::helper('core')->quoteEscape(Mage::helper('rule')->__('Open Chooser'))
-                . '" /></a>';
-        }
-        return $html;
+        return '';
     }
 
     /**
