@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -55,6 +55,33 @@ class Mage_Adminhtml_Block_Notification_Toolbar extends Mage_Adminhtml_Block_Tem
         }
 
         return true;
+    }
+
+    /**
+     * Retrieve count of each error as HTML
+     */
+    public function getMessageStats(): string
+    {
+        $parts = [];
+
+        if ($this->getCriticalCount()) {
+            $parts[] = '<strong class="critical">' . $this->getCriticalCount() . '</strong> ' . $this->__('critical');
+        }
+
+        if ($this->getMajorCount()) {
+            $parts[] = '<strong>' . $this->getMajorCount() . '</strong> ' . $this->__('major');
+        }
+
+        if ($this->getMinorCount()) {
+            $parts[] = '<strong>' . $this->getMinorCount() . '</strong> ' . $this->__('minor');
+        }
+
+        if ($this->getNoticeCount()) {
+            $parts[] = '<strong>' . $this->getNoticeCount() . '</strong> ' . $this->__('notice');
+        }
+
+        $last = array_pop($parts);
+        return implode(', ', $parts) . $this->__(' and ') . $last;
     }
 
     /**
