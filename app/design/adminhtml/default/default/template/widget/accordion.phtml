@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
@@ -16,11 +16,11 @@
  * @var Mage_Adminhtml_Block_Customer_Edit_Tab_View_Accordion $this
  */
 ?>
-<dl id="tab_content_<?= $this->getHtmlId() ?>" name="tab_content_<?= $this->getHtmlId() ?>" class="accordion">
+<div id="tab_content_<?= $this->getHtmlId() ?>" name="tab_content_<?= $this->getHtmlId() ?>" class="accordion">
 <?php foreach ($this->getItems() as $_item): ?>
     <?= $this->getChildHtml($_item->getId()) ?>
 <?php endforeach ?>
-</dl>
-<script type="text/javascript">
-    tab_content_<?= $this->getHtmlId() ?>AccordionJs = new varienAccordion('tab_content_<?= $this->getHtmlId() ?>', '<?= $this->getShowOnlyOne() ?>');
+</div>
+<script>
+    window.tab_content_<?= $this->getHtmlId() ?>AccordionJs = new varienAccordion('tab_content_<?= $this->getHtmlId() ?>', '<?= $this->getShowOnlyOne() ?>');
 </script>
