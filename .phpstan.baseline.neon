@@ -4375,30 +4375,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/catalog/product/attribute/set/toolbar/main.phtml
 
 		-
-			message: '#^Access to an undefined property Mage_Catalog_Model_Product_Option\:\:\$decoratedIsLast\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/design/adminhtml/default/default/template/catalog/product/composite/fieldset/options/type/date.phtml
-
-		-
-			message: '#^Access to an undefined property Mage_Catalog_Model_Product_Option\:\:\$decoratedIsLast\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/design/adminhtml/default/default/template/catalog/product/composite/fieldset/options/type/file.phtml
-
-		-
-			message: '#^Access to an undefined property Mage_Catalog_Model_Product_Option\:\:\$decoratedIsLast\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/design/adminhtml/default/default/template/catalog/product/composite/fieldset/options/type/select.phtml
-
-		-
-			message: '#^Access to an undefined property Mage_Catalog_Model_Product_Option\:\:\$decoratedIsLast\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/design/adminhtml/default/default/template/catalog/product/composite/fieldset/options/type/text.phtml
-
-		-
 			message: '#^Variable \$_weeeTaxAttributes might not be defined\.$#'
 			identifier: variable.undefined
 			count: 9

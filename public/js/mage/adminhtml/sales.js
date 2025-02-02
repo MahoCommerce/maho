@@ -4,6 +4,7 @@
  * @package     Mage_Adminhtml
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 var AdminOrder = new Class.create();
@@ -530,14 +531,14 @@ AdminOrder.prototype = {
                         grid.setCheckboxChecked(checkbox, true);
                     }.bind(this));
                     productConfigure.setCancelCallback(listType, function() {
-                        if (!$(productConfigure.confirmedCurrentId) || !$(productConfigure.confirmedCurrentId).innerHTML) {
+                        if (!productConfigure.itemConfigured(listType, productId)) {
                             grid.setCheckboxChecked(checkbox, false);
                         }
                     });
                     productConfigure.setShowWindowCallback(listType, function() {
                         // sync qty of grid and qty of popup
                         var formCurrentQty = productConfigure.getCurrentFormQtyElement();
-                        if (formCurrentQty && qtyElement && !isNaN(qtyElement.value)) {
+                        if (formCurrentQty && qtyElement && qtyElement.value && !isNaN(qtyElement.value)) {
                             formCurrentQty.value = qtyElement.value;
                         }
                     }.bind(this));
