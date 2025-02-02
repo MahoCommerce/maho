@@ -5,12 +5,13 @@
  * @package     js
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2017-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-class ProductConfigConfigurable
-{
+var Product = Product ?? {};
+
+Product.Config2 = class {
     constructor(config) {
         this.config = config;
         this.taxConfig = config.taxConfig;
@@ -28,13 +29,11 @@ class ProductConfigConfigurable
         }
 
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams) {
-            for (const [key, value] of urlParams) {
-                if (!this.values) {
-                    this.values = {};
-                }
-                this.values[key] = value;
+        for (const [key, value] of urlParams) {
+            if (!this.values) {
+                this.values = {};
             }
+            this.values[key] = value;
         }
 
         if (config.inputsInitialized) {
@@ -69,10 +68,10 @@ class ProductConfigConfigurable
             } else {
                 this.settings[i].disabled = true;
             }
-            childSettings.push(this.settings[i]);
             this.settings[i].childSettings = [...childSettings];
             this.settings[i].prevSetting = prevSetting;
             this.settings[i].nextSetting = nextSetting;
+            childSettings.push(this.settings[i]);
         }
 
         this.configureForValues();
@@ -83,7 +82,8 @@ class ProductConfigConfigurable
         if (this.values) {
             this.settings.forEach(element => {
                 const attributeId = element.attributeId;
-                element.value = this.values[attributeId] || '';
+                //element.value = this.values[attributeId] || '';
+                element.value = typeof this.values[attributeId] === 'undefined' ? '' : this.values[attributeId];
                 this.configureElement(element);
             });
         }
@@ -111,7 +111,7 @@ class ProductConfigConfigurable
 
     reloadOptionLabels(element) {
         let selectedPrice = 0;
-        if(element.options[element.selectedIndex].config && !this.config.stablePrices){
+        if(element.options[element.selectedIndex].config && !this.config.stablePrices){ // this line
             selectedPrice = parseFloat(element.options[element.selectedIndex].config.price);
         }
 
@@ -127,7 +127,7 @@ class ProductConfigConfigurable
             element.childSettings.forEach(child => {
                 child.selectedIndex = 0;
                 child.disabled = true;
-                if (child.config) {
+                if (element.config) {
                     this.state[child.config.id] = false;
                 }
             });
@@ -171,6 +171,7 @@ class ProductConfigConfigurable
     }
 
     getOptionLabel(option, price) {
+        price = parseFloat(price);
         let tax, excl, incl;
         if (this.taxConfig.includeTax) {
             tax = price / (100 + this.taxConfig.defaultTax) * this.taxConfig.defaultTax;
@@ -268,6 +269,3 @@ class ProductConfigConfigurable
         }
     }
 }
-
-var Product = Product ?? {};
-Product.Config = ProductConfigConfigurable;
