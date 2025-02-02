@@ -5,17 +5,16 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Adminhtml_Block_Catalog_Product_Composite_Fieldset_Options $this */
+$options = $this->getOptions();
 ?>
-<?php /** @var Mage_Adminhtml_Block_Catalog_Product_Composite_Fieldset_Options $this */ ?>
-<?php $options = Mage::helper('core')->decorateArray($this->getOptions()); ?>
 <?php if (count($options)): ?>
-
 <?= $this->getChildHtml('options_js') ?>
-
-<div id="product_composite_configure_fields_options" class="<?= $this->getIsLastFieldset() ? 'last-fieldset' : '' ?>">
+<div>
     <h4><?= Mage::helper('catalog')->__('Custom Options') ?></h4>
     <div class="product-options">
         <dl>
@@ -25,5 +24,4 @@
         </dl>
     </div>
 </div>
-
 <?php endif ?>
