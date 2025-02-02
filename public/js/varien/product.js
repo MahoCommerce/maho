@@ -4,91 +4,102 @@
  * @package     js
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 var Product = Product ?? {};
 
-/**************************** CONFIGURABLE PRODUCT **************************/
-class ProductConfig
-{
+Product.Config = class {
     constructor(config) {
         this.config = config;
         this.taxConfig = this.config.taxConfig;
-        this.settings = Array.from(document.querySelectorAll('.super-attribute-select'));
         this.state = new Map();
+        this.configureObservers = [];
         this.priceTemplate = new Template(this.config.template);
         this.prices = config.prices;
 
+        if (this.config.containerId) {
+            this.settings = document.querySelectorAll(`#${config.containerId} .super-attribute-select`);
+        } else {
+            this.settings = document.querySelectorAll('.super-attribute-select');
+        }
+
+        // Set default values
+        if (this.config.defaultValues) {
+            this.values = config.defaultValues;
+        }
+
+        // Overwrite defaults by url
+        for (const [ key, value ] of new URLSearchParams(window.location.hash.slice(1))) {
+            this.values ??= {};
+            this.values[key] = value;
+        }
+
+        // Overwrite defaults by inputs values if needed
+        if (this.config.inputsInitialized) {
+            this.values = {};
+            for (const element of this.settings) {
+                if (element.value) {
+                    const attributeId = element.id.replace(/[a-z]*/, '');
+                    this.values[attributeId] = element.value;
+                }
+            }
+        }
+
         // Add change event listeners to all settings
-        this.settings.forEach(element => {
-            element.addEventListener('change', (event) => this.configure(event));
-        });
+        for (const element of this.settings) {
+            element.addEventListener('change', this.configure.bind(this));
+        }
 
         // Fill state
-        this.settings.forEach(element => {
+        for (const element of this.settings) {
             const attributeId = element.id.replace(/[a-z]*/, '');
             if (attributeId && this.config.attributes[attributeId]) {
                 element.config = this.config.attributes[attributeId];
                 element.attributeId = attributeId;
                 this.state.set(attributeId, false);
             }
-        });
+        }
 
         // Init settings dropdown
         const childSettings = [];
-        for (let i = this.settings.length - 1; i >= 0; i--) {
-            const prevSetting = this.settings[i - 1] || false;
-            const nextSetting = this.settings[i + 1] || false;
-
-            if (i === 0) {
-                this.fillSelect(this.settings[i]);
-            } else {
-                this.settings[i].disabled = true;
+        for (const [ i, element ] of Object.entries(this.settings).reverse()) {
+            if (element === this.settings[0]) {
+                this.fillSelect(element);
             }
 
-            this.settings[i].childSettings = [...childSettings];
-            this.settings[i].prevSetting = prevSetting;
-            this.settings[i].nextSetting = nextSetting;
-            childSettings.push(this.settings[i]);
-        }
+            element.childSettings = [...childSettings];
+            element.prevSetting = this.settings[+i - 1] || false;
+            element.nextSetting = this.settings[+i + 1] || false;
+            element.disabled = i > 0;
 
-        // Set default values
-        if (config.defaultValues) {
-            this.values = config.defaultValues;
-        }
-
-        // Parse URL parameters
-        const separatorIndex = window.location.href.indexOf('#');
-        if (separatorIndex !== -1) {
-            const paramsStr = window.location.href.substr(separatorIndex + 1);
-            const urlValues = new URLSearchParams(paramsStr);
-            if (!this.values) {
-                this.values = {};
-            }
-            for (const [key, value] of urlValues) {
-                this.values[key] = value;
-            }
+            childSettings.push(element);
         }
 
         this.configureForValues();
-        document.addEventListener('DOMContentLoaded', () => this.configureForValues());
+        document.addEventListener('DOMContentLoaded', this.configureForValues.bind(this));
+    }
+
+    configureSubscribe(fn) {
+        this.configureObservers.push(fn);
     }
 
     configureForValues() {
-        if (this.values) {
-            this.settings.forEach(element => {
-                const attributeId = element.attributeId;
-                element.value = (typeof(this.values[attributeId]) === 'undefined') ? '' : this.values[attributeId];
+        for (const element of this.settings) {
+            if (this.values?.[element.attributeId]) {
+                element.value = this.values[element.attributeId];
                 this.configureElement(element);
-            });
+            }
         }
     }
 
     configure(event) {
         const element = event.target;
         this.configureElement(element);
+        for (const fn of this.configureObservers) {
+            fn(element);
+        }
     }
 
     configureElement(element) {
@@ -107,32 +118,30 @@ class ProductConfig
     }
 
     reloadOptionLabels(element) {
-        let selectedPrice;
-        if (element.options[element.selectedIndex]?.config) {
+        let selectedPrice = 0;
+        if (element.options[element.selectedIndex]?.config && !this.config.stablePrices) {
             selectedPrice = parseFloat(element.options[element.selectedIndex].config.price);
-        } else {
-            selectedPrice = 0;
         }
 
-        Array.from(element.options).forEach(option => {
+        for (const option of element.options) {
             if (option.config) {
                 option.text = this.getOptionLabel(
                     option.config,
                     option.config.price - selectedPrice
                 );
             }
-        });
+        }
     }
 
     resetChildren(element) {
         if (element.childSettings) {
-            element.childSettings.forEach(child => {
+            for (const child of element.childSettings) {
                 child.selectedIndex = 0;
                 child.disabled = true;
                 if (element.config) {
                     this.state.set(element.config.id, false);
                 }
-            });
+            }
         }
     }
 
@@ -142,38 +151,25 @@ class ProductConfig
         this.clearSelect(element);
 
         // Add default empty option
-        element.options[0] = new Option('', '');
-        element.options[0].innerHTML = this.config.chooseText;
+        element.options.add(new Option(this.config.chooseText, ''));
 
-        let prevConfig = false;
+        let prevConfig;
         if (element.prevSetting) {
             prevConfig = element.prevSetting.options[element.prevSetting.selectedIndex];
         }
 
-        if (options) {
-            let index = 1;
-            options.forEach(option => {
-                let allowedProducts = [];
-
-                if (prevConfig) {
-                    allowedProducts = option.products.filter(productId =>
-                        prevConfig.config.allowedProducts &&
-                        prevConfig.config.allowedProducts.includes(productId)
-                    );
-                } else {
-                    allowedProducts = [...option.products]; // Create a copy of the array
-                }
-
-                if (allowedProducts.length > 0) {
-                    option.allowedProducts = allowedProducts;
-                    element.options[index] = new Option(
-                        this.getOptionLabel(option, option.price),
-                        option.id
-                    );
-                    element.options[index].config = option;
-                    index++;
-                }
+        for (const option of options ?? []) {
+            const allowedProducts = option.products.filter((productId) => {
+                return !prevConfig || prevConfig.config.allowedProducts?.includes(productId);
             });
+
+            if (allowedProducts.length > 0) {
+                option.allowedProducts = allowedProducts;
+
+                const opt = new Option(this.getOptionLabel(option, option.price), option.id);
+                opt.config = option;
+                element.options.add(opt);
+            }
         }
     }
 
@@ -222,7 +218,7 @@ class ProductConfig
             str += this.prices[roundedPrice];
         } else {
             // Keep original priceTemplate evaluation
-            str += this.priceTemplate.evaluate({price: price.toFixed(2)});
+            str += this.priceTemplate.evaluate({ price: price.toFixed(2) });
         }
 
         return str;
@@ -239,11 +235,13 @@ class ProductConfig
     }
 
     reloadPrice() {
-        let price = 0;
-        let oldPrice = 0;
+        if (this.config.disablePriceReload) {
+            return;
+        }
 
-        for (let i = this.settings.length - 1; i >= 0; i--) {
-            const selected = this.settings[i].options[this.settings[i].selectedIndex];
+        let price = 0, oldPrice = 0;
+        for (const [ i, element ] of Object.entries(this.settings).reverse()) {
+            const selected = element.options[element.selectedIndex];
             if (selected?.config) {
                 price += parseFloat(selected.config.price);
                 oldPrice += parseFloat(selected.config.oldPrice);
@@ -251,21 +249,23 @@ class ProductConfig
         }
 
         // Assuming optionsPrice is a global object
-        optionsPrice.changePrice('config', {
-            price: price,
-            oldPrice: oldPrice
-        });
+        optionsPrice.changePrice('config', { price, oldPrice });
         optionsPrice.reload();
 
         return price;
     }
 
     reloadOldPrice() {
+        if (this.config.disablePriceReload) {
+            return;
+        }
+
         const oldPriceElement = document.getElementById(`old-price-${this.config.productId}`);
-        if (!oldPriceElement) return;
+        if (!oldPriceElement) {
+            return;
+        }
 
         let price = parseFloat(this.config.oldPrice);
-
         for (let i = this.settings.length - 1; i >= 0; i--) {
             const selected = this.settings[i].options[this.settings[i].selectedIndex];
             if (selected?.config) {
@@ -275,15 +275,14 @@ class ProductConfig
         }
 
         price = Math.max(0, price);
-        const formattedPrice = this.formatPrice(price);
-        oldPriceElement.innerHTML = formattedPrice;
+        oldPriceElement.textContent = this.formatPrice(price);
     }
 }
 
 /**************************** SUPER PRODUCTS ********************************/
 
-class ProductSuperConfigurable
-{
+Product.Super = {};
+Product.Super.Configurable = class {
     constructor(container, observeCss, updateUrl, updatePriceUrl, priceContainerId) {
         this.container = document.getElementById(container);
         this.observeCss = observeCss;
@@ -294,17 +293,15 @@ class ProductSuperConfigurable
     }
 
     registerObservers() {
-        const elements = this.container.getElementsByClassName(this.observeCss);
-        Array.from(elements).forEach(element => {
-            element.addEventListener('change', (event) => this.update(event));
+        this.container.getElementsByClassName(this.observeCss).forEach((element) => {
+            element.addEventListener('change', this.update.bind(this));
         });
         return this;
     }
 
     update(event) {
-        const elements = this.container.getElementsByClassName(this.observeCss);
         const parameters = new FormData();
-        Array.from(elements).forEach(element => {
+        this.container.getElementsByClassName(this.observeCss).forEach((elements) => {
             parameters.append(element.name, element.value);
         });
 
@@ -333,6 +330,3 @@ class ProductSuperConfigurable
         }
     }
 }
-
-Product.Super = {};
-Product.Super.Configurable = ProductSuperConfigurable;
