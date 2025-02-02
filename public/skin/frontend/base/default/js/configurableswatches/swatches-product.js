@@ -4,7 +4,7 @@
  * @package    rwd_default
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -13,11 +13,12 @@ window.addEventListener('load', function() {
     windowLoaded = true;
 });
 
-class ProductConfigWithSwatches extends ProductConfig
-{
+
+var Product = Product ?? {};
+
+Product.Config = class extends Product.Config {
     constructor (config) {
         super(config);
-        this.configureObservers = [];
         this.loadOptions();
     }
 
@@ -38,18 +39,6 @@ class ProductConfigWithSwatches extends ProductConfig
         this.configureObservers.forEach(function(funct) {
             funct(element);
         });
-    }
-
-    configure (event) {
-        super.configure(event);
-        var element = event.target;
-        this.configureObservers.forEach(function(funct) {
-            funct(element);
-        });
-    }
-
-    configureSubscribe (funct) {
-        this.configureObservers.push(funct);
     }
 
     /**
@@ -80,10 +69,7 @@ class ProductConfigWithSwatches extends ProductConfig
     }
 }
 
-Product.Config = ProductConfigWithSwatches;
-
-class ProductConfigurableSwatches
-{
+Product.ConfigurableSwatches = class {
     constructor(productConfig, config) {
         this.productConfig = false;
         this.configurableAttributes = {};
@@ -699,5 +685,3 @@ class ProductConfigurableSwatches
         return lists.reduce((a, b) => a.filter(c => b.includes(c)));
     }
 }
-
-Product.ConfigurableSwatches = ProductConfigurableSwatches;
