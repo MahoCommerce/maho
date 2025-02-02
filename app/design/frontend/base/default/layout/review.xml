@@ -6,6 +6,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -69,7 +70,6 @@ Product reviews page
         <reference name="head">
             <action method="addJs"><script>varien/product.js</script></action>
             <action method="addJs"><script>varien/product_options.js</script></action>
-            <action method="addJs"><script>varien/configurable.js</script></action>
         </reference>
         <reference name="content">
             <block type="review/product_view" name="product.info" template="catalog/product/view.phtml">
