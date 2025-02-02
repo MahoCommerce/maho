@@ -5,36 +5,30 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
- ?>
-<?php /** @var Mage_Adminhtml_Block_Catalog_Product_Composite_Configure $this */ ?>
-<div id="popup-window-mask" style="display:none;"></div>
-<div id="product_composite_configure" class="product-configure-popup" style="display:none;">
-    <iframe name="product_composite_configure_iframe" id="product_composite_configure_iframe" src="" style="width:0; height:0; border:0px solid #fff; position:absolute; top:-1000px; left:-1000px" onload="window.productConfigure && productConfigure.onLoadIFrame()"></iframe>
-    <form action="" method="post" id="product_composite_configure_form" enctype="multipart/form-data" onsubmit="productConfigure.onConfirmBtn(); return false;" target="product_composite_configure_iframe">
-        <div class="entry-edit">
-            <div class="entry-edit-head">
-                <h4 class="icon-head fieldset-legend"><?= Mage::helper('catalog')->__('Configure Product') ?></h4>
-            </div>
-            <div id="product_composite_configure_messages" style="display: none;" >
-                <ul class="messages"><li class="error-msg"></li></ul>
-            </div>
-            <div id="product_composite_configure_form_fields" class="content"></div>
-            <div id="product_composite_configure_form_additional" style="display:none;"></div>
-            <div id="product_composite_configure_form_confirmed" style="display:none;"></div>
-            <div class="buttons-set a-right">
-                <button type="button" class="scalable" onclick="productConfigure.onCancelBtn()" id="product_composite_configure_form_cancel"><span><?= Mage::helper('catalog')->__('Cancel') ?></span></button>
-                <button type="submit" class="scalable"><span><?= Mage::helper('catalog')->__('OK') ?></span></button>
-            </div>
-        </div>
-        <input type="hidden" name="as_js_varname" value="iFrameResponse" />
-        <input type="hidden" name="form_key" value="<?= $this->getFormKey() ?>" />
-    </form>
-    <div id="product_composite_configure_confirmed" style="display:none;"></div>
 
-    <script type="text/javascript">
-        var productCompositeConfigureForm = new varienForm('product_composite_configure_form');
-    </script>
+/**
+ * Product Composite Dialog Block
+ *
+ * Elements:
+ * - product_composite_configure_confirmed - contains per product configure form template with formData property
+ * - product_composite_configure_form - edit form with validation for maho dialog
+ * - product_composite_configure_form_fields - per product configure form area
+ * - product_composite_configure_form_additional - overriding fields added with `window.productConfigure.addFields()`
+ * - product_composite_configure_form_confirmed - when using urlSubmit for batch submit,  confirmed products will be
+ *                                                renamed and appended here for form submission
+ *
+ * @var Mage_Adminhtml_Block_Catalog_Product_Composite_Configure $this
+ */
+?>
+<div id="product_composite_configure" class="no-display">
+    <div id="product_composite_configure_confirmed"></div>
+    <form id="product_composite_configure_form">
+        <div id="product_composite_configure_messages"></div>
+        <div id="product_composite_configure_form_fields" class="content"></div>
+        <div id="product_composite_configure_form_additional" class="no-display"></div>
+        <div id="product_composite_configure_form_confirmed" class="no-display"></div>
+    </form>
 </div>

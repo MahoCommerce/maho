@@ -5,28 +5,34 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
+/** @var Mage_Bundle_Block_Adminhtml_Catalog_Product_Composite_Fieldset_Options_Type_Multi $this */
+$option = $this->getOption();
+$selections = $option->getSelections();
+$skipSaleableCheck = Mage::helper('catalog/product')->getSkipSaleableCheck();
 ?>
-<?php /** @var Mage_Bundle_Block_Adminhtml_Catalog_Product_Composite_Fieldset_Options_Type_Multi $this */ ?>
-<?php $_option = $this->getOption(); ?>
-<?php $_selections = $_option->getSelections(); ?>
-<?php $_skipSaleableCheck = Mage::helper('catalog/product')->getSkipSaleableCheck(); ?>
-<dt><label<?php if ($_option->getRequired()) echo ' class="required"' ?>><?php if ($_option->getRequired()) echo '<em>*</em>' ?><?= $this->escapeHtml($_option->getTitle()) ?></label></dt>
-<dd<?php if ($_option->decoratedIsLast){?> class="last"<?php }?>>
+<dt>
+    <label for="bundle-option-<?= $option->getId() ?>"<?= $option->getRequired() ? ' class="required"' : '' ?>>
+        <?= $this->escapeHtml($option->getTitle()) ?>
+    </label>
+</dt>
+<dd>
     <div class="input-box">
-    <?php if (count($_selections) == 1 && $_option->getRequired()): ?>
-        <?= $this->getSelectionQtyTitlePrice($_selections[0]) ?>
-        <input type="hidden" name="bundle_option[<?= $_option->getId() ?>]" value="<?= $_selections[0]->getSelectionId() ?>" price="<?= $this->getSelectionPrice($_selections[0]) ?>"/>
+    <?php if (count($selections) == 1 && $option->getRequired()): ?>
+        <?= $this->getSelectionQtyTitlePrice($selections[0]) ?>
+        <input type="hidden" name="bundle_option[<?= $option->getId() ?>]" value="<?= $selections[0]->getSelectionId() ?>" price="<?= $this->getSelectionPrice($selections[0]) ?>"/>
     <?php else: ?>
-        <select multiple="multiple" size="5" id="bundle-option-<?= $_option->getId() ?>" name="bundle_option[<?= $_option->getId() ?>][]" class="bundle-option-<?= $_option->getId() ?><?php if ($_option->getRequired()) echo ' required-entry' ?> bundle-option-select multiselect change-container-classname" onchange="ProductConfigure.bundleControl.changeSelection(this)">
-        <?php if(!$_option->getRequired()): ?>
+        <select multiple="multiple" size="5" id="bundle-option-<?= $option->getId() ?>" name="bundle_option[<?= $option->getId() ?>][]" class="bundle-option-<?= $option->getId() ?><?= $option->getRequired() ? ' required-entry' : '' ?> bundle-option-select multiselect change-container-classname" onchange="ProductConfigure.bundleControl.changeSelection(this)">
+        <?php if (!$option->getRequired()): ?>
             <option value=""><?= $this->__('None') ?></option>
         <?php endif ?>
-        <?php foreach ($_selections as $_selection): ?>
-            <option value="<?= $_selection->getSelectionId() ?>"<?php if ($this->_isSelected($_selection)) echo ' selected="selected"' ?><?php if (!$_selection->isSaleable() && !$_skipSaleableCheck) echo ' disabled="disabled"' ?> price="<?= $this->getSelectionPrice($_selection) ?>"><?= $this->getSelectionQtyTitlePrice($_selection, false) ?></option>
+        <?php foreach ($selections as $selection): ?>
+            <?php $selected = $this->_isSelected($selection) ? ' selected="selected"' : '' ?>
+            <?php $disabled = !$selection->isSaleable() && !$skipSaleableCheck ? ' disabled="disabled"' : '' ?>
+            <option value="<?= $selection->getSelectionId() ?>"<?= $selected ?><?= $disabled ?> price="<?= $this->getSelectionPrice($selection) ?>"><?= $this->getSelectionQtyTitlePrice($selection, false) ?></option>
         <?php endforeach ?>
         </select>
     <?php endif ?>
