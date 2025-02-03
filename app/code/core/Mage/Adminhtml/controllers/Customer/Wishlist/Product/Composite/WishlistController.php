@@ -6,6 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,10 +24,15 @@ class Mage_Adminhtml_Customer_Wishlist_Product_Composite_WishlistController exte
     public const ADMIN_RESOURCE = 'customer/manage';
 
     /**
-    * Wishlist we're working with
-    *
-    * @var Mage_Wishlist_Model_Wishlist
-    */
+     * Customer we're working with
+     */
+    protected Mage_Customer_Model_Customer $customer;
+
+    /**
+     * Wishlist we're working with
+     *
+     * @var Mage_Wishlist_Model_Wishlist
+     */
     protected $_wishlist = null;
 
     /**
@@ -43,23 +49,25 @@ class Mage_Adminhtml_Customer_Wishlist_Product_Composite_WishlistController exte
      */
     protected function _initData()
     {
+        $customerId = (int) $this->getRequest()->getParam('customer_id');
+        if (!$customerId) {
+            Mage::throwException($this->__('No customer id defined.'));
+        }
+
+        $this->customer = Mage::getModel('customer/customer')
+            ->load($customerId);
+
         $wishlistItemId = (int) $this->getRequest()->getParam('id');
-        if (!$wishlistItemId) {
-            Mage::throwException($this->__('No wishlist item id defined.'));
-        }
-
-        /** @var Mage_Wishlist_Model_Item $wishlistItem */
-        $wishlistItem = Mage::getModel('wishlist/item')
-            ->loadWithOptions($wishlistItemId);
-
-        if (!$wishlistItem->getWishlistId()) {
-            Mage::throwException($this->__('Wishlist item is not loaded.'));
-        }
+        $websiteId = (int) $this->getRequest()->getParam('website_id');
 
         $this->_wishlist = Mage::getModel('wishlist/wishlist')
-            ->load($wishlistItem->getWishlistId());
+            ->setWebsite(Mage::app()->getWebsite($websiteId))
+            ->loadByCustomer($this->customer);
 
-        $this->_wishlistItem = $wishlistItem;
+        $this->_wishlistItem = $this->_wishlist->getItemById($wishlistItemId);
+        if (!$this->_wishlistItem) {
+            Mage::throwException($this->__('Wishlist item is not loaded.'));
+        }
 
         return $this;
     }
@@ -71,55 +79,58 @@ class Mage_Adminhtml_Customer_Wishlist_Product_Composite_WishlistController exte
      */
     public function configureAction()
     {
-        $configureResult = new Varien_Object();
         try {
             $this->_initData();
 
-            $configureResult->setProductId($this->_wishlistItem->getProductId());
-            $configureResult->setBuyRequest($this->_wishlistItem->getBuyRequest());
-            $configureResult->setCurrentStoreId($this->_wishlistItem->getStoreId());
-            $configureResult->setCurrentCustomerId($this->_wishlist->getCustomerId());
+            $configureResult = new Varien_Object([
+                'ok'                  => true,
+                'product_id'          => $this->_wishlistItem->getProductId(),
+                'buy_request'         => $this->_wishlistItem->getBuyRequest(),
+                'current_store_id'    => $this->_wishlistItem->getStoreId(),
+                'current_customer_id' => $this->_wishlist->getCustomerId(),
+            ]);
 
-            $configureResult->setOk(true);
+            // During order creation in the backend admin has ability to add any products to order
+            Mage::helper('catalog/product')->setSkipSaleableCheck(true);
+
+            // Render page
+            Mage::helper('adminhtml/catalog_product_composite')->renderConfigureResult($this, $configureResult);
+
+        } catch (Mage_Core_Exception $e) {
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         } catch (Exception $e) {
-            $configureResult->setError(true);
-            $configureResult->setMessage($e->getMessage());
+            Mage::logException($e);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Internal Error')]);
         }
-
-        /** @var Mage_Adminhtml_Helper_Catalog_Product_Composite $helper */
-        $helper = Mage::helper('adminhtml/catalog_product_composite');
-        Mage::helper('catalog/product')->setSkipSaleableCheck(true);
-        $helper->renderConfigureResult($this, $configureResult);
 
         return $this;
     }
 
     /**
-     * IFrame handler for submitted configuration for wishlist item
+     * Ajax handler for submitted configuration for wishlist item
      *
      * @return false
      */
     public function updateAction()
     {
-        // Update wishlist item
-        $updateResult = new Varien_Object();
         try {
             $this->_initData();
 
-            $buyRequest = new Varien_Object($this->getRequest()->getParams());
+            $buyRequest = new Varien_Object($this->getRequest()->getPost());
+            $buyRequest->unsFormKey();
 
             $this->_wishlist
                 ->updateItem($this->_wishlistItem->getId(), $buyRequest)
                 ->save();
 
-            $updateResult->setOk(true);
+            $this->getResponse()->setBodyJson(['ok' => true]);
+
+        } catch (Mage_Core_Exception $e) {
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         } catch (Exception $e) {
-            $updateResult->setError(true);
-            $updateResult->setMessage($e->getMessage());
+            Mage::logException($e);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Internal Error')]);
         }
-        $updateResult->setJsVarName($this->getRequest()->getParam('as_js_varname'));
-        Mage::getSingleton('adminhtml/session')->setCompositeProductResult($updateResult);
-        $this->_redirect('*/catalog_product/showUpdateResult');
 
         return false;
     }
