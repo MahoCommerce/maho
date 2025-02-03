@@ -1,3 +1,4 @@
+
 <?php
 
 /**
@@ -6,7 +7,7 @@
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,6 +21,11 @@
  */
 class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
+    /**
+     * Collection wishlist instance
+     */
+    protected Mage_Wishlist_Model_Wishlist $wishlist;
+
     /**
      * Product Visibility Filter to product collection flag
      *
@@ -149,39 +155,26 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
     protected function _assignProducts()
     {
         Varien_Profiler::start('WISHLIST:' . __METHOD__);
+
         $productIds = [];
-
-        $isStoreAdmin = Mage::app()->getStore()->isAdmin();
-
-        $storeIds = [];
         foreach ($this as $item) {
-            $productIds[$item->getProductId()] = 1;
-            if ($isStoreAdmin && !in_array($item->getStoreId(), $storeIds)) {
-                $storeIds[] = $item->getStoreId();
-            }
+            $productIds[] = (int) $item->getProductId();
         }
-        if (!$isStoreAdmin) {
-            $storeIds = $this->_storeIds;
-        }
-
         $this->_productIds = array_merge($this->_productIds, array_keys($productIds));
-        $attributes = Mage::getSingleton('wishlist/config')->getProductAttributes();
-        $productCollection = Mage::getModel('catalog/product')->getCollection();
-        foreach ($storeIds as $id) {
-            $productCollection->addWebsiteFilter(Mage::app()->getStore($id)->getWebsiteId());
-        }
+
+        $productCollection = Mage::getModel('catalog/product')->getCollection()
+            ->setStoreId($this->getStoreId())
+            ->addIdFilter($this->_productIds)
+            ->addAttributeToSelect(Mage::getSingleton('wishlist/config')->getProductAttributes())
+            ->addOptionsToResult()
+            ->addPriceData($this->_customerGroupId, $this->_websiteId)
+            ->addStoreFilter()
+            ->addUrlRewrite()
+            ->addTaxPercents();
 
         if ($this->_productVisible) {
             Mage::getSingleton('catalog/product_visibility')->addVisibleInSiteFilterToCollection($productCollection);
         }
-
-        $productCollection->addPriceData($this->_customerGroupId, $this->_websiteId)
-            ->addTaxPercents()
-            ->addIdFilter($this->_productIds)
-            ->addAttributeToSelect($attributes)
-            ->addOptionsToResult()
-            ->addUrlRewrite();
-
         if ($this->_productSalable) {
             $productCollection = Mage::helper('adminhtml/sales')->applySalableProductTypesFilter($productCollection);
         }
@@ -216,14 +209,40 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
     }
 
     /**
-     * Add filter by wishlist object
+     * Retrieve Store ID (from wishlist)
+     */
+    public function getStoreId(): int
+    {
+        return (int) $this->wishlist->getStoreId();
+    }
+
+    /**
+     * Set Wishlist object to Collection
      *
      * @return $this
      */
+    public function setWishlist(Mage_Wishlist_Model_Wishlist $wishlist): self
+    {
+        $this->wishlist = $wishlist;
+        $wishlistId     = $wishlist->getId();
+        if ($wishlistId) {
+            $this->addFieldToFilter('wishlist_id', $wishlist->getId());
+        } else {
+            $this->_totalRecords = 0;
+            $this->_setIsLoaded(true);
+        }
+        return $this;
+    }
+
+    /**
+     * Add filter by wishlist object
+     *
+     * @return $this
+     * @deprecated use self::setWishlist($wishlist) instead
+     */
     public function addWishlistFilter(Mage_Wishlist_Model_Wishlist $wishlist)
     {
-        $this->addFieldToFilter('wishlist_id', $wishlist->getId());
-        return $this;
+        return $this->setWishlist($wishlist);
     }
 
     /**
@@ -248,7 +267,6 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
      * Add filter by shared stores
      *
      * @param array $storeIds
-     *
      * @return $this
      */
     public function addStoreFilter($storeIds = [])

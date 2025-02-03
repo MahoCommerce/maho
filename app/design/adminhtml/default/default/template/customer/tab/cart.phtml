@@ -5,11 +5,12 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Adminhtml_Block_Customer_Edit_Tab_Cart $this */
 ?>
-<?php /** @var Mage_Adminhtml_Block_Customer_Edit_Tab_Cart $this */ ?>
 <?php if($this->getCartHeader()): ?>
 <div class="content-header skip-header">
     <table cellspacing="0">
@@ -20,35 +21,34 @@
 </div>
 <?php endif ?>
 <?= $this->getGridParentHtml() ?>
+
 <?php if ($this->canDisplayContainer()) : ?>
-<?php
-    $listType = $this->getJsObjectName();
-?>
-<script type="text/javascript">
-<?= $this->getJsObjectName() ?>cartControl = {
-    reload: function (params) {
+<script>
+<?php $jsObjectName = $this->getJsObjectName() ?>
+window.<?= $jsObjectName ?>cartControl = {
+    reload (params) {
         if (!params) {
             params = {};
         }
-        <?= $this->getJsObjectName() ?>.reloadParams = params;
-        <?= $this->getJsObjectName() ?>.reload();
-        <?= $this->getJsObjectName() ?>.reloadParams = {};
+        <?= $jsObjectName ?>.reloadParams = params;
+        <?= $jsObjectName ?>.reload();
+        <?= $jsObjectName ?>.reloadParams = {};
     },
 
-    configureItem: function (itemId) {
-        productConfigure.setOnLoadIFrameCallback('<?= $listType ?>', this.cbOnLoadIframe.bind(this));
-        productConfigure.showItemConfiguration('<?= $listType ?>', itemId);
+    configureItem (itemId) {
+        productConfigure.setOnLoadIFrameCallback('<?= $jsObjectName ?>', this.cbOnLoadIframe.bind(this));
+        productConfigure.showItemConfiguration('<?= $jsObjectName ?>', itemId);
         return false;
     },
 
-    cbOnLoadIframe: function (response) {
+    cbOnLoadIframe (response) {
         if (!response.ok) {
             return;
         }
         this.reload();
     },
 
-    removeItem: function (itemId) {
+    removeItem (itemId) {
         if (!itemId) {
             alert('<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('customer')->__('No item specified.')) ?>');
             return false;
@@ -60,22 +60,18 @@
         this.reload({'delete':itemId});
 
         return false;
-    }
+    },
 };
 
 <?php
 $params = [
     'customer_id' => $this->getCustomer()->getId(),
-    'website_id' => $this->getWebsiteId()
+    'website_id' => $this->getWebsiteId(),
 ];
 ?>
-productConfigure.addListType(
-    '<?= $listType ?>',
-    {
-        urlFetch: '<?= $this->getUrl('*/customer_cart_product_composite_cart/configure', $params) ?>',
-        urlConfirm: '<?= $this->getUrl('*/customer_cart_product_composite_cart/update', $params) ?>'
-    }
-);
+productConfigure.addListType('<?= $jsObjectName ?>', {
+    urlFetch: '<?= $this->getUrl('*/customer_cart_product_composite_cart/configure', $params) ?>',
+    urlConfirm: '<?= $this->getUrl('*/customer_cart_product_composite_cart/update', $params) ?>'
+});
 </script>
 <?php endif ?>
-<br />
