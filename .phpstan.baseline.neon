@@ -421,12 +421,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/SearchController.php
 
 		-
-			message: '#^Property Mage_Adminhtml_Customer_Wishlist_Product_Composite_WishlistController\:\:\$_wishlistItem \(Mage_Wishlist_Model_Wishlist\) does not accept Mage_Wishlist_Model_Item\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Customer/Wishlist/Product/Composite/WishlistController.php
-
-		-
 			message: '#^Variable \$id in isset\(\) always exists and is not nullable\.$#'
 			identifier: isset.variable
 			count: 1
