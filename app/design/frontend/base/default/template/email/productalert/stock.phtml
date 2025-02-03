@@ -19,7 +19,7 @@
 <table>
 <?php foreach ($products as $product): ?>
     <tr>
-        <td><a href="<?= $product->getProductUrl() ?>" title="<?= $this->escapeHtml($product->getName()) ?>"><img src="<?= $this->helper('catalog/image')->init($product, 'thumbnail')->resize(75, 75) ?>" border="0" align="left" height="75" width="75" alt="<?= $this->escapeHtml($product->getName()) ?>" /></a></td>
+        <td><a href="<?= $product->getProductUrl() ?>" title="<?= $this->escapeHtml($product->getName()) ?>"><img src="<?= $this->helper('catalog/image')->init($product, 'thumbnail')->resize(75, 75) ?>" srcset="<?= $this->helper('catalog/image')->init($product, 'thumbnail')->resize(150, 150) ?> 2x" border="0" align="left" height="75" width="75" alt="<?= $this->escapeHtml($product->getName()) ?>" /></a></td>
         <td>
             <p><a href="<?= $product->getProductUrl() ?>"><strong><?= $this->escapeHtml($product->getName()) ?></strong></a></p>
             <?php $shortDescription = $this->_getFilteredProductShortDescription($product) ?>

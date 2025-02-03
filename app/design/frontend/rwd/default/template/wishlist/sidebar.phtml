@@ -24,7 +24,7 @@
         <?php $product = $_item->getProduct(); ?>
         <?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])); ?>
         <li class="item">
-            <a href="<?= $this->getProductUrl($_item) ?>" title="<?= $this->escapeHtml($product->getName()) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($product, 'thumbnail')->resize(50) ?>" width="50" height="50" alt="<?= $this->escapeHtml($product->getName()) ?>" /></a>
+            <a href="<?= $this->getProductUrl($_item) ?>" title="<?= $this->escapeHtml($product->getName()) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($product, 'thumbnail')->resize(50) ?>" srcset="<?= $this->helper('catalog/image')->init($product, 'thumbnail')->resize(100) ?> 2x" width="50" height="50" alt="<?= $this->escapeHtml($product->getName()) ?>" /></a>
             <div class="product-details">
                 <a href="#"
                    class="btn-remove"

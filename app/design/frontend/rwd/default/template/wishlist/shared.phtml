@@ -39,7 +39,7 @@
                 ?>
                 <tr>
                     <td>
-                        <a class="product-image" href="<?= $this->getProductUrl($item) ?>" title="<?= $this->escapeHtml($product->getName()) ?>"><img src="<?= $this->helper('catalog/image')->init($product, 'small_image')->resize(113, 113) ?>" width="113" height="113" alt="<?= $this->escapeHtml($product->getName()) ?>" /></a>
+                        <a class="product-image" href="<?= $this->getProductUrl($item) ?>" title="<?= $this->escapeHtml($product->getName()) ?>"><img src="<?= $this->helper('catalog/image')->init($product, 'small_image')->resize(113, 113) ?>" srcset="<?= $this->helper('catalog/image')->init($product, 'small_image')->resize(226, 226) ?> 2x" width="113" height="113" alt="<?= $this->escapeHtml($product->getName()) ?>" /></a>
                         <h2 class="product-name"><a href="<?= $this->getProductUrl($item) ?>"><?= $this->escapeHtml($product->getName()) ?></a></h2>
                         <?= $this->getPriceHtml($product) ?>
                         <?= $this->getDetailsHtml($item) ?>

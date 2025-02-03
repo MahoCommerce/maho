@@ -27,7 +27,9 @@
         <li class="item">
             <div class="product-info">
                 <a class="product-image" href="<?= $_item->getProductUrl() ?>" title="<?= $this->escapeHtml($_item->getName()) ?>">
-                    <img src="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(210) ?>" alt="<?= $this->escapeHtml($_item->getName()) ?>" />
+                    <img src="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(210) ?>"
+                         srcset="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(420) ?> 2x"
+                         alt="<?= $this->escapeHtml($_item->getName()) ?>" />
                 </a>
                 <h3 class="product-name"><a href="<?= $_item->getProductUrl() ?>"><?= $this->escapeHtml($_item->getName()) ?></a></h3>
                 <?= $this->getPriceHtml($_item, true) ?>

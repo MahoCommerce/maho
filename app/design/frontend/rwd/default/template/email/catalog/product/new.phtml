@@ -25,7 +25,9 @@
                 <div class="product-wrapper">
                     <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->escapeHtml($_product->getName()) ?>" class="product-image">
                         <?php $_imgSize = 260; ?>
-                        <img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize) ?>" alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" />
+                        <img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize) ?>"
+                             srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize * 2) ?> 2x"
+                             alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" />
                     </a>
                     <h3 class="product-name"><a href="<?= $_product->getProductUrl() ?>" title="<?= $this->escapeHtml($_product->getName()) ?>"><?= $this->escapeHtml($_product->getName()) ?></a></h3>
                     <?= $this->getPriceHtml($_product, true, '-new') ?>

@@ -46,6 +46,7 @@ $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()]));
                             <?php $_imgSize = 300; ?>
                             <img id="product-collection-image-<?= $_product->getId() ?>"
                                  src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->keepFrame(false)->resize($_imgSize) ?>"
+                                 srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->keepFrame(false)->resize($_imgSize * 2) ?> 2x"
                                  alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" />
                         </a>
                         <?php // Product description ?>
@@ -135,6 +136,7 @@ $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()]));
                             <?php $_imgSize = 210; ?>
                             <img id="product-collection-image-<?= $_product->getId() ?>"
                                  src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize) ?>"
+                                 srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize * 2) ?> 2x"
                                  alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" />
                         </a>
                         <div class="product-info">

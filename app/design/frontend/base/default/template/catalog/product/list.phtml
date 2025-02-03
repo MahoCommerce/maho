@@ -36,7 +36,7 @@
     <?php foreach ($_productCollection as $_product): ?>
         <li class="item<?php if(++$_iterator === $_productCollectionCount): ?> last<?php endif ?>">
             <?php // Product Image ?>
-            <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(135) ?>" width="135" height="135" alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" /></a>
+            <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(135) ?>" srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(270) ?> 2x" width="135" height="135" alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" /></a>
             <?php // Product description ?>
             <div class="product-shop">
                 <div class="f-fix">
@@ -104,7 +104,7 @@
         <ul class="products-grid">
         <?php endif ?>
             <li class="item">
-                <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(135) ?>" width="135" height="135" alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" /></a>
+                <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(135) ?>" srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(270) ?> 2x" width="135" height="135" alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" /></a>
                 <h2 class="product-name"><a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($_product->getName(), null, true) ?>"><?= $_helper->productAttribute($_product, $_product->getName(), 'name') ?></a></h2>
                 <?php if($_product->getRatingSummary()): ?>
                 <?= $this->getReviewsSummaryHtml($_product, 'short') ?>
