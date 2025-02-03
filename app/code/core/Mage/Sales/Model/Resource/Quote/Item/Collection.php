@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -134,13 +134,16 @@ class Mage_Sales_Model_Resource_Quote_Item_Collection extends Mage_Core_Model_Re
      */
     protected function _assignOptions()
     {
-        $itemIds          = array_keys($this->_items);
-        $optionCollection = Mage::getModel('sales/quote_item_option')->getCollection()
-            ->addItemFilter($itemIds);
+        $itemIds = array_keys($this->_items);
+        /** @var Mage_Sales_Model_Resource_Quote_Item_Option_Collection $optionCollection */
+        $optionCollection = Mage::getModel('sales/quote_item_option')->getCollection();
+        $optionCollection->addItemFilter($itemIds);
+
+        /** @var Mage_Sales_Model_Quote_Item $item */
         foreach ($this as $item) {
             $item->setOptions($optionCollection->getOptionsByItem($item));
         }
-        $productIds        = $optionCollection->getProductIds();
+        $productIds = $optionCollection->getProductIds();
         $this->_productIds = array_merge($this->_productIds, $productIds);
 
         return $this;
@@ -188,9 +191,7 @@ class Mage_Sales_Model_Resource_Quote_Item_Collection extends Mage_Core_Model_Re
                 $qtyOptions         = [];
                 $optionProductIds   = [];
                 foreach ($item->getOptions() as $option) {
-                    /**
-                     * Call type-specific logic for product associated with quote item
-                     */
+                    // Call type-specific logic for product associated with quote item
                     $product->getTypeInstance(true)->assignProductToOption(
                         $productCollection->getItemById($option->getProductId()),
                         $option,

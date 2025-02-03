@@ -6,7 +6,7 @@
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -57,6 +57,23 @@ class Mage_Wishlist_Model_Resource_Wishlist extends Mage_Core_Model_Resource_Db_
                 ->limit(1);
         }
         return $select;
+    }
+
+    /**
+     * Load quote data by customer identifier
+     */
+    public function loadByCustomerId(Mage_Wishlist_Model_Wishlist $wishlist, int $customerId): self
+    {
+        $adapter = $this->_getReadAdapter();
+        $select  = $this->_getLoadSelect($this->getCustomerIdFieldName(), $customerId, $wishlist);
+        $data    = $adapter->fetchRow($select);
+
+        if ($data) {
+            $wishlist->setData($data);
+        }
+
+        $this->_afterLoad($wishlist);
+        return $this;
     }
 
     /**
