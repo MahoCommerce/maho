@@ -30,10 +30,10 @@
            class="btn-remove">
             <?= $this->__('Remove This Item') ?>
         </a>
+        <p class="product-name"><?php if ($this->hasProductUrl()): ?><a href="<?= $this->getProductUrl() ?>"><?php endif ?><?= $this->escapeHtml($this->getProductName()) ?><?php if ($this->hasProductUrl()): ?></a><?php endif ?></p>
         <?php if ($isVisibleProduct): ?>
         <a href="<?= $this->getConfigureUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Edit item')) ?>" class="btn-edit"><?= $this->__('Edit item') ?></a>
         <?php endif ?>
-        <p class="product-name"><?php if ($this->hasProductUrl()): ?><a href="<?= $this->getProductUrl() ?>"><?php endif ?><?= $this->escapeHtml($this->getProductName()) ?><?php if ($this->hasProductUrl()): ?></a><?php endif ?></p>
         <strong><?= $this->getQty() ?></strong> x
 
     <?php if ($canApplyMsrp): ?>

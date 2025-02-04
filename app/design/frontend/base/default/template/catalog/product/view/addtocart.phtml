@@ -13,14 +13,18 @@
 /** @var Mage_Catalog_Block_Product_View $this */
 ?>
 <?php $_product = $this->getProduct(); ?>
-<?php $buttonTitle = $this->__('Add to Cart'); ?>
+<?php $buttonTitle = Mage::helper('core')->quoteEscape($this->__('Add to Cart')); ?>
 <?php if($_product->isSaleable()): ?>
     <div class="add-to-cart">
         <?php if(!$_product->isGrouped()): ?>
-        <label for="qty"><?= $this->__('Qty:') ?></label>
-        <input type="text" name="qty" id="qty" maxlength="12" value="<?= $this->getProductDefaultQty() * 1 ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Qty')) ?>" class="input-text qty" />
+        <div class="qty-wrapper">
+            <label for="qty"><?= $this->__('Qty:') ?></label>
+            <input type="text" pattern="\d*(\.\d+)?" name="qty" id="qty" maxlength="12" value="<?= $this->getProductDefaultQty() * 1 ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Qty')) ?>" class="input-text qty" />
+        </div>
         <?php endif ?>
-        <button type="button" title="<?= $buttonTitle ?>" id="product-addtocart-button" class="button btn-cart" onclick="productAddToCartForm.submit(this)"><?= $buttonTitle ?></button>
-        <?= $this->getChildHtml('', true, true) ?>
+        <div class="add-to-cart-buttons">
+            <button type="button" title="<?= $buttonTitle ?>" class="button btn-cart" onclick="productAddToCartForm.submit(this)"><?= $buttonTitle ?></button>
+            <?= $this->getChildHtml('', true, true) ?>
+        </div>
     </div>
 <?php endif ?>

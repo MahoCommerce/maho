@@ -34,6 +34,18 @@ Customer account home dashboard layout
 
     </customer_account_index>
 
+<!--
+Product view page
+-->
+
+    <catalog_product_view>
+        <reference name="product.info">
+            <block type="review/product_view_list" name="product.reviews" as="reviews" template="review/product/view/list.phtml" after="additional">
+                <action method="addToParentGroup"><group>detailed_info</group></action>
+                <action method="setTitle" translate="value"><value>Reviews</value></action>
+            </block>
+        </reference>
+    </catalog_product_view>
 
 <!--
 Product reviews page (?)
@@ -70,7 +82,7 @@ Product reviews page
                     <!-- workaround: a better place for this code is in paypal.xml -->
                     <block type="page/html_wrapper" name="review.product.info.addtocart.paypal.wrapper" translate="label" module="paypal">
                         <label>PayPal Express Checkout Shortcut Wrapper</label>
-                        <block type="paypal/express_shortcut" name="review.product.info.addtocart.paypal" template="paypal/express/shortcut.phtml">
+                        <block type="paypal/express_shortcut" name="review.product.info.addtocart.paypal" template="paypal/express/product/shortcut.phtml">
                             <action method="setIsInCatalogProduct"><value>1</value></action>
                         </block>
                     </block>

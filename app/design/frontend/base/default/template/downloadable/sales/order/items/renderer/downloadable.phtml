@@ -57,9 +57,9 @@
                 onclick="return giftMessageToogle('<?= $_item->getId() ?>')"><?= $this->__('Gift Message') ?></a>
     <?php endif ?>
 </td>
-<td><?= $this->escapeHtml(Mage::helper('core/string')->splitInjection($this->getSku())) ?></td>
+<td data-rwd-label="<?= $this->__('SKU') ?>"><?= $this->escapeHtml(Mage::helper('core/string')->splitInjection($this->getSku())) ?></td>
 
-<td class="a-right nowrap">
+<td class="a-right nowrap<?php if (!$this->helper('tax')->displayCartBothPrices() && !$this->helper('tax')->displayCartPriceExclTax()): ?> lin-hide<?php endif ?>" data-rwd-label="<?= $this->__('Price') ?>">
     <?php if ($this->helper('tax')->displayCartBothPrices() || $this->helper('tax')->displayCartPriceExclTax()): ?>
     <span class="price-excl-tax">
             <?php if ($this->helper('tax')->displayCartBothPrices()): ?>
@@ -188,7 +188,7 @@
             <?php endif ?>
 </td>
 
-<td class="a-right nowrap">
+<td class="a-right nowrap" data-rwd-label="<?= $this->__('Qty') ?>">
         <span class="nobr">
                 <?php if ($this->getItem()->getQtyOrdered() > 0): ?>
                     <?= $this->__('Ordered') ?>:
@@ -208,7 +208,7 @@
             <?php endif ?>
         </span>
 </td>
-<td class="a-right nowrap">
+<td class="a-right nowrap<?php if (!$this->helper('tax')->displayCartBothPrices() && !$this->helper('tax')->displayCartPriceExclTax()): ?> lin-hide<?php endif ?>" data-rwd-label="<?= $this->__('Subtotal') ?>">
     <?php if ($this->helper('tax')->displayCartBothPrices() || $this->helper('tax')->displayCartPriceExclTax()): ?>
     <span class="price-excl-tax">
             <?php if ($this->helper('tax')->displayCartBothPrices()): ?>

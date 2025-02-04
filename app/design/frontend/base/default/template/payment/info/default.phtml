@@ -9,25 +9,18 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
+
 /** @var Mage_Payment_Block_Info $this */
 ?>
-<p><strong><?= $this->escapeHtml($this->getMethod()->getTitle()) ?></strong></p>
+<p class="subtitle"><?= $this->escapeHtml($this->getMethod()->getTitle()) ?></p>
 
 <?php if ($_specificInfo = $this->getSpecificInformation()):?>
-<table>
-    <tbody>
+<dl class="payment-info">
     <?php foreach ($_specificInfo as $_label => $_value):?>
-        <tr>
-            <th><strong><?= $this->escapeHtml($_label) ?>:</strong></th>
-        </tr>
-        <tr>
-            <td><?= nl2br(implode("\n", $this->getValueAsArray($_value, true))) ?></td>
-        </tr>
+        <dt><?= $this->escapeHtml($_label) ?></dt>
+        <dd><?= nl2br(implode("\n", $this->getValueAsArray($_value, true))) ?></dd>
     <?php endforeach ?>
-    </tbody>
-</table>
+</dl>
 <?php endif ?>
 
 <?= $this->getChildHtml() ?>

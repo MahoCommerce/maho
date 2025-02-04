@@ -16,16 +16,17 @@
     <div class="discount">
         <h2><?= $this->__('Discount Codes') ?></h2>
         <div class="discount-form">
-            <label for="coupon_code"><?= $this->__('Enter your coupon code if you have one.') ?></label>
+            <label for="coupon_code"><?= $this->__('Discount Codes') ?></label>
             <input type="hidden" name="remove" id="remove-coupone" value="0" />
-            <div class="input-box">
-                <input class="input-text" id="coupon_code" name="coupon_code" value="<?= $this->escapeHtml($this->getCouponCode()) ?>" />
-            </div>
-            <div class="buttons-set">
-                <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Apply Coupon')) ?>" class="button" onclick="discountForm.submit(false)" value="<?= Mage::helper('core')->quoteEscape($this->__('Apply Coupon')) ?>"><?= $this->__('Apply Coupon') ?></button>
-                <?php if(strlen($this->getCouponCode())): ?>
-                    &nbsp; <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Cancel Coupon')) ?>" class="button" onclick="discountForm.submit(true)" value="<?= Mage::helper('core')->quoteEscape($this->__('Cancel Coupon')) ?>"><?= $this->__('Cancel Coupon') ?></button>
-                <?php endif ?>
+            <div class="field-wrapper">
+                <input class="input-text" type="text" id="coupon_code" name="coupon_code" value="<?= $this->escapeHtml($this->getCouponCode()) ?>" />
+                <div class="button-wrapper">
+                    <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Apply')) ?>" class="button2" onclick="discountForm.submit(false)" value="<?= $this->__('Apply') ?>"><?= $this->__('Apply') ?></button>
+                    <?php if(strlen($this->getCouponCode())): ?>
+                        <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Cancel')) ?>" class="button2 cancel-coupon" onclick="discountForm.submit(true)" value="<?= $this->__('Cancel') ?>"><?= $this->__('Cancel') ?>
+                        </button>
+                    <?php endif ?>
+                </div>
             </div>
         </div>
     </div>

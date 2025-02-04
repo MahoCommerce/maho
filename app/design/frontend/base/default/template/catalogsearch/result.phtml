@@ -34,6 +34,7 @@
 </div>
 <p class="note-msg">
     <?= ($this->getNoResultText()) ? $this->getNoResultText() : $this->__('Your search returns no results.') ?>
+    <?= $this->getAdditionalHtml() ?>
     <?php if ($messages = $this->getNoteMessages()):?>
         <?php foreach ($messages as $message):?>
         <br /><?= $message ?>

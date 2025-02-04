@@ -47,8 +47,9 @@
                             <div class="btn-close"><a href="#" id="payment-tool-tip-close" title="<?= Mage::helper('core')->quoteEscape($this->__('Close')) ?>"><?= $this->__('Close') ?></a></div>
                             <div class="tool-tip-content"><img src="<?= $this->getSkinUrl('images/cvv.gif') ?>" alt="<?= Mage::helper('core')->quoteEscape($this->__('Card Verification Number Visual Reference')) ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Card Verification Number Visual Reference')) ?>" /></div>
                         </div>
+                        <?= $this->getChildHtml('payment_methods_before') ?>
                         <!-- Payment methods forms list -->
-                        <dl class="sp-methods">
+                        <dl id="payment-methods" class="sp-methods">
                         <?php
                             $_methods       = $this->getMethods();
                             $_methodsCount  = count($_methods);
@@ -69,6 +70,7 @@
                             <?php endif ?>
                         <?php endforeach ?>
                         </dl>
+                        <?= $this->getChildHtml('payment_methods_after') ?>
                         <?= $this->getChildHtml('checkout_billing_items') ?>
                     </div>
                 </div>

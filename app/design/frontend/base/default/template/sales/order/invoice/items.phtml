@@ -15,34 +15,34 @@
 <?php  $_order = $this->getOrder() ?>
 <p class="order-links"><a href="<?= $this->getPrintAllInvoicesUrl($_order) ?>" onclick="this.target='_blank'" class="link-print"><?= $this->__('Print All Invoices') ?></a></p>
 <?php foreach ($_order->getInvoiceCollection() as $_invoice): ?>
-<h2 class="sub-title"><?= $this->__('Invoice #') ?><?= $_invoice->getIncrementId() ?> <span class="separator">|</span> <a href="<?= $this->getPrintInvoiceUrl($_invoice) ?>" onclick="this.target='_blank'" class="link-print"><?= $this->__('Print Invoice') ?></a></h2>
-<h3 class="table-caption"><?= $this->__('Items Invoiced') ?></h3>
-<table class="data-table" id="my-invoice-table-<?= $_invoice->getId() ?>">
-    <col />
-    <col width="1" />
-    <col width="1" />
-    <col width="1" />
-    <col width="1" />
-    <thead>
+    <h2 class="sub-title"><?= $this->__('Invoice #') ?><?= $_invoice->getIncrementId() ?> <span class="separator">|</span> <a href="<?= $this->getPrintInvoiceUrl($_invoice) ?>" onclick="this.target='_blank'" class="link-print"><?= $this->__('Print Invoice') ?></a></h2>
+    <h3 class="table-caption"><?= $this->__('Items Invoiced') ?></h3>
+    <table class="data-table linearize-table" id="my-invoice-table-<?= $_invoice->getId() ?>">
+        <col />
+        <col width="1" />
+        <col width="1" />
+        <col width="1" />
+        <col width="1" />
+        <thead>
         <tr>
             <th><?= $this->__('Product Name') ?></th>
             <th><?= $this->__('SKU') ?></th>
-            <th class="a-right"><?= $this->__('Price') ?></th>
-            <th class="a-center"><span class="nobr"><?= $this->__('Qty Invoiced') ?></span></th>
-            <th class="a-right"><?= $this->__('Subtotal') ?></th>
+            <th class="a-right" data-rwd-label="<?= $this->__('Price') ?>"><?= $this->__('Price') ?></th>
+            <th class="a-center" data-rwd-label="<?= $this->__('Qty Invoiced') ?>"><span class="nobr"><?= $this->__('Qty Invoiced') ?></span></th>
+            <th class="a-right" data-rwd-label="<?= $this->__('Subtotal') ?>"><?= $this->__('Subtotal') ?></th>
         </tr>
-    </thead>
-    <tfoot>
+        </thead>
+        <tfoot>
         <?= $this->getInvoiceTotalsHtml($_invoice) ?>
-    </tfoot>
-    <?php $_items = $_invoice->getAllItems(); ?>
-    <?php $_count = count($_items) ?>
-    <?php foreach ($_items as $_item): ?>
-    <?php if ($_item->getOrderItem()->getParentItem()) continue; ?>
-    <tbody>
-        <?= $this->getItemHtml($_item) ?>
-    </tbody>
-    <?php endforeach ?>
-</table>
-<?= $this->getInvoiceCommentsHtml($_invoice) ?>
+        </tfoot>
+        <?php $_items = $_invoice->getAllItems(); ?>
+        <?php $_count = count($_items) ?>
+        <?php foreach ($_items as $_item): ?>
+            <?php if ($_item->getOrderItem()->getParentItem()) continue; ?>
+            <tbody>
+            <?= $this->getItemHtml($_item) ?>
+            </tbody>
+        <?php endforeach ?>
+    </table>
+    <?= $this->getInvoiceCommentsHtml($_invoice) ?>
 <?php endforeach ?>

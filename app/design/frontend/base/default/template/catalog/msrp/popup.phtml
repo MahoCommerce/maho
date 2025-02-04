@@ -14,10 +14,17 @@
 ?>
 <?php if (Mage::helper('catalog')->isMsrpEnabled()): ?>
 <div id="map-popup" class="map-popup" style="display:none;">
-    <a href="#" class="map-popup-close" id="map-popup-close">x</a>
-    <div class="map-popup-arrow"></div>
-    <div class="map-popup-heading"><h2 id="map-popup-heading"></h2></div>
+    <a href="#" class="map-popup-close" id="map-popup-close">&times;</a>
+    <div class="map-popup-heading"><h3 id="map-popup-heading"></h3></div>
     <div class="map-popup-content" id="map-popup-content">
+        <div class="map-popup-msrp" id="map-popup-msrp-box">
+            <span class="label"><?= $this->__('Price') ?>:</span>
+            <span style="text-decoration:line-through;" id="map-popup-msrp"></span>
+        </div>
+        <div class="map-popup-price" id="map-popup-price-box">
+            <span class="label"><?= $this->__('Actual Price') ?>:</span>
+            <span id="map-popup-price"></span>
+        </div>
         <div class="map-popup-checkout">
             <form action="" method="POST" id="product_addtocart_form_from_popup">
                 <input type="hidden" name="product" class="product_id" value="" id="map-popup-product-id" />
@@ -27,8 +34,6 @@
                 <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Add to Cart')) ?>" class="button btn-cart" id="map-popup-button"><?= $this->__('Add to Cart') ?></button>
             </form>
         </div>
-        <div class="map-popup-msrp" id="map-popup-msrp-box"><strong><?= $this->__('Price') ?>:</strong> <span style="text-decoration:line-through;" id="map-popup-msrp"></span></div>
-        <div class="map-popup-price" id="map-popup-price-box"><strong><?= $this->__('Actual Price') ?>:</strong> <span id="map-popup-price"></span></div>
         <script type="text/javascript">
             document.addEventListener("DOMContentLoaded", () => {
                 Catalog.Map.bindProductForm();

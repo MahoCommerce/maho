@@ -5,28 +5,54 @@
  * @category    design
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-/**
- * @var Mage_Page_Block_Html_Header $this
- */
+
+/** @var Mage_Page_Block_Html_Header $this */
 ?>
-<div class="header-container">
-    <div class="header">
-        <?php if ($this->getIsHomePage()):?>
-        <h1 class="logo"><strong><?= $this->getLogoAlt() ?></strong><a href="<?= $this->getUrl('') ?>" title="<?= $this->__('Go to Home Page') ?>" class="logo"><img src="<?= $this->getLogoSrc() ?>" alt="<?= $this->getLogoAlt() ?>" /></a></h1>
-        <?php else: ?>
-        <a href="<?= $this->getUrl('') ?>" title="<?= $this->__('Go to Home Page') ?>" class="logo"><strong><?= $this->getLogoAlt() ?></strong><img src="<?= $this->getLogoSrc() ?>" alt="<?= $this->getLogoAlt() ?>" /></a>
-        <?php endif ?>
-        <div class="quick-access">
-            <?= $this->getChildHtml('topSearch') ?>
-            <p class="welcome-msg"><?= $this->getChildHtml('welcome') ?> <?= $this->getAdditionalHtml() ?></p>
-            <?= $this->getChildHtml('topLinks') ?>
-            <?= $this->getChildHtml('store_language') ?>
+<header id="header" class="page-header">
+    <div class="page-header-container skip-links">
+        <div>
+            <a href="#header-nav" class="skip-link skip-nav" data-target-element="header-nav" title="<?= $this->__('Menu') ?>">
+                <span class="icon"></span>
+                <span class="label"><?= $this->__('Menu') ?></span>
+            </a>
+
+            <a class="logo" href="<?= $this->getUrl('') ?>" title="<?= $this->__('Go to Home Page') ?>">
+                <img src="<?= $this->getLogoSrc() ?>" alt="<?= $this->getLogoAlt() ?>" width="<?= $this->getLogoWidth() ?>" height="<?= $this->getLogoHeight() ?>" />
+            </a>
         </div>
-        <?= $this->getChildHtml('topContainer') ?>
+
+        <?= $this->getChildHtml('topSearch') ?>
+
+        <div>
+            <?= $this->getChildHtml('store_language') ?>
+            <?= $this->getChildHtml('currency_switcher') ?>
+
+            <a href="<?= $this->helper('customer')->getAccountUrl() ?>" class="skip-link skip-account" title="<?= $this->__('Account') ?>">
+                <span class="icon"></span>
+                <span class="label"><?= $this->__('Account') ?></span>
+            </a>
+
+            <?php if ($this->isModuleOutputEnabled('Mage_Wishlist') && Mage::getStoreConfig('wishlist/general/active')): ?>
+            <a href="<?= $this->helper('customer')->getWishlistUrl() ?>" class="skip-link skip-wishlist" title="<?= $this->__('Wishlist') ?>">
+                <span class="icon"></span>
+                <span class="label"><?= $this->__('Wishlist') ?></span>
+            </a>
+            <?php endif ?>
+
+            <div class="header-minicart">
+                <?= $this->getChildHtml('minicart_head') ?>
+            </div>
+        </div>
     </div>
-</div>
-<?= $this->getChildHtml('topMenu') ?>
+
+    <div id="minicart-container-mobile" class="header-minicart"></div>
+    <div id="header-nav" class="skip-content">
+        <?= $this->getChildHtml('topMenu') ?>
+    </div>
+</header>
+
+<?= $this->getChildHtml('topContainer') ?>

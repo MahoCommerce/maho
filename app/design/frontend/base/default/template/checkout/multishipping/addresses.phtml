@@ -9,16 +9,10 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Checkout_Block_Multishipping_Addresses $this */
 ?>
-<?php
-/**
- * Ship to multiple address template
- *
- * @see Mage_Checkout_Block_Multishipping_Addresses
- * @var Mage_Checkout_Block_Multishipping_Addresses $this 
- */
-?>
-<?= $this->getMessagesBlock()->toHtml() ?>
+<?= $this->getMessagesBlock()->getGroupedHtml() ?>
 <form id="checkout_multishipping_form" action="<?= $this->getPostActionUrl() ?>" method="post">
     <div class="multiple-checkout">
         <div class="page-title title-buttons">
@@ -28,39 +22,39 @@
         <input type="hidden" name="continue" value="0" id="can_continue_flag" />
         <input type="hidden" name="new_address" value="0" id="add_new_address_flag" />
         <h2><?= $this->__('Please select shipping address for applicable items') ?></h2>
-        <table class="data-table" id="multiship-addresses-table">
+        <table class="data-table linearize-table" id="multiship-addresses-table">
             <col />
             <col width="1" />
             <col width="1" />
             <col width="1" />
             <thead>
-                <tr>
-                    <th><?= $this->__('Product') ?></th>
-                    <th class="a-center"><?= $this->__('Qty') ?></th>
-                    <th><?= $this->__('Send To') ?></th>
-                    <th>&nbsp;</th>
-                </tr>
+            <tr>
+                <th><?= $this->__('Product') ?></th>
+                <th class="a-center"><?= $this->__('Qty') ?></th>
+                <th><?= $this->__('Send To') ?></th>
+                <th>&nbsp;</th>
+            </tr>
             </thead>
             <tfoot>
-                <tr>
-                    <td colspan="100" class="a-right"><button type="submit"
-                          data-multiship-item-update
-                          title="<?= Mage::helper('core')->quoteEscape($this->__('Update Qty &amp; Addresses')) ?>"
-                          class="button" onclick="document.getElementById('can_continue_flag').value=0;">
-                            <?= $this->__('Update Qty &amp; Addresses') ?>
-                        </button>
-                    </td>
-                </tr>
+            <tr>
+                <td colspan="100" class="a-right">
+                    <button type="submit" title="<?= Mage::helper('core')->quoteEscape($this->__('Update Qty &amp; Addresses')) ?>"
+                            class="button" onclick="document.getElementById('can_continue_flag').value=0;"
+                            data-multiship-item-update>
+                        <?= $this->__('Update Qty &amp; Addresses') ?>
+                    </button>
+                </td>
+            </tr>
             </tfoot>
             <tbody>
             <?php foreach ($this->getItems() as $_index => $_item): ?>
                 <?php if ($_item->getQuoteItem()) :?>
-                <tr>
-                    <td><?= $this->getItemHtml($_item->getQuoteItem()) ?></td>
-                    <td><input type="text" data-multiship-item-id="<?= $this->jsQuoteEscape($_item->getSku()) ?>" name="ship[<?= $_index ?>][<?= $_item->getQuoteItemId() ?>][qty]" value="<?= $this->escapeHtml($_item->getQty()) ?>" size="2" class="input-text qty" /></td>
-                    <td><?php if ($_item->getProduct()->getIsVirtual()): echo $this->__('Shipping selection is not applicable.'); else: echo $this->getAddressesHtmlSelect($_item, $_index); endif; ?></td>
-                    <td class="a-center"><a href="<?= $this->getItemDeleteUrl($_item) ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Remove Item')) ?>" class="btn-remove2"><?= $this->__('Remove Item') ?></a></td>
-                </tr>
+                    <tr>
+                        <td><?= $this->getItemHtml($_item->getQuoteItem()) ?></td>
+                        <td><input type="text" data-multiship-item-id="<?= $this->jsQuoteEscape($_item->getSku()) ?>" name="ship[<?= $_index ?>][<?= $_item->getQuoteItemId() ?>][qty]" value="<?= $this->escapeHtml($_item->getQty()) ?>" size="2" class="input-text qty" /></td>
+                        <td data-rwd-label="Send To"><?php if ($_item->getProduct()->getIsVirtual()): echo $this->__('Shipping selection is not applicable.'); else: echo $this->getAddressesHtmlSelect($_item, $_index); endif; ?></td>
+                        <td class="a-center"><a href="<?= $this->getItemDeleteUrl($_item) ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Remove Item')) ?>" class="btn-remove2"><?= $this->__('Remove Item') ?></a></td>
+                    </tr>
                 <?php endif ?>
             <?php endforeach ?>
             </tbody>
@@ -70,5 +64,5 @@
             <button type="submit" data-action="checkout-continue-shipping" title="<?= Mage::helper('core')->quoteEscape($this->__('Continue to Shipping Information')) ?>" class="button<?php if ($this->isContinueDisabled()):?> disabled<?php endif ?>" onclick="document.getElementById('can_continue_flag').value=1;"<?php if ($this->isContinueDisabled()):?> disabled="disabled"<?php endif ?>><?= $this->__('Continue to Shipping Information') ?></button>
         </div>
     </div>
-    <?= $this->getBlockHtml("formkey") ?>
+    <?= $this->getBlockHtml('formkey') ?>
 </form>

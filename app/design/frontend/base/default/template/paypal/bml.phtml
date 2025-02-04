@@ -12,7 +12,7 @@
 
 /** @var Mage_Paypal_Block_Bml_Banners $this */
 ?>
-<div class="paypal-logo bill-me-latter">
+<div class="bml-ad large">
 <script type="text/javascript" data-pp-pubid="<?= $this->escapeHtml($this->getPublisherId()) ?>" data-pp-placementtype="<?= $this->escapeHtml($this->getSize()) ?>"> (function (d, t) {
     "use strict";
     var s = d.getElementsByTagName(t)[0], n = d.createElement(t);
@@ -20,4 +20,13 @@
     s.parentNode.insertBefore(n, s);
 }(document, "script"));
 </script>
+</div>
+<div class="bml-ad small">
+    <script type="text/javascript" data-pp-pubid="<?= $this->escapeHtml($this->getPublisherId()) ?>" data-pp-placementtype="300x50"> (function (d, t) {
+            "use strict";
+            var s = d.getElementsByTagName(t)[0], n = d.createElement(t);
+            n.src = "//paypal.adtag.where.com/merchant.js";
+            s.parentNode.insertBefore(n, s);
+        }(document, "script"));
+    </script>
 </div>

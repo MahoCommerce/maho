@@ -9,17 +9,19 @@
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-
-/** @var Mage_Wishlist_Block_Customer_Wishlist_Items $this */
 ?>
 <?php
     $columns = $this->getColumns();
 ?>
-<table class="data-table" id="wishlist-table">
+<table class="clean-table linearize-table" id="wishlist-table">
     <thead>
         <tr>
-            <?php foreach ($columns as $column): ?>
-                <th><?= $column->getTitle() ?></th>
+            <?php
+                /* @var $column Mage_Wishlist_Block_Customer_Wishlist_Item_Column */
+                foreach ($columns as $column):
+                    $_blockName = str_replace('.','-',strtolower($column->getNameInLayout()));
+            ?>
+                <th class="<?= $_blockName ?>"><?= $column->getTitle() ?></th>
             <?php endforeach ?>
         </tr>
     </thead>
@@ -27,8 +29,18 @@
         <?php if (count($this->getItems())): ?>
             <?php foreach ($this->getItems() as $item): ?>
                 <tr id="item_<?= $item->getId() ?>">
-                    <?php foreach ($columns as $column): ?>
-                        <td><?php $column->setItem($item); echo $column->toHtml($item);?></td>
+                    <?php
+                        foreach ($columns as $key => $column):
+                            $_blockName = str_replace('.','-',strtolower($column->getNameInLayout()));
+
+                            /* Override default column title in layout, useful for certain cases like select all box */
+                            if ($column->getRwdTitle()) {
+                                $_rwdLabel = $column->getRwdTitle();
+                            } else {
+                                $_rwdLabel = ($column->getTitle()) ? $column->getTitle() : false;
+                            }
+                    ?>
+                        <td class="<?= 'wishlist-cell'.$key ?> <?= $_blockName ?>"<?php if($_rwdLabel): ?> data-rwd-label="<?= $_rwdLabel ?>"<?php endif ?>><?php $column->setItem($item); echo $column->toHtml($item);?></td>
                     <?php endforeach ?>
                 </tr>
             <?php endforeach ?>

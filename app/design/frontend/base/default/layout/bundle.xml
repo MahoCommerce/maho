@@ -66,6 +66,9 @@ Adding custom product price block
     </tag_customer_view>
 
     <default>
+        <reference name="minicart_head">
+            <action method="addItemRender"><type>bundle</type><block>bundle/checkout_cart_item_renderer</block><template>checkout/cart/minicart/default.phtml</template></action>
+        </reference>
         <reference name="cart_sidebar">
             <action method="addItemRender"><type>bundle</type><block>bundle/checkout_cart_item_renderer</block><template>checkout/cart/sidebar/default.phtml</template></action>
         </reference>
@@ -187,12 +190,12 @@ Additional block for bundle product type
             <action method="addItem"><type>skin_js</type><name>js/bundle.js</name></action>
         </reference>
         <reference name="product.info">
-            <block type="bundle/catalog_product_view_type_bundle" name="product.info.bundle" as="product_type_data" template="bundle/catalog/product/view/type/bundle.phtml">
-                <action method="addPriceBlockType"><type>bundle</type><block>bundle/catalog_product_price</block><template>bundle/catalog/product/price.phtml</template></action>
-                <block type="bundle/catalog_product_price" name="bundle.prices" as="bundle_prices" template="bundle/catalog/product/view/price.phtml">
-                    <action method="setMAPTemplate"><tmpl>catalog/product/price_msrp_item.phtml</tmpl></action>
-                </block>
+            <action method="addPriceBlockType"><type>bundle</type><block>bundle/catalog_product_price</block><template>bundle/catalog/product/price.phtml</template></action>
+            <block type="bundle/catalog_product_price" name="bundle.prices" as="bundle_prices" template="bundle/catalog/product/view/price.phtml">
+                <action method="setMAPTemplate"><tmpl>catalog/product/price_msrp_item.phtml</tmpl></action>
             </block>
+            <block type="bundle/catalog_product_view_type_bundle" name="product.info.bundle" as="product_type_data" template="bundle/catalog/product/view/type/bundle.phtml"/>
+            <block type="bundle/catalog_product_view_type_bundle" name="product.info.availability" as="product_type_availability" template="bundle/catalog/product/view/type/bundle/availability.phtml" />
         </reference>
         <reference name="product.info.options.wrapper">
             <block type="bundle/catalog_product_view_type_bundle" name="product.info.bundle.options" as="type_bundle_options" template="bundle/catalog/product/view/type/bundle/options.phtml">

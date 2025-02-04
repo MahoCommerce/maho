@@ -49,8 +49,8 @@
             <a href="#" id="order-item-gift-message-link-<?= $_item->getId() ?>" class="gift-message-link" onclick="return giftMessageToogle('<?= $_item->getId() ?>')"><?= $this->__('Gift Message') ?></a>
         <?php endif ?>
     </td>
-    <td><?= $this->escapeHtml(Mage::helper('core/string')->splitInjection($this->getSku())) ?></td>
-    <td class="a-right">
+    <td data-rwd-label="<?= $this->__('SKU') ?>"><?= $this->escapeHtml(Mage::helper('core/string')->splitInjection($this->getSku())) ?></td>
+    <td class="a-right" data-rwd-label="<?= $this->__('Price') ?>">
         <?php if ($this->helper('tax')->displaySalesBothPrices() || $this->helper('tax')->displaySalesPriceExclTax()): ?>
             <span class="price-excl-tax">
                 <?php if ($this->helper('tax')->displaySalesBothPrices()): ?>
@@ -166,7 +166,7 @@
             </span>
         <?php endif ?>
     </td>
-    <td class="a-right">
+    <td class="a-right" data-rwd-label="<?= $this->__('Qty') ?>">
         <span class="nobr">
                 <?php if ($this->getItem()->getQtyOrdered() > 0): ?>
             <?= $this->__('Ordered') ?>: <strong><?= $this->getItem()->getQtyOrdered()*1 ?></strong><br />
@@ -182,7 +182,7 @@
         <?php endif ?>
         </span>
     </td>
-    <td class="a-right">
+    <td class="a-right" data-rwd-label="<?= $this->__('Subtotal') ?>">
         <?php if ($this->helper('tax')->displaySalesBothPrices() || $this->helper('tax')->displaySalesPriceExclTax()): ?>
             <span class="price-excl-tax">
                 <?php if ($this->helper('tax')->displaySalesBothPrices()): ?>

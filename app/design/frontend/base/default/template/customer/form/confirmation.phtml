@@ -24,7 +24,7 @@
             <li>
                 <label for="email_address" class="required"><em>*</em><?= $this->__('Email Address') ?></label>
                 <div class="input-box">
-                    <input type="text" name="email" id="email_address" title="<?= Mage::helper('core')->quoteEscape($this->__('Email Address')) ?>" class="input-text required-entry validate-email" value="<?= $this->escapeHtml($this->getEmail()) ?>" />
+                    <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="email" id="email_address" title="<?= Mage::helper('core')->quoteEscape($this->__('Email Address')) ?>" class="input-text required-entry validate-email" value="<?= $this->escapeHtml($this->getEmail()) ?>" />
                 </div>
             </li>
         </ul>

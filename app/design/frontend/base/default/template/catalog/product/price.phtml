@@ -3,26 +3,29 @@
  * Maho
  *
  * @category    design
- * @package     base_default
+ * @package     rwd_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+?>
 
+<?php
 /**
  * Template for displaying product price in different places (products grid, product view page etc)
  *
  * @see Mage_Catalog_Block_Product_Abstract
  * @var Mage_Catalog_Block_Product_Abstract $this
  */
-
+?>
+<?php
 $_coreHelper = $this->helper('core');
 $_weeeHelper = $this->helper('weee');
 $_taxHelper = $this->helper('tax');
-/** @var Mage_Core_Helper_Data $_coreHelper */
-/** @var Mage_Weee_Helper_Data $_weeeHelper */
-/** @var Mage_Tax_Helper_Data $_taxHelper */
+/* @var Mage_Core_Helper_Data $_coreHelper */
+/* @var Mage_Weee_Helper_Data $_weeeHelper */
+/* @var Mage_Tax_Helper_Data $_taxHelper */
 
 $_product = $this->getProduct();
 $_storeId = $_product->getStoreId();
@@ -183,8 +186,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                         : <?= $_coreHelper->currency($_weeeTaxAttribute->getAmount() + ($_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAttribute->getTaxAmount() : 0), true, true) ?>
                     </span>
                 <?php endforeach ?>
-                <span class="regular-price"
-                      id="product-price-weee-<?= $_id ?><?= $this->getIdSuffix() ?>">
+                <span class="regular-price" id="product-price-weee-<?= $_id ?><?= $this->getIdSuffix() ?>">
                     <?= $_coreHelper->currency($_price + $weeeAmountToDisplay, true, true) ?>
                 </span>
             <?php else: ?>
@@ -214,8 +216,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                     <span class="price-label"><?= $_specialPriceStoreLabel ?></span>
                     <span class="price-excluding-tax">
                         <span class="label"><?= $this->helper('tax')->__('Excl. Tax:') ?></span>
-                        <span class="price"
-                              id="price-excluding-tax-<?= $_id ?><?= $this->getIdSuffix() ?>">
+                        <span class="price" id="price-excluding-tax-<?= $_id ?><?= $this->getIdSuffix() ?>">
                             <?= $_coreHelper->formatPrice($_finalPrice + $_weeeTaxAmount, false) ?>
                         </span>
                     </span>
@@ -267,12 +268,10 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 </span>
                 </span>
             <?php else: ?>
-                <p class="special-price">
-                    <span class="price-label"><?= $this->__('Special Price:') ?></span>
+                <span class="price-label"><?= $this->__('Special Price:') ?></span>
                 <span class="price" id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
                     <?= $_coreHelper->formatPrice($_finalPrice + $_weeeTaxAmountInclTaxes, false) ?>
                 </span>
-                </p>
                 <span class="weee">(
                     <?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                         <?= $_weeeSeparator ?>
@@ -355,15 +354,13 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                     <span class="price-label"><?= $_specialPriceStoreLabel ?></span>
                     <span class="price-excluding-tax">
                         <span class="label"><?= $this->helper('tax')->__('Excl. Tax:') ?></span>
-                        <span class="price"
-                              id="price-excluding-tax-<?= $_id ?><?= $this->getIdSuffix() ?>">
+                        <span class="price" id="price-excluding-tax-<?= $_id ?><?= $this->getIdSuffix() ?>">
                             <?= $_coreHelper->formatPrice($_finalPrice, false) ?>
                         </span>
                     </span>
                     <span class="price-including-tax">
                         <span class="label"><?= $this->helper('tax')->__('Incl. Tax:') ?></span>
-                        <span class="price"
-                              id="price-including-tax-<?= $_id ?><?= $this->getIdSuffix() ?>">
+                        <span class="price" id="price-including-tax-<?= $_id ?><?= $this->getIdSuffix() ?>">
                             <?= $_coreHelper->formatPrice($_finalPriceInclTax, false) ?>
                         </span>
                     </span>
@@ -426,15 +423,13 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 <?php if ($_taxHelper->displayBothPrices()): ?>
                     <span class="price-excluding-tax">
                         <span class="label"><?= $this->helper('tax')->__('Excl. Tax:') ?></span>
-                        <span class="price"
-                              id="price-excluding-tax-<?= $_id ?><?= $this->getIdSuffix() ?>">
+                        <span class="price" id="price-excluding-tax-<?= $_id ?><?= $this->getIdSuffix() ?>">
                             <?= $_coreHelper->formatPrice($_exclTax, false) ?>
                         </span>
                     </span>
                     <span class="price-including-tax">
                         <span class="label"><?= $this->helper('tax')->__('Incl. Tax:') ?></span>
-                        <span class="price"
-                              id="price-including-tax-<?= $_id ?><?= $this->getIdSuffix() ?>">
+                        <span class="price" id="price-including-tax-<?= $_id ?><?= $this->getIdSuffix() ?>">
                             <?= $_coreHelper->formatPrice($_inclTax, false) ?>
                         </span>
                     </span>
