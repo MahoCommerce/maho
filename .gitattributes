@@ -8,6 +8,7 @@
 /.phpstan.neon export-ignore
 /.rector.php export-ignore
 /README.md export-ignore
+/SECURITY.md export-ignore
 
 # Enforce checkout with linux lf
 *.html text eol=lf
