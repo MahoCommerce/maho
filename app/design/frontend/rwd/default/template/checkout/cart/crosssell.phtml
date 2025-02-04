@@ -6,17 +6,11 @@
  * @package     rwd_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
-/**
- * Cart cross sell items template
- *
- * @see Mage_Checkout_Block_Cart_Crosssell
- * @var Mage_Checkout_Block_Cart_Crosssell $this
- */
+
+/** @var Mage_Checkout_Block_Cart_Crosssell $this */
 ?>
 <?php if($this->getItemCount()): ?>
 <?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])); ?>
@@ -27,7 +21,9 @@
         <li class="item">
             <div class="product-info">
                 <a class="product-image" href="<?= $_item->getProductUrl() ?>" title="<?= $this->escapeHtml($_item->getName()) ?>">
-                    <img src="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(210) ?>" alt="<?= $this->escapeHtml($_item->getName()) ?>" />
+                    <img src="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(210) ?>"
+                         srcset="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(420) ?> 2x"
+                         alt="<?= $this->escapeHtml($_item->getName()) ?>" />
                 </a>
                 <h3 class="product-name"><a href="<?= $_item->getProductUrl() ?>"><?= $this->escapeHtml($_item->getName()) ?></a></h3>
                 <?= $this->getPriceHtml($_item, true) ?>

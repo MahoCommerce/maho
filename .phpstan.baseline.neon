@@ -4809,7 +4809,7 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 12
+			count: 13
 			path: app/design/frontend/base/default/template/bundle/catalog/product/list/partof.phtml
 
 		-
@@ -5025,13 +5025,13 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 13
+			count: 14
 			path: app/design/frontend/base/default/template/catalog/product/widget/new/column/new_default_list.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 7
+			count: 8
 			path: app/design/frontend/base/default/template/catalog/product/widget/new/column/new_images_list.phtml
 
 		-
@@ -5043,13 +5043,13 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 22
+			count: 23
 			path: app/design/frontend/base/default/template/catalog/product/widget/new/content/new_grid.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 21
+			count: 22
 			path: app/design/frontend/base/default/template/catalog/product/widget/new/content/new_list.phtml
 
 		-
@@ -5409,13 +5409,13 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 12
+			count: 13
 			path: app/design/frontend/base/default/template/reports/widget/compared/column/compared_default_list.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 6
+			count: 7
 			path: app/design/frontend/base/default/template/reports/widget/compared/column/compared_images_list.phtml
 
 		-
@@ -5427,13 +5427,13 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 21
+			count: 22
 			path: app/design/frontend/base/default/template/reports/widget/compared/content/compared_grid.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 20
+			count: 21
 			path: app/design/frontend/base/default/template/reports/widget/compared/content/compared_list.phtml
 
 		-
@@ -5589,13 +5589,13 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 9
+			count: 10
 			path: app/design/frontend/rwd/default/template/catalog/product/widget/new/column/new_default_list.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 7
+			count: 8
 			path: app/design/frontend/rwd/default/template/catalog/product/widget/new/column/new_images_list.phtml
 
 		-
@@ -5607,7 +5607,7 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 8
+			count: 9
 			path: app/design/frontend/rwd/default/template/catalog/product/widget/new/content/new_list.phtml
 
 		-
@@ -5775,13 +5775,13 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 8
+			count: 9
 			path: app/design/frontend/rwd/default/template/reports/widget/compared/column/compared_default_list.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 6
+			count: 7
 			path: app/design/frontend/rwd/default/template/reports/widget/compared/column/compared_images_list.phtml
 
 		-
@@ -5793,13 +5793,13 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 20
+			count: 21
 			path: app/design/frontend/rwd/default/template/reports/widget/compared/content/compared_grid.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 7
+			count: 8
 			path: app/design/frontend/rwd/default/template/reports/widget/compared/content/compared_list.phtml
 
 		-

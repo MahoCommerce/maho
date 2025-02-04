@@ -6,7 +6,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 /** @var Mage_Wishlist_Block_Share_Email_Items $this */
@@ -20,7 +20,7 @@
         <?php /** @var Mage_Catalog_Model_Product $_product */ ?>
         <?php $_product = $item->getProduct(); ?>
         <td width="32%">
-            <p align="center" style="font-size:12px;"><a href="<?= $this->getProductUrl($_product) ?>"><img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(135) ?>" style="border:1px solid #ccc;" width="135" height="135" alt="" /></a></p>
+            <p align="center" style="font-size:12px;"><a href="<?= $this->getProductUrl($_product) ?>"><img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(135) ?>" srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(270) ?> 2x" style="border:1px solid #ccc;" width="135" height="135" alt="" /></a></p>
             <p align="center" style="font-size:12px;"><a href="<?= $this->getProductUrl($_product) ?>" style="color:#203548;"><strong><?= $this->escapeHtml($_product->getName()) ?></strong></a></p>
             <?php if($this->hasDescription($item)): ?><p align="center" style="font-size:12px;"><?= $this->__('Comment') ?>:<br /><?= $this->getEscapedDescription($item) ?></p><?php endif ?>
             <p align="center" style="font-size:12px;"><a href="<?= $this->getProductUrl($_product) ?>" style="color:#1E7EC8;"><?= $this->__('View Product') ?></a> <small>

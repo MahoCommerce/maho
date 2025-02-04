@@ -46,6 +46,7 @@ $mainImage = $this->helper('catalog/image')->init($_product, 'image');
                     <li>
                         <a class="thumb-link" href="#" title="<?= $this->escapeHtml($_image->getLabel() ?: $this->__('Image') . ' ' . ($i+1)) ?>" data-image-index="<?= $i ?>">
                             <img src="<?= $this->helper('catalog/image')->init($this->getProduct(), 'thumbnail', $_image->getFile())->resize(75) ?>"
+                                 srcset="<?= $this->helper('catalog/image')->init($this->getProduct(), 'thumbnail', $_image->getFile())->resize(150) ?> 2x"
                                  width="75" height="75" alt="<?= $this->escapeHtml($_image->getLabel()) ?>" />
                         </a>
                     </li>

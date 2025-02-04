@@ -6,7 +6,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 /** @var Mage_Wishlist_Block_Customer_Sidebar $this */
@@ -24,7 +24,7 @@
     <?php foreach ($this->getWishlistItems() as $_item): ?>
         <?php $product = $_item->getProduct(); ?>
         <li class="item">
-            <a href="<?= $this->getProductUrl($_item) ?>" title="<?= $this->escapeHtml($product->getName()) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($product, 'thumbnail')->resize(50) ?>" width="50" height="50" alt="<?= $this->escapeHtml($product->getName()) ?>" /></a>
+            <a href="<?= $this->getProductUrl($_item) ?>" title="<?= $this->escapeHtml($product->getName()) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($product, 'thumbnail')->resize(50) ?>" srcset="<?= $this->helper('catalog/image')->init($product, 'thumbnail')->resize(100) ?> 2x" width="50" height="50" alt="<?= $this->escapeHtml($product->getName()) ?>" /></a>
             <div class="product-details">
                 <a href="#"
                    class="btn-remove"

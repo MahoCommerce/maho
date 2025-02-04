@@ -6,17 +6,11 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
-/**
- * Product list template
- *
- * @see Mage_Catalog_Block_Product_List
- * @var Mage_Catalog_Block_Product_List $this
- */
+
+/** @var Mage_Catalog_Block_Product_List $this */
 ?>
 <?php
     $_productCollection = $this->getLoadedProductCollection();
@@ -36,7 +30,7 @@
     <?php foreach ($_productCollection as $_product): ?>
         <li class="item<?php if(++$_iterator === $_productCollectionCount): ?> last<?php endif ?>">
             <?php // Product Image ?>
-            <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(135) ?>" width="135" height="135" alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" /></a>
+            <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(135) ?>" srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(270) ?> 2x" width="135" height="135" alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" /></a>
             <?php // Product description ?>
             <div class="product-shop">
                 <div class="f-fix">
@@ -104,7 +98,7 @@
         <ul class="products-grid">
         <?php endif ?>
             <li class="item">
-                <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(135) ?>" width="135" height="135" alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" /></a>
+                <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(135) ?>" srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(270) ?> 2x" width="135" height="135" alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" /></a>
                 <h2 class="product-name"><a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($_product->getName(), null, true) ?>"><?= $_helper->productAttribute($_product, $_product->getName(), 'name') ?></a></h2>
                 <?php if($_product->getRatingSummary()): ?>
                 <?= $this->getReviewsSummaryHtml($_product, 'short') ?>

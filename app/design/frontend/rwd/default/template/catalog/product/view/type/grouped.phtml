@@ -6,17 +6,11 @@
  * @package     rwd_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/**
- * Grouped product data template
- *
- * @see Mage_Catalog_Block_Product_View_Media
- * @see Mage_Catalog_Block_Product_View_Type_Grouped
- * @var Mage_Catalog_Block_Product_View_Media $this
- */
+/** @var Mage_Catalog_Block_Product_View_Media $this */
 ?>
 <?php $this->setPreconfiguredValue(); ?>
 <?php $_product = $this->getProduct(); ?>
@@ -36,6 +30,7 @@
                 <td class='image'>
                     <img class="thumbnail"
                          src="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->constrainOnly(true)->resize(105, 80) ?>"
+                         srcset="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->constrainOnly(true)->resize(210, 160) ?> 2x"
                          alt="<?= $this->escapeHtml($this->getImageLabel()) ?>"
                          title="<?= $this->escapeHtml($this->getImageLabel()) ?>" />
                 </td>
