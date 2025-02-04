@@ -4939,28 +4939,16 @@ parameters:
 			path: app/design/frontend/base/default/template/catalog/category/widget/link/link_inline.phtml
 
 		-
-			message: '#^Call to method escapeUrl\(\) on an unknown class Mage_Catalog_Block_Layer_Filter\.$#'
-			identifier: class.notFound
+			message: '#^Cannot call method setFilter\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
 			count: 1
-			path: app/design/frontend/base/default/template/catalog/layer/filter.phtml
+			path: app/design/frontend/base/default/template/catalog/layer/state.phtml
 
 		-
-			message: '#^Call to method getItems\(\) on an unknown class Mage_Catalog_Block_Layer_Filter\.$#'
-			identifier: class.notFound
+			message: '#^Cannot call method toHtml\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
 			count: 1
-			path: app/design/frontend/base/default/template/catalog/layer/filter.phtml
-
-		-
-			message: '#^Call to method shouldDisplayProductCount\(\) on an unknown class Mage_Catalog_Block_Layer_Filter\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/design/frontend/base/default/template/catalog/layer/filter.phtml
-
-		-
-			message: '#^PHPDoc tag @var for variable \$this contains unknown class Mage_Catalog_Block_Layer_Filter\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/design/frontend/base/default/template/catalog/layer/filter.phtml
+			path: app/design/frontend/base/default/template/catalog/layer/state.phtml
 
 		-
 			message: '#^Left side of && is always true\.$#'
@@ -5011,6 +4999,24 @@ parameters:
 			path: app/design/frontend/base/default/template/catalog/product/view/tierprices.phtml
 
 		-
+			message: '#^Cannot call method setAttributeObj\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/design/frontend/base/default/template/catalog/product/view/type/options/configurable.phtml
+
+		-
+			message: '#^Cannot call method setProduct\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/design/frontend/base/default/template/catalog/product/view/type/options/configurable.phtml
+
+		-
+			message: '#^Cannot call method toHtml\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/design/frontend/base/default/template/catalog/product/view/type/options/configurable.phtml
+
+		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
 			count: 3
@@ -5025,7 +5031,7 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 14
+			count: 10
 			path: app/design/frontend/base/default/template/catalog/product/widget/new/column/new_default_list.phtml
 
 		-
@@ -5043,13 +5049,7 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 23
-			path: app/design/frontend/base/default/template/catalog/product/widget/new/content/new_grid.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 22
+			count: 9
 			path: app/design/frontend/base/default/template/catalog/product/widget/new/content/new_list.phtml
 
 		-
@@ -5057,6 +5057,18 @@ parameters:
 			identifier: arguments.count
 			count: 12
 			path: app/design/frontend/base/default/template/checkout/cart/item/default.phtml
+
+		-
+			message: '#^Method Mage_Checkout_Helper_Data\:\:formatPrice\(\) invoked with 3 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 6
+			path: app/design/frontend/base/default/template/checkout/cart/minicart/default.phtml
+
+		-
+			message: '#^Call to an undefined method Mage_Checkout_Block_Cart_Minicart\:\:isPossibleOnepageCheckout\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/design/frontend/base/default/template/checkout/cart/minicart/items.phtml
 
 		-
 			message: '#^Method Mage_Checkout_Helper_Data\:\:formatPrice\(\) invoked with 3 parameters, 1 required\.$#'
@@ -5079,7 +5091,7 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 7
+			count: 9
 			path: app/design/frontend/base/default/template/checkout/multishipping/item/default.phtml
 
 		-
@@ -5253,7 +5265,7 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 50
+			count: 51
 			path: app/design/frontend/base/default/template/customer/form/address.phtml
 
 		-
@@ -5323,6 +5335,12 @@ parameters:
 			path: app/design/frontend/base/default/template/downloadable/checkout/cart/item/default.phtml
 
 		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 79
+			path: app/design/frontend/base/default/template/downloadable/checkout/cart/item/default.phtml
+
+		-
 			message: '#^Method Mage_Checkout_Helper_Data\:\:formatPrice\(\) invoked with 3 parameters, 1 required\.$#'
 			identifier: arguments.count
 			count: 12
@@ -5331,13 +5349,13 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 16
+			count: 17
 			path: app/design/frontend/base/default/template/email/order/items/creditmemo/default.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 16
+			count: 17
 			path: app/design/frontend/base/default/template/email/order/items/invoice/default.phtml
 
 		-
@@ -5389,10 +5407,22 @@ parameters:
 			path: app/design/frontend/base/default/template/page/html/cookienotice.phtml
 
 		-
+			message: '#^Call to protected method _getRenderedMenuItemAttributes\(\) of class Mage_Page_Block_Html_Topmenu\.$#'
+			identifier: method.protected
+			count: 1
+			path: app/design/frontend/base/default/template/page/html/topmenu/renderer.phtml
+
+		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
 			count: 7
 			path: app/design/frontend/base/default/template/page/redirect.phtml
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 70
+			path: app/design/frontend/base/default/template/paypal/express/review/address.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
@@ -5409,7 +5439,7 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 13
+			count: 9
 			path: app/design/frontend/base/default/template/reports/widget/compared/column/compared_default_list.phtml
 
 		-
@@ -5427,13 +5457,13 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 22
+			count: 21
 			path: app/design/frontend/base/default/template/reports/widget/compared/content/compared_grid.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 21
+			count: 8
 			path: app/design/frontend/base/default/template/reports/widget/compared/content/compared_list.phtml
 
 		-
@@ -5521,292 +5551,10 @@ parameters:
 			path: app/design/frontend/base/default/template/wishlist/item/configure/addto.phtml
 
 		-
-			message: '#^Call to protected method _getDefaultValues\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/rwd/default/template/bundle/catalog/product/view/type/bundle/option/select.phtml
-
-		-
-			message: '#^Call to protected method _isSelected\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 2
-			path: app/design/frontend/rwd/default/template/bundle/catalog/product/view/type/bundle/option/select.phtml
-
-		-
-			message: '#^Call to protected method _showSingle\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/rwd/default/template/bundle/catalog/product/view/type/bundle/option/select.phtml
-
-		-
-			message: '#^Cannot call method setFilter\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/design/frontend/rwd/default/template/catalog/layer/state.phtml
-
-		-
-			message: '#^Cannot call method toHtml\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/design/frontend/rwd/default/template/catalog/layer/state.phtml
-
-		-
-			message: '#^Left side of && is always true\.$#'
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: app/design/frontend/rwd/default/template/catalog/product/price.phtml
-
-		-
-			message: '#^Ternary operator condition is always true\.$#'
-			identifier: ternary.alwaysTrue
-			count: 1
-			path: app/design/frontend/rwd/default/template/catalog/product/price.phtml
-
-		-
-			message: '#^Call to protected method _isSecure\(\) of class Mage_Core_Block_Abstract\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/rwd/default/template/catalog/product/view.phtml
-
-		-
-			message: '#^Cannot call method setAttributeObj\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/design/frontend/rwd/default/template/catalog/product/view/type/options/configurable.phtml
-
-		-
-			message: '#^Cannot call method setProduct\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/design/frontend/rwd/default/template/catalog/product/view/type/options/configurable.phtml
-
-		-
-			message: '#^Cannot call method toHtml\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/design/frontend/rwd/default/template/catalog/product/view/type/options/configurable.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 10
-			path: app/design/frontend/rwd/default/template/catalog/product/widget/new/column/new_default_list.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 8
-			path: app/design/frontend/rwd/default/template/catalog/product/widget/new/column/new_images_list.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 6
-			path: app/design/frontend/rwd/default/template/catalog/product/widget/new/column/new_names_list.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 9
-			path: app/design/frontend/rwd/default/template/catalog/product/widget/new/content/new_list.phtml
-
-		-
-			message: '#^Method Mage_Checkout_Helper_Data\:\:formatPrice\(\) invoked with 3 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 12
-			path: app/design/frontend/rwd/default/template/checkout/cart/item/default.phtml
-
-		-
-			message: '#^Method Mage_Checkout_Helper_Data\:\:formatPrice\(\) invoked with 3 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 6
-			path: app/design/frontend/rwd/default/template/checkout/cart/minicart/default.phtml
-
-		-
-			message: '#^Call to an undefined method Mage_Checkout_Block_Cart_Minicart\:\:isPossibleOnepageCheckout\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/design/frontend/rwd/default/template/checkout/cart/minicart/items.phtml
-
-		-
-			message: '#^Method Mage_Checkout_Helper_Data\:\:formatPrice\(\) invoked with 3 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 6
-			path: app/design/frontend/rwd/default/template/checkout/cart/sidebar/default.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 45
-			path: app/design/frontend/rwd/default/template/checkout/cart/sidebar/default.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 9
-			path: app/design/frontend/rwd/default/template/checkout/multishipping/item/default.phtml
-
-		-
-			message: '#^Method Mage_Checkout_Helper_Data\:\:formatPrice\(\) invoked with 3 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 12
-			path: app/design/frontend/rwd/default/template/checkout/multishipping/overview/item.phtml
-
-		-
-			message: '#^Method Mage_Checkout_Helper_Data\:\:formatPrice\(\) invoked with 3 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 12
-			path: app/design/frontend/rwd/default/template/checkout/onepage/review/item.phtml
-
-		-
-			message: '#^Variable \$action might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$address might not be defined\.$#'
-			identifier: variable.undefined
-			count: 2
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$countries might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$data might not be defined\.$#'
-			identifier: variable.undefined
-			count: 12
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$primaryTypes might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 51
-			path: app/design/frontend/rwd/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$action might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/rwd/default/template/customer/form/changepassword.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 15
-			path: app/design/frontend/rwd/default/template/customer/form/changepassword.phtml
-
-		-
-			message: '#^Cannot call method isEnabled\(\) on Mage_Core_Block_Abstract\|false\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: app/design/frontend/rwd/default/template/customer/form/edit.phtml
-
-		-
-			message: '#^Method Mage_Checkout_Helper_Data\:\:formatPrice\(\) invoked with 3 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 12
-			path: app/design/frontend/rwd/default/template/downloadable/checkout/cart/item/default.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 79
-			path: app/design/frontend/rwd/default/template/downloadable/checkout/cart/item/default.phtml
-
-		-
-			message: '#^Method Mage_Checkout_Helper_Data\:\:formatPrice\(\) invoked with 3 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 12
-			path: app/design/frontend/rwd/default/template/downloadable/checkout/onepage/review/item.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 8
-			path: app/design/frontend/rwd/default/template/email/order/creditmemo/items.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 17
-			path: app/design/frontend/rwd/default/template/email/order/items/creditmemo/default.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 17
-			path: app/design/frontend/rwd/default/template/email/order/items/invoice/default.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 8
-			path: app/design/frontend/rwd/default/template/email/order/items/shipment/default.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 7
-			path: app/design/frontend/rwd/default/template/email/order/shipment/items.phtml
-
-		-
-			message: '#^Call to protected method _getRenderedMenuItemAttributes\(\) of class Mage_Page_Block_Html_Topmenu\.$#'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/rwd/default/template/page/html/topmenu/renderer.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 70
-			path: app/design/frontend/rwd/default/template/paypal/express/review/address.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 9
-			path: app/design/frontend/rwd/default/template/reports/widget/compared/column/compared_default_list.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 7
-			path: app/design/frontend/rwd/default/template/reports/widget/compared/column/compared_images_list.phtml
-
-		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
 			count: 4
-			path: app/design/frontend/rwd/default/template/reports/widget/compared/column/compared_names_list.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 21
-			path: app/design/frontend/rwd/default/template/reports/widget/compared/content/compared_grid.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 8
-			path: app/design/frontend/rwd/default/template/reports/widget/compared/content/compared_list.phtml
-
-		-
-			message: '#^Variable \$data might not be defined\.$#'
-			identifier: variable.undefined
-			count: 3
-			path: app/design/frontend/rwd/default/template/review/form.phtml
+			path: app/design/frontend/base/default/template/wishlist/item/list.phtml
 
 		-
 			message: '#^Variable \$steps might not be defined\.$#'
