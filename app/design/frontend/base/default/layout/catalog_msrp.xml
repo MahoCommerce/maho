@@ -31,7 +31,6 @@ Default layout, loads most of the pages
     <default>
         <reference name="head">
             <action method="addItem" ifconfig="sales/msrp/enabled"><type>skin_js</type><name>js/msrp.js</name></action>
-            <action method="addItem" ifconfig="sales/msrp/enabled"><type>skin_js</type><name>js/msrp_rwd.js</name></action>
         </reference>
         <reference name="content">
             <block type="core/template" template="catalog/msrp/popup.phtml" name="product.tooltip"></block>
