@@ -2,8 +2,8 @@
 
 If you believe you have found a security vulnerability in Maho, please report it through coordinated disclosure.
 
-**Please do not report security vulnerabilities through the repository issues, discussions, or pull requests**,
-instead, please [open a new Github security advisory](https://github.com/MahoCommerce/maho/security/advisories/new).
+**Please do not report security vulnerabilities through the repository issues, discussions, or pull requests**.
+Instead, please [open a new Github security advisory](https://github.com/MahoCommerce/maho/security/advisories/new).
 
 Please include the following information to help us better understand and resolve the issue:
 
