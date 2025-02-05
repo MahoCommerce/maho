@@ -72,11 +72,13 @@ async function mahoFetch(url, options) {
         return result;
 
     } catch (error) {
-        console.error('mahoFetch error:', error);
         if (loaderArea !== false && typeof hideLoader === 'function') {
             hideLoader();
         }
-        throw error;
+        if (error.name !== 'AbortError') {
+            console.error('mahoFetch error:', error);
+            throw error;
+        }
     }
 }
 
@@ -245,7 +247,8 @@ function expandDetails(el, childClass) {
         el.classList.remove('show-details');
     } else {
         document.querySelectorAll(childClass).forEach(item => {
-            item.style.display = 'block';
+            item.style.display = '';
+            item.classList.remove('no-display');
         });
         el.classList.add('show-details');
     }
@@ -341,13 +344,12 @@ Varien.Tabs = class {
         const ul = li.parentNode;
 
         // Get all li elements in both ul and ol within the parent
-        const allTabs = [...ul.querySelectorAll('li')];
-
-        allTabs.forEach(el => {
+        ul.querySelectorAll('li').forEach(el => {
             const contents = document.getElementById(`${el.id}_contents`);
             if (el === li) {
                 el.classList.add('active');
-                contents.style.display = 'block';
+                el.classList.remove('no-display');
+                contents.style.display = '';
             } else {
                 el.classList.remove('active');
                 contents.style.display = 'none';
