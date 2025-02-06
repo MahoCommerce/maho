@@ -25,7 +25,7 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
         $this->setForm($form);
 
         $fieldset = $form->addFieldset('blog_form', [
-            'legend' => Mage::helper('blog')->__('Post Information'),
+            'legend' => Mage::helper('blog')->__('General Information'),
             'class' => 'fieldset-wide'
         ]);
 

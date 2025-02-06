@@ -13,9 +13,5 @@
         <reference name="content">
             <block type="blog/adminhtml_post_edit" name="posts_edit"/>
         </reference>
-        <reference name="left">
-            <block type="adminhtml/store_switcher" name="store_switcher" before="-"></block>
-            <block type="blog/adminhtml_post_edit_tabs" name="post_tabs"></block>
-        </reference>
     </adminhtml_blog_post_edit>
 </layout>
