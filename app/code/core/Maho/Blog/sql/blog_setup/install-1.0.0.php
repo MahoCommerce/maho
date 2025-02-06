@@ -112,7 +112,7 @@ $table = $installer->getConnection()
             'unsigned' => true,
             'nullable' => false,
             'primary' => true,
-        ]
+        ],
     )
     ->addColumn(
         'store_id',
@@ -122,40 +122,40 @@ $table = $installer->getConnection()
             'unsigned' => true,
             'nullable' => false,
             'primary' => true,
-        ]
+        ],
     )
     ->addIndex(
         $installer->getIdxName(
             'blog/post_store',
-            ['store_id']
+            ['store_id'],
         ),
-        ['store_id']
+        ['store_id'],
     )
     ->addForeignKey(
         $installer->getFkName(
             'blog/post_store',
             'blog_post_id',
             'blog/post',
-            'entity_id'
+            'entity_id',
         ),
         'blog_post_id',
         $installer->getTable('blog/post'),
         'entity_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->addForeignKey(
         $installer->getFkName(
             'blog/post_store',
             'store_id',
             'core/store',
-            'store_id'
+            'store_id',
         ),
         'store_id',
         $installer->getTable('core/store'),
         'store_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Blog Post To Store Linkage Table');
 $installer->getConnection()->createTable($table);
