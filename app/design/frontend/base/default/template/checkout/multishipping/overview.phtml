@@ -3,7 +3,7 @@
  * Maho
  *
  * @category    design
- * @package     base_default
+ * @package     rwd_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
@@ -15,7 +15,7 @@
     <div class="page-title">
         <h1><?= $this->__('Review Order') ?></h1>
     </div>
-    <?= $this->getMessagesBlock()->toHtml() ?>
+    <?= $this->getMessagesBlock()->getGroupedHtml() ?>
     <form id="review-order-form" action="<?= $this->getPostActionUrl() ?>" method="post" onsubmit="return showLoader();">
         <?= $this->getBlockHtml('formkey') ?>
         <div class="col2-set">
@@ -83,7 +83,8 @@
                 </div>
                 <div class="col-2 col-wide">
                     <h4><?= $this->__('Items') ?> <span class="separator">|</span> <a href="<?= $this->getAddressesEditUrl() ?>"><?= $this->__('Edit Items') ?></a></h4>
-                    <table class="data-table" id="overview-table-<?= $_address->getId() ?>">
+                    <?php $_tableClass = $this->helper('tax')->displayCartBothPrices() ? 'linearize-table-large' : 'linearize-table'; ?>
+                    <table class="data-table <?= $_tableClass ?> checkout-review-table" id="overview-table-<?= $_address->getId() ?>">
                         <col />
                         <col width="1" />
                         <?php if ($this->helper('tax')->displayCartBothPrices()): ?>
@@ -132,7 +133,8 @@
             <div class="col-2 col-wide">
                 <h3><?= $this->__('Items') ?> <span class="separator">|</span> <a href="<?= $this->getVirtualProductEditUrl() ?>"><?= $this->__('Edit Items') ?></a></h3>
                 <?php $mergedCells = ($this->helper('tax')->displayCartBothPrices() ? 2 : 1); ?>
-                <table class="data-table" id="virtual-overview-table">
+                <?php $_tableClass = $this->helper('tax')->displayCartBothPrices() ? 'linearize-table-large' : 'linearize-table'; ?>
+                <table class="data-table <?= $_tableClass ?> checkout-review-table" id="virtual-overview-table">
                     <col />
                     <col width="1" />
                     <?php if ($this->helper('tax')->displayCartBothPrices()): ?>
@@ -181,12 +183,12 @@
                         <div class="inner">
                             <big><?= $this->__('Grand Total:') ?> <?= $this->helper('checkout')->formatPrice($this->getTotal()) ?></big>
                             <div id="review-buttons-container">
-                                <button type="submit" title="<?= Mage::helper('core')->quoteEscape($this->__('Place Order')) ?>" class="button btn-checkout" id="review-button"><?= $this->__('Place Order') ?></button>
+                                <button type="submit" title="<?= $this->quoteEscape($this->__('Place Order')) ?>" class="button btn-checkout" id="review-button"><?= $this->__('Place Order') ?></button>
                             </div>
                         </div>
                     </div>
                     <span class="please-wait" id="review-please-wait" style="display:none;">
-                        <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= Mage::helper('core')->quoteEscape($this->__('Submitting order information...')) ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Submitting order information...')) ?>" class="v-middle" /> <?= $this->__('Submitting order information...') ?>
+                        <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Submitting order information...')) ?>" title="<?= $this->quoteEscape($this->__('Submitting order information...')) ?>" class="v-middle" /> <?= $this->__('Submitting order information...') ?>
                     </span>
                 </div>
             </div>
@@ -194,37 +196,37 @@
                 <p class="back-link"><a href="<?= $this->getBackUrl() ?>"><small>&laquo; </small><?= $this->__('Back to Billing Information') ?></a></p>
             </div>
         </form>
-    <script type="text/javascript">
-        var submitted = false;
-        function showLoader() {
-            if (submitted) {
-                return false;
-            }
+        <script type="text/javascript">
+            var submitted = false;
+            function showLoader() {
+                if (submitted) {
+                    return false;
+                }
 
-            const agreements = document.getElementById('checkout-agreements');
-            if (agreements) {
-                const checkboxes = agreements.querySelectorAll('input');
-                for (let i = 0; i < checkboxes.length; i++) {
-                    if (!checkboxes[i].checked) {
-                        alert("<?= $this->jsQuoteEscape($this->__('Please agree to all Terms and Conditions before placing the orders.')) ?>");
-                        return false;
+                const agreements = document.getElementById('checkout-agreements');
+                if (agreements) {
+                    const checkboxes = agreements.querySelectorAll('input');
+                    for (let i = 0; i < checkboxes.length; i++) {
+                        if (!checkboxes[i].checked) {
+                            alert("<?= $this->jsQuoteEscape($this->__('Please agree to all Terms and Conditions before placing the orders.')) ?>");
+                            return false;
+                        }
                     }
                 }
+
+                submitted = true;
+                const step = 'review';
+                document.getElementById(step + '-please-wait').style.display = 'block';
+
+                const buttonsContainer = document.getElementById(step + '-buttons-container');
+                buttonsContainer.style.opacity = '0.5';
+
+                const elements = buttonsContainer.getElementsByTagName('*');
+                Array.from(elements).forEach(element => {
+                    element.disabled = true;
+                });
+
+                return true;
             }
-
-            submitted = true;
-            const step = 'review';
-            document.getElementById(step + '-please-wait').style.display = 'block';
-
-            const buttonsContainer = document.getElementById(step + '-buttons-container');
-            buttonsContainer.style.opacity = '0.5';
-
-            const elements = buttonsContainer.getElementsByTagName('*');
-            Array.from(elements).forEach(element => {
-                element.disabled = true;
-            });
-
-            return true;
-        }
-    </script>
+        </script>
 </div>

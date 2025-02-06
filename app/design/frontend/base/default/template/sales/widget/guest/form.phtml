@@ -26,8 +26,8 @@
                            <label class="required"><?= Mage::helper('sales')->__('Find Order By:') ?></label>
                            <div class="input-box">
                                <select name="oar_type" id="quick_search_type_id" class="select" title="" onchange="showIdentifyBlock(this.value);">
-                                   <option value="email"><?= Mage::helper('sales')->__('Email Address') ?></option>
-                                   <option value="zip"><?= Mage::helper('sales')->__('ZIP Code') ?></option>
+                                   <option value="email"><?= $this->__('Email Address') ?></option>
+                                   <option value="zip"><?= $this->__('ZIP Code') ?></option>
                                </select>
                            </div>
                        </li>
@@ -46,7 +46,7 @@
                        <li id="oar-email">
                            <label for="oar_email" class="required"><?= Mage::helper('sales')->__('Email Address') ?> <em>*</em></label>
                            <div class="input-box">
-                               <input type="text" class="input-text validate-email required-entry" id="oar_email" name="oar_email" autocomplete="off" />
+                               <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" class="input-text validate-email required-entry" id="oar_email" name="oar_email" autocomplete="off" />
                            </div>
                        </li>
                        <li id="oar-zip" style="display:none;">

@@ -10,22 +10,15 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/**
- * Category left navigation
- *
- * @see Mage_Catalog_Block_Navigation
- * @var Mage_Catalog_Block_Navigation $this 
- */
+/** @var Mage_Catalog_Block_Navigation $this */
 ?>
 <?php if (!Mage::registry('current_category')) return ?>
 <?php $_categories = $this->getCurrentChildCategories() ?>
 <?php $_count = is_array($_categories)?count($_categories):$_categories->count(); ?>
 <?php if($_count): ?>
-<div class="block block-layered-nav">
-    <div class="block-title">
-        <strong><span><?= $this->__('Browse By') ?></span></strong>
-    </div>
-    <div class="block-content">
+<div class="block block-layered-nav>
+    <div class="block-content toggle-content open">
+        <p class="block-subtitle block-subtitle--filter"><?= $this->__('Filter') ?></p>
         <dl id="narrow-by-list2">
             <dt><?= $this->__('Category') ?></dt>
             <dd>
@@ -33,7 +26,10 @@
                 <?php foreach ($_categories as $_category): ?>
                     <?php if($_category->getIsActive()): ?>
                     <li>
-                        <a href="<?= $this->getCategoryUrl($_category) ?>"<?php if ($this->isCategoryActive($_category)): ?> class="current"<?php endif ?>><?= $this->escapeHtml($_category->getName()) ?></a> (<?= $_category->getProductCount() ?>)
+                        <a href="<?= $this->getCategoryUrl($_category) ?>"<?php if ($this->isCategoryActive($_category)): ?> class="current"<?php endif ?>>
+                            <?= $this->escapeHtml($_category->getName()) ?>
+                            <span class="count">(<?= $_category->getProductCount() ?>)</span>
+                        </a>
                     </li>
                     <?php endif ?>
                 <?php endforeach ?>

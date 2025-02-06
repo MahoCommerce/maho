@@ -20,10 +20,9 @@ Default layout, loads most of the pages
     <default>
 
         <!-- Mage_Newsletter -->
-        <reference name="left">
-            <block type="newsletter/subscribe" name="left.newsletter" template="newsletter/subscribe.phtml"/>
+        <reference name="footer">
+            <block type="newsletter/subscribe" name="footer.newsletter" as="newsletter" before="footer_store_language" template="newsletter/subscribe.phtml"/>
         </reference>
-
     </default>
 
 <!--
@@ -45,7 +44,6 @@ Customer account pages, rendered for all tabs in dashboard
             <block type="customer/newsletter" name="customer_newsletter">
                 <block type="page/html_wrapper" name="customer.newsletter.form.before" as="form_before" translate="label">
                     <label>Newsletter Subscription Form Before</label>
-                    <action method="setMayBeInvisible"><value>1</value></action>
                 </block>
             </block>
         </reference>

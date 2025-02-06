@@ -239,6 +239,21 @@ Catalog.Map = {
             Catalog.Map.active = false;
         }
 
+        if (helpBox && this != Catalog.Map && Catalog.Map.active != this.link) {
+            helpBox.classList.remove('map-popup-right');
+            helpBox.classList.remove('map-popup-left');
+
+            // Replace Element.getWidth with standard JavaScript
+            const helpBoxWidth = helpBox.offsetWidth;
+            const bodyWidth = bodyNode.offsetWidth;
+
+            if (bodyWidth < event.pageX + (helpBoxWidth / 2)) {
+                helpBox.classList.add('map-popup-left');
+            } else if (event.pageX - (helpBoxWidth / 2) < 0) {
+                helpBox.classList.add('map-popup-right');
+            }
+        }
+
         event.preventDefault();
     },
 

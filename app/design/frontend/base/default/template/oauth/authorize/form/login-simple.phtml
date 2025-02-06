@@ -10,11 +10,7 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/**
- * Simple login form template
- *
- * @var Mage_Oauth_Block_Authorize $this
- */
+/** @var Mage_Oauth_Block_Authorize $this */
 ?>
 <div class="content-container">
     <div class="login-box">
@@ -26,7 +22,7 @@
             <?php if (!$this->getHasException()) : ?>
             <form method="post" action="<?= $this->getPostActionUrl() ?>" id="loginForm">
                 <?= $this->getBlockHtml('formkey') ?>
-                <fieldset class="fieldset">
+                <div class="fieldset" class="fieldset">
                     <h2 class="legend"><?= $this->getFormTitle() ?></h2>
                     <p class="description"><?= $this->__('Log in to use <strong>%s</strong>', $this->getConsumer()->getName()) ?></p>
                     <div class="login-form simple">
@@ -47,13 +43,13 @@
                             <div class="clear"></div>
                             <div class="form-buttons">
                                 <button type="submit" class="form-button"
-                                       title="<?= $this->__('Login') ?>"/><?= $this->__('Login') ?></button>
+                                       title="<?= $this->quoteEscape($this->__('Login')) ?>"/><?= $this->__('Login') ?></button>
                                 <button type="button" onclick="document.location.href='<?= $this->getRejectUrl() ?>';"
-                                        title="<?= $this->__('Reject') ?>"><?= $this->__('Reject') ?></button>
+                                        title="<?= $this->quoteEscape($this->__('Reject')) ?>"><?= $this->__('Reject') ?></button>
                                 <p class="required"><?= $this->__('* Required Fields') ?></p>
                             </div>
                         </div>
-                    </fieldset>
+                    </div>
                 </form>
             <?php endif ?>
         </div>

@@ -10,20 +10,21 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/**
- * Downloadable product type
- *
- * @see Mage_Downloadable_Block_Catalog_Product_View_Type
- * @var Mage_Downloadable_Block_Catalog_Product_View_Type $this
- */
+/** @var Mage_Downloadable_Block_Catalog_Product_View_Type $this */
 ?>
 <?php $_product = $this->getProduct() ?>
 
 <?php if($_product->isSaleable()): ?>
-    <p class="availability in-stock"><?= $this->__('Availability:') ?> <span><?= $this->__('In stock') ?></span></p>
+    <p class="availability in-stock">
+        <span class="label"><?= $this->helper('catalog')->__('Availability:') ?></span>
+        <span class="value"><?= $this->helper('catalog')->__('In stock') ?></span>
+    </p>
 <?php else: ?>
-    <p class="availability out-of-stock"><?= $this->__('Availability:') ?> <span><?= $this->__('Out of stock') ?></span></p>
+    <p class="availability out-of-stock">
+        <span class="label"><?= $this->helper('catalog')->__('Availability:') ?></span>
+        <span class="value"><?= $this->helper('catalog')->__('Out of stock') ?></span>
+    </p>
 <?php endif ?>
 <?= $this->getChildHtml('product_type_data_extra') ?>
-<?= $this->getPriceHtml($_product) ?>
-<?= $this->getChildHtml('samples') ?>
+<?php //echo $this->getPriceHtml($_product) ?>
+<?php //echo $this->getChildHtml('samples') ?>

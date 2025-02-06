@@ -10,13 +10,7 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/**
- * Shoping cart sidebar
- *
- * @see Mage_Checkout_Block_Cart_Sidebar
- * @var Mage_Checkout_Block_Cart_Sidebar $this
- */
-
+/** @var Mage_Checkout_Block_Cart_Sidebar $this */
 ?>
 <?php if ($this->getIsNeedToDisplaySideBar()):?>
 <div class="block block-cart">
@@ -44,12 +38,6 @@
             </p>
         </div>
     <?php endif ?>
-    <?php if($_cartQty && $this->isPossibleOnepageCheckout()): ?>
-    <div class="actions">
-        <?= $this->getChildHtml('extra_actions') ?>
-        <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Checkout')) ?>" class="button" onclick="setLocation('<?= $this->getCheckoutUrl() ?>')"><?= $this->__('Checkout') ?></button>
-    </div>
-    <?php endif ?>
     <?php $_items = $this->getRecentItems() ?>
     <?php if(count($_items)): ?>
         <p class="block-subtitle"><?= $this->__('Recently added item(s)') ?></p>
@@ -60,6 +48,12 @@
         </ol>
     <?php else: ?>
         <p class="empty"><?= $this->__('You have no items in your shopping cart.') ?></p>
+    <?php endif ?>
+    <?php if($_cartQty && $this->isPossibleOnepageCheckout()): ?>
+        <div class="actions">
+            <?= $this->getChildHtml('extra_actions') ?>
+            <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Checkout')) ?>" class="button" onclick="setLocation('<?= $this->getCheckoutUrl() ?>')"><?= $this->__('Checkout') ?></button>
+        </div>
     <?php endif ?>
     </div>
 </div>

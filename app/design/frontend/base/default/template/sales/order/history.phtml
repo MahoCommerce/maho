@@ -17,9 +17,10 @@
 <div class="page-title">
     <h1><?= $this->__('My Orders') ?></h1>
 </div>
+<?= $this->getChildHtml('info') ?>
 <?= $this->getPagerHtml() ?>
 <?php if($_orders->getSize()): ?>
-<table class="data-table" id="my-orders-table">
+<table class="data-table orders" id="my-orders-table">
     <col width="1" />
     <col width="1" />
     <col />
@@ -28,23 +29,23 @@
     <col width="1" />
     <thead>
         <tr>
-            <th><?= $this->__('Order #') ?></th>
-            <th><?= $this->__('Date') ?></th>
-            <th><?= $this->__('Ship To') ?></th>
-            <th><span class="nobr"><?= $this->__('Order Total') ?></span></th>
-            <th><span class="nobr"><?= $this->__('Order Status') ?></span></th>
-            <th>&nbsp;</th>
+            <th class="number"><?= $this->__('Order #') ?></th>
+            <th class="date"><?= $this->__('Date') ?></th>
+            <th class="ship"><?= $this->__('Ship To') ?></th>
+            <th class="total"><span class="nobr"><?= $this->__('Order Total') ?></span></th>
+            <th class="status"><span class="nobr"><?= $this->__('Order Status') ?></span></th>
+            <th class="view">&nbsp;</th>
         </tr>
     </thead>
     <tbody>
         <?php foreach ($_orders as $_order): ?>
         <tr>
-            <td><?= $_order->getRealOrderId() ?></td>
-            <td><span class="nobr"><?= $this->formatDate($_order->getCreatedAtStoreDate()) ?></span></td>
-            <td><?= $_order->getShippingAddress() ? $this->escapeHtml($_order->getShippingAddress()->getName()) : '&nbsp;' ?></td>
-            <td><?= $_order->formatPrice($_order->getGrandTotal()) ?></td>
-            <td><em><?= $_order->getStatusLabel() ?></em></td>
-            <td class="a-center">
+            <td class="number"><?= $_order->getRealOrderId() ?></td>
+            <td class="date"><span class="nobr"><?= $this->formatDate($_order->getCreatedAtStoreDate()) ?></span></td>
+            <td class="ship"><?= $_order->getShippingAddress() ? $this->escapeHtml($_order->getShippingAddress()->getName()) : '&nbsp;' ?></td>
+            <td class="total"><?= $_order->formatPrice($_order->getGrandTotal()) ?></td>
+            <td class="status"><em><?= $_order->getStatusLabel() ?></em></td>
+            <td class="a-center view">
                 <span class="nobr"><a href="<?= $this->getViewUrl($_order) ?>"><?= $this->__('View Order') ?></a>
                     <?php /*<span class="separator">|</span><a href="<?= $this->getTrackUrl($_order) ?>"><?= $this->__('Track Order') ?></a>&nbsp;*/ ?>
                     <?php if ($this->helper('sales/reorder')->canReorder($_order)) : ?>

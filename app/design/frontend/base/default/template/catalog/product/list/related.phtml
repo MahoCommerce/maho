@@ -15,7 +15,7 @@
 <?php if($this->getItems()->getSize()): ?>
 <div class="block block-related">
     <div class="block-title">
-        <strong><span><?= $this->__('Related Products') ?></span></strong>
+        <h2><?= $this->__('Related Products') ?></h2>
     </div>
     <div class="block-content">
         <p class="block-subtitle"><?= $this->__('Check items to add to the cart or') ?>&nbsp;<a href="#" onclick="selectAllRelated(this); return false;"><?= $this->__('select all') ?></a></p>
@@ -28,7 +28,7 @@
                     <?php endif ?>
                 <?php endif ?>
                 <div class="product">
-                    <a href="<?= $_item->getProductUrl() ?>" title="<?= $this->escapeHtml($_item->getName()) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(50) ?>" srcset="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(100) ?> 2x" width="50" height="50" alt="<?= $this->escapeHtml($_item->getName()) ?>" /></a>
+                    <a href="<?= $_item->getProductUrl() ?>" title="<?= $this->escapeHtml($_item->getName()) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(75) ?>" srcset="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(150) ?> 2x" width="75" height="75" alt="<?= $this->escapeHtml($_item->getName()) ?>" /></a>
                     <div class="product-details">
                         <p class="product-name"><a href="<?= $_item->getProductUrl() ?>"><?= $this->escapeHtml($_item->getName()) ?></a></p>
                         <?= $this->getPriceHtml($_item, true, '-related') ?>

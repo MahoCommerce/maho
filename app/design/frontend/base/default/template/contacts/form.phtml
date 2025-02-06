@@ -16,10 +16,11 @@
 <div class="page-title">
     <h1><?= Mage::helper('contacts')->__('Contact Us') ?></h1>
 </div>
-<form action="<?= $this->getFormAction() ?>" id="contactForm" method="post">
+<form action="<?= $this->getFormAction() ?>" id="contactForm" method="post" class="scaffold-form">
     <?= $this->getBlockHtml('formkey') ?>
     <div class="fieldset">
         <h2 class="legend"><?= Mage::helper('contacts')->__('Contact Information') ?></h2>
+        <p class="required"><?= Mage::helper('contacts')->__('* Required Fields') ?></p>
         <ul class="form-list">
             <li class="fields">
                 <div class="field">
@@ -31,14 +32,14 @@
                 <div class="field">
                     <label for="email" class="required"><em>*</em><?= Mage::helper('contacts')->__('Email') ?></label>
                     <div class="input-box">
-                        <input name="email" id="email" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('contacts')->__('Email')) ?>" value="<?= $this->escapeHtml($this->helper('contacts')->getUserEmail()) ?>" class="input-text required-entry validate-email" type="text" />
+                        <input name="email" id="email" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('contacts')->__('Email')) ?>" value="<?= $this->escapeHtml($this->helper('contacts')->getUserEmail()) ?>" class="input-text required-entry validate-email" type="email" autocapitalize="off" autocorrect="off" spellcheck="false" />
                     </div>
                 </div>
             </li>
             <li>
                 <label for="telephone"><?= Mage::helper('contacts')->__('Telephone') ?></label>
                 <div class="input-box">
-                    <input name="telephone" id="telephone" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('contacts')->__('Telephone')) ?>" value="" class="input-text" type="text" />
+                    <input name="telephone" id="telephone" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('contacts')->__('Telephone')) ?>" value="" class="input-text" type="tel" />
                 </div>
             </li>
             <li class="wide">
@@ -50,7 +51,6 @@
         </ul>
     </div>
     <div class="buttons-set">
-        <p class="required"><?= Mage::helper('contacts')->__('* Required Fields') ?></p>
         <button type="submit" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('contacts')->__('Submit')) ?>" class="button"><?= Mage::helper('contacts')->__('Submit') ?></button>
     </div>
 </form>

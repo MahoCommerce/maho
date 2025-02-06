@@ -26,37 +26,44 @@
 <?php endif ?>
 
 <?php foreach ($items as $_item): ?>
-
 <?php if ($_item->getParentItem()): ?>
     <?php $attributes = $this->getSelectionAttributes($_item) ?>
     <?php if ($_prevOptionId != $attributes['option_id']): ?>
     <tr>
-        <td align="left" valign="top" style="padding:3px 9px"><strong><em><?= $this->escapeHtml($attributes['option_label']) ?></em></strong></td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
+        <td class="bundle-item"><strong><em><?= $this->escapeHtml($attributes['option_label']) ?></em></strong></td>
+        <td class="bundle-item">&nbsp;</td>
+        <td class="bundle-item">&nbsp;</td>
     </tr>
     <?php $_prevOptionId = $attributes['option_id'] ?>
     <?php endif ?>
 <?php endif ?>
 <tr id="order-item-row-<?= $_item->getId() ?>">
     <?php if (!$_item->getParentItem()): ?>
-    <td align="left" valign="top" style="padding:3px 9px"><strong><?= $this->escapeHtml($_item->getName()) ?></strong></td>
+    <td class="bundle-item-parent product-info">
+        <p class="product-name"><?= $this->escapeHtml($_item->getName()) ?></p>
+    </td>
+    <td class="bundle-item-parent align-center">
+        <?= $this->escapeHtml($_item->getSku()) ?>
+    </td>
+    <td class="bundle-item-parent align-right">
     <?php else: ?>
-    <td align="left" valign="top" style="padding:3px 19px"><?= $this->getValueHtml($_item) ?></td>
+    <td class="bundle-item bundle-details product-info"><div><?= $this->getValueHtml($_item) ?></div></td>
+    <td class="bundle-item bundle-details align-center">
+        <?= $this->escapeHtml($_item->getSku()) ?>
+    </td>
+    <td class="bundle-item align-right">
     <?php endif ?>
-    <td align="left" valign="top" style="padding:3px 9px"><?= $this->escapeHtml($_item->getSku()) ?></td>
-    <td align="center" valign="top" style="padding:3px 9px">
-        <?php if (($this->isShipmentSeparately() && $_item->getParentItem()) || (!$this->isShipmentSeparately() && !$_item->getParentItem())): ?>
-            <?php if (isset($shipItems[$_item->getId()])): ?>
-                <?= $shipItems[$_item->getId()]->getQty()*1 ?>
-            <?php elseif ($_item->getIsVirtual()): ?>
-                <?= $this->__('N/A') ?>
-            <?php else: ?>
-                0
-            <?php endif ?>
+    <?php if (($this->isShipmentSeparately() && $_item->getParentItem()) || (!$this->isShipmentSeparately() && !$_item->getParentItem())): ?>
+        <?php if (isset($shipItems[$_item->getId()])): ?>
+            <?= $shipItems[$_item->getId()]->getQty()*1 ?>
+        <?php elseif ($_item->getIsVirtual()): ?>
+            <?= $this->__('N/A') ?>
         <?php else: ?>
-        &nbsp;
+            0
         <?php endif ?>
+    <?php else: ?>
+    &nbsp;
+    <?php endif ?>
     </td>
 </tr>
 <?php endforeach ?>

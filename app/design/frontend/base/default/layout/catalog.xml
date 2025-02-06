@@ -29,23 +29,6 @@ Default layout, loads most of the pages
 -->
 
     <default>
-
-        <!-- Mage_Catalog
-        <reference name="left">
-            <block type="core/template" name="left.permanent.callout" template="callouts/left_col.phtml">
-                <action method="setImgSrc"><src>images/media/col_left_callout.jpg</src></action>
-                <action method="setImgAlt" translate="alt" module="catalog"><alt>Our customer service is available 24/7. Call us at (555) 555-0123.</alt></action>
-                <action method="setLinkUrl"><url>checkout/cart</url></action>
-            </block>
-        </reference>
-        <reference name="right">
-            <block type="catalog/product_compare_sidebar" before="cart_sidebar" name="catalog.compare.sidebar" template="catalog/product/compare/sidebar.phtml"/>
-            <block type="core/template" name="right.permanent.callout" template="callouts/right_col.phtml">
-                <action method="setImgSrc"><src>images/media/col_right_callout.jpg</src></action>
-                <action method="setImgAlt" translate="alt" module="catalog"><alt>Keep your eyes open for our special Back to School items and save A LOT!</alt></action>
-            </block>
-        </reference>
-        -->
         <reference name="footer_links">
             <action method="addLink" translate="label title" module="catalog" ifconfig="catalog/seo/site_map"><label>Site Map</label><url helper="catalog/map/getCategoryUrl" /><title>Site Map</title></action>
         </reference>
@@ -59,12 +42,16 @@ Category default layout
 
     <catalog_category_default translate="label">
         <label>Catalog Category (Non-Anchor)</label>
-        <reference name="left">
-            <block type="catalog/navigation" name="catalog.leftnav" after="currency" template="catalog/navigation/left.phtml"/>
+        <reference name="left_first">
+            <block type="catalog/navigation" name="catalog.leftnav" after="currency" template="catalog/navigation/left.phtml">
+                <block type="core/text_list" name="catalog.leftnav.state.renderers" as="state_renderers" />
+            </block>
         </reference>
         <reference name="content">
             <block type="catalog/category_view" name="category.products" template="catalog/category/view.phtml">
                 <block type="catalog/product_list" name="product_list" template="catalog/product/list.phtml">
+                    <block type="core/text_list" name="product_list.name.after" as="name.after" />
+                    <block type="core/text_list" name="product_list.after" as="after" />
                     <block type="catalog/product_list_toolbar" name="product_list_toolbar" template="catalog/product/list/toolbar.phtml">
                         <block type="page/html_pager" name="product_list_toolbar_pager"/>
                         <!-- The following code shows how to set your own pager increments -->
@@ -84,6 +71,8 @@ Category default layout
                     <action method="addColumnCountLayoutDepend"><layout>two_columns_right</layout><count>4</count></action>
                     <action method="addColumnCountLayoutDepend"><layout>three_columns</layout><count>3</count></action>
                     <action method="setToolbarBlockName"><name>product_list_toolbar</name></action>
+                    <!-- Since the addColumnCountLayoutDepend does not work, we are manually setting the max columns -->
+                    <action method="setColumnCount"><count>4</count></action>
                 </block>
             </block>
         </reference>
@@ -95,12 +84,16 @@ Category layered navigation layout
 
     <catalog_category_layered translate="label">
         <label>Catalog Category (Anchor)</label>
-        <reference name="left">
-            <block type="catalog/layer_view" name="catalog.leftnav" after="currency" template="catalog/layer/view.phtml"/>
+        <reference name="left_first">
+            <block type="catalog/layer_view" name="catalog.leftnav" after="currency" template="catalog/layer/view.phtml">
+                <block type="core/text_list" name="catalog.leftnav.state.renderers" as="state_renderers" />
+            </block>
         </reference>
         <reference name="content">
             <block type="catalog/category_view" name="category.products" template="catalog/category/view.phtml">
                 <block type="catalog/product_list" name="product_list" template="catalog/product/list.phtml">
+                    <block type="core/text_list" name="product_list.name.after" as="name.after" />
+                    <block type="core/text_list" name="product_list.after" as="after" />
                     <!-- <action method="addReviewSummaryTemplate"><type>default</type><template>review/helper/su.phtml</template></action> -->
                     <block type="catalog/product_list_toolbar" name="product_list_toolbar" template="catalog/product/list/toolbar.phtml">
                         <block type="page/html_pager" name="product_list_toolbar_pager"/>
@@ -125,6 +118,8 @@ Category layered navigation layout
                     <action method="addColumnCountLayoutDepend"><layout>two_columns_right</layout><count>4</count></action>
                     <action method="addColumnCountLayoutDepend"><layout>three_columns</layout><count>3</count></action>
                     <action method="setToolbarBlockName"><name>product_list_toolbar</name></action>
+                    <!-- Since the addColumnCountLayoutDepend does not work, we are manually setting the max columns -->
+                    <action method="setColumnCount"><count>4</count></action>
                 </block>
             </block>
         </reference>
@@ -143,6 +138,7 @@ Compare products page
         <reference name="head">
             <action method="addJs"><script>varien/product.js</script></action>
             <action method="addJs"><script>varien/product_options.js</script></action>
+            <action method="unsetChild"><name>head.viewport</name></action>
         </reference>
         <reference name="content">
             <block type="catalog/product_compare_list" name="catalog.compare.list" template="catalog/product/compare/list.phtml"/>
@@ -163,7 +159,7 @@ Product view
         <label>Catalog Product View (Any)</label>
         <!-- Mage_Catalog -->
         <reference name="root">
-            <action method="setTemplate"><template>page/2columns-right.phtml</template></action>
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
         </reference>
         <reference name="head">
             <action method="addJs"><script>varien/product.js</script></action>
@@ -177,7 +173,9 @@ Product view
                 <action method="addReviewSummaryTemplate"><type>short</type><template>review/helper/summary_short.phtml</template></action>
                 <action method="addReviewSummaryTemplate"><type>...</type><template>...</template></action>
                 -->
-                <block type="catalog/product_view_media" name="product.info.media" as="media" template="catalog/product/view/media.phtml"/>
+                <block type="catalog/product_view_media" name="product.info.media" as="media" template="catalog/product/view/media.phtml">
+                    <block type="core/text_list" name="product.info.media.after" as="after" />
+                </block>
                 <block type="core/text_list" name="alert.urls" as="alert_urls" translate="label">
                     <label>Alert Urls</label>
                 </block>
@@ -185,17 +183,21 @@ Product view
                 <action method="setTierPriceTemplate"><template>catalog/product/view/tierprices.phtml</template></action>
 
                 <block type="catalog/product_list_upsell" name="product.info.upsell" as="upsell_products" template="catalog/product/list/upsell.phtml">
-                    <action method="setColumnCount"><columns>4</columns></action>
-                    <action method="setItemLimit"><type>upsell</type><limit>4</limit></action>
+                    <action method="setColumnCount"><columns>6</columns></action>
+                    <action method="setItemLimit"><type>upsell</type><limit>6</limit></action>
                 </block>
 
                 <block type="catalog/product_view_additional" name="product.info.additional" as="product_additional_data" />
                 <block type="catalog/product_view_description" name="product.description" as="description" template="catalog/product/view/description.phtml">
                     <action method="addToParentGroup"><group>detailed_info</group></action>
+                    <action method="setTitle" translate="value"><value>Description</value></action>
                 </block>
                 <block type="catalog/product_view_attributes" name="product.attributes" as="additional" template="catalog/product/view/attributes.phtml">
                     <action method="addToParentGroup"><group>detailed_info</group></action>
+                    <action method="setTitle" translate="value"><value>Additional Information</value></action>
                 </block>
+                <block type="catalog/product_list_related" name="catalog.product.related" as="related_products" template="catalog/product/list/related.phtml" />
+
                 <block type="catalog/product_view" name="product.info.addto" as="addto" template="catalog/product/view/addto.phtml"/>
                 <block type="catalog/product_view" name="product.info.addtocart" as="addtocart" template="catalog/product/view/addtocart.phtml"/>
 
@@ -219,6 +221,7 @@ Product view
                     <block type="catalog/product_view" name="product.clone_prices" as="prices" template="catalog/product/view/price_clone.phtml"/>
                     <action method="append"><block>product.info.addtocart</block></action>
                     <action method="append"><block>product.info.addto</block></action>
+                    <action method="append"><block>product.info.sharing</block></action>
                 </block>
 
                 <block type="core/template_facade" name="product.info.container1" as="container1">
@@ -238,7 +241,7 @@ Product view
             </block>
         </reference>
         <reference name="right">
-            <block type="catalog/product_list_related" name="catalog.product.related" before="-" template="catalog/product/list/related.phtml"/>
+
         </reference>
     </catalog_product_view>
 
@@ -253,6 +256,7 @@ Additional block dependant on product type
                     <label>Product Extra Info</label>
                 </block>
             </block>
+            <block type="catalog/product_view_type_simple" name="product.info.availability" as="product_type_availability" template="catalog/product/view/type/availability/default.phtml" />
         </reference>
     </PRODUCT_TYPE_simple>
     <PRODUCT_TYPE_configurable translate="label" module="catalog">
@@ -263,9 +267,13 @@ Additional block dependant on product type
                     <label>Product Extra Info</label>
                 </block>
             </block>
+            <block type="catalog/product_view_type_configurable" name="product.info.availability" as="product_type_availability" template="catalog/product/view/type/availability/default.phtml" />
         </reference>
         <reference name="product.info.options.wrapper">
-            <block type="catalog/product_view_type_configurable" name="product.info.options.configurable" as="options_configurable" before="-" template="catalog/product/view/type/options/configurable.phtml"/>
+            <block type="catalog/product_view_type_configurable" name="product.info.options.configurable" as="options_configurable" before="-" template="catalog/product/view/type/options/configurable.phtml">
+                <block type="core/text_list" name="product.info.options.configurable.renderers" as="attr_renderers" />
+                <block type="core/text_list" name="product.info.options.configurable.after" as="after" />
+            </block>
         </reference>
     </PRODUCT_TYPE_configurable>
     <PRODUCT_TYPE_grouped translate="label" module="catalog">
@@ -276,6 +284,7 @@ Additional block dependant on product type
                     <label>Product Extra Info</label>
                 </block>
             </block>
+            <block type="catalog/product_view_type_grouped" name="product.info.availability" as="product_type_availability" template="catalog/product/view/type/availability/grouped.phtml" />
         </reference>
     </PRODUCT_TYPE_grouped>
     <PRODUCT_TYPE_virtual translate="label" module="catalog">
@@ -286,6 +295,7 @@ Additional block dependant on product type
                     <label>Product Extra Info</label>
                 </block>
             </block>
+            <block type="catalog/product_view_type_virtual" name="product.info.availability" as="product_type_availability" template="catalog/product/view/type/availability/default.phtml" />
         </reference>
     </PRODUCT_TYPE_virtual>
 

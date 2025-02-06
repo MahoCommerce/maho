@@ -29,3 +29,6 @@
     <?php endforeach ?>
 </dl>
 <?php endif ?>
+<?php if ($addtInfoBlock = $this->getProductAdditionalInformationBlock()):?>
+    <?= $addtInfoBlock->setItem($this->getItem())->toHtml() ?>
+<?php endif ?>

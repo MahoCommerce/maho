@@ -20,31 +20,37 @@
 <?php if($this->getCollection()->getSize()): ?>
 
     <?php if($this->getUseContainer()): ?>
-    <div class="pager">
+    <div class="pager pager-no-toolbar">
     <?php endif ?>
 
-    <?php if($this->getShowAmounts()): ?>
-    <p class="amount">
-        <?php if($this->getLastPageNum()>1): ?>
-            <?= $this->__('Items %s to %s of %s total', $this->getFirstNum(), $this->getLastNum(), $this->getTotalNum()) ?>
-        <?php else: ?>
-            <strong><?= $this->__('%s Item(s)', $this->getTotalNum()) ?></strong>
+    <?php if($this->getShowAmounts() || $this->getShowPerPage()): ?>
+    <div class="count-container">
+        <?php if($this->getShowAmounts()): ?>
+            <?php if($this->getLastPageNum()>1): ?>
+            <p class="amount amount--has-pages">
+                <?= $this->__('%s-%s of %s', $this->getFirstNum(), $this->getLastNum(), $this->getTotalNum()) ?>
+            </p>
+            <?php else: ?>
+            <p class="amount amount--no-pages">
+                <strong><?= $this->__('%s Item(s)', $this->getTotalNum()) ?></strong>
+            </p>
+            <?php endif ?>
         <?php endif ?>
-    </p>
-    <?php endif ?>
 
-    <?php $availableLimits = $this->getAvailableLimit() ?>
-    <?php if (count($availableLimits) > 1): ?>
-        <div class="limiter">
-            <label><?= $this->__('Show') ?></label>
-            <select onchange="setLocation(this.value)">
-            <?php foreach ($availableLimits as $_key => $_limit): ?>
-                <option value="<?= $this->getLimitUrl($_key) ?>"<?php if($this->isLimitCurrent($_key)): ?> selected="selected"<?php endif ?>>
-                    <?= $_limit ?>
-                </option>
-            <?php endforeach ?>
-            </select> <?= $this->__('per page') ?>
-        </div>
+        <?php $availableLimits = $this->getAvailableLimit() ?>
+        <?php if (count($availableLimits) > 1): ?>
+            <div class="limiter">
+                <label><?= $this->__('Show') ?></label>
+                <select onchange="setLocation(this.value)" title="<?= Mage::helper('core')->quoteEscape($this->__('Results per page')) ?>">
+                <?php foreach ($availableLimits as $_key => $_limit): ?>
+                    <option value="<?= $this->getLimitUrl($_key) ?>"<?php if($this->isLimitCurrent($_key)): ?> selected="selected"<?php endif ?>>
+                        <?= $_limit ?>
+                    </option>
+                <?php endforeach ?>
+                </select>
+            </div>
+        <?php endif ?>
+    </div>
     <?php endif ?>
 
     <?php if($this->getLastPageNum()>1): ?>
@@ -55,7 +61,7 @@
             <li>
                 <a class="previous<?php if(!$this->getAnchorTextForPrevious()): ?> i-previous<?php endif ?>" href="<?= $this->getPreviousPageUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Previous')) ?>">
                     <?php if(!$this->getAnchorTextForPrevious()): ?>
-                        <img src="<?= $this->getSkinUrl('images/pager_arrow_left.gif') ?>" alt="<?= Mage::helper('core')->quoteEscape($this->__('Previous')) ?>" class="v-middle" />
+                        <?= $this->__('Previous') ?>
                     <?php else: ?>
                         <?= $this->getAnchorTextForPrevious() ?>
                     <?php endif ?>
@@ -79,6 +85,7 @@
             <?php endif ?>
         <?php endforeach ?>
 
+
         <?php if ($this->canShowNextJump()): ?>
             <li><a class="next_jump" title="" href="<?= $this->getNextJumpUrl() ?>">...</a></li>
         <?php endif ?>
@@ -91,7 +98,7 @@
             <li>
                 <a class="next<?php if(!$this->getAnchorTextForNext()): ?> i-next<?php endif ?>" href="<?= $this->getNextPageUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Next')) ?>">
                     <?php if(!$this->getAnchorTextForNext()): ?>
-                        <img src="<?= $this->getSkinUrl('images/pager_arrow_right.gif') ?>" alt="<?= Mage::helper('core')->quoteEscape($this->__('Next')) ?>" class="v-middle" />
+                        <?= $this->__('Next') ?>
                     <?php else: ?>
                         <?= $this->getAnchorTextForNext() ?>
                     <?php endif ?>
@@ -99,6 +106,7 @@
             </li>
         <?php endif ?>
         </ol>
+
     </div>
     <?php endif ?>
 
