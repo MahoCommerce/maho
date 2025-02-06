@@ -8,7 +8,15 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-
+/** @var Maho_Blog_Block_Post_List $this */
+$posts = $this->getPosts();
 ?>
 
-CIAO
+<h1><?= $this->__('Blog') ?></h1>
+
+<?php foreach ($posts->getItems() as $post): ?>
+    <div>
+        <p><strong><?= $post->getTitle() ?></strong></p>
+        <div><?= $post->getContent() ?></div>
+    </div>
+<?php endforeach ?>

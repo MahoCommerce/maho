@@ -11,5 +11,8 @@
 
 class Maho_Blog_Block_Post_View extends Mage_Core_Block_Template
 {
-
+    public function getPost(): Maho_Blog_Model_Post
+    {
+        return Mage::registry('current_post');
+    }
 }
