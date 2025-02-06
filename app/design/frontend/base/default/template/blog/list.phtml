@@ -16,7 +16,8 @@ $posts = $this->getPosts();
 
 <?php foreach ($posts->getItems() as $post): ?>
     <div>
-        <p><strong><?= $post->getTitle() ?></strong></p>
+        <div><strong><?= $post->getTitle() ?></strong></div>
+        <div class="blog_post_date"><?= $post->getPublishedAt() ?></div>
         <div><?= $post->getContent() ?></div>
     </div>
 <?php endforeach ?>

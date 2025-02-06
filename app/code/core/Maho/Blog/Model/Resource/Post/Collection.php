@@ -15,4 +15,12 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
     {
         $this->_init('blog/post');
     }
+
+    /**
+     * @param int|array $storeId
+     */
+    public function addStoreFilter($storeId): self
+    {
+        return $this->addFieldToFilter('store_id', ['in' => $storeId]);
+    }
 }

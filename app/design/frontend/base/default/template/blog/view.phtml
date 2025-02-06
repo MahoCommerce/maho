@@ -13,6 +13,7 @@ $post = $this->getPost();
 ?>
 
 <h1><?= $post->getTitle() ?></h1>
+<div class="blog_post_date"><?= $post->getPublishedAt() ?></div>
 <div>
     <?= $post->getContent() ?>
 </div>

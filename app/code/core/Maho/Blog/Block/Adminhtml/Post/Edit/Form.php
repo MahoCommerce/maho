@@ -39,6 +39,7 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
             'name' => 'content',
             'label' => Mage::helper('blog')->__('Content'),
             'title' => Mage::helper('blog')->__('Content'),
+            'style'     => 'height:36em',
             'required' => true,
             'config' => Mage::getSingleton('cms/wysiwyg_config')->getConfig(),
         ]);

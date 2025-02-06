@@ -14,6 +14,7 @@ class Maho_Blog_Block_Post_List extends Mage_Core_Block_Template
     public function getPosts(): Maho_Blog_Model_Resource_Post_Collection
     {
         return Mage::getResourceModel('blog/post_collection')
+            ->addStoreFilter(Mage::app()->getStore())
             ->addAttributeToSelect('*');
     }
 }

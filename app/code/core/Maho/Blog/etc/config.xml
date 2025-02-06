@@ -17,6 +17,9 @@
                     <post>
                         <table>blog_post_entity</table>
                     </post>
+                    <post_website>
+                        <table>blog_post_website</table>
+                    </post_website>
                 </entities>
             </blog_resource>
         </models>

@@ -21,6 +21,22 @@ class Maho_Blog_Block_Adminhtml_Post_Edit extends Mage_Adminhtml_Block_Widget_Fo
 
         $this->_updateButton('save', 'label', Mage::helper('blog')->__('Save Post'));
         $this->_updateButton('delete', 'label', Mage::helper('blog')->__('Delete Post'));
+
+        $this->_addButton('saveandcontinue', [
+            'label'     => Mage::helper('adminhtml')->__('Save and Continue Edit'),
+            'onclick'   => 'saveAndContinueEdit()',
+            'class'     => 'save',
+        ], -100);
+
+        $this->_formScripts[] = "
+            function toggleEditor() {
+                tinymce.execCommand('mceToggleEditor', false, wysiwygblock_content);
+            }
+
+            function saveAndContinueEdit(){
+                editForm.submit($('edit_form').action+'back/edit/');
+            }
+        ";
     }
 
     #[\Override]

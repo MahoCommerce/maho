@@ -13,6 +13,17 @@
 $installer = $this;
 $installer->startSetup();
 
+/*
+$installer->getConnection()->query('drop table blog_post_entity');
+$installer->getConnection()->query('drop table blog_post_entity_char');
+$installer->getConnection()->query('drop table blog_post_entity_datetime');
+$installer->getConnection()->query('drop table blog_post_entity_decimal');
+$installer->getConnection()->query('drop table blog_post_entity_int');
+$installer->getConnection()->query('drop table blog_post_entity_text');
+$installer->getConnection()->query('drop table blog_post_entity_varchar');
+$installer->getConnection()->query('delete from eav_entity_type where entity_type_code="blog_post"');
+*/
+
 $installer->addEntityType('blog_post', [
     'entity_model'                => 'blog/post',
     'attribute_model'             => 'blog_post/attribute',
@@ -20,7 +31,7 @@ $installer->addEntityType('blog_post', [
     'increment_model'             => 'eav/entity_increment_numeric',
     'increment_per_store'         => 0,
     'increment_pad_length'        => 0,
-    'additional_attribute_table'  => 'blog_post/eav_attribute',
+    'additional_attribute_table'  => '',
     'entity_attribute_collection' => 'blog_post/attribute_collection',
 ]);
 
@@ -88,5 +99,64 @@ foreach ($attributes as $code => $options) {
         'sort_order'        => $options['sort_order'],
     ]);
 }
+
+// Create the blog_website table
+$table = $installer->getConnection()
+    ->newTable($installer->getTable('blog/post_website'))
+    ->addColumn(
+        'blog_post_id',
+        Varien_Db_Ddl_Table::TYPE_INTEGER,
+        null,
+        [
+            'unsigned' => true,
+            'nullable' => false,
+            'primary' => true,
+        ]
+    )
+    ->addColumn(
+        'website_id',
+        Varien_Db_Ddl_Table::TYPE_SMALLINT,
+        null,
+        [
+            'unsigned' => true,
+            'nullable' => false,
+            'primary' => true,
+        ]
+    )
+    ->addIndex(
+        $installer->getIdxName(
+            'blog/post_website',
+            ['website_id']
+        ),
+        ['website_id']
+    )
+    ->addForeignKey(
+        $installer->getFkName(
+            'blog/post_website',
+            'blog_post_id',
+            'blog/post',
+            'entity_id'
+        ),
+        'blog_post_id',
+        $installer->getTable('blog/post'),
+        'entity_id',
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Varien_Db_Ddl_Table::ACTION_CASCADE
+    )
+    ->addForeignKey(
+        $installer->getFkName(
+            'blog/post_website',
+            'website_id',
+            'core/website',
+            'website_id'
+        ),
+        'website_id',
+        $installer->getTable('core/website'),
+        'website_id',
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
+        Varien_Db_Ddl_Table::ACTION_CASCADE
+    )
+    ->setComment('Blog Post To Website Linkage Table');
+$installer->getConnection()->createTable($table);
 
 $installer->endSetup();
