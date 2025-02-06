@@ -72,7 +72,7 @@
         <layout>
             <updates>
                 <blog>
-                    <file>maho_blog.xml</file>
+                    <file>blog.xml</file>
                 </blog>
             </updates>
         </layout>

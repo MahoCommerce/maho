@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+    <default>
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+        </reference>
+    </default>
+    <blog_index_index>
+        <reference name="content">
+            <block type="blog/post_list" name="blog.post.list"/>
+        </reference>
+    </blog_index_index>
+    <blog_index_view>
+        <reference name="content">
+            <block type="blog/post_view" name="blog.post.view"/>
+        </reference>
+    </blog_index_view>
+</layout>
