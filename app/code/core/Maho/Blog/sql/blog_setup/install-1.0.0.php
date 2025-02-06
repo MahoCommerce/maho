@@ -13,7 +13,6 @@
 $installer = $this;
 $installer->startSetup();
 
-/*
 $installer->getConnection()->query('drop table blog_post_entity');
 $installer->getConnection()->query('drop table blog_post_entity_char');
 $installer->getConnection()->query('drop table blog_post_entity_datetime');
@@ -21,8 +20,8 @@ $installer->getConnection()->query('drop table blog_post_entity_decimal');
 $installer->getConnection()->query('drop table blog_post_entity_int');
 $installer->getConnection()->query('drop table blog_post_entity_text');
 $installer->getConnection()->query('drop table blog_post_entity_varchar');
+$installer->getConnection()->query('drop table blog_post_store');
 $installer->getConnection()->query('delete from eav_entity_type where entity_type_code="blog_post"');
-*/
 
 $installer->addEntityType('blog_post', [
     'entity_model'                => 'blog/post',
@@ -55,13 +54,6 @@ $attributes = [
         'required' => true,
         'sort_order' => 20,
     ],
-    'content' => [
-        'type' => 'text',
-        'label' => 'Content',
-        'input' => 'textarea',
-        'required' => true,
-        'sort_order' => 30,
-    ],
     'publish_date' => [
         'type' => 'datetime',
         'label' => 'Publish Date',
@@ -69,13 +61,14 @@ $attributes = [
         'required' => false,
         'sort_order' => 40,
     ],
-    'created_at' => [
-        'type' => 'datetime',
-        'label' => 'Creation Time',
-        'input' => 'date',
+    'content' => [
+        'type' => 'text',
+        'label' => 'Content',
+        'input' => 'textarea',
         'required' => true,
         'sort_order' => 50,
     ],
+
 ];
 
 foreach ($attributes as $code => $options) {

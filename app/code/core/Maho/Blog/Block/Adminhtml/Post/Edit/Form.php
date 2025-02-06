@@ -69,6 +69,28 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
             $model->setStoreId(Mage::app()->getStore(true)->getId());
         }
 
+        $fieldset->addField('is_active', 'select', [
+            'label'     => Mage::helper('cms')->__('Status'),
+            'title'     => Mage::helper('cms')->__('Status'),
+            'name'      => 'is_active',
+            'required'  => true,
+            'options'   => [
+                '1' => Mage::helper('cms')->__('Enabled'),
+                '0' => Mage::helper('cms')->__('Disabled'),
+            ],
+        ]);
+        if (!$model->getId()) {
+            $model->setData('is_active', '1');
+        }
+
+        $fieldset->addField('publish_date', 'date', [
+            'label'     => Mage::helper('blog')->__('Publishing Date'),
+            'name'      => 'publishing_date',
+            'format'    => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
+            'image'     => $this->getSkinUrl('images/grid-cal.gif'),
+            'required'  => false,
+        ]);
+
         $fieldset->addField('content', 'editor', [
             'name' => 'content',
             'label' => Mage::helper('blog')->__('Content'),
@@ -76,14 +98,6 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
             'style'     => 'height:36em',
             'required' => true,
             'config' => Mage::getSingleton('cms/wysiwyg_config')->getConfig(),
-        ]);
-
-        $fieldset->addField('publishing_date', 'date', [
-            'label'     => Mage::helper('blog')->__('Publishing Date'),
-            'name'      => 'publishing_date',
-            'format'    => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
-            'image'     => $this->getSkinUrl('images/grid-cal.gif'),
-            'required'  => false,
         ]);
 
         if (Mage::registry('blog_post')) {

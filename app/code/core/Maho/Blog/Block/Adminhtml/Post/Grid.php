@@ -23,7 +23,9 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
     #[\Override]
     protected function _prepareCollection()
     {
+        /** @var Maho_Blog_Model_Resource_Post_Collection $collection */
         $collection = Mage::getModel('blog/post')->getCollection();
+        $collection->addAttributeToSelect('title');
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }
@@ -56,6 +58,16 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
                 => [$this, '_filterStoreCondition'],
             ]);
         }
+
+        $this->addColumn('is_active', [
+            'header'    => Mage::helper('blog')->__('Status'),
+            'index'     => 'is_active',
+            'type'      => 'options',
+            'options'   => [
+                0 => Mage::helper('blog')->__('Disabled'),
+                1 => Mage::helper('blog')->__('Enabled'),
+            ],
+        ]);
 
         $this->addColumn('created_at', [
             'header' => Mage::helper('blog')->__('Created At'),
