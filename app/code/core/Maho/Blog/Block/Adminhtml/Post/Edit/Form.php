@@ -14,6 +14,8 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
     #[\Override]
     protected function _prepareForm()
     {
+        $model = Mage::registry('blog_post');
+
         $form = new Varien_Data_Form([
             'id' => 'edit_form',
             'action' => $this->getUrl('*/*/save', ['id' => $this->getRequest()->getParam('id')]),
@@ -29,11 +31,24 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
             'class' => 'fieldset-wide'
         ]);
 
+        if ($model->getEntityId()) {
+            $fieldset->addField('entity_id', 'hidden', [
+                'name' => 'entity_id',
+            ]);
+        }
+
         $fieldset->addField('title', 'text', [
             'label' => Mage::helper('blog')->__('Title'),
             'class' => 'required-entry',
             'required' => true,
             'name' => 'title',
+        ]);
+
+        $fieldset->addField('url_key', 'text', [
+            'label' => Mage::helper('blog')->__('URL Key'),
+            'class' => 'required-entry',
+            'required' => true,
+            'name' => 'url_key',
         ]);
 
         if (!Mage::app()->isSingleStoreMode()) {

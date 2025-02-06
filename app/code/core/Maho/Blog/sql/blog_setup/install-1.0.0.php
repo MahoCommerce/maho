@@ -26,9 +26,9 @@ $installer->getConnection()->query('delete from eav_entity_type where entity_typ
 
 $installer->addEntityType('blog_post', [
     'entity_model'                => 'blog/post',
-    'attribute_model'             => 'blog_post/attribute',
+    'attribute_model'             => '',
     'table'                       => 'blog/post',
-    'increment_model'             => 'eav/entity_increment_numeric',
+    'increment_model'             => '',
     'increment_per_store'         => 0,
     'increment_pad_length'        => 0,
     'additional_attribute_table'  => '',
@@ -91,6 +91,7 @@ foreach ($attributes as $code => $options) {
         'visible'           => true,
         'required'          => $options['required'],
         'user_defined'      => false,
+        'group'             => 'General',
         'searchable'        => true,
         'filterable'        => true,
         'comparable'        => false,

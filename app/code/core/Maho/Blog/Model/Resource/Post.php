@@ -13,11 +13,11 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
 {
     public function __construct()
     {
-        $resource = Mage::getSingleton('core/resource');
         $this->setType('blog_post');
+        $resource = Mage::getSingleton('core/resource');
         $this->setConnection(
-            $resource->getConnection('core_read'),
-            $resource->getConnection('core_write'),
+            $resource->getConnection('sales_read'),
+            $resource->getConnection('sales_write')
         );
     }
 }

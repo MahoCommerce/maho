@@ -11,6 +11,8 @@
 
 class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Collection_Abstract
 {
+    public const ENTITY = 'blog_post';
+
     protected function _construct()
     {
         $this->_init('blog/post');
