@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -49,7 +50,7 @@ final class Maho
     public static function toRelativePath(string $path): string
     {
         $paths = array_column(self::getInstalledPackages(), 'path');
-        usort($paths, fn ($a, $b) => strlen($b) <=> strlen($a));
+        usort($paths, fn($a, $b) => strlen($b) <=> strlen($a));
         return ltrim(str_replace($paths, '', $path), '/');
     }
 
@@ -151,7 +152,7 @@ final class Maho
     {
         $reportIdMessage = '';
         if ($reportData) {
-            $reportId   = abs((int)(microtime(true) * random_int(100, 1000)));
+            $reportId   = abs((int) (microtime(true) * random_int(100, 1000)));
             $reportIdMessage = "<p>Error log record number: {$reportId}</p>";
             $reportDir = Mage::getBaseDir('var') . '/report';
             if (!file_exists($reportDir)) {

@@ -19,30 +19,31 @@ $options = $this->getChild('customer.wishlist.item.options')
     ->getConfiguredOptions();
 ?>
 <div class="cart-cell">
-<?= $this->getPriceHtml($product, empty($options)) ?>
-<div class="add-to-cart-alt">
-<?php if ($item->canHaveQty() && $item->getProduct()->isVisibleInSiteVisibility()): ?>
-    <input type="text" class="input-text qty validate-not-negative-number" name="qty[<?= $item->getId() ?>]" value="<?= $this->getAddToCartQty($item) * 1 ?>" />
-<?php endif ?>
 <?php if ($product->isSaleable()): ?>
     <button type="button"
-        title="<?= Mage::helper('core')->quoteEscape($this->__('Add to Cart')) ?>"
-        onclick="addWItemToCartCustom(<?= $item->getId() ?>, false);"
-        class="button btn-cart">
-    <?= $this->__('Add to Cart') ?>
+            title="<?= Mage::helper('core')->quoteEscape($this->__('Add to Cart')) ?>"
+            onclick="addWItemToCartCustom(<?= $item->getId() ?>, false);"
+            class="button btn-cart">
+        <?= $this->__('Add to Cart') ?>
     </button>
 <?php else: ?>
     <?php if ($product->getIsSalable()): ?>
-        <p class="availability in-stock"><span><?= $this->__('In stock') ?></span></p>
+        <p class="availability in-stock">
+            <span class="label"><?= $this->helper('catalog')->__('Availability:') ?></span>
+            <span class="value"><?= $this->helper('catalog')->__('In stock') ?></span>
+        </p>
     <?php else: ?>
-        <p class="availability out-of-stock"><span><?= $this->__('Out of stock') ?></span></p>
+        <p class="availability out-of-stock">
+            <span class="label"><?= $this->helper('catalog')->__('Availability:') ?></span>
+            <span class="value"><?= $this->helper('catalog')->__('Out of stock') ?></span>
+        </p>
     <?php endif ?>
 <?php endif ?>
 </div>
+<?php if ($product->isVisibleInSiteVisibility()): ?>
+    <p><a class="link-edit button button-secondary" href="<?= $this->getItemConfigureUrl($item) ?>"><?= $this->__('Edit') ?></a></p>
+<?php endif ?>
 <?php foreach($this->getSortedChildren() as $childName):?>
     <?= $this->getChildHtml($childName, false) ?>
 <?php endforeach ?>
-<?php if ($product->isVisibleInSiteVisibility()): ?>
-    <p><a class="link-edit" href="<?= $this->getItemConfigureUrl($item) ?>"><?= $this->__('Edit') ?></a></p>
-<?php endif ?>
 </div>

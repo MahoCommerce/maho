@@ -6,9 +6,10 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
 /** @var Mage_Wishlist_Block_Share_Wishlist $this */
 ?>
 <div class="my-wishlist">
@@ -18,7 +19,7 @@
     <?= $this->getMessagesBlock()->toHtml() ?>
     <?php if ($this->hasWishlistItems()): ?>
     <form action="<?= $this->getUrl('*/*/update') ?>" method="post">
-        <fieldset>
+        <div class="fieldset">
             <table class="data-table" id="wishlist-table">
             <col width="1" />
             <col />
@@ -31,6 +32,7 @@
                 </tr>
             </thead>
             <tbody>
+            <?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])); ?>
             <?php foreach($this->getWishlistItems() as $item): ?>
                 <?php
                     $product = $item->getProduct();
@@ -38,7 +40,7 @@
                 ?>
                 <tr>
                     <td>
-                        <a class="product-image" href="<?= $this->getProductUrl($item) ?>" title="<?= $this->escapeHtml($product->getName()) ?>"><img src="<?= $this->helper('catalog/image')->init($product, 'small_image')->resize(113, 113) ?>" width="113" height="113" alt="<?= $this->escapeHtml($product->getName()) ?>" /></a>
+                        <a class="product-image" href="<?= $this->getProductUrl($item) ?>" title="<?= $this->escapeHtml($product->getName()) ?>"><img src="<?= $this->helper('catalog/image')->init($product, 'small_image')->resize(113, 113) ?>" srcset="<?= $this->helper('catalog/image')->init($product, 'small_image')->resize(226, 226) ?> 2x" width="113" height="113" alt="<?= $this->escapeHtml($product->getName()) ?>" /></a>
                         <h2 class="product-name"><a href="<?= $this->getProductUrl($item) ?>"><?= $this->escapeHtml($product->getName()) ?></a></h2>
                         <?= $this->getPriceHtml($product) ?>
                         <?= $this->getDetailsHtml($item) ?>
@@ -47,15 +49,15 @@
                     <td class="a-center">
                     <?php if ($product->isSaleable()): ?>
                         <?php if ($isVisibleProduct): ?>
-                            <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Add to Cart')) ?>" onclick="setLocation('<?= $this->getSharedItemAddToCartUrl($item) ?>')" class="button btn-cart"><?= $this->__('Add to Cart') ?></button>
+                            <button type="button" title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>" onclick="setLocation('<?= $this->getSharedItemAddToCartUrl($item) ?>')" class="button btn-cart"><?= $this->__('Add to Cart') ?></button>
                         <?php endif ?>
                     <?php endif ?>
                         <p>
+                            <?php $_wishlistUrl = $this->getAddToWishlistUrlCustom($item, false); ?>
                             <a href="#"
-                               onclick="customFormSubmit(
-                                       '<?= $this->getAddToWishlistUrlCustom($item, false) ?>',
-                                       '<?= $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])) ?>',
-                                       'post')"
+                               data-url="<?= $_wishlistUrl ?>"
+                               data-params="<?= $_params ?>"
+                               onclick="customFormSubmit('<?= $_wishlistUrl ?>', '<?= $_params ?>', 'post')"
                                class="link-wishlist">
                                 <?= $this->__('Add to Wishlist') ?>
                             </a>
@@ -65,11 +67,11 @@
             <?php endforeach ?>
             </tbody>
             </table>
-        </fieldset>
+        </div>
         <div class="buttons-set">
             <p class="back-link"><a href="<?= $this->escapeUrl($this->getBackUrl()) ?>"><small>&laquo; </small><?= $this->__('Back') ?></a></p>
             <?php if($this->isSaleable()):?>
-                <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Add All to Cart')) ?>" onclick="setLocation('<?= $this->getUrl('*/*/allcart', ['_current'=>true]) ?>')" class="button"><?= $this->__('Add All to Cart') ?></button>
+                <button type="button" title="<?= $this->quoteEscape($this->__('Add All to Cart')) ?>" onclick="setLocation('<?= $this->getUrl('*/*/allcart', ['_current'=>true]) ?>')" class="button"><?= $this->__('Add All to Cart') ?></button>
             <?php endif ?>
         </div>
     </form>

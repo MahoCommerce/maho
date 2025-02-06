@@ -270,7 +270,7 @@
             <package>
                 <area>frontend</area>
                 <default_theme>default</default_theme>
-                <name>rwd</name>
+                <name>base</name>
                 <theme>default</theme>
                 <translate>default</translate>
             </package>

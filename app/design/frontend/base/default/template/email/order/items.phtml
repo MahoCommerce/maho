@@ -14,46 +14,59 @@
 ?>
 <?php $_order = $this->getOrder() ?>
 <?php if ($_order): ?>
-<table cellspacing="0" cellpadding="0" border="0" width="650" style="border:1px solid #EAEAEA;">
-    <thead>
-        <tr>
-            <th align="left" bgcolor="#EAEAEA" style="font-size:13px; padding:3px 9px"><?= $this->__('Item') ?></th>
-            <th align="left" bgcolor="#EAEAEA" style="font-size:13px; padding:3px 9px"><?= $this->__('Sku') ?></th>
-            <th align="center" bgcolor="#EAEAEA" style="font-size:13px; padding:3px 9px"><?= $this->__('Qty') ?></th>
-            <th align="right" bgcolor="#EAEAEA" style="font-size:13px; padding:3px 9px"><?= $this->__('Subtotal') ?></th>
-        </tr>
-    </thead>
+    <?php $_items = $_order->getAllItems(); ?>
+    <?php $_itemCount = count($_items); ?>
+    <tr>
+        <td>
+            <table class="items" cellpadding="0" cellspacing="0" border="0">
+                <thead>
+                    <tr>
+                        <th class="cell-name">
+                            <?php if($_itemCount > 1): ?>
+                                <?= $this->__('Items in your order') ?>
+                            <?php else: ?>
+                                <?= $this->__('Item in your order') ?>
+                            <?php endif ?>
+                        </th>
+                        <th class="cell-name align-center">
+                            <?= $this->__('Qty') ?>
+                        </th>
+                        <th class="cell-name align-right">
+                            <?= $this->__('Price') ?>
+                        </th>
+                    </tr>
+                </thead>
+            <?php $i=0; foreach ($_order->getAllItems() as $_item): ?>
+            <?php if($_item->getParentItem()) continue; else $i++; ?>
+                <?= $this->getItemHtml($_item) ?>
+            <?php endforeach ?>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <?= $this->getChildHtml('order_totals') ?>
+        </td>
+    </tr>
+    <?php if ($_giftMessage = $this->getGiftMessageOrder()): ?>
+        <br />
+        <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border:1px solid #EAEAEA;">
+            <thead>
+                <tr>
+                    <th align="left" bgcolor="#EAEAEA" style="font-size:13px; padding:3px 9px"><strong><?= $this->__('Gift Message for this Order') ?></strong></th>
+                </tr>
+            </thead>
 
-    <?php $i=0; foreach ($_order->getAllItems() as $_item): ?>
-    <?php if($_item->getParentItem()) continue; else $i++; ?>
-    <tbody<?= $i%2 ? ' bgcolor="#F6F6F6"' : '' ?>>
-        <?= $this->getItemHtml($_item) ?>
-    </tbody>
-    <?php endforeach ?>
+            <tbody>
 
-    <tbody>
-        <?= $this->getChildHtml('order_totals') ?>
-    </tbody>
-</table>
-<?php if ($_giftMessage = $this->getGiftMessageOrder()): ?>
-<br />
-<table cellspacing="0" cellpadding="0" border="0" width="100%" style="border:1px solid #EAEAEA;">
-    <thead>
-        <tr>
-            <th align="left" bgcolor="#EAEAEA" style="font-size:13px; padding:3px 9px"><strong><?= $this->__('Gift Message for this Order') ?></strong></th>
-        </tr>
-    </thead>
-
-    <tbody>
-
-        <tr>
-            <td colspan="4" align="left" style="padding:3px 9px">
-            <strong><?= $this->__('From:') ?></strong> <?= $this->escapeHtml($_giftMessage->getSender()) ?>
-            <br /><strong><?= $this->__('To:') ?></strong> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?>
-            <br /><strong><?= $this->__('Message:') ?></strong><br /> <?= $this->escapeHtml($_giftMessage->getMessage()) ?>
-            </td>
-        </tr>
-    </tbody>
-</table>
-<?php endif ?>
+                <tr>
+                    <td colspan="4" align="left" style="padding:3px 9px">
+                    <strong><?= $this->__('From:') ?></strong> <?= $this->escapeHtml($_giftMessage->getSender()) ?>
+                    <br /><strong><?= $this->__('To:') ?></strong> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?>
+                    <br /><strong><?= $this->__('Message:') ?></strong><br /> <?= $this->escapeHtml($_giftMessage->getMessage()) ?>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    <?php endif ?>
 <?php endif ?>

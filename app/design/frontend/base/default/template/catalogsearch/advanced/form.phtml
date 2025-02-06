@@ -34,16 +34,16 @@
                 <?php switch($this->getAttributeInputType($_attribute)):
                     case 'number': ?>
                     <div class="input-range">
-                        <input type="text" name="<?= $_code ?>[from]" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute, 'from')) ?>" id="<?= $_code ?>" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>" class="input-text validate-number" maxlength="<?= $maxQueryLength ?>" />
+                        <input type="text" pattern="\d*" name="<?= $_code ?>[from]" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute, 'from')) ?>" id="<?= $_code ?>" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>" class="input-text validate-number" maxlength="<?= $maxQueryLength ?>" />
                         <span class="separator">-</span>
-                        <input type="text" name="<?= $_code ?>[to]" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute, 'to')) ?>" id="<?= $_code ?>_to" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>" class="input-text validate-number" maxlength="<?= $maxQueryLength ?>" />
+                        <input type="text" pattern="\d*" name="<?= $_code ?>[to]" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute, 'to')) ?>" id="<?= $_code ?>_to" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>" class="input-text validate-number" maxlength="<?= $maxQueryLength ?>" />
                     </div>
                     <?php break;
                     case 'price': ?>
                     <div class="input-range">
-                        <input name="<?= $_code ?>[from]" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute, 'from')) ?>" id="<?= $_code ?>" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>"  class="input-text validate-number" type="text" maxlength="<?= $maxQueryLength ?>" />
+                        <input name="<?= $_code ?>[from]" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute, 'from')) ?>" id="<?= $_code ?>" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>"  class="input-text validate-number" type="text" pattern="\d*" maxlength="<?= $maxQueryLength ?>" />
                         <span class="separator">-</span>
-                        <input name="<?= $_code ?>[to]" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute, 'to')) ?>" id="<?= $_code ?>_to" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>"  class="input-text validate-number" type="text" maxlength="<?= $maxQueryLength ?>" />
+                        <input name="<?= $_code ?>[to]" value="<?= $this->escapeHtml($this->getAttributeValue($_attribute, 'to')) ?>" id="<?= $_code ?>_to" title="<?= $this->escapeHtml($this->getAttributeLabel($_attribute)) ?>"  class="input-text validate-number" type="text" pattern="\d*" maxlength="<?= $maxQueryLength ?>" />
                         <small>(<?= $this->getCurrency($_attribute) ?>)</small>
                     </div>
                     <?php break;

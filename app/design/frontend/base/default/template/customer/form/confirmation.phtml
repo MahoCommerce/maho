@@ -5,7 +5,7 @@
  * @category    design
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
@@ -24,7 +24,7 @@
             <li>
                 <label for="email_address" class="required"><em>*</em><?= $this->__('Email Address') ?></label>
                 <div class="input-box">
-                    <input type="text" name="email" id="email_address" title="<?= Mage::helper('core')->quoteEscape($this->__('Email Address')) ?>" class="input-text required-entry validate-email" value="<?= $this->escapeHtml($this->getEmail()) ?>" />
+                    <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="email" id="email_address" title="<?= Mage::helper('core')->quoteEscape($this->__('Email Address')) ?>" class="input-text required-entry validate-email" value="<?= $this->escapeHtml($this->getEmail()) ?>" />
                 </div>
             </li>
         </ul>

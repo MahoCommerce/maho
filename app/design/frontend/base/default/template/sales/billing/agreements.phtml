@@ -21,7 +21,7 @@
     <?php $billingAgreements = $this->getBillingAgreements(); ?>
     <?php if (count($billingAgreements) > 0): ?>
         <?= $this->getChildHtml('pager') ?>
-        <table id="billing-agreements" class="data-table">
+        <table id="billing-agreements" class="data-table linearize-table">
             <col />
             <col width="1" />
             <col />
@@ -29,26 +29,26 @@
             <col />
             <col width="1" />
             <thead>
-                <tr>
-                    <th><span class="nobr"><?= $this->__('Reference ID') ?></span></th>
-                    <th><?= $this->__('Status') ?></th>
-                    <th><span class="nobr"><?= $this->__('Created At') ?></span></th>
-                    <th><span class="nobr"><?= $this->__('Updated At') ?></span></th>
-                    <th><span class="nobr"><?= $this->__('Payment Method') ?></span></th>
-                    <th>&nbsp;</th>
-                </tr>
+            <tr>
+                <th class="reference-id"><span class="nobr"><?= $this->__('Reference ID') ?></span></th>
+                <th class="status"><?= $this->__('Status') ?></th>
+                <th class="created-at"><span class="nobr"><?= $this->__('Created At') ?></span></th>
+                <th class="updated-at"><span class="nobr"><?= $this->__('Updated At') ?></span></th>
+                <th class="payment-method"><span class="nobr"><?= $this->__('Payment Method') ?></span></th>
+                <th class="actions">&nbsp;</th>
+            </tr>
             </thead>
             <tbody>
-                <?php foreach($billingAgreements as $item): ?>
+            <?php foreach($billingAgreements as $item): ?>
                 <tr>
-                    <td><span class="nobr"><?= $this->getItemValue($item, 'reference_id') ?></span></td>
-                    <td><?= $this->getItemValue($item, 'status') ?></td>
-                    <td><span class="nobr"><?= $this->getItemValue($item, 'created_at') ?></span></td>
-                    <td><span class="nobr"><?= $this->getItemValue($item, 'updated_at') ?></span></td>
-                    <td><?= $this->getItemValue($item, 'payment_method_label') ?></td>
-                    <td><a href="<?= $this->getItemValue($item, 'edit_url') ?>"><?= $this->__('View') ?></a></td>
+                    <td class="reference-id"><span class="nobr"><?= $this->getItemValue($item, 'reference_id') ?></span></td>
+                    <td class="status" data-rwd-label="Status"><?= $this->getItemValue($item, 'status') ?></td>
+                    <td class="created-at" data-rwd-label="Created at"><span class="nobr"><?= $this->getItemValue($item, 'created_at') ?></span></td>
+                    <td class="updated-at" data-rwd-label="Updated at"><span class="nobr"><?= $this->getItemValue($item, 'updated_at') ?></span></td>
+                    <td class="payment-method" data-rwd-label="Payment method"><?= $this->getItemValue($item, 'payment_method_label') ?></td>
+                    <td class="actions"><a href="<?= $this->getItemValue($item, 'edit_url') ?>"><?= $this->__('View') ?></a></td>
                 </tr>
-                <?php endforeach ?>
+            <?php endforeach ?>
             </tbody>
         </table>
     <?php else: ?>

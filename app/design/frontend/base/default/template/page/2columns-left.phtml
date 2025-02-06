@@ -5,7 +5,7 @@
  * @category    design
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
@@ -26,6 +26,10 @@
         <div class="main-container col2-left-layout">
             <div class="main">
                 <?= $this->getChildHtml('breadcrumbs') ?>
+                <?php // This left_first block will display above the main content on smaller viewports ?>
+                <?php if ($_leftContent = $this->getChildHtml('left_first')): ?>
+                <div class="col-left sidebar col-left-first"><?= $_leftContent;   ?></div>
+                <?php endif ?>
                 <div class="col-main">
                     <?= $this->getChildHtml('global_messages') ?>
                     <?= $this->getChildHtml('content') ?>
@@ -33,6 +37,7 @@
                 <div class="col-left sidebar"><?= $this->getChildHtml('left') ?></div>
             </div>
         </div>
+        <?= $this->getChildHtml('footer_before') ?>
         <?= $this->getChildHtml('footer') ?>
         <?= $this->getChildHtml('global_cookie_notice') ?>
         <?= $this->getChildHtml('before_body_end') ?>

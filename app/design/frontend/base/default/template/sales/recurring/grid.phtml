@@ -20,7 +20,7 @@
 <?php $gridElements = $this->getGridElements(); ?>
 <?php if ($gridElements): ?>
     <?= $this->getChildHtml('pager') ?>
-    <table id="<?= $this->getGridHtmlId() ?>" class="data-table">
+    <table id="<?= $this->getGridHtmlId() ?>" class="data-table linearize-table-large">
 <?php foreach ($this->getGridColumns() as $column):?>
         <col <?php $width = $this->getObjectData($column, 'width'); echo $width ? ' width="' . $width . '"' : '' ?>/>
 <?php endforeach ?>
@@ -46,7 +46,7 @@ $linkAnchorText = $this->getObjectData($row, "{$index}_link_text");
 $linkText = $linkUrl ? ($linkAnchorText ? $linkAnchorText : $value) : '';
 $linkFormat = $linkUrl ? '<a href="%s">%s</a>' : '';
 ?>
-                <td<?php $this->getObjectData($row, 'is_amount') ? ' class="a-right"' : '' ?>><?php
+                <td<?php $this->getObjectData($row, 'is_amount') ? ' class="a-right"' : '' ?> data-rwd-label="<?= $this->getObjectData($column, 'title') ?>"><?php
 if ($linkFormat) {
     echo sprintf($nobr, sprintf($linkFormat, $this->escapeHtml($linkUrl), $this->escapeHtml($linkText)));
 } else {

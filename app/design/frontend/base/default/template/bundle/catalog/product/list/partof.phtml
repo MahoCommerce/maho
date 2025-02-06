@@ -6,7 +6,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
@@ -21,7 +21,7 @@
         <?php for($_j=0;$_j<$this->getColumnCount();$_j++): ?>
             <?php if($_bundle=$this->getIterableItem()): ?>
             <td>
-                <a href="<?= $_bundle->getProductUrl() ?>" title="<?= $this->escapeHtml($_bundle->getName()) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_bundle, 'small_image')->resize(125) ?>" width="125" height="125" alt="<?= $this->escapeHtml($_bundle->getName()) ?>" /></a>
+                <a href="<?= $_bundle->getProductUrl() ?>" title="<?= $this->escapeHtml($_bundle->getName()) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_bundle, 'small_image')->resize(125) ?>" srcset="<?= $this->helper('catalog/image')->init($_bundle, 'small_image')->resize(250) ?> 2x" width="125" height="125" alt="<?= $this->escapeHtml($_bundle->getName()) ?>" /></a>
                 <h3 class="product-name"><a href="<?= $_bundle->getProductUrl() ?>"><?= $this->escapeHtml($_bundle->getName()) ?></a></h3>
                 <?= $this->getPriceHtml($_bundle, true) ?>
                 <?= $this->getReviewsSummaryHtml($_bundle) ?>

@@ -22,13 +22,32 @@ Default layout, loads most of the pages
                     The content of this block is taken from the database by its block_id.
                     You can manage it in admin CMS -> Static Blocks
                 -->
-                <action method="setBlockId"><block_id>footer_links</block_id></action>
+                <action method="setBlockId"><block_id>footer_links_company</block_id></action>
+            </block>
+            <block type="cms/block" name="cms_footer_links_sm" after="footer_links2">
+                <!--
+                    The content of this block is taken from the database by its block_id.
+                    You can manage it in admin CMS -> Static Blocks
+                -->
+                <action method="setBlockId"><block_id>footer_links_sm</block_id></action>
             </block>
         </reference>
     </default>
 
+    <cms_menu>
+        <reference name="left_first">
+            <block type="cms/block" name="cms_menu" >
+                <action method="setBlockId"><block_id>cms_menu</block_id></action>
+            </block>
+        </reference>
+    </cms_menu>
+
     <cms_page translate="label">
         <label>CMS Pages (All)</label>
+        <remove name="left.permanent.callout"/>
+
+        <update handle="cms_menu"/>
+
         <reference name="content">
             <block type="core/template" name="page_content_heading" template="cms/content_heading.phtml"/>
             <block type="page/html_wrapper" name="cms.wrapper" translate="label">

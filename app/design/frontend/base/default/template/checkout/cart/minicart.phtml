@@ -1,0 +1,25 @@
+<?php
+/**
+ * Maho
+ *
+ * @category    design
+ * @package     rwd_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Checkout_Block_Cart_Sidebar $this */
+?>
+
+<?php $qty = $this->getSummaryCount() ?: 0 ?>
+<a href="<?= $this->helper('checkout/cart')->getCartUrl() ?>" data-target-element="header-cart" class="skip-link skip-cart" title="<?= $this->__('Cart') ?>">
+    <span class="icon"></span>
+    <span class="label"><?= $this->__('Cart') ?></span>
+    <span class="count count-<?= $qty ?>"><?= $qty ?></span>
+</a>
+
+<div id="header-cart" class="block-cart skip-content">
+    <?= $this->getChildHtml('minicart_content') ?>
+</div>

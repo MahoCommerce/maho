@@ -11,7 +11,7 @@
  */
 /** @var Mage_Paypal_Block_Express_Review $this */
 ?>
-<fieldset id="shipping-method-container">
+<div class="fieldset" id="shipping-method-container">
 <?php if ($this->getCanEditShippingMethod() || !$this->getCurrentShippingRate()):?>
         <?php if ($groups = $this->getShippingRateGroups()):?>
             <?php $currentRate = $this->getCurrentShippingRate(); ?>
@@ -35,5 +35,5 @@
 <?php else: ?>
     <p><strong><?= $this->renderShippingRateOption($this->getCurrentShippingRate()) ?></strong></p>
 <?php endif ?>
-</fieldset>
+</div>
 <div style="display:none" id="shipping_method_update"><p><?= $this->__('Please update order data to get shipping methods and rates') ?></p></div>

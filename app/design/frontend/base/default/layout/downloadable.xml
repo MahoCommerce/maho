@@ -202,10 +202,11 @@ Emails
     <PRODUCT_TYPE_downloadable translate="label" module="downloadable">
         <label>Catalog Product View (Downloadable)</label>
         <reference name="product.info">
-            <block type="downloadable/catalog_product_view_type" name="product.info.downloadable" as="product_type_data" template="downloadable/catalog/product/type.phtml">
-                 <block type="downloadable/catalog_product_samples" name="product.info.downloadable.samples" as="samples" template="downloadable/catalog/product/samples.phtml"/>
+            <block type="downloadable/catalog_product_view_type" name="product.info.downloadable" as="product_type_availability" template="downloadable/catalog/product/type.phtml">
+            <!--<block type="downloadable/catalog_product_view_type" name="product.info.downloadable" as="product_type_data" template="downloadable/catalog/product/type.phtml">-->
                  <block type="cataloginventory/stockqty_default" name="product.info.downloadable.extra" as="product_type_data_extra" template="cataloginventory/stockqty/default.phtml"/>
             </block>
+            <block type="downloadable/catalog_product_samples" name="product.info.downloadable.samples" as="product_type_data" template="downloadable/catalog/product/samples.phtml"/>
         </reference>
         <reference name="product.info.options.wrapper">
             <block type="downloadable/catalog_product_links" name="product.info.downloadable.options" as="type_downloadable_options" before="-" template="downloadable/catalog/product/links.phtml"/>

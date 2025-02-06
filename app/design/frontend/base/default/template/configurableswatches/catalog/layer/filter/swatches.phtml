@@ -1,0 +1,53 @@
+<?php
+/**
+ * Maho
+ *
+ * @category    design
+ * @package     rwd_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Catalog_Block_Layer_Filter_Attribute $this */
+?>
+<?php
+
+$_dimHelper = Mage::helper('configurableswatches/swatchdimensions');
+$_swatchInnerWidth = $_dimHelper->getInnerWidth(Mage_ConfigurableSwatches_Helper_Swatchdimensions::AREA_LAYER);
+$_swatchInnerHeight = $_dimHelper->getInnerHeight(Mage_ConfigurableSwatches_Helper_Swatchdimensions::AREA_LAYER);
+$_swatchOuterWidth = $_dimHelper->getOuterWidth(Mage_ConfigurableSwatches_Helper_Swatchdimensions::AREA_LAYER);
+$_swatchOuterHeight = $_dimHelper->getOuterHeight(Mage_ConfigurableSwatches_Helper_Swatchdimensions::AREA_LAYER);
+?>
+
+<ol class="configurable-swatch-list">
+    <?php foreach ($this->getItems() as $_item): ?>
+        <?php
+        $_hasItems = ($_item->getCount() > 0);
+        $_label = $_item->getLabel();
+        $_swatchUrl = Mage::helper('configurableswatches/productimg')->getGlobalSwatchUrl($_item, $_label, $_swatchInnerWidth, $_swatchInnerHeight);
+        $_hasImage = (!empty($_swatchUrl));
+        ?>
+        <li>
+            <?php if ($_hasItems): ?>
+                <a href="<?= $this->escapeUrl($_item->getUrl()) ?>" class="swatch-link" title="<?= $_label ?>">
+            <?php else: ?>
+                <span class="swatch-link">
+            <?php endif ?>
+                <?php if ($_hasImage): ?>
+                    <img src="<?= $_swatchUrl ?>" alt="<?= $_label ?>" alt="<?= $_label ?>" width="<?= $_swatchInnerWidth ?>" height="<?= $_swatchInnerHeight ?>" />
+                <?php else: ?>
+                    <?= $_label ?>
+                <?php endif ?>
+                <?php if ($this->shouldDisplayProductCount()): ?>
+                    <span class="count">(<?= $_item->getCount() ?>)</span>
+                <?php endif ?>
+            <?php if ($_hasItems): ?>
+                </a>
+            <?php else: ?>
+                </span>
+            <?php endif ?>
+        </li>
+    <?php endforeach ?>
+</ol>

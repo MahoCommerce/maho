@@ -15,9 +15,8 @@
 
 <?php $_items = $this->getReviewsCollection()->getItems() ?>
 <div class="box-collateral box-reviews" id="customer-reviews">
-    <a href="<?= $this->getReviewsUrl() ?>#review-form"><?= $this->__('Add Your Review') ?></a>
-
-    <?php if (count($_items)):?>
+    <?php if (count($_items)): ?>
+        <a href="<?= Mage::getUrl('review/product/list', ['id' => $this->getProduct()->getId(), 'category' => $this->getProduct()->getCategoryId(),]) ?>#review-form"><?= $this->__('Add Your Review') ?></a>
         <dl>
         <?php foreach ($_items as $_review):?>
             <?php $_votes = $_review->getRatingVotes() ?>

@@ -14,14 +14,16 @@
 <layout version="0.1.0">
     <checkout_cart_index>
         <reference name="checkout.cart.top_methods">
-            <block type="paypal/express_shortcut" name="checkout.cart.methods.paypal_express.top" before="-" template="paypal/express/shortcut.phtml">
+            <block type="paypal/express_shortcut" name="checkout.cart.methods.paypal_express.top" before="checkout.cart.methods.onepage.top" template="paypal/express/shortcut.phtml">
                 <action method="setIsQuoteAllowed"><value>1</value></action>
+                <action method="setShowOrPosition"><value>after</value></action>
             </block>
         </reference>
 
         <reference name="checkout.cart.methods">
-            <block type="paypal/express_shortcut" name="checkout.cart.methods.paypal_express.bottom" before="-" template="paypal/express/shortcut.phtml">
+            <block type="paypal/express_shortcut" name="checkout.cart.methods.paypal_express.bottom" before="checkout.cart.methods.onepage.bottom" template="paypal/express/shortcut.phtml">
                 <action method="setIsQuoteAllowed"><value>1</value></action>
+                <action method="setShowOrPosition"><value>after</value></action>
             </block>
         </reference>
 
@@ -77,8 +79,9 @@ Available logo types can be assigned with action="setLogoType":
     <catalog_product_view>
         <reference name="product.info.addtocart">
             <block type="page/html_wrapper" name="product.info.addtocart.paypal.wrapper" translate="label">
+                <action method="setMayBeInvisible"><value>true</value></action>
                 <label>PayPal Express Checkout Shortcut Wrapper</label>
-                <block type="paypal/express_shortcut" name="product.info.addtocart.paypal" template="paypal/express/shortcut.phtml">
+                <block type="paypal/express_shortcut" name="product.info.addtocart.paypal" template="paypal/express/product/shortcut.phtml">
                     <action method="setIsInCatalogProduct"><value>1</value></action>
                 </block>
             </block>
@@ -132,7 +135,7 @@ Available logo types can be assigned with action="setLogoType":
             <block type="paypal/express_shortcut" name="paypal.partner.top_cart.shortcut" template="paypal/express/shortcut.phtml"/>
         </reference>
         <reference name="cart_sidebar.extra_actions">
-            <block type="paypal/express_shortcut" name="paypal.partner.cart_sidebar.shortcut" template="paypal/express/shortcut.phtml"/>
+            <block type="paypal/express_shortcut" name="paypal.partner.cart_sidebar.shortcut" template="paypal/express/minicart/shortcut.phtml"/>
         </reference>
     </default>
 

@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Maho
  *
  * @category   Mage
  * @package    Mage
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -715,7 +716,7 @@ final class Mage
             if (is_readable($localConfigFile)) {
                 $localConfig = simplexml_load_file($localConfigFile);
                 date_default_timezone_set('UTC');
-                if (($date = $localConfig->global->install->date) && strtotime((string)$date)) {
+                if (($date = $localConfig->global->install->date) && strtotime((string) $date)) {
                     self::$_isInstalled = true;
                 }
             }
@@ -772,7 +773,7 @@ final class Mage
                 // Validate file extension before save. Allowed file extensions: log, txt, html, csv
                 $_allowedFileExtensions = explode(
                     ',',
-                    (string) self::getConfig()->getNode('dev/log/allowedFileExtensions', Mage_Core_Model_Store::DEFAULT_CODE)
+                    (string) self::getConfig()->getNode('dev/log/allowedFileExtensions', Mage_Core_Model_Store::DEFAULT_CODE),
                 );
                 if (! ($extension = pathinfo($file, PATHINFO_EXTENSION)) || ! in_array($extension, $_allowedFileExtensions)) {
                     return;
@@ -793,7 +794,7 @@ final class Mage
 
                 $format = '%timestamp% %priorityName% (%priority%): %message%' . PHP_EOL;
                 $formatter = new Zend_Log_Formatter_Simple($format);
-                $writerModel = (string)self::getConfig()->getNode('global/log/core/writer_model');
+                $writerModel = (string) self::getConfig()->getNode('global/log/core/writer_model');
                 if (!self::$_app || !$writerModel) {
                     $writer = new Zend_Log_Writer_Stream($logFile);
                 } else {
@@ -833,7 +834,7 @@ final class Mage
      */
     public static function setIsDeveloperMode($mode)
     {
-        self::$_isDeveloperMode = (bool)$mode;
+        self::$_isDeveloperMode = (bool) $mode;
         return self::$_isDeveloperMode;
     }
 
@@ -865,7 +866,7 @@ final class Mage
         } else {
             $reportData = [
                 (!empty($extra) ? $extra . "\n\n" : '') . $e->getMessage(),
-                $e->getTraceAsString()
+                $e->getTraceAsString(),
             ];
 
             // retrieve server data

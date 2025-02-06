@@ -6,7 +6,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -32,7 +32,7 @@
     <?php $iterator = 0 ?>
     <?php foreach($this->getMyProducts() as $_product): ?>
         <tr<?php if($iterator % 2 == 0): ?> class="odd"<?php $iterator++;endif; ?>>
-            <td><a href="<?= $_product->getProductUrl() ?>" title="<?= $this->escapeHtml($_product->getName()) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(100, 100) ?>" width="100" height="100" alt="<?= $this->escapeHtml($_product->getName()) ?>" /></a></td>
+            <td><a href="<?= $_product->getProductUrl() ?>" title="<?= $this->escapeHtml($_product->getName()) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(100, 100) ?>" srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize(200, 200) ?> 2x" width="100" height="100" alt="<?= $this->escapeHtml($_product->getName()) ?>" /></a></td>
             <td>
                 <h2 class="product-name"><a href="<?= $_product->getProductUrl() ?>"><?= $this->escapeHtml($_product->getName()) ?></a></h2>
                 <?= $this->getReviewsSummaryHtml($_product, 'short') ?>

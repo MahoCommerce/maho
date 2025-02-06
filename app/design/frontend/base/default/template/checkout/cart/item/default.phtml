@@ -5,7 +5,7 @@
  * @category    design
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
@@ -20,8 +20,39 @@ $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()]));
 $_deleteUrl = $this->getDeleteUrlCustom(false);
 ?>
 <tr>
-    <td><?php if ($this->hasProductUrl()):?><a href="<?= $this->getProductUrl() ?>" title="<?= $this->escapeHtml($this->getProductName()) ?>" class="product-image"><?php endif ?><img src="<?= $this->getProductThumbnail()->resize(75) ?>" width="75" height="75" alt="<?= $this->escapeHtml($this->getProductName()) ?>" /><?php if ($this->hasProductUrl()):?></a><?php endif ?></td>
-    <td>
+    <td class="product-cart-image">
+        <?php if ($this->hasProductUrl()):?>
+            <a href="<?= $this->getProductUrl() ?>" title="<?= $this->escapeHtml($this->getProductName()) ?>" class="product-image">
+        <?php endif ?>
+            <img src="<?= $this->getProductThumbnail()->resize(180) ?>" alt="<?= $this->escapeHtml($this->getProductName()) ?>" />
+        <?php if ($this->hasProductUrl()):?>
+            </a>
+        <?php endif ?>
+
+        <ul class="cart-links">
+            <?php if ($isVisibleProduct): ?>
+                <li>
+                    <a href="<?= $this->getConfigureUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Edit item parameters')) ?>"><?= $this->__('Edit') ?></a>
+                </li>
+            <?php endif ?>
+
+            <?php if ($this->helper('wishlist')->isAllowInCart() && $isVisibleProduct) : ?>
+                <li>
+                    <a href="<?= $this->helper('wishlist')->getMoveFromCartUrl($_item->getId()) ?>" class="link-wishlist use-ajax"><?= $this->__('Move to wishlist') ?></a>
+                </li>
+            <?php endif ?>
+        </ul>
+    </td>
+
+    <td class="product-cart-info">
+
+        <a href="#"
+           title="<?= Mage::helper('core')->quoteEscape($this->__('Remove Item')) ?>"
+           class="btn-remove btn-remove2"
+           onclick="customFormSubmit('<?= $_deleteUrl ?>', '<?= $_params ?>', 'post')">
+            <?= $this->__('Remove Item') ?>
+        </a>
+
         <h2 class="product-name">
         <?php if ($this->hasProductUrl()):?>
             <a href="<?= $this->getProductUrl() ?>"><?= $this->escapeHtml($this->getProductName()) ?></a>
@@ -29,12 +60,17 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
             <?= $this->escapeHtml($this->getProductName()) ?>
         <?php endif ?>
         </h2>
+
+        <div class="product-cart-sku">
+            <span class="label"><?= $this->__('SKU') ?>:</span> <?= $this->escapeHtml($_item->getSku()) ?>
+        </div>
+
         <?php if ($_options = $this->getOptionList()):?>
         <dl class="item-options">
             <?php foreach ($_options as $_option) : ?>
             <?php $_formatedOptionValue = $this->getFormatedOptionValue($_option) ?>
-            <dt><?= $this->escapeHtml($_option['label']) ?></dt>
-            <dd<?php if (isset($_formatedOptionValue['full_view'])): ?> class="truncated"<?php endif ?>><?= $_formatedOptionValue['value'] ?>
+                <dt><?= $this->escapeHtml($_option['label']) ?></dt>
+                <dd<?php if (isset($_formatedOptionValue['full_view'])): ?> class="truncated"<?php endif ?>><?= $_formatedOptionValue['value'] ?>
                 <?php if (isset($_formatedOptionValue['full_view'])): ?>
                 <div class="truncated_full_value">
                     <dl class="item-options">
@@ -47,44 +83,40 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
             <?php endforeach ?>
         </dl>
         <?php endif ?>
+
         <?php if ($messages = $this->getMessages()): ?>
         <?php foreach ($messages as $message): ?>
-            <p class="item-msg <?= $message['type'] ?>">* <?= $this->escapeHtml($message['text']) ?></p>
+            <p class="item-msg <?= $message['type'] ?>">
+                * <?= $this->escapeHtml($message['text']) ?>
+            </p>
         <?php endforeach ?>
         <?php endif ?>
+
         <?php $addInfoBlock = $this->getProductAdditionalInformationBlock(); ?>
         <?php if ($addInfoBlock): ?>
             <?= $addInfoBlock->setItem($_item)->toHtml() ?>
         <?php endif ?>
+
     </td>
-    <td class="a-center">
-        <?php if ($isVisibleProduct): ?>
-        <a href="<?= $this->getConfigureUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Edit item parameters')) ?>"><?= $this->__('Edit') ?></a>
-        <?php endif ?>
-    </td>
-    <?php if ($this->helper('wishlist')->isAllowInCart()) : ?>
-    <td class="a-center">
-        <?php if ($isVisibleProduct): ?>
-            <a href="<?= $this->helper('wishlist')->getMoveFromCartUrl($_item->getId()) ?>" class="link-wishlist use-ajax"><?= $this->__('Move') ?></a>
-        <?php endif ?>
-    </td>
-    <?php endif ?>
 
     <?php if ($canApplyMsrp): ?>
-        <td class="a-right"<?php if ($this->helper('tax')->displayCartBothPrices()): ?> colspan="2"<?php endif ?>>
+        <td class="a-center product-cart-price"<?php if ($this->helper('tax')->displayCartBothPrices()): ?> colspan="2"<?php endif ?>>
             <span class="cart-price">
                 <span class="cart-msrp-unit"><?= $this->__('See price before order confirmation.') ?></span>
                 <?php $helpLinkId = 'cart-msrp-help-' . $_item->getId(); ?>
                 <a id="<?= $helpLinkId ?>" href="#" class="map-help-link"><?= $this->__("What's this?") ?></a>
+
                 <script type="text/javascript">
                     Catalog.Map.addHelpLink('<?= $helpLinkId ?>', "<?= Mage::helper('core')->jsQuoteEscape($this->__("What's this?")) ?>");
                 </script>
+
             </span>
         </td>
     <?php else: ?>
 
         <?php if ($this->helper('tax')->displayCartPriceExclTax() || $this->helper('tax')->displayCartBothPrices()): ?>
-        <td class="a-right">
+        <td class="product-cart-price" data-rwd-label="<?= $this->__('Price') ?>" data-rwd-tax-label="<?= $this->__('Excl. Tax') ?>">
+
             <?php if (Mage::helper('weee')->typeOfDisplay($_item, [1, 4], 'sales') && $_item->getWeeeTaxAppliedAmount()): ?>
                 <span class="cart-tax-total" onclick="taxToggle('eunit-item-tax-details<?= $_item->getId() ?>', this, 'cart-tax-total-expanded');">
             <?php else: ?>
@@ -125,7 +157,7 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
         </td>
         <?php endif ?><!-- inclusive price starts here -->
         <?php if ($this->helper('tax')->displayCartPriceInclTax() || $this->helper('tax')->displayCartBothPrices()): ?>
-        <td>
+        <td class="product-cart-price" data-rwd-label="<?= $this->__('Price') ?>" data-rwd-tax-label="<?= $this->__('Incl. Tax') ?>">
             <?php $_incl = $this->helper('checkout')->getPriceInclTax($_item); ?>
             <?php if (Mage::helper('weee')->typeOfDisplay($_item, [1, 4], 'sales') && $_item->getWeeeTaxAppliedAmount()): ?>
                 <span class="cart-tax-total" onclick="taxToggle('unit-item-tax-details<?= $_item->getId() ?>', this, 'cart-tax-total-expanded');">
@@ -167,15 +199,35 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
         </td>
         <?php endif ?>
     <?php endif ?>
-    <td class="a-center">
-        <input name="cart[<?= $_item->getId() ?>][qty]"
+    <td class="product-cart-actions" data-rwd-label="<?= $this->__('Qty') ?>">
+        <input type="text" pattern="\d*(\.\d+)?" name="cart[<?= $_item->getId() ?>][qty]" value="<?= $this->getQty() ?>" size="4"
                data-cart-item-id="<?= $this->jsQuoteEscape($_item->getSku()) ?>"
-               value="<?= $this->getQty() ?>" size="4" title="<?= $this->__('Qty') ?>" class="input-text qty" maxlength="12" />
+               title="<?= Mage::helper('core')->quoteEscape($this->__('Qty')) ?>" class="input-text qty" maxlength="12" />
+
+        <button type="submit" name="update_cart_action" data-cart-item-update value="update_qty" title="<?= Mage::helper('core')->quoteEscape($this->__('Update')) ?>" class="button btn-update"><?= $this->__('Update') ?>
+        </button>
+
+        <ul class="cart-links">
+            <?php if ($isVisibleProduct): ?>
+                <li>
+                    <a href="<?= $this->getConfigureUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Edit item parameters')) ?>"><?= $this->__('Edit') ?></a>
+                </li>
+            <?php endif ?>
+
+            <?php if ($this->helper('wishlist')->isAllowInCart()) : ?>
+            <li>
+                <?php if ($isVisibleProduct): ?>
+                    <a href="<?= $this->helper('wishlist')->getMoveFromCartUrl($_item->getId()) ?>" class="link-wishlist use-ajax"><?= $this->__('Move to wishlist') ?></a>
+                <?php endif ?>
+            </li>
+            <?php endif ?>
+        </ul>
+
     </td>
 
     <!--Sub total starts here -->
     <?php if (($this->helper('tax')->displayCartPriceExclTax() || $this->helper('tax')->displayCartBothPrices()) && !$_item->getNoSubtotal()): ?>
-    <td class="a-right">
+    <td class="product-cart-total" data-rwd-label="<?= $this->__('Subtotal') ?>">
         <?php if (Mage::helper('weee')->typeOfDisplay($_item, [1, 4], 'sales') && $_item->getWeeeTaxAppliedAmount()): ?>
             <span class="cart-tax-total" onclick="taxToggle('esubtotal-item-tax-details<?= $_item->getId() ?>', this, 'cart-tax-total-expanded');">
         <?php else: ?>
@@ -220,7 +272,7 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
     </td>
     <?php endif ?>
     <?php if (($this->helper('tax')->displayCartPriceInclTax() || $this->helper('tax')->displayCartBothPrices()) && !$_item->getNoSubtotal()): ?>
-    <td>
+    <td class="product-cart-total" data-rwd-label="<?= $this->__('Subtotal') ?>">
         <?php $_incl = $this->helper('checkout')->getSubtotalInclTax($_item); ?>
         <?php if (Mage::helper('weee')->typeOfDisplay($_item, [1, 4], 'sales') && $_item->getWeeeTaxAppliedAmount()): ?>
             <span class="cart-tax-total" onclick="taxToggle('subtotal-item-tax-details<?= $_item->getId() ?>', this, 'cart-tax-total-expanded');">
@@ -267,7 +319,7 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
         <?php endif ?>
     </td>
     <?php endif ?>
-    <td class="a-center">
+    <td class="a-center product-cart-remove">
         <a href="#"
            title="<?= Mage::helper('core')->quoteEscape($this->__('Remove Item')) ?>"
            class="btn-remove btn-remove2"
@@ -276,3 +328,5 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
         </a>
     </td>
 </tr>
+
+

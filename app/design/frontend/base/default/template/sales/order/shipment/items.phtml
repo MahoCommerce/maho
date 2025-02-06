@@ -5,7 +5,7 @@
  * @category    design
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
@@ -23,7 +23,7 @@
 <h2 class="sub-title"><?= $this->__('Shipment #') ?><?= $_shipment->getIncrementId() ?> <span class="separator">|</span> <a href="<?= $this->getPrintShipmentUrl($_shipment) ?>" onclick="this.target='_blank'" class="link-print"><?= $this->__('Print Shipment') ?></a></h2>
 <?php $tracks = $_shipment->getTracksCollection(); ?>
 <?php  if ($tracks->count()): ?>
-    <table class="data-table tracking-table" id="my-tracking-table-<?= $_shipment->getId() ?>">
+    <table class="data-table tracking-table linearize-table" id="my-tracking-table-<?= $_shipment->getId() ?>">
         <tbody>
             <tr>
                 <td colspan="2">

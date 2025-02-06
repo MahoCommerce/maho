@@ -5,8 +5,8 @@
  * @category    design
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -18,7 +18,12 @@
         <h1><?= $this->__('Review Details') ?></h1>
     </div>
     <div class="product-img-box">
-        <a href="<?= $this->getProductData()->getProductUrl() ?>" title="<?= $this->escapeHtml($this->getProductData()->getName()) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($this->getProductData(), 'small_image')->resize(125, 125) ?>" height="125" width="125" alt="<?= $this->escapeHtml($this->getProductData()->getName()) ?>" /></a>
+        <a href="<?= $this->getProductData()->getProductUrl() ?>" title="<?= $this->escapeHtml($this->getProductData()->getName()) ?>">
+            <img src="<?= $this->helper('catalog/image')->init($this->getProductData(), 'small_image')->resize(450, 450)->keepFrame(false) ?>"
+                 srcset="<?= $this->helper('catalog/image')->init($this->getProductData(), 'small_image')->resize(900, 900)->keepFrame(false) ?> 2x"
+                 alt="<?= $this->escapeHtml($this->getProductData()->getName()) ?>"
+                 class="product-image" />
+        </a>
         <?php if( $this->getRating() && $this->getRating()->getSize()): ?>
              <p class="label"><?= $this->__('Average Customer Rating') ?>:</p>
              <?= $this->getReviewsSummaryHtml($this->getProductData()) ?>
