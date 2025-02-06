@@ -44,6 +44,19 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
             'index' => 'title',
         ]);
 
+        if (!Mage::app()->isSingleStoreMode()) {
+            $this->addColumn('store_id', [
+                'header'        => Mage::helper('blog')->__('Store View'),
+                'index'         => 'store_id',
+                'type'          => 'store',
+                'store_all'     => true,
+                'store_view'    => true,
+                'sortable'      => false,
+                'filter_condition_callback'
+                => [$this, '_filterStoreCondition'],
+            ]);
+        }
+
         $this->addColumn('created_at', [
             'header' => Mage::helper('blog')->__('Created At'),
             'width' => '150px',

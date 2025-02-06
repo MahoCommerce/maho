@@ -5,11 +5,7 @@
             <action method="setTitle" translate="title"><title>Blog Posts</title></action>
         </reference>
         <reference name="content">
-            <block type="blog/adminhtml_post" name="posts">
-                <block type="adminhtml/store_switcher" name="store_switcher" as="store_switcher">
-                    <action method="setUseConfirm"><params>0</params></action>
-                </block>
-            </block>
+            <block type="blog/adminhtml_post" name="posts"/>
         </reference>
     </adminhtml_blog_post_index>
 

@@ -102,7 +102,7 @@ foreach ($attributes as $code => $options) {
 
 // Create the blog_website table
 $table = $installer->getConnection()
-    ->newTable($installer->getTable('blog/post_website'))
+    ->newTable($installer->getTable('blog/post_store'))
     ->addColumn(
         'blog_post_id',
         Varien_Db_Ddl_Table::TYPE_INTEGER,
@@ -114,7 +114,7 @@ $table = $installer->getConnection()
         ]
     )
     ->addColumn(
-        'website_id',
+        'store_id',
         Varien_Db_Ddl_Table::TYPE_SMALLINT,
         null,
         [
@@ -125,14 +125,14 @@ $table = $installer->getConnection()
     )
     ->addIndex(
         $installer->getIdxName(
-            'blog/post_website',
-            ['website_id']
+            'blog/post_store',
+            ['store_id']
         ),
-        ['website_id']
+        ['store_id']
     )
     ->addForeignKey(
         $installer->getFkName(
-            'blog/post_website',
+            'blog/post_store',
             'blog_post_id',
             'blog/post',
             'entity_id'
@@ -145,18 +145,18 @@ $table = $installer->getConnection()
     )
     ->addForeignKey(
         $installer->getFkName(
-            'blog/post_website',
-            'website_id',
-            'core/website',
-            'website_id'
+            'blog/post_store',
+            'store_id',
+            'core/store',
+            'store_id'
         ),
-        'website_id',
-        $installer->getTable('core/website'),
-        'website_id',
+        'store_id',
+        $installer->getTable('core/store'),
+        'store_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
         Varien_Db_Ddl_Table::ACTION_CASCADE
     )
-    ->setComment('Blog Post To Website Linkage Table');
+    ->setComment('Blog Post To Store Linkage Table');
 $installer->getConnection()->createTable($table);
 
 $installer->endSetup();

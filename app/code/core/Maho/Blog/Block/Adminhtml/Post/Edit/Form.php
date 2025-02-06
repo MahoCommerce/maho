@@ -26,6 +26,7 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
 
         $fieldset = $form->addFieldset('blog_form', [
             'legend' => Mage::helper('blog')->__('Post Information'),
+            'class' => 'fieldset-wide'
         ]);
 
         $fieldset->addField('title', 'text', [
@@ -34,6 +35,24 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
             'required' => true,
             'name' => 'title',
         ]);
+
+        if (!Mage::app()->isSingleStoreMode()) {
+            $field = $fieldset->addField('store_id', 'multiselect', [
+                'name'      => 'stores[]',
+                'label'     => Mage::helper('cms')->__('Store View'),
+                'title'     => Mage::helper('cms')->__('Store View'),
+                'required'  => true,
+                'values'    => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true),
+            ]);
+            $renderer = $this->getStoreSwitcherRenderer();
+            $field->setRenderer($renderer);
+        } else {
+            $fieldset->addField('store_id', 'hidden', [
+                'name'      => 'stores[]',
+                'value'     => Mage::app()->getStore(true)->getId(),
+            ]);
+            $model->setStoreId(Mage::app()->getStore(true)->getId());
+        }
 
         $fieldset->addField('content', 'editor', [
             'name' => 'content',

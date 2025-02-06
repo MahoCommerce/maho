@@ -34,7 +34,7 @@ class Maho_Blog_Block_Adminhtml_Post_Edit extends Mage_Adminhtml_Block_Widget_Fo
             }
 
             function saveAndContinueEdit(){
-                editForm.submit($('edit_form').action+'back/edit/');
+                editForm.submit(document.getElementById('edit_form').action+'back/edit/');
             }
         ";
     }

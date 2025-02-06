@@ -13,16 +13,13 @@
 <div class="content-header">
     <table cellspacing="0">
         <tr>
-            <td style="width:50%;"><h3><?= Mage::helper('blog')->__('Manage Blog Posts') ?></h3></td>
+            <td style="width:50%;"><h3><?= Mage::helper('blog')->__('Blog Posts') ?></h3></td>
             <td class="a-right">
                 <?= $this->getButtonsHtml() ?>
             </td>
         </tr>
     </table>
 </div>
-<?php if (!$this->isSingleStoreMode()): ?>
-    <?= $this->getChildHtml('store_switcher') ?>
-<?php endif ?>
 <div>
     <?= $this->getChildHtml('grid') ?>
 </div>
