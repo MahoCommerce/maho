@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Sales report coupons collection
  *
- * @category   Mage
  * @package    Mage_SalesRule
  */
 class Mage_SalesRule_Model_Resource_Report_Collection extends Mage_Sales_Model_Resource_Report_Collection_Abstract

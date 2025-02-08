@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Catalog Product Type Price Indexer interface
  *
- * @category   Mage
  * @package    Mage_Catalog
  */
 interface Mage_Catalog_Model_Resource_Product_Indexer_Price_Interface

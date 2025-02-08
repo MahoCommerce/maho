@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
  * Modifier of queries, developed for backwards compatibility on MySQL,
  * while creating foreign keys
  *
- * @category   Mage
  * @package    Mage_Core
  */
 class Mage_Core_Model_Resource_Setup_Query_Modifier

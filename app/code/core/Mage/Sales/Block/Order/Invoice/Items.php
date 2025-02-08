@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Sales order view items block
  *
- * @category   Mage
  * @package    Mage_Sales
  */
 class Mage_Sales_Block_Order_Invoice_Items extends Mage_Sales_Block_Items_Abstract

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Bundle
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Bundle Resource Model
  *
- * @category   Mage
  * @package    Mage_Bundle
  */
 class Mage_Bundle_Model_Resource_Bundle extends Mage_CatalogIndex_Model_Resource_Data_Abstract

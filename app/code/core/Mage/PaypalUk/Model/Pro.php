@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_PaypalUk
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
@@ -16,7 +15,6 @@
  * This model was created because right now PayPal Direct and PayPal Express payment
  * (Payflow Edition) methods cannot have same abstract
  *
- * @category   Mage
  * @package    Mage_PaypalUk
  */
 class Mage_PaypalUk_Model_Pro extends Mage_Paypal_Model_Pro

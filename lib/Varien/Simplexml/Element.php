@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Simplexml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Extends SimpleXML to add valuable functionality to SimpleXMLElement class
  *
- * @category   Varien
  * @package    Varien_Simplexml
  */
 class Varien_Simplexml_Element extends SimpleXMLElement

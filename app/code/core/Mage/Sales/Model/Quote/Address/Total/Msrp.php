@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
@@ -15,7 +14,6 @@
  * Msrp items total
  * Collects flag if MSRP price is in use
  *
- * @category   Mage
  * @package    Mage_Sales
  */
 class Mage_Sales_Model_Quote_Address_Total_Msrp extends Mage_Sales_Model_Quote_Address_Total_Abstract

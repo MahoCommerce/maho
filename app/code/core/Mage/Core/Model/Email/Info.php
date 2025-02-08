@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -18,7 +17,6 @@
  *  -Bcc: Blind carbon copy to tertiary recipients who receive the message
  *        without anyone else (including the To, Cc, and Bcc recipients) seeing who the tertiary recipients are
  *
- * @category   Mage
  * @package    Mage_Core
  */
 class Mage_Core_Model_Email_Info extends Varien_Object

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Abstract installation block
  *
- * @category   Mage
  * @package    Mage_Install
  */
 abstract class Mage_Install_Block_Abstract extends Mage_Core_Block_Template

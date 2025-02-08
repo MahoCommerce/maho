@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -18,7 +17,6 @@
  * Collects and provides access to PayPal-specific payment data
  * Provides business logic information about payment flow
  *
- * @category   Mage
  * @package    Mage_Paypal
  */
 class Mage_Paypal_Model_Info

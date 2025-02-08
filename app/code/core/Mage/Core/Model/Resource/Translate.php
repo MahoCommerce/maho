@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Translation resource model
  *
- * @category   Mage
  * @package    Mage_Core
  */
 class Mage_Core_Model_Resource_Translate extends Mage_Core_Model_Resource_Db_Abstract

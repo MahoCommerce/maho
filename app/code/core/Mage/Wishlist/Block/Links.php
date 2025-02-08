@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Links block
  *
- * @category   Mage
  * @package    Mage_Wishlist
  */
 class Mage_Wishlist_Block_Links extends Mage_Page_Block_Template_Links_Block

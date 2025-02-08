@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Usa
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
@@ -15,7 +14,6 @@
  * USPS shipping rates estimation
  *
  * @link       http://www.usps.com/webtools/htm/Development-Guide-v3-0b.htm
- * @category   Mage
  * @package    Mage_Usa
  */
 class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carrier_Abstract implements Mage_Shipping_Model_Carrier_Interface

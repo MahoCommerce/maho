@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_GiftMessage
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * GiftMessage api
  *
- * @category   Mage
  * @package    Mage_GiftMessage
  */
 class Mage_GiftMessage_Model_Api_V2 extends Mage_GiftMessage_Model_Api

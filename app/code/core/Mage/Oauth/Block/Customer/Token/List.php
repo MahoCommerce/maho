@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Customer My Applications list block
  *
- * @category   Mage
  * @package    Mage_Oauth
  */
 class Mage_Oauth_Block_Customer_Token_List extends Mage_Customer_Block_Account_Dashboard

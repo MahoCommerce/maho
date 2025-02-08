@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Options for Code Format Field in Auto Generated Specific Coupon Codes configuration section
  *
- * @category   Mage
  * @package    Mage_SalesRule
  */
 class Mage_SalesRule_Model_System_Config_Source_Coupon_Format

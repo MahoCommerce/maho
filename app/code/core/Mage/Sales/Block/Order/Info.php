@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Invoice view  comments form
  *
- * @category   Mage
  * @package    Mage_Sales
  */
 class Mage_Sales_Block_Order_Info extends Mage_Core_Block_Template

@@ -2,7 +2,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Convert
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Convert HTTP adapter
  *
- * @category   Varien
  * @package    Varien_Convert
  */
 class Varien_Convert_Adapter_Http extends Varien_Convert_Adapter_Abstract

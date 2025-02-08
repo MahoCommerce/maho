@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Multishipping checkout address matipulation controller
  *
- * @category   Mage
  * @package    Mage_Checkout
  */
 class Mage_Checkout_Multishipping_AddressController extends Mage_Core_Controller_Front_Action

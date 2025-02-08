@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -15,7 +14,6 @@
  * Renderer for URL key input
  * Allows to manage and overwrite URL Rewrites History save settings
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  */
 class Mage_Adminhtml_Block_Catalog_Form_Renderer_Attribute_Urlkey extends Mage_Adminhtml_Block_Catalog_Form_Renderer_Fieldset_Element

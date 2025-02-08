@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Report events resource model
  *
- * @category   Mage
  * @package    Mage_Reports
  */
 class Mage_Reports_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abstract

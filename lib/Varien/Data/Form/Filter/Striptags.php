@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Data
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Form Input/Output Strip HTML tags Filter
  *
- * @category   Varien
  * @package    Varien_Data
  */
 class Varien_Data_Form_Filter_Striptags implements Varien_Data_Form_Filter_Interface

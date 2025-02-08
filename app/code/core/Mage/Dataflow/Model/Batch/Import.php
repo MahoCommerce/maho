@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Dataflow
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Dataflow Batch import model
  *
- * @category   Mage
  * @package    Mage_Dataflow
  *
  * @method Mage_Dataflow_Model_Resource_Batch_Import _getResource()

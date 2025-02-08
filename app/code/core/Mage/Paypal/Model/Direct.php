@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -15,7 +14,6 @@
  *
  * PayPal Direct Module
  *
- * @category   Mage
  * @package    Mage_Paypal
  */
 class Mage_Paypal_Model_Direct extends Mage_Payment_Model_Method_Cc

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Paypal Express Onepage checkout block for Billing Address
  *
- * @category   Mage
  * @package    Mage_Paypal
  */
 class Mage_Paypal_Block_Express_Review_Billing extends Mage_Checkout_Block_Onepage_Billing

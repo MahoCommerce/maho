@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_GiftMessage
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Gift Message url helper
  *
- * @category   Mage
  * @package    Mage_GiftMessage
  */
 class Mage_GiftMessage_Helper_Url extends Mage_Core_Helper_Url

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2015-2024 The OpenMage Contributors (https://openmage.org)
@@ -21,7 +20,6 @@
  *  sales_order_delete_before
  *  sales_order_delete_after
  *
- * @category   Mage
  * @package    Mage_Sales
  *
  * @method Mage_Sales_Model_Resource_Order _getResource()

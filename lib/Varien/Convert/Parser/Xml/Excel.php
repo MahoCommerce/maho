@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Convert
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Convert excel xml parser
  *
- * @category   Varien
  * @package    Varien_Convert
  */
 class Varien_Convert_Parser_Xml_Excel extends Varien_Convert_Parser_Abstract

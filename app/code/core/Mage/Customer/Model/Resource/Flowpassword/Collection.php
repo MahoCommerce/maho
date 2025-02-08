@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Customer flow password info collection
  *
- * @category   Mage
  * @package    Mage_Customer
  */
 class Mage_Customer_Model_Resource_Flowpassword_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract

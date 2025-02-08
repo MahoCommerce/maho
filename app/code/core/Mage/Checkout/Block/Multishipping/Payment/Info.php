@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Multishipping checkout payment information data
  *
- * @category   Mage
  * @package    Mage_Checkout
  */
 class Mage_Checkout_Block_Multishipping_Payment_Info extends Mage_Payment_Block_Info_Container

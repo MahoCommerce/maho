@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Sales report invoiced collection
  *
- * @category   Mage
  * @package    Mage_Sales
  */
 class Mage_Sales_Model_Resource_Report_Invoiced_Collection_Order extends Mage_Sales_Model_Resource_Report_Collection_Abstract

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2016-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * File storage database resource resource model class
  *
- * @category   Mage
  * @package    Mage_Core
  */
 class Mage_Core_Model_Resource_File_Storage_Database extends Mage_Core_Model_Resource_File_Storage_Abstract

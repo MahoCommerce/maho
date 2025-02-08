@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_ProductAlert
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * ProductAlert email price changed grid
  *
- * @category   Mage
  * @package    Mage_ProductAlert
  */
 class Mage_ProductAlert_Block_Email_Price extends Mage_ProductAlert_Block_Email_Abstract

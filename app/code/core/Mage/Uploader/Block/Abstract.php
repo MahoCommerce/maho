@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Uploader
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Class Mage_Uploader_Block_Abstract
  *
- * @category   Mage
  * @package    Mage_Uploader
  */
 abstract class Mage_Uploader_Block_Abstract extends Mage_Adminhtml_Block_Widget

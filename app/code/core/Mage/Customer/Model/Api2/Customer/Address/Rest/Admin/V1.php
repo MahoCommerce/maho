@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * API2 class for customer address (admin)
  *
- * @category   Mage
  * @package    Mage_Customer
  */
 class Mage_Customer_Model_Api2_Customer_Address_Rest_Admin_V1 extends Mage_Customer_Model_Api2_Customer_Address_Rest {}

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * CatalogInventory Stock Status Indexer Model
  *
- * @category   Mage
  * @package    Mage_CatalogInventory
  *
  * @method Mage_CatalogInventory_Model_Resource_Indexer_Stock _getResource()

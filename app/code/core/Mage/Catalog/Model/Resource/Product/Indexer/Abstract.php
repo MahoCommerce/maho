@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Catalog Product Indexer Abstract Resource Model
  *
- * @category   Mage
  * @package    Mage_Catalog
  */
 abstract class Mage_Catalog_Model_Resource_Product_Indexer_Abstract extends Mage_Index_Model_Resource_Abstract

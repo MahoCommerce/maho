@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Newsletter
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Customers newsletter subscription controller
  *
- * @category   Mage
  * @package    Mage_Newsletter
  */
 class Mage_Newsletter_ManageController extends Mage_Core_Controller_Front_Action

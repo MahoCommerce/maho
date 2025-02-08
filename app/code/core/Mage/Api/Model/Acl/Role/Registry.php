@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Acl role registry
  *
- * @category   Mage
  * @package    Mage_Api
  */
 class Mage_Api_Model_Acl_Role_Registry extends Zend_Acl_Role_Registry

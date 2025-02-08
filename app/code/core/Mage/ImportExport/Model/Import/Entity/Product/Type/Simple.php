@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Import entity simple product type
  *
- * @category   Mage
  * @package    Mage_ImportExport
  */
 class Mage_ImportExport_Model_Import_Entity_Product_Type_Simple extends Mage_ImportExport_Model_Import_Entity_Product_Type_Abstract

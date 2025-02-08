@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Api2
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * API2 Abstract Resource
  *
- * @category   Mage
  * @package    Mage_Api2
  *
  * @method string _create() _create(array $filteredData) creation of an entity, return location header

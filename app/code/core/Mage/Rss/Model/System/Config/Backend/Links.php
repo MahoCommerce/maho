@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Rss
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Cache cleaner backend model
  *
- * @category   Mage
  * @package    Mage_Rss
  */
 class Mage_Rss_Model_System_Config_Backend_Links extends Mage_Core_Model_Config_Data

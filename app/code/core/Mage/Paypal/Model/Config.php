@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -15,7 +14,6 @@
  * Config model that is aware of all Mage_Paypal payment methods
  * Works with PayPal-specific system configuration
  *
- * @category   Mage
  * @package    Mage_Paypal
  *
  * @property mixed $allow_ba_signup;

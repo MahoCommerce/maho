@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Api2
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * API2 model for multiple internal calls to subresources of specified resource
  *
- * @category   Mage
  * @package    Mage_Api2
  */
 class Mage_Api2_Model_Multicall

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_PaypalUk
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * PayPal Express (Payflow Edition) implementation for payment method instances
  *
- * @category   Mage
  * @package    Mage_PaypalUk
  */
 class Mage_PaypalUk_Model_Express_Pro extends Mage_PaypalUk_Model_Pro

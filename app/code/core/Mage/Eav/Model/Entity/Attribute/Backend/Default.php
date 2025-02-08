@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Entity/Attribute/Model - attribute backend default
  *
- * @category   Mage
  * @package    Mage_Eav
  */
 class Mage_Eav_Model_Entity_Attribute_Backend_Default extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract {}

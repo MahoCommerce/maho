@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Checkout workflow helper
  *
- * @category   Mage
  * @package    Mage_Paypal
  */
 class Mage_Paypal_Helper_Checkout extends Mage_Core_Helper_Abstract

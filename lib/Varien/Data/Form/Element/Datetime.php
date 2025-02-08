@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Data
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Varien data selector form element
  *
- * @category   Varien
  * @package    Varien_Data
  */
 class Varien_Data_Form_Element_Datetime extends Varien_Data_Form_Element_Date {}

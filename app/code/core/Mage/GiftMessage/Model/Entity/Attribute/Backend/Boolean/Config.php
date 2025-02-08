@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_GiftMessage
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Product attribute for allowing of gift messages per item
  *
- * @category   Mage
  * @package    Mage_GiftMessage
  * @deprecated after 1.4.2.0
  */

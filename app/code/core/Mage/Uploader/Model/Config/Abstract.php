@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Uploader
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Uploader Config Instance Abstract Model
  *
- * @category   Mage
  * @package    Mage_Uploader
  */
 abstract class Mage_Uploader_Model_Config_Abstract extends Varien_Object

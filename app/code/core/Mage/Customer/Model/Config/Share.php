@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Customer sharing config model
  *
- * @category   Mage
  * @package    Mage_Customer
  */
 class Mage_Customer_Model_Config_Share extends Mage_Core_Model_Config_Data

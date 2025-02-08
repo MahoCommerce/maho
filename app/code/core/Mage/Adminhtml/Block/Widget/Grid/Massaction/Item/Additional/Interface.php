@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Adminhtml grid widget massaction item additional action interface
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  */
 interface Mage_Adminhtml_Block_Widget_Grid_Massaction_Item_Additional_Interface

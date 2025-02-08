@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Eav Mysql resource helper model
  *
- * @category   Mage
  * @package    Mage_Eav
  */
 class Mage_Eav_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_Helper_Mysql4

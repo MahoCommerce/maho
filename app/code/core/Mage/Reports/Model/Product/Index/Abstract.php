@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Reports Product Index Abstract Model
  *
- * @category   Mage
  * @package    Mage_Reports
  *
  * @method Mage_Reports_Model_Resource_Product_Index_Abstract _getResource()

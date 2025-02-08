@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Shipping
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Class Mage_Shipping_Model_Rate_Result_Abstract
  *
- * @category   Mage
  * @package    Mage_Shipping
  *
  * @method string getCarrier()

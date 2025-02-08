@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Checkout api resource
  *
- * @category   Mage
  * @package    Mage_Checkout
  */
 class Mage_Checkout_Model_Api_Resource extends Mage_Api_Model_Resource_Abstract

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Abstract API2 class for stock item
  *
- * @category   Mage
  * @package    Mage_CatalogInventory
  */
 abstract class Mage_CatalogInventory_Model_Api2_Stock_Item_Rest extends Mage_CatalogInventory_Model_Api2_Stock_Item

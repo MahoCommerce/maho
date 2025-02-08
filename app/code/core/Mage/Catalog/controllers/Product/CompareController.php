@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Catalog comapare controller
  *
- * @category   Mage
  * @package    Mage_Catalog
  */
 class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_Action

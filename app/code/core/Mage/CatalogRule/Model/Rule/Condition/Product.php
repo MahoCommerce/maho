@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_CatalogRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Catalog Rule Product Condition data model
  *
- * @category   Mage
  * @package    Mage_CatalogRule
  */
 class Mage_CatalogRule_Model_Rule_Condition_Product extends Mage_Rule_Model_Condition_Product_Abstract

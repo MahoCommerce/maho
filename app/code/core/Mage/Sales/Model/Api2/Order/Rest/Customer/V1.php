@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * API2 class for orders (customer)
  *
- * @category   Mage
  * @package    Mage_Sales
  */
 class Mage_Sales_Model_Api2_Order_Rest_Customer_V1 extends Mage_Sales_Model_Api2_Order_Rest

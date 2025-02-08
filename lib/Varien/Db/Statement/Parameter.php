@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Db
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -19,7 +18,6 @@
  * Most used properties and methods are defined in interface. Specific things for concrete DB adapter can be
  * transmitted using 'additional' property (Varien_Object) as a container.
  *
- * @category   Varien
  * @package    Varien_Db
  */
 class Varien_Db_Statement_Parameter

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Adminhtml sales create order product search grid giftmessage column renderer
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @deprecated after 1.4.2.0 - gift column has been removed from search grid
  */

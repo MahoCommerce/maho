@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_CatalogIndex
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Event observer and indexer running application
  *
- * @category   Mage
  * @package    Mage_CatalogIndex
  */
 class Mage_CatalogIndex_Model_Observer extends Mage_Core_Model_Abstract

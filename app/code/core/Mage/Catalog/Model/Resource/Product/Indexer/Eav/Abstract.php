@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Catalog Product Eav Attributes abstract indexer resource model
  *
- * @category   Mage
  * @package    Mage_Catalog
  */
 abstract class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract extends Mage_Catalog_Model_Resource_Product_Indexer_Abstract

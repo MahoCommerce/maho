@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_ProductAlert
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * ProductAlert unsubscribe controller
  *
- * @category   Mage
  * @package    Mage_ProductAlert
  */
 class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front_Action

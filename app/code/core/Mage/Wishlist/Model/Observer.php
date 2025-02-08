@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Shopping cart operation observer
  *
- * @category   Mage
  * @package    Mage_Wishlist
  */
 class Mage_Wishlist_Model_Observer extends Mage_Core_Model_Abstract

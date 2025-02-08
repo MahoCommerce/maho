@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Index
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
@@ -15,7 +14,6 @@
  * Abstract index process class
  * Predefine list of methods required by indexer
  *
- * @category   Mage
  * @package    Mage_Index
  *
  * @method Mage_Index_Model_Resource_Abstract _getResource()

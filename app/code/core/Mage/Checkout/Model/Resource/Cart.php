@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Resource model for Checkout Cart
  *
- * @category   Mage
  * @package    Mage_Checkout
  */
 class Mage_Checkout_Model_Resource_Cart extends Mage_Core_Model_Resource_Db_Abstract

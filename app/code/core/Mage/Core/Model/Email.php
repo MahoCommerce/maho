@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -21,7 +20,6 @@
  * - template (file name)
  * - module (for template)
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  *
  * @method getFromEmail()

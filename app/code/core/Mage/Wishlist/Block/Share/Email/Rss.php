@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Wishlist RSS URL to Email Block
  *
- * @category   Mage
  * @package    Mage_Wishlist
  *
  * @method $this setWishlistId(int $value)

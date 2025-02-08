@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Crypt
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Mcrypt plugin
  *
- * @category   Varien
  * @package    Varien_Crypt
  */
 class Varien_Crypt_Mcrypt extends Varien_Crypt_Abstract

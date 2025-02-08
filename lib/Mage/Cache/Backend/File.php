@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Cache
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -42,7 +41,6 @@
 /**
  * Optimized file cache backend
  *
- * @category  Mage
  * @package   Mage_Cache
  */
 class Mage_Cache_Backend_File extends Zend_Cache_Backend_File

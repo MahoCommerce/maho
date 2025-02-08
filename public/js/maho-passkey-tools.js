@@ -1,7 +1,6 @@
 /**
  * Maho
  *
- * @category    Maho
  * @package     js
  * @copyright   Copyright (c) 2018 Thomas Bleeker (CBOR & ByteBuffer part)
  * @copyright   Copyright (c) 2022 Lukas Buchs

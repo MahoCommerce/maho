@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * EAV Entity Attribute Select Data Model
  *
- * @category   Mage
  * @package    Mage_Eav
  */
 class Mage_Eav_Model_Attribute_Data_Select extends Mage_Eav_Model_Attribute_Data_Abstract

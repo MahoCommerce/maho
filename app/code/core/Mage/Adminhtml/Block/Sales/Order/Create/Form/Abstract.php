@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Sales Order Create Form Abstract Block
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  */
 abstract class Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract extends Mage_Adminhtml_Block_Sales_Order_Create_Abstract

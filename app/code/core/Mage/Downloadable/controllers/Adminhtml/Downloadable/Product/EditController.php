@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Adminhtml downloadable product edit
  *
- * @category   Mage
  * @package    Mage_Downloadable
  */
 class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Mage_Adminhtml_Catalog_ProductController

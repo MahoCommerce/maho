@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Rss
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Rss abstract controller
  *
- * @category   Mage
  * @package    Mage_Rss
  */
 class Mage_Rss_Controller_Abstract extends Mage_Core_Controller_Front_Action

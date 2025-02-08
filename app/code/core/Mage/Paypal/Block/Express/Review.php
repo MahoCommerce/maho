@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Paypal Express Onepage checkout block
  *
- * @category   Mage
  * @package    Mage_Paypal
  */
 class Mage_Paypal_Block_Express_Review extends Mage_Core_Block_Template

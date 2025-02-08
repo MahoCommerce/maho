@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Admin
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Admin redirect policy model, guard admin from direct link to store/category/product deletion
  *
- * @category   Mage
  * @package    Mage_Admin
  */
 class Mage_Admin_Model_Redirectpolicy

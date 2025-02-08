@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Abstract API2 class for sales order comments
  *
- * @category   Mage
  * @package    Mage_Sales
  */
 abstract class Mage_Sales_Model_Api2_Order_Comment_Rest extends Mage_Sales_Model_Api2_Order_Comment

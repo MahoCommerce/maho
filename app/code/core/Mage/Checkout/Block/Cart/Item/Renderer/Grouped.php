@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Shopping cart item render block
  *
- * @category   Mage
  * @package    Mage_Checkout
  *
  * @method \Mage_Checkout_Block_Cart_Sidebar getRenderedBlock()

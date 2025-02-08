@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * NVP API wrappers model
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  *
  * @TODO: move some parts to abstract, don't hesitate to throw exceptions on api calls

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Shipping
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -42,7 +41,6 @@
  *   - container: CP
  *   - address: RES
  *
- * @category   Mage
  * @package    Mage_Shipping
  *
  * @method Mage_Sales_Model_Quote_Item[] getAllItems()

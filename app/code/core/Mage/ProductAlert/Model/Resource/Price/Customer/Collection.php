@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_ProductAlert
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * ProductAlert Price Customer collection
  *
- * @category   Mage
  * @package    Mage_ProductAlert
  */
 class Mage_ProductAlert_Model_Resource_Price_Customer_Collection extends Mage_Customer_Model_Resource_Customer_Collection

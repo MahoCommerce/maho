@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Backend model for saving certificate file in case of using certificate based authentication
  *
- * @category   Mage
  * @package    Mage_Paypal
  */
 class Mage_Paypal_Model_System_Config_Backend_Cert extends Mage_Core_Model_Config_Data

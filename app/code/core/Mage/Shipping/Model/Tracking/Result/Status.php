@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Shipping
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -31,7 +30,6 @@
  * -carrier: usps
  * -tracksummary: Your item was delivered at 6:50 am on February 6 in Los Angeles CA 90064
  *
- * @category   Mage
  * @package    Mage_Shipping
  */
 class Mage_Shipping_Model_Tracking_Result_Status extends Mage_Shipping_Model_Tracking_Result_Abstract

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2016-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Catalog Configurable Product Attribute Collection
  *
- * @category   Mage
  * @package    Mage_Catalog
  *
  * @method Mage_Catalog_Model_Product_Type_Configurable_Attribute getItemById(int $value)

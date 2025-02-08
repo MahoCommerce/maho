@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Shipping
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Shipping table rates
  *
- * @category   Mage
  * @package    Mage_Shipping
  */
 class Mage_Shipping_Model_Resource_Carrier_Tablerate extends Mage_Core_Model_Resource_Db_Abstract

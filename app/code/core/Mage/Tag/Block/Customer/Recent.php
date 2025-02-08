@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Tag
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Tags Customer Reviews Block
  *
- * @category   Mage
  * @package    Mage_Tag
  */
 class Mage_Tag_Block_Customer_Recent extends Mage_Core_Block_Template

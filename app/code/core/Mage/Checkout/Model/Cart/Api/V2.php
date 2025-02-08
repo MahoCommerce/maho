@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Shopping cart model
  *
- * @category   Mage
  * @package    Mage_Checkout
  */
 class Mage_Checkout_Model_Cart_Api_V2 extends Mage_Checkout_Model_Cart_Api {}

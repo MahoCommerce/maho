@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Widget
  * @copyright  Copyright (c) 2024 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)

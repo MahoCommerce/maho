@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -29,7 +28,6 @@
  * $validator->isValid('/path/to/my.xml'); //return true, because directory structure can't exist
  * </code>
  *
- * @category   Mage
  * @package    Mage_Core
  */
 class Mage_Core_Model_File_Validator_AvailablePath extends Zend_Validate_Abstract

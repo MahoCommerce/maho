@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * ACL user resource
  *
- * @category   Mage
  * @package    Mage_Api
  */
 class Mage_Api_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstract

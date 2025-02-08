@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -16,7 +15,6 @@
  * Deprecated because after Magento 1.4.2.0 it's impossible
  * to use product collection in wishlist
  *
- * @category   Mage
  * @package    Mage_Wishlist
  * @deprecated after 1.4.2.0
  */

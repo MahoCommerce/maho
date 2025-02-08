@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Store render store
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @deprecated after 1.13.1.0 use Mage_Adminhtml_Block_System_Store_Tree
  */

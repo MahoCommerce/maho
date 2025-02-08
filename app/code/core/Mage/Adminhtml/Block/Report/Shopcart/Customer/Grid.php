@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Adminhtml items in carts report grid block
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  *
  * @method Mage_Reports_Model_Resource_Customer_Collection getCollection()

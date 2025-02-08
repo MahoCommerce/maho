@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Payment
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
@@ -15,7 +14,6 @@
  * Recurring payment profile
  * Extends from Mage_Core_Abstract for a reason: to make descendants have its own resource
  *
- * @category   Mage
  * @package    Mage_Payment
  *
  * @method float getBillingAmount()

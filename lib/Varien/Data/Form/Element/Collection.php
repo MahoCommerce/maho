@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Data
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Form element collection
  *
- * @category   Varien
  * @package    Varien_Data
  */
 class Varien_Data_Form_Element_Collection implements ArrayAccess, IteratorAggregate, Countable

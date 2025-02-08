@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Class Mage_Adminhtml_Block_Api_User_Edit_Tab_Roles
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  *
  * @method Mage_Api_Model_Resource_Role_Collection getCollection()

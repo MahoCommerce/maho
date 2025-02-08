@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Payment
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Payment method form base block
  *
- * @category   Mage
  * @package    Mage_Payment
  */
 class Mage_Payment_Block_Form extends Mage_Core_Block_Template

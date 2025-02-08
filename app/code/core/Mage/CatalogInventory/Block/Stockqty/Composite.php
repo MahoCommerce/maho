@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Product stock qty block for abstract composite product
  *
- * @category   Mage
  * @package    Mage_CatalogInventory
  */
 abstract class Mage_CatalogInventory_Block_Stockqty_Composite extends Mage_CatalogInventory_Block_Stockqty_Default

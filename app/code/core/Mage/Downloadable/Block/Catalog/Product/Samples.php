@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Downloadable Product Samples part block
  *
- * @category   Mage
  * @package    Mage_Downloadable
  */
 class Mage_Downloadable_Block_Catalog_Product_Samples extends Mage_Catalog_Block_Product_Abstract

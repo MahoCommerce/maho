@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
@@ -12,7 +11,6 @@
 /**
  * Core Environment helper
  *
- * @category   Mage
  * @package    Mage_Core
  */
 class Mage_Core_Helper_EnvironmentConfigLoader extends Mage_Core_Helper_Abstract

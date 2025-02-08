@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Base front controller
  *
- * @category   Mage
  * @package    Mage_Core
  */
 class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Action

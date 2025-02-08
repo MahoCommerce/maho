@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Downloadable product type model
  *
- * @category   Mage
  * @package    Mage_Downloadable
  */
 class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Virtual

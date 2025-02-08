@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Downloadable checkout success page
  *
- * @category   Mage
  * @package    Mage_Downloadable
  */
 class Mage_Downloadable_Block_Checkout_Success extends Mage_Checkout_Block_Onepage_Success

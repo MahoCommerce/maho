@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_HTTP
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Class to work with HTTP protocol using sockets
  *
- * @category   Mage
  * @package    Mage_HTTP
  */
 class Mage_HTTP_Client_Socket implements Mage_HTTP_IClient

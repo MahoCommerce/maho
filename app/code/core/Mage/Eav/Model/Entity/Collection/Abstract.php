@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Entity/Attribute/Model - collection abstract
  *
- * @category   Mage
  * @package    Mage_Eav
  */
 abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Collection_Db

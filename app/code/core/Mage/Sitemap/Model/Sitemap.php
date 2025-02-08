@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sitemap
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2016-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Sitemap model
  *
- * @category   Mage
  * @package    Mage_Sitemap
  *
  * @method Mage_Sitemap_Model_Resource_Sitemap _getResource()

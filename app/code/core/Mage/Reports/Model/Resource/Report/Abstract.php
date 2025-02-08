@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Abstract report aggregate resource model
  *
- * @category   Mage
  * @package    Mage_Reports
  */
 abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Model_Resource_Db_Abstract

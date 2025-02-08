@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * OAuth Helper
  *
- * @category   Mage
  * @package    Mage_Oauth
  */
 class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract

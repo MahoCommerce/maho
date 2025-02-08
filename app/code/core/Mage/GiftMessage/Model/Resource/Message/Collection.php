@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_GiftMessage
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Gift Message collection
  *
- * @category   Mage
  * @package    Mage_GiftMessage
  */
 class Mage_GiftMessage_Model_Resource_Message_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
