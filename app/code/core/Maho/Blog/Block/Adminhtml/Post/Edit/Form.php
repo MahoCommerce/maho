@@ -54,8 +54,8 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
         if (!Mage::app()->isSingleStoreMode()) {
             $field = $fieldset->addField('stores', 'multiselect', [
                 'name'      => 'stores[]',
-                'label'     => Mage::helper('cms')->__('Store View'),
-                'title'     => Mage::helper('cms')->__('Store View'),
+                'label'     => Mage::helper('blog')->__('Store View'),
+                'title'     => Mage::helper('blog')->__('Store View'),
                 'required'  => true,
                 'values'    => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true),
             ]);
@@ -70,13 +70,13 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
         }
 
         $fieldset->addField('is_active', 'select', [
-            'label'     => Mage::helper('cms')->__('Status'),
-            'title'     => Mage::helper('cms')->__('Status'),
+            'label'     => Mage::helper('blog')->__('Status'),
+            'title'     => Mage::helper('blog')->__('Status'),
             'name'      => 'is_active',
             'required'  => true,
             'options'   => [
-                '1' => Mage::helper('cms')->__('Enabled'),
-                '0' => Mage::helper('cms')->__('Disabled'),
+                '1' => Mage::helper('blog')->__('Enabled'),
+                '0' => Mage::helper('blog')->__('Disabled'),
             ],
         ]);
         if (!$model->getId()) {
