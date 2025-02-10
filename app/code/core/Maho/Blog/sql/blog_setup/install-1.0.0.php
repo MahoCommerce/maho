@@ -68,13 +68,28 @@ $attributes = [
         'required' => true,
         'sort_order' => 50,
     ],
-
+    'is_active' => [
+        'type' => 'int',
+        'label' => 'Is Active',
+        'input' => 'boolean',
+        'required' => true,
+        'sort_order' => 60,
+        'system' => true,
+    ],
+    'store_id' => [
+        'type' => 'int',
+        'label' => 'Store ID',
+        'input' => 'int',
+        'required' => true,
+        'sort_order' => 70,
+        'backend_model' => 'blog/post_attribute_backend_store'
+    ]
 ];
 
 foreach ($attributes as $code => $options) {
     $installer->addAttribute('blog_post', $code, [
         'type'              => $options['type'],
-        'backend'           => '',
+        'backend'           => $options['backend_model'] ?? null,
         'frontend'          => '',
         'label'             => $options['label'],
         'input'             => $options['input'],
@@ -91,6 +106,7 @@ foreach ($attributes as $code => $options) {
         'visible_on_front'  => true,
         'unique'            => false,
         'sort_order'        => $options['sort_order'],
+        'system'            => $options['system'] ?? false,
     ]);
 }
 
@@ -98,7 +114,7 @@ foreach ($attributes as $code => $options) {
 $table = $installer->getConnection()
     ->newTable($installer->getTable('blog/post_store'))
     ->addColumn(
-        'blog_post_id',
+        'post_id',
         Varien_Db_Ddl_Table::TYPE_INTEGER,
         null,
         [
@@ -127,11 +143,11 @@ $table = $installer->getConnection()
     ->addForeignKey(
         $installer->getFkName(
             'blog/post_store',
-            'blog_post_id',
+            'post_id',
             'blog/post',
             'entity_id',
         ),
-        'blog_post_id',
+        'post_id',
         $installer->getTable('blog/post'),
         'entity_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,

@@ -52,7 +52,7 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
         ]);
 
         if (!Mage::app()->isSingleStoreMode()) {
-            $field = $fieldset->addField('store_id', 'multiselect', [
+            $field = $fieldset->addField('stores', 'multiselect', [
                 'name'      => 'stores[]',
                 'label'     => Mage::helper('cms')->__('Store View'),
                 'title'     => Mage::helper('cms')->__('Store View'),
@@ -62,7 +62,7 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
             $renderer = $this->getStoreSwitcherRenderer();
             $field->setRenderer($renderer);
         } else {
-            $fieldset->addField('store_id', 'hidden', [
+            $fieldset->addField('stores', 'hidden', [
                 'name'      => 'stores[]',
                 'value'     => Mage::app()->getStore(true)->getId(),
             ]);

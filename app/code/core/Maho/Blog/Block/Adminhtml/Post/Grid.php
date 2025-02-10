@@ -119,4 +119,11 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
     }
+
+    protected function _filterStoreCondition(Maho_Blog_Model_Resource_Post_Collection $collection, Mage_Adminhtml_Block_Widget_Grid_Column $column)
+    {
+        if ($value = $column->getFilter()->getValue()) {
+            $collection->addStoreFilter($value);
+        }
+    }
 }
