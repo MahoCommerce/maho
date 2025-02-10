@@ -84,10 +84,9 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
         }
 
         $fieldset->addField('publish_date', 'date', [
+            'name'      => 'publish_date',
             'label'     => Mage::helper('blog')->__('Publishing Date'),
-            'name'      => 'publishing_date',
             'format'    => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
-            'image'     => $this->getSkinUrl('images/grid-cal.gif'),
             'required'  => false,
         ]);
 

@@ -20,4 +20,16 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             $resource->getConnection('sales_write'),
         );
     }
+
+    protected function _getDefaultAttributes()
+    {
+        return [
+            'entity_type_id',
+            'attribute_set_id',
+            'increment_id',
+            'created_at',
+            'updated_at',
+            'is_active',
+        ];
+    }
 }
