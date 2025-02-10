@@ -61,6 +61,15 @@
                 </blog>
             </updates>
         </layout>
+        <translate>
+            <modules>
+                <Maho_Blog>
+                    <files>
+                        <default>Maho_Blog.csv</default>
+                    </files>
+                </Maho_Blog>
+            </modules>
+        </translate>
     </adminhtml>
     <frontend>
         <routers>
@@ -79,5 +88,14 @@
                 </blog>
             </updates>
         </layout>
+        <translate>
+            <modules>
+                <Maho_Blog>
+                    <files>
+                        <default>Maho_Blog.csv</default>
+                    </files>
+                </Maho_Blog>
+            </modules>
+        </translate>
     </frontend>
 </config>
