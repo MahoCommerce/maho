@@ -24,6 +24,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         );
     }
 
+    #[\Override]
     protected function _getDefaultAttributes()
     {
         return [
@@ -36,6 +37,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         ];
     }
 
+    #[\Override]
     protected function _afterSave(Varien_Object $object)
     {
         if ($object->hasStores()) {
@@ -86,6 +88,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         return $adapter->fetchCol($select);
     }
 
+    #[\Override]
     protected function _afterLoad(Varien_Object $object)
     {
         if ($object->getId()) {
