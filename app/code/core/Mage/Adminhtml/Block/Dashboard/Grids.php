@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Adminhtml dashboard bottom tabs
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  */
 class Mage_Adminhtml_Block_Dashboard_Grids extends Mage_Adminhtml_Block_Widget_Tabs

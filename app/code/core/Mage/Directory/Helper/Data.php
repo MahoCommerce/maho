@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Directory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Directory data helper
  *
- * @category   Mage
  * @package    Mage_Directory
  */
 class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract

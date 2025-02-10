@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Adminhtml catalog inventory "Minimum Qty Allowed in Shopping Cart" field
  *
- * @category   Mage
  * @package    Mage_CatalogInventory
  */
 class Mage_CatalogInventory_Block_Adminhtml_Form_Field_Minsaleqty extends Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract

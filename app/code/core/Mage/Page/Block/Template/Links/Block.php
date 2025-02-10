@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Page
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2015-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Simple links list block
  *
- * @category   Mage
  * @package    Mage_Page
  */
 class Mage_Page_Block_Template_Links_Block extends Mage_Core_Block_Template

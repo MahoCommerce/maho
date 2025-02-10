@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_CatalogSearch
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Catalog search query model
  *
- * @category   Mage
  * @package    Mage_CatalogSearch
  *
  * @method Mage_CatalogSearch_Model_Resource_Query _getResource()

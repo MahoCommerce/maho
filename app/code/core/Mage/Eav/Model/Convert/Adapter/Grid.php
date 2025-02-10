@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Class Mage_Eav_Model_Convert_Adapter_Grid
  *
- * @category   Mage
  * @package    Mage_Eav
  *
  * @method $this setExceptionLocation(string $string)

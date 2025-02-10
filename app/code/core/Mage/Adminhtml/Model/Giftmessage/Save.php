@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Adminhtml giftmessage save model
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  *
  * @method array getGiftmessages()

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Payment
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Recurring profile gateway management interface
  *
- * @category   Mage
  * @package    Mage_Payment
  */
 interface Mage_Payment_Model_Recurring_Profile_MethodInterface

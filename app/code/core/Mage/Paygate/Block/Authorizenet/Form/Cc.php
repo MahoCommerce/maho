@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paygate
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
@@ -12,7 +11,6 @@
  */
 
 /**
- * @category   Mage
  * @package    Mage_Paygate
  */
 class Mage_Paygate_Block_Authorizenet_Form_Cc extends Mage_Payment_Block_Form

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -15,7 +14,6 @@
  *
  * Frontend is providing the user interface for the attribute
  *
- * @category   Mage
  * @package    Mage_Eav
  */
 interface Mage_Eav_Model_Entity_Attribute_Frontend_Interface {}

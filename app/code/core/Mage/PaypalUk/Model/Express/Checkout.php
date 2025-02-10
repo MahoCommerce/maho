@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_PaypalUk
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -15,7 +14,6 @@
  * Wrapper that performs Paypal Express and Checkout communication
  * Use current Paypal Express method instance
  *
- * @category   Mage
  * @package    Mage_PaypalUk
  */
 class Mage_PaypalUk_Model_Express_Checkout extends Mage_Paypal_Model_Express_Checkout

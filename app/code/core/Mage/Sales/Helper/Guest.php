@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Sales module base helper
  *
- * @category   Mage
  * @package    Mage_Sales
  */
 class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data

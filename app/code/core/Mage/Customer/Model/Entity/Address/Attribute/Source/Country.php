@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Customer country attribute source
  *
- * @category   Mage
  * @package    Mage_Customer
  */
 class Mage_Customer_Model_Entity_Address_Attribute_Source_Country extends Mage_Customer_Model_Resource_Address_Attribute_Source_Country

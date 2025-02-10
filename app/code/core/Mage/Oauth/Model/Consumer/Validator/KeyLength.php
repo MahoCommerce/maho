@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Validate OAuth keys
  *
- * @category   Mage
  * @package    Mage_Oauth
  */
 class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Zend_Validate_StringLength

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Newsletter
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Template model
  *
- * @category   Mage
  * @package    Mage_Newsletter
  *
  * @method Mage_Newsletter_Model_Resource_Template _getResource()

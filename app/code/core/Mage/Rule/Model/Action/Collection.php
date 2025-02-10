@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Rule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Class Mage_Rule_Model_Action_Collection
  *
- * @category   Mage
  * @package    Mage_Rule
  *
  * @method array getActions()

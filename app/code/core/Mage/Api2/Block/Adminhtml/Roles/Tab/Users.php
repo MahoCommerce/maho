@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Api2
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Block for rendering users list tab
  *
- * @category   Mage
  * @package    Mage_Api2
  *
  * @method Mage_Admin_Model_Resource_User_Collection getCollection()

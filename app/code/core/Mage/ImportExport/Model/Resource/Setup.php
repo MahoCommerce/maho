@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * ImportExport setup model
  *
- * @category   Mage
  * @package    Mage_ImportExport
  */
 class Mage_ImportExport_Model_Resource_Setup extends Mage_Core_Model_Resource_Setup {}

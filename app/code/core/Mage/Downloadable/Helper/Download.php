@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Downloadable Products Download Helper
  *
- * @category   Mage
  * @package    Mage_Downloadable
  */
 class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract

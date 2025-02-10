@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Abstract API2 class for product categories
  *
- * @category   Mage
  * @package    Mage_Catalog
  */
 abstract class Mage_Catalog_Model_Api2_Product_Category_Rest extends Mage_Catalog_Model_Api2_Product_Rest

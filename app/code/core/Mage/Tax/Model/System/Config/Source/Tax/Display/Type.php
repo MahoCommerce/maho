@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Price display type source model
  *
- * @category   Mage
  * @package    Mage_Tax
  */
 class Mage_Tax_Model_System_Config_Source_Tax_Display_Type

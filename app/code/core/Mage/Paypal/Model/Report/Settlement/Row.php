@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Model for report rows
  *
- * @category   Mage
  * @package    Mage_Paypal
  *
  * @method Mage_Paypal_Model_Resource_Report_Settlement_Row _getResource()

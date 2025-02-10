@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_ConfigurableSwatches
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Class implementing price change for swatches in product listing pages
  *
- * @category   Mage
  * @package    Mage_ConfigurableSwatches
  */
 class Mage_ConfigurableSwatches_Helper_List_Price extends Mage_Core_Helper_Abstract

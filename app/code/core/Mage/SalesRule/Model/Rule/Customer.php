@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * SalesRule Rule Customer Model
  *
- * @category   Mage
  * @package    Mage_SalesRule
  *
  * @method Mage_SalesRule_Model_Resource_Rule_Customer _getResource()

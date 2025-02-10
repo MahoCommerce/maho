@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Rating
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Rating option model
  *
- * @category   Mage
  * @package    Mage_Rating
  *
  * @method Mage_Rating_Model_Resource_Rating_Option_Collection getResourceCollection()

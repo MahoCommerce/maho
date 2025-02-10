@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Catalog Product widgets controller for CMS WYSIWYG
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  */
 class Mage_Adminhtml_Catalog_Product_WidgetController extends Mage_Adminhtml_Controller_Action

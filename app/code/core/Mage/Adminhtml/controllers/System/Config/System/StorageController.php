@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Adminhtml account controller
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  */
 class Mage_Adminhtml_System_Config_System_StorageController extends Mage_Adminhtml_Controller_Action

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Customer EAV additional attribute resource collection
  *
- * @category   Mage
  * @package    Mage_Customer
  */
 class Mage_Customer_Model_Resource_Attribute_Collection extends Mage_Eav_Model_Resource_Attribute_Collection

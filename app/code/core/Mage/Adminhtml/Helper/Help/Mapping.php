@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Adminhtml help url mapper
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  */
 abstract class Mage_Adminhtml_Helper_Help_Mapping extends Mage_Core_Helper_Abstract

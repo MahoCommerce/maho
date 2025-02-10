@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Data
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -24,7 +23,6 @@
  * @method $this setDisabled(bool $value)
  * @method $this setRequired(bool $value)
  *
- * @category   Varien
  * @package    Varien_Data
  */
 class Varien_Data_Form_Abstract extends Varien_Object

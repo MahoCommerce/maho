@@ -1,7 +1,6 @@
 /**
  * Maho
  *
- * @category    design
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)

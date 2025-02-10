@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Catalog product price block
  *
- * @category   Mage
  * @package    Mage_Catalog
  */
 class Mage_Catalog_Block_Product_View_Price extends Mage_Core_Block_Template

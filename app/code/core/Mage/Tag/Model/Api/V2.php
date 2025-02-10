@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Tag
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Product Tag API
  *
- * @category   Mage
  * @package    Mage_Tag
  */
 class Mage_Tag_Model_Api_V2 extends Mage_Tag_Model_Api

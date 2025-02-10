@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -16,7 +15,6 @@
  * Collects only items segregated by isNominal property
  * Aggregates row totals per item
  *
- * @category   Mage
  * @package    Mage_Checkout
  */
 class Mage_Sales_Model_Quote_Address_Total_Nominal extends Mage_Sales_Model_Quote_Address_Total_Abstract

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_CatalogSearch
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * CatalogSearch fulltext indexer model
  *
- * @category   Mage
  * @package    Mage_CatalogSearch
  */
 class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer_Abstract

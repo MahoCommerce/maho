@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Widget
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Template Filter Model
  *
- * @category   Mage
  * @package    Mage_Widget
  */
 class Mage_Widget_Model_Template_Filter extends Mage_Cms_Model_Template_Filter

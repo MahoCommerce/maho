@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Widget
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * WYSIWYG widget options form
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  *
  * @method $this setConfig(Varien_Object $value)

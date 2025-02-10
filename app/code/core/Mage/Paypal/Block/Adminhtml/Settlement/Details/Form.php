@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Settlement reports transaction details
  *
- * @category   Mage
  * @package    Mage_Paypal
  */
 class Mage_Paypal_Block_Adminhtml_Settlement_Details_Form extends Mage_Adminhtml_Block_Widget_Form

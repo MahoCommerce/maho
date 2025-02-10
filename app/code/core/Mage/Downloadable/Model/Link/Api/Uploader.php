@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * File uploader for API
  *
- * @category   Mage
  * @package    Mage_Downloadable
  */
 class Mage_Downloadable_Model_Link_Api_Uploader extends Mage_Core_Model_File_Uploader

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Api2
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * API2 Global ACL role resources permissions model
  *
- * @category   Mage
  * @package    Mage_Api2
  */
 class Mage_Api2_Model_Acl_Global_Rule_ResourcePermission implements Mage_Api2_Model_Acl_PermissionInterface

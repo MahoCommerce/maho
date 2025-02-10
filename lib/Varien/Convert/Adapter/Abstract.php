@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Convert
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Convert abstract adapter
  *
- * @category   Varien
  * @package    Varien_Convert
  */
 abstract class Varien_Convert_Adapter_Abstract extends Varien_Convert_Container_Abstract implements Varien_Convert_Adapter_Interface

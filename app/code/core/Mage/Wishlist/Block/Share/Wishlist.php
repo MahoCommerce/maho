@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Wishlist block shared items
  *
- * @category   Mage
  * @package    Mage_Wishlist
  */
 class Mage_Wishlist_Block_Share_Wishlist extends Mage_Wishlist_Block_Abstract

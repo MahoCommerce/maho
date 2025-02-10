@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -15,7 +14,6 @@
  *
  * Allows dispatching before and after events for each controller action
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  */
 abstract class Mage_Adminhtml_Model_System_Config_Backend_Currency_Abstract extends Mage_Core_Model_Config_Data

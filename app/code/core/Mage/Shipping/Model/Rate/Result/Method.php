@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Shipping
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -19,7 +18,6 @@
  * - price: $9.40 (cost+handling)
  * - cost: $8.00
  *
- * @category   Mage
  * @package    Mage_Shipping
  *
  * @method $this setCarrier(string $value)

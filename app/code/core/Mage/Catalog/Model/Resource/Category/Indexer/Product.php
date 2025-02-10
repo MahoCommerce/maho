@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Resource model for category product indexer
  *
- * @category   Mage
  * @package    Mage_Catalog
  */
 class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Model_Resource_Abstract

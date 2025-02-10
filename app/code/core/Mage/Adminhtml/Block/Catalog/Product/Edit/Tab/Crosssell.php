@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Crossell products admin grid
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  *
  * @method Mage_Catalog_Model_Resource_Product_Link_Product_Collection getCollection()

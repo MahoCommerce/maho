@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Immediate flush block. To be used only as root
  *
- * @category   Mage
  * @package    Mage_Core
  */
 class Mage_Core_Block_Flush extends Mage_Core_Block_Abstract

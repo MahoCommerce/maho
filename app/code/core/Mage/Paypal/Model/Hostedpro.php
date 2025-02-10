@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Website Payments Pro Hosted Solution payment gateway model
  *
- * @category   Mage
  * @package    Mage_Paypal
  */
 class Mage_Paypal_Model_Hostedpro extends Mage_Paypal_Model_Direct

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_GoogleAnalytics
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * GoogleAnalitics Page Block
  *
- * @category   Mage
  * @package    Mage_GoogleAnalytics
  */
 class Mage_GoogleAnalytics_Block_Ga extends Mage_Core_Block_Template

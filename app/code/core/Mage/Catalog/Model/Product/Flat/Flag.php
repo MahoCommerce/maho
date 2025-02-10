@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Calatog Product Flat Flag Model
  *
- * @category   Mage
  * @package    Mage_Catalog
  */
 class Mage_Catalog_Model_Product_Flat_Flag extends Mage_Core_Model_Flag

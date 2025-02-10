@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Admin abstract reports controller
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  */
 abstract class Mage_Adminhtml_Controller_Report_Abstract extends Mage_Adminhtml_Controller_Action

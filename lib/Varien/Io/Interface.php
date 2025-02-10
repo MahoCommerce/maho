@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Io
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Input/output client interface
  *
- * @category   Varien
  * @package    Varien_Io
  */
 interface Varien_Io_Interface

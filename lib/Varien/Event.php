@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Event
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Event object and dispatcher
  *
- * @category   Varien
  * @package    Varien_Event
  */
 class Varien_Event extends Varien_Object

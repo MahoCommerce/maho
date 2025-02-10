@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -19,7 +18,6 @@
  *  - Store save (new store creation, changed store group) - require reindex all data
  *  - Store group save (changed root category or group website) - require reindex all data
  *
- * @category   Mage
  * @package    Mage_Catalog
  *
  * @method Mage_Catalog_Model_Resource_Category_Indexer_Product _getResource()

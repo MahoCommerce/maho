@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Cms
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Wysiwyg Images model
  *
- * @category   Mage
  * @package    Mage_Cms
  */
 class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_CatalogRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Catalog Rule Product Aggregated Price per date Resource Model
  *
- * @category   Mage
  * @package    Mage_CatalogRule
  */
 class Mage_CatalogRule_Model_Resource_Rule_Product_Price extends Mage_Core_Model_Resource_Db_Abstract

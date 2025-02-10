@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Bundle
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Bundle Product Price Index Resource model
  *
- * @category   Mage
  * @package    Mage_Bundle
  */
 class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db_Abstract

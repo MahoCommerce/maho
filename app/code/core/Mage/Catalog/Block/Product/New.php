@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * New products block
  *
- * @category   Mage
  * @package    Mage_Catalog
  */
 class Mage_Catalog_Block_Product_New extends Mage_Catalog_Block_Product_Abstract

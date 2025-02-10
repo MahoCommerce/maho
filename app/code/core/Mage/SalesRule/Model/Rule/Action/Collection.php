@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Class Mage_SalesRule_Model_Rule_Action_Collection
  *
- * @category   Mage
  * @package    Mage_SalesRule
  *
  * @method $this setType(string $value)

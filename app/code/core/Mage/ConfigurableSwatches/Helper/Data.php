@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_ConfigurableSwatches
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
@@ -11,7 +10,6 @@
  */
 
 /**
- * @category   Mage
  * @package    Mage_ConfigurableSwatches
  */
 class Mage_ConfigurableSwatches_Helper_Data extends Mage_Core_Helper_Abstract

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Catalog product abstract group price backend attribute model
  *
- * @category   Mage
  * @package    Mage_Catalog
  *
  * @method Mage_Catalog_Model_Resource_Product_Attribute_Backend_Groupprice _getResource()

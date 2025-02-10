@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -15,7 +14,6 @@
  * Payment transaction model
  * Tracks transaction history
  *
- * @category   Mage
  * @package    Mage_Paypal
  *
  * @method Mage_Paypal_Model_Resource_Payment_Transaction _getResource()

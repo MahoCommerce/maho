@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Dataflow
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Dataflow Batch abstract model
  *
- * @category   Mage
  * @package    Mage_Dataflow
  */
 abstract class Mage_Dataflow_Model_Batch_Abstract extends Mage_Core_Model_Abstract

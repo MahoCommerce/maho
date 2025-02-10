@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_PaypalUk
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * PayPal Bill Me Later method
  *
- * @category   Mage
  * @package    Mage_PaypalUk
  */
 class Mage_PaypalUk_Model_Bml extends Mage_Paypal_Model_Bml

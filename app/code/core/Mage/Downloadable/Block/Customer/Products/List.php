@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Block to display downloadable links bought by customer
  *
- * @category   Mage
  * @package    Mage_Downloadable
  *
  * @method Mage_Downloadable_Model_Resource_Link_Purchased_Item_Collection getItems()

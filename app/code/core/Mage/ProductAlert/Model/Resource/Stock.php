@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_ProductAlert
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Product alert for back in stock resource model
  *
- * @category   Mage
  * @package    Mage_ProductAlert
  */
 class Mage_ProductAlert_Model_Resource_Stock extends Mage_ProductAlert_Model_Resource_Abstract

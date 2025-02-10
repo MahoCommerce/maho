@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Widget
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Widgets Insertion Plugin Config for Editor HTML Element
  *
- * @category   Mage
  * @package    Mage_Widget
  */
 class Mage_Widget_Model_Widget_Config extends Varien_Object

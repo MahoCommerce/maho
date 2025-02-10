@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Rss
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Rss data helper
  *
- * @category   Mage
  * @package    Mage_Rss
  */
 class Mage_Rss_Helper_Data extends Mage_Core_Helper_Abstract

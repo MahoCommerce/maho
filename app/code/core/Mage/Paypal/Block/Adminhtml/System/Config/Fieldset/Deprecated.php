@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Fieldset renderer for deprecated PayPal solutions
  *
- * @category   Mage
  * @package    Mage_Paypal
  */
 class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Deprecated extends Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Payment

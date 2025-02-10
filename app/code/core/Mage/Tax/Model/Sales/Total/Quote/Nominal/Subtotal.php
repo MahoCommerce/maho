@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Nominal subtotal tax total
  *
- * @category   Mage
  * @package    Mage_Tax
  */
 class Mage_Tax_Model_Sales_Total_Quote_Nominal_Subtotal extends Mage_Tax_Model_Sales_Total_Quote_Subtotal

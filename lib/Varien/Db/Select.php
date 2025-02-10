@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Db
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -33,7 +32,6 @@
  * @method $this reset($part = null)
  * @method $this columns($cols = '*', $correlationName = null)
  *
- * @category   Varien
  * @package    Varien_Db
  */
 class Varien_Db_Select extends Zend_Db_Select

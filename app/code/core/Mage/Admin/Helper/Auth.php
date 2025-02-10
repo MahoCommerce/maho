@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
@@ -13,7 +12,6 @@ use lbuchs\WebAuthn\WebAuthn;
 use lbuchs\WebAuthn\Attestation\AuthenticatorData;
 
 /**
- * @category   Mage
  * @package    Mage_Adminhtml
  */
 class Mage_Admin_Helper_Auth extends Mage_Core_Helper_Abstract

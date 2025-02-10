@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Paypal Payflow Advanced Express Onepage checkout block
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @deprecated since 1.6.2.0
  */

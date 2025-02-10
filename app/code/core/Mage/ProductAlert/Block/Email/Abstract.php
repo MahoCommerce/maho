@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_ProductAlert
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Product Alert Abstract Email Block
  *
- * @category   Mage
  * @package    Mage_ProductAlert
  */
 abstract class Mage_ProductAlert_Block_Email_Abstract extends Mage_Core_Block_Template

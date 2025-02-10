@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Order status resource model
  *
- * @category   Mage
  * @package    Mage_Sales
  */
 class Mage_Sales_Model_Resource_Order_Status extends Mage_Core_Model_Resource_Db_Abstract

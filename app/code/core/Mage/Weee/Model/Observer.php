@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Weee
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Class Mage_Weee_Model_Observer
  *
- * @category   Mage
  * @package    Mage_Weee
  */
 class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract

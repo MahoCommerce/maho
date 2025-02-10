@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Class Mage_Adminhtml_Block_Tax_Rule_Grid
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  *
  * @method Mage_Tax_Model_Resource_Calculation_Rule_Collection getCollection()

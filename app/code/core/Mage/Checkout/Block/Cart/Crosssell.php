@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Cart crosssell list
  *
- * @category   Mage
  * @package    Mage_Checkout
  */
 class Mage_Checkout_Block_Cart_Crosssell extends Mage_Catalog_Block_Product_Abstract

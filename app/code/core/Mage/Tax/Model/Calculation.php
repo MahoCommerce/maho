@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Tax Calculation Model
  *
- * @category   Mage
  * @package    Mage_Tax
  *
  * @method Mage_Tax_Model_Resource_Calculation _getResource()

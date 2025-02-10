@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Adminhtml customer billing agreement tab
  *
- * @category   Mage
  * @package    Mage_Sales
  */
 class Mage_Sales_Block_Adminhtml_Customer_Edit_Tab_Agreement extends Mage_Sales_Block_Adminhtml_Billing_Agreement_Grid implements Mage_Adminhtml_Block_Widget_Tab_Interface

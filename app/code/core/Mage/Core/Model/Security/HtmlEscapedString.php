@@ -5,7 +5,6 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
@@ -14,7 +13,6 @@ declare(strict_types=1);
 /**
  * Wrapper to escape a string value with a method to get the original string value
  *
- * @category   Mage
  * @package    Mage_Core
  */
 class Mage_Core_Model_Security_HtmlEscapedString implements Stringable

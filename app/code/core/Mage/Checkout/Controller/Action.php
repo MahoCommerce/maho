@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Controller for onepage and multishipping checkouts
  *
- * @category   Mage
  * @package    Mage_Checkout
  */
 abstract class Mage_Checkout_Controller_Action extends Mage_Core_Controller_Front_Action

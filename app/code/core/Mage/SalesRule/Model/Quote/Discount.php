@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Discount calculation model
  *
- * @category   Mage
  * @package    Mage_SalesRule
  */
 class Mage_SalesRule_Model_Quote_Discount extends Mage_Sales_Model_Quote_Address_Total_Abstract

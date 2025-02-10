@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Controller exception that can fork different actions, cause forward or redirect
  *
- * @category   Mage
  * @package    Mage_Core
  */
 class Mage_Core_Controller_Varien_Exception extends Exception

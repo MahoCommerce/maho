@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Io
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Install and upgrade client abstract class
  *
- * @category   Varien
  * @package    Varien_Io
  */
 abstract class Varien_Io_Abstract implements Varien_Io_Interface

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Usa
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * DHL shipping implementation
  *
- * @category   Mage
  * @package    Mage_Usa
  */
 class Mage_Usa_Model_Shipping_Carrier_Dhl extends Mage_Usa_Model_Shipping_Carrier_Dhl_Abstract implements Mage_Shipping_Model_Carrier_Interface

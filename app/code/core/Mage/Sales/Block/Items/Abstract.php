@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Abstract block for display sales (quote/order/invoice etc.) items
  *
- * @category   Mage
  * @package    Mage_Sales
  */
 class Mage_Sales_Block_Items_Abstract extends Mage_Core_Block_Template

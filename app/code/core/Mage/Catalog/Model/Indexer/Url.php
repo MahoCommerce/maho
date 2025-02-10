@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -20,7 +19,6 @@
  *  - Store group save (changed root category or group website) - require reindex all data
  *  - Seo config settings change - require reindex all data
  *
- * @category   Mage
  * @package    Mage_Catalog
  */
 class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract

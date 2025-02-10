@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Contacts
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Contacts base helper
  *
- * @category   Mage
  * @package    Mage_Contacts
  */
 class Mage_Contacts_Helper_Data extends Mage_Core_Helper_Abstract

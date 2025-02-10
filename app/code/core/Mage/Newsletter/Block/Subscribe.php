@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Newsletter
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Newsletter subscribe block
  *
- * @category   Mage
  * @package    Mage_Newsletter
  */
 class Mage_Newsletter_Block_Subscribe extends Mage_Core_Block_Template

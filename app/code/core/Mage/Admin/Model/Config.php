@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Admin
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Configuration for Admin model
  *
- * @category   Mage
  * @package    Mage_Admin
  */
 class Mage_Admin_Model_Config extends Varien_Simplexml_Config

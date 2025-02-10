@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Sales Order downloadable items name column renderer
  *
- * @category   Mage
  * @package    Mage_Downloadable
  */
 class Mage_Downloadable_Block_Adminhtml_Sales_Items_Column_Downloadable_Name extends Mage_Adminhtml_Block_Sales_Items_Column_Name

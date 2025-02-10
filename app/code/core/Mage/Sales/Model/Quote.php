@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -21,7 +20,6 @@
  *  sales_quote_delete_before
  *  sales_quote_delete_after
  *
- * @category   Mage
  * @package    Mage_Sales
  *
  * @method Mage_Sales_Model_Resource_Quote _getResource()

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Catalog Product Custom Options helper
  *
- * @category   Mage
  * @package    Mage_Catalog
  */
 class Mage_Catalog_Helper_Product_Options extends Mage_Core_Helper_Abstract

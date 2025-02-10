@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Page
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Js translation block
  *
- * @category   Mage
  * @package    Mage_Page
  * @deprecated since 1.7.0.0 (used in adminhtml/default/default/layout/main.xml)
  */

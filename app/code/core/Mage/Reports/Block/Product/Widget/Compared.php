@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Reports Recently Compared Products Widget
  *
- * @category   Mage
  * @package    Mage_Reports
  */
 class Mage_Reports_Block_Product_Widget_Compared extends Mage_Reports_Block_Product_Compared implements Mage_Widget_Block_Interface

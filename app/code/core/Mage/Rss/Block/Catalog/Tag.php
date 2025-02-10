@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Rss
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Review form block
  *
- * @category   Mage
  * @package    Mage_Rss
  */
 class Mage_Rss_Block_Catalog_Tag extends Mage_Rss_Block_Catalog_Abstract

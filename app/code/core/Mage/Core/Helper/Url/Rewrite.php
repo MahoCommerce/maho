@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Url rewrite helper
  *
- * @category   Mage
  * @package    Mage_Core
  */
 class Mage_Core_Helper_Url_Rewrite extends Mage_Core_Helper_Abstract

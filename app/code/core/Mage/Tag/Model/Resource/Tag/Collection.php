@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Tag
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Tag collection model
  *
- * @category   Mage
  * @package    Mage_Tag
  */
 class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract

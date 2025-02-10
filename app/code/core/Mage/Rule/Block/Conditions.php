@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Rule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -12,7 +11,6 @@
  */
 
 /**
- * @category   Mage
  * @package    Mage_Rule
  */
 class Mage_Rule_Block_Conditions implements Varien_Data_Form_Element_Renderer_Interface

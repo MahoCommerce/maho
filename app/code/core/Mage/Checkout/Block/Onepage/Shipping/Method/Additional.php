@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Block for additional information in shipping method
  *
- * @category   Mage
  * @package    Mage_Checkout
  */
 class Mage_Checkout_Block_Onepage_Shipping_Method_Additional extends Mage_Checkout_Block_Onepage_Abstract {}

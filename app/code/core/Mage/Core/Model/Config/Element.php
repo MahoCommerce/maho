@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Config element model
  *
- * @category   Mage
  * @package    Mage_Core
  */
 class Mage_Core_Model_Config_Element extends Varien_Simplexml_Element

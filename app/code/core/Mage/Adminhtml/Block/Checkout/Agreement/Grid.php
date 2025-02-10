@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Class Mage_Adminhtml_Block_Checkout_Agreement_Grid
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  *
  * @method Mage_Checkout_Model_Resource_Agreement_Collection getCollection()

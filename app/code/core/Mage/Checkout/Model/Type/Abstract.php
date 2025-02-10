@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Cehckout type abstract class
  *
- * @category   Mage
  * @package    Mage_Checkout
  */
 abstract class Mage_Checkout_Model_Type_Abstract extends Varien_Object

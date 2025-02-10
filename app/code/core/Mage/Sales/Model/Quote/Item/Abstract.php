@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -21,7 +20,6 @@
  *  - custom_price - new price that can be declared by user and recalculated during calculation process
  *  - original_custom_price - original defined value of custom price without any conversion
  *
- * @category   Mage
  * @package    Mage_Sales
  *
  * @method Mage_Sales_Model_Quote_Address getAddress()

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Base class for invoice total
  *
- * @category   Mage
  * @package    Mage_Sales
  */
 abstract class Mage_Sales_Model_Order_Invoice_Total_Abstract extends Mage_Sales_Model_Order_Total_Abstract

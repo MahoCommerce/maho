@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Class Mage_SalesRule_Model_Rule_Condition_Product_Found
  *
- * @category   Mage
  * @package    Mage_SalesRule
  *
  * @method setValueOption(array $array)

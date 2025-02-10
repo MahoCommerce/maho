@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Import controller
  *
- * @category   Mage
  * @package    Mage_ImportExport
  */
 class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Controller_Action

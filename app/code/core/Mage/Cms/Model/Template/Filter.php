@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Cms
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Cms Template Filter Model
  *
- * @category   Mage
  * @package    Mage_Cms
  */
 class Mage_Cms_Model_Template_Filter extends Mage_Core_Model_Email_Template_Filter

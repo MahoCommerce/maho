@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
@@ -86,7 +85,6 @@
  *  ));
  * </code>
  *
- * @category   Mage
  * @package    Mage_Core
  * @see Mage_Core_Model_Input_FilterTest See this class for manual
  */

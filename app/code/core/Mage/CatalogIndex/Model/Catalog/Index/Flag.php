@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_CatalogIndex
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -12,7 +11,6 @@
  */
 
 /**
- * @category   Mage
  * @package    Mage_CatalogIndex
  */
 class Mage_CatalogIndex_Model_Catalog_Index_Flag extends Mage_Core_Model_Flag

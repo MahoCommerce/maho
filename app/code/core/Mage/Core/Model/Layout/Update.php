@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2015-2025 The OpenMage Contributors (https://openmage.org)
@@ -11,7 +10,6 @@
  */
 
 /**
- * @category   Mage
  * @package    Mage_Core
  */
 class Mage_Core_Model_Layout_Update

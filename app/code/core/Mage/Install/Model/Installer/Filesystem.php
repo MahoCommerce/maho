@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Filesystem installer
  *
- * @category   Mage
  * @package    Mage_Install
  */
 class Mage_Install_Model_Installer_Filesystem extends Mage_Install_Model_Installer_Abstract

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Log
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Log Prepare Online visitors resource
  *
- * @category   Mage
  * @package    Mage_Log
  */
 class Mage_Log_Model_Resource_Visitor_Online extends Mage_Core_Model_Resource_Db_Abstract

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Http
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * HTTP CURL Adapter
  *
- * @category   Varien
  * @package    Varien_Http
  */
 class Varien_Http_Adapter_Curl implements Zend_Http_Client_Adapter_Interface

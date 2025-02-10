@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
@@ -15,7 +14,6 @@
  * Nominal total rendered
  * Each item is rendered as separate total with its details
  *
- * @category   Mage
  * @package    Mage_Checkout
  */
 class Mage_Checkout_Block_Total_Nominal extends Mage_Checkout_Block_Total_Default

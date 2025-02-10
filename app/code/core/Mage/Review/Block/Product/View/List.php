@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Review
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Detailed Product Reviews
  *
- * @category   Mage
  * @package    Mage_Review
  */
 class Mage_Review_Block_Product_View_List extends Mage_Review_Block_Product_View

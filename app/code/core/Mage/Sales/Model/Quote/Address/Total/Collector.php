@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Address Total Collector model
  *
- * @category   Mage
  * @package    Mage_Sales
  */
 class Mage_Sales_Model_Quote_Address_Total_Collector extends Mage_Sales_Model_Config_Ordered

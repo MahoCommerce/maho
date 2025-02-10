@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_ProductAlert
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -12,7 +11,6 @@
  */
 
 /**
- * @category   Mage
  * @package    Mage_ProductAlert
  * @deprecated after 1.4.1.0
  * @see Mage_ProductAlert_Block_Product_View

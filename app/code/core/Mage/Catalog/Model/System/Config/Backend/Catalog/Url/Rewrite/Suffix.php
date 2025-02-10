@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Url rewrite suffix backend
  *
- * @category   Mage
  * @package    Mage_Catalog
  */
 class Mage_Catalog_Model_System_Config_Backend_Catalog_Url_Rewrite_Suffix extends Mage_Core_Model_Config_Data

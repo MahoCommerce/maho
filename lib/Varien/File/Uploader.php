@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_File
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
@@ -17,7 +16,6 @@
  * ATTENTION! This class must be used like abstract class and must added
  * validation by protected file extension list to extended class
  *
- * @category   Varien
  * @package    Varien_File
  */
 

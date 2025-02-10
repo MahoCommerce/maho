@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Order Tax Item Collection
  *
- * @category   Mage
  * @package    Mage_Tax
  */
 class Mage_Tax_Model_Resource_Sales_Order_Tax_Item_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract

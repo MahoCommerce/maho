@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Data
  * @copyright  Copyright (c) 2023 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
@@ -12,7 +11,6 @@
 /**
  * Form text element
  *
- * @category   Varien
  * @package    Varien_Data
  */
 class Varien_Data_Form_Element_Color extends Varien_Data_Form_Element_Abstract

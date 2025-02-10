@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Notifications about not correct tax settings
  *
- * @category   Mage
  * @package    Mage_Tax
  */
 class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Template

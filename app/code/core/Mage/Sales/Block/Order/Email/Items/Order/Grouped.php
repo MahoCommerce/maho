@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Sales Order Email items grouped renderer
  *
- * @category   Mage
  * @package    Mage_Sales
  */
 class Mage_Sales_Block_Order_Email_Items_Order_Grouped extends Mage_Sales_Block_Order_Email_Items_Order_Default

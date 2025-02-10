@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Most viewed product report aggregate resource model
  *
- * @category   Mage
  * @package    Mage_Reports
  */
 class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model_Resource_Report_Abstract

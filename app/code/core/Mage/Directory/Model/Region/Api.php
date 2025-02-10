@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Directory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Directory Region Api
  *
- * @category   Mage
  * @package    Mage_Directory
  */
 class Mage_Directory_Model_Region_Api extends Mage_Api_Model_Resource_Abstract

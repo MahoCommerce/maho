@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -15,7 +14,6 @@
 /**
  * Admin tag edit block
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @deprecated after 1.3.2.3
  */

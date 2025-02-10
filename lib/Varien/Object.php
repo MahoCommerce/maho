@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Object
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Varien Object
  *
- * @category   Varien
  * @package    Varien_Object
  */
 class Varien_Object implements ArrayAccess
@@ -574,7 +572,8 @@ class Varien_Object implements ArrayAccess
         } else {
             preg_match_all('/\{\{([a-z0-9_]+)\}\}/is', $format, $matches);
             foreach ($matches[1] as $var) {
-                $format = str_replace('{{' . $var . '}}', $this->getData($var), $format);
+                $replace = is_null($this->getData($var)) ? '' : $this->getData($var);
+                $format = str_replace('{{' . $var . '}}', $replace, $format);
             }
             $str = $format;
         }

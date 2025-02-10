@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Abstract adapter model
  *
- * @category   Mage
  * @package    Mage_ImportExport
  */
 abstract class Mage_ImportExport_Model_Export_Adapter_Abstract

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2023 The OpenMage Contributors (https://openmage.org)
@@ -12,7 +11,6 @@
  */
 
 /**
- * @category   Mage
  * @package    Mage_Api
  */
 class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mage_Api_Model_Server_Adapter_Interface

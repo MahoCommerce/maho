@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Exception which thrown by PayPal API in case of processable error codes
  *
- * @category   Mage
  * @package    Mage_Paypal
  */
 class Mage_Paypal_Model_Api_ProcessableException extends Mage_Core_Exception

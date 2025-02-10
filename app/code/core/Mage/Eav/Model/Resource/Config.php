@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Eav Resource Config model
  *
- * @category   Mage
  * @package    Mage_Eav
  */
 class Mage_Eav_Model_Resource_Config extends Mage_Core_Model_Resource_Db_Abstract

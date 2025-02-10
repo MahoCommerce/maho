@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Administrator account install block
  *
- * @category   Mage
  * @package    Mage_Install
  */
 class Mage_Install_Block_Admin extends Mage_Install_Block_Abstract

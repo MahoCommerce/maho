@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Product url rewrite helper
  *
- * @category   Mage
  * @package    Mage_Catalog
  */
 class Mage_Catalog_Helper_Product_Url_Rewrite implements Mage_Catalog_Helper_Product_Url_Rewrite_Interface

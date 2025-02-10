@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Customer address helper
  *
- * @category   Mage
  * @package    Mage_Customer
  */
 class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract

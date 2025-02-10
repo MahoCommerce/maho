@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Paypal Billing Agreement method
  *
- * @category   Mage
  * @package    Mage_Paypal
  */
 class Mage_Paypal_Model_Method_Agreement extends Mage_Sales_Model_Payment_Method_Billing_AgreementAbstract implements Mage_Payment_Model_Billing_Agreement_MethodInterface

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Weee
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Weee calculation model
  *
- * @category   Mage
  * @package    Mage_Weee
  */
 class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_Tax

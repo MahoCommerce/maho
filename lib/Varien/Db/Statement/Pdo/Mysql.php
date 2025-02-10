@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Db
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Mysql DB Statement
  *
- * @category   Varien
  * @package    Varien_Db
  */
 class Varien_Db_Statement_Pdo_Mysql extends Zend_Db_Statement_Pdo

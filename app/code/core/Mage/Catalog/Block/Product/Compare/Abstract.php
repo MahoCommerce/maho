@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Catalog Compare Products Abstract Block
  *
- * @category   Mage
  * @package    Mage_Catalog
  */
 abstract class Mage_Catalog_Block_Product_Compare_Abstract extends Mage_Catalog_Block_Product_Abstract

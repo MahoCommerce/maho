@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
@@ -12,7 +11,6 @@
 /**
  * Config model for loading jstranslate.xml files
  *
- * @category   Mage
  * @package    Mage_Core
  */
 class Mage_Core_Model_Translate_Config extends Varien_Simplexml_Config

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Cms
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * CMS page collection
  *
- * @category   Mage
  * @package    Mage_Cms
  */
 class Mage_Cms_Model_Resource_Page_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * HTML select element block with customer groups options
  *
- * @category   Mage
  * @package    Mage_CatalogInventory
  */
 class Mage_CatalogInventory_Block_Adminhtml_Form_Field_Customergroup extends Mage_Core_Block_Html_Select

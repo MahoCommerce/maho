@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
@@ -16,7 +15,6 @@
  * Tracks transaction history, allows to build transactions hierarchy
  * By default transactions are saved as closed.
  *
- * @category   Mage
  * @package    Mage_Sales
  *
  * @method Mage_Sales_Model_Resource_Order_Payment_Transaction _getResource()

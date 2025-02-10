@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Rule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Abstract Rule entity data model
  *
- * @category   Mage
  * @package    Mage_Rule
  * @deprecated since 1.7.0.0 use Mage_Rule_Model_Abstract instead
  */

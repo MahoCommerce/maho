@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Tag
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Tag Indexer Model
  *
- * @category   Mage
  * @package    Mage_Tag
  */
 class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resource_Product_Indexer_Abstract

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Convert
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -16,7 +15,6 @@
  *
  * Insert where you want to step profile execution if dry run flag is set
  *
- * @category   Varien
  * @package    Varien_Convert
  */
 class Varien_Convert_Validator_Dryrun extends Varien_Convert_Validator_Abstract

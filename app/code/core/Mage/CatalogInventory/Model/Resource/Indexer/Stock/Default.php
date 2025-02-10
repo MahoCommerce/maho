@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * CatalogInventory Default Stock Status Indexer Resource Model
  *
- * @category   Mage
  * @package    Mage_CatalogInventory
  */
 class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default extends Mage_Catalog_Model_Resource_Product_Indexer_Abstract implements Mage_CatalogInventory_Model_Resource_Indexer_Stock_Interface

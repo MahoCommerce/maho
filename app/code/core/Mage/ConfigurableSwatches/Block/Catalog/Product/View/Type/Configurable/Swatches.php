@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_ConfigurableSwatches
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Class Mage_ConfigurableSwatches_Block_Catalog_Product_View_Type_Configurable_Swatches
  *
- * @category   Mage
  * @package    Mage_ConfigurableSwatches
  *
  * @method $this setJsonConfig(string $value)

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Abstract class for Paypal API wrappers
  *
- * @category   Mage
  * @package    Mage_Paypal
  */
 abstract class Mage_Paypal_Model_Api_Abstract extends Varien_Object

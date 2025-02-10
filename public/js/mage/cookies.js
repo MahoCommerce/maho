@@ -1,7 +1,6 @@
 /**
  * Maho
  *
- * @category    Mage
  * @package     js
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2018-2022 The OpenMage Contributors (https://openmage.org)

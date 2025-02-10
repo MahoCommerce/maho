@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Renderer for Payflow Link information
  *
- * @category   Mage
  * @package    Mage_Paypal
  */
 class Mage_Paypal_Block_Adminhtml_System_Config_Payflowlink_Info extends Mage_Adminhtml_Block_System_Config_Form_Field

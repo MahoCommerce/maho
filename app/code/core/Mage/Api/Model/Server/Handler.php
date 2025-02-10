@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Webservices default server handler
  *
- * @category   Mage
  * @package    Mage_Api
  */
 class Mage_Api_Model_Server_Handler extends Mage_Api_Model_Server_Handler_Abstract {}

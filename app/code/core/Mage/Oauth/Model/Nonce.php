@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * oAuth nonce model
  *
- * @category   Mage
  * @package    Mage_Oauth
  *
  * @method Mage_Oauth_Model_Resource_Nonce getResource()

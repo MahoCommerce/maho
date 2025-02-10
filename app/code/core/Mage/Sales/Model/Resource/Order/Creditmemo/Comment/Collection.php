@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Flat sales order creditmemo comments collection
  *
- * @category   Mage
  * @package    Mage_Sales
  */
 class Mage_Sales_Model_Resource_Order_Creditmemo_Comment_Collection extends Mage_Sales_Model_Resource_Order_Comment_Collection_Abstract

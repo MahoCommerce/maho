@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Log
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Logging level backend source model
  *
- * @category   Mage
  * @package    Mage_Log
  */
 class Mage_Log_Model_Adminhtml_System_Config_Source_Loglevel

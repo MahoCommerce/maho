@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Varien
  * @package    Varien_Simplexml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * File based cache for configuration
  *
- * @category   Varien
  * @package    Varien_Simplexml
  */
 class Varien_Simplexml_Config_Cache_File extends Varien_Simplexml_Config_Cache_Abstract

@@ -3,14 +3,12 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Cron
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
- * @category   Mage
  * @package    Mage_Cron
  */
 class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml_Controller_Action

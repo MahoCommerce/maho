@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
  * Block, that can get data from layout or from registry.
  * Can compare its data values by specified keys
  *
- * @category   Mage
  * @package    Mage_Core
  */
 class Mage_Core_Block_Template_Facade extends Mage_Core_Block_Template

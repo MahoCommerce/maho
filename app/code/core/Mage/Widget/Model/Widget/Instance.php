@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Widget
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Widget Instance Model
  *
- * @category   Mage
  * @package    Mage_Widget
  *
  * @method Mage_Widget_Model_Resource_Widget_Instance _getResource()

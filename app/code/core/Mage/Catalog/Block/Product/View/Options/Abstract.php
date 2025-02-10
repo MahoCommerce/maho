@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Product options abstract type block
  *
- * @category   Mage
  * @package    Mage_Catalog
  */
 abstract class Mage_Catalog_Block_Product_View_Options_Abstract extends Mage_Core_Block_Template

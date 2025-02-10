@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_PaypalUk
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * NVP API wrappers model
  *
- * @category   Mage
  * @package    Mage_PaypalUk
  */
 class Mage_PaypalUk_Model_Api_Nvp extends Mage_Paypal_Model_Api_Nvp

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
@@ -11,7 +10,6 @@
  */
 
 /**
- * @category   Mage
  * @package    Mage_Adminhtml
  */
 class Mage_Adminhtml_Model_System_Config_Source_Tax_Catalog

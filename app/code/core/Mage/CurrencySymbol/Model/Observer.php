@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_CurrencySymbol
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Currency Symbol Observer
  *
- * @category   Mage
  * @package    Mage_CurrencySymbol
  */
 class Mage_CurrencySymbol_Model_Observer

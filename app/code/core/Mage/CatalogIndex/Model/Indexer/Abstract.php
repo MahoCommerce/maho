@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_CatalogIndex
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Catalog indexer abstract class
  *
- * @category   Mage
  * @package    Mage_CatalogIndex
  */
 abstract class Mage_CatalogIndex_Model_Indexer_Abstract extends Mage_Core_Model_Abstract implements Mage_CatalogIndex_Model_Indexer_Interface

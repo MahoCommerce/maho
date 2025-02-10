@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Review
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Review summery collection
  *
- * @category   Mage
  * @package    Mage_Review
  */
 class Mage_Review_Model_Resource_Review_Summary_Collection extends Varien_Data_Collection_Db

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * Checkout url helper
  *
- * @category   Mage
  * @package    Mage_Checkout
  */
 class Mage_Checkout_Helper_Url extends Mage_Core_Helper_Url

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -13,7 +12,6 @@
 /**
  * oAuth authorize controller
  *
- * @category   Mage
  * @package    Mage_Oauth
  */
 class Mage_Oauth_AuthorizeController extends Mage_Core_Controller_Front_Action

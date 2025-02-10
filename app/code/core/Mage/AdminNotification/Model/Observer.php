@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_AdminNotification
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * AdminNotification observer
  *
- * @category   Mage
  * @package    Mage_AdminNotification
  */
 class Mage_AdminNotification_Model_Observer

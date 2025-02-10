@@ -5,7 +5,6 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
@@ -14,7 +13,6 @@ declare(strict_types=1);
 /**
  * Adminhtml permissions orphanedResource grid
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  */
 class Mage_Adminhtml_Block_Permissions_OrphanedResource_Grid extends Mage_Adminhtml_Block_Widget_Grid

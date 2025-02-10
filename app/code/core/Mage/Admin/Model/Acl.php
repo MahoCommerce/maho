@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Admin
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Acl model
  *
- * @category   Mage
  * @package    Mage_Admin
  *
  * @property Mage_Admin_Model_Acl_Role_Registry $_roleRegistry

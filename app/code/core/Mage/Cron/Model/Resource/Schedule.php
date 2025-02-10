@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Cron
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Schedule mysql4 resource
  *
- * @category   Mage
  * @package    Mage_Cron
  */
 class Mage_Cron_Model_Resource_Schedule extends Mage_Core_Model_Resource_Db_Abstract

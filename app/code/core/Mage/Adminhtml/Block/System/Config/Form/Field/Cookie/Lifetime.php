@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
@@ -12,7 +11,6 @@
 /**
  * Adminhtml system config cookie lifetime field renderer
  *
- * @category   Mage
  * @package    Mage_Adminhtml
  */
 class Mage_Adminhtml_Block_System_Config_Form_Field_Cookie_Lifetime extends Mage_Adminhtml_Block_System_Config_Form_Field

@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Cms
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
@@ -14,7 +13,6 @@
 /**
  * Cms Controller Router
  *
- * @category   Mage
  * @package    Mage_Cms
  */
 class Mage_Cms_Controller_Router extends Mage_Core_Controller_Varien_Router_Abstract

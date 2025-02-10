@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @category   Mage
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
@@ -15,7 +14,6 @@
  *
  * Used to retrieve core configuration values
  *
- * @category   Mage
  * @package    Mage_Core
  */
 class Mage_Core_Model_Config_Base extends Varien_Simplexml_Config
