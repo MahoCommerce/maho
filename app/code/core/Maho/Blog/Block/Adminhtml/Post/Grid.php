@@ -25,8 +25,12 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
     {
         /** @var Maho_Blog_Model_Resource_Post_Collection $collection */
         $collection = Mage::getModel('blog/post')->getCollection();
-        $collection->addAttributeToSelect('title');
+        $collection
+            ->addAttributeToSelect('title')
+            ->addAttributeToSelect('publish_date')
+            ->addAttributeToSelect('created_at');
         $this->setCollection($collection);
+
         return parent::_prepareCollection();
     }
 
@@ -47,9 +51,9 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
         ]);
 
         if (!Mage::app()->isSingleStoreMode()) {
-            $this->addColumn('store_id', [
+            $this->addColumn('stores', [
                 'header'        => Mage::helper('blog')->__('Store View'),
-                'index'         => 'store_id',
+                'index'         => 'stores',
                 'type'          => 'store',
                 'store_all'     => true,
                 'store_view'    => true,
@@ -69,10 +73,17 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
             ],
         ]);
 
+        $this->addColumn('publish_date', [
+            'header' => Mage::helper('blog')->__('Publishing Date'),
+            'index'  => 'publish_date',
+            'width' => '150px',
+            'type' => 'datetime',
+        ]);
+
         $this->addColumn('created_at', [
             'header' => Mage::helper('blog')->__('Created At'),
+            'index'  => 'created_at',
             'width' => '150px',
-            'index' => 'created_at',
             'type' => 'datetime',
         ]);
 
@@ -100,7 +111,7 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
     }
 
     #[\Override]
-    protected function _prepareMassaction()
+    protected function _prepareMassaction(): self
     {
         $this->setMassactionIdField('entity_id');
         $this->getMassactionBlock()->setFormFieldName('post');
@@ -115,15 +126,17 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
     }
 
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl($row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
     }
 
-    protected function _filterStoreCondition(Maho_Blog_Model_Resource_Post_Collection $collection, Mage_Adminhtml_Block_Widget_Grid_Column $column)
+    protected function _filterStoreCondition(Maho_Blog_Model_Resource_Post_Collection $collection, Mage_Adminhtml_Block_Widget_Grid_Column $column): self
     {
-        if ($value = $column->getFilter()->getValue()) {
+        $value = $column->getFilter()->getValue();
+        if ($value) {
             $collection->addStoreFilter($value);
         }
+        return $this;
     }
 }
