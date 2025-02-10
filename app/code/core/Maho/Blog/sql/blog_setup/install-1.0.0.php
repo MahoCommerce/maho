@@ -82,8 +82,8 @@ $attributes = [
         'input' => 'int',
         'required' => true,
         'sort_order' => 70,
-        'backend_model' => 'blog/post_attribute_backend_store'
-    ]
+        'backend_model' => 'blog/post_attribute_backend_store',
+    ],
 ];
 
 foreach ($attributes as $code => $options) {

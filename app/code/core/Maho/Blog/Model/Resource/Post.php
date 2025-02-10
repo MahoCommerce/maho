@@ -48,7 +48,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     protected function _saveStoreRelations($post)
     {
         $oldStores = $this->lookupStoreIds($post->getId());
-        $newStores = (array)$post->getStores();
+        $newStores = (array) $post->getStores();
 
         $table = $this->_storeTable;
         $adapter = $this->_getWriteAdapter();
@@ -57,8 +57,8 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         $delete = array_diff($oldStores, $newStores);
         if (!empty($delete)) {
             $adapter->delete($table, [
-                'post_id = ?' => (int)$post->getId(),
-                'store_id IN (?)' => $delete
+                'post_id = ?' => (int) $post->getId(),
+                'store_id IN (?)' => $delete,
             ]);
         }
 
@@ -68,8 +68,8 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             $data = [];
             foreach ($insert as $storeId) {
                 $data[] = [
-                    'post_id' => (int)$post->getId(),
-                    'store_id' => (int)$storeId
+                    'post_id' => (int) $post->getId(),
+                    'store_id' => (int) $storeId,
                 ];
             }
             $adapter->insertMultiple($table, $data);
@@ -81,7 +81,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         $adapter = $this->_getReadAdapter();
         $select = $adapter->select()
             ->from($this->_storeTable, 'store_id')
-            ->where('post_id = ?', (int)$postId);
+            ->where('post_id = ?', (int) $postId);
 
         return $adapter->fetchCol($select);
     }
