@@ -60,28 +60,12 @@ class TranslationsUnused extends BaseMahoCommand
      */
     protected function getFiles(): array
     {
-        $files = [];
-        $fh = fopen('php://stdin', 'r');
-
-        if ($fh === false) {
-            return $files;
-        }
-
-        stream_set_blocking($fh, false);
-
-        while (($line = fgets($fh)) !== false) {
-            $files[] = $line;
-        }
-        if (count($files)) {
-            $this->_stdin = true;
-        } else {
-            $files = array_merge(
-                // Grep for all files that might call the __ function
-                explode("\n", (string) shell_exec("grep -Frl --exclude-dir='.git' --include=*.php --include=*.phtml '__' .")),
-                // Grep for all XML files that might use the translate attribute
-                explode("\n", (string) shell_exec("grep -Frl --exclude-dir='.git' --include=*.xml 'translate=' .")),
-            );
-        }
+        $files = array_merge(
+            // Grep for all files that might call the __ function
+            explode("\n", (string) shell_exec("grep -Frl --exclude-dir='.git' --include=*.php --include=*.phtml '__' .")),
+            // Grep for all XML files that might use the translate attribute
+            explode("\n", (string) shell_exec("grep -Frl --exclude-dir='.git' --include=*.xml 'translate=' .")),
+        );
         return array_filter(array_map('trim', $files));
     }
 
@@ -148,7 +132,7 @@ class TranslationsUnused extends BaseMahoCommand
                 foreach ($nodes as $node) {
                     // Which children should we translate?
                     $translateNode = $node['translate'];
-                    if (!$translateNode instanceof SimpleXMLElement) {
+                    if (!$translateNode instanceof \SimpleXMLElement) {
                         continue;
                     }
                     $translateChildren = array_map('trim', explode(' ', $translateNode->__toString()));
