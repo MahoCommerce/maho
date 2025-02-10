@@ -20,6 +20,21 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
     }
 
     #[\Override]
+    protected function _initSelect(): self
+    {
+        parent::_initSelect();
+
+        // Add store view information
+        $this->getSelect()->joinLeft(
+            ['store_table' => $this->getTable('blog/post_store')],
+            'e.entity_id = store_table.post_id',
+            ['GROUP_CONCAT(store_table.store_id SEPARATOR ",") as stores']
+        )->group('e.entity_id');
+
+        return $this;
+    }
+
+    #[\Override]
     public function toOptionArray(): array
     {
         return $this->_toOptionArray('entity_id', 'title');
@@ -47,36 +62,17 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
         return $this;
     }
 
-    /**
-     * Get SQL for get record count.
-     * Extra GROUP BY strip added.
-     */
     #[\Override]
-    public function getSelectCountSql(): Varien_Db_Select
+    protected function _afterLoad(): self
     {
-        $countSelect = parent::getSelectCountSql();
-        $countSelect->reset(Zend_Db_Select::GROUP);
-        return $countSelect;
-    }
+        parent::_afterLoad();
 
-    /**
-     * Join store relation table if there is store filter
-     */
-    #[\Override]
-    protected function _renderFiltersBefore()
-    {
-        if ($this->getFilter('store')) {
-            $this->getSelect()->join(
-                ['store_table' => $this->getTable('cms/block_store')],
-                'main_table.block_id = store_table.block_id',
-                [],
-            )->group('main_table.block_id');
-
-            /*
-             * Allow analytic functions usage because of one field grouping
-             */
-            $this->_useAnalyticFunction = true;
+        // Convert comma-separated stores string to array
+        foreach ($this->_items as $item) {
+            $stores = explode(',', $item->getStores());
+            $item->setStores($stores);
         }
-        return parent::_renderFiltersBefore();
+
+        return $this;
     }
 }
