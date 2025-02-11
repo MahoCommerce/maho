@@ -102,15 +102,16 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
 
     public function getPostIdByUrlKey(string $urlKey, int $storeId): ?int
     {
-        $urlKey = ltrim($urlKey, 'blog/');
-        $urlKey = rtrim($urlKey, '.html');
+
+        $urlKey = substr($urlKey, strlen('blog/'));
+        $urlKey = substr($urlKey, 0, -strlen('.html'));
+
         $stores = [Mage_Core_Model_App::ADMIN_STORE_ID, $storeId];
         $select = $this->getLoadByUrkKeySelect($urlKey, $stores, 1);
         $select->reset(Zend_Db_Select::COLUMNS)
             ->columns('bp.entity_id')
             ->order('bps.store_id DESC')
             ->limit(1);
-        echo $select;
 
         $result = $this->_getReadAdapter()->fetchOne($select);
         return $result ? (int) $result : null;
