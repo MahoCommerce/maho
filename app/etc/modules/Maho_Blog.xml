@@ -4,6 +4,9 @@
         <Maho_Blog>
             <active>true</active>
             <codePool>core</codePool>
+            <depends>
+                <Mage_Catalog/>
+            </depends>
         </Maho_Blog>
     </modules>
 </config>

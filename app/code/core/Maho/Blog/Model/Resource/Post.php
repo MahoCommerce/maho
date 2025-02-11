@@ -98,4 +98,56 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
 
         return parent::_afterLoad($object);
     }
+
+    public function getPostIdByUrlKey(string $urlKey, int $storeId): int
+    {
+        $stores = [Mage_Core_Model_App::ADMIN_STORE_ID, $storeId];
+        $select = $this->getLoadByUrkKeySelect($urlKey, $stores, 1);
+        $select->reset(Zend_Db_Select::COLUMNS)
+            ->columns('bp.page_id')
+            ->order('bps.store_id DESC')
+            ->limit(1);
+
+        return $this->_getReadAdapter()->fetchOne($select);
+    }
+
+    protected function getLoadByUrkKeySelect(string $urlKey, array $store, ?bool $isActive = null): Varien_Db_Select
+    {
+        $select = $this->_getReadAdapter()->select()
+            ->from(['bp' => $this->getMainTable()])
+            ->join(
+                ['bps' => $this->getTable('blog/post_store')],
+                'bp.post_id = bps.post_id',
+                [],
+            )
+            ->where('bp.identifier = ?', $urlKey)
+            ->where('bps.store_id IN (?)', $store);
+
+        if (!is_null($isActive)) {
+            $select->where('cp.is_active = ?', (int) $isActive);
+        }
+
+        return $select;
+    }
+
+    #[\Override]
+    protected function _beforeSave(Varien_Object $object): self
+    {
+        if (empty($object->getData('url_key'))) {
+            $storeId = null;
+            if (is_array($object->getData('stores'))) {
+                foreach ($object->getData('stores') as $store) {
+                    if (!empty($store)) {
+                        $storeId = $store;
+                        break;
+                    }
+                }
+            }
+            $locale = Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, $storeId);
+            $urlkey = Mage::getModel('catalog/product_url')->formatUrlKey($object->getData('title'), $locale);
+            $object->setData('url_key', $urlkey);
+        }
+
+        return parent::_beforeSave($object);
+    }
 }

@@ -14,10 +14,36 @@ $posts = $this->getPosts();
 
 <h1><?= $this->__('Blog') ?></h1>
 
-<?php foreach ($posts->getItems() as $post): ?>
-    <div>
-        <div><strong><?= $post->getTitle() ?></strong></div>
-        <div class="blog_post_date"><?= $post->getPublishedAt() ?></div>
-        <div><?= $post->getContent() ?></div>
-    </div>
-<?php endforeach ?>
+<div id="blog_posts">
+    <?php foreach ($posts->getItems() as $post): ?>
+        <div>
+            <a href="<?= Mage::getUrl() . "blog/{$post->getUrlKey()}" ?>.html"><strong><?= $post->getTitle() ?></strong></a>
+            <div class="blog_post_date"><?= $post->getPublishedAt() ?? $post->getCreatedAt() ?></div>
+        </div>
+    <?php endforeach ?>
+</div>
+
+<style>
+    #blog_posts {
+        --gap: 1.25rem;
+        --min-col: 15.625rem; /* 250px */
+        --max-cols: 4;
+
+        display: grid;
+        gap: var(--gap);
+        grid-template-columns: repeat(auto-fit, minmax(
+            clamp(
+                var(--min-col),
+                (100% - (var(--max-cols) - 1) * var(--gap)) / var(--max-cols),
+                100%
+            ),
+            1fr
+        ));
+    }
+
+    #blog_posts > div {
+        padding: 0.9375rem;
+        border-radius: 0.5rem;
+        border: 1px solid var(--maho-color-border-light);
+    }
+</style>

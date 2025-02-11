@@ -41,6 +41,16 @@
                 </setup>
             </blog_setup>
         </resources>
+        <events>
+            <controller_front_init_routers>
+                <observers>
+                    <cms>
+                        <class>Maho_Blog_Controller_Router</class>
+                        <method>initControllerRouters</method>
+                    </cms>
+                </observers>
+            </controller_front_init_routers>
+        </events>
     </global>
     <admin>
         <routers>
@@ -81,6 +91,16 @@
                 </args>
             </blog>
         </routers>
+        <events>
+            <controller_action_noroute>
+                <observers>
+                    <cms>
+                        <class>blog/observer</class>
+                        <method>noRoute</method>
+                    </cms>
+                </observers>
+            </controller_action_noroute>
+        </events>
         <layout>
             <updates>
                 <blog>

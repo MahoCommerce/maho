@@ -19,8 +19,12 @@ class Maho_Blog_Block_Post_List extends Mage_Core_Block_Template
 
         return Mage::getResourceModel('blog/post_collection')
             ->addStoreFilter(Mage::app()->getStore())
-            ->addFieldToFilter('visible', ['eq' => 1])
-            ->addFieldToFilter('publish_date', ['from' => $todayStartOfDayDate, 'datetime' => true])
-            ->addAttributeToSelect('*');
+            ->addFieldToFilter('is_active', ['eq' => 1])
+            ->addAttributeToFilter([
+                ['attribute' => 'publish_date', 'null' => true],
+                ['attribute' => 'publish_date', 'to' => $todayStartOfDayDate, 'datetime' => true]
+            ], '', 'left')
+            ->addAttributeToSelect('*')
+            ->addAttributeToSort('publish_date', 'DESC');
     }
 }

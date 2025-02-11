@@ -46,8 +46,6 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
 
         $fieldset->addField('url_key', 'text', [
             'label' => Mage::helper('blog')->__('URL Key'),
-            'class' => 'required-entry',
-            'required' => true,
             'name' => 'url_key',
         ]);
 
