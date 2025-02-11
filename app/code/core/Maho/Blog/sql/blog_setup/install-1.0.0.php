@@ -13,14 +13,14 @@
 $installer = $this;
 $installer->startSetup();
 
-$installer->getConnection()->query('drop table blog_post_entity');
-$installer->getConnection()->query('drop table blog_post_entity_char');
-$installer->getConnection()->query('drop table blog_post_entity_datetime');
-$installer->getConnection()->query('drop table blog_post_entity_decimal');
-$installer->getConnection()->query('drop table blog_post_entity_int');
-$installer->getConnection()->query('drop table blog_post_entity_text');
-$installer->getConnection()->query('drop table blog_post_entity_varchar');
-$installer->getConnection()->query('drop table blog_post_store');
+$installer->getConnection()->query('drop table IF EXISTS blog_post_entity');
+$installer->getConnection()->query('drop table IF EXISTS blog_post_entity_char');
+$installer->getConnection()->query('drop table IF EXISTS blog_post_entity_datetime');
+$installer->getConnection()->query('drop table IF EXISTS blog_post_entity_decimal');
+$installer->getConnection()->query('drop table IF EXISTS blog_post_entity_int');
+$installer->getConnection()->query('drop table IF EXISTS blog_post_entity_text');
+$installer->getConnection()->query('drop table IF EXISTS blog_post_entity_varchar');
+$installer->getConnection()->query('drop table IF EXISTS blog_post_store');
 $installer->getConnection()->query('delete from eav_entity_type where entity_type_code="blog_post"');
 
 $installer->addEntityType('blog_post', [
@@ -47,33 +47,26 @@ $attributes = [
         'required' => true,
         'sort_order' => 10,
     ],
-    'url_key' => [
-        'type' => 'varchar',
-        'label' => 'URL Key',
-        'input' => 'text',
-        'required' => true,
-        'sort_order' => 20,
-    ],
     'publish_date' => [
         'type' => 'datetime',
         'label' => 'Publish Date',
         'input' => 'date',
         'required' => false,
-        'sort_order' => 40,
+        'sort_order' => 20,
     ],
     'content' => [
         'type' => 'text',
         'label' => 'Content',
         'input' => 'textarea',
         'required' => true,
-        'sort_order' => 50,
+        'sort_order' => 30,
     ],
     'is_active' => [
         'type' => 'int',
         'label' => 'Is Active',
         'input' => 'boolean',
         'required' => true,
-        'sort_order' => 60,
+        'sort_order' => 40,
         'system' => true,
     ],
     'store_id' => [
@@ -81,7 +74,7 @@ $attributes = [
         'label' => 'Store ID',
         'input' => 'int',
         'required' => true,
-        'sort_order' => 70,
+        'sort_order' => 50,
         'backend_model' => 'blog/post_attribute_backend_store',
     ],
 ];
@@ -109,6 +102,18 @@ foreach ($attributes as $code => $options) {
         'system'            => $options['system'] ?? false,
     ]);
 }
+
+// Adding the url_key as a static column on the main table
+$installer->getConnection()->addColumn(
+    $installer->getTable('blog/post'),
+    'url_key',
+    [
+        'type' => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'length' => 255,
+        'nullable' => false,
+        'comment' => 'URL Key',
+    ],
+);
 
 // Create the blog_website table
 $table = $installer->getConnection()

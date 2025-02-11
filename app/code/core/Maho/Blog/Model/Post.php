@@ -31,8 +31,8 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
         return $this->_getData('stores');
     }
 
-    public function getPostIdByUrlKey(string $identifier, int $storeId): int
+    public function getPostIdByUrlKey(string $urlKey, int $storeId): ?int
     {
-        return $this->_getResource()->getPostIdByUrlKey($identifier, $storeId);
+        return $this->_getResource()->getPostIdByUrlKey($urlKey, $storeId);
     }
 }

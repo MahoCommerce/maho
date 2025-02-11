@@ -34,6 +34,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             'created_at',
             'updated_at',
             'is_active',
+            'url_key',
         ];
     }
 
@@ -101,12 +102,15 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
 
     public function getPostIdByUrlKey(string $urlKey, int $storeId): ?int
     {
+        $urlKey = ltrim($urlKey, 'blog/');
+        $urlKey = rtrim($urlKey, '.html');
         $stores = [Mage_Core_Model_App::ADMIN_STORE_ID, $storeId];
         $select = $this->getLoadByUrkKeySelect($urlKey, $stores, 1);
         $select->reset(Zend_Db_Select::COLUMNS)
             ->columns('bp.entity_id')
             ->order('bps.store_id DESC')
             ->limit(1);
+        echo $select;
 
         $result = $this->_getReadAdapter()->fetchOne($select);
         return $result ? (int) $result : null;
@@ -118,14 +122,14 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             ->from(['bp' => $this->getEntityTable()])
             ->join(
                 ['bps' => $this->getTable('blog/post_store')],
-                'bp.post_id = bps.post_id',
+                'bp.entity_id = bps.post_id',
                 [],
             )
             ->where('bp.url_key = ?', $urlKey)
             ->where('bps.store_id IN (?)', $store);
 
         if (!is_null($isActive)) {
-            $select->where('cp.is_active = ?', (int) $isActive);
+            $select->where('bp.is_active = ?', (int) $isActive);
         }
 
         return $select;
