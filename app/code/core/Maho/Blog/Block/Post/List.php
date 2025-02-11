@@ -22,7 +22,7 @@ class Maho_Blog_Block_Post_List extends Mage_Core_Block_Template
             ->addFieldToFilter('is_active', ['eq' => 1])
             ->addAttributeToFilter([
                 ['attribute' => 'publish_date', 'null' => true],
-                ['attribute' => 'publish_date', 'to' => $todayStartOfDayDate, 'datetime' => true]
+                ['attribute' => 'publish_date', 'to' => $todayStartOfDayDate, 'datetime' => true],
             ], '', 'left')
             ->addAttributeToSelect('*')
             ->addAttributeToSort('publish_date', 'DESC');
