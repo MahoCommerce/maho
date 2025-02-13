@@ -58,7 +58,7 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
         }
 
         $request->setModuleName('blog')
-            ->setControllerName('post')
+            ->setControllerName('index')
             ->setActionName('view')
             ->setParam('post_id', $postId);
         $request->setAlias(
