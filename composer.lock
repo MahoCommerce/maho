@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bed15259bcd2631fd65f8f4d0555c628",
+    "content-hash": "cef4f3730984633731fd1829634f176e",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -263,6 +263,33 @@
                 "source": "https://github.com/lbuchs/WebAuthn/tree/v2.2.0"
             },
             "time": "2024-07-04T07:17:40+00:00"
+        },
+        {
+            "name": "mahocommerce/icons",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/MahoCommerce/icons.git",
+                "reference": "9caf5299f7b23dd11ee594ef183dc627668a1438"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/MahoCommerce/icons/zipball/9caf5299f7b23dd11ee594ef183dc627668a1438",
+                "reference": "9caf5299f7b23dd11ee594ef183dc627668a1438",
+                "shasum": ""
+            },
+            "default-branch": true,
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A huge package of optimized SVG icons",
+            "support": {
+                "issues": "https://github.com/MahoCommerce/icons/issues",
+                "source": "https://github.com/MahoCommerce/icons/tree/main"
+            },
+            "time": "2025-02-13T18:55:20+00:00"
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
@@ -3400,7 +3427,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": {
+        "mahocommerce/icons": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

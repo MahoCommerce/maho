@@ -1157,6 +1157,35 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
         return $helper->formatTime($time, $format, $showDate);
     }
 
+    public function getIconSvg(string $name, string $variant = 'outline'): string
+    {
+        $name = strtolower($name);
+        $variant = strtolower($variant);
+
+        $packageName = 'mahocommerce/icons';
+        $iconName = basename($name);
+        $allowedVariants = ['outline', 'filled'];
+
+        if (!in_array($variant, $allowedVariants)) {
+            $variant = 'outline';
+        }
+
+        $installPath = \Composer\InstalledVersions::getInstallPath($packageName);
+        $svgPath = implode(DIRECTORY_SEPARATOR, [
+            $installPath,
+            'icons',
+            $variant,
+            $iconName . '.svg'
+        ]);
+
+        $iconSvg = file_get_contents($svgPath, false);
+        if ($iconSvg === false) {
+            return '';
+        }
+
+        return $iconSvg;
+    }
+
     /**
      * Retrieve module name of block
      *
