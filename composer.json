@@ -42,7 +42,8 @@
         "spomky-labs/otphp": "^11.3",
         "bacon/bacon-qr-code": "^3.0",
         "symfony/polyfill-php83": "^1.31",
-        "lbuchs/webauthn": "^2.2"
+        "lbuchs/webauthn": "^2.2",
+        "mahocommerce/icons": "dev-main"
     },
     "replace": {
         "symfony/polyfill-ctype": "*",

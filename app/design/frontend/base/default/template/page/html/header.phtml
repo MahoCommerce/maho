@@ -15,7 +15,7 @@
     <div class="page-header-container skip-links">
         <div>
             <a href="#header-nav" class="skip-link skip-nav" data-target-element="header-nav" title="<?= $this->__('Menu') ?>">
-                <span class="icon"></span>
+                <?= $this->getIconSvg('menu-2') ?>
                 <span class="label"><?= $this->__('Menu') ?></span>
             </a>
 
@@ -31,13 +31,13 @@
             <?= $this->getChildHtml('currency_switcher') ?>
 
             <a href="<?= $this->helper('customer')->getAccountUrl() ?>" class="skip-link skip-account" title="<?= $this->__('Account') ?>">
-                <span class="icon"></span>
+                <?= $this->getIconSvg('user') ?>
                 <span class="label"><?= $this->__('Account') ?></span>
             </a>
 
             <?php if ($this->isModuleOutputEnabled('Mage_Wishlist') && Mage::getStoreConfig('wishlist/general/active')): ?>
             <a href="<?= $this->helper('customer')->getWishlistUrl() ?>" class="skip-link skip-wishlist" title="<?= $this->__('Wishlist') ?>">
-                <span class="icon"></span>
+                <?= $this->getIconSvg('heart') ?>
                 <span class="label"><?= $this->__('Wishlist') ?></span>
             </a>
             <?php endif ?>
