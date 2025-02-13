@@ -1175,7 +1175,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
             $installPath,
             'icons',
             $variant,
-            $iconName . '.svg'
+            $iconName . '.svg',
         ]);
 
         $iconSvg = file_get_contents($svgPath, false);
