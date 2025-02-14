@@ -6215,6 +6215,7 @@ div.paypal-logo span > img {
   position: absolute;
   left: -5px;
   top: -2px;
+  stroke-width: 1.2;
 }
 #customer-reviews dl dd {
   font-size: 0.875rem;
