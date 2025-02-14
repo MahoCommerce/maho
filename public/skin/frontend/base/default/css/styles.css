@@ -2766,6 +2766,11 @@ body {
 /* -------------------------------------------- *
  * Skip - Link
  */
+
+.skip-nav {
+  color: var(--maho-color-text-primary);
+}
+
 .skip-link:not(.skip-active):hover {
   opacity: 0.8;
 }
