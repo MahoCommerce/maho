@@ -13,13 +13,15 @@
 ?>
 
 <?php $_items = $this->getReviewsCollection()->getItems() ?>
+<?php $userIcon = $this->getIconSvg('user') ?>
 <div class="box-collateral box-reviews" id="customer-reviews">
     <?php if (count($_items)): ?>
         <a href="<?= Mage::getUrl('review/product/list', ['id' => $this->getProduct()->getId(), 'category' => $this->getProduct()->getCategoryId(),]) ?>#review-form"><?= $this->__('Add Your Review') ?></a>
         <dl>
         <?php foreach ($_items as $_review):?>
             <?php $_votes = $_review->getRatingVotes() ?>
-            <dt>
+            <dt style="position: relative;">
+                <?= $userIcon ?>
                 <?= $this->escapeHtml($_review->getNickname()) ?> -
                 <em><?= $this->formatDate($_review->getCreatedAt()) ?></em>
             </dt>
@@ -58,8 +60,3 @@
     <?php endif ?>
     <?= $this->getChildHtml('review_form') ?>
 </div>
-<style>
-    #customer-reviews dt:before {
-        background-image: <?= $this->getIconDataUrl('user', 'outline', ['stroke-width'=>'1.5']) ?>;
-    }
-</style>

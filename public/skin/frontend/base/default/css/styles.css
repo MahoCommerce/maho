@@ -3102,15 +3102,6 @@ body {
  * Header - Account
  * ============================================ */
 
-#customer-reviews dt:before {
-  content: '';
-  position: absolute;
-  margin-left: -25px;
-  width: 20px;
-  height: 20px;
-  background-size: 20px;
-}
-
 @media only screen and (min-width: 771px) {
   .skip-account {
     float: none;
@@ -6209,6 +6200,7 @@ div.paypal-logo span > img {
   width: 470px;
 }
 #customer-reviews dl {
+  position: relative;
   font-size: 0.875rem;
   font-weight: normal;
   margin-block: 1.5rem 0;
@@ -6218,6 +6210,11 @@ div.paypal-logo span > img {
   background-repeat: no-repeat;
   padding-inline-start: 25px;
   line-height: 22px;
+}
+#customer-reviews dl dt svg {
+  position: absolute;
+  left: -5px;
+  top: -2px;
 }
 #customer-reviews dl dd {
   font-size: 0.875rem;
