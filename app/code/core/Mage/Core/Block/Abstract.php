@@ -1186,6 +1186,22 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
         return $iconSvg;
     }
 
+    public function getIconDataUrl(string $name, string $variant = 'outline', array $attributes = []): string
+    {
+        $svg = $this->getIconSvg($name, $variant);
+
+        if ($attributes) {
+            $attributesSearch = $attributesReplace = [];
+            foreach ($attributes as $key => $value) {
+                $attributesSearch[] = "/$key=\".*?\"/";
+                $attributesReplace[] = "$key=\"$value\"";
+            }
+            $svg = preg_replace($attributesSearch, $attributesReplace, $svg);
+        }
+
+        return "url('data:image/svg+xml,{$svg}')";
+    }
+
     /**
      * Retrieve module name of block
      *

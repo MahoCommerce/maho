@@ -58,3 +58,8 @@
     <?php endif ?>
     <?= $this->getChildHtml('review_form') ?>
 </div>
+<style>
+    #customer-reviews dt:before {
+        background-image: <?= $this->getIconDataUrl('user', 'outline', ['stroke-width'=>'1.5']) ?>;
+    }
+</style>

@@ -17,7 +17,7 @@ $catalogSearchHelper =  $this->helper('catalogsearch');
     <div class="input-box">
         <label for="search"><?= $this->__('Search:') ?></label>
         <input id="search" type="search" name="<?= $catalogSearchHelper->getQueryParamName() ?>" value="<?= $catalogSearchHelper->getEscapedQueryText() ?>" class="input-text required-entry" maxlength="<?= $catalogSearchHelper->getMaxQueryLength();?>" placeholder="<?= $this->quoteEscape($this->__('Search entire store here...')) ?>" />
-        <button type="submit" title="<?= $this->quoteEscape($this->__('Search')) ?>" class="button search-button"><?= $this->__('Search') ?></button>
+        <button type="submit" title="<?= $this->quoteEscape($this->__('Search')) ?>" class="button search-button"><?= $this->getIconSvg('search') ?></button>
     </div>
 
     <div id="search_autocomplete" class="search-autocomplete"></div>
