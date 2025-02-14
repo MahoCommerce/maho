@@ -168,6 +168,11 @@ abstract class Mage_Api2_Model_Resource
     protected $_multicall;
 
     /**
+     * @var Mage_Core_Model_Store
+     */
+    protected $_store;
+
+    /**
      * Dispatch
      * To implement the functionality, you must create a method in the parent one.
      *
@@ -1024,6 +1029,9 @@ abstract class Mage_Api2_Model_Resource
      */
     protected function _getStore()
     {
+        if ($this->_store) {
+            return $this->_store;
+        }
         $store = $this->getRequest()->getParam('store');
         try {
             if ($this->getUserType() != Mage_Api2_Model_Auth_User_Admin::USER_TYPE) {
@@ -1044,6 +1052,7 @@ abstract class Mage_Api2_Model_Resource
             // store does not exist
             $this->_critical('Requested store is invalid', Mage_Api2_Model_Server::HTTP_BAD_REQUEST);
         }
+        $this->_store = $store;
         return $store;
     }
 }
