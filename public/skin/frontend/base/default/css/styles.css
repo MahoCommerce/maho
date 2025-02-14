@@ -7243,27 +7243,10 @@ div.paypal-logo span > img {
 .contacts-index-index h1 {
   border: none;
 }
-
-#contactForm {
-  padding-left: 40px;
-}
-#contactForm h2 {
-  display: none;
-}
-#contactForm:after {
-  content: '';
-  display: table;
-  clear: both;
-}
 #contactForm .fieldset .legend + .required {
   margin: 0;
 }
 
-@media only screen and (max-width: 770px) {
-  #contactForm {
-    padding-left: 0;
-  }
-}
 /* ============================================ *
  * Pricing Conditions
  * ============================================ */
