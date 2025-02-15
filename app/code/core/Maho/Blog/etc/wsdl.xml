@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns:typens="urn:Maho" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             name="Maho" targetNamespace="urn:Maho">
+    <types>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:Maho">
+            <xsd:complexType name="blogPostEntity">
+                <xsd:all>
+                    <xsd:element name="post_id" type="xsd:string" minOccurs="0" />
+                    <xsd:element name="title" type="xsd:string" minOccurs="0" />
+                    <xsd:element name="content" type="xsd:string" minOccurs="0" />
+                    <xsd:element name="url_key" type="xsd:string" minOccurs="0" />
+                    <xsd:element name="is_active" type="xsd:int" minOccurs="0" />
+                    <xsd:element name="created_at" type="xsd:string" minOccurs="0" />
+                    <xsd:element name="updated_at" type="xsd:string" minOccurs="0" />
+                    <xsd:element name="stores" type="soapenc:Array" minOccurs="0" />
+                </xsd:all>
+            </xsd:complexType>
+            <xsd:element name="blogPostList">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="0" maxOccurs="unbounded" name="item" type="typens:blogPostEntity" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </types>
+
+    <message name="blogPostListRequest">
+        <part name="sessionId" type="xsd:string" />
+        <part name="filters" type="typens:filters" />
+    </message>
+    <message name="blogPostListResponse">
+        <part name="result" type="typens:blogPostEntityArray" />
+    </message>
+
+    <message name="blogPostInfoRequest">
+        <part name="sessionId" type="xsd:string" />
+        <part name="postId" type="xsd:string" />
+    </message>
+    <message name="blogPostInfoResponse">
+        <part name="result" type="typens:blogPostEntity" />
+    </message>
+
+    <message name="blogPostCreateRequest">
+        <part name="sessionId" type="xsd:string" />
+        <part name="postData" type="typens:blogPostEntity" />
+    </message>
+    <message name="blogPostCreateResponse">
+        <part name="result" type="xsd:string" />
+    </message>
+
+    <message name="blogPostUpdateRequest">
+        <part name="sessionId" type="xsd:string" />
+        <part name="postId" type="xsd:string" />
+        <part name="postData" type="typens:blogPostEntity" />
+    </message>
+    <message name="blogPostUpdateResponse">
+        <part name="result" type="xsd:boolean" />
+    </message>
+
+    <message name="blogPostDeleteRequest">
+        <part name="sessionId" type="xsd:string" />
+        <part name="postId" type="xsd:string" />
+    </message>
+    <message name="blogPostDeleteResponse">
+        <part name="result" type="xsd:boolean" />
+    </message>
+
+    <portType name="{{var wsdl.handler}}PortType">
+        <operation name="blogPostList">
+            <documentation>Retrieve list of blog posts</documentation>
+            <input message="typens:blogPostListRequest" />
+            <output message="typens:blogPostListResponse" />
+        </operation>
+        <operation name="blogPostInfo">
+            <documentation>Retrieve blog post info</documentation>
+            <input message="typens:blogPostInfoRequest" />
+            <output message="typens:blogPostInfoResponse" />
+        </operation>
+        <operation name="blogPostCreate">
+            <documentation>Create new blog post</documentation>
+            <input message="typens:blogPostCreateRequest" />
+            <output message="typens:blogPostCreateResponse" />
+        </operation>
+        <operation name="blogPostUpdate">
+            <documentation>Update blog post</documentation>
+            <input message="typens:blogPostUpdateRequest" />
+            <output message="typens:blogPostUpdateResponse" />
+        </operation>
+        <operation name="blogPostDelete">
+            <documentation>Delete blog post</documentation>
+            <input message="typens:blogPostDeleteRequest" />
+            <output message="typens:blogPostDeleteResponse" />
+        </operation>
+    </portType>
+
+    <binding name="{{var wsdl.handler}}Binding" type="typens:{{var wsdl.handler}}PortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http" />
+        <operation name="blogPostList">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+        <operation name="blogPostInfo">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+        <operation name="blogPostCreate">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+        <operation name="blogPostUpdate">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+        <operation name="blogPostDelete">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+    </binding>
+
+    <service name="{{var wsdl.name}}Service">
+        <port name="{{var wsdl.handler}}Port" binding="typens:{{var wsdl.handler}}Binding">
+            <soap:address location="{{var wsdl.url}}" />
+        </port>
+    </service>
+</definitions>

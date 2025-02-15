@@ -22,6 +22,17 @@
                             </blog_posts>
                         </children>
                     </cms>
+                    <system>
+                        <children>
+                            <api>
+                                <children>
+                                    <blog_post translate="title">
+                                        <title>Blog Posts</title>
+                                    </blog_post>
+                                </children>
+                            </api>
+                        </children>
+                    </system>
                 </children>
             </admin>
         </resources>
