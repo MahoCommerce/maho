@@ -25,6 +25,7 @@ class Maho_Blog_Block_Post_List extends Mage_Core_Block_Template
                 ['attribute' => 'publish_date', 'to' => $todayStartOfDayDate, 'datetime' => true],
             ], '', 'left')
             ->addAttributeToSelect('*')
-            ->addAttributeToSort('publish_date', 'DESC');
+            ->addAttributeToSort('publish_date', 'DESC')
+            ->addAttributeToSort('created_at', 'DESC');
     }
 }

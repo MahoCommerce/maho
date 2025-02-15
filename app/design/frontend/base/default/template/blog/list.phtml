@@ -18,7 +18,7 @@ $posts = $this->getPosts();
     <?php foreach ($posts->getItems() as $post): ?>
         <div>
             <a href="<?= Mage::getUrl() . "blog/{$post->getUrlKey()}" ?>.html"><strong><?= $post->getTitle() ?></strong></a>
-            <div class="blog_post_date"><?= $post->getPublishedAt() ?? $post->getCreatedAt() ?></div>
+            <div class="blog_post_date"><?= $this->formatDate($post->getPublishedAt() ?? $post->getCreatedAt()) ?></div>
         </div>
     <?php endforeach ?>
 </div>
