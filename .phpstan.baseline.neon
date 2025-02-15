@@ -5325,7 +5325,7 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 79
+			count: 75
 			path: app/design/frontend/base/default/template/downloadable/checkout/cart/item/default.phtml
 
 		-
@@ -5445,7 +5445,7 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 21
+			count: 26
 			path: app/design/frontend/base/default/template/reports/widget/compared/content/compared_grid.phtml
 
 		-
@@ -5535,7 +5535,7 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 9
+			count: 11
 			path: app/design/frontend/base/default/template/wishlist/item/configure/addto.phtml
 
 		-
