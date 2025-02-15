@@ -3405,6 +3405,31 @@ p.product-name a:hover {
   text-align: center;
 }
 
+.products-grid > li > div:first-child {
+  position: relative;
+}
+
+.products-grid > li > div:first-child ul {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.products-grid > li > div:first-child ul a {
+  font-size: 0;
+  color: var(--maho-color-border);
+  display: block;
+}
+.products-grid > li > div:first-child ul a:hover {
+  color: var(--maho-color-primary);
+}
+.products-grid > li > div:first-child ul svg {
+  width: 22px;
+  height: 22px;
+}
+
 .products-grid .product-image {
   width: 100%;
   margin-bottom: 15px;
@@ -3522,7 +3547,9 @@ p.product-name a:hover {
   padding-bottom: 0;
   border-bottom: none;
 }
-
+.products-list .add-to-links {
+  place-content: flex-end;
+}
 .products-list .product-shop {
   float: right;
   width: 66.66667%;
