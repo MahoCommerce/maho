@@ -1547,21 +1547,6 @@ span.weee {
 }
 
 /* -------------------------------------------- *
- * Add to links
- */
-.add-to-links {
-  margin: 7px 0;
-}
-.add-to-links a {
-  display: inline-block;
-  padding: 0px 3px 3px;
-}
-
-.add-to-links .separator {
-  display: none;
-}
-
-/* -------------------------------------------- *
  * Product Image
  */
 .product-image,
@@ -3462,8 +3447,15 @@ p.product-name a:hover {
   margin: 0 0 5px;
 }
 
-.products-grid .add-to-links {
-  margin-bottom: 0;
+.add-to-links {
+  margin-top: 0.5rem;
+  display: flex;
+  place-content: center;
+  gap: 0.2rem;
+}
+
+.product-view .add-to-links {
+  place-content: flex-start;
 }
 
 .products-grid .product-image {
@@ -4270,32 +4262,9 @@ p.product-name a:hover {
   display: none;
 }
 
-.product-view .add-to-links {
-  clear: both;
-  margin-top: 0px;
-  margin-right: 15px;
-  float: left;
+.add-to-links a {
+  font-size: 0;
 }
-.product-view .add-to-links:after {
-  content: '';
-  display: table;
-  clear: both;
-}
-.product-view .add-to-links li {
-  float: left;
-}
-.product-view .add-to-links a {
-  padding: 2px 7px 2px 0px;
-  margin-left: 7px;
-  border-right: 1px solid var(--maho-color-border);
-}
-.product-view .add-to-links li:first-child a {
-  margin-left: 0px;
-}
-.product-view .add-to-links li:last-child a {
-  border-right: 0px;
-}
-
 .product-view .sharing-links {
   float: left;
 }

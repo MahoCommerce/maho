@@ -20,13 +20,12 @@
 <?php $_compareUrl = $this->helper('catalog/product_compare')->getAddUrlCustom($_product, false); ?>
 <?php if ($_compareUrl) : ?>
     <li>
-        <span class="separator">|</span>
-        <a href="#"
-           class="link-compare"
+        <a href="#" class="link-compare" title="<?= $this->__('Add to Compare') ?>"
            onclick="customFormSubmit(
                    '<?= $_compareUrl ?>',
                    '<?= $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])) ?>',
                    'post')">
+            <?= $this->getIconSvg('scale') ?>
             <?= $this->__('Add to Compare') ?>
         </a>
     </li>

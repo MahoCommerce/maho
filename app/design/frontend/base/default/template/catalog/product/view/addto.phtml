@@ -20,9 +20,9 @@
     <ul class="add-to-links">
         <?php if ($_wishlistSubmitUrl) : ?>
             <li>
-                <a href="<?= $_wishlistSubmitUrl ?>"
-                   onclick="productAddToCartForm.submitLight(this, this.href); return false;"
-                   class="link-wishlist">
+                <a href="<?= $_wishlistSubmitUrl ?>" class="link-wishlist" title="<?= $this->__('Add to Wishlist') ?>"
+                   onclick="productAddToCartForm.submitLight(this, this.href); return false;">
+                    <?= $this->getIconSvg('heart') ?>
                     <?= $this->__('Add to Wishlist') ?>
                 </a>
             </li>
@@ -30,10 +30,9 @@
         <?php if ($_compareUrl) : ?>
             <?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])) ?>
             <li>
-                <?php if ($_wishlistSubmitUrl): ?><span class="separator">|</span><?php endif ?>
-                <a href="#"
-                   class="link-compare"
+                <a href="#" class="link-compare" title="<?= $this->__('Add to Compare') ?>"
                    onclick="customFormSubmit('<?= $_compareUrl ?>', '<?= $_params ?>', 'post')">
+                    <?= $this->getIconSvg('scale') ?>
                     <?= $this->__('Add to Compare') ?>
                 </a>
             </li>
