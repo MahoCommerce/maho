@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+    <blog_index_index>
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+        </reference>
+        <reference name="head">
+            <action method="addCss"><stylesheet>css/blog.css</stylesheet></action>
+        </reference>
+        <reference name="content">
+            <block type="blog/post_list" name="blog.post.list">
+                <action method="setTemplate"><template>blog/list.phtml</template></action>
+            </block>
+        </reference>
+    </blog_index_index>
+    <blog_index_view>
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+        </reference>
+        <reference name="head">
+            <action method="addCss"><stylesheet>css/blog.css</stylesheet></action>
+        </reference>
+        <reference name="content">
+            <block type="blog/post_view" name="blog.post.view">
+                <action method="setTemplate"><template>blog/view.phtml</template></action>
+            </block>
+        </reference>
+    </blog_index_view>
+</layout>
