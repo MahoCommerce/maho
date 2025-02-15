@@ -50,6 +50,10 @@
   accent-color: var(--maho-color-primary);
 }
 
+svg {
+  stroke-width: 1.5;
+}
+
 /* ============================================ *
  * Reset
  * ============================================ */
@@ -731,8 +735,8 @@ a.button:hover {
 /* -------------------------------------------- *
  * Icons
  */
-.icon-sprite, .btn-remove2, .ratings .rating-box, .ratings .rating-box .rating, .sorter > .sort-by .sort-by-switcher, .sorter > .view-mode .grid,
-.sorter > .view-mode .list, .skip-nav .icon, .skip-search .icon, #search_mini_form .search-button:before, .skip-account .icon, .skip-wishlist .icon, .skip-cart .icon, .product-view .sharing-links a, .review-summary-table .rating-box .rating-number:after, .ratings-table .rating-box, .ratings-table .rating-box .rating {
+.icon-sprite, .btn-remove2, .ratings .rating-box, .ratings .rating-box .rating,
+#search_mini_form .search-button:before, .product-view .sharing-links a, .review-summary-table .rating-box .rating-number:after, .ratings-table .rating-box, .ratings-table .rating-box .rating {
   background-repeat: no-repeat;
   background-size: 20px;
   background-position: center;
@@ -1127,15 +1131,6 @@ a.button:hover {
   text-align: center;
   margin: 10px;
   text-transform: uppercase;
-}
-
-/* -------------------------------------------- *
- * Grid
- */
-.grid:after {
-  content: '';
-  display: table;
-  clear: both;
 }
 
 /* -------------------------------------------- *
@@ -1713,12 +1708,10 @@ span.weee {
   border-bottom: 1px solid var(--maho-color-border);
   border-top: 1px solid var(--maho-color-border);
   background: var(--maho-color-background-alt);
-  padding: 5px 10px 0px 10px;
-}
-.toolbar:after {
-  content: '';
-  display: table;
-  clear: both;
+  padding: 3px 10px;
+  justify-content: space-between;
+  display: flex;
+  width: 100%;
 }
 
 .pager-no-toolbar {
@@ -1732,7 +1725,6 @@ span.weee {
 .toolbar,
 .pager {
   color: var(--maho-color-text-primary);
-  line-height: 30px;
   font-size: 0.75rem;
 }
 
@@ -1742,63 +1734,35 @@ span.weee {
   text-transform: uppercase;
 }
 
-.sorter {
-  float: left;
-  margin-bottom: 5px;
+.toolbar .view-mode > * {
+  font-size: 0;
+  width: 24px;
+  height: 24px;
 }
-.sorter label {
-  float: left;
-  margin-right: 5px;
+
+.toolbar .view-mode > a:hover,
+.toolbar .view-mode > strong {
+  color: var(--maho-color-primary);
 }
-.sorter label:after {
-  content: ':';
+.toolbar .view-mode > a {
+  color: var(--maho-color-text-primary);
+}
+
+.toolbar .count-container,
+.sorter, .sorter .view-mode {
+  display: flex;
+  place-items: center;
 }
 
 .sorter > .sort-by {
-  float: left;
-  margin-right: 5px;
-  height: 30px;
+  display: flex;
+  place-items: center;
+  gap: 0.2rem;
 }
 .sorter > .sort-by .sort-by-switcher {
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   display: inline-block;
-}
-.sorter > .sort-by .sort-by-switcher--asc {
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="%23999" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" /></svg>');
-  background-size: 16px;
-}
-.sorter > .sort-by .sort-by-switcher--desc {
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="%23999" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" /></svg>');
-  background-size: 16px;
-}
-
-.sorter > .view-mode {
-  float: right;
-}
-.sorter > .view-mode .grid,
-.sorter > .view-mode .list {
-  float: left;
-  width: 30px;
-  height: 30px;
-}
-.sorter > .view-mode .grid {
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="%23999" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" /></svg>');
-}
-.sorter > .view-mode .list {
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="%23999" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>');
-}
-.sorter > .view-mode strong.grid, .sorter > .view-mode a.grid:hover,
-.sorter > .view-mode strong.list, .sorter > .view-mode a.list:hover {
-  filter: invert(33%) sepia(70%) saturate(1011%) hue-rotate(165deg) brightness(55%) contrast(98%);
-}
-
-.pager {
-  float: right;
-  overflow: hidden;
-}
-.pager > .count-container {
-  float: left;
 }
 .pager .amount {
   float: left;
@@ -1938,50 +1902,6 @@ span.weee {
 
   .limiter label {
     display: none;
-  }
-}
-@media only screen and (max-width: 770px) {
-  .col1-layout .sorter,
-  .col1-layout .pager {
-    width: 100%;
-  }
-  .col1-layout .pager {
-    float: left;
-    clear: both;
-  }
-  .col1-layout .pager .pages {
-    float: left;
-    margin-left: 0;
-  }
-  .col1-layout .pager .count-container {
-    float: right;
-  }
-}
-@media only screen and (max-width: 979px) {
-  .col2-left-layout .sorter,
-  .col2-left-layout .pager,
-  .col2-right-layout .sorter,
-  .col2-right-layout .pager,
-  .col3-layout .sorter,
-  .col3-layout .pager {
-    width: 100%;
-  }
-  .col2-left-layout .pager,
-  .col2-right-layout .pager,
-  .col3-layout .pager {
-    float: left;
-    clear: both;
-  }
-  .col2-left-layout .pager .pages,
-  .col2-right-layout .pager .pages,
-  .col3-layout .pager .pages {
-    float: left;
-    margin-left: 0;
-  }
-  .col2-left-layout .pager .count-container,
-  .col2-right-layout .pager .count-container,
-  .col3-layout .pager .count-container {
-    float: right;
   }
 }
 @media only screen and (max-width: 1279px) {
@@ -2780,7 +2700,6 @@ body {
   width:30px;
   height:30px;
   background-size: 30px;
-  stroke-width: 1.5;
 }
 
 @media (max-width: 770px) {
