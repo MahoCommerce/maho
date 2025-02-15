@@ -102,7 +102,6 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
 
     public function getPostIdByUrlKey(string $urlKey, int $storeId): ?int
     {
-
         $urlKey = substr($urlKey, strlen('blog/'));
         $urlKey = substr($urlKey, 0, -strlen('.html'));
 
