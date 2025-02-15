@@ -3895,25 +3895,15 @@ p.product-name a:hover {
   text-rendering: optimizeSpeed;
   text-transform: uppercase;
 }
-.block-layered-nav .currently ol {
-  padding-left: 10px;
-  margin-bottom: 10px;
-}
-.block-layered-nav .currently ol li {
-  margin-bottom: 5px;
-}
 .block-layered-nav .currently ol li .label {
   font-weight: bold;
 }
-.block-layered-nav .currently ol li:after {
-  content: '';
-  display: table;
-  clear: both;
-}
-
 .block-layered-nav .actions {
   text-align: right;
-  margin-bottom: 7px;
+  margin: 0 0 10px 0;
+}
+.block-layered-nav .actions a {
+  float: none;
 }
 
 /* ============================================ *
@@ -5161,18 +5151,12 @@ p.product-name a:hover {
   border-radius: 3px;
 }
 
-.currently .swatch-current {
-  position: relative;
+.currently li {
+  display: flex;
+  gap: 0.2rem;
 }
-.currently .swatch-current .btn-remove {
-  margin-top: -10px;
-  position: absolute;
-  right: 0;
-  top: 50%;
-}
-.currently .swatch-current span {
-  display: block;
-  float: left;
+.currently li span.value {
+  flex-grow: 1;
 }
 .currently .swatch-link {
   display: inline-block;
