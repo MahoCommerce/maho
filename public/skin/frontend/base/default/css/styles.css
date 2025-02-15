@@ -735,7 +735,7 @@ a.button:hover {
 /* -------------------------------------------- *
  * Icons
  */
-.icon-sprite, .btn-remove2, .ratings .rating-box, .ratings .rating-box .rating,
+.icon-sprite, .ratings .rating-box, .ratings .rating-box .rating,
 #search_mini_form .search-button:before, .product-view .sharing-links a, .review-summary-table .rating-box .rating-number:after, .ratings-table .rating-box, .ratings-table .rating-box .rating {
   background-repeat: no-repeat;
   background-size: 20px;
@@ -784,6 +784,19 @@ a.button:hover {
 /* -------------------------------------------- *
  * Button - Remove / Previous
  */
+
+#wishlist-table a:has(svg),
+#multiship-addresses-table a:has(svg),
+.product-cart-remove a {
+  font-size: 0;
+  color: var(--maho-color-text-primary);
+}
+#wishlist-table a:has(svg):hover,
+#multiship-addresses-table a:has(svg):hover,
+.product-cart-remove a:hover {
+  color: var(--maho-color-primary);
+}
+
 .btn-remove,
 .btn-previous {
   display: inline-block;
@@ -815,15 +828,6 @@ a.button:hover {
 .btn-remove:hover:after {
   color: var(--maho-color-background);
   text-decoration: none;
-}
-
-.btn-remove2 {
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="%23999" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>');
-  border: none;
-  vertical-align: top;
-}
-.btn-remove2:hover {
-  background-color: transparent;
 }
 
 .btn-previous:after {

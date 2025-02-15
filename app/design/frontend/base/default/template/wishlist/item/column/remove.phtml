@@ -11,9 +11,7 @@
 
 /** @var Mage_Wishlist_Block_Customer_Wishlist_Item_Column_Remove $this */
 ?>
-<a href="#"
-   class="btn-remove btn-remove2"
-   title="<?= Mage::helper('core')->quoteEscape($this->__('Remove Item')) ?>"
+<a href="#" title="<?= Mage::helper('core')->quoteEscape($this->__('Remove Item')) ?>"
    onclick="if (confirmRemoveWishlistItem()) {
                 customFormSubmit(
                     '<?= $this->getItemRemoveUrlCustom($this->getItem(), false) ?>',
@@ -21,5 +19,6 @@
                     'post'
                 )
             }">
+    <?= $this->getIconSvg('x') ?>
     <?= $this->__('Remove item') ?>
 </a>
