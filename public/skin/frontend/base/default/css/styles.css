@@ -5158,6 +5158,10 @@ p.product-name a:hover {
 .currently li span.value {
   flex-grow: 1;
 }
+.currently li a svg {
+  width: 20px;
+  height: 20px;
+}
 .currently .swatch-link {
   display: inline-block;
   margin: 0 0 0 3px;
