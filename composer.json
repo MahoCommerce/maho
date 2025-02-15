@@ -43,7 +43,7 @@
         "bacon/bacon-qr-code": "^3.0",
         "symfony/polyfill-php83": "^1.31",
         "lbuchs/webauthn": "^2.2",
-        "mahocommerce/icons": "dev-main"
+        "mahocommerce/icons": "^1"
     },
     "replace": {
         "symfony/polyfill-ctype": "*",
