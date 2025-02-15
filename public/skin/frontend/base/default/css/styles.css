@@ -3451,14 +3451,13 @@ p.product-name a:hover {
 
 .products-grid .product-info {
   position: relative;
-  padding-bottom: 95px;
+  padding-bottom: 55px;
 }
 
 .products-grid .actions {
   padding-top: 10px;
   position: absolute;
-  bottom: 0px;
-  min-height: 85px;
+  bottom: 0;
   width: 100%;
 }
 
