@@ -3393,17 +3393,13 @@ p.product-name a:hover {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   grid-gap: 10px;
+  grid-row-gap: 20px;
+  text-align: center;
 }
 
 .products-grid:has(> :nth-child(2) ~ *) {
   justify-items: center;
-}
-
-.products-grid > li {
-  max-width: 180px;
-  margin-bottom: 20px;
-  text-align: center;
-}
+}}
 
 .products-grid > li > div:first-child {
   position: relative;
