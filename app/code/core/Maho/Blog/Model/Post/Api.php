@@ -11,9 +11,10 @@
 
 class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
 {
-    public function items($filters = null)
+    public function items($filters = null): array
     {
         try {
+            /** @var Maho_Blog_Model_Resource_Post_Collection $collection */
             $collection = Mage::getModel('blog/post')->getCollection();
             $collection->addAttributeToSelect('*');
 
@@ -38,7 +39,7 @@ class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
         }
     }
 
-    public function info($postId)
+    public function info($postId): array
     {
         try {
             $post = Mage::getModel('blog/post')->load($postId);
@@ -53,7 +54,7 @@ class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
         }
     }
 
-    public function create($postData)
+    public function create($postData): int
     {
         try {
             $post = Mage::getModel('blog/post')
@@ -68,7 +69,7 @@ class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
         }
     }
 
-    public function update($postId, $postData)
+    public function update($postId, $postData): true
     {
         try {
             $post = Mage::getModel('blog/post')->load($postId);
@@ -87,7 +88,7 @@ class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
         }
     }
 
-    public function delete($postId)
+    public function delete($postId): true
     {
         try {
             $post = Mage::getModel('blog/post')->load($postId);
@@ -97,14 +98,13 @@ class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
             }
 
             $post->delete();
-
             return true;
         } catch (Mage_Core_Exception $e) {
             $this->_fault('not_deleted', $e->getMessage());
         }
     }
 
-    protected function _getPostData($post)
+    protected function _getPostData($post): array
     {
         return [
             'post_id' => $post->getId(),
