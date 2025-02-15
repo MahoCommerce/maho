@@ -3399,7 +3399,7 @@ p.product-name a:hover {
 
 .products-grid:has(> :nth-child(2) ~ *) {
   justify-items: center;
-}}
+}
 
 .products-grid > li > div:first-child {
   position: relative;
