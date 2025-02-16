@@ -60,14 +60,7 @@
 
     <?= $this->getChildHtml('js') ?>
     <?= $this->getChildHtml('profiler') ?>
-<div id="loading-mask" style="display:none">
-    <div class="backdrop"></div>
-    <p class="loader" id="loading_mask_loader">
-        <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Loading...')) ?>"/><br/><?= Mage::helper('adminhtml')->__('Please wait...') ?>
-    </p>
-</div>
-
-<?= $this->getChildHtml('before_body_end') ?>
+    <?= $this->getChildHtml('before_body_end') ?>
 
 </body>
 </html>

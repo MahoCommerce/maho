@@ -8,6 +8,67 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
+var Maho = Maho ?? {};
+Maho.Ajax ??= {};
+
+Maho.Ajax.Loader = {
+    loaders: new Map(),
+
+    createLoaderEl() {
+        const loaderEl = document.createElement('div');
+        loaderEl.className = 'loading-mask';
+        loaderEl.innerHTML = `
+            <div class="backdrop no-display"></div>
+            <div class="loader no-display"><h3>${Translator.translate('Please wait...')}</h3></div>
+        `
+        return loaderEl
+    },
+
+    getLoaderAreaEl(loaderArea = null) {
+        if (loaderArea instanceof HTMLElement) {
+            return loaderArea;
+        }
+        if (typeof loaderArea === 'string') {
+            return document.getElementById(loaderArea);
+        }
+        return document.body;
+    },
+
+    show(loaderArea = null) {
+        const loaderAreaEl = this.getLoaderAreaEl(loaderArea);
+
+        if (!this.loaders.has(loaderAreaEl)) {
+            const loaderEl = loaderAreaEl.appendChild(this.createLoaderEl());
+            this.loaders.set(loaderAreaEl, { count: 0, loaderEl });
+            loaderAreaEl.style.position = 'relative';
+        }
+
+        const loader = this.loaders.get(loaderAreaEl);
+        loader.count++;
+
+        setTimeout(() => {
+            for (const el of loader.loaderEl.children) {
+                toggleVis(el, true);
+            }
+        }, window.LOADING_TIMEOUT ?? 200);
+    },
+
+    hide(loaderArea = null) {
+        const loaderAreaEl = this.getLoaderAreaEl(loaderArea);
+        const loader = this.loaders.get(loaderAreaEl);
+
+        // TODO: if no loaderArea specified, and no document.body loaders, remove all loaders
+        if (!loader || --loader.count > 0) {
+            return;
+        }
+
+        loader.loaderEl.remove();
+        loaderAreaEl.style.position = null;
+        this.loaders.delete(loaderAreaEl);
+    },
+}
+
+
 /**
  * Custom error with translated message
  */
