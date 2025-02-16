@@ -1162,6 +1162,13 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
         $name = strtolower($name);
         $variant = strtolower($variant);
 
+        $cacheId = "MAHO_ICON_{$variant}_$name";
+        $cache = Mage::app()->getCache();
+        $cachedIcon = $cache->load($cacheId);
+        if ($cachedIcon) {
+            return $cachedIcon;
+        }
+
         $packageName = 'mahocommerce/icons';
         $iconName = basename($name);
         $allowedVariants = ['outline', 'filled'];
@@ -1188,6 +1195,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
             return '';
         }
 
+        $cache->save($iconSvg, $cacheId, ['MAHO_ICONS']);
         return $iconSvg;
     }
 
