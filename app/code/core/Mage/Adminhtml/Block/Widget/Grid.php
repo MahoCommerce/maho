@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -1470,12 +1470,24 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     }
 
     /**
+     * Check whether the grid container should be rendered
+     *
+     * Rendering the grid container adds a `<script>` tag containing javascript code to initialize
+     * the grid, and so should not be rendered when updating the grid via AJAX.
+     *
+     * Note: Magento 1.9 checked for the presense of the `?ajax=true` query parameter to control
+     * container rendering. This is bad practice as there are reasons to fetch a grid via ajax
+     * and also have the container rendered. The new `?hideGridContainer=true` should be preferred.
+     *
+     * @see app/design/adminhtml/default/default/template/widget/grid.phtml
      * @return bool
-     * @throws Exception
      */
     public function canDisplayContainer()
     {
         if ($this->getRequest()->getQuery('ajax')) {
+            return false;
+        }
+        if ($this->getRequest()->getQuery('hideGridContainer')) {
             return false;
         }
         return true;
