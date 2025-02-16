@@ -3391,10 +3391,22 @@ p.product-name a:hover {
  * ============================================ */
 .products-grid {
   display: grid;
+  grid-auto-rows: 1fr;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   grid-gap: 10px;
   grid-row-gap: 20px;
   text-align: center;
+}
+
+.products-grid > li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 210px;
+}
+.products-grid > li .product-info {
+  flex-grow: 1;
 }
 
 .products-grid:has(> :nth-child(2) ~ *) {
@@ -3407,8 +3419,8 @@ p.product-name a:hover {
 
 .products-grid > li > div:first-child ul {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
+  bottom: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
@@ -3426,11 +3438,6 @@ p.product-name a:hover {
   height: 22px;
 }
 
-.products-grid .product-image {
-  width: 100%;
-  margin-bottom: 15px;
-}
-
 .products-grid .product-image img {
   width: 100%;
   height: auto;
@@ -3443,18 +3450,6 @@ p.product-name a:hover {
   width: 75%;
   margin-bottom: 15px;
   margin-left: 10%;
-}
-
-.products-grid .product-info {
-  position: relative;
-  padding-bottom: 55px;
-}
-
-.products-grid .actions {
-  padding-top: 10px;
-  position: absolute;
-  bottom: 0;
-  width: 100%;
 }
 
 .products-grid .ratings .rating-box {
@@ -3482,9 +3477,6 @@ p.product-name a:hover {
   place-content: flex-start;
 }
 
-.products-grid .product-image {
-  margin-bottom: 5px;
-}
 .products-grid .product-image:before, .products-grid .product-image:after {
   content: '';
   position: absolute;
