@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
@@ -20,22 +20,6 @@
 <div class="toolbar">
     <?php if( $this->isExpanded() ): ?>
         <div class="sorter">
-            <?php if( $this->isEnabledViewSwitcher() ): ?>
-                <p class="view-mode">
-                    <?php $_modes = $this->getModes(); ?>
-                    <?php if($_modes && count($_modes)>1): ?>
-                        <label><?= $this->__('View as') ?></label>
-                        <?php foreach ($this->getModes() as $_code => $_label): ?>
-                            <?php if($this->isModeActive($_code)): ?>
-                                <strong title="<?= $_label ?>" class="<?= strtolower($_code) ?>"><?= $_label ?></strong>
-                            <?php else: ?>
-                                <a href="<?= $this->getModeUrl($_code) ?>" title="<?= $_label ?>" class="<?= strtolower($_code) ?>"><?= $_label ?></a>
-                            <?php endif ?>
-                        <?php endforeach ?>
-                    <?php endif ?>
-                </p>
-            <?php endif ?>
-
             <div class="sort-by">
                 <label><?= $this->__('Sort By') ?></label>
                 <select onchange="window.location.href=this.value" title="<?= Mage::helper('core')->quoteEscape($this->__('Sort By')) ?>">
@@ -46,11 +30,33 @@
                     <?php endforeach ?>
                 </select>
                 <?php if($this->getCurrentDirection() === 'desc'): ?>
-                    <a href="<?= $this->getOrderUrl(null, 'asc') ?>" class="sort-by-switcher sort-by-switcher--desc" title="<?= Mage::helper('core')->quoteEscape($this->__('Set Ascending Direction')) ?>"><?= $this->__('Set Ascending Direction') ?></a>
+                    <a href="<?= $this->getOrderUrl(null, 'asc') ?>" class="sort-by-switcher sort-by-switcher--desc" title="<?= Mage::helper('core')->quoteEscape($this->__('Set Ascending Direction')) ?>"><?= $this->getIconSvg('arrow-down') ?></a>
                 <?php else: ?>
-                    <a href="<?= $this->getOrderUrl(null, 'desc') ?>" class="sort-by-switcher sort-by-switcher--asc" title="<?= Mage::helper('core')->quoteEscape($this->__('Set Descending Direction')) ?>"><?= $this->__('Set Descending Direction') ?></a>
+                    <a href="<?= $this->getOrderUrl(null, 'desc') ?>" class="sort-by-switcher sort-by-switcher--asc" title="<?= Mage::helper('core')->quoteEscape($this->__('Set Descending Direction')) ?>"><?= $this->getIconSvg('arrow-up') ?></a>
                 <?php endif ?>
             </div>
+
+            <?php if( $this->isEnabledViewSwitcher() ): ?>
+                <p class="view-mode">
+                    <?php $_modes = $this->getModes(); ?>
+                    <?php if($_modes && count($_modes)>1): ?>
+                        <label><?= $this->__('View as') ?></label>
+                        <?php foreach ($this->getModes() as $_code => $_label): ?>
+                            <?php if($this->isModeActive($_code)): ?>
+                                <strong title="<?= $_label ?>" class="<?= strtolower($_code) ?>">
+                                    <?= $this->getIconSvg("layout-{$_code}") ?>
+                                    <?= $_label ?>
+                                </strong>
+                            <?php else: ?>
+                                <a href="<?= $this->getModeUrl($_code) ?>" title="<?= $_label ?>" class="<?= strtolower($_code) ?>">
+                                    <?= $this->getIconSvg("layout-{$_code}") ?>
+                                    <?= $_label ?>
+                                </a>
+                            <?php endif ?>
+                        <?php endforeach ?>
+                    <?php endif ?>
+                </p>
+            <?php endif ?>
         </div>
     <?php endif ?>
     <div class="pager">

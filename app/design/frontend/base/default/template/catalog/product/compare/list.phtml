@@ -76,11 +76,10 @@
                         <?php $_wishlistUrl = $this->getAddToWishlistUrlCustom($_item, false); ?>
                         <ul class="add-to-links">
                             <li>
-                                <a href="#"
-                                   data-url="<?= $_wishlistUrl ?>"
-                                   data-params="<?= $_params ?>"
-                                   class="link-wishlist"
+                                <a href="#" data-url="<?= $_wishlistUrl ?>" data-params="<?= $_params ?>"
+                                   class="link-wishlist" title="<?= $this->__('Add to Wishlist') ?>"
                                    onclick="customFormSubmit('<?= $_wishlistUrl ?>', '<?= $_params ?>', 'post')">
+                                    <?= $this->getIconSvg('heart') ?>
                                     <?= $this->__('Add to Wishlist') ?>
                                 </a>
                             </li>
@@ -148,11 +147,10 @@
                         <?php $_wishlistUrl = $this->getAddToWishlistUrlCustom($_item, false); ?>
                         <ul class="add-to-links">
                             <li>
-                                <a href="#"
-                                   data-url="<?= $_wishlistUrl ?>"
-                                   data-params="<?= $_params ?>"
-                                   class="link-wishlist"
+                                <a href="#" data-url="<?= $_wishlistUrl ?>" data-params="<?= $_params ?>"
+                                   class="link-wishlist" title="<?= $this->__('Add to Wishlist') ?>"
                                    onclick="customFormSubmit('<?= $_wishlistUrl ?>', '<?= $_params ?>', 'post')">
+                                    <?= $this->getIconSvg('heart') ?>
                                     <?= $this->__('Add to Wishlist') ?>
                                 </a>
                             </li>

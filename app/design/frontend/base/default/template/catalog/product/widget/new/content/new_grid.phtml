@@ -51,21 +51,19 @@
                                 <?php if ($this->helper('wishlist')->isAllow()) : ?>
                                     <?php $_wishlistUrl = $this->getAddToWishlistUrlCustom($_product, false); ?>
                                     <li>
-                                        <a href="#"
-                                           data-url="<?= $_wishlistUrl ?>"
-                                           data-params="<?= $_params ?>"
-                                           class="link-wishlist"
+                                        <a href="#" data-url="<?= $_wishlistUrl ?>" data-params="<?= $_params ?>"
+                                           class="link-wishlist" title="<?= $this->__('Add to Wishlist') ?>"
                                            onclick="customFormSubmit('<?= $_wishlistUrl ?>', '<?= $_params ?>', 'post')">
+                                            <?= $this->getIconSvg('heart') ?>
                                             <?= $this->__('Add to Wishlist') ?>
                                         </a>
                                     </li>
                                 <?php endif ?>
                                 <?php if ($_compareUrl = $this->getAddToCompareUrlCustom($_product, false)) : ?>
                                     <li>
-                                        <span class="separator">|</span>
-                                        <a href="#"
-                                           class="link-compare"
+                                        <a href="#" class="link-compare" title="<?= $this->__('Add to Compare') ?>"
                                            onclick="customFormSubmit('<?= $_compareUrl ?>', '<?= $_params ?>', 'post')">
+                                            <?= $this->getIconSvg('scale') ?>
                                             <?= $this->__('Add to Compare') ?>
                                         </a>
                                     </li>
