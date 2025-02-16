@@ -1170,7 +1170,12 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
             $variant = 'outline';
         }
 
-        $installPath = \Composer\InstalledVersions::getInstallPath($packageName);
+        try {
+            $installPath = \Composer\InstalledVersions::getInstallPath($packageName);
+        } catch (\OutOfBoundsException $e) {
+            return '';
+        }
+
         $svgPath = implode(DIRECTORY_SEPARATOR, [
             $installPath,
             'icons',
