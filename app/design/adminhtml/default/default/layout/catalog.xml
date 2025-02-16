@@ -332,13 +332,6 @@ Layout handle for configurable products
         </block>
     </ADMINHTML_CATALOG_PRODUCT_COMPOSITE_CONFIGURE>
 
-    <ADMINHTML_CATALOG_PRODUCT_COMPOSITE_CONFIGURE_ERROR>
-        <block type="adminhtml/catalog_product_composite_error" name="product.composite.error" output="toHtml" />
-    </ADMINHTML_CATALOG_PRODUCT_COMPOSITE_CONFIGURE_ERROR>
-
-    <ADMINHTML_CATALOG_PRODUCT_COMPOSITE_UPDATE_RESULT>
-        <block type="adminhtml/catalog_product_composite_update_result" name="product.composite.update.result" output="toHtml" />
-    </ADMINHTML_CATALOG_PRODUCT_COMPOSITE_UPDATE_RESULT>
 <!--
 Additional block in composite_fieldset block dependant on product type
 -->

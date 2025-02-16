@@ -4,13 +4,13 @@
  * @package     js
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-var Product = Product || {};
+var Product = Product ?? {};
 
-class OptionsPrice {
+Product.OptionsPrice = class {
     constructor(config) {
         this.productId = config.productId;
         this.priceFormat = config.priceFormat;
@@ -278,5 +278,3 @@ class OptionsPrice {
         return formatCurrency(price, this.priceFormat);
     }
 }
-
-Product.OptionsPrice = OptionsPrice;
