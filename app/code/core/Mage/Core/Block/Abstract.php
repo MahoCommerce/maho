@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -1155,6 +1155,57 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
         /** @var Mage_Core_Helper_Data $helper */
         $helper = $this->helper('core');
         return $helper->formatTime($time, $format, $showDate);
+    }
+
+    public function getIconSvg(string $name, string $variant = 'outline'): string
+    {
+        $name = basename(strtolower($name));
+        $variant = in_array($variant, ['outline', 'filled']) ? $variant : 'outline';
+
+        $cache = Mage::app()->getCache();
+        $cacheId = "MAHO_ICON_{$variant}_{$name}";
+        $useCache = Mage::app()->useCache('icons');
+
+        if ($useCache && $cachedIcon = $cache->load($cacheId)) {
+            return $cachedIcon;
+        }
+
+        $installPath = null;
+        $packageName = 'mahocommerce/icons';
+        try {
+            $installPath = \Composer\InstalledVersions::getInstallPath($packageName);
+        } catch (OutOfBoundsException $e) {
+            return '';
+        }
+        if ($installPath === null) {
+            return '';
+        }
+
+        $iconSvg = file_get_contents("$installPath/icons/$variant/$name.svg", false);
+        if ($iconSvg === false) {
+            return '';
+        }
+
+        if ($useCache) {
+            $cache->save($iconSvg, $cacheId, ['ICONS']);
+        }
+        return $iconSvg;
+    }
+
+    public function getIconDataUrl(string $name, string $variant = 'outline', array $attributes = []): string
+    {
+        $svg = $this->getIconSvg($name, $variant);
+
+        if ($attributes) {
+            $attributesSearch = $attributesReplace = [];
+            foreach ($attributes as $key => $value) {
+                $attributesSearch[] = "/$key=\".*?\"/";
+                $attributesReplace[] = "$key=\"$value\"";
+            }
+            $svg = preg_replace($attributesSearch, $attributesReplace, $svg);
+        }
+
+        return "url('data:image/svg+xml,{$svg}')";
     }
 
     /**

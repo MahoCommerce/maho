@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -35,16 +35,11 @@ $_renderers = $this->getParentBlock()->getChild('state_renderers')->getSortedChi
         if (!$_rendered):
         ?>
         <li>
-            <?php
-                $clearLinkUrl = $_filter->getClearLinkUrl();
-                if ($clearLinkUrl):
-            ?>
-                <a  class="btn-previous" href="<?= $_filter->getRemoveUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Previous')) ?>"><?= $this->__('Previous') ?></a>
-                <a  class="btn-remove" title="<?= $this->escapeHtml($_filter->getFilter()->getClearLinkText()) ?>" href="<?= $clearLinkUrl ?>"><?= $this->escapeHtml($_filter->getFilter()->getClearLinkText()) ?></a>
-            <?php else: ?>
-                <a  class="btn-remove" href="<?= $_filter->getRemoveUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Remove This Item')) ?>"><?= $this->__('Remove This Item') ?></a>
-            <?php endif ?>
-            <span class="label"><?= $this->__($_filter->getName()) ?>:</span> <span class="value"><?= $this->stripTags($_filter->getLabel()) ?></span>
+            <span class="label"><?= $this->__($_filter->getName()) ?>:</span>
+            <span class="value"><?= $this->stripTags($_filter->getLabel()) ?></span>
+            <a href="<?= $_filter->getRemoveUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Remove This Item')) ?>">
+                <?= $this->getIconSvg('x') ?>
+            </a>
         </li>
         <?php endif ?>
     <?php endforeach ?>

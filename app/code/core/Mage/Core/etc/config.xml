@@ -130,6 +130,11 @@
                     <description>Collection data files.</description>
                     <tags>COLLECTION_DATA</tags>
                 </collections>
+                <icons translate="label,description" module="core">
+                    <label>Icons</label>
+                    <description>SVG icons library.</description>
+                    <tags>ICONS</tags>
+                </icons>
             </types>
         </cache>
         <session>
