@@ -1159,43 +1159,37 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
 
     public function getIconSvg(string $name, string $variant = 'outline'): string
     {
-        $name = strtolower($name);
-        $variant = strtolower($variant);
+        $name = basename(strtolower($name));
+        $variant = in_array($variant, ['outline', 'filled']) ? $variant : 'outline';
 
-        $cacheId = "MAHO_ICON_{$variant}_$name";
         $cache = Mage::app()->getCache();
-        $cachedIcon = $cache->load($cacheId);
-        if ($cachedIcon) {
+        $cacheId = "MAHO_ICON_{$variant}_{$name}";
+        $useCache = Mage::app()->useCache('icons');
+
+        if ($useCache && $cachedIcon = $cache->load($cacheId)) {
             return $cachedIcon;
         }
 
+        $installPath = null;
         $packageName = 'mahocommerce/icons';
-        $iconName = basename($name);
-        $allowedVariants = ['outline', 'filled'];
-
-        if (!in_array($variant, $allowedVariants)) {
-            $variant = 'outline';
-        }
-
         try {
             $installPath = \Composer\InstalledVersions::getInstallPath($packageName);
-        } catch (\OutOfBoundsException $e) {
+        } catch (OutOfBoundsException $e) {
+            return '';
+        }
+        if ($installPath === null) {
             return '';
         }
 
-        $svgPath = implode(DIRECTORY_SEPARATOR, [
-            $installPath,
-            'icons',
-            $variant,
-            $iconName . '.svg',
-        ]);
-
+        $svgPath = implode(DIRECTORY_SEPARATOR, [ $installPath, 'icons', $variant, "$name.svg" ]);
         $iconSvg = file_get_contents($svgPath, false);
         if ($iconSvg === false) {
             return '';
         }
 
-        $cache->save($iconSvg, $cacheId, ['ICONS']);
+        if ($useCache) {
+            $cache->save($iconSvg, $cacheId, ['ICONS']);
+        }
         return $iconSvg;
     }
 
