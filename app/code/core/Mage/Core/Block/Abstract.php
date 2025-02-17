@@ -1195,7 +1195,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
             return '';
         }
 
-        $cache->save($iconSvg, $cacheId, ['MAHO_ICONS']);
+        $cache->save($iconSvg, $cacheId, ['ICONS']);
         return $iconSvg;
     }
 
