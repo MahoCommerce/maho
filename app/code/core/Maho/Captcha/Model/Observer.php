@@ -13,7 +13,7 @@ class Maho_Captcha_Model_Observer
         $controller = $observer->getControllerAction();
         $data = $controller->getRequest()->getPost();
 
-        $token = $data['cf-turnstile-response'] ?? '';
+        $token = $data['altcha_payload'] ?? '';
         if ($helper->verify((string) $token)) {
             return;
         }
@@ -32,7 +32,7 @@ class Maho_Captcha_Model_Observer
         $controller = $observer->getControllerAction();
         $data = $controller->getRequest()->getPost();
 
-        $token = $data['cf-turnstile-response'] ?? '';
+        $token = $data['altcha_payload'] ?? '';
         if ($helper->verify((string) $token)) {
             return;
         }
@@ -54,10 +54,8 @@ class Maho_Captcha_Model_Observer
             return;
         }
 
-
-
         $data = $request->getPost();
-        $token = $data['cf-turnstile-response'] ?? '';
+        $token = $data['altcha_payload'] ?? '';
         if ($helper->verify((string) $token)) {
             return;
         }
@@ -72,7 +70,7 @@ class Maho_Captcha_Model_Observer
 
         if ($isAjax) {
             $result = ['error' => 1, 'message' => $errorMessage];
-            $controller->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
+            $controller->getResponse()->setBodyJson($result);
             return;
         }
 
