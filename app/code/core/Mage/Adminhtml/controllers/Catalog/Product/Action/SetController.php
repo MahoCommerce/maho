@@ -31,8 +31,8 @@ class Mage_Adminhtml_Catalog_Product_Action_SetController extends Mage_Adminhtml
         $collection->getConnection()
             ->update(
                 $collection->getTable('catalog/product'),
-                array('attribute_set_id' => $request->getParam('attribute_set')),
-                'entity_id IN (' . implode(',', $request->getParam('product')) . ')'
+                ['attribute_set_id' => $request->getParam('attribute_set')],
+                'entity_id IN (' . implode(',', $request->getParam('product')) . ')',
             );
 
         $this->_getSession()->addSuccess(
@@ -40,7 +40,7 @@ class Mage_Adminhtml_Catalog_Product_Action_SetController extends Mage_Adminhtml
         );
 
         $this->_redirect('*/catalog_product/', [
-            'store' => (int) $request->getParam('store', Mage_Core_Model_App::ADMIN_STORE_ID)
+            'store' => (int) $request->getParam('store', Mage_Core_Model_App::ADMIN_STORE_ID),
         ]);
     }
 }
