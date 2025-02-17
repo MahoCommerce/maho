@@ -25,11 +25,8 @@
         <?php foreach ($addressCollection as $_address): ?>
         <li id="address_item_<?= $_address->getId() ?>">
             <?php if (!$this->isReadonly()): ?>
-            <a href="#" class="btn-remove-address">
-                <img src="<?= $this->getSkinUrl('images/cancel_icon.gif') ?>" alt="<?= $this->quoteEscape(Mage::helper('customer')->__('Remove address')) ?>" id="delete_button<?= ++$_iterator ?>" />
-            </a>
-            <a href="#" id="select_button_<?= $_address->getId() ?>" class="select_button btn-edit-address">
-                <img src="<?= $this->getSkinUrl('images/edit_icon.gif') ?>" alt="<?= $this->quoteEscape(Mage::helper('customer')->__('Edit address')) ?>"/>
+            <a href="#" id="delete_button<?= ++$_iterator ?>" class="btn-remove-address" title="<?= $this->quoteEscape(Mage::helper('customer')->__('Remove address')) ?>">
+                <?= $this->getIconSvg('x') ?>
             </a>
             <?php endif ?>
             <address>
@@ -55,11 +52,6 @@
     <?php $_templatePrefix = $this->getTemplatePrefix() ?>
     <div id="address_item_template" class="no-display template">
         <?php if (!$this->isReadonly()): ?>
-        <a href="#" class="btn-remove-address">
-            <img src="<?= $this->getSkinUrl('images/cancel_icon.gif') ?>" alt="<?= $this->quoteEscape(Mage::helper('customer')->__('Remove address')) ?>" id="delete_button<?= ++$_iterator ?>" />
-        </a>
-        <a href="#" id="select_button_" class="select_button btn-edit-address">
-            <img src="<?= $this->getSkinUrl('images/edit_icon.gif') ?>" alt="<?= $this->quoteEscape(Mage::helper('customer')->__('Edit address')) ?>"/>
         </a>
         <?php endif ?>
         <address><?= Mage::helper('customer')->__('New Customer Address') ?></address>

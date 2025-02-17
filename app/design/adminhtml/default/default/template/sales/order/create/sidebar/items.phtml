@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
@@ -14,7 +14,7 @@
     <div class="head">
         <h5><?= $this->getHeaderText() ?> <span class="normal">(<?= $this->getItemCount() ?>)</span></h5>
         <a href="#" title="<?= Mage::helper('sales')->__('Refresh') ?>" onclick="order.loadArea('sidebar_<?= $this->getDataId() ?>', 'sidebar_data_<?= $this->getDataId() ?>');return false;">
-            <img src="<?= $this->getSkinUrl('images/fam_refresh.gif') ?>" alt="<?= Mage::helper('sales')->__('Refresh') ?>" width="16" height="16"/>
+            <?= $this->getIconSvg('refresh') ?>
         </a>
     </div>
     <div class="content">
@@ -41,9 +41,9 @@
                 <th><?= Mage::helper('sales')->__('Price') ?></th>
                 <?php endif ?>
                 <?php if($this->canRemoveItems()): ?>
-                <th class="a-center"><img src="<?= $this->getSkinUrl('images/fam_bin.gif') ?>" alt="<?= Mage::helper('sales')->__('Remove') ?>" title="<?= Mage::helper('sales')->__('Remove') ?>" width="16" height="16"/></th>
+                <th class="a-center"><span title="<?= Mage::helper('sales')->__('Remove') ?>"><?= $this->getIconSvg('trash') ?></span></th>
                 <?php endif ?>
-                <th class="a-center"><img src="<?= $this->getSkinUrl('images/fam_package_go.gif') ?>" alt="<?= Mage::helper('sales')->__('Add To Order') ?>" title="<?= Mage::helper('sales')->__('Add To Order') ?>" width="16" height="16"/></th>
+                <th class="a-center"><span title="<?= Mage::helper('sales')->__('Add To Order') ?>"><?= $this->getIconSvg('package-export') ?></span></th>
             </tr>
             <?php foreach ($this->getItems() as $_item): ?>
             <tr>
@@ -63,9 +63,9 @@
                 <?php endif ?>
                 <td class="a-center">
                     <?php if ($_item->getTypeId() == Mage_Catalog_Model_Product_Type_Grouped::TYPE_CODE && $this->getDataId() == 'wishlist'): ?>
-                        <a href="#" onclick="order.sidebarConfigureProduct('<?= 'sidebar_wishlist' ?>', <?= $this->getProductId($_item) ?>, <?= $this->getItemId($_item) ?>); return false;"><img src="<?= $this->getSkinUrl('images/grouped_to_order_icon.png') ?>" class="v-middle" alt="<?= Mage::helper('sales')->__('Configure and Add to Order') ?>" title="<?= Mage::helper('sales')->__('Configure and Add to Order') ?>" width="16" height="16"/></a>
+                        <a href="#" onclick="order.sidebarConfigureProduct('<?= 'sidebar_wishlist' ?>', <?= $this->getProductId($_item) ?>, <?= $this->getItemId($_item) ?>); return false;" title="<?= Mage::helper('sales')->__('Configure and Add to Order') ?>"><?= $this->getIconSvg('tool') ?></a>
                     <?php elseif ($_item->getTypeId() == Mage_Catalog_Model_Product_Type_Grouped::TYPE_CODE): ?>
-                        <a href="#" onclick="order.sidebarConfigureProduct('<?= 'sidebar' ?>', <?= $this->getProductId($_item) ?>); return false;"><img src="<?= $this->getSkinUrl('images/grouped_to_order_icon.png') ?>" class="v-middle" alt="<?= Mage::helper('sales')->__('Configure and Add to Order') ?>" title="<?= Mage::helper('sales')->__('Configure and Add to Order') ?>" width="16" height="16"/></a>
+                        <a href="#" onclick="order.sidebarConfigureProduct('<?= 'sidebar' ?>', <?= $this->getProductId($_item) ?>); return false;" title="<?= Mage::helper('sales')->__('Configure and Add to Order') ?>"><?= $this->getIconSvg('tool') ?></a>
                     <?php else: ?>
                         <input type="checkbox" name="sidebar[<?= $this->getSidebarStorageAction() ?>][<?= $this->getIdentifierId($_item) ?>]" value="<?= $this->canDisplayItemQty() ? $_item->getQty()*1 : 1 ?>" title="<?= Mage::helper('sales')->__('Add To Order') ?>"/>
                     <?php endif ?>
