@@ -141,7 +141,7 @@
             <modules>
                 <Maho_Captcha>
                     <files>
-                        <default>maho_captcha.csv</default>
+                        <default>Maho_Captcha.csv</default>
                     </files>
                 </Maho_Captcha>
             </modules>

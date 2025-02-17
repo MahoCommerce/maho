@@ -58,12 +58,14 @@ class Maho_Captcha_Model_Observer
         /** @var Mage_Adminhtml_IndexController $controller */
         $controller = $observer->getControllerAction();
         $request = $controller->getRequest();
+
         if (!$request->isPost()) {
             return;
         }
 
         $data = $request->getPost();
         $token = $data['altcha'] ?? '';
+
         if ($helper->verify((string) $token)) {
             return;
         }

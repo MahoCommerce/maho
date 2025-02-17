@@ -19,7 +19,9 @@ class Maho_Captcha_IndexController extends Mage_Core_Controller_Front_Action
             }
 
             $options = new \AltchaOrg\Altcha\ChallengeOptions([
-                'hmacKey'   => $helper->getHmacKey(),
+                'algorithm' => \AltchaOrg\Altcha\Algorithm::SHA512,
+                'saltLength' => 32,
+                'hmacKey' => $helper->getHmacKey(),
             ]);
             $challenge = \AltchaOrg\Altcha\Altcha::createChallenge($options);
 
