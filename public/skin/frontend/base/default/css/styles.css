@@ -1699,8 +1699,10 @@ span.weee {
   background: var(--maho-color-background-alt);
   padding: 3px 10px;
   justify-content: space-between;
+  align-items: center;
   display: flex;
   width: 100%;
+  min-height: 40px;
 }
 
 .pager-no-toolbar {
@@ -1709,12 +1711,6 @@ span.weee {
 
 .pager-no-toolbar ~ .pager-no-toolbar {
   margin-top: 10px;
-}
-
-.toolbar,
-.pager {
-  color: var(--maho-color-text-primary);
-  font-size: 0.75rem;
 }
 
 .toolbar label,
@@ -1727,6 +1723,9 @@ span.weee {
   font-size: 0;
   width: 24px;
   height: 24px;
+}
+.toolbar .view-mode > label {
+  display: none;
 }
 
 .toolbar .view-mode > a:hover,
@@ -1741,6 +1740,7 @@ span.weee {
 .sorter, .sorter .view-mode {
   display: flex;
   place-items: center;
+  gap: 0.5rem;
 }
 
 .sorter > .sort-by {
@@ -1753,39 +1753,13 @@ span.weee {
   height: 24px;
   display: inline-block;
 }
-.pager .amount {
-  float: left;
-  white-space: nowrap;
-  margin: 0 15px 0 0;
-}
-.pager .limiter {
-  float: left;
-  height: 30px;
-  line-height: 30px;
-}
-.pager .limiter > label {
-  padding-right: 5px;
-}
-.pager .limiter > label:after {
-  content: ':';
-}
-.pager .amount,
-.pager .limiter,
-.pager .pages {
-  margin-bottom: 5px;
-}
-
-.pages {
-  float: right;
-  overflow: hidden;
-  margin-left: 15px;
-}
 .pages strong {
   display: none;
 }
 
-.pages li {
-  float: left;
+.pages ol {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .pages a,
