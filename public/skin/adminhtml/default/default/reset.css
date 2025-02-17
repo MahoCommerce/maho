@@ -12,20 +12,55 @@
 /***************** BASE *******************/
 /******************************************/
 
+html {
+    text-rendering: optimizeLegibility;
+  
+    --font-family-sans: "Inter", -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    
+    --color-brand: #d7df22;
+    --input-highlight: #2374ff;
+    --emphasis-color: #c40000;
+    --accient-color: #ddcf00;
+  
+    --link-color: #1b4da3;
+    --body-color: #32333c;
+  
+    --button-primary-bg: var(--input-highlight);
+    --button-primary-color: #fff;
+}
+
+@font-face {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('./fonts/InterVariable.woff2') format('woff2');
+}
+@font-face {
+    font-family: Inter;
+    font-style: italic;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('./fonts/InterVariable-Italic.woff2') format('woff2');
+}
+
 *                       { margin:0; padding:0; }
 
-body                    { background:#e6e6e6; color:#2f2f2f; font:12px/1.5em ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";  }
+body                    { background:#fafafa; color: var(--body-color); font:400 14px/1.5em var(--font-family-sans); }
 
-a                       { color:#ea7601; text-decoration:underline; }
-a:hover                 { color:#ea7601; text-decoration:underline; }
+a                       { display: inline; color: var(--link-color); text-decoration:underline; }
+a:hover,
+a:focus,
+a:active                 { color: var(--link-color); text-decoration: none; }
 a img                   { border:0; }
 :focus                  { outline:0; }
 
 /* Heading */
+h1, h2, h3, h4, h5, h6  { color: var(--body-color); font-weight: 400; }
 h1, h2, h3, h4          { margin-bottom:.5em; line-height:1.4em; }
 h2                      { font-size:1.7em; }
-h3                      { margin-bottom:.5em; color:#253033; font-size:1.25em; }
-h4                      { margin-bottom:.6em; color:#494848; font-size:1.05em; }
+h3                      { margin-bottom:.5em; font-size:1.25em; }
+h4                      { margin-bottom:.6em; font-size:1.05em; }
 h5                      { font-size:1.05em; }
 h6                      { font-size:1em; }
 h1 a, h1 a:hover,
@@ -43,12 +78,14 @@ address                 { font-style:normal; }
 cite                    { font-style:normal; font-size:10px; }
 q:before,
 q:after                 { content:'';}
+strong,
+b                       { font-weight: 600; }
 
 /* Form */
 form                    { display:inline; }
 fieldset                { border:0; }
 legend                  { display:none; display:block !important; height:0; line-height:0; margin:0; overflow:hidden; padding:0; width:0; visibility:hidden; }
-label                   { color:#333; }
+label                   { font-weight: 400; }
 input, select           { vertical-align:middle; }
 textarea                { overflow:auto; }
 
