@@ -10,6 +10,7 @@
 
 class Maho_Captcha_Block_Captcha extends Mage_Core_Block_Template
 {
+    #[\Override]
     public function _construct()
     {
         parent::_construct();
