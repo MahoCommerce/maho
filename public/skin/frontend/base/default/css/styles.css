@@ -736,7 +736,7 @@ a.button:hover {
  * Icons
  */
 .icon-sprite, .ratings .rating-box, .ratings .rating-box .rating,
-#search_mini_form .search-button:before, .product-view .sharing-links a, .review-summary-table .rating-box .rating-number:after, .ratings-table .rating-box, .ratings-table .rating-box .rating {
+#search_mini_form .search-button:before, .review-summary-table .rating-box .rating-number:after, .ratings-table .rating-box, .ratings-table .rating-box .rating {
   background-repeat: no-repeat;
   background-size: 20px;
   background-position: center;
@@ -4271,43 +4271,13 @@ p.product-name a:hover {
 }
 
 .add-to-links a {
+  margin-right: 0.5rem;
+}
+.add-to-links a svg {
+  vertical-align: bottom;
+}
+body:not(.catalog-product-view) .add-to-links a {
   font-size: 0;
-}
-.product-view .sharing-links {
-  float: left;
-}
-.product-view .sharing-links:after {
-  content: '';
-  display: table;
-  clear: both;
-}
-.product-view .sharing-links li {
-  float: left;
-  padding: 0px 7px 7px;
-}
-.product-view .sharing-links a {
-  text-indent: -9999px;
-  display: block;
-  width: 26px;
-  height: 26px;
-}
-.product-view .sharing-links a:hover {
-  opacity: 0.8;
-}
-.product-view .sharing-links a.link-wishlist {
-  background-position: 0px -225px;
-}
-.product-view .sharing-links a.link-compare {
-  background-position: 0px -250px;
-}
-.product-view .sharing-links a.link-email-friend {
-  background-position: 0px -322px;
-}
-.product-view .sharing-links a.link-facebook {
-  background-position: 0px -425px;
-}
-.product-view .sharing-links a.link-twitter {
-  background-position: 0px -372px;
 }
 
 @media only screen and (max-width: 599px) {
