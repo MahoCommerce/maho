@@ -328,6 +328,26 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
             ]);
         }
 
+        if (Mage::getSingleton('admin/session')->isAllowed('catalog/attributes/sets')) {
+            $this->getMassactionBlock()->addItem(MassAction::CHANGE_ATTRIBUTE_SET, [
+                'confirm' => Mage::helper('catalog')->__('Changing the attribute set may result in data loss for attributes that do not exist in the new set. Are you sure?'),
+                'label' => Mage::helper('catalog')->__('Change Attribute Set'),
+                'url'   => $this->getUrl('*/catalog_product_action_set/save', ['_current' => true]),
+                'additional' => [
+                    'visibility' => [
+                        'name' => 'attribute_set',
+                        'type' => 'select',
+                        'class' => 'required-entry',
+                        'label' => Mage::helper('catalog')->__('Attribute Set'),
+                        'values' => Mage::getResourceModel('eav/entity_attribute_set_collection')
+                            ->setEntityTypeFilter(Mage::getModel('catalog/product')->getResource()->getTypeId())
+                            ->setOrder('attribute_set_name', Varien_Data_Collection::SORT_ORDER_ASC)
+                            ->toOptionArray(),
+                    ],
+                ],
+            ]);
+        }
+
         Mage::dispatchEvent('adminhtml_catalog_product_grid_prepare_massaction', ['block' => $this]);
         return $this;
     }

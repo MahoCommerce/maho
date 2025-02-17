@@ -30,6 +30,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract extends Mage
     public const ASSIGN_GROUP              = 'assign_group';
     public const ATTRIBUTES                = 'attributes';
     public const CANCEL_ORDER              = 'cancel_order';
+    public const CHANGE_ATTRIBUTE_SET      = 'change_attribute_set';
     public const CHANGE_MODE               = 'change_mode';
     public const ENABLE                    = 'enable';
     public const DELETE                    = 'delete';
