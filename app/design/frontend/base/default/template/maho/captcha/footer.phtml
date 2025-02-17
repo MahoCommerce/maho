@@ -8,7 +8,7 @@ if (!$helper->isEnabled()) return;
         mahoCaptchaRenderedElements.push(element.id);
 
         if (mahoCaptchaRenderedElements.length <= 1) {
-            element.insertAdjacentHTML('beforeend', '<altcha-widget challengeurl="https://your-challenge-url"></altcha-widget>');
+            element.insertAdjacentHTML('beforeend', '<altcha-widget challengeurl="https://your-challenge-url" hidelogo hidefooter></altcha-widget>');
             let script = document.createElement('script');
             script.type = 'module';
             script.src = 'https://eu.altcha.org/js/latest/altcha.min.js';
