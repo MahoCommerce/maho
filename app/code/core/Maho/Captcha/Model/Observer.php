@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * Maho
+ *
+ * @package    Maho_Captcha
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
 class Maho_Captcha_Model_Observer
 {
     public function verify(Varien_Event_Observer $observer): void
@@ -13,7 +21,7 @@ class Maho_Captcha_Model_Observer
         $controller = $observer->getControllerAction();
         $data = $controller->getRequest()->getPost();
 
-        $token = $data['altcha_payload'] ?? '';
+        $token = $data['altcha'] ?? '';
         if ($helper->verify((string) $token)) {
             return;
         }
@@ -32,7 +40,7 @@ class Maho_Captcha_Model_Observer
         $controller = $observer->getControllerAction();
         $data = $controller->getRequest()->getPost();
 
-        $token = $data['altcha_payload'] ?? '';
+        $token = $data['altcha'] ?? '';
         if ($helper->verify((string) $token)) {
             return;
         }
@@ -55,7 +63,7 @@ class Maho_Captcha_Model_Observer
         }
 
         $data = $request->getPost();
-        $token = $data['altcha_payload'] ?? '';
+        $token = $data['altcha'] ?? '';
         if ($helper->verify((string) $token)) {
             return;
         }

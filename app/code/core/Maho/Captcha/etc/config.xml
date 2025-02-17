@@ -27,6 +27,15 @@
         </helpers>
     </global>
     <frontend>
+        <routers>
+            <maho_captcha>
+                <use>standard</use>
+                <args>
+                    <module>Maho_Captcha</module>
+                    <frontName>captcha</frontName>
+                </args>
+            </maho_captcha>
+        </routers>
         <events>
             <controller_action_predispatch_checkout_onepage_savebilling>
                 <observers>
