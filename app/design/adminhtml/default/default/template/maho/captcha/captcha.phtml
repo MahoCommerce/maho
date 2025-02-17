@@ -16,4 +16,4 @@ $challengeUrl = $helper->getChallengeUrl();
             .insertAdjacentHTML('beforeend', '<altcha-widget challengeurl="<?= $challengeUrl ?>" hidelogo hidefooter></altcha-widget>');
     });
 </script>
-<script src="https://eu.altcha.org/js/latest/altcha.min.js" type="module"></script>
+<script src="<?= Mage::getBaseUrl('js') ?>altcha.min.js" type="module"></script>

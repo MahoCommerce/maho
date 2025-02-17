@@ -20,7 +20,7 @@ $challengeUrl = $helper->getChallengeUrl();
             element.insertAdjacentHTML('beforeend', '<altcha-widget challengeurl="<?= $challengeUrl ?>" hidelogo hidefooter></altcha-widget>');
             let script = document.createElement('script');
             script.type = 'module';
-            script.src = 'https://eu.altcha.org/js/latest/altcha.min.js';
+            script.src = '<?= Mage::getBaseUrl('js') ?>altcha.min.js';
             document.head.appendChild(script);
         } else {
             mahoCaptchaRender();

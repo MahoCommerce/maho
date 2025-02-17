@@ -55,11 +55,8 @@ class Maho_Captcha_Model_Observer
             return;
         }
 
-        /** @var Mage_Adminhtml_IndexController $controller */
-        $controller = $observer->getControllerAction();
-        $request = $controller->getRequest();
-
-        if (!$request->isPost()) {
+        $request = Mage::app()->getRequest();
+        if ($request->getActionName() == 'prelogin' || !$request->isPost()) {
             return;
         }
 

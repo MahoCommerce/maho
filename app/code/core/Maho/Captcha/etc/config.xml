@@ -113,14 +113,14 @@
     </frontend>
     <adminhtml>
         <events>
-            <controller_action_predispatch_adminhtml_index_login>
+            <admin_user_authenticate_before>
                 <observers>
                     <maho_captcha>
                         <class>maho_captcha/observer</class>
                         <method>verifyAdmin</method>
                     </maho_captcha>
                 </observers>
-            </controller_action_predispatch_adminhtml_index_login>
+            </admin_user_authenticate_before>
             <controller_action_predispatch_adminhtml_index_forgotpassword>
                 <observers>
                     <maho_captcha>
