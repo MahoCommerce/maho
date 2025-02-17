@@ -87,9 +87,9 @@
         </events>
         <layout>
             <updates>
-                <mahocaptcha>
+                <maho_captcha>
                     <file>maho_captcha.xml</file>
-                </mahocaptcha>
+                </maho_captcha>
             </updates>
         </layout>
         <translate>
@@ -138,4 +138,19 @@
             </modules>
         </translate>
     </adminhtml>
+    <default>
+        <admin>
+            <maho_captcha>
+                <enable>1</enable>
+                <selectors>.checkout-onepage-index #billing-new-address-form
+.contacts-index-index #contactForm
+.customer-account-create #form-validate
+.customer-account-forgotpassword #form-validate
+#newsletter-validate-detail
+.catalog-product-view #review-form
+.review-product-list #review-form
+.wishlist-index-share #form-validate</selectors>
+            </maho_captcha>
+        </admin>
+    </default>
 </config>

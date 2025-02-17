@@ -1,19 +1,11 @@
 <?xml version="1.0"?>
 <config>
     <sections>
-        <maho_captcha translate="label" module="maho_captcha">
-            <label>Maho Captcha</label>
-            <tab>general</tab>
-            <frontend_type>text</frontend_type>
-            <sort_order>1000</sort_order>
-            <show_in_default>1</show_in_default>
-            <show_in_website>1</show_in_website>
-            <show_in_store>1</show_in_store>
+        <admin>
             <groups>
-                <settings translate="label">
-                    <label>Settings</label>
+                <maho_captcha translate="label" module="maho_captcha">
+                    <label>Captcha</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>10</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
@@ -45,8 +37,8 @@
                             <show_in_store>1</show_in_store>
                         </selectors>
                     </fields>
-                </settings>
+                </maho_captcha>
             </groups>
-        </maho_captcha>
+        </admin>
     </sections>
 </config>
