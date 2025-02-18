@@ -3433,7 +3433,7 @@ p.product-name a:hover {
 }
 
 .add-to-links {
-  margin-top: 0.5rem;
+  margin-block: 0.5rem;
   display: flex;
   place-content: center;
   gap: 0.2rem;
@@ -3441,6 +3441,10 @@ p.product-name a:hover {
 
 .product-view .add-to-links {
   place-content: flex-start;
+}
+
+.product-options-bottom .add-to-links {
+  margin-block-end: 0;
 }
 
 .products-grid .product-image:before, .products-grid .product-image:after {
@@ -4614,12 +4618,6 @@ body:not(.catalog-product-view) .add-to-links a {
   border: 1px solid var(--maho-color-border);
   border-top: 0;
   margin-bottom: 10px;
-}
-
-.product-options-bottom:after {
-  content: '';
-  display: table;
-  clear: both;
 }
 
 .product-options-bottom .product-pricing,
