@@ -56,14 +56,6 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
     protected $_subscribersCollection = null;
 
     /**
-     * save template flag
-     *
-     * @var bool
-     * @deprecated since 1.4.0.1
-     */
-    protected $_saveTemplateFlag = false;
-
-    /**
      * Save stores flag.
      *
      * @var bool
@@ -112,23 +104,6 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
         }
 
         return $this->_subscribersCollection;
-    }
-
-    /**
-     * Add template data to queue.
-     *
-     * @param Varien_Object $data
-     * @return $this
-     * @deprecated since 1.4.0.1
-     */
-    public function addTemplateData($data)
-    {
-        $template = $this->getTemplate();
-        if ($data->getTemplateId() && $data->getTemplateId() != $template->getId()) {
-            $template->load($data->getTemplateId());
-        }
-
-        return $this;
     }
 
     /**
@@ -251,30 +226,6 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
     {
         $this->_getResource()->addSubscribersToQueue($this, $subscriberIds);
         return $this;
-    }
-
-    /**
-     * Setter for save template flag.
-     *
-     * @param bool|int|string $value
-     * @return $this
-     * @deprecated since 1.4.0.1
-     */
-    public function setSaveTemplateFlag($value)
-    {
-        $this->_saveTemplateFlag = (bool) $value;
-        return $this;
-    }
-
-    /**
-     * Getter for save template flag.
-     *
-     * @return bool
-     * @deprecated since 1.4.0.1
-     */
-    public function getSaveTemplateFlag()
-    {
-        return $this->_saveTemplateFlag;
     }
 
     /**

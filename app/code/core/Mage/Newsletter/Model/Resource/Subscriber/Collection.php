@@ -164,31 +164,6 @@ class Mage_Newsletter_Model_Resource_Subscriber_Collection extends Mage_Core_Mod
     }
 
     /**
-     * Returns field table alias
-     *
-     * @deprecated after 1.4.0.0-rc1
-     *
-     * @param string $field
-     * @return string|Zend_Db_Expr
-     */
-    public function _getFieldTableAlias($field)
-    {
-        if (str_starts_with($field, 'customer')) {
-            return $field . '_table.value';
-        }
-
-        if ($field == 'type') {
-            return $this->getConnection()->getCheckSql('main_table.customer_id = 0', '1', '2');
-        }
-
-        if (in_array($field, ['website_id', 'group_id'])) {
-            return 'store.' . $field;
-        }
-
-        return 'main_table.' . $field;
-    }
-
-    /**
      * Returns select count sql
      *
      * @return Varien_Db_Select
