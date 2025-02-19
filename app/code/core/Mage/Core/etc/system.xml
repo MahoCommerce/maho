@@ -868,22 +868,22 @@
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
-                        <disable translate="label">
-                            <label>Disable Email Communications</label>
+                        <enabled translate="label">
+                            <label>Transport</label>
                             <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <source_model>adminhtml/system_config_source_email_transport</source_model>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                        </disable>
+                        </enabled>
                         <host translate="label">
                             <label>Host</label>
                             <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><disable>0</disable></depends>
+                            <depends><enabled>smtp</enabled></depends>
                         </host>
                         <port translate="label">
                             <label>Port</label>
@@ -891,7 +891,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><disable>0</disable></depends>
+                            <depends><enabled>smtp</enabled></depends>
                         </port>
                         <auth translate="label">
                             <label>Authentication method</label>
@@ -901,7 +901,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><disable>0</disable></depends>
+                            <depends><enabled>smtp</enabled></depends>
                         </auth>
                         <username translate="label">
                             <label>Username</label>
@@ -909,7 +909,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><disable>0</disable></depends>
+                            <depends><enabled>smtp</enabled></depends>
                         </username>
                         <password translate="label">
                             <label>Password</label>
@@ -917,7 +917,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><disable>0</disable></depends>
+                            <depends><enabled>smtp</enabled></depends>
                         </password>
                         <security translate="label">
                             <label>Security Type</label>
@@ -927,6 +927,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><enabled>smtp</enabled></depends>
                         </security>
                         <set_return_path translate="label">
                             <label>Set Return-Path</label>
@@ -936,7 +937,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <depends><disable>0</disable></depends>
+                            <depends><enabled>smtp</enabled></depends>
                         </set_return_path>
                         <return_path_email translate="label">
                             <label>Return-Path Email</label>
@@ -947,7 +948,7 @@
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                             <depends>
-                                <disable>0</disable>
+                                <depends><enabled>smtp</enabled></depends>
                                 <set_return_path>2</set_return_path>
                             </depends>
                         </return_path_email>
