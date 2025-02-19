@@ -436,7 +436,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
                 'auth' => Mage::getStoreConfig('system/smtp/auth'),
                 'username' => Mage::getStoreConfig('system/smtp/username'),
                 'password' => Mage::getStoreConfig('system/smtp/password'),
-                'port' => Mage::getStoreConfig('system/smtp/port')
+                'port' => Mage::getStoreConfig('system/smtp/port'),
             ];
             $security = Mage::getStoreConfig('system/smtp/security');
             if ($security) {

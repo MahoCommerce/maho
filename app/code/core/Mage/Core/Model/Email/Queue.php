@@ -200,13 +200,13 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                         'auth' => Mage::getStoreConfig('system/smtp/auth'),
                         'username' => Mage::getStoreConfig('system/smtp/username'),
                         'password' => Mage::getStoreConfig('system/smtp/password'),
-                        'port' => Mage::getStoreConfig('system/smtp/port')
+                        'port' => Mage::getStoreConfig('system/smtp/port'),
                     ];
                     $security = Mage::getStoreConfig('system/smtp/security');
                     if ($security) {
                         $config['ssl'] = $security;
                     }
-                    
+
                     $mailTransport = new Zend_Mail_Transport_Smtp(Mage::getStoreConfig('system/smtp/host'), $config);
                     Zend_Mail::setDefaultTransport($mailTransport);
                 } elseif ($parameters->getReturnPathEmail() !== null) {
