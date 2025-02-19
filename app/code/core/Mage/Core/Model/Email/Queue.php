@@ -191,7 +191,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
 
                 $parameters = new Varien_Object($message->getMessageParameters());
                 $mailer = new Zend_Mail('utf-8');
-                if (is_string($parameters->getReturnPathEmail())) {
+                if ($parameters->getReturnPathEmail() !== null) {
                     $mailer->setFrom($parameters->getReturnPathEmail());
                 }
 

@@ -392,6 +392,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         $text = $this->getProcessedTemplate($variables, true);
         $subject = $this->getProcessedTemplateSubject($variables);
 
+        $emailTransport = Mage::getStoreConfig('system/smtp/enabled');
         $setReturnPath = Mage::getStoreConfig(self::XML_PATH_SENDING_SET_RETURN_PATH);
         switch ($setReturnPath) {
             case 1:
@@ -425,12 +426,26 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             return true;
         }
 
-        ini_set('SMTP', Mage::getStoreConfig('system/smtp/host'));
-        ini_set('smtp_port', Mage::getStoreConfig('system/smtp/port'));
-
         $mail = $this->getMail();
-
         if ($returnPathEmail !== null) {
+            $mail->setFrom($returnPathEmail);
+        }
+
+        if ($emailTransport === 'smtp') {
+            $config = [
+                'auth' => Mage::getStoreConfig('system/smtp/auth'),
+                'username' => Mage::getStoreConfig('system/smtp/username'),
+                'password' => Mage::getStoreConfig('system/smtp/password'),
+                'port' => Mage::getStoreConfig('system/smtp/port')
+            ];
+            $security = Mage::getStoreConfig('system/smtp/security');
+            if ($security) {
+                $config['ssl'] = $security;
+            }
+
+            $mailTransport = new Zend_Mail_Transport_Smtp(Mage::getStoreConfig('system/smtp/host'), $config);
+            Zend_Mail::setDefaultTransport($mailTransport);
+        } elseif ($returnPathEmail !== null) {
             $mailTransport = new Zend_Mail_Transport_Sendmail('-f' . $returnPathEmail);
             Zend_Mail::setDefaultTransport($mailTransport);
         }
