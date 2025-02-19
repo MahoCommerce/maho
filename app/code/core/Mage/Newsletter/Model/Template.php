@@ -123,6 +123,17 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
     }
 
     /**
+     * @return bool
+     */
+    public function isValidForSend()
+    {
+        return !Mage::getStoreConfigFlag('system/smtp/disable')
+            && $this->getTemplateSenderName()
+            && $this->getTemplateSenderEmail()
+            && $this->getTemplateSubject();
+    }
+
+    /**
      * Getter for template type
      *
      * @return int|string
