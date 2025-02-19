@@ -231,6 +231,7 @@ class Mage_Core_Model_Resource
      *
      * @param   string|array $modelEntity
      * @return  string
+     * @throws Mage_Core_Exception
      */
     public function getTableName($modelEntity)
     {
