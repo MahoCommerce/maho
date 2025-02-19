@@ -43,6 +43,20 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
     }
 
     /**
+     * @return $this
+     */
+    public function addTemplateInfo()
+    {
+        $this->getSelect()->joinLeft(
+            ['template' => $this->getTable('template')],
+            'template.template_id=main_table.template_id',
+            ['template_subject','template_sender_name','template_sender_email'],
+        );
+        $this->_joinedTables['template'] = true;
+        return $this;
+    }
+
+    /**
      * Adds subscribers info to selelect
      *
      * @return $this
