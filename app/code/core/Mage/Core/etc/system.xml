@@ -883,19 +883,16 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <comment>For Windows server only.</comment>
                             <depends><disable>0</disable></depends>
                         </host>
                         <port translate="label">
-                            <label>Port (25)</label>
+                            <label>Port</label>
                             <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <comment>For Windows server only.</comment>
                             <depends><disable>0</disable></depends>
                         </port>
-                        <!--
                         <auth translate="label">
                             <label>Authentication method</label>
                             <frontend_type>select</frontend_type>
@@ -922,12 +919,20 @@
                             <show_in_store>1</show_in_store>
                             <depends><disable>0</disable></depends>
                         </password>
-                        -->
+                        <security translate="label">
+                            <label>Security Type</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_smtpsecurity</source_model>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </security>
                         <set_return_path translate="label">
                             <label>Set Return-Path</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesnocustom</source_model>
-                            <sort_order>70</sort_order>
+                            <sort_order>80</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -937,7 +942,7 @@
                             <label>Return-Path Email</label>
                             <validate>validate-email</validate>
                             <backend_model>adminhtml/system_config_backend_email_address</backend_model>
-                            <sort_order>80</sort_order>
+                            <sort_order>90</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
