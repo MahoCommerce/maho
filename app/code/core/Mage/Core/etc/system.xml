@@ -937,7 +937,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <depends><enabled>smtp</enabled></depends>
+                            <depends><enabled separator=",">1,smtp</enabled></depends>
                         </set_return_path>
                         <return_path_email translate="label">
                             <label>Return-Path Email</label>
@@ -948,7 +948,7 @@
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                             <depends>
-                                <depends><enabled>smtp</enabled></depends>
+                                <enabled separator=",">1,smtp</enabled>
                                 <set_return_path>2</set_return_path>
                             </depends>
                         </return_path_email>

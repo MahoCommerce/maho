@@ -172,25 +172,48 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
      */
     public function send()
     {
+        $emailTransport = Mage::getStoreConfig('system/smtp/enabled');
         $collection = Mage::getModel('core/email_queue')->getCollection()
             ->addOnlyForSendingFilter()
             ->setPageSize(self::MESSAGES_LIMIT_PER_CRON_RUN)
             ->setCurPage(1)
             ->load();
 
-        ini_set('SMTP', Mage::getStoreConfig('system/smtp/host'));
-        ini_set('smtp_port', Mage::getStoreConfig('system/smtp/port'));
-
         /** @var Mage_Core_Model_Email_Queue $message */
         foreach ($collection as $message) {
             if ($message->getId()) {
+                if ($emailTransport == 0) {
+                    // This means email sending is disabled, just mark as processed without sending
+                    $message->setProcessedAt(Varien_Date::formatDate(true));
+                    $message->save();
+                    continue;
+                }
+
                 $parameters = new Varien_Object($message->getMessageParameters());
-                if ($parameters->getReturnPathEmail() !== null) {
+                $mailer = new Zend_Mail('utf-8');
+                if (is_string($parameters->getReturnPathEmail())) {
+                    $mailer->setFrom($parameters->getReturnPathEmail());
+                }
+
+                if ($emailTransport === 'smtp') {
+                    $config = [
+                        'auth' => Mage::getStoreConfig('system/smtp/auth'),
+                        'username' => Mage::getStoreConfig('system/smtp/username'),
+                        'password' => Mage::getStoreConfig('system/smtp/password'),
+                        'port' => Mage::getStoreConfig('system/smtp/port')
+                    ];
+                    $security = Mage::getStoreConfig('system/smtp/security');
+                    if ($security) {
+                        $config['ssl'] = $security;
+                    }
+                    
+                    $mailTransport = new Zend_Mail_Transport_Smtp(Mage::getStoreConfig('system/smtp/host'), $config);
+                    Zend_Mail::setDefaultTransport($mailTransport);
+                } elseif ($parameters->getReturnPathEmail() !== null) {
                     $mailTransport = new Zend_Mail_Transport_Sendmail('-f' . $parameters->getReturnPathEmail());
                     Zend_Mail::setDefaultTransport($mailTransport);
                 }
 
-                $mailer = new Zend_Mail('utf-8');
                 foreach ($message->getRecipients() as $recipient) {
                     list($email, $name, $type) = $recipient;
                     switch ($type) {
@@ -236,7 +259,6 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
 
                     unset($mailer);
                     $message->setProcessedAt(Varien_Date::formatDate(true));
-                    // save() is throwing exception when recipient is not set
                     $message->save();
 
                     foreach ($message->getRecipients() as $recipient) {
