@@ -6,7 +6,7 @@
  * @package    Mage_Newsletter
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -123,10 +123,7 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
     }
 
     /**
-     * Return true if this template can be used for sending queue as main template
-     *
      * @return bool
-     * @deprecated since 1.4.0.1
      */
     public function isValidForSend()
     {
@@ -250,131 +247,6 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
         return Mage::getModel('newsletter/template')
             ->loadByCode($templateCode)
             ->getProcessedTemplate($variables);
-    }
-
-    /**
-     * Retrieve mail object instance
-     *
-     * @return Zend_Mail
-     * @deprecated since 1.4.0.1
-     */
-    public function getMail()
-    {
-        if (is_null($this->_mail)) {
-            $this->_mail = new Zend_Mail('utf-8');
-        }
-        return $this->_mail;
-    }
-
-    /**
-     * Send mail to subscriber
-     *
-     * @param   Mage_Newsletter_Model_Subscriber|string   $subscriber   subscriber Model or E-mail
-     * @param   array                                     $variables    template variables
-     * @param   string|null                               $name         receiver name (if subscriber model not specified)
-     * @param   Mage_Newsletter_Model_Queue|null          $queue        queue model, used for problems reporting.
-     * @return bool
-     * @deprecated since 1.4.0.1
-     **/
-    public function send($subscriber, array $variables = [], $name = null, ?Mage_Newsletter_Model_Queue $queue = null)
-    {
-        if (!$this->isValidForSend()) {
-            return false;
-        }
-
-        $email = '';
-        if ($subscriber instanceof Mage_Newsletter_Model_Subscriber) {
-            $email = $subscriber->getSubscriberEmail();
-            if (is_null($name)) {
-                $name = $subscriber->getSubscriberFullName();
-            }
-        } else {
-            $email = (string) $subscriber;
-        }
-
-        if (Mage::getStoreConfigFlag(Mage_Core_Model_Email_Template::XML_PATH_SENDING_SET_RETURN_PATH)) {
-            $this->getMail()->setReturnPath($this->getTemplateSenderEmail());
-        }
-
-        ini_set('SMTP', Mage::getStoreConfig('system/smtp/host'));
-        ini_set('smtp_port', Mage::getStoreConfig('system/smtp/port'));
-
-        $mail = $this->getMail();
-        $mail->addTo($email, $name);
-        $text = $this->getProcessedTemplate($variables, true);
-
-        if ($this->isPlain()) {
-            $mail->setBodyText($text);
-        } else {
-            $mail->setBodyHtml($text);
-        }
-
-        $mail->setSubject($this->getProcessedTemplateSubject($variables));
-        $mail->setFrom($this->getTemplateSenderEmail(), $this->getTemplateSenderName());
-
-        try {
-            $transport = new Varien_Object();
-
-            Mage::dispatchEvent('newsletter_send_before', [
-                'mail'       => $mail,
-                'transport'  => $transport,
-                'template'   => $this,
-                'subscriber' => $subscriber,
-            ]);
-
-            if ($transport->getTransport()) {
-                $mail->send($transport->getTransport());
-            } else {
-                $mail->send();
-            }
-
-            Mage::dispatchEvent('newsletter_send_after', [
-                'to'         => $email,
-                'html'       => !$this->isPlain(),
-                'queue'      => $queue,
-                'subject'    => $mail->getSubject(),
-                'email_body' => $text,
-            ]);
-            $this->_mail = null;
-            if (!is_null($queue)) {
-                $subscriber->received($queue);
-            }
-        } catch (Exception $e) {
-            if ($subscriber instanceof Mage_Newsletter_Model_Subscriber) {
-                // If letter sent for subscriber, we create a problem report entry
-                $problem = Mage::getModel('newsletter/problem');
-                $problem->addSubscriberData($subscriber);
-                if (!is_null($queue)) {
-                    $problem->addQueueData($queue);
-                }
-                $problem->addErrorData($e);
-                $problem->save();
-
-                if (!is_null($queue)) {
-                    $subscriber->received($queue);
-                }
-            } else {
-                // Otherwise throw error to upper level
-                throw $e;
-            }
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Prepare Process (with save)
-     *
-     * @return $this
-     * @deprecated since 1.4.0.1
-     */
-    public function preprocess()
-    {
-        $this->_preprocessFlag = true;
-        $this->save();
-        $this->_preprocessFlag = false;
-        return $this;
     }
 
     /**

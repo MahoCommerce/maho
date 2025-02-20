@@ -6,7 +6,7 @@
  * @package    Mage_Newsletter
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -161,31 +161,6 @@ class Mage_Newsletter_Model_Resource_Subscriber_Collection extends Mage_Core_Mod
         );
 
         return $this;
-    }
-
-    /**
-     * Returns field table alias
-     *
-     * @deprecated after 1.4.0.0-rc1
-     *
-     * @param string $field
-     * @return string|Zend_Db_Expr
-     */
-    public function _getFieldTableAlias($field)
-    {
-        if (str_starts_with($field, 'customer')) {
-            return $field . '_table.value';
-        }
-
-        if ($field == 'type') {
-            return $this->getConnection()->getCheckSql('main_table.customer_id = 0', '1', '2');
-        }
-
-        if (in_array($field, ['website_id', 'group_id'])) {
-            return 'store.' . $field;
-        }
-
-        return 'main_table.' . $field;
     }
 
     /**
