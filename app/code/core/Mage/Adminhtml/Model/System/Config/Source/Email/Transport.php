@@ -10,9 +10,30 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Email_Transport
 {
+    private const SCHEME_TO_PACKAGE_MAP = [
+        'azure' => 'symfony/azure-mailer',
+        'brevo' => 'symfony/brevo-mailer',
+        'gmail' => 'symfony/google-mailer',
+        'infobip' => 'symfony/infobip-mailer',
+        'mailersend' => 'symfony/mailersend-mailer',
+        'mailgun' => 'symfony/mailgun-mailer',
+        'mailjet' => 'symfony/mailjet-mailer',
+        'mailomat' => 'symfony/mailomat-mailer',
+        'mailpace' => 'symfony/mail-pace-mailer',
+        'mandrill' => 'symfony/mailchimp-mailer',
+        'postal' => 'symfony/postal-mailer',
+        'postmark' => 'symfony/postmark-mailer',
+        'mailtrap' => 'symfony/mailtrap-mailer',
+        'resend' => 'symfony/resend-mailer',
+        'scaleway' => 'symfony/scaleway-mailer',
+        'sendgrid' => 'symfony/sendgrid-mailer',
+        'ses' => 'symfony/amazon-mailer',
+        'sweego' => 'symfony/sweego-mailer',
+    ];
+
     public function toOptionArray()
     {
-        return [
+        $options = [
             ['value' => '0', 'label' => Mage::helper('adminhtml')->__('Disable All Email Communications')],
             ['value' => 'sendmail', 'label' => 'Sendmail'],
             ['value' => 'smtp', 'label' => 'SMTP'],
@@ -53,5 +74,23 @@ class Mage_Adminhtml_Model_System_Config_Source_Email_Transport
             ['value' => 'sweego+smtp', 'label' => 'Sweego - SMTP'],
             ['value' => 'sweego+api', 'label' => 'Sweego - API'],
         ];
+
+        foreach ($options as $k => $option) {
+            if (!str_contains($option['value'], '+')) {
+                continue;
+            }
+
+            $scheme = explode('+', $option['value']);
+            $scheme = $scheme[0];
+
+            if (isset(self::SCHEME_TO_PACKAGE_MAP[$scheme])) {
+                $package = self::SCHEME_TO_PACKAGE_MAP[$scheme];
+                if (!\Composer\InstalledVersions::isInstalled($package)) {
+                    $options[$k]['label'] .= " ⚠️ Install $package";
+                }
+            }
+        }
+
+        return $options;
     }
 }
