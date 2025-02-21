@@ -445,50 +445,8 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
                 $email->html($text);
             }
 
-            $user = Mage::getStoreConfig('system/smtp/username');
-            $pass = Mage::getStoreConfig('system/smtp/password');
-            $host = Mage::getStoreConfig('system/smtp/host');
-            $port = Mage::getStoreConfig('system/smtp/port');
-            $dsn = match ($emailTransport) {
-                'smtp' => "$emailTransport://$user:$pass@$host:$port",
-                'ses+smtp' => "$emailTransport://$user:$pass@default",
-                'ses+https' => "$emailTransport://$user:$pass@default",
-                'ses+api' => "$emailTransport://$user:$pass@default",
-                'azure+api' => "$emailTransport://$user:$pass@default",
-                'brevo+smtp' => "$emailTransport://$user:$pass@default",
-                'brevo+api' => "$emailTransport://$pass@default",
-                'infobip+smtp' => "$emailTransport://$pass@$host",
-                'infobip+api' => "$emailTransport://$pass@default",
-                'mailgun+smtp' => "$emailTransport://$user:$pass@default",
-                'mailgun+https' => "$emailTransport://$pass:$host@default",
-                'mailgun+api' => "$emailTransport://$pass:$host@default",
-                'mailjet+smtp' => "$emailTransport://$user:$pass@default",
-                'mailjet+api' => "$emailTransport://$user:$pass@default",
-                'mailomat+smtp' => "$emailTransport://$user:$pass@default",
-                'mailomat+api' => "$emailTransport://$pass@default",
-                'mailpace+api' => "$emailTransport://$pass@default",
-                'mailersend+smtp' => "$emailTransport://$user:$pass@default",
-                'mailersend+api' => "$emailTransport://$pass@default",
-                'mailtrap+smtp' => "$emailTransport://$pass@default",
-                'mailtrap+api' => "$emailTransport://$pass@default",
-                'mandrill+smtp' => "$emailTransport://$user:$pass@default",
-                'mandrill+https' => "$emailTransport://$pass@default",
-                'mandrill+api' => "$emailTransport://$pass@default",
-                'postal+api' => "$emailTransport://$pass@$host",
-                'postmark+smtp' => "$emailTransport://$pass@default",
-                'postmark+api' => "$emailTransport://$pass@default",
-                'resend+smtp' => "$emailTransport://resend:$pass@default",
-                'resend+api' => "$emailTransport://$pass@default",
-                'scaleway+smtp' => "$emailTransport://$user:$pass@default",
-                'scaleway+api' => "$emailTransport://$user:$pass@default",
-                'sendgrid+smtp' => "$emailTransport://$pass@default",
-                'sendgrid+api' => "$emailTransport://$pass@default",
-                'sweego+smtp' => "$emailTransport://$user:$pass@$host:$port",
-                'sweego+api' => "$emailTransport://$pass@default",
-                'sendmail' => "$emailTransport://default",
-                default => null
-            };
-            if ($dsn === null) {
+            $dsn = Mage::helper('core')->getMailerDsn();
+            if (!$dsn) {
                 // This means email sending is disabled
                 return true;
             }

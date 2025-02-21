@@ -175,14 +175,8 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
-    use Symfony\Component\Mailer\Transport;
-    use Symfony\Component\Mailer\Mailer;
-    use Symfony\Component\Mime\Email;
-    use Symfony\Component\Mime\Address;
-
     public function send()
     {
-        $emailTransport = Mage::getStoreConfig('system/smtp/enabled');
         $setReturnPath = Mage::getStoreConfig(self::XML_PATH_SENDING_SET_RETURN_PATH);
         $returnPathEmail = match ($setReturnPath) {
             1 => $this->getSenderEmail(),
@@ -199,59 +193,16 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
         /** @var Mage_Core_Model_Email_Queue $message */
         foreach ($collection as $message) {
             if ($message->getId()) {
-                if ($emailTransport == 0) {
+                $dsn = Mage::helper('core')->getMailerDsn();
+                if (!$dsn) {
                     $message->setProcessedAt(Varien_Date::formatDate(true));
                     $message->save();
                     continue;
                 }
 
-                $parameters = new Varien_Object($message->getMessageParameters());
-
                 try {
-                    $user = Mage::getStoreConfig('system/smtp/username');
-                    $pass = Mage::getStoreConfig('system/smtp/password');
-                    $host = Mage::getStoreConfig('system/smtp/host');
-                    $port = Mage::getStoreConfig('system/smtp/port');
-                    $dsn = match ($emailTransport) {
-                        'smtp' => "$emailTransport://$user:$pass@$host:$port",
-                        'ses+smtp' => "$emailTransport://$user:$pass@default",
-                        'ses+https' => "$emailTransport://$user:$pass@default",
-                        'ses+api' => "$emailTransport://$user:$pass@default",
-                        'azure+api' => "$emailTransport://$user:$pass@default",
-                        'brevo+smtp' => "$emailTransport://$user:$pass@default",
-                        'brevo+api' => "$emailTransport://$pass@default",
-                        'infobip+smtp' => "$emailTransport://$pass@$host",
-                        'infobip+api' => "$emailTransport://$pass@default",
-                        'mailgun+smtp' => "$emailTransport://$user:$pass@default",
-                        'mailgun+https' => "$emailTransport://$pass:$host@default",
-                        'mailgun+api' => "$emailTransport://$pass:$host@default",
-                        'mailjet+smtp' => "$emailTransport://$user:$pass@default",
-                        'mailjet+api' => "$emailTransport://$user:$pass@default",
-                        'mailomat+smtp' => "$emailTransport://$user:$pass@default",
-                        'mailomat+api' => "$emailTransport://$pass@default",
-                        'mailpace+api' => "$emailTransport://$pass@default",
-                        'mailersend+smtp' => "$emailTransport://$user:$pass@default",
-                        'mailersend+api' => "$emailTransport://$pass@default",
-                        'mailtrap+smtp' => "$emailTransport://$pass@default",
-                        'mailtrap+api' => "$emailTransport://$pass@default",
-                        'mandrill+smtp' => "$emailTransport://$user:$pass@default",
-                        'mandrill+https' => "$emailTransport://$pass@default",
-                        'mandrill+api' => "$emailTransport://$pass@default",
-                        'postal+api' => "$emailTransport://$pass@$host",
-                        'postmark+smtp' => "$emailTransport://$pass@default",
-                        'postmark+api' => "$emailTransport://$pass@default",
-                        'resend+smtp' => "$emailTransport://resend:$pass@default",
-                        'resend+api' => "$emailTransport://$pass@default",
-                        'scaleway+smtp' => "$emailTransport://$user:$pass@default",
-                        'scaleway+api' => "$emailTransport://$user:$pass@default",
-                        'sendgrid+smtp' => "$emailTransport://$pass@default",
-                        'sendgrid+api' => "$emailTransport://$pass@default",
-                        'sweego+smtp' => "$emailTransport://$user:$pass@$host:$port",
-                        'sweego+api' => "$emailTransport://$pass@default",
-                        'sendmail' => "$emailTransport://default",
-                    };
+                    $parameters = new Varien_Object($message->getMessageParameters());
                     $mailer = new Mailer(Transport::fromDsn($dsn));
-
                     $email = new Email();
                     $email->subject($parameters->getSubject());
                     $email->from(new Address($parameters->getFromEmail(), $parameters->getFromName()));
