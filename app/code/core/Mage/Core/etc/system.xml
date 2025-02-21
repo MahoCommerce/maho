@@ -883,7 +883,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><enabled>smtp</enabled></depends>
+                            <depends><enabled separator=",">smtp,infobip+smtp,mailgun+https,mailgun+api,postal+api,sweego+smtp</enabled></depends>
                         </host>
                         <port translate="label">
                             <label>Port</label>
@@ -891,7 +891,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><enabled>smtp</enabled></depends>
+                            <depends><enabled separator=",">smtp,sweego+smtp</enabled></depends>
                         </port>
                         <username translate="label">
                             <label>Username</label>
@@ -899,7 +899,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><enabled>smtp</enabled></depends>
+                            <depends><enabled separator=",">smtp,ses+smtp,ses+https,ses+api,azure+api,brevo+smtp,mailgun+smtp,mailjet+smtp,mailjet+api,mailomat+smtp,mailersend+smtp,mandrill+smtp,scaleway+smtp,scaleway+api,sweego+smtp</enabled></depends>
                         </username>
                         <password translate="label">
                             <label>Password</label>
@@ -907,7 +907,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><enabled>smtp</enabled></depends>
+                            <depends><enabled separator=",">smtp,ses+smtp,ses+https,ses+api,azure+api,brevo+smtp,brevo+api,gmail+smtp,infobip+smtp,infobip+api,mandrill+smtp,mandrill+https,mandrill+api,mailersend+smtp,mailersend+api,mailgun+smtp,mailgun+https,mailgun+api,mailjet+smtp,mailjet+api,mailomat+smtp,mailomat+api,mailpace+smtp,mailpace+api,mailtrap+smtp,mailtrap+api,postal+api,postmark+smtp,postmark+api,resend+smtp,resend+api,scaleway+smtp,scaleway+api,sendgrid+smtp,sendgrid+api,sweego+smtp,sweego+api</enabled></depends>
                         </password>
                         <set_return_path translate="label">
                             <label>Set Return-Path</label>
@@ -917,7 +917,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <depends><enabled separator=",">1,smtp</enabled></depends>
+                            <depends><enabled separator=",">sendmail,smtp,ses+smtp,ses+https,ses+api,azure+api,brevo+smtp,brevo+api,gmail+smtp,infobip+smtp,infobip+api,mandrill+smtp,mandrill+https,mandrill+api,mailersend+smtp,mailersend+api,mailgun+smtp,mailgun+https,mailgun+api,mailjet+smtp,mailjet+api,mailomat+smtp,mailomat+api,mailpace+smtp,mailpace+api,mailtrap+smtp,mailtrap+api,postal+api,postmark+smtp,postmark+api,resend+smtp,resend+api,scaleway+smtp,scaleway+api,sendgrid+smtp,sendgrid+api,sweego+smtp,sweego+api</enabled></depends>
                         </set_return_path>
                         <return_path_email translate="label">
                             <label>Return-Path Email</label>
