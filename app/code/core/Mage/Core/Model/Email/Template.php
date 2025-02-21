@@ -451,8 +451,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
                     "smtp://{urlencode(Mage::getStoreConfig('system/smtp/username'))}:" .
                     "{urlencode(Mage::getStoreConfig('system/smtp/password'))}@" .
                     "{Mage::getStoreConfig('system/smtp/host')}:" .
-                    "{Mage::getStoreConfig('system/smtp/port')}" .
-                    (Mage::getStoreConfig('system/smtp/encryption') ? "?encryption=" . Mage::getStoreConfig('system/smtp/encryption') : ''),
+                    "{Mage::getStoreConfig('system/smtp/port')}",
                 default => 'sendmail://default'
             };
             $mailer = new Mailer(Transport::fromDsn($dsn));
