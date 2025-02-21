@@ -1,0 +1,43 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Maho_Captcha
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+$helper = Mage::helper('maho_captcha');
+if (!$helper->isEnabled()) return;
+$challengeUrl = $helper->getChallengeUrl();
+?><script>
+    let mahoCaptchaRenderedElements = [];
+    function mahoCaptchaInject(element) {
+        if (mahoCaptchaRenderedElements.includes(element.id)) return;
+        mahoCaptchaRenderedElements.push(element.id);
+
+        if (mahoCaptchaRenderedElements.length <= 1) {
+            element.insertAdjacentHTML('beforeend', '<altcha-widget challengeurl="<?= $challengeUrl ?>" hidelogo hidefooter></altcha-widget>');
+            let script = document.createElement('script');
+            script.type = 'module';
+            script.src = '<?= Mage::getBaseUrl('js') ?>altcha.min.js';
+            document.head.appendChild(script);
+        } else {
+            mahoCaptchaRender();
+        }
+    }
+    function mahoCaptchaRender() {
+        let element = document.getElementById(mahoCaptchaRenderedElements[mahoCaptchaRenderedElements.length - 1]);
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll('<?= $helper->getFrontendSelectors() ?>').forEach(function (element) {
+            if (element.matches(':focus-within')) {
+                mahoCaptchaInject(element);
+                return;
+            }
+            element.addEventListener('focusin', function (event) {
+                mahoCaptchaInject(element);
+            });
+        });
+    });
+</script>

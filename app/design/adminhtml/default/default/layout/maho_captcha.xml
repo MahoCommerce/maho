@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+    <adminhtml_index_login>
+        <reference name="form.additional.info">
+            <block type="core/template" template="maho/captcha/captcha.phtml"></block>
+        </reference>
+    </adminhtml_index_login>
+    <adminhtml_index_forgotpassword>
+        <reference name="form.additional.info">
+            <reference name="form.additional.info">
+                <block type="core/template" template="maho/captcha/captcha.phtml"></block>
+            </reference>
+        </reference>
+    </adminhtml_index_forgotpassword>
+</layout>
