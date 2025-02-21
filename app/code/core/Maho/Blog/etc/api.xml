@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<config>
+    <api>
+        <resources>
+            <blog_post translate="title" module="blog">
+                <model>blog/post_api</model>
+                <title>Blog Post API</title>
+                <methods>
+                    <list translate="title" module="blog">
+                        <title>Get post list</title>
+                        <method>items</method>
+                        <acl>blog/post/list</acl>
+                    </list>
+                    <info translate="title" module="blog">
+                        <title>Get post info</title>
+                        <method>info</method>
+                        <acl>blog/post/info</acl>
+                    </info>
+                    <create translate="title" module="blog">
+                        <title>Create new post</title>
+                        <method>create</method>
+                        <acl>blog/post/create</acl>
+                    </create>
+                    <update translate="title" module="blog">
+                        <title>Update post</title>
+                        <method>update</method>
+                        <acl>blog/post/update</acl>
+                    </update>
+                    <delete translate="title" module="blog">
+                        <title>Delete post</title>
+                        <method>delete</method>
+                        <acl>blog/post/delete</acl>
+                    </delete>
+                </methods>
+            </blog_post>
+        </resources>
+        <resources_alias>
+            <blog_post>blog_post</blog_post>
+        </resources_alias>
+        <v2>
+            <resources_function_prefix>
+                <blog_post>blogPost</blog_post>
+            </resources_function_prefix>
+        </v2>
+        <acl>
+            <resources>
+                <blog translate="title" module="blog">
+                    <title>Blog</title>
+                    <sort_order>1000</sort_order>
+                    <post translate="title" module="blog">
+                        <title>Posts</title>
+                        <list translate="title" module="blog">
+                            <title>List</title>
+                        </list>
+                        <info translate="title" module="blog">
+                            <title>Info</title>
+                        </info>
+                        <create translate="title" module="blog">
+                            <title>Create</title>
+                        </create>
+                        <update translate="title" module="blog">
+                            <title>Update</title>
+                        </update>
+                        <delete translate="title" module="blog">
+                            <title>Delete</title>
+                        </delete>
+                    </post>
+                </blog>
+            </resources>
+        </acl>
+    </api>
+</config>
