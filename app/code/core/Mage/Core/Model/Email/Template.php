@@ -268,8 +268,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      */
     public function isValidForSend()
     {
-        return !Mage::getStoreConfigFlag('system/smtp/disable')
-            && $this->getSenderName()
+        return $this->getSenderName()
             && $this->getSenderEmail()
             && $this->getTemplateSubject();
     }
@@ -486,8 +485,13 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
                 'sendgrid+api' => "$emailTransport://$pass@default",
                 'sweego+smtp' => "$emailTransport://$user:$pass@$host:$port",
                 'sweego+api' => "$emailTransport://$pass@default",
-                default => 'sendmail://default'
+                'sendmail' => "$emailTransport://default",
+                default => null
             };
+            if ($dsn === null) {
+                // This means email sending is disabled
+                return true;
+            }
             $mailer = new Mailer(Transport::fromDsn($dsn));
 
             $transportObj = new Varien_Object();

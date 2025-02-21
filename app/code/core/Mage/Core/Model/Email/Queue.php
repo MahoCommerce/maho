@@ -10,6 +10,11 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Address;
+
 /**
  * Email Template Mailer Model
  *
@@ -170,9 +175,21 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    use Symfony\Component\Mailer\Transport;
+    use Symfony\Component\Mailer\Mailer;
+    use Symfony\Component\Mime\Email;
+    use Symfony\Component\Mime\Address;
+
     public function send()
     {
         $emailTransport = Mage::getStoreConfig('system/smtp/enabled');
+        $setReturnPath = Mage::getStoreConfig(self::XML_PATH_SENDING_SET_RETURN_PATH);
+        $returnPathEmail = match ($setReturnPath) {
+            1 => $this->getSenderEmail(),
+            2 => Mage::getStoreConfig(self::XML_PATH_SENDING_RETURN_PATH_EMAIL),
+            default => null,
+        };
+
         $collection = Mage::getModel('core/email_queue')->getCollection()
             ->addOnlyForSendingFilter()
             ->setPageSize(self::MESSAGES_LIMIT_PER_CRON_RUN)
@@ -183,81 +200,102 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
         foreach ($collection as $message) {
             if ($message->getId()) {
                 if ($emailTransport == 0) {
-                    // This means email sending is disabled, just mark as processed without sending
                     $message->setProcessedAt(Varien_Date::formatDate(true));
                     $message->save();
                     continue;
                 }
 
                 $parameters = new Varien_Object($message->getMessageParameters());
-                $mailer = new Zend_Mail('utf-8');
-                if ($parameters->getReturnPathEmail() !== null) {
-                    $mailer->setFrom($parameters->getReturnPathEmail());
-                }
-
-                if ($emailTransport === 'smtp') {
-                    $config = [
-                        'auth' => Mage::getStoreConfig('system/smtp/auth'),
-                        'username' => Mage::getStoreConfig('system/smtp/username'),
-                        'password' => Mage::getStoreConfig('system/smtp/password'),
-                        'port' => Mage::getStoreConfig('system/smtp/port'),
-                    ];
-                    $security = Mage::getStoreConfig('system/smtp/security');
-                    if ($security) {
-                        $config['ssl'] = $security;
-                    }
-
-                    $mailTransport = new Zend_Mail_Transport_Smtp(Mage::getStoreConfig('system/smtp/host'), $config);
-                    Zend_Mail::setDefaultTransport($mailTransport);
-                } elseif ($parameters->getReturnPathEmail() !== null) {
-                    $mailTransport = new Zend_Mail_Transport_Sendmail('-f' . $parameters->getReturnPathEmail());
-                    Zend_Mail::setDefaultTransport($mailTransport);
-                }
-
-                foreach ($message->getRecipients() as $recipient) {
-                    list($email, $name, $type) = $recipient;
-                    switch ($type) {
-                        case self::EMAIL_TYPE_BCC:
-                            $mailer->addBcc($email, '=?utf-8?B?' . base64_encode($name) . '?=');
-                            break;
-                        case self::EMAIL_TYPE_TO:
-                        case self::EMAIL_TYPE_CC:
-                        default:
-                            $mailer->addTo($email, '=?utf-8?B?' . base64_encode($name) . '?=');
-                            break;
-                    }
-                }
-
-                if ($parameters->getIsPlain()) {
-                    $mailer->setBodyText($message->getMessageBody());
-                } else {
-                    $mailer->setBodyHtml($message->getMessageBody());
-                }
-
-                $mailer->setSubject('=?utf-8?B?' . base64_encode($parameters->getSubject()) . '?=');
-                $mailer->setFrom($parameters->getFromEmail(), $parameters->getFromName());
-                if ($parameters->getReplyTo() !== null) {
-                    $mailer->setReplyTo($parameters->getReplyTo());
-                }
-                if ($parameters->getReturnTo() !== null) {
-                    $mailer->setReturnPath($parameters->getReturnTo());
-                }
 
                 try {
+                    $user = Mage::getStoreConfig('system/smtp/username');
+                    $pass = Mage::getStoreConfig('system/smtp/password');
+                    $host = Mage::getStoreConfig('system/smtp/host');
+                    $port = Mage::getStoreConfig('system/smtp/port');
+                    $dsn = match ($emailTransport) {
+                        'smtp' => "$emailTransport://$user:$pass@$host:$port",
+                        'ses+smtp' => "$emailTransport://$user:$pass@default",
+                        'ses+https' => "$emailTransport://$user:$pass@default",
+                        'ses+api' => "$emailTransport://$user:$pass@default",
+                        'azure+api' => "$emailTransport://$user:$pass@default",
+                        'brevo+smtp' => "$emailTransport://$user:$pass@default",
+                        'brevo+api' => "$emailTransport://$pass@default",
+                        'infobip+smtp' => "$emailTransport://$pass@$host",
+                        'infobip+api' => "$emailTransport://$pass@default",
+                        'mailgun+smtp' => "$emailTransport://$user:$pass@default",
+                        'mailgun+https' => "$emailTransport://$pass:$host@default",
+                        'mailgun+api' => "$emailTransport://$pass:$host@default",
+                        'mailjet+smtp' => "$emailTransport://$user:$pass@default",
+                        'mailjet+api' => "$emailTransport://$user:$pass@default",
+                        'mailomat+smtp' => "$emailTransport://$user:$pass@default",
+                        'mailomat+api' => "$emailTransport://$pass@default",
+                        'mailpace+api' => "$emailTransport://$pass@default",
+                        'mailersend+smtp' => "$emailTransport://$user:$pass@default",
+                        'mailersend+api' => "$emailTransport://$pass@default",
+                        'mailtrap+smtp' => "$emailTransport://$pass@default",
+                        'mailtrap+api' => "$emailTransport://$pass@default",
+                        'mandrill+smtp' => "$emailTransport://$user:$pass@default",
+                        'mandrill+https' => "$emailTransport://$pass@default",
+                        'mandrill+api' => "$emailTransport://$pass@default",
+                        'postal+api' => "$emailTransport://$pass@$host",
+                        'postmark+smtp' => "$emailTransport://$pass@default",
+                        'postmark+api' => "$emailTransport://$pass@default",
+                        'resend+smtp' => "$emailTransport://resend:$pass@default",
+                        'resend+api' => "$emailTransport://$pass@default",
+                        'scaleway+smtp' => "$emailTransport://$user:$pass@default",
+                        'scaleway+api' => "$emailTransport://$user:$pass@default",
+                        'sendgrid+smtp' => "$emailTransport://$pass@default",
+                        'sendgrid+api' => "$emailTransport://$pass@default",
+                        'sweego+smtp' => "$emailTransport://$user:$pass@$host:$port",
+                        'sweego+api' => "$emailTransport://$pass@default",
+                        'sendmail' => "$emailTransport://default",
+                    };
+                    $mailer = new Mailer(Transport::fromDsn($dsn));
+
+                    $email = new Email();
+                    $email->subject($parameters->getSubject());
+                    $email->from(new Address($parameters->getFromEmail(), $parameters->getFromName()));
+
+                    foreach ($message->getRecipients() as $recipient) {
+                        list($emailAddress, $name, $type) = $recipient;
+                        $address = new Address($emailAddress, $name);
+
+                        switch ($type) {
+                            case self::EMAIL_TYPE_BCC:
+                                $email->addBcc($address);
+                                break;
+                            case self::EMAIL_TYPE_CC:
+                                $email->addCc($address);
+                                break;
+                            case self::EMAIL_TYPE_TO:
+                            default:
+                                $email->addTo($address);
+                                break;
+                        }
+                    }
+
+                    if ($parameters->getIsPlain()) {
+                        $email->text($message->getMessageBody());
+                    } else {
+                        $email->html($message->getMessageBody());
+                    }
+
+                    if ($parameters->getReplyTo() !== null) {
+                        $email->replyTo($parameters->getReplyTo());
+                    }
+
+                    if ($parameters->getReturnTo() !== null) {
+                        $email->returnPath($parameters->getReturnTo());
+                    }
+
                     $transport = new Varien_Object();
                     Mage::dispatchEvent('email_queue_send_before', [
-                        'mail'      => $mailer,
+                        'mail'      => $email,
                         'message'   => $message,
                         'transport' => $transport,
                     ]);
 
-                    if ($transport->getTransport()) {
-                        $mailer->send($transport->getTransport());
-                    } else {
-                        $mailer->send();
-                    }
-
-                    unset($mailer);
+                    $mailer->send($email);
                     $message->setProcessedAt(Varien_Date::formatDate(true));
                     $message->save();
 
