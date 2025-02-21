@@ -132,6 +132,18 @@
             </modules>
         </translate>
     </frontend>
+    <crontab>
+        <jobs>
+            <clean_orphaned_records>
+                <schedule>
+                    <cron_expr>0 2 * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>eav/observer::cleanOrphanedRecords</model>
+                </run>
+            </clean_orphaned_records>
+        </jobs>
+    </crontab>
     <default>
         <general>
             <validator_data>
