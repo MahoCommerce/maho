@@ -478,7 +478,6 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
 
             return true;
         } catch (Exception $e) {
-            echo $e->getMessage();
             Mage::logException($e);
             return false;
         }
