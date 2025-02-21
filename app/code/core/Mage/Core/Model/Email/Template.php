@@ -10,6 +10,11 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Address;
+
 /**
  * Template model
  *
@@ -372,7 +377,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     public function send(#[\SensitiveParameter] $email, $name = null, array $variables = [])
     {
         if (!$this->isValidForSend()) {
-            Mage::logException(new Exception('This letter cannot be sent.')); // translation is intentionally omitted
+            Mage::logException(new Exception('This letter cannot be sent.'));
             return false;
         }
 
@@ -394,17 +399,11 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
 
         $emailTransport = Mage::getStoreConfig('system/smtp/enabled');
         $setReturnPath = Mage::getStoreConfig(self::XML_PATH_SENDING_SET_RETURN_PATH);
-        switch ($setReturnPath) {
-            case 1:
-                $returnPathEmail = $this->getSenderEmail();
-                break;
-            case 2:
-                $returnPathEmail = Mage::getStoreConfig(self::XML_PATH_SENDING_RETURN_PATH_EMAIL);
-                break;
-            default:
-                $returnPathEmail = null;
-                break;
-        }
+        $returnPathEmail = match ($setReturnPath) {
+            1 => $this->getSenderEmail(),
+            2 => Mage::getStoreConfig(self::XML_PATH_SENDING_RETURN_PATH_EMAIL),
+            default => null,
+        };
 
         if ($this->hasQueue() && $this->getQueue() instanceof Mage_Core_Model_Email_Queue) {
             $emailQueue = $this->getQueue();
@@ -426,76 +425,63 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             return true;
         }
 
-        $mail = $this->getMail();
-        if ($returnPathEmail !== null) {
-            $mail->setFrom($returnPathEmail);
-        }
-
-        if ($emailTransport === 'smtp') {
-            $config = [
-                'auth' => Mage::getStoreConfig('system/smtp/auth'),
-                'username' => Mage::getStoreConfig('system/smtp/username'),
-                'password' => Mage::getStoreConfig('system/smtp/password'),
-                'port' => Mage::getStoreConfig('system/smtp/port'),
-            ];
-            $security = Mage::getStoreConfig('system/smtp/security');
-            if ($security) {
-                $config['ssl'] = $security;
+        try {
+            $email = new Email();
+            $email->subject($subject);
+            $email->from(new Address($this->getSenderEmail(), $this->getSenderName()));
+            if ($returnPathEmail !== null) {
+                $email->returnPath($returnPathEmail);
+            }
+            foreach ($emails as $key => $recipient) {
+                $email->addTo(new Address($recipient, $names[$key]));
+            }
+            if (!empty($this->_bccEmails)) {
+                foreach ($this->_bccEmails as $bccEmail) {
+                    $email->addBcc($bccEmail);
+                }
+            }
+            if ($this->isPlain()) {
+                $email->text($text);
+            } else {
+                $email->html($text);
             }
 
-            $mailTransport = new Zend_Mail_Transport_Smtp(Mage::getStoreConfig('system/smtp/host'), $config);
-            Zend_Mail::setDefaultTransport($mailTransport);
-        } elseif ($returnPathEmail !== null) {
-            $mailTransport = new Zend_Mail_Transport_Sendmail('-f' . $returnPathEmail);
-            Zend_Mail::setDefaultTransport($mailTransport);
-        }
+            $dsn = match ($emailTransport) {
+                'smtp' =>
+                    "smtp://{urlencode(Mage::getStoreConfig('system/smtp/username'))}:" .
+                    "{urlencode(Mage::getStoreConfig('system/smtp/password'))}@" .
+                    "{Mage::getStoreConfig('system/smtp/host')}:" .
+                    "{Mage::getStoreConfig('system/smtp/port')}" .
+                    (Mage::getStoreConfig('system/smtp/encryption') ? "?encryption=" . Mage::getStoreConfig('system/smtp/encryption') : ''),
+                default => 'sendmail://default'
+            };
+            $mailer = new Mailer(Transport::fromDsn($dsn));
 
-        foreach ($emails as $key => $email) {
-            $mail->addTo($email, '=?utf-8?B?' . base64_encode($names[$key]) . '?=');
-        }
-
-        if ($this->isPlain()) {
-            $mail->setBodyText($text);
-        } else {
-            $mail->setBodyHtml($text);
-        }
-
-        $mail->setSubject('=?utf-8?B?' . base64_encode($subject) . '?=');
-        $mail->setFrom($this->getSenderEmail(), $this->getSenderName());
-
-        try {
-            $transport = new Varien_Object();
-
+            $transportObj = new Varien_Object();
             Mage::dispatchEvent('email_template_send_before', [
-                'mail'      => $mail,
+                'mail'      => $email,
                 'template'  => $this,
-                'transport' => $transport,
+                'transport' => $transportObj,
                 'variables' => $variables,
             ]);
 
-            if ($transport->getTransport()) {
-                $mail->send($transport->getTransport());
-            } else {
-                $mail->send();
-            }
+            $mailer->send($email);
 
-            foreach ($emails as $key => $email) {
+            foreach ($emails as $recipientEmail) {
                 Mage::dispatchEvent('email_template_send_after', [
-                    'to'         => $email,
+                    'to'         => $recipientEmail,
                     'html'       => !$this->isPlain(),
                     'subject'    => $subject,
                     'template'   => $this->getTemplateId(),
                     'email_body' => $text,
                 ]);
             }
-            $this->_mail = null;
+
+            return true;
         } catch (Exception $e) {
-            $this->_mail = null;
             Mage::logException($e);
             return false;
         }
-
-        return true;
     }
 
     /**

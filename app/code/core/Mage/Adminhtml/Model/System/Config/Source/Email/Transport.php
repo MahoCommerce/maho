@@ -13,9 +13,9 @@ class Mage_Adminhtml_Model_System_Config_Source_Email_Transport
     public function toOptionArray()
     {
         return [
-            ['value' => '1', 'label' => 'Sendmail'],
-            ['value' => 'smtp', 'label' => 'SMTP'],
             ['value' => '0', 'label' => Mage::helper('adminhtml')->__('Disable All Email Communications')],
+            ['value' => 'sendmail', 'label' => 'Sendmail'],
+            ['value' => 'smtp', 'label' => 'SMTP'],
         ];
     }
 }

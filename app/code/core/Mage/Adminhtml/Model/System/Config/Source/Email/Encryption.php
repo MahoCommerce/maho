@@ -8,7 +8,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Model_System_Config_Source_Email_Smtpsecurity
+class Mage_Adminhtml_Model_System_Config_Source_Email_Encryption
 {
     public function toOptionArray()
     {
