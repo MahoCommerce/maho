@@ -448,10 +448,10 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
 
             $dsn = match ($emailTransport) {
                 'smtp' =>
-                    "smtp://{urlencode(Mage::getStoreConfig('system/smtp/username'))}:" .
-                    "{urlencode(Mage::getStoreConfig('system/smtp/password'))}@" .
-                    "{Mage::getStoreConfig('system/smtp/host')}:" .
-                    "{Mage::getStoreConfig('system/smtp/port')}",
+                    "smtp://" . urlencode(Mage::getStoreConfig('system/smtp/username')) . ":" .
+                    urlencode(Mage::getStoreConfig('system/smtp/password')) . "@" .
+                    Mage::getStoreConfig('system/smtp/host'). ":" .
+                    Mage::getStoreConfig('system/smtp/port'),
                 default => 'sendmail://default'
             };
             $mailer = new Mailer(Transport::fromDsn($dsn));
@@ -478,6 +478,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
 
             return true;
         } catch (Exception $e) {
+            echo $e->getMessage();
             Mage::logException($e);
             return false;
         }
