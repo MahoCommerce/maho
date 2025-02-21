@@ -177,13 +177,6 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
      */
     public function send()
     {
-        $setReturnPath = Mage::getStoreConfig(self::XML_PATH_SENDING_SET_RETURN_PATH);
-        $returnPathEmail = match ($setReturnPath) {
-            1 => $this->getSenderEmail(),
-            2 => Mage::getStoreConfig(self::XML_PATH_SENDING_RETURN_PATH_EMAIL),
-            default => null,
-        };
-
         $collection = Mage::getModel('core/email_queue')->getCollection()
             ->addOnlyForSendingFilter()
             ->setPageSize(self::MESSAGES_LIMIT_PER_CRON_RUN)
