@@ -17,7 +17,7 @@ $challengeUrl = $helper->getChallengeUrl();
         mahoCaptchaRenderedElements.push(element.id);
 
         if (mahoCaptchaRenderedElements.length <= 1) {
-            element.insertAdjacentHTML('beforeend', '<altcha-widget challengeurl="<?= $challengeUrl ?>" hidelogo hidefooter></altcha-widget>');
+            element.insertAdjacentHTML('beforeend', '<altcha-widget challengeurl="<?= $challengeUrl ?>" auto=onload hidelogo hidefooter floating=auto></altcha-widget>');
             let script = document.createElement('script');
             script.type = 'module';
             script.src = '<?= Mage::getBaseUrl('js') ?>altcha.min.js';

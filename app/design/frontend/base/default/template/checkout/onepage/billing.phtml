@@ -188,7 +188,7 @@
         <input type="hidden" name="billing[use_for_shipping]" value="1" />
     <?php endif ?>
     <div class="buttons-set" id="billing-buttons-container">
-        <button type="button" title="<?= $this->quoteEscape($this->__('Continue')) ?>" class="button" onclick="billing.save()"><?= $this->__('Continue') ?></button>
+        <button type="submit" title="<?= $this->quoteEscape($this->__('Continue')) ?>" class="button" onclick="billing.save()"><?= $this->__('Continue') ?></button>
         <span class="please-wait" id="billing-please-wait" style="display:none;">
             <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" title="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" class="v-middle" /> <?= $this->__('Loading next step...') ?>
         </span>
