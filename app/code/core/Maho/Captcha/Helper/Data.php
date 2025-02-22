@@ -13,6 +13,8 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_ENABLED = 'admin/maho_captcha/enabled';
     public const XML_PATH_FRONTEND_SELECTORS = 'admin/maho_captcha/selectors';
 
+    protected $_moduleName = 'Maho_Captcha';
+
     public function isEnabled(): bool
     {
         return true;
