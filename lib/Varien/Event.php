@@ -25,6 +25,39 @@ class Varien_Event extends Varien_Object
     protected $_observers;
 
     /**
+     * Array containing arguments from `config.xml`, or an empty array if the `<args>` node is missing or empty.
+     *
+     * This example defines an arg `is_ajax=1` for the `controller_action_predispatch` event:
+     * ```xml
+     * <global>
+     *     <events>
+     *         <controller_action_predispatch>
+     *             <observers>
+     *                 <my_event_observer>
+     *                     <class>Company_Name_Model_Observer</class>
+     *                     <method>process</method>
+     *                     <args>
+     *                         <is_ajax>1</is_ajax>
+     *                     </args>
+     *                 </my_event_observer>
+     *             </observers>
+     *         </controller_action_predispatch>
+     *     </events>
+     * </global>
+     * ```
+     *
+     * In the observer method, `Company_Name_Model_Observer->process()`, access the args with:
+     * ```php
+     * public function process(Varien_Event_Observer $observer): void
+     * {
+     *     $isAjax = (bool) $observer->getEvent()->args['is_ajax'];
+     *     // ...
+     * }
+     * ```
+     */
+    public array $args;
+
+    /**
      * Constructor
      *
      * Initializes observers collection
