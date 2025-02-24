@@ -8,12 +8,14 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+/** @var Mage_Core_Model_Resource_Setup $this */
 $installer = $this;
 $installer->startSetup();
 
-$installer->getConnection()
-    ->newTable($installer->getTable('maho_captcha/captcha'))
+$table = $installer->getConnection()
+    ->newTable($installer->getTable('maho_captcha/challenge'))
     ->addColumn('challenge', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
+        'nullable'  => false,
         'primary' => true
     ])
     ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_DATETIME, null, array(

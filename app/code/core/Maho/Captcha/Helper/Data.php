@@ -17,6 +17,7 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function isEnabled(): bool
     {
+        return true;
         return $this->isModuleEnabled() && $this->isModuleOutputEnabled() && Mage::getStoreConfigFlag(self::XML_PATH_ENABLED);
     }
 
@@ -54,9 +55,9 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
             return false;
         }
 
-        // Check that the challange is not stored in the database, meaning it was already solved
+        // Check that the challenge is not stored in the database, meaning it was already solved
         $coreRead = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $table = Mage::getSingleton('core/resource')->getTableName('maho_captcha/captcha');
+        $table = Mage::getSingleton('core/resource')->getTableName('maho_captcha/challenge');
         $select = $coreRead->select()
             ->from($table, ['challenge'])
             ->where('challenge = ?', $payload);

@@ -13,6 +13,11 @@
             </maho_captcha>
             <maho_captcha_resource>
                 <class>Maho_Captcha_Model_Resource</class>
+                <entities>
+                    <challenge>
+                        <table>captha_challenge</table>
+                    </challenge>
+                </entities>
             </maho_captcha_resource>
         </models>
         <blocks>

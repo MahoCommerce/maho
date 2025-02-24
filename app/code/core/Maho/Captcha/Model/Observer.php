@@ -98,7 +98,7 @@ class Maho_Captcha_Model_Observer
     {
         $resource = Mage::getSingleton('core/resource');
         $connection = $resource->getConnection('core_write');
-        $table = $resource->getTableName('maho_captcha/captcha');
+        $table = $resource->getTableName('maho_captcha/challenge');
 
         $cutOffDate = Mage::getModel('core/date')->gmtDate('Y-m-d H:i:s', strtotime('-7 days'));
         $connection->delete(
