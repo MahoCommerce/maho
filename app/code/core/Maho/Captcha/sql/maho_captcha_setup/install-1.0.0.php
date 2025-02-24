@@ -16,11 +16,11 @@ $table = $installer->getConnection()
     ->newTable($installer->getTable('maho_captcha/challenge'))
     ->addColumn('challenge', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
         'nullable'  => false,
-        'primary' => true
+        'primary' => true,
     ])
-    ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_DATETIME, null, array(
-        'nullable' => false
-    ));
+    ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_DATETIME, null, [
+        'nullable' => false,
+    ]);
 $installer->getConnection()->createTable($table);
 
 $installer->endSetup();

@@ -79,7 +79,7 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
                 $coreWrite = Mage::getSingleton('core/resource')->getConnection('core_write');
                 $coreWrite->insert($table, [
                     'challenge' => $payload,
-                    'created_at' => Mage::getModel('core/date')->gmtDate('Y-m-d H:i:s')
+                    'created_at' => Mage::getModel('core/date')->gmtDate('Y-m-d H:i:s'),
                 ]);
             }
         }
