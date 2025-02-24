@@ -30,7 +30,7 @@ class Maho_Captcha_IndexController extends Mage_Core_Controller_Front_Action
         } catch (Exception $e) {
             $this->getResponse()
                 ->setHttpResponseCode(400)
-                ->setBodyJson(['error' => true, 'message' => $error]);
+                ->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 }

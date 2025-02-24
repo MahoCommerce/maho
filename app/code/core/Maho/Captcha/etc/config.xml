@@ -25,6 +25,14 @@
                 <class>Maho_Captcha_Helper</class>
             </maho_captcha>
         </helpers>
+        <resources>
+            <maho_captcha_setup>
+                <setup>
+                    <module>Maho_Captcha</module>
+                    <class>Mage_Core_Model_Resource_Setup</class>
+                </setup>
+            </maho_captcha_setup>
+        </resources>
     </global>
     <frontend>
         <routers>
@@ -147,6 +155,14 @@
             </modules>
         </translate>
     </adminhtml>
+    <crontab>
+        <jobs>
+            <maho_captcha_cleanup>
+                <schedule><cron_expr>0 3 * * *</cron_expr></schedule>
+                <run><model>maho_captcha/observer::cleanup</model></run>
+            </maho_captcha_cleanup>
+        </jobs>
+    </crontab>
     <default>
         <admin>
             <maho_captcha>

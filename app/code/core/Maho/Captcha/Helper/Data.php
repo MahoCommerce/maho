@@ -17,7 +17,6 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function isEnabled(): bool
     {
-        return true;
         return $this->isModuleEnabled() && $this->isModuleOutputEnabled() && Mage::getStoreConfigFlag(self::XML_PATH_ENABLED);
     }
 
@@ -51,11 +50,39 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function verify(string $payload): bool
     {
+        if (empty($payload)) {
+            return false;
+        }
+
+        // Check that the challange is not stored in the database, meaning it was already solved
+        $coreRead = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $table = Mage::getSingleton('core/resource')->getTableName('maho_captcha/captcha');
+        $select = $coreRead->select()
+            ->from($table, ['challenge'])
+            ->where('challenge = ?', $payload);
+        if ($coreRead->fetchOne($select)) {
+            return false;
+        }
+
         try {
-            return \AltchaOrg\Altcha\Altcha::verifySolution($payload, $this->getHmacKey(), true);
+            $isValid = \AltchaOrg\Altcha\Altcha::verifySolution($payload, $this->getHmacKey(), true);
         } catch (Exception $e) {
             Mage::logException($e);
             return false;
+        } finally {
+            if (!isset($isValid)) {
+                $isValid = false;
+            }
+
+            if ($isValid === true) {
+                $coreWrite = Mage::getSingleton('core/resource')->getConnection('core_write');
+                $coreWrite->insert($table, [
+                    'challenge' => $payload,
+                    'created_at' => Mage::getModel('core/date')->gmtDate('Y-m-d H:i:s')
+                ]);
+            }
         }
+
+        return $isValid;
     }
 }
