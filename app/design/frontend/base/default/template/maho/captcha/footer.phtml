@@ -11,32 +11,38 @@ $helper = Mage::helper('maho_captcha');
 if (!$helper->isEnabled()) return;
 $challengeUrl = $helper->getChallengeUrl();
 ?><script>
-    let mahoCaptchaRenderedElements = [];
     function mahoCaptchaInject(element) {
-        if (mahoCaptchaRenderedElements.includes(element.id)) return;
-        mahoCaptchaRenderedElements.push(element.id);
+        element.insertAdjacentHTML('beforeend', '<altcha-widget challengeurl="<?= $challengeUrl ?>" auto=onload hidelogo hidefooter floating=auto name=maho_captcha refetchonexpire></altcha-widget>');
+        let script = document.createElement('script');
+        script.type = 'module';
+        script.src = '<?= Mage::getBaseUrl('js') ?>altcha.min.js';
+        document.head.appendChild(script);
 
-        if (mahoCaptchaRenderedElements.length <= 1) {
-            element.insertAdjacentHTML('beforeend', '<altcha-widget challengeurl="<?= $challengeUrl ?>" auto=onload hidelogo hidefooter floating=auto></altcha-widget>');
-            let script = document.createElement('script');
-            script.type = 'module';
-            script.src = '<?= Mage::getBaseUrl('js') ?>altcha.min.js';
-            document.head.appendChild(script);
-        } else {
-            mahoCaptchaRender();
-        }
-    }
-    function mahoCaptchaRender() {
-        let element = document.getElementById(mahoCaptchaRenderedElements[mahoCaptchaRenderedElements.length - 1]);
+        document.querySelector('altcha-widget').addEventListener('statechange', (ev) => {
+            try {
+                let payload = ev.detail.payload;
+                document.querySelectorAll('<?= $helper->getFrontendSelectors() ?>').forEach(form => {
+                    let hiddenInput = form.querySelector('input[name="maho_captcha"]');
+                    if (!hiddenInput) {
+                        hiddenInput = document.createElement('input');
+                        hiddenInput.setAttribute('type', 'hidden');
+                        hiddenInput.setAttribute('name', 'maho_captcha');
+                        form.appendChild(hiddenInput);
+                    }
+
+                    hiddenInput.value = payload;
+                });
+            } catch (e) {}
+        });
     }
     document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll('<?= $helper->getFrontendSelectors() ?>').forEach(function (element) {
-            if (element.matches(':focus-within')) {
-                mahoCaptchaInject(element);
+        document.querySelectorAll('<?= $helper->getFrontendSelectors() ?>').forEach(form => {
+            if (form.matches(':focus-within')) {
+                mahoCaptchaInject(form);
                 return;
             }
-            element.addEventListener('focusin', function (event) {
-                mahoCaptchaInject(element);
+            form.addEventListener('focusin', function (event) {
+                mahoCaptchaInject(form);
             });
         });
     });

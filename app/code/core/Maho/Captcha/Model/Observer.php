@@ -21,7 +21,7 @@ class Maho_Captcha_Model_Observer
         $controller = $observer->getControllerAction();
         $data = $controller->getRequest()->getPost();
 
-        $token = $data['altcha'] ?? '';
+        $token = $data['maho_captcha'] ?? '';
         if ($helper->verify((string) $token)) {
             return;
         }
@@ -40,7 +40,7 @@ class Maho_Captcha_Model_Observer
         $controller = $observer->getControllerAction();
         $data = $controller->getRequest()->getPost();
 
-        $token = $data['altcha'] ?? '';
+        $token = $data['maho_captcha'] ?? '';
         if ($helper->verify((string) $token)) {
             return;
         }
@@ -61,7 +61,7 @@ class Maho_Captcha_Model_Observer
         }
 
         $data = $request->getPost();
-        $token = $data['altcha'] ?? '';
+        $token = $data['maho_captcha'] ?? '';
 
         if ($helper->verify((string) $token)) {
             return;
