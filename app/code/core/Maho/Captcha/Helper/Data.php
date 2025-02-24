@@ -17,7 +17,6 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function isEnabled(): bool
     {
-        return true;
         return $this->isModuleEnabled() && $this->isModuleOutputEnabled() && Mage::getStoreConfigFlag(self::XML_PATH_ENABLED);
     }
 
