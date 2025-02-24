@@ -2019,16 +2019,16 @@
         },
         {
             "name": "friendsofphp/php-cs-fixer",
-            "version": "v3.69.0",
+            "version": "v3.70.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer.git",
-                "reference": "630a59448c00729bc235d5e95cfedefeaca37523"
+                "reference": "2ecd5aae0edc937f0d5aa4a22d1d705c6b2e084e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/630a59448c00729bc235d5e95cfedefeaca37523",
-                "reference": "630a59448c00729bc235d5e95cfedefeaca37523",
+                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/2ecd5aae0edc937f0d5aa4a22d1d705c6b2e084e",
+                "reference": "2ecd5aae0edc937f0d5aa4a22d1d705c6b2e084e",
                 "shasum": ""
             },
             "require": {
@@ -2110,7 +2110,7 @@
             ],
             "support": {
                 "issues": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/issues",
-                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.69.0"
+                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.70.0"
             },
             "funding": [
                 {
@@ -2118,7 +2118,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-02-14T16:19:23+00:00"
+            "time": "2025-02-22T23:30:51+00:00"
         },
         {
             "name": "mahocommerce/maho-phpstan-plugin",
@@ -2156,16 +2156,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.5",
+            "version": "2.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "451b17f9665481ee502adc39be987cb71067ece2"
+                "reference": "6eaec7c6c9e90dcfe46ad1e1ffa5171e2dab641c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/451b17f9665481ee502adc39be987cb71067ece2",
-                "reference": "451b17f9665481ee502adc39be987cb71067ece2",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/6eaec7c6c9e90dcfe46ad1e1ffa5171e2dab641c",
+                "reference": "6eaec7c6c9e90dcfe46ad1e1ffa5171e2dab641c",
                 "shasum": ""
             },
             "require": {
@@ -2210,7 +2210,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-02-13T12:49:56+00:00"
+            "time": "2025-02-19T15:46:42+00:00"
         },
         {
             "name": "psr/event-dispatcher",
