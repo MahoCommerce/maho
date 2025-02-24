@@ -52,7 +52,7 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
     public function verify(string $payload): bool
     {
         try {
-            return \AltchaOrg\Altcha\Altcha::verifySolution($payload, $this->getHmacKey());
+            return \AltchaOrg\Altcha\Altcha::verifySolution($payload, $this->getHmacKey(), true);
         } catch (Exception $e) {
             Mage::logException($e);
             return false;
