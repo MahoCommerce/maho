@@ -44,7 +44,7 @@ class Mage_Adminhtml_Catalog_Product_Action_SetController extends Mage_Adminhtml
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
         } catch (Exception $e) {
-            $this->_getSession()->addError('Internal Error');
+            $this->_getSession()->addError($this->__('Internal Error'));
         }
         $this->_redirect('*/catalog_product/', ['_current' => true]);
     }
