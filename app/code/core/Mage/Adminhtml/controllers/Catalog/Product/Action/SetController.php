@@ -39,7 +39,7 @@ class Mage_Adminhtml_Catalog_Product_Action_SetController extends Mage_Adminhtml
             );
 
             $this->_getSession()->addSuccess(
-                $this->__('%d product(s) were updated', $rowCount)
+                $this->__('%d product(s) were updated', $rowCount),
             );
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
