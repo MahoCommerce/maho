@@ -25,22 +25,27 @@ class Mage_Adminhtml_Catalog_Product_Action_SetController extends Mage_Adminhtml
 
     public function saveAction()
     {
-        $request = $this->getRequest();
+        try {
+            $data = $this->getRequest()->getPost();
+            if (!isset($data['attribute_set']) || !is_array($data['product'])) {
+                Mage::throwException($this->__('Invalid data'));
+            }
 
-        $collection = Mage::getResourceModel('catalog/product_collection');
-        $collection->getConnection()
-            ->update(
+            $collection = Mage::getResourceModel('catalog/product_collection');
+            $rowCount = $collection->getConnection()->update(
                 $collection->getTable('catalog/product'),
-                ['attribute_set_id' => $request->getParam('attribute_set')],
-                'entity_id IN (' . implode(',', $request->getParam('product')) . ')',
+                ['attribute_set_id' => $data['attribute_set']],
+                ['entity_id IN (?)' => $data['product']],
             );
 
-        $this->_getSession()->addSuccess(
-            $this->__('%d product(s) were updated', sizeof($request->getParam('product') ?? [])),
-        );
-
-        $this->_redirect('*/catalog_product/', [
-            'store' => (int) $request->getParam('store', Mage_Core_Model_App::ADMIN_STORE_ID),
-        ]);
+            $this->_getSession()->addSuccess(
+                $this->__('%d product(s) were updated', $rowCount)
+            );
+        } catch (Mage_Core_Exception $e) {
+            $this->_getSession()->addError($e->getMessage());
+        } catch (Exception $e) {
+            $this->_getSession()->addError('Internal Error');
+        }
+        $this->_redirect('*/catalog_product/', ['_current' => true]);
     }
 }
