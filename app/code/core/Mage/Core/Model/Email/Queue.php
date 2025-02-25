@@ -6,9 +6,14 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Address;
 
 /**
  * Email Template Mailer Model
@@ -178,65 +183,64 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
             ->setCurPage(1)
             ->load();
 
-        ini_set('SMTP', Mage::getStoreConfig('system/smtp/host'));
-        ini_set('smtp_port', Mage::getStoreConfig('system/smtp/port'));
-
         /** @var Mage_Core_Model_Email_Queue $message */
         foreach ($collection as $message) {
             if ($message->getId()) {
-                $parameters = new Varien_Object($message->getMessageParameters());
-                if ($parameters->getReturnPathEmail() !== null) {
-                    $mailTransport = new Zend_Mail_Transport_Sendmail('-f' . $parameters->getReturnPathEmail());
-                    Zend_Mail::setDefaultTransport($mailTransport);
-                }
-
-                $mailer = new Zend_Mail('utf-8');
-                foreach ($message->getRecipients() as $recipient) {
-                    list($email, $name, $type) = $recipient;
-                    switch ($type) {
-                        case self::EMAIL_TYPE_BCC:
-                            $mailer->addBcc($email, '=?utf-8?B?' . base64_encode($name) . '?=');
-                            break;
-                        case self::EMAIL_TYPE_TO:
-                        case self::EMAIL_TYPE_CC:
-                        default:
-                            $mailer->addTo($email, '=?utf-8?B?' . base64_encode($name) . '?=');
-                            break;
-                    }
-                }
-
-                if ($parameters->getIsPlain()) {
-                    $mailer->setBodyText($message->getMessageBody());
-                } else {
-                    $mailer->setBodyHtml($message->getMessageBody());
-                }
-
-                $mailer->setSubject('=?utf-8?B?' . base64_encode($parameters->getSubject()) . '?=');
-                $mailer->setFrom($parameters->getFromEmail(), $parameters->getFromName());
-                if ($parameters->getReplyTo() !== null) {
-                    $mailer->setReplyTo($parameters->getReplyTo());
-                }
-                if ($parameters->getReturnTo() !== null) {
-                    $mailer->setReturnPath($parameters->getReturnTo());
+                $dsn = Mage::helper('core')->getMailerDsn();
+                if (!$dsn) {
+                    $message->setProcessedAt(Varien_Date::formatDate(true));
+                    $message->save();
+                    continue;
                 }
 
                 try {
+                    $parameters = new Varien_Object($message->getMessageParameters());
+                    $mailer = new Mailer(Transport::fromDsn($dsn));
+                    $email = new Email();
+                    $email->subject($parameters->getSubject());
+                    $email->from(new Address($parameters->getFromEmail(), $parameters->getFromName()));
+
+                    foreach ($message->getRecipients() as $recipient) {
+                        list($emailAddress, $name, $type) = $recipient;
+                        $address = new Address($emailAddress, $name);
+
+                        switch ($type) {
+                            case self::EMAIL_TYPE_BCC:
+                                $email->addBcc($address);
+                                break;
+                            case self::EMAIL_TYPE_CC:
+                                $email->addCc($address);
+                                break;
+                            case self::EMAIL_TYPE_TO:
+                            default:
+                                $email->addTo($address);
+                                break;
+                        }
+                    }
+
+                    if ($parameters->getIsPlain()) {
+                        $email->text($message->getMessageBody());
+                    } else {
+                        $email->html($message->getMessageBody());
+                    }
+
+                    if ($parameters->getReplyTo() !== null) {
+                        $email->replyTo($parameters->getReplyTo());
+                    }
+
+                    if ($parameters->getReturnTo() !== null) {
+                        $email->returnPath($parameters->getReturnTo());
+                    }
+
                     $transport = new Varien_Object();
                     Mage::dispatchEvent('email_queue_send_before', [
-                        'mail'      => $mailer,
+                        'mail'      => $email,
                         'message'   => $message,
                         'transport' => $transport,
                     ]);
 
-                    if ($transport->getTransport()) {
-                        $mailer->send($transport->getTransport());
-                    } else {
-                        $mailer->send();
-                    }
-
-                    unset($mailer);
+                    $mailer->send($email);
                     $message->setProcessedAt(Varien_Date::formatDate(true));
-                    // save() is throwing exception when recipient is not set
                     $message->save();
 
                     foreach ($message->getRecipients() as $recipient) {
