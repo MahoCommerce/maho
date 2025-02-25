@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -325,6 +325,26 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
             $this->getMassactionBlock()->addItem(MassAction::ATTRIBUTES, [
                 'label' => Mage::helper('catalog')->__('Update Attributes'),
                 'url'   => $this->getUrl('*/catalog_product_action_attribute/edit', ['_current' => true]),
+            ]);
+        }
+
+        if (Mage::getSingleton('admin/session')->isAllowed('catalog/attributes/sets')) {
+            $this->getMassactionBlock()->addItem(MassAction::CHANGE_ATTRIBUTE_SET, [
+                'confirm' => Mage::helper('catalog')->__('Changing the attribute set may result in data loss for attributes that do not exist in the new set. Are you sure?'),
+                'label' => Mage::helper('catalog')->__('Change Attribute Set'),
+                'url'   => $this->getUrl('*/catalog_product_action_set/save', ['_current' => true]),
+                'additional' => [
+                    'visibility' => [
+                        'name' => 'attribute_set',
+                        'type' => 'select',
+                        'class' => 'required-entry',
+                        'label' => Mage::helper('catalog')->__('Attribute Set'),
+                        'values' => Mage::getResourceModel('eav/entity_attribute_set_collection')
+                            ->setEntityTypeFilter(Mage::getModel('catalog/product')->getResource()->getTypeId())
+                            ->setOrder('attribute_set_name', Varien_Data_Collection::SORT_ORDER_ASC)
+                            ->toOptionArray(),
+                    ],
+                ],
             ]);
         }
 
