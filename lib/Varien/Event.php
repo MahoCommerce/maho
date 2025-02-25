@@ -6,7 +6,7 @@
  * @package    Varien_Event
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,39 +23,6 @@ class Varien_Event extends Varien_Object
      * @var Varien_Event_Observer_Collection
      */
     protected $_observers;
-
-    /**
-     * Array containing arguments from `config.xml`, or an empty array if the `<args>` node is missing or empty.
-     *
-     * This example defines an arg `is_ajax=1` for the `controller_action_predispatch` event:
-     * ```xml
-     * <global>
-     *     <events>
-     *         <controller_action_predispatch>
-     *             <observers>
-     *                 <my_event_observer>
-     *                     <class>Company_Name_Model_Observer</class>
-     *                     <method>process</method>
-     *                     <args>
-     *                         <is_ajax>1</is_ajax>
-     *                     </args>
-     *                 </my_event_observer>
-     *             </observers>
-     *         </controller_action_predispatch>
-     *     </events>
-     * </global>
-     * ```
-     *
-     * In the observer method, `Company_Name_Model_Observer->process()`, access the args with:
-     * ```php
-     * public function process(Varien_Event_Observer $observer): void
-     * {
-     *     $isAjax = (bool) ($observer->getEvent()->args['is_ajax'] ?? null);
-     *     // ...
-     * }
-     * ```
-     */
-    public array $args;
 
     /**
      * Constructor

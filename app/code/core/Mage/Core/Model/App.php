@@ -1360,6 +1360,38 @@ class Mage_Core_Model_App
     }
 
     /**
+     * Dispatch event to observers
+     *
+     * Default arguments can be defined in `config.xml` using the `<args>` node. These are merged with the $args parameter.
+     *
+     * For example, this defines `is_ajax=1` for the `controller_action_predispatch` event:
+     * ```xml
+     * <global>
+     *     <events>
+     *         <controller_action_predispatch>
+     *             <observers>
+     *                 <my_event_observer>
+     *                     <class>Company_Name_Model_Observer</class>
+     *                     <method>process</method>
+     *                     <args>
+     *                         <is_ajax>1</is_ajax>
+     *                     </args>
+     *                 </my_event_observer>
+     *             </observers>
+     *         </controller_action_predispatch>
+     *     </events>
+     * </global>
+     * ```
+     *
+     * In the observer method, `Company_Name_Model_Observer->process()`, access the args with:
+     * ```php
+     * public function process(Varien_Event_Observer $observer): void
+     * {
+     *     $isAjax = (bool) $observer->getIsAjax();
+     *     // ...
+     * }
+     * ```
+     *
      * @param string $eventName
      * @param array $args
      * @return $this
@@ -1400,8 +1432,7 @@ class Mage_Core_Model_App
             }
 
             foreach ($events[$eventName]['observers'] as $obsName => $obs) {
-                $event->args = $obs['args'];
-                $observer->setData(['event' => $event]);
+                $observer->setData([...$obs['args'], 'event' => $event]);
                 Varien_Profiler::start('OBSERVER: ' . $obsName);
                 switch ($obs['type']) {
                     case 'disabled':
