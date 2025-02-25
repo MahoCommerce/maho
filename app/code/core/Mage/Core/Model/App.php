@@ -1425,14 +1425,18 @@ class Mage_Core_Model_App
             }
             if ($events[$eventName] === false) {
                 continue;
-            } else {
-                $event = new Varien_Event($args);
-                $event->setName($eventName);
-                $observer = new Varien_Event_Observer();
             }
 
             foreach ($events[$eventName]['observers'] as $obsName => $obs) {
-                $observer->setData([...$obs['args'], 'event' => $event]);
+                $observer = new Varien_Event_Observer([
+                    ...$obs['args'],
+                    ...$args,
+                    'event' => new Varien_Event([
+                        ...$obs['args'],
+                        ...$args,
+                        'name' => $eventName,
+                    ])
+                ]);
                 Varien_Profiler::start('OBSERVER: ' . $obsName);
                 switch ($obs['type']) {
                     case 'disabled':
@@ -1440,13 +1444,11 @@ class Mage_Core_Model_App
                     case 'object':
                     case 'model':
                         $method = $obs['method'];
-                        $observer->addData($args);
                         $object = Mage::getModel($obs['model']);
                         $this->_callObserverMethod($object, $method, $observer, $obsName);
                         break;
                     default:
                         $method = $obs['method'];
-                        $observer->addData($args);
                         $object = Mage::getSingleton($obs['model']);
                         $this->_callObserverMethod($object, $method, $observer, $obsName);
                         break;
