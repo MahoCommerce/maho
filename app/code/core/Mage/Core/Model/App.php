@@ -1429,13 +1429,13 @@ class Mage_Core_Model_App
 
             foreach ($events[$eventName]['observers'] as $obsName => $obs) {
                 $observer = new Varien_Event_Observer([
-                    ...$obs['args'],
-                    ...$args,
                     'event' => new Varien_Event([
                         ...$obs['args'],
                         ...$args,
                         'name' => $eventName,
-                    ])
+                    ]),
+                    ...$obs['args'],
+                    ...$args,
                 ]);
                 Varien_Profiler::start('OBSERVER: ' . $obsName);
                 switch ($obs['type']) {
