@@ -1430,12 +1430,12 @@ class Mage_Core_Model_App
             foreach ($events[$eventName]['observers'] as $obsName => $obs) {
                 $observer = new Varien_Event_Observer([
                     'event' => new Varien_Event([
-                        ...$obs['args'],
-                        ...$args,
+                        ...$obs['args'], // Default config.xml <args>
+                        ...$args,        // Mage::dispatchEvent() $args
                         'name' => $eventName,
                     ]),
-                    ...$obs['args'],
-                    ...$args,
+                    ...$obs['args'], // Default config.xml <args>
+                    ...$args,        // Mage::dispatchEvent() $args
                 ]);
                 Varien_Profiler::start('OBSERVER: ' . $obsName);
                 switch ($obs['type']) {
