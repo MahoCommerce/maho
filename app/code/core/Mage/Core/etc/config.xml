@@ -321,9 +321,7 @@
                 <flush_cron_expr>30 2 * * *</flush_cron_expr>
             </cache>
             <smtp>
-                <disable>0</disable>
-                <host>localhost</host>
-                <port>25</port>
+                <enabled>sendmail</enabled>
             </smtp>
             <media_storage_configuration>
                 <image_file_type>18</image_file_type>

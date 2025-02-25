@@ -43,15 +43,18 @@
         "bacon/bacon-qr-code": "^3.0",
         "symfony/polyfill-php83": "^1.31",
         "lbuchs/webauthn": "^2.2",
-        "mahocommerce/icons": "^1"
+        "mahocommerce/icons": "^1",
+        "symfony/mailer": "^7.2"
     },
     "replace": {
         "symfony/polyfill-ctype": "*",
         "symfony/polyfill-mbstring": "*",
         "symfony/polyfill-intl-grapheme": "*",
+        "symfony/polyfill-intl-idn": "*",
         "symfony/polyfill-intl-normalizer": "*",
         "symfony/polyfill-php80": "*",
-        "symfony/polyfill-php81": "*"
+        "symfony/polyfill-php81": "*",
+        "symfony/polyfill-php82": "*"
     },
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",

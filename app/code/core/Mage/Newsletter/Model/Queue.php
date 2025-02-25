@@ -6,7 +6,7 @@
  * @package    Mage_Newsletter
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -54,14 +54,6 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
      * @var Mage_Newsletter_Model_Resource_Subscriber_Collection|null
      */
     protected $_subscribersCollection = null;
-
-    /**
-     * save template flag
-     *
-     * @var bool
-     * @deprecated since 1.4.0.1
-     */
-    protected $_saveTemplateFlag = false;
 
     /**
      * Save stores flag.
@@ -112,23 +104,6 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
         }
 
         return $this->_subscribersCollection;
-    }
-
-    /**
-     * Add template data to queue.
-     *
-     * @param Varien_Object $data
-     * @return $this
-     * @deprecated since 1.4.0.1
-     */
-    public function addTemplateData($data)
-    {
-        $template = $this->getTemplate();
-        if ($data->getTemplateId() && $data->getTemplateId() != $template->getId()) {
-            $template->load($data->getTemplateId());
-        }
-
-        return $this;
     }
 
     /**
@@ -251,30 +226,6 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
     {
         $this->_getResource()->addSubscribersToQueue($this, $subscriberIds);
         return $this;
-    }
-
-    /**
-     * Setter for save template flag.
-     *
-     * @param bool|int|string $value
-     * @return $this
-     * @deprecated since 1.4.0.1
-     */
-    public function setSaveTemplateFlag($value)
-    {
-        $this->_saveTemplateFlag = (bool) $value;
-        return $this;
-    }
-
-    /**
-     * Getter for save template flag.
-     *
-     * @return bool
-     * @deprecated since 1.4.0.1
-     */
-    public function getSaveTemplateFlag()
-    {
-        return $this->_saveTemplateFlag;
     }
 
     /**
