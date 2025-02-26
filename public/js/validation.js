@@ -228,8 +228,8 @@ class Validation {
     }
 
     static updateCallback(elm, status) {
-        if (typeof elm.callbackFunction !== 'undefined') {
-            new Function(elm.callbackFunction + "('" + elm.id + "','" + status + "')")();
+        if (typeof window[elm.callbackFunction] === 'function') {
+            window[elm.callbackFunction](elm.id, status);
         }
     }
 
