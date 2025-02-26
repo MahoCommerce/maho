@@ -13,7 +13,7 @@ $challengeUrl = $helper->getChallengeUrl();
 ?><script>
     document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('loginForm')
-            .insertAdjacentHTML('beforeend', '<altcha-widget challengeurl="<?= $challengeUrl ?>" hidelogo hidefooter></altcha-widget>');
+            .insertAdjacentHTML('beforeend', '<altcha-widget challengeurl="<?= $challengeUrl ?>" auto=onload hidelogo hidefooter floating=auto name=maho_captcha refetchonexpire></altcha-widget>');
     });
 </script>
 <script src="<?= Mage::getBaseUrl('js') ?>altcha.min.js" type="module"></script>
