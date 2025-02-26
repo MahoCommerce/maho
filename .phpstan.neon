@@ -13,7 +13,7 @@ parameters:
     paths:
         - app/bootstrap.php
         - app/Mage.php
-        - app/code/core/Mage
+        - app/code/core
         - app/design
         - lib
         - maho
