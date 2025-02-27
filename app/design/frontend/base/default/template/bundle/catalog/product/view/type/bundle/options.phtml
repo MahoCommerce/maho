@@ -5,23 +5,21 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Bundle_Block_Catalog_Product_View_Type_Bundle $this */
+$product = $this->getProduct();
+$options = $this->getOptions();
 ?>
-
-<?php $_product = $this->getProduct(); ?>
-<?php $_options = Mage::helper('core')->decorateArray($this->getOptions()); ?>
-<?php if ($_product->isSaleable()):?>
-    <?php if (count($_options)): ?>
+<?php if ($product->isSaleable()): ?>
+    <?php if (count($options)): ?>
         <dl>
-        <?php foreach ($_options as $_option): ?>
-            <?php if (!$_option->getSelections()): ?>
-                <?php continue; ?>
-            <?php endif ?>
-            <?= $this->getOptionHtml($_option) ?>
+        <?php foreach ($options as $option): ?>
+        <?php if ($option->getSelections()): ?>
+            <?= $this->getOptionHtml($option) ?>
+        <?php endif ?>
         <?php endforeach ?>
         </dl>
     <?php else: ?>

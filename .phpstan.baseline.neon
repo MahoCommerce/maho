@@ -907,6 +907,24 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Product/View/Options/Type/Date.php
 
 		-
+			message: '#^Cannot call method setAttributeObj\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Block/Product/View/Type/Configurable.php
+
+		-
+			message: '#^Cannot call method setProduct\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Block/Product/View/Type/Configurable.php
+
+		-
+			message: '#^Cannot call method toHtml\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Block/Product/View/Type/Configurable.php
+
+		-
 			message: '#^Invalid array key type array\.$#'
 			identifier: offsetAccess.invalidOffset
 			count: 1
@@ -4831,12 +4849,6 @@ parameters:
 			path: app/design/frontend/base/default/template/bundle/catalog/product/view/type/bundle/option/select.phtml
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/design/frontend/base/default/template/bundle/catalog/product/view/type/bundle/options.phtml
-
-		-
 			message: '#^Variable \$_weeeTaxAttributes might not be defined\.$#'
 			identifier: variable.undefined
 			count: 8
@@ -4909,50 +4921,14 @@ parameters:
 			path: app/design/frontend/base/default/template/catalog/product/view.phtml
 
 		-
-			message: '#^Access to an undefined property Mage_Catalog_Model_Product_Option\:\:\$decoratedIsLast\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/design/frontend/base/default/template/catalog/product/view/options/type/date.phtml
-
-		-
-			message: '#^Access to an undefined property Mage_Catalog_Model_Product_Option\:\:\$decoratedIsLast\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/design/frontend/base/default/template/catalog/product/view/options/type/file.phtml
-
-		-
-			message: '#^Access to an undefined property Mage_Catalog_Model_Product_Option\:\:\$decoratedIsLast\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/design/frontend/base/default/template/catalog/product/view/options/type/select.phtml
-
-		-
-			message: '#^Access to an undefined property Mage_Catalog_Model_Product_Option\:\:\$decoratedIsLast\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/design/frontend/base/default/template/catalog/product/view/options/type/text.phtml
-
-		-
 			message: '#^Variable \$_weeeTaxAttributes might not be defined\.$#'
 			identifier: variable.undefined
 			count: 9
 			path: app/design/frontend/base/default/template/catalog/product/view/tierprices.phtml
 
 		-
-			message: '#^Cannot call method setAttributeObj\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/design/frontend/base/default/template/catalog/product/view/type/options/configurable.phtml
-
-		-
-			message: '#^Cannot call method setProduct\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/design/frontend/base/default/template/catalog/product/view/type/options/configurable.phtml
-
-		-
-			message: '#^Cannot call method toHtml\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
+			message: '#^Call to protected method renderAttributeBlock\(\) of class Mage_Catalog_Block_Product_View_Type_Configurable\.$#'
+			identifier: method.protected
 			count: 1
 			path: app/design/frontend/base/default/template/catalog/product/view/type/options/configurable.phtml
 

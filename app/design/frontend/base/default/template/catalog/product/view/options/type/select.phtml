@@ -5,20 +5,22 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/** @var Mage_Catalog_Block_Product_View_Options_Type_Select  $this */
+/** @var Mage_Catalog_Block_Product_View_Options_Type_Select $this */
+$option = $this->getOption();
 ?>
-<?php $_option = $this->getOption() ?>
-<dt><label<?php if ($_option->getIsRequire()) echo ' class="required"' ?>><?php if ($_option->getIsRequire()) echo '<em>*</em>' ?><?=  $this->escapeHtml($_option->getTitle()) ?></label></dt>
-<dd<?php if ($_option->decoratedIsLast){?> class="last"<?php }?>>
+<dt>
+    <label<?= $option->getIsRequired() ? ' class="required"' : '' ?>><?=  $this->escapeHtml($option->getTitle()) ?></label>
+</dt>
+<dd>
     <div class="input-box">
         <?= $this->getValuesHtml() ?>
-        <?php if ($_option->getIsRequire()): ?>
-            <?php if ($_option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_RADIO || $_option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_CHECKBOX): ?>
-                <span id="options-<?= $_option->getId() ?>-container"></span>
+        <?php if ($option->getIsRequired()): ?>
+            <?php if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_RADIO || $option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_CHECKBOX): ?>
+                <span id="options-<?= $option->getId() ?>-container"></span>
             <?php endif ?>
         <?php endif ?>
     </div>
