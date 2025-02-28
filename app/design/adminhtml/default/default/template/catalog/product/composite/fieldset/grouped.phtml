@@ -60,7 +60,7 @@ $skipSaleableCheck = Mage::helper('catalog/product')->getSkipSaleableCheck();
                     <?php endif ?>
                     <?php if ($product->isSaleable() || $skipSaleableCheck): ?>
                     <td class="a-center">
-                    <?php if ($item->isSaleable() || $skipSaleableCheck) : ?>
+                    <?php if ($item->isSaleable() || $skipSaleableCheck): ?>
                         <input type="number" name="super_group[<?= $item->getId() ?>]" id="super_group[<?= $item->getId() ?>]" maxlength="12" min="0" value="<?= $item->getQty()*1 ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('catalog')->__('Qty')) ?>" class="input-text qty" />
                         <input type="hidden" value="1" price="<?= $this->getCurrencyPrice($item->getPrice()) ?>" qtyId="super_group[<?= $item->getId() ?>]" />
                     <?php else: ?>
@@ -72,7 +72,9 @@ $skipSaleableCheck = Mage::helper('catalog/product')->getSkipSaleableCheck();
             <?php endforeach ?>
             <?php else: ?>
                <tr>
-                   <td colspan="<?php if ($product->isSaleable() || $skipSaleableCheck): ?>4<?php else: ?>3<?php endif ?>"><?= Mage::helper('catalog')->__('No options of this product are available.') ?></td>
+                   <td colspan="<?= $product->isSaleable() || $skipSaleableCheck ? 4 : 3 ?>">
+                       <?= Mage::helper('catalog')->__('No options of this product are available.') ?>
+                   </td>
                </tr>
             <?php endif ?>
             </tbody>

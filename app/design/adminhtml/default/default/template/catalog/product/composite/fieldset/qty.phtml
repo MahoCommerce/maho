@@ -17,7 +17,7 @@
             <dt>
                 <label>
                     <?= Mage::helper('catalog')->__('Quantity') ?>
-                    <input type="number" min="1" name="qty" value="<?= $this->getQtyValue() ?>" class="input-text">
+                    <input type="number" min="1" name="qty" value="<?= $this->getQtyValue() ?>" class="input-text validate-digits validate-greater-than-zero">
                 </label>
             </dt>
         </dl>

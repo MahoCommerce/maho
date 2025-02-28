@@ -23,7 +23,9 @@ $skipSaleableCheck = Mage::helper('catalog/product')->getSkipSaleableCheck();
         <dl>
         <?php foreach($attributes as $attribute): ?>
             <dt>
-                <label for="attribute<?= $attribute->getAttributeId() ?>"><?= $this->escapeHtml($attribute->getLabel()) ?></label>
+                <label for="attribute<?= $attribute->getAttributeId() ?>" class="required">
+                    <?= $this->escapeHtml($attribute->getLabel()) ?>
+                </label>
             </dt>
             <dd>
                 <div class="input-box">
