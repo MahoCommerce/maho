@@ -1,0 +1,49 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Maho_Captcha
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+$helper = Mage::helper('maho_captcha');
+if (!$helper->isEnabled()) return;
+$challengeUrl = $helper->getChallengeUrl();
+?><script>
+    function mahoCaptchaInject(element) {
+        element.insertAdjacentHTML('beforeend', '<altcha-widget challengeurl="<?= $challengeUrl ?>" auto=onload hidelogo hidefooter floating=auto name=maho_captcha refetchonexpire></altcha-widget>');
+        let script = document.createElement('script');
+        script.type = 'module';
+        script.src = '<?= Mage::getBaseUrl('js') ?>altcha.min.js';
+        document.head.appendChild(script);
+
+        document.querySelector('altcha-widget').addEventListener('statechange', (ev) => {
+            try {
+                let payload = ev.detail.payload;
+                document.querySelectorAll('<?= $helper->getFrontendSelectors() ?>').forEach(form => {
+                    let hiddenInput = form.querySelector('input[name="maho_captcha"]');
+                    if (!hiddenInput) {
+                        hiddenInput = document.createElement('input');
+                        hiddenInput.setAttribute('type', 'hidden');
+                        hiddenInput.setAttribute('name', 'maho_captcha');
+                        form.appendChild(hiddenInput);
+                    }
+
+                    hiddenInput.value = payload;
+                });
+            } catch (e) {}
+        });
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll('<?= $helper->getFrontendSelectors() ?>').forEach(form => {
+            if (form.matches(':focus-within')) {
+                mahoCaptchaInject(form);
+                return;
+            }
+            form.addEventListener('focusin', function (event) {
+                mahoCaptchaInject(form);
+            });
+        });
+    });
+</script>

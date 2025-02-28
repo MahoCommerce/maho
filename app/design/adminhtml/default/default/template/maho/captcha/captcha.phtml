@@ -1,0 +1,19 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Maho_Captcha
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+$helper = Mage::helper('maho_captcha');
+if (!$helper->isEnabled()) return;
+$challengeUrl = $helper->getChallengeUrl();
+?><script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById('loginForm')
+            .insertAdjacentHTML('beforeend', '<altcha-widget challengeurl="<?= $challengeUrl ?>" auto=onload hidelogo hidefooter floating=auto name=maho_captcha refetchonexpire></altcha-widget>');
+    });
+</script>
+<script src="<?= Mage::getBaseUrl('js') ?>altcha.min.js" type="module"></script>
