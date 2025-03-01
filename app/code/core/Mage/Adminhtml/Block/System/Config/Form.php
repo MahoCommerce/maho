@@ -227,7 +227,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
             if ($block->isLogicalOperator($operator)) {
                 $conditions = [];
                 foreach ($node->children() as $child) {
-                    list($fieldId, $condition) = $this->_buildDependenceCondition($child, $group, $section, $fieldPrefix);
+                    [$fieldId, $condition] = $this->_buildDependenceCondition($child, $group, $section, $fieldPrefix);
                     if ($block->isLogicalOperator($fieldId)) {
                         $conditions[] = $block->createCondition($fieldId, $condition);
                     } else {
@@ -431,7 +431,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
                     $method = false;
                     if (preg_match('/^([^:]+?)::([^:]+?)$/', $factoryName, $matches)) {
                         array_shift($matches);
-                        list($factoryName, $method) = array_values($matches);
+                        [$factoryName, $method] = array_values($matches);
                     }
 
                     $sourceModel = Mage::getSingleton($factoryName);

@@ -130,7 +130,7 @@ class Mage_Cache_Backend_File extends Zend_Cache_Backend_File
         if (!$cache) {
             return false;
         }
-        list($metadatas, $data) = $cache;
+        [$metadatas, $data] = $cache;
         if (!$doNotTestCacheValidity && time() > $metadatas['expire']) {
             // ?? $this->remove($id);
             return false;
@@ -352,7 +352,7 @@ class Mage_Cache_Backend_File extends Zend_Cache_Backend_File
         if (!$cache) {
             return false;
         }
-        list($metadatas, $data) = $cache;
+        [$metadatas, $data] = $cache;
         if (time() > $metadatas['expire']) {
             return false;
         }

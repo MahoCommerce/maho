@@ -201,7 +201,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                     $email->from(new Address($parameters->getFromEmail(), $parameters->getFromName()));
 
                     foreach ($message->getRecipients() as $recipient) {
-                        list($emailAddress, $name, $type) = $recipient;
+                        [$emailAddress, $name, $type] = $recipient;
                         $address = new Address($emailAddress, $name);
 
                         switch ($type) {
@@ -244,7 +244,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                     $message->save();
 
                     foreach ($message->getRecipients() as $recipient) {
-                        list($email, $name, $type) = $recipient;
+                        [$email, $name, $type] = $recipient;
                         Mage::dispatchEvent('email_queue_send_after', [
                             'to'         => $email,
                             'html'       => !$parameters->getIsPlain(),
