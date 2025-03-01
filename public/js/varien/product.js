@@ -10,9 +10,6 @@
 
 var Product = Product ?? {};
 
-/**
- * Configurable Product Controller
- */
 Product.Config = class {
     constructor(config) {
         this.config = config;

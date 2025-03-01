@@ -10,9 +10,6 @@
 
 var Product = Product ?? {};
 
-/**
- * Downloadable Product Controller
- */
 Product.Downloadable = class {
     constructor(config) {
         this.config = config;
