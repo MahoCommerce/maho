@@ -110,9 +110,9 @@
 
         document.body.appendChild(dialog);
 
-        function closeDialog(action) {
+        async function closeDialog(action) {
             if (action === 'ok' && typeof options.ok === 'function') {
-                const result = options.ok(dialog);
+                const result = await options.ok(dialog);
                 if (result === false) {
                     return;
                 }
