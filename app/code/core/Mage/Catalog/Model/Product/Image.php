@@ -210,7 +210,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     public function setSize($size)
     {
         // determine width and height from string
-        list($width, $height) = explode('x', strtolower($size), 2);
+        [$width, $height] = explode('x', strtolower($size), 2);
         foreach (['width', 'height'] as $wh) {
             $$wh  = (int) $$wh;
             if (empty($$wh)) {
@@ -309,7 +309,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
                 $result[] = sprintf('%02s', dechex($value));
             }
         }
-        return implode($result);
+        return implode('', $result);
     }
 
     /**
@@ -322,7 +322,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     {
         $this->_isBaseFilePlaceholder = false;
 
-        if (($file) && (strpos($file, '/', 0) !== 0)) {
+        if (($file) && (!str_starts_with($file, '/'))) {
             $file = '/' . $file;
         }
 
@@ -363,11 +363,6 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         }
 
         $baseFile = $baseDir . $file;
-
-        if ((!$file) || (!file_exists($baseFile))) {
-            throw new Exception(Mage::helper('catalog')->__('Image file was not found.'));
-        }
-
         $this->_baseFile = $baseFile;
 
         // If the image is an SVG then we don't need to resize it

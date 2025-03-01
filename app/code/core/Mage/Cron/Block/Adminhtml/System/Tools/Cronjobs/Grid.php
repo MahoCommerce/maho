@@ -123,17 +123,11 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
         $status = $row->getStatus();
         $class = '';
 
-        switch ($status) {
-            case 'running':
-                $class = 'major';
-                break;
-            case 'missed':
-            case 'error':
-                $class = 'critical';
-                break;
-            default:
-                $class = 'notice';
-        }
+        $class = match ($status) {
+            'running' => 'major',
+            'missed', 'error' => 'critical',
+            default => 'notice',
+        };
 
         return '<span class="grid-severity-' . $class . '"><span>' . $value . '</span></span>';
     }

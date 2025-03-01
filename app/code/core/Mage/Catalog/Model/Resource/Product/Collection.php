@@ -1364,7 +1364,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         if (is_string($attribute) && $attribute == 'is_saleable') {
             $columns = $this->getSelect()->getPart(Zend_Db_Select::COLUMNS);
             foreach ($columns as $columnEntry) {
-                list($correlationName, $column, $alias) = $columnEntry;
+                [$correlationName, $column, $alias] = $columnEntry;
                 if ($alias == 'is_saleable') {
                     if ($column instanceof Zend_Db_Expr) {
                         $field = $column;
@@ -1624,7 +1624,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
 
         $hasColumn = false;
         foreach ($this->getSelect()->getPart(Zend_Db_Select::COLUMNS) as $columnEntry) {
-            list(, , $alias) = $columnEntry;
+            [, , $alias] = $columnEntry;
             if ($alias == 'visibility') {
                 $hasColumn = true;
             }

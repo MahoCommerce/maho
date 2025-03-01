@@ -222,24 +222,14 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      */
     protected function _getRangeExpression($range)
     {
-        switch ($range) {
-            case '24h':
-                $expression = $this->getConnection()->getConcatSql([
-                    $this->getConnection()->getDateFormatSql('{{attribute}}', '%Y-%m-%d %H:'),
-                    $this->getConnection()->quote('00'),
-                ]);
-                break;
-            case '7d':
-            case '1m':
-                $expression = $this->getConnection()->getDateFormatSql('{{attribute}}', '%Y-%m-%d');
-                break;
-            case '1y':
-            case '2y':
-            case 'custom':
-            default:
-                $expression = $this->getConnection()->getDateFormatSql('{{attribute}}', '%Y-%m');
-                break;
-        }
+        $expression = match ($range) {
+            '24h' => $this->getConnection()->getConcatSql([
+                $this->getConnection()->getDateFormatSql('{{attribute}}', '%Y-%m-%d %H:'),
+                $this->getConnection()->quote('00'),
+            ]),
+            '7d', '1m' => $this->getConnection()->getDateFormatSql('{{attribute}}', '%Y-%m-%d'),
+            default => $this->getConnection()->getDateFormatSql('{{attribute}}', '%Y-%m'),
+        };
 
         return $expression;
     }
@@ -795,7 +785,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      */
     public function addCreateAtPeriodFilter($period)
     {
-        list($from, $to) = $this->getDateRange($period, 0, 0, true);
+        [$from, $to] = $this->getDateRange($period, 0, 0, true);
 
         $this->checkIsLive($period);
 

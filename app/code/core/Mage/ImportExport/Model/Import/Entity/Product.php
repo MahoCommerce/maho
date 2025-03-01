@@ -936,7 +936,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                                 if (array_key_exists($paramSuffix, $solidParams)) {
                                     $solidParams[$paramSuffix] = $data;
                                 } elseif ($paramSuffix === 'price') {
-                                    if (substr($data, -1) === '%') {
+                                    if (str_ends_with($data, '%')) {
                                         $priceTableRow['price_type'] = 'percent';
                                     }
                                     $priceTableRow['price'] = (float) rtrim($data, '%');
@@ -974,7 +974,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                                 'price'      => (float) rtrim($rowData['_custom_option_row_price'], '%'),
                                 'price_type' => 'fixed',
                             ];
-                            if (substr($rowData['_custom_option_row_price'], -1) === '%') {
+                            if (str_ends_with($rowData['_custom_option_row_price'], '%')) {
                                 $typePriceRow['price_type'] = 'percent';
                             }
                             if ($priceIsGlobal) {

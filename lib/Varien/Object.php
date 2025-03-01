@@ -314,7 +314,7 @@ class Varien_Object implements ArrayAccess
         }
 
         $data = $this->_data[$key] ?? null;
-        if ($data === null && $key !== null && strpos($key, '/') !== false) {
+        if ($data === null && $key !== null && str_contains($key, '/')) {
             /* process a/b/c key as ['a']['b']['c'] */
             $data = $this->getDataByPath($key);
         }
@@ -618,7 +618,7 @@ class Varien_Object implements ArrayAccess
                 return isset($this->_data[$key]);
         }
         throw new Varien_Exception(
-            'Invalid method ' . get_class($this) . '::' . $method . '(' . print_r($args, true) . ')',
+            'Invalid method ' . static::class . '::' . $method . '(' . print_r($args, true) . ')',
         );
     }
 
@@ -749,7 +749,7 @@ class Varien_Object implements ArrayAccess
             } elseif (is_array($value)) {
                 $debug[$key] = $this->debug($value, $objects);
             } elseif ($value instanceof Varien_Object) {
-                $debug[$key . ' (' . get_class($value) . ')'] = $value->debug(null, $objects);
+                $debug[$key . ' (' . $value::class . ')'] = $value->debug(null, $objects);
             }
         }
         return $debug;

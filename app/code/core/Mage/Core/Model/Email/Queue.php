@@ -201,21 +201,14 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                     $email->from(new Address($parameters->getFromEmail(), $parameters->getFromName()));
 
                     foreach ($message->getRecipients() as $recipient) {
-                        list($emailAddress, $name, $type) = $recipient;
+                        [$emailAddress, $name, $type] = $recipient;
                         $address = new Address($emailAddress, $name);
 
-                        switch ($type) {
-                            case self::EMAIL_TYPE_BCC:
-                                $email->addBcc($address);
-                                break;
-                            case self::EMAIL_TYPE_CC:
-                                $email->addCc($address);
-                                break;
-                            case self::EMAIL_TYPE_TO:
-                            default:
-                                $email->addTo($address);
-                                break;
-                        }
+                        match ($type) {
+                            self::EMAIL_TYPE_BCC => $email->addBcc($address),
+                            self::EMAIL_TYPE_CC => $email->addCc($address),
+                            default => $email->addTo($address),
+                        };
                     }
 
                     if ($parameters->getIsPlain()) {
@@ -244,7 +237,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                     $message->save();
 
                     foreach ($message->getRecipients() as $recipient) {
-                        list($email, $name, $type) = $recipient;
+                        [$email, $name, $type] = $recipient;
                         Mage::dispatchEvent('email_queue_send_after', [
                             'to'         => $email,
                             'html'       => !$parameters->getIsPlain(),

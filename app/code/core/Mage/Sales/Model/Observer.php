@@ -380,13 +380,10 @@ class Mage_Sales_Model_Observer
     {
         $configAddressType = Mage::helper('customer/address')->getTaxCalculationAddressType($store);
         $requiredAddress = null;
-        switch ($configAddressType) {
-            case Mage_Customer_Model_Address_Abstract::TYPE_SHIPPING:
-                $requiredAddress = $salesModel->getShippingAddress();
-                break;
-            default:
-                $requiredAddress = $salesModel->getBillingAddress();
-        }
+        $requiredAddress = match ($configAddressType) {
+            Mage_Customer_Model_Address_Abstract::TYPE_SHIPPING => $salesModel->getShippingAddress(),
+            default => $salesModel->getBillingAddress(),
+        };
         return $requiredAddress;
     }
 
@@ -400,13 +397,10 @@ class Mage_Sales_Model_Observer
     {
         $configAddressType = Mage::helper('customer/address')->getTaxCalculationAddressType($store);
         $requiredAddress = null;
-        switch ($configAddressType) {
-            case Mage_Customer_Model_Address_Abstract::TYPE_SHIPPING:
-                $requiredAddress = $customer->getDefaultShipping();
-                break;
-            default:
-                $requiredAddress = $customer->getDefaultBilling();
-        }
+        $requiredAddress = match ($configAddressType) {
+            Mage_Customer_Model_Address_Abstract::TYPE_SHIPPING => $customer->getDefaultShipping(),
+            default => $customer->getDefaultBilling(),
+        };
         return $requiredAddress;
     }
 

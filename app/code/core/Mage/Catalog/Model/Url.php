@@ -609,7 +609,7 @@ class Mage_Catalog_Model_Url
                 $this->_refreshProductRewrite($product, $this->_categories[$storeRootCategoryId]);
                 foreach ($product->getCategoryIds() as $categoryId) {
                     if ($categoryId != $storeRootCategoryId && isset($this->_categories[$categoryId])) {
-                        if (strpos($this->_categories[$categoryId]['path'], $storeRootCategoryPath . '/') !== 0) {
+                        if (!str_starts_with($this->_categories[$categoryId]['path'], $storeRootCategoryPath . '/')) {
                             continue;
                         }
                         $this->_refreshProductRewrite($product, $this->_categories[$categoryId]);
@@ -714,7 +714,7 @@ class Mage_Catalog_Model_Url
                 return $this->getUnusedPathByUrlKey($storeId, '-', $idPath, $urlKey);
             }
             $match['prefix'] = $match['prefix'] . '-';
-            $match['suffix'] = $match['suffix'] ?? '';
+            $match['suffix'] ??= '';
 
             $lastRequestPath = $this->getResource()
                 ->getLastUsedRewriteRequestIncrement($match['prefix'], $match['suffix'], $storeId);

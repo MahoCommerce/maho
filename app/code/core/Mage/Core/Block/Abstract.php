@@ -747,7 +747,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     public function sortChildren($force = false)
     {
         foreach ($this->_sortInstructions as $name => $list) {
-            list($siblingName, $after, $exists) = $list;
+            [$siblingName, $after, $exists] = $list;
             if ($exists && !$force) {
                 continue;
             }
@@ -1217,7 +1217,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     {
         $module = $this->getData('module_name');
         if (is_null($module)) {
-            $class = get_class($this);
+            $class = static::class;
             $module = substr($class, 0, strpos($class, '_Block'));
             $this->setData('module_name', $module);
         }
@@ -1451,7 +1451,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     {
         if ($this->hasData('cache_key')) {
             $cacheKey = $this->getData('cache_key');
-            if (strpos($cacheKey, self::CACHE_KEY_PREFIX) !== 0) {
+            if (!str_starts_with($cacheKey, self::CACHE_KEY_PREFIX)) {
                 $cacheKey = self::CACHE_KEY_PREFIX . $cacheKey;
                 $this->setData('cache_key', $cacheKey);
             }

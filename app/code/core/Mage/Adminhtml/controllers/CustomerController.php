@@ -787,7 +787,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $fileName   = $ioFile->getCleanPath($path . $file);
         $path       = $ioFile->getCleanPath($path);
 
-        if ((!$ioFile->fileExists($fileName) || strpos($fileName, $path) !== 0)
+        if ((!$ioFile->fileExists($fileName) || !str_starts_with($fileName, $path))
             && !Mage::helper('core/file_storage')->processStorageFile(str_replace('/', DS, $fileName))
         ) {
             $this->norouteAction();
@@ -796,26 +796,14 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
 
         if ($plain) {
             $extension = pathinfo($fileName, PATHINFO_EXTENSION);
-            switch (strtolower($extension)) {
-                case 'gif':
-                    $contentType = 'image/gif';
-                    break;
-                case 'jpg':
-                    $contentType = 'image/jpeg';
-                    break;
-                case 'webp':
-                    $contentType = 'image/webp';
-                    break;
-                case 'avif':
-                    $contentType = 'image/avif';
-                    break;
-                case 'png':
-                    $contentType = 'image/png';
-                    break;
-                default:
-                    $contentType = 'application/octet-stream';
-                    break;
-            }
+            $contentType = match (strtolower($extension)) {
+                'gif' => 'image/gif',
+                'jpg' => 'image/jpeg',
+                'webp' => 'image/webp',
+                'avif' => 'image/avif',
+                'png' => 'image/png',
+                default => 'application/octet-stream',
+            };
 
             $ioFile->streamOpen($fileName, 'r');
             $contentLength = $ioFile->streamStat('size');
