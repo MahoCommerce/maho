@@ -279,3 +279,30 @@ Product.Config = class {
         oldPriceElement.textContent = this.formatPrice(price);
     }
 }
+
+/**************************** DOWNLOADABLE PRODUCT **************************/
+Product.Downloadable = class {
+    constructor(config) {
+        this.config = config;
+        this.reloadPrice();
+        document.addEventListener('DOMContentLoaded', this.reloadPrice.bind(this));
+    }
+
+    reloadPrice() {
+        let price = 0;
+        for (const el of document.querySelectorAll('.product-downloadable-link')) {
+            if (this.config[el.value] && el.checked) {
+                price += parseFloat(this.config[el.value]);
+            }
+        }
+        try {
+            // Assuming optionsPrice is a global object
+            const _displayZeroPrice = optionsPrice.displayZeroPrice;
+            optionsPrice.displayZeroPrice = false;
+            optionsPrice.changePrice('downloadable', price);
+            optionsPrice.reload();
+            optionsPrice.displayZeroPrice = _displayZeroPrice;
+        } catch (error) {
+        }
+    }
+}

@@ -24,8 +24,7 @@ $skipSaleableCheck = Mage::helper('catalog/product')->getSkipSaleableCheck();
     <div class="product-options">
         <dl>
             <dt>
-                <?php if ($isRequired): ?><span class="required">*</span><?php endif ?>
-                <?= $this->escapeHtml($this->getLinksTitle()) ?>
+                <label<?= $isRequired ? ' class="required"' : '' ?>><?= $this->escapeHtml($this->getLinksTitle()) ?></label>
             </dt>
             <dd>
                 <ul id="downloadable-links-list" class="options-list">
@@ -58,22 +57,21 @@ $skipSaleableCheck = Mage::helper('catalog/product')->getSkipSaleableCheck();
 
 <?php if (count($requiredIds)): ?>
 <script type="module">
-    const requiriedIds = <?= json_encode($requiredIds) ?>;
-    for (const linkId of requiriedIds) {
+    const requiredIds = <?= json_encode($requiredIds) ?>;
+    for (const linkId of requiredIds) {
         for (const inputEl of document.querySelectorAll(`input[id="links_${linkId}"]`)) {
             inputEl.adviceContainer = inputEl.closest('dd').querySelector('.links-advice-container');
             inputEl.callbackFunction = 'validateDownloadableCallback';
         }
     }
     window.validateDownloadableCallback = (elmId, result) => {
-        for (const container of document.querySelectorAll('#downloadable-links-list')) {
-            if (result === 'failed') {
-                container.classList.remove('validation-passed');
-                container.classList.add('validation-failed');
-            } else {
-                container.classList.remove('validation-failed');
-                container.classList.add('validation-passed');
-            }
+        const container = document.getElementById('downloadable-links-list');
+        if (result === 'failed') {
+            container.classList.remove('validation-passed');
+            container.classList.add('validation-failed');
+        } else {
+            container.classList.remove('validation-failed');
+            container.classList.add('validation-passed');
         }
     }
 </script>

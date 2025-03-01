@@ -44,8 +44,8 @@ $optionId = $option->getId();
         'validate-datetime-<?= $optionId ?>',
         '<?= $this->jsQuoteEscape( Mage::helper('catalog')->__('This is a required option') ) ?>',
         function(v, el) {
-            const dateTimeParts = el.parentNode.querySelectorAll('.datetime-picker[id^="options_<?= $optionId ?>"]');
-            return [...dateTimeParts].every(el => el.value !== '');
+            const parts = el.parentNode.querySelectorAll('.datetime-picker[id^="options_<?= $optionId ?>"]:not([id$=day_part])');
+            return [...parts].every(el => el.value !== '');
         }
     );
 <?php else: ?>
@@ -53,9 +53,9 @@ $optionId = $option->getId();
         'validate-datetime-<?= $optionId ?>',
         '<?= $this->jsQuoteEscape( Mage::helper('catalog')->__('Field is not complete') ) ?>',
         function(v, el) {
-            const dateTimeParts = el.parentNode.querySelectorAll('.datetime-picker[id^="options_<?= $optionId ?>"]');
-            return [...dateTimeParts].every(el => el.value === '')
-                || [...dateTimeParts].every(el => el.value !== '');
+            const parts = el.parentNode.querySelectorAll('.datetime-picker[id^="options_<?= $optionId ?>"]:not([id$=day_part])');
+            return [...parts].every(el => el.value === '')
+                || [...parts].every(el => el.value !== '');
         }
     );
 <?php endif ?>
