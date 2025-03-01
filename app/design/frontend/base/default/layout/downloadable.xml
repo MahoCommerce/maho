@@ -200,6 +200,9 @@ Emails
 
     <PRODUCT_TYPE_downloadable translate="label" module="downloadable">
         <label>Catalog Product View (Downloadable)</label>
+        <reference name="head">
+            <action method="addJs"><script>varien/product_downloadable.js</script></action>
+        </reference>
         <reference name="product.info">
             <block type="downloadable/catalog_product_view_type" name="product.info.downloadable" as="product_type_availability" template="downloadable/catalog/product/type.phtml">
             <!--<block type="downloadable/catalog_product_view_type" name="product.info.downloadable" as="product_type_data" template="downloadable/catalog/product/type.phtml">-->

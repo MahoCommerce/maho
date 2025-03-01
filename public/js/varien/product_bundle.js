@@ -1,7 +1,7 @@
 /**
  * Maho
  *
- * @package     base_default
+ * @package     js
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
  * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
@@ -10,6 +10,9 @@
 
 var Product = Product ?? {};
 
+/**
+ * Bundle Product Controller
+ */
 Product.Bundle = class {
     constructor(config) {
         this.config = config;
