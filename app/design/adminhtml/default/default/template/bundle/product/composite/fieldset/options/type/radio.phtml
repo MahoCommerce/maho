@@ -19,7 +19,7 @@ list($defaultQty, $canChangeQty) = $this->_getDefaultValues();
 <dt>
     <span class="qty-holder">
         <label for="bundle-option-<?= $option->getId() ?>-qty-input"><?= $this->__('Qty:') ?></label>
-        <input<?= !$canChangeQty ? ' disabled="disabled"' : '' ?> id="bundle-option-<?= $option->getId() ?>-qty-input" class="input-text qty<?= !$canChangeQty ? ' qty-disabled' : '' ?>" type="text" name="bundle_option_qty[<?= $option->getId() ?>]" value="<?= $defaultQty ?>"/>
+        <input<?= !$canChangeQty ? ' disabled="disabled"' : '' ?> id="bundle-option-<?= $option->getId() ?>-qty-input" class="input-text qty<?= !$canChangeQty ? ' qty-disabled' : '' ?> required-entry validate-digits validate-greater-than-zero" type="number" min="1" name="bundle_option_qty[<?= $option->getId() ?>]" value="<?= $defaultQty ?>"/>
     </span>
     <label<?= $option->getRequired() ? ' class="required"' : '' ?>>
         <?= $this->escapeHtml($option->getTitle()) ?>
