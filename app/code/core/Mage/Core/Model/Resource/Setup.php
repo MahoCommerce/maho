@@ -635,22 +635,12 @@ class Mage_Core_Model_Resource_Setup
 
     protected function _modifyResourceDb($actionType, $fromVersion, $toVersion)
     {
-        switch ($actionType) {
-            case self::TYPE_DB_INSTALL:
-            case self::TYPE_DB_UPGRADE:
-                $files = $this->_getAvailableDbFiles($actionType, $fromVersion, $toVersion);
-                break;
-            case self::TYPE_DATA_INSTALL:
-            case self::TYPE_DATA_UPGRADE:
-                $files = $this->_getAvailableDataFiles($actionType, $fromVersion, $toVersion);
-                break;
-            case self::TYPE_MAHO:
-                $files = $this->_getAvailableMahoFiles($actionType, $fromVersion, $toVersion);
-                break;
-            default:
-                $files = [];
-                break;
-        }
+        $files = match ($actionType) {
+            self::TYPE_DB_INSTALL, self::TYPE_DB_UPGRADE => $this->_getAvailableDbFiles($actionType, $fromVersion, $toVersion),
+            self::TYPE_DATA_INSTALL, self::TYPE_DATA_UPGRADE => $this->_getAvailableDataFiles($actionType, $fromVersion, $toVersion),
+            self::TYPE_MAHO => $this->_getAvailableMahoFiles($actionType, $fromVersion, $toVersion),
+            default => [],
+        };
         if (empty($files) || !$this->getConnection()) {
             return false;
         }
