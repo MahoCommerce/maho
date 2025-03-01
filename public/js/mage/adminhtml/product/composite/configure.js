@@ -400,6 +400,14 @@ class ProductConfigure // Maho.Admin.Controller.ProductConfigurePopup
         if (listType) {
             this.current = { listType, itemId: null };
         }
+
+        // Two methods of configuration submission:
+        // 1) urlConfirm - submits a single product via AJAX, thrown errors will prevent dialog from closing.
+        //    For example: configuring a product from the adminhtml customer cart and wishlist tabs
+        // 2) urlSubmit - copy + rename all confirmed blocks of listType into form and submit via AJAX
+        //    For example: configuring multiple listTypes on adminhtml sales_order_create page
+        const { urlConfirm, urlSubmit } = this.listTypes[this.current.listType];
+
         try {
             const submitForm = async (url, extraFormData = null) => {
                 if (typeof this.beforeSubmitCallback[this.current.listType] === 'function') {
@@ -421,16 +429,8 @@ class ProductConfigure // Maho.Admin.Controller.ProductConfigurePopup
                 return true;
             }
 
-            // Two methods of configuration submission:
-            // 1) urlConfirm - submits a single product via AJAX, thrown errors will prevent dialog from closing.
-            //    For example: configuring a product from the adminhtml customer cart and wishlist tabs
-            // 2) urlSubmit - copy + rename all confirmed blocks of listType into form and submit via AJAX
-            //    For example: configuring multiple listTypes on adminhtml sales_order_create page
-
-            const { urlConfirm, urlSubmit } = this.listTypes[this.current.listType];
-
             if (urlConfirm) {
-                return submitForm(setRouteParams(urlConfirm, { id: this.current.itemId }));
+                return await submitForm(setRouteParams(urlConfirm, { id: this.current.itemId }));
             }
             if (urlSubmit) {
                 // Clear out product_composite_configure_form_fields
@@ -473,8 +473,7 @@ class ProductConfigure // Maho.Admin.Controller.ProductConfigurePopup
                 Translator.translate('Save URL not specified. Product configuration will not be saved. Press Cancel to exit.'),
             );
         } catch (error) {
-            console.error(error);
-            setMessagesDiv(error.message, 'error');
+            setMessagesDiv(error.message, 'error', urlConfirm ? this.blockMsg : null);
             return false;
         }
     }
