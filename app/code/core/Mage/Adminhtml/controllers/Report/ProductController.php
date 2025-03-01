@@ -211,9 +211,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     {
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'viewed' => Mage::getSingleton('admin/session')->isAllowed('report/products/viewed'),
-            'sold' => Mage::getSingleton('admin/session')->isAllowed('report/products/sold'),
-            'lowstock' => Mage::getSingleton('admin/session')->isAllowed('report/products/lowstock'),
+            'lowstock', 'sold', 'viewed' => Mage::getSingleton('admin/session')->isAllowed("report/products/$action"),
             default => Mage::getSingleton('admin/session')->isAllowed('report/products'),
         };
     }

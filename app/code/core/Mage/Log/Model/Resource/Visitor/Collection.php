@@ -137,8 +137,7 @@ class Mage_Log_Model_Resource_Visitor_Collection extends Mage_Core_Model_Resourc
     {
         $format = match ($type) {
             'day' => '%Y-%m-%d',
-            'hour' => '%Y-%m-%d %H',
-            default => $format,
+            default => '%Y-%m-%d %H',
         };
         return $format;
     }
