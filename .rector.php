@@ -28,6 +28,7 @@ return RectorConfig::configure()
         DeadCode\ClassMethod\RemoveUselessReturnTagRector::class,
         DeadCode\Property\RemoveUselessVarTagRector::class,
         Rector\CodingStyle\Rector\FuncCall\ConsistentImplodeRector::class,
+        Rector\Php74\Rector\Assign\NullCoalescingOperatorRector::class,
         Rector\Php80\Rector\FuncCall\ClassOnObjectRector::class,
         Rector\Php80\Rector\ClassConstFetch\ClassOnThisVariableObjectRector::class,
         Rector\Php80\Rector\Identical\StrEndsWithRector::class,
