@@ -544,7 +544,6 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
                 $item->setStoreId(Mage::app()->getStore()->getId());
             }
             $newItem = true;
-        } else {
         }
 
         // We can't modify existing child items
