@@ -363,11 +363,6 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         }
 
         $baseFile = $baseDir . $file;
-
-        if ((!$file) || (!file_exists($baseFile))) {
-            throw new Exception(Mage::helper('catalog')->__('Image file was not found.'));
-        }
-
         $this->_baseFile = $baseFile;
 
         // If the image is an SVG then we don't need to resize it
