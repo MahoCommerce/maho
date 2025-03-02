@@ -666,6 +666,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
                     ->loadWithOptions($itemId, 'info_buyRequest');
                 if ($item->getId()) {
                     $this->addProduct($item->getProduct(), $item->getBuyRequest()->toArray());
+                    $this->removeItem($itemId, 'wishlist');
                 }
             }
         }
