@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -39,31 +39,20 @@ class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
     #[\Override]
     protected function _toHtml()
     {
-        $displayFormat = Varien_Date::convertZendToStrftime($this->getFormat(), true, (bool) $this->getTime());
-
-        $html  = '<input type="text" name="' . $this->getName() . '" id="' . $this->getId() . '" ';
-        $html .= 'value="' . $this->escapeHtml($this->getValue()) . '" class="' . $this->getClass() . '" ' . $this->getExtraParams() . '/> ';
-
-        $html .=
-        '<script type="text/javascript">
-            var calendarSetupObject = {
-                inputField  : "' . $this->getId() . '",
-                ifFormat    : "' . $displayFormat . '",
-                showsTime   : ' . ($this->getTime() ? 'true' : 'false') . '
-            }';
-
-        $calendarYearsRange = $this->getYearsRange();
-        if ($calendarYearsRange) {
-            $html .= '
-                calendarSetupObject.range = ' . $calendarYearsRange . '
-                ';
+        $setupObj = [
+            'inputField' => (string) $this->getId(),
+            'ifFormat'   => (string) Varien_Date::convertZendToStrftime($this->getFormat(), true, (bool) $this->getTime()),
+            'showsTime'  => (bool) $this->getTime(),
+        ];
+        if ($calendarYearsRange = $this->getYearsRange()) {
+            $setupObj['range'] = $calendarYearsRange;
         }
+        $setupObj = Mage::helper('core')->jsonEncode($setupObj);
 
-        $html .= '
-            Calendar.setup(calendarSetupObject);
-        </script>';
-
-        return $html;
+        return <<<HTML
+            <input type="text" name="{$this->getName()}" id="{$this->getId()}" value="{$this->escapeHtml($this->getValue())}" class="{$this->getClass()}" {$this->getExtraParams()} />
+            <script>Calendar.setup({$setupObj});</script>
+        HTML;
     }
 
     /**

@@ -70,24 +70,6 @@
             padding: 15px 20px;
             border-top: 1px solid #e0e0e0;
         }
-        .dialog-buttons button {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            color: black;
-            background-color: #f0f0f0;
-            cursor: pointer;
-        }
-        .dialog-buttons button:hover {
-            background-color: #e0e0e0;
-        }
-        .dialog-buttons button[id$=-ok] {
-            background-color: #0090ff;
-            color: white;
-        }
-        .dialog-buttons button[id$=-ok]:hover {
-            background-color: #1a9bff;
-        }
     `;
     document.head.appendChild(style);
 
@@ -95,6 +77,7 @@
         const dialogCount = document.querySelectorAll('dialog').length;
         const dialog = document.createElement('dialog');
         dialog.id = options.id ?? `dialog-${dialogCount + 1}`;
+        dialog.className = options.className ?? 'maho-dialog';
         dialog.options = options;
 
         dialog.innerHTML = `
@@ -102,13 +85,13 @@
                 <h2>${options.title || ''}</h2>
                 <button title="Close">&times;</button>
             </div>
-            <div class="dialog-content"></div>
+            <div class="dialog-content" tabindex="-1"></div>
         `;
         if (options.ok || options.cancel) {
             dialog.innerHTML += `
             <div class="dialog-buttons">
-                ${options.cancel ? `<button id="${dialog.id}-cancel">Cancel</button>` : ''}
-                ${options.ok ? `<button id="${dialog.id}-ok">${options.okLabel || "OK"}</button>` : ''}
+                ${options.cancel ? `<button id="${dialog.id}-cancel" class="cancel">Cancel</button>` : ''}
+                ${options.ok ? `<button id="${dialog.id}-ok" class="ok">${options.okLabel || "OK"}</button>` : ''}
             </div>
         `;
         }
@@ -127,14 +110,16 @@
 
         document.body.appendChild(dialog);
 
-        function closeDialog(action) {
+        async function closeDialog(action) {
             if (action === 'ok' && typeof options.ok === 'function') {
-                options.ok(dialog);
+                const result = await options.ok(dialog);
+                if (result === false) {
+                    return;
+                }
             } else if (action === 'cancel' && typeof options.cancel === 'function') {
                 options.cancel(dialog);
             }
 
-            dialog.close();
             dialog.remove();
 
             if (typeof options.onClose === 'function') {
@@ -156,19 +141,16 @@
             }
         });
 
-        dialog.addEventListener('keydown', function(event) {
+        dialog.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
                 event.preventDefault();
-                const openDialogs = document.querySelectorAll('dialog[open]');
-                if (openDialogs.length > 0) {
-                    const dialog = openDialogs[openDialogs.length - 1];
-                    dialog.close();
-                    dialog.remove();
-                }
+                closeDialog('cancel');
             }
         });
 
         dialog.showModal();
+        dialog.querySelector('.dialog-content')?.focus();
+
         return dialog;
     }
 
@@ -184,13 +166,12 @@
         return createDialog({ ...options, content });
     };
 
-    Windows.focus = Dialog.focus = function() {};
+    Windows.focus = Dialog.focus = function() {
+        const dialog = [...document.querySelectorAll('dialog[open]')].pop();
+        dialog?.querySelector('.dialog-content')?.focus();
+    };
     Windows.close = Dialog.close = function() {
-        const openDialogs = document.querySelectorAll('dialog[open]');
-        if (openDialogs.length > 0) {
-            const dialog = openDialogs[openDialogs.length - 1];
-            dialog.close();
-            dialog.remove();
-        }
+        const dialog = [...document.querySelectorAll('dialog[open]')].pop();
+        dialog?.close();
     };
 })();

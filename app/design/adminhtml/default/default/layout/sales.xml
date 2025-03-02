@@ -6,6 +6,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 -->
@@ -497,7 +498,8 @@
             <action method="addJs"><file>mage/adminhtml/sales.js</file></action>
             <action method="addJs"><file>mage/adminhtml/giftmessage.js</file></action>
             <action method="addJs"><file>mage/adminhtml/product/composite/configure.js</file></action>
-            <action method="addJs"><file>varien/configurable.js</file></action>
+            <action method="addJs"><file>varien/product.js</file></action>
+            <action method="addJs"><file>varien/product_options.js</file></action>
             <action method="addJs"><file>mage/adminhtml/giftoptions/tooltip.js</file></action>
             <block type="adminhtml/template" name="optional_zip_countries" as="optional_zip_countries" template="directory/js/optional_zip_countries.phtml" />
         </reference>

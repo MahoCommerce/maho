@@ -1110,6 +1110,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      * in Wishlist and Cart controllers.
      *
      * @return false|void
+     * @deprecated use `$this->getResponse()->setBodyJson()`
      */
     public function showUpdateResultAction()
     {

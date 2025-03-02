@@ -5,24 +5,26 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Catalog_Block_Product_View_Options_Type_Text $this */
+$option = $this->getOption();
 ?>
-<?php $_option = $this->getOption(); ?>
-<dt><label<?php if ($_option->getIsRequire()) echo ' class="required"' ?>><?php if ($_option->getIsRequire()) echo '<em>*</em>' ?><?=  $this->escapeHtml($_option->getTitle()) ?></label>
-    <?= $this->getFormatedPrice() ?></dt>
-<dd<?php if ($_option->decoratedIsLast){?> class="last"<?php }?>>
+<dt>
+    <label<?= $option->getIsRequired() ? ' class="required"' : '' ?>><?=  $this->escapeHtml($option->getTitle()) ?></label>
+    <?= $this->getFormatedPrice() ?>
+</dt>
+<dd>
     <div class="input-box">
-    <?php if ($_option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_FIELD): ?>
-        <input type="text" onchange="opConfig.reloadPrice()" id="options_<?= $_option->getId() ?>_text" class="input-text<?= $_option->getIsRequire() ? ' required-entry' : '' ?> <?= $_option->getMaxCharacters() ? ' validate-length maximum-length-'.$_option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $_option->getId() ?>]" value="<?= $this->escapeHtml($this->getDefaultValue()) ?>" />
-    <?php elseif ($_option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_AREA): ?>
-        <textarea id="options_<?= $_option->getId() ?>_text" onchange="opConfig.reloadPrice()" class="<?= $_option->getIsRequire() ? ' required-entry' : '' ?> <?= $_option->getMaxCharacters() ? ' validate-length maximum-length-'.$_option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $_option->getId() ?>]" rows="5" cols="25"><?= $this->escapeHtml($this->getDefaultValue()) ?></textarea>
+    <?php if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_FIELD): ?>
+        <input type="text" id="options_<?= $option->getId() ?>_text" class="input-text<?= $option->getIsRequired() ? ' required-entry' : '' ?> <?= $option->getMaxCharacters() ? ' validate-length maximum-length-' . $option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $option->getId() ?>]" value="<?= $this->escapeHtml($this->getDefaultValue()) ?>" onchange="opConfig.reloadPrice()" />
+    <?php elseif ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_AREA): ?>
+        <textarea id="options_<?= $option->getId() ?>_text" class="<?= $option->getIsRequired() ? ' required-entry' : '' ?> <?= $option->getMaxCharacters() ? ' validate-length maximum-length-' . $option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $option->getId() ?>]" rows="5" cols="25" onchange="opConfig.reloadPrice()"><?= $this->escapeHtml($this->getDefaultValue()) ?></textarea>
     <?php endif ?>
-    <?php if ($_option->getMaxCharacters()): ?>
-        <p class="note"><?= Mage::helper('catalog')->__('Maximum number of characters:')?> <strong><?= $_option->getMaxCharacters() ?></strong></p>
+    <?php if ($option->getMaxCharacters()): ?>
+        <p class="note"><?= Mage::helper('catalog')->__('Maximum number of characters:')?> <strong><?= $option->getMaxCharacters() ?></strong></p>
     <?php endif ?>
     </div>
 </dd>

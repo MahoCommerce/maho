@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -32,13 +32,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Cart extends Mage_Adminhtml_Block_W
         $this->setUseAjax(true);
         $this->_parentTemplate = $this->getTemplate();
         $this->setTemplate('customer/tab/cart.phtml');
-    }
-
-    #[\Override]
-    protected function _prepareGrid()
-    {
-        $this->setId('customer_cart_grid' . $this->getWebsiteId());
-        return parent::_prepareGrid();
+        $this->setWebsiteId($attributes['website_id'] ?? null);
     }
 
     #[\Override]
@@ -123,6 +117,16 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Cart extends Mage_Adminhtml_Block_W
         ]);
 
         return parent::_prepareColumns();
+    }
+
+    /**
+     * Set website ID and update grid's HTML ID
+     */
+    public function setWebsiteId(?int $websiteId): self
+    {
+        $this->setData('id', "customer_cart_grid{$websiteId}");
+        $this->setData('website_id', $websiteId);
+        return $this;
     }
 
     /**

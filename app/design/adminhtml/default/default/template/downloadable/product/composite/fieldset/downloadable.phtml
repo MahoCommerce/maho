@@ -5,70 +5,75 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php /** @var Mage_Downloadable_Block_Adminhtml_Catalog_Product_Composite_Fieldset_Downloadable $this */ ?>
-<?php $_linksPurchasedSeparately = $this->getLinksPurchasedSeparately(); ?>
-<?php $_skipSaleableCheck = Mage::helper('catalog/product')->getSkipSaleableCheck(); ?>
-<?php if (($this->getProduct()->isSaleable() || $_skipSaleableCheck) && $this->hasLinks()):?>
 
-<div id="catalog_product_composite_configure_fields_downloadable" class="<?= $this->getIsLastFieldset() ? 'last-fieldset' : '' ?>">
+/** @var Mage_Downloadable_Block_Adminhtml_Catalog_Product_Composite_Fieldset_Downloadable $this */
+
+$linksPurchasedSeparately = $this->getLinksPurchasedSeparately();
+$skipSaleableCheck = Mage::helper('catalog/product')->getSkipSaleableCheck();
+?>
+
+<?php if (($this->getProduct()->isSaleable() || $skipSaleableCheck) && $this->hasLinks()):?>
+<?php $links = $this->getLinks(); ?>
+<?php $isRequired = $this->getLinkSelectionRequired(); ?>
+<?php $requiredIds = []; ?>
+<div>
     <h4><?= Mage::helper('catalog')->__('Downloadable Information') ?></h4>
     <div class="product-options">
         <dl>
-        <?php $_links = $this->getLinks(); ?>
-        <?php $_isRequired = $this->getLinkSelectionRequired(); ?>
-            <dt><label<?php if ($_isRequired) echo ' class="required"' ?>><?php if ($_isRequired) echo '<em>*</em>' ?><?= $this->escapeHtml($this->getLinksTitle()) ?></label></dt>
-            <dd class="last">
+            <dt>
+                <label<?= $isRequired ? ' class="required"' : '' ?>><?= $this->escapeHtml($this->getLinksTitle()) ?></label>
+            </dt>
+            <dd>
                 <ul id="downloadable-links-list" class="options-list">
-                <?php foreach ($_links as $_link): ?>
+                <?php foreach ($links as $link): ?>
+                    <?php if ($isRequired) $requiredIds[] = $link->getId() ?>
                     <li>
-                    <?php if ($_linksPurchasedSeparately): ?>
-                        <input type="checkbox" class="checkbox<?php if ($_isRequired):?> validate-one-required-by-name<?php endif ?> product-downloadable-link" name="links[]" id="links_<?= $_link->getId() ?>" value="<?= $_link->getId() ?>" <?= $this->getLinkCheckedValue($_link) ?> price="<?= $this->getCurrencyPrice($_link->getPrice()) ?>"/>
-                        <?php endif ?>
-                        <span class="label">
-                        <label for="links_<?= $_link->getId() ?>">
-                        <?= $this->escapeHtml($_link->getTitle()) ?>
-                        </label>
-                        <?php if ($_link->getSampleFile() || $_link->getSampleUrl()): ?>
-                            &nbsp;(<a href="<?= $this->getLinkSamlpeUrl($_link) ?>" <?= $this->getIsOpenInNewWindow()?'onclick="this.target=\'_blank\'"':'' ?>><?= Mage::helper('downloadable')->__('sample') ?></a>)
-                        <?php endif ?>
-                        <?php if ($_linksPurchasedSeparately): ?>
-                        <?= $this->getFormattedLinkPrice($_link) ?>
-                        <?php endif ?>
-                    </span>
-                    <?php if ($_isRequired): ?>
-                        <script type="text/javascript">
-                            document.getElementById('links_<?= $_link->getId() ?>').advaiceContainer = 'links-advice-container';
-                            document.getElementById('links_<?= $_link->getId() ?>').callbackFunction = 'validateDownloadableCallback';
-                        </script>
+                    <?php if ($linksPurchasedSeparately): ?>
+                        <input type="checkbox" class="checkbox<?= $isRequired ? ' validate-one-required-by-name' : '' ?> product-downloadable-link" name="links[]" id="links_<?= $link->getId() ?>" value="<?= $link->getId() ?>" <?= $this->getLinkCheckedValue($link) ?> price="<?= $this->getCurrencyPrice($link->getPrice()) ?>"/>
                     <?php endif ?>
+                        <span class="label">
+                            <label for="links_<?= $link->getId() ?>"><?= $this->escapeHtml($link->getTitle()) ?></label>
+                        <?php if ($link->getSampleFile() || $link->getSampleUrl()): ?>
+                            <?php $onclick = $this->getIsOpenInNewWindow() ? ` onclick="this.target='_blank'"` : '' ?>
+                            (<a href="<?= $this->getLinkSamlpeUrl($link) ?>"<?= $onclick ?>><?= Mage::helper('downloadable')->__('sample') ?></a>)
+                        <?php endif ?>
+                        <?php if ($linksPurchasedSeparately): ?>
+                            <?= $this->getFormattedLinkPrice($link) ?>
+                        <?php endif ?>
+                        </span>
                     </li>
                 <?php endforeach ?>
                 </ul>
-
-            <?php if ($_isRequired): ?>
-                <span id="links-advice-container"></span>
+            <?php if ($isRequired): ?>
+                <span class="links-advice-container"></span>
             <?php endif ?>
             </dd>
         </dl>
     </div>
 </div>
 
-    <script type="text/javascript">
-    //<![CDATA[
-        validateDownloadableCallback = function (elmId, result) {
-            var container = $('downloadable-links-list');
-            if (result == 'failed') {
-                container.removeClassName('validation-passed');
-                container.addClassName('validation-failed');
-            } else {
-                container.removeClassName('validation-failed');
-                container.addClassName('validation-passed');
-            }
+<?php if (count($requiredIds)): ?>
+<script type="module">
+    const requiredIds = <?= json_encode($requiredIds) ?>;
+    for (const linkId of requiredIds) {
+        for (const inputEl of document.querySelectorAll(`input[id="links_${linkId}"]`)) {
+            inputEl.adviceContainer = inputEl.closest('dd').querySelector('.links-advice-container');
+            inputEl.callbackFunction = 'validateDownloadableCallback';
         }
-    //]]>
-    </script>
+    }
+    window.validateDownloadableCallback = (elmId, result) => {
+        const container = document.getElementById('downloadable-links-list');
+        if (result === 'failed') {
+            container.classList.remove('validation-passed');
+            container.classList.add('validation-failed');
+        } else {
+            container.classList.remove('validation-failed');
+            container.classList.add('validation-passed');
+        }
+    }
+</script>
+<?php endif ?>
 <?php endif ?>

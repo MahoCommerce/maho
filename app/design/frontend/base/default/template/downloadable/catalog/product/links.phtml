@@ -8,87 +8,70 @@
  * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Downloadable_Block_Catalog_Product_Links $this */
+
+$linksPurchasedSeparately = $this->getLinksPurchasedSeparately();
 ?>
-<?php /** @var Mage_Downloadable_Block_Catalog_Product_Links $this */ ?>
-<?php $_linksPurchasedSeparately = $this->getLinksPurchasedSeparately(); ?>
-<?php if ($this->getProduct()->isSaleable() && $this->hasLinks()):?>
-    <dl>
-        <?php $_links = $this->getLinks(); ?>
-        <?php $_isRequired = $this->getLinkSelectionRequired(); ?>
-        <dt><label<?php if ($_isRequired) echo ' class="required"' ?>><?php if ($_isRequired) echo '<em>*</em>' ?><?= $this->escapeHtml($this->getLinksTitle()) ?></label></dt>
-        <dd>
-            <ul id="downloadable-links-list" class="options-list">
-            <?php foreach ($_links as $_link): ?>
-                <li>
-                    <?php if ($_linksPurchasedSeparately): ?>
-                        <input type="checkbox" class="checkbox<?php if($_isRequired):?> validate-one-required-by-name<?php endif ?> product-downloadable-link" onclick="dConfig.reloadPrice()" name="links[]" id="links_<?= $_link->getId() ?>" value="<?= $_link->getId() ?>" <?= $this->getLinkCheckedValue($_link) ?> />
+<?php if ($this->getProduct()->isSaleable() && $this->hasLinks()): ?>
+<?php $links = $this->getLinks() ?>
+<?php $isRequired = $this->getLinkSelectionRequired() ?>
+<?php $requiredIds = []; ?>
+<dl>
+    <dt>
+        <label<?= $isRequired ? ' class="required"' : '' ?>><?= $this->escapeHtml($this->getLinksTitle()) ?></label>
+    </dt>
+    <dd>
+        <ul id="downloadable-links-list" class="options-list">
+        <?php foreach ($links as $link): ?>
+            <?php if ($isRequired) $requiredIds[] = $link->getId() ?>
+            <li>
+                <?php if ($linksPurchasedSeparately): ?>
+                <input type="checkbox" class="checkbox<?= $isRequired ? ' validate-one-required-by-name' : '' ?> product-downloadable-link" onclick="dConfig.reloadPrice()" name="links[]" id="links_<?= $link->getId() ?>" value="<?= $link->getId() ?>" <?= $this->getLinkCheckedValue($link) ?> />
+                <?php endif ?>
+                <span class="label">
+                    <label for="links_<?= $link->getId() ?>">
+                        <?= $this->escapeHtml($link->getTitle()) ?>
+                    </label>
+                    <?php if ($this->getLinkHasSample($link)): ?>
+                        <?php $onclick = $this->getIsOpenInNewWindow() ? ` onclick="this.target='_blank'"` : '' ?>
+                        (<a href="<?= $this->getLinkSamlpeUrl($link) ?>"<?= $onclick ?>><?= Mage::helper('downloadable')->__('sample') ?></a>)
                     <?php endif ?>
-                    <span class="label">
-                        <label for="links_<?= $_link->getId() ?>">
-                            <?= $this->escapeHtml($_link->getTitle()) ?>
-                        </label>
-                            <?php if ($this->getLinkHasSample($_link)): ?>
-                                &nbsp;(<a href="<?= $this->getLinkSamlpeUrl($_link) ?>" <?= $this->getIsOpenInNewWindow()?'onclick="this.target=\'_blank\'"':'' ?>><?= Mage::helper('downloadable')->__('sample') ?></a>)
-                            <?php endif ?>
-                            <?php if ($_linksPurchasedSeparately): ?>
-                                <?= $this->getFormattedLinkPrice($_link) ?>
-                            <?php endif ?>
-                    </span>
-                    <?php if ($_isRequired): ?>
-                        <script type="text/javascript">
-                            var linkElement = document.getElementById('links_<?= $_link->getId() ?>');
-                            linkElement.advaiceContainer = 'links-advice-container';
-                            linkElement.callbackFunction = 'validateDownloadableCallback';
-                        </script>
+                    <?php if ($linksPurchasedSeparately): ?>
+                        <?= $this->getFormattedLinkPrice($link) ?>
                     <?php endif ?>
-                </li>
-            <?php endforeach ?>
-            </ul>
+                </span>
+            </li>
+        <?php endforeach ?>
+        </ul>
 
-            <?php if ($_isRequired): ?>
-                <span id="links-advice-container"></span>
-            <?php endif ?>
-        </dd>
-    </dl>
-    <script type="text/javascript">
-        class ProductDownloadable {
-            constructor(config) {
-                this.config = config;
-                this.reloadPrice();
-                document.addEventListener('DOMContentLoaded', () => this.reloadPrice());
-            }
+        <?php if ($isRequired): ?>
+            <span id="links-advice-container"></span>
+        <?php endif ?>
+    </dd>
+</dl>
 
-            reloadPrice() {
-                let price = 0;
-                const config = this.config;
-
-                document.querySelectorAll('.product-downloadable-link').forEach(elm => {
-                    if (config[elm.value] && elm.checked) {
-                        price += parseFloat(config[elm.value]);
-                    }
-                });
-
-                try {
-                    const _displayZeroPrice = optionsPrice.displayZeroPrice;
-                    optionsPrice.displayZeroPrice = false;
-                    optionsPrice.changePrice('downloadable', price);
-                    optionsPrice.reload();
-                    optionsPrice.displayZeroPrice = _displayZeroPrice;
-                } catch (e) {}
-            }
+<script type="module">
+<?php if (count($requiredIds)): ?>
+    const requiredIds = <?= json_encode($requiredIds) ?>;
+    for (const linkId of requiredIds) {
+        for (const inputEl of document.querySelectorAll(`input[id="links_${linkId}"]`)) {
+            inputEl.adviceContainer = inputEl.closest('dd').querySelector('.links-advice-container');
+            inputEl.callbackFunction = 'validateDownloadableCallback';
         }
-
-        function validateDownloadableCallback(elmId, result) {
-            const container = document.getElementById('downloadable-links-list');
-            if (result == 'failed') {
-                container.classList.remove('validation-passed');
-                container.classList.add('validation-failed');
-            } else {
-                container.classList.remove('validation-failed');
-                container.classList.add('validation-passed');
-            }
+    }
+    window.validateDownloadableCallback = (elmId, result) => {
+        const container = document.getElementById('downloadable-links-list');
+        if (result === 'failed') {
+            container.classList.remove('validation-passed');
+            container.classList.add('validation-failed');
+        } else {
+            container.classList.remove('validation-failed');
+            container.classList.add('validation-passed');
         }
+    }
+<?php endif ?>
 
-        const dConfig = new ProductDownloadable(<?= $this->getJsonConfig() ?>);
-    </script>
+    window.dConfig = new Product.Downloadable(<?= $this->getJsonConfig() ?>);
+</script>
 <?php endif ?>
