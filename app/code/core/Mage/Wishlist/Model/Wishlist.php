@@ -89,11 +89,17 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
     protected function _afterSave()
     {
         parent::_afterSave();
-
         if ($this->_itemCollection !== null) {
             $this->getItemsCollection()->save();
         }
         return $this;
+    }
+
+    #[\Override]
+    public function save()
+    {
+        $this->_hasDataChanges = true;
+        return parent::save();
     }
 
     /**
