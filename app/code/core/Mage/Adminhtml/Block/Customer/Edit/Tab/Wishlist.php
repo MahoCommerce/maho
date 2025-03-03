@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -24,7 +24,6 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist extends Mage_Adminhtml_Blo
      *
      * @var string
      */
-
     protected $_defaultSort = 'added_at';
 
     /**
@@ -55,16 +54,6 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist extends Mage_Adminhtml_Blo
     }
 
     /**
-     * Retrieve current customer object
-     *
-     * @return Mage_Customer_Model_Customer
-     */
-    protected function _getCustomer()
-    {
-        return Mage::registry('current_customer');
-    }
-
-    /**
      * Create customer wishlist item collection
      *
      * @return Mage_Wishlist_Model_Resource_Item_Collection
@@ -84,10 +73,26 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist extends Mage_Adminhtml_Blo
     #[\Override]
     protected function _prepareCollection()
     {
-        $collection = $this->_createCollection()->addCustomerIdFilter($this->_getCustomer()->getId())
+        $customer = Mage::registry('current_customer');
+        $storeIds = Mage::app()->getWebsite($this->getWebsiteId())->getStoreIds();
+
+        $wishlist = Mage::getModel('wishlist/wishlist')
+            ->setSharedStoreIds($storeIds)
+            ->loadByCustomer($customer, true);
+
+        if ($wishlist) {
+            $collection = $wishlist->getItemsCollection();
+        } else {
+            $collection = new Varien_Data_Collection();
+        }
+
+        $collection
+            ->setWebsiteId($this->_getCustomer()->getWebsiteId())
+            ->setCustomerGroupId($this->_getCustomer()->getGroupId())
             ->resetSortOrder()
             ->addDaysInWishlist()
             ->addStoreData();
+
         $this->setCollection($collection);
 
         return parent::_prepareCollection();
@@ -162,17 +167,6 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist extends Mage_Adminhtml_Blo
     }
 
     /**
-     * Retrieve Grid URL
-     *
-     * @return string
-     */
-    #[\Override]
-    public function getGridUrl()
-    {
-        return $this->getUrl('*/*/wishlist', ['_current' => true]);
-    }
-
-    /**
      * Add column filter to collection
      *
      * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
@@ -184,20 +178,12 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist extends Mage_Adminhtml_Blo
         $collection = $this->getCollection();
         $value = $column->getFilter()->getValue();
         if ($collection && $value) {
-            switch ($column->getId()) {
-                case 'product_name':
-                    $collection->addProductNameFilter($value);
-                    break;
-                case 'store':
-                    $collection->addStoreFilter($value);
-                    break;
-                case 'days':
-                    $collection->addDaysFilter($value);
-                    break;
-                default:
-                    $collection->addFieldToFilter($column->getIndex(), $column->getFilter()->getCondition());
-                    break;
-            }
+            match ($column->getId()) {
+                'product_name' => $collection->addProductNameFilter($value),
+                'store' => $collection->addStoreFilter($value),
+                'days' => $collection->addDaysFilter($value),
+                default => $collection->addFieldToFilter($column->getIndex(), $column->getFilter()->getCondition()),
+            };
         }
         return $this;
     }
@@ -213,16 +199,41 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist extends Mage_Adminhtml_Blo
     {
         $collection = $this->getCollection();
         if ($collection) {
-            switch ($column->getId()) {
-                case 'product_name':
-                    $collection->setOrderByProductName($column->getDir());
-                    break;
-                default:
-                    parent::_setCollectionOrder($column);
-                    break;
-            }
+            match ($column->getId()) {
+                'product_name' => $collection->setOrderByProductName($column->getDir()),
+                default => parent::_setCollectionOrder($column),
+            };
         }
         return $this;
+    }
+
+    /**
+     * Retrieve current customer object
+     *
+     * @return Mage_Customer_Model_Customer
+     */
+    protected function _getCustomer()
+    {
+        return Mage::registry('current_customer');
+    }
+
+    /**
+     * Gets customer assigned to this block
+     */
+    public function getCustomer(): Mage_Customer_Model_Customer
+    {
+        return Mage::registry('current_customer');
+    }
+
+    /**
+     * Retrieve Grid URL
+     *
+     * @return string
+     */
+    #[\Override]
+    public function getGridUrl()
+    {
+        return $this->getUrl('*/*/wishlist', ['_current' => true, 'website_id' => $this->getWebsiteId()]);
     }
 
     /**

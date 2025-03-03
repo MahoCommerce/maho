@@ -786,8 +786,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     protected function _getDeclaredModuleFiles()
     {
         $moduleFiles = [];
-
-        foreach (Maho::globPackages('/app/etc/modules/*.xml') as $file) {
+        $etcDir = $this->getOptions()->getEtcDir();
+        foreach (Maho::globPackages("$etcDir/modules/*.xml") as $file) {
             $moduleFiles[basename($file)] = $file;
         }
 
@@ -1264,24 +1264,17 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             $eventName = strtolower($event->getName());
             $observers = $event->observers->children();
             foreach ($observers as $observer) {
-                switch ((string) $observer->type) {
-                    case 'singleton':
-                        $callback = [
-                            Mage::getSingleton((string) $observer->class),
-                            (string) $observer->method,
-                        ];
-                        break;
-                    case 'object':
-                    case 'model':
-                        $callback = [
-                            Mage::getModel((string) $observer->class),
-                            (string) $observer->method,
-                        ];
-                        break;
-                    default:
-                        $callback = [$observer->getClassName(), (string) $observer->method];
-                        break;
-                }
+                $callback = match ((string) $observer->type) {
+                    'singleton' => [
+                        Mage::getSingleton((string) $observer->class),
+                        (string) $observer->method,
+                    ],
+                    'object', 'model' => [
+                        Mage::getModel((string) $observer->class),
+                        (string) $observer->method,
+                    ],
+                    default => [$observer->getClassName(), (string) $observer->method],
+                };
 
                 $args = (array) $observer->args;
                 $observerClass = $observer->observer_class ? (string) $observer->observer_class : '';
@@ -1726,7 +1719,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             return false;
         }
 
-        list($module, $model) = $classArray;
+        [$module, $model] = $classArray;
         if (!isset($this->_xml->global->models->{$module})) {
             return false;
         }

@@ -3474,6 +3474,16 @@ p.product-name a:hover {
   display: block;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .products-grid > li > div:first-child ul:has(.link-wishlist, link-compare) {
+    display: none;
+  }
+
+  .products-grid > li:hover > div:first-child ul:has(.link-wishlist, link-compare) {
+    display: block;
+  }
+}
+
 /* ============================================ *
  * Product List
  * ============================================ */

@@ -5,62 +5,73 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist $this */
 ?>
+<?php if($this->getWishlistHeader()): ?>
+<div class="content-header skip-header">
+    <table cellspacing="0">
+        <tr>
+            <td style="width:50%;"><h4><?= $this->getWishlistHeader() ?></h4></td>
+        </tr>
+    </table>
+</div>
+<?php endif ?>
 <?= $this->getGridParentHtml() ?>
+
 <?php if($this->canDisplayContainer()): ?>
-<script type="text/javascript">
-//<!--
-wishlistControl = {
-    reload: function (urlParams) {
-        if (!urlParams) {
-            urlParams = '';
+<script>
+<?php $jsObjectName = $this->getJsObjectName() ?>
+window.wishlistControl = {
+    reload (params) {
+        if (!params) {
+            params = {};
         }
-        var url = <?= $this->getJsObjectName() ?>.url + '?ajax=true' + urlParams;
-        new Ajax.Updater(
-            <?= $this->getJsObjectName() ?>.containerId,
-            url,
-            {
-                parameters: {form_key: FORM_KEY},
-                onComplete: <?= $this->getJsObjectName() ?>.initGrid.bind(<?= $this->getJsObjectName() ?>),
-                evalScripts:true
-            }
-        );
+        <?= $jsObjectName ?>.reloadParams = params;
+        <?= $jsObjectName ?>.reload();
+        <?= $jsObjectName ?>.reloadParams = {};
     },
 
-    configureItem: function (itemId) {
+    configureItem (itemId) {
         productConfigure.setOnLoadIFrameCallback('wishlist', this.cbOnLoadIframe.bind(this));
         productConfigure.showItemConfiguration('wishlist', itemId);
         return false;
     },
 
-    cbOnLoadIframe: function (response) {
+    cbOnLoadIframe (response) {
         if (!response.ok) {
             return;
         }
         this.reload();
     },
 
-    removeItem: function (itemId) {
+    removeItem (itemId) {
+        if (!itemId) {
+            alert('<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('customer')->__('No item specified.')) ?>');
+            return false;
+        }
         if(!confirm('<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('customer')->__('Are you sure that you want to remove this item?')) ?>')) {
             return false;
         }
-        this.reload('&delete=' + itemId);
+
+        this.reload({'delete':itemId});
+
         return false;
-    }
+    },
 }
 
-productConfigure.addListType(
-    'wishlist',
-    {
-        urlFetch: '<?= $this->getUrl('*/customer_wishlist_product_composite_wishlist/configure') ?>',
-        urlConfirm: '<?= $this->getUrl('*/customer_wishlist_product_composite_wishlist/update') ?>'
-    }
-);
-//-->
+<?php
+$params = [
+    'customer_id' => $this->getCustomer()->getId(),
+    'website_id' => $this->getWebsiteId(),
+];
+?>
+productConfigure.addListType('wishlist', {
+    urlFetch: '<?= $this->getUrl("*/customer_wishlist_product_composite_wishlist/configure", $params) ?>',
+    urlConfirm: '<?= $this->getUrl("*/customer_wishlist_product_composite_wishlist/update", $params) ?>',
+});
 </script>
 <?php endif ?>

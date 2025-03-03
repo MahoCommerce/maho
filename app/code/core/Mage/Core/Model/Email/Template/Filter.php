@@ -361,7 +361,7 @@ class Mage_Core_Model_Email_Template_Filter extends Varien_Filter_Template
 
         $parts = explode('|', $construction[2], 2);
         if (count($parts) === 2) {
-            list($variableName, $modifiersString) = $parts;
+            [$variableName, $modifiersString] = $parts;
             return $this->_amplifyModifiers($this->_getVariable($variableName, ''), $modifiersString);
         }
         return $this->_getVariable($construction[2], '');
@@ -405,17 +405,12 @@ class Mage_Core_Model_Email_Template_Filter extends Varien_Filter_Template
      */
     public function modifierEscape($value, $type = 'html')
     {
-        switch ($type) {
-            case 'html':
-                return htmlspecialchars($value, ENT_QUOTES);
-
-            case 'htmlentities':
-                return htmlentities($value, ENT_QUOTES);
-
-            case 'url':
-                return rawurlencode($value);
-        }
-        return $value;
+        return match ($type) {
+            'html' => htmlspecialchars($value, ENT_QUOTES),
+            'htmlentities' => htmlentities($value, ENT_QUOTES),
+            'url' => rawurlencode($value),
+            default => $value,
+        };
     }
 
     /**

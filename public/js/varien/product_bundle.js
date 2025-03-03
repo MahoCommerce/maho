@@ -1,16 +1,14 @@
 /**
  * Maho
  *
- * @package     base_default
+ * @package     js
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-if (typeof Product === 'undefined') {
-    var Product = {};
-}
+var Product = Product ?? {};
 
 Product.Bundle = class {
     constructor(config) {
@@ -50,7 +48,7 @@ Product.Bundle = class {
 
             const tierPriceElement = document.getElementById(`bundle-option-${parts[2]}-tier-prices`);
             let tierPriceHtml = '';
-            if (selection.value !== '' && this.config.options[parts[2]].selections[selection.value].customQty === 1) {
+            if (selection.value !== '' && Number(this.config.options[parts[2]].selections[selection.value].customQty) === 1) {
                 tierPriceHtml = this.config.options[parts[2]].selections[selection.value].tierPriceHtml;
             }
             tierPriceElement.innerHTML = tierPriceHtml;
@@ -118,7 +116,7 @@ Product.Bundle = class {
         let tierPriceInclTax, tierPriceExclTax;
         const selection = this.config.options[optionId].selections[selectionId];
 
-        if (selection.customQty === 1 && !this.config.options[optionId].isMulti) {
+        if (Number(selection.customQty) === 1 && !this.config.options[optionId].isMulti) {
             const qtyInput = document.getElementById(`bundle-option-${optionId}-qty-input`);
             qty = qtyInput ? qtyInput.value : 1;
         } else {
@@ -184,7 +182,7 @@ Product.Bundle = class {
         }
 
         const selection = this.config.options[optionId].selections[selectionId];
-        this.showQtyInput(optionId, selection.qty, selection.customQty === 1);
+        this.showQtyInput(optionId, selection.qty, Number(selection.customQty) === 1);
     }
 
     showQtyInput(optionId, value, canEdit) {

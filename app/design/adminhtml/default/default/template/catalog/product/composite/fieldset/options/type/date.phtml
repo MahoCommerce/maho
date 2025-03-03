@@ -5,75 +5,58 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Catalog_Block_Product_View_Options_Type_Date $this */
+$option = $this->getOption();
+$optionId = $option->getId();
 ?>
-<?php /** @var Mage_Catalog_Block_Product_View_Options_Type_Date $this */ ?>
-<?php $_option = $this->getOption(); ?>
-<?php $_optionId = $_option->getId(); ?>
-<dt class="label"><label<?php if ($_option->getIsRequire()) echo ' class="required"' ?>><?php if ($_option->getIsRequire()) echo '<em>*</em>' ?><?=  $this->escapeHtml($_option->getTitle()) ?></label>
-    <?= $this->getFormatedPrice() ?></dt>
-<dd<?php if ($_option->decoratedIsLast){?> class="last"<?php }?>>
-
-<?php if ($_option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME
-    || $_option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE): ?>
-
+<dt>
+    <label<?= $option->getIsRequired() ? ' class="required"' : '' ?>><?=  $this->escapeHtml($option->getTitle()) ?></label>
+    <?= $this->getFormatedPrice() ?>
+</dt>
+<dd>
+<?php if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME || $option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE): ?>
     <?= $this->getDateHtml() ?>
 
     <?php if (!$this->useCalendar()): ?>
-    <script type="text/javascript">
-    //<![CDATA[
-        var dateOption = productConfigure.opConfig.dateOption;
-        Event.observe('options_<?= $_optionId ?>_month', 'change', dateOption.reloadMonth.bind(dateOption));
-        Event.observe('options_<?= $_optionId ?>_year', 'change', dateOption.reloadMonth.bind(dateOption));
-    //]]>
+    <script type="module">
+        const dateOption = productConfigure.opConfig.dateOption;
+        const reloadMonth = dateOption.reloadMonth.bind(dateOption);
+        document.getElementById('options_<?= $optionId ?>_month').addEventListener('change', reloadMonth);
+        document.getElementById('options_<?= $optionId ?>_year').addEventListener('change', reloadMonth);
     </script>
     <?php endif ?>
-
 <?php endif ?>
 
-<?php if ($_option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME
-    || $_option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME): ?>
+<?php if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME || $option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME): ?>
     <span class="time-picker"><?= $this->getTimeHtml() ?></span>
 <?php endif ?>
 
-    <input type="hidden" name="validate_datetime_<?= $_optionId ?>" class="validate-datetime-<?= $_optionId ?>" value="" />
-    <script type="text/javascript">
-    //<![CDATA[
-<?php if ($_option->getIsRequire()): ?>
-        Validation.addAllThese(
-        [
-               ['validate-datetime-<?= $_optionId ?>', '<?= $this->jsQuoteEscape( Mage::helper('catalog')->__('This is a required option') ) ?>', function(v) {
-                   var dateTimeParts = $$('.datetime-picker[id^="options_<?= $_optionId ?>"]');
-                   for (var i=0; i < dateTimeParts.length; i++) {
-                       if (dateTimeParts[i].value == "") return false;
-                   }
-                   return true;
-                }]
-        ]
-        );
-<?php else: ?>
-        Validation.add(
-            'validate-datetime-<?= $_optionId ?>',
-            '<?= $this->jsQuoteEscape( Mage::helper('catalog')->__('Field is not complete') ) ?>',
-            function(v) {
-                var dateTimeParts = $$('.datetime-picker[id^="options_<?= $_optionId ?>"]');
-                var hasWithValue = false, hasWithNoValue = false;
-                var pattern = /day_part$/i;
-                for (var i=0; i < dateTimeParts.length; i++) {
-                   if (! pattern.test(dateTimeParts[i].id)) {
-                       if (dateTimeParts[i].value === "") {
-                           hasWithValue = true;
-                       } else {
-                           hasWithNoValue = true;
-                       }
-                   }
-                }
-                return hasWithValue ^ hasWithNoValue;
-            }
-        );
-<?php endif ?>
-    //]]>
-    </script>
+    <input type="hidden" name="validate_datetime_<?= $optionId ?>" class="validate-datetime-<?= $optionId ?>" value="" />
 </dd>
+
+<script>
+<?php if ($option->getIsRequired()): ?>
+    Validation.add(
+        'validate-datetime-<?= $optionId ?>',
+        '<?= $this->jsQuoteEscape( Mage::helper('catalog')->__('This is a required option') ) ?>',
+        function(v, el) {
+            const parts = el.parentNode.querySelectorAll('.datetime-picker[id^="options_<?= $optionId ?>"]:not([id$=day_part])');
+            return [...parts].every(el => el.value !== '');
+        }
+    );
+<?php else: ?>
+    Validation.add(
+        'validate-datetime-<?= $optionId ?>',
+        '<?= $this->jsQuoteEscape( Mage::helper('catalog')->__('Field is not complete') ) ?>',
+        function(v, el) {
+            const parts = el.parentNode.querySelectorAll('.datetime-picker[id^="options_<?= $optionId ?>"]:not([id$=day_part])');
+            return [...parts].every(el => el.value === '')
+                || [...parts].every(el => el.value !== '');
+        }
+    );
+<?php endif ?>
+</script>
