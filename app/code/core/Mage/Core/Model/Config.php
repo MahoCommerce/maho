@@ -786,8 +786,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     protected function _getDeclaredModuleFiles()
     {
         $moduleFiles = [];
-
-        foreach (Maho::globPackages('/app/etc/modules/*.xml') as $file) {
+        $etcDir = $this->getOptions()->getEtcDir();
+        foreach (Maho::globPackages("$etcDir/modules/*.xml") as $file) {
             $moduleFiles[basename($file)] = $file;
         }
 

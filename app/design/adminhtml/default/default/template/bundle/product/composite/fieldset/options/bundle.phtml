@@ -5,15 +5,15 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
 
-<?php /** @var Mage_Bundle_Block_Adminhtml_Catalog_Product_Composite_Fieldset_Bundle $this */ ?>
-<?php $options = Mage::helper('core')->decorateArray($this->getOptions()); ?>
+/** @var Mage_Bundle_Block_Adminhtml_Catalog_Product_Composite_Fieldset_Bundle $this */
+$options = $this->getOptions();
+?>
 <?php if (count($options)): ?>
-<div id="catalog_product_composite_configure_fields_bundle" class="<?= $this->getIsLastFieldset() ? 'last-fieldset' : '' ?>">
+<div id="catalog_product_composite_configure_fields_bundle">
     <h4><?= Mage::helper('catalog')->__('Bundle Items') ?></h4>
     <div class="product-options">
         <dl>
@@ -25,10 +25,13 @@
         </dl>
     </div>
 </div>
-
 <script>
-    class BundleControl {
-        constructor(config) {
+    window.BundleControl = class {
+        constructor() {
+            this.initialize(...arguments);
+        }
+
+        initialize(config) {
             this.config = config;
         }
 
@@ -40,14 +43,14 @@
             const optionId = parts[2];
             const showQtyInput = selection.value && selection.value !== 'none';
             const options = this.config.options[optionId];
-            const selectionOptions = options && options.selections && options.selections[selection.value] || {};
+            const selectionOptions = options?.selections?.[selection.value] ?? {};
 
             selectionOptions.can_change_qty = Number(selectionOptions.can_change_qty) && showQtyInput;
             this.updateQtyInput(optionId, selectionOptions);
         }
 
         updateQtyInput(optionId, selectionOptions) {
-            const elem = document.getElementById('bundle-option-' + optionId + '-qty-input');
+            const elem = document.getElementById(`bundle-option-${optionId}-qty-input`);
             const default_qty = Number(selectionOptions.default_qty);
             if (!elem) {
                 return;
@@ -66,8 +69,8 @@
         }
 
         updateForDefaults() {
-            for (const optionId in this.config.options) {
-                const selection = document.getElementById('bundle-option-' + optionId);
+            for (const optionId of Object.keys(this.config.options)) {
+                const selection = document.getElementById(`bundle-option-${optionId}`);
                 if (selection) {
                     this.changeSelection(selection);
                 }

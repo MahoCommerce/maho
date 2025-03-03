@@ -834,6 +834,9 @@ class Template
      * @returns {string} Interpolated string
      */
     evaluate(data = {}) {
+        if (typeof data?.toObject === 'function') {
+            data = data.toObject();
+        }
         return this.template.replaceAll(this.pattern, function() {
             const before = arguments[1] ?? '';    // The preceding character
             const symbol = arguments[2] ?? '';    // The entire symbol, i.e. "#{ foo }"

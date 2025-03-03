@@ -6,6 +6,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -200,6 +201,9 @@ Emails
 
     <PRODUCT_TYPE_downloadable translate="label" module="downloadable">
         <label>Catalog Product View (Downloadable)</label>
+        <reference name="head">
+            <action method="addJs"><script>varien/product_downloadable.js</script></action>
+        </reference>
         <reference name="product.info">
             <block type="downloadable/catalog_product_view_type" name="product.info.downloadable" as="product_type_availability" template="downloadable/catalog/product/type.phtml">
             <!--<block type="downloadable/catalog_product_view_type" name="product.info.downloadable" as="product_type_data" template="downloadable/catalog/product/type.phtml">-->

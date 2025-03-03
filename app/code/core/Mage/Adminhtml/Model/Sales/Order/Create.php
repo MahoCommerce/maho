@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -598,32 +598,24 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
                     }
                     break;
                 case 'wishlist':
-                    $wishlist = null;
-                    if (!isset($moveTo[1])) {
-                        $wishlist = Mage::getModel('wishlist/wishlist')->loadByCustomer(
-                            $this->getSession()->getCustomer(),
-                            true,
-                        );
+                    if (isset($moveTo[1])) {
+                        $wishlist = Mage::getModel('wishlist/wishlist')
+                            ->load($moveTo[1])
+                            ->setStore($this->getSession()->getStore())
+                            ->setSharedStoreIds($this->getSession()->getStore()->getWebsite()->getStoreIds());
                     } else {
-                        $wishlist = Mage::getModel('wishlist/wishlist')->load($moveTo[1]);
-                        if (!$wishlist->getId()
-                            || $wishlist->getCustomerId() != $this->getSession()->getCustomerId()
-                        ) {
-                            $wishlist = null;
-                        }
+                        $wishlist = $this->getCustomerWishlist();
                     }
-                    if (!$wishlist) {
+                    if (!$wishlist || !$wishlist->getId() || $wishlist->getCustomerId() != $this->getSession()->getCustomerId()) {
                         Mage::throwException(Mage::helper('wishlist')->__('Could not find wishlist'));
                     }
-                    $wishlist->setStore($this->getSession()->getStore())
-                        ->setSharedStoreIds($this->getSession()->getStore()->getWebsite()->getStoreIds());
-
-                    if ($wishlist->getId() && $item->getProduct()->isVisibleInSiteVisibility()) {
+                    if ($item->getProduct()->isVisibleInSiteVisibility()) {
                         $info = $item->getBuyRequest();
                         $info->setOptions($this->_prepareOptionsForRequest($item))
                             ->setQty($qty)
                             ->setStoreId($this->getSession()->getStoreId());
-                        $wishlist->addNewItem($item->getProduct(), $info);
+                        $wishlist->addNewItem($item->getProduct(), $info)
+                            ->save();
                         $removeItem = true;
                     }
                     break;
@@ -674,6 +666,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
                     ->loadWithOptions($itemId, 'info_buyRequest');
                 if ($item->getId()) {
                     $this->addProduct($item->getProduct(), $item->getBuyRequest()->toArray());
+                    $this->removeItem($itemId, 'wishlist');
                 }
             }
         }
@@ -708,15 +701,15 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
                 break;
             case 'cart':
                 if ($cart = $this->getCustomerCart()) {
-                    $cart->removeItem($itemId);
-                    $cart->collectTotals()
+                    $cart->removeItem($itemId)
+                        ->collectTotals()
                         ->save();
                 }
                 break;
             case 'wishlist':
                 if ($wishlist = $this->getCustomerWishlist()) {
-                    $item = Mage::getModel('wishlist/item')->load($itemId);
-                    $item->delete();
+                    $wishlist->removeItem($itemId)
+                        ->save();
                 }
                 break;
             case 'compared':
