@@ -13,7 +13,7 @@ $installer = $this;
 $installer->startSetup();
 
 $table = $installer->getConnection()
-    ->newTable($installer->getTable('maho_captcha/challenge'))
+    ->newTable($installer->getTable('captcha/challenge'))
     ->addColumn('challenge', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
         'nullable'  => false,
         'primary' => true,

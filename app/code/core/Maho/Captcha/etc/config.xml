@@ -7,111 +7,111 @@
     </modules>
     <global>
         <models>
-            <maho_captcha>
+            <captcha>
                 <class>Maho_Captcha_Model</class>
                 <resourceModel>maho_captcha_resource</resourceModel>
-            </maho_captcha>
-            <maho_captcha_resource>
+            </captcha>
+            <captcha_resource>
                 <class>Maho_Captcha_Model_Resource</class>
                 <entities>
                     <challenge>
                         <table>captha_challenge</table>
                     </challenge>
                 </entities>
-            </maho_captcha_resource>
+            </captcha_resource>
         </models>
         <blocks>
-            <maho_captcha>
+            <captcha>
                 <class>Maho_Captcha_Block</class>
-            </maho_captcha>
+            </captcha>
         </blocks>
         <helpers>
-            <maho_captcha>
+            <captcha>
                 <class>Maho_Captcha_Helper</class>
-            </maho_captcha>
+            </captcha>
         </helpers>
         <resources>
-            <maho_captcha_setup>
+            <captcha_setup>
                 <setup>
                     <module>Maho_Captcha</module>
                     <class>Mage_Core_Model_Resource_Setup</class>
                 </setup>
-            </maho_captcha_setup>
+            </captcha_setup>
         </resources>
     </global>
     <frontend>
         <routers>
-            <maho_captcha>
+            <captcha>
                 <use>standard</use>
                 <args>
                     <module>Maho_Captcha</module>
                     <frontName>captcha</frontName>
                 </args>
-            </maho_captcha>
+            </captcha>
         </routers>
         <events>
             <controller_action_predispatch_checkout_onepage_savebilling>
                 <observers>
-                    <maho_captcha>
-                        <class>maho_captcha/observer</class>
+                    <captcha>
+                        <class>captcha/observer</class>
                         <method>verifyAjax</method>
-                    </maho_captcha>
+                    </captcha>
                 </observers>
             </controller_action_predispatch_checkout_onepage_savebilling>
             <controller_action_predispatch_contacts_index_post>
                 <observers>
-                    <maho_captcha>
-                        <class>maho_captcha/observer</class>
+                    <captcha>
+                        <class>captcha/observer</class>
                         <method>verify</method>
-                    </maho_captcha>
+                    </captcha>
                 </observers>
             </controller_action_predispatch_contacts_index_post>
             <controller_action_predispatch_customer_account_createpost>
                 <observers>
-                    <maho_captcha>
-                        <class>maho_captcha/observer</class>
+                    <captcha>
+                        <class>captcha/observer</class>
                         <method>verify</method>
-                    </maho_captcha>
+                    </captcha>
                 </observers>
             </controller_action_predispatch_customer_account_createpost>
             <controller_action_predispatch_customer_account_forgotpasswordpost>
                 <observers>
-                    <maho_captcha>
-                        <class>maho_captcha/observer</class>
+                    <captcha>
+                        <class>captcha/observer</class>
                         <method>verify</method>
-                    </maho_captcha>
+                    </captcha>
                 </observers>
             </controller_action_predispatch_customer_account_forgotpasswordpost>
             <controller_action_predispatch_newsletter_subscriber_new>
                 <observers>
-                    <maho_captcha>
-                        <class>maho_captcha/observer</class>
+                    <captcha>
+                        <class>captcha/observer</class>
                         <method>verify</method>
-                    </maho_captcha>
+                    </captcha>
                 </observers>
             </controller_action_predispatch_newsletter_subscriber_new>
             <controller_action_predispatch_review_product_post>
                 <observers>
-                    <maho_captcha>
-                        <class>maho_captcha/observer</class>
+                    <captcha>
+                        <class>captcha/observer</class>
                         <method>verify</method>
-                    </maho_captcha>
+                    </captcha>
                 </observers>
             </controller_action_predispatch_review_product_post>
             <controller_action_predispatch_wishlist_index_send>
                 <observers>
-                    <maho_captcha>
-                        <class>maho_captcha/observer</class>
+                    <captcha>
+                        <class>captcha/observer</class>
                         <method>verify</method>
-                    </maho_captcha>
+                    </captcha>
                 </observers>
             </controller_action_predispatch_wishlist_index_send>
         </events>
         <layout>
             <updates>
-                <maho_captcha>
-                    <file>maho_captcha.xml</file>
-                </maho_captcha>
+                <captcha>
+                    <file>captcha.xml</file>
+                </captcha>
             </updates>
         </layout>
         <translate>
@@ -128,26 +128,26 @@
         <events>
             <admin_user_authenticate_before>
                 <observers>
-                    <maho_captcha>
-                        <class>maho_captcha/observer</class>
+                    <captcha>
+                        <class>captcha/observer</class>
                         <method>verifyAdmin</method>
-                    </maho_captcha>
+                    </captcha>
                 </observers>
             </admin_user_authenticate_before>
             <controller_action_predispatch_adminhtml_index_forgotpassword>
                 <observers>
-                    <maho_captcha>
-                        <class>maho_captcha/observer</class>
+                    <captcha>
+                        <class>captcha/observer</class>
                         <method>verifyAdmin</method>
-                    </maho_captcha>
+                    </captcha>
                 </observers>
             </controller_action_predispatch_adminhtml_index_forgotpassword>
         </events>
         <layout>
             <updates>
-                <maho_captcha>
-                    <file>maho_captcha.xml</file>
-                </maho_captcha>
+                <captcha>
+                    <file>captcha.xml</file>
+                </captcha>
             </updates>
         </layout>
         <translate>
@@ -162,16 +162,16 @@
     </adminhtml>
     <crontab>
         <jobs>
-            <maho_captcha_cleanup>
+            <captcha_cleanup>
                 <schedule><cron_expr>0 3 * * *</cron_expr></schedule>
-                <run><model>maho_captcha/observer::cleanup</model></run>
-            </maho_captcha_cleanup>
+                <run><model>captcha/observer::cleanup</model></run>
+            </captcha_cleanup>
         </jobs>
     </crontab>
     <default>
         <admin>
-            <maho_captcha>
-                <enable>1</enable>
+            <captcha>
+                <enabled>1</enabled>
                 <selectors>.checkout-onepage-index #billing-new-address-form
 .contacts-index-index #contactForm
 .customer-account-create #form-validate
@@ -180,7 +180,7 @@
 .catalog-product-view #review-form
 .review-product-list #review-form
 .wishlist-index-share #form-validate</selectors>
-            </maho_captcha>
+            </captcha>
         </admin>
     </default>
 </config>

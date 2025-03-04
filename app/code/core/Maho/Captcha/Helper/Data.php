@@ -10,8 +10,8 @@
 
 class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_ENABLED = 'admin/maho_captcha/enabled';
-    public const XML_PATH_FRONTEND_SELECTORS = 'admin/maho_captcha/selectors';
+    public const XML_PATH_ENABLED = 'admin/captcha/enabled';
+    public const XML_PATH_FRONTEND_SELECTORS = 'admin/captcha/selectors';
 
     protected $_moduleName = 'Maho_Captcha';
 
@@ -56,7 +56,7 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 
         // Check that the challenge is not stored in the database, meaning it was already solved
         $coreRead = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $table = Mage::getSingleton('core/resource')->getTableName('maho_captcha/challenge');
+        $table = Mage::getSingleton('core/resource')->getTableName('captcha/challenge');
         $select = $coreRead->select()
             ->from($table, ['challenge'])
             ->where('challenge = ?', $payload);

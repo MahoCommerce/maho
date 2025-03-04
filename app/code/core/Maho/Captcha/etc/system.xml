@@ -3,7 +3,7 @@
     <sections>
         <admin>
             <groups>
-                <maho_captcha translate="label" module="maho_captcha">
+                <captcha translate="label" module="captcha">
                     <label>Captcha</label>
                     <frontend_type>text</frontend_type>
                     <show_in_default>1</show_in_default>
@@ -29,7 +29,7 @@
                             <show_in_store>1</show_in_store>
                         </selectors>
                     </fields>
-                </maho_captcha>
+                </captcha>
             </groups>
         </admin>
     </sections>

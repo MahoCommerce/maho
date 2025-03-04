@@ -13,7 +13,7 @@ class Maho_Captcha_IndexController extends Mage_Core_Controller_Front_Action
     public function challengeAction()
     {
         try {
-            $helper = Mage::helper('maho_captcha');
+            $helper = Mage::helper('captcha');
             if (!$helper->isEnabled()) {
                 throw new Exception('Captcha is disabled');
             }

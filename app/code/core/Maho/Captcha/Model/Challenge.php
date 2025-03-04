@@ -12,6 +12,6 @@ class Maho_Captcha_Model_Challenge extends Mage_Core_Model_Abstract
 {
     protected function _construct()
     {
-        $this->_init('maho_captcha/challenge');
+        $this->_init('captcha/challenge');
     }
 }

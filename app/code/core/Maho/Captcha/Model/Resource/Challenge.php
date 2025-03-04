@@ -12,6 +12,6 @@ class Maho_Captcha_Model_Resource_Challenge extends Mage_Core_Model_Resource_Db_
 {
     protected function _construct()
     {
-        $this->_init('maho_captcha/challenge', 'challenge');
+        $this->_init('captcha/challenge', 'challenge');
     }
 }
