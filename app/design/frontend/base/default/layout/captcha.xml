@@ -2,13 +2,13 @@
 <layout version="0.1.0">
     <default>
         <reference name="before_body_end">
-            <block type="core/template" template="maho/captcha/footer.phtml"></block>
+            <block type="core/template" template="captcha/footer.phtml"></block>
         </reference>
     </default>
     <checkout_onepage_index>
         <reference name="checkout.onepage.billing">
             <reference name="form.additional.info">
-                <block type="core/template" template="maho/captcha/default_checkout.phtml"></block>
+                <block type="core/template" template="captcha/default_checkout.phtml"></block>
             </reference>
         </reference>
     </checkout_onepage_index>
