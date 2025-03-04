@@ -9,7 +9,7 @@
         <models>
             <captcha>
                 <class>Maho_Captcha_Model</class>
-                <resourceModel>maho_captcha_resource</resourceModel>
+                <resourceModel>captcha_resource</resourceModel>
             </captcha>
             <captcha_resource>
                 <class>Maho_Captcha_Model_Resource</class>
