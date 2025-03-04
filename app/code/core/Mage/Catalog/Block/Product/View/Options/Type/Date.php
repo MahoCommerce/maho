@@ -45,6 +45,26 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
         return Mage::getSingleton('catalog/product_option_type_date')->useCalendar();
     }
 
+    public function getHtml()
+    {
+        $option = $this->getOption();
+
+        if ($this->useCalendar()) {
+            return $option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME
+                ? $this->getCalendarTimeHtml()
+                : $this->getCalendarDateHtml();
+        }
+
+        $html = '';
+        if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME || $option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE) {
+            $html .= $this->getDropDownsDateHtml();
+        }
+        if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME || $option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME) {
+            $html .= $this->getDropDownsTimeHtml();
+        }
+        return $html;
+    }
+
     /**
      * Date input
      *
@@ -67,22 +87,23 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
     public function getCalendarDateHtml()
     {
         $option = $this->getOption();
-        $value = $this->getProduct()->getPreconfiguredValues()->getData('options/' . $option->getId() . '/date');
-
-        //$require = $this->getOption()->getIsRequire() ? ' required-entry' : '';
-        $require = '';
+        $value = $this->getProduct()->getPreconfiguredValues()->getData("options/{$option->getId()}/date");
 
         $yearStart = Mage::getSingleton('catalog/product_option_type_date')->getYearStart();
         $yearEnd = Mage::getSingleton('catalog/product_option_type_date')->getYearEnd();
 
         $calendar = $this->getLayout()
             ->createBlock('core/html_date')
-            ->setId('options_' . $this->getOption()->getId() . '_date')
-            ->setName('options[' . $this->getOption()->getId() . '][date]')
-            ->setClass('product-custom-option datetime-picker input-text' . $require)
+            ->setId("options_{$option->getId()}_date")
+            ->setName("options[{$option->getId()}][date]")
+            ->setClass('product-custom-option datetime-picker input-text')
             ->setFormat(Mage::app()->getLocale()->getDateStrFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT))
             ->setValue($value)
-            ->setYearsRange('[' . $yearStart . ', ' . $yearEnd . ']');
+            ->setYearsRange("[$yearStart , $yearEnd]")
+            ->setConfig([
+                'enableTime' => $option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME,
+                'time_24hr' => Mage::getSingleton('catalog/product_option_type_date')->is24hTimeFormat(),
+            ]);
         if (!$this->getSkipJsReloadPrice()) {
             $calendar->setExtraParams('onchange="opConfig.reloadPrice()"');
         }
@@ -117,11 +138,53 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
     }
 
     /**
-     * Time (hh:mm am/pm) html drop-downs
+     * Time input
      *
      * @return string Formatted Html
      */
     public function getTimeHtml()
+    {
+        if ($this->useCalendar()) {
+            return $this->getCalendarTimeHtml();
+        } else {
+            return $this->getDropDownsTimeHtml();
+        }
+    }
+
+    /**
+     * JS Calendar (time only) html
+     */
+    public function getCalendarTimeHtml(): string
+    {
+        $option = $this->getOption();
+        $calendar = $this->getLayout()
+            ->createBlock('core/html_date')
+            ->setId("options_{$option->getId()}_time")
+            ->setName("options[{$option->getId()}][time]")
+            ->setClass('product-custom-option datetime-picker input-text')
+            ->setConfig([
+                'noCalendar' => true,
+                'enableTime' => true,
+            ]);
+
+        if (Mage::getSingleton('catalog/product_option_type_date')->is24hTimeFormat()) {
+            $calendar->setFormat(Mage::app()->getLocale()->getTimeStrFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT))
+                ->setConfig('time_24h', true);
+        } else {
+            $calendar->setFormat(Mage::app()->getLocale()->getTimeStrFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT));
+        }
+
+        if (!$this->getSkipJsReloadPrice()) {
+            $calendar->setExtraParams('onchange="opConfig.reloadPrice()"');
+        }
+
+        return $calendar->getHtml();
+    }
+
+    /**
+     * Time (hh:mm am/pm) html drop-downs
+     */
+    public function getDropDownsTimeHtml(): string
     {
         if (Mage::getSingleton('catalog/product_option_type_date')->is24hTimeFormat()) {
             $hourStart = 0;
@@ -175,13 +238,11 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
     protected function _getHtmlSelect($name, $value = null)
     {
         $option = $this->getOption();
-
-        $require = '';
         $select = $this->getLayout()->createBlock('core/html_select')
-            ->setId('options_' . $this->getOption()->getId() . '_' . $name)
-            ->setClass('product-custom-option datetime-picker' . $require)
+            ->setId("options_{$option->getId()}_{$name}")
+            ->setClass('product-custom-option datetime-picker')
             ->setExtraParams()
-            ->setName('options[' . $option->getId() . '][' . $name . ']');
+            ->setName("options[{$option->getId()}][{$name}]");
 
         $extraParams = 'style="width:auto"';
         if (!$this->getSkipJsReloadPrice()) {
@@ -190,7 +251,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
         $select->setExtraParams($extraParams);
 
         if (is_null($value)) {
-            $value = $this->getProduct()->getPreconfiguredValues()->getData('options/' . $option->getId() . '/' . $name);
+            $value = $this->getProduct()->getPreconfiguredValues()->getData("options/{$option->getId()}/{$name}");
         }
         if (!is_null($value)) {
             $select->setValue($value);
@@ -208,8 +269,8 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
     protected function _getValueWithLeadingZeros($value)
     {
         if (!$this->_fillLeadingZeros) {
-            return $value;
+            return (string) $value;
         }
-        return $value < 10 ? '0' . $value : $value;
+        return str_pad((string) $value, 2, '0', STR_PAD_LEFT);
     }
 }

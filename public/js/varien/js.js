@@ -721,93 +721,68 @@ function buttonDisabler() {
 }
 
 const Calendar = {
-    configMap: new Map(),
-
-    setup(config) {
+    async setup(config) {
         const inputEl = document.getElementById(config.inputField ?? '');
         if (!inputEl) {
-            return; // throw
+            throw new Error(`Input with ID ${config.inputField} not found in DOM`);
         }
-        Calendar.configMap.set(inputEl, config);
-        inputEl.addEventListener('focus', Calendar.initialize);
-        inputEl.addEventListener('click', Calendar.initialize);
-    },
-
-    async initialize(event) {
-        const inputEl = event?.target;
-        const config = Calendar.configMap.get(inputEl);
-        if (!inputEl || !config) {
-            return;
-        }
-
-        // Cleanup
-        Calendar.configMap.delete(inputEl);
-        inputEl.removeEventListener('focus', Calendar.initialize);
-        inputEl.removeEventListener('click', Calendar.initialize);
 
         if (typeof flatpickr === 'undefined') {
             // Load flatpickr JS + CSS
-            try {
-                await Promise.all([
-                    new Promise((resolve, reject) => {
-                        const link = document.createElement('link');
-                        link.rel = 'stylesheet';
-                        link.href = '/js/flatpickr/flatpickr.min.css';
-                        link.onload = resolve;
-                        link.onerror = () => reject(`${link.href} Not Found`);
-                        document.head.appendChild(link);
-                    }),
-                    new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = '/js/flatpickr/flatpickr.min.js';
-                        script.onload = resolve;
-                        script.onerror = () => reject(`${script.src} Not Found`);
-                        document.head.appendChild(script);
-                    }),
-                ]);
-            } catch (error) {
-                console.error('Failed to load Flatpickr:', error);
-                return;
-            }
+            await Promise.all([
+                new Promise((resolve, reject) => {
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = '/js/flatpickr/flatpickr.min.css';
+                    link.onload = resolve;
+                    link.onerror = () => reject(`${link.href} Not Found`);
+                    document.head.appendChild(link);
+                }),
+                new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = '/js/flatpickr/flatpickr.min.js';
+                    script.onload = resolve;
+                    script.onerror = () => reject(`${script.src} Not Found`);
+                    document.head.appendChild(script);
+                }),
+            ]);
         }
 
-        const strftimeToDateConvertionMap = {
-            '%O': 'S', '%d': 'd', '%a': 'D', '%e': 'j', '%A': 'l', '%u': 'N', '%w': 'w', '%j': 'z', '%V': 'W',
-            '%B': 'F', '%m': 'm', '%b': 'M', '%-m': 'n', '%G': 'o', '%Y': 'Y', '%y': 'y', '%P': 'a', '%p': 'A',
-            '%l': 'g', '%I': 'h', '%H': 'H', '%M': 'i', '%S': 's', '%z': 'O', '%Z': 'T', '%s': 'U'
-        };
+        if (config.ifFormat) {
+            const strftimeToDateConvertionMap = {
+                '%O': 'S', '%d': 'd', '%a': 'D', '%e': 'j', '%A': 'l', '%u': 'N', '%w': 'w', '%j': 'z', '%V': 'W',
+                '%B': 'F', '%m': 'm', '%b': 'M', '%-m': 'n', '%G': 'o', '%Y': 'Y', '%y': 'y', '%P': 'a', '%p': 'K',
+                '%l': 'g', '%I': 'h', '%H': 'H', '%M': 'i', '%S': 's', '%z': 'O', '%Z': 'T', '%s': 'U'
+            };
+            config.dateFormat = config.ifFormat.replace(
+                /%[OdaeAuwjVBmbGYyPplIHMSzZs-]/g,
+                (match) => strftimeToDateConvertionMap[match] || match,
+            );
+        }
 
-        const dateFormat = config.ifFormat.replace(
-            /%[OdaeAuwjVBmbGYyPplIHMSzZs-]/g,
-            (match) => strftimeToDateConvertionMap[match] || match,
-        );
-
-        const flatpickrOptions = {
-            allowInput: true,
-            dateFormat: dateFormat,
-            enableTime: config.showsTime,
-            static: !!inputEl.closest('dialog'),
-        };
+        // TODO: temp debug
+        config.dateFormat = 'm/j/Y h:i K'
+        config.time_24hr = true
 
         if (Array.isArray(config.range)) {
             const [ yearStart, yearEnd ] = config.range;
             if (yearStart) {
-                const minDate = new Date(yearStart, 0, 1);
-                flatpickrOptions.minDate = flatpickr.formatDate(minDate, dateFormat, {});
+                config.minDate = new Date(yearStart, 0, 1);
             }
             if (yearEnd) {
-                const maxDate = new Date(yearEnd, 11, 31);
-                flatpickrOptions.maxDate = flatpickr.formatDate(maxDate, dateFormat, {});
+                config.maxDate = new Date(yearEnd, 11, 31);
             }
         }
 
-        // Initialize flatpickr
-        flatpickr(inputEl, flatpickrOptions);
-
-        // Trigger flatpickr on focus event
-        if (event.type !== 'click') {
-            inputEl.click();
+        if (inputEl.closest('dialog')) {
+            config.static = true;
         }
+
+        config.onChange = (_, dateStr) => {
+            document.getElementById('options_26_text').innerHTML = dateStr
+        }
+
+        flatpickr(inputEl, config);
     },
 }
 

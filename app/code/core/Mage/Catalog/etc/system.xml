@@ -428,7 +428,6 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><use_calendar>1</use_calendar></depends>
                         </date_fields_order>
                         <time_format translate="label">
                             <label>Time Format</label>
@@ -438,7 +437,6 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><use_calendar>1</use_calendar></depends>
                         </time_format>
                         <year_range translate="label comment">
                             <label>Year Range</label>
@@ -448,7 +446,6 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><use_calendar>1</use_calendar></depends>
                         </year_range>
                     </fields>
                 </custom_options>

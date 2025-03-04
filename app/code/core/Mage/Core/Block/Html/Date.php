@@ -33,17 +33,23 @@
  */
 class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
 {
+    protected array $config = [];
+
     /**
      * @return string
      */
     #[\Override]
     protected function _toHtml()
     {
+        $enableTime = (bool) ($this->config['enableTime'] ?? $this->getTime());
         $setupObj = [
             'inputField' => (string) $this->getId(),
-            'ifFormat'   => (string) Varien_Date::convertZendToStrftime($this->getFormat(), true, (bool) $this->getTime()),
-            'showsTime'  => (bool) $this->getTime(),
+            'ifFormat'   => (string) Varien_Date::convertZendToStrftime($this->getFormat(), true, $enableTime),
+            'enableTime' => $enableTime,
+            'allowInput' => true,
+            ...$this->config,
         ];
+
         if ($calendarYearsRange = $this->getYearsRange()) {
             $setupObj['range'] = $calendarYearsRange;
         }
@@ -53,6 +59,16 @@ class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
             <input type="text" name="{$this->getName()}" id="{$this->getId()}" value="{$this->escapeHtml($this->getValue())}" class="{$this->getClass()}" {$this->getExtraParams()} />
             <script>Calendar.setup({$setupObj});</script>
         HTML;
+    }
+
+    public function setConfig(string|array $key, mixed $value = null): self
+    {
+        if (is_array($key)) {
+            $this->config = [...$this->config, ...$key];
+        } else {
+            $this->config[$key] = $value;
+        }
+        return $this;
     }
 
     /**

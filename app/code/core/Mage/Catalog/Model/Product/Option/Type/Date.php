@@ -35,46 +35,54 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
         $option = $this->getOption();
         $value = $this->getUserValue();
 
-        $dateValid = true;
-        if ($this->_dateExists()) {
-            if ($this->useCalendar()) {
-                $dateValid = isset($value['date']) && preg_match('/^\d{1,4}.+\d{1,4}.+\d{1,4}$/', $value['date']);
+        $isValid = $dateValid = $timeValid = true;
+
+        if (isset($value['date']) && $this->useCalendar()) {
+            $matches = [];
+            if ($this->_dateExists() && $this->_timeExists()) {
+                $pattern = '/^(\d{1,4}).+(\d{1,4}).+(\d{1,4}) (\d{1,2}).+(\d{1,2}) (AM|PM)$/';
+            } elseif ($this->_dateExists()) {
+                $pattern = '/^(\d{1,4}).+(\d{1,4}).+(\d{1,4})$/';
             } else {
-                $dateValid = isset($value['day']) && isset($value['month']) && isset($value['year'])
-                    && $value['day'] > 0 && $value['month'] > 0 && $value['year'] > 0;
+                $pattern = '/^(\d{1,2}).+(\d{1,2}) (AM|PM)$/';
+            }
+
+            $isValid = (bool) preg_match($pattern, $value['date'] ?? '');
+
+        } else {
+            if ($this->_dateExists()) {
+                if (($value['day'] ?? 0) <= 0 || ($value['month'] ?? 0) <= 0 || ($value['year'] ?? 0) <= 0) {
+                    $isValid = $dateValid = false;
+                }
+            }
+            if ($this->_timeExists()) {
+                if (!is_numeric($value['hour'] ?? '') || !is_numeric($value['minute'] ?? '')) {
+                    $isValid = $timeValid = false;
+                }
             }
         }
-
-        $timeValid = true;
-        if ($this->_timeExists()) {
-            $timeValid = isset($value['hour']) && isset($value['minute'])
-                && is_numeric($value['hour']) && is_numeric($value['minute']);
-        }
-
-        $isValid = $dateValid && $timeValid;
 
         if ($isValid) {
-            $this->setUserValue(
-                [
-                    'date' => $value['date'] ?? '',
-                    'year' => isset($value['year']) ? (int) $value['year'] : 0,
-                    'month' => isset($value['month']) ? (int) $value['month'] : 0,
-                    'day' => isset($value['day']) ? (int) $value['day'] : 0,
-                    'hour' => isset($value['hour']) ? (int) $value['hour'] : 0,
-                    'minute' => isset($value['minute']) ? (int) $value['minute'] : 0,
-                    'day_part' => $value['day_part'] ?? '',
-                    'date_internal' => $value['date_internal'] ?? '',
-                ],
-            );
-        } elseif (!$isValid && $option->getIsRequire() && !$this->getSkipCheckRequiredOption()) {
+            $this->setUserValue([
+                'date' => $value['date'] ?? '',
+                'year' => (int) ($value['year'] ?? 0),
+                'month' => (int) ($value['month'] ?? 0),
+                'day' => (int) ($value['day'] ?? 0),
+                'hour' => (int) ($value['hour'] ?? 0),
+                'minute' => (int) ($value['minute'] ?? 0),
+                'day_part' => $value['day_part'] ?? '',
+                'date_internal' => $value['date_internal'] ?? '',
+            ]);
+        } elseif (!$isValid && $option->getIsRequired() && !$this->getSkipCheckRequiredOption()) {
             $this->setIsValid(false);
             if (!$dateValid) {
-                Mage::throwException(Mage::helper('catalog')->__('Please specify date required option <em>%s</em>.', $option->getTitle()));
+                $message = 'Please specify date required option <em>%s</em>.';
             } elseif (!$timeValid) {
-                Mage::throwException(Mage::helper('catalog')->__('Please specify time required option <em>%s</em>.', $option->getTitle()));
+                $message = 'Please specify time required option <em>%s</em>.';
             } else {
-                Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option <em>%s</em>.', $option->getTitle()));
+                $message = 'Please specify the product required option <em>%s</em>.';
             }
+            Mage::throwException(Mage::helper('catalog')->__($message, $option->getTitle()));
         } else {
             $this->setUserValue(null);
             return $this;
@@ -116,7 +124,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
 
             if ($this->_timeExists()) {
                 // 24hr hour conversion
-                if (!$this->is24hTimeFormat()) {
+                if (!$this->is24hTimeFormat() || $this->useCalendar()) {
                     $pmDayPart = (strtolower($value['day_part']) == 'pm');
                     if ($value['hour'] == 12) {
                         $value['hour'] = $pmDayPart ? 12 : 0;
