@@ -26,7 +26,7 @@
                     </div>
         <?php if(!$this->isCustomerLoggedIn() && !$this->getHideEmailAddress()): ?>
                     <div class="field">
-                        <label for="<?= $prefix ?>:email" class="required"><em>*</em><?= $this->__('Email Address') ?></label>
+                        <label for="<?= $prefix ?>:email" class="required"><?= $this->__('Email Address') ?></label>
                         <div class="input-box">
                             <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="<?= $prefix ?>[email]" id="<?= $prefix ?>:email" value="<?= $this->escapeHtml($this->getAddress()->getEmail()) ?>" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="input-text validate-email required-entry" />
                         </div>
@@ -36,7 +36,7 @@
         <?php $_streetValidationClass = $this->helper('customer/address')->getAttributeValidationClass('street'); ?>
                 <li class="fields">
                     <div class="field">
-                        <label for="<?= $prefix ?>:street1" class="required"><em>*</em><?= $this->__('Address') ?></label>
+                        <label for="<?= $prefix ?>:street1" class="required"><?= $this->__('Address') ?></label>
                         <div class="input-box">
                             <input type="text" title="<?= $this->quoteEscape($this->__('Street Address')) ?>" name="<?= $prefix ?>[street][]" id="<?= $prefix ?>:street1" value="<?= $this->escapeHtml($this->getAddress()->getStreet(1)) ?>" class="input-text <?= $_streetValidationClass ?>" />
                         </div>
@@ -65,13 +65,13 @@
                 <?php endif ?>
                 <li class="fields">
                     <div class="field">
-                        <label for="<?= $prefix ?>:city" class="required"><em>*</em><?= $this->__('City') ?></label>
+                        <label for="<?= $prefix ?>:city" class="required"><?= $this->__('City') ?></label>
                         <div class="input-box">
                             <input type="text" title="<?= $this->quoteEscape($this->__('City')) ?>" name="<?= $prefix ?>[city]" value="<?= $this->escapeHtml($this->getAddress()->getCity()) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('city') ?>" id="<?= $prefix ?>:city" />
                         </div>
                     </div>
                     <div class="field">
-                        <label for="<?= $prefix ?>:region_id" class="required"><em>*</em><?= $this->__('State/Province') ?></label>
+                        <label for="<?= $prefix ?>:region_id" class="required"><?= $this->__('State/Province') ?></label>
                         <div class="input-box">
                             <select id="<?= $prefix ?>:region_id" name="<?= $prefix ?>[region_id]" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="validate-select" style="display:none;">
                                 <option value=""><?= $this->__('Please select region, state or province') ?></option>
@@ -85,13 +85,13 @@
                 </li>
                 <li class="fields">
                     <div class="field">
-                        <label for="<?= $prefix ?>:postcode" class="required"><em>*</em><?= $this->__('Zip/Postal Code') ?></label>
+                        <label for="<?= $prefix ?>:postcode" class="required"><?= $this->__('Zip/Postal Code') ?></label>
                         <div class="input-box">
                             <input type="text" title="<?= $this->quoteEscape($this->__('Zip/Postal Code')) ?>" name="<?= $prefix ?>[postcode]" id="<?= $prefix ?>:postcode" value="<?= $this->escapeHtml($this->getAddress()->getPostcode()) ?>" class="input-text validate-zip-international <?= $this->helper('customer/address')->getAttributeValidationClass('postcode') ?>" />
                         </div>
                     </div>
                     <div class="field">
-                        <label for="<?= $prefix ?>:country_id" class="required"><em>*</em><?= $this->__('Country') ?></label>
+                        <label for="<?= $prefix ?>:country_id" class="required"><?= $this->__('Country') ?></label>
                         <div class="input-box">
                             <?= $this->getCountryHtmlSelect($prefix) ?>
                         </div>
@@ -99,7 +99,7 @@
                 </li>
                 <li class="fields">
                     <div class="field">
-                        <label for="<?= $prefix ?>:telephone" class="required"><em>*</em><?= $this->__('Telephone') ?></label>
+                        <label for="<?= $prefix ?>:telephone" class="required"><?= $this->__('Telephone') ?></label>
                         <div class="input-box">
                             <input type="tel" name="<?= $prefix ?>[telephone]" value="<?= $this->escapeHtml($this->getAddress()->getTelephone()) ?>" title="<?= $this->quoteEscape($this->__('Telephone')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('telephone') ?>" id="<?= $prefix ?>:telephone" />
                         </div>

@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
@@ -36,7 +36,7 @@
                     <?= $this->getLayout()->createBlock('customer/widget_name')->setObject($this->getFormData())->setForceUseCustomerAttributes(true)->toHtml() ?>
                 </li>
                 <li>
-                    <label for="email_address" class="required"><em>*</em><?= $this->__('Email Address') ?></label>
+                    <label for="email_address" class="required"><?= $this->__('Email Address') ?></label>
                     <div class="input-box">
                         <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="email" id="email_address" value="<?= $this->escapeHtml($this->getFormData()->getEmail()) ?>" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="input-text validate-email required-entry" />
                     </div>
@@ -78,7 +78,7 @@
                         </div>
                     </div>
                     <div class="field">
-                        <label for="telephone" class="required"><em>*</em><?= $this->__('Telephone') ?></label>
+                        <label for="telephone" class="required"><?= $this->__('Telephone') ?></label>
                         <div class="input-box">
                             <input type="tel" name="telephone" id="telephone" value="<?= $this->escapeHtml($this->getFormData()->getTelephone()) ?>" title="<?= $this->quoteEscape($this->__('Telephone')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('telephone') ?>" />
                         </div>
@@ -86,7 +86,7 @@
                 </li>
             <?php $_streetValidationClass = $this->helper('customer/address')->getAttributeValidationClass('street'); ?>
                 <li class="wide">
-                    <label for="street_1" class="required"><em>*</em><?= $this->__('Street Address') ?></label>
+                    <label for="street_1" class="required"><?= $this->__('Street Address') ?></label>
                     <div class="input-box">
                         <input type="text" name="street[]" value="<?= $this->escapeHtml($this->getFormData()->getStreet(0)) ?>" title="<?= $this->quoteEscape($this->__('Street Address')) ?>" id="street_1" class="input-text <?= $_streetValidationClass ?>" />
                     </div>
@@ -102,13 +102,13 @@
             <?php endfor ?>
                 <li class="fields">
                     <div class="field">
-                        <label for="city" class="required"><em>*</em><?= $this->__('City') ?></label>
+                        <label for="city" class="required"><?= $this->__('City') ?></label>
                         <div class="input-box">
                             <input type="text" name="city" value="<?= $this->escapeHtml($this->getFormData()->getCity()) ?>" title="<?= $this->quoteEscape($this->__('City')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('city') ?>" id="city" />
                         </div>
                     </div>
                     <div class="field">
-                        <label for="region_id" class="required"><em>*</em><?= $this->__('State/Province') ?></label>
+                        <label for="region_id" class="required"><?= $this->__('State/Province') ?></label>
                         <div class="input-box">
                             <select id="region_id" name="region_id" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="validate-select" style="display:none;">
                                 <option value=""><?= $this->__('Please select region, state or province') ?></option>
@@ -122,13 +122,13 @@
                 </li>
                 <li class="fields">
                     <div class="field">
-                        <label for="zip" class="required"><em>*</em><?= $this->__('Zip/Postal Code') ?></label>
+                        <label for="zip" class="required"><?= $this->__('Zip/Postal Code') ?></label>
                         <div class="input-box">
                             <input type="text" name="postcode" value="<?= $this->escapeHtml($this->getFormData()->getPostcode()) ?>" title="<?= $this->quoteEscape($this->__('Zip/Postal Code')) ?>" id="zip" class="input-text validate-zip-international <?= $this->helper('customer/address')->getAttributeValidationClass('postcode') ?>" />
                         </div>
                     </div>
                     <div class="field">
-                        <label for="country" class="required"><em>*</em><?= $this->__('Country') ?></label>
+                        <label for="country" class="required"><?= $this->__('Country') ?></label>
                         <div class="input-box">
                             <?= $this->getCountryHtmlSelect() ?>
                         </div>
@@ -144,7 +144,7 @@
             <ul class="form-list">
                 <li class="fields">
                     <div class="field">
-                        <label for="password" class="required"><em>*</em><?= $this->__('Password') ?></label>
+                        <label for="password" class="required"><?= $this->__('Password') ?></label>
                         <div class="input-box">
                             <?php $minPasswordLength = $this->getMinPasswordLength(); ?>
                             <input type="password"
@@ -159,7 +159,7 @@
                         </div>
                     </div>
                     <div class="field">
-                        <label for="confirmation" class="required"><em>*</em><?= $this->__('Confirm Password') ?></label>
+                        <label for="confirmation" class="required"><?= $this->__('Confirm Password') ?></label>
                         <div class="input-box">
                             <input type="password" name="confirmation" title="<?= $this->quoteEscape($this->__('Confirm Password')) ?>" id="confirmation" class="input-text required-entry validate-cpassword" autocomplete="new-password" />
                         </div>
