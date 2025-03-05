@@ -4,7 +4,7 @@
  * @package    js
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -98,19 +98,10 @@ class RegionUpdater {
             }
             const label = document.querySelector(`label[for="${currentElement.id}"]`);
             if (label) {
-                let wildCard = label.querySelector('em') || label.querySelector('span.required');
-                if (!wildCard) {
-                    label.insertAdjacentHTML('beforeend', ' <span class="required">*</span>');
-                    wildCard = label.querySelector('span.required');
-                }
                 if (!this.config.show_all_regions) {
                     label.parentElement.style.display = regionRequired ? '' : 'none';
                 }
-
-                if (wildCard) {
-                    wildCard.style.display = regionRequired ? '' : 'none';
-                    label.classList.toggle('required', regionRequired);
-                }
+                label.classList.toggle('required', regionRequired);
             }
 
             currentElement.classList.toggle('required-entry', regionRequired);
@@ -252,32 +243,14 @@ class ZipUpdater {
         if (!this.zipElement) return false;
 
         const label = document.querySelector(`label[for="${this.zipElement.id}"]`);
-        let wildCard;
-        if (label !== null) {
-            wildCard = label.querySelector('em') || label.querySelector('span.required');
-            if (!wildCard) {
-                label.insertAdjacentHTML('beforeend', ' <span class="required">*</span>');
-                wildCard = label.querySelector('span.required');
-            }
-        }
 
         // Make Zip and its label required/optional
         if (optionalZipCountries.indexOf(this.country) != -1) {
-            if (label !== null) {
-                label.classList.remove('required');
-            }
+            label?.classList.remove('required');
             this.zipElement.classList.remove('required-entry');
-            if (wildCard !== undefined) {
-                wildCard.style.display = 'none';
-            }
         } else {
-            if (label !== null) {
-                label.classList.add('required');
-            }
+            label?.classList.add('required');
             this.zipElement.classList.add('required-entry');
-            if (wildCard !== undefined) {
-                wildCard.style.display = '';
-            }
         }
     }
 }
