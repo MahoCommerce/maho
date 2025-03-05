@@ -4,229 +4,177 @@
  * @package     Mage_Adminhtml
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-var varienTabs = new Class.create();
 
-varienTabs.prototype = {
-    initialize : function(containerId, destElementId,  activeTabId, shadowTabs){
-        this.containerId    = containerId;
-        this.destElementId  = destElementId;
+class varienTabs {
+    constructor() {
+        this.initialize(...arguments);
+    }
+
+    initialize(containerId, destElementId, activeTabId, shadowTabs) {
+        this.containerId = containerId;
+        this.container = document.getElementById(containerId);
+        if (!this.container) {
+            throw new Error(`Tabs container with ID ${containerId} not found in DOM`);
+        }
+
+        this.destElementId = destElementId;
         this.activeTab = null;
+        this.displayFirst = activeTabId;
 
-        this.tabOnClick     = this.tabMouseClick.bindAsEventListener(this);
+        this.tabs = this.container.querySelectorAll('li a.tab-item-link');
+        this.tabOnClick = this.tabMouseClick.bind(this);
 
-        this.tabs = $$('#'+this.containerId+' li a.tab-item-link');
-
-        this.hideAllTabsContent();
-        for (var tab=0; tab<this.tabs.length; tab++) {
-            Event.observe(this.tabs[tab],'click',this.tabOnClick);
-            // move tab contents to destination element
-            if($(this.destElementId)){
-                var tabContentElement = $(this.getTabContentElementId(this.tabs[tab]));
-                if(tabContentElement && tabContentElement.parentNode.id != this.destElementId){
-                    $(this.destElementId).appendChild(tabContentElement);
-                    tabContentElement.container = this;
-                    tabContentElement.statusBar = this.tabs[tab];
-                    tabContentElement.tabObject  = this.tabs[tab];
-                    this.tabs[tab].contentMoved = true;
-                    this.tabs[tab].container = this;
-                    this.tabs[tab].show = function(){
-                        this.container.showTabContent(this);
-                    };
-                    if(varienGlobalEvents){
-                        varienGlobalEvents.fireEvent('moveTab', {tab:this.tabs[tab]});
-                    }
-                }
-            }
-/*
-            // this code is pretty slow in IE, so lets do it in tabs*.phtml
-            // mark ajax tabs as not loaded
-            if (Element.hasClassName($(this.tabs[tab].id), 'ajax')) {
-                Element.addClassName($(this.tabs[tab].id), 'notloaded');
-            }
-*/
-            // bind shadow tabs
-            if (this.tabs[tab].id && shadowTabs && shadowTabs[this.tabs[tab].id]) {
-                this.tabs[tab].shadowTabs = shadowTabs[this.tabs[tab].id];
+        // bind shadow tabs
+        for (const tab of this.tabs) {
+            if (tab.id && shadowTabs?.[tab.id]) {
+                tab.shadowTabs = shadowTabs[tab.id];
             }
         }
 
-        this.displayFirst = activeTabId;
-        Event.observe(window,'load',this.moveTabContentInDest.bind(this));
-    },
-    
-    setSkipDisplayFirstTab : function(){
-        this.displayFirst = null;
-    },
+        this.hideAllTabsContent();
+        this.moveTabContentInDest();
+        this.bindEventListeners();
+    }
 
-    moveTabContentInDest : function(){
-        for(var tab=0; tab<this.tabs.length; tab++){
-            if($(this.destElementId) &&  !this.tabs[tab].contentMoved){
-                var tabContentElement = $(this.getTabContentElementId(this.tabs[tab]));
-                if(tabContentElement && tabContentElement.parentNode.id != this.destElementId){
-                    $(this.destElementId).appendChild(tabContentElement);
-                    tabContentElement.container = this;
-                    tabContentElement.statusBar = this.tabs[tab];
-                    tabContentElement.tabObject  = this.tabs[tab];
-                    this.tabs[tab].container = this;
-                    this.tabs[tab].show = function(){
-                        this.container.showTabContent(this);
-                    };
-                    if(varienGlobalEvents){
-                        varienGlobalEvents.fireEvent('moveTab', {tab:this.tabs[tab]});
-                    }
-                }
+    bindEventListeners() {
+        document.addEventListener('DOMContentLoaded', () => {
+            this.moveTabContentInDest();
+        });
+        for (const tab of this.tabs) {
+            tab.addEventListener('click', this.tabOnClick);
+        }
+    }
+
+    setSkipDisplayFirstTab() {
+        this.displayFirst = null;
+    }
+
+    moveTabContentInDest() {
+        const destElement = document.getElementById(this.destElementId);
+        if (!destElement) {
+            return;
+        }
+        for (const tab of this.tabs) {
+            const tabContentElement = this.getTabContentElement(tab);
+            if (!tabContentElement || tabContentElement.parentNode === destElement || tab.contentMoved) {
+                continue;
             }
+            destElement.appendChild(tabContentElement);
+            tabContentElement.container = this;
+            tabContentElement.statusBar = tab;
+            tabContentElement.tabObject = tab;
+            tab.contentMoved = true;
+            tab.container = this;
+            tab.show = () => this.container.showTabContent(tab);
+            varienGlobalEvents?.fireEvent('moveTab', { tab });
         }
         if (this.displayFirst) {
-            this.showTabContent($(this.displayFirst));
+            this.showTabContent(document.getElementById(this.displayFirst));
             this.displayFirst = null;
         }
-    },
+    }
 
-    getTabContentElementId : function(tab){
-        if(tab){
-            return tab.id+'_content';
-        }
-        return false;
-    },
+    getTabContentElementId(tab) {
+        return tab instanceof HTMLElement ? `${tab.id}_content` : false;
+    }
 
-    tabMouseClick : function(event) {
-        var tab = Event.findElement(event, 'a');
+    getTabContentElement(tab) {
+        return tab instanceof HTMLElement ? document.getElementById(this.getTabContentElementId(tab)) : false;
+    }
 
-        // go directly to specified url or switch tab
-        if ((tab.href.indexOf('#') != tab.href.length-1)
-            && !(Element.hasClassName(tab, 'ajax'))
-        ) {
-            location.href = tab.href;
-        }
-        else {
+    tabMouseClick(event) {
+        const tab = event.target;
+        event.preventDefault();
+
+        if (!tab.href.endsWith('#') && !tab.classList.contains('ajax')) {
+            setLocation(tab.href);
+        } else {
             this.showTabContent(tab);
         }
-        Event.stop(event);
-    },
+    }
 
-    hideAllTabsContent : function(){
-        for(var tab in this.tabs){
-            this.hideTabContent(this.tabs[tab]);
+    hideAllTabsContent() {
+        for (const tab of this.tabs) {
+            this.hideTabContent(tab);
         }
-    },
+    }
 
     // show tab, ready or not
-    showTabContentImmediately : function(tab) {
+    showTabContentImmediately(tab) {
         this.hideAllTabsContent();
-        var tabContentElement = $(this.getTabContentElementId(tab));
+
+        const tabContentElement = this.getTabContentElement(tab);
         if (tabContentElement) {
-            Element.show(tabContentElement);
-            Element.addClassName(tab, 'active');
-            // load shadow tabs, if any
-            if (tab.shadowTabs && tab.shadowTabs.length) {
-                for (var k in tab.shadowTabs) {
-                    this.loadShadowTab($(tab.shadowTabs[k]));
-                }
+            toggleVis(tabContentElement, true);
+            tab.classList.add('active');
+
+            // Load shadow tabs, if any
+            for (const shadowTab of tab.shadowTabs ?? []) {
+                this.loadShadowTab(document.getElementById(shadowTab));
             }
-            if (!Element.hasClassName(tab, 'ajax only')) {
-                Element.removeClassName(tab, 'notloaded');
+            if (!tab.classList.contains('ajax') || !tab.classList.contains('only')) {
+                tab.classList.remove('notloaded');
             }
             this.activeTab = tab;
         }
-        if (varienGlobalEvents) {
-            varienGlobalEvents.fireEvent('showTab', {tab:tab});
-        }
-    },
+        varienGlobalEvents?.fireEvent('showTab', { tab });
+    }
 
     // the lazy show tab method
-    showTabContent : function(tab) {
-        var tabContentElement = $(this.getTabContentElementId(tab));
-        if (tabContentElement) {
-            if (this.activeTab != tab) {
-                if (varienGlobalEvents) {
-                    if (varienGlobalEvents.fireEvent('tabChangeBefore', $(this.getTabContentElementId(this.activeTab))).indexOf('cannotchange') != -1) {
-                        return;
-                    };
-                }
+    async showTabContent(tab) {
+        const tabContentElement = this.getTabContentElement(tab);
+        if (!tabContentElement) {
+            return;
+        }
+        if (this.activeTab !== tab) {
+            const result = varienGlobalEvents?.fireEvent('tabChangeBefore', this.getTabContentElement(this.activeTab));
+            if (result.includes('cannotchange')) {
+                return;
             }
-            // wait for ajax request, if defined
-            var isAjax = Element.hasClassName(tab, 'ajax');
-            var isEmpty = tabContentElement.innerHTML=='' && tab.href.indexOf('#')!=tab.href.length-1;
-            var isNotLoaded = Element.hasClassName(tab, 'notloaded');
+        }
 
-            if ( isAjax && (isEmpty || isNotLoaded) )
-            {
-                new Ajax.Request(tab.href, {
-                    parameters: {form_key: FORM_KEY},
-                    evalScripts: true,
-                    onSuccess: function(transport) {
-                        try {
-                            if (transport.responseText.isJSON()) {
-                                var response = transport.responseText.evalJSON();
-                                if (response.error) {
-                                    alert(response.message);
-                                }
-                                if(response.ajaxExpired && response.ajaxRedirect) {
-                                    setLocation(response.ajaxRedirect);
-                                }
-                            } else {
-                                $(tabContentElement.id).update(transport.responseText);
-                                this.showTabContentImmediately(tab);
-                            }
-                        }
-                        catch (e) {
-                            $(tabContentElement.id).update(transport.responseText);
-                            this.showTabContentImmediately(tab);
-                        }
-                    }.bind(this)
-                });
-            }
-            else {
+        // wait for ajax request, if defined
+        const isAjax = tab.classList.contains('ajax');
+        const isEmpty = !tabContentElement.innerHTML && !tab.href.endsWith('#');
+        const isNotLoaded = tab.classList.contains('notloaded');
+
+        if (isAjax && (isEmpty || isNotLoaded)) {
+            try {
+                const html = await mahoFetch(tab.href, { method: 'POST' });
+                updateElementHtmlAndExecuteScripts(tabContentElement, html);
                 this.showTabContentImmediately(tab);
+            } catch (error) {
+                setMessagesDiv('Failed to load tab content', 'error') // TODO translate
             }
+        } else {
+            this.showTabContentImmediately(tab);
         }
-    },
+    }
 
-    loadShadowTab : function(tab) {
-        var tabContentElement = $(this.getTabContentElementId(tab));
-        if (tabContentElement && Element.hasClassName(tab, 'ajax') && Element.hasClassName(tab, 'notloaded')) {
-            new Ajax.Request(tab.href, {
-                parameters: {form_key: FORM_KEY},
-                evalScripts: true,
-                onSuccess: function(transport) {
-                    try {
-                        if (transport.responseText.isJSON()) {
-                            var response = transport.responseText.evalJSON();
-                            if (response.error) {
-                                alert(response.message);
-                            }
-                            if(response.ajaxExpired && response.ajaxRedirect) {
-                                setLocation(response.ajaxRedirect);
-                            }
-                        } else {
-                            $(tabContentElement.id).update(transport.responseText);
-                            if (!Element.hasClassName(tab, 'ajax only')) {
-                                Element.removeClassName(tab, 'notloaded');
-                            }
-                        }
-                    }
-                    catch (e) {
-                        $(tabContentElement.id).update(transport.responseText);
-                        if (!Element.hasClassName(tab, 'ajax only')) {
-                            Element.removeClassName(tab, 'notloaded');
-                        }
-                    }
-                }.bind(this)
-            });
+    async loadShadowTab(tab) {
+        const tabContentElement = this.getTabContentElement(tab);
+        if (!tabContentElement || !tab.classList.contains('ajax') || !tab.classList.contains('notloaded')) {
+            return;
         }
-    },
 
-    hideTabContent : function(tab){
-        var tabContentElement = $(this.getTabContentElementId(tab));
-        if($(this.destElementId) && tabContentElement){
-           Element.hide(tabContentElement);
-           Element.removeClassName(tab, 'active');
+        try {
+            const html = await mahoFetch(tab.href, { method: 'POST' });
+            updateElementHtmlAndExecuteScripts(tabContentElement, html);
+        } catch (error) {
+            setMessagesDiv('Failed to load tab content', 'error') // TODO translate
         }
-        if(varienGlobalEvents){
-            varienGlobalEvents.fireEvent('hideTab', {tab:tab});
+    }
+
+    hideTabContent(tab) {
+        const destElement = document.getElementById(this.destElementId);
+        const tabContentElement = this.getTabContentElement(tab);
+        if (destElement && tabContentElement) {
+            toggleVis(tabContentElement, false);
+            tab.classList.remove('active');
         }
+        varienGlobalEvents?.fireEvent('hideTab', { tab });
     }
 };
