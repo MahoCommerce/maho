@@ -1,4 +1,14 @@
 <?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @package    Mage_Tag
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
 <config>
     <sections>
         <catalog>
@@ -12,8 +22,7 @@
                     <fields>
                         <enable_adding_tags_in_frontend translate="label">
                             <label>Enable Adding Tags in Frontend</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>

@@ -136,20 +136,18 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
         $fieldset->addField('passkey_value', 'hidden', [
             'name'  => 'passkey_value',
         ]);
-        $fieldset->addField('password_enabled', 'select', [
+        $fieldset->addField('password_enabled', 'boolean', [
             'label' => Mage::helper('adminhtml')->__('Enable Password Authentication'),
             'note' => Mage::helper('adminhtml')->__('Registering a passkey automatically disables password authentication. For security reasons, we recommend keeping it disabled, though you can re-enable it if necessary.'),
             'name' => 'password_enabled',
-            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
         ]);
 
         $fieldset = $form->addFieldset('twofa_fieldset', [
             'legend' => Mage::helper('adminhtml')->__('Two-Factor Authentication'),
         ]);
-        $fieldset->addField('twofa_enabled', 'select', [
+        $fieldset->addField('twofa_enabled', 'boolean', [
             'label' => Mage::helper('adminhtml')->__('Enable 2FA'),
             'name' => 'twofa_enabled',
-            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
         ]);
 
         if (!$user->getTwofaEnabled()) {
