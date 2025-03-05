@@ -23,7 +23,7 @@
     <div class="product-details">
         <a href="#"
            title="<?= Mage::helper('core')->quoteEscape($this->__('Remove This Item')) ?>"
-           onclick="if (confirm('<?= Mage::helper('core')->jsQuoteEscape($this->__('Are you sure you would like to remove this item from the shopping cart?')) ?>')) {
+           onclick="if (confirm('<?= $this->jsQuoteEscape($this->__('Are you sure you would like to remove this item from the shopping cart?')) ?>')) {
                    customFormSubmit('<?= $this->getDeleteUrlCustom(false) ?>','<?= $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])) ?>', 'post')
                    }"
            class="btn-remove">

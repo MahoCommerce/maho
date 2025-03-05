@@ -45,7 +45,7 @@
             storeParam += obj.switchParams;
         }
     <?php if ($this->getUseConfirm()): ?>
-        if (confirm('<?= Mage::helper('core')->jsQuoteEscape($this->__('Please confirm site switching. All data that hasn\'t been saved will be lost.')) ?>')) {
+        if (confirm('<?= $this->jsQuoteEscape($this->__('Please confirm site switching. All data that hasn\'t been saved will be lost.')) ?>')) {
             setLocation('<?= $this->getSwitchUrl() ?>' + storeParam);
             return true;
         } else {

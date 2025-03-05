@@ -57,7 +57,7 @@
         <span class="please-wait" id="review-please-wait" style="display:none;">
             <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= Mage::helper('core')->quoteEscape($this->__('Submitting order information...')) ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Submitting order information...')) ?>" class="v-middle" /> <?= $this->__('Submitting order information...') ?>
         </span>
-        <p class="f-left"><?= $this->__('Forgot an Item?') ?> <a href="<?= $this->getUrl('checkout/cart') ?>" onclick="return confirm('<?= Mage::helper('core')->jsQuoteEscape($this->__('Are you sure you want to leave this page? You will need to go through the checkout steps again.')) ?>')"><?= $this->__('Edit Your Cart') ?></a></p>
+        <p class="f-left"><?= $this->__('Forgot an Item?') ?> <a href="<?= $this->getUrl('checkout/cart') ?>" onclick="return confirm('<?= $this->jsQuoteEscape($this->__('Are you sure you want to leave this page? You will need to go through the checkout steps again.')) ?>')"><?= $this->__('Edit Your Cart') ?></a></p>
     </div>
     <script type="text/javascript">
         review = new Review(

@@ -92,7 +92,7 @@
         <script type="text/javascript">
             Catalog.Map.addHelpLink(
                 '<?= $helpLinkId ?>',
-                '<?= Mage::helper('core')->jsQuoteEscape($this->__("What's this?")) ?>'
+                '<?= $this->jsQuoteEscape($this->__("What's this?")) ?>'
             );
         </script>
     </div>

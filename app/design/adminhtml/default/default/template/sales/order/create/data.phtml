@@ -21,7 +21,7 @@
 </select>
 </p>
     <script type="text/javascript">
-        order.setCurrencySymbol('<?= Mage::helper('core')->jsQuoteEscape($this->getCurrencySymbol($this->getCurrentCurrencyCode())) ?>')
+        order.setCurrencySymbol('<?= $this->jsQuoteEscape($this->getCurrencySymbol($this->getCurrentCurrencyCode())) ?>')
     </script>
 <table cellspacing="0" width="100%">
 <tr>

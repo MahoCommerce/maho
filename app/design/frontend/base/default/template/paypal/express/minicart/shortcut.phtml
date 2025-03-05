@@ -40,7 +40,7 @@
         ['<?= $shortcutHtmlId ?>', '<?= $bmlShortcutHtmlId ?>'].forEach(id => {
             document.getElementById(id).addEventListener('click', function(event) {
                 <?php if ($this->getConfirmationUrl()): ?>
-                if (confirm('<?= Mage::helper('core')->jsQuoteEscape($this->getConfirmationMessage()) ?>')) {
+                if (confirm('<?= $this->jsQuoteEscape($this->getConfirmationMessage()) ?>')) {
                     this.href = '<?= $this->getConfirmationUrl() ?>';
                 }
                 <?php endif ?>

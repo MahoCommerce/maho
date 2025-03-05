@@ -72,7 +72,7 @@
     <script type="text/javascript">
         var dataForm = new VarienForm('review-form');
         Validation.add('validate-rating',
-            '<?= Mage::helper('core')->jsQuoteEscape($this->__('Please select one of each of the ratings above')) ?>',
+            '<?= $this->jsQuoteEscape($this->__('Please select one of each of the ratings above')) ?>',
             function(v) {
                 const trs = document.getElementById('product-review-table').getElementsByTagName('tr');
                 let error = 1;

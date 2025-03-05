@@ -65,11 +65,11 @@ var tierPriceRowTemplate = '<tr>'
     <?php endforeach ?>
     + '</select></td>'
     + '<td class="nobr"><input class="<?= $_htmlClass ?> qty required-entry validate-greater-than-zero" type="text" name="<?= $_htmlName ?>[{{index}}][price_qty]" value="{{qty}}" id="tier_price_row_{{index}}_qty" />'
-    + ' <small class="nobr"><?= Mage::helper('core')->jsQuoteEscape(Mage::helper('catalog')->__('and above')) ?></small></td>'
+    + ' <small class="nobr"><?= $this->jsQuoteEscape(Mage::helper('catalog')->__('and above')) ?></small></td>'
     + '<td><input class="<?= $_htmlClass ?> required-entry <?= $_priceValueValidation ?>" type="text" name="<?= $_htmlName ?>[{{index}}][price]" value="{{price}}" id="tier_price_row_{{index}}_price" /></td>'
     + '<td class="last"><input type="hidden" name="<?= $_htmlName ?>[{{index}}][delete]" class="delete" value="" id="tier_price_row_{{index}}_delete" />'
-    + '<button title="<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('catalog')->__("Delete Tier")) ?>" type="button" class="scalable delete icon-btn delete-product-option" id="tier_price_row_{{index}}_delete_button" onclick="return tierPriceControl.deleteItem(event);">'
-    + '<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('catalog')->__("Delete")) ?></button></td>'
+    + '<button title="<?= $this->jsQuoteEscape(Mage::helper('catalog')->__("Delete Tier")) ?>" type="button" class="scalable delete icon-btn delete-product-option" id="tier_price_row_{{index}}_delete_button" onclick="return tierPriceControl.deleteItem(event);">'
+    + '<?= $this->jsQuoteEscape(Mage::helper('catalog')->__("Delete")) ?></button></td>'
     + '</tr>';
 
 var tierPriceControl = {

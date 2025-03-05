@@ -51,7 +51,7 @@
 </form>
 <script type="text/javascript">
     Validation.add('validate-emails',
-        '<?= Mage::helper('core')->jsQuoteEscape($this->__('Please enter a valid email addresses, separated by commas. For example johndoe@domain.com, johnsmith@domain.com.')) ?>',
+        '<?= $this->jsQuoteEscape($this->__('Please enter a valid email addresses, separated by commas. For example johndoe@domain.com, johnsmith@domain.com.')) ?>',
         function (v) {
             if(Validation.get('IsEmpty').test(v)) {
                 return true;

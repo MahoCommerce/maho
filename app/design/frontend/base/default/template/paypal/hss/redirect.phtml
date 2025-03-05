@@ -33,7 +33,7 @@
         window.top.document.getElementById('checkout-review-submit').style.display = 'block';
         window.top.document.getElementById('iframe-warning').style.display = 'none';
         <?php if ($this->getErrorMsg()): ?>
-        alert('<?= Mage::helper('core')->jsQuoteEscape($this->getErrorMsg()) ?>');
+        alert('<?= $this->jsQuoteEscape($this->getErrorMsg()) ?>');
         <?php endif ?>
         <?php elseif ($this->getGotoSuccessPage()) : ?>
         window.top.location="<?= $this->getUrl('checkout/onepage/success') ?>";

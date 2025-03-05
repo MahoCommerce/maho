@@ -24,11 +24,11 @@
         new Ajax.Request('<?= $this->getAjaxUrl() ?>', {
             parameters: params,
             onSuccess: function(response) {
-                result = '<?= Mage::helper('core')->jsQuoteEscape($this->__('VAT Number is Invalid')) ?>';
+                result = '<?= $this->jsQuoteEscape($this->__('VAT Number is Invalid')) ?>';
                 try {
                     response = response.responseText;
                     if (response == 1) {
-                        result = '<?= Mage::helper('core')->jsQuoteEscape($this->__('VAT Number is Valid')) ?>';
+                        result = '<?= $this->jsQuoteEscape($this->__('VAT Number is Valid')) ?>';
                         elem.removeClassName('fail').addClassName('success')
                     } else {
                         elem.removeClassName('success').addClassName('fail')

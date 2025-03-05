@@ -50,10 +50,10 @@ window.wishlistControl = {
 
     removeItem (itemId) {
         if (!itemId) {
-            alert('<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('customer')->__('No item specified.')) ?>');
+            alert('<?= $this->jsQuoteEscape(Mage::helper('customer')->__('No item specified.')) ?>');
             return false;
         }
-        if(!confirm('<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('customer')->__('Are you sure that you want to remove this item?')) ?>')) {
+        if(!confirm('<?= $this->jsQuoteEscape(Mage::helper('customer')->__('Are you sure that you want to remove this item?')) ?>')) {
             return false;
         }
 

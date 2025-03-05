@@ -18,6 +18,6 @@
 ?>
 
 <script type="text/javascript">
-    Mage.Cookies.path   = '<?= Mage::helper('core')->jsQuoteEscape($this->getPath()) ?>';
-    Mage.Cookies.domain = '<?= Mage::helper('core')->jsQuoteEscape($this->getDomain()) ?>';
+    Mage.Cookies.path   = '<?= $this->jsQuoteEscape($this->getPath()) ?>';
+    Mage.Cookies.domain = '<?= $this->jsQuoteEscape($this->getDomain()) ?>';
 </script>

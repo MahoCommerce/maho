@@ -67,7 +67,7 @@ function selectCarrier(elem) {
 }
 
 function deleteTrackingNumber(url) {
-    if (confirm('<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('sales')->__('Are you sure?')) ?>')) {
+    if (confirm('<?= $this->jsQuoteEscape(Mage::helper('sales')->__('Are you sure?')) ?>')) {
         submitAndReloadArea($('shipment_tracking_info').parentNode, url)
     }
 }
