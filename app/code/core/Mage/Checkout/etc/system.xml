@@ -29,8 +29,7 @@
                     <fields>
                         <onepage_checkout_enabled translate="label">
                             <label>Enable Onepage Checkout</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>5</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -38,8 +37,7 @@
                         </onepage_checkout_enabled>
                         <guest_checkout translate="label">
                             <label>Allow Guest Checkout</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -48,8 +46,7 @@
                         <redirect_register translate="label">
                             <label>Use Separate Register Step</label>
                             <comment><![CDATA["If enabled, customers choosing to register during checkout will be redirected to the customer/account/create page.<br />Note: If email confirmation is required, users won't be able to complete the order before confirming their email."]]></comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>15</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -57,8 +54,7 @@
                         </redirect_register>
                         <enable_agreements translate="label">
                             <label>Enable Terms and Conditions</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -84,8 +80,7 @@
                         </delete_quote_after>
                         <redirect_to_cart translate="label">
                             <label>After Adding a Product Redirect to Shopping Cart</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -140,8 +135,7 @@
                     <fields>
                         <display translate="label">
                             <label>Display Shopping Cart Sidebar</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

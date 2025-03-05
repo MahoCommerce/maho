@@ -31,8 +31,7 @@
                         </account>
                         <active translate="label">
                             <label>Enabled for Checkout</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -82,8 +81,7 @@
                         </free_shipping_subtotal>
                         <dutiable translate="label">
                             <label>Shipment Dutiable</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>130</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -122,8 +120,7 @@
                         </gateway_url>
                         <verify_peer translate="label">
                             <label>Enable SSL Verification</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -268,10 +265,9 @@
                         </specificcountry>
                         <showmethod translate="label">
                             <label>Show Method if Not Applicable</label>
-                            <frontend_type>select</frontend_type>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>1940</sort_order>
                             <frontend_class>shipping-skip-hide</frontend_class>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -289,8 +285,7 @@
 
                         <additional_protection_enabled translate="label">
                             <label>Additional Protection Enabled</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>1300</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -339,8 +334,7 @@
 
                         <hazardous_materials translate="label">
                             <label>Shipment Contains Hazardous Materials</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>1350</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -398,8 +392,7 @@
                         </intl_shipment_days>
                         <debug translate="label">
                             <label>Debug</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>1950</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -417,8 +410,7 @@
                     <fields>
                         <active translate="label">
                             <label>Enabled for Checkout</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -475,8 +467,7 @@
                         </password>
                         <sandbox_mode translate="label">
                             <label>Sandbox Mode</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>75</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -563,9 +554,8 @@
                         </handling_fee>
                         <residence_delivery translate="label">
                             <label>Residential Delivery</label>
-                            <frontend_type>select</frontend_type>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>140</sort_order>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -654,8 +644,7 @@
                         </specificcountry>
                         <debug translate="label">
                             <label>Debug</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>220</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -664,10 +653,9 @@
                         </debug>
                         <showmethod translate="label">
                             <label>Show Method if Not Applicable</label>
-                            <frontend_type>select</frontend_type>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>230</sort_order>
                             <frontend_class>shipping-skip-hide</frontend_class>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -702,8 +690,7 @@
                         </access_license_number>
                         <active translate="label">
                             <label>Enabled for Checkout</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -783,8 +770,7 @@
                         </free_method>
                         <verify_peer translate="label">
                             <label>Enable SSL Verification</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>45</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -1002,8 +988,7 @@
                         </username>
                         <negotiated_active translate="label">
                             <label>Enable Negotiated Rates</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -1043,10 +1028,9 @@
                         </specificcountry>
                         <showmethod translate="label">
                             <label>Show Method if Not Applicable</label>
-                            <frontend_type>select</frontend_type>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>920</sort_order>
                             <frontend_class>shipping-skip-hide</frontend_class>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -1074,8 +1058,7 @@
                         </mode_xml>
                         <debug translate="label">
                             <label>Debug</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>920</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -1093,8 +1076,7 @@
                     <fields>
                         <active translate="label">
                             <label>Enabled for Checkout</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -1342,8 +1324,7 @@
                         </specificcountry>
                         <debug translate="label">
                             <label>Debug</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>200</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -1352,10 +1333,9 @@
                         </debug>
                         <showmethod translate="label">
                             <label>Show Method if Not Applicable</label>
-                            <frontend_type>select</frontend_type>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>210</sort_order>
                             <frontend_class>shipping-skip-hide</frontend_class>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -1380,8 +1360,7 @@
                     <fields>
                         <active translate="label">
                             <label>Enabled for Checkout</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -1397,8 +1376,7 @@
                         </gateway_url>
                         <verify_peer translate="label">
                             <label>Enable SSL Verification</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -1484,8 +1462,7 @@
                         <divide_order_weight translate="label comment">
                             <label>Divide Order Weight</label>
                             <comment>Allows breaking total order weight into smaller pieces if it exeeds 70 kg to ensure accurate calculation of shipping charges.</comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>130</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -1665,10 +1642,9 @@
                         </specificcountry>
                         <showmethod translate="label">
                             <label>Show Method if Not Applicable</label>
-                            <frontend_type>select</frontend_type>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>1940</sort_order>
                             <frontend_class>shipping-skip-hide</frontend_class>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -1684,8 +1660,7 @@
                         </sort_order>
                         <debug translate="label">
                             <label>Debug</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>1950</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

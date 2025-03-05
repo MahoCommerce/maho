@@ -22,8 +22,7 @@
                     <fields>
                         <allow_order translate="label">
                             <label>Allow Gift Messages on Order Level</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -31,8 +30,7 @@
                         </allow_order>
                         <allow_items translate="label">
                             <label>Allow Gift Messages for Order Items</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>5</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

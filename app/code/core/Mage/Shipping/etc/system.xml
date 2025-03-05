@@ -28,8 +28,7 @@
                     <fields>
                         <checkout_multiple translate="label">
                             <label>Allow Shipping to Multiple Addresses</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -119,8 +118,7 @@
                     <fields>
                         <active translate="label">
                             <label>Enabled</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -212,9 +210,8 @@
                         </specificcountry>
                         <showmethod translate="label">
                             <label>Show Method if Not Applicable</label>
-                            <frontend_type>select</frontend_type>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>92</sort_order>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -240,8 +237,7 @@
                     <fields>
                         <active translate="label">
                             <label>Enabled</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -304,9 +300,8 @@
                         </specificcountry>
                         <showmethod translate="label">
                             <label>Show Method if Not Applicable</label>
-                            <frontend_type>select</frontend_type>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>92</sort_order>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -351,8 +346,7 @@
                         </handling_fee>
                         <active translate="label">
                             <label>Enabled</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -370,8 +364,7 @@
                         </condition_name>
                         <include_virtual_price translate="label">
                             <label>Include Virtual Products in Price Calculation</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>5</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -445,10 +438,9 @@
                         </specificcountry>
                         <showmethod translate="label">
                             <label>Show Method if Not Applicable</label>
-                            <frontend_type>select</frontend_type>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>92</sort_order>
                             <frontend_class>shipping-skip-hide</frontend_class>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>

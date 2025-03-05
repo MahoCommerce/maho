@@ -44,8 +44,7 @@
                         </session_timeout>
                         <compliance_wsi translate="label">
                             <label>WS-I Compliance</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <backend_model>adminhtml/system_config_backend_store</backend_model>
                             <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
@@ -54,8 +53,7 @@
                         </compliance_wsi>
                         <wsdl_cache_enabled translate="label">
                             <label>Enable WSDL Cache</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <backend_model>adminhtml/system_config_backend_store</backend_model>
                             <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
