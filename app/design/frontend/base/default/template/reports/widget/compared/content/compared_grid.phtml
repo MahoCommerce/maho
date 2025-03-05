@@ -8,6 +8,8 @@
  * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Reports_Block_Product_Compared $this */
 ?>
 <?php if ($_products = $this->getRecentlyComparedProducts()): ?>
 <div class="widget widget-compared">
@@ -34,7 +36,7 @@
                         <div class="actions">
                             <?php if($_product->isSaleable()): ?>
                                 <button type="button"
-                                        title="<?= Mage::helper('core')->quoteEscape($this->__('Add to Cart')) ?>"
+                                        title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>"
                                         class="button btn-cart"
                                         onclick="customFormSubmit(
                                                 '<?= $this->getAddToCartUrlCustom($_product, [], false) ?>',

@@ -88,7 +88,7 @@
                         <span class="or">-<?= $this->__('or') ?>-</span>
 
                         <?php if ($this->getContinueShoppingUrl()): ?>
-                            <button type="button" title="<?= $this->quoteEscape($this->__('Continue Shopping')) ?>" class="button2 btn-continue" onclick="setLocation('<?= Mage::helper('core')->quoteEscape($this->getContinueShoppingUrl()) ?>')"><?= $this->__('Continue Shopping') ?></button>
+                            <button type="button" title="<?= $this->quoteEscape($this->__('Continue Shopping')) ?>" class="button2 btn-continue" onclick="setLocation('<?= $this->quoteEscape($this->getContinueShoppingUrl()) ?>')"><?= $this->__('Continue Shopping') ?></button>
                         <?php endif ?>
                     </td>
                 </tr>

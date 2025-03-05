@@ -44,7 +44,7 @@
 
     tree.setRootNode({
         id: 'root',
-        text: '<?= Mage::helper('core')->jsQuoteEscape($this->getRootNodeName()) ?>',
+        text: '<?= $this->jsQuoteEscape($this->getRootNodeName()) ?>',
         expanded: true,
         children: <?= $this->getTreeJson() ?>
     });

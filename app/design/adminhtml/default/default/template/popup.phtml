@@ -5,9 +5,11 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Adminhtml_Block_Page $this */
 ?>
 <?php /*{
     "label":"Root page layout",
@@ -59,7 +61,7 @@
     <div id="loading-mask" style="display:none;">
         <div class="backdrop"></div>
         <p class="loader" id="loading_mask_loader">
-            <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= Mage::helper('core')->quoteEscape(Mage::helper('adminhtml')->__('Loading...')) ?>"/><br/><?= Mage::helper('adminhtml')->__('Please wait...') ?>
+            <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Loading...')) ?>"/><br/><?= Mage::helper('adminhtml')->__('Please wait...') ?>
         </p>
     </div>
 </div>

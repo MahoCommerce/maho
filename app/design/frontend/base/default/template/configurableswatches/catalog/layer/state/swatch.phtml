@@ -31,7 +31,7 @@ $_swatchUrl = $this->getSwatchUrl();
             </span>
         </span>
     </span>
-    <a href="<?= $_filter->getRemoveUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Remove This Item')) ?>">
+    <a href="<?= $_filter->getRemoveUrl() ?>" title="<?= $this->quoteEscape($this->__('Remove This Item')) ?>">
         <?= $this->getIconSvg('x') ?>
     </a>
 </li>

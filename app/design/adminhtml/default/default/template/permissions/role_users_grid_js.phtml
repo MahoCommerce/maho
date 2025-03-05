@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -42,7 +42,7 @@
             if(checkbox[0]){
                 var checked = isInput ? !checkbox[0].checked : checkbox[0].checked;
                 if (checked) {
-                    if ( confirm('<?= Mage::helper('core')->jsQuoteEscape($this->__('Warning!\r\nThis action will remove this user from already assigned role\r\nAre you sure?')) ?>') ) {
+                    if ( confirm('<?= $this->jsQuoteEscape($this->__('Warning!\r\nThis action will remove this user from already assigned role\r\nAre you sure?')) ?>') ) {
                         checkbox[0].checked = false;
                         checkBoxes.unset(checkbox[0].value);
                         varienElementMethods.setHasChanges(checkbox[0]);
@@ -78,7 +78,7 @@
     function massSelectUsers(allCheckbox)
     {
         if (!allCheckbox.checked && checkBoxes.size() > 0) {
-            if (!confirm('<?= Mage::helper('core')->jsQuoteEscape($this->__('Warning!\r\nThis action will remove those users from already assigned roles\r\nAre you sure?')) ?>') ) {
+            if (!confirm('<?= $this->jsQuoteEscape($this->__('Warning!\r\nThis action will remove those users from already assigned roles\r\nAre you sure?')) ?>') ) {
                 allCheckbox.checked = false;
                 return false;
             }

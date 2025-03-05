@@ -2631,7 +2631,13 @@ body {
 
 .logo img {
   width: auto;
-  max-height: 50px
+  max-height: 50px;
+}
+
+@media (max-width: 770px) {
+  .logo img {
+    max-width: 100%;
+  }
 }
 
 .logo:hover {

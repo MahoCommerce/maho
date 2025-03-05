@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -23,16 +23,16 @@
         <li>
             <div class="input-box">
                 <label for="firstname"><?= $this->__('First Name') ?> <span class="required">*</span></label><br/>
-                <input type="text" name="admin[firstname]" id="firstname" value="<?= $this->getFormData()->getFirstname() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('First Name')) ?>" class="required-entry input-text"/>
+                <input type="text" name="admin[firstname]" id="firstname" value="<?= $this->getFormData()->getFirstname() ?>" title="<?= $this->quoteEscape($this->__('First Name')) ?>" class="required-entry input-text"/>
             </div>
             <div class="input-box">
                 <label for="lastname"><?= $this->__('Last Name') ?> <span class="required">*</span></label><br/>
-                <input type="text" name="admin[lastname]" id="lastname" value="<?= $this->getFormData()->getLastname() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Last Name')) ?>" class="required-entry input-text"/>
+                <input type="text" name="admin[lastname]" id="lastname" value="<?= $this->getFormData()->getLastname() ?>" title="<?= $this->quoteEscape($this->__('Last Name')) ?>" class="required-entry input-text"/>
             </div>
         </li>
         <li>
             <label for="email_address"><?= $this->__('Email') ?> <span class="required">*</span></label><br/>
-            <input type="text" name="admin[email]" id="email_address" value="<?= $this->getFormData()->getEmail() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Email Address')) ?>" class="validate-email required-entry input-text"/>
+            <input type="text" name="admin[email]" id="email_address" value="<?= $this->getFormData()->getEmail() ?>" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="validate-email required-entry input-text"/>
         </li>
     </ul>
 </fieldset>
@@ -42,7 +42,7 @@
     <ul>
         <li>
             <label for="username"><?= $this->__('Username') ?> <span class="required">*</span></label><br/>
-            <input type="text" name="admin[username]" id="username" value="<?= $this->getFormData()->getUsername() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Username')) ?>" class="required-entry input-text"/>
+            <input type="text" name="admin[username]" id="username" value="<?= $this->getFormData()->getUsername() ?>" title="<?= $this->quoteEscape($this->__('Username')) ?>" class="required-entry input-text"/>
         </li>
         <li>
             <div class="input-box">
@@ -53,7 +53,7 @@
                 <input type="password"
                        name="admin[new_password]"
                        id="password"
-                       title="<?= Mage::helper('core')->quoteEscape($this->__('Password')) ?>"
+                       title="<?= $this->quoteEscape($this->__('Password')) ?>"
                        class="required-entry validate-admin-password input-text min-admin-pass-length-<?= $minAdminPasswordLength ?>"
                        autocomplete="new-password"/>
                 <p class="note">
@@ -67,7 +67,7 @@
                             class="required">*</span></label><br/>
                 <!-- This is a dummy hidden field to trick firefox from auto filling the password -->
                 <input type="password" class="input-text" name="dummy" id="dummy" style="display: none;"/>
-                <input type="password" name="admin[password_confirmation]" title="<?= Mage::helper('core')->quoteEscape($this->__('Password Confirmation')) ?>" id="confirmation" class="required-entry validate-cpassword input-text" autocomplete="new-password"/>
+                <input type="password" name="admin[password_confirmation]" title="<?= $this->quoteEscape($this->__('Password Confirmation')) ?>" id="confirmation" class="required-entry validate-cpassword input-text" autocomplete="new-password"/>
             </div>
         </li>
     </ul>
@@ -77,7 +77,7 @@
     <h4 class="legend"><?= $this->__('Encryption Key') ?></h4>
     <ul>
         <li>
-            <input type="text" name="encryption_key" id="encryption_key" value="<?= $this->getFormData()->getEncryptionKey() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Encryption Key')) ?>" class="input-text"/>
+            <input type="text" name="encryption_key" id="encryption_key" value="<?= $this->getFormData()->getEncryptionKey() ?>" title="<?= $this->quoteEscape($this->__('Encryption Key')) ?>" class="input-text"/>
             <p style="margin-top:4px; line-height:1.3em; color:#666;">
                 <small><?= $this->__('Maho uses this key to encrypt passwords, credit cards and more. If this field is left empty the system will create an encryption key for you and will display it on the next page.') ?></small>
             </p>

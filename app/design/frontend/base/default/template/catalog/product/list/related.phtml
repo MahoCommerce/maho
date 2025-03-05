@@ -60,13 +60,13 @@
                     elem.checked = true;
                 });
                 relatedProductsCheckFlag = true;
-                txt.innerHTML = "<?= Mage::helper('core')->jsQuoteEscape($this->__('unselect all')) ?>";
+                txt.innerHTML = "<?= $this->jsQuoteEscape($this->__('unselect all')) ?>";
             } else {
                 document.querySelectorAll('.related-checkbox').forEach(elem => {
                     elem.checked = false;
                 });
                 relatedProductsCheckFlag = false;
-                txt.innerHTML = "<?= Mage::helper('core')->jsQuoteEscape($this->__('select all')) ?>";
+                txt.innerHTML = "<?= $this->jsQuoteEscape($this->__('select all')) ?>";
             }
             addRelatedToProduct();
         }
