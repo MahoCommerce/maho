@@ -14,7 +14,7 @@
 <?php  $_order = $this->getOrder() ?>
 <p class="order-links">
     <?php  if ($_order->getTracksCollection()->count()) : ?>
-        <a href="#" onclick="popWin('<?= $this->helper('shipping')->getTrackingPopupUrlBySalesModel($_order) ?>','trackorder','width=800,height=600,top=0,left=0,resizable=yes,scrollbars=yes'); return false;" title="<?= Mage::helper('core')->quoteEscape($this->__('Track all shipment(s)')) ?>"><?= $this->__('Track all shipments') ?></a> <span class="separator">|</span>
+        <a href="#" onclick="popWin('<?= $this->helper('shipping')->getTrackingPopupUrlBySalesModel($_order) ?>','trackorder','width=800,height=600,top=0,left=0,resizable=yes,scrollbars=yes'); return false;" title="<?= $this->quoteEscape($this->__('Track all shipment(s)')) ?>"><?= $this->__('Track all shipments') ?></a> <span class="separator">|</span>
     <?php endif ?>
     <a href="<?= $this->getPrintAllShipmentsUrl($_order) ?>" onclick="this.target='_blank'" class="link-print"><?= $this->__('Print All Shipments') ?></a>
 </p>
@@ -26,7 +26,7 @@
         <tbody>
             <tr>
                 <td colspan="2">
-                    <a href="#" onclick="popWin('<?= $this->helper('shipping')->getTrackingPopupUrlBySalesModel($_shipment) ?>','trackshipment','width=800,height=600,top=0,left=0,resizable=yes,scrollbars=yes'); return false;" title="<?= Mage::helper('core')->quoteEscape($this->__('Track this shipment')) ?>"><?= $this->__('Track this shipment') ?></a>
+                    <a href="#" onclick="popWin('<?= $this->helper('shipping')->getTrackingPopupUrlBySalesModel($_shipment) ?>','trackshipment','width=800,height=600,top=0,left=0,resizable=yes,scrollbars=yes'); return false;" title="<?= $this->quoteEscape($this->__('Track this shipment')) ?>"><?= $this->__('Track this shipment') ?></a>
                 </td>
             </tr>
             <tr>

@@ -22,7 +22,7 @@
     <?php endif ?>
     <div class="product-details">
         <a href="#"
-           title="<?= Mage::helper('core')->quoteEscape($this->__('Remove This Item')) ?>"
+           title="<?= $this->quoteEscape($this->__('Remove This Item')) ?>"
            onclick="if (confirm('<?= $this->jsQuoteEscape($this->__('Are you sure you would like to remove this item from the shopping cart?')) ?>')) {
                    customFormSubmit('<?= $this->getDeleteUrlCustom(false) ?>','<?= $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])) ?>', 'post')
                    }"
@@ -31,7 +31,7 @@
         </a>
         <p class="product-name"><?php if ($this->hasProductUrl()): ?><a href="<?= $this->getProductUrl() ?>"><?php endif ?><?= $this->escapeHtml($this->getProductName()) ?><?php if ($this->hasProductUrl()): ?></a><?php endif ?></p>
         <?php if ($isVisibleProduct): ?>
-        <a href="<?= $this->getConfigureUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Edit item')) ?>" class="btn-edit"><?= $this->__('Edit item') ?></a>
+        <a href="<?= $this->getConfigureUrl() ?>" title="<?= $this->quoteEscape($this->__('Edit item')) ?>" class="btn-edit"><?= $this->__('Edit item') ?></a>
         <?php endif ?>
         <strong><?= $this->getQty() ?></strong> x
 

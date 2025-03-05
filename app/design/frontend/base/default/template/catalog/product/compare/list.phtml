@@ -61,7 +61,7 @@
                 <td>
                     <?php if($_item->isSaleable()): ?>
                         <button type="button"
-                                title="<?= Mage::helper('core')->quoteEscape($this->__('Add to Cart')) ?>"
+                                title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>"
                                 class="button btn-cart"
                                 onclick="customFormSubmitToParent(
                                         '<?= $this->helper('catalog/product_compare')->getAddToCartUrlCustom($_item, false) ?>',
@@ -131,7 +131,7 @@
                     <?php if($_item->isSaleable()): ?>
                         <p>
                             <button type="button"
-                                   title="<?= Mage::helper('core')->quoteEscape($this->__('Add to Cart')) ?>"
+                                   title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>"
                                    class="button btn-cart"
                                    onclick="customFormSubmitToParent(
                                            '<?= $this->helper('catalog/product_compare')->getAddToCartUrlCustom($_item, false) ?>',

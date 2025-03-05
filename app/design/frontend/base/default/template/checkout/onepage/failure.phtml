@@ -16,4 +16,4 @@
 </div>
 <?php if ($this->getRealOrderId()) : ?><p><?= $this->__('Order #') . $this->getRealOrderId() ?></p><?php endif ?>
 <?php if ($error = $this->getErrorMessage()) : ?><p><?= $error ?></p><?php endif ?>
-<p><?= $this->__('Click <a href="%s">here</a> to continue shopping.', Mage::helper('core')->quoteEscape($this->getContinueShoppingUrl())) ?></p>
+<p><?= $this->__('Click <a href="%s">here</a> to continue shopping.', $this->quoteEscape($this->getContinueShoppingUrl())) ?></p>

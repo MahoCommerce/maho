@@ -16,7 +16,7 @@
 ?>
 <?php if($this->isMsgVisible()): ?>
     <p class="availability-only">
-        <a href="#" id="<?= $this->getPlaceholderId() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Only %s left', ($this->getStockQty()))) ?>"><?= $this->__('Only %s left', "<strong>{$this->getStockQty()}</strong>") ?></a>
+        <a href="#" id="<?= $this->getPlaceholderId() ?>" title="<?= $this->quoteEscape($this->__('Only %s left', ($this->getStockQty()))) ?>"><?= $this->__('Only %s left', "<strong>{$this->getStockQty()}</strong>") ?></a>
     </p>
     <table id="<?= $this->getDetailsPlaceholderId() ?>" class="availability-only-details no-display">
         <col />

@@ -36,9 +36,9 @@
         <tbody>
             <?php foreach ($_items as $_item): ?>
                 <tr>
-                    <td data-rwd-label="<?= Mage::helper('downloadable')->__('Order #') ?>"><a href="<?= $this->getOrderViewUrl($_item->getPurchased()->getOrderId()) ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('downloadable')->__('View Order')) ?>"><?= $_item->getPurchased()->getOrderIncrementId() ?></a></td>
+                    <td data-rwd-label="<?= Mage::helper('downloadable')->__('Order #') ?>"><a href="<?= $this->getOrderViewUrl($_item->getPurchased()->getOrderId()) ?>" title="<?= $this->quoteEscape(Mage::helper('downloadable')->__('View Order')) ?>"><?= $_item->getPurchased()->getOrderIncrementId() ?></a></td>
                     <td data-rwd-label="<?= Mage::helper('downloadable')->__('Date') ?>"><span class="nobr"><?= $this->formatDate($_item->getPurchased()->getCreatedAt()) ?></span></td>
-                    <td data-rwd-label="<?= Mage::helper('downloadable')->__('Title') ?>"><?= $this->escapeHtml($_item->getPurchased()->getProductName()) ?> - <a href="<?= $this->getDownloadUrl($_item) ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('downloadable')->__('Start Download')) ?>" <?= $this->getIsOpenInNewWindow()?'onclick="this.target=\'_blank\'"':'' ?>><?= $this->escapeHtml($_item->getLinkTitle()) ?></a></td>
+                    <td data-rwd-label="<?= Mage::helper('downloadable')->__('Title') ?>"><?= $this->escapeHtml($_item->getPurchased()->getProductName()) ?> - <a href="<?= $this->getDownloadUrl($_item) ?>" title="<?= $this->quoteEscape(Mage::helper('downloadable')->__('Start Download')) ?>" <?= $this->getIsOpenInNewWindow()?'onclick="this.target=\'_blank\'"':'' ?>><?= $this->escapeHtml($_item->getLinkTitle()) ?></a></td>
                     <td data-rwd-label="<?= Mage::helper('downloadable')->__('Status') ?>"><em><?= Mage::helper('downloadable')->__(ucfirst($_item->getStatus())) ?></em></td>
                     <td data-rwd-label="<?= Mage::helper('downloadable')->__('Remaining Downloads') ?>"><?= $this->getRemainingDownloads($_item) ?></td>
                 </tr>

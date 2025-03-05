@@ -112,7 +112,7 @@
         <?= $this->getChildHtml('checkout_billing_items') ?>
         <div class="buttons-set">
             <p class="back-link"><a href="<?= $this->getBackUrl() ?>"><small>&laquo; </small><?= $this->__('Back to Select Addresses') ?></a></p>
-            <button data-action="checkout-continue-billing" type="submit" title="<?= Mage::helper('core')->quoteEscape($this->__('Continue to Billing Information')) ?>" class="button"><?= $this->__('Continue to Billing Information') ?></button>
+            <button data-action="checkout-continue-billing" type="submit" title="<?= $this->quoteEscape($this->__('Continue to Billing Information')) ?>" class="button"><?= $this->__('Continue to Billing Information') ?></button>
         </div>
         <?= $this->getBlockHtml('formkey') ?>
     </form>

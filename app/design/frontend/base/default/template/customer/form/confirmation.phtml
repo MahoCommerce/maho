@@ -23,7 +23,7 @@
             <li>
                 <label for="email_address" class="required"><em>*</em><?= $this->__('Email Address') ?></label>
                 <div class="input-box">
-                    <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="email" id="email_address" title="<?= Mage::helper('core')->quoteEscape($this->__('Email Address')) ?>" class="input-text required-entry validate-email" value="<?= $this->escapeHtml($this->getEmail()) ?>" />
+                    <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="email" id="email_address" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="input-text required-entry validate-email" value="<?= $this->escapeHtml($this->getEmail()) ?>" />
                 </div>
             </li>
         </ul>
@@ -31,7 +31,7 @@
     <div class="buttons-set">
         <p class="required"><?= $this->__('* Required Fields') ?></p>
         <p class="back-link"><a href="<?= $this->helper('customer')->getLoginUrl() ?>"><small>&laquo; </small><?= $this->__('Back to Login') ?></a></p>
-        <button type="submit" title="<?= Mage::helper('core')->quoteEscape($this->__('Submit')) ?>" class="button"><?= $this->__('Submit') ?></button>
+        <button type="submit" title="<?= $this->quoteEscape($this->__('Submit')) ?>" class="button"><?= $this->__('Submit') ?></button>
     </div>
 </form>
 <script type="text/javascript">

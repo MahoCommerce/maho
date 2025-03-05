@@ -14,7 +14,7 @@
 <?php if ($this->getCurrencyCount() > 1): ?>
 <div class="currency-switcher">
     <label for="select-currency"><?= $this->__('Your Currency:') ?></label>
-    <select id="select-currency" name="currency" title="<?= Mage::helper('core')->quoteEscape($this->__('Your Currency')) ?>" onchange="setLocation(this.value)">
+    <select id="select-currency" name="currency" title="<?= $this->quoteEscape($this->__('Your Currency')) ?>" onchange="setLocation(this.value)">
         <?php foreach ($this->getCurrencies() as $_code => $_name): ?>
         <option value="<?= $this->getSwitchCurrencyUrl($_code) ?>"<?php if($_code==$this->getCurrentCurrencyCode()): ?> selected="selected"<?php endif ?>>
             <?= Mage::app()->getLocale()->currency($_code)->getSymbol() ?>

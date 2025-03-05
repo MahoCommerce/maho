@@ -14,8 +14,8 @@
 <?php $_order=$this->getOrder() ?>
 <div>
 <?php $customerName = $_order->getCustomerFirstname() ? $_order->getCustomerName() : $_order->getBillingAddress()->getName(); ?>
-<?= $this->__('Customer Name: %s', Mage::helper('core')->quoteEscape($customerName)) ?><br />
-<?= $this->__('Purchased From: %s', Mage::helper('core')->quoteEscape($_order->getStore()->getGroup()->getName())) ?><br />
+<?= $this->__('Customer Name: %s', $this->quoteEscape($customerName)) ?><br />
+<?= $this->__('Purchased From: %s', $this->quoteEscape($_order->getStore()->getGroup()->getName())) ?><br />
 </div>
 <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border:1px solid #bebcb7; background:#f8f7f5;">
     <thead>

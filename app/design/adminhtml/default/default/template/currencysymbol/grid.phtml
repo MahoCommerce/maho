@@ -49,8 +49,8 @@
                                 <label for="custom_currency_symbol<?= $this->escapeHtml($code) ?>"><?= $this->escapeHtml($code) ?> (<?= $this->escapeHtml($data['displayName']) ?>)</label>
                                 </td>
                                 <td class="value">
-                                    <input id="custom_currency_symbol<?= $this->escapeHtml($code) ?>" class=" required-entry input-text" type="text" value="<?= Mage::helper('core')->quoteEscape($this->escapeHtml($data['displaySymbol'])) ?>"<?= $data['inherited'] ? ' disabled="disabled"' : '';?> name="custom_currency_symbol[<?= $this->escapeHtml($code) ?>]">
-                                    &nbsp; <input id="custom_currency_symbol_inherit<?= $this->escapeHtml($code) ?>" class="checkbox config-inherit" type="checkbox" onclick="toggleUseDefault(<?= '\'' . $this->escapeHtml($code) . '\',\'' . Mage::helper('core')->quoteEscape($data['parentSymbol'], true) . '\'' ?>)"<?= $data['inherited'] ? ' checked="checked"' : '' ?> value="1" name="inherit_custom_currency_symbol[<?= $this->escapeHtml($code) ?>]">
+                                    <input id="custom_currency_symbol<?= $this->escapeHtml($code) ?>" class=" required-entry input-text" type="text" value="<?= $this->quoteEscape($this->escapeHtml($data['displaySymbol'])) ?>"<?= $data['inherited'] ? ' disabled="disabled"' : '';?> name="custom_currency_symbol[<?= $this->escapeHtml($code) ?>]">
+                                    &nbsp; <input id="custom_currency_symbol_inherit<?= $this->escapeHtml($code) ?>" class="checkbox config-inherit" type="checkbox" onclick="toggleUseDefault(<?= '\'' . $this->escapeHtml($code) . '\',\'' . $this->quoteEscape($data['parentSymbol'], true) . '\'' ?>)"<?= $data['inherited'] ? ' checked="checked"' : '' ?> value="1" name="inherit_custom_currency_symbol[<?= $this->escapeHtml($code) ?>]">
                                     <label class="inherit" title="" for="custom_currency_symbol_inherit<?= $this->escapeHtml($code) ?>"><?= $this->getInheritText() ?></label>
                                 </td>
                             </tr>

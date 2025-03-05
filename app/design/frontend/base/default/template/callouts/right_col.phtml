@@ -14,11 +14,11 @@
 <div class="block block-banner">
     <div class="block-content">
         <?php if(strtolower(substr($this->getLinkUrl(), 0, 4)) === 'http'): ?>
-            <a href="<?= $this->getLinkUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__($this->getImgAlt())) ?>">
+            <a href="<?= $this->getLinkUrl() ?>" title="<?= $this->quoteEscape($this->__($this->getImgAlt())) ?>">
         <?php elseif($this->getLinkUrl()): ?>
-            <a href="<?= $this->getUrl($this->getLinkUrl()) ?>" title="<?= Mage::helper('core')->quoteEscape($this->__($this->getImgAlt())) ?>">
+            <a href="<?= $this->getUrl($this->getLinkUrl()) ?>" title="<?= $this->quoteEscape($this->__($this->getImgAlt())) ?>">
         <?php endif ?>
-            <img src="<?= $this->getSkinUrl($this->getImgSrc()) ?>"<?php if(!$this->getLinkUrl()): ?> title="<?= Mage::helper('core')->quoteEscape($this->__($this->getImgAlt())) ?>"<?php endif ?> alt="<?= Mage::helper('core')->quoteEscape($this->__($this->getImgAlt())) ?>" />
+            <img src="<?= $this->getSkinUrl($this->getImgSrc()) ?>"<?php if(!$this->getLinkUrl()): ?> title="<?= $this->quoteEscape($this->__($this->getImgAlt())) ?>"<?php endif ?> alt="<?= $this->quoteEscape($this->__($this->getImgAlt())) ?>" />
         <?php if($this->getLinkUrl()): ?>
         </a>
         <?php endif ?>

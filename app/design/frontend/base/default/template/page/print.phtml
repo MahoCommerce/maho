@@ -25,7 +25,7 @@
     </div>
     <?= $this->getChildHtml('content') ?>
     <div class="buttons-set">
-        <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Close Window')) ?>" class="button" onclick="window.close();"><?= $this->__('Close Window') ?></button>
+        <button type="button" title="<?= $this->quoteEscape($this->__('Close Window')) ?>" class="button" onclick="window.close();"><?= $this->__('Close Window') ?></button>
     </div>
     <?= $this->getAbsoluteFooter() ?>
 </div>

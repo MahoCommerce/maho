@@ -174,7 +174,7 @@ Event.observe(window, 'load', function(){
                                 <?php if ($_group->getId() != $_store->getGroupId()) continue; ?>
                                 <?php if (!$_websiteShow): ?>
                                     <?php $_websiteShow=true; ?>
-                                    <optgroup label="<?= Mage::helper('core')->quoteEscape($_website->getName()) ?>"></optgroup>
+                                    <optgroup label="<?= $this->quoteEscape($_website->getName()) ?>"></optgroup>
                                 <?php endif ?>
                                 <?php if (!$_groupShow): ?>
                                     <?php $_groupShow=true; ?>

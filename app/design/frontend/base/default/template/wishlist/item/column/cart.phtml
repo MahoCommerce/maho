@@ -20,7 +20,7 @@ $options = $this->getChild('customer.wishlist.item.options')
 <div class="cart-cell">
 <?php if ($product->isSaleable()): ?>
     <button type="button"
-            title="<?= Mage::helper('core')->quoteEscape($this->__('Add to Cart')) ?>"
+            title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>"
             onclick="addWItemToCartCustom(<?= $item->getId() ?>, false);"
             class="button btn-cart">
         <?= $this->__('Add to Cart') ?>

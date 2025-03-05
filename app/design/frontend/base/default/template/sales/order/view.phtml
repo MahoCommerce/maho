@@ -41,7 +41,7 @@
     <?php $_order = $this->getOrder() ?>
     <h2 class="table-caption"><?= $this->__('Items Ordered') ?>
         <?php if ($_order->getTracksCollection()->count()) : ?>
-            <span class="separator">|</span> <a href="#" onclick="popWin('<?= $this->helper('shipping')->getTrackingPopupUrlBySalesModel($_order) ?>','trackorder','top=0,left=0,width=800,height=600,resizable=yes,scrollbars=yes'); return false;" title="<?= Mage::helper('core')->quoteEscape($this->__('Track your order')) ?>"><?= $this->__('Track your order') ?></a>
+            <span class="separator">|</span> <a href="#" onclick="popWin('<?= $this->helper('shipping')->getTrackingPopupUrlBySalesModel($_order) ?>','trackorder','top=0,left=0,width=800,height=600,resizable=yes,scrollbars=yes'); return false;" title="<?= $this->quoteEscape($this->__('Track your order')) ?>"><?= $this->__('Track your order') ?></a>
         <?php endif ?>
     </h2>
 

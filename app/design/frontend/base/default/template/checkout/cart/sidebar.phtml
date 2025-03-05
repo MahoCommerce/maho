@@ -51,7 +51,7 @@
     <?php if($_cartQty && $this->isPossibleOnepageCheckout()): ?>
         <div class="actions">
             <?= $this->getChildHtml('extra_actions') ?>
-            <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Checkout')) ?>" class="button" onclick="setLocation('<?= $this->getCheckoutUrl() ?>')"><?= $this->__('Checkout') ?></button>
+            <button type="button" title="<?= $this->quoteEscape($this->__('Checkout')) ?>" class="button" onclick="setLocation('<?= $this->getCheckoutUrl() ?>')"><?= $this->__('Checkout') ?></button>
         </div>
     <?php endif ?>
     </div>

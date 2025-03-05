@@ -13,7 +13,7 @@
 ?>
 <label for="<?= $this->getFieldId('gender')?>"<?php if ($this->isRequired()) echo ' class="required"' ?>><?php if ($this->isRequired()) echo '<em>*</em>' ?><?= $this->__('Gender') ?></label>
 <div class="input-box">
-    <select id="<?= $this->getFieldId('gender')?>" name="<?= $this->getFieldName('gender') ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Gender')) ?>"<?php if ($this->isRequired()):?> class="validate-select"<?php endif ?> <?= $this->getFieldParams() ?>>
+    <select id="<?= $this->getFieldId('gender')?>" name="<?= $this->getFieldName('gender') ?>" title="<?= $this->quoteEscape($this->__('Gender')) ?>"<?php if ($this->isRequired()):?> class="validate-select"<?php endif ?> <?= $this->getFieldParams() ?>>
         <?php $options = Mage::getResourceSingleton('customer/customer')->getAttribute('gender')->getSource()->getAllOptions();?>
         <?php $value = $this->getGender();?>
         <?php foreach ($options as $option):?>

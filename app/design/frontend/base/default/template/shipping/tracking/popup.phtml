@@ -42,7 +42,7 @@
                     <?php if($track->getErrorMessage()): ?>
                     <tr>
                         <th class="label"><?= $this->__('Error:') ?></th>
-                        <td class="error"><?= $this->__('Tracking information is currently not available. Please '); if ($this->getContactUsEnabled()) : ?><a href="<?= $this->getContactUs() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('contact us')) ?>" onclick="this.target='_blank'"><?= $this->__('contact us') ?></a><?= $this->__(' for more information or '); endif; echo $this->__('email us at ') ?><a href="mailto:<?= $this->getStoreSupportEmail() ?>"><?= $this->getStoreSupportEmail() ?></a></td>
+                        <td class="error"><?= $this->__('Tracking information is currently not available. Please '); if ($this->getContactUsEnabled()) : ?><a href="<?= $this->getContactUs() ?>" title="<?= $this->quoteEscape($this->__('contact us')) ?>" onclick="this.target='_blank'"><?= $this->__('contact us') ?></a><?= $this->__(' for more information or '); endif; echo $this->__('email us at ') ?><a href="mailto:<?= $this->getStoreSupportEmail() ?>"><?= $this->getStoreSupportEmail() ?></a></td>
                     </tr>
                     <?php elseif($track->getTrackSummary()): ?>
                     <tr>
@@ -157,5 +157,5 @@
     <p><?= $this->__('There is no tracking available.') ?></p>
 <?php endif ?>
 <div class="buttons-set">
-    <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Close Window')) ?>" class="button" onclick="window.close(); window.opener.focus();"><?= $this->__('Close Window') ?></button>
+    <button type="button" title="<?= $this->quoteEscape($this->__('Close Window')) ?>" class="button" onclick="window.close(); window.opener.focus();"><?= $this->__('Close Window') ?></button>
 </div>

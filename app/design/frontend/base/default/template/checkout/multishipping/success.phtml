@@ -32,6 +32,6 @@
     <?php endif ?>
     <?= $this->getChildHtml() ?>
     <div class="buttons-set">
-        <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Continue Shopping')) ?>" class="button" onclick="setLocation('<?= $this->getContinueUrl() ?>')"><?= $this->__('Continue Shopping') ?></button>
+        <button type="button" title="<?= $this->quoteEscape($this->__('Continue Shopping')) ?>" class="button" onclick="setLocation('<?= $this->getContinueUrl() ?>')"><?= $this->__('Continue Shopping') ?></button>
     </div>
 </div>

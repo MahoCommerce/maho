@@ -11,4 +11,4 @@
 
 /** @var Mage_Core_Block_Template $this */
 ?>
-<button type="submit" title="<?= Mage::helper('core')->quoteEscape($this->__('Place Order')) ?>" class="button btn-checkout" onclick="review.save();"><?= $this->__('Place Order') ?></button>
+<button type="submit" title="<?= $this->quoteEscape($this->__('Place Order')) ?>" class="button btn-checkout" onclick="review.save();"><?= $this->__('Place Order') ?></button>

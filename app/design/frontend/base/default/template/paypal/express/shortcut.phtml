@@ -24,7 +24,7 @@
 <li class="bml-checkout-type">
     <p class="paypal-logo">
     <span class="bml_button">
-        <a id="<?= $bmlShortcutHtmlId ?>" href="<?= $this->getBmlCheckoutUrl() ?>"><img src="<?= $this->getBmlImageUrl() ?>" alt="<?= Mage::helper('core')->quoteEscape(Mage::helper('paypal')->__('Checkout with PayPal Paypal Credit')) ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('paypal')->__('Checkout with PayPal Paypal Credit')) ?>" /></a>
+        <a id="<?= $bmlShortcutHtmlId ?>" href="<?= $this->getBmlCheckoutUrl() ?>"><img src="<?= $this->getBmlImageUrl() ?>" alt="<?= $this->quoteEscape(Mage::helper('paypal')->__('Checkout with PayPal Paypal Credit')) ?>" title="<?= $this->quoteEscape(Mage::helper('paypal')->__('Checkout with PayPal Paypal Credit')) ?>" /></a>
         <a href="<?= $this->getMarketMessageUrl() ?>"><img src="<?= $this->getMarketMessage() ?>" /></a>
     </span>
     </p>
