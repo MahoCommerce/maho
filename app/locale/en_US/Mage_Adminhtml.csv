@@ -1294,7 +1294,6 @@
 "Your password has been updated.","Your password has been updated."
 "Your password reset link has expired.","Your password reset link has expired."
 "Your server PHP settings allow you to upload files not more than %s at a time. Please modify post_max_size (currently is %s) and upload_max_filesize (currently is %s) values in php.ini if you want to upload larger files.","Your server PHP settings allow you to upload files not more than %s at a time. Please modify post_max_size (currently is %s) and upload_max_filesize (currently is %s) values in php.ini if you want to upload larger files."
-"Your web server is configured incorrectly. As a result, configuration files with sensitive information are accessible from the outside. Please contact your hosting provider.","Your web server is configured incorrectly. As a result, configuration files with sensitive information are accessible from the outside. Please contact your hosting provider."
 "Zip/Postal Code","Zip/Postal Code"
 "Zip/Postal Code:","Zip/Postal Code:"
 "[ deleted ]","[ deleted ]"
