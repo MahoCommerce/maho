@@ -21,7 +21,7 @@
         <p><?= $this->__('Please enter your email below and we\'ll send you confirmation link for it.') ?></p>
         <ul class="form-list">
             <li>
-                <label for="email_address" class="required"><em>*</em><?= $this->__('Email Address') ?></label>
+                <label for="email_address" class="required"><?= $this->__('Email Address') ?></label>
                 <div class="input-box">
                     <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="email" id="email_address" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="input-text required-entry validate-email" value="<?= $this->escapeHtml($this->getEmail()) ?>" />
                 </div>

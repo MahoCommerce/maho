@@ -25,7 +25,7 @@
                 <?= $this->getLayout()->createBlock('customer/widget_name')->setObject($this->getCustomer())->toHtml() ?>
             </li>
             <li>
-                <label for="email" class="required"><em>*</em><?= $this->__('Email Address') ?></label>
+                <label for="email" class="required"><?= $this->__('Email Address') ?></label>
                 <div class="input-box">
                     <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="email" id="email" value="<?= $this->escapeHtml($this->getCustomer()->getEmail()) ?>" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="input-text required-entry validate-email" />
                 </div>
@@ -43,7 +43,7 @@
             <li><?= $_gender->setGender($this->getCustomer()->getGender())->toHtml() ?></li>
         <?php endif ?>
             <li>
-                <label for="current_password" class="required"><em>*</em><?= $this->quoteEscape($this->__('Current Password')) ?></label>
+                <label for="current_password" class="required"><?= $this->quoteEscape($this->__('Current Password')) ?></label>
                 <div class="input-box">
                     <!-- This is a dummy hidden field to trick firefox from automatically filling the password -->
                     <input type="text" class="input-text no-display" name="dummy" id="dummy" />
@@ -60,7 +60,7 @@
         <ul class="form-list">
             <li class="fields">
                 <div class="field">
-                    <label for="password" class="required"><em>*</em><?= $this->__('New Password') ?></label>
+                    <label for="password" class="required"><?= $this->__('New Password') ?></label>
                     <div class="input-box">
                         <?php $minPasswordLength = $this->getCustomer()->getMinPasswordLength(); ?>
                         <input type="password"
@@ -75,7 +75,7 @@
                     </div>
                 </div>
                 <div class="field">
-                    <label for="confirmation" class="required"><em>*</em><?= $this->__('Confirm New Password') ?></label>
+                    <label for="confirmation" class="required"><?= $this->__('Confirm New Password') ?></label>
                     <div class="input-box">
                         <input type="password" title="<?= $this->quoteEscape($this->__('Confirm New Password')) ?>" class="input-text required-entry validate-cpassword" name="confirmation" id="confirmation" autocomplete="new-password" />
                     </div>

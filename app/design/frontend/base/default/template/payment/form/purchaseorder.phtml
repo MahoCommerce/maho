@@ -13,7 +13,7 @@
 ?>
 <ul class="form-list" id="payment_form_<?= $this->getMethodCode() ?>" style="display:none;">
     <li>
-        <label for="po_number" class="required"><em>*</em><?= $this->__('Purchase Order Number') ?></label>
+        <label for="po_number" class="required"><?= $this->__('Purchase Order Number') ?></label>
         <div class="input-box">
             <input type="text" id="po_number" name="payment[po_number]" title="<?= $this->quoteEscape($this->__('Purchase Order Number')) ?>" class="input-text required-entry" value="<?= $this->escapeHtml($this->getInfoData('po_number')) ?>" />
         </div>
