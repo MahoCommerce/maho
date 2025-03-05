@@ -6,7 +6,7 @@
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
@@ -44,8 +44,7 @@
                         </session_timeout>
                         <compliance_wsi translate="label">
                             <label>WS-I Compliance</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <backend_model>adminhtml/system_config_backend_store</backend_model>
                             <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
@@ -54,8 +53,7 @@
                         </compliance_wsi>
                         <wsdl_cache_enabled translate="label">
                             <label>Enable WSDL Cache</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <backend_model>adminhtml/system_config_backend_store</backend_model>
                             <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
