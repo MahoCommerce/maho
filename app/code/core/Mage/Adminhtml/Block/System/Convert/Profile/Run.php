@@ -109,15 +109,6 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Run extends Mage_Adminhtml_Blo
         );
     }
     /**
-     * Encoding to JSON
-     * @param string $source
-     * @return string JSON
-     */
-    public function jsonEncode($source)
-    {
-        return Mage::helper('core')->jsonEncode($source);
-    }
-    /**
      * Get a profile
      * @return object
      */

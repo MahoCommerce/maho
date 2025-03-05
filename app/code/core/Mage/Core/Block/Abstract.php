@@ -1379,6 +1379,27 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     }
 
     /**
+     * Encode the mixed $valueToEncode into the JSON format
+     *
+     * @see Mage_Core_Helper_Data::jsonEncode()
+     */
+    public function jsonEncode($valueToEncode, bool $cycleCheck = false, array $options = []): string
+    {
+        return Mage::helper('core')->jsonEncode($valueToEncode, $cycleCheck, $options);
+    }
+
+    /**
+     * Decodes the given $encodedValue string which is encoded in the JSON format
+     *
+     * @see Mage_Core_Helper_Data::jsonDecode()
+     * @throws Zend_Json_Exception
+     */
+    public function jsonDecode(string $encodedValue, int $objectDecodeType = Zend_Json::TYPE_ARRAY): mixed
+    {
+        return Mage::helper('core')->jsonDecode($encodedValue, $objectDecodeType);
+    }
+
+    /**
      * Alias for getName method.
      *
      * @return string

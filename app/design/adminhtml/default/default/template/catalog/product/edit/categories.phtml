@@ -24,7 +24,7 @@
 <?php if ($rootNode = $this->getRootNode()): ?>
 <script type="module">
     // In store view mode, keep a list of categories outside of the store's root category
-    const nonRootIds = <?= Mage::helper('core')->jsonEncode(
+    const nonRootIds = <?= $this->jsonEncode(
         array_values(array_diff($this->getCategoryIds(), array_keys($rootNode->getAllChildNodes())))
     ) ?>;
 
