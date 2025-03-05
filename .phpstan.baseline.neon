@@ -4531,12 +4531,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/sales/order/shipment/create/items/renderer/configurable.phtml
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/design/adminhtml/default/default/template/sales/order/shipment/packaging/grid.phtml
-
-		-
 			message: '#^Access to an undefined property Mage_Adminhtml_Block_Sales_Order_Shipment_Tracking_Info\:\:\$trackingInfo\.$#'
 			identifier: property.notFound
 			count: 1

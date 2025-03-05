@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -68,34 +68,29 @@
     </div>
 </form>
 <?= $this->getChildHtml('shipment_packaging') ?>
-<script type="text/javascript">
-//<![CDATA[
-    document.observe("dom:loaded", function() {
-        setTimeout(function(){
-            packaging.setConfirmPackagingCallback(function(){
-                packaging.setParamsCreateLabelRequest($('edit_form').serialize(true));
-                packaging.sendCreateLabelRequest();
-            });
-            packaging.setLabelCreatedCallback(function(response){
-                setLocation("<?php echo $this->getUrl(
-                    '*/sales_order/view',
-                    ['order_id' => $this->getShipment()->getOrderId()]
-                ); ?>");
-            });
-            packaging.setCancelCallback(function() {
-                packaging.cleanPackages();
-                $('create_shipping_label').checked = false;
-                toggleCreateLabelCheckbox();
-            });
-            packaging.setItemQtyCallback(function(itemId){
-                var item = $$('[name="shipment[items]['+itemId+']"]')[0];
-                if (item && !isNaN(item.value)) {
-                    return item.value;
-                }
-            });
-        }, 500);
-    });
 
+<script>
     editForm = new varienForm('edit_form');
-//]]>
+
+    document.addEventListener('DOMContentLoaded', () => {
+        packaging.setConfirmPackagingCallback(() => {
+            const formData = new FormData(document.getElementById('edit_form'));
+            packaging.setParamsCreateLabelRequest(Object.fromEntries(formData));
+            return packaging.sendCreateLabelRequest();
+        });
+        packaging.setLabelCreatedCallback((response) => {
+            setLocation("<?= $this->getUrl('*/sales_order/view', ['order_id' => $this->getShipment()->getOrderId()]) ?>");
+        });
+        packaging.setCancelCallback(() => {
+            packaging.cleanPackages();
+            document.getElementById('create_shipping_label').checked = false;
+            toggleCreateLabelCheckbox();
+        });
+        packaging.setItemQtyCallback((itemId) => {
+            const item = document.querySelector(`[name="shipment[items][${itemId}]"]`);
+            if (item && !isNaN(item.value)) {
+                return item.value;
+            }
+        });
+    });
 </script>
