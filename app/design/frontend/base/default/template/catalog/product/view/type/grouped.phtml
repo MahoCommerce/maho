@@ -40,7 +40,7 @@
                     <?php if ($_product->isSaleable()): ?>
                     <div class="qty-wrapper">
                         <?php if ($_item->isSaleable()) : ?>
-                            <input id="super_group_<?= $_item->getId() ?>" type="text" pattern="\d*(\.\d+)?" name="super_group[<?= $_item->getId() ?>]" maxlength="12" value="<?= $_item->getQty() * 1 ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Qty')) ?>" class="input-text qty" />
+                            <input id="super_group_<?= $_item->getId() ?>" type="text" pattern="\d*(\.\d+)?" name="super_group[<?= $_item->getId() ?>]" maxlength="12" value="<?= $_item->getQty() * 1 ?>" title="<?= $this->quoteEscape($this->__('Qty')) ?>" class="input-text qty" />
                             <label for="super_group_<?= $_item->getId() ?>" class="qty-label">
                                 <?= $this->__('Quantity') ?>
                             </label>

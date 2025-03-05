@@ -61,7 +61,7 @@ $skipSaleableCheck = Mage::helper('catalog/product')->getSkipSaleableCheck();
                     <?php if ($product->isSaleable() || $skipSaleableCheck): ?>
                     <td class="a-center">
                     <?php if ($item->isSaleable() || $skipSaleableCheck): ?>
-                        <input type="number" name="super_group[<?= $item->getId() ?>]" id="super_group[<?= $item->getId() ?>]" maxlength="12" min="0" value="<?= $item->getQty()*1 ?>" title="<?= Mage::helper('core')->quoteEscape(Mage::helper('catalog')->__('Qty')) ?>" class="input-text qty" />
+                        <input type="number" name="super_group[<?= $item->getId() ?>]" id="super_group[<?= $item->getId() ?>]" maxlength="12" min="0" value="<?= $item->getQty()*1 ?>" title="<?= $this->quoteEscape(Mage::helper('catalog')->__('Qty')) ?>" class="input-text qty" />
                         <input type="hidden" value="1" price="<?= $this->getCurrencyPrice($item->getPrice()) ?>" qtyId="super_group[<?= $item->getId() ?>]" />
                     <?php else: ?>
                         <p class="availability out-of-stock"><span><?= $this->__('Out of stock') ?></span></p>

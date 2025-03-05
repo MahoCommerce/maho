@@ -4309,18 +4309,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/api/userroles.phtml
 
 		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/adminhtml/default/default/template/api2/permissions/user/edit/tab/roles/js.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 3
-			path: app/design/adminhtml/default/default/template/api2/role/users_grid_js.phtml
-
-		-
 			message: '#^Call to protected method _isSelected\(\) of class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option\.$#'
 			identifier: method.protected
 			count: 1
@@ -4479,12 +4467,6 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 17
-			path: app/design/adminhtml/default/default/template/popup.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
 			count: 3
 			path: app/design/adminhtml/default/default/template/promo/form.phtml
 
@@ -4633,9 +4615,27 @@ parameters:
 			path: app/design/adminhtml/default/default/template/system/autocomplete.phtml
 
 		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 16
+			message: '#^Access to protected property Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract\:\:\$_addAfter\.$#'
+			identifier: property.protected
+			count: 3
+			path: app/design/adminhtml/default/default/template/system/config/form/field/array.phtml
+
+		-
+			message: '#^Access to protected property Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract\:\:\$_addButtonLabel\.$#'
+			identifier: property.protected
+			count: 2
+			path: app/design/adminhtml/default/default/template/system/config/form/field/array.phtml
+
+		-
+			message: '#^Access to protected property Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract\:\:\$_columns\.$#'
+			identifier: property.protected
+			count: 4
+			path: app/design/adminhtml/default/default/template/system/config/form/field/array.phtml
+
+		-
+			message: '#^Call to protected method _renderCellTemplate\(\) of class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract\.$#'
+			identifier: method.protected
+			count: 1
 			path: app/design/adminhtml/default/default/template/system/config/form/field/array.phtml
 
 		-
@@ -4993,12 +4993,6 @@ parameters:
 			path: app/design/frontend/base/default/template/checkout/cart/sidebar/default.phtml
 
 		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 45
-			path: app/design/frontend/base/default/template/checkout/cart/sidebar/default.phtml
-
-		-
 			message: '#^Left side of && is always true\.$#'
 			identifier: booleanAnd.leftAlwaysTrue
 			count: 1
@@ -5131,12 +5125,6 @@ parameters:
 			path: app/design/frontend/base/default/template/core/messages.phtml
 
 		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 16
-			path: app/design/frontend/base/default/template/customer/address.phtml
-
-		-
 			message: '#^Variable \$customer might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -5147,54 +5135,6 @@ parameters:
 			identifier: variable.undefined
 			count: 4
 			path: app/design/frontend/base/default/template/customer/balance.phtml
-
-		-
-			message: '#^Variable \$action might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$address might not be defined\.$#'
-			identifier: variable.undefined
-			count: 2
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$countries might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$data might not be defined\.$#'
-			identifier: variable.undefined
-			count: 12
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$primaryTypes might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 51
-			path: app/design/frontend/base/default/template/customer/form/address.phtml
-
-		-
-			message: '#^Variable \$action might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/customer/form/changepassword.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 15
-			path: app/design/frontend/base/default/template/customer/form/changepassword.phtml
 
 		-
 			message: '#^Cannot call method isEnabled\(\) on Mage_Core_Block_Abstract\|false\.$#'
@@ -5248,12 +5188,6 @@ parameters:
 			message: '#^Method Mage_Checkout_Helper_Data\:\:formatPrice\(\) invoked with 3 parameters, 1 required\.$#'
 			identifier: arguments.count
 			count: 12
-			path: app/design/frontend/base/default/template/downloadable/checkout/cart/item/default.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 75
 			path: app/design/frontend/base/default/template/downloadable/checkout/cart/item/default.phtml
 
 		-
@@ -5337,14 +5271,8 @@ parameters:
 		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
-			count: 70
+			count: 82
 			path: app/design/frontend/base/default/template/paypal/express/review/address.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 2
-			path: app/design/frontend/base/default/template/paypal/hss/review/button.phtml
 
 		-
 			message: '#^Class Mage_Paypal_Block_Express_Form referenced with incorrect case\: Mage_PayPal_Block_Express_Form\.$#'
@@ -5371,18 +5299,6 @@ parameters:
 			path: app/design/frontend/base/default/template/reports/widget/compared/column/compared_names_list.phtml
 
 		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 26
-			path: app/design/frontend/base/default/template/reports/widget/compared/content/compared_grid.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 8
-			path: app/design/frontend/base/default/template/reports/widget/compared/content/compared_list.phtml
-
-		-
 			message: '#^Variable \$data might not be defined\.$#'
 			identifier: variable.undefined
 			count: 3
@@ -5405,60 +5321,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/design/frontend/base/default/template/sales/order/trackinginfo.phtml
-
-		-
-			message: '#^Call to method __\(\) on an unknown class Mage_Sale_Block_Reorder_Sidebar\.$#'
-			identifier: class.notFound
-			count: 6
-			path: app/design/frontend/base/default/template/sales/reorder/sidebar.phtml
-
-		-
-			message: '#^Call to method escapeHtml\(\) on an unknown class Mage_Sale_Block_Reorder_Sidebar\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/design/frontend/base/default/template/sales/reorder/sidebar.phtml
-
-		-
-			message: '#^Call to method getBlockHtml\(\) on an unknown class Mage_Sale_Block_Reorder_Sidebar\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/design/frontend/base/default/template/sales/reorder/sidebar.phtml
-
-		-
-			message: '#^Call to method getFormActionUrl\(\) on an unknown class Mage_Sale_Block_Reorder_Sidebar\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/design/frontend/base/default/template/sales/reorder/sidebar.phtml
-
-		-
-			message: '#^Call to method getItems\(\) on an unknown class Mage_Sale_Block_Reorder_Sidebar\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/design/frontend/base/default/template/sales/reorder/sidebar.phtml
-
-		-
-			message: '#^Call to method getPagerHtml\(\) on an unknown class Mage_Sale_Block_Reorder_Sidebar\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/design/frontend/base/default/template/sales/reorder/sidebar.phtml
-
-		-
-			message: '#^Call to method getUrl\(\) on an unknown class Mage_Sale_Block_Reorder_Sidebar\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/design/frontend/base/default/template/sales/reorder/sidebar.phtml
-
-		-
-			message: '#^Call to method isItemAvailableForReorder\(\) on an unknown class Mage_Sale_Block_Reorder_Sidebar\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/design/frontend/base/default/template/sales/reorder/sidebar.phtml
-
-		-
-			message: '#^PHPDoc tag @var for variable \$this contains unknown class Mage_Sale_Block_Reorder_Sidebar\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/design/frontend/base/default/template/sales/reorder/sidebar.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'

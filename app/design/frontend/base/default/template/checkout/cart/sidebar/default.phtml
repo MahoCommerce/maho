@@ -5,9 +5,11 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Checkout_Block_Cart_Item_Renderer $this */
 ?>
 <?php
     $_item = $this->getItem();
@@ -22,8 +24,8 @@
     <?php endif ?>
     <div class="product-details">
         <a href="#"
-           title="<?= Mage::helper('core')->quoteEscape($this->__('Remove This Item')) ?>"
-           onclick="if (confirm('<?= Mage::helper('core')->jsQuoteEscape($this->__('Are you sure you would like to remove this item from the shopping cart?')) ?>')) {
+           title="<?= $this->quoteEscape($this->__('Remove This Item')) ?>"
+           onclick="if (confirm('<?= $this->jsQuoteEscape($this->__('Are you sure you would like to remove this item from the shopping cart?')) ?>')) {
                    customFormSubmit('<?= $this->getDeleteUrlCustom(false) ?>','<?= $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])) ?>', 'post')
                    }"
            class="btn-remove">
@@ -31,7 +33,7 @@
         </a>
         <p class="product-name"><?php if ($this->hasProductUrl()): ?><a href="<?= $this->getProductUrl() ?>"><?php endif ?><?= $this->escapeHtml($this->getProductName()) ?><?php if ($this->hasProductUrl()): ?></a><?php endif ?></p>
         <?php if ($isVisibleProduct): ?>
-        <a href="<?= $this->getConfigureUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Edit item')) ?>" class="btn-edit"><?= $this->__('Edit item') ?></a>
+        <a href="<?= $this->getConfigureUrl() ?>" title="<?= $this->quoteEscape($this->__('Edit item')) ?>" class="btn-edit"><?= $this->__('Edit item') ?></a>
         <?php endif ?>
         <strong><?= $this->getQty() ?></strong> x
 

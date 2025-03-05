@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -58,7 +58,7 @@ $('product_bundle_container').select('input', 'select', 'textarea', 'button').ea
     }
 });
 <?php endif ?>
-Validation.add('validate-greater-zero-based-on-option', '<?= Mage::helper('core')->jsQuoteEscape($this->__('Please enter a number greater 0 in this field.')) ?>', function(v, el) {
+Validation.add('validate-greater-zero-based-on-option', '<?= $this->jsQuoteEscape($this->__('Please enter a number greater 0 in this field.')) ?>', function(v, el) {
     var optionType = $(el).up('div.grid').previous('table.option-header').select('select.select-product-option-type')[0],
         v = Number(v) || 0;
 

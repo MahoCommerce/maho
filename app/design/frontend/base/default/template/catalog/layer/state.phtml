@@ -37,7 +37,7 @@ $_renderers = $this->getParentBlock()->getChild('state_renderers')->getSortedChi
         <li>
             <span class="label"><?= $this->__($_filter->getName()) ?>:</span>
             <span class="value"><?= $this->stripTags($_filter->getLabel()) ?></span>
-            <a href="<?= $_filter->getRemoveUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Remove This Item')) ?>">
+            <a href="<?= $_filter->getRemoveUrl() ?>" title="<?= $this->quoteEscape($this->__('Remove This Item')) ?>">
                 <?= $this->getIconSvg('x') ?>
             </a>
         </li>

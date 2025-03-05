@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
@@ -112,7 +112,7 @@
         <?= $this->getChildHtml('checkout_billing_items') ?>
         <div class="buttons-set">
             <p class="back-link"><a href="<?= $this->getBackUrl() ?>"><small>&laquo; </small><?= $this->__('Back to Select Addresses') ?></a></p>
-            <button data-action="checkout-continue-billing" type="submit" title="<?= Mage::helper('core')->quoteEscape($this->__('Continue to Billing Information')) ?>" class="button"><?= $this->__('Continue to Billing Information') ?></button>
+            <button data-action="checkout-continue-billing" type="submit" title="<?= $this->quoteEscape($this->__('Continue to Billing Information')) ?>" class="button"><?= $this->__('Continue to Billing Information') ?></button>
         </div>
         <?= $this->getBlockHtml('formkey') ?>
     </form>

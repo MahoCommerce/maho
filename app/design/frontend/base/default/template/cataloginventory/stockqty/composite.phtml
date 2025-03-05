@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -16,7 +16,7 @@
 ?>
 <?php if($this->isMsgVisible()): ?>
     <p class="availability-only">
-        <a href="#" id="<?= $this->getPlaceholderId() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Only %s left', ($this->getStockQty()))) ?>"><?= $this->__('Only %s left', "<strong>{$this->getStockQty()}</strong>") ?></a>
+        <a href="#" id="<?= $this->getPlaceholderId() ?>" title="<?= $this->quoteEscape($this->__('Only %s left', ($this->getStockQty()))) ?>"><?= $this->__('Only %s left', "<strong>{$this->getStockQty()}</strong>") ?></a>
     </p>
     <table id="<?= $this->getDetailsPlaceholderId() ?>" class="availability-only-details no-display">
         <col />

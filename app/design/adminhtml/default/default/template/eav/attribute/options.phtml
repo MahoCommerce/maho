@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
@@ -110,7 +110,7 @@ var templateText =
             '<td style="position:relative">'+
                 '<input type="hidden" disabled class="swatch-value" name="option[swatch][{{id}}]" value="{{swatch}}" />'+
                 '<input type="color" class="swatch-option input-color-html5 validate-hex-color-hash {{swatch_class}}" value="{{swatch}}" />'+
-                '<span class="swatch-delete" data-msg-delete="<?= Mage::helper('core')->jsQuoteEscape($this->__('Are you sure to delete this fallback color?')) ?>">X</span>'+
+                '<span class="swatch-delete" data-msg-delete="<?= $this->jsQuoteEscape($this->__('Are you sure to delete this fallback color?')) ?>">X</span>'+
             '</td>'+
         <?php endif ?>
 <?php foreach ($this->getStores() as $_store): ?>
@@ -121,7 +121,7 @@ var templateText =
             '<td class="a-left" id="delete_button_container_{{id}}">'+
                 '<input type="hidden" class="delete-flag" name="option[delete][{{id}}]" value="" />'+
                 <?php if (!$this->getReadOnly()):?>
-                    '<?= Mage::helper('core')->jsQuoteEscape($this->getDeleteButtonHtml()) ?>'+
+                    '<?= $this->jsQuoteEscape($this->getDeleteButtonHtml()) ?>'+
                 <?php endif ?>
             '<\/td>'+
         '<\/tr>';
