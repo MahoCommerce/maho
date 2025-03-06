@@ -21,7 +21,7 @@ class Maho_Captcha_IndexController extends Mage_Core_Controller_Front_Action
             $options = new \AltchaOrg\Altcha\ChallengeOptions([
                 'algorithm' => \AltchaOrg\Altcha\Algorithm::SHA512,
                 'saltLength' => 32,
-                'expires' => (new DateTime())->modify('+30 seconds'),
+                'expires' => (new DateTime())->modify('+1 minute'),
                 'hmacKey' => $helper->getHmacKey(),
             ]);
             $challenge = \AltchaOrg\Altcha\Altcha::createChallenge($options);

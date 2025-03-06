@@ -38,8 +38,12 @@ class Maho_Captcha_Model_Observer
 
         /** @var Mage_Core_Controller_Front_Action $controller */
         $controller = $observer->getControllerAction();
-        $data = $controller->getRequest()->getPost();
+        if ($controller->getFullActionName() == 'checkout_onepage_saveBilling' &&
+            Mage::getSingleton('customer/session')->isLoggedIn()) {
+            return;
+        }
 
+        $data = $controller->getRequest()->getPost();
         $token = $data['maho_captcha'] ?? '';
         if ($helper->verify((string) $token)) {
             return;
