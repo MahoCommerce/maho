@@ -15,6 +15,9 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 
     protected $_moduleName = 'Maho_Captcha';
 
+    /** @var array <string, bool> */
+    protected static array $_payloadVerificationCache = [];
+
     public function isEnabled(): bool
     {
         return $this->isModuleEnabled() && $this->isModuleOutputEnabled() && Mage::getStoreConfigFlag(self::XML_PATH_ENABLED);
@@ -54,6 +57,10 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
             return false;
         }
 
+        if (isset(self::$_payloadVerificationCache[$payload])) {
+            return self::$_payloadVerificationCache[$payload];
+        }
+
         // Check that the challenge is not stored in the database, meaning it was already solved
         $coreRead = Mage::getSingleton('core/resource')->getConnection('core_read');
         $table = Mage::getSingleton('core/resource')->getTableName('captcha/challenge');
@@ -83,6 +90,7 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
             }
         }
 
+        self::$_payloadVerificationCache[$payload] = $isValid;
         return $isValid;
     }
 }
