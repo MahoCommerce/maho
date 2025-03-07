@@ -83,10 +83,12 @@
 </div>
 <div class="clear"></div>
 <script>
+<?php if ($this->canSendShipmentEmail()): ?>
     document.getElementById('send_email').addEventListener('click', (event) => {
         setElementDisable('notify_customer', !event.target.checked);
     });
-
+<?php endif ?>
+<?php if ($this->canCreateShippingLabel()): ?>
     document.getElementById('create_shipping_label').addEventListener('click', (event) => {
         toggleCreateLabelCheckbox();
     });
@@ -101,6 +103,7 @@
             submitBtn.textContent += '...';
         }
     }
+<?php endif ?>
 
     window.submitShipment = function(submitBtn) {
         for (const item of document.querySelectorAll('.qty-item')) {
@@ -110,13 +113,9 @@
                 return;
             }
         }
-
-        const checkboxEl = document.getElementById('create_shipping_label');
-        if (checkboxEl?.checked) {
+        if (document.getElementById('create_shipping_label')?.checked) {
             packaging.showWindow();
-            return;
-        }
-        if (editForm.submit()) {
+        } else if (editForm.submit()) {
             disableElements('submit-button');
         }
     }
