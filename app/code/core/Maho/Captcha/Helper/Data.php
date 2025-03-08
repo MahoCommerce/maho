@@ -8,7 +8,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use \AltchaOrg\Altcha;
+use AltchaOrg\Altcha;
 
 class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 {
@@ -70,7 +70,7 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
         ]);
     }
 
-    public function createChallenge(array $options = null): Altcha\Challenge
+    public function createChallenge(?array $options = null): Altcha\Challenge
     {
         $options = new Altcha\ChallengeOptions([
             'algorithm' => Altcha\Algorithm::SHA512,
