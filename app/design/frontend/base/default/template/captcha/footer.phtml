@@ -7,44 +7,15 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+/** @var Mage_Core_Block_Template $this */
 $helper = Mage::helper('captcha');
-if (!$helper->isEnabled()) return;
-$challengeUrl = $helper->getChallengeUrl();
-?><script>
-    function mahoCaptchaInject(element) {
-        if (document.querySelector('altcha-widget')) return;
-
-        // inject altcha
-        element.insertAdjacentHTML('beforeend', '<altcha-widget challengeurl="<?= $challengeUrl ?>" auto=onload hidelogo hidefooter name=maho_captcha refetchonexpire></altcha-widget>');
-        let script = document.createElement('script');
-        script.type = 'module';
-        script.src = '<?= Mage::getBaseUrl('js') ?>altcha.min.js';
-        document.head.appendChild(script);
-
-        // replicate maho_captcha input into all forms
-        document.querySelector('altcha-widget').addEventListener('statechange', (ev) => {
-            try {
-                let payload = ev.detail.payload;
-                document.querySelectorAll('<?= $helper->getFrontendSelectors() ?>').forEach(form => {
-                    let hiddenInput = form.querySelector('input[name="maho_captcha"]');
-                    if (!hiddenInput) {
-                        hiddenInput = document.createElement('input');
-                        hiddenInput.setAttribute('type', 'hidden');
-                        hiddenInput.setAttribute('name', 'maho_captcha');
-                        form.appendChild(hiddenInput);
-                    }
-                    hiddenInput.value = payload;
-                });
-            } catch (e) {}
-        });
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll('<?= $helper->getFrontendSelectors() ?>').forEach(form => {
-            form.addEventListener('focusin', function (event) {
-                mahoCaptchaInject(form);
-            });
-        });
-    });
+?>
+<?php if ($helper->isEnabled()): ?>
+<altcha-widget <?= $helper->getWidgetAttributes()->serialize() ?>></altcha-widget>
+<script>
+MahoRecaptcha.setup({
+    frontendSelectors: '<?= $helper->getFrontendSelectors() ?>',
+    widgetAttributes: <?= $helper->getWidgetAttributes()->toJson() ?>,
+});
 </script>
-<style>altcha-widget {display: flex;position: fixed;bottom: 0;right: 0}</style>
+<?php endif ?>

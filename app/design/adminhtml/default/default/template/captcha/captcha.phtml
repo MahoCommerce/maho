@@ -7,14 +7,16 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+/** @var Mage_Adminhtml_Block_Template $this */
 $helper = Mage::helper('captcha');
-if (!$helper->isEnabled()) return;
-$challengeUrl = $helper->getChallengeUrl();
-?><script>
-    document.addEventListener("DOMContentLoaded", function () {
-        document.getElementById('loginForm')
-            .insertAdjacentHTML('beforeend', '<altcha-widget challengeurl="<?= $challengeUrl ?>" auto=onload hidelogo hidefooter name=maho_captcha refetchonexpire></altcha-widget>');
-    });
+?>
+<?php if ($helper->isEnabled()): ?>
+<altcha-widget <?= $helper->getWidgetAttributes()->serialize() ?>></altcha-widget>
+<script src="<?= Mage::getBaseUrl('js') ?>maho-captcha.js"></script>
+<script>
+MahoRecaptcha.setup({
+    frontendSelectors: '<?= $helper->getFrontendSelectors() ?>',
+    widgetAttributes: <?= $helper->getWidgetAttributes()->toJson() ?>,
+});
 </script>
-<script src="<?= Mage::getBaseUrl('js') ?>altcha.min.js" type="module"></script>
-<style>altcha-widget {display: flex;position: fixed;bottom: 0;right: 0}</style>
+<?php endif ?>

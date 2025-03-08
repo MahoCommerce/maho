@@ -12,25 +12,21 @@ class Maho_Captcha_IndexController extends Mage_Core_Controller_Front_Action
 {
     public function challengeAction()
     {
+        $helper = Mage::helper('captcha');
         try {
-            $helper = Mage::helper('captcha');
             if (!$helper->isEnabled()) {
-                throw new Exception('Captcha is disabled');
+                Mage::throwException($helper->__('Captcha is disabled'));
             }
-
-            $options = new \AltchaOrg\Altcha\ChallengeOptions([
-                'algorithm' => \AltchaOrg\Altcha\Algorithm::SHA512,
-                'saltLength' => 32,
-                'expires' => (new DateTime())->modify('+1 minute'),
-                'hmacKey' => $helper->getHmacKey(),
-            ]);
-            $challenge = \AltchaOrg\Altcha\Altcha::createChallenge($options);
-
-            $this->getResponse()->setBodyJson($challenge);
+            $this->getResponse()->setBodyJson($helper->createChallenge());
+        } catch (Mage_Core_Exception $e) {
+            $error = $e->getMessage();
         } catch (Exception $e) {
+            $error = $helper->__('Internal Error');
+        }
+        if (isset($error)) {
             $this->getResponse()
                 ->setHttpResponseCode(400)
-                ->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
+                ->setBodyJson(['error' => true, 'message' => $error]);
         }
     }
 }
