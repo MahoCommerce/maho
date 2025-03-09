@@ -15,7 +15,7 @@ $helper = Mage::helper('captcha');
 <script src="<?= Mage::getBaseUrl('js') ?>maho-captcha.js"></script>
 <script>
 MahoCaptcha.setup({
-    frontendSelectors: '<?= $helper->getFrontendSelectors() ?>',
+    frontendSelectors: '#loginForm',
     widgetAttributes: <?= $helper->getWidgetAttributes()->toJson() ?>,
 });
 </script>

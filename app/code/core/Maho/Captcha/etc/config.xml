@@ -172,8 +172,7 @@
         <admin>
             <captcha>
                 <enabled>1</enabled>
-                <selectors>#page-login #loginForm
-.checkout-onepage-index #billing-new-address-form
+                <selectors>.checkout-onepage-index #billing-new-address-form
 .contacts-index-index #contactForm
 .customer-account-create #form-validate
 .customer-account-forgotpassword #form-validate
