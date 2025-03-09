@@ -9,7 +9,7 @@
 
 /** @var Mage_Core_Block_Template $this */
 $helper = Mage::helper('captcha');
-if (!$helper->isEnabled()) return;
+if (!$helper->isEnabled()) return '';
 ?>
 <altcha-widget <?= $helper->getWidgetAttributes()->serialize() ?>></altcha-widget>
 <script src="<?= Mage::getBaseUrl('js') ?>maho-captcha.js" defer></script>
