@@ -13,7 +13,7 @@ $helper = Mage::helper('captcha');
 <?php if ($helper->isEnabled()): ?>
 <altcha-widget <?= $helper->getWidgetAttributes()->serialize() ?>></altcha-widget>
 <script>
-MahoRecaptcha.setup({
+MahoCaptcha.setup({
     frontendSelectors: '<?= $helper->getFrontendSelectors() ?>',
     widgetAttributes: <?= $helper->getWidgetAttributes()->toJson() ?>,
 });
