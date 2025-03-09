@@ -1,9 +1,6 @@
 <?xml version="1.0"?>
 <layout version="0.1.0">
     <default>
-        <reference name="head">
-            <action method="addJs"><name>maho-captcha.js</name></action>
-        </reference>
         <reference name="before_body_end">
             <block type="core/template" template="captcha/footer.phtml"></block>
         </reference>
