@@ -20,11 +20,6 @@
                 </entities>
             </captcha_resource>
         </models>
-        <blocks>
-            <captcha>
-                <class>Maho_Captcha_Block</class>
-            </captcha>
-        </blocks>
         <helpers>
             <captcha>
                 <class>Maho_Captcha_Helper</class>
