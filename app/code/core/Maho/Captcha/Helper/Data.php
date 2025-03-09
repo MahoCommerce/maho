@@ -63,7 +63,7 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
         return new Varien_Object([
             'challengeurl' => $this->getChallengeUrl(),
             'name' => 'maho_captcha',
-            // 'auto' => 'onload',
+            'auto' => 'onload',
             'hidelogo' => '',
             'hidefooter' => '',
             'refetchonexpire' => '',
@@ -77,7 +77,6 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
             'saltLength' => 32,
             'expires' => (new DateTime())->modify('+1 minute'),
             'hmacKey' => $this->getHmacKey(),
-            // 'maxNumber' => 2500000,
             ...($options ?? []),
         ]);
         return Altcha\Altcha::createChallenge($options);

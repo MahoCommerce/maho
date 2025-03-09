@@ -16,19 +16,36 @@ const MahoCaptcha = {
         this.altchaWidget = document.querySelector('altcha-widget');
         this.frontendSelectors = config.frontendSelectors ?? '';
 
-        // Load Altcha JS
-        if (typeof customElements.get('altcha-widget') !== 'function') {
-            await Promise.all([
-                new Promise((resolve, reject) => {
-                    const script = document.createElement('script');
-                    script.src = '/js/altcha.min.js';
-                    script.type = 'module';
-                    script.onload = resolve;
-                    script.onerror = () => reject(`${script.src} Not Found`);
-                    document.head.appendChild(script);
-                }),
-            ]);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', this.initForms.bind(this));
+        } else {
+            this.initForms();
         }
+    },
+
+    initForms() {
+        for (const formEl of document.querySelectorAll(this.frontendSelectors)) {
+            formEl.addEventListener('focusin', this.loadAltchaScripts.bind(this), true);
+            formEl.addEventListener('submit', this.onFormSubmit.bind(this), true);
+        }
+    },
+
+    async loadAltchaScripts() {
+        if (typeof customElements.get('altcha-widget') === 'function') {
+            return;
+        }
+
+        // Load Altcha JS
+        await Promise.all([
+            new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = '/js/altcha.min.js';
+                script.type = 'module';
+                script.onload = resolve;
+                script.onerror = () => reject(`${script.src} Not Found`);
+                document.head.appendChild(script);
+            }),
+        ]);
 
         // Inject Altcha Widget
         if (!this.altchaWidget) {
@@ -82,19 +99,6 @@ const MahoCaptcha = {
             this.onStateChange({ detail: { state } });
             this.altchaWidget.addEventListener('statechange', this.onStateChange.bind(this));
         });
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', this.initForms.bind(this));
-        } else {
-            this.initForms();
-        }
-    },
-
-    initForms() {
-        for (const formEl of document.querySelectorAll(this.frontendSelectors)) {
-            formEl.addEventListener('focusin', this.startVerification.bind(this), true);
-            formEl.addEventListener('submit', this.onFormSubmit.bind(this), true);
-        }
     },
 
     onFormSubmit(event) {
