@@ -8,11 +8,4 @@
             <block type="core/template" template="captcha/footer.phtml"></block>
         </reference>
     </default>
-    <checkout_onepage_index>
-        <reference name="checkout.onepage.billing">
-            <reference name="form.additional.info">
-                <block type="core/template" template="captcha/default_checkout.phtml"></block>
-            </reference>
-        </reference>
-    </checkout_onepage_index>
 </layout>
