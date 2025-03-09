@@ -49,7 +49,8 @@
                 <observers>
                     <captcha>
                         <class>captcha/observer</class>
-                        <method>verifyAjax</method>
+                        <method>verify</method>
+                        <args><is_ajax>1</is_ajax></args>
                     </captcha>
                 </observers>
             </controller_action_predispatch_checkout_onepage_savebilling>

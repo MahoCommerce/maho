@@ -19,26 +19,7 @@ class Maho_Captcha_Model_Observer
 
         /** @var Mage_Core_Controller_Front_Action $controller */
         $controller = $observer->getControllerAction();
-        $data = $controller->getRequest()->getPost();
-
-        $token = $data['maho_captcha'] ?? '';
-        if ($helper->verify((string) $token)) {
-            return;
-        }
-
-        $this->failedVerification($controller);
-    }
-
-    public function verifyAjax(Varien_Event_Observer $observer): void
-    {
-        $helper = Mage::helper('captcha');
-        if (!$helper->isEnabled()) {
-            return;
-        }
-
-        /** @var Mage_Core_Controller_Front_Action $controller */
-        $controller = $observer->getControllerAction();
-        if ($controller->getFullActionName() == 'checkout_onepage_saveBilling' &&
+        if ($controller->getFullActionName() === 'checkout_onepage_saveBilling' &&
             Mage::getSingleton('customer/session')->isLoggedIn()) {
             return;
         }
@@ -49,7 +30,8 @@ class Maho_Captcha_Model_Observer
             return;
         }
 
-        $this->failedVerification($controller, true);
+        $isAjax = (bool) ($observer->getEvent()->args['is_ajax'] ?? null);
+        $this->failedVerification($controller, $isAjax);
     }
 
     public function verifyAdmin(Varien_Event_Observer $observer): void
@@ -80,7 +62,7 @@ class Maho_Captcha_Model_Observer
         $errorMessage = Mage::helper('captcha')->__('Incorrect CAPTCHA.');
 
         if ($isAjax) {
-            $result = ['error' => 1, 'message' => $errorMessage];
+            $result = ['error' => true, 'message' => $errorMessage];
             $controller->getResponse()->setBodyJson($result);
             return;
         }
