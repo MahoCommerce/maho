@@ -452,16 +452,16 @@
         },
         {
             "name": "mahocommerce/icons",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/icons.git",
-                "reference": "9caf5299f7b23dd11ee594ef183dc627668a1438"
+                "reference": "4ab52632c47fa4c81100fe0be156372c21129e5f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/icons/zipball/9caf5299f7b23dd11ee594ef183dc627668a1438",
-                "reference": "9caf5299f7b23dd11ee594ef183dc627668a1438",
+                "url": "https://api.github.com/repos/MahoCommerce/icons/zipball/4ab52632c47fa4c81100fe0be156372c21129e5f",
+                "reference": "4ab52632c47fa4c81100fe0be156372c21129e5f",
                 "shasum": ""
             },
             "type": "library",
@@ -472,9 +472,9 @@
             "description": "A huge package of optimized SVG icons",
             "support": {
                 "issues": "https://github.com/MahoCommerce/icons/issues",
-                "source": "https://github.com/MahoCommerce/icons/tree/1.0.0"
+                "source": "https://github.com/MahoCommerce/icons/tree/1.0.1"
             },
-            "time": "2025-02-13T18:55:20+00:00"
+            "time": "2025-03-05T08:13:16+00:00"
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
@@ -2659,16 +2659,16 @@
         },
         {
             "name": "friendsofphp/php-cs-fixer",
-            "version": "v3.70.2",
+            "version": "v3.71.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer.git",
-                "reference": "1ca468270efbb75ce0c7566a79cca8ea2888584d"
+                "reference": "3825ffdc69501e1c9230291b79f036a0c0d8749d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/1ca468270efbb75ce0c7566a79cca8ea2888584d",
-                "reference": "1ca468270efbb75ce0c7566a79cca8ea2888584d",
+                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/3825ffdc69501e1c9230291b79f036a0c0d8749d",
+                "reference": "3825ffdc69501e1c9230291b79f036a0c0d8749d",
                 "shasum": ""
             },
             "require": {
@@ -2750,7 +2750,7 @@
             ],
             "support": {
                 "issues": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/issues",
-                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.70.2"
+                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.71.0"
             },
             "funding": [
                 {
@@ -2758,7 +2758,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-03-03T21:07:23+00:00"
+            "time": "2025-03-07T23:06:56+00:00"
         },
         {
             "name": "mahocommerce/maho-phpstan-plugin",
@@ -2796,16 +2796,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.6",
+            "version": "2.1.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "6eaec7c6c9e90dcfe46ad1e1ffa5171e2dab641c"
+                "reference": "f9adff3b87c03b12cc7e46a30a524648e497758f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/6eaec7c6c9e90dcfe46ad1e1ffa5171e2dab641c",
-                "reference": "6eaec7c6c9e90dcfe46ad1e1ffa5171e2dab641c",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/f9adff3b87c03b12cc7e46a30a524648e497758f",
+                "reference": "f9adff3b87c03b12cc7e46a30a524648e497758f",
                 "shasum": ""
             },
             "require": {
@@ -2850,7 +2850,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-02-19T15:46:42+00:00"
+            "time": "2025-03-09T09:30:48+00:00"
         },
         {
             "name": "react/cache",
