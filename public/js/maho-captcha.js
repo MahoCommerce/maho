@@ -31,10 +31,6 @@ const MahoCaptcha = {
     },
 
     async loadAltchaScripts() {
-        if (typeof customElements.get('altcha-widget') === 'function') {
-            return;
-        }
-
         // Load Altcha JS
         await Promise.all([
             new Promise((resolve, reject) => {
