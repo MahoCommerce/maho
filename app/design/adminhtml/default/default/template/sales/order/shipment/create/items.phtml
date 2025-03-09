@@ -62,12 +62,12 @@
           <?php if ($this->canCreateShippingLabel()): ?>
           <p>
               <label class="normal" for="create_shipping_label"><?= Mage::helper('sales')->__('Create Shipping Label') ?></label>
-              <input id="create_shipping_label" name="shipment[create_shipping_label]" value="1" type="checkbox"  onclick="toggleCreateLabelCheckbox();" />
+              <input id="create_shipping_label" name="shipment[create_shipping_label]" value="1" type="checkbox" />
           </p>
           <?php endif ?>
           <p>
               <label class="normal" for="notify_customer"><?= Mage::helper('sales')->__('Append Comments') ?></label>
-              <input id="notify_customer" name="shipment[comment_customer_notify]" value="1" type="checkbox" />
+              <input id="notify_customer" name="shipment[comment_customer_notify]" value="1" type="checkbox" disabled />
           </p>
           <?php if ($this->canSendShipmentEmail()): ?>
           <p>
@@ -82,60 +82,41 @@
     </div>
 </div>
 <div class="clear"></div>
-<script type="text/javascript">
-//<![CDATA[
-var sendEmailCheckbox = $('send_email');
-if (sendEmailCheckbox) {
-    var notifyCustomerCheckbox = $('notify_customer');
-    var shipmentCommentText = $('shipment_comment_text');
-    Event.observe(sendEmailCheckbox, 'change', bindSendEmail);
-    bindSendEmail();
-}
-function bindSendEmail() {
-    if (sendEmailCheckbox.checked == true) {
-        notifyCustomerCheckbox.disabled = false;
-        //shipmentCommentText.disabled = false;
-    }
-    else {
-        notifyCustomerCheckbox.disabled = true;
-        //shipmentCommentText.disabled = true;
-    }
-}
-function toggleCreateLabelCheckbox() {
-    var checkbox = $('create_shipping_label');
-    var submitButton = checkbox.up('.order-totals').select('.submit-button span')[0];
-    if (checkbox.checked) {
-        submitButton.innerText += '...';
-    } else {
-        submitButton.innerText = submitButton.innerText.replace(/\.\.\.$/, '');
-    }
-}
-function submitShipment(btn) {
-    var checkbox = $(btn).up('.order-totals').select('#create_shipping_label')[0];
-
-    if (!validQtyItems()) {
-        return;
-    }
-
-    if (checkbox && checkbox.checked) {
-        packaging.showWindow();
-    } else if(editForm.submit()) {
-        disableElements('submit-button');
-    }
-}
-
-function validQtyItems() {
-    var valid = true;
-    var errorMessage = '<?= $this->jsQuoteEscape($this->helper('sales')->__('Invalid value(s) for Qty to Ship')) ?>';
-    $$('.qty-item').each(function(item) {
-        var val = parseFloat(item.value);
-        if (isNaN(val) || val < 0) {
-            valid = false;
-            alert(errorMessage);
-            throw $break;
-        }
+<script>
+<?php if ($this->canSendShipmentEmail()): ?>
+    document.getElementById('send_email').addEventListener('click', (event) => {
+        setElementDisable('notify_customer', !event.target.checked);
     });
-    return valid;
-}
-//]]>
+<?php endif ?>
+<?php if ($this->canCreateShippingLabel()): ?>
+    document.getElementById('create_shipping_label').addEventListener('click', (event) => {
+        toggleCreateLabelCheckbox();
+    });
+
+    window.toggleCreateLabelCheckbox = function() {
+        const checkboxEl = document.getElementById('create_shipping_label');
+        const submitBtn = checkboxEl.closest('.order-totals').querySelector('.submit-button');
+        if (submitBtn.textContent.endsWith('...')) {
+            submitBtn.textContent = submitBtn.textContent.slice(0, -3);
+        }
+        if (checkboxEl.checked) {
+            submitBtn.textContent += '...';
+        }
+    }
+<?php endif ?>
+
+    window.submitShipment = function(submitBtn) {
+        for (const item of document.querySelectorAll('.qty-item')) {
+            const value = parseFloat(item.value);
+            if (isNaN(value) || value < 0) {
+                alert('<?= $this->jsQuoteEscape($this->helper('sales')->__('Invalid value(s) for Qty to Ship')) ?>');
+                return;
+            }
+        }
+        if (document.getElementById('create_shipping_label')?.checked) {
+            packaging.showWindow();
+        } else if (editForm.submit()) {
+            disableElements('submit-button');
+        }
+    }
 </script>
