@@ -47,18 +47,6 @@ const MahoCaptcha = {
             }),
         ]);
 
-        // Inject Altcha Widget
-        if (!this.altchaWidget) {
-            if (typeof config.widgetAttributes !== 'object' || config.widgetAttributes === null) {
-                throw new Error('widgetAttributes must be specified');
-            }
-            this.altchaWidget = document.createElement('altcha-widget');
-            for (const [ attr, val ] of Object.entries(config.widgetAttributes)) {
-                this.altchaWidget.setAttribute(attr, val);
-            }
-            document.body.appendChild(this.altchaWidget);
-        }
-
         // Inject Stylesheet
         if (!document.querySelector('style[maho-captcha-style]')) {
             const styleEl = document.createElement('style');
