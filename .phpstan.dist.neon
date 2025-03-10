@@ -1,0 +1,34 @@
+includes:
+    - .phpstan.dist.baseline.neon
+    - vendor/mahocommerce/maho-phpstan-plugin/extension.neon
+    - vendor/phpstan/phpstan/conf/bleedingEdge.neon
+    - vendor/phpstan/phpstan-deprecation-rules/rules.neon
+
+parameters:
+    level: 6
+    tmpDir: .phpstan.cache
+    reportUnmatchedIgnoredErrors: true
+    checkFunctionNameCase: true
+    checkInternalClassCaseSensitivity: true
+    checkMissingOverrideMethodAttribute: true
+    treatPhpDocTypesAsCertain: false
+
+    phpVersion:
+        min: 80200
+        max: 80499
+
+    fileExtensions:
+        - php
+        - phtml
+
+    paths:
+        - app
+        - lib
+        - maho
+        - public
+
+    typeAliases:
+        Cm_RedisSession_Model_Session: 'Mage_Core_Model_Resource_Session'
+
+    ignoreErrors:
+        - identifier: missingType.iterableValue
