@@ -23,11 +23,17 @@ const MahoCaptcha = {
         } else {
             this.initForms();
         }
+
+        this.altchaWidget.addEventListener('load', () => {
+            const state = this.altchaWidget.getState();
+            this.onStateChange({detail: {state}});
+            this.altchaWidget.addEventListener('statechange', this.onStateChange.bind(this));
+        });
     },
 
     initForms() {
         for (const formEl of document.querySelectorAll(this.frontendSelectors)) {
-            formEl.addEventListener('focusin', this.loadAltchaScripts.bind(this), true);
+            formEl.addEventListener('focusin', this.loadAltchaScripts.bind(this), { capture: true, once: true });
             formEl.addEventListener('submit', this.onFormSubmit.bind(this), true);
         }
     },
@@ -61,12 +67,6 @@ const MahoCaptcha = {
             &::backdrop {background: rgba(0, 0, 0, 0.5)}
         }`;
         document.head.appendChild(styleEl);
-
-        this.altchaWidget.addEventListener('load', () => {
-            const state = this.altchaWidget.getState();
-            this.onStateChange({detail: {state}});
-            this.altchaWidget.addEventListener('statechange', this.onStateChange.bind(this));
-        });
     },
 
     onFormSubmit(event) {
