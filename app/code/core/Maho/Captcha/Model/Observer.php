@@ -30,7 +30,7 @@ class Maho_Captcha_Model_Observer
             return;
         }
 
-        $isAjax = (bool) ($observer->getEvent()->args['is_ajax'] ?? null);
+        $isAjax = (bool) $observer->getEvent()->getIsAjax();
         $this->failedVerification($controller, $isAjax);
     }
 
