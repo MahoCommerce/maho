@@ -1,0 +1,146 @@
+/**
+ * Maho
+ *
+ * @package     Maho_Captcha
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+const MahoCaptcha = {
+    loading: null,
+    altchaWidget: null,
+    altchaState: null,
+    frontendSelectors: '',
+    onVerifiedCallback: null,
+
+    async setup(config) {
+        this.altchaWidget = document.querySelector('altcha-widget');
+        this.frontendSelectors = config.frontendSelectors ?? '';
+        this.loading = config.loading ?? '';
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', this.initForms.bind(this));
+        } else {
+            this.initForms();
+        }
+    },
+
+    initForms() {
+        for (const formEl of document.querySelectorAll(this.frontendSelectors)) {
+            formEl.addEventListener('focusin', this.loadAltchaScripts.bind(this), true);
+            formEl.addEventListener('submit', this.onFormSubmit.bind(this), true);
+        }
+    },
+
+    async loadAltchaScripts() {
+        // Load Altcha JS
+        await Promise.all([
+            new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = '/js/altcha.min.js';
+                script.type = 'module';
+                script.onload = resolve;
+                script.onerror = () => reject(`${script.src} Not Found`);
+                document.head.appendChild(script);
+            }),
+        ]);
+
+        // Inject Stylesheet
+        const styleEl = document.createElement('style');
+        styleEl.textContent = `
+            altcha-widget {display: flex;position: fixed;bottom: 0;right: 0}
+            dialog.maho-captcha-verifying {
+                margin: auto;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                padding: 1rem;
+                border: none;
+                border-radius: 0.5rem;
+                body:has(&) {overflow: hidden}
+                &::backdrop {background: rgba(0, 0, 0, 0.5)}
+            }`;
+        document.head.appendChild(styleEl);
+
+        this.altchaWidget.addEventListener('load', () => {
+            const state = this.altchaWidget.getState();
+            this.onStateChange({detail: {state}});
+            this.altchaWidget.addEventListener('statechange', this.onStateChange.bind(this));
+        });
+    },
+
+    onFormSubmit(event) {
+        const formEl = event.target;
+        if (this.altchaState !== 'verified') {
+            event.preventDefault();
+            event.stopPropagation();
+
+            this.showLoader();
+            this.onVerifiedCallback = () => {
+                this.hideLoader();
+                formEl.requestSubmit(event.submitter)
+            }
+            this.startVerification();
+        }
+    },
+
+    startVerification() {
+        if (this.altchaState === 'unverified' || this.altchaState === 'error') {
+            this.altchaWidget.verify();
+        }
+    },
+
+    onStateChange(event) {
+        const { state, payload } = event.detail;
+        this.altchaState = state;
+
+        // Fix for error `An invalid form control with name='' is not focusable.`
+        document.getElementById('maho_captcha_checkbox').disabled = state === 'verifying';
+
+        // Replicate maho_captcha input into all forms
+        if (state === 'verified' && typeof payload === 'string') {
+            for (const formEl of document.querySelectorAll(this.frontendSelectors)) {
+                this.setHiddenInputValue(formEl, payload);
+            }
+        }
+
+        // Call stored form submit event on the next event loop
+        if (state === 'verified' && typeof this.onVerifiedCallback === 'function') {
+            setTimeout(this.onVerifiedCallback.bind(this), 0);
+        }
+        this.onVerifiedCallback = null;
+    },
+
+    setHiddenInputValue(formEl, payload) {
+        let hiddenInput = formEl.querySelector('input[name="maho_captcha"]');
+        if (!hiddenInput) {
+            hiddenInput = document.createElement('input');
+            hiddenInput.setAttribute('type', 'hidden');
+            hiddenInput.setAttribute('name', 'maho_captcha');
+            formEl.appendChild(hiddenInput);
+        }
+        hiddenInput.value = payload;
+    },
+
+    showLoader() {
+        if (this.loaderEl) {
+            return;
+        }
+        this.loaderEl = document.createElement('dialog');
+        this.loaderEl.className = 'maho-captcha-verifying';
+        this.loaderEl.innerHTML = (this.loading ? '<img src="' + this.loading + '">' : '') + ' Verifying...';
+        this.loaderEl.addEventListener('close', () => {
+            this.onVerifiedCallback = null;
+            this.hideLoader();
+        });
+        document.body.appendChild(this.loaderEl);
+        this.loaderEl.showModal();
+    },
+
+    hideLoader() {
+        if (this.loaderEl) {
+            this.loaderEl.remove();
+            this.loaderEl = null;
+        }
+    },
+}
