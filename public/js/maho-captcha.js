@@ -7,6 +7,7 @@
  */
 
 const MahoCaptcha = {
+    loading: null,
     altchaWidget: null,
     altchaState: null,
     frontendSelectors: '',
@@ -15,6 +16,7 @@ const MahoCaptcha = {
     async setup(config) {
         this.altchaWidget = document.querySelector('altcha-widget');
         this.frontendSelectors = config.frontendSelectors ?? '';
+        this.loading = config.loading ?? '';
 
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', this.initForms.bind(this));
@@ -44,43 +46,25 @@ const MahoCaptcha = {
         ]);
 
         // Inject Stylesheet
-        if (!document.querySelector('style[maho-captcha-style]')) {
-            const styleEl = document.createElement('style');
-            styleEl.dataset.mahoCaptchaStyle = '';
-            styleEl.textContent = `
-                altcha-widget[name=maho_captcha] {
-                    display: flex;
-                    position: fixed;
-                    bottom: 0;
-                    right: 0;
-                }
-                dialog.maho-captcha-verifying {
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 8px;
-                    padding: 8px;
-                    border: none;
-                    border-radius: 6px;
-                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-                    body:has(&) {
-                        overflow: hidden;
-                    }
-                    &::backdrop {
-                        background: rgba(0, 0, 0, 0.7);
-                    }
-                }
-            `;
-            document.head.appendChild(styleEl);
-        }
+        const styleEl = document.createElement('style');
+        styleEl.textContent = `
+            altcha-widget {display: flex;position: fixed;bottom: 0;right: 0}
+            dialog.maho-captcha-verifying {
+                margin: auto;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                padding: 1rem;
+                border: none;
+                border-radius: 0.5rem;
+                body:has(&) {overflow: hidden}
+                &::backdrop {background: rgba(0, 0, 0, 0.5)}
+            }`;
+        document.head.appendChild(styleEl);
 
         this.altchaWidget.addEventListener('load', () => {
             const state = this.altchaWidget.getState();
-            this.onStateChange({ detail: { state } });
+            this.onStateChange({detail: {state}});
             this.altchaWidget.addEventListener('statechange', this.onStateChange.bind(this));
         });
     },
@@ -144,7 +128,7 @@ const MahoCaptcha = {
         }
         this.loaderEl = document.createElement('dialog');
         this.loaderEl.className = 'maho-captcha-verifying';
-        this.loaderEl.textContent = 'Verifying...';
+        this.loaderEl.innerHTML = (this.loading ? '<img src="' + this.loading + '">' : '') + ' Verifying...';
         this.loaderEl.addEventListener('close', () => {
             this.onVerifiedCallback = null;
             this.hideLoader();
