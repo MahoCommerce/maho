@@ -35,6 +35,9 @@ const MahoCaptcha = {
         for (const formEl of document.querySelectorAll(this.frontendSelectors)) {
             formEl.addEventListener('focusin', this.loadAltchaScripts.bind(this), { capture: true, once: true });
             formEl.addEventListener('submit', this.onFormSubmit.bind(this), true);
+            for (const buttonEl of formEl.querySelectorAll('button[type=submit]')) {
+                buttonEl.addEventListener('click', this.onFormButtonClick.bind(this), true);
+            }
         }
     },
 
@@ -79,6 +82,21 @@ const MahoCaptcha = {
             this.onVerifiedCallback = () => {
                 this.hideLoader();
                 formEl.requestSubmit(event.submitter)
+            }
+            this.startVerification();
+        }
+    },
+
+    onFormButtonClick(event) {
+        const buttonEl = event.target;
+        if (this.altchaState !== 'verified') {
+            event.preventDefault();
+            event.stopPropagation();
+
+            this.showLoader();
+            this.onVerifiedCallback = () => {
+                this.hideLoader();
+                buttonEl.dispatchEvent(new PointerEvent('click'));
             }
             this.startVerification();
         }
