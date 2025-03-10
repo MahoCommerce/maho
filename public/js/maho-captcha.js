@@ -12,6 +12,8 @@ const MahoCaptcha = {
     altchaState: null,
     frontendSelectors: '',
     onVerifiedCallback: null,
+    loaderEl: null,
+    loaderTimeoutId: null,
 
     async setup(config) {
         this.altchaWidget = document.querySelector('altcha-widget');
@@ -141,24 +143,30 @@ const MahoCaptcha = {
     },
 
     showLoader() {
-        if (this.loaderEl) {
+        if (this.loaderEl || this.loaderTimeoutId) {
             return;
         }
-        this.loaderEl = document.createElement('dialog');
-        this.loaderEl.className = 'maho-captcha-verifying';
-        this.loaderEl.innerHTML = (this.loading ? '<img src="' + this.loading + '">' : '') + ' Verifying...';
-        this.loaderEl.addEventListener('close', () => {
-            this.onVerifiedCallback = null;
-            this.hideLoader();
-        });
-        document.body.appendChild(this.loaderEl);
-        this.loaderEl.showModal();
+        this.loaderTimeoutId = setTimeout(() => {
+            this.loaderEl = document.createElement('dialog');
+            this.loaderEl.className = 'maho-captcha-verifying';
+            this.loaderEl.innerHTML = (this.loading ? '<img src="' + this.loading + '">' : '') + ' Verifying...';
+            this.loaderEl.addEventListener('close', () => {
+                this.onVerifiedCallback = null;
+                this.hideLoader();
+            });
+            document.body.appendChild(this.loaderEl);
+            this.loaderEl.showModal();
+        }, window.LOADING_TIMEOUT ?? 200);
     },
 
     hideLoader() {
         if (this.loaderEl) {
             this.loaderEl.remove();
             this.loaderEl = null;
+        }
+        if (this.loaderTimeoutId) {
+            clearTimeout(this.loaderTimeoutId);
+            this.loaderTimeoutId = null;
         }
     },
 }
