@@ -33,7 +33,8 @@ const MahoCaptcha = {
     },
 
     async loadAltchaScripts() {
-        // Load Altcha JS
+        if (typeof customElements.get('altcha-widget') === 'function') return;
+
         await Promise.all([
             new Promise((resolve, reject) => {
                 const script = document.createElement('script');
@@ -45,21 +46,20 @@ const MahoCaptcha = {
             }),
         ]);
 
-        // Inject Stylesheet
         const styleEl = document.createElement('style');
         styleEl.textContent = `
-            altcha-widget {display: flex;position: fixed;bottom: 0;right: 0}
-            dialog.maho-captcha-verifying {
-                margin: auto;
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-                padding: 1rem;
-                border: none;
-                border-radius: 0.5rem;
-                body:has(&) {overflow: hidden}
-                &::backdrop {background: rgba(0, 0, 0, 0.5)}
-            }`;
+        altcha-widget {display: flex;position: fixed;bottom: 0;right: 0}
+        dialog.maho-captcha-verifying {
+            margin: auto;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            body:has(&) {overflow: hidden}
+            &::backdrop {background: rgba(0, 0, 0, 0.5)}
+        }`;
         document.head.appendChild(styleEl);
 
         this.altchaWidget.addEventListener('load', () => {
