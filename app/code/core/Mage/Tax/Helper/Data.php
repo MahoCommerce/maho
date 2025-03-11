@@ -979,10 +979,10 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getCalculatedTaxes($source)
     {
-        if ($this->_getFromRegistry('current_invoice')) {
-            $current = $this->_getFromRegistry('current_invoice');
-        } elseif ($this->_getFromRegistry('current_creditmemo')) {
-            $current = $this->_getFromRegistry('current_creditmemo');
+        if (Mage::registry('current_invoice')) {
+            $current = Mage::registry('current_invoice');
+        } elseif (Mage::registry('current_creditmemo')) {
+            $current = Mage::registry('current_creditmemo');
         } else {
             $current = $source;
         }

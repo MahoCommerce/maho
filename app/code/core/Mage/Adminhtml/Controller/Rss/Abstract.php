@@ -56,8 +56,11 @@ class Mage_Adminhtml_Controller_Rss_Abstract extends Mage_Adminhtml_Controller_A
      * @deprecated use Mage::helper()
      */
     #[\Override]
-    protected function _getHelper($name)
+    protected function _getHelper($name = '')
     {
-        return Mage::helper($name);
+        if ($name) {
+            return Mage::helper($name);
+        }
+        return parent::_getHelper();
     }
 }
