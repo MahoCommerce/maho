@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -27,17 +27,17 @@
     <?php endif ?>
     <div class="store-scope">
         <div class="tree-store-scope">
-            <?php foreach ($this->getWebsiteCollection() as $_website): ?>
+            <?php foreach ($this->getWebsites() as $_website): ?>
             <div class="website-name">
                 <input name="product[website_ids][]" value="<?= $_website->getId() ?>" <?php if ($this->isReadonly()):?> disabled="disabled"<?php endif ?> class="checkbox website-checkbox" id="product_website_<?= $_website->getId() ?>" type="checkbox"<?php if($this->hasWebsite($_website->getId())): ?> checked="checked"<?php endif ?> />
                 <big><strong><label for="product_website_<?= $_website->getId() ?>"><?= $this->escapeHtml($_website->getName()) ?></label></strong></big>
             </div>
             <div class="webiste-groups" id="product_website_<?= $_website->getId() ?>_data">
-            <?php foreach ($this->getGroupCollection($_website) as $_group): ?>
+            <?php foreach ($this->getStoreGroups($_website) as $_group): ?>
                 <h4><?= $this->escapeHtml($_group->getName()) ?></h4>
                 <div class="group-stores">
                 <table>
-                <?php foreach ($this->getStoreCollection($_group) as $_store): ?>
+                <?php foreach ($this->getStores($_group) as $_store): ?>
                     <tr>
                         <td><?= $this->escapeHtml($_store->getName()) ?></td>
                         <td>
