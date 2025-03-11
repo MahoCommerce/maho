@@ -18,6 +18,11 @@
 abstract class Mage_Catalog_Model_Product_Type_Abstract
 {
     /**
+     * Cache key for Editable Products
+     */
+    protected string $cacheKeyEditableAttributes = '_cache_editable_attributes';
+
+    /**
      * Product model instance, if not used as a singleton
      *
      * @var Mage_Catalog_Model_Product
@@ -30,20 +35,6 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * @var string
      */
     protected $_typeId;
-
-    /**
-     * @deprecated
-     *
-     * @var array
-     */
-    protected $_setAttributes;
-
-    /**
-     * @deprecated
-     *
-     * @var Mage_Catalog_Model_Resource_Eav_Attribute[]|null
-     */
-    protected $_editableAttributes;
 
     /**
      * Is a composite product type
@@ -65,13 +56,6 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * @var bool
      */
     protected $_canUseQtyDecimals  = true;
-
-    /**
-     * @deprecated
-     *
-     * @var int
-     */
-    protected $_storeFilter     = null;
 
     /**
      * File queue array
@@ -226,8 +210,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      */
     public function getEditableAttributes($product = null)
     {
-        $cacheKey = '_cache_editable_attributes';
-        if (!$this->getProduct($product)->hasData($cacheKey)) {
+        if (!$this->getProduct($product)->hasData($this->cacheKeyEditableAttributes)) {
             $editableAttributes = [];
             foreach ($this->getSetAttributes($product) as $attributeCode => $attribute) {
                 if (!is_array($attribute->getApplyTo())
@@ -237,9 +220,9 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
                     $editableAttributes[$attributeCode] = $attribute;
                 }
             }
-            $this->getProduct($product)->setData($cacheKey, $editableAttributes);
+            $this->getProduct($product)->setData($this->cacheKeyEditableAttributes, $editableAttributes);
         }
-        return $this->getProduct($product)->getData($cacheKey);
+        return $this->getProduct($product)->getData($this->cacheKeyEditableAttributes);
     }
 
     /**
