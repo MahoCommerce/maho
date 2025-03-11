@@ -28,23 +28,6 @@
     <sections>
         <system>
             <groups>
-                <csrf translate="label" module="core">
-                    <label>CSRF protection</label>
-                    <sort_order>0</sort_order>
-                    <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
-                    <fields>
-                        <use_form_key translate="label">
-                            <label>Enabled</label>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>10</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </use_form_key>
-                    </fields>
-                </csrf>
                 <rate_limit translate="label comment" module="core">
                     <label>Rate limit</label>
                     <sort_order>10</sort_order>
