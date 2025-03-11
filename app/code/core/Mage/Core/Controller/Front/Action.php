@@ -160,7 +160,7 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
      * Check if form key validation is enabled.
      *
      * @return bool
-     * @deprecated since 25.3
+     * @deprecated since 25.5.0
      */
     protected function _isFormKeyEnabled()
     {

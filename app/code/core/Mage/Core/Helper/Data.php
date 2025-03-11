@@ -905,7 +905,7 @@ XML;
     }
 
     /**
-     * @deprecated since 25.3
+     * @deprecated since 25.5.0
      */
     public function isFormKeyEnabled(): bool
     {
