@@ -182,14 +182,14 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
         $functionParameters[] = $this->_imageHandler;
         $functionParameters[] = $fileName;
 
+        // force lossless quality for WEBP file type
+        if ($this->targetFileType == IMAGETYPE_WEBP) {
+            $this->quality(IMG_WEBP_LOSSLESS);
+        }
+
         // set quality param for JPG file type
         if (!is_null($this->quality()) && $this->_fileType == IMAGETYPE_JPEG) {
             $functionParameters[] = $this->quality();
-        }
-
-        // set lossless quality for WEBP file type
-        if ($this->_fileType == IMAGETYPE_WEBP) {
-            $functionParameters[] = IMG_WEBP_LOSSLESS;
         }
 
         // make jpegs progressive
