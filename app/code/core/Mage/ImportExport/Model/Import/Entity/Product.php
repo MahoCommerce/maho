@@ -1910,9 +1910,9 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
             'is_decimal_divided'            => 0,
         ];
 
-        $entityTable = $this->getResourceModel('cataloginventory/stock_item')->getMainTable();
+        $entityTable = Mage::getResourceModel('cataloginventory/stock_item')->getMainTable();
         /** @var Mage_CatalogInventory_Helper_Data $helper */
-        $helper      = $this->getHelper('cataloginventory');
+        $helper      = Mage::helper('cataloginventory');
 
         while ($bunch = $this->getNextBunch()) {
             $stockData = [];
@@ -1933,7 +1933,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                 $row['stock_id'] = 1;
 
                 /** @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
-                $stockItem = $this->getModel('cataloginventory/stock_item');
+                $stockItem = Mage::getModel('cataloginventory/stock_item');
                 $stockItem->loadByProduct($row['product_id']);
                 $existStockData = $stockItem->getData();
 
@@ -2219,7 +2219,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     {
         if ($this->_urlKeyAttributeId === null) {
             $adapter  = $this->getConnection();
-            $resource = $this->getResourceModel('eav/entity_attribute');
+            $resource = Mage::getResourceModel('eav/entity_attribute');
 
             $select = $adapter->select()
                 ->from(

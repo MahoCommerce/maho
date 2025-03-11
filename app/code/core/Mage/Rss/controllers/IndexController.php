@@ -6,6 +6,7 @@
  * @package    Mage_Rss
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -36,7 +37,7 @@ class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
     public function indexAction()
     {
         /** @var Mage_Rss_Helper_Data $helper */
-        $helper = $this->_getHelper('rss');
+        $helper = Mage::helper('rss');
         if ($helper->isRssEnabled()) {
             $this->loadLayout();
             $this->renderLayout();
@@ -132,7 +133,7 @@ class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
         if (is_null($this->_customer)) {
             $this->_customer = Mage::getModel('customer/customer');
 
-            $params = $this->_getHelper('core')->urlDecode($this->getRequest()->getParam('data'));
+            $params = Mage::helper('core')->urlDecode($this->getRequest()->getParam('data'));
             $data   = explode(',', $params);
             $customerId    = abs((int) $data[0]);
             if ($customerId && ($customerId == Mage::getSingleton('customer/session')->getCustomerId())) {
