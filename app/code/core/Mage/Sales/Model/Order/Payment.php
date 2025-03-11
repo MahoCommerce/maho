@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -405,7 +405,8 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         // add message if order was put into review during authorization or capture
         if ($order->getState() == Mage_Sales_Model_Order::STATE_PAYMENT_REVIEW) {
             if ($message) {
-                $order->addStatusToHistory($order->getStatus(), $message, $isCustomerNotified);
+                $order->addStatusHistoryComment($message, $order->getStatus())
+                    ->setIsCustomerNotified($isCustomerNotified);
             }
         } elseif ($order->getState() && ($orderStatus !== $order->getStatus() || $message)) {
             // add message to history if order state already declared

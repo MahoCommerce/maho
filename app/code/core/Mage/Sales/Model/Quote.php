@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -1505,7 +1505,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         }
 
         $sortedTotals = [];
-        foreach ($this->getBillingAddress()->getTotalModels() as $total) {
+        foreach ($this->getBillingAddress()->getTotalCollector()->getRetrievers() as $total) {
             /** @var Mage_Sales_Model_Quote_Address_Total_Abstract $total */
             if (isset($totals[$total->getCode()])) {
                 $sortedTotals[$total->getCode()] = $totals[$total->getCode()];
@@ -2009,31 +2009,22 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @deprecated after 1.4 beta1 - one page checkout responsibility
-     */
-    public const CHECKOUT_METHOD_REGISTER  = 'register';
-    public const CHECKOUT_METHOD_GUEST     = 'guest';
-    public const CHECKOUT_METHOD_LOGIN_IN  = 'login_in';
-
-    /**
      * Return quote checkout method code
      *
-     * @deprecated after 1.4 beta1 it is checkout module responsibility
      * @param bool $originalMethod if true return defined method from beginning
      * @return string
      */
     public function getCheckoutMethod($originalMethod = false)
     {
-        if ($this->getCustomerId() && !$originalMethod) {
-            return self::CHECKOUT_METHOD_LOGIN_IN;
+        if ($originalMethod) {
+            return $this->_getData('checkout_method');
         }
-        return $this->_getData('checkout_method');
+        return Mage::helper('checkout')->getCheckoutMethod($this);
     }
 
     /**
      * Check is allow Guest Checkout
      *
-     * @deprecated after 1.4 beta1 it is checkout module responsibility
      * @return bool
      */
     public function isAllowedGuestCheckout()
