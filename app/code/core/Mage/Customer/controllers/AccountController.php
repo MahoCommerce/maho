@@ -6,7 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -451,7 +451,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * Get Helper
      *
      * @param string $path
-     * @return Mage_Core_Helper_Abstract
+     * @return Mage_Core_Helper_Abstract|false
+     * @deprecated use Mage::helper()
      */
     protected function _getHelper($path)
     {
@@ -514,12 +515,12 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * @deprecated Use Mage::getModel() instead for PHPStan and IDE type hinting.
      * Get model by path
      *
      * @param string $path
-     * @param array|null $arguments
-     * @return false|Mage_Core_Model_Abstract
+     * @param ?array $arguments
+     * @return Mage_Core_Model_Abstract|false
+     * @deprecated use Mage::getModel()
      */
     public function _getModel($path, $arguments = [])
     {
@@ -531,6 +532,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      *
      * @param string $path
      * @return mixed
+     * @deprecated use Mage::registry()
      */
     protected function _getFromRegistry($path)
     {

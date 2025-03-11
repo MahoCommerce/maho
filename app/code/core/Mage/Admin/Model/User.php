@@ -666,7 +666,8 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
      * Returns helper instance
      *
      * @param string $helperName
-     * @return Mage_Core_Helper_Abstract
+     * @return Mage_Core_Helper_Abstract|false
+     * @deprecated use Mage::helper()
      */
     protected function _getHelper($helperName)
     {

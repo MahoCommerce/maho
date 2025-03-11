@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -1846,7 +1846,8 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      * Returns resource model
      *
      * @param string $resourceModelName
-     * @return Object
+     * @return Mage_Core_Model_Resource_Db_Collection_Abstract|false
+     * @deprecated use Mage::getResourceModel()
      */
     protected function getResourceModel($resourceModelName)
     {
@@ -1857,7 +1858,8 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      * Returns helper
      *
      * @param string $helperName
-     * @return Mage_Core_Helper_Abstract
+     * @return Mage_Core_Helper_Abstract|false
+     * @deprecated use Mage::helper()
      */
     protected function getHelper($helperName)
     {
@@ -1868,7 +1870,8 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      * Returns model
      *
      * @param string $modelName
-     * @return bool|Mage_Core_Model_Abstract
+     * @return Mage_Core_Model_Abstract|false
+     * @deprecated use Mage::getModel()
      */
     protected function getModel($modelName)
     {
