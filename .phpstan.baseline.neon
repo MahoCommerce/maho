@@ -4747,8 +4747,8 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
 
 		-
-			message: '#^Call to an undefined method Mage_Core_Helper_Abstract\:\:priceIncludesTax\(\)\.$#'
-			identifier: method.notFound
+			message: '#^Cannot call method priceIncludesTax\(\) on Mage_Core_Helper_Abstract\|false\.$#'
+			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Weee/Helper/Data.php
 

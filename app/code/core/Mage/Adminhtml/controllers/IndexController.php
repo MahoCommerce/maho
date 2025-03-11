@@ -486,10 +486,10 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Retrieve model object
      *
-     * @link    Mage_Core_Model_Config::getModelInstance
      * @param   string $modelClass
      * @param   array|object $arguments
      * @return  Mage_Core_Model_Abstract|false
+     * @deprecated use Mage::getModel()
      */
     protected function _getModel($modelClass = '', $arguments = [])
     {
