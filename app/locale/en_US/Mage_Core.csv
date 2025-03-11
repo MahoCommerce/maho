@@ -169,6 +169,7 @@
 "Incorrect credit card expiration date.","Incorrect credit card expiration date."
 "Input type ""%value%"" not found in the input types list.","Input type ""%value%"" not found in the input types list."
 "Invalid MIME type.","Invalid MIME type."
+"Invalid URL","Invalid URL"
 "Invalid URL '%value%'.","Invalid URL '%value%'."
 "Invalid URL scheme.","Invalid URL scheme."
 "Invalid base url type","Invalid base url type"
