@@ -7,7 +7,7 @@
  */
 
 const MahoCaptcha = {
-    loading: null,
+    loadingImageUrl: null,
     altchaWidget: null,
     altchaState: null,
     frontendSelectors: '',
@@ -18,9 +18,9 @@ const MahoCaptcha = {
     async setup(config) {
         this.altchaWidget = document.querySelector('altcha-widget');
         this.frontendSelectors = config.frontendSelectors ?? '';
-        this.loading = config.loading ?? '';
+        this.loadingImageUrl = config.loadingImageUrl ?? '';
 
-        if (document.readyState === 'loading') {
+        if (document.readyState === 'loadingImageUrl') {
             document.addEventListener('DOMContentLoaded', this.initForms.bind(this));
         } else {
             this.initForms();
@@ -149,7 +149,7 @@ const MahoCaptcha = {
         this.loaderTimeoutId = setTimeout(() => {
             this.loaderEl = document.createElement('dialog');
             this.loaderEl.className = 'maho-captcha-verifying';
-            this.loaderEl.innerHTML = (this.loading ? '<img src="' + this.loading + '">' : '') + ' Verifying...';
+            this.loaderEl.innerHTML = (this.loadingImageUrl ? '<img src="' + this.loadingImageUrl + '">' : '') + ' Verifying...';
             this.loaderEl.addEventListener('close', () => {
                 this.onVerifiedCallback = null;
                 this.hideLoader();
