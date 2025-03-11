@@ -186,7 +186,7 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected function _createWishlistItemCollection()
     {
-        return $this->getWishlist()->getItemCollection();
+        return $this->getWishlist()->getItemsCollection();
     }
 
     /**

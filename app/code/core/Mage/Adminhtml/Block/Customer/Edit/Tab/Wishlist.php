@@ -90,7 +90,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist extends Mage_Adminhtml_Blo
             ->setWebsiteId($this->_getCustomer()->getWebsiteId())
             ->setCustomerGroupId($this->_getCustomer()->getGroupId())
             ->resetSortOrder()
-            ->addDaysInWishlist()
+            ->setDaysInWishlist(true)
             ->addStoreData();
 
         $this->setCollection($collection);
