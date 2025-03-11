@@ -6,7 +6,7 @@
  * @package    Mage_Page
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -78,11 +78,10 @@ class Mage_Page_Block_Html_Topmenu extends Mage_Core_Block_Template
     }
 
     /**
-     * Recursively generates top menu html from data that is specified in $menuTree
+     * Internal method to recursively generates top menu html from data that is specified in $menuTree
      *
      * @param string $childrenWrapClass
      * @return string
-     * @deprecated since 1.8.2.0 use child block catalog.topnav.renderer instead
      */
     protected function _getHtml(Varien_Data_Tree_Node $menuTree, $childrenWrapClass)
     {
