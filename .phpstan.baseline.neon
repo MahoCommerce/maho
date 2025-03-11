@@ -97,12 +97,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Page/Menu.php
 
 		-
-			message: '#^Call to method getCollection\(\) on an unknown class Mage_Permissions_Model_Users\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Permissions/Grid/User.php
-
-		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
 			count: 1
@@ -113,18 +107,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Permissions/Tab/Userroles.php
-
-		-
-			message: '#^Call to method getCollection\(\) on an unknown class Mage_Permissions_Model_Roles\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Permissions/Usernroles.php
-
-		-
-			message: '#^Call to method getCollection\(\) on an unknown class Mage_Permissions_Model_Users\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Permissions/Usernroles.php
 
 		-
 			message: '#^Method Mage_Adminhtml_Block_Report_Grid_Abstract\:\:getCollection\(\) should return Mage_Core_Model_Resource_Db_Collection_Abstract\|Mage_Reports_Model_Grouped_Collection but returns Varien_Data_Collection_Db\|null\.$#'
@@ -3535,12 +3517,6 @@ parameters:
 			path: app/code/core/Mage/Rule/Model/Condition/Product/Abstract.php
 
 		-
-			message: '#^Call to method setOrderFilter\(\) on an unknown class Mage_Sales_Model_Resource_Invoice_Collection\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Order/Details.php
-
-		-
 			message: '#^Property Mage_Sales_Block_Recurring_Profiles\:\:\$_profiles \(Mage_Sales_Model_Resource_Recurring_Profile_Collection\) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -4307,12 +4283,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/design/adminhtml/default/default/template/api/user_roles_grid_js.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 4
-			path: app/design/adminhtml/default/default/template/api/usernroles.phtml
 
 		-
 			message: '#^Variable \$roles might not be defined\.$#'
