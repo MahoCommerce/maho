@@ -335,7 +335,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
 
             Mage::helper('wishlist')->calculate();
             Mage::dispatchEvent('wishlist_update_item', [
-                'wishlist' => $wishlist, 'product' => $product, 'item' => $wishlist->getItem($id)]);
+                'wishlist' => $wishlist, 'product' => $product, 'item' => $wishlist->getItemById($id)]);
 
             Mage::helper('wishlist')->calculate();
 

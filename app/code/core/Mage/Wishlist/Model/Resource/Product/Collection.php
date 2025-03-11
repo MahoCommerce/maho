@@ -6,7 +6,7 @@
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -112,30 +112,31 @@ class Mage_Wishlist_Model_Resource_Product_Collection extends Mage_Catalog_Model
     }
 
     /**
-     * Add store data (days in wishlist)
+     * Add store data
      *
      * @return $this
      */
     public function addStoreData()
     {
-        $adapter = $this->getConnection();
-        if (!$this->getDaysInWishlist()) {
+        return $this;
+    }
+
+    /**
+     * Calculate days in wishlist
+     *
+     * @return $this
+     */
+    protected function calculateDaysInWishlist(): self
+    {
+        if ($this->_addDaysInWishlist !== true) {
             return $this;
         }
 
-        $this->setDaysInWishlist(false);
-
-        /** @var Mage_Core_Model_Resource_Helper_Mysql4 $resourceHelper */
-        $resourceHelper = Mage::getResourceHelper('core');
-        $nowDate = $adapter->formatDate(Mage::getSingleton('core/date')->date());
-
-        $this->joinField('store_name', 'core/store', 'name', 'store_id=item_store_id');
-        $this->joinField(
-            'days_in_wishlist',
-            'wishlist/item',
-            $resourceHelper->getDateDiff($this->_wishlistItemTableAlias . '.added_at', $nowDate),
-            'wishlist_item_id=wishlist_item_id',
-        );
+        foreach ($this->getItems() as $item) {
+            $addedAt = new DateTimeImmutable($item->getAddedAt());
+            $now = new DateTimeImmutable('now');
+            $item->setDaysInWishlist($now->diff($addedAt)->format('%a'));
+        }
 
         return $this;
     }
@@ -163,6 +164,19 @@ class Mage_Wishlist_Model_Resource_Product_Collection extends Mage_Catalog_Model
     #[\Override]
     public function load($printQuery = false, $logQuery = false)
     {
+        return $this;
+    }
+
+    /**
+     * After load processing
+     *
+     * @return $this
+     */
+    #[\Override]
+    protected function _afterLoad()
+    {
+        parent::_afterLoad();
+        $this->calculateDaysInWishlist();
         return $this;
     }
 }

@@ -75,7 +75,7 @@ abstract class Mage_Wishlist_Controller_Abstract extends Mage_Core_Controller_Fr
         $hasOptions = [];
 
         $cart       = Mage::getSingleton('checkout/cart');
-        $collection = $wishlist->getItemCollection()
+        $collection = $wishlist->getItemsCollection()
                 ->setVisibilityFilter();
 
         $qtysString = $this->getRequest()->getParam('qty');
