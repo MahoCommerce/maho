@@ -108,14 +108,14 @@
         <td class="input-price">
             <input type="text" id="downloadable_link_{{id}}_price_value" class="input-text validate-number link-prices <?= $disabled ?>" name="downloadable[link][{{id}}][price]" value="{{price}}" <?= $disabled ?> />
             <label>[<?= Mage::app()->getStore($product->getStoreId())->getBaseCurrencyCode() ?>]</label>
-            <?php if ($product->getStoreId() && $this->getIsPriceWebsiteScope()) : ?>
+            <?php if ($product->getStoreId() && Mage::helper('downloadable')->getIsPriceWebsiteScope()): ?>
             <br>
             <input type="checkbox" id="downloadable_link_{{id}}_price" name="downloadable[link][{{id}}][use_default_price]" value="1" <?= $disabled ?> /> <label for="downloadable_link_{{id}}_price"><?= $helper->__('Use Default Value') ?></label>
             <?php endif ?>
         </td>
         <?php else: ?>
         <input type="hidden" id="downloadable_link_{{id}}_price_value" class="link-prices" name="downloadable[link][{{id}}][price]" value="0" />
-        <?php if ($product->getStoreId() && $this->getIsPriceWebsiteScope()) : ?>
+        <?php if ($product->getStoreId() && Mage::helper('downloadable')->getIsPriceWebsiteScope()): ?>
         <input type="hidden" id="downloadable_link_{{id}}_price" name="downloadable[link][{{id}}][use_default_price]" value="1" />
         <?php endif ?>
         <?php endif ?>

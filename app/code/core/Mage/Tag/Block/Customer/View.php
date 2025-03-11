@@ -6,7 +6,7 @@
  * @package    Mage_Tag
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -137,8 +137,6 @@ class Mage_Tag_Block_Customer_View extends Mage_Catalog_Block_Product_Abstract
                 ->addAttributeToSelect(Mage::getSingleton('catalog/config')->getProductAttributes())
                 ->setActiveFilter();
 
-            Mage::getSingleton('catalog/product_status')
-                ->addVisibleFilterToCollection($this->_collection);
             Mage::getSingleton('catalog/product_visibility')
                 ->addVisibleInSiteFilterToCollection($this->_collection);
         }
