@@ -123,7 +123,7 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
         $request->setPackageQty($oldQty - $freeQty);
 
         /** @var Mage_Shipping_Model_Rate_Result $result */
-        $result = $this->_getModel('shipping/rate_result');
+        $result = Mage::getModel('shipping/rate_result');
         $rate = $this->getRate($request);
 
         $request->setPackageWeight($oldWeight);
@@ -131,7 +131,7 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
 
         if (!empty($rate) && $rate['price'] >= 0) {
             /** @var Mage_Shipping_Model_Rate_Result_Method $method */
-            $method = $this->_getModel('shipping/rate_result_method');
+            $method = Mage::getModel('shipping/rate_result_method');
 
             $method->setCarrier('tablerate');
             $method->setCarrierTitle($this->getConfigData('title'));
@@ -161,7 +161,7 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
             $rate = $this->getRate($request);
             if (!empty($rate) && $rate['price'] >= 0) {
                 /** @var Mage_Shipping_Model_Rate_Result_Method $method */
-                $method = $this->_getModel('shipping/rate_result_method');
+                $method = Mage::getModel('shipping/rate_result_method');
 
                 $method->setCarrier('tablerate');
                 $method->setCarrierTitle($this->getConfigData('title'));
@@ -176,7 +176,7 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
             }
         } else {
             /** @var Mage_Shipping_Model_Rate_Result_Error $error */
-            $error = $this->_getModel('shipping/rate_result_error');
+            $error = Mage::getModel('shipping/rate_result_error');
             $error->setCarrier('tablerate');
             $error->setCarrierTitle($this->getConfigData('title'));
             $error->setErrorMessage($this->getConfigData('specificerrmsg'));

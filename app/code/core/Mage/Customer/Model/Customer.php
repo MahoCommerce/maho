@@ -505,7 +505,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     public function hashPassword(#[\SensitiveParameter] $password, $salt = null)
     {
         /** @var Mage_Core_Helper_Data $helper */
-        $helper = $this->_getHelper('core');
+        $helper = Mage::helper('core');
         return $helper->getHash(trim($password), (bool) $salt ? $salt : Mage_Admin_Model_User::HASH_SALT_LENGTH);
     }
 

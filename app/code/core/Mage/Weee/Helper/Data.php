@@ -467,7 +467,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
     public function validateCatalogPricesAndFptConfiguration($store = null)
     {
         // Check the configuration - Weee enabled and catalog display
-        $priceIncludesTax = $this->_getHelper('tax')->priceIncludesTax($store);
+        $priceIncludesTax = Mage::helper('tax')->priceIncludesTax($store);
         // $priceIncludesTax = Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_PRICE_INCLUDES_TAX, $store);
         $fptTaxConfig = $this->getTaxType($store);
 

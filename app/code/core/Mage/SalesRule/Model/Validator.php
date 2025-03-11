@@ -523,7 +523,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
     public function processWeeeAmount(Mage_Sales_Model_Quote_Address $address, $items)
     {
         /** @var Mage_Weee_Helper_Data $helper */
-        $helper = $this->_getHelper('weee');
+        $helper = Mage::helper('weee');
         $quote = $address->getQuote();
         $store = $quote->getStore();
 
@@ -535,9 +535,9 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
          *   for calculating weee tax discount
          */
         /** @var Mage_Tax_Model_Config $config */
-        $config = $this->_getSingleton('tax/config');
+        $config = Mage::getSingleton('tax/config');
         /** @var Mage_Tax_Model_Calculation $calculator */
-        $calculator = $this->_getSingleton('tax/calculation');
+        $calculator = Mage::getSingleton('tax/calculation');
         $request = $calculator->getRateRequest(
             $address,
             $quote->getBillingAddress(),
@@ -546,7 +546,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
         );
 
         /** @var Mage_Weee_Helper_Data $helper */
-        $helper = $this->_getHelper('weee');
+        $helper = Mage::helper('weee');
 
         $applyTaxAfterDiscount = $config->applyTaxAfterDiscount();
         $discountTax = $config->discountTax();

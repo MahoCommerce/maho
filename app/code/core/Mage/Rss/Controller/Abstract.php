@@ -26,7 +26,7 @@ class Mage_Rss_Controller_Abstract extends Mage_Core_Controller_Front_Action
     protected function isFeedEnable($code)
     {
         /** @var Mage_Rss_Helper_Data $helper */
-        $helper = $this->_getHelper('rss');
+        $helper = Mage::helper('rss');
         return $helper->isRssEnabled() && Mage::getStoreConfig('rss/' . $code);
     }
 

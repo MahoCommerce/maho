@@ -160,12 +160,12 @@ class Mage_Checkout_Helper_Cart extends Mage_Core_Helper_Url
     public function getAddUrlCustom($product, $additional = [], $addFormKey = true)
     {
         $routeParams = [
-            Mage_Core_Controller_Front_Action::PARAM_NAME_URL_ENCODED => $this->_getHelperInstance('core')
+            Mage_Core_Controller_Front_Action::PARAM_NAME_URL_ENCODED => Mage::helper('core')
                 ->urlEncode($this->getCurrentUrl()),
             'product' => $product->getEntityId(),
         ];
         if ($addFormKey) {
-            $routeParams[Mage_Core_Model_Url::FORM_KEY] = $this->_getSingletonModel('core/session')->getFormKey();
+            $routeParams[Mage_Core_Model_Url::FORM_KEY] = Mage::getSingleton('core/session')->getFormKey();
         }
         if (!empty($additional)) {
             $routeParams = array_merge($routeParams, $additional);
