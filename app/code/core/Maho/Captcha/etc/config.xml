@@ -15,7 +15,7 @@
                 <class>Maho_Captcha_Model_Resource</class>
                 <entities>
                     <challenge>
-                        <table>captha_challenge</table>
+                        <table>captcha_challenge</table>
                     </challenge>
                 </entities>
             </captcha_resource>
