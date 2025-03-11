@@ -167,7 +167,6 @@
     <default>
         <admin>
             <captcha>
-                <enabled>1</enabled>
                 <selectors>.checkout-onepage-index #co-billing-form
 .contacts-index-index #contactForm
 .customer-account-create #form-validate
