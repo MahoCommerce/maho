@@ -29,11 +29,6 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
     public const SESSION_MAX_LIFETIME = 60 * 60 * 24 * 400;
 
     /**
-     * Add secret key to url config path
-     */
-    public const XML_CSRF_USE_FLAG_CONFIG_PATH   = 'system/csrf/use_form_key';
-
-    /**
      * Currently used area
      *
      * @var string
@@ -162,39 +157,24 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
     }
 
     /**
-     * Validate Form Key
-     *
-     * @return bool
-     */
-    #[\Override]
-    protected function _validateFormKey()
-    {
-        $validated = true;
-        if ($this->_isFormKeyEnabled()) {
-            $validated = parent::_validateFormKey();
-        }
-        return $validated;
-    }
-
-    /**
      * Check if form key validation is enabled.
      *
      * @return bool
+     * @deprecated since 25.3
      */
     protected function _isFormKeyEnabled()
     {
-        return Mage::helper('core')->isFormKeyEnabled();
+        return true;
     }
 
     /**
      * Check if form_key validation enabled on checkout process
      *
      * @deprecated
-     * @see _isFormKeyEnabled
      * @return bool
      */
     protected function isFormkeyValidationOnCheckoutEnabled()
     {
-        return $this->_isFormKeyEnabled();
+        return true;
     }
 }

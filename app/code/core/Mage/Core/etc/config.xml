@@ -310,9 +310,6 @@
             </log>
         </dev>
         <system>
-            <csrf>
-                <use_form_key>1</use_form_key>
-            </csrf>
             <rate_limit>
                 <active>1</active>
                 <timeframe>30</timeframe>

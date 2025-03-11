@@ -904,9 +904,12 @@ XML;
         return $data;
     }
 
+    /**
+     * @deprecated since 25.3
+     */
     public function isFormKeyEnabled(): bool
     {
-        return Mage::getStoreConfigFlag(Mage_Core_Controller_Front_Action::XML_CSRF_USE_FLAG_CONFIG_PATH);
+        return true;
     }
 
     /**
