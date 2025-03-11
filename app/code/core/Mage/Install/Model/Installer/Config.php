@@ -142,7 +142,6 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
      * @return $this
      * @throws Mage_Core_Exception
      * @throws Zend_Http_Client_Exception
-     * @deprecated
      */
     protected function _checkUrl($url, $secure = false)
     {
