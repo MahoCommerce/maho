@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,9 +18,8 @@
 abstract class Mage_Catalog_Model_Product_Type_Abstract
 {
     /**
-     * Product model instance
+     * Product model instance, if not used as a singleton
      *
-     * @deprecated if use as singleton
      * @var Mage_Catalog_Model_Product
      */
     protected $_product;
@@ -112,7 +111,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
     public const OPTION_PREFIX = 'option_';
 
     /**
-     * Specify type instance product
+     * Specify type instance product, if not used as a singleton
      *
      * @param   Mage_Catalog_Model_Product $product
      * @return  Mage_Catalog_Model_Product_Type_Abstract

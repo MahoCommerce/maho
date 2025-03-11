@@ -6,6 +6,7 @@
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -33,7 +34,6 @@ abstract class Mage_Wishlist_Controller_Abstract extends Mage_Core_Controller_Fr
      *
      * @param string $qty
      * @return float|int|null
-     * @deprecated
      */
     protected function _processLocalizedQty($qty)
     {
