@@ -55,6 +55,30 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Api/Tab/Userroles.php
 
 		-
+			message: '#^Call to an undefined method Mage_Core_Model_Resource_Db_Collection_Abstract\:\:addCollectionData\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Catalog/Category/Abstract.php
+
+		-
+			message: '#^Call to an undefined method Mage_Core_Model_Resource_Db_Collection_Abstract\:\:getNodeById\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Catalog/Category/Abstract.php
+
+		-
+			message: '#^Cannot call method loadByIds\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Catalog/Category/Abstract.php
+
+		-
+			message: '#^Cannot call method setStoreId\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Catalog/Category/Edit/Form.php
+
+		-
 			message: '#^Cannot call method addAttributeToSelect\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -73,6 +97,12 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Super/Settings.php
 
 		-
+			message: '#^Cannot call method getAttributeRawValue\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Widget/Chooser.php
+
+		-
 			message: '#^Property Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales\:\:\$_collection \(Mage_Sales_Model_Entity_Sale_Collection\) does not accept Varien_Data_Collection_Db\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -83,6 +113,24 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Wishlist.php
+
+		-
+			message: '#^Cannot call method addSubscriberInfo\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Newsletter/Problem.php
+
+		-
+			message: '#^Cannot call method addTemplateInfo\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Newsletter/Subscriber.php
+
+		-
+			message: '#^Cannot call method useOnlyActual\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Newsletter/Template/Grid.php
 
 		-
 			message: '#^Access to an undefined property Mage_Adminhtml_Block_Notification_Window\:\:\$_aclResourcePath\.$#'
@@ -167,6 +215,12 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Sidebar/Compared.php
+
+		-
+			message: '#^Cannot call method applyLogToCollection\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Sidebar/Pcompared.php
 
 		-
 			message: '#^Method Mage_Catalog_Model_Resource_Product_Compare_Item_Collection\:\:useProductItem\(\) invoked with 1 parameter, 0 required\.$#'
@@ -331,6 +385,12 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Controller/Report/Abstract.php
 
 		-
+			message: '#^Cannot call method prepareSummary\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Helper/Dashboard/Order.php
+
+		-
 			message: '#^Property Mage_Adminhtml_Model_Config\:\:\$_config \(Mage_Core_Model_Config_Base\) does not accept Varien_Simplexml_Config\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -407,6 +467,12 @@ parameters:
 			identifier: isset.variable
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Permissions/BlockController.php
+
+		-
+			message: '#^Cannot call method deleteOrphanedResources\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Permissions/OrphanedResourceController.php
 
 		-
 			message: '#^Variable \$id in isset\(\) always exists and is not nullable\.$#'
@@ -515,6 +581,12 @@ parameters:
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Api/Model/Config.php
+
+		-
+			message: '#^Cannot call method cleanOldSessions\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Api/Model/Cron.php
 
 		-
 			message: '#^Cannot call method getClassName\(\) on bool\|SimpleXMLElement\.$#'
@@ -805,6 +877,30 @@ parameters:
 			path: app/code/core/Mage/Bundle/Model/Product/Price.php
 
 		-
+			message: '#^Cannot call method getAttributeData\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Bundle/Model/Product/Price.php
+
+		-
+			message: '#^Cannot call method getPriceFromIndex\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Bundle/Model/Product/Price.php
+
+		-
+			message: '#^Cannot call method getSelectionsData\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Bundle/Model/Product/Price.php
+
+		-
+			message: '#^Cannot call method reset\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Bundle/Model/Product/Price.php
+
+		-
 			message: '#^Method Mage_Bundle_Model_Product_Price\:\:getOptions\(\) should return Mage_Bundle_Model_Resource_Option_Collection but returns array\.$#'
 			identifier: return.type
 			count: 1
@@ -823,6 +919,18 @@ parameters:
 			path: app/code/core/Mage/Bundle/Model/Product/Type.php
 
 		-
+			message: '#^Cannot call method getChildrenIds\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Bundle/Model/Product/Type.php
+
+		-
+			message: '#^Cannot call method getParentIdsByChild\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Bundle/Model/Product/Type.php
+
+		-
 			message: '#^Left side of && is always true\.$#'
 			identifier: booleanAnd.leftAlwaysTrue
 			count: 1
@@ -835,6 +943,12 @@ parameters:
 			path: app/code/core/Mage/Bundle/Model/Product/Type.php
 
 		-
+			message: '#^Cannot call method processRelations\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Bundle/Model/Resource/Bundle.php
+
+		-
 			message: '#^Variable \$basePrice might not be defined\.$#'
 			identifier: variable.undefined
 			count: 2
@@ -845,6 +959,12 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/Bundle/Model/Resource/Price/Index.php
+
+		-
+			message: '#^Property Mage_Catalog_Block_Widget_Link\:\:\$_entityResource \(Mage_Catalog_Model_Resource_Abstract\|null\) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Catalog/Block/Category/Widget/Link.php
 
 		-
 			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
@@ -877,10 +997,22 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Product/Compare/List.php
 
 		-
+			message: '#^Cannot call method addExcludeProductFilter\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Block/Product/List/Related.php
+
+		-
 			message: '#^Property Mage_Catalog_Block_Product_List_Toolbar\:\:\$_collection \(Mage_Core_Model_Resource_Db_Collection_Abstract\) does not accept Varien_Data_Collection\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/List/Toolbar.php
+
+		-
+			message: '#^Cannot call method addExcludeProductFilter\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Block/Product/List/Upsell.php
 
 		-
 			message: '#^Method Mage_Catalog_Block_Product_View_Options_Type_Date\:\:_getValueWithLeadingZeros\(\) should return string but returns int\.$#'
@@ -925,6 +1057,12 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Product/Widget/Html/Pager.php
 
 		-
+			message: '#^Property Mage_Catalog_Block_Widget_Link\:\:\$_entityResource \(Mage_Catalog_Model_Resource_Abstract\|null\) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Catalog/Block/Product/Widget/Link.php
+
+		-
 			message: '#^Property Mage_Catalog_Block_Product_Widget_New\:\:\$_pager \(Mage_Catalog_Block_Product_Widget_Html_Pager\) does not accept Mage_Core_Block_Abstract\|false\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -959,6 +1097,12 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Widget/Link.php
+
+		-
+			message: '#^Cannot call method isBuilt\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Helper/Category/Flat.php
 
 		-
 			message: '#^Property Mage_Catalog_Helper_Output\:\:\$_templateProcessor \(Varien_Filter_Template\) does not accept Mage_Core_Model_Abstract\|false\.$#'
@@ -1045,6 +1189,12 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Category.php
 
 		-
+			message: '#^Property Mage_Catalog_Model_Category\:\:\$_treeModel \(Mage_Catalog_Model_Resource_Category_Tree\|null\) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
 			message: '#^Cannot call method getRootCategoryId\(\) on int\|string\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -1055,6 +1205,12 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Category/Attribute/Api.php
+
+		-
+			message: '#^Method Mage_Catalog_Model_Category_Indexer_Flat\:\:_getIndexer\(\) should return Mage_Catalog_Model_Resource_Category_Flat but returns Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category/Indexer/Flat.php
 
 		-
 			message: '#^Call to an undefined method Mage_Catalog_Model_Config\:\:_init\(\)\.$#'
@@ -1071,6 +1227,12 @@ parameters:
 		-
 			message: '#^Call to an undefined method Mage_Eav_Model_Entity_Abstract\:\:getStoreId\(\)\.$#'
 			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
+
+		-
+			message: '#^Cannot call method addProductToStore\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
 
@@ -1123,6 +1285,24 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Entity/Product/Attribute/Design/Options/Container.php
 
 		-
+			message: '#^Cannot call method refreshEnabledIndex\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Index.php
+
+		-
+			message: '#^Cannot call method refreshProductIndex\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Index.php
+
+		-
+			message: '#^Cannot call method getAttribute\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Layer.php
+
+		-
 			message: '#^Parameter \#2 \$filterBlock \(Varien_Object\) of method Mage_Catalog_Model_Layer_Filter_Attribute\:\:apply\(\) should be compatible with parameter \$filterBlock \(null\) of method Mage_Catalog_Model_Layer_Filter_Abstract\:\:apply\(\)$#'
 			identifier: method.childParameterType
 			count: 1
@@ -1133,6 +1313,18 @@ parameters:
 			identifier: method.childParameterType
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Layer/Filter/Decimal.php
+
+		-
+			message: '#^Cannot call method refreshEnabledIndex\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Observer.php
+
+		-
+			message: '#^Cannot call method refreshProductIndex\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Observer.php
 
 		-
 			message: '#^Method Mage_Catalog_Model_Resource_Category_Flat\:\:move\(\) invoked with 3 parameters, 1 required\.$#'
@@ -1159,6 +1351,18 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Api/V2.php
 
 		-
+			message: '#^Method Mage_Catalog_Model_Product_Attribute_Backend_Groupprice\:\:_getResource\(\) should return Mage_Catalog_Model_Resource_Product_Attribute_Backend_Groupprice but returns Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Backend/Groupprice.php
+
+		-
+			message: '#^Method Mage_Catalog_Model_Product_Attribute_Backend_Tierprice\:\:_getResource\(\) should return Mage_Catalog_Model_Resource_Product_Attribute_Backend_Tierprice but returns Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Backend/Tierprice.php
+
+		-
 			message: '#^Cannot call method getBackend\(\) on bool\|Mage_Catalog_Model_Resource_Attribute\.$#'
 			identifier: method.nonObject
 			count: 11
@@ -1175,6 +1379,12 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Compare/Item.php
+
+		-
+			message: '#^Cannot call method getCount\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Compare/List.php
 
 		-
 			message: '#^Call to an undefined method Mage_Catalog_Model_Resource_Product_Flat_Indexer\:\:prepareFlatTables\(\)\.$#'
@@ -1213,6 +1423,12 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Status.php
 
 		-
+			message: '#^Cannot call method getFlatUpdateSelect\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Status.php
+
+		-
 			message: '#^Method Mage_Catalog_Model_Product_Type\:\:priceFactory\(\) should return Mage_Catalog_Model_Product_Type_Price but returns Mage_Core_Model_Abstract\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -1221,6 +1437,24 @@ parameters:
 		-
 			message: '#^Call to function is_array\(\) with string will always evaluate to false\.$#'
 			identifier: function.impossibleType
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
+
+		-
+			message: '#^Cannot call method getChildrenIds\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
+
+		-
+			message: '#^Cannot call method getConfigurableOptions\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
+
+		-
+			message: '#^Cannot call method getParentIdsByChild\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
 
@@ -1235,6 +1469,24 @@ parameters:
 			identifier: function.impossibleType
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Type/Grouped.php
+
+		-
+			message: '#^Cannot call method getChildrenIds\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Type/Grouped.php
+
+		-
+			message: '#^Cannot call method getParentIdsByChild\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Type/Grouped.php
+
+		-
+			message: '#^Cannot call method getFlatUpdateSelect\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Visibility.php
 
 		-
 			message: '#^Call to an undefined method Mage_Eav_Model_Entity_Attribute_Abstract\:\:isScopeStore\(\)\.$#'
@@ -1357,6 +1609,18 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
 
 		-
+			message: '#^Cannot call method getAttribute\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
+
+		-
+			message: '#^Cannot call method move\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Category/Tree.php
+
+		-
 			message: '#^Method Mage_Catalog_Model_Resource_Category_Tree\:\:_getItemIsActive\(\) invoked with 2 parameters, 1 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -1367,6 +1631,12 @@ parameters:
 			identifier: nullCoalesce.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Config.php
+
+		-
+			message: '#^Cannot call method getAttributesByCode\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Eav/Attribute.php
 
 		-
 			message: '#^Binary operation "\-" between int and non\-falsy\-string results in an error\.$#'
@@ -1389,6 +1659,12 @@ parameters:
 		-
 			message: '#^Call to function is_array\(\) with non\-empty\-array will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Product.php
+
+		-
+			message: '#^Cannot call method verifyIds\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product.php
 
@@ -1429,6 +1705,12 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
 
 		-
+			message: '#^Cannot call method getRewriteByProductStore\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
+
+		-
 			message: '#^Method Mage_Catalog_Model_Resource_Product_Collection\:\:_addUrlRewrite\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -1453,6 +1735,12 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
 
 		-
+			message: '#^Cannot call method clearItems\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Product/Compare/Item/Collection.php
+
+		-
 			message: '#^Method Mage_Catalog_Model_Resource_Product_Indexer_Abstract\:\:_getAttribute\(\) should return Mage_Catalog_Model_Resource_Eav_Attribute but returns Mage_Eav_Model_Entity_Attribute_Abstract\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -1471,10 +1759,34 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Indexer/Price.php
 
 		-
+			message: '#^Cannot call method processRelations\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Product/Link.php
+
+		-
 			message: '#^Left side of && is always true\.$#'
 			identifier: booleanAnd.leftAlwaysTrue
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Link/Product/Collection.php
+
+		-
+			message: '#^Cannot call method refreshEnabledIndex\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Product/Status.php
+
+		-
+			message: '#^Cannot call method processRelations\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Product/Type/Configurable.php
+
+		-
+			message: '#^Method Mage_Catalog_Model_Resource_Product_Website\:\:_getProductResource\(\) should return Mage_Catalog_Model_Resource_Product but returns Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Product/Website.php
 
 		-
 			message: '#^Variable \$category might not be defined\.$#'
@@ -1491,6 +1803,18 @@ parameters:
 		-
 			message: '#^Property Mage_Catalog_Model_Url\:\:\$_saveRewritesHistory \(bool\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Url.php
+
+		-
+			message: '#^Static property Mage_Catalog_Model_Url\:\:\$_categoryResourceSingleton \(Mage_Catalog_Model_Category\) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Url.php
+
+		-
+			message: '#^Static property Mage_Catalog_Model_Url\:\:\$_productResourceSingleton \(Mage_Catalog_Model_Category\) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Url.php
 
@@ -1537,6 +1861,12 @@ parameters:
 			path: app/code/core/Mage/CatalogIndex/Model/Indexer.php
 
 		-
+			message: '#^Cannot call method refreshEnabledIndex\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/CatalogIndex/Model/Indexer.php
+
+		-
 			message: '#^Variable \$storeObject might not be defined\.$#'
 			identifier: variable.undefined
 			count: 2
@@ -1567,6 +1897,42 @@ parameters:
 			path: app/code/core/Mage/CatalogInventory/Block/Adminhtml/Form/Field/Minsaleqty.php
 
 		-
+			message: '#^Cannot call method prepareCatalogProductIndexSelect\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Observer.php
+
+		-
+			message: '#^Cannot call method reindexProductIds\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Observer.php
+
+		-
+			message: '#^Cannot call method reindexProducts\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Observer.php
+
+		-
+			message: '#^Cannot call method updateLowStockDate\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Observer.php
+
+		-
+			message: '#^Cannot call method updateSetInStock\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Observer.php
+
+		-
+			message: '#^Cannot call method updateSetOutOfStock\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Observer.php
+
+		-
 			message: '#^Method Mage_CatalogInventory_Model_Observer\:\:_getQuoteItemQtyForCheck\(\) should return int but returns float\.$#'
 			identifier: return.type
 			count: 1
@@ -1589,6 +1955,18 @@ parameters:
 			identifier: function.alreadyNarrowedType
 			count: 1
 			path: app/code/core/Mage/CatalogInventory/Model/Stock/Item.php
+
+		-
+			message: '#^Cannot call method getRulePrices\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/CatalogRule/Model/Observer.php
+
+		-
+			message: '#^Cannot call method updateRuleProductData\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/CatalogRule/Model/Observer.php
 
 		-
 			message: '#^Variable \$gId might not be defined\.$#'
@@ -1633,6 +2011,24 @@ parameters:
 			path: app/code/core/Mage/CatalogSearch/Block/Term.php
 
 		-
+			message: '#^Call to an undefined method Mage_Core_Model_Resource_Db_Collection_Abstract\:\:test\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/CatalogSearch/Helper/Data.php
+
+		-
+			message: '#^Property Mage_CatalogSearch_Helper_Data\:\:\$_engine \(Mage_CatalogSearch_Model_Resource_Fulltext_Engine\) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/CatalogSearch/Helper/Data.php
+
+		-
+			message: '#^Property Mage_CatalogSearch_Helper_Data\:\:\$_engine \(Mage_CatalogSearch_Model_Resource_Fulltext_Engine\) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/CatalogSearch/Helper/Data.php
+
+		-
 			message: '#^Property Mage_CatalogSearch_Helper_Data\:\:\$_queryText \(string\) in isset\(\) is not nullable\.$#'
 			identifier: isset.property
 			count: 1
@@ -1645,6 +2041,12 @@ parameters:
 			path: app/code/core/Mage/CatalogSearch/Model/Advanced.php
 
 		-
+			message: '#^Method Mage_CatalogSearch_Model_Indexer_Fulltext\:\:_getResource\(\) should return Mage_CatalogSearch_Model_Resource_Indexer_Fulltext but returns Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/CatalogSearch/Model/Indexer/Fulltext.php
+
+		-
 			message: '#^Variable \$select might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -1655,6 +2057,12 @@ parameters:
 			identifier: if.alwaysTrue
 			count: 1
 			path: app/code/core/Mage/CatalogSearch/Model/Resource/Search/Collection.php
+
+		-
+			message: '#^Cannot call method getRewriteByProductStore\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Checkout/Block/Cart.php
 
 		-
 			message: '#^Cannot call method setItem\(\) on array\.$#'
@@ -1691,6 +2099,12 @@ parameters:
 			identifier: varTag.nativeType
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Api/Resource/Product.php
+
+		-
+			message: '#^Method Mage_Checkout_Model_Cart\:\:_getResource\(\) should return Mage_Checkout_Model_Resource_Cart but returns Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Checkout/Model/Cart.php
 
 		-
 			message: '#^Negated boolean expression is always false\.$#'
@@ -1781,6 +2195,18 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Checkout/controllers/OnepageController.php
+
+		-
+			message: '#^Cannot call method getCmsPageTitleById\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/code/core/Mage/Cms/Block/Widget/Page/Link.php
+
+		-
+			message: '#^Cannot call method setStore\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/code/core/Mage/Cms/Block/Widget/Page/Link.php
 
 		-
 			message: '#^Method Mage_Eav_Model_Entity_Attribute_Source_Interface\:\:getAllOptions\(\) invoked with 2 parameters, 0 required\.$#'
@@ -1921,6 +2347,12 @@ parameters:
 			path: app/code/core/Mage/Core/Model/App.php
 
 		-
+			message: '#^Method Mage_Core_Model_Cache\:\:_getResource\(\) should return Mage_Core_Model_Resource_Cache but returns Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Core/Model/Cache.php
+
+		-
 			message: '#^Return type \(Mage_Core_Model_App\) of method Mage_Core_Model_Config\:\:_saveCache\(\) should be compatible with return type \(bool\) of method Varien_Simplexml_Config\:\:_saveCache\(\)$#'
 			identifier: method.childReturnType
 			count: 1
@@ -2029,14 +2461,14 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Layout.php
 
 		-
-			message: '#^Cannot unset offset ''@attributes'' on \(array\{\}\|array\{\000\*\000_parent\: Varien_Simplexml_Element\}\)\.$#'
-			identifier: unset.offset
+			message: '#^Call to function is_object\(\) with object will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
 			count: 1
 			path: app/code/core/Mage/Core/Model/Layout.php
 
 		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
+			message: '#^Cannot unset offset ''@attributes'' on \(array\{\}\|array\{\000\*\000_parent\: Varien_Simplexml_Element\}\)\.$#'
+			identifier: unset.offset
 			count: 1
 			path: app/code/core/Mage/Core/Model/Layout.php
 
@@ -2125,6 +2557,12 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Iterator.php
 
 		-
+			message: '#^Method Mage_Core_Model_Resource_Setup\:\:_getResource\(\) should return Mage_Core_Model_Resource_Resource but returns Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Core/Model/Resource/Setup.php
+
+		-
 			message: '#^Property Mage_Core_Model_Resource_Setup\:\:\$_resourceConfig \(Mage_Core_Model_Config_Element\) does not accept SimpleXMLElement\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -2177,6 +2615,12 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Core/Model/Store.php
+
+		-
+			message: '#^Method Mage_Core_Model_Translate\:\:getResource\(\) should return Mage_Core_Model_Resource_Translate but returns Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Core/Model/Translate.php
 
 		-
 			message: '#^Method Mage_Core_Model_Url\:\:getRequest\(\) should return Mage_Core_Controller_Request_Http but returns Zend_Controller_Request_Http\.$#'
@@ -2323,6 +2767,12 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address.php
 
 		-
+			message: '#^Cannot call method findEmailDuplicates\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Config/Share.php
+
+		-
 			message: '#^Method Mage_Eav_Model_Entity_Attribute_Source_Interface\:\:getAllOptions\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -2357,6 +2807,12 @@ parameters:
 			identifier: deadCode.unreachable
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Customer/Api/V2.php
+
+		-
+			message: '#^Cannot call method checkCustomerId\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Session.php
 
 		-
 			message: '#^Method Mage_Dataflow_Model_Batch\:\:setParams\(\) should return Mage_Dataflow_Model_Batch_Abstract but returns \$this\(Mage_Dataflow_Model_Batch\)\.$#'
@@ -2713,6 +3169,12 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Group.php
 
 		-
+			message: '#^Cannot call method getValidAttributeIds\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Set.php
+
+		-
 			message: '#^Call to an undefined method Mage_Eav_Model_Entity_Collection_Abstract\:\:getStoreId\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -2813,6 +3275,12 @@ parameters:
 			identifier: empty.property
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Type.php
+
+		-
+			message: '#^Cannot call method getAdditionalAttributeTable\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Eav/Model/Resource/Entity/Attribute.php
 
 		-
 			message: '#^Method Mage_Eav_Model_Resource_Entity_Attribute\:\:_getMaxSortOrder\(\) should return int but returns string\|false\|null\.$#'
@@ -2929,6 +3397,12 @@ parameters:
 			path: app/code/core/Mage/ImportExport/Model/Export/Entity/Product.php
 
 		-
+			message: '#^Method Mage_ImportExport_Model_Import\:\:getDataSourceModel\(\) should return Mage_ImportExport_Model_Resource_Import_Data but returns Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/ImportExport/Model/Import.php
+
+		-
 			message: '#^Method Mage_Eav_Model_Entity_Attribute_Source_Interface\:\:getAllOptions\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -2965,7 +3439,7 @@ parameters:
 			path: app/code/core/Mage/Index/Model/Lock/Storage/Db.php
 
 		-
-			message: '#^Property Mage_Index_Model_Lock_Storage_Db\:\:\$_helper \(Mage_Index_Model_Resource_Helper_Mysql4\) does not accept Mage_Core_Model_Resource_Helper_Abstract\.$#'
+			message: '#^Property Mage_Index_Model_Lock_Storage_Db\:\:\$_helper \(Mage_Index_Model_Resource_Helper_Mysql4\) does not accept Mage_Core_Model_Resource_Helper_Abstract\|false\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Index/Model/Lock/Storage/Db.php
@@ -3047,6 +3521,12 @@ parameters:
 			identifier: binaryOp.invalid
 			count: 2
 			path: app/code/core/Mage/Log/Model/Resource/Log.php
+
+		-
+			message: '#^Call to an undefined method Mage_Core_Model_Resource_Db_Collection_Abstract\:\:useOnlySubscribed\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Newsletter/Model/Resource/Queue.php
 
 		-
 			message: '#^Call to function is_null\(\) with bool will always evaluate to false\.$#'
@@ -3319,6 +3799,12 @@ parameters:
 			path: app/code/core/Mage/ProductAlert/controllers/AddController.php
 
 		-
+			message: '#^Cannot call method deleteAggregatedRatingsByProductId\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Rating/Model/Observer.php
+
+		-
 			message: '#^Method Mage_Rating_Model_Resource_Rating\:\:getEntityIdByCode\(\) should return int but returns string\|false\|null\.$#'
 			identifier: return.type
 			count: 1
@@ -3391,10 +3877,40 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Resource/Order/Collection.php
 
 		-
+			message: '#^Cannot call method getEntityIdField\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Reports/Model/Resource/Product/Collection.php
+
+		-
+			message: '#^Cannot call method getEntityTable\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Reports/Model/Resource/Product/Collection.php
+
+		-
+			message: '#^Cannot call method getTypeId\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Reports/Model/Resource/Product/Collection.php
+
+		-
 			message: '#^Variable \$productViewEvent might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Resource/Product/Collection.php
+
+		-
+			message: '#^Property Mage_Reports_Model_Resource_Product_Lowstock_Collection\:\:\$_inventoryItemResource \(Mage_CatalogInventory_Model_Resource_Stock_Item\) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/code/core/Mage/Reports/Model/Resource/Product/Lowstock/Collection.php
+
+		-
+			message: '#^Cannot call method getAttribute\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 6
+			path: app/code/core/Mage/Reports/Model/Resource/Quote/Collection.php
 
 		-
 			message: '#^Comparison operation "\!\=" between array\|int and 0 results in an error\.$#'
@@ -3431,6 +3947,18 @@ parameters:
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Review/Block/Form.php
+
+		-
+			message: '#^Cannot call method deleteReviewsByProductId\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Review/Model/Observer.php
+
+		-
+			message: '#^Call to an undefined method Mage_Core_Model_Resource_Db_Collection_Abstract\:\:aggregateEntityByRatingId\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Review/Model/Resource/Review.php
 
 		-
 			message: '#^Method Mage_Review_Model_Resource_Review\:\:getTotalReviews\(\) should return int but returns string\|false\|null\.$#'
@@ -3505,6 +4033,12 @@ parameters:
 			path: app/code/core/Mage/Rule/Model/Condition/Combine.php
 
 		-
+			message: '#^Cannot call method loadAllAttributes\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Rule/Model/Condition/Product/Abstract.php
+
+		-
 			message: '#^Method Mage_Eav_Model_Entity_Attribute_Source_Interface\:\:getAllOptions\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -3529,10 +4063,40 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Config/Ordered.php
 
 		-
+			message: '#^Cannot call method getTypeId\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Entity/Order/Collection.php
+
+		-
 			message: '#^Call to an undefined method Mage_Sales_Model_Resource_Quote_Collection\:\:addAttributeToSelect\(\)\.$#'
 			identifier: method.notFound
 			count: 2
 			path: app/code/core/Mage/Sales/Model/Entity/Quote.php
+
+		-
+			message: '#^Cannot call method markQuotesRecollect\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/code/core/Mage/Sales/Model/Observer.php
+
+		-
+			message: '#^Cannot call method markQuotesRecollectByAffectedProduct\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Observer.php
+
+		-
+			message: '#^Cannot call method substractProductFromQuotes\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Observer.php
+
+		-
+			message: '#^Cannot call method getEmail\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Order.php
 
 		-
 			message: '#^Variable \$oldArea might not be defined\.$#'
@@ -3733,6 +4297,18 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
 
 		-
+			message: '#^Cannot call method getAttribute\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: app/code/core/Mage/Sales/Model/Resource/Billing/Agreement/Collection.php
+
+		-
+			message: '#^Cannot call method getTypeId\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: app/code/core/Mage/Sales/Model/Resource/Billing/Agreement/Collection.php
+
+		-
 			message: '#^Cannot call method updateOnRelatedRecordChanged\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -3743,6 +4319,12 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Resource/Order/Payment/Transaction.php
+
+		-
+			message: '#^Cannot call method getReadConnection\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Resource/Sale/Collection.php
 
 		-
 			message: '#^Call to an undefined method Varien_Db_Adapter_Interface\:\:listTables\(\)\.$#'
@@ -4177,6 +4759,12 @@ parameters:
 			path: app/code/core/Mage/Weee/Helper/Data.php
 
 		-
+			message: '#^Method Mage_Weee_Model_Attribute_Backend_Weee_Tax\:\:_getResource\(\) should return Mage_Weee_Model_Resource_Attribute_Backend_Weee_Tax but returns Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Weee/Model/Attribute/Backend/Weee/Tax.php
+
+		-
 			message: '#^Call to an undefined method Mage_Eav_Model_Entity_Attribute_Abstract\:\:isScopeGlobal\(\)\.$#'
 			identifier: method.notFound
 			count: 2
@@ -4235,6 +4823,12 @@ parameters:
 			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Widget/Block/Adminhtml/Widget/Options.php
+
+		-
+			message: '#^Cannot call method loadPreconfiguredWidget\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Widget/Model/Template/Filter.php
 
 		-
 			message: '#^Variable \$template might not be defined\.$#'
@@ -5153,6 +5747,12 @@ parameters:
 			identifier: variable.undefined
 			count: 4
 			path: app/design/frontend/base/default/template/customer/form/remember.phtml
+
+		-
+			message: '#^Cannot call method getAttribute\(\) on Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/design/frontend/base/default/template/customer/widget/gender.phtml
 
 		-
 			message: '#^Variable \$currency might not be defined\.$#'
