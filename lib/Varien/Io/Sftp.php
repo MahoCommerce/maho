@@ -6,9 +6,11 @@
  * @package    Varien_Io
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+use phpseclib3\Net\SFTP;
 
 /**
  * Sftp client interface
@@ -22,18 +24,14 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
     public const SSH2_PORT = 22;
 
     /**
-     * @var \phpseclib3\Net\SFTP $_connection
+     * @var SFTP $_connection
      */
     protected $_connection = null;
 
     /**
      * Open a SFTP connection to a remote site.
      *
-     * @param array $args Connection arguments
-     * @param string $args[host] Remote hostname
-     * @param string $args[username] Remote username
-     * @param string $args[password] Connection password
-     * @param int $args[timeout] Connection timeout [=10]
+     * @param array{host?: mixed, username?: mixed, password?: mixed, timeout?: int} $args Connection arguments
      * @throws Exception
      */
     #[\Override]
@@ -48,20 +46,20 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
             $host = $args['host'];
             $port = self::SSH2_PORT;
         }
-        $this->_connection = new \phpseclib3\Net\SFTP($host, $port, $args['timeout']);
+        $this->_connection = new SFTP($host, $port, $args['timeout']);
         if (!$this->_connection->login($args['username'], $args['password'])) {
             throw new Exception(sprintf('Unable to open SFTP connection as %s@%s', $args['username'], $args['host']));
         }
+        return true;
     }
 
     /**
      * Close a connection
-     *
      */
     #[\Override]
     public function close()
     {
-        return $this->_connection->disconnect();
+        $this->_connection->disconnect();
     }
 
     /**
@@ -233,6 +231,6 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
      */
     public function writeFile($filename, $src)
     {
-        return $this->_connection->put($filename, $src, \phpseclib3\Net\SFTP::SOURCE_LOCAL_FILE);
+        return $this->_connection->put($filename, $src, SFTP::SOURCE_LOCAL_FILE);
     }
 }
