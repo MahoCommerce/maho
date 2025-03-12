@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -238,7 +238,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
             }
         }
         if ($isNeedCreateLabel) {
-            $this->getResponse()->setBody($responseAjax->toJson());
+            $this->getResponse()->setBodyJson($responseAjax);
         } else {
             $this->_redirect('*/sales_order/view', ['order_id' => $shipment->getOrderId()]);
         }
@@ -542,21 +542,21 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
         $response = new Varien_Object();
         try {
             $shipment = $this->_initShipment();
-            if ($this->_createShippingLabel($shipment)) {
-                $shipment->save();
-                $this->_getSession()->addSuccess(Mage::helper('sales')->__('The shipping label has been created.'));
-                $response->setOk(true);
+            if (!$this->_createShippingLabel($shipment)) {
+                Mage::throwException(Mage::helper('sales')->__('An error occurred while creating shipping label.'));
             }
+            $shipment->save();
+            $this->_getSession()->addSuccess(Mage::helper('sales')->__('The shipping label has been created.'));
+            $this->getResponse()->setBodyJson([ 'ok' => true ]);
         } catch (Mage_Core_Exception $e) {
-            $response->setError(true);
-            $response->setMessage($e->getMessage());
+            $this->getResponse()->setBodyJson([ 'error' => true, 'message' => $e->getMessage() ]);
         } catch (Exception $e) {
             Mage::logException($e);
-            $response->setError(true);
-            $response->setMessage(Mage::helper('sales')->__('An error occurred while creating shipping label.'));
+            $this->getResponse()->setBodyJson([
+                'error' => true,
+                'message' => Mage::helper('sales')->__('An error occurred while creating shipping label.'),
+            ]);
         }
-
-        $this->getResponse()->setBody($response->toJson());
     }
 
     /**

@@ -2533,12 +2533,6 @@ parameters:
 			path: app/code/core/Mage/Directory/Model/Observer.php
 
 		-
-			message: '#^Left side of && is always true\.$#'
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Downloadable/Block/Catalog/Product/Links.php
-
-		-
 			message: '#^Cannot call method streamRead\(\) on resource\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -3429,12 +3423,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method Mage_Reports_Model_Resource_Review_Collection\:\:_joinFields\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Review/Collection.php
-
-		-
-			message: '#^Call to an undefined static method Mage_Review_Model_Resource_Review_Collection\:\:resetSelect\(\)\.$#'
-			identifier: staticMethod.notFound
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Resource/Review/Collection.php
 
@@ -4559,12 +4547,6 @@ parameters:
 			identifier: variable.undefined
 			count: 6
 			path: app/design/adminhtml/default/default/template/sales/order/shipment/create/items/renderer/configurable.phtml
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/design/adminhtml/default/default/template/sales/order/shipment/packaging/grid.phtml
 
 		-
 			message: '#^Access to an undefined property Mage_Adminhtml_Block_Sales_Order_Shipment_Tracking_Info\:\:\$trackingInfo\.$#'
