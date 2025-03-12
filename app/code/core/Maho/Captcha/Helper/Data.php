@@ -14,6 +14,8 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_ENABLED = 'admin/captcha/enabled';
     public const XML_PATH_FRONTEND_SELECTORS = 'admin/captcha/selectors';
+    public const CACHE_TAG = 'maho_captcha';
+    public const CHALLENGE_EXPIRATION = 60;
 
     protected $_moduleName = 'Maho_Captcha';
 
@@ -23,11 +25,6 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
     public function isEnabled(): bool
     {
         return $this->isModuleEnabled() && $this->isModuleOutputEnabled() && Mage::getStoreConfigFlag(self::XML_PATH_ENABLED);
-    }
-
-    public function getTableName(): string
-    {
-        return Mage::getSingleton('core/resource')->getTableName('captcha/challenge');
     }
 
     public function getHmacKey(): string
@@ -75,7 +72,7 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
         $options = new Altcha\ChallengeOptions([
             'algorithm' => Altcha\Algorithm::SHA512,
             'saltLength' => 32,
-            'expires' => (new DateTime())->modify('+1 minute'),
+            'expires' => (new DateTime())->modify('+' . self::CHALLENGE_EXPIRATION . ' seconds'),
             'hmacKey' => $this->getHmacKey(),
             ...($options ?? []),
         ]);
@@ -88,22 +85,21 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
             return false;
         }
 
+        // If the verify() is called multiple times in the same request, it should be considered valid
         if (isset(self::$_payloadVerificationCache[$payload])) {
             return self::$_payloadVerificationCache[$payload];
         }
 
-        // Check that the challenge is not stored in the database, meaning it was already solved
-        $coreRead = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $select = $coreRead->select()
-            ->from($this->getTableName(), ['challenge'])
-            ->where('challenge = ?', $payload);
-        if ($coreRead->fetchOne($select)) {
+        // If challenge is already in cache, it was already solved, validation fails for replay attack protection
+        $cacheKey = sha1($payload);
+        if (Mage::app()->getCache()->test($cacheKey)) {
             return false;
         }
 
         try {
             $isValid = Altcha\Altcha::verifySolution($payload, $this->getHmacKey(), true);
-            $this->logChallenge($payload);
+            Mage::app()->getCache()->save('1', $cacheKey, [self::CACHE_TAG], self::CHALLENGE_EXPIRATION);
+            Mage::app()->getCache()->clean(Zend_Cache::CLEANING_MODE_OLD, [self::CACHE_TAG]);
         } catch (Exception $e) {
             $isValid = false;
             Mage::logException($e);
@@ -111,19 +107,5 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 
         self::$_payloadVerificationCache[$payload] = $isValid;
         return $isValid;
-    }
-
-    protected function logChallenge(string $payload): void
-    {
-        try {
-            Mage::getSingleton('core/resource')
-                ->getConnection('core_write')
-                ->insert($this->getTableName(), [
-                    'challenge' => $payload,
-                    'created_at' => Mage::getModel('core/date')->gmtDate('Y-m-d H:i:s'),
-                ]);
-        } catch (Exception $e) {
-            Mage::logException($e);
-        }
     }
 }

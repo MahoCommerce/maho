@@ -9,30 +9,13 @@
         <models>
             <captcha>
                 <class>Maho_Captcha_Model</class>
-                <resourceModel>captcha_resource</resourceModel>
             </captcha>
-            <captcha_resource>
-                <class>Maho_Captcha_Model_Resource</class>
-                <entities>
-                    <challenge>
-                        <table>captcha_challenge</table>
-                    </challenge>
-                </entities>
-            </captcha_resource>
         </models>
         <helpers>
             <captcha>
                 <class>Maho_Captcha_Helper</class>
             </captcha>
         </helpers>
-        <resources>
-            <captcha_setup>
-                <setup>
-                    <module>Maho_Captcha</module>
-                    <class>Mage_Core_Model_Resource_Setup</class>
-                </setup>
-            </captcha_setup>
-        </resources>
     </global>
     <frontend>
         <routers>
@@ -156,14 +139,6 @@
             </modules>
         </translate>
     </adminhtml>
-    <crontab>
-        <jobs>
-            <captcha_cleanup>
-                <schedule><cron_expr>0 3 * * *</cron_expr></schedule>
-                <run><model>captcha/observer::cleanup</model></run>
-            </captcha_cleanup>
-        </jobs>
-    </crontab>
     <default>
         <admin>
             <captcha>
