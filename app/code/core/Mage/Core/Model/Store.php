@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -573,7 +573,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         if (!isset($this->_baseUrlCache[$cacheKey])) {
             switch ($type) {
                 case self::URL_TYPE_WEB:
-                    $secure = is_null($secure) ? $this->isCurrentlySecure() : (bool) $secure;
+                    $secure = is_null($secure) ? Mage::app()->isCurrentlySecure() : (bool) $secure;
                     $url = $this->getConfig('web/' . ($secure ? 'secure' : 'unsecure') . '/base_url');
                     break;
 
@@ -592,7 +592,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
 
                 case self::URL_TYPE_SKIN:
                 case self::URL_TYPE_JS:
-                    $secure = is_null($secure) ? $this->isCurrentlySecure() : (bool) $secure;
+                    $secure = is_null($secure) ? Mage::app()->isCurrentlySecure() : (bool) $secure;
                     $url = $this->getConfig('web/' . ($secure ? 'secure' : 'unsecure') . '/base_' . $type . '_url');
                     break;
 
@@ -652,7 +652,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      */
     protected function _updateMediaPathUseRewrites($secure = null, $type = self::URL_TYPE_MEDIA)
     {
-        $secure = is_null($secure) ? $this->isCurrentlySecure() : (bool) $secure;
+        $secure = is_null($secure) ? Mage::app()->isCurrentlySecure() : (bool) $secure;
         $secureStringFlag = $secure ? 'secure' : 'unsecure';
         $url = $this->getConfig('web/' . $secureStringFlag . '/base_' . $type . '_url');
         if (!$this->getConfig(self::XML_PATH_USE_REWRITES)
