@@ -6,6 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -35,6 +36,7 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_Packaging extends Mage_Adminhtml
     public function getConfigDataJson()
     {
         $shipmentId = $this->getShipment()->getId();
+        $shippingMethod = $this->getShipment()->getOrder()->getShippingMethod();
         $orderId = $this->getRequest()->getParam('order_id');
         $urlParams = [];
 
@@ -88,6 +90,7 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_Packaging extends Mage_Adminhtml
             'shipmentItemsProductId'    => $itemsProductId,
             'shipmentItemsOrderItemId'  => $itemsOrderItemId,
             'customizable'              => $this->_getCustomizableContainers(),
+            'girthEnabled'              => Mage::helper('usa')->displayGirthValue($shippingMethod) && $this->isGirthAllowed(),
         ];
         return Mage::helper('core')->jsonEncode($data);
     }
@@ -205,9 +208,9 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_Packaging extends Mage_Adminhtml
     {
         $items = $this->getShipment()->getAllItems();
         foreach ($items as $item) {
-            if ($itemsOf == 'order' && $item->getOrderItemId() == $itemId) {
+            if ($itemsOf === 'order' && $item->getOrderItemId() == $itemId) {
                 return $item;
-            } elseif ($itemsOf == 'shipment' && $item->getId() == $itemId) {
+            } elseif ($itemsOf === 'shipment' && $item->getId() == $itemId) {
                 return $item;
             }
         }
