@@ -35,7 +35,7 @@ class Varien_Io_Ftp extends Varien_Io_Abstract
     /**
      * An FTP connection
      *
-     * @var false|resource|FTP\Connection
+     * @var FTP\Connection|false
      */
     protected $_conn;
 
