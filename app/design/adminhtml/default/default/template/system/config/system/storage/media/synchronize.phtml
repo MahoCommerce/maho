@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -14,7 +14,7 @@
 
 <script type="text/javascript">
 //<![CDATA[
-    Validation.add('required-synchronize', '<?= Mage::helper('core')->jsQuoteEscape($this->__('Synchronization is required.')) ?>', function(){
+    Validation.add('required-synchronize', '<?= $this->jsQuoteEscape($this->__('Synchronization is required.')) ?>', function(){
         storage = getConnectionName(
             $('system_media_storage_configuration_media_storage').value,
             $('system_media_storage_configuration_media_database').value

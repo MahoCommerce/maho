@@ -61,4 +61,16 @@
             <message>Passkey will be deleted upon saving.</message>
         </passkey-deleted>
     </script>
+
+    <script path="mage/adminhtml/sales/packaging.js" area="adminhtml" module="sales">
+        <invalid-url translate="message" module="core">
+            <message>Invalid URL</message>
+        </invalid-url>
+        <dialog-title translate="message">
+            <message>Create Packages</message>
+        </dialog-title>
+        <submit-shipment translate="message">
+            <message>Submit Shipment</message>
+        </submit-shipment>
+    </script>
 </jstranslator>

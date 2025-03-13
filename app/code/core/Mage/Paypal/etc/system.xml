@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
@@ -168,8 +168,7 @@
                                             <sandbox_flag translate="label">
                                                 <label>Test Mode</label>
                                                 <config_path>payment/payflow_advanced/sandbox_flag</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>50</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -178,8 +177,7 @@
                                             <use_proxy translate="label">
                                                 <label>Use Proxy</label>
                                                 <config_path>payment/payflow_advanced/use_proxy</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>60</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -292,8 +290,7 @@
                                             <sandbox_flag translate="label">
                                                 <label>Sandbox Mode</label>
                                                 <config_path>paypal/wpp/sandbox_flag</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>80</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -302,8 +299,7 @@
                                             <use_proxy translate="label">
                                                 <label>API Uses Proxy</label>
                                                 <config_path>paypal/wpp/use_proxy</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>90</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -332,8 +328,7 @@
                                     <enable_payflow_advanced translate="label comment">
                                         <label>Enable this Solution</label>
                                         <config_path>payment/payflow_advanced/active</config_path>
-                                        <frontend_type>select</frontend_type>
-                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                        <frontend_type>boolean</frontend_type>
                                         <sort_order>30</sort_order>
                                         <show_in_default>1</show_in_default>
                                         <show_in_website>1</show_in_website>
@@ -543,8 +538,7 @@
                                             <debug translate="label">
                                                 <label>Debug Mode</label>
                                                 <config_path>payment/payflow_advanced/debug</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>30</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -552,8 +546,7 @@
                                             <verify_peer translate="label">
                                                 <label>Enable SSL verification</label>
                                                 <config_path>payment/payflow_advanced/verify_peer</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>35</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -561,8 +554,7 @@
                                             <csc_editable translate="label">
                                                 <label>CVV Entry is Editable</label>
                                                 <config_path>payment/payflow_advanced/csc_editable</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>40</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -570,8 +562,7 @@
                                             <csc_required translate="label">
                                                 <label>Require CVV Entry</label>
                                                 <config_path>payment/payflow_advanced/csc_required</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>50</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -580,8 +571,7 @@
                                             <email_confirmation translate="label">
                                                 <label>Send Email Confirmation</label>
                                                 <config_path>payment/payflow_advanced/email_confirmation</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>60</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -598,8 +588,7 @@
                                             <mobile_optimized translate="label">
                                                 <label>Mobile Optimized</label>
                                                 <config_path>payment/payflow_advanced/mobile_optimized</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>75</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -615,8 +604,7 @@
                                                         <label>Enabled</label>
                                                         <comment><![CDATA[Will appear as a payment option only for customers who have at least one active billing agreement.]]></comment>
                                                         <config_path>payment/paypal_billing_agreement/active</config_path>
-                                                        <frontend_type>select</frontend_type>
-                                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                        <frontend_type>boolean</frontend_type>
                                                         <sort_order>10</sort_order>
                                                         <show_in_default>1</show_in_default>
                                                         <show_in_website>1</show_in_website>
@@ -675,8 +663,7 @@
                                                     <debug translate="label">
                                                         <label>Debug Mode</label>
                                                         <config_path>payment/paypal_billing_agreement/debug</config_path>
-                                                        <frontend_type>select</frontend_type>
-                                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                        <frontend_type>boolean</frontend_type>
                                                         <sort_order>70</sort_order>
                                                         <show_in_default>1</show_in_default>
                                                         <show_in_website>1</show_in_website>
@@ -685,8 +672,7 @@
                                                     <verify_peer translate="label">
                                                         <label>Enable SSL verification</label>
                                                         <config_path>payment/paypal_billing_agreement/verify_peer</config_path>
-                                                        <frontend_type>select</frontend_type>
-                                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                        <frontend_type>boolean</frontend_type>
                                                         <sort_order>75</sort_order>
                                                         <show_in_default>1</show_in_default>
                                                         <show_in_website>1</show_in_website>
@@ -695,8 +681,7 @@
                                                     <line_items_enabled translate="label">
                                                         <label>Transfer Cart Line Items</label>
                                                         <config_path>payment/paypal_billing_agreement/line_items_enabled</config_path>
-                                                        <frontend_type>select</frontend_type>
-                                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                        <frontend_type>boolean</frontend_type>
                                                         <sort_order>80</sort_order>
                                                         <show_in_default>1</show_in_default>
                                                         <show_in_website>1</show_in_website>
@@ -705,8 +690,7 @@
                                                     <allow_billing_agreement_wizard translate="label">
                                                         <label>Allow in Billing Agreement Wizard</label>
                                                         <config_path>payment/paypal_billing_agreement/allow_billing_agreement_wizard</config_path>
-                                                        <frontend_type>select</frontend_type>
-                                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                        <frontend_type>boolean</frontend_type>
                                                         <sort_order>90</sort_order>
                                                         <show_in_default>1</show_in_default>
                                                         <show_in_website>1</show_in_website>
@@ -750,8 +734,7 @@
                                                     <settlement_reports_ftp_sandbox translate="label">
                                                         <label>Sandbox Mode</label>
                                                         <config_path>paypal/fetch_reports/ftp_sandbox</config_path>
-                                                        <frontend_type>select</frontend_type>
-                                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                        <frontend_type>boolean</frontend_type>
                                                         <sort_order>40</sort_order>
                                                         <show_in_default>1</show_in_default>
                                                         <show_in_website>1</show_in_website>
@@ -789,8 +772,7 @@
                                                     <settlement_reports_active translate="label">
                                                         <label>Enable Automatic Fetching</label>
                                                         <config_path>paypal/fetch_reports/active</config_path>
-                                                        <frontend_type>select</frontend_type>
-                                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                        <frontend_type>boolean</frontend_type>
                                                         <sort_order>80</sort_order>
                                                         <show_in_default>1</show_in_default>
                                                         <show_in_website>1</show_in_website>
@@ -941,8 +923,7 @@
                                     <visible_on_product translate="label">
                                         <label>Display on Product Details Page</label>
                                         <config_path>payment/paypal_express/visible_on_product</config_path>
-                                        <frontend_type>select</frontend_type>
-                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                        <frontend_type>boolean</frontend_type>
                                         <sort_order>40</sort_order>
                                         <show_in_default>1</show_in_default>
                                         <show_in_website>1</show_in_website>
@@ -1023,8 +1004,7 @@
                                             <debug translate="label">
                                                 <label>Debug Mode</label>
                                                 <config_path>payment/paypal_express/debug</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>30</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -1033,8 +1013,7 @@
                                             <verify_peer translate="label">
                                                 <label>Enable SSL verification</label>
                                                 <config_path>payment/paypal_express/verify_peer</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>35</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -1043,8 +1022,7 @@
                                             <line_items_enabled translate="label">
                                                 <label>Transfer Cart Line Items</label>
                                                 <config_path>payment/paypal_express/line_items_enabled</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>40</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -1055,8 +1033,7 @@
                                                 <config_path>payment/paypal_express/transfer_shipping_options</config_path>
                                                 <tooltip>If this option is enabled, customer can change shipping address and shipping method on PayPal website. In live mode works via HTTPS protocol only.</tooltip>
                                                 <comment>Notice that PayPal can handle up to 10 shipping options. That is why Maho will transfer only first 10 cheapest shipping options if there are more than 10 available.</comment>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>50</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -1112,8 +1089,7 @@
                                             <skip_order_review_step translate="label comment">
                                                 <label>Skip Order Review Step</label>
                                                 <config_path>payment/paypal_express/skip_order_review_step</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>95</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -1335,8 +1311,7 @@
                                     <enable_wpp translate="label">
                                         <label>Enable this Solution</label>
                                         <config_path>payment/paypal_direct/active</config_path>
-                                        <frontend_type>select</frontend_type>
-                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                        <frontend_type>boolean</frontend_type>
                                         <sort_order>20</sort_order>
                                         <show_in_default>1</show_in_default>
                                         <show_in_website>1</show_in_website>
@@ -1429,8 +1404,7 @@
                                             <debug translate="label">
                                                 <label>Debug Mode</label>
                                                 <config_path>payment/paypal_direct/debug</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>30</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -1438,8 +1412,7 @@
                                             <verify_peer translate="label">
                                                 <label>Enable SSL verification</label>
                                                 <config_path>payment/paypal_direct/verify_peer</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>35</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -1447,8 +1420,7 @@
                                             <line_items_enabled translate="label">
                                                 <label>Transfer Cart Line Items</label>
                                                 <config_path>payment/paypal_direct/line_items_enabled</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>40</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -1456,8 +1428,7 @@
                                             <useccv translate="label">
                                                 <label>Require CVV Entry</label>
                                                 <config_path>payment/paypal_direct/useccv</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>50</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -1472,8 +1443,7 @@
                                             <centinel translate="label">
                                                 <label>3D Secure Card Validation</label>
                                                 <config_path>payment/paypal_direct/centinel</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>60</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -1482,8 +1452,7 @@
                                                 <label>Severe 3D Secure Card Validation</label>
                                                 <config_path>payment/paypal_direct/centinel_is_mode_strict</config_path>
                                                 <comment>Severe Validation Removes Chargeback Liability on Merchant</comment>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>65</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -1650,8 +1619,7 @@
                                     <enable_wps translate="label">
                                         <label>Enable this Solution</label>
                                         <config_path>payment/paypal_standard/active</config_path>
-                                        <frontend_type>select</frontend_type>
-                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                        <frontend_type>boolean</frontend_type>
                                         <sort_order>20</sort_order>
                                         <show_in_default>1</show_in_default>
                                         <show_in_website>1</show_in_website>
@@ -1724,8 +1692,7 @@
                                             <sandbox_flag translate="label">
                                                 <label>Sandbox Mode</label>
                                                 <config_path>payment/paypal_standard/sandbox_flag</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>30</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -1733,8 +1700,7 @@
                                             <line_items_enabled translate="label">
                                                 <label>Transfer Cart Line Items</label>
                                                 <config_path>payment/paypal_standard/line_items_enabled</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>40</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -1752,8 +1718,7 @@
                                             <debug translate="label">
                                                 <label>Debug Mode</label>
                                                 <config_path>payment/paypal_standard/debug</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>60</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -1761,8 +1726,7 @@
                                             <verify_peer translate="label">
                                                 <label>Enable SSL verification</label>
                                                 <config_path>payment/paypal_standard/verify_peer</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>70</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -1974,8 +1938,7 @@
                                     <enable_wps_express_checkout translate="label">
                                         <label>Enable this Solution</label>
                                         <config_path>payment/paypal_wps_express/active</config_path>
-                                        <frontend_type>select</frontend_type>
-                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                        <frontend_type>boolean</frontend_type>
                                         <sort_order>20</sort_order>
                                         <show_in_default>1</show_in_default>
                                         <show_in_website>1</show_in_website>
@@ -2158,8 +2121,7 @@
                                             <sandbox_flag translate="label">
                                                 <label>Test Mode</label>
                                                 <config_path>payment/verisign/sandbox_flag</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>60</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -2167,8 +2129,7 @@
                                             <use_proxy translate="label">
                                                 <label>Use Proxy</label>
                                                 <config_path>payment/verisign/use_proxy</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>70</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -2194,8 +2155,7 @@
                                     <enable_paypal_payflow translate="label">
                                         <label>Enable this Solution</label>
                                         <config_path>payment/verisign/active</config_path>
-                                        <frontend_type>select</frontend_type>
-                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                        <frontend_type>boolean</frontend_type>
                                         <sort_order>20</sort_order>
                                         <show_in_default>1</show_in_default>
                                         <show_in_website>1</show_in_website>
@@ -2286,8 +2246,7 @@
                                             <debug translate="label">
                                                 <label>Debug Mode</label>
                                                 <config_path>payment/verisign/debug</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>30</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -2295,8 +2254,7 @@
                                             <verify_peer translate="label">
                                                 <label>Enable SSL verification</label>
                                                 <config_path>payment/verisign/verify_peer</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>35</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -2304,8 +2262,7 @@
                                             <useccv translate="label">
                                                 <label>Require CVV Entry</label>
                                                 <config_path>payment/verisign/useccv</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>40</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -2320,8 +2277,7 @@
                                             <centinel translate="label">
                                                 <label>3D Secure Card Validation</label>
                                                 <config_path>payment/verisign/centinel</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>60</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -2330,8 +2286,7 @@
                                                 <label>Severe 3D Secure Card Validation</label>
                                                 <config_path>payment/verisign/centinel_is_mode_strict</config_path>
                                                 <comment>Severe validation removes chargeback liability on merchant.</comment>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>70</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -2406,8 +2361,7 @@
                                                 <a href="https://www.paypal.com/webapps/mpp/promotional-financing" target="_blank">Learn More</a>]]>
                                                 </comment>
                                                 <config_path>payment/paypaluk_express_bml/active</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>21</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -2596,10 +2550,9 @@
                                 <fields>
                                     <enable_express_pe>
                                         <config_path>payment/paypaluk_express/active</config_path>
-                                        <frontend_type>select</frontend_type>
+                                        <frontend_type>boolean</frontend_type>
                                         <frontend_model>paypal/adminhtml_system_config_field_hidden</frontend_model>
                                         <frontend_class>paypal-ec-payflow-enabler</frontend_class>
-                                        <source_model>adminhtml/system_config_source_yesno</source_model>
                                         <show_in_default>1</show_in_default>
                                         <show_in_website>1</show_in_website>
                                     </enable_express_pe>
@@ -2632,8 +2585,7 @@
                                     <visible_on_product translate="label">
                                         <label>Display on Product Details Page</label>
                                         <config_path>payment/paypaluk_express/visible_on_product</config_path>
-                                        <frontend_type>select</frontend_type>
-                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                        <frontend_type>boolean</frontend_type>
                                         <sort_order>50</sort_order>
                                         <show_in_default>1</show_in_default>
                                         <show_in_website>1</show_in_website>
@@ -2679,8 +2631,7 @@
                                             <debug translate="label">
                                                 <label>Debug Mode</label>
                                                 <config_path>payment/paypaluk_express/debug</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>30</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -2688,8 +2639,7 @@
                                             <verify_peer translate="label">
                                                 <label>Enable SSL verification</label>
                                                 <config_path>payment/paypaluk_express/verify_peer</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>35</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -2697,8 +2647,7 @@
                                             <line_items_enabled translate="label">
                                                 <label>Transfer Cart Line Items</label>
                                                 <config_path>payment/paypaluk_express/line_items_enabled</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>40</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -2920,8 +2869,7 @@
                                             <sandbox_flag translate="label">
                                                 <label>Test Mode</label>
                                                 <config_path>payment/payflow_link/sandbox_flag</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>50</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -2929,8 +2877,7 @@
                                             <use_proxy translate="label">
                                                 <label>Use Proxy</label>
                                                 <config_path>payment/payflow_link/use_proxy</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>60</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -2963,8 +2910,7 @@
                                     <enable_payflow_link translate="label">
                                         <label>Enable Payflow Link</label>
                                         <config_path>payment/payflow_link/active</config_path>
-                                        <frontend_type>select</frontend_type>
-                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                        <frontend_type>boolean</frontend_type>
                                         <sort_order>20</sort_order>
                                         <show_in_default>1</show_in_default>
                                         <show_in_website>1</show_in_website>
@@ -2994,8 +2940,7 @@
                                     <enable_express_checkout translate="label">
                                         <label>Enable Express Checkout</label>
                                         <config_path>payment/paypal_express/active</config_path>
-                                        <frontend_type>select</frontend_type>
-                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                        <frontend_type>boolean</frontend_type>
                                         <sort_order>40</sort_order>
                                         <show_in_default>1</show_in_default>
                                         <show_in_website>1</show_in_website>
@@ -3071,8 +3016,7 @@
                                             <debug translate="label">
                                                 <label>Debug Mode</label>
                                                 <config_path>payment/payflow_link/debug</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>30</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3080,8 +3024,7 @@
                                             <verify_peer translate="label">
                                                 <label>Enable SSL verification</label>
                                                 <config_path>payment/payflow_link/verify_peer</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>35</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3089,8 +3032,7 @@
                                             <csc_editable translate="label">
                                                 <label>CVV Entry is Editable</label>
                                                 <config_path>payment/payflow_link/csc_editable</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>40</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3098,8 +3040,7 @@
                                             <csc_required translate="label">
                                                 <label>Require CVV Entry</label>
                                                 <config_path>payment/payflow_link/csc_required</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>50</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3108,8 +3049,7 @@
                                             <email_confirmation translate="label">
                                                 <label>Send Email Confirmation</label>
                                                 <config_path>payment/payflow_link/email_confirmation</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>60</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3126,8 +3066,7 @@
                                             <mobile_optimized translate="label">
                                                 <label>Mobile Optimized</label>
                                                 <config_path>payment/payflow_link/mobile_optimized</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>75</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3304,8 +3243,7 @@
                                             <sandbox_flag translate="label">
                                                 <label>Test Mode</label>
                                                 <config_path>paypal/wpuk/sandbox_flag</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>60</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3313,8 +3251,7 @@
                                             <use_proxy translate="label">
                                                 <label>API Uses Proxy</label>
                                                 <config_path>paypal/wpuk/use_proxy</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>70</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3340,8 +3277,7 @@
                                     <enable_pp_pe translate="label">
                                         <label>Enable this Solution</label>
                                         <config_path>payment/paypaluk_direct/active</config_path>
-                                        <frontend_type>select</frontend_type>
-                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                        <frontend_type>boolean</frontend_type>
                                         <sort_order>20</sort_order>
                                         <show_in_default>1</show_in_default>
                                         <show_in_website>1</show_in_website>
@@ -3433,8 +3369,7 @@
                                             <debug translate="label">
                                                 <label>Debug Mode</label>
                                                 <config_path>payment/paypaluk_direct/debug</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>30</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3442,8 +3377,7 @@
                                             <verify_peer translate="label">
                                                 <label>Enable SSL verification</label>
                                                 <config_path>payment/paypaluk_direct/verify_peer</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>35</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3451,8 +3385,7 @@
                                             <line_items_enabled translate="label">
                                                 <label>Transfer Cart Line Items</label>
                                                 <config_path>payment/paypaluk_direct/line_items_enabled</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>37</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3460,8 +3393,7 @@
                                             <useccv translate="label">
                                                 <label>Require CVV Entry</label>
                                                 <config_path>payment/paypaluk_direct/useccv</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>40</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3476,8 +3408,7 @@
                                             <centinel translate="label">
                                                 <label>3D Secure Card Validation</label>
                                                 <config_path>payment/paypaluk_direct/centinel</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>60</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3486,8 +3417,7 @@
                                                 <label>Severe 3D Secure Card Validation</label>
                                                 <config_path>payment/paypaluk_direct/centinel_is_mode_strict</config_path>
                                                 <comment>Severe Validation Removes Chargeback Liability on Merchant</comment>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>70</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3675,8 +3605,7 @@
                                     <pphs_enable translate="label">
                                         <label>Enable this Solution</label>
                                         <config_path>payment/hosted_pro/active</config_path>
-                                        <frontend_type>select</frontend_type>
-                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                        <frontend_type>boolean</frontend_type>
                                         <sort_order>20</sort_order>
                                         <show_in_default>1</show_in_default>
                                         <show_in_website>1</show_in_website>
@@ -3723,8 +3652,7 @@
                                     <display_ec translate="label">
                                         <label>Display Express Checkout in the Payment Information step</label>
                                         <config_path>payment/hosted_pro/display_ec</config_path>
-                                        <frontend_type>select</frontend_type>
-                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                        <frontend_type>boolean</frontend_type>
                                         <sort_order>40</sort_order>
                                         <show_in_default>1</show_in_default>
                                         <show_in_website>1</show_in_website>
@@ -3759,8 +3687,7 @@
                                             <debug translate="label">
                                                 <label>Debug Mode</label>
                                                 <config_path>payment/hosted_pro/debug</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>30</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3768,8 +3695,7 @@
                                             <verify_peer translate="label">
                                                 <label>Enable SSL verification</label>
                                                 <config_path>payment/hosted_pro/verify_peer</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>35</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3777,8 +3703,7 @@
                                             <mobile_optimized translate="label">
                                                 <label>Mobile Optimized</label>
                                                 <config_path>payment/hosted_pro/mobile_optimized</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>37</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -3966,8 +3891,7 @@
                                         <a href="https://www.paypal.com/webapps/mpp/promotional-financing" target="_blank">Learn More</a>]]>
                                                 </comment>
                                                 <config_path>payment/paypal_express_bml/active</config_path>
-                                                <frontend_type>select</frontend_type>
-                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                <frontend_type>boolean</frontend_type>
                                                 <sort_order>21</sort_order>
                                                 <show_in_default>1</show_in_default>
                                                 <show_in_website>1</show_in_website>
@@ -4017,8 +3941,7 @@
                                                             <bml_homepage_display translate="label">
                                                                 <label>Display</label>
                                                                 <config_path>payment/paypal_express_bml/homepage_display</config_path>
-                                                                <frontend_type>select</frontend_type>
-                                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                                <frontend_type>boolean</frontend_type>
                                                                 <show_in_default>1</show_in_default>
                                                                 <show_in_website>1</show_in_website>
                                                                 <sort_order>10</sort_order>
@@ -4061,8 +3984,7 @@
                                                             <bml_categorypage_display translate="label">
                                                                 <label>Display</label>
                                                                 <config_path>payment/paypal_express_bml/categorypage_display</config_path>
-                                                                <frontend_type>select</frontend_type>
-                                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                                <frontend_type>boolean</frontend_type>
                                                                 <show_in_default>1</show_in_default>
                                                                 <show_in_website>1</show_in_website>
                                                                 <sort_order>10</sort_order>
@@ -4105,8 +4027,7 @@
                                                             <bml_productpage_display translate="label">
                                                                 <label>Display</label>
                                                                 <config_path>payment/paypal_express_bml/productpage_display</config_path>
-                                                                <frontend_type>select</frontend_type>
-                                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                                <frontend_type>boolean</frontend_type>
                                                                 <show_in_default>1</show_in_default>
                                                                 <show_in_website>1</show_in_website>
                                                                 <sort_order>10</sort_order>
@@ -4149,8 +4070,7 @@
                                                             <bml_checkout_display translate="label">
                                                                 <label>Display</label>
                                                                 <config_path>payment/paypal_express_bml/checkout_display</config_path>
-                                                                <frontend_type>select</frontend_type>
-                                                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                                                <frontend_type>boolean</frontend_type>
                                                                 <show_in_default>1</show_in_default>
                                                                 <show_in_website>1</show_in_website>
                                                                 <sort_order>10</sort_order>
@@ -4228,8 +4148,7 @@
                                     <enable_express_checkout translate="label">
                                         <label>Enable this Solution</label>
                                         <config_path>payment/paypal_express/active</config_path>
-                                        <frontend_type>select</frontend_type>
-                                        <source_model>adminhtml/system_config_source_yesno</source_model>
+                                        <frontend_type>boolean</frontend_type>
                                         <sort_order>20</sort_order>
                                         <show_in_default>1</show_in_default>
                                         <show_in_website>1</show_in_website>

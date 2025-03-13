@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 /** @var Mage_Checkout_Block_Onepage_Billing $this */
@@ -36,7 +36,7 @@
                     </div>
         <?php if(!$this->isCustomerLoggedIn()): ?>
                     <div class="field">
-                        <label for="billing:email" class="required"><em>*</em><?= $this->__('Email Address') ?></label>
+                        <label for="billing:email" class="required"><?= $this->__('Email Address') ?></label>
                         <div class="input-box">
                             <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="billing[email]" id="billing:email" value="<?= $this->escapeHtml($this->getAddress()->getEmail()) ?>" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="input-text validate-email required-entry" />
                         </div>
@@ -45,7 +45,7 @@
                 </li>
         <?php $_streetValidationClass = $this->helper('customer/address')->getAttributeValidationClass('street'); ?>
                 <li class="wide">
-                    <label for="billing:street1" class="required"><em>*</em><?= $this->__('Address') ?></label>
+                    <label for="billing:street1" class="required"><?= $this->__('Address') ?></label>
                     <div class="input-box">
                         <input type="text" title="<?= $this->quoteEscape($this->__('Street Address')) ?>" name="billing[street][]" id="billing:street1" value="<?= $this->escapeHtml($this->getAddress()->getStreet(1)) ?>" class="input-text <?= $_streetValidationClass ?>" />
                     </div>
@@ -69,13 +69,13 @@
                 <?php endif ?>
                 <li class="fields">
                     <div class="field">
-                        <label for="billing:city" class="required"><em>*</em><?= $this->__('City') ?></label>
+                        <label for="billing:city" class="required"><?= $this->__('City') ?></label>
                         <div class="input-box">
                             <input type="text" title="<?= $this->quoteEscape($this->__('City')) ?>" name="billing[city]" value="<?= $this->escapeHtml($this->getAddress()->getCity()) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('city') ?>" id="billing:city" />
                         </div>
                     </div>
                     <div class="field">
-                        <label for="billing:region_id" class="required"><em>*</em><?= $this->__('State/Province') ?></label>
+                        <label for="billing:region_id" class="required"><?= $this->__('State/Province') ?></label>
                         <div class="input-box">
                             <select id="billing:region_id" name="billing[region_id]" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="validate-select" style="display:none;">
                                 <option value=""><?= $this->__('Please select region, state or province') ?></option>
@@ -89,13 +89,13 @@
                 </li>
                 <li class="fields">
                     <div class="field">
-                        <label for="billing:postcode" class="required"><em>*</em><?= $this->__('Zip/Postal Code') ?></label>
+                        <label for="billing:postcode" class="required"><?= $this->__('Zip/Postal Code') ?></label>
                         <div class="input-box">
                             <input type="text" title="<?= $this->quoteEscape($this->__('Zip/Postal Code')) ?>" name="billing[postcode]" id="billing:postcode" value="<?= $this->escapeHtml($this->getAddress()->getPostcode()) ?>" class="input-text validate-zip-international <?= $this->helper('customer/address')->getAttributeValidationClass('postcode') ?>" />
                         </div>
                     </div>
                     <div class="field">
-                        <label for="billing:country_id" class="required"><em>*</em><?= $this->__('Country') ?></label>
+                        <label for="billing:country_id" class="required"><?= $this->__('Country') ?></label>
                         <div class="input-box">
                             <?= $this->getCountryHtmlSelect('billing') ?>
                         </div>
@@ -103,7 +103,7 @@
                 </li>
                 <li class="fields">
                     <div class="field">
-                        <label for="billing:telephone" class="required"><em>*</em><?= $this->__('Telephone') ?></label>
+                        <label for="billing:telephone" class="required"><?= $this->__('Telephone') ?></label>
                         <div class="input-box">
                             <input type="tel" name="billing[telephone]" value="<?= $this->escapeHtml($this->getAddress()->getTelephone()) ?>" title="<?= $this->quoteEscape($this->__('Telephone')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('telephone') ?>" id="billing:telephone" />
                         </div>
@@ -140,7 +140,7 @@
 
                 <li class="fields" id="register-customer-password">
                     <div class="field">
-                        <label for="billing:customer_password" class="required"><em>*</em><?= $this->__('Password') ?></label>
+                        <label for="billing:customer_password" class="required"><?= $this->__('Password') ?></label>
                         <div class="input-box">
                             <?php $minPasswordLength = $this->getQuote()->getCustomer()->getMinPasswordLength(); ?>
                             <input type="password"
@@ -155,7 +155,7 @@
                         </div>
                     </div>
                     <div class="field">
-                        <label for="billing:confirm_password" class="required"><em>*</em><?= $this->__('Confirm Password') ?></label>
+                        <label for="billing:confirm_password" class="required"><?= $this->__('Confirm Password') ?></label>
                         <div class="input-box">
                             <input type="password" name="billing[confirm_password]" title="<?= $this->quoteEscape($this->__('Confirm Password')) ?>" id="billing:confirm_password" class="input-text required-entry validate-cpassword" autocomplete="new-password" />
                         </div>

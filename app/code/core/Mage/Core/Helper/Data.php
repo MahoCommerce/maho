@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2016-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -530,6 +530,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      * @param string $prefix
      * @param bool $forceSetAll
      * @return mixed
+     * @deprecated since 25.3.0
      */
     public function decorateArray($array, $prefix = 'decorated_', $forceSetAll = false)
     {
@@ -580,6 +581,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      * @param string $key
      * @param mixed $value
      * @param bool $dontSkip
+     * @deprecated since 25.3.0
      */
     private function _decorateArrayObject($element, $key, $value, $dontSkip)
     {

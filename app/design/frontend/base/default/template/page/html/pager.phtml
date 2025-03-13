@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
@@ -40,7 +40,7 @@
         <?php if (count($availableLimits) > 1): ?>
             <div class="limiter">
                 <label><?= $this->__('Show') ?></label>
-                <select onchange="setLocation(this.value)" title="<?= Mage::helper('core')->quoteEscape($this->__('Results per page')) ?>">
+                <select onchange="setLocation(this.value)" title="<?= $this->quoteEscape($this->__('Results per page')) ?>">
                 <?php foreach ($availableLimits as $_key => $_limit): ?>
                     <option value="<?= $this->getLimitUrl($_key) ?>"<?php if($this->isLimitCurrent($_key)): ?> selected="selected"<?php endif ?>>
                         <?= $_limit ?>
@@ -58,7 +58,7 @@
         <ol>
         <?php if (!$this->isFirstPage()): ?>
             <li>
-                <a class="previous<?php if(!$this->getAnchorTextForPrevious()): ?> i-previous<?php endif ?>" href="<?= $this->getPreviousPageUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Previous')) ?>">
+                <a class="previous<?php if(!$this->getAnchorTextForPrevious()): ?> i-previous<?php endif ?>" href="<?= $this->getPreviousPageUrl() ?>" title="<?= $this->quoteEscape($this->__('Previous')) ?>">
                     <?php if(!$this->getAnchorTextForPrevious()): ?>
                         <?= $this->__('Previous') ?>
                     <?php else: ?>
@@ -95,7 +95,7 @@
 
         <?php if (!$this->isLastPage()): ?>
             <li>
-                <a class="next<?php if(!$this->getAnchorTextForNext()): ?> i-next<?php endif ?>" href="<?= $this->getNextPageUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Next')) ?>">
+                <a class="next<?php if(!$this->getAnchorTextForNext()): ?> i-next<?php endif ?>" href="<?= $this->getNextPageUrl() ?>" title="<?= $this->quoteEscape($this->__('Next')) ?>">
                     <?php if(!$this->getAnchorTextForNext()): ?>
                         <?= $this->__('Next') ?>
                     <?php else: ?>

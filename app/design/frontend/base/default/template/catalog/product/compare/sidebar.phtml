@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 /** @var Mage_Catalog_Block_Product_Compare_Sidebar $this */
@@ -29,14 +29,14 @@ $_items = $_helper->getItemCount() > 0 ? $_helper->getItemCollection() : null;
         <?php foreach($_items as $_index => $_item): ?>
             <li class="item">
                 <input type="hidden" class="compare-item-id" value="<?= $_item->getId() ?>" />
-                <a href="<?= $_helper->getRemoveUrl($_item) ?>" title="<?= $this->quoteEscape($this->__('Remove This Item')) ?>" class="btn-remove" onclick="return confirm('<?= Mage::helper('core')->jsQuoteEscape($this->__('Are you sure you would like to remove this item from the compare products?')) ?>');"><?= $this->__('Remove This Item') ?></a>
+                <a href="<?= $_helper->getRemoveUrl($_item) ?>" title="<?= $this->quoteEscape($this->__('Remove This Item')) ?>" class="btn-remove" onclick="return confirm('<?= $this->jsQuoteEscape($this->__('Are you sure you would like to remove this item from the compare products?')) ?>');"><?= $this->__('Remove This Item') ?></a>
                 <p class="product-name"><a href="<?= $this->getProductUrl($_item) ?>"><?= $this->helper('catalog/output')->productAttribute($_item, $_item->getName(), 'name') ?></a></p>
             </li>
         <?php endforeach ?>
         </ol>
         <div class="actions">
-            <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Compare')) ?>" class="button" onclick="popWin('<?= $_helper->getListUrl() ?>','compare','top:0,left:0,width=820,height=600,resizable=yes,scrollbars=yes')"><?= $this->__('Compare') ?></button>
-            <a href="<?= $_helper->getClearListUrl() ?>" onclick="return confirm('<?= Mage::helper('core')->jsQuoteEscape($this->__('Are you sure you would like to remove all products from your comparison?')) ?>');"><?= $this->__('Clear All') ?></a>
+            <button type="button" title="<?= $this->quoteEscape($this->__('Compare')) ?>" class="button" onclick="popWin('<?= $_helper->getListUrl() ?>','compare','top:0,left:0,width=820,height=600,resizable=yes,scrollbars=yes')"><?= $this->__('Compare') ?></button>
+            <a href="<?= $_helper->getClearListUrl() ?>" onclick="return confirm('<?= $this->jsQuoteEscape($this->__('Are you sure you would like to remove all products from your comparison?')) ?>');"><?= $this->__('Clear All') ?></a>
         </div>
     <?php else: ?>
         <p class="empty"><?= $this->__('You have no items to compare.') ?></p>

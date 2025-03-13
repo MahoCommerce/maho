@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -21,14 +21,14 @@
         <?= $this->getBlockHtml('formkey') ?>
         <h2 class="legend"><?= $this->__('Newsletter Subscription') ?></h2>
         <ul class="form-list">
-            <li class="control"><input type="checkbox" name="is_subscribed" id="subscription" value="1" title="<?= Mage::helper('core')->quoteEscape($this->__('General Subscription')) ?>"<?php if($this->getIsSubscribed()): ?> checked="checked"<?php endif ?> class="checkbox" /><label for="subscription"><?= $this->__('General Subscription') ?></label></li>
+            <li class="control"><input type="checkbox" name="is_subscribed" id="subscription" value="1" title="<?= $this->quoteEscape($this->__('General Subscription')) ?>"<?php if($this->getIsSubscribed()): ?> checked="checked"<?php endif ?> class="checkbox" /><label for="subscription"><?= $this->__('General Subscription') ?></label></li>
             <?php /* Extensions placeholder */ ?>
             <?= $this->getChildHtml('customer.form.newsletter.extra') ?>
         </ul>
     </div>
     <div class="buttons-set">
         <p class="back-link"><a href="<?= $this->escapeUrl($this->getBackUrl()) ?>"><small>&laquo; </small><?= $this->__('Back') ?></a></p>
-        <button type="submit" title="<?= Mage::helper('core')->quoteEscape($this->__('Save')) ?>" class="button"><?= $this->__('Save') ?></button>
+        <button type="submit" title="<?= $this->quoteEscape($this->__('Save')) ?>" class="button"><?= $this->__('Save') ?></button>
     </div>
 </form>
 <?php /* Extensions placeholder */ ?>

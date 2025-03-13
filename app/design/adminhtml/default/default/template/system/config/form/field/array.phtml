@@ -5,9 +5,11 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract $this */
 ?>
 
 <?php
@@ -59,13 +61,13 @@ var arrayRow<?= $_htmlId ?> = {
         '<tr id="#{_id}">'
 <?php foreach ($this->_columns as $columnName => $column):?>
             +'<td>'
-                +'<?= Mage::helper('core')->jsQuoteEscape($this->_renderCellTemplate($columnName)) ?>'
+                +'<?= $this->jsQuoteEscape($this->_renderCellTemplate($columnName)) ?>'
             +'<\/td>'
 <?php endforeach ?>
 <?php if ($this->_addAfter):?>
-            +'<td><button onclick="" class="scalable add" type="button" id="addAfterBtn#{_id}"><span><?= Mage::helper('core')->jsQuoteEscape(Mage::helper('adminhtml')->__('Add after')) ?><\/span><\/span><\/span><\/button><\/td>'
+            +'<td><button onclick="" class="scalable add" type="button" id="addAfterBtn#{_id}"><span><?= $this->jsQuoteEscape(Mage::helper('adminhtml')->__('Add after')) ?><\/span><\/span><\/span><\/button><\/td>'
 <?php endif ?>
-            +'<td><button onclick="arrayRow<?= $_htmlId ?>.del(\'#{_id}\')" class="scalable delete" type="button"><span><?= Mage::helper('core')->jsQuoteEscape(Mage::helper('adminhtml')->__('Delete')) ?><\/span><\/span><\/span><\/button><\/td>'
+            +'<td><button onclick="arrayRow<?= $_htmlId ?>.del(\'#{_id}\')" class="scalable delete" type="button"><span><?= $this->jsQuoteEscape(Mage::helper('adminhtml')->__('Delete')) ?><\/span><\/span><\/span><\/button><\/td>'
         +'<\/tr>'
     ),
 

@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -41,7 +41,7 @@
     <?php $_order = $this->getOrder() ?>
     <h2 class="table-caption"><?= $this->__('Items Ordered') ?>
         <?php if ($_order->getTracksCollection()->count()) : ?>
-            <span class="separator">|</span> <a href="#" onclick="popWin('<?= $this->helper('shipping')->getTrackingPopupUrlBySalesModel($_order) ?>','trackorder','top=0,left=0,width=800,height=600,resizable=yes,scrollbars=yes'); return false;" title="<?= Mage::helper('core')->quoteEscape($this->__('Track your order')) ?>"><?= $this->__('Track your order') ?></a>
+            <span class="separator">|</span> <a href="#" onclick="popWin('<?= $this->helper('shipping')->getTrackingPopupUrlBySalesModel($_order) ?>','trackorder','top=0,left=0,width=800,height=600,resizable=yes,scrollbars=yes'); return false;" title="<?= $this->quoteEscape($this->__('Track your order')) ?>"><?= $this->__('Track your order') ?></a>
         <?php endif ?>
     </h2>
 

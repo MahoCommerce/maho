@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -22,8 +22,8 @@
 <?php foreach ($tabs as $_tab): ?>
 <?php if (!$this->canShowTab($_tab)): continue;  endif; ?>
     <li <?php if($this->getTabIsHidden($_tab)): ?> style="display:none"<?php endif ?>>
-        <a href="<?= $this->getTabUrl($_tab) ?>" id="<?= $this->getTabId($_tab) ?>" name="<?= $this->getTabId($_tab, false) ?>" title="<?= Mage::helper('core')->quoteEscape($this->getTabTitle($_tab)) ?>" class="tab-item-link <?= $this->getTabClass($_tab) ?><?php if (preg_match('/\s?ajax\s?/', $_tab->getClass() ?? '')) {?> notloaded<?php }?>">
-            <span><span class="changed" title="<?= Mage::helper('core')->quoteEscape($this->__('The information in this tab has been changed.')) ?>"></span><span class="error" title="<?= Mage::helper('core')->quoteEscape($this->__('This tab contains invalid data. Please solve the problem before saving.')) ?>"></span><?= $this->getTabLabel($_tab) ?></span>
+        <a href="<?= $this->getTabUrl($_tab) ?>" id="<?= $this->getTabId($_tab) ?>" name="<?= $this->getTabId($_tab, false) ?>" title="<?= $this->quoteEscape($this->getTabTitle($_tab)) ?>" class="tab-item-link <?= $this->getTabClass($_tab) ?><?php if (preg_match('/\s?ajax\s?/', $_tab->getClass() ?? '')) {?> notloaded<?php }?>">
+            <span><span class="changed" title="<?= $this->quoteEscape($this->__('The information in this tab has been changed.')) ?>"></span><span class="error" title="<?= $this->quoteEscape($this->__('This tab contains invalid data. Please solve the problem before saving.')) ?>"></span><?= $this->getTabLabel($_tab) ?></span>
         </a>
         <div id="<?= $this->getTabId($_tab) ?>_content" style="display:none;"><?= $this->getTabContent($_tab) ?></div>
     </li>

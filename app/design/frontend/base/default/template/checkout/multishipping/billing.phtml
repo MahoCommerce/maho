@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
@@ -43,8 +43,8 @@
                     </div>
                     <div class="box-content">
                         <div class="tool-tip" id="payment-tool-tip" style="display:none;">
-                            <div class="btn-close"><a href="#" id="payment-tool-tip-close" title="<?= Mage::helper('core')->quoteEscape($this->__('Close')) ?>"><?= $this->__('Close') ?></a></div>
-                            <div class="tool-tip-content"><img src="<?= $this->getSkinUrl('images/cvv.gif') ?>" alt="<?= Mage::helper('core')->quoteEscape($this->__('Card Verification Number Visual Reference')) ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Card Verification Number Visual Reference')) ?>" /></div>
+                            <div class="btn-close"><a href="#" id="payment-tool-tip-close" title="<?= $this->quoteEscape($this->__('Close')) ?>"><?= $this->__('Close') ?></a></div>
+                            <div class="tool-tip-content"><img src="<?= $this->getSkinUrl('images/cvv.gif') ?>" alt="<?= $this->quoteEscape($this->__('Card Verification Number Visual Reference')) ?>" title="<?= $this->quoteEscape($this->__('Card Verification Number Visual Reference')) ?>" /></div>
                         </div>
                         <?= $this->getChildHtml('payment_methods_before') ?>
                         <!-- Payment methods forms list -->
@@ -77,7 +77,7 @@
         </div>
         <div class="buttons-set">
             <p class="back-link"><a href="<?= $this->getBackUrl() ?>"><small>&laquo; </small><?= $this->__('Back to Shipping Information') ?></a></p>
-            <button id="payment-continue" type="submit" title="<?= Mage::helper('core')->quoteEscape($this->__('Continue to Review Your Order')) ?>" class="button"><?= $this->__('Continue to Review Your Order') ?></button>
+            <button id="payment-continue" type="submit" title="<?= $this->quoteEscape($this->__('Continue to Review Your Order')) ?>" class="button"><?= $this->__('Continue to Review Your Order') ?></button>
         </div>
         <?= $this->getBlockHtml('formkey') ?>
     </form>

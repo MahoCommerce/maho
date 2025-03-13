@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
@@ -63,14 +63,6 @@
                     </massaction>
                 </observers>
             </adminhtml_controller_action_predispatch_start>
-            <admin_user_authenticate_after>
-                <observers>
-                    <configuration_files_access_level_verification>
-                        <class>adminhtml/observer</class>
-                        <method>clearCacheConfigurationFilesAccessLevelVerification</method>
-                    </configuration_files_access_level_verification>
-                </observers>
-            </admin_user_authenticate_after>
             <session_before_renew_cookie>
                 <observers>
                     <adminhtml_session_before_renew_cookie>

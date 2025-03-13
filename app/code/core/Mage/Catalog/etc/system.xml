@@ -85,10 +85,9 @@
                         </list_per_page>
                         <flat_catalog_category translate="label">
                             <label>Use Flat Catalog Category</label>
-                            <frontend_type>select</frontend_type>
+                            <frontend_type>boolean</frontend_type>
                             <frontend_model>adminhtml/system_config_form_field_select_flatcatalog</frontend_model>
                             <backend_model>catalog/system_config_backend_catalog_category_flat</backend_model>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>100</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
@@ -98,10 +97,9 @@
                         <flat_catalog_product translate="label comment">
                             <label>Use Flat Catalog Product</label>
                             <comment><![CDATA[Enable for reindexing a big number of SKUs]]>.</comment>
-                            <frontend_type>select</frontend_type>
+                            <frontend_type>boolean</frontend_type>
                             <frontend_model>adminhtml/system_config_form_field_select_flatproduct</frontend_model>
                             <backend_model>catalog/system_config_backend_catalog_product_flat</backend_model>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>100</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
@@ -119,8 +117,7 @@
                         <list_allow_all translate="label comment">
                             <label>Allow All Products per Page</label>
                             <comment>Whether to show "All" option in the "Show X Per Page" dropdown.</comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>6</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -129,8 +126,7 @@
                         <parse_url_directives translate="label comment">
                             <label>Allow Dynamic Media URLs in Products and Categories</label>
                             <comment>E.g. {{media url="path/to/image.jpg"}} {{skin url="path/to/picture.gif"}}. Dynamic directives parsing impacts catalog performance.</comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>200</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -147,8 +143,7 @@
                     <fields>
                         <tree_mode translate="label">
                             <label>Use Tree Like Category Sitemap</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -258,8 +253,7 @@
                         </product_url_suffix>
                         <product_use_categories translate="label">
                             <label>Use Categories Path for Product URLs</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <backend_model>adminhtml/system_config_backend_seo_product</backend_model>
                             <sort_order>4</sort_order>
                             <show_in_default>1</show_in_default>
@@ -268,8 +262,7 @@
                         </product_use_categories>
                         <save_rewrites_history translate="label">
                             <label>Create Permanent Redirect for URLs if URL Key Changed</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>5</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -284,8 +277,7 @@
                         </title_separator>
                         <category_canonical_tag translate="label">
                             <label>Use Canonical Link Meta Tag For Categories</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>7</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -293,8 +285,7 @@
                         </category_canonical_tag>
                         <product_canonical_tag translate="label">
                             <label>Use Canonical Link Meta Tag For Products</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>8</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -332,9 +323,8 @@
                     <fields>
                         <display_product_count translate="label">
                             <label>Display Product Count</label>
-                            <frontend_type>select</frontend_type>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>5</sort_order>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -370,8 +360,7 @@
                         <one_price_interval translate="label comment">
                             <label>Display Price Interval as One Price</label>
                             <comment>This setting will be applied when all prices in the specific price interval are equal.</comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>15</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -414,8 +403,7 @@
                     <fields>
                         <use_calendar translate="label">
                             <label>Use JavaScript Calendar</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -458,8 +446,7 @@
                     <fields>
                         <configurable_children translate="label">
                             <label>Index configurable product's children</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <backend_model>adminhtml/system_config_backend_layer_children</backend_model>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
@@ -527,8 +514,7 @@
                         <use_static_urls_in_catalog translate="label comment">
                             <label>Use Static URLs for Media Content in WYSIWYG for Catalog</label>
                             <comment>Applicable to catalog products and categories only. Any media content will be inserted into editor as a static URL. It is not updated if the system configuration base URL changes.</comment>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <frontend_type>select</frontend_type>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
@@ -549,8 +535,7 @@
                     <fields>
                         <enabled translate="label">
                             <label>Enable MAP</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -558,8 +543,7 @@
                         </enabled>
                         <apply_for_all translate="label comment">
                             <label>Apply MAP (Default Value)</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -97,8 +97,8 @@ function exportUrlField()
 
 function changeEntityType()
 {
-    //toggleSelectOption('remove', 'profile_entity_type', 'profile_direction', 'customer', 'import', '<?= Mage::helper('core')->jsQuoteEscape($this->__('Import')) ?>');
-    //toggleSelectOption('remove', 'profile_entity_type', 'profile_store_id', 'customer', '0', '<?= Mage::helper('core')->jsQuoteEscape($this->__('Default Values')) ?>');
+    //toggleSelectOption('remove', 'profile_entity_type', 'profile_direction', 'customer', 'import', '<?= $this->jsQuoteEscape($this->__('Import')) ?>');
+    //toggleSelectOption('remove', 'profile_entity_type', 'profile_store_id', 'customer', '0', '<?= $this->jsQuoteEscape($this->__('Default Values')) ?>');
     //showOption('profile_direction');
     changeDirection();
 }
@@ -106,7 +106,7 @@ function changeEntityType()
 
 function changeDirection()
 {
-    toggleSelectOption('remove', 'profile_direction', 'profile_data_transfer', 'export', 'interactive', '<?= Mage::helper('core')->jsQuoteEscape($this->__('Interactive')) ?>');
+    toggleSelectOption('remove', 'profile_direction', 'profile_data_transfer', 'export', 'interactive', '<?= $this->jsQuoteEscape($this->__('Interactive')) ?>');
     //showOption('profile_data_transfer');
     if ($('profile_direction').value == 'import') {
         profileImportOnly.each(function(id){if ($(id))$(id).up(1).show();});
@@ -174,7 +174,7 @@ Event.observe(window, 'load', function(){
                                 <?php if ($_group->getId() != $_store->getGroupId()) continue; ?>
                                 <?php if (!$_websiteShow): ?>
                                     <?php $_websiteShow=true; ?>
-                                    <optgroup label="<?= Mage::helper('core')->quoteEscape($_website->getName()) ?>"></optgroup>
+                                    <optgroup label="<?= $this->quoteEscape($_website->getName()) ?>"></optgroup>
                                 <?php endif ?>
                                 <?php if (!$_groupShow): ?>
                                     <?php $_groupShow=true; ?>
