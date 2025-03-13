@@ -28,6 +28,7 @@ return RectorConfig::configure()
         DeadCode\ClassMethod\RemoveUselessReturnTagRector::class,
         DeadCode\Property\RemoveUselessVarTagRector::class,
         Rector\CodingStyle\Rector\FuncCall\ConsistentImplodeRector::class,
+        Rector\Php55\Rector\Class_\ClassConstantToSelfClassRector::class,
         Rector\Php71\Rector\List_\ListToArrayDestructRector::class,
         Rector\Php74\Rector\Assign\NullCoalescingOperatorRector::class,
         Rector\Php80\Rector\ClassConstFetch\ClassOnThisVariableObjectRector::class,
@@ -38,6 +39,8 @@ return RectorConfig::configure()
         Rector\Php80\Rector\Switch_\ChangeSwitchToMatchRector::class,
         Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector::class,
         TypeDeclaration\ClassMethod\ReturnNeverTypeRector::class,
+
+
     ])
     ->withConfiguredRule(Rector\Php82\Rector\Param\AddSensitiveParameterAttributeRector::class, [
         'sensitive_parameters' => [
