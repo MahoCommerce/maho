@@ -25,12 +25,6 @@ parameters:
 			path: app/Mage.php
 
 		-
-			message: '#^Method Mage\:\:getBlockSingleton\(\) never returns false so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: app/Mage.php
-
-		-
 			message: '#^Method Mage\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -97,35 +91,16 @@ parameters:
 			path: app/Mage.php
 
 		-
-			message: '''
-				#^Call to deprecated method create\(\) of class OTPHP\\TOTP\:
-				Deprecated since v11\.1, use \:\:createFromSecret or \:\:generate instead$#
-			'''
-			identifier: staticMethod.deprecated
-			count: 3
-			path: app/code/core/Mage/Admin/Helper/Auth.php
-
-		-
-			message: '#^Method Mage_Admin_Model_Acl_Assert_Ip\:\:_isCleanIP\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Mage_Admin_Model_Acl_Assert_Ip\:\:_isCleanIP\(\) should return bool\|null but return statement is missing\.$#'
+			identifier: return.missing
 			count: 1
 			path: app/code/core/Mage/Admin/Model/Acl/Assert/Ip.php
 
 		-
-			message: '#^Method Mage_Admin_Model_Acl_Assert_Time\:\:_isCleanTime\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Mage_Admin_Model_Acl_Assert_Time\:\:_isCleanTime\(\) should return bool\|null but return statement is missing\.$#'
+			identifier: return.missing
 			count: 1
 			path: app/code/core/Mage/Admin/Model/Acl/Assert/Time.php
-
-		-
-			message: '''
-				#^Call to deprecated method add\(\) of class Zend_Acl\:
-				in version 1\.9\.1 and will be available till 2\.0\.  New code
-				            should use addResource\(\) instead\.$#
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/Admin/Model/Config.php
 
 		-
 			message: '#^Comparison operation "\=\=" between \(Varien_Simplexml_Element\|null\) and 1 results in an error\.$#'
@@ -264,15 +239,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Admin/Model/Session.php
-
-		-
-			message: '''
-				#^Call to deprecated method _getHelper\(\) of class Mage_Admin_Model_User\:
-				use Mage\:\:helper\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/Admin/Model/User.php
 
 		-
 			message: '#^Method Mage_Admin_Model_User\:\:setPasskeyData\(\) has no return type specified\.$#'
@@ -473,12 +439,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Cache/Grid.php
 
 		-
-			message: '#^Call to an undefined method Varien_Data_Tree_Dbp\:\:addCollectionData\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Category/Abstract.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Block_Catalog_Category_Edit_Form\:\:getProductsJson\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -495,12 +455,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Category/Widget/Chooser.php
-
-		-
-			message: '#^Call to deprecated method checkConfigurableProducts\(\) of class Mage_Eav_Model_Resource_Entity_Attribute_Collection\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Attribute/Set/Main.php
 
 		-
 			message: '#^Method Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main_Formgroup\:\:_getSetId\(\) has no return type specified\.$#'
@@ -863,24 +817,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Super/Settings.php
 
 		-
-			message: '#^Call to deprecated method getGroupCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Websites.php
-
-		-
-			message: '#^Call to deprecated method getStoreCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Websites.php
-
-		-
-			message: '#^Call to deprecated method getWebsiteCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Edit/Tab/Websites.php
-
-		-
 			message: '#^Property Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Websites\:\:\$_storeFromHtml has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -1125,30 +1061,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Sales.php
-
-		-
-			message: '''
-				#^Call to deprecated method addDaysInWishlist\(\) of class Mage_Wishlist_Model_Resource_Item_Collection\:
-				after 1\.4\.2\.0$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Wishlist.php
-
-		-
-			message: '#^Method Mage_Wishlist_Model_Resource_Item_Collection\:\:addDaysInWishlist\(\) invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Wishlist.php
-
-		-
-			message: '''
-				#^Call to deprecated method addDaysInWishlist\(\) of class Mage_Wishlist_Model_Resource_Item_Collection\:
-				after 1\.4\.2\.0$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/Wishlist.php
 
 		-
 			message: '#^Property Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist\:\:\$_productHelpers has no type specified\.$#'
@@ -1907,12 +1819,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Report/Shopcart/Abandoned.php
 
 		-
-			message: '#^Parameter \#2 \$filter of method Mage_Reports_Model_Resource_Quote_Collection\:\:prepareForAbandonedReport\(\) expects string\|null, array\<int\|string, array\<mixed\>\|string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Shopcart/Abandoned/Grid.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Block_Report_Tag_Popular\:\:getStoreSwitcherHtml\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2171,12 +2077,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Form.php
 
 		-
-			message: '#^Call to deprecated method isOutputEnabled\(\) of class Mage_Adminhtml_Block_Template\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Giftmessage.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Block_Sales_Order_Create_Giftmessage_Form\:\:getEntity\(\) should return Varien_Object but returns Mage_Eav_Model_Entity_Abstract\.$#'
 			identifier: return.type
 			count: 1
@@ -2195,16 +2095,10 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Items.php
 
 		-
-			message: '#^Call to Mage\:\:getSingleton\(''adminhtml/quote''\) resulted in invalid type Mage_Adminhtml_Model_Quote\.$#'
-			identifier: mage.invalidType
+			message: '#^Method Mage_Adminhtml_Block_Sales_Order_Create_Search\:\:addButton\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Newsletter.php
-
-		-
-			message: '#^Cannot call method getIsOldCustomer\(\) on false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Newsletter.php
+			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Search.php
 
 		-
 			message: '#^Method Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Address\:\:getIsAsBilling\(\) should return bool but returns int\.$#'
@@ -2265,15 +2159,6 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Sidebar/Pcompared.php
-
-		-
-			message: '''
-				#^Call to deprecated method getItemCollection\(\) of class Mage_Wishlist_Model_Wishlist\:
-				use self\:\:getItemsCollection\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Create/Sidebar/Wishlist.php
 
 		-
 			message: '#^Method Mage_Adminhtml_Block_Sales_Order_Create_Totals\:\:_getTotalRenderer\(\) has no return type specified\.$#'
@@ -4946,15 +4831,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/Sales/Order.php
 
 		-
-			message: '''
-				#^Call to deprecated method submit\(\) of class Mage_Sales_Model_Service_Quote\:
-				after 1\.4\.0\.1$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Model_Sales_Order_Create\:\:_initBillingAddressFromOrder\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -5095,6 +4971,12 @@ parameters:
 		-
 			message: '#^Method Mage_Adminhtml_Model_Sales_Order_Create\:\:setShippingMethod\(\) has parameter \$method with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
+
+		-
+			message: '#^Method Mage_Sales_Model_Quote_Item\:\:getMessage\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/Sales/Order/Create.php
 
@@ -6995,12 +6877,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Customer/System/Config/ValidatevatController.php
 
 		-
-			message: '#^Property Mage_Adminhtml_Customer_Wishlist_Product_Composite_WishlistController\:\:\$_wishlistItem \(Mage_Wishlist_Model_Wishlist\) does not accept Mage_Wishlist_Model_Item\|null\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Customer/Wishlist/Product/Composite/WishlistController.php
-
-		-
 			message: '#^Method Mage_Adminhtml_CustomerController\:\:_sendUploadResponse\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7197,15 +7073,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/DashboardController.php
-
-		-
-			message: '''
-				#^Call to deprecated method _getModel\(\) of class Mage_Adminhtml_IndexController\:
-				use Mage\:\:getModel\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 4
-			path: app/code/core/Mage/Adminhtml/controllers/IndexController.php
 
 		-
 			message: '#^Method Mage_Adminhtml_IndexController\:\:_getDeniedIframe\(\) has no return type specified\.$#'
@@ -7718,12 +7585,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Permissions/VariableController.php
 
 		-
-			message: '#^Call to \$this\-\>getLayout\(\)\-\>createBlock\(\$type\) resulted in invalid type Mage_Adminhtml_Block_Promo_Widget_Chooser_Categories\.$#'
-			identifier: mage.invalidType
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Promo/CatalogController.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Promo_CatalogController\:\:_initAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7737,12 +7598,6 @@ parameters:
 
 		-
 			message: '#^Method Mage_Adminhtml_Promo_CatalogController\:\:applyRulesAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Promo/CatalogController.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Promo_CatalogController\:\:chooserAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Promo/CatalogController.php
@@ -10094,24 +9949,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Tax/RateController.php
 
 		-
-			message: '''
-				#^Call to deprecated method _getHelperModel\(\) of class Mage_Adminhtml_Tax_RuleController\:
-				use Mage\:\:helper\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 3
-			path: app/code/core/Mage/Adminhtml/controllers/Tax/RuleController.php
-
-		-
-			message: '''
-				#^Call to deprecated method _getSingletonModel\(\) of class Mage_Adminhtml_Tax_RuleController\:
-				use Mage\:\:getSingleton\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 4
-			path: app/code/core/Mage/Adminhtml/controllers/Tax/RuleController.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Tax_RuleController\:\:deleteAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10137,12 +9974,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$rateId of method Mage_Tax_Model_Calculation_Rule\:\:fetchRuleCodes\(\) expects array, float given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Tax/RuleController.php
-
-		-
-			message: '#^Parameter \#1 \$ruleModel of method Mage_Adminhtml_Tax_RuleController\:\:_isValidRuleRequest\(\) expects Mage_Tax_Model_Calculation_Rule, Mage_Core_Model_Abstract given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Tax/RuleController.php
@@ -10238,32 +10069,16 @@ parameters:
 			path: app/code/core/Mage/Api/Model/Acl.php
 
 		-
-			message: '#^Method Mage_Api_Model_Acl_Assert_Ip\:\:_isCleanIP\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Mage_Api_Model_Acl_Assert_Ip\:\:_isCleanIP\(\) should return bool\|null but return statement is missing\.$#'
+			identifier: return.missing
 			count: 1
 			path: app/code/core/Mage/Api/Model/Acl/Assert/Ip.php
 
 		-
-			message: '#^Method Mage_Api_Model_Acl_Assert_Time\:\:_isCleanTime\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method Mage_Api_Model_Acl_Assert_Time\:\:_isCleanTime\(\) should return bool\|null but return statement is missing\.$#'
+			identifier: return.missing
 			count: 1
 			path: app/code/core/Mage/Api/Model/Acl/Assert/Time.php
-
-		-
-			message: '#^Parameter \#1 \$time of method Mage_Api_Model_Acl_Assert_Time\:\:_isCleanTime\(\) expects bool, int\<1, max\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Api/Model/Acl/Assert/Time.php
-
-		-
-			message: '''
-				#^Call to deprecated method add\(\) of class Zend_Acl\:
-				in version 1\.9\.1 and will be available till 2\.0\.  New code
-				            should use addResource\(\) instead\.$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Api/Model/Config.php
 
 		-
 			message: '#^Parameter \#2 \$resource of method Mage_Api_Model_Config\:\:loadAclResources\(\) expects Mage_Core_Model_Config_Element\|null, Varien_Simplexml_Element given\.$#'
@@ -10564,15 +10379,6 @@ parameters:
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Api/Model/Session.php
-
-		-
-			message: '''
-				#^Call to deprecated method _getHelper\(\) of class Mage_Api_Model_User\:
-				use Mage\:\:helper\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 8
-			path: app/code/core/Mage/Api/Model/User.php
 
 		-
 			message: '#^Invalid array key type array\.$#'
@@ -11097,15 +10903,6 @@ parameters:
 			path: app/code/core/Mage/Bundle/Block/Adminhtml/Catalog/Product/Edit/Tabs.php
 
 		-
-			message: '''
-				#^Call to deprecated method addMinimalPrice\(\) of class Mage_Catalog_Model_Resource_Product_Collection\:
-				use addPriceData$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Catalog/Product/List/Partof.php
-
-		-
 			message: '#^Method Mage_Bundle_Block_Catalog_Product_List_Partof\:\:resetItemsIterator\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -11146,6 +10943,18 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Bundle/Block/Catalog/Product/View/Type/Bundle.php
+
+		-
+			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: app/code/core/Mage/Bundle/Block/Checkout/Cart/Item/Renderer.php
+
+		-
+			message: '#^Method Mage_Sales_Model_Quote_Item\:\:getMessage\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Bundle/Block/Checkout/Cart/Item/Renderer.php
 
 		-
 			message: '#^Call to an undefined method Mage_Catalog_Model_Product_Configuration_Item_Interface\:\:getQty\(\)\.$#'
@@ -11205,15 +11014,6 @@ parameters:
 			message: '#^Call to an undefined method Mage_Bundle_Model_Product_Price\:\:getPricesTierPrice\(\)\.$#'
 			identifier: method.notFound
 			count: 2
-			path: app/code/core/Mage/Bundle/Model/Product/Price.php
-
-		-
-			message: '''
-				#^Call to deprecated method getSelectionPrice\(\) of class Mage_Bundle_Model_Product_Price\:
-				after 1\.6\.2\.0$#
-			'''
-			identifier: method.deprecated
-			count: 1
 			path: app/code/core/Mage/Bundle/Model/Product/Price.php
 
 		-
@@ -11445,28 +11245,10 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Product.php
 
 		-
-			message: '''
-				#^Call to deprecated method _getSingletonModel\(\) of class Mage_Catalog_Block_Product_Abstract\:
-				use Mage\:\:getSingleton\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/Abstract.php
-
-		-
 			message: '#^Method Mage_Catalog_Block_Product_Abstract\:\:addPriceBlockType\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/Abstract.php
-
-		-
-			message: '''
-				#^Call to deprecated method addMinimalPrice\(\) of class Mage_Catalog_Model_Resource_Product_Collection\:
-				use addPriceData$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/Compare/List.php
 
 		-
 			message: '#^Method Mage_Catalog_Model_Resource_Product_Compare_Item_Collection\:\:useProductItem\(\) invoked with 1 parameter, 0 required\.$#'
@@ -11595,42 +11377,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Product/View/Tabs.php
 
 		-
-			message: '#^Access to deprecated property \$_resPrices of class Mage_Catalog_Block_Product_View_Type_Configurable\.$#'
-			identifier: property.deprecated
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/View/Type/Configurable.php
-
-		-
-			message: '#^Call to deprecated method _convertPrice\(\) of class Mage_Catalog_Block_Product_View_Type_Configurable\.$#'
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/Catalog/Block/Product/View/Type/Configurable.php
-
-		-
-			message: '#^Call to deprecated method _prepareOldPrice\(\) of class Mage_Catalog_Block_Product_View_Type_Configurable\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/View/Type/Configurable.php
-
-		-
-			message: '#^Call to deprecated method _preparePrice\(\) of class Mage_Catalog_Block_Product_View_Type_Configurable\.$#'
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/Catalog/Block/Product/View/Type/Configurable.php
-
-		-
-			message: '#^Call to deprecated method _registerJsPrice\(\) of class Mage_Catalog_Block_Product_View_Type_Configurable\.$#'
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/Catalog/Block/Product/View/Type/Configurable.php
-
-		-
-			message: '#^Call to deprecated method getCurrentStore\(\) of class Mage_Catalog_Block_Product_View_Type_Configurable\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/View/Type/Configurable.php
-
-		-
 			message: '#^Cannot call method setAttributeObj\(\) on class\-string\|object\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -11651,6 +11397,12 @@ parameters:
 		-
 			message: '#^Invalid array key type array\.$#'
 			identifier: offsetAccess.invalidOffset
+			count: 1
+			path: app/code/core/Mage/Catalog/Block/Product/View/Type/Configurable.php
+
+		-
+			message: '#^Parameter \#1 \$value of method Mage_Catalog_Model_Product\:\:setConfigurablePrice\(\) expects float, string given\.$#'
+			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/View/Type/Configurable.php
 
@@ -11879,12 +11631,6 @@ parameters:
 		-
 			message: '#^Method Mage_Catalog_Helper_Product_Type_Composite\:\:getCurrentStore\(\) has parameter \$storeId with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Catalog/Helper/Product/Type/Composite.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, float given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Helper/Product/Type/Composite.php
 
@@ -12205,18 +11951,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Category/Indexer/Flat.php
-
-		-
-			message: '#^Call to an undefined method Varien_Object\:\:dataHasChangedFor\(\)\.$#'
-			identifier: method.notFound
-			count: 3
-			path: app/code/core/Mage/Catalog/Model/Category/Indexer/Product.php
-
-		-
-			message: '#^Call to an undefined method Varien_Object\:\:isObjectNew\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Category/Indexer/Product.php
 
 		-
 			message: '#^Method Mage_Catalog_Model_Category_Indexer_Product\:\:_processEvent\(\) has no return type specified\.$#'
@@ -12552,19 +12286,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Index.php
 
 		-
-			message: '#^Call to an undefined method Varien_Object\:\:dataHasChangedFor\(\)\.$#'
-			identifier: method.notFound
-			count: 5
-			path: app/code/core/Mage/Catalog/Model/Indexer/Url.php
-
-		-
-			message: '#^Call to an undefined method Varien_Object\:\:isObjectNew\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Indexer/Url.php
-
-		-
-			message: '#^Call to an undefined method Varien_Object\:\:isValueChanged\(\)\.$#'
+			message: '#^Call to an undefined method Mage_Core_Model_Store\|Mage_Core_Model_Store_Group\:\:isValueChanged\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Indexer/Url.php
@@ -12894,15 +12616,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Api.php
 
 		-
-			message: '''
-				#^Call to deprecated method getIsGlobal\(\) of class Mage_Eav_Model_Entity_Attribute_Abstract\:
-				moved to catalog attribute model$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Backend/Price.php
-
-		-
 			message: '#^Cannot call method getBackend\(\) on bool\|Mage_Catalog_Model_Resource_Attribute\.$#'
 			identifier: method.nonObject
 			count: 11
@@ -13065,13 +12778,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Indexer/Flat.php
 
 		-
-			message: '#^Call to an undefined method Varien_Object\:\:isObjectNew\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Indexer/Price.php
-
-		-
-			message: '#^Call to an undefined method Varien_Object\:\:isValueChanged\(\)\.$#'
+			message: '#^Call to an undefined method Mage_Core_Model_Store\|Mage_Core_Model_Store_Group\:\:isValueChanged\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Indexer/Price.php
@@ -13143,30 +12850,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Option/Type/Date.php
 
 		-
-			message: '#^Negated boolean expression is always true\.$#'
-			identifier: booleanNot.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Option/Type/Date.php
-
-		-
-			message: '#^Parameter \#4 \$month of function mktime expects int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Option/Type/Date.php
-
-		-
-			message: '#^Parameter \#5 \$day of function mktime expects int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Option/Type/Date.php
-
-		-
-			message: '#^Parameter \#6 \$year of function mktime expects int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Option/Type/Date.php
-
-		-
 			message: '#^Call to an undefined method Mage_Catalog_Model_Product_Configuration_Item_Option_Interface\:\:getId\(\)\.$#'
 			identifier: method.notFound
 			count: 2
@@ -13175,24 +12858,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method Mage_Catalog_Model_Product_Configuration_Item_Option_Interface\:\:setValue\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Option/Type/File.php
-
-		-
-			message: '''
-				#^Call to deprecated method getErrors\(\) of class Zend_Validate\:
-				Since 1\.5\.0$#
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Product/Option/Type/File.php
-
-		-
-			message: '''
-				#^Call to deprecated method getQuoteItemOption\(\) of class Mage_Catalog_Model_Product_Option_Type_Default\:
-				after 1\.4\.2\.0$#
-			'''
-			identifier: method.deprecated
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Option/Type/File.php
 
@@ -13302,21 +12967,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Type/Abstract.php
 
 		-
-			message: '#^Access to deprecated property \$_editableAttributes of class Mage_Catalog_Model_Product_Type_Abstract\.$#'
-			identifier: property.deprecated
-			count: 5
-			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
-
-		-
-			message: '''
-				#^Call to deprecated method getIsGlobal\(\) of class Mage_Eav_Model_Entity_Attribute_Abstract\:
-				moved to catalog attribute model$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
-
-		-
 			message: '#^Call to function is_array\(\) with string will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 1
@@ -13395,15 +13045,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Abstract.php
 
 		-
-			message: '''
-				#^Call to deprecated method getIsGlobal\(\) of class Mage_Eav_Model_Entity_Attribute_Abstract\:
-				moved to catalog attribute model$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Abstract.php
-
-		-
 			message: '#^Cannot call method isScopeStore\(\) on Mage_Eav_Model_Entity_Attribute_Abstract\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -13448,12 +13089,6 @@ parameters:
 		-
 			message: '#^Property Mage_Catalog_Model_Resource_Category\:\:\$_storeId \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category.php
-
-		-
-			message: '#^Property Mage_Catalog_Model_Resource_Category\:\:\$_tree \(Varien_Data_Tree_Db\) does not accept Varien_Data_Tree_Dbp\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Category.php
 
@@ -13645,15 +13280,6 @@ parameters:
 			identifier: nullCoalesce.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Config.php
-
-		-
-			message: '''
-				#^Call to deprecated method getIsGlobal\(\) of class Mage_Catalog_Model_Resource_Eav_Attribute\:
-				moved to catalog attribute model$#
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Resource/Eav/Attribute.php
 
 		-
 			message: '#^Method Mage_Catalog_Model_Resource_Eav_Attribute\:\:initLabels\(\) has no return type specified\.$#'
@@ -14382,15 +14008,6 @@ parameters:
 			path: app/code/core/Mage/CatalogIndex/Model/Indexer/Tierprice.php
 
 		-
-			message: '''
-				#^Call to deprecated method loadParentProductIds\(\) of class Mage_Catalog_Model_Product\:
-				after 1\.4\.2\.0$#
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/CatalogIndex/Model/Observer.php
-
-		-
 			message: '#^Property Mage_CatalogIndex_Model_Observer\:\:\$_parentProductIds has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -14595,12 +14212,6 @@ parameters:
 			path: app/code/core/Mage/CatalogInventory/Block/Adminhtml/Form/Field/Minsaleqty.php
 
 		-
-			message: '#^Property Mage_CatalogInventory_Helper_Minsaleqty\:\:\$_moduleName has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Helper/Minsaleqty.php
-
-		-
 			message: '#^Method Mage_CatalogInventory_Model_Api2_Stock_Item_Rest\:\:_multiUpdate\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -14613,7 +14224,7 @@ parameters:
 			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Rest.php
 
 		-
-			message: '#^Call to an undefined method Varien_Object\:\:isValueChanged\(\)\.$#'
+			message: '#^Call to an undefined method Mage_Core_Model_Store\|Mage_Core_Model_Store_Group\:\:isValueChanged\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/CatalogInventory/Model/Indexer/Stock.php
@@ -14670,6 +14281,12 @@ parameters:
 			message: '#^Method Mage_CatalogInventory_Model_Observer\:\:revertQuoteInventory\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Observer.php
+
+		-
+			message: '#^Method Mage_Sales_Model_Quote_Item\:\:setMessage\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 2
 			path: app/code/core/Mage/CatalogInventory/Model/Observer.php
 
 		-
@@ -14783,6 +14400,12 @@ parameters:
 		-
 			message: '#^Call to function is_numeric\(\) with int will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Stock/Item.php
+
+		-
+			message: '#^Method Mage_Sales_Model_Quote_Item\:\:setMessage\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/CatalogInventory/Model/Stock/Item.php
 
@@ -15111,41 +14734,14 @@ parameters:
 			path: app/code/core/Mage/CatalogSearch/Helper/Data.php
 
 		-
-			message: '''
-				#^Call to deprecated method _prepareCondition\(\) of class Mage_CatalogSearch_Model_Advanced\:
-				after 1\.4\.1\.0 \- use Mage_CatalogSearch_Model_Resource_Advanced\-\>_prepareCondition\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Advanced.php
-
-		-
-			message: '''
-				#^Call to deprecated method addMinimalPrice\(\) of class Mage_Catalog_Model_Resource_Product_Collection\:
-				use addPriceData$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Advanced.php
-
-		-
 			message: '#^Method Mage_CatalogSearch_Model_Advanced\:\:getProductCollection\(\) should return Mage_CatalogSearch_Model_Resource_Advanced_Collection but returns array\|float\|int\|string\|false\|null\.$#'
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/CatalogSearch/Model/Advanced.php
 
 		-
-			message: '#^Call to an undefined method Varien_Object\:\:isValueChanged\(\)\.$#'
+			message: '#^Call to an undefined method Mage_Core_Model_Store\|Mage_Core_Model_Store_Group\:\:isValueChanged\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Indexer/Fulltext.php
-
-		-
-			message: '''
-				#^Call to deprecated method updateCategoryIndex\(\) of class Mage_CatalogSearch_Model_Fulltext\:
-				after 1\.6\.2\.0$#
-			'''
-			identifier: method.deprecated
 			count: 1
 			path: app/code/core/Mage/CatalogSearch/Model/Indexer/Fulltext.php
 
@@ -15166,24 +14762,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/CatalogSearch/Model/Indexer/Fulltext.php
-
-		-
-			message: '''
-				#^Call to deprecated method addMinimalPrice\(\) of class Mage_Catalog_Model_Resource_Product_Collection\:
-				use addPriceData$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Query.php
-
-		-
-			message: '''
-				#^Call to deprecated method getMinQueryLenght\(\) of class Mage_CatalogSearch_Model_Query\:
-				after 1\.3\.2\.3 use getMinQueryLength\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Model/Query.php
 
 		-
 			message: '#^Method Mage_CatalogSearch_Model_Query\:\:setStoreId\(\) has no return type specified\.$#'
@@ -15348,6 +14926,18 @@ parameters:
 			path: app/code/core/Mage/Checkout/Block/Cart/Crosssell.php
 
 		-
+			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: app/code/core/Mage/Checkout/Block/Cart/Item/Renderer.php
+
+		-
+			message: '#^Method Mage_Sales_Model_Quote_Item\:\:getMessage\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Checkout/Block/Cart/Item/Renderer.php
+
+		-
 			message: '#^Property Mage_Checkout_Block_Cart_Item_Renderer\:\:\$_item has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -15444,15 +15034,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Block/Onepage/Abstract.php
 
 		-
-			message: '''
-				#^Call to deprecated method getCheckoutMethod\(\) of class Mage_Sales_Model_Quote\:
-				after 1\.4 beta1 it is checkout module responsibility$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Checkout/Block/Onepage/Billing.php
-
-		-
 			message: '#^Method Mage_Checkout_Block_Onepage_Billing\:\:getSaveUrl\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -15469,15 +15050,6 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Checkout/Block/Onepage/Progress.php
-
-		-
-			message: '''
-				#^Call to deprecated method getCheckoutMethod\(\) of class Mage_Sales_Model_Quote\:
-				after 1\.4 beta1 it is checkout module responsibility$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Checkout/Block/Onepage/Shipping.php
 
 		-
 			message: '#^Property Mage_Checkout_Block_Onepage_Shipping_Method_Available\:\:\$_address has no type specified\.$#'
@@ -15510,24 +15082,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Block/Onepage/Success.php
 
 		-
-			message: '''
-				#^Call to deprecated method _getHelperInstance\(\) of class Mage_Checkout_Helper_Cart\:
-				use Mage\:\:helper\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Checkout/Helper/Cart.php
-
-		-
-			message: '''
-				#^Call to deprecated method _getSingletonModel\(\) of class Mage_Core_Helper_Url\:
-				use Mage\:\:getSingleton\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Checkout/Helper/Cart.php
-
-		-
 			message: '#^Property Mage_Checkout_Helper_Data\:\:\$_agreements has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -15538,15 +15092,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Checkout/Helper/Url.php
-
-		-
-			message: '''
-				#^Call to deprecated method getCheckoutMethod\(\) of class Mage_Sales_Model_Quote\:
-				after 1\.4 beta1 it is checkout module responsibility$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Api/Resource/Customer.php
 
 		-
 			message: '#^Parameter \#1 \$value of method Mage_Sales_Model_Quote\:\:setCustomerId\(\) expects int, null given\.$#'
@@ -15589,15 +15134,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Cart.php
-
-		-
-			message: '''
-				#^Call to deprecated method getCheckoutMethod\(\) of class Mage_Sales_Model_Quote\:
-				after 1\.4 beta1 it is checkout module responsibility$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart/Api.php
 
 		-
 			message: '#^Parameter \#1 \$value of method Mage_Sales_Model_Quote\:\:setIsActive\(\) expects int, false given\.$#'
@@ -15826,24 +15362,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Type/Multishipping/State.php
-
-		-
-			message: '''
-				#^Call to deprecated method getCheckoutMethod\(\) of class Mage_Sales_Model_Quote\:
-				after 1\.4 beta1 it is checkout module responsibility$#
-			'''
-			identifier: method.deprecated
-			count: 6
-			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
-
-		-
-			message: '''
-				#^Call to deprecated method isAllowedGuestCheckout\(\) of class Mage_Sales_Model_Quote\:
-				after 1\.4 beta1 it is checkout module responsibility$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
 
 		-
 			message: '#^Method Mage_Checkout_Model_Type_Onepage\:\:_prepareCustomerQuote\(\) has no return type specified\.$#'
@@ -16502,6 +16020,12 @@ parameters:
 		-
 			message: '#^Method Mage_ConfigurableSwatches_Helper_List_Price\:\:attachConfigurableProductChildrenPricesMapping\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/ConfigurableSwatches/Helper/List/Price.php
+
+		-
+			message: '#^Parameter \#1 \$value of method Mage_Catalog_Model_Product\:\:setConfigurablePrice\(\) expects float, string given\.$#'
+			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/ConfigurableSwatches/Helper/List/Price.php
 
@@ -17616,15 +17140,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Layout.php
 
 		-
-			message: '''
-				#^Call to deprecated method isInstalled\(\) of class Mage_Core_Model_App\:
-				since 1\.2$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Core/Model/Layout/Update.php
-
-		-
 			message: '#^Method Mage_Core_Model_Layout_Validator\:\:validateTemplatePath\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -18093,15 +17608,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Session/Abstract/Varien.php
 
 		-
-			message: '''
-				#^Call to deprecated method revalidateCookie\(\) of class Mage_Core_Model_Session_Abstract_Varien\:
-				after 1\.4 cookie renew moved to session start method$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Core/Model/Session/Abstract/Varien.php
-
-		-
 			message: '#^Parameter \#2 \$clear \(bool\) of method Mage_Core_Model_Session_Abstract_Varien\:\:getData\(\) should be compatible with parameter \$index \(int\|string\) of method Varien_Object\:\:getData\(\)$#'
 			identifier: method.childParameterType
 			count: 1
@@ -18118,12 +17624,6 @@ parameters:
 			identifier: method.childParameterType
 			count: 1
 			path: app/code/core/Mage/Core/Model/Session/Abstract/Zend.php
-
-		-
-			message: '#^Call to deprecated method isCurrentlySecure\(\) of class Mage_Core_Model_Store\.$#'
-			identifier: method.deprecated
-			count: 3
-			path: app/code/core/Mage/Core/Model/Store.php
 
 		-
 			message: '#^Method Mage_Core_Model_Store\:\:_getSession\(\) should return Mage_Core_Model_Session but returns Mage_Core_Model_Session_Abstract\.$#'
@@ -18483,15 +17983,6 @@ parameters:
 			message: '#^Call to an undefined method Mage_Wishlist_Model_Resource_Item_Collection\:\:addAttributeToSelect\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: app/code/core/Mage/Customer/Block/Account/Dashboard/Sidebar.php
-
-		-
-			message: '''
-				#^Call to deprecated method getItemCollection\(\) of class Mage_Wishlist_Model_Wishlist\:
-				use self\:\:getItemsCollection\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 2
 			path: app/code/core/Mage/Customer/Block/Account/Dashboard/Sidebar.php
 
 		-
@@ -19011,15 +18502,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Customer.php
 
 		-
-			message: '''
-				#^Call to deprecated method _getHelper\(\) of class Mage_Customer_Model_Customer\:
-				use Mage\:\:helper\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Customer.php
-
-		-
 			message: '#^Method Mage_Customer_Model_Customer\:\:cleanAllAddresses\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -19200,24 +18682,6 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Session.php
 
 		-
-			message: '''
-				#^Call to deprecated method _getFromRegistry\(\) of class Mage_Customer_AccountController\:
-				use Mage\:\:registry\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Customer/controllers/AccountController.php
-
-		-
-			message: '''
-				#^Call to deprecated method _getHelper\(\) of class Mage_Customer_AccountController\:
-				use Mage\:\:helper\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 17
-			path: app/code/core/Mage/Customer/controllers/AccountController.php
-
-		-
 			message: '#^Method Mage_Customer_AccountController\:\:_addSessionError\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -19352,6 +18816,12 @@ parameters:
 		-
 			message: '#^Method Mage_Customer_Model_Session\:\:getCustomerFormData\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Customer/controllers/AccountController.php
+
+		-
+			message: '#^Parameter \#1 \$value of method Mage_Customer_Model_Customer\:\:setIsSubscribed\(\) expects bool, int given\.$#'
+			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Customer/controllers/AccountController.php
 
@@ -20100,12 +19570,6 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Exception.php
 
 		-
-			message: '#^Call to an undefined method Mage_Dataflow_Model_Session_Adapter_Iterator\:\:__\(\)\.$#'
-			identifier: method.notFound
-			count: 10
-			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator.php
-
-		-
 			message: '#^Method Mage_Dataflow_Model_Session_Adapter_Iterator\:\:_getProgressBarHtml\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -20142,6 +19606,18 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator.php
 
 		-
+			message: '#^Method Mage_Dataflow_Model_Session_Adapter_Iterator\:\:load\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator.php
+
+		-
+			message: '#^Method Mage_Dataflow_Model_Session_Adapter_Iterator\:\:save\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator.php
+
+		-
 			message: '#^Method Mage_Dataflow_Model_Session_Adapter_Iterator\:\:updateProgress\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -20160,7 +19636,25 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator.php
 
 		-
+			message: '#^Method Mage_Dataflow_Model_Convert_Iterator_File_Csv\:\:parse\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator/File/Csv.php
+
+		-
+			message: '#^Method Mage_Dataflow_Model_Convert_Iterator_File_Csv\:\:unparse\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator/File/Csv.php
+
+		-
 			message: '#^Method Mage_Dataflow_Model_Convert_Iterator_Http\:\:load\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator/Http.php
+
+		-
+			message: '#^Method Mage_Dataflow_Model_Convert_Iterator_Http\:\:save\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator/Http.php
@@ -20856,6 +20350,12 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Session/Adapter/Http.php
 
 		-
+			message: '#^Method Mage_Dataflow_Model_Session_Adapter_Http\:\:save\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/Dataflow/Model/Session/Adapter/Http.php
+
+		-
 			message: '#^Method Mage_Dataflow_Model_Session_Parser_Csv\:\:parse\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -21034,12 +20534,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: app/code/core/Mage/Downloadable/Helper/Download.php
-
-		-
-			message: '#^Call to deprecated method _getFileTypeByExt\(\) of class Mage_Downloadable_Helper_File\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Downloadable/Helper/File.php
 
 		-
 			message: '#^Variable \$downloadableModel might not be defined\.$#'
@@ -21514,12 +21008,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Convert/Parser/Abstract.php
-
-		-
-			message: '#^Call to deprecated method _afterSetConfig\(\) of class Mage_Eav_Model_Entity_Abstract\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
 
 		-
 			message: '#^Cannot call method lastInsertId\(\) on Varien_Db_Adapter_Interface\|false\.$#'
@@ -22302,42 +21790,6 @@ parameters:
 			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Customer.php
 
 		-
-			message: '''
-				#^Call to deprecated method getHelper\(\) of class Mage_ImportExport_Model_Import_Entity_Product\:
-				use Mage\:\:helper\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Product.php
-
-		-
-			message: '''
-				#^Call to deprecated method getIsGlobal\(\) of class Mage_Eav_Model_Entity_Attribute_Abstract\:
-				moved to catalog attribute model$#
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Product.php
-
-		-
-			message: '''
-				#^Call to deprecated method getModel\(\) of class Mage_ImportExport_Model_Import_Entity_Product\:
-				use Mage\:\:getModel\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Product.php
-
-		-
-			message: '''
-				#^Call to deprecated method getResourceModel\(\) of class Mage_ImportExport_Model_Import_Entity_Product\:
-				use Mage\:\:getResourceModel\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Product.php
-
-		-
 			message: '#^Method Mage_ImportExport_Model_Import_Entity_Product\:\:_filterRowData\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -22372,15 +21824,6 @@ parameters:
 			identifier: booleanOr.alwaysTrue
 			count: 1
 			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Product.php
-
-		-
-			message: '''
-				#^Call to deprecated method getIsGlobal\(\) of class Mage_Eav_Model_Entity_Attribute_Abstract\:
-				moved to catalog attribute model$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Product/Type/Abstract.php
 
 		-
 			message: '#^Method Mage_ImportExport_Model_Import_Uploader\:\:_setUploadFile\(\) has no return type specified\.$#'
@@ -24504,15 +23947,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Block/Payflow/Link/Info.php
 
 		-
-			message: '''
-				#^Call to deprecated method getCheckoutMethod\(\) of class Mage_Sales_Model_Quote\:
-				after 1\.4 beta1 it is checkout module responsibility$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Paypal/Controller/Express/Abstract.php
-
-		-
 			message: '#^Method Mage_Paypal_Controller_Express_Abstract\:\:_processPaypalApiError\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -25321,15 +24755,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Express.php
-
-		-
-			message: '''
-				#^Call to deprecated method getCheckoutMethod\(\) of class Mage_Sales_Model_Quote\:
-				after 1\.4 beta1 it is checkout module responsibility$#
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
 
 		-
 			message: '#^Cannot call method getData\(\) on array\.$#'
@@ -26742,15 +26167,6 @@ parameters:
 			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option.php
 
 		-
-			message: '''
-				#^Access to deprecated property \$_ratingOptionTable of class Mage_Rating_Model_Resource_Rating_Option_Collection\:
-				since 1\.5\.0\.0$#
-			'''
-			identifier: property.deprecated
-			count: 1
-			path: app/code/core/Mage/Rating/Model/Resource/Rating/Option/Collection.php
-
-		-
 			message: '#^Parameter \#2 \$value of method Varien_Data_Collection\:\:addFilter\(\) expects array\|string, int given\.$#'
 			identifier: argument.type
 			count: 1
@@ -26949,18 +26365,6 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Resource/Product/Sold/Collection.php
 
 		-
-			message: '#^Parameter \#1 \$filter of method Mage_Reports_Model_Resource_Quote_Collection\:\:addCustomerData\(\) expects array\|null, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Quote/Collection.php
-
-		-
-			message: '#^Parameter \#2 \$filter of method Mage_Reports_Model_Resource_Quote_Collection\:\:addSubtotal\(\) expects array\|null, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Quote/Collection.php
-
-		-
 			message: '#^Parameter \#3 \$cols of method Zend_Db_Select\:\:joinInner\(\) expects array\|string, null given\.$#'
 			identifier: argument.type
 			count: 2
@@ -27025,15 +26429,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Resource/Tag/Customer/Collection.php
-
-		-
-			message: '''
-				#^Call to deprecated method setJoinFlag\(\) of class Mage_Tag_Model_Resource_Product_Collection\:
-				after 1\.3\.2\.3$#
-			'''
-			identifier: method.deprecated
-			count: 3
-			path: app/code/core/Mage/Reports/Model/Resource/Tag/Product/Collection.php
 
 		-
 			message: '#^Method Mage_Reports_Model_Resource_Tag_Product_Collection\:\:_construct\(\) has no return type specified\.$#'
@@ -27390,15 +26785,6 @@ parameters:
 			path: app/code/core/Mage/Rss/Block/Wishlist.php
 
 		-
-			message: '''
-				#^Call to deprecated method _getHelper\(\) of class Mage_Rss_Controller_Abstract\:
-				use Mage\:\:helper\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Rss/Controller/Abstract.php
-
-		-
 			message: '#^Cannot call method getId\(\) on true\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -27511,15 +26897,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Rss/controllers/CatalogController.php
-
-		-
-			message: '''
-				#^Call to deprecated method _getHelper\(\) of class Mage_Rss_Controller_Abstract\:
-				use Mage\:\:helper\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/Rss/controllers/IndexController.php
 
 		-
 			message: '#^Method Mage_Rss_IndexController\:\:_showWishlistRss\(\) has no return type specified\.$#'
@@ -28392,15 +27769,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Order/Item.php
 
 		-
-			message: '''
-				#^Call to deprecated method addStatusToHistory\(\) of class Mage_Sales_Model_Order\:
-				after 1\.4\.0\.0\-alpha3$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Payment.php
-
-		-
 			message: '#^If condition is always false\.$#'
 			identifier: if.alwaysFalse
 			count: 1
@@ -28827,12 +28195,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote.php
 
 		-
-			message: '#^Call to deprecated method getTotalModels\(\) of class Mage_Sales_Model_Quote_Address\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote.php
-
-		-
 			message: '#^Method Mage_Sales_Model_Quote\:\:getIsVirtual\(\) should return bool but returns int\.$#'
 			identifier: return.type
 			count: 1
@@ -28852,12 +28214,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$value of method Mage_Sales_Model_Quote\:\:setIsMultiShipping\(\) expects int, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote.php
-
-		-
-			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, list\<array\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Quote.php
@@ -29034,6 +28390,12 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Item.php
 
 		-
+			message: '#^Method Mage_Sales_Model_Quote_Item\:\:setMessage\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Quote/Item.php
+
+		-
 			message: '#^Parameter \#1 \$value of method Mage_Sales_Model_Quote_Item\:\:setIsRecurring\(\) expects int, bool given\.$#'
 			identifier: argument.type
 			count: 1
@@ -29200,18 +28562,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Resource/Order.php
-
-		-
-			message: '#^Parameter \#2 \$attribute of method Mage_Sales_Model_Resource_Order_Abstract\:\:_afterSaveAttribute\(\) expects string, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Abstract.php
-
-		-
-			message: '#^Parameter \#2 \$attribute of method Mage_Sales_Model_Resource_Order_Abstract\:\:_beforeSaveAttribute\(\) expects string, array\<mixed, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Order/Abstract.php
 
 		-
 			message: '#^Method Mage_Sales_Model_Resource_Order_Address\:\:_construct\(\) has no return type specified\.$#'
@@ -29886,24 +29236,6 @@ parameters:
 			path: app/code/core/Mage/SalesRule/Model/Validator.php
 
 		-
-			message: '''
-				#^Call to deprecated method _getHelper\(\) of class Mage_SalesRule_Model_Validator\:
-				use Mage\:\:helper\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/SalesRule/Model/Validator.php
-
-		-
-			message: '''
-				#^Call to deprecated method _getSingleton\(\) of class Mage_SalesRule_Model_Validator\:
-				use Mage\:\:getSingleton\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/SalesRule/Model/Validator.php
-
-		-
 			message: '#^Method Mage_SalesRule_Model_Validator\:\:setCartFixedRuleUsedForAddress\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -29988,15 +29320,6 @@ parameters:
 			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
 
 		-
-			message: '''
-				#^Call to deprecated method _getTrackingUrl\(\) of class Mage_Shipping_Helper_Data\:
-				the non\-model usage$#
-			'''
-			identifier: method.deprecated
-			count: 3
-			path: app/code/core/Mage/Shipping/Helper/Data.php
-
-		-
 			message: '#^Call to an undefined method Mage_Shipping_Model_Carrier_Abstract\:\:_getQuotes\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -30063,15 +29386,6 @@ parameters:
 			path: app/code/core/Mage/Shipping/Model/Carrier/Pickup.php
 
 		-
-			message: '''
-				#^Call to deprecated method _getModel\(\) of class Mage_Shipping_Model_Carrier_Tablerate\:
-				use Mage\:\:getModel\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 4
-			path: app/code/core/Mage/Shipping/Model/Carrier/Tablerate.php
-
-		-
 			message: '#^Method Mage_Shipping_Model_Carrier_Tablerate\:\:getRate\(\) should return Mage_Core_Model_Abstract but returns array\|bool\.$#'
 			identifier: return.type
 			count: 1
@@ -30106,15 +29420,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Shipping/Model/Resource/Carrier/Tablerate.php
-
-		-
-			message: '''
-				#^Access to deprecated property \$_shipTable of class Mage_Shipping_Model_Resource_Carrier_Tablerate_Collection\:
-				since 1\.4\.1\.0$#
-			'''
-			identifier: property.deprecated
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Resource/Carrier/Tablerate/Collection.php
 
 		-
 			message: '#^Comparison operation "\<" between \(array\|float\|int\) and float results in an error\.$#'
@@ -30285,15 +29590,6 @@ parameters:
 			path: app/code/core/Mage/Tag/Block/Customer/Tags.php
 
 		-
-			message: '''
-				#^Call to deprecated method addVisibleFilterToCollection\(\) of class Mage_Catalog_Model_Product_Status\:
-				remove on new builds$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Tag/Block/Customer/View.php
-
-		-
 			message: '#^Property Mage_Tag_Block_Popular\:\:\$_maxPopularity has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -30316,15 +29612,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Tag/Block/Product/List.php
-
-		-
-			message: '''
-				#^Call to deprecated method addMinimalPrice\(\) of class Mage_Catalog_Model_Resource_Product_Collection\:
-				use addPriceData$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Tag/Block/Product/Result.php
 
 		-
 			message: '#^Method Mage_Tag_Block_Product_Result\:\:setListCollection\(\) has no return type specified\.$#'
@@ -30573,15 +29860,6 @@ parameters:
 			message: '#^Call to an undefined method Mage_Core_Model_App\:\:getOrder\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: app/code/core/Mage/Tax/Helper/Data.php
-
-		-
-			message: '''
-				#^Call to deprecated method _getFromRegistry\(\) of class Mage_Tax_Helper_Data\:
-				use Mage\:\:registry\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 4
 			path: app/code/core/Mage/Tax/Helper/Data.php
 
 		-
@@ -31023,12 +30301,6 @@ parameters:
 			path: app/code/core/Mage/Tax/sql/tax_setup/install-1.6.0.0.php
 
 		-
-			message: '#^Parameter \#1 \$type of method Mage_Usa_Model_Shipping_Carrier_Dhl_International\:\:getCode\(\) expects strin, string given\.$#'
-			identifier: argument.type
-			count: 5
-			path: app/code/core/Mage/Usa/Block/Adminhtml/Dhl/Unitofmeasure.php
-
-		-
 			message: '#^Method Mage_Usa_Helper_Data\:\:getMeasureDimensionName\(\) has parameter \$key with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -31245,12 +30517,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
 
 		-
-			message: '#^Invalid array key type strin\.$#'
-			identifier: offsetAccess.invalidOffset
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
-
-		-
 			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl_International\:\:_addDimension\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -31303,30 +30569,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
-
-		-
-			message: '#^Parameter \#1 \$type of method Mage_Usa_Model_Shipping_Carrier_Dhl_International\:\:getCode\(\) expects strin, string given\.$#'
-			identifier: argument.type
-			count: 6
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
-
-		-
-			message: '#^Parameter \$type of method Mage_Usa_Model_Shipping_Carrier_Dhl_International\:\:getCode\(\) has invalid type strin\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
-
-		-
-			message: '#^Parameter \#1 \$type of method Mage_Usa_Model_Shipping_Carrier_Dhl_International\:\:getCode\(\) expects strin, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International/Source/Method/Size.php
-
-		-
-			message: '#^Parameter \#1 \$type of method Mage_Usa_Model_Shipping_Carrier_Dhl_International\:\:getCode\(\) expects strin, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International/Source/Method/Unitofmeasure.php
 
 		-
 			message: '#^Method Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page\:\:drawText\(\) has parameter \$align with no type specified\.$#'
@@ -31803,21 +31045,6 @@ parameters:
 			path: app/code/core/Mage/Weee/Block/Renderer/Weee/Tax.php
 
 		-
-			message: '''
-				#^Call to deprecated method _getHelper\(\) of class Mage_Weee_Helper_Data\:
-				use Mage\:\:helper\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Weee/Helper/Data.php
-
-		-
-			message: '#^Cannot call method priceIncludesTax\(\) on Mage_Core_Helper_Abstract\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Weee/Helper/Data.php
-
-		-
 			message: '#^Method Mage_Weee_Helper_Data\:\:getOriginalAmount\(\) should return int but returns float\.$#'
 			identifier: return.type
 			count: 1
@@ -31854,25 +31081,10 @@ parameters:
 			path: app/code/core/Mage/Weee/Helper/Data.php
 
 		-
-			message: '#^Method Mage_Weee_Model_Attribute_Backend_Weee_Tax\:\:_getResource\(\) should return Mage_Weee_Model_Resource_Attribute_Backend_Weee_Tax but returns Mage_Core_Model_Resource_Db_Collection_Abstract\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Attribute/Backend/Weee/Tax.php
-
-		-
 			message: '#^Parameter \#1 \$product of method Mage_Weee_Model_Resource_Attribute_Backend_Weee_Tax\:\:deleteProductData\(\) expects Mage_Catalog_Model_Product, Varien_Object given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Weee/Model/Attribute/Backend/Weee/Tax.php
-
-		-
-			message: '''
-				#^Call to deprecated method _getHelper\(\) of class Mage_Weee_Model_Config_Source_Fpt_Tax\:
-				use Mage\:\:helper\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Config/Source/Fpt/Tax.php
 
 		-
 			message: '#^Call to an undefined method Mage_Eav_Model_Entity_Attribute_Abstract\:\:isScopeGlobal\(\)\.$#'
@@ -32235,15 +31447,6 @@ parameters:
 			path: app/code/core/Mage/Widget/sql/widget_setup/install-1.6.0.0.php
 
 		-
-			message: '''
-				#^Call to deprecated method getItemCollection\(\) of class Mage_Wishlist_Model_Wishlist\:
-				use self\:\:getItemsCollection\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Wishlist/Block/Abstract.php
-
-		-
 			message: '#^Method Mage_Wishlist_Block_Abstract\:\:addItemPriceBlockType\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -32260,15 +31463,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Wishlist/Block/Customer/Wishlist/Item/Column.php
-
-		-
-			message: '''
-				#^Call to deprecated method getItemCollection\(\) of class Mage_Wishlist_Model_Wishlist\:
-				use self\:\:getItemsCollection\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Wishlist/Block/Links.php
 
 		-
 			message: '#^Method Mage_Wishlist_Block_Links\:\:initLinkProperties\(\) has no return type specified\.$#'
@@ -32295,15 +31489,6 @@ parameters:
 			path: app/code/core/Mage/Wishlist/Block/Share/Email/Items.php
 
 		-
-			message: '''
-				#^Call to deprecated method getItemCollection\(\) of class Mage_Wishlist_Model_Wishlist\:
-				use self\:\:getItemsCollection\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Wishlist/Controller/Abstract.php
-
-		-
 			message: '#^Method Mage_Wishlist_Controller_Abstract\:\:allcartAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -32314,33 +31499,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Wishlist/Controller/Abstract.php
-
-		-
-			message: '''
-				#^Call to deprecated method _getHelperInstance\(\) of class Mage_Wishlist_Helper_Data\:
-				use Mage\:\:helper\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Wishlist/Helper/Data.php
-
-		-
-			message: '''
-				#^Call to deprecated method _getSingletonModel\(\) of class Mage_Wishlist_Helper_Data\:
-				use Mage\:\:getSingleton\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 3
-			path: app/code/core/Mage/Wishlist/Helper/Data.php
-
-		-
-			message: '''
-				#^Call to deprecated method getItemCollection\(\) of class Mage_Wishlist_Model_Wishlist\:
-				use self\:\:getItemsCollection\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Wishlist/Helper/Data.php
 
 		-
 			message: '#^Method Mage_Customer_Model_Session\:\:getDisplayOutOfStockProducts\(\) invoked with 0 parameters, 1 required\.$#'
@@ -32415,15 +31573,6 @@ parameters:
 			path: app/code/core/Mage/Wishlist/Model/Item/Option.php
 
 		-
-			message: '''
-				#^Call to deprecated method getItemCollection\(\) of class Mage_Wishlist_Model_Wishlist\:
-				use self\:\:getItemsCollection\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/Wishlist/Model/Observer.php
-
-		-
 			message: '#^Method Mage_Wishlist_Model_Observer\:\:processAddToCart\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -32460,15 +31609,6 @@ parameters:
 			path: app/code/core/Mage/Wishlist/Model/Resource/Wishlist.php
 
 		-
-			message: '''
-				#^Call to deprecated method getItemCollection\(\) of class Mage_Wishlist_Model_Wishlist\:
-				use self\:\:getItemsCollection\(\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Wishlist/Model/Wishlist.php
-
-		-
 			message: '#^Parameter \#1 \$qty of method Mage_Wishlist_Model_Item\:\:setQty\(\) expects int, float given\.$#'
 			identifier: argument.type
 			count: 1
@@ -32479,15 +31619,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/Wishlist/Model/Wishlist.php
-
-		-
-			message: '''
-				#^Call to deprecated method getItem\(\) of class Mage_Wishlist_Model_Wishlist\:
-				use self\:\:getItemById\(int\)$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Wishlist/controllers/IndexController.php
 
 		-
 			message: '#^Method Mage_Customer_Model_Session\:\:getAddActionReferer\(\) invoked with 1 parameter, 0 required\.$#'
@@ -32568,24 +31699,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/api/userroles.phtml
 
 		-
-			message: '#^Call to deprecated method getGroupCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/catalog/product/edit/websites.phtml
-
-		-
-			message: '#^Call to deprecated method getStoreCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/catalog/product/edit/websites.phtml
-
-		-
-			message: '#^Call to deprecated method getWebsiteCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/catalog/product/edit/websites.phtml
-
-		-
 			message: '#^Parameter \#2 \$store of method Mage_Core_Helper_Data\:\:currencyByStore\(\) expects int\|Mage_Core_Model_Store\|null, true given\.$#'
 			identifier: argument.type
 			count: 1
@@ -32608,15 +31721,6 @@ parameters:
 			identifier: variable.undefined
 			count: 2
 			path: app/design/adminhtml/default/default/template/customer/tab/addresses.phtml
-
-		-
-			message: '''
-				#^Call to deprecated method getFormObject\(\) of class Mage_Adminhtml_Block_Widget_Form\:
-				deprecated since version 1\.2$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/customer/tab/newsletter.phtml
 
 		-
 			message: '''
@@ -32647,15 +31751,6 @@ parameters:
 			identifier: variable.undefined
 			count: 13
 			path: app/design/adminhtml/default/default/template/dashboard/store/switcher.phtml
-
-		-
-			message: '''
-				#^Call to deprecated method getIsPriceWebsiteScope\(\) of class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Links\:
-				since 1\.14\.2\.0$#
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: app/design/adminhtml/default/default/template/downloadable/product/edit/downloadable/links.phtml
 
 		-
 			message: '#^Method Mage_Sales_Model_Order\:\:formatPrice\(\) invoked with 3 parameters, 1\-2 required\.$#'
@@ -32769,42 +31864,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/report/grid.phtml
 
 		-
-			message: '#^Call to deprecated method getGroupCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/report/store/switcher.phtml
-
-		-
-			message: '#^Call to deprecated method getStoreCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/report/store/switcher.phtml
-
-		-
-			message: '#^Call to deprecated method getWebsiteCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/report/store/switcher.phtml
-
-		-
-			message: '#^Call to deprecated method getGroupCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/report/store/switcher/enhanced.phtml
-
-		-
-			message: '#^Call to deprecated method getStoreCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/report/store/switcher/enhanced.phtml
-
-		-
-			message: '#^Call to deprecated method getWebsiteCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/report/store/switcher/enhanced.phtml
-
-		-
 			message: '#^Variable \$minAdminPasswordLength might not be defined\.$#'
 			identifier: variable.undefined
 			count: 2
@@ -32839,24 +31898,6 @@ parameters:
 			identifier: arguments.count
 			count: 18
 			path: app/design/adminhtml/default/default/template/sales/order/create/items/grid.phtml
-
-		-
-			message: '#^Call to deprecated method getGroupCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/sales/order/create/store/select.phtml
-
-		-
-			message: '#^Call to deprecated method getStoreCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/sales/order/create/store/select.phtml
-
-		-
-			message: '#^Call to deprecated method getWebsiteCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/sales/order/create/store/select.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
@@ -32935,24 +31976,6 @@ parameters:
 			identifier: variable.undefined
 			count: 5
 			path: app/design/adminhtml/default/default/template/sales/order/view/tracking.phtml
-
-		-
-			message: '#^Call to deprecated method getGroupCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/store/switcher/enhanced.phtml
-
-		-
-			message: '#^Call to deprecated method getStoreCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/store/switcher/enhanced.phtml
-
-		-
-			message: '#^Call to deprecated method getWebsiteCollection\(\) of class Mage_Adminhtml_Block_Store_Switcher\.$#'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/store/switcher/enhanced.phtml
 
 		-
 			message: '#^Variable \$items might not be defined\.$#'
@@ -33136,15 +32159,6 @@ parameters:
 			identifier: variable.undefined
 			count: 2
 			path: app/design/frontend/base/default/template/bundle/catalog/product/view/price.phtml
-
-		-
-			message: '''
-				#^Call to deprecated method getPrices\(\) of class Mage_Bundle_Model_Product_Price\:
-				after 1\.5\.1\.0$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/design/frontend/base/default/template/bundle/rss/catalog/product/price.phtml
 
 		-
 			message: '#^Variable \$_weeeTaxAttributes might not be defined\.$#'
@@ -35817,206 +34831,56 @@ parameters:
 			path: lib/Varien/Debug.php
 
 		-
-			message: '#^Default value of the parameter \#2 \$isRecursion \(string\) of method Varien_Directory_Collection\:\:setPath\(\) is incompatible with type bool\.$#'
-			identifier: parameter.defaultValue
+			message: '#^Method Varien_Directory_Collection\:\:getDirsName\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/Collection.php
 
 		-
-			message: '#^Method Varien_Directory_Collection\:\:__construct\(\) has invalid return type none\.$#'
-			identifier: class.notFound
+			message: '#^Method Varien_Directory_Collection\:\:getFilesName\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/Collection.php
 
 		-
-			message: '#^Method Varien_Directory_Collection\:\:__construct\(\) has parameter \$isRecursion with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Varien_Directory_Collection\:\:getFilesObj\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/Collection.php
 
 		-
-			message: '#^Method Varien_Directory_Collection\:\:__construct\(\) has parameter \$recursionLevel with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method Varien_Directory_Collection\:\:getFilesPaths\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/Collection.php
 
 		-
-			message: '#^Method Varien_Directory_Collection\:\:__toXml\(\) has invalid return type none\.$#'
-			identifier: class.notFound
+			message: '#^Method Varien_Directory_Collection\:\:parseDir\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/Collection.php
 
 		-
-			message: '#^Method Varien_Directory_Collection\:\:__toXml\(\) should return none but returns string\.$#'
-			identifier: return.type
+			message: '#^Method Varien_Directory_Collection\:\:setFilesFilter\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/Collection.php
 
 		-
-			message: '#^Method Varien_Directory_Collection\:\:_renderFilters\(\) has invalid return type none\.$#'
-			identifier: class.notFound
+			message: '#^Method Varien_Directory_Collection\:\:setPath\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/Collection.php
 
 		-
-			message: '#^Method Varien_Directory_Collection\:\:_renderFilters\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
+			message: '#^Method Varien_Directory_Collection\:\:setRecursion\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/Collection.php
 
 		-
-			message: '#^Method Varien_Directory_Collection\:\:addFilter\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:addFilter\(\) should return none but returns \$this\(Varien_Directory_Collection\)\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:addItem\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:addItem\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:getDirsName\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:getDirsName\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:getFilesName\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:getFilesName\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:getFilesObj\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:getFilesObj\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:getFilesPaths\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:getFilesPaths\(\) has parameter \$paths with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:getFilesPaths\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:parseDir\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:parseDir\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:setFilesFilter\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:setFilesFilter\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:setPath\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:setPath\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:setRecursion\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:setRecursion\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:setRecursionLevel\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:setRecursionLevel\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:toArray\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:toArray\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:toXml\(\) has invalid return type none\.$#'
-			identifier: class.notFound
+			message: '#^Method Varien_Directory_Collection\:\:setRecursionLevel\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/Collection.php
 
@@ -36027,229 +34891,109 @@ parameters:
 			path: lib/Varien/Directory/Collection.php
 
 		-
-			message: '#^Method Varien_Directory_Collection\:\:toXml\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Collection\:\:useFilter\(\) has invalid return type none\.$#'
-			identifier: class.notFound
+			message: '#^Method Varien_Directory_Collection\:\:useFilter\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/Collection.php
 
 		-
-			message: '#^Method Varien_Directory_Collection\:\:useFilter\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$files$#'
-			identifier: parameter.notFound
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$is_recursion$#'
-			identifier: parameter.notFound
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$path$#'
-			identifier: parameter.notFound
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Parameter \#1 \$item of method Varien_Directory_Collection\:\:addItem\(\) expects IFactory, IFactor given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Parameter \#1 \$path of static method Varien_Directory_Factory\:\:getFactory\(\) expects array, SplFileInfo\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Parameter \#3 \$addOpenTag of method Varien_Directory_Collection\:\:toXml\(\) expects bool, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Property Varien_Directory_Collection\:\:\$_dirName has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Property Varien_Directory_Collection\:\:\$_isRecursion has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Property Varien_Directory_Collection\:\:\$_path has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Property Varien_Directory_Collection\:\:\$_recursionLevel has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Return type \(none\) of method Varien_Directory_Collection\:\:toArray\(\) should be compatible with return type \(array\) of method Varien_Data_Collection\:\:toArray\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Return type \(none\) of method Varien_Directory_Collection\:\:toXml\(\) should be compatible with return type \(string\) of method Varien_Data_Collection\:\:toXml\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: lib/Varien/Directory/Collection.php
-
-		-
-			message: '#^Method Varien_Directory_Factory\:\:getFactory\(\) has invalid return type IFactor\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/Directory/Factory.php
-
-		-
-			message: '#^Method Varien_Directory_Factory\:\:getFactory\(\) should return IFactor but returns Varien_Directory_Collection\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Varien/Directory/Factory.php
-
-		-
-			message: '#^Method Varien_Directory_Factory\:\:getFactory\(\) should return IFactor but returns Varien_File_Object\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Varien/Directory/Factory.php
-
-		-
-			message: '#^Parameter \#1 \$filename of function is_dir expects string, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Varien/Directory/Factory.php
-
-		-
-			message: '#^Parameter \#1 \$path of class Varien_Directory_Collection constructor expects string, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Varien/Directory/Factory.php
-
-		-
-			message: '#^Parameter \#1 \$path of class Varien_File_Object constructor expects string, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/Varien/Directory/Factory.php
-
-		-
-			message: '#^Method IFactory\:\:getDirsName\(\) has no return type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:getDirsName\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
 
 		-
-			message: '#^Method IFactory\:\:getDirsName\(\) has parameter \$dirs with no type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:getDirsName\(\) has parameter \$dirs with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
 
 		-
-			message: '#^Method IFactory\:\:getFilesName\(\) has no return type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:getFilesName\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
 
 		-
-			message: '#^Method IFactory\:\:getFilesName\(\) has parameter \$files with no type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:getFilesName\(\) has parameter \$files with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
 
 		-
-			message: '#^Method IFactory\:\:getFilesObj\(\) has no return type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:getFilesObj\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
 
 		-
-			message: '#^Method IFactory\:\:getFilesObj\(\) has parameter \$objs with no type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:getFilesObj\(\) has parameter \$objs with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
 
 		-
-			message: '#^Method IFactory\:\:getFilesPaths\(\) has no return type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:getFilesPaths\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
 
 		-
-			message: '#^Method IFactory\:\:getFilesPaths\(\) has parameter \$paths with no type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:getFilesPaths\(\) has parameter \$paths with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
 
 		-
-			message: '#^Method IFactory\:\:toArray\(\) has no return type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:toArray\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
 
 		-
-			message: '#^Method IFactory\:\:toArray\(\) has parameter \$arr with no type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:toArray\(\) has parameter \$arr with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
 
 		-
-			message: '#^Method IFactory\:\:toXml\(\) has no return type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:toXml\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
 
 		-
-			message: '#^Method IFactory\:\:toXml\(\) has parameter \$addOpenTag with no type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:toXml\(\) has parameter \$addOpenTag with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
 
 		-
-			message: '#^Method IFactory\:\:toXml\(\) has parameter \$recursionLevel with no type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:toXml\(\) has parameter \$recursionLevel with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
 
 		-
-			message: '#^Method IFactory\:\:toXml\(\) has parameter \$rootName with no type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:toXml\(\) has parameter \$rootName with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
 
 		-
-			message: '#^Method IFactory\:\:toXml\(\) has parameter \$xml with no type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:toXml\(\) has parameter \$xml with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
 
 		-
-			message: '#^Method IFactory\:\:useFilter\(\) has no return type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:useFilter\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
 
 		-
-			message: '#^Method IFactory\:\:useFilter\(\) has parameter \$useFilter with no type specified\.$#'
+			message: '#^Method Varien_Directory_IFactory\:\:useFilter\(\) has parameter \$useFilter with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Varien/Directory/IFactory.php
@@ -36339,236 +35083,62 @@ parameters:
 			path: lib/Varien/File/Csv.php
 
 		-
-			message: '#^Binary operation "\.\=" between array and non\-falsy\-string results in an error\.$#'
-			identifier: assignOp.invalid
+			message: '#^Method Varien_File_Object\:\:addFilter\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/File/Object.php
 
 		-
-			message: '#^Method Varien_Directory_Collection\:\:lastDir\(\) invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
+			message: '#^Method Varien_File_Object\:\:getDirsName\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/File/Object.php
 
 		-
-			message: '#^Method Varien_File_Object\:\:__construct\(\) has invalid return type none\.$#'
-			identifier: class.notFound
+			message: '#^Method Varien_File_Object\:\:getFilesName\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/File/Object.php
 
 		-
-			message: '#^Method Varien_File_Object\:\:addFilter\(\) has invalid return type none\.$#'
-			identifier: class.notFound
+			message: '#^Method Varien_File_Object\:\:getFilesObj\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/File/Object.php
 
 		-
-			message: '#^Method Varien_File_Object\:\:addFilter\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
+			message: '#^Method Varien_File_Object\:\:getFilesPaths\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/File/Object.php
 
 		-
-			message: '#^Method Varien_File_Object\:\:getDirName\(\) has invalid return type none\.$#'
-			identifier: class.notFound
+			message: '#^Method Varien_File_Object\:\:renderFilter\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/File/Object.php
 
 		-
-			message: '#^Method Varien_File_Object\:\:getDirName\(\) should return none but returns string\.$#'
-			identifier: return.type
+			message: '#^Method Varien_File_Object\:\:setFilesFilter\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/File/Object.php
 
 		-
-			message: '#^Method Varien_File_Object\:\:getDirsName\(\) has invalid return type none\.$#'
-			identifier: class.notFound
+			message: '#^Method Varien_File_Object\:\:toArray\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/File/Object.php
 
 		-
-			message: '#^Method Varien_File_Object\:\:getDirsName\(\) should return none but returns string\.$#'
-			identifier: return.type
+			message: '#^Method Varien_File_Object\:\:toXml\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/File/Object.php
 
 		-
-			message: '#^Method Varien_File_Object\:\:getFileName\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:getFileName\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:getFilePath\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:getFilePath\(\) has parameter \$path with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:getFilePath\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:getFilesName\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:getFilesName\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:getFilesObj\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:getFilesObj\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:getFilesPaths\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:getFilesPaths\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:renderFilter\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:renderFilter\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:setFilesFilter\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:setFilesFilter\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:toArray\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:toArray\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:toXml\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:toXml\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:useFilter\(\) has invalid return type none\.$#'
-			identifier: class.notFound
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Object\:\:useFilter\(\) should return none but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$dirs$#'
-			identifier: parameter.notFound
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$paths$#'
-			identifier: parameter.notFound
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Parameter &\$files by\-ref type of method Varien_File_Object\:\:getFilesName\(\) expects array, array\|null given\.$#'
-			identifier: parameterByRef.type
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Property Varien_File_Object\:\:\$_filename has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Property Varien_File_Object\:\:\$_filter has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Property Varien_File_Object\:\:\$_isCorrect has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Property Varien_File_Object\:\:\$_path has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Property Varien_File_Object\:\:\$filtered has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Static call to instance method Varien_Directory_Collection\:\:lastDir\(\)\.$#'
-			identifier: method.staticCall
+			message: '#^Method Varien_File_Object\:\:useFilter\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: lib/Varien/File/Object.php
 
@@ -37905,12 +36475,6 @@ parameters:
 			path: lib/Varien/Io/Sftp.php
 
 		-
-			message: '#^Method Varien_Io_Sftp\:\:open\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: lib/Varien/Io/Sftp.php
-
-		-
 			message: '#^Method Varien_Io_Sftp\:\:pwd\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -37991,12 +36555,6 @@ parameters:
 		-
 			message: '#^Method Varien_Io_Sftp\:\:write\(\) has parameter \$src with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Io/Sftp.php
-
-		-
-			message: '#^PHPDoc tag @param for parameter \$args with type int is incompatible with native type array\.$#'
-			identifier: parameter.phpDocType
 			count: 1
 			path: lib/Varien/Io/Sftp.php
 
