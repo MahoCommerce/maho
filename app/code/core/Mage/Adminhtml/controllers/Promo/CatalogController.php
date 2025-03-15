@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -253,25 +253,6 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
             $html = '';
         }
         $this->getResponse()->setBody($html);
-    }
-
-    public function chooserAction()
-    {
-        switch ($this->getRequest()->getParam('attribute')) {
-            case 'sku':
-                $type = 'adminhtml/promo_widget_chooser_sku';
-                break;
-
-            case 'categories':
-                $type = 'adminhtml/promo_widget_chooser_categories';
-                break;
-        }
-        if (!empty($type)) {
-            $block = $this->getLayout()->createBlock($type);
-            if ($block) {
-                $this->getResponse()->setBody($block->toHtml());
-            }
-        }
     }
 
     public function newActionHtmlAction()

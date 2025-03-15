@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -100,12 +100,12 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
         }
 
         $ruleId = (int) $this->getRequest()->getParam('tax_calculation_rule_id');
-        $ruleModel = $this->_getSingletonModel('tax/calculation_rule')->load($ruleId);
+        $ruleModel = Mage::getSingleton('tax/calculation_rule')->load($ruleId);
         $ruleModel->setData($postData);
         $ruleModel->setCalculateSubtotal($this->getRequest()->getParam('calculate_subtotal', 0));
 
         /** @var Mage_Adminhtml_Model_Session $session */
-        $session = $this->_getSingletonModel('adminhtml/session');
+        $session = Mage::getSingleton('adminhtml/session');
 
         try {
             //Check if the rule already exists
@@ -114,7 +114,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
             }
 
             $ruleModel->save();
-            $session->addSuccess($this->_getHelperModel('tax')->__('The tax rule has been saved.'));
+            $session->addSuccess(Mage::helper('tax')->__('The tax rule has been saved.'));
 
             if ($this->getRequest()->getParam('back')) {
                 return $this->_redirect('*/*/edit', ['rule' => $ruleModel->getId()]);
@@ -124,10 +124,10 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
         } catch (Mage_Core_Exception $e) {
             $session->addError($e->getMessage());
         } catch (Exception $e) {
-            $session->addError($this->_getHelperModel('tax')->__('An error occurred while saving this tax rule.'));
+            $session->addError(Mage::helper('tax')->__('An error occurred while saving this tax rule.'));
         }
 
-        $this->_getSingletonModel('adminhtml/session')->setRuleData($postData);
+        Mage::getSingleton('adminhtml/session')->setRuleData($postData);
         $this->_redirectReferer();
     }
 
@@ -146,7 +146,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
         );
 
         /** @var Mage_Adminhtml_Model_Session $session */
-        $session = $this->_getSingletonModel('adminhtml/session');
+        $session = Mage::getSingleton('adminhtml/session');
 
         //Remove the current one from the list
         $existingRules = array_diff($existingRules, [$ruleModel->getOrigData('code')]);
@@ -155,7 +155,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
         if (count($existingRules) > 0) {
             $ruleCodes = implode(',', $existingRules);
             $session->addError(
-                $this->_getHelperModel('tax')->__('Rules (%s) already exist for the specified Tax Rate, Customer Tax Class and Product Tax Class combinations', $ruleCodes),
+                Mage::helper('tax')->__('Rules (%s) already exist for the specified Tax Rate, Customer Tax Class and Product Tax Class combinations', $ruleCodes),
             );
             return false;
         }
@@ -214,7 +214,8 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
      *
      * @param string $className
      * @param array $arguments
-     * @return Mage_Core_Model_Abstract
+     * @return Mage_Core_Model_Abstract|false
+     * @deprecated use Mage::getSingleton()
      */
     protected function _getSingletonModel($className, $arguments = [])
     {
@@ -225,7 +226,8 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
      * Return helper instance
      *
      * @param string $className
-     * @return Mage_Core_Helper_Abstract
+     * @return Mage_Core_Helper_Abstract|false
+     * @deprecated use Mage::helper()
      */
     protected function _getHelperModel($className)
     {

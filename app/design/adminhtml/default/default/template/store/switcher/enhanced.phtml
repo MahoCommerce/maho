@@ -5,23 +5,23 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Store_Switcher $this */
 ?>
-<?php $_websiteCollection = $this->getWebsiteCollection() ?>
-<?php if ($_websiteCollection->getSize()): ?>
+<?php $_websiteCollection = $this->getWebsites() ?>
+<?php if (count($_websiteCollection)): ?>
 <div id="store_switcher_container">
 <p class="switcher"><label for="store_switcher"><?= $this->__('Choose Store View:') ?></label>
 <select name="store_switcher" id="store_switcher" class="left-col-block">
     <option value=""><?= $this->escapeHtml($this->getDefaultStoreName()) ?></option>
     <?php foreach ($_websiteCollection as $_website): ?>
         <?php $showWebsite=false; ?>
-        <?php foreach ($this->getGroupCollection($_website) as $_group): ?>
+        <?php foreach ($this->getStoreGroups($_website) as $_group): ?>
             <?php $showGroup=false; ?>
-            <?php foreach ($this->getStoreCollection($_group) as $_store): ?>
+            <?php foreach ($this->getStores($_group) as $_store): ?>
                 <?php if ($showWebsite == false): ?>
                     <?php $showWebsite = true; ?>
                     <optgroup label="<?= $this->escapeHtml($_website->getName()) ?>"></optgroup>

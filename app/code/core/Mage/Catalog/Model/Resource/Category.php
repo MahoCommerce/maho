@@ -20,7 +20,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
     /**
      * Category tree object
      *
-     * @var Varien_Data_Tree_Db
+     * @var Mage_Catalog_Model_Resource_Category_Tree
      */
     protected $_tree;
 
@@ -85,7 +85,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
     /**
      * Retrieve category tree object
      *
-     * @return Varien_Data_Tree_Db
+     * @return Mage_Catalog_Model_Resource_Category_Tree
      */
     protected function _getTree()
     {

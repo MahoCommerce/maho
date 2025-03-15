@@ -6,7 +6,7 @@
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -351,7 +351,8 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
      * Get helper instance
      *
      * @param string $helperName
-     * @return Mage_Core_Helper_Abstract
+     * @return Mage_Core_Helper_Abstract|false
+     * @deprecated use Mage::helper()
      */
     protected function _getHelper($helperName)
     {
@@ -369,19 +370,19 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
         $errors = new ArrayObject();
 
         if (!Zend_Validate::is($this->getUsername(), 'NotEmpty')) {
-            $errors->append($this->_getHelper('api')->__('User Name is required field.'));
+            $errors->append(Mage::helper('api')->__('User Name is required field.'));
         }
 
         if (!Zend_Validate::is($this->getFirstname(), 'NotEmpty')) {
-            $errors->append($this->_getHelper('api')->__('First Name is required field.'));
+            $errors->append(Mage::helper('api')->__('First Name is required field.'));
         }
 
         if (!Zend_Validate::is($this->getLastname(), 'NotEmpty')) {
-            $errors->append($this->_getHelper('api')->__('Last Name is required field.'));
+            $errors->append(Mage::helper('api')->__('Last Name is required field.'));
         }
 
         if (!Zend_Validate::is($this->getEmail(), 'EmailAddress')) {
-            $errors->append($this->_getHelper('api')->__('Please enter a valid email.'));
+            $errors->append(Mage::helper('api')->__('Please enter a valid email.'));
         }
 
         if ($this->hasNewApiKey()) {
@@ -393,22 +394,22 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
         if (isset($apiKey)) {
             $minCustomerPasswordLength = $this->_getMinCustomerPasswordLength();
             if (strlen($apiKey) < $minCustomerPasswordLength) {
-                $errors->append($this->_getHelper('api')
+                $errors->append(Mage::helper('api')
                     ->__('Api Key must be at least of %d characters.', $minCustomerPasswordLength));
             }
 
             if (!preg_match('/[a-z]/iu', $apiKey) || !preg_match('/[0-9]/u', $apiKey)) {
-                $errors->append($this->_getHelper('api')
+                $errors->append(Mage::helper('api')
                     ->__('Api Key must include both numeric and alphabetic characters.'));
             }
 
             if ($this->hasApiKeyConfirmation() && $apiKey != $this->getApiKeyConfirmation()) {
-                $errors->append($this->_getHelper('api')->__('Api Key confirmation must be same as Api Key.'));
+                $errors->append(Mage::helper('api')->__('Api Key confirmation must be same as Api Key.'));
             }
         }
 
         if ($this->userExists()) {
-            $errors->append($this->_getHelper('api')
+            $errors->append(Mage::helper('api')
                 ->__('A user with the same user name or email already exists.'));
         }
 

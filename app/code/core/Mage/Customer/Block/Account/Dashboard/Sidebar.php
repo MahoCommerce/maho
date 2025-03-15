@@ -6,6 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -56,7 +57,7 @@ class Mage_Customer_Block_Account_Dashboard_Sidebar extends Mage_Core_Block_Temp
         if (!$this->_wishlist) {
             $this->_wishlist = Mage::getModel('wishlist/wishlist')
                 ->loadByCustomer(Mage::getSingleton('customer/session')->getCustomer());
-            $this->_wishlist->getItemCollection()
+            $this->_wishlist->getItemsCollection()
                 ->addAttributeToSelect('name')
                 ->addAttributeToSelect('price')
                 ->addAttributeToSelect('small_image')
@@ -67,7 +68,7 @@ class Mage_Customer_Block_Account_Dashboard_Sidebar extends Mage_Core_Block_Temp
                 ->load();
         }
 
-        return $this->_wishlist->getItemCollection();
+        return $this->_wishlist->getItemsCollection();
     }
 
     /**

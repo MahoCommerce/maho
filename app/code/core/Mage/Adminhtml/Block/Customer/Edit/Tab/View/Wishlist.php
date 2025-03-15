@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -35,11 +35,25 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Wishlist extends Mage_Adminhtm
     #[\Override]
     protected function _prepareCollection()
     {
-        $collection = Mage::getModel('wishlist/item')->getCollection()
-            ->addCustomerIdFilter(Mage::registry('current_customer')->getId())
-            ->addDaysInWishlist(true)
-            ->addStoreData()
-            ->setInStockFilter(true);
+        $customer = Mage::registry('current_customer');
+        $storeIds = Mage::app()->getWebsite($this->getWebsiteId())->getStoreIds();
+
+        $wishlist = Mage::getModel('wishlist/wishlist')
+            ->setSharedStoreIds($storeIds)
+            ->loadByCustomer($customer, true);
+
+        if ($wishlist) {
+            $collection = $wishlist->getItemsCollection();
+        } else {
+            $collection = new Varien_Data_Collection();
+        }
+
+        $collection
+            ->setWebsiteId($customer->getWebsiteId())
+            ->setCustomerGroupId($customer->getGroupId())
+            ->resetSortOrder()
+            ->setDaysInWishlist(true)
+            ->addStoreData();
 
         $this->setCollection($collection);
 

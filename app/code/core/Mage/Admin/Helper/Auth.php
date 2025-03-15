@@ -31,12 +31,12 @@ class Mage_Admin_Helper_Auth extends Mage_Core_Helper_Abstract
 
     public function getTwofaSecret(): string
     {
-        return \OTPHP\TOTP::create()->getSecret();
+        return \OTPHP\TOTP::generate()->getSecret();
     }
 
     public function getTwofaQRCode(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $secret): string
     {
-        $otp = \OTPHP\TOTP::create($secret);
+        $otp = \OTPHP\TOTP::createFromSecret($secret);
         $otp->setLabel($username);
         $otp->setParameter('image', 'https://mahocommerce.com/assets/maho-logo-square.png');
         if ($storeName = Mage::getStoreConfig('general/store_information/name')) {
@@ -56,7 +56,7 @@ class Mage_Admin_Helper_Auth extends Mage_Core_Helper_Abstract
 
     public function verifyTwofaCode(#[\SensitiveParameter] string $secret, #[\SensitiveParameter] string $code): bool
     {
-        $otp = \OTPHP\TOTP::create($secret);
+        $otp = \OTPHP\TOTP::createFromSecret($secret);
         return $otp->verify($code);
     }
 }
