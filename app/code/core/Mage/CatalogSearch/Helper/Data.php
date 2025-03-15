@@ -349,4 +349,9 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
 
         return $this->_engine;
     }
+
+    public function isAdvancedSearchEnabled(): bool
+    {
+        return Mage::getStoreConfigFlag('catalog/advanced_search/enabled');
+    }
 }
