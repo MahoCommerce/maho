@@ -19,6 +19,11 @@ class Mage_CatalogSearch_AdvancedController extends Mage_Core_Controller_Front_A
 {
     public function indexAction()
     {
+        if (!Mage::helper('catalogsearch')->isAdvancedSearchEnabled()) {
+            $this->_forward('noroute');
+            return;
+        }
+
         $this->loadLayout();
         $this->_initLayoutMessages('catalogsearch/session');
         $this->renderLayout();
@@ -26,6 +31,11 @@ class Mage_CatalogSearch_AdvancedController extends Mage_Core_Controller_Front_A
 
     public function resultAction()
     {
+        if (!Mage::helper('catalogsearch')->isAdvancedSearchEnabled()) {
+            $this->_forward('noroute');
+            return;
+        }
+
         $this->loadLayout();
         try {
             Mage::getSingleton('catalogsearch/advanced')->addFilters($this->getRequest()->getQuery());
