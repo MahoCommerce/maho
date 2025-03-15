@@ -330,8 +330,8 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
                 break;
 
             case 'custom':
-                $dateStart = $customStart ? $customStart : $dateEnd;
-                $dateEnd   = $customEnd ? $customEnd : $dateEnd;
+                $dateStart = $customStart ?: $dateEnd;
+                $dateEnd   = $customEnd ?: $dateEnd;
                 break;
 
             case '1y':

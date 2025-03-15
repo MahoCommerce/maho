@@ -28,7 +28,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Checkbox extends Mage_Adm
     public function getValues()
     {
         if (is_null($this->_values)) {
-            $this->_values = $this->getColumn()->getData('values') ? $this->getColumn()->getData('values') : [];
+            $this->_values = $this->getColumn()->getData('values') ?: [];
         }
         return $this->_values;
     }
@@ -76,7 +76,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Checkbox extends Mage_Adm
         $html = '<input type="checkbox" ';
         $html .= 'name="' . $this->getColumn()->getFieldName() . '" ';
         $html .= 'value="' . $this->escapeHtml($value) . '" ';
-        $html .= 'class="' . ($this->getColumn()->getInlineCss() ? $this->getColumn()->getInlineCss() : 'checkbox') . '"';
+        $html .= 'class="' . ($this->getColumn()->getInlineCss() ?: 'checkbox') . '"';
         $html .= $checked . $this->getDisabled() . '/>';
         return $html;
     }

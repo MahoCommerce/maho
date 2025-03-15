@@ -13,6 +13,9 @@ return RectorConfig::configure()
         __DIR__ . '/lib',
         __DIR__ . '/public',
     ])
+    ->withPhpSets(
+        php70: true,
+    )
     ->withRules([
         CodeQuality\BooleanNot\ReplaceMultipleBooleanNotRector::class,
         CodeQuality\Foreach_\UnusedForeachValueToArrayKeysRector::class,
@@ -28,7 +31,6 @@ return RectorConfig::configure()
         DeadCode\ClassMethod\RemoveUselessReturnTagRector::class,
         DeadCode\Property\RemoveUselessVarTagRector::class,
         Rector\CodingStyle\Rector\FuncCall\ConsistentImplodeRector::class,
-        Rector\Php55\Rector\Class_\ClassConstantToSelfClassRector::class,
         Rector\Php71\Rector\List_\ListToArrayDestructRector::class,
         Rector\Php73\Rector\FuncCall\ArrayKeyFirstLastRector::class,
         Rector\Php74\Rector\Assign\NullCoalescingOperatorRector::class,

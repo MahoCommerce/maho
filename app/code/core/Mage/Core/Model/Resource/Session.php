@@ -220,7 +220,7 @@ class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
     public function gc($sessMaxLifeTime): int|false
     {
         if ($this->_automaticCleaningFactor > 0) {
-            if ($this->_automaticCleaningFactor == 1 || rand(1, $this->_automaticCleaningFactor) == 1) {
+            if ($this->_automaticCleaningFactor == 1 || random_int(1, $this->_automaticCleaningFactor) == 1) {
                 $where = ['session_expires < ?' => Varien_Date::toTimestamp(true)];
                 return $this->_write->delete($this->_sessionTable, $where);
             }

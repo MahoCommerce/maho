@@ -1291,11 +1291,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             'US' => 'United States',
         ];
 
-        if (isset($countries[$countryId])) {
-            return $countries[$countryId];
-        }
-
-        return false;
+        return $countries[$countryId] ?? false;
     }
 
     /**

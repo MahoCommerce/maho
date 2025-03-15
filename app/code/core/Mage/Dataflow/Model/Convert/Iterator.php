@@ -106,7 +106,7 @@ function updateProgress(sessionId, idx, time, memory) {
         if (!($model = Mage::getModel($match[1]))) {
             return false;
         }
-        if (!($method = $match[3] ? $match[3] : $defaultMethod)) {
+        if (!($method = $match[3] ?: $defaultMethod)) {
             return false;
         }
         return [$model, $method];
