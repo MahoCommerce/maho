@@ -26,10 +26,11 @@
             <?php if($this->getCouponCode()): ?>
                 <p><strong><?= $this->escapeHtml($this->getCouponCode()) ?></strong> [<a href="#" onclick="order.applyCoupon(''); return false;" title="<?= Mage::helper('sales')->__('Remove Coupon Code') ?>"><?= Mage::helper('sales')->__('Remove') ?></a>]</p>
             <?php endif ?>
-            <script type="text/javascript">
-                order.overlay('shipping-method-overlay', <?php if ($this->getQuote()->isVirtual()): ?>false<?php else: ?>true<?php endif ?>);
-                order.overlay('address-shipping-overlay', <?php if ($this->getQuote()->isVirtual()): ?>false<?php else: ?>true<?php endif ?>);
-            </script>
         </div>
     </fieldset>
+
 </div>
+<script>
+    order.overlay('shipping-method-overlay', <?= json_encode(!$this->getQuote()->isVirtual()) ?>);
+    order.overlay('address-shipping-overlay', <?= json_encode(!$this->getQuote()->isVirtual()) ?>);
+</script>

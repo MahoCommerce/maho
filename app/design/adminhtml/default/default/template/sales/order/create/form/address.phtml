@@ -13,51 +13,48 @@
 /** @see Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Address $this */
 /** @var Mage_Adminhtml_Block_Sales_Order_Create_Form_Address $this */
 
-if ($this->getIsShipping()):
-    $_fieldsContainerId = 'order-shipping_address_fields';
-    $_addressChoiceContainerId = 'order-shipping_address_choice';
+$addressType = $this->getIsShipping() ? 'shipping' : 'billing';
+$fieldsContainerId = "order-{$addressType}_address_fields";
+$addressChoiceContainerId = "order-{$addressType}_address_choice";
 ?>
-    <script type="text/javascript">
-    order.shippingAddressContainer = '<?= $_fieldsContainerId ?>';
+<script>
+<?php if ($this->getIsShipping()): ?>
+    order.shippingAddressContainer = '<?= $fieldsContainerId ?>';
     order.setAddresses(<?= $this->getAddressCollectionJson() ?>);
-    </script>
-<?php else:
-    $_fieldsContainerId = 'order-billing_address_fields';
-    $_addressChoiceContainerId = 'order-billing_address_choice';
-?>
-    <script type="text/javascript">
-    order.billingAddressContainer = '<?= $_fieldsContainerId ?>';
-    </script>
+<?php else: ?>
+    order.billingAddressContainer = '<?= $fieldsContainerId ?>';
 <?php endif ?>
-<div class="entry-edit">
+</script>
 
+<div class="entry-edit">
     <div class="entry-edit-head">
         <h4 class="fieldset-legend <?= $this->getHeaderCssClass() ?>"><?= $this->getHeaderText() ?></h4>
     </div>
 
     <fieldset class="fieldset-wide">
-    <div id = "<?= $_addressChoiceContainerId ?>" class="order-choose-address">
+    <div id="<?= $addressChoiceContainerId ?>" class="order-choose-address">
         <?= Mage::helper('sales')->__('Select from existing customer addresses:') ?><br/>
-        <?php $_id = $this->getForm()->getHtmlIdPrefix() . 'customer_address_id' ?>
-        <select id="<?= $_id ?>"  name="<?= $this->getForm()->getHtmlNamePrefix() ?>[customer_address_id]" onchange="order.selectAddress(this, '<?= $_fieldsContainerId ?>')">
+        <?php $id = $this->getForm()->getHtmlIdPrefix() . 'customer_address_id' ?>
+        <select id="<?= $id ?>" name="<?= $this->getForm()->getHtmlNamePrefix() ?>[customer_address_id]">
             <option value=""><?= Mage::helper('sales')->__('Add New Address') ?></option>
-            <?php foreach ($this->getAddressCollection() as $_address): ?>
-                <option value="<?= $_address->getId() ?>"<?php if ($_address->getId() == $this->getAddressId()): ?> selected="selected"<?php endif ?>>
-                    <?= $this->getAddressAsString($_address) ?>
-                </option>
-            <?php endforeach ?>
-
+        <?php foreach ($this->getAddressCollection() as $address): ?>
+            <?php $selected = $address->getId() == $this->getAddressId() ? ' selected="selected"' : '' ?>
+            <option value="<?= $address->getId() ?>"<?= $selected ?>>
+                <?= $this->getAddressAsString($address) ?>
+            </option>
+        <?php endforeach ?>
         </select>
+
         <br/>
         <?php if ($this->getIsShipping()): ?>
-            <input type="checkbox" id="order-shipping_as_billing" name="shipping_as_billing" value="1" onclick="order.setShippingAsBilling(this.checked)" <?php if ($this->getIsAsBilling()): ?>checked<?php endif ?>/>
+            <input type="checkbox" id="order-shipping_as_billing" name="shipping_as_billing" value="1" onclick="order.setShippingAsBilling(this.checked)"<?= $this->getIsAsBilling() ? ' checked' : '' ?> />
             <label for="order-shipping_as_billing" class="no-float"><?= Mage::helper('sales')->__('Same As Billing Address') ?></label>
         <?php else: ?>
             &nbsp;
         <?php endif ?>
     </div>
 
-    <div class="order-address" id="<?= $_fieldsContainerId ?>">
+    <div class="order-address" id="<?= $fieldsContainerId ?>">
         <div class="content">
             <?= $this->getForm()->toHtml() ?>
         </div>
@@ -66,14 +63,18 @@ if ($this->getIsShipping()):
             <label for="<?= $this->getForm()->getHtmlIdPrefix() ?>save_in_address_book"><?= Mage::helper('sales')->__('Save in address book') ?></label>
         </div>
     </div>
-    <?php $hideElement = 'address-' . ($this->getIsShipping() ? 'shipping' : 'billing') . '-overlay'; ?>
-    <div style="display:none;" id="<?= $hideElement ?>" class="overlay"><span><?= $this->__('Shipping address selection is not applicable') ?></span></div>
-    <script type="text/javascript">
-        order.bindAddressFields('<?= $_fieldsContainerId ?>');
-        order.bindAddressFields('<?= $_addressChoiceContainerId ?>');
+    <div id="address-<?= $addressType ?>-overlay" class="overlay no-display">
+        <?= $this->__('Shipping address selection is not applicable') ?>
+    </div>
+    <script>
+        order.bindAddressFields('<?= $fieldsContainerId ?>');
+        order.bindAddressFields('<?= $addressChoiceContainerId ?>');
         <?php if ($this->getIsShipping() && $this->getIsAsBilling()): ?>
         order.disableShippingAddress(true);
         <?php endif ?>
+        document.getElementById('<?= $id ?>').addEventListener('change', (event) => {
+            order.selectAddress(event.target, '<?= $fieldsContainerId ?>');
+        });
     </script>
     </fieldset>
 </div>
