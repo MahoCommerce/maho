@@ -182,9 +182,8 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
         $functionParameters[] = $this->_imageHandler;
         $functionParameters[] = $fileName;
 
-        $quality = $this->quality() ?? Mage::getStoreConfigAsInt('system/media_storage_configuration/image_quality');
-        if (!is_null($this->quality()) && ($this->_fileType == IMAGETYPE_JPEG || $this->_fileType == IMAGETYPE_WEBP)) {
-            $functionParameters[] = $this->quality();
+        if ($this->_fileType == IMAGETYPE_JPEG || $this->_fileType == IMAGETYPE_WEBP) {
+            $functionParameters[] = $this->quality() ?? Mage::getStoreConfigAsInt('system/media_storage_configuration/image_quality');
         }
 
         // make jpegs progressive
