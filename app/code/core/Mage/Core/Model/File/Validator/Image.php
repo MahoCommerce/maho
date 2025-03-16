@@ -80,19 +80,7 @@ class Mage_Core_Model_File_Validator_Image
                 return null;
             }
             if ($this->isImageType($fileType)) {
-                // Config 'general/reprocess_images/active' is deprecated, replacement is the following:
-                $imageQuality = Mage::getStoreConfig('admin/security/reprocess_image_quality');
-                if ($imageQuality != '') {
-                    $imageQuality = (int) $imageQuality;
-                } else {
-                    // Value not set in backend. For BC, if depcrecated config does not exist, default to 85.
-                    $imageQuality = Mage::getStoreConfig('general/reprocess_images/active') === null
-                        ? 85
-                        : (Mage::getStoreConfigFlag('general/reprocess_images/active') ? 85 : 0);
-                }
-                if ($imageQuality === 0) {
-                    return null;
-                }
+                $imageQuality = Mage::getStoreConfigAsInt('system/media_storage_configuration/image_quality');
                 //replace tmp image with re-sampled copy to exclude images with malicious data
                 $image = imagecreatefromstring(file_get_contents($filePath));
                 if ($image !== false) {
