@@ -430,6 +430,7 @@
                 <custom/>
             </url>
             <security>
+                <use_form_key>1</use_form_key>
                 <domain_policy_backend>2</domain_policy_backend>
                 <domain_policy_frontend>2</domain_policy_frontend>
                 <session_cookie_lifetime>10800</session_cookie_lifetime>
