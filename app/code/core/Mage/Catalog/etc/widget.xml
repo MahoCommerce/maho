@@ -36,8 +36,7 @@
             <show_pager translate="label">
                 <visible>1</visible>
                 <label>Display Page Control</label>
-                <type>select</type>
-                <source_model>adminhtml/system_config_source_yesno</source_model>
+                <type>boolean</type>
             </show_pager>
             <products_per_page translate="label">
                 <required>1</required>

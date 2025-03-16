@@ -108,6 +108,23 @@
                         </show_autocomplete_results_count>
                     </fields>
                 </search>
+                <advanced_search translate="label" module="catalogsearch">
+                    <label>Advanced Search</label>
+                    <sort_order>600</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label">
+                            <label>Enable</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+                    </fields>
+                </advanced_search>
             </groups>
         </catalog>
     </sections>

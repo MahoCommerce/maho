@@ -43,10 +43,7 @@ class Mage_Api2_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected static function _compareOrder($a, $b)
     {
-        if ($a['order'] == $b['order']) {
-            return 0;
-        }
-        return ($a['order'] < $b['order']) ? -1 : 1;
+        return $a['order'] <=> $b['order'];
     }
 
     /**

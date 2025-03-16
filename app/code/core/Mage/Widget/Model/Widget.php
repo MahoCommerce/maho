@@ -181,7 +181,7 @@ class Mage_Widget_Model_Widget extends Varien_Object
             $result = [];
             /** @var Varien_Simplexml_Element $widget */
             foreach ($this->getWidgetsXml($filters) as $widget) {
-                $helper = $widget->getAttribute('module') ? $widget->getAttribute('module') : 'widget';
+                $helper = $widget->getAttribute('module') ?: 'widget';
                 $helper = Mage::helper($helper);
                 $widgetName = $widget->getName();
                 $result[$widgetName] = [
@@ -297,6 +297,6 @@ class Mage_Widget_Model_Widget extends Varien_Object
     {
         $aOrder = (int) $a->getData('sort_order');
         $bOrder = (int) $b->getData('sort_order');
-        return $aOrder < $bOrder ? -1 : ($aOrder > $bOrder ? 1 : 0);
+        return $aOrder <=> $bOrder;
     }
 }

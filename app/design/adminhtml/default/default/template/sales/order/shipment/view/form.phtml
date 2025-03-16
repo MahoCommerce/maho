@@ -67,22 +67,15 @@
             <div><?= $this->getChildHtml('shipment_tracking') ?></div>
         </fieldset>
     <?= $this->getChildHtml('shipment_packaging') ?>
-    <script type="text/javascript">
-    //<![CDATA[
-        document.observe("dom:loaded", function() {
-            setTimeout(function(){
-                packaging.setConfirmPackagingCallback(function(){
-                    packaging.sendCreateLabelRequest();
-                });
-                packaging.setLabelCreatedCallback(function(response){
-                    setLocation("<?php echo $this->getUrl(
-                        '*/sales_order_shipment/view',
-                        ['shipment_id' => $this->getShipment()->getId()]
-                    ); ?>");
-                });
-            }, 500);
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            packaging.setConfirmPackagingCallback(() => {
+                return packaging.sendCreateLabelRequest();
+            });
+            packaging.setLabelCreatedCallback((response) => {
+                setLocation("<?= $this->getUrl('*/sales_order_shipment/view', ['shipment_id' => $this->getShipment()->getId()]) ?>");
+            });
         });
-    //]]>
     </script>
     </div>
 </div>

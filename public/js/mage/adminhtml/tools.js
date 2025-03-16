@@ -22,10 +22,15 @@ function deleteConfirm(message, url) {
     confirmSetLocation(message, url);
 }
 
-function setElementDisable(element, disable){
-    if($(element)){
-        $(element).disabled = disable;
+function setElementDisable(element, disable) {
+    if (typeof element === 'string' || element instanceof String) {
+        element = document.getElementById(element);
     }
+    if (!element instanceof Element) {
+        throw new TypeError('Argument must be type of String or Element');
+    }
+    element.disabled = disable;
+    element.classList.toggle('disabled', disable);
 }
 
 function toggleParentVis(element, force = null) {
