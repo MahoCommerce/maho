@@ -21,7 +21,6 @@ class Mage_Adminhtml_Helper_Data extends Mage_Adminhtml_Helper_Help_Mapping
     public const XML_PATH_USE_CUSTOM_ADMIN_URL         = 'default/admin/url/use_custom';
     public const XML_PATH_USE_CUSTOM_ADMIN_PATH        = 'default/admin/url/use_custom_path';
     public const XML_PATH_CUSTOM_ADMIN_PATH            = 'default/admin/url/custom_path';
-    public const XML_PATH_ADMINHTML_SECURITY_USE_FORM_KEY = 'admin/security/use_form_key';
 
     protected $_moduleName = 'Mage_Adminhtml';
 
@@ -118,12 +117,11 @@ class Mage_Adminhtml_Helper_Data extends Mage_Adminhtml_Helper_Help_Mapping
     }
 
     /**
-     * Check if enabled "Add Secret Key to URLs" functionality
-     *
-     * @return bool
+     * @deprecated since 25.5.0
+     * @return true
      */
     public function isEnabledSecurityKeyUrl()
     {
-        return Mage::getStoreConfigFlag(self::XML_PATH_ADMINHTML_SECURITY_USE_FORM_KEY);
+        return true;
     }
 }

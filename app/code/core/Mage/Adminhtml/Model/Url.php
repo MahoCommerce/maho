@@ -127,7 +127,7 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
      */
     public function useSecretKey()
     {
-        return Mage::getStoreConfigFlag('admin/security/use_form_key') && !$this->getNoSecret();
+        return !$this->getNoSecret();
     }
 
     /**
