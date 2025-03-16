@@ -6,6 +6,7 @@
  * @package    Mage_CatalogSearch
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -65,6 +66,19 @@ class Mage_CatalogSearch_ResultController extends Mage_Core_Controller_Front_Act
 
             if (!Mage::helper('catalogsearch')->isMinQueryLength()) {
                 $query->save();
+            }
+
+            // Redirect to product if there's only one result
+            if (Mage::getStoreConfigFlag('catalog/search/redirect_to_product_if_one_result')) {
+                $searchResultBlock = Mage::app()->getLayout()->getBlock('search_result_list');
+                if ($searchResultBlock) {
+                    /** @var Mage_CatalogSearch_Model_Resource_Fulltext_Collection $productCollection */
+                    $productCollection = $searchResultBlock->getLoadedProductCollection();
+                    if ($productCollection && $productCollection->getSize() === 1) {
+                        $product = $productCollection->getFirstItem();
+                        $this->_redirectUrl($product->getProductUrl());
+                    }
+                }
             }
         } else {
             $this->_redirectReferer();
