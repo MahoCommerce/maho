@@ -69,14 +69,15 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function createChallenge(?array $options = null): Altcha\Challenge
     {
-        $options = new Altcha\ChallengeOptions([
-            'algorithm' => Altcha\Algorithm::SHA512,
-            'saltLength' => 32,
-            'expires' => (new DateTime())->modify('+' . self::CHALLENGE_EXPIRATION . ' seconds'),
-            'hmacKey' => $this->getHmacKey(),
-            ...($options ?? []),
-        ]);
-        return Altcha\Altcha::createChallenge($options);
+        $options = new Altcha\ChallengeOptions(
+            Altcha\Hasher\Algorithm::SHA512,
+            Altcha\ChallengeOptions::DEFAULT_MAX_NUMBER,
+            (new DateTime())->modify('+' . self::CHALLENGE_EXPIRATION . ' seconds'),
+            $options ?? [],
+            32
+        );
+        $altcha = new Altcha\Altcha($this->getHmacKey());
+        return $altcha->createChallenge($options);
     }
 
     public function verify(string $payload): bool
@@ -97,7 +98,8 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         try {
-            $isValid = Altcha\Altcha::verifySolution($payload, $this->getHmacKey(), true);
+            $altcha = new Altcha\Altcha($this->getHmacKey());
+            $isValid = $altcha->verifySolution($payload, true);
             Mage::app()->getCache()->clean(Zend_Cache::CLEANING_MODE_OLD, [self::CACHE_TAG]);
             Mage::app()->getCache()->save('1', $cacheKey, [self::CACHE_TAG], self::CHALLENGE_EXPIRATION);
         } catch (Exception $e) {
