@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,17 +19,18 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Items extends Mage_Adminhtml_Block
 {
     /**
      * Contains button descriptions to be shown at the top of accordion
-     * @var array
+     * @var list<array>
      */
     protected $_buttons = [];
 
-    /**
-     * Define block ID
-     */
     public function __construct()
     {
         parent::__construct();
         $this->setId('sales_order_create_items');
+        $this->addButton([
+            'label' => Mage::helper('sales')->__('Add Products'),
+            'onclick' => 'order.productGridShow()',
+        ]);
     }
 
     /**

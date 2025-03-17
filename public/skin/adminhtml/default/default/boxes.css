@@ -768,6 +768,14 @@ ul.item-options li { padding-left:.7em; }
 .entry-edit .order-address .validate-vat { text-align:right; padding:10px 0 0; width:96%; }
 .order-search-items .entry-edit .grid    { height:610px; overflow:auto; }
 .order-search-items .entry-edit .grid table { width:99.9%; }
+#order-data .ignore-validate:has(> .overlay) {
+    position: relative;
+    .overlay {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        position: absolute; z-index: 1; top: 0; bottom: 0; left: 0; right: 0;
+        background: rgba(255,255,255,0.8);
+    }
+}
 /* .create-order-totals                 { background:url(images/bg_create_order_totals.gif) repeat-y 50% 0 !important; } */
 
 /* Product Configuration Popup */

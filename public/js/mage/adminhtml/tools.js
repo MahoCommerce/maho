@@ -832,3 +832,15 @@ function setQueryParams(url, params = {}) {
     }
     return url.toString();
 }
+
+/**
+ * Alternative to PrototypeJS's Function.wrap() method
+ */
+function wrapFunction(originalFn, wrapperFn) {
+    if (typeof originalFn !== 'function' || typeof wrapperFn !== 'function') {
+        throw new TypeError('Arguments must be functions');
+    }
+    return function() {
+        return wrapperFn(originalFn, ...arguments);
+    };
+}
