@@ -5,13 +5,12 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Sales_Order_Create_Comment $this */
  ?>
-<!--<h4 class="icon-head fieldset-legend <?= $this->getHeaderCssClass() ?>"><?= $this->getHeaderText() ?></h4>-->
-<label for="order-comment"><?= Mage::helper('sales')->__('Order Comments') ?></label><br />
-<textarea style="width:98%; height:8em;" id="order-comment" name="order[comment][customer_note]" rows="2" cols="15"><?= $this->getCommentNote() ?></textarea>
+<label for="order-comment"><?= Mage::helper('sales')->__('Order Comments') ?></label><br>
+<textarea id="order-comment" name="order[comment][customer_note]"><?= $this->getCommentNote() ?></textarea>
 <script type="text/javascript">order.commentFieldsBind('order-comment')</script>

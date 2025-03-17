@@ -5,27 +5,19 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Sales_Order_Totalbar $this */
 ?>
 <?php if(count($this->getTotals()) > 0): ?>
-<div class="box">
-    <div class="entry-edit">
-        <table border="0" cellspacing="0" width="100%">
-            <tr>
-            <?php foreach( $this->getTotals() as $_total ): ?>
-                <td class="a-center">
-                    <div <?php if ($_total['grand']): ?>class="grand-total"<?php endif ?>>
-                        <?= $_total['label'] ?><br />
-                        <?= $_total['value'] ?>
-                    </div>
-                </td>
-            <?php endforeach ?>
-            </tr>
-        </table>
+<div class="sales-totalbar box">
+<?php foreach( $this->getTotals() as $total ): ?>
+    <div class="<?= $total['grand'] ? 'grand-total' : '' ?>">
+        <span><?= $total['label'] ?></span>
+        <span><?= $total['value'] ?></span>
     </div>
+<?php endforeach ?>
 </div>
 <?php endif ?>

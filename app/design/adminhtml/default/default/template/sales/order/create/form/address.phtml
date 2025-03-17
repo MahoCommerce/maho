@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -32,21 +32,19 @@ if ($this->getIsShipping()):
 <div class="entry-edit">
 
     <div class="entry-edit-head">
-        <h4 class="icon-head fieldset-legend <?= $this->getHeaderCssClass() ?>"><?= $this->getHeaderText() ?></h4>
+        <h4 class="fieldset-legend <?= $this->getHeaderCssClass() ?>"><?= $this->getHeaderText() ?></h4>
     </div>
 
-    <fieldset class="np">
+    <fieldset class="fieldset-wide">
     <div id = "<?= $_addressChoiceContainerId ?>" class="order-choose-address">
         <?= Mage::helper('sales')->__('Select from existing customer addresses:') ?><br/>
         <?php $_id = $this->getForm()->getHtmlIdPrefix() . 'customer_address_id' ?>
-        <select id="<?= $_id ?>"  name="<?= $this->getForm()->getHtmlNamePrefix() ?>[customer_address_id]" style="width:97.5%;" onchange="order.selectAddress(this, '<?= $_fieldsContainerId ?>')">
+        <select id="<?= $_id ?>"  name="<?= $this->getForm()->getHtmlNamePrefix() ?>[customer_address_id]" onchange="order.selectAddress(this, '<?= $_fieldsContainerId ?>')">
             <option value=""><?= Mage::helper('sales')->__('Add New Address') ?></option>
             <?php foreach ($this->getAddressCollection() as $_address): ?>
-            <?php //if ($this->getAddressAsString($_address) != $this->getAddressAsString($this->getAddress())): ?>
                 <option value="<?= $_address->getId() ?>"<?php if ($_address->getId() == $this->getAddressId()): ?> selected="selected"<?php endif ?>>
                     <?= $this->getAddressAsString($_address) ?>
                 </option>
-            <?php //endif ?>
             <?php endforeach ?>
 
         </select>

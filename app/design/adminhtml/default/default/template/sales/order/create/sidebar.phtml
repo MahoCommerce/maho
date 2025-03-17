@@ -5,27 +5,30 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Sales_Order_Create_Sidebar $this */
 ?>
-<div class="entry-edit"><div class="entry-edit-head"><h4><?= $this->helper('sales')->__('Customer\'s Current Activities') ?></h4></div></div>
-<div class="create-order-sidebar-container">
-<?= $this->getChildHtml('top_button') ?>
-<?php foreach ($this->getChild() as $_child): ?>
-    <?php $_alias = $_child->getBlockAlias(); ?>
-    <?php if ($_alias != 'top_button' && $_alias != 'bottom_button'): ?>
+<div>
+    <h3><?= $this->helper('sales')->__('Customer\'s Current Activities') ?></h3>
+    <div class="create-order-sidebar-container">
+        <?= $this->getChildHtml('top_button') ?>
+    <?php foreach ($this->getChild() as $_child): ?>
+        <?php $_alias = $_child->getBlockAlias(); ?>
+        <?php if ($_alias != 'top_button' && $_alias != 'bottom_button'): ?>
         <div id="order-sidebar_<?= $_alias ?>">
             <?php if($this->canDisplay($_child)): ?>
                 <?= $this->getChildHtml($_alias) ?>
             <?php endif ?>
         </div>
-    <?php endif ?>
-<?php endforeach ?>
-<?= $this->getChildHtml('bottom_button') ?>
+        <?php endif ?>
+    <?php endforeach ?>
+        <?= $this->getChildHtml('bottom_button') ?>
+    </div>
 </div>
+
 <script>
 function addSidebarCompositeListType() {
     productConfigure.addListType('sidebar', {
