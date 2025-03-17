@@ -357,7 +357,7 @@ class MahoTreeNode {
      * @param {MahoTreeNodeData|MahoTreeNodeData[]} data -
      */
     constructor(tree, data) {
-        if (!tree instanceof MahoTree) {
+        if (!(tree instanceof MahoTree)) {
             throw new TypeError('Tree parameter must be instance of MahoTree');
         }
         if (typeof data !== 'object' || Array.isArray(data) || data === null) {
