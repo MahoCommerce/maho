@@ -491,9 +491,16 @@ class ProductConfigure // Maho.Admin.Controller.ProductConfigurePopup
     /**
      * Helper to find qty of currently confirmed item
      */
-    getCurrentConfirmedQtyElement() {
+    getCurrentConfirmedBlock() {
         const { listType, itemId } = this.current;
-        return this._getConfirmedBlock(listType, itemId).querySelector('input[name=qty]');
+        return this._getConfirmedBlock(listType, itemId);
+    }
+
+    /**
+     * Helper to find qty of currently confirmed item
+     */
+    getCurrentConfirmedQtyElement() {
+        return this.getCurrentConfirmedBlock().querySelector('input[name=qty]');
     }
 
     /**

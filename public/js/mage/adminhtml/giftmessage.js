@@ -4,6 +4,7 @@
  * @package     Mage_Adminhtml
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -247,7 +248,10 @@ GiftMessageSet.prototype = {
             $(this.sourcePrefix + this.id + '_form').request();
         } else if (typeof(order) != 'undefined') {
             var data = order.serializeData('gift_options_data_' + this.id);
-            order.loadArea(['items'], true, data.toObject());
+            if (typeof data?.toObject === 'function') {
+                data = data.toObject();
+            }
+            order.loadArea(['items'], true, data);
         }
     }
 };
