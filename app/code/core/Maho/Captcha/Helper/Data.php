@@ -74,7 +74,7 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
             Altcha\ChallengeOptions::DEFAULT_MAX_NUMBER,
             (new DateTime())->modify('+' . self::CHALLENGE_EXPIRATION . ' seconds'),
             $options ?? [],
-            32
+            32,
         );
         $altcha = new Altcha\Altcha($this->getHmacKey());
         return $altcha->createChallenge($options);
