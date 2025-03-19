@@ -12,6 +12,7 @@
 class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
 {
     protected string $_storeTable;
+
     public function __construct()
     {
         $this->setType('blog_post');
@@ -39,7 +40,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     }
 
     #[\Override]
-    protected function _afterSave(Varien_Object $object)
+    protected function _afterSave(Maho_Blog_Model_Post $object)
     {
         if ($object->hasStores()) {
             $this->_saveStoreRelations($object);
@@ -48,7 +49,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         return parent::_afterSave($object);
     }
 
-    protected function _saveStoreRelations($post)
+    protected function _saveStoreRelations(Maho_Blog_Model_Post $post): void
     {
         $oldStores = $this->lookupStoreIds($post->getId());
         $newStores = (array) $post->getStores();
@@ -79,7 +80,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         }
     }
 
-    public function lookupStoreIds($postId)
+    public function lookupStoreIds(int $postId): array
     {
         $adapter = $this->_getReadAdapter();
         $select = $adapter->select()
@@ -90,7 +91,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     }
 
     #[\Override]
-    protected function _afterLoad(Varien_Object $object)
+    protected function _afterLoad(Varien_Object $object): self
     {
         if ($object->getId()) {
             $stores = $this->lookupStoreIds($object->getId());
@@ -106,7 +107,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         $urlKey = substr($urlKey, 0, -strlen('.html'));
 
         $stores = [Mage_Core_Model_App::ADMIN_STORE_ID, $storeId];
-        $select = $this->getLoadByUrkKeySelect($urlKey, $stores, 1);
+        $select = $this->getLoadByUrkKeySelect($urlKey, $stores, true);
         $select->reset(Zend_Db_Select::COLUMNS)
             ->columns('bp.entity_id')
             ->order('bps.store_id DESC')

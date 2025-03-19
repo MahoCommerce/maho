@@ -13,7 +13,7 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
 {
     public const ENTITY = 'blog_post';
 
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('blog/post');
         $this->_map['fields']['store'] = 'store_table.store_id';

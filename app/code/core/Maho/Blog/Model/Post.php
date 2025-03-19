@@ -22,7 +22,7 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
         $this->_init('blog/post');
     }
 
-    public function getStores()
+    public function getStores(): array
     {
         if (!$this->hasStores()) {
             $stores = $this->_getResource()->lookupStoreIds($this->getId());

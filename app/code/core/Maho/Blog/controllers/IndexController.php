@@ -11,7 +11,7 @@
 
 class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
 {
-    public function indexAction()
+    public function indexAction(): void
     {
         if (!Mage::helper('blog')->isEnabled()) {
             $this->_forward('noRoute');
@@ -22,7 +22,7 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
-    public function viewAction()
+    public function viewAction(): void
     {
         if (!Mage::helper('blog')->isEnabled()) {
             $this->_forward('noRoute');

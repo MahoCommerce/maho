@@ -11,26 +11,26 @@
 
 class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_Action
 {
-    protected function _initAction()
+    protected function _initAction(): self
     {
         $this->loadLayout()
             ->_setActiveMenu('cms/blog_posts');
         return $this;
     }
 
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->_title($this->__('Blog Posts'));
         $this->_initAction();
         $this->renderLayout();
     }
 
-    public function newAction()
+    public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    public function editAction()
+    public function editAction(): void
     {
         $this->_title($this->__('Blog Post'));
 
@@ -65,7 +65,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
             ->renderLayout();
     }
 
-    public function saveAction()
+    public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
             $model = Mage::getModel('blog/post');
@@ -102,7 +102,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
         $this->_redirect('*/*/');
     }
 
-    public function deleteAction()
+    public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
             try {
@@ -122,7 +122,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
         $this->_redirect('*/*/');
     }
 
-    public function massDeleteAction()
+    public function massDeleteAction(): void
     {
         $postIds = $this->getRequest()->getParam('post');
         if (!is_array($postIds)) {
@@ -146,7 +146,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
     }
 
     #[\Override]
-    protected function _isAllowed()
+    protected function _isAllowed(): bool
     {
         return Mage::getSingleton('admin/session')->isAllowed('cms/blog_posts');
     }
