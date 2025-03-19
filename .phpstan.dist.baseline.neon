@@ -1273,24 +1273,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Notification/Window.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Block_Page_Header\:\:getHomeLink\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Page/Header.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Page_Header\:\:getLogoutLink\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Page/Header.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Page_Header\:\:getUser\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Page/Header.php
-
-		-
 			message: '#^Comparison operation "\=\=" between \(Varien_Simplexml_Element\|null\) and 1 results in an error\.$#'
 			identifier: equal.invalid
 			count: 1
@@ -2869,7 +2851,7 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Store/Switcher/Form/Renderer/Fieldset/Element.php
 
 		-
-			message: '#^Parameter \#2 \$onclick of method Mage_Adminhtml_Block_Widget\:\:getButtonHtml\(\) expects string, null given\.$#'
+			message: '#^Parameter \#2 \$onclick of method Mage_Adminhtml_Block_Template\:\:getButtonHtml\(\) expects string, null given\.$#'
 			identifier: argument.type
 			count: 4
 			path: app/code/core/Mage/Adminhtml/Block/System/Account/Edit/Form.php
@@ -3475,12 +3457,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Accordion.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Accordion_Item\:\:getClass\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Accordion/Item.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Block_Widget_Accordion_Item\:\:getContent\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -3488,12 +3464,6 @@ parameters:
 
 		-
 			message: '#^Method Mage_Adminhtml_Block_Widget_Accordion_Item\:\:getTarget\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Accordion/Item.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Accordion_Item\:\:getTitle\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Accordion/Item.php
@@ -3515,18 +3485,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Accordion/Item.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Button\:\:getOnClick\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Button.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Block_Widget_Button\:\:getType\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Button.php
 
 		-
 			message: '#^Method Mage_Adminhtml_Block_Widget_Form\:\:_addElementTypes\(\) has no return type specified\.$#'
@@ -4227,24 +4185,6 @@ parameters:
 		-
 			message: '#^Method Mage_Adminhtml_Block_Widget_Grid_Container\:\:_addBackButton\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Container.php
-
-		-
-			message: '#^Property Mage_Adminhtml_Block_Widget_Grid_Container\:\:\$_addButtonLabel has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Container.php
-
-		-
-			message: '#^Property Mage_Adminhtml_Block_Widget_Grid_Container\:\:\$_backButtonLabel has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Container.php
-
-		-
-			message: '#^Property Mage_Adminhtml_Block_Widget_Grid_Container\:\:\$_blockGroup has no type specified\.$#'
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Container.php
 
@@ -31723,30 +31663,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/customer/tab/addresses.phtml
 
 		-
-			message: '''
-				#^Call to deprecated method getGridUrl\(\) of class Mage_Adminhtml_Block_Widget_Grid\:
-				after 1\.3\.2\.3 Use getAbsoluteGridUrl\(\) method instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/dashboard/grid.phtml
-
-		-
-			message: '''
-				#^Call to deprecated method getRowId\(\) of class Mage_Adminhtml_Block_Widget_Grid\:
-				since 1\.1\.7$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/dashboard/grid.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 3
-			path: app/design/adminhtml/default/default/template/dashboard/searches.phtml
-
-		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
 			count: 13
@@ -31775,24 +31691,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/design/adminhtml/default/default/template/giftmessage/giftoptionsform.phtml
-
-		-
-			message: '#^Call to an undefined method Mage_GiftMessage_Block_Message_Helper\:\:prepareAsIs\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			message: '#^Method Varien_Object\:\:getWidgetButtonHtml\(\) invoked with 2 parameters, 0\-1 required\.$#'
-			identifier: arguments.count
-			count: 4
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
-
-		-
-			message: '#^Parameter \#1 \$value of method Mage_GiftMessage_Block_Message_Helper\:\:setScriptIncluded\(\) expects string, true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
@@ -31829,12 +31727,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/design/adminhtml/default/default/template/permissions/userroles.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 3
-			path: app/design/adminhtml/default/default/template/promo/form.phtml
 
 		-
 			message: '#^Variable \$options might not be defined\.$#'
