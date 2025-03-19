@@ -324,6 +324,14 @@ label {
     font-weight: 400;
 }
 
+dialog {
+    color: var(--maho-box-text-color);
+    background: var(--maho-box-background);
+    .dialog-header, .dialog-buttons {
+        border-color: var(--maho-box-border-color);
+    }
+}
+
 /* TODO */
 .box {
     padding: 16px;
@@ -740,6 +748,29 @@ td.divider {
                 0% 45%, 100% 45%, 100% 55%, 0% 55%, 0% 45%,
                 0% 75%, 100% 75%, 100% 85%, 0% 85%, 0% 75%
             );
+        }
+    }
+}
+
+#global-search-dialog {
+    #global-search-input-box {
+        input {
+            width: 100%;
+        }
+    }
+    #global-search-results {
+        margin-top: 8px;
+        a {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            color: var(--maho-box-text-color);
+            &:hover, &:focus {
+                color: var(--maho-box-hover-text-color, --maho-box-text-color);
+                background: var(--maho-box-shade-1);
+                text-decoration: none;
+            }
         }
     }
 }

@@ -14,7 +14,7 @@
 ?>
 <template id="global-search-dialog">
     <div id="global-search-input-box">
-        <input name="query" autocomplete="off" autofocus>
+        <input name="query" autocomplete="off" autofocus placeholder="<?= $this->quoteEscape($this->__('Search for customers, products, or orders'), true) ?>">
         <span class="icon loading no-display"></span>
     </div>
     <div id="global-search-results"></div>
@@ -53,15 +53,19 @@
                     signal: controller.signal,
                 });
 
-                resultsEl.innerHTML = html;
-                const ulEl = resultsEl.querySelector('ul');
+                if (html) {
+                    resultsEl.innerHTML = html;
+                    const ulEl = resultsEl.querySelector('ul');
 
-                if (ulEl.children.length === 0) {
-                    resultsEl.innerHTML = '<?= $this->__('No records found.') ?>';
-                } else {
-                    ulEl.children.forEach((li) => {
-                        li.addEventListener('click', () => setLocation(li.getAttribute('url')));
-                    });
+                    if (ulEl.children.length === 0) {
+                        resultsEl.innerHTML = '<?= $this->__('No records found.') ?>';
+                    } else {
+                        for (const liEl of ulEl.children) {
+                            if (liEl.hasAttribute('url')) {
+                                liEl.addEventListener('click', () => setLocation(liEl.getAttribute('url')));
+                            }
+                        }
+                    }
                 }
             } catch {
             }
