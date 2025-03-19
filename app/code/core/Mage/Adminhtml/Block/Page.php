@@ -53,6 +53,18 @@ class Mage_Adminhtml_Block_Page extends Mage_Adminhtml_Block_Template
         return $this;
     }
 
+    public function getBodyAttributes(): string
+    {
+        $attributes = '';
+        if ($class = $this->getBodyClass()) {
+            $attributes .= " class=\"{$this->escapeHtml($class)}\"";
+        }
+        if ($theme = Mage::app()->getCookie()->get('maho_admin_theme')) {
+            $attributes .= " data-maho-theme=\"{$this->escapeHtml($theme)}\"";
+        }
+        return $attributes;
+    }
+
     public function getContainerCssClass(): string
     {
         $blockLeft = $this->getLayout()->getBlock('left');

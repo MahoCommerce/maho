@@ -16,6 +16,13 @@
         <svg viewBox="0 0 242 237" xmlns="http://www.w3.org/2000/svg"><path d="M199 34c4 0 8 4 8 8v77c0 46-38 84-85 84H43c-4 0-8-4-8-8v-82c0-43 36-79 80-79h84zm-79 29c-30 0-54 25-54 55a54 54 0 0 0 109 0c0-30-25-55-55-55z" fill="#d7df22"/></svg>
     </a>
     <ul id="usermenu">
+        <li class="level0">
+            <a id="theme-switcher" href="#" onclick="return switchTheme()">
+                <span title="<?= $this->__('Light Mode') ?>"><?= $this->getIconSvg('sun') ?></span>
+                <span title="<?= $this->__('Dark Mode') ?>"><?= $this->getIconSvg('moon') ?></span>
+                <span title="<?= $this->__('System Theme') ?>"><?= $this->getIconSvg('sun-moon') ?></span>
+            </a>
+        </li>
         <li class="parent level0 usermenulabel">
             <a href="#" onclick="return false" title="<?= $this->__('User Menu') ?>"></a>
             <ul>
@@ -32,3 +39,13 @@
         <?= $this->getChildHtml('globalsearch') ?>
     <?php endif ?>
 </div>
+<script>
+    function switchTheme() {
+        const modes = ['', 'dark', 'light'];
+        const oldMode = Math.max(modes.indexOf(document.body.dataset.mahoTheme), 0);
+        const newMode = modes[(oldMode + 1) % modes.length];
+        document.body.dataset.mahoTheme = newMode;
+        Mage.Cookies.set('maho_admin_theme', newMode);
+        return false;
+    }
+</script>

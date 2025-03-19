@@ -30,7 +30,7 @@
     <?= $this->getChildHtml('head') ?>
 </head>
 
-<body id="html-body"<?= $this->getBodyClass() ? ' class="' . $this->getBodyClass() . '"' : '' ?>>
+<body id="html-body"<?= $this->getBodyAttributes() ?>>
     <?= $this->getChildHtml('notification_window') ?>
 
     <div class="wrapper">
@@ -42,7 +42,7 @@
         <?= $this->getChildHtml('notifications') ?>
         <div id="anchor-content" class="middle">
             <div id="page:main-container">
-                <div id="page:container" class="columns <?php echo $this->getContainerCssClass() ?>">
+                <div id="page:container" class="columns <?= $this->getContainerCssClass() ?>">
                     <aside id="page:left" class="side-col">
                         <?= $this->getChildHtml('left') ?>
                     </aside>

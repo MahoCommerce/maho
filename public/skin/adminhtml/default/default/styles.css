@@ -486,6 +486,22 @@ td.divider {
                 top: 4px;
                 right: 16px;
             }
+
+            #theme-switcher {
+                svg:not([data-name=sun-moon]) {
+                    display: none;
+                }
+                [data-maho-theme=light] & svg[data-name=sun] {
+                    display: inline-block;
+                }
+                [data-maho-theme=dark] & svg[data-name=moon] {
+                    display: inline-block;
+                }
+                [data-maho-theme=light] & svg[data-name=sun-moon],
+                [data-maho-theme=dark] & svg[data-name=sun-moon] {
+                    display: none;
+                }
+            }
         }
 
         .nav-bar {
