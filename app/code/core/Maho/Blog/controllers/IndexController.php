@@ -13,12 +13,22 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
 {
     public function indexAction()
     {
+        if (!Mage::helper('blog')->isEnabled()) {
+            $this->_forward('noRoute');
+            return;
+        }
+
         $this->loadLayout();
         $this->renderLayout();
     }
 
     public function viewAction()
     {
+        if (!Mage::helper('blog')->isEnabled()) {
+            $this->_forward('noRoute');
+            return;
+        }
+
         $postId = $this->getRequest()->getParam('post_id');
         $post = Mage::getModel('blog/post')->load($postId);
         if (!$post->getId()) {

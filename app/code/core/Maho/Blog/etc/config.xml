@@ -91,16 +91,6 @@
                 </args>
             </blog>
         </routers>
-        <events>
-            <controller_action_noroute>
-                <observers>
-                    <cms>
-                        <class>blog/observer</class>
-                        <method>noRoute</method>
-                    </cms>
-                </observers>
-            </controller_action_noroute>
-        </events>
         <layout>
             <updates>
                 <blog>

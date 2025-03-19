@@ -12,4 +12,9 @@
 class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Maho_Blog';
+
+    public function isEnabled(): bool
+    {
+        return $this->isModuleEnabled() && $this->isModuleOutputEnabled();
+    }
 }

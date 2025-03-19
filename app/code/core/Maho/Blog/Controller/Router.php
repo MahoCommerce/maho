@@ -20,15 +20,11 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
     #[\Override]
     public function match(Zend_Controller_Request_Http $request): bool
     {
-        if (!Mage::isInstalled()) {
-            Mage::app()->getFrontController()->getResponse()
-                ->setRedirect(Mage::getUrl('install'))
-                ->sendResponse();
-            exit;
+        if (!Mage::isInstalled() || !Mage::helper('blog')->isEnabled()) {
+            return false;
         }
 
         $identifier = trim($request->getPathInfo(), '/');
-
         $condition = new Varien_Object([
             'identifier' => $identifier,
             'continue'   => true,
