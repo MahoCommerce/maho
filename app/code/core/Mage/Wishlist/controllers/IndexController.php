@@ -6,7 +6,7 @@
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -129,7 +129,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
         }
         $this->loadLayout();
 
-        if ($this->_isFormKeyEnabled() && strpos($this->_getRefererUrl(), 'login')) {
+        if (strpos($this->_getRefererUrl(), 'login')) {
             Mage::getSingleton('core/session')->addError(Mage::helper('wishlist')->__(
                 'Please add product to wishlist again.',
             ));
@@ -326,14 +326,16 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                 return;
             }
 
-            $buyRequest = new Varien_Object($this->getRequest()->getParams());
+            $buyRequest = new Varien_Object($this->getRequest()->getPost());
+            $buyRequest->unsFormKey();
 
-            $wishlist->updateItem($id, $buyRequest)
+            $wishlist
+                ->updateItem($item->getId(), $buyRequest)
                 ->save();
 
             Mage::helper('wishlist')->calculate();
             Mage::dispatchEvent('wishlist_update_item', [
-                'wishlist' => $wishlist, 'product' => $product, 'item' => $wishlist->getItem($id)]);
+                'wishlist' => $wishlist, 'product' => $product, 'item' => $wishlist->getItemById($id)]);
 
             Mage::helper('wishlist')->calculate();
 

@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
@@ -14,19 +14,21 @@
 <?php $_wishlistSubmitUrl = $this->helper('wishlist')->getUpdateUrl($_wishlistItem); ?>
 <ul class="add-to-links">
 <?php if ($this->helper('wishlist')->isAllow()) : ?>
-    <li><a href="<?= $_wishlistSubmitUrl ?>" onclick="productAddToCartForm.submitLight(this, this.href); return false;" class="link-compare"><?= $this->__('Update Wishlist') ?></a></li>
+    <li><a href="<?= $_wishlistSubmitUrl ?>" onclick="productAddToCartForm.submitLight(this, this.href); return false;">
+            <?= $this->getIconSvg('heart') ?>
+            <?= $this->__('Update Wishlist') ?>
+        </a></li>
 <?php endif ?>
 <?php $_product = $this->getProduct(); ?>
 <?php $_compareUrl = $this->helper('catalog/product_compare')->getAddUrlCustom($_product, false); ?>
 <?php if ($_compareUrl) : ?>
     <li>
-        <span class="separator">|</span>
-        <a href="#"
-           class="link-compare"
+        <a href="#" title="<?= $this->__('Add to Compare') ?>"
            onclick="customFormSubmit(
                    '<?= $_compareUrl ?>',
                    '<?= $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])) ?>',
                    'post')">
+            <?= $this->getIconSvg('scale') ?>
             <?= $this->__('Add to Compare') ?>
         </a>
     </li>

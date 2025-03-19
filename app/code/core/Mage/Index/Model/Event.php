@@ -6,7 +6,7 @@
  * @package    Mage_Index
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -24,7 +24,7 @@
  * @method $this setCreatedAt(string $value)
  * @method $this setOldData(string|array $value)
  * @method $this setNewData(string|array $value)
- * @method Varien_Object getDataObject()
+ * @method Mage_Core_Model_Store|Mage_Core_Model_Store_Group getDataObject()
  * @method $this setDataObject(Varien_Object $value)
  * @method bool hasCreatedAt()
  */
@@ -209,7 +209,7 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
             if ($processStatus == Mage_Index_Model_Process::EVENT_STATUS_DONE) {
                 $process = Mage::getSingleton('index/indexer')->getProcessById($processId);
                 if ($process) {
-                    $namespace = get_class($process->getIndexer());
+                    $namespace = $process->getIndexer()::class;
                     if (array_key_exists($namespace, $newData)) {
                         unset($newData[$namespace]);
                     }

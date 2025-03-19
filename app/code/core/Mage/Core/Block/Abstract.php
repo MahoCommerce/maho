@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -747,7 +747,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     public function sortChildren($force = false)
     {
         foreach ($this->_sortInstructions as $name => $list) {
-            list($siblingName, $after, $exists) = $list;
+            [$siblingName, $after, $exists] = $list;
             if ($exists && !$force) {
                 continue;
             }
@@ -1157,6 +1157,57 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
         return $helper->formatTime($time, $format, $showDate);
     }
 
+    public function getIconSvg(string $name, string $variant = 'outline'): string
+    {
+        $name = basename(strtolower($name));
+        $variant = in_array($variant, ['outline', 'filled']) ? $variant : 'outline';
+
+        $cache = Mage::app()->getCache();
+        $cacheId = "MAHO_ICON_{$variant}_{$name}";
+        $useCache = Mage::app()->useCache('icons');
+
+        if ($useCache && $cachedIcon = $cache->load($cacheId)) {
+            return $cachedIcon;
+        }
+
+        $installPath = null;
+        $packageName = 'mahocommerce/icons';
+        try {
+            $installPath = \Composer\InstalledVersions::getInstallPath($packageName);
+        } catch (OutOfBoundsException $e) {
+            return '';
+        }
+        if ($installPath === null) {
+            return '';
+        }
+
+        $iconSvg = file_get_contents("$installPath/icons/$variant/$name.svg", false);
+        if ($iconSvg === false) {
+            return '';
+        }
+
+        if ($useCache) {
+            $cache->save($iconSvg, $cacheId, ['ICONS']);
+        }
+        return $iconSvg;
+    }
+
+    public function getIconDataUrl(string $name, string $variant = 'outline', array $attributes = []): string
+    {
+        $svg = $this->getIconSvg($name, $variant);
+
+        if ($attributes) {
+            $attributesSearch = $attributesReplace = [];
+            foreach ($attributes as $key => $value) {
+                $attributesSearch[] = "/$key=\".*?\"/";
+                $attributesReplace[] = "$key=\"$value\"";
+            }
+            $svg = preg_replace($attributesSearch, $attributesReplace, $svg);
+        }
+
+        return "url('data:image/svg+xml,{$svg}')";
+    }
+
     /**
      * Retrieve module name of block
      *
@@ -1166,7 +1217,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     {
         $module = $this->getData('module_name');
         if (is_null($module)) {
-            $class = get_class($this);
+            $class = static::class;
             $module = substr($class, 0, strpos($class, '_Block'));
             $this->setData('module_name', $module);
         }
@@ -1328,6 +1379,27 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     }
 
     /**
+     * Encode the mixed $valueToEncode into the JSON format
+     *
+     * @see Mage_Core_Helper_Data::jsonEncode()
+     */
+    public function jsonEncode($valueToEncode, bool $cycleCheck = false, array $options = []): string
+    {
+        return Mage::helper('core')->jsonEncode($valueToEncode, $cycleCheck, $options);
+    }
+
+    /**
+     * Decodes the given $encodedValue string which is encoded in the JSON format
+     *
+     * @see Mage_Core_Helper_Data::jsonDecode()
+     * @throws Zend_Json_Exception
+     */
+    public function jsonDecode(string $encodedValue, int $objectDecodeType = Zend_Json::TYPE_ARRAY): mixed
+    {
+        return Mage::helper('core')->jsonDecode($encodedValue, $objectDecodeType);
+    }
+
+    /**
      * Alias for getName method.
      *
      * @return string
@@ -1400,7 +1472,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     {
         if ($this->hasData('cache_key')) {
             $cacheKey = $this->getData('cache_key');
-            if (strpos($cacheKey, self::CACHE_KEY_PREFIX) !== 0) {
+            if (!str_starts_with($cacheKey, self::CACHE_KEY_PREFIX)) {
                 $cacheKey = self::CACHE_KEY_PREFIX . $cacheKey;
                 $this->setData('cache_key', $cacheKey);
             }

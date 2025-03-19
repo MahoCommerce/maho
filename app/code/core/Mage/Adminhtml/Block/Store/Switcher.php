@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -46,7 +46,6 @@ class Mage_Adminhtml_Block_Store_Switcher extends Mage_Adminhtml_Block_Template
     /**
      * @return Mage_Core_Model_Resource_Website_Collection
      * @throws Mage_Core_Exception
-     * @deprecated
      */
     public function getWebsiteCollection()
     {
@@ -81,7 +80,6 @@ class Mage_Adminhtml_Block_Store_Switcher extends Mage_Adminhtml_Block_Template
     /**
      * @param Mage_Core_Model_Website|int|string $website
      * @return Mage_Core_Model_Resource_Store_Group_Collection
-     * @deprecated
      */
     public function getGroupCollection($website)
     {
@@ -108,7 +106,6 @@ class Mage_Adminhtml_Block_Store_Switcher extends Mage_Adminhtml_Block_Template
     /**
      * @param Mage_Core_Model_Store_Group|int|string $group
      * @return Mage_Core_Model_Resource_Store_Collection
-     * @deprecated
      */
     public function getStoreCollection($group)
     {

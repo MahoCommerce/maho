@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -936,7 +936,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                                 if (array_key_exists($paramSuffix, $solidParams)) {
                                     $solidParams[$paramSuffix] = $data;
                                 } elseif ($paramSuffix === 'price') {
-                                    if (substr($data, -1) === '%') {
+                                    if (str_ends_with($data, '%')) {
                                         $priceTableRow['price_type'] = 'percent';
                                     }
                                     $priceTableRow['price'] = (float) rtrim($data, '%');
@@ -974,7 +974,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                                 'price'      => (float) rtrim($rowData['_custom_option_row_price'], '%'),
                                 'price_type' => 'fixed',
                             ];
-                            if (substr($rowData['_custom_option_row_price'], -1) === '%') {
+                            if (str_ends_with($rowData['_custom_option_row_price'], '%')) {
                                 $typePriceRow['price_type'] = 'percent';
                             }
                             if ($priceIsGlobal) {
@@ -996,8 +996,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                         $flagNewOption = true;
                         if ($lastStoreId != $storeId) {
                             if (!$firstKeyOption) {
-                                reset($customOptions[$typeTitleTable]);
-                                $firstKeyOption = key($customOptions[$typeTitleTable]);
+                                $firstKeyOption = array_key_first($customOptions[$typeTitleTable]);
                             }
                             $currentValueId = $firstKeyOption;
                             $lastStoreId    = $storeId;
@@ -1847,7 +1846,8 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      * Returns resource model
      *
      * @param string $resourceModelName
-     * @return Object
+     * @return Mage_Core_Model_Resource_Db_Collection_Abstract|false
+     * @deprecated use Mage::getResourceModel()
      */
     protected function getResourceModel($resourceModelName)
     {
@@ -1858,7 +1858,8 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      * Returns helper
      *
      * @param string $helperName
-     * @return Mage_Core_Helper_Abstract
+     * @return Mage_Core_Helper_Abstract|false
+     * @deprecated use Mage::helper()
      */
     protected function getHelper($helperName)
     {
@@ -1869,7 +1870,8 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      * Returns model
      *
      * @param string $modelName
-     * @return bool|Mage_Core_Model_Abstract
+     * @return Mage_Core_Model_Abstract|false
+     * @deprecated use Mage::getModel()
      */
     protected function getModel($modelName)
     {
@@ -1908,9 +1910,9 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
             'is_decimal_divided'            => 0,
         ];
 
-        $entityTable = $this->getResourceModel('cataloginventory/stock_item')->getMainTable();
+        $entityTable = Mage::getResourceModel('cataloginventory/stock_item')->getMainTable();
         /** @var Mage_CatalogInventory_Helper_Data $helper */
-        $helper      = $this->getHelper('cataloginventory');
+        $helper      = Mage::helper('cataloginventory');
 
         while ($bunch = $this->getNextBunch()) {
             $stockData = [];
@@ -1931,7 +1933,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                 $row['stock_id'] = 1;
 
                 /** @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
-                $stockItem = $this->getModel('cataloginventory/stock_item');
+                $stockItem = Mage::getModel('cataloginventory/stock_item');
                 $stockItem->loadByProduct($row['product_id']);
                 $existStockData = $stockItem->getData();
 
@@ -2217,7 +2219,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     {
         if ($this->_urlKeyAttributeId === null) {
             $adapter  = $this->getConnection();
-            $resource = $this->getResourceModel('eav/entity_attribute');
+            $resource = Mage::getResourceModel('eav/entity_attribute');
 
             $select = $adapter->select()
                 ->from(

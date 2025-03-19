@@ -5,15 +5,15 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Customer_Block_Widget_Gender $this */
 ?>
-<label for="<?= $this->getFieldId('gender')?>"<?php if ($this->isRequired()) echo ' class="required"' ?>><?php if ($this->isRequired()) echo '<em>*</em>' ?><?= $this->__('Gender') ?></label>
+<label for="<?= $this->getFieldId('gender')?>"<?= $this->isRequired() ? ' class="required"' : '' ?>><?= $this->__('Gender') ?></label>
 <div class="input-box">
-    <select id="<?= $this->getFieldId('gender')?>" name="<?= $this->getFieldName('gender') ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Gender')) ?>"<?php if ($this->isRequired()):?> class="validate-select"<?php endif ?> <?= $this->getFieldParams() ?>>
+    <select id="<?= $this->getFieldId('gender')?>" name="<?= $this->getFieldName('gender') ?>" title="<?= $this->quoteEscape($this->__('Gender')) ?>"<?php if ($this->isRequired()):?> class="validate-select"<?php endif ?> <?= $this->getFieldParams() ?>>
         <?php $options = Mage::getResourceSingleton('customer/customer')->getAttribute('gender')->getSource()->getAllOptions();?>
         <?php $value = $this->getGender();?>
         <?php foreach ($options as $option):?>

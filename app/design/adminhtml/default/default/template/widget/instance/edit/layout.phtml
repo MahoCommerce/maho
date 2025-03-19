@@ -334,7 +334,7 @@ var WidgetInstance = {
                                 chooser.show();
                             }
                         } catch (e) {
-                            alert('<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('widget')->__('Error occurs during loading chooser.')) ?>');
+                            alert('<?= $this->jsQuoteEscape(Mage::helper('widget')->__('Error occurs during loading chooser.')) ?>');
                         }
                     }
                 });
@@ -413,7 +413,7 @@ var WidgetInstance = {
                                 }
                             }
                         } catch (e) {
-                            alert('<?= Mage::helper('core')->jsQuoteEscape(Mage::helper('widget')->__('Error occurs during loading chooser.')) ?>');
+                            alert('<?= $this->jsQuoteEscape(Mage::helper('widget')->__('Error occurs during loading chooser.')) ?>');
                         }
                     }
                 });

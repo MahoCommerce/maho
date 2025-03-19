@@ -6,6 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -152,6 +153,15 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Return Customer Address Attribute
+     */
+    public function getAttribute(string $attributeCode): Mage_Customer_Model_Attribute
+    {
+        return $this->_attributes[$attributeCode] ??
+            Mage::getSingleton('eav/config')->getAttribute('customer_address', $attributeCode);
+    }
+
+    /**
      * Get string with frontend validation classes for attribute
      *
      * @param string $attributeCode
@@ -159,23 +169,27 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
      */
     public function getAttributeValidationClass($attributeCode)
     {
+        $classes = [];
+
         /** @var Mage_Customer_Model_Attribute $attribute */
-        $attribute = $this->_attributes[$attributeCode] ?? Mage::getSingleton('eav/config')->getAttribute('customer_address', $attributeCode);
-        $class = $attribute ? $attribute->getFrontend()->getClass() : '';
+        $attribute = $this->getAttribute($attributeCode);
+        if ($attribute) {
+            array_push($classes, ...explode(' ', $attribute->getFrontend()->getClass()));
+        }
 
         if (in_array($attributeCode, ['firstname', 'middlename', 'lastname', 'prefix', 'suffix', 'taxvat'])) {
-            if ($class && !$attribute->getIsVisible()) {
-                $class = ''; // address attribute is not visible thus its validation rules are not applied
+            if ($attribute && !$attribute->getIsVisible()) {
+                $classes = []; // address attribute is not visible thus its validation rules are not applied
             }
 
             /** @var Mage_Customer_Model_Attribute $customerAttribute */
             $customerAttribute = Mage::getSingleton('eav/config')->getAttribute('customer', $attributeCode);
-            $class .= $customerAttribute && $customerAttribute->getIsVisible()
-                ? $customerAttribute->getFrontend()->getClass() : '';
-            $class = implode(' ', array_unique(array_filter(explode(' ', $class))));
+            if ($customerAttribute && $customerAttribute->getIsVisible()) {
+                array_push($classes, ...explode(' ', $customerAttribute->getFrontend()->getClass()));
+            }
         }
 
-        return $class;
+        return implode(' ', array_unique(array_filter($classes)));
     }
 
     /**

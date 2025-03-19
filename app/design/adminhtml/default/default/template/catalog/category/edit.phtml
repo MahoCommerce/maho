@@ -39,7 +39,7 @@ $treeBlock = $this->getLayout()->getBlock('category.tree');
         });
 
     <?php if ($treeBlock->getRootNode()): ?>
-        categoryForm.renderTree(<?= Mage::helper('core')->jsonEncode($treeBlock->getRootTreeParameters()) ?>);
+        categoryForm.renderTree(<?= $this->jsonEncode($treeBlock->getRootTreeParameters()) ?>);
     <?php endif ?>
 
         // Expose global functions called by form buttons to instance methods

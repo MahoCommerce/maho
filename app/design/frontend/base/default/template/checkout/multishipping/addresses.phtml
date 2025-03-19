@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -16,7 +16,7 @@
     <div class="multiple-checkout">
         <div class="page-title title-buttons">
             <h1><?= $this->__('Ship to Multiple Addresses') ?></h1>
-            <button data-action="add-new-customer-address" type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Enter a New Address')) ?>" class="button" onclick="document.getElementById('add_new_address_flag').value=1; document.getElementById('checkout_multishipping_form').submit();"><?= $this->__('Enter a New Address') ?></button>
+            <button data-action="add-new-customer-address" type="button" title="<?= $this->quoteEscape($this->__('Enter a New Address')) ?>" class="button" onclick="document.getElementById('add_new_address_flag').value=1; document.getElementById('checkout_multishipping_form').submit();"><?= $this->__('Enter a New Address') ?></button>
         </div>
         <input type="hidden" name="continue" value="0" id="can_continue_flag" />
         <input type="hidden" name="new_address" value="0" id="add_new_address_flag" />
@@ -37,7 +37,7 @@
             <tfoot>
             <tr>
                 <td colspan="100" class="a-right">
-                    <button type="submit" title="<?= Mage::helper('core')->quoteEscape($this->__('Update Qty &amp; Addresses')) ?>"
+                    <button type="submit" title="<?= $this->quoteEscape($this->__('Update Qty &amp; Addresses')) ?>"
                             class="button" onclick="document.getElementById('can_continue_flag').value=0;"
                             data-multiship-item-update>
                         <?= $this->__('Update Qty &amp; Addresses') ?>
@@ -52,7 +52,10 @@
                         <td><?= $this->getItemHtml($_item->getQuoteItem()) ?></td>
                         <td><input type="text" data-multiship-item-id="<?= $this->jsQuoteEscape($_item->getSku()) ?>" name="ship[<?= $_index ?>][<?= $_item->getQuoteItemId() ?>][qty]" value="<?= $this->escapeHtml($_item->getQty()) ?>" size="2" class="input-text qty" /></td>
                         <td data-rwd-label="Send To"><?php if ($_item->getProduct()->getIsVirtual()): echo $this->__('Shipping selection is not applicable.'); else: echo $this->getAddressesHtmlSelect($_item, $_index); endif; ?></td>
-                        <td class="a-center"><a href="<?= $this->getItemDeleteUrl($_item) ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Remove Item')) ?>" class="btn-remove2"><?= $this->__('Remove Item') ?></a></td>
+                        <td class="a-center"><a href="<?= $this->getItemDeleteUrl($_item) ?>" title="<?= $this->quoteEscape($this->__('Remove Item')) ?>">
+                                <?= $this->getIconSvg('x') ?>
+                                <?= $this->__('Remove Item') ?>
+                            </a></td>
                     </tr>
                 <?php endif ?>
             <?php endforeach ?>
@@ -60,7 +63,7 @@
         </table>
         <div class="buttons-set">
             <p class="back-link"><a href="<?= $this->getBackUrl() ?>"><small>&laquo; </small><?= $this->__('Back to Shopping Cart') ?></a></p>
-            <button type="submit" data-action="checkout-continue-shipping" title="<?= Mage::helper('core')->quoteEscape($this->__('Continue to Shipping Information')) ?>" class="button<?php if ($this->isContinueDisabled()):?> disabled<?php endif ?>" onclick="document.getElementById('can_continue_flag').value=1;"<?php if ($this->isContinueDisabled()):?> disabled="disabled"<?php endif ?>><?= $this->__('Continue to Shipping Information') ?></button>
+            <button type="submit" data-action="checkout-continue-shipping" title="<?= $this->quoteEscape($this->__('Continue to Shipping Information')) ?>" class="button<?php if ($this->isContinueDisabled()):?> disabled<?php endif ?>" onclick="document.getElementById('can_continue_flag').value=1;"<?php if ($this->isContinueDisabled()):?> disabled="disabled"<?php endif ?>><?= $this->__('Continue to Shipping Information') ?></button>
         </div>
     </div>
     <?= $this->getBlockHtml('formkey') ?>

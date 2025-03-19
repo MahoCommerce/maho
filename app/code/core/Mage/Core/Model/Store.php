@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -486,14 +486,14 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             $sValue = $backend->getValue();
         }
 
-        if (is_string($sValue) && strpos($sValue, '{{') !== false) {
-            if (strpos($sValue, '{{unsecure_base_url}}') !== false) {
+        if (is_string($sValue) && str_contains($sValue, '{{')) {
+            if (str_contains($sValue, '{{unsecure_base_url}}')) {
                 $unsecureBaseUrl = $this->getConfig(self::XML_PATH_UNSECURE_BASE_URL);
                 $sValue = str_replace('{{unsecure_base_url}}', $unsecureBaseUrl, $sValue);
-            } elseif (strpos($sValue, '{{secure_base_url}}') !== false) {
+            } elseif (str_contains($sValue, '{{secure_base_url}}')) {
                 $secureBaseUrl = $this->getConfig(self::XML_PATH_SECURE_BASE_URL);
                 $sValue = str_replace('{{secure_base_url}}', $secureBaseUrl, $sValue);
-            } elseif (strpos($sValue, '{{base_url}}') !== false) {
+            } elseif (str_contains($sValue, '{{base_url}}')) {
                 $sValue = Mage::getConfig()->substDistroServerVars($sValue);
             }
         }
@@ -516,13 +516,13 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             return $value;
         }
 
-        if (strpos($value, '{{unsecure_base_url}}') !== false) {
+        if (str_contains($value, '{{unsecure_base_url}}')) {
             $unsecureBaseUrl = $this->getConfig(self::XML_PATH_UNSECURE_BASE_URL);
             $value = str_replace('{{unsecure_base_url}}', $unsecureBaseUrl, $value);
-        } elseif (strpos($value, '{{secure_base_url}}') !== false) {
+        } elseif (str_contains($value, '{{secure_base_url}}')) {
             $secureBaseUrl = $this->getConfig(self::XML_PATH_SECURE_BASE_URL);
             $value = str_replace('{{secure_base_url}}', $secureBaseUrl, $value);
-        } elseif (strpos($value, '{{') !== false && strpos($value, '{{base_url}}') === false) {
+        } elseif (str_contains($value, '{{') && !str_contains($value, '{{base_url}}')) {
             $value = Mage::getConfig()->substDistroServerVars($value);
         }
         return $value;
@@ -573,7 +573,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         if (!isset($this->_baseUrlCache[$cacheKey])) {
             switch ($type) {
                 case self::URL_TYPE_WEB:
-                    $secure = is_null($secure) ? $this->isCurrentlySecure() : (bool) $secure;
+                    $secure = is_null($secure) ? Mage::app()->isCurrentlySecure() : (bool) $secure;
                     $url = $this->getConfig('web/' . ($secure ? 'secure' : 'unsecure') . '/base_url');
                     break;
 
@@ -592,7 +592,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
 
                 case self::URL_TYPE_SKIN:
                 case self::URL_TYPE_JS:
-                    $secure = is_null($secure) ? $this->isCurrentlySecure() : (bool) $secure;
+                    $secure = is_null($secure) ? Mage::app()->isCurrentlySecure() : (bool) $secure;
                     $url = $this->getConfig('web/' . ($secure ? 'secure' : 'unsecure') . '/base_' . $type . '_url');
                     break;
 
@@ -604,7 +604,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
                     throw Mage::exception('Mage_Core', Mage::helper('core')->__('Invalid base url type'));
             }
 
-            if (strpos($url, '{{base_url}}') !== false) {
+            if (str_contains($url, '{{base_url}}')) {
                 $baseUrl = Mage::getConfig()->substDistroServerVars('{{base_url}}');
                 $url = str_replace('{{base_url}}', $baseUrl, $url);
             }
@@ -652,7 +652,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      */
     protected function _updateMediaPathUseRewrites($secure = null, $type = self::URL_TYPE_MEDIA)
     {
-        $secure = is_null($secure) ? $this->isCurrentlySecure() : (bool) $secure;
+        $secure = is_null($secure) ? Mage::app()->isCurrentlySecure() : (bool) $secure;
         $secureStringFlag = $secure ? 'secure' : 'unsecure';
         $url = $this->getConfig('web/' . $secureStringFlag . '/base_' . $type . '_url');
         if (!$this->getConfig(self::XML_PATH_USE_REWRITES)

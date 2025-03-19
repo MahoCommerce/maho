@@ -5,9 +5,11 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Downloadable_Block_Checkout_Cart_Item_Renderer $this */
 ?>
 <?php
 $_item = $this->getItem();
@@ -21,28 +23,8 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
        title="<?= $this->escapeHtml($this->getProductName()) ?>"><img
             src="<?= $this->getProductThumbnail()->resize(180) ?>"
             alt="<?= $this->escapeHtml($this->getProductName()) ?>"/></a>
-
-    <ul class="cart-links">
-        <?php if ($isVisibleProduct): ?>
-            <li>
-                <a href="<?= $this->getConfigureUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Edit item parameters')) ?>"><?= $this->__('Edit') ?></a>
-            </li>
-        <?php endif ?>
-
-        <?php if ($this->helper('wishlist')->isAllowInCart() && $isVisibleProduct) : ?>
-            <li>
-                <a href="<?= $this->helper('wishlist')->getMoveFromCartUrl($_item->getId()) ?>" class="link-wishlist use-ajax"><?= $this->__('Move to wishlist') ?></a>
-            </li>
-        <?php endif ?>
-    </ul>
 </td>
 <td class="product-cart-info">
-    <a href="#"
-       title="<?= Mage::helper('core')->quoteEscape($this->__('Remove Item')) ?>"
-       class="btn-remove btn-remove2"
-       onclick="customFormSubmit('<?= $_deleteUrl ?>', '<?= $_params ?>', 'post')">
-        <?= $this->__('Remove Item') ?>
-    </a>
     <h2 class="product-name"><a
             href="<?= $this->getProductUrl() ?>"><?= $this->escapeHtml($this->getProductName()) ?></a>
     </h2>
@@ -96,7 +78,7 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
             <a id="<?= $helpLinkId ?>" href="#"
                class="map-help-link"><?= $this->__("What's this?") ?></a>
             <script type="text/javascript">
-                Catalog.Map.addHelpLink('<?= $helpLinkId ?>', "<?= Mage::helper('core')->jsQuoteEscape($this->__("What's this?")) ?>");
+                Catalog.Map.addHelpLink('<?= $helpLinkId ?>', "<?= $this->jsQuoteEscape($this->__("What's this?")) ?>");
             </script>
         </span>
     </td>
@@ -206,25 +188,10 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
 <td class="product-cart-actions" data-rwd-label="<?= $this->__('Qty') ?>">
     <input type="text" pattern="\d*(\.\d+)?" name="cart[<?= $_item->getId() ?>][qty]" value="<?= $this->getQty() ?>"
            data-cart-item-id="<?= $this->jsQuoteEscape($_item->getSku()) ?>"
-           size="4" title="<?= Mage::helper('core')->quoteEscape($this->__('Qty')) ?>" class="input-text qty" maxlength="12" />
+           size="4" title="<?= $this->quoteEscape($this->__('Qty')) ?>" class="input-text qty" maxlength="12" />
 
-    <button type="submit" data-cart-item-update name="update_cart_action" value="update_qty" title="<?= Mage::helper('core')->quoteEscape($this->__('Update')) ?>" class="button btn-update"><?= $this->__('Update') ?>
+    <button type="submit" data-cart-item-update name="update_cart_action" value="update_qty" title="<?= $this->quoteEscape($this->__('Update')) ?>" class="button btn-update"><?= $this->__('Update') ?>
     </button>
-
-    <ul class="cart-links">
-        <?php if ($isVisibleProduct): ?>
-            <li>
-                <a href="<?= $this->getConfigureUrl() ?>" title="<?= Mage::helper('core')->quoteEscape($this->__('Edit item parameters')) ?>"><?= $this->__('Edit') ?></a>
-            </li>
-        <?php endif ?>
-
-        <?php if ($this->helper('wishlist')->isAllowInCart() && $isVisibleProduct) : ?>
-            <li>
-                <a href="<?= $this->helper('wishlist')->getMoveFromCartUrl($_item->getId()) ?>" class="link-wishlist use-ajax"><?= $this->__('Move to wishlist') ?></a>
-            </li>
-        <?php endif ?>
-    </ul>
-
 </td>
 <?php if (($this->helper('tax')->displayCartPriceExclTax() || $this->helper('tax')->displayCartBothPrices()) && !$_item->getNoSubtotal()): ?>
     <td class="product-cart-total" data-rwd-label="<?= $this->__('Subtotal') ?>">
@@ -333,11 +300,24 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
             <?php endif ?>
     </td>
 <?php endif ?>
-<td class="a-center product-cart-remove">
-    <a href="#"
-       title="<?= Mage::helper('core')->quoteEscape($this->__('Remove Item')) ?>"
-       class="btn-remove btn-remove2"
+<td class="product-cart-remove">
+    <?php if ($isVisibleProduct): ?>
+        <a href="<?= $this->getConfigureUrl() ?>" title="<?= $this->quoteEscape($this->__('Edit item parameters')) ?>">
+            <?= $this->getIconSvg('edit') ?>
+            <?= $this->__('Edit') ?>
+        </a>
+    <?php endif ?>
+
+    <?php if ($this->helper('wishlist')->isAllowInCart() && $isVisibleProduct) : ?>
+        <a href="<?= $this->helper('wishlist')->getMoveFromCartUrl($_item->getId()) ?>" class="link-wishlist use-ajax" title="<?= $this->quoteEscape($this->__('Move to wishlist')) ?>">
+            <?= $this->getIconSvg('heart') ?>
+            <?= $this->__('Move to wishlist') ?>
+        </a>
+    <?php endif ?>
+
+    <a href="#" title="<?= $this->quoteEscape($this->__('Remove Item')) ?>"
        onclick="customFormSubmit('<?= $_deleteUrl ?>', '<?= $_params ?>', 'post')">
+        <?= $this->getIconSvg('x') ?>
         <?= $this->__('Remove Item') ?>
     </a>
 </td>

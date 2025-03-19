@@ -151,9 +151,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $minimumAmount = Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())
                     ->toCurrency(Mage::getStoreConfig('sales/minimum_order/amount'));
 
-                $warning = Mage::getStoreConfig('sales/minimum_order/description')
-                    ? Mage::getStoreConfig('sales/minimum_order/description')
-                    : Mage::helper('checkout')->__('Minimum order amount is %s', $minimumAmount);
+                $warning = Mage::getStoreConfig('sales/minimum_order/description') ?: Mage::helper('checkout')->__('Minimum order amount is %s', $minimumAmount);
 
                 $cart->getCheckoutSession()->addNotice($warning);
             }
@@ -433,16 +431,11 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
 
         $updateAction = (string) $this->getRequest()->getParam('update_cart_action');
 
-        switch ($updateAction) {
-            case 'empty_cart':
-                $this->_emptyShoppingCart();
-                break;
-            case 'update_qty':
-                $this->_updateShoppingCart();
-                break;
-            default:
-                $this->_updateShoppingCart();
-        }
+        match ($updateAction) {
+            'empty_cart' => $this->_emptyShoppingCart(),
+            'update_qty' => $this->_updateShoppingCart(),
+            default => $this->_updateShoppingCart(),
+        };
 
         $this->_goBack();
     }

@@ -22,17 +22,22 @@ function deleteConfirm(message, url) {
     confirmSetLocation(message, url);
 }
 
-function setElementDisable(element, disable){
-    if($(element)){
-        $(element).disabled = disable;
+function setElementDisable(element, disable) {
+    if (typeof element === 'string' || element instanceof String) {
+        element = document.getElementById(element);
     }
+    if (!(element instanceof Element)) {
+        throw new TypeError('Argument must be type of String or Element');
+    }
+    element.disabled = disable;
+    element.classList.toggle('disabled', disable);
 }
 
 function toggleParentVis(element, force = null) {
     if (typeof element === 'string' || element instanceof String) {
         element = document.getElementById(element);
     }
-    if (!element instanceof Element) {
+    if (!(element instanceof Element)) {
         throw new TypeError('Argument must be type of String or Element');
     }
     toggleVis(element.parentNode, force);
@@ -44,7 +49,7 @@ function toggleFieldsetVis(element, force = null) {
     if (typeof element === 'string' || element instanceof String) {
         element = document.getElementById(element);
     }
-    if (!element instanceof Element) {
+    if (!(element instanceof Element)) {
         throw new TypeError('Argument must be type of String or Element');
     }
     toggleVis(element, force);
@@ -59,7 +64,7 @@ function toggleVis(element, force = null) {
     if (typeof element === 'string' || element instanceof String) {
         element = document.getElementById(element);
     }
-    if (!element instanceof Element) {
+    if (!(element instanceof Element)) {
         throw new TypeError('Argument must be type of String or Element');
     }
     if (element.style.display === 'none') {
@@ -77,7 +82,7 @@ function checkVisibility(element) {
     if (typeof element === 'string' || element instanceof String) {
         element = document.getElementById(element);
     }
-    if (!element instanceof Element) {
+    if (!(element instanceof Element)) {
         throw new TypeError('Argument must be type of String or Element');
     }
     if (element.checkVisibility) {
@@ -761,8 +766,8 @@ function copyText(event) {
 /**
  * Clear <div id="messages"></div>
  */
-function clearMessagesDiv() {
-    setMessagesDivHtml('');
+function clearMessagesDiv(div = null) {
+    setMessagesDivHtml('', div);
 }
 
 /**
@@ -771,8 +776,8 @@ function clearMessagesDiv() {
  * @param {string} message - text value of the message to display
  * @param {string} type - one of `success|error|notice`
  */
-function setMessagesDiv(message, type = 'success') {
-    setMessagesDivHtml(`<ul class="messages"><li class="${type}-msg"><ul><li><span>${message}</span></li></ul></li></ul>`);
+function setMessagesDiv(message, type = 'success', div = null) {
+    setMessagesDivHtml(`<ul class="messages"><li class="${type}-msg"><ul><li><span>${message}</span></li></ul></li></ul>`, div);
 }
 
 /**
@@ -780,9 +785,8 @@ function setMessagesDiv(message, type = 'success') {
  *
  * @param {string} html
 */
-function setMessagesDivHtml(html) {
-    const div = document.getElementById('messages');
-    if (div) {
+function setMessagesDivHtml(html, div = null) {
+    if (div ??= document.getElementById('messages')) {
         div.innerHTML = html;
     }
 }
@@ -827,4 +831,16 @@ function setQueryParams(url, params = {}) {
         }
     }
     return url.toString();
+}
+
+/**
+ * Alternative to PrototypeJS's Function.wrap() method
+ */
+function wrapFunction(originalFn, wrapperFn) {
+    if (typeof originalFn !== 'function' || typeof wrapperFn !== 'function') {
+        throw new TypeError('Arguments must be functions');
+    }
+    return function() {
+        return wrapperFn(originalFn, ...arguments);
+    };
 }

@@ -5,32 +5,63 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Catalog_Block_Product_View_Options_Type_File $this */
+$option = $this->getOption();
+$fileInfo = $this->getFileInfo();
+$fileExists = (bool) $fileInfo->hasData();
+$fileName = "options_{$option->getId()}_file";
+$fieldNameAction = "{$fileName}_action";
+$fieldValueAction = $fileExists ? 'save_old' : 'save_new';
+$fileNamed = "{$fileName}_name";
+$jsVarName = 'opFile' . rand();
 ?>
-<?php /** @var Mage_Catalog_Block_Product_View_Options_Type_File $this */ ?>
-<?php $_option = $this->getOption(); ?>
-<?php $_fileInfo = $this->getFileInfo(); ?>
-<?php $_fileExists = $_fileInfo->hasData() ? true : false; ?>
-<?php $_fileName = 'options_' . $_option->getId() . '_file'; ?>
-<?php $_fieldNameAction = $_fileName . '_action'; ?>
-<?php $_fieldValueAction = $_fileExists ? 'save_old' : 'save_new'; ?>
-<?php $_fileNamed = $_fileName . '_name'; ?>
-<?php $_rand = rand(); ?>
 
-<script type="text/javascript">
-//<![CDATA[
-    opFile<?= $_rand ?> = {
-        initializeFile: function(inputBox) {
-            this.inputFile = inputBox.select('input[name="<?= $_fileName ?>"]')[0];
-            this.inputFileAction = inputBox.select('input[name="<?= $_fieldNameAction ?>"]')[0];
-            this.fileNameBox = inputBox.up('dd').select('.<?= $_fileNamed ?>')[0];
+<dt>
+    <label<?= $option->getIsRequired() ? ' class="required"' : '' ?>><?= $this->escapeHtml($option->getTitle()) ?></label>
+    <?= $this->getFormatedPrice() ?>
+</dt>
+<dd>
+<?php if ($fileExists): ?>
+    <span class="<?= $fileNamed ?>"><?= $this->escapeHtml($fileInfo->getTitle()) ?></span>
+    <a href="javascript:void(0)" class="label" onclick="<?= $jsVarName ?>.toggleFileChange(this.closest('dd').querySelector('.input-box'))">
+        <?= Mage::helper('catalog')->__('Change') ?>
+    </a>
+    <?php if (!$option->getIsRequired()): ?>
+        <label>
+            <input type="checkbox" onclick="<?= $jsVarName ?>.toggleFileDelete(this, this.closest('dd').querySelector('.input-box'))" price="<?= $this->getCurrencyPrice($option->getPrice(true)) ?>"/>
+            <?= Mage::helper('catalog')->__('Delete') ?>
+        </label>
+    <?php endif ?>
+<?php endif ?>
+    <div class="input-box<?= $fileExists ? ' no-display' : '' ?>">
+        <input type="file" name="<?= $fileName ?>" class="product-custom-option<?= $option->getIsRequired() ? ' required-entry' : '' ?>" price="<?= $this->getCurrencyPrice($option->getPrice(true)) ?>" <?= $fileExists ? 'disabled="disabled"' : '' ?>/>
+        <input type="hidden" name="<?= $fieldNameAction ?>" value="<?= $fieldValueAction ?>" />
+        <?php if ($option->getFileExtension()): ?>
+        <p class="no-margin"><?= Mage::helper('catalog')->__('Allowed file extensions to upload')?>: <strong><?= $option->getFileExtension() ?></strong></p>
+        <?php endif ?>
+        <?php if ($option->getImageSizeX() > 0): ?>
+        <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum image width')?>: <strong><?= $option->getImageSizeX() ?> <?= Mage::helper('catalog')->__('px.') ?></strong></p>
+        <?php endif ?>
+        <?php if ($option->getImageSizeY() > 0): ?>
+        <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum image height')?>: <strong><?= $option->getImageSizeY() ?> <?= Mage::helper('catalog')->__('px.') ?></strong></p>
+        <?php endif ?>
+    </div>
+</dd>
+
+<script>
+    window.<?= $jsVarName ?> = {
+        initializeFile(inputBox) {
+            this.inputFile = inputBox.querySelector('input[name="<?= $fileName ?>"]');
+            this.inputFileAction = inputBox.querySelector('input[name="<?= $fieldNameAction ?>"]');
+            this.fileNameBox = inputBox.closest('dd').querySelector('.<?= $fileNamed ?>');
         },
-
-        toggleFileChange: function(inputBox) {
+        toggleFileChange(inputBox) {
             this.initializeFile(inputBox);
-            inputBox.toggle();
+            inputBox.classList.remove('no-display');
             this.fileChangeFlag = this.fileChangeFlag ? false : true;
             if (!this.fileDeleteFlag) {
                 if (this.fileChangeFlag) {
@@ -42,48 +73,18 @@
                  }
             }
         },
-
-        toggleFileDelete: function(fileDeleteFlag, inputBox) {
+        toggleFileDelete(fileDeleteFlag, inputBox) {
             this.initializeFile(inputBox);
             this.fileDeleteFlag = fileDeleteFlag.checked ? true : false;
             if (this.fileDeleteFlag) {
                 this.inputFileAction.value = '';
                 this.inputFile.disabled = true;
-                this.fileNameBox.setStyle({'text-decoration': 'line-through'});
+                this.fileNameBox.style.textDecoration = 'line-through';
             } else {
                 this.inputFileAction.value = this.fileChangeFlag ? 'save_new' : 'save_old';
-                this.inputFile.disabled = (this.fileChangeFlag == 'save_old');
-                this.fileNameBox.setStyle({'text-decoration': 'none'});
+                this.inputFile.disabled = this.fileChangeFlag === 'save_old';
+                this.fileNameBox.style.textDecoration = null;
             }
         }
     };
-//]]>
 </script>
-
-<dt><label <?php if ($_option->getIsRequire()) echo ' class="required"' ?>><?php if ($_option->getIsRequire()) echo '<em>*</em>' ?><?=  $this->escapeHtml($_option->getTitle()) ?></label>
-    <?= $this->getFormatedPrice() ?></dt>
-<dd<?php if ($_option->decoratedIsLast){?> class="last"<?php }?>>
-    <?php if ($_fileExists): ?>
-        <span class="<?= $_fileNamed ?>"><?= $this->escapeHtml($_fileInfo->getTitle()) ?></span>
-        <a href="javascript:void(0)" class="label" onclick="opFile<?= $_rand ?>.toggleFileChange($(this).next('.input-box'))">
-            <?= Mage::helper('catalog')->__('Change') ?>
-        </a>&nbsp;
-        <?php if (!$_option->getIsRequire()): ?>
-            <input type="checkbox" onclick="opFile<?= $_rand ?>.toggleFileDelete($(this), $(this).next('.input-box'))" price="<?= $this->getCurrencyPrice($_option->getPrice(true)) ?>"/>
-            <span class="label"><?= Mage::helper('catalog')->__('Delete') ?></span>
-        <?php endif ?>
-    <?php endif ?>
-    <div class="input-box" <?= $_fileExists ? 'style="display:none"' : '' ?>>
-        <input type="file" name="<?= $_fileName ?>" class="product-custom-option<?= $_option->getIsRequire() ? ' required-entry' : '' ?>" price="<?= $this->getCurrencyPrice($_option->getPrice(true)) ?>" <?= $_fileExists ? 'disabled="disabled"' : '' ?>/>
-        <input type="hidden" name="<?= $_fieldNameAction ?>" value="<?= $_fieldValueAction ?>" />
-        <?php if ($_option->getFileExtension()): ?>
-        <p class="no-margin"><?= Mage::helper('catalog')->__('Allowed file extensions to upload')?>: <strong><?= $_option->getFileExtension() ?></strong></p>
-        <?php endif ?>
-        <?php if ($_option->getImageSizeX() > 0): ?>
-        <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum image width')?>: <strong><?= $_option->getImageSizeX() ?> <?= Mage::helper('catalog')->__('px.') ?></strong></p>
-        <?php endif ?>
-        <?php if ($_option->getImageSizeY() > 0): ?>
-        <p class="no-margin"><?= Mage::helper('catalog')->__('Maximum image height')?>: <strong><?= $_option->getImageSizeY() ?> <?= Mage::helper('catalog')->__('px.') ?></strong></p>
-        <?php endif ?>
-    </div>
-</dd>

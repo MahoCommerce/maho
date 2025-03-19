@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -221,7 +221,7 @@ perPageModel.prototype = {
     },
     addValidate : function()
     {
-        Validation.add('validate-per-page-value-list', '<?= Mage::helper('core')->jsQuoteEscape($this->__('Please enter a valid value, ex: 10,20,30')) ?>', function(v) {
+        Validation.add('validate-per-page-value-list', '<?= $this->jsQuoteEscape($this->__('Please enter a valid value, ex: 10,20,30')) ?>', function(v) {
             var isValid = !Validation.get('IsEmpty').test(v);
             var values  = v.split(',');
             for (var i=0;i<values.length;i++) {
@@ -231,7 +231,7 @@ perPageModel.prototype = {
             }
             return isValid;
         });
-        Validation.add('validate-per-page-value', '<?= Mage::helper('core')->jsQuoteEscape($this->__('Please enter a valid value from list')) ?>', function(v, elm) {
+        Validation.add('validate-per-page-value', '<?= $this->jsQuoteEscape($this->__('Please enter a valid value from list')) ?>', function(v, elm) {
             if (Validation.get('IsEmpty').test(v)) {
                 return false;
             }

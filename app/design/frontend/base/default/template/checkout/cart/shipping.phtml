@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
@@ -17,7 +17,7 @@
             <p class="shipping-desc"><?= $this->__('Enter your destination to get a shipping estimate.') ?></p>
             <ul class="form-list">
                 <li class="shipping-country">
-                    <label for="country" class="required"><em>*</em><?= $this->__('Country') ?></label>
+                    <label for="country" class="required"><?= $this->__('Country') ?></label>
                     <div class="input-box">
                         <?= Mage::getBlockSingleton('directory/data')->getCountryHtmlSelect($this->getEstimateCountryId()) ?>
                     </div>
@@ -27,7 +27,7 @@
                     <?php /* Removing the conditional check for whether the region is required, because it doesn't work
                     <label for="region_id"<?php if ($this->isStateProvinceRequired()) echo ' class="required"' ?>><?php if ($this->isStateProvinceRequired()) echo '<em>*</em>' ?><?= $this->__('State/Province') ?></label>
                     */ ?>
-                    <label for="region_id" class="required"><em>*</em><?= $this->__('State/Province') ?></label>
+                    <label for="region_id" class="required"><?= $this->__('State/Province') ?></label>
                     <div class="input-box">
                         <select id="region_id" name="region_id" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" style="display:none;"<?= ($this->isStateProvinceRequired() ? ' class="validate-select"' : '') ?>>
                             <option value=""><?= $this->__('Please select region, state or province') ?></option>
@@ -41,7 +41,7 @@
             <?php //endif ?>
             <?php if ($this->getCityActive()): ?>
                 <li class="shipping-region">
-                    <label for="city"<?php if ($this->isCityRequired()) echo ' class="required"' ?>><?php if ($this->isCityRequired()) echo '<em>*</em>' ?><?= $this->__('City') ?></label>
+                    <label for="city"<?= $this->isCityRequired() ? ' class="required"' : '' ?>><?= $this->__('City') ?></label>
                     <div class="input-box">
                         <input class="input-text<?php if ($this->isCityRequired()):?> required-entry<?php endif ?>" id="city" type="text" name="estimate_city" value="<?= $this->escapeHtml($this->getEstimateCity()) ?>" />
                     </div>
@@ -51,7 +51,7 @@
                     <?php /* Removing the conditional check for whether the postal code is required, because it doesn't work
                     <label for="postcode"<?php if ($this->isZipCodeRequired()) echo ' class="required"' ?>><?php if ($this->isZipCodeRequired()) echo '<em>*</em>' ?><?= $this->__('Zip/Postal Code') ?></label>
                     */ ?>
-                    <label for="postcode" class="required"><em>*</em><?= $this->__('Zip') ?></label>
+                    <label for="postcode" class="required"><?= $this->__('Zip') ?></label>
                     <div class="input-box">
                         <input class="input-text validate-postcode<?php if ($this->isZipCodeRequired()):?> required-entry<?php endif ?>" type="text" id="postcode" name="estimate_postcode" value="<?= $this->escapeHtml($this->getEstimatePostcode()) ?>" />
                     </div>

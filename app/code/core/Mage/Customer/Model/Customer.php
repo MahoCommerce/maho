@@ -6,7 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -505,7 +505,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     public function hashPassword(#[\SensitiveParameter] $password, $salt = null)
     {
         /** @var Mage_Core_Helper_Data $helper */
-        $helper = $this->_getHelper('core');
+        $helper = Mage::helper('core');
         return $helper->getHash(trim($password), (bool) $salt ? $salt : Mage_Admin_Model_User::HASH_SALT_LENGTH);
     }
 
@@ -513,7 +513,8 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      * Get helper instance
      *
      * @param string $helperName
-     * @return Mage_Core_Helper_Abstract
+     * @return Mage_Core_Helper_Abstract|false
+     * @deprecated use Mage::helper()
      */
     protected function _getHelper($helperName)
     {
@@ -588,7 +589,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     {
         $primaryAddress = $this->getAddressesCollection()->getItemById($this->getData($attributeCode));
 
-        return $primaryAddress ? $primaryAddress : false;
+        return $primaryAddress ?: false;
     }
 
     /**
@@ -837,7 +838,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      */
     protected function _sendEmailTemplate($template, $sender, $templateParams = [], $storeId = null, $customerEmail = null)
     {
-        $customerEmail = ($customerEmail) ? $customerEmail : $this->getEmail();
+        $customerEmail = $customerEmail ?: $this->getEmail();
         /** @var Mage_Core_Model_Email_Template_Mailer $mailer */
         $mailer = Mage::getModel('core/email_template_mailer');
         $emailInfo = Mage::getModel('core/email_info');
@@ -920,7 +921,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     public function getGroupId()
     {
         if (!$this->hasData('group_id')) {
-            $storeId = $this->getStoreId() ? $this->getStoreId() : Mage::app()->getStore()->getId();
+            $storeId = $this->getStoreId() ?: Mage::app()->getStore()->getId();
             $groupId = Mage::getStoreConfig(Mage_Customer_Model_Group::XML_PATH_DEFAULT_ID, $storeId);
             $this->setData('group_id', $groupId);
         }

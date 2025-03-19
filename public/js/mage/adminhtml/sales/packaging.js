@@ -4,15 +4,20 @@
  * @package     Mage_Adminhtml
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-var Packaging = Class.create();
-Packaging.prototype = {
+
+class Packaging
+{
+    constructor() {
+        this.initialize(...arguments);
+    }
+
     /**
      * Initialize object
      */
-    initialize: function(params) {
+    initialize(params) {
         this.packageIncrement = 0;
         this.packages = [];
         this.itemsAll = [];
@@ -20,11 +25,7 @@ Packaging.prototype = {
         this.itemsGridUrl = params.itemsGridUrl ? params.itemsGridUrl : null;
         this.errorQtyOverLimit = params.errorQtyOverLimit;
         this.titleDisabledSaveBtn = params.titleDisabledSaveBtn;
-        this.window = $('packaging_window');
-        this.windowMask = $('popup-window-mask');
-        this.messages = this.window.select('.messages')[0];
-        this.packagesContent = $('packages_content');
-        this.template = $('package_template');
+
         this.paramsCreateLabelRequest = {};
         this.validationErrorMsg = params.validationErrorMsg;
 
@@ -35,388 +36,472 @@ Packaging.prototype = {
         this.defaultItemsProductId      = params.shipmentItemsProductId ? params.shipmentItemsProductId : null;
         this.defaultItemsOrderItemId    = params.shipmentItemsOrderItemId ? params.shipmentItemsOrderItemId : null;
 
-        this.shippingInformation= params.shippingInformation ? params.shippingInformation : null;
-        this.thisPage           = params.thisPage ? params.thisPage : null;
+        this.shippingInformation = params.shippingInformation ? params.shippingInformation : null;
+        this.thisPage            = params.thisPage ? params.thisPage : null;
         this.customizableContainers = params.customizable ? params.customizable : [];
+        this.girthEnabled        = params.girthEnabled;
 
         this.eps = .000001;
-    },
+    }
 
-//******************** Setters **********************************//
-    setLabelCreatedCallback: function(callback) {
-        this.labelCreatedCallback = callback;
-    },
-    setCancelCallback: function(callback) {
-        this.cancelCallback = callback;
-    },
-    setConfirmPackagingCallback: function(callback) {
-        this.confirmPackagingCallback = callback;
-    },
-    setItemQtyCallback: function(callback) {
-        this.itemQtyCallback = callback;
-    },
-    setCreateLabelUrl: function(url) {
-        this.createLabelUrl = url;
-    },
-    setParamsCreateLabelRequest: function(params) {
-        Object.extend(this.paramsCreateLabelRequest, params);
-    },
-//******************** End Setters *******************************//
+    bindWindowEventListeners() {
+        this.window.querySelector('.AddPackageBtn').addEventListener('click', this.newPackage.bind(this));
+    }
 
-    showWindow: function() {
-        if (this.packagesContent.childElements().length == 0) {
-            this.newPackage();
-        }
-        this.window.show().setStyle({
-            'marginLeft': -this.window.getDimensions().width/2 + 'px'
+    bindPackageBlockEventListeners(packageBlock) {
+        packageBlock.querySelector('.AddItemsBtn').addEventListener('click', (event) => {
+            this.getItemsForPack(event.target);
         });
-        this.windowMask.setStyle({
-            height: $('html-body').getHeight() + 'px'
-        }).show();
-    },
+        packageBlock.querySelector('.DeletePackageBtn').addEventListener('click', (event) => {
+            this.deletePackage(event.target);
+        });
+        packageBlock.querySelector('.AddSelectedBtn').addEventListener('click', (event) => {
+            this.packItems(event.target);
+        });
+        packageBlock.querySelector('select[name=package_container]')?.addEventListener('change', (event) => {
+            this.changeContainerType(event.target);
+            this.checkSizeAndGirthParameter(event.target, this.girthEnabled);
+        });
+        packageBlock.querySelector('select[name=package_size]')?.addEventListener('change', (event) => {
+            this.checkSizeAndGirthParameter(event.target, this.girthEnabled);
+        });
+        for (const selectEl of packageBlock.querySelectorAll('.measures')) {
+            selectEl.addEventListener('change', (event) => {
+                this.changeMeasures(event.target);
+            });
+        }
+        packageBlock.querySelector('select[name=content_type]')?.addEventListener('change', (event) => {
+            this.changeContentTypes(event.target, this.girthEnabled);
+        });
+    }
 
-    cancelPackaging: function() {
-        packaging.window.hide();
-        packaging.windowMask.hide();
-        if (Object.isFunction(this.cancelCallback)) {
+    setLabelCreatedCallback(callback) {
+        this.labelCreatedCallback = callback;
+    }
+    setCancelCallback(callback) {
+        this.cancelCallback = callback;
+    }
+    setConfirmPackagingCallback(callback) {
+        this.confirmPackagingCallback = callback;
+    }
+    setItemQtyCallback(callback) {
+        this.itemQtyCallback = callback;
+    }
+    setCreateLabelUrl(url) {
+        this.createLabelUrl = url;
+    }
+    setParamsCreateLabelRequest(params) {
+        Object.extend(this.paramsCreateLabelRequest, params);
+    }
+
+    showWindow() {
+        const template = document.getElementById('packaging_window_template');
+        if (!template) {
+            return;
+        }
+
+        this.window = Dialog.confirm(template.innerHTML, {
+            title: Translator.translate('Create Packages'),
+            className: 'packaging-window',
+            ok: this.confirmPackaging.bind(this),
+            okLabel: Translator.translate('Submit Shipment'),
+            cancel: this.cancelPackaging.bind(this),
+        });
+
+        this.packagesContent = this.window.querySelector('#packages_content');
+        this.newPackage();
+        this.bindWindowEventListeners();
+    }
+
+    updateMessage(message) {
+        const block = this.window.querySelector('.messages');
+        block.innerHTML = message;
+        toggleVis(block, true);
+    }
+
+    clearMessage() {
+        const block = this.window.querySelector('.messages');
+        block.textContent = '';
+        toggleVis(block, false);
+    }
+
+    cancelPackaging() {
+        if (typeof this.cancelCallback === 'function') {
             this.cancelCallback();
         }
-    },
+    }
 
-    confirmPackaging: function(params) {
-        if (Object.isFunction(this.confirmPackagingCallback)) {
-            this.confirmPackagingCallback();
+    confirmPackaging(params) {
+        if (!this.validate()) {
+            this.updateMessage(this.validationErrorMsg);
+            return false;
         }
-    },
+        if (typeof this.confirmPackagingCallback === 'function') {
+            return this.confirmPackagingCallback();
+        }
+        return true;
+    }
 
-    checkAllItems: function(headCheckbox) {
-        $(headCheckbox).up('table').select('tbody input[type="checkbox"]').each(function(checkbox){
+    checkAllItems(headCheckbox) {
+        for (const checkbox of headCheckbox.closest('table').querySelectorAll('tbody input[type=checkbox]')) {
             checkbox.checked = headCheckbox.checked;
             this._observeQty.call(checkbox);
-        }.bind(this));
-    },
+        }
+    }
 
-    cleanPackages: function() {
-        this.packagesContent.update();
+    cleanPackages() {
+        this.packagesContent.textContent = '';
         this.packages = [];
         this.itemsAll = [];
         this.packageIncrement = 0;
         this._setAllItemsPackedState();
-        this.messages.hide().update();
-    },
+        this.clearMessage();
+    }
 
-    sendCreateLabelRequest: function() {
-        var package = this;
-        if (!this.validate()) {
-            this.messages.show().update(this.validationErrorMsg);
-            return;
-        } else {
-            this.messages.hide().update();
+    async sendCreateLabelRequest() {
+        this.clearMessage();
+        if (!this.createLabelUrl) {
+            this.updateMessage(Translator.translate('Invalid URL'));
+            return false;
         }
-        if (this.createLabelUrl) {
-            var weight, length, width, height = null;
-            var packagesParams = [];
-            this.packagesContent.childElements().each(function(pack) {
-                var packageId = pack.id.match(/\d+$/)[0];
-                weight = parseFloat(pack.select('input[name="container_weight"]')[0].value);
-                length = parseFloat(pack.select('input[name="container_length"]')[0].value);
-                width = parseFloat(pack.select('input[name="container_width"]')[0].value);
-                height = parseFloat(pack.select('input[name="container_height"]')[0].value);
-                packagesParams[packageId] = {
-                    container:                  pack.select('select[name="package_container"]')[0].value,
-                    customs_value:              parseFloat(pack.select('input[name="package_customs_value"]')[0].value, 10),
-                    weight:                     isNaN(weight) ? '' : weight,
-                    length:                     isNaN(length) ? '' : length,
-                    width:                      isNaN(width) ? '' : width,
-                    height:                     isNaN(height) ? '' : height,
-                    weight_units:               pack.select('select[name="container_weight_units"]')[0].value,
-                    dimension_units:            pack.select('select[name="container_dimension_units"]')[0].value
-                };
-                if (isNaN(packagesParams[packageId]['customs_value'])) {
-                    packagesParams[packageId]['customs_value'] = 0;
-                }
-                if ('undefined' != typeof pack.select('select[name="package_size"]')[0]) {
-                    if ('' != pack.select('select[name="package_size"]')[0].value) {
-                        packagesParams[packageId]['size'] = pack.select('select[name="package_size"]')[0].value;
-                    }
-                }
-                if ('undefined' != typeof pack.select('input[name="container_girth"]')[0]) {
-                    if ('' != pack.select('input[name="container_girth"]')[0].value) {
-                        packagesParams[packageId]['girth'] = pack.select('input[name="container_girth"]')[0].value;
-                        packagesParams[packageId]['girth_dimension_units'] = pack.select('select[name="container_girth_dimension_units"]')[0].value;
-                    }
-                }
-                if ('undefined' != typeof pack.select('select[name="content_type"]')[0] && 'undefined' != typeof pack.select('input[name="content_type_other"]')[0]) {
-                    packagesParams[packageId]['content_type'] = pack.select('select[name="content_type"]')[0].value;
-                    packagesParams[packageId]['content_type_other'] = pack.select('input[name="content_type_other"]')[0].value;
-                } else {
-                    packagesParams[packageId]['content_type'] = '';
-                    packagesParams[packageId]['content_type_other'] = '';
-                }
-                var deliveryConfirmation = pack.select('select[name="delivery_confirmation_types"]');
-                if (deliveryConfirmation.length) {
-                     packagesParams[packageId]['delivery_confirmation'] =  deliveryConfirmation[0].value;
-                }
-            }.bind(this));
-            for (var packageId in this.packages) {
-                 if (!isNaN(packageId)) {
-                     this.paramsCreateLabelRequest['packages['+packageId+']'+'[params]'+'[container]']              = packagesParams[packageId]['container'];
-                     this.paramsCreateLabelRequest['packages['+packageId+']'+'[params]'+'[weight]']                 = packagesParams[packageId]['weight'];
-                     this.paramsCreateLabelRequest['packages['+packageId+']'+'[params]'+'[customs_value]']          = packagesParams[packageId]['customs_value'];
-                     this.paramsCreateLabelRequest['packages['+packageId+']'+'[params]'+'[length]']                 = packagesParams[packageId]['length'];
-                     this.paramsCreateLabelRequest['packages['+packageId+']'+'[params]'+'[width]']                  = packagesParams[packageId]['width'];
-                     this.paramsCreateLabelRequest['packages['+packageId+']'+'[params]'+'[height]']                 = packagesParams[packageId]['height'];
-                     this.paramsCreateLabelRequest['packages['+packageId+']'+'[params]'+'[weight_units]']           = packagesParams[packageId]['weight_units'];
-                     this.paramsCreateLabelRequest['packages['+packageId+']'+'[params]'+'[dimension_units]']        = packagesParams[packageId]['dimension_units'];
-                     this.paramsCreateLabelRequest['packages['+packageId+']'+'[params]'+'[content_type]']           = packagesParams[packageId]['content_type'];
-                     this.paramsCreateLabelRequest['packages['+packageId+']'+'[params]'+'[content_type_other]']     = packagesParams[packageId]['content_type_other'];
 
-                     if ('undefined' != typeof packagesParams[packageId]['size']) {
-                         this.paramsCreateLabelRequest['packages['+packageId+']'+'[params]'+'[size]'] = packagesParams[packageId]['size'];
-                     }
+        const packagesParams = [];
 
-                     if ('undefined' != typeof packagesParams[packageId]['girth']) {
-                         this.paramsCreateLabelRequest['packages['+packageId+']'+'[params]'+'[girth]'] = packagesParams[packageId]['girth'];
-                         this.paramsCreateLabelRequest['packages['+packageId+']'+'[params]'+'[girth_dimension_units]'] = packagesParams[packageId]['girth_dimension_units'];
-                     }
+        for (const packageBlock of this.packagesContent.children) {
+            const packageId = packageBlock.dataset.id;
+            const weight = parseFloat(packageBlock.querySelector('input[name=container_weight]').value);
+            const length = parseFloat(packageBlock.querySelector('input[name=container_length]').value);
+            const width  = parseFloat(packageBlock.querySelector('input[name=container_width]').value);
+            const height = parseFloat(packageBlock.querySelector('input[name=container_height]').value);
 
-                     if ('undefined' != typeof packagesParams[packageId]['delivery_confirmation']) {
-                         this.paramsCreateLabelRequest['packages['+packageId+']'+'[params]'+'[delivery_confirmation]']  = packagesParams[packageId]['delivery_confirmation'];
-                     }
-                     for (var packedItemId in this.packages[packageId]['items']) {
-                         if (!isNaN(packedItemId)) {
-                             this.paramsCreateLabelRequest['packages['+packageId+']'+'[items]'+'['+packedItemId+'][qty]']           = this.packages[packageId]['items'][packedItemId]['qty'];
-                             this.paramsCreateLabelRequest['packages['+packageId+']'+'[items]'+'['+packedItemId+'][customs_value]'] = this.packages[packageId]['items'][packedItemId]['customs_value'];
-                             this.paramsCreateLabelRequest['packages['+packageId+']'+'[items]'+'['+packedItemId+'][price]']         = package.defaultItemsPrice[packedItemId];
-                             this.paramsCreateLabelRequest['packages['+packageId+']'+'[items]'+'['+packedItemId+'][name]']          = package.defaultItemsName[packedItemId];
-                             this.paramsCreateLabelRequest['packages['+packageId+']'+'[items]'+'['+packedItemId+'][weight]']        = package.defaultItemsWeight[packedItemId];
-                             this.paramsCreateLabelRequest['packages['+packageId+']'+'[items]'+'['+packedItemId+'][product_id]']    = package.defaultItemsProductId[packedItemId];
-                             this.paramsCreateLabelRequest['packages['+packageId+']'+'[items]'+'['+packedItemId+'][order_item_id]'] = package.defaultItemsOrderItemId[packedItemId];
-                         }
-                     }
-                 }
+            packagesParams[packageId] = {
+                weight_units:    packageBlock.querySelector('select[name=container_weight_units]').value,
+                dimension_units: packageBlock.querySelector('select[name=container_dimension_units]').value,
+                weight:          isNaN(weight) ? '' : weight,
+                length:          isNaN(length) ? '' : length,
+                width:           isNaN(width)  ? '' : width,
+                height:          isNaN(height) ? '' : height,
+            };
+
+            const packageContainer = packageBlock.querySelector('select[name=package_container]');
+            if (packageContainer) {
+                packagesParams[packageId]['container'] = packageContainer.value;
             }
 
-            new Ajax.Request(this.createLabelUrl, {
-                parameters: this.paramsCreateLabelRequest,
-                onSuccess: function(transport) {
-                    var response = transport.responseText;
-                    if (response.isJSON()) {
-                        response = response.evalJSON();
-                        if (response.error) {
-                            this.messages.show().innerHTML = response.message;
-                        } else if (response.ok && Object.isFunction(this.labelCreatedCallback)) {
-                            this.labelCreatedCallback(response);
-                        }
-                    }
-                }.bind(this)
+            const customsValue = packageBlock.querySelector('input[name=package_customs_value]');
+            if (parseFloat(customsValue?.value)) {
+                packagesParams[packageId]['customs_value'] = parseFloat(customsValue.value);
+            } else {
+                packagesParams[packageId]['customs_value'] = 0;
+            }
+
+            const packageSize = packageBlock.querySelector('select[name=package_size]');
+            if (packageSize?.value) {
+                packagesParams[packageId]['size'] = packageSize.value;
+            }
+
+            const containerGirth = packageBlock.querySelector('select[name=container_girth]');
+            const containerGirthDimensionUnits = packageBlock.querySelector('select[name=container_girth_dimension_units]');
+            if (containerGirth?.value) {
+                packagesParams[packageId]['girth'] = containerGirth.value;
+                packagesParams[packageId]['girth_dimension_units'] = containerGirthDimensionUnits?.value;
+            }
+
+            const contentType = packageBlock.querySelector('[name=content_type]');
+            const contentTypeOther = packageBlock.querySelector('[name=content_type_other]');
+            if (contentType && contentTypeOther) {
+                packagesParams[packageId]['content_type'] = contentType.value;
+                packagesParams[packageId]['content_type_other'] = contentTypeOther.value;
+            } else {
+                packagesParams[packageId]['content_type'] = '';
+                packagesParams[packageId]['content_type_other'] = '';
+            }
+
+            const deliveryConfirmation = packageBlock.querySelector('select[name=delivery_confirmation_types]');
+            if (deliveryConfirmation) {
+                packagesParams[packageId]['delivery_confirmation'] =  deliveryConfirmation.value;
+            }
+        }
+
+        for (const packageId of Object.keys(this.packages)) {
+            if (isNaN(packageId) || !packagesParams[packageId]) {
+                continue;
+            }
+            for (const [ key, val ] of Object.entries(packagesParams[packageId])) {
+                this.paramsCreateLabelRequest[`packages[${packageId}][params][${key}]`] = val;
+            }
+
+            for (const [ packedItemId, packedItem ] of Object.entries(this.packages[packageId]['items'])) {
+                if (isNaN(packedItemId)) {
+                    continue;
+                }
+                for (const [ key, val ] of Object.entries(packedItem)) {
+                    this.paramsCreateLabelRequest[`packages[${packageId}][items][${packedItemId}][${key}]`] = val;
+                }
+
+                this.paramsCreateLabelRequest[`packages[${packageId}][items][${packedItemId}][price]`] =
+                    this.defaultItemsPrice[packedItemId];
+                this.paramsCreateLabelRequest[`packages[${packageId}][items][${packedItemId}][name]`] =
+                    this.defaultItemsName[packedItemId];
+                this.paramsCreateLabelRequest[`packages[${packageId}][items][${packedItemId}][weight]`] =
+                    this.defaultItemsWeight[packedItemId];
+                this.paramsCreateLabelRequest[`packages[${packageId}][items][${packedItemId}][product_id]`] =
+                    this.defaultItemsProductId[packedItemId];
+                this.paramsCreateLabelRequest[`packages[${packageId}][items][${packedItemId}][order_item_id]`] =
+                    this.defaultItemsOrderItemId[packedItemId];
+            }
+        }
+
+        try {
+            const response = await mahoFetch(this.createLabelUrl, {
+                method: 'POST',
+                body: new URLSearchParams(this.paramsCreateLabelRequest),
             });
-            if (this.paramsCreateLabelRequest['code']
-                && this.paramsCreateLabelRequest['carrier_title']
-                && this.paramsCreateLabelRequest['method_title']
-                && this.paramsCreateLabelRequest['price']
-            ) {
-                var a = this.paramsCreateLabelRequest['code'];
-                var b = this.paramsCreateLabelRequest['carrier_title'];
-                var c = this.paramsCreateLabelRequest['method_title'];
-                var d = this.paramsCreateLabelRequest['price'];
 
-                this.paramsCreateLabelRequest = {};
-                this.paramsCreateLabelRequest['code']           = a;
-                this.paramsCreateLabelRequest['carrier_title']  = b;
-                this.paramsCreateLabelRequest['method_title']   = c;
-                this.paramsCreateLabelRequest['price']          = d;
+            if (typeof this.labelCreatedCallback === 'function') {
+                this.labelCreatedCallback(response);
+            }
+            return true;
+        } catch (error) {
+            this.updateMessage(error.message);
+            return false;
+        } finally {
+            // Reset object
+            const { code, carrier_title, method_title, price } = this.paramsCreateLabelRequest;
+            if (code && carrier_title && method_title && price) {
+                this.paramsCreateLabelRequest = { code, carrier_title, method_title, price };
             } else {
                 this.paramsCreateLabelRequest = {};
             }
         }
-    },
+    }
 
-    validate: function() {
-        var dimensionElements = $("packaging_window").select(
-            'input[name=container_length],input[name=container_width],input[name=container_height]'
+    validate() {
+        const dimensionElements = this.window.querySelectorAll(
+            'input[name=container_length], input[name=container_width], input[name=container_height]'
         );
-        var callback = null;
-        if ( dimensionElements.any(function(element) { return !!element.value; })) {
-            callback = function(element) { $(element).addClassName('required-entry'); };
-        } else {
-            callback = function(element) { $(element).removeClassName('required-entry'); };
+
+        // If at least one dimensional el has a value, all must be filled
+        const dimensionRequired = Array.from(dimensionElements).some((el) => !!el.value);
+        for (const el of dimensionElements) {
+            el.classList.toggle('required-entry', dimensionRequired);
         }
-        dimensionElements.each(callback);
 
-        return result = $$('[id^="package_block_"] input').collect(function (element) {
-            return this.validateElement(element);
-        }, this).all();
-    },
+        const valid = Array.from(this.window.querySelectorAll('[id^=package_block] input')).map((el) => this.validateElement(el));
+        return valid.every(Boolean);
+    }
 
-    validateElement: function(elm) {
-        var cn = $w(elm.className);
-        return result = cn.all(function(value) {
-            var v = Validation.get(value);
-            if (Validation.isVisible(elm) && !v.test($F(elm), elm)) {
-                $(elm).addClassName('validation-failed');
+    validateElement(el) {
+        for (const value of el.classList) {
+            if (Validation.isVisible(el) && !Validation.get(value).test(el.value, el)) {
+                el.classList.add('validation-failed');
                 return false;
-            } else {
-                $(elm).removeClassName('validation-failed');
-                return true;
             }
-        });
-    },
+        }
+        el.classList.remove('validation-failed');
+        return true;
+    }
 
-    validateCustomsValue: function() {
-        var items = [];
-        var isValid = true;
-        var itemsPrepare = [];
-        var itemsPacked = [];
-
-        this.packagesContent.childElements().each(function(pack) {
-            itemsPrepare = pack.select('.package_prapare')[0];
+    validateCustomsValue() {
+        const items = [];
+        for (const packageBlock of this.packagesContent.children) {
+            const itemsPrepare = packageBlock.querySelector('.package_prepare, .package_prepare');
             if (itemsPrepare) {
-                items = items.concat(itemsPrepare.select('.grid tbody tr'));
+                items.push(...itemsPrepare.querySelectorAll('.grid tbody tr'));
             }
-            itemsPacked = pack.select('.package_items')[0];
+            const itemsPacked = packageBlock.querySelector('.package_items');;
             if (itemsPacked) {
-                items = items.concat(itemsPacked.select('.grid tbody tr'));
+                items.push(...itemsPacked.select('.grid tbody tr'));
             }
-        }.bind(this));
+        }
 
-        items.each(function(item) {
-            var itemCustomsValue = item.select('[name="customs_value"]')[0];
+        let isValid = true;
+        for (const item of items) {
+            const itemCustomsValue = item.querySelector('[name=customs_value]');
             if (!this.validateElement(itemCustomsValue)) {
                 isValid = false;
             }
-        }.bind(this));
+        }
 
         if (isValid) {
-            this.messages.hide().update();
+            this.clearMessage();
         } else {
-            this.messages.show().update(this.validationErrorMsg);
+            this.updateMessage(this.validationErrorMsg);
         }
         return isValid;
-    },
+    }
 
-    newPackage: function() {
-        var pack = this.template.cloneNode(true);
-        pack.id = 'package_block_' + ++this.packageIncrement;
-        pack.addClassName('package-block');
-        pack.select('.package-number span')[0].update(this.packageIncrement);
-        this.packagesContent.insert({top: pack});
-        pack.select('.AddSelectedBtn')[0].hide();
-        pack.show();
-    },
+    sortPackages() {
+        const packagesSorted = [];
+        this.packageIncrement = 0;
+        for (const packageBlock of this.packagesContent.children) {
+            const newPackageId = ++this.packageIncrement;
+            const oldPackageId = packageBlock.dataset.id;
+            packageBlock.dataset.id = newPackageId;
+            packageBlock.id = `package_block_${newPackageId}`;
+            packageBlock.querySelector('.package-number span').textContent = newPackageId;
+            if (this.packages[oldPackageId]) {
+                packagesSorted[newPackageId] = this.packages[oldPackageId];
+            }
+        }
+        this.packages = packagesSorted;
+    }
 
-    deletePackage: function(obj) {
-        var pack = $(obj).up('div[id^="package_block"]');
-        var packItems = pack.select('.package_items')[0];
-        var packageId = pack.id.match(/\d$/)[0];
+    newPackage() {
+        const template = document.getElementById('packaging_package_template');
+        const packageBlock = document.createElement('div');
+        const packageId = ++this.packageIncrement;
+
+        packageBlock.innerHTML = template.innerHTML;
+        packageBlock.classList.add('package-block', ...template.classList);
+        packageBlock.dataset.id = packageId;
+        packageBlock.id = `package_block_${packageId}`;
+        packageBlock.querySelector('.package-number span').textContent = packageId;
+
+        this.packagesContent.appendChild(packageBlock);
+        this.sortPackages();
+        this.bindPackageBlockEventListeners(packageBlock);
+
+        packageBlock.querySelector('select[name=package_container]')?.dispatchEvent(new Event('change'));
+    }
+
+    deletePackage(obj) {
+        const packageBlock = obj.closest('div[id^=package_block]');
+        const packageId = packageBlock.dataset.id;
 
         delete this.packages[packageId];
-        pack.remove();
-        this.messages.hide().update();
+        packageBlock.remove();
+        this.sortPackages();
+        this.clearMessage();
         this._setAllItemsPackedState();
-    },
+    }
 
-    deleteItem: function(obj) {
-        var item = $(obj).up('tr');
-        var itemId = item.select('[type="checkbox"]')[0].value;
-        var pack = $(obj).up('div[id^="package_block"]');
-        var packItems = pack.select('.package_items')[0];
-        var packageId = pack.id.match(/\d$/)[0];
+    deleteItem(obj) {
+        const item = obj.closest('tr');
+        const itemId = item.querySelector('[type=checkbox]').value;
 
-        delete this.packages[packageId]['items'][itemId];
-        if (item.offsetParent.rows.length <= 2) { /* head + this last row */
-            $(packItems).hide();
+        const packageBlock = obj.closest('[id^=package_block]');
+        const packageItems = packageBlock.querySelector('.package_items');
+        const packageId = packageBlock.dataset.id;
+
+        if (item.parentElement.rows.length === 1) {
+            toggleVis(packageItems, false);
         }
-        item.remove();
-        this.messages.hide().update();
-        this._recalcContainerWeightAndCustomsValue(packItems);
-        this._setAllItemsPackedState();
-    },
 
-    recalcContainerWeightAndCustomsValue: function(obj) {
-        var pack = $(obj).up('div[id^="package_block"]');
-        var packItems = pack.select('.package_items')[0];
-        if (packItems) {
+        item.remove();
+        delete this.packages[packageId]['items'][itemId];
+
+        this.clearMessage();
+        this._recalcContainerWeightAndCustomsValue(packageItems);
+        this._setAllItemsPackedState();
+    }
+
+    recalcContainerWeightAndCustomsValue(obj) {
+        const packageBlock = obj.closest('[id^=package_block]');
+        const packageItems = packageBlock.querySelector('.package_items');
+        if (packageItems) {
             if (!this.validateCustomsValue()) {
                 return;
             }
-            this._recalcContainerWeightAndCustomsValue(packItems);
+            this._recalcContainerWeightAndCustomsValue(packageItems);
         }
-    },
+    }
 
-    getItemsForPack: function(obj) {
-        if (this.itemsGridUrl) {
-            var parameters = $H({'shipment_id': this.shipmentId});
-            var packageBlock = $(obj).up('[id^="package_block"]');
-            var packagePrapare = packageBlock.select('.package_prapare')[0];
-            var packagePrapareGrid = packagePrapare.select('.grid_prepare')[0];
-            new Ajax.Request(this.itemsGridUrl, {
-                parameters: parameters,
-                onSuccess: function(transport) {
-                    var response = transport.responseText;
-                    if (response) {
-                        packagePrapareGrid.update(response);
-                        this._processPackagePrapare(packagePrapareGrid);
-                        if (packagePrapareGrid.select('.grid tbody tr').length) {
-                            packageBlock.select('.AddItemsBtn')[0].hide();
-                            packageBlock.select('.AddSelectedBtn')[0].show();
-                            packagePrapare.show();
-                        } else {
-                            packagePrapareGrid.update();
-                        }
-                    }
-                }.bind(this)
-            });
+    async getItemsForPack(obj) {
+        if (!this.itemsGridUrl) {
+            return;
         }
-    },
 
-    getPackedItemsQty: function() {
-        var items = [];
-        for (var packageId in this.packages) {
-             if (!isNaN(packageId)) {
-                 for (var packedItemId in this.packages[packageId]['items']) {
-                     if (!isNaN(packedItemId)) {
-                         if (items[packedItemId]) {
-                             items[packedItemId] += this.packages[packageId]['items'][packedItemId]['qty'];
-                         } else {
-                             items[packedItemId] = this.packages[packageId]['items'][packedItemId]['qty'];
-                         }
-                     }
-                 }
-             }
+        const packageBlock = obj.closest('[id^=package_block]');
+        const packagePrepare = packageBlock.querySelector('.package_prepare, .package_prepare');
+        const productGrid = packagePrepare.querySelector('.grid_prepare');
+
+        try {
+            const html = await mahoFetch(this.itemsGridUrl);
+
+            updateElementHtmlAndExecuteScripts(productGrid, html);
+            this._processPackagePrepare(productGrid);
+
+            if (productGrid.querySelectorAll('.grid tbody tr').length) {
+                setElementDisable(packageBlock.querySelector('.AddItemsBtn'), true);
+                toggleVis(packagePrepare, true);
+            } else {
+                productGrid.textContent = '';
+            }
+
+        } catch (error) {
+            console.error(error)
+            productGrid.textContent = '';
+        }
+    }
+
+    getPackedItemsQty() {
+        const items = [];
+        for (const packageId of Object.keys(this.packages)) {
+            if (isNaN(packageId) || !this.packages[packageId]) {
+                continue;
+            }
+            for (const packedItemId of Object.keys(this.packages[packageId]['items'])) {
+                if (isNaN(packedItemId)) {
+                    continue;
+                }
+                if (items[packedItemId]) {
+                    items[packedItemId] += this.packages[packageId]['items'][packedItemId]['qty'];
+                } else {
+                    items[packedItemId] = this.packages[packageId]['items'][packedItemId]['qty'];
+                }
+            }
         }
         return items;
-    },
+    }
 
-    _parseQty: function(obj) {
-        var qty = $(obj).hasClassName('qty-decimal') ? parseFloat(obj.value) : parseInt(obj.value);
+    _parseQty(obj) {
+        const qty = obj.classList.contains('qty-decimal')
+            ? parseFloat(obj.value)
+            : parseInt(obj.value);
+
         if (isNaN(qty) || qty <= 0) {
-            qty = 1;
+            return 1;
         }
         return qty;
-    },
+    }
 
-    packItems: function(obj) {
-        var anySelected = false;
-        var packageBlock = $(obj).up('[id^="package_block"]');
-        var packageId = packageBlock.id.match(/\d$/)[0];
-        var packagePrepare = packageBlock.select('.package_prapare')[0];
-        var packagePrepareGrid = packagePrepare.select('.grid_prepare')[0];
+    _parseAllQty(obj) {
+        const packageBlock = obj.closest('[id^=package_block]');
+        const packagePrepare = packageBlock.querySelector('.package_prepare, .package_prepare');
+        const productGrid = packagePrepare.querySelector('.grid_prepare');
 
-        // check for exceeds the total shipped quantity
-        var checkExceedsQty = false;
-        this.messages.hide().update();
-        packagePrepareGrid.select('.grid tbody tr').each(function(item) {
-            var checkbox = item.select('[type="checkbox"]')[0];
-            var itemId = checkbox.value;
-            var qtyValue  = this._parseQty(item.select('[name="qty"]')[0]);
-            item.select('[name="qty"]')[0].value = qtyValue;
-            if (checkbox.checked && this._checkExceedsQty(itemId, qtyValue)) {
-                this.messages.show().update(this.errorQtyOverLimit);
-                checkExceedsQty = true;
+        // Parse qty inputs
+        for (const item of productGrid.querySelectorAll('.grid tbody tr')) {
+            const qtyInput = item.querySelector('[name=qty]');
+            qtyInput.value = this._parseQty(qtyInput);
+        }
+    }
+
+    packItems(obj) {
+        const packageBlock = obj.closest('[id^=package_block]');
+        const packageId = packageBlock.dataset.id;
+        const packagePrepare = packageBlock.querySelector('.package_prepare, .package_prepare');
+        const productGrid = packagePrepare.querySelector('.grid_prepare');
+
+        this.clearMessage();
+        this._parseAllQty(obj);
+
+        // Check if qty exceeds the total shipped quantity
+        let validateQty = true;
+        for (const item of productGrid.querySelectorAll('.grid tbody tr')) {
+            const checkbox = item.querySelector('[type=checkbox]');
+            const qtyInput = item.querySelector('[name=qty]');
+            if (checkbox.checked && this._checkExceedsQty(checkbox.value, qtyInput.value)) {
+                qtyInput.classList.add('validation-failed');
+                validateQty = false;
+            } else {
+                qtyInput.classList.remove('validation-failed');
             }
-        }.bind(this));
-        if (checkExceedsQty) {
+        }
+
+        if (!validateQty) {
+            this.updateMessage(this.errorQtyOverLimit);
             return;
         }
 
@@ -424,388 +509,282 @@ Packaging.prototype = {
             return;
         }
 
-        // prepare items for packing
-        packagePrepareGrid.select('.grid tbody tr').each(function(item) {
-            var checkbox = item.select('[type="checkbox"]')[0];
-            if (checkbox.checked) {
-                var qty  = item.select('[name="qty"]')[0];
-                var qtyValue  = this._parseQty(qty);
-                item.select('[name="qty"]')[0].value = qtyValue;
-                anySelected = true;
-                qty.disabled = 'disabled';
-                checkbox.up('td').hide();
-                packagePrepareGrid.select('.grid th [type="checkbox"]')[0].up('th').hide();
-                item.select('.delete')[0].show();
-            } else {
-                item.remove();
-            }
-        }.bind(this));
+        toggleVis(packagePrepare, false);
+        setElementDisable(packageBlock.querySelector('.AddItemsBtn'), false);
 
-        // packing items
-        if (anySelected) {
-            var packItems = packageBlock.select('.package_items')[0];
-            if (!packItems) {
-                packagePrepare.insert(new Element('div').addClassName('grid_prepare'));
-                packagePrepare.insert({after: packagePrepareGrid});
-                packItems = packagePrepareGrid.removeClassName('grid_prepare').addClassName('package_items');
-                packItems.select('.grid tbody tr').each(function(item) {
-                    var itemId = item.select('[type="checkbox"]')[0].value;
-                    var qtyValue  = parseFloat(item.select('[name="qty"]')[0].value);
-                    qtyValue = (qtyValue <= 0) ? 1 : qtyValue;
-
-                    if ('undefined' == typeof this.packages[packageId]) {
-                        this.packages[packageId] = {'items': [], 'params': {}};
-                    }
-                    if ('undefined' == typeof this.packages[packageId]['items'][itemId]) {
-                        this.packages[packageId]['items'][itemId] = {};
-                        this.packages[packageId]['items'][itemId]['qty'] = qtyValue;
-                    } else {
-                        this.packages[packageId]['items'][itemId]['qty'] += qtyValue;
-                    }
-                }.bind(this));
-            } else {
-                packagePrepareGrid.select('.grid tbody tr').each(function(item) {
-                    var itemId = item.select('[type="checkbox"]')[0].value;
-                    var qtyValue  = parseFloat(item.select('[name="qty"]')[0].value);
-                    qtyValue = (qtyValue <= 0) ? 1 : qtyValue;
-
-                    if ('undefined' == typeof this.packages[packageId]['items'][itemId]) {
-                        this.packages[packageId]['items'][itemId] = {};
-                        this.packages[packageId]['items'][itemId]['qty'] = qtyValue;
-                        packItems.select('.grid tbody')[0].insert(item);
-                    } else {
-                        this.packages[packageId]['items'][itemId]['qty'] += qtyValue;
-                        var packItem = packItems.select('[type="checkbox"][value="'+itemId+'"]')[0].up('tr').select('[name="qty"]')[0];
-                        packItem.value = this.packages[packageId]['items'][itemId]['qty'];
-                    }
-                }.bind(this));
-                packagePrepareGrid.update();
-            }
-            $(packItems).show();
-            this._recalcContainerWeightAndCustomsValue(packItems);
-        } else {
-            packagePrepareGrid.update();
+        const selectedItems = productGrid.querySelectorAll('.grid tbody tr:has([type=checkbox]:checked)');
+        if (selectedItems.length === 0) {
+            return;
         }
 
-        // show/hide disable/enable
-        packagePrepare.hide();
-        packageBlock.select('.AddSelectedBtn')[0].hide();
-        packageBlock.select('.AddItemsBtn')[0].show();
+        // Clone the product grid if not already exist
+        let packageItems = packageBlock.querySelector('.package_items');
+        if (!packageItems) {
+            packageItems = productGrid.cloneNode(true);
+            packageItems.classList.replace('grid_prepare', 'package_items');
+            packageItems.querySelector('.grid tbody').textContent = '';
+            packagePrepare.after(packageItems);
+        }
+
+        this.packages[packageId] ??= { items: [], params: {} };
+
+        // Loop through selected items and update or add new row to package_items
+        for (const item of selectedItems) {
+            const checkbox = item.querySelector('[type=checkbox]');
+            const qtyInput = item.querySelector('[name=qty]');
+            const itemId = checkbox.value;
+
+            this.packages[packageId]['items'][itemId] ??= { qty: 0 };
+            this.packages[packageId]['items'][itemId]['qty'] += +qtyInput.value;
+
+            const existingItem = packageItems.querySelector(`.grid tbody tr:has([type=checkbox][value='${itemId}'])`);
+            if (existingItem) {
+                qtyInput.value = this.packages[packageId]['items'][itemId]['qty'];
+                existingItem.replaceWith(item);
+            } else {
+                const row = packageItems.querySelector('.grid tbody').appendChild(item);
+                row.querySelector('input[name=qty]')?.setAttribute('disabled', '');
+            }
+        }
+
+        toggleVis(packageItems, true);
+        this._recalcContainerWeightAndCustomsValue(packageItems);
         this._setAllItemsPackedState();
-    },
+    }
 
-    validateItemQty: function (itemId, qty) {
-        return (this.defaultItemsQty[itemId] < qty) ? this.defaultItemsQty[itemId] : qty;
-    },
+    validateItemQty(itemId, qty) {
+        return Math.min(this.defaultItemsQty[itemId], qty);
+     }
 
-    changeMeasures: function(obj) {
-        var incr = 0;
-        var incrSelected = 0;
-        obj.childElements().each(function(option) {
-            if (option.selected) {
-                incrSelected = incr;
-            }
-            incr++;
-        }.bind(this));
+    changeMeasures(obj) {
+        const packageBlock = obj.closest('[id^=package_block]');
+        for (const selectEl of packageBlock.querySelectorAll('.measures')) {
+            selectEl.selectedIndex = obj.selectedIndex;
+        }
+    }
 
-        var packageBlock = $(obj).up('[id^="package_block"]');
-        packageBlock.select('.measures').each(function(item){
-            if (item.name != obj.name) {
-                var incr = 0;
-                item.select('option').each(function(option){
-                    if (incr == incrSelected) {
-                        item.value = option.value;
-                        //option.selected = true
-                    }
-                    incr++;
-                }.bind(this));
-            }
-        }.bind(this));
-
-    },
-
-    checkSizeAndGirthParameter: function(obj, enabled) {
+    checkSizeAndGirthParameter(obj, enabled) {
         if (enabled == 0) {
             return;
         }
-        var currentNode = obj;
 
-        while (currentNode.nodeName != 'TBODY') {
-            currentNode = currentNode.parentNode;
-        }
+        const currentNode = obj.closest('tbody');
         if (!currentNode) {
             return;
         }
 
-        var packageSize = currentNode.select('select[name=package_size]');
-        var packageContainer = currentNode.select('select[name=package_container]');
-        var packageGirth = currentNode.select('input[name=container_girth]');
-        var packageGirthDimensionUnits = currentNode.select('select[name=container_girth_dimension_units]');
+        const packageSizeEl = currentNode.querySelector('select[name=package_size]');
+        const packageContainerEl = currentNode.querySelector('select[name=package_container]');
+        const packageGirthEl = currentNode.querySelector('input[name=container_girth]');
+        const packageGirthUnitsEl = currentNode.querySelector('select[name=container_girth_dimension_units]');
 
-        if (packageSize.length <= 0) {
+        if (!packageSizeEl) {
             return;
         }
 
-        var girthEnabled = (packageSize[0].value == 'LARGE' && (packageContainer[0].value == 'NONRECTANGULAR'
-            || packageContainer[0].value == 'VARIABLE' ));
-
-        if (!girthEnabled) {
-            packageGirth[0].value='';
-            packageGirth[0].disable();
-            packageGirth[0].addClassName('disabled');
-            packageGirthDimensionUnits[0].disable();
-            packageGirthDimensionUnits[0].addClassName('disabled');
+        const girthEnabled = packageSizeEl.value === 'LARGE' && ['NONRECTANGULAR', 'VARIABLE'].includes(packageContainerEl.value);
+        if (girthEnabled) {
+            setElementDisable(packageGirthEl, false);
+            setElementDisable(packageGirthUnitsEl, false);
         } else {
-            packageGirth[0].enable();
-            packageGirth[0].removeClassName('disabled');
-            packageGirthDimensionUnits[0].enable();
-            packageGirthDimensionUnits[0].removeClassName('disabled');
+            setElementDisable(packageGirthEl, true);
+            setElementDisable(packageGirthUnitsEl, true);
+            packageGirthEl.value = '';
         }
 
-        var sizeEnabled = (packageContainer[0].value == 'NONRECTANGULAR' || packageContainer[0].value == 'RECTANGULAR'
-            || packageContainer[0].value == 'VARIABLE');
-
-        if (!sizeEnabled) {
-            option = document.createElement('OPTION');
-            option.value = '';
-            option.text = '';
-            packageSize[0].options.add(option);
-            packageSize[0].value = '';
-            packageSize[0].disable();
-            packageSize[0].addClassName('disabled');
-        } else {
-            for (i = 0; i < packageSize[0].length; i ++) {
-                if (packageSize[0].options[i].value == '') {
-                    packageSize[0].removeChild(packageSize[0].options[i]);
+        const sizeEnabled = ['NONRECTANGULAR', 'RECTANGULAR', 'VARIABLE'].includes(packageContainerEl.value);
+        if (sizeEnabled) {
+            for (const option of packageSizeEl.options) {
+                if (option.value === '') {
+                    option.remove();
                 }
             }
-            packageSize[0].enable();
-            packageSize[0].removeClassName('disabled');
+            setElementDisable(packageSizeEl, false);
+        } else {
+            packageSizeEl.options.add(new Option('', '', null, true));
+            setElementDisable(packageSizeEl, true);
         }
-    },
+    }
 
-    changeContainerType: function(obj) {
-        if (this.customizableContainers.length <= 0) {
+    changeContainerType(obj) {
+        if (this.customizableContainers.length === 0) {
             return;
         }
 
-        var disable = true;
-        for (var i in this.customizableContainers) {
-            if (this.customizableContainers[i] == obj.value) {
-                disable = false;
-                break;
-            }
-        }
-
-        var currentNode = obj;
-        while (currentNode.nodeName != 'TBODY') {
-            currentNode = currentNode.parentNode;
-        }
+        const currentNode = obj.closest('tbody');
         if (!currentNode) {
             return;
         }
 
-        $(currentNode).select(
-            'input[name=container_length],input[name=container_width],input[name=container_height],select[name=container_dimension_units]'
-        ).each(function(inputElement) {
+        const disable = Object.values(this.customizableContainers).every((value) => value !== obj.value)
+        const inputNames = ['container_length', 'container_width', 'container_height', 'container_dimension_units'];;
+
+        for (const inputEl of currentNode.querySelectorAll(inputNames.map((n) => `[name=${n}]`).join(','))) {
             if (disable) {
-                Form.Element.disable(inputElement);
-                inputElement.addClassName('disabled');
-                if (inputElement.nodeName == 'INPUT') {
-                    $(inputElement).value = '';
+                setElementDisable(inputEl, true);
+                if (inputEl.nodeName === 'INPUT') {
+                    inputEl.value = '';
                 }
             } else {
-                Form.Element.enable(inputElement);
-                inputElement.removeClassName('disabled');
+                setElementDisable(inputEl, false);
             }
-        });
-    },
-
-    changeContentTypes: function(obj) {
-        var packageBlock = $(obj).up('[id^="package_block"]');
-        var contentType = packageBlock.select('[name=content_type]')[0];
-        var contentTypeOther = packageBlock.select('[name=content_type_other]')[0];
-        if (contentType.value == 'OTHER') {
-            Form.Element.enable(contentTypeOther);
-            contentTypeOther.removeClassName('disabled');
-        } else {
-            Form.Element.disable(contentTypeOther);
-            contentTypeOther.addClassName('disabled');
         }
+    }
 
-    },
+    changeContentTypes(obj) {
+        const packageBlock = obj.closest('[id^=package_block]');
+        const contentType = packageBlock.querySelector('[name=content_type]');
+        const contentTypeOther = packageBlock.querySelector('[name=content_type_other]');
+        if (contentType.value === 'OTHER') {
+            setElementDisable(contentTypeOther, false);
+            contentTypeOther.focus();
+        } else {
+            setElementDisable(contentTypeOther, true);
+            contentTypeOther.value = '';
+        }
+    }
 
-//******************** Private functions **********************************//
-    _getItemsCount: function(items) {
-        var count = 0;
-        items.each(function(itemCount) {
-            if (!isNaN(itemCount)) {
-                count += parseFloat(itemCount);
-            }
-        }.bind(this));
-        return count;
-    },
+    _getItemsCount(items) {
+        return items.reduce((acc, cur) => acc + (isNaN(cur) ? 0 : cur), 0);
+    }
 
     /**
      * Show/hide disable/enable buttons in case of all items packed state
      */
-    _setAllItemsPackedState: function() {
-        var addPackageBtn = this.window.select('.AddPackageBtn')[0];
-        var savePackagesBtn = this.window.select('.SavePackagesBtn')[0];
-        if (this._getItemsCount(this.itemsAll) > 0
-                && (this._checkExceedsQtyFinal(this._getItemsCount(this.getPackedItemsQty()),this._getItemsCount(this.itemsAll)))
-        ) {
-            this.packagesContent.select('.AddItemsBtn').each(function(button){
-                button.disabled = 'disabled';
-                button.addClassName('disabled');
-            });
-            addPackageBtn.addClassName('disabled');
-            Form.Element.disable(addPackageBtn);
-            savePackagesBtn.removeClassName('disabled');
-            Form.Element.enable(savePackagesBtn);
-            savePackagesBtn.title = '';
+    _setAllItemsPackedState() {
+        const allPackedConditions = [
+            this._getItemsCount(this.itemsAll) > 0,
+            this._checkExceedsQtyFinal(this._getItemsCount(this.getPackedItemsQty()), this._getItemsCount(this.itemsAll)),
+        ];
 
-            // package number recalculation
-            var packagesRecalc = [];
-            this.packagesContent.childElements().each(function(pack) {
-                if (!pack.select('.package_items .grid tbody tr').length) {
-                    pack.remove();
-                }
-            }.bind(this));
-            var packagesCount = this.packagesContent.childElements().length;
-            this.packageIncrement = packagesCount;
-            this.packagesContent.childElements().each(function(pack) {
-                var packageId = pack.id.match(/\d$/)[0];
-                pack.id = 'package_block_' + packagesCount;
-                pack.select('.package-number span')[0].update(packagesCount);
-                packagesRecalc[packagesCount] = this.packages[packageId];
-                --packagesCount;
-            }.bind(this));
-            this.packages = packagesRecalc;
-
-        } else {
-            this.packagesContent.select('.AddItemsBtn').each(function(button){
-                button.removeClassName('disabled');
-                Form.Element.enable(button);
-            });
-            addPackageBtn.removeClassName('disabled');
-            Form.Element.enable(addPackageBtn);
-            savePackagesBtn.addClassName('disabled');
-            Form.Element.disable(savePackagesBtn);
-            savePackagesBtn.title = this.titleDisabledSaveBtn;
-        }
-    },
-
-    _processPackagePrapare: function(packagePrapare) {
-        var itemsAll = [];
-        packagePrapare.select('.grid tbody tr').each(function(item) {
-            var qty  = item.select('[name="qty"]')[0];
-            var itemId = item.select('[type="checkbox"]')[0].value;
-            var qtyValue = 0;
-            if (Object.isFunction(this.itemQtyCallback)) {
-                var value = this.itemQtyCallback(itemId);
-                qtyValue = ((typeof value == 'string') && (value.length == 0)) ? 0 : parseFloat(value);
-                if (isNaN(qtyValue) || qtyValue < 0) {
-                    qtyValue = 1;
-                }
-                qtyValue = this.validateItemQty(itemId, qtyValue);
-                qty.value = qtyValue;
-            } else {
-                var value = item.select('[name="qty"]')[0].value;
-                qtyValue = ((typeof value == 'string') && (value.length == 0)) ? 0 : parseFloat(value);
-                if (isNaN(qtyValue) || qtyValue < 0) {
-                    qtyValue = 1;
+        if (allPackedConditions.every(Boolean)) {
+            // Remove empty packages
+            for (const packageBlock of this.packagesContent.children) {
+                if (!packageBlock.querySelector('.package_items .grid tbody tr')) {
+                    packageBlock.remove();
                 }
             }
-            if (qtyValue == 0) {
+
+            // Resort packages
+            this.sortPackages();
+
+            // Disable add items / add package buttons
+            setElementDisable(this.window.querySelector('.AddPackageBtn'), true);
+            for (const addItemsBtn of this.packagesContent.querySelectorAll('.AddItemsBtn')) {
+                setElementDisable(addItemsBtn, true);
+            }
+        } else {
+            // Enable add items / add package buttons
+            setElementDisable(this.window.querySelector('.AddPackageBtn'), false);
+            for (const addItemsBtn of this.packagesContent.querySelectorAll('.AddItemsBtn')) {
+                setElementDisable(addItemsBtn, false);
+            }
+        }
+    }
+
+    _processPackagePrapare(packagePrepare) {
+        this._processPackagePrepare(packagePrepare);
+    }
+
+    _processPackagePrepare(packagePrepare) {
+        const itemsAll = [];
+        for (const item of packagePrepare.querySelectorAll('.grid tbody tr')) {
+            const qtyEl = item.querySelector('[name=qty]');
+            const itemId = item.querySelector('[type=checkbox]').value;
+
+            let qtyValue = typeof this.itemQtyCallback === 'function'
+                ? this.itemQtyCallback(itemId)
+                : item.querySelector('[name=qty]').value;
+
+            qtyValue = parseFloat(qtyValue === '' ? 0 : qtyValue);
+            if (isNaN(qtyValue) || qtyValue < 0) {
+                qtyValue = 1;
+            }
+
+            qtyValue = this.validateItemQty(itemId, qtyValue);
+            qtyEl.value = qtyValue;
+
+            if (qtyValue === 0) {
                 item.remove();
                 return;
             }
-            var packedItems = this.getPackedItemsQty();
+
+            const packedItems = this.getPackedItemsQty();
             itemsAll[itemId] = qtyValue;
-            for (var packedItemId in packedItems) {
-                if (!isNaN(packedItemId)) {
-                    var packedQty = packedItems[packedItemId];
-                    if (itemId == packedItemId) {
-                        if (qtyValue == packedQty || qtyValue <= packedQty) {
-                            item.remove();
-                        } else if (qtyValue > packedQty) {
-                            /* fix float number precision */
-                            qty.value = Number((qtyValue - packedQty).toFixed(4));
-                        }
+
+            for (const packedItemId of Object.keys(packedItems)) {
+                if (isNaN(packedItemId)) {
+                    continue;
+                }
+                const packedQty = packedItems[packedItemId];
+                if (itemId === packedItemId) {
+                    if (qtyValue == packedQty || qtyValue <= packedQty) {
+                        item.remove();
+                    } else if (qtyValue > packedQty) {
+                        // Fix float number precision
+                        qtyEl.value = Number((qtyValue - packedQty).toFixed(4));
                     }
                 }
             }
-        }.bind(this));
-        if (!this.itemsAll.length) {
+        }
+
+        if (this.itemsAll.length === 0) {
             this.itemsAll = itemsAll;
         }
 
-        packagePrapare.select('tbody input[type="checkbox"]').each(function(item){
-            $(item).observe('change', this._observeQty);
-            this._observeQty.call(item);
-        }.bind(this));
-    },
-
-    _observeQty: function() {
-        /** this = input[type="checkbox"] */
-        var tr  = this.parentNode.parentNode,
-            qty = $(tr.cells[tr.cells.length - 1]).select('input[name="qty"]')[0];
-
-        if (qty.disabled = !this.checked) {
-            $(qty).addClassName('disabled');
-        } else {
-            $(qty).removeClassName('disabled');
+        for (const checkboxEl of packagePrepare.querySelectorAll('tbody input[type=checkbox]')) {
+            checkboxEl.addEventListener('change', this._observeQty);
+            this._observeQty.call(checkboxEl);
         }
-    },
-
-    _checkExceedsQty: function(itemId, qty) {
-        var packedItemQty = this.getPackedItemsQty()[itemId] ? this.getPackedItemsQty()[itemId] : 0;
-        var allItemQty = this.itemsAll[itemId];
-        return (qty * (1 - this.eps) > (allItemQty *  (1 + this.eps)  - packedItemQty * (1 - this.eps)));
-    },
-
-    _checkExceedsQtyFinal: function(checkOne, defQty) {
-        return checkOne * (1 + this.eps) >= defQty * (1 - this.eps);
-    },
-
-    _recalcContainerWeightAndCustomsValue: function(container) {
-        var packageBlock = container.up('[id^="package_block"]');
-        var packageId = packageBlock.id.match(/\d$/)[0];
-        var containerWeight = packageBlock.select('[name="container_weight"]')[0];
-        var containerCustomsValue = packageBlock.select('[name="package_customs_value"]')[0];
-        containerWeight.value = 0;
-        containerCustomsValue.value = 0;
-        container.select('.grid tbody tr').each(function(item) {
-            var itemId = item.select('[type="checkbox"]')[0].value;
-            var qtyValue  = parseFloat(item.select('[name="qty"]')[0].value);
-            if (isNaN(qtyValue) || qtyValue <= 0) {
-                qtyValue = 1;
-                item.select('[name="qty"]')[0].value = qtyValue;
-            }
-            var itemWeight = parseFloat(this._getElementText(item.select('.weight')[0]));
-            containerWeight.value = parseFloat(containerWeight.value) + (itemWeight * qtyValue);
-            var itemCustomsValue = parseFloat(item.select('[name="customs_value"]')[0].value) || 0;
-            containerCustomsValue.value = parseFloat(containerCustomsValue.value) + itemCustomsValue * qtyValue;
-            this.packages[packageId]['items'][itemId]['customs_value'] = itemCustomsValue;
-        }.bind(this));
-        containerWeight.value = parseFloat(parseFloat(containerWeight.value).toFixed(4));
-        containerCustomsValue.value = parseFloat(containerCustomsValue.value).toFixed(2);
-        if (containerCustomsValue.value == 0) {
-            containerCustomsValue.value = '';
-        }
-    },
-
-    _getElementText: function(el) {
-        if ('string' == typeof el.textContent) {
-            return el.textContent;
-        }
-        if ('string' == typeof el.innerText) {
-            return el.innerText;
-        }
-        var parser = new DOMParser();
-        var doc = parser.parseFromString(el.innerHTML, 'text/html');
-        return doc.body.textContent || "";
     }
-//******************** End Private functions ******************************//
-};
+
+    _observeQty() {
+        const qtyEl = this.closest('tr').querySelector('td:last-child input[name=qty]');
+        setElementDisable(qtyEl, !this.checked);
+    }
+
+    _checkExceedsQty(itemId, qty) {
+        const packedItemQty = this.getPackedItemsQty()[itemId] ? this.getPackedItemsQty()[itemId] : 0;
+        const allItemQty = this.itemsAll[itemId];
+        return (qty * (1 - this.eps) > (allItemQty *  (1 + this.eps)  - packedItemQty * (1 - this.eps)));
+    }
+
+    _checkExceedsQtyFinal(checkOne, defQty) {
+        return checkOne * (1 + this.eps) >= defQty * (1 - this.eps);
+    }
+
+    _recalcContainerWeightAndCustomsValue(container) {
+        const packageBlock = container.closest('[id^=package_block]');
+        const packageId = packageBlock.dataset.id;
+        const packageItems = packageBlock.querySelector('.package_items');
+
+        let weight = 0, customsValue = 0;
+
+        this._parseAllQty(container);
+
+        for (const item of packageItems.querySelectorAll('.grid tbody tr')) {
+            const checkbox = item.querySelector('[type=checkbox]');;
+            const qtyInput = item.querySelector('[name=qty]');
+
+            const itemCustomsValue = parseFloat(item.querySelector('[name=customs_value]')?.value) || 0;
+            this.packages[packageId]['items'][checkbox.value]['customs_value'] = itemCustomsValue;
+            customsValue += itemCustomsValue;
+
+            weight += parseFloat(item.querySelector('.weight').textContent) * qtyInput.value;
+        }
+
+        const containerWeight = packageBlock.querySelector('[name=container_weight]');
+        if (containerWeight) {
+            containerWeight.value = weight.toFixed(4);
+        }
+
+        const containerCustomsValue = packageBlock.querySelector('[name=package_customs_value]');
+        if (containerCustomsValue) {
+            containerCustomsValue.value = customsValue > 0 ? customsValue.toFixed(2) : '';
+        }
+    }
+
+    _getElementText(el) {
+        return el.textContent;
+    }
+}

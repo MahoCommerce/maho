@@ -6,7 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -155,7 +155,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                     switch ($e->getCode()) {
                         case Mage_Customer_Model_Customer::EXCEPTION_EMAIL_NOT_CONFIRMED:
                             /** @var Helper $helper */
-                            $helper = $this->_getHelper('customer');
+                            $helper = Mage::helper('customer');
                             $value = $helper->getEmailConfirmationUrl($login['username']);
                             $message = $helper->__('This account is not confirmed. <a href="%s">Click here</a> to resend confirmation email.', $value);
                             break;
@@ -185,7 +185,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     {
         Mage::dispatchEvent('customer_controller_account_login_post_redirect_before', ['controller' => $this]);
         /** @var Helper $helper */
-        $helper = $this->_getHelper('customer');
+        $helper = Mage::helper('customer');
 
         $session = $this->_getSession();
 
@@ -199,7 +199,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                     if ($referer) {
                         // Rebuild referer URL to handle the case when SID was changed
                         $referer = Mage::getModel('core/url')
-                            ->getRebuiltUrl($this->_getHelper('core')->urlDecodeAndEscape($referer));
+                            ->getRebuiltUrl(Mage::helper('core')->urlDecodeAndEscape($referer));
                         if ($this->_isUrlInternal($referer)) {
                             $session->setBeforeAuthUrl($referer);
                         }
@@ -337,7 +337,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 $this->getRequest()->getPost('password'),
             );
             /** @var Helper $customerHelper */
-            $customerHelper = $this->_getHelper('customer');
+            $customerHelper = Mage::helper('customer');
             $session->addSuccess($this->__(
                 'Account confirmation is required. Please, check your email for the confirmation link. To resend the confirmation email please <a href="%s">click here</a>.',
                 $customerHelper->getEmailConfirmationUrl($customer->getEmail()),
@@ -359,7 +359,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      */
     protected function _getCustomer()
     {
-        $customer = $this->_getFromRegistry('current_customer');
+        /** @var ?Mage_Customer_Model_Customer $customer */
+        $customer = Mage::registry('current_customer');
         if (!$customer) {
             $customer = Mage::getModel('customer/customer')->setId(null);
         }
@@ -451,7 +452,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * Get Helper
      *
      * @param string $path
-     * @return Mage_Core_Helper_Abstract
+     * @return Mage_Core_Helper_Abstract|false
+     * @deprecated use Mage::helper()
      */
     protected function _getHelper($path)
     {
@@ -514,12 +516,12 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * @deprecated Use Mage::getModel() instead for PHPStan and IDE type hinting.
      * Get model by path
      *
      * @param string $path
-     * @param array|null $arguments
-     * @return false|Mage_Core_Model_Abstract
+     * @param ?array $arguments
+     * @return Mage_Core_Model_Abstract|false
+     * @deprecated use Mage::getModel()
      */
     public function _getModel($path, $arguments = [])
     {
@@ -531,6 +533,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      *
      * @param string $path
      * @return mixed
+     * @deprecated use Mage::registry()
      */
     protected function _getFromRegistry($path)
     {
@@ -554,22 +557,19 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         if ($this->_isVatValidationEnabled()) {
             // Show corresponding VAT message to customer
             /** @var Mage_Customer_Helper_Address $helper */
-            $helper = $this->_getHelper('customer/address');
+            $helper = Mage::helper('customer/address');
             $configAddressType = $helper->getTaxCalculationAddressType();
             $userPrompt = '';
-            switch ($configAddressType) {
-                case Mage_Customer_Model_Address_Abstract::TYPE_SHIPPING:
-                    $userPrompt = $this->__(
-                        'If you are a registered VAT customer, please click <a href="%s">here</a> to enter you shipping address for proper VAT calculation',
-                        $this->_getUrl('customer/address/edit'),
-                    );
-                    break;
-                default:
-                    $userPrompt = $this->__(
-                        'If you are a registered VAT customer, please click <a href="%s">here</a> to enter you billing address for proper VAT calculation',
-                        $this->_getUrl('customer/address/edit'),
-                    );
-            }
+            $userPrompt = match ($configAddressType) {
+                Mage_Customer_Model_Address_Abstract::TYPE_SHIPPING => $this->__(
+                    'If you are a registered VAT customer, please click <a href="%s">here</a> to enter you shipping address for proper VAT calculation',
+                    $this->_getUrl('customer/address/edit'),
+                ),
+                default => $this->__(
+                    'If you are a registered VAT customer, please click <a href="%s">here</a> to enter you billing address for proper VAT calculation',
+                    $this->_getUrl('customer/address/edit'),
+                ),
+            };
             $this->_getSession()->addSuccess($userPrompt);
         }
 
@@ -757,7 +757,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             if ($customerId) {
                 try {
                     /** @var Helper $helper */
-                    $helper = $this->_getHelper('customer');
+                    $helper = Mage::helper('customer');
                     $newResetPasswordLinkToken = $helper->generateResetPasswordLinkToken();
                     $newResetPasswordLinkCustomerId = $helper->generateResetPasswordLinkCustomerId($customerId);
                     $customer->changeResetPasswordLinkCustomerId($newResetPasswordLinkCustomerId);
@@ -770,10 +770,10 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 }
             }
             $this->_getSession()
-                ->addSuccess($this->_getHelper('customer')
+                ->addSuccess(Mage::helper('customer')
                 ->__(
                     'If there is an account associated with %s you will receive an email with a link to reset your password.',
-                    $this->_getHelper('customer')->escapeHtml($email),
+                    Mage::helper('customer')->escapeHtml($email),
                 ));
             $this->_redirect('*/*/');
             return;
@@ -791,12 +791,12 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     public function changeForgottenAction()
     {
         try {
-            list($customerId, $resetPasswordLinkToken) = $this->_getRestorePasswordParameters($this->_getSession());
+            [$customerId, $resetPasswordLinkToken] = $this->_getRestorePasswordParameters($this->_getSession());
             $this->_validateResetPasswordLinkToken($customerId, $resetPasswordLinkToken);
             $this->loadLayout();
             $this->renderLayout();
         } catch (Exception $exception) {
-            $this->_getSession()->addError($this->_getHelper('customer')->__('Your password reset link has expired.'));
+            $this->_getSession()->addError(Mage::helper('customer')->__('Your password reset link has expired.'));
             $this->_redirect('*/*/forgotpassword');
         }
     }
@@ -817,7 +817,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $this->_saveRestorePasswordParameters($customerId, $resetPasswordLinkToken)
                 ->_redirect('*/*/changeforgotten');
         } catch (Exception $exception) {
-            $this->_getSession()->addError($this->_getHelper('customer')->__('Your password reset link has expired.'));
+            $this->_getSession()->addError(Mage::helper('customer')->__('Your password reset link has expired.'));
             $this->_redirect('*/*/forgotpassword');
         }
     }
@@ -833,21 +833,21 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             return;
         }
 
-        list($customerId, $resetPasswordLinkToken) = $this->_getRestorePasswordParameters($this->_getSession());
+        [$customerId, $resetPasswordLinkToken] = $this->_getRestorePasswordParameters($this->_getSession());
         $password = (string) $this->getRequest()->getPost('password');
         $passwordConfirmation = (string) $this->getRequest()->getPost('confirmation');
 
         try {
             $this->_validateResetPasswordLinkToken($customerId, $resetPasswordLinkToken);
         } catch (Exception $exception) {
-            $this->_getSession()->addError($this->_getHelper('customer')->__('Your password reset link has expired.'));
+            $this->_getSession()->addError(Mage::helper('customer')->__('Your password reset link has expired.'));
             $this->_redirect('*/*/');
             return;
         }
 
         $errorMessages = [];
         if (iconv_strlen($password) <= 0) {
-            $errorMessages[] = $this->_getHelper('customer')->__('New password field cannot be empty.');
+            $errorMessages[] = Mage::helper('customer')->__('New password field cannot be empty.');
         }
         $customer = Mage::getModel('customer/customer')->load($customerId);
 
@@ -880,7 +880,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $this->_getSession()->unsetData(self::TOKEN_SESSION_NAME);
             $this->_getSession()->unsetData(self::CUSTOMER_ID_SESSION_NAME);
 
-            $this->_getSession()->addSuccess($this->_getHelper('customer')->__('Your password has been updated.'));
+            $this->_getSession()->addSuccess(Mage::helper('customer')->__('Your password has been updated.'));
             $this->_redirect('*/*/login');
         } catch (Exception $exception) {
             $this->_getSession()->addException($exception, $this->__('Cannot save a new password.'));
@@ -923,17 +923,17 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             || empty($customerId)
             || $customerId < 0
         ) {
-            throw Mage::exception('Mage_Core', $this->_getHelper('customer')->__('Invalid password reset token.'));
+            throw Mage::exception('Mage_Core', Mage::helper('customer')->__('Invalid password reset token.'));
         }
 
         $customer = Mage::getModel('customer/customer')->load($customerId);
         if (!$customer || !$customer->getId()) {
-            throw Mage::exception('Mage_Core', $this->_getHelper('customer')->__('Wrong customer account specified.'));
+            throw Mage::exception('Mage_Core', Mage::helper('customer')->__('Wrong customer account specified.'));
         }
 
         $customerToken = $customer->getRpToken();
         if (is_null($customerToken) || strcmp($customerToken, $resetPasswordLinkToken) !== 0 || $customer->isResetPasswordLinkTokenExpired()) {
-            throw Mage::exception('Mage_Core', $this->_getHelper('customer')->__('Your password reset link has expired.'));
+            throw Mage::exception('Mage_Core', Mage::helper('customer')->__('Your password reset link has expired.'));
         }
     }
 
@@ -1091,7 +1091,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     protected function _isVatValidationEnabled($store = null)
     {
         /** @var Mage_Customer_Helper_Address $helper */
-        $helper = $this->_getHelper('customer/address');
+        $helper = Mage::helper('customer/address');
         return $helper->isVatValidationEnabled($store);
     }
 

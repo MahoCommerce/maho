@@ -6,7 +6,7 @@
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -823,15 +823,15 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
             'currentTaxString' => 'currentTaxes',
         ];
         foreach ($rateToVariable as $rateVariable => $rateArray) {
-            if ($$rateArray && is_array($$rateArray)) {
-                $$rateVariable = '';
-                foreach ($$rateArray as $classId => $rate) {
+            if (${$rateArray} && is_array(${$rateArray})) {
+                ${$rateVariable} = '';
+                foreach (${$rateArray} as $classId => $rate) {
                     if ($rate) {
-                        $$rateVariable .= sprintf('WHEN %d THEN %12.4f ', $classId, $rate / 100);
+                        ${$rateVariable} .= sprintf('WHEN %d THEN %12.4f ', $classId, $rate / 100);
                     }
                 }
-                if ($$rateVariable) {
-                    $$rateVariable = "CASE {$taxClassField} {$$rateVariable} ELSE 0 END";
+                if (${$rateVariable}) {
+                    ${$rateVariable} = "CASE {$taxClassField} {${$rateVariable}} ELSE 0 END";
                 }
             }
         }
@@ -979,10 +979,10 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getCalculatedTaxes($source)
     {
-        if ($this->_getFromRegistry('current_invoice')) {
-            $current = $this->_getFromRegistry('current_invoice');
-        } elseif ($this->_getFromRegistry('current_creditmemo')) {
-            $current = $this->_getFromRegistry('current_creditmemo');
+        if (Mage::registry('current_invoice')) {
+            $current = Mage::registry('current_invoice');
+        } elseif (Mage::registry('current_creditmemo')) {
+            $current = Mage::registry('current_creditmemo');
         } else {
             $current = $source;
         }
@@ -1011,7 +1011,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
                 foreach ($current->getItemsCollection() as $item) {
                     $taxCollection = Mage::getResourceModel('tax/sales_order_tax_item')
                         ->getTaxItemsByItemId(
-                            $item->getOrderItemId() ? $item->getOrderItemId() : $item->getItemId(),
+                            $item->getOrderItemId() ?: $item->getItemId(),
                         );
 
                     foreach ($taxCollection as $tax) {
@@ -1068,6 +1068,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * @param string $key
      * @return mixed
+     * @deprecated use Mage::registry()
      */
     protected function _getFromRegistry($key)
     {

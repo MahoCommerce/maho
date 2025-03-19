@@ -348,7 +348,7 @@ class Varien_Data_Collection implements IteratorAggregate, Countable
 
         if (!is_null($itemId)) {
             if (isset($this->_items[$itemId])) {
-                throw new Exception('Item (' . get_class($item) . ') with the same id "' . $item->getId() . '" already exist');
+                throw new Exception('Item (' . $item::class . ') with the same id "' . $item->getId() . '" already exist');
             }
             $this->_items[$itemId] = $item;
         } else {
@@ -721,10 +721,7 @@ class Varien_Data_Collection implements IteratorAggregate, Countable
     public function getItemById($idValue)
     {
         $this->load();
-        if (isset($this->_items[$idValue])) {
-            return $this->_items[$idValue];
-        }
-        return null;
+        return $this->_items[$idValue] ?? null;
     }
 
     /**
@@ -803,7 +800,7 @@ class Varien_Data_Collection implements IteratorAggregate, Countable
      */
     public function getFlag($flag)
     {
-        return isset($this->_flags[$flag]) ? $this->_flags[$flag] : null;
+        return $this->_flags[$flag] ?? null;
     }
 
     /**

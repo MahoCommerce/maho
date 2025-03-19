@@ -61,7 +61,7 @@
                 <td>
                     <?php if($_item->isSaleable()): ?>
                         <button type="button"
-                                title="<?= Mage::helper('core')->quoteEscape($this->__('Add to Cart')) ?>"
+                                title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>"
                                 class="button btn-cart"
                                 onclick="customFormSubmitToParent(
                                         '<?= $this->helper('catalog/product_compare')->getAddToCartUrlCustom($_item, false) ?>',
@@ -76,11 +76,10 @@
                         <?php $_wishlistUrl = $this->getAddToWishlistUrlCustom($_item, false); ?>
                         <ul class="add-to-links">
                             <li>
-                                <a href="#"
-                                   data-url="<?= $_wishlistUrl ?>"
-                                   data-params="<?= $_params ?>"
-                                   class="link-wishlist"
+                                <a href="#" data-url="<?= $_wishlistUrl ?>" data-params="<?= $_params ?>"
+                                   class="link-wishlist" title="<?= $this->__('Add to Wishlist') ?>"
                                    onclick="customFormSubmit('<?= $_wishlistUrl ?>', '<?= $_params ?>', 'post')">
+                                    <?= $this->getIconSvg('heart') ?>
                                     <?= $this->__('Add to Wishlist') ?>
                                 </a>
                             </li>
@@ -132,7 +131,7 @@
                     <?php if($_item->isSaleable()): ?>
                         <p>
                             <button type="button"
-                                   title="<?= Mage::helper('core')->quoteEscape($this->__('Add to Cart')) ?>"
+                                   title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>"
                                    class="button btn-cart"
                                    onclick="customFormSubmitToParent(
                                            '<?= $this->helper('catalog/product_compare')->getAddToCartUrlCustom($_item, false) ?>',
@@ -148,11 +147,10 @@
                         <?php $_wishlistUrl = $this->getAddToWishlistUrlCustom($_item, false); ?>
                         <ul class="add-to-links">
                             <li>
-                                <a href="#"
-                                   data-url="<?= $_wishlistUrl ?>"
-                                   data-params="<?= $_params ?>"
-                                   class="link-wishlist"
+                                <a href="#" data-url="<?= $_wishlistUrl ?>" data-params="<?= $_params ?>"
+                                   class="link-wishlist" title="<?= $this->__('Add to Wishlist') ?>"
                                    onclick="customFormSubmit('<?= $_wishlistUrl ?>', '<?= $_params ?>', 'post')">
+                                    <?= $this->getIconSvg('heart') ?>
                                     <?= $this->__('Add to Wishlist') ?>
                                 </a>
                             </li>

@@ -16,7 +16,7 @@
 </div>
 <?= $this->getMessagesBlock()->toHtml() ?>
 <p class="my-tag-edit">
-    <a href="#" title="<?= Mage::helper('core')->quoteEscape($this->__('Delete')) ?>" onclick="if(confirm('<?= Mage::helper('core')->quoteEscape($this->__('Are you sure you want to delete this tag?'), true) ?>')) window.location='<?= $this->getTagInfo()->getRemoveTagUrl() ?>'; return false;" class="button btn-remove"><span><?= $this->__('Delete') ?></span></a>
+    <a href="#" title="<?= $this->quoteEscape($this->__('Delete')) ?>" onclick="if(confirm('<?= $this->quoteEscape($this->__('Are you sure you want to delete this tag?'), true) ?>')) window.location='<?= $this->getTagInfo()->getRemoveTagUrl() ?>'; return false;" class="button btn-remove"><span><?= $this->__('Delete') ?></span></a>
     <?= $this->__('<strong>Tag Name:</strong> %s', $this->escapeHtml($this->getTagInfo()->getName())) ?>
 </p>
 <div class="clearer"></div>
@@ -41,17 +41,17 @@
             <td>
                 <?php if($_product->isSaleable()): ?>
                     <?php $params['product'] = $_product->getId(); ?>
-                    <button type="button" title="<?= Mage::helper('core')->quoteEscape($this->__('Add to Cart')) ?>" class="button btn-cart" onclick="setLocation('<?= $this->getUrl('checkout/cart/add', $params) ?>')"><?= $this->__('Add to Cart') ?></button>
+                    <button type="button" title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>" class="button btn-cart" onclick="setLocation('<?= $this->getUrl('checkout/cart/add', $params) ?>')"><?= $this->__('Add to Cart') ?></button>
                 <?php endif ?>
                 <?php if ($this->helper('wishlist')->isAllow()) : ?>
                 <ul class="add-to-links">
                     <li>
-                        <a href="#"
-                           class="link-wishlist"
+                        <a href="#" class="link-wishlist" title="<?= $this->__('Add to Wishlist') ?>"
                            onclick="customFormSubmit(
                                    '<?= $this->getAddToWishlistUrlCustom($_product, false) ?>',
                                    '<?= $this->escapeHtml(json_encode(['form_key' => $params[Mage_Core_Model_Url::FORM_KEY]])) ?>',
                                    'post')">
+                            <?= $this->getIconSvg('heart') ?>
                             <?= $this->__('Add to Wishlist') ?>
                         </a>
                     </li>

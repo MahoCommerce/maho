@@ -6,6 +6,7 @@
  * @package    Mage_Weee
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -312,7 +313,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
                 $shipping,
                 $billing,
                 $website,
-                $calculateTaxes ? $calculateTaxes : $this->typeOfDisplay($product, 1),
+                $calculateTaxes ?: $this->typeOfDisplay($product, 1),
             );
         }
         return [];
@@ -466,7 +467,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
     public function validateCatalogPricesAndFptConfiguration($store = null)
     {
         // Check the configuration - Weee enabled and catalog display
-        $priceIncludesTax = $this->_getHelper('tax')->priceIncludesTax($store);
+        $priceIncludesTax = Mage::helper('tax')->priceIncludesTax($store);
         // $priceIncludesTax = Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_PRICE_INCLUDES_TAX, $store);
         $fptTaxConfig = $this->getTaxType($store);
 
@@ -678,7 +679,8 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      * Get The Helper with the name provider
      *
      * @param string $helperName
-     * @return Mage_Core_Helper_Abstract
+     * @return Mage_Core_Helper_Abstract|false
+     * @deprecated use Mage::helper()
      */
     protected function _getHelper($helperName)
     {

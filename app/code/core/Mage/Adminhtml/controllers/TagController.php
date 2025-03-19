@@ -316,7 +316,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
             }
         }
-        $ret = $this->getRequest()->getParam('ret') ? $this->getRequest()->getParam('ret') : 'index';
+        $ret = $this->getRequest()->getParam('ret') ?: 'index';
         $this->_redirect('*/*/' . $ret);
     }
 
@@ -324,13 +324,10 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     protected function _isAllowed()
     {
         $action = strtolower($this->getRequest()->getActionName());
-        switch ($action) {
-            case 'pending':
-                return Mage::getSingleton('admin/session')->isAllowed('catalog/tag/pending');
-            case 'all':
-                return Mage::getSingleton('admin/session')->isAllowed('catalog/tag/all');
-            default:
-                return Mage::getSingleton('admin/session')->isAllowed('catalog/tag');
-        }
+        return match ($action) {
+            'pending' => Mage::getSingleton('admin/session')->isAllowed('catalog/tag/pending'),
+            'all' => Mage::getSingleton('admin/session')->isAllowed('catalog/tag/all'),
+            default => Mage::getSingleton('admin/session')->isAllowed('catalog/tag'),
+        };
     }
 }

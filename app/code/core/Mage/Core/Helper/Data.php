@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2016-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -530,6 +530,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      * @param string $prefix
      * @param bool $forceSetAll
      * @return mixed
+     * @deprecated since 25.3.0
      */
     public function decorateArray($array, $prefix = 'decorated_', $forceSetAll = false)
     {
@@ -580,6 +581,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      * @param string $key
      * @param mixed $value
      * @param bool $dontSkip
+     * @deprecated since 25.3.0
      */
     private function _decorateArrayObject($element, $key, $value, $dontSkip)
     {
@@ -902,9 +904,12 @@ XML;
         return $data;
     }
 
+    /**
+     * @deprecated since 25.5.0
+     */
     public function isFormKeyEnabled(): bool
     {
-        return Mage::getStoreConfigFlag(Mage_Core_Controller_Front_Action::XML_CSRF_USE_FLAG_CONFIG_PATH);
+        return true;
     }
 
     /**
@@ -943,5 +948,53 @@ XML;
             $cacheTag = 'rate_limit_' . $remoteAddr;
             Mage::app()->saveCache(1, $cacheTag, ['brute_force'], Mage::getStoreConfig('system/rate_limit/timeframe'));
         }
+    }
+
+    public function getMailerDsn(): string
+    {
+        $emailTransport = Mage::getStoreConfig('system/smtp/enabled');
+        $user = Mage::getStoreConfig('system/smtp/username');
+        $pass = Mage::getStoreConfig('system/smtp/password');
+        $host = Mage::getStoreConfig('system/smtp/host');
+        $port = Mage::getStoreConfig('system/smtp/port');
+        return match ($emailTransport) {
+            'smtp' => "$emailTransport://$user:$pass@$host:$port",
+            'ses+smtp' => "$emailTransport://$user:$pass@default",
+            'ses+https' => "$emailTransport://$user:$pass@default",
+            'ses+api' => "$emailTransport://$user:$pass@default",
+            'azure+api' => "$emailTransport://$user:$pass@default",
+            'brevo+smtp' => "$emailTransport://$user:$pass@default",
+            'brevo+api' => "$emailTransport://$pass@default",
+            'infobip+smtp' => "$emailTransport://$pass@$host",
+            'infobip+api' => "$emailTransport://$pass@default",
+            'mailgun+smtp' => "$emailTransport://$user:$pass@default",
+            'mailgun+https' => "$emailTransport://$pass:$host@default",
+            'mailgun+api' => "$emailTransport://$pass:$host@default",
+            'mailjet+smtp' => "$emailTransport://$user:$pass@default",
+            'mailjet+api' => "$emailTransport://$user:$pass@default",
+            'mailomat+smtp' => "$emailTransport://$user:$pass@default",
+            'mailomat+api' => "$emailTransport://$pass@default",
+            'mailpace+api' => "$emailTransport://$pass@default",
+            'mailersend+smtp' => "$emailTransport://$user:$pass@default",
+            'mailersend+api' => "$emailTransport://$pass@default",
+            'mailtrap+smtp' => "$emailTransport://$pass@default",
+            'mailtrap+api' => "$emailTransport://$pass@default",
+            'mandrill+smtp' => "$emailTransport://$user:$pass@default",
+            'mandrill+https' => "$emailTransport://$pass@default",
+            'mandrill+api' => "$emailTransport://$pass@default",
+            'postal+api' => "$emailTransport://$pass@$host",
+            'postmark+smtp' => "$emailTransport://$pass@default",
+            'postmark+api' => "$emailTransport://$pass@default",
+            'resend+smtp' => "$emailTransport://resend:$pass@default",
+            'resend+api' => "$emailTransport://$pass@default",
+            'scaleway+smtp' => "$emailTransport://$user:$pass@default",
+            'scaleway+api' => "$emailTransport://$user:$pass@default",
+            'sendgrid+smtp' => "$emailTransport://$pass@default",
+            'sendgrid+api' => "$emailTransport://$pass@default",
+            'sweego+smtp' => "$emailTransport://$user:$pass@$host:$port",
+            'sweego+api' => "$emailTransport://$pass@default",
+            'sendmail' => "$emailTransport://default",
+            default => ''
+        };
     }
 }

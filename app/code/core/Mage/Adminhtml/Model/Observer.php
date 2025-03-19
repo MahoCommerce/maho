@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -51,19 +51,8 @@ class Mage_Adminhtml_Model_Observer
         $request = Mage::app()->getFrontController()->getRequest();
         if ($key = $request->getPost('massaction_prepare_key')) {
             $value = is_array($request->getPost($key)) ? $request->getPost($key) : explode(',', $request->getPost($key));
-            $request->setPost($key, $value ? $value : null);
+            $request->setPost($key, $value ?: null);
         }
-        return $this;
-    }
-
-    /**
-     * Clear result of configuration files access level verification in system cache
-     *
-     * @return $this
-     */
-    public function clearCacheConfigurationFilesAccessLevelVerification()
-    {
-        Mage::app()->removeCache(Mage_Adminhtml_Block_Notification_Security::VERIFICATION_RESULT_CACHE_KEY);
         return $this;
     }
 

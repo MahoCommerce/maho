@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
@@ -17,7 +17,7 @@
  */
 ?>
 <!-- PayPal Logo -->
-<img src="<?= $this->escapeHtml($this->getPaymentAcceptanceMarkSrc())?>" alt="<?= Mage::helper('core')->quoteEscape(Mage::helper('paypal')->__('Acceptance Mark')) ?>" class="v-middle" />&nbsp;
+<img src="<?= $this->escapeHtml($this->getPaymentAcceptanceMarkSrc())?>" alt="<?= $this->quoteEscape(Mage::helper('paypal')->__('Acceptance Mark')) ?>" class="v-middle" />&nbsp;
 <a href="<?= $this->getPaymentAcceptanceMarkHref() ?>" onclick="javascript:window.open('<?= $this->getPaymentAcceptanceMarkHref() ?>','olcwhatispaypal','toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, ,left=0, top=0, width=400, height=350'); return false;">
     <?php if($this->getPaymentWhatIs()) {echo Mage::helper('paypal')->__($this->getPaymentWhatIs());} else {echo Mage::helper('paypal')->__('What is PayPal?');} ?>
 </a>

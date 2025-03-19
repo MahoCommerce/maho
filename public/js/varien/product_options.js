@@ -4,13 +4,143 @@
  * @package     js
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-var Product = Product || {};
+var Product = Product ?? {};
 
-class OptionsPrice {
+Product.Options = class {
+    constructor(config) {
+        this.config = config;
+        this.reloadPrice();
+        document.addEventListener('DOMContentLoaded', () => this.reloadPrice());
+    }
+
+    reloadPrice() {
+        const config = this.config;
+        const skipIds = [];
+
+        for (const element of document.querySelectorAll('.product-custom-option')) {
+            let optionId = 0;
+            const match = element.name.match(/[0-9]+/);
+            if (match) {
+                optionId = parseInt(match[0], 10);
+            }
+
+            if (!config[optionId]) {
+                return;
+            }
+
+            const configOptions = config[optionId];
+            let curConfig = {price: 0};
+
+            if (element.type === 'checkbox' || element.type === 'radio') {
+                if (element.checked) {
+                    if (typeof configOptions[element.value] !== 'undefined') {
+                        curConfig = configOptions[element.value];
+                    }
+                }
+            } else if (element.classList.contains('datetime-picker') && !skipIds.includes(optionId)) {
+                let dateSelected = true;
+                document.querySelectorAll(`.product-custom-option[id^="options_${optionId}"]`)
+                    .forEach(dt => {
+                        if (dt.value === '') {
+                            dateSelected = false;
+                        }
+                    });
+
+                if (dateSelected) {
+                    curConfig = configOptions;
+                    skipIds[optionId] = optionId;
+                }
+            } else if (element.type === 'select-one' || element.type === 'select-multiple') {
+                if ('options' in element) {
+                    Array.from(element.options).forEach(selectOption => {
+                        if ('selected' in selectOption && selectOption.selected) {
+                            if (typeof configOptions[selectOption.value] !== 'undefined') {
+                                curConfig = configOptions[selectOption.value];
+                            }
+                        }
+                    });
+                }
+            } else {
+                if (element.value.trim() !== '') {
+                    curConfig = configOptions;
+                }
+            }
+
+            if (element.type === 'select-multiple' && ('options' in element)) {
+                Array.from(element.options).forEach(selectOption => {
+                    if ('selected' in selectOption &&
+                        typeof configOptions[selectOption.value] !== 'undefined') {
+                        if (selectOption.selected) {
+                            curConfig = configOptions[selectOption.value];
+                        } else {
+                            curConfig = {price: 0};
+                        }
+                        optionsPrice.addCustomPrices(`${optionId}-${selectOption.value}`, curConfig);
+                        optionsPrice.reload();
+                    }
+                });
+            } else {
+                optionsPrice.addCustomPrices(element.id || optionId, curConfig);
+                optionsPrice.reload();
+            }
+        }
+    }
+}
+
+Product.OptionsDate = class {
+    getDaysInMonth(month, year) {
+        const curDate = new Date();
+        if (!month) {
+            month = curDate.getMonth();
+        }
+        if (2 == month && !year) { // leap year assumption for unknown year
+            return 29;
+        }
+        if (!year) {
+            year = curDate.getFullYear();
+        }
+        return 32 - new Date(year, month - 1, 32).getDate();
+    }
+
+    reloadMonth(event) {
+        const selectEl = event.target;
+        const idParts = selectEl.id.split('_');
+        if (idParts.length != 3) {
+            return false;
+        }
+        const optionIdPrefix = idParts[0] + '_' + idParts[1];
+        const month = parseInt(document.getElementById(optionIdPrefix + '_month').value);
+        const year = parseInt(document.getElementById(optionIdPrefix + '_year').value);
+        const dayEl = document.getElementById(optionIdPrefix + '_day');
+        const days = this.getDaysInMonth(month, year);
+
+        // remove days
+        for (let i = dayEl.options.length - 1; i >= 0; i--) {
+            if (dayEl.options[i].value > days) {
+                dayEl.remove(i);
+            }
+        }
+
+        // add days
+        const lastDay = parseInt(dayEl.options[dayEl.options.length-1].value);
+        for (let i = lastDay + 1; i <= days; i++) {
+            this.addOption(dayEl, i, i);
+        }
+    }
+
+    addOption(select, text, value) {
+        const option = document.createElement('OPTION');
+        option.value = value;
+        option.text = text;
+        select.options.add(option);
+    }
+}
+
+Product.OptionsPrice = class {
     constructor(config) {
         this.productId = config.productId;
         this.priceFormat = config.priceFormat;
@@ -278,5 +408,3 @@ class OptionsPrice {
         return formatCurrency(price, this.priceFormat);
     }
 }
-
-Product.OptionsPrice = OptionsPrice;

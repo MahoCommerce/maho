@@ -6,7 +6,7 @@
  * @package    Varien_Db
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -1037,12 +1037,8 @@ interface Varien_Db_Adapter_Interface
 
     /**
      * Returns date that fits into TYPE_DATETIME range and is suggested to act as default 'zero' value
-     * for a column for current RDBMS. Deprecated and left for compatibility only.
-     * In Magento at MySQL there was zero date used for datetime columns. However, zero date it is not supported across
-     * different RDBMS. Thus now it is recommended to use same default value equal for all RDBMS - either NULL
-     * or specific date supported by all RDBMS.
+     * for a column for current RDBMS.
      *
-     * @deprecated after 1.5.1.0
      * @return string
      */
     public function getSuggestedZeroDate();

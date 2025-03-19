@@ -6,7 +6,7 @@
  * @package    Varien_Db
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -331,7 +331,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
             $hostInfo->setAddressType(self::ADDRESS_TYPE_IPV6_ADDRESS)
                 ->setHostName($hostName);
         } elseif (str_contains($hostName, ':')) {
-            list($hostAddress, $hostPort) = explode(':', $hostName);
+            [$hostAddress, $hostPort] = explode(':', $hostName);
             $hostInfo->setAddressType(
                 filter_var($hostAddress, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)
                     ? self::ADDRESS_TYPE_IPV4_ADDRESS
@@ -572,9 +572,9 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     {
         if (isset($matches[6])
             && (
-                strpos($matches[6], "'") !== false
-                || strpos($matches[6], ':') !== false
-                || strpos($matches[6], '?') !== false
+                str_contains($matches[6], "'")
+                || str_contains($matches[6], ':')
+                || str_contains($matches[6], '?')
             )
         ) {
             $bindName = ':_mage_bind_var_' . (++$this->_bindIncrement);
@@ -790,7 +790,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     {
         $foreignKeys = $this->getForeignKeys($tableName, $schemaName);
         $fkName = strtoupper($fkName);
-        if (substr($fkName, 0, 3) == 'FK_') {
+        if (str_starts_with($fkName, 'FK_')) {
             $fkName = substr($fkName, 3);
         }
         foreach ([$fkName, 'FK_' . $fkName] as $key) {
@@ -1287,8 +1287,8 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
                         $options['COLUMN_NAME'],
                         $options['REF_TABLE_NAME'],
                         $options['REF_COLUMN_NAME'],
-                        ($onDelete) ? $onDelete : Varien_Db_Adapter_Interface::FK_ACTION_NO_ACTION,
-                        ($onUpdate) ? $onUpdate : Varien_Db_Adapter_Interface::FK_ACTION_NO_ACTION,
+                        $onDelete ?: Varien_Db_Adapter_Interface::FK_ACTION_NO_ACTION,
+                        $onUpdate ?: Varien_Db_Adapter_Interface::FK_ACTION_NO_ACTION,
                     );
                 }
             }
@@ -1765,7 +1765,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     {
         $matches = [];
         if (preg_match('/^((?:var)?binary)\((\d+)\)/', $tableColumnInfo['DATA_TYPE'], $matches)) {
-            list($fieldFullDescription, $fieldType, $fieldLength) = $matches;
+            [$fieldFullDescription, $fieldType, $fieldLength] = $matches;
             $tableColumnInfo['DATA_TYPE'] = $fieldType;
             $tableColumnInfo['LENGTH'] = $fieldLength;
         }
@@ -2270,7 +2270,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
                         /** @see Zend_Db_Adapter_Exception */
                         #require_once 'Zend/Db/Adapter/Exception.php';
                         throw new Zend_Db_Adapter_Exception(
-                            get_class($this) . " doesn't support positional or named binding",
+                            static::class . " doesn't support positional or named binding",
                         );
                     }
                 }
@@ -2947,20 +2947,12 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         }
         $fieldSql = implode(',', $fieldSql);
 
-        switch (strtolower($indexType)) {
-            case Varien_Db_Adapter_Interface::INDEX_TYPE_PRIMARY:
-                $condition = 'PRIMARY KEY';
-                break;
-            case Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE:
-                $condition = 'UNIQUE ' . $this->quoteIdentifier($indexName);
-                break;
-            case Varien_Db_Adapter_Interface::INDEX_TYPE_FULLTEXT:
-                $condition = 'FULLTEXT ' . $this->quoteIdentifier($indexName);
-                break;
-            default:
-                $condition = 'INDEX ' . $this->quoteIdentifier($indexName);
-                break;
-        }
+        $condition = match (strtolower($indexType)) {
+            Varien_Db_Adapter_Interface::INDEX_TYPE_PRIMARY => 'PRIMARY KEY',
+            Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE => 'UNIQUE ' . $this->quoteIdentifier($indexName),
+            Varien_Db_Adapter_Interface::INDEX_TYPE_FULLTEXT => 'FULLTEXT ' . $this->quoteIdentifier($indexName),
+            default => 'INDEX ' . $this->quoteIdentifier($indexName),
+        };
 
         $query .= sprintf(' ADD %s (%s)', $condition, $fieldSql);
 
@@ -3946,7 +3938,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         // render UPDATE SET
         $columns = [];
         foreach ($select->getPart(Zend_Db_Select::COLUMNS) as $columnEntry) {
-            list($correlationName, $column, $alias) = $columnEntry;
+            [$correlationName, $column, $alias] = $columnEntry;
             if (empty($alias)) {
                 $alias = $column;
             }
@@ -4130,16 +4122,12 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
      */
     protected function _getDdlAction($action)
     {
-        switch ($action) {
-            case Varien_Db_Adapter_Interface::FK_ACTION_CASCADE:
-                return Varien_Db_Ddl_Table::ACTION_CASCADE;
-            case Varien_Db_Adapter_Interface::FK_ACTION_SET_NULL:
-                return Varien_Db_Ddl_Table::ACTION_SET_NULL;
-            case Varien_Db_Adapter_Interface::FK_ACTION_RESTRICT:
-                return Varien_Db_Ddl_Table::ACTION_RESTRICT;
-            default:
-                return Varien_Db_Ddl_Table::ACTION_NO_ACTION;
-        }
+        return match ($action) {
+            Varien_Db_Adapter_Interface::FK_ACTION_CASCADE => Varien_Db_Ddl_Table::ACTION_CASCADE,
+            Varien_Db_Adapter_Interface::FK_ACTION_SET_NULL => Varien_Db_Ddl_Table::ACTION_SET_NULL,
+            Varien_Db_Adapter_Interface::FK_ACTION_RESTRICT => Varien_Db_Ddl_Table::ACTION_RESTRICT,
+            default => Varien_Db_Ddl_Table::ACTION_NO_ACTION,
+        };
     }
 
     /**
@@ -4231,12 +4219,8 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
 
     /**
      * Returns date that fits into TYPE_DATETIME range and is suggested to act as default 'zero' value
-     * for a column for current RDBMS. Deprecated and left for compatibility only.
-     * In Magento at MySQL there was zero date used for datetime columns. However, zero date it is not supported across
-     * different RDBMS. Thus now it is recommended to use same default value equal for all RDBMS - either NULL
-     * or specific date supported by all RDBMS.
+     * for a column for current RDBMS.
      *
-     * @deprecated after 1.5.1.0
      * @return string
      */
     #[\Override]
@@ -4255,7 +4239,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
      */
     protected function _getForeignKeyName($fkName)
     {
-        if (substr($fkName, 0, 3) != 'FK_') {
+        if (!str_starts_with($fkName, 'FK_')) {
             $fkName = 'FK_' . $fkName;
         }
 

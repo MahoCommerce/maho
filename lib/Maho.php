@@ -50,7 +50,15 @@ final class Maho
     {
         $paths = array_column(self::getInstalledPackages(), 'path');
         usort($paths, fn($a, $b) => strlen($b) <=> strlen($a));
-        return ltrim(str_replace($paths, '', $path), '/');
+
+        foreach ($paths as $installPath) {
+            if (str_starts_with($path, $installPath)) {
+                $path = substr($path, strlen($installPath));
+                break;
+            }
+        }
+
+        return ltrim($path, '/');
     }
 
     /**

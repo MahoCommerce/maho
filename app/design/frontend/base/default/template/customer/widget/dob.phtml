@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -32,10 +32,10 @@ NOTE: Regarding styles - if we leave it this way, we'll move it to boxes.css
 
 /**
  * @see Mage_Customer_Block_Widget_Dob
- * @var Mage_Customer_Block_Widget_Dob $this 
+ * @var Mage_Customer_Block_Widget_Dob $this
  */
 ?>
-<label for="<?= $this->getFieldId('month')?>"<?php if ($this->isRequired()) echo ' class="required"' ?>><?php if ($this->isRequired()) echo '<em>*</em>' ?><?= $this->__('Date of Birth') ?></label>
+<label for="<?= $this->getFieldId('month')?>"<?= $this->isRequired() ? ' class="required"' : '' ?>><?= $this->__('Date of Birth') ?></label>
 <div class="input-box customer-dob">
 <?php
     $this->setDateInput('d',

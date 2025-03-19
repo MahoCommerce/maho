@@ -5,33 +5,35 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Sales_Order_Shipment_Packaging $this */
 ?>
 
-<div id="packed_window" style="display:none;" class="packed-window">
-    <div class="entry-edit">
-        <div class="entry-edit-head">
-            <h4 class="icon-head fieldset-legend"><?= Mage::helper('sales')->__('Packages') ?></h4>
-        </div>
-        <div class="packed-content">
-            <?php foreach ($this->getPackages() as $packageId => $package): ?>
-                <div class="package">
-                    <?php $package = new Varien_Object($package) ?>
-                    <?php $params = new Varien_Object($package->getParams()) ?>
-                    <h4><?= Mage::helper('sales')->__('Package') . ' ' . $packageId ?></h4>
+<template id="packed_window_template">
+    <div class="buttons-set">
+        <?= $this->getPrintButton() ?>
+    </div>
+    <div class="packed-content">
+        <?php foreach ($this->getPackages() as $packageId => $package): ?>
+            <div class="package entry-edit">
+                <?php $package = new Varien_Object($package) ?>
+                <?php $params = new Varien_Object($package->getParams()) ?>
+                <div class="entry-edit-head">
+                    <h4><?= Mage::helper('sales')->__('Package') . " $packageId" ?></h4>
+                </div>
+                <div class="fieldset">
                     <div class="package-info">
                         <table class="package-options" cellspacing="0">
                             <colgroup>
-                                <col width="80"/>
-                                <col width="*"/>
-                                <col width="60"/>
-                                <col width="70"/>
-                                <col width="140"/>
-                                <col width="*"/>
+                                <col width="80">
+                                <col width="*">
+                                <col width="60">
+                                <col width="70">
+                                <col width="140">
+                                <col width="*">
                             </colgroup>
                             <tbody>
                                 <tr>
@@ -49,8 +51,8 @@
                                         <th><?= Mage::helper('sales')->__('Signature Confirmation') ?></th>
                                         <td><?= $this->getDeliveryConfirmationTypeByCode($params->getDeliveryConfirmation()) ?></td>
                                     <?php else: ?>
-                                        <th>&nbsp;</th>
-                                        <td>&nbsp;</td>
+                                        <th></th>
+                                        <td></td>
                                     <?php endif ?>
                                 </tr>
                                 <tr>
@@ -77,8 +79,8 @@
                                             <td><?= $this->getContentTypeByCode($params->getContentType()) ?></td>
                                         <?php endif ?>
                                     <?php else: ?>
-                                        <th>&nbsp;</th>
-                                        <td>&nbsp;</td>
+                                        <th></th>
+                                        <td></td>
                                     <?php endif ?>
                                 </tr>
                                 <tr>
@@ -86,8 +88,8 @@
                                         <th><?= Mage::helper('sales')->__('Total Weight') ?></th>
                                         <td><?= $params->getWeight() .' '. Mage::helper('usa')->getMeasureWeightName($params->getWeightUnits()) ?></td>
                                     <?php else: ?>
-                                        <th>&nbsp;</th>
-                                        <td>&nbsp;</td>
+                                        <th></th>
+                                        <td></td>
                                     <?php endif ?>
                                     <th><?= Mage::helper('sales')->__('Height') ?></th>
                                     <td>
@@ -97,26 +99,26 @@
                                             --
                                         <?php endif ?>
                                     <td>
-                                    <th>&nbsp;</th>
-                                    <td>&nbsp;</td>
+                                    <th></th>
+                                    <td></td>
                                 </tr>
                                 <tr>
                                     <?php if ($params->getSize()): ?>
                                         <th><?= Mage::helper('sales')->__('Size') ?></th>
                                         <td><?= ucfirst(strtolower($params->getSize())) ?></td>
                                     <?php else: ?>
-                                        <th>&nbsp;</th>
-                                        <td>&nbsp;</td>
+                                        <th></th>
+                                        <td></td>
                                     <?php endif ?>
                                     <?php if ($params->getGirth()): ?>
                                         <th><?= Mage::helper('sales')->__('Girth') ?></th>
                                         <td><?= $params->getGirth() .' '. Mage::helper('usa')->getMeasureDimensionName($params->getGirthDimensionUnits()) ?></td>
                                     <?php else: ?>
-                                        <th>&nbsp;</th>
-                                        <td>&nbsp;</td>
+                                        <th></th>
+                                        <td></td>
                                     <?php endif ?>
-                                    <th>&nbsp;</th>
-                                    <td>&nbsp;</td>
+                                    <th></th>
+                                    <td></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -136,13 +138,23 @@
                                 </colgroup>
                                 <thead>
                                 <tr class="headings">
-                                    <th class=" no-link"><span class="nobr"><?= Mage::helper('sales')->__('Product') ?></span></th>
-                                    <th class=" no-link"><span class="nobr"><?= Mage::helper('sales')->__('Weight') ?></span></th>
+                                    <th class="no-link">
+                                        <span class="nobr"><?= Mage::helper('sales')->__('Product') ?></span>
+                                    </th>
+                                    <th class="no-link">
+                                        <span class="nobr"><?= Mage::helper('sales')->__('Weight') ?></span>
+                                    </th>
                                     <?php if ($this->displayCustomsValue()): ?>
-                                        <th class=" no-link"><span class="nobr"><?= Mage::helper('sales')->__('Customs Value') ?></span></th>
+                                    <th class="no-link">
+                                        <span class="nobr"><?= Mage::helper('sales')->__('Customs Value') ?></span>
+                                    </th>
                                     <?php endif ?>
-                                    <th class=" no-link"><span class="nobr"><?= Mage::helper('sales')->__('Qty Ordered') ?></span></th>
-                                    <th class=" no-link last"><span class="nobr"><?= Mage::helper('sales')->__('Qty') ?></span></th>
+                                    <th class="no-link">
+                                        <span class="nobr"><?= Mage::helper('sales')->__('Qty Ordered') ?></span>
+                                    </th>
+                                    <th class="no-link last">
+                                        <span class="nobr"><?= Mage::helper('sales')->__('Qty') ?></span>
+                                    </th>
                                 </tr>
                                 </thead>
 
@@ -153,11 +165,13 @@
                                         <td class="name">
                                             <?= $item->getName() ?>
                                         </td>
-                                        <td class="a-center weight ">
+                                        <td class="a-center weight">
                                             <?= $item->getWeight() ?>
                                         </td>
                                         <?php if ($this->displayCustomsValue()): ?>
-                                            <td class="a-right"><?= $this->displayCustomsPrice($item->getCustomsValue()) ?></td>
+                                        <td class="a-right">
+                                            <?= $this->displayCustomsPrice($item->getCustomsValue()) ?>
+                                        </td>
                                         <?php endif ?>
                                         <td class="a-right">
                                             <?= $this->getQtyOrderedItem($item->getOrderItemId()) ?>
@@ -172,31 +186,20 @@
                         </div>
                     </div>
                 </div>
-            <?php endforeach ?>
-        </div>
-        <div class="buttons-set a-right">
-            <?= $this->getPrintButton() ?>
-            <button type="button" class="scalable SavePackagesBtn save" onclick="hidePackedWindow();" title="<?= Mage::helper('sales')->__('Products should be added to package(s)') ?>">
-                <span><?= Mage::helper('sales')->__('OK') ?></span>
-            </button>
-        </div>
+            </div>
+        <?php endforeach ?>
     </div>
-</div>
+</template>
 
-<script type="text/javascript">
-//<![CDATA[
-    function showPackedWindow() {
-        var window = $('packed_window');
-        window.show().setStyle({
-            'marginLeft': -window.getDimensions().width/2 + 'px'
+<script type="module">
+    let dialog = null;
+    window.showPackedWindow = function() {
+        dialog = Dialog.info(document.getElementById('packed_window_template').innerHTML, {
+            title: '<?= Mage::helper('sales')->__('Packages') ?>',
+            className: 'packed-window',
         });
-        $('popup-window-mask').setStyle({
-            height: $('html-body').getHeight() + 'px'
-        }).show();
     }
-    function hidePackedWindow() {
-        $('packed_window').hide();
-        $('popup-window-mask').hide();
+    window.hidePackedWindow = function() {
+        dialog.close();
     }
-//]]>
 </script>

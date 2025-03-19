@@ -6,9 +6,11 @@
  * @package    Varien_File
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+use Varien_Directory_IFactory as IFactory;
 
 /**
  * File Object
@@ -17,17 +19,25 @@
  */
 class Varien_File_Object extends SplFileObject implements IFactory
 {
-    protected $_filename;
+    /** @var string */
     protected $_path;
+
+    /** @var string */
+    protected $_filename;
+
+    /** @var ?array */
     protected $_filter;
-    protected $_isCorrect = true; # - pass or not filter checking
+
+    /** @var bool */
+    protected $_isCorrect = true;
+
+    /** @var ?bool */
     protected $filtered;
 
     /**
      * Constructor
      *
-     * @param   string $path - path to directory
-     * @return  none
+     * @param string $path - path to directory
      */
     public function __construct($path)
     {
@@ -35,66 +45,69 @@ class Varien_File_Object extends SplFileObject implements IFactory
         $this->_path = $path;
         $this->_filename = basename($path);
     }
+
     /**
-     * add file name to array
+     * Get basename of file
      *
-     * @param   array &$files - array of files
-     * @return  none
+     * @param array &$files - array of files
      */
     #[\Override]
     public function getFilesName(&$files)
     {
-        $this->getFileName($files);
+        $files = [$this->getFilename()];
     }
+
     /**
-     * add file name to array
-     *
-     * @param   array &$files - array of files
-     * @return  none
+     * Get basename of file
      */
     #[\Override]
-    public function getFileName(&$files = null)
+    public function getFilename(): string
     {
         if ($this->_isCorrect) {
-            if ($files === null) {
-                return $this->_filename;
-            }
-            $files[] = $this->_filename;
+            return parent::getFilename();
         }
+        return '';
     }
+
     /**
-     * add file path to array
+     * Gets the path without filename
      *
-     * @param   array &$paths - array of paths
-     * @return  none
+     * @param array &$paths - array of paths
      */
     #[\Override]
     public function getFilesPaths(&$paths)
     {
-        if ($this->_isCorrect) {
-            $paths[] = (string) $this->_path;
-        }
+        $paths = [$this->getPath()];
     }
+
     /**
-     * add file path to array
+     * Gets the path without filename
      *
-     * @param   array &$paths - array of paths
-     * @return  none
+     * @param array &$paths - array of paths
+     * @return string
      */
-    public function getFilePath(&$path = null)
+    public function getFilePath(&$paths)
+    {
+        $paths = [$this->getPath()];
+        return $paths[0];
+    }
+
+    /**
+     * Gets the path without filename
+     */
+    #[\Override]
+    public function getPath(): string
     {
         if ($this->_isCorrect) {
-            if ($path === null) {
-                return $this->_path;
-            }
-            $paths[] = $this->_path;
+            return parent::getPath();
         }
+        return '';
     }
+
     /**
-     * use filter
+     * Use filter
      *
-     * @param   bool $useFilter - use or not filter
-     * @return  none
+     * @param bool $useFilter - use or not filter
      */
     #[\Override]
     public function useFilter($useFilter)
@@ -106,11 +119,11 @@ class Varien_File_Object extends SplFileObject implements IFactory
             $this->filtered = false;
         }
     }
+
     /**
-     * add file object to array
+     * Get SplFileObject objects of this file
      *
-     * @param   array &$objs - array of gile objects
-     * @return  none
+     * @param array &$objs - array of gile objects
      */
     #[\Override]
     public function getFilesObj(&$objs)
@@ -119,62 +132,56 @@ class Varien_File_Object extends SplFileObject implements IFactory
             $objs[] = $this;
         }
     }
+
     /**
-     * nothing
+     * Get names of dirs of current collection
      *
-     * @param   array &$dirs - array of dirs
-     * @return  none
+     * @param array &$dirs - array of dirs
      */
     #[\Override]
     public function getDirsName(&$dirs)
     {
-        return Varien_Directory_Collection::getLastDir($this->_path);
+        $dirs = [$this->getDirName()];
+        return $dirs[0];
     }
+
     /**
-     * nothing
+     * Get name of this directory
      *
-     * @param   array &$dirs - array of dirs
-     * @return  none
+     * @return string
      */
     public function getDirName()
     {
-        return Varien_Directory_Collection::lastDir($this->_path);
+        $path = $this->getPath();
+        $last = strrpos($path, '/');
+        return substr($path, $last + 1);
     }
+
     /**
-     * set file filter
+     * Set file filter
      *
-     * @param   array $filter - array of filter
-     * @return  none
+     * @param array $filter - array of filter
      */
     public function setFilesFilter($filter)
     {
         $this->addFilter($filter);
     }
+
     /**
-     * set file filter
+     * Set file filter
      *
-     * @param   array $filter - array of filter
-     * @return  none
+     * @param array $filter - array of filter
      */
     public function addFilter($filter)
     {
         $this->_filter = $filter;
     }
+
     /**
-     * get extension of file
+     * Get extension of file
      *
-     * @return  string - extension of file
-     */
-    #[\Override]
-    public function getExtension()
-    {
-        return self::getExt($this->_filename);
-    }
-    /**
-     * get extension of file
-     *
-     * @param   string $fileName - name of file
-     * @return  string - extension of file
+     * @param string $fileName - name of file
+     * @return string - extension of file
      */
     public static function getExt($fileName)
     {
@@ -185,19 +192,19 @@ class Varien_File_Object extends SplFileObject implements IFactory
             return '';
         }
     }
+
     /**
-     * get name of file
+     * Get name of file
      *
-     * @return  string - name of file
+     * @return string - name of file
      */
     public function getName()
     {
         return basename($this->_filename, '.' . $this->getExtension());
     }
+
     /**
-     * render filters
-     *
-     * @return  none
+     * Render filters
      */
     public function renderFilter()
     {
@@ -245,33 +252,35 @@ class Varien_File_Object extends SplFileObject implements IFactory
             }
         }
     }
+
     /**
-     * add to array file name
+     * Convert collection to array
      *
-     * @param   array &$arr -export array
-     * @return  none
+     * @param array &$arr - export array
      */
     #[\Override]
-    public function toArray(&$arr)
+    public function toArray(&$arr = [])
     {
         if ($this->_isCorrect) {
             $arr['files_in_dirs'][] = $this->_filename;
         }
+        return $arr;
     }
+
     /**
-     * add to xml file name
+     * Convert collection to XML
      *
-     * @param   array &$xml -export xml
-     * @param   int $recursionLevel - level of recursion
-     * @param   bool $addOpenTag - nothing
-     * @param   string $rootName - nothing
-     * @return  none
+     * @param string &$xml - export xml
+     * @param int $recursionLevel - level of recursion
+     * @param bool $addOpenTag - not used
+     * @param string $rootName - not used
      */
     #[\Override]
-    public function toXml(&$xml, $recursionLevel = 0, $addOpenTag = true, $rootName = 'Struct')
+    public function toXml(&$xml = '', $recursionLevel = 0, $addOpenTag = null, $rootName = null)
     {
         if ($this->_isCorrect) {
-            $xml .= str_repeat("\t", $recursionLevel + 2) . '<fileName>' . $this->_filename . '</fileName>' . "\n";
+            $xml .= str_repeat("\t", $recursionLevel + 2) . "<fileName>{$this->_filename}</fileName>\n";
         }
+        return $xml;
     }
 }

@@ -5,7 +5,7 @@
  * @package     rwd_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -30,11 +30,11 @@ $_swatchArray = $_config->attributes->$_id;
 ?>
 <dt class="swatch-attr">
     <label id="<?= $_attrCode ?>_label" class="required">
-        <em>*</em><?= $_attribute->getLabel() ?>:
+        <?= $_attribute->getLabel() ?>:
         <span id="select_label_<?= $_attrCode ?>" class="select-label"></span>
     </label>
 </dt>
-<dd class="clearfix swatch-attr<?php if ($_attribute->decoratedIsLast) echo ' last'; ?>">
+<dd class="clearfix swatch-attr">
     <div class="input-box">
         <select name="super_attribute[<?= $_attribute->getAttributeId() ?>]" id="attribute<?= $_attribute->getAttributeId() ?>" class="required-entry super-attribute-select no-display swatch-select">
             <option><?= $this->__('Choose an Option...') ?></option>

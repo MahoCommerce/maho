@@ -46,7 +46,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Grid_Renderer_Item extends Mag
                 $grid = $column->getGrid();
                 if ($grid) {
                     $productHelpers = $grid->getProductConfigurationHelpers();
-                    $this->setProductHelpers($productHelpers ? $productHelpers : []);
+                    $this->setProductHelpers($productHelpers ?: []);
                 }
             }
         }

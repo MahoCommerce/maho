@@ -42,22 +42,27 @@
         "spomky-labs/otphp": "^11.3",
         "bacon/bacon-qr-code": "^3.0",
         "symfony/polyfill-php83": "^1.31",
-        "lbuchs/webauthn": "^2.2"
+        "lbuchs/webauthn": "^2.2",
+        "altcha-org/altcha": "^1.1.0",
+        "mahocommerce/icons": "^1",
+        "symfony/mailer": "^7.2",
+        "symfony/polyfill-php84": "^1.31"
     },
     "replace": {
         "symfony/polyfill-ctype": "*",
         "symfony/polyfill-mbstring": "*",
         "symfony/polyfill-intl-grapheme": "*",
+        "symfony/polyfill-intl-idn": "*",
         "symfony/polyfill-intl-normalizer": "*",
         "symfony/polyfill-php80": "*",
-        "symfony/polyfill-php81": "*"
+        "symfony/polyfill-php81": "*",
+        "symfony/polyfill-php82": "*"
     },
     "require-dev": {
-        "dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
-        "friendsofphp/php-cs-fixer": "^3.4",
-        "mahocommerce/maho-phpstan-plugin": "^2",
+        "friendsofphp/php-cs-fixer": "^3",
+        "mahocommerce/maho-phpstan-plugin": "^3",
         "phpstan/phpstan": "^2.0",
-        "squizlabs/php_codesniffer": "^3.7"
+        "phpstan/phpstan-deprecation-rules": "^2.0"
     },
     "suggest": {
         "colinmollenhour/cache-backend-redis": "Redis support for Maho's backend cache",

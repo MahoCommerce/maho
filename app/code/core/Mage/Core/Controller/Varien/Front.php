@@ -6,14 +6,14 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
  * @package    Mage_Core
  *
- * @method Mage_Core_Controller_Varien_Action getAction()
+ * @method ?Mage_Core_Controller_Varien_Action getAction()
  * @method $this setAction(Mage_Core_Controller_Varien_Action $value)
  * @method bool getNoRender()
  */
@@ -342,10 +342,10 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
         }
 
         $uri = @parse_url($baseUrl);
-        $requestUri = $request->getRequestUri() ? $request->getRequestUri() : '/';
+        $requestUri = $request->getRequestUri() ?: '/';
         if (isset($uri['scheme']) && $uri['scheme'] != $request->getScheme()
             || isset($uri['host']) && $uri['host'] != $request->getHttpHost()
-            || isset($uri['path']) && strpos($requestUri, $uri['path']) === false
+            || isset($uri['path']) && !str_contains($requestUri, $uri['path'])
         ) {
             Mage::app()->getFrontController()->getResponse()
                 ->setRedirect($baseUrl, $redirectCode)

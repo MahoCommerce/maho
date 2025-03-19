@@ -130,7 +130,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
                         'block_reference' => $pageGroupData['block'],
                         'entities' => '',
                         'layout_handle_updates' => [$layoutHandle],
-                        'template' => $pageGroupData['template'] ? $pageGroupData['template'] : '',
+                        'template' => $pageGroupData['template'] ?: '',
                     ];
                     if ($pageGroupData['for'] == self::SPECIFIC_ENTITIES) {
                         $layoutHandleUpdates = [];
@@ -306,7 +306,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
     protected function _parsePackageTheme()
     {
         if ($this->getPackageTheme() && strpos($this->getPackageTheme(), '/')) {
-            list($package, $theme) = explode('/', $this->getPackageTheme());
+            [$package, $theme] = explode('/', $this->getPackageTheme());
             $this->setData('package', $package);
             $this->setData('theme', $theme);
         }
@@ -404,7 +404,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
         if ($this->getWidgetConfig() && ($configTemplates = $this->getWidgetConfig()->parameters->template)) {
             if ($configTemplates->values && $configTemplates->values->children()) {
                 foreach ($configTemplates->values->children() as $name => $template) {
-                    $helper = $template->getAttribute('module') ? $template->getAttribute('module') : 'widget';
+                    $helper = $template->getAttribute('module') ?: 'widget';
                     $templates[(string) $name] = [
                         'value' => (string) $template->value,
                         'label' => Mage::helper($helper)->__((string) $template->label),

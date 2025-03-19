@@ -6,7 +6,7 @@
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -252,7 +252,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
 
             switch ($rule->getSimpleFreeShipping()) {
                 case Mage_SalesRule_Model_Rule::FREE_SHIPPING_ITEM:
-                    $item->setFreeShipping($rule->getDiscountQty() ? $rule->getDiscountQty() : true);
+                    $item->setFreeShipping($rule->getDiscountQty() ?: true);
                     break;
 
                 case Mage_SalesRule_Model_Rule::FREE_SHIPPING_ADDRESS:
@@ -523,7 +523,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
     public function processWeeeAmount(Mage_Sales_Model_Quote_Address $address, $items)
     {
         /** @var Mage_Weee_Helper_Data $helper */
-        $helper = $this->_getHelper('weee');
+        $helper = Mage::helper('weee');
         $quote = $address->getQuote();
         $store = $quote->getStore();
 
@@ -535,9 +535,9 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
          *   for calculating weee tax discount
          */
         /** @var Mage_Tax_Model_Config $config */
-        $config = $this->_getSingleton('tax/config');
+        $config = Mage::getSingleton('tax/config');
         /** @var Mage_Tax_Model_Calculation $calculator */
-        $calculator = $this->_getSingleton('tax/calculation');
+        $calculator = Mage::getSingleton('tax/calculation');
         $request = $calculator->getRateRequest(
             $address,
             $quote->getBillingAddress(),
@@ -546,7 +546,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
         );
 
         /** @var Mage_Weee_Helper_Data $helper */
-        $helper = $this->_getHelper('weee');
+        $helper = Mage::helper('weee');
 
         $applyTaxAfterDiscount = $config->applyTaxAfterDiscount();
         $discountTax = $config->discountTax();
@@ -1052,7 +1052,8 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
      * wrap Mage::getSingleton
      *
      * @param string $name
-     * @return Mage_Core_Model_Abstract
+     * @return Mage_Core_Model_Abstract|false
+     * @deprecated use Mage::getSingleton()
      */
     protected function _getSingleton($name)
     {
@@ -1063,7 +1064,8 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
      * wrap Mage::helper
      *
      * @param string $name
-     * @return Mage_Core_Helper_Abstract
+     * @return Mage_Core_Helper_Abstract|false
+     * @deprecated use Mage::helper()
      */
     protected function _getHelper($name)
     {

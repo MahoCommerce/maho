@@ -6,7 +6,7 @@
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -167,7 +167,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     public function setConnection($read, $write = null)
     {
         $this->_read  = $read;
-        $this->_write = $write ? $write : $read;
+        $this->_write = $write ?: $read;
 
         return $this;
     }
@@ -255,7 +255,6 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     public function setType($type)
     {
         $this->_type = Mage::getSingleton('eav/config')->getEntityType($type);
-        $this->_afterSetConfig();
         return $this;
     }
 
@@ -1093,7 +1092,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      */
     protected function _getOrigObject($object)
     {
-        $className  = get_class($object);
+        $className  = $object::class;
         $origObject = new $className();
         $origObject->setData([]);
         $this->load($origObject, $object->getData($this->getEntityIdField()));

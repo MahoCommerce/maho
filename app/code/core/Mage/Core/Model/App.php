@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -1360,6 +1360,38 @@ class Mage_Core_Model_App
     }
 
     /**
+     * Dispatch event to observers
+     *
+     * Default arguments can be defined in `config.xml` using the `<args>` node. These are merged with the $args parameter.
+     *
+     * For example, this defines `is_ajax=1` for the `controller_action_predispatch` event:
+     * ```xml
+     * <global>
+     *     <events>
+     *         <controller_action_predispatch>
+     *             <observers>
+     *                 <my_event_observer>
+     *                     <class>Company_Name_Model_Observer</class>
+     *                     <method>process</method>
+     *                     <args>
+     *                         <is_ajax>1</is_ajax>
+     *                     </args>
+     *                 </my_event_observer>
+     *             </observers>
+     *         </controller_action_predispatch>
+     *     </events>
+     * </global>
+     * ```
+     *
+     * In the observer method, `Company_Name_Model_Observer->process()`, access the args with:
+     * ```php
+     * public function process(Varien_Event_Observer $observer): void
+     * {
+     *     $isAjax = (bool) $observer->getIsAjax();
+     *     // ...
+     * }
+     * ```
+     *
      * @param string $eventName
      * @param array $args
      * @return $this
@@ -1393,14 +1425,18 @@ class Mage_Core_Model_App
             }
             if ($events[$eventName] === false) {
                 continue;
-            } else {
-                $event = new Varien_Event($args);
-                $event->setName($eventName);
-                $observer = new Varien_Event_Observer();
             }
 
             foreach ($events[$eventName]['observers'] as $obsName => $obs) {
-                $observer->setData(['event' => $event]);
+                $observer = new Varien_Event_Observer([
+                    'event' => new Varien_Event([
+                        ...$obs['args'], // Default config.xml <args>
+                        ...$args,        // Mage::dispatchEvent() $args
+                        'name' => $eventName,
+                    ]),
+                    ...$obs['args'], // Default config.xml <args>
+                    ...$args,        // Mage::dispatchEvent() $args
+                ]);
                 Varien_Profiler::start('OBSERVER: ' . $obsName);
                 switch ($obs['type']) {
                     case 'disabled':
@@ -1408,13 +1444,11 @@ class Mage_Core_Model_App
                     case 'object':
                     case 'model':
                         $method = $obs['method'];
-                        $observer->addData($args);
                         $object = Mage::getModel($obs['model']);
                         $this->_callObserverMethod($object, $method, $observer, $obsName);
                         break;
                     default:
                         $method = $obs['method'];
-                        $observer->addData($args);
                         $object = Mage::getSingleton($obs['model']);
                         $this->_callObserverMethod($object, $method, $observer, $obsName);
                         break;
@@ -1441,7 +1475,7 @@ class Mage_Core_Model_App
             $object->$method($observer);
         } elseif (Mage::getIsDeveloperMode()) {
             if (is_object($object)) {
-                $message = 'Method "' . $method . '" is not defined in "' . get_class($object) . '"';
+                $message = 'Method "' . $method . '" is not defined in "' . $object::class . '"';
             } else {
                 $message = 'Class from observer "' . $observerName . '" is not initialized';
             }

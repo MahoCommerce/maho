@@ -57,14 +57,14 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
         }
 
         if (isset($data['unsecure_base_url'])) {
-            $data['unsecure_base_url'] .= substr($data['unsecure_base_url'], -1) != '/' ? '/' : '';
-            if (strpos($data['unsecure_base_url'], 'http') !== 0) {
+            $data['unsecure_base_url'] .= !str_ends_with($data['unsecure_base_url'], '/') ? '/' : '';
+            if (!str_starts_with($data['unsecure_base_url'], 'http')) {
                 $data['unsecure_base_url'] = 'http://' . $data['unsecure_base_url'];
             }
         }
         if (isset($data['secure_base_url'])) {
-            $data['secure_base_url'] .= substr($data['secure_base_url'], -1) != '/' ? '/' : '';
-            if (strpos($data['secure_base_url'], 'http') !== 0) {
+            $data['secure_base_url'] .= !str_ends_with($data['secure_base_url'], '/') ? '/' : '';
+            if (!str_starts_with($data['secure_base_url'], 'http')) {
                 $data['secure_base_url'] = 'https://' . $data['secure_base_url'];
             }
         }
@@ -142,7 +142,6 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
      * @return $this
      * @throws Mage_Core_Exception
      * @throws Zend_Http_Client_Exception
-     * @deprecated
      */
     protected function _checkUrl($url, $secure = false)
     {
@@ -169,7 +168,7 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
     {
         $stamp    = strtotime((string) $date);
         $localXml = file_get_contents($this->_localConfigFile);
-        $localXml = str_replace(self::TMP_INSTALL_DATE_VALUE, date('r', $stamp ? $stamp : time()), $localXml);
+        $localXml = str_replace(self::TMP_INSTALL_DATE_VALUE, date('r', $stamp ?: time()), $localXml);
         file_put_contents($this->_localConfigFile, $localXml);
 
         return $this;

@@ -6,6 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,20 +19,6 @@
  */
 class Mage_Catalog_Block_Product_View_Type_Configurable extends Mage_Catalog_Block_Product_View_Abstract
 {
-    /**
-     * Prices
-     * @deprecated
-     * @var array
-     */
-    protected $_prices      = [];
-
-    /**
-     * Prepared prices
-     * @deprecated
-     * @var array
-     */
-    protected $_resPrices   = [];
-
     /**
      * Get helper for calculation purposes
      *
@@ -130,7 +117,8 @@ class Mage_Catalog_Block_Product_View_Type_Configurable extends Mage_Catalog_Blo
     {
         $attributes = [];
         $options    = [];
-        $store      = $this->getCurrentStore();
+        $helper     = $this->_getHelper();
+        $store      = $helper->getCurrentStore();
         $taxHelper  = Mage::helper('tax');
         $currentProduct = $this->getProduct();
 
@@ -158,10 +146,6 @@ class Mage_Catalog_Block_Product_View_Type_Configurable extends Mage_Catalog_Blo
             }
         }
 
-        $this->_resPrices = [
-            $this->_preparePrice($currentProduct->getFinalPrice()),
-        ];
-
         foreach ($this->getAllowAttributes() as $attribute) {
             $productAttribute = $attribute->getProductAttribute();
             $attributeId = $productAttribute->getId();
@@ -180,7 +164,7 @@ class Mage_Catalog_Block_Product_View_Type_Configurable extends Mage_Catalog_Blo
                         continue;
                     }
                     $currentProduct->setConfigurablePrice(
-                        $this->_preparePrice($value['pricing_value'], $value['is_percent']),
+                        $helper->preparePrice($currentProduct, $value['pricing_value'], $value['is_percent']),
                     );
                     $currentProduct->setParentId(true);
                     Mage::dispatchEvent(
@@ -205,7 +189,7 @@ class Mage_Catalog_Block_Product_View_Type_Configurable extends Mage_Catalog_Blo
                         'id'        => $value['value_index'],
                         'label'     => $value['label'],
                         'price'     => $configurablePrice,
-                        'oldPrice'  => $this->_prepareOldPrice($value['pricing_value'], $value['is_percent']),
+                        'oldPrice'  => $helper->prepareOldPrice($currentProduct, $value['pricing_value'], $value['is_percent']),
                         'products'  => $productsIndex,
                     ];
                     $optionPrices[] = $configurablePrice;
@@ -250,8 +234,8 @@ class Mage_Catalog_Block_Product_View_Type_Configurable extends Mage_Catalog_Blo
         $config = [
             'attributes'        => $attributes,
             'template'          => str_replace('%s', '#{price}', $store->getCurrentCurrency()->getOutputFormat()),
-            'basePrice'         => $this->_registerJsPrice($this->_convertPrice($currentProduct->getFinalPrice())),
-            'oldPrice'          => $this->_registerJsPrice($this->_convertPrice($currentProduct->getPrice())),
+            'basePrice'         => $helper->registerJsPrice($helper->convertPrice($currentProduct->getFinalPrice())),
+            'oldPrice'          => $helper->registerJsPrice($helper->convertPrice($currentProduct->getPrice())),
             'productId'         => $currentProduct->getId(),
             'chooseText'        => Mage::helper('catalog')->__('Choose an Option...'),
             'taxConfig'         => $taxConfig,
@@ -346,5 +330,23 @@ class Mage_Catalog_Block_Product_View_Type_Configurable extends Mage_Catalog_Blo
     protected function _convertPrice($price, $round = false)
     {
         return $this->_getHelper()->convertPrice($price, $round);
+    }
+
+    /**
+     * Render attribute using item renderer block
+     */
+    protected function renderAttributeBlock(Mage_Catalog_Model_Product_Type_Configurable_Attribute $attribute): ?string
+    {
+        $product = $this->getProduct();
+        $jsonConfig = $this->getJsonConfig();
+        foreach ($this->getChild('attr_renderers')->getSortedChildren() as $rendererName) {
+            $renderer = $this->getChild('attr_renderers')->getChild($rendererName);
+            if (method_exists($renderer, 'shouldRender') && $renderer->shouldRender($attribute, $jsonConfig)) {
+                $renderer->setProduct($product);
+                $renderer->setAttributeObj($attribute);
+                return $renderer->toHtml();
+            }
+        }
+        return null;
     }
 }

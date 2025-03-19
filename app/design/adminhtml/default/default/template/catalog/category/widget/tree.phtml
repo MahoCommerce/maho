@@ -41,7 +41,7 @@
 <?php if ($this->getWithEmptyNode()): ?>
     const emptyNode = new MahoTreeNode(tree, {
         id: 'none',
-        text: '<?= Mage::helper('core')->jsQuoteEscape($this->__('View All Products')) ?>',
+        text: '<?= $this->jsQuoteEscape($this->__('View All Products')) ?>',
         cls: 'leaf',
     });
     tree.rootNode.prependChild(emptyNode);

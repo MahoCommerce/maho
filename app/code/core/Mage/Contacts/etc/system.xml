@@ -5,7 +5,8 @@
  *
  * @package    Mage_Contacts
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
@@ -28,8 +29,7 @@
                     <fields>
                         <enabled translate="label">
                             <label>Enable Contact Us</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <backend_model>contacts/system_config_backend_links</backend_model>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
@@ -83,8 +83,7 @@
                         <enabled translate="label comment">
                             <label>Enable Auto Reply</label>
                             <comment><![CDATA[<strong style="color:red">Warning!</strong> Enabling this feature may cause unwanted messages to be sent to people whose email addresses are being used abusively. Please make sure that you have implemented security measures before enabling (e.g. CAPTCHA, HoneySpam).]]></comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>91</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

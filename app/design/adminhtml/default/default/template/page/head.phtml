@@ -19,7 +19,7 @@
 
 <script type="text/javascript">
     var BASE_URL = '<?= $this->getUrl('*') ?>';
-    var SKIN_URL = '<?= $this->jsQuoteEscape($this->getSkinUrl()) ?>';
+    var SKIN_URL = '<?= $this->getSkinUrl() ?>';
     var FORM_KEY = '<?= $this->getFormKey() ?>';
     var LOADING_TIMEOUT = <?= (int)$this->getLoadingTimeout() ?>;
 </script>

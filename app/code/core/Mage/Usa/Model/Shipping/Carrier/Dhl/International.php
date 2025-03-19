@@ -6,7 +6,7 @@
  * @package    Mage_Usa
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -322,7 +322,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
             $requestObject->getStoreId(),
         );
 
-        $requestObject->setOrigStreet($request->getOrigStreet() ? $request->getOrigStreet() : $originStreet2);
+        $requestObject->setOrigStreet($request->getOrigStreet() ?: $originStreet2);
 
         if (is_numeric($request->getOrigState())) {
             $requestObject->setOrigState(Mage::getModel('directory/region')->load($request->getOrigState())->getCode());
@@ -397,7 +397,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Get configuration data of carrier
      *
-     * @param strin $type
+     * @param string $type
      * @param string $code
      * @return array|string|false
      */
@@ -909,7 +909,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         $responseError =  Mage::helper('usa')->__('The response is in wrong format.');
 
         if (strlen(trim($response)) > 0) {
-            if (strpos(trim($response), '<?xml') === 0) {
+            if (str_starts_with(trim($response), '<?xml')) {
                 $xml = simplexml_load_string($response);
                 if (is_object($xml)) {
                     if (in_array($xml->getName(), ['ErrorResponse', 'ShipmentValidateErrorResponse'])
@@ -1044,7 +1044,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
             if (isset($shipmentDetails->GlobalProductCode)) {
                 $dhlProductDescription  = $this->getDhlProductTitle((string) $shipmentDetails->GlobalProductCode);
             }
-            $dhlProductDescription = $dhlProductDescription ? $dhlProductDescription : Mage::helper('usa')->__('DHL');
+            $dhlProductDescription = $dhlProductDescription ?: Mage::helper('usa')->__('DHL');
             $this->_errors[] = Mage::helper('usa')->__("Zero shipping charge for '%s'", $dhlProductDescription);
         }
         return $this;
@@ -1290,9 +1290,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         /* Receiver */
         $nodeConsignee = $xml->addChild('Consignee', '', '');
 
-        $companyName = ($rawRequest->getRecipientContactCompanyName())
-            ? $rawRequest->getRecipientContactCompanyName()
-            : $rawRequest->getRecipientContactPersonName();
+        $companyName = $rawRequest->getRecipientContactCompanyName() ?: $rawRequest->getRecipientContactPersonName();
 
         $nodeConsignee->addChild('CompanyName', substr($companyName, 0, 35));
 

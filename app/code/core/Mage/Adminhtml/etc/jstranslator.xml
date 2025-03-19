@@ -61,4 +61,25 @@
             <message>Passkey will be deleted upon saving.</message>
         </passkey-deleted>
     </script>
+
+    <script path="mage/adminhtml/sales.js" area="adminhtml" module="sales">
+        <submit-order-unsaved-items translate="message">
+            <message>You have unsaved item changes. Discard and proceed with checkout?</message>
+        </submit-order-unsaved-items>
+        <clear-giftmessage translate="message">
+            <message>First, clean the Message field in Gift Message form</message>
+        </clear-giftmessage>
+    </script>
+
+    <script path="mage/adminhtml/sales/packaging.js" area="adminhtml" module="sales">
+        <invalid-url translate="message" module="core">
+            <message>Invalid URL</message>
+        </invalid-url>
+        <dialog-title translate="message">
+            <message>Create Packages</message>
+        </dialog-title>
+        <submit-shipment translate="message">
+            <message>Submit Shipment</message>
+        </submit-shipment>
+    </script>
 </jstranslator>

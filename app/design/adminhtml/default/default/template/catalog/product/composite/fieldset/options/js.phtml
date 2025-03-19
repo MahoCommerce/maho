@@ -5,86 +5,24 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Core_Block_Template $this */
 ?>
-<?php /** @var Mage_Core_Block_Template $this */ ?>
-<script type="text/javascript">
-//<![CDATA[
-validateOptionsCallback = function (elmId, result){
-    var container = $(elmId).up('ul.options-list');
-    if (!container) {
-        return;
-    }
-    if (result == 'failed') {
-        container.removeClassName('validation-passed');
-        container.addClassName('validation-failed');
-    } else {
-        container.removeClassName('validation-failed');
-        container.addClassName('validation-passed');
-    }
-}
-
-productConfigure.opConfig = {};
-
-var DateOption = Class.create({
-
-    getDaysInMonth: function(month, year)
-    {
-        var curDate = new Date();
-        if (!month) {
-            month = curDate.getMonth();
-        }
-        if (2 == month && !year) { // leap year assumption for unknown year
-            return 29;
-        }
-        if (!year) {
-            year = curDate.getFullYear();
-        }
-        return 32 - new Date(year, month - 1, 32).getDate();
-    },
-
-    reloadMonth: function(event)
-    {
-        var selectEl = event.findElement();
-        var idParts = selectEl.id.split("_");
-        if (idParts.length != 3) {
-            return false;
-        }
-        var optionIdPrefix = idParts[0] + "_" + idParts[1];
-        var month = parseInt($(optionIdPrefix + "_month").value);
-        var year = parseInt($(optionIdPrefix + "_year").value);
-        var dayEl = $(optionIdPrefix + "_day");
-
-        var days = this.getDaysInMonth(month, year);
-
-        //remove days
-        for (var i = dayEl.options.length - 1; i >= 0; i--) {
-            if (dayEl.options[i].value > days) {
-                dayEl.remove(dayEl.options[i].index);
-            }
-        }
-
-        // add days
-        var lastDay = parseInt(dayEl.options[dayEl.options.length-1].value);
-        for (i = lastDay + 1; i <= days; i++) {
-            this.addOption(dayEl, i, i);
-        }
-    },
-
-    addOption: function(select, text, value)
-    {
-        var option = document.createElement('OPTION');
-        option.value = value;
-        option.text = text;
-
-        if (select.options.add) {
-            select.options.add(option);
+<script>
+    window.validateOptionsCallback = (elmId, result) => {
+        const container = document.getElementById(elmId).closest('ul.options-list');
+        if (result === 'failed') {
+            container.classList.remove('validation-passed');
+            container.classList.add('validation-failed');
         } else {
-            select.appendChild(option);
+            container.classList.remove('validation-failed');
+            container.classList.add('validation-passed');
         }
     }
-});
-productConfigure.opConfig.dateOption = new DateOption();
-//]]>
+
+    productConfigure.opConfig ??= {};
+    productConfigure.opConfig.dateOption = new Product.OptionsDate();
 </script>

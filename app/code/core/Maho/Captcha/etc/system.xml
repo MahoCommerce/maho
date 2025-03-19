@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<config>
+    <sections>
+        <admin>
+            <groups>
+                <captcha translate="label" module="captcha">
+                    <label>Captcha</label>
+                    <frontend_type>text</frontend_type>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label">
+                            <label>Enable Captcha</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+                        <selectors translate="label comment">
+                            <label>CSS Selectors</label>
+                            <comment><![CDATA[These CSS selectors are used to identify the forms for which captcha will be activated.<br />One selector per line.<br />To disable a selector, type // at the beginning of the line.]]></comment>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </selectors>
+                    </fields>
+                </captcha>
+            </groups>
+        </admin>
+    </sections>
+</config>

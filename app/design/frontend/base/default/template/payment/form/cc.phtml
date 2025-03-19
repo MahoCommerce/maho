@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -16,16 +16,16 @@
 <?php /*
     <li>
         <div class="input-box">
-            <label for="<?= $_code ?>_cc_owner" class="required"><em>*</em><?= $this->__('Name on Card') ?></label>
+            <label for="<?= $_code ?>_cc_owner" class="required"><?= $this->__('Name on Card') ?></label>
             <input type="text" title="<?= $this->__('Name on Card') ?>" class="input-text required-entry" id="<?= $_code ?>_cc_owner" name="payment[cc_owner]" value="<?= $this->escapeHtml($this->getInfoData('cc_owner')) ?>" />
         </div>
     </li>
 */ ?>
     <li>
         <p class="required"><?= $this->__('* Required Fields') ?></p>
-        <label for="<?= $_code ?>_cc_type" class="required"><em>*</em><?= $this->__('Credit Card Type') ?></label>
+        <label for="<?= $_code ?>_cc_type" class="required"><?= $this->__('Credit Card Type') ?></label>
         <div class="input-box">
-            <select id="<?= $_code ?>_cc_type" name="payment[cc_type]" class="required-entry validate-cc-type-select" title="<?= Mage::helper('core')->quoteEscape($this->__('Credit Card Type')) ?>">
+            <select id="<?= $_code ?>_cc_type" name="payment[cc_type]" class="required-entry validate-cc-type-select" title="<?= $this->quoteEscape($this->__('Credit Card Type')) ?>">
                 <option value=""><?= $this->__('--Please Select--') ?></option>
             <?php $_ccType = $this->getInfoData('cc_type') ?>
             <?php foreach ($this->getCcAvailableTypes() as $_typeCode => $_typeName): ?>
@@ -35,13 +35,13 @@
         </div>
     </li>
     <li>
-        <label for="<?= $_code ?>_cc_number" class="required"><em>*</em><?= $this->__('Credit Card Number') ?></label>
+        <label for="<?= $_code ?>_cc_number" class="required"><?= $this->__('Credit Card Number') ?></label>
         <div class="input-box">
-            <input type="text" pattern="\d*" id="<?= $_code ?>_cc_number" name="payment[cc_number]" title="<?= Mage::helper('core')->quoteEscape($this->__('Credit Card Number')) ?>" class="input-text validate-cc-number validate-cc-type" value="" />
+            <input type="text" pattern="\d*" id="<?= $_code ?>_cc_number" name="payment[cc_number]" title="<?= $this->quoteEscape($this->__('Credit Card Number')) ?>" class="input-text validate-cc-number validate-cc-type" value="" />
         </div>
     </li>
     <li id="<?= $_code ?>_cc_type_exp_div">
-        <label for="<?= $_code ?>_expiration" class="required"><em>*</em><?= $this->__('Expiration Date') ?></label>
+        <label for="<?= $_code ?>_expiration" class="required"><?= $this->__('Expiration Date') ?></label>
         <div class="input-box">
             <div class="v-fix">
                 <select id="<?= $_code ?>_expiration" name="payment[cc_exp_month]" class="month validate-cc-exp required-entry">
@@ -64,10 +64,10 @@
     <?= $this->getChildHtml() ?>
     <?php if($this->hasVerification()): ?>
     <li id="<?= $_code ?>_cc_type_cvv_div">
-        <label for="<?= $_code ?>_cc_cid" class="required"><em>*</em><?= $this->__('Card Verification Number') ?></label>
+        <label for="<?= $_code ?>_cc_cid" class="required"><?= $this->__('Card Verification Number') ?></label>
         <div class="input-box">
             <div class="v-fix">
-                <input type="text" pattern="\d*" title="<?= Mage::helper('core')->quoteEscape($this->__('Card Verification Number')) ?>" class="input-text cvv required-entry validate-cc-cvn" id="<?= $_code ?>_cc_cid" name="payment[cc_cid]" value="" />
+                <input type="text" pattern="\d*" title="<?= $this->quoteEscape($this->__('Card Verification Number')) ?>" class="input-text cvv required-entry validate-cc-cvn" id="<?= $_code ?>_cc_cid" name="payment[cc_cid]" value="" />
             </div>
             <a href="#" class="cvv-what-is-this"><?= $this->__('What is this?') ?></a>
         </div>
@@ -77,11 +77,11 @@
     <?php if ($this->hasSsCardType()): ?>
     <li id="<?= $_code ?>_cc_type_ss_div">
         <ul class="inner-form">
-            <li class="form-alt"><label for="<?= $_code ?>_cc_issue" class="required"><em>*</em><?= $this->__('Switch/Solo/Maestro Only') ?></label></li>
+            <li class="form-alt"><label for="<?= $_code ?>_cc_issue" class="required"><?= $this->__('Switch/Solo/Maestro Only') ?></label></li>
             <li>
                 <label for="<?= $_code ?>_cc_issue"><?= $this->__('Issue Number') ?>:</label>
                 <span class="input-box">
-                    <input type="text" title="<?= Mage::helper('core')->quoteEscape($this->__('Issue Number')) ?>" class="input-text validate-cc-ukss cvv" id="<?= $_code ?>_cc_issue" name="payment[cc_ss_issue]" value="" />
+                    <input type="text" title="<?= $this->quoteEscape($this->__('Issue Number')) ?>" class="input-text validate-cc-ukss cvv" id="<?= $_code ?>_cc_issue" name="payment[cc_ss_issue]" value="" />
                 </span>
             </li>
 
