@@ -8,6 +8,8 @@
  */
 
 :root {
+    color-scheme: 'light dark';
+
     /* Tailwind color palette with --color-neutral-0 (white) added */
     --color-neutral-0: oklch(1 0 0);
     --color-neutral-50: oklch(0.985 0 0);
@@ -175,6 +177,45 @@
     --maho-button-default-hover-background: var(--maho-box-shade-4);
 }
 
+@media (prefers-color-scheme: dark) {
+    :root {
+        accent-color: var(--maho-color-brand);
+
+        --maho-text-color: var(--color-neutral-100);
+        --maho-background: var(--color-neutral-800);
+
+        --maho-form-input-text-color: var(--color-neutral-100);
+        --maho-form-input-background: var(--color-neutral-800);
+
+        --maho-color-border: var(--color-neutral-500);
+        --maho-link-text-color: var(--maho-color-brand);
+
+        --maho-layout-body-text-color: var(--color-neutral-100);
+        --maho-layout-body-background: var(--color-neutral-800);
+        --maho-layout-header-text-color: var(--color-neutral-100);
+        --maho-layout-header-background: var(--color-neutral-700);
+        --maho-layout-sidebar-text-color: var(--color-neutral-100);
+        --maho-layout-sidebar-background: var(--color-neutral-700);
+        --maho-layout-footer-text-color: var(--color-neutral-100);
+        --maho-layout-footer-background: var(--color-neutral-700);
+
+        --maho-layout-nav-hover-text-color: var(--maho-layout-header-text-color);
+        --maho-layout-nav-hover-background: var(--maho-box-shade-2);
+        --maho-layout-nav-active-text-color: var(--maho-layout-header-text-color);
+        --maho-layout-nav-active-background: var(--maho-box-shade-4);
+
+        /* Boxes */
+        --maho-box-text-color: var(--color-neutral-100);
+        --maho-box-background: var(--color-neutral-700);
+        --maho-box-border-color: color-mix(in oklab, var(--color-neutral-500), var(--color-neutral-600));
+        --maho-box-active-background: var(--maho-box-shade-4);
+
+        --maho-button-default-text-color: var(--color-neutral-100);
+        --maho-button-default-background: var(--maho-box-shade-2);
+        --maho-button-default-hover-text-color: var(--color-neutral-100);
+        --maho-button-default-hover-background: var(--maho-box-shade-4);
+    }
+}
 
 /* === Global HTML Styles === */
 
