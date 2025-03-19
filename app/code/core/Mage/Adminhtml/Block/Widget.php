@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -62,32 +62,11 @@ class Mage_Adminhtml_Block_Widget extends Mage_Adminhtml_Block_Template
     }
 
     /**
-     * Create button and return its html
-     *
-     * @param string $label
-     * @param string $onclick
-     * @param string $class
-     * @param string $id
-     * @return string
-     */
-    public function getButtonHtml($label, $onclick, $class = '', $id = null)
-    {
-        return $this->getLayout()->createBlock('adminhtml/widget_button')
-            ->setData([
-                'label'     => $label,
-                'onclick'   => $onclick,
-                'class'     => $class,
-                'type'      => 'button',
-                'id'        => $id,
-            ])
-            ->toHtml();
-    }
-
-    /**
      * @return string
      */
     public function getGlobalIcon()
     {
-        return '<img src="' . $this->getSkinUrl('images/fam_link.gif') . '" alt="' . $this->__('Global Attribute') . '" title="' . $this->__('This attribute shares the same value in all the stores') . '" class="attribute-global"/>';
+        $title = $this->__('This attribute shares the same value in all the stores');
+        return "<span title=\"$title\" class=\"attribute-global\">{$this->getIconSvg('link')}</span>";
     }
 }

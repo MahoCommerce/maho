@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -58,6 +58,30 @@ class Mage_Adminhtml_Block_Template extends Mage_Core_Block_Template
     {
         Mage::dispatchEvent('adminhtml_block_html_before', ['block' => $this]);
         return parent::_toHtml();
+    }
+
+    /**
+     * Create button and return its html
+     *
+     * @param string $label
+     * @param string $onclick
+     * @param string $class
+     * @param string $id
+     * @param string $icon
+     * @return string
+     */
+    public function getButtonHtml($label, $onclick = '', $class = '', $id = null, $icon = null)
+    {
+        return $this->getLayout()->createBlock('adminhtml/widget_button')
+            ->setData([
+                'label'     => $label,
+                'onclick'   => $onclick,
+                'class'     => $class,
+                'type'      => 'button',
+                'id'        => $id,
+                'icon'      => $icon,
+            ])
+            ->toHtml();
     }
 
     /**
