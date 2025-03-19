@@ -19,7 +19,6 @@ class Mage_Usa_Model_Shipping_Carrier_Ups_Source_Type
     public function toOptionArray()
     {
         return [
-            ['value' => 'UPS_XML', 'label' => Mage::helper('usa')->__('United Parcel Service XML')],
             ['value' => 'UPS_REST', 'label' => Mage::helper('usa')->__('United Parcel Service REST')],
         ];
     }

@@ -50,22 +50,7 @@ if (!Mage::helper('usa')->validateUpsType($storedUpsType)) {
     $storedUpsType = '';
 }
 ?>
-<script type="text/javascript">
-//<![CDATA[
-    function hideRowArrayElements(arr)
-    {
-        for (var a = 0; a < arr.length; a++) {
-            $(arr[a]).up(1).hide();
-        }
-    }
-
-    function showRowArrayElements(arr)
-    {
-        for (var a = 0; a < arr.length; a++) {
-            $(arr[a]).up(1).show();
-        }
-    }
-
+<script type="module">
     function inArray(arr, value)
     {
         for (var i = 0; i < arr.length; i++) {
@@ -76,29 +61,18 @@ if (!Mage::helper('usa')->validateUpsType($storedUpsType)) {
         return false;
     }
 
-    var upsXml = Class.create();
-    upsXml.prototype = {
+    var ups = Class.create();
+    ups.prototype = {
         initialize: function()
         {
             this.carriersUpsTypeId = 'carriers_ups_type';
             if (!$(this.carriersUpsTypeId)) {
                 return;
             }
-            
-            this.checkingUpsXmlId = ['carriers_ups_gateway_xml_url','carriers_ups_username',
-                'carriers_ups_password','carriers_ups_access_license_number'];
-            this.checkingUpsRestId = ['carriers_ups_gateway_rest_url','carriers_ups_client_id',
-                'carriers_ups_client_secret'];
 
             this.originShipmentTitle = '';
             this.allowedMethodsId = 'carriers_ups_allowed_methods';
             this.freeShipmentId = 'carriers_ups_free_method';
-
-            this.onlyUpsXmlElements = ['carriers_ups_gateway_xml_url','carriers_ups_tracking_xml_url',
-                'carriers_ups_shipconfirm_xml_url', 'carriers_ups_shipaccept_xml_url',
-                'carriers_ups_username','carriers_ups_password','carriers_ups_access_license_number'];
-            this.onlyUpsRestElements = ['carriers_ups_gateway_rest_url','carriers_ups_tracking_rest_url',
-                'carriers_ups_shipconfirm_rest_url', 'carriers_ups_client_id','carriers_ups_client_secret'];
 
             this.storedOriginShipment = '<?= $storedOriginShipment ?>';
             this.storedFreeShipment = '<?= $storedFreeShipment ?>';
@@ -160,48 +134,8 @@ if (!Mage::helper('usa')->validateUpsType($storedUpsType)) {
         },
         setFormValues: function()
         {
-            var a;
-            if ($F(this.carriersUpsTypeId) == 'UPS_XML') {
-                if (document.getElementById('carriers_ups_active').value == 1) {
-                    for (a = 0; a < this.checkingUpsXmlId.length; a++) {
-                        $(this.checkingUpsXmlId[a]).addClassName('required-entry');
-                    }
-                    for (a = 0; a < this.checkingUpsRestId.length; a++) {
-                        $(this.checkingUpsRestId[a]).addClassName('required-entry');
-                    }
-                } else {
-                    for (a = 0; a < this.checkingUpsXmlId.length; a++) {
-                        $(this.checkingUpsXmlId[a]).removeClassName('required-entry');
-                    }
-                    for (a = 0; a < this.checkingUpsRestId.length; a++) {
-                        $(this.checkingUpsRestId[a]).removeClassName('required-entry');
-                    }
-                }
-                Event.observe($('carriers_ups_origin_shipment'), 'change', this.changeOriginShipment.bind(this));
-                showRowArrayElements(this.onlyUpsXmlElements);
-                hideRowArrayElements(this.onlyUpsRestElements);
-                this.changeOriginShipment(null, null);
-            } else if ($F(this.carriersUpsTypeId) == 'UPS_REST') {
-                if (document.getElementById('carriers_ups_active').value == 1) {
-                    for (a = 0; a < this.checkingUpsRestId.length; a++) {
-                        $(this.checkingUpsRestId[a]).addClassName('required-entry');
-                    }
-                    for (a = 0; a < this.checkingUpsXmlId.length; a++) {
-                        $(this.checkingUpsXmlId[a]).addClassName('required-entry');
-                    }
-                } else {
-                    for (a = 0; a < this.checkingUpsRestId.length; a++) {
-                        $(this.checkingUpsRestId[a]).removeClassName('required-entry');
-                    }
-                    for (a = 0; a < this.checkingUpsXmlId.length; a++) {
-                        $(this.checkingUpsXmlId[a]).removeClassName('required-entry');
-                    }
-                }
-                Event.observe($('carriers_ups_origin_shipment'), 'change', this.changeOriginShipment.bind(this));
-                showRowArrayElements(this.onlyUpsRestElements);
-                hideRowArrayElements(this.onlyUpsXmlElements);
-                this.changeOriginShipment(null, null);
-            }
+            Event.observe($('carriers_ups_origin_shipment'), 'change', this.changeOriginShipment.bind(this));
+            this.changeOriginShipment(null, null);
         },
         changeOriginShipment: function(Event, key)
         {
@@ -209,6 +143,5 @@ if (!Mage::helper('usa')->validateUpsType($storedUpsType)) {
             this.updateAllowedMethods(this.originShipmentTitle);
         }
     };
-    xml = new upsXml();
-    //]]>
+    new ups();
 </script>
