@@ -9,6 +9,8 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
+/** @var Mage_Core_Helper_Data $_coreHelper */
+$_coreHelper = Mage::helper('core');
 /** @var Mage_Usa_Model_Shipping_Carrier_Ups $upsModel */
 $upsModel = Mage::getSingleton('usa/shipping_carrier_ups');
 $orShipArr = $upsModel->getCode('originShipment');
@@ -51,22 +53,10 @@ if (!Mage::helper('usa')->validateUpsType($storedUpsType)) {
 }
 ?>
 <script type="module">
-    function inArray(arr, value)
-    {
-        for (var i = 0; i < arr.length; i++) {
-            if (arr[i] === value) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    var ups = Class.create();
-    ups.prototype = {
-        initialize: function()
-        {
+    class UPS {
+        constructor() {
             this.carriersUpsTypeId = 'carriers_ups_type';
-            if (!$(this.carriersUpsTypeId)) {
+            if (!document.getElementById(this.carriersUpsTypeId)) {
                 return;
             }
 
@@ -77,71 +67,77 @@ if (!Mage::helper('usa')->validateUpsType($storedUpsType)) {
             this.storedOriginShipment = '<?= $storedOriginShipment ?>';
             this.storedFreeShipment = '<?= $storedFreeShipment ?>';
             this.storedUpsType = '<?= $storedUpsType ?>';
-            <?php /** @var Mage_Core_Helper_Data $_coreHelper */ $_coreHelper = Mage::helper('core'); ?>
             this.storedAllowedMethods = <?= $_coreHelper->jsonEncode($storedAllowedMethods) ?>;
             this.originShipmentObj = <?= $_coreHelper->jsonEncode($orShipArr) ?>;
             this.originShipmentObj['default'] = <?= $_coreHelper->jsonEncode($defShipArr) ?>;
 
-            this.setFormValues();
-            Event.observe($(this.carriersUpsTypeId), 'change', this.setFormValues.bind(this));
-            Event.observe($('carriers_ups_active'), 'change', this.setFormValues.bind(this));
-        },
-        updateAllowedMethods: function(originShipmentTitle)
-        {
-            var allowedMethods = $(this.allowedMethodsId), // multiselect
-                freeMethod = $(this.freeShipmentId), // single-choice select
-                originShipment = this.originShipmentObj[originShipmentTitle];
+            // Set up event listeners
+            document.getElementById(this.carriersUpsTypeId).addEventListener('change', () => this.changeOriginShipment());
+            document.getElementById('carriers_ups_active').addEventListener('change', () => this.changeOriginShipment());
 
-            while (allowedMethods.length > 0) {
-                allowedMethods.remove(0);
-            }
+            const originShipmentEl = document.getElementById('carriers_ups_origin_shipment');
+            originShipmentEl.addEventListener('change', () => this.changeOriginShipment());
 
-            while (freeMethod.length > 0) {
-                freeMethod.remove(0);
-            }
+            // Initialize with current values
+            this.changeOriginShipment();
+        }
 
-            freeMethod.insert(new Element('option', {value:''}).update('None'));
+        updateAllowedMethods(originShipmentTitle) {
+            const allowedMethods = document.getElementById(this.allowedMethodsId); // multiselect
+            const freeMethod = document.getElementById(this.freeShipmentId); // single-choice select
+            const originShipment = this.originShipmentObj[originShipmentTitle];
 
-            var code, option;
-            for (code in originShipment) {
-                option = new Element('option', {value:code}).update(originShipment[code]);
+            // Clear existing options
+            allowedMethods.innerHTML = '';
+            freeMethod.innerHTML = '';
+
+            // Add "None" option to free method select
+            const noneOption = document.createElement('option');
+            noneOption.value = '';
+            noneOption.textContent = 'None';
+            freeMethod.appendChild(noneOption);
+
+            // Add options for each shipping method
+            for (const code in originShipment) {
+                // Create and add option for free method select
+                const freeOption = document.createElement('option');
+                freeOption.value = code;
+                freeOption.textContent = originShipment[code];
+
                 if ((originShipmentTitle == this.storedOriginShipment || originShipmentTitle == 'default')
-                    && this.storedFreeShipment == code
-                ) {
-                    option.selected = true;
+                    && this.storedFreeShipment == code) {
+                    freeOption.selected = true;
                 }
-                freeMethod.insert(option);
+                freeMethod.appendChild(freeOption);
 
-                option = new Element('option', {value:code}).update(originShipment[code]);
+                // Create and add option for allowed methods multiselect
+                const allowedOption = document.createElement('option');
+                allowedOption.value = code;
+                allowedOption.textContent = originShipment[code];
+
                 if (this.storedUpsType == 'UPS') {
-                    if (originShipmentTitle != 'default' || inArray(this.storedAllowedMethods, code)) {
-                        option.selected = true;
+                    if (originShipmentTitle != 'default' || this.storedAllowedMethods.includes(code)) {
+                        allowedOption.selected = true;
                     }
                 } else if (originShipmentTitle != this.storedOriginShipment
-                    || inArray(this.storedAllowedMethods, code)
-                ) {
-                    option.selected = true;
+                    || this.storedAllowedMethods.includes(code)) {
+                    allowedOption.selected = true;
                 }
 
                 if ((originShipmentTitle == 'default' || originShipmentTitle == this.storedOriginShipment)
-                    && inArray(this.storedAllowedMethods, code)
-                ) {
-                    option.selected = true;
+                    && this.storedAllowedMethods.includes(code)) {
+                    allowedOption.selected = true;
                 }
 
-                allowedMethods.insert(option);
+                allowedMethods.appendChild(allowedOption);
             }
-        },
-        setFormValues: function()
-        {
-            Event.observe($('carriers_ups_origin_shipment'), 'change', this.changeOriginShipment.bind(this));
-            this.changeOriginShipment(null, null);
-        },
-        changeOriginShipment: function(Event, key)
-        {
-            this.originShipmentTitle = key ? key : $F('carriers_ups_origin_shipment');
+        }
+
+        changeOriginShipment() {
+            this.originShipmentTitle = document.getElementById('carriers_ups_origin_shipment').value;
             this.updateAllowedMethods(this.originShipmentTitle);
         }
-    };
-    new ups();
+    }
+
+    new UPS();
 </script>
