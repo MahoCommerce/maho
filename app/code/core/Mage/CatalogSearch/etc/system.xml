@@ -106,6 +106,14 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </show_autocomplete_results_count>
+                        <redirect_to_product_if_one_result translate="label">
+                            <label>Redirect to product page if search generates one result</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </redirect_to_product_if_one_result>
                     </fields>
                 </search>
                 <advanced_search translate="label" module="catalogsearch">
