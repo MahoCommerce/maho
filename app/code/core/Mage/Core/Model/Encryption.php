@@ -162,13 +162,15 @@ class Mage_Core_Model_Encryption
     {
         $decoded = base64_decode($data);
         if ($decoded === false) {
+            $exception = new Exception('Invalid base64 encoding');
+            Mage::logException($exception);
             return '';
-            throw new Exception('Invalid base64 encoding');
         }
 
         if (mb_strlen($decoded, '8bit') < (SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + SODIUM_CRYPTO_SECRETBOX_MACBYTES)) {
+            $exception = new Exception('Data is too short to be valid');
+            Mage::logException($exception);
             return '';
-            throw new Exception('Data is too short to be valid');
         }
 
         $key = (string) Mage::getConfig()->getNode('global/crypt/key');
@@ -177,8 +179,9 @@ class Mage_Core_Model_Encryption
         $plaintext = sodium_crypto_secretbox_open($ciphertext, $nonce, $key);
 
         if ($plaintext === false) {
+            $exception = new Exception('Decryption failed: data may be corrupted or tampered with');
+            Mage::logException($exception);
             return '';
-            throw new Exception('Decryption failed: data may be corrupted or tampered with');
         }
 
         // Clean sensitive data from memory
