@@ -170,36 +170,49 @@ class Mage_Core_Model_Encryption
         return $this->_crypt;
     }
 
-    /**
-     * Encrypt a string
-     *
-     * @param string $data
-     * @return string
-     */
-    public function encrypt($data)
+    public function encrypt(#[\SensitiveParameter] string $data): string
     {
-        return base64_encode($this->_getCrypt()->encrypt((string) $data));
+        $key = (string) Mage::getConfig()->getNode('global/crypt/key');
+        $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+        $ciphertext = sodium_crypto_secretbox($data, $nonce, $key);
+        $encrypted = base64_encode($nonce . $ciphertext);
+        sodium_memzero($data); // Clean sensitive data from memory
+        return $encrypted;
     }
 
-    /**
-     * Decrypt a string
-     *
-     * @param string $data
-     * @return string
-     */
-    public function decrypt($data)
+    public function decrypt(#[\SensitiveParameter] string $data): string
     {
-        return str_replace("\x0", '', trim($this->_getCrypt()->decrypt(base64_decode((string) $data))));
+        $decoded = base64_decode($data);
+        if ($decoded === false) {
+            return '';
+            throw new Exception('Invalid base64 encoding');
+        }
+
+        if (mb_strlen($decoded, '8bit') < (SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + SODIUM_CRYPTO_SECRETBOX_MACBYTES)) {
+            return '';
+            throw new Exception('Data is too short to be valid');
+        }
+
+        $key = (string) Mage::getConfig()->getNode('global/crypt/key');
+        $nonce = mb_substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit');
+        $ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit');
+        $plaintext = sodium_crypto_secretbox_open($ciphertext, $nonce, $key);
+
+        if ($plaintext === false) {
+            return '';
+            throw new Exception('Decryption failed: data may be corrupted or tampered with');
+        }
+
+        // Clean sensitive data from memory
+        sodium_memzero($decoded);
+        sodium_memzero($nonce);
+        sodium_memzero($ciphertext);
+
+        return $plaintext;
     }
 
-    /**
-     * Return crypt model, instantiate if it is empty
-     *
-     * @param string $key
-     * @return Varien_Crypt_Mcrypt
-     */
-    public function validateKey($key)
+    public function validateKey(#[\SensitiveParameter]string $key): bool
     {
-        return $this->_getCrypt($key);
+        return strlen($key) === SODIUM_CRYPTO_SECRETBOX_KEYBYTES;
     }
 }
