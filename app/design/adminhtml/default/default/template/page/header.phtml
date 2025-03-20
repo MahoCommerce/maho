@@ -30,7 +30,6 @@
                 <li><a href="#" onclick="return openGlobalSearch()"><span><?= $this->__('Global Record Search') ?></span></a></li>
             <?php endif ?>
                 <li><a href="<?= Mage::helper('adminhtml')->getUrl('adminhtml/system_account') ?>"><span><?= $this->__('Logged in as %s', $this->escapeHtml($this->getUser()->getUsername())) ?></span></a></li>
-                <li><a href="<?= Mage::getBaseUrl() ?>" target="_blank"><span><?= $this->__('View') . ': ' . $this->escapeHtml(Mage::app()->getStore()->getFrontendName()) ?></span></a></li>
                 <li><a href="<?= $this->getLogoutLink() ?>"><span><?= $this->__('Log Out') ?></span></a></li>
             </ul>
         </li>
