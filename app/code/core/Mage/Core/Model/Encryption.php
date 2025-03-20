@@ -94,7 +94,7 @@ class Mage_Core_Model_Encryption
      * @param int $version
      * @return bool|string
      */
-    public function hash($data, $version = self::HASH_VERSION_MD5)
+    public function hash(#[\SensitiveParameter] $data, $version = self::HASH_VERSION_MD5)
     {
         if (self::HASH_VERSION_LATEST === $version && $version === $this->_helper->getVersionHash($this)) {
             return password_hash($data, PASSWORD_DEFAULT);
@@ -114,7 +114,7 @@ class Mage_Core_Model_Encryption
      * @return bool
      * @throws Exception
      */
-    public function validateHash(#[\SensitiveParameter] $password, $hash)
+    public function validateHash(#[\SensitiveParameter] $password, #[\SensitiveParameter] $hash)
     {
         if (strlen($password) > self::MAXIMUM_PASSWORD_LENGTH) {
             return false;
@@ -134,7 +134,7 @@ class Mage_Core_Model_Encryption
      * @param int $version
      * @return bool
      */
-    public function validateHashByVersion(#[\SensitiveParameter] $password, $hash, $version = self::HASH_VERSION_MD5)
+    public function validateHashByVersion(#[\SensitiveParameter] $password, #[\SensitiveParameter] $hash, $version = self::HASH_VERSION_MD5)
     {
         if ($version == self::HASH_VERSION_LATEST && $version == $this->_helper->getVersionHash($this)) {
             return password_verify($password, $hash);
