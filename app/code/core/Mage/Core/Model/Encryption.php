@@ -32,11 +32,6 @@ class Mage_Core_Model_Encryption
     public const MAXIMUM_PASSWORD_LENGTH = 256;
 
     /**
-     * @var Varien_Crypt_Mcrypt
-     */
-    protected $_crypt;
-
-    /**
      * @var Mage_Core_Helper_Data
      */
     protected $_helper;
@@ -151,23 +146,6 @@ class Mage_Core_Model_Encryption
         }
         [$hash, $salt] = $hashArr;
         return hash_equals($this->hash($salt . $password, $version), $hash);
-    }
-
-    /**
-     * Instantiate crypt model
-     *
-     * @param string $key
-     * @return Varien_Crypt_Mcrypt
-     */
-    protected function _getCrypt($key = null)
-    {
-        if (!$this->_crypt) {
-            if ($key === null) {
-                $key = (string) Mage::getConfig()->getNode('global/crypt/key');
-            }
-            $this->_crypt = Varien_Crypt::factory()->init($key);
-        }
-        return $this->_crypt;
     }
 
     public function encrypt(#[\SensitiveParameter] string $data): string
