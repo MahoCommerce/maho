@@ -22,7 +22,6 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initMaho();
-        $a = get_declared_classes();print_r($a);die();
 
         $metaDir = BP . '/.phpstorm.meta.php';
         $filesystem = new Filesystem();
@@ -35,11 +34,62 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
         $this->generateFactoryMethodsMetadata($output, $metaDir);
         $this->generateHelperMethodsMetadata($output, $metaDir);
         $this->generateRegistryMetadata($output, $metaDir);
+        $this->generateBlockMetadata($output, $metaDir);
+        $this->generateResourceModelMetadata($output, $metaDir);
+        $this->generateResourceHelperMetadata($output, $metaDir);
 
         $output->writeln("<info>PhpStorm metadata generation complete!</info>");
         $output->writeln("<comment>Remember to add .phpstorm.meta.php to your .gitignore file</comment>");
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Generate metadata for block factories
+     */
+    private function generateBlockMetadata(OutputInterface $output, string $metaDir): void
+    {
+        $output->writeln("Scanning for block classes...");
+
+        $blocks = $this->scanForBlocks();
+        $output->writeln("<info>Found " . count($blocks) . " block classes</info>");
+
+        $blockContent = $this->generateBlockMetadataContent($blocks);
+        file_put_contents($metaDir . '/block.meta.php', $blockContent);
+
+        $output->writeln("<info>Block methods metadata written to block.meta.php</info>");
+    }
+
+    /**
+     * Generate metadata for resource models
+     */
+    private function generateResourceModelMetadata(OutputInterface $output, string $metaDir): void
+    {
+        $output->writeln("Scanning for resource model classes...");
+
+        $resourceModels = $this->scanForResourceModels();
+        $output->writeln("<info>Found " . count($resourceModels) . " resource model classes</info>");
+
+        $resourceContent = $this->generateResourceModelMetadataContent($resourceModels);
+        file_put_contents($metaDir . '/resource_model.meta.php', $resourceContent);
+
+        $output->writeln("<info>Resource model metadata written to resource_model.meta.php</info>");
+    }
+
+    /**
+     * Generate metadata for resource helpers
+     */
+    private function generateResourceHelperMetadata(OutputInterface $output, string $metaDir): void
+    {
+        $output->writeln("Scanning for resource helper classes...");
+
+        $resourceHelpers = $this->scanForResourceHelpers();
+        $output->writeln("<info>Found " . count($resourceHelpers) . " resource helper classes</info>");
+
+        $resourceHelperContent = $this->generateResourceHelperMetadataContent($resourceHelpers);
+        file_put_contents($metaDir . '/resource_helper.meta.php', $resourceHelperContent);
+
+        $output->writeln("<info>Resource helper metadata written to resource_helper.meta.php</info>");
     }
 
     /**
@@ -91,6 +141,38 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
     }
 
     /**
+     * Scan the codebase for block classes
+     */
+    private function scanForBlocks(): array
+    {
+        $blocks = [];
+        $codeBase = BP . '/app/code';
+
+        $blockFiles = $this->findPhpFilesContaining($codeBase, 'extends Mage_Core_Block_');
+
+        foreach ($blockFiles as $file) {
+            // Extract namespace and class information
+            $content = file_get_contents($file);
+            if (preg_match('/class\s+(\w+)/', $content, $matches)) {
+                $className = $matches[1];
+
+                // Parse the class path to determine block alias
+                $relativePath = str_replace($codeBase, '', $file);
+                if (preg_match('#/([^/]+)/([^/]+)/Block/(.+)\.php$#', $relativePath, $parts)) {
+                    $namespace = strtolower($parts[1]);
+                    $module = $parts[2];
+                    $blockPath = str_replace('/', '_', $parts[3]);
+
+                    $alias = $namespace . '/' . strtolower($blockPath);
+                    $blocks[$alias] = '\\' . $namespace . '_' . $module . '_Block_' . $blockPath;
+                }
+            }
+        }
+
+        return $blocks;
+    }
+
+    /**
      * Scan the codebase for model classes
      */
     private function scanForModels(): array
@@ -98,35 +180,60 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
         $models = [];
         $codeBase = BP . '/app/code';
 
-        $dirs = ['core', 'community', 'local'];
+        $modelFiles = $this->findPhpFilesContaining($codeBase, 'extends Mage_Core_Model_Abstract');
 
-        foreach ($dirs as $dir) {
-            $path = $codeBase . '/' . $dir;
-            if (!is_dir($path)) continue;
+        foreach ($modelFiles as $file) {
+            // Extract namespace and class information
+            $content = file_get_contents($file);
+            if (preg_match('/class\s+(\w+)/', $content, $matches)) {
+                $className = $matches[1];
 
-            $modelFiles = $this->findPhpFilesContaining($path, 'extends Mage_Core_Model_Abstract');
+                // Parse the class path to determine model alias
+                $relativePath = str_replace($codeBase, '', $file);
+                if (preg_match('#/([^/]+)/([^/]+)/Model/(.+)\.php$#', $relativePath, $parts)) {
+                    $namespace = strtolower($parts[1]);
+                    $module = $parts[2];
+                    $modelPath = str_replace('/', '_', $parts[3]);
 
-            foreach ($modelFiles as $file) {
-                // Extract namespace and class information
-                $content = file_get_contents($file);
-                if (preg_match('/class\s+(\w+)/', $content, $matches)) {
-                    $className = $matches[1];
-
-                    // Parse the class path to determine model alias
-                    $relativePath = str_replace($path, '', $file);
-                    if (preg_match('#/([^/]+)/([^/]+)/Model/(.+)\.php$#', $relativePath, $parts)) {
-                        $namespace = strtolower($parts[1]);
-                        $module = $parts[2];
-                        $modelPath = str_replace('/', '_', $parts[3]);
-
-                        $alias = $namespace . '/' . strtolower($modelPath);
-                        $models[$alias] = '\\' . $namespace . '_' . $module . '_Model_' . $modelPath;
-                    }
+                    $alias = $namespace . '/' . strtolower($modelPath);
+                    $models[$alias] = '\\' . $namespace . '_' . $module . '_Model_' . $modelPath;
                 }
             }
         }
 
         return $models;
+    }
+
+    /**
+     * Scan the codebase for resource model classes
+     */
+    private function scanForResourceModels(): array
+    {
+        $resourceModels = [];
+        $codeBase = BP . '/app/code';
+
+        $resourceFiles = $this->findPhpFilesContaining($codeBase, 'extends Mage_Core_Model_Resource_');
+
+        foreach ($resourceFiles as $file) {
+            // Extract namespace and class information
+            $content = file_get_contents($file);
+            if (preg_match('/class\s+(\w+)/', $content, $matches)) {
+                $className = $matches[1];
+
+                // Parse the class path to determine resource model alias
+                $relativePath = str_replace($codeBase, '', $file);
+                if (preg_match('#/([^/]+)/([^/]+)/Model/Resource/(.+)\.php$#', $relativePath, $parts)) {
+                    $namespace = strtolower($parts[1]);
+                    $module = $parts[2];
+                    $resourcePath = str_replace('/', '_', $parts[3]);
+
+                    $alias = $namespace . '/resource_' . strtolower($resourcePath);
+                    $resourceModels[$alias] = '\\' . $namespace . '_' . $module . '_Model_Resource_' . $resourcePath;
+                }
+            }
+        }
+
+        return $resourceModels;
     }
 
     /**
@@ -137,41 +244,66 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
         $helpers = [];
         $codeBase = BP . '/app/code';
 
-        $dirs = ['core', 'community', 'local'];
+        $helperFiles = $this->findPhpFilesContaining($codeBase, 'extends Mage_Core_Helper_Abstract');
 
-        foreach ($dirs as $dir) {
-            $path = $codeBase . '/' . $dir;
-            if (!is_dir($path)) continue;
+        foreach ($helperFiles as $file) {
+            // Extract namespace and class information
+            $content = file_get_contents($file);
+            if (preg_match('/class\s+(\w+)/', $content, $matches)) {
+                $className = $matches[1];
 
-            $helperFiles = $this->findPhpFilesContaining($path, 'extends Mage_Core_Helper_Abstract');
+                // Parse the class path to determine helper alias
+                $relativePath = str_replace($codeBase, '', $file);
+                if (preg_match('#/([^/]+)/([^/]+)/Helper/(.+)\.php$#', $relativePath, $parts)) {
+                    $namespace = strtolower($parts[1]);
+                    $module = $parts[2];
+                    $helperPath = str_replace('/', '_', $parts[3]);
 
-            foreach ($helperFiles as $file) {
-                // Extract namespace and class information
-                $content = file_get_contents($file);
-                if (preg_match('/class\s+(\w+)/', $content, $matches)) {
-                    $className = $matches[1];
-
-                    // Parse the class path to determine helper alias
-                    $relativePath = str_replace($path, '', $file);
-                    if (preg_match('#/([^/]+)/([^/]+)/Helper/(.+)\.php$#', $relativePath, $parts)) {
-                        $namespace = strtolower($parts[1]);
-                        $module = $parts[2];
-                        $helperPath = str_replace('/', '_', $parts[3]);
-
-                        // Standard data helper
-                        if ($helperPath === 'Data') {
-                            $alias = $namespace;
-                            $helpers[$alias] = '\\' . $namespace . '_' . $module . '_Helper_Data';
-                        } else {
-                            $alias = $namespace . '/' . strtolower($helperPath);
-                            $helpers[$alias] = '\\' . $namespace . '_' . $module . '_Helper_' . $helperPath;
-                        }
+                    // Standard data helper
+                    if ($helperPath === 'Data') {
+                        $alias = $namespace;
+                        $helpers[$alias] = '\\' . $namespace . '_' . $module . '_Helper_Data';
+                    } else {
+                        $alias = $namespace . '/' . strtolower($helperPath);
+                        $helpers[$alias] = '\\' . $namespace . '_' . $module . '_Helper_' . $helperPath;
                     }
                 }
             }
         }
 
         return $helpers;
+    }
+
+    /**
+     * Scan the codebase for resource helper classes
+     */
+    private function scanForResourceHelpers(): array
+    {
+        $resourceHelpers = [];
+        $codeBase = BP . '/app/code';
+
+        $resourceHelperFiles = $this->findPhpFilesContaining($codeBase, 'extends Mage_Core_Model_Resource_Helper_');
+
+        foreach ($resourceHelperFiles as $file) {
+            // Extract namespace and class information
+            $content = file_get_contents($file);
+            if (preg_match('/class\s+(\w+)/', $content, $matches)) {
+                $className = $matches[1];
+
+                // Parse the class path to determine resource helper alias
+                $relativePath = str_replace($codeBase, '', $file);
+                if (preg_match('#/([^/]+)/([^/]+)/Model/Resource/Helper/(.+)\.php$#', $relativePath, $parts)) {
+                    $namespace = strtolower($parts[1]);
+                    $module = $parts[2];
+                    $helperPath = str_replace('/', '_', $parts[3]);
+
+                    $alias = $namespace;
+                    $resourceHelpers[$alias] = '\\' . $namespace . '_' . $module . '_Model_Resource_Helper_' . $helperPath;
+                }
+            }
+        }
+
+        return $resourceHelpers;
     }
 
     /**
@@ -182,21 +314,14 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
         $registryKeys = [];
         $codeBase = BP . '/app/code';
 
-        $dirs = ['core', 'community', 'local'];
+        $files = $this->findPhpFilesContaining($codeBase, 'Mage::register');
 
-        foreach ($dirs as $dir) {
-            $path = $codeBase . '/' . $dir;
-            if (!is_dir($path)) continue;
-
-            $files = $this->findPhpFilesContaining($path, 'Mage::register');
-
-            foreach ($files as $file) {
-                $content = file_get_contents($file);
-                preg_match_all('/Mage::register\(\s*[\'"]([^\'"]+)[\'"]/', $content, $matches);
-                if (!empty($matches[1])) {
-                    foreach ($matches[1] as $key) {
-                        $registryKeys[$key] = $key;
-                    }
+        foreach ($files as $file) {
+            $content = file_get_contents($file);
+            preg_match_all('/Mage::register\(\s*[\'"]([^\'"]+)[\'"]/', $content, $matches);
+            if (!empty($matches[1])) {
+                foreach ($matches[1] as $key) {
+                    $registryKeys[$key] = $key;
                 }
             }
         }
@@ -222,6 +347,71 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
         }
 
         return $matchingFiles;
+    }
+
+    /**
+     * Generate metadata content for block methods
+     */
+    private function generateBlockMetadataContent(array $blocks): string
+    {
+        $content = "<?php\n\nnamespace PHPSTORM_META {\n";
+
+        // Mage::getBlockSingleton() metadata
+        $content .= "    // Type information for Mage::getBlockSingleton()\n";
+        $content .= "    override(\\Mage::getBlockSingleton(0), map([\n";
+        foreach ($blocks as $alias => $class) {
+            $content .= "        '$alias' => $class::class,\n";
+        }
+        $content .= "    ]));\n\n";
+
+        // Mage_Core_Model_Layout::createBlock() metadata
+        $content .= "    // Type information for Mage_Core_Model_Layout::createBlock()\n";
+        $content .= "    override(\\Mage_Core_Model_Layout::createBlock(0), map([\n";
+        foreach ($blocks as $alias => $class) {
+            $content .= "        '$alias' => $class::class,\n";
+        }
+        $content .= "    ]));\n";
+
+        $content .= "}\n";
+        return $content;
+    }
+
+    /**
+     * Generate metadata content for resource models
+     */
+    private function generateResourceModelMetadataContent(array $resourceModels): string
+    {
+        $content = "<?php\n\nnamespace PHPSTORM_META {\n";
+
+        // Mage::getResourceModel() metadata
+        $content .= "    // Type information for Mage::getResourceModel()\n";
+        $content .= "    override(\\Mage::getResourceModel(0), map([\n";
+        foreach ($resourceModels as $alias => $class) {
+            $content .= "        '$alias' => $class::class,\n";
+        }
+        $content .= "    ]));\n";
+
+        $content .= "}\n";
+        return $content;
+    }
+
+    /**
+     * Generate metadata content for resource helpers
+     */
+    private function generateResourceHelperMetadataContent(array $resourceHelpers): string
+    {
+        $content = "<?php\n\nnamespace PHPSTORM_META {\n";
+
+        // Mage::getResourceHelper() metadata
+        $content .= "    // Type information for Mage::getResourceHelper()\n";
+        $content .= "    override(\\Mage::getResourceHelper(0), map([\n";
+        foreach ($resourceHelpers as $alias => $class) {
+            $content .= "        '$alias' => $class::class,\n";
+        }
+        $content .= "    ]));\n";
+
+        $content .= "}\n";
+        return $content;
     }
 
     /**
