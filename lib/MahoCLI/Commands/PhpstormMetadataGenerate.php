@@ -293,11 +293,13 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
                 // Parse the class path to determine resource helper alias
                 $relativePath = str_replace($codeBase, '', $file);
                 if (preg_match('#/([^/]+)/([^/]+)/Model/Resource/Helper/(.+)\.php$#', $relativePath, $parts)) {
-                    $namespace = strtolower($parts[1]);
+                    $namespace = $parts[1];
                     $module = $parts[2];
                     $helperPath = str_replace('/', '_', $parts[3]);
 
-                    $alias = $namespace;
+                    // Convert the namespace to lowercase for the alias (frontend name)
+                    // Example: Mage_Reports becomes 'reports'
+                    $alias = strtolower($module);
                     $resourceHelpers[$alias] = '\\' . $namespace . '_' . $module . '_Model_Resource_Helper_' . $helperPath;
                 }
             }
@@ -355,23 +357,16 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
     private function generateBlockMetadataContent(array $blocks): string
     {
         $content = "<?php\n\nnamespace PHPSTORM_META {\n";
-
-        // Mage::getBlockSingleton() metadata
-        $content .= "    // Type information for Mage::getBlockSingleton()\n";
         $content .= "    override(\\Mage::getBlockSingleton(0), map([\n";
         foreach ($blocks as $alias => $class) {
             $content .= "        '$alias' => $class::class,\n";
         }
         $content .= "    ]));\n\n";
-
-        // Mage_Core_Model_Layout::createBlock() metadata
-        $content .= "    // Type information for Mage_Core_Model_Layout::createBlock()\n";
         $content .= "    override(\\Mage_Core_Model_Layout::createBlock(0), map([\n";
         foreach ($blocks as $alias => $class) {
             $content .= "        '$alias' => $class::class,\n";
         }
         $content .= "    ]));\n";
-
         $content .= "}\n";
         return $content;
     }
@@ -382,15 +377,11 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
     private function generateResourceModelMetadataContent(array $resourceModels): string
     {
         $content = "<?php\n\nnamespace PHPSTORM_META {\n";
-
-        // Mage::getResourceModel() metadata
-        $content .= "    // Type information for Mage::getResourceModel()\n";
         $content .= "    override(\\Mage::getResourceModel(0), map([\n";
         foreach ($resourceModels as $alias => $class) {
             $content .= "        '$alias' => $class::class,\n";
         }
         $content .= "    ]));\n";
-
         $content .= "}\n";
         return $content;
     }
@@ -401,15 +392,11 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
     private function generateResourceHelperMetadataContent(array $resourceHelpers): string
     {
         $content = "<?php\n\nnamespace PHPSTORM_META {\n";
-
-        // Mage::getResourceHelper() metadata
-        $content .= "    // Type information for Mage::getResourceHelper()\n";
         $content .= "    override(\\Mage::getResourceHelper(0), map([\n";
         foreach ($resourceHelpers as $alias => $class) {
             $content .= "        '$alias' => $class::class,\n";
         }
         $content .= "    ]));\n";
-
         $content .= "}\n";
         return $content;
     }
@@ -420,23 +407,16 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
     private function generateFactoryMetadataContent(array $models): string
     {
         $content = "<?php\n\nnamespace PHPSTORM_META {\n";
-
-        // Mage::getModel() metadata
-        $content .= "    // Type information for Mage::getModel()\n";
         $content .= "    override(\\Mage::getModel(0), map([\n";
         foreach ($models as $alias => $class) {
             $content .= "        '$alias' => $class::class,\n";
         }
         $content .= "    ]));\n\n";
-
-        // Mage::getSingleton() metadata
-        $content .= "    // Type information for Mage::getSingleton()\n";
         $content .= "    override(\\Mage::getSingleton(0), map([\n";
         foreach ($models as $alias => $class) {
             $content .= "        '$alias' => $class::class,\n";
         }
         $content .= "    ]));\n";
-
         $content .= "}\n";
         return $content;
     }
@@ -447,15 +427,11 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
     private function generateHelperMetadataContent(array $helpers): string
     {
         $content = "<?php\n\nnamespace PHPSTORM_META {\n";
-
-        // Mage::helper() metadata
-        $content .= "    // Type information for Mage::helper()\n";
         $content .= "    override(\\Mage::helper(0), map([\n";
         foreach ($helpers as $alias => $class) {
             $content .= "        '$alias' => $class::class,\n";
         }
         $content .= "    ]));\n";
-
         $content .= "}\n";
         return $content;
     }
@@ -466,18 +442,12 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
     private function generateRegistryMetadataContent(array $registryKeys): string
     {
         $content = "<?php\n\nnamespace PHPSTORM_META {\n";
-
-        // Create argument set for registry keys
-        $content .= "    // Registry keys\n";
         $content .= "    registerArgumentsSet('registry_keys',\n";
         foreach ($registryKeys as $key) {
             $content .= "        '$key',\n";
         }
         $content .= "    );\n\n";
-
-        // Apply to Mage::registry() method
         $content .= "    expectedArguments(\\Mage::registry(0), 0, argumentsSet('registry_keys'));\n";
-
         $content .= "}\n";
         return $content;
     }
