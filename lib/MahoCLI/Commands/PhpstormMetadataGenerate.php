@@ -18,7 +18,6 @@ use RegexIterator;
 )]
 class PhpstormMetadataGenerate extends BaseMahoCommand
 {
-    private array $phpFiles = [];
     private array $phpClasses = [];
 
     private array $moduleConfigs = [
@@ -56,7 +55,6 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
 
         // Extract a list of all classes in those .php files
         foreach ($phpFiles as $file) {
-            $this->phpFiles[] = $file[0];
             foreach ($this->extractClassesFromFile($file[0]) as $class) {
                 $this->phpClasses[] = $class;
             }
@@ -64,11 +62,11 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
 
         $this->loadModuleConfigurations($output);
 
-        $this->generateFactoryMethodsMetadata($output, $metaDir);
-        $this->generateHelperMethodsMetadata($output, $metaDir);
+        $this->generateModelsMetadata($output, $metaDir);
+        $this->generateHelpersMetadata($output, $metaDir);
         $this->generateRegistryMetadata($output, $metaDir);
-        $this->generateBlockMetadata($output, $metaDir);
-        $this->generateResourceModelMetadata($output, $metaDir);
+        $this->generateBlocksMetadata($output, $metaDir);
+        $this->generateResourceModelsMetadata($output, $metaDir);
 
         $output->writeln("<info>PhpStorm metadata generation complete!</info>");
         $output->writeln("<comment>Remember to add .phpstorm.meta.php to your .gitignore file</comment>");
@@ -129,7 +127,7 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
     /**
      * Generate metadata for block factories
      */
-    private function generateBlockMetadata(OutputInterface $output, string $metaDir): void
+    private function generateBlocksMetadata(OutputInterface $output, string $metaDir): void
     {
         $output->writeln("Scanning for block classes...");
 
@@ -147,15 +145,15 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
         $output->writeln("<info>Found " . count($blocks) . " block classes</info>");
 
         $blockContent = $this->generateBlockMetadataContent($blocks);
-        file_put_contents($metaDir . '/block.meta.php', $blockContent);
+        file_put_contents($metaDir . '/blocks.meta.php', $blockContent);
 
-        $output->writeln("<info>Block methods metadata written to block.meta.php</info>");
+        $output->writeln("<info>Block methods metadata written to blocks.meta.php</info>");
     }
 
     /**
      * Generate metadata for resource models
      */
-    private function generateResourceModelMetadata(OutputInterface $output, string $metaDir): void
+    private function generateResourceModelsMetadata(OutputInterface $output, string $metaDir): void
     {
         $output->writeln("Scanning for resource model classes...");
 
@@ -173,41 +171,15 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
         $output->writeln("<info>Found " . count($resourceModels) . " resource model classes</info>");
 
         $resourceContent = $this->generateResourceModelMetadataContent($resourceModels);
-        file_put_contents($metaDir . '/resource_model.meta.php', $resourceContent);
+        file_put_contents($metaDir . '/resource_models.meta.php', $resourceContent);
 
-        $output->writeln("<info>Resource model metadata written to resource_model.meta.php</info>");
-    }
-
-    /**
-     * Generate metadata for resource helpers
-     */
-    private function generateResourceHelperMetadata(OutputInterface $output, string $metaDir): void
-    {
-        $output->writeln("Scanning for resource helper classes...");
-
-        $resourceHelpers = [];
-        foreach ($this->moduleConfigs['resourceModels'] as $aliasPrefix => $classPrefix) {
-            foreach ($this->phpClasses as $class) {
-                if (str_starts_with($class, $classPrefix)) {
-                    $aliasSuffix = str_replace("{$classPrefix}_", '', $class);
-                    $aliasSuffix = strtolower($aliasSuffix);;
-                    $resourceHelpers["{$aliasPrefix}/{$aliasSuffix}"] = $class;
-                }
-            }
-        }
-
-        $output->writeln("<info>Found " . count($resourceHelpers) . " resource helper classes</info>");
-
-        $resourceHelperContent = $this->generateResourceHelperMetadataContent($resourceHelpers);
-        file_put_contents($metaDir . '/resource_helper.meta.php', $resourceHelperContent);
-
-        $output->writeln("<info>Resource helper metadata written to resource_helper.meta.php</info>");
+        $output->writeln("<info>Resource model metadata written to resource_models.meta.php</info>");
     }
 
     /**
      * Generate metadata for Mage::getModel(), Mage::getSingleton(), etc.
      */
-    private function generateFactoryMethodsMetadata(OutputInterface $output, string $metaDir): void
+    private function generateModelsMetadata(OutputInterface $output, string $metaDir): void
     {
         $output->writeln("Scanning for model classes...");
 
@@ -225,15 +197,15 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
         $output->writeln("<info>Found " . count($models) . " model classes</info>");
 
         $factoryContent = $this->generateFactoryMetadataContent($models);
-        file_put_contents($metaDir . '/factory.meta.php', $factoryContent);
+        file_put_contents($metaDir . '/models.meta.php', $factoryContent);
 
-        $output->writeln("<info>Factory methods metadata written to factory.meta.php</info>");
+        $output->writeln("<info>Factory methods metadata written to models.meta.php</info>");
     }
 
     /**
      * Generate metadata for Mage::helper() calls
      */
-    private function generateHelperMethodsMetadata(OutputInterface $output, string $metaDir): void
+    private function generateHelpersMetadata(OutputInterface $output, string $metaDir): void
     {
         $output->writeln("Scanning for helper classes...");
 
@@ -251,9 +223,9 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
         $output->writeln("<info>Found " . count($helpers) . " helper classes</info>");
 
         $helperContent = $this->generateHelperMetadataContent($helpers);
-        file_put_contents($metaDir . '/helper.meta.php', $helperContent);
+        file_put_contents($metaDir . '/helpers.meta.php', $helperContent);
 
-        $output->writeln("<info>Helper methods metadata written to helper.meta.php</info>");
+        $output->writeln("<info>Helper methods metadata written to helpers.meta.php</info>");
     }
 
     /**
@@ -497,31 +469,6 @@ namespace PHPSTORM_META {
 PHP;
 
         foreach ($resourceModels as $alias => $class) {
-            $content .= "\n        '$alias' => \\$class::class,";
-        }
-
-        $content .= <<<'PHP'
-
-    ]));
-}
-
-PHP;
-
-        return $content;
-    }
-
-    /**
-     * Generate resource helper metadata content
-     */
-    private function generateResourceHelperMetadataContent(array $resourceHelpers): string
-    {
-        $content = <<<'PHP'
-<?php
-namespace PHPSTORM_META {
-    override(\Mage_Core_Model_Resource_Abstract::getHelper(0), map([
-PHP;
-
-        foreach ($resourceHelpers as $alias => $class) {
             $content .= "\n        '$alias' => \\$class::class,";
         }
 
