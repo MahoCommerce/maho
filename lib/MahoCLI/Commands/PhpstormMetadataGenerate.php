@@ -196,7 +196,7 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
 
         $output->writeln("<info>Found " . count($models) . " model classes</info>");
 
-        $factoryContent = $this->generateFactoryMetadataContent($models);
+        $factoryContent = $this->generateModelsMetadataContent($models);
         file_put_contents($metaDir . '/models.meta.php', $factoryContent);
 
         $output->writeln("<info>Factory methods metadata written to models.meta.php</info>");
@@ -334,151 +334,63 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
         return $files;
     }
 
-    /**
-     * Generate factory methods metadata content
-     */
-    private function generateFactoryMetadataContent(array $models): string
+    private function generateModelsMetadataContent(array $models): string
     {
-        $content = <<<'PHP'
-<?php
-namespace PHPSTORM_META {
-    override(\Mage::getModel(0), map([
-PHP;
-
-        foreach ($models as $alias => $class) {
-            $content .= "\n        '$alias' => \\$class::class,";
-        }
-
-        $content .= <<<'PHP'
-
-    ]));
-    
-    override(\Mage::getSingleton(0), map([
-PHP;
-
-        foreach ($models as $alias => $class) {
-            $content .= "\n        '$alias' => \\$class::class,";
-        }
-
-        $content .= <<<'PHP'
-
-    ]));
-}
-
-PHP;
-
+        $content = "<?php\nnamespace PHPSTORM_META {\n";
+        $content .= $this->generateMappingContent('\Mage::getModel(0)', $models);
+        $content .= $this->generateMappingContent('\Mage::getSingleton(0)', $models);
+        $content .= "}\n";
         return $content;
     }
 
-    /**
-     * Generate helper methods metadata content
-     */
     private function generateHelperMetadataContent(array $helpers): string
     {
-        $content = <<<'PHP'
-<?php
-namespace PHPSTORM_META {
-    override(\Mage::helper(0), map([
-PHP;
-
-        foreach ($helpers as $alias => $class) {
-            $content .= "\n        '$alias' => \\$class::class,";
-        }
-
-        $content .= <<<'PHP'
-
-    ]));
-}
-
-PHP;
-
+        $content = "<?php\nnamespace PHPSTORM_META {\n";
+        $content .= $this->generateMappingContent('\Mage::helper(0)', $helpers);
+        $content .= "}\n";
         return $content;
     }
 
-    /**
-     * Generate registry metadata content
-     */
     private function generateRegistryMetadataContent(array $registryKeys): string
     {
-        $content = <<<'PHP'
-<?php
-namespace PHPSTORM_META {
-    expectedArguments(\Mage::registry(), 0, 
-PHP;
-
-        $keysList = array_map(function($key) {
-            return "'$key'";
-        }, array_keys($registryKeys));
-
-        $content .= implode(', ', $keysList);
-
-        $content .= <<<'PHP'
-);
-}
-
-PHP;
-
+        $content = "<?php\nnamespace PHPSTORM_META {\n";
+        $content .= "    expectedArguments(\Mage::registry(), 0, ";
+        $content .= $this->formatRegistryKeys($registryKeys);
+        $content .= ");\n}\n";
         return $content;
     }
 
-    /**
-     * Generate block metadata content
-     */
     private function generateBlockMetadataContent(array $blocks): string
     {
-        $content = <<<'PHP'
-<?php
-namespace PHPSTORM_META {
-    override(\Mage_Core_Model_Layout::createBlock(0), map([
-PHP;
-
-        foreach ($blocks as $alias => $class) {
-            $content .= "\n        '$alias' => \\$class::class,";
-        }
-
-        $content .= <<<'PHP'
-
-    ]));
-    
-    override(\Mage_Core_Model_Layout::getBlockSingleton(0), map([
-PHP;
-
-        foreach ($blocks as $alias => $class) {
-            $content .= "\n        '$alias' => \\$class::class,";
-        }
-
-        $content .= <<<'PHP'
-
-    ]));
-}
-
-PHP;
-
+        $content = "<?php\nnamespace PHPSTORM_META {\n";
+        $content .= $this->generateMappingContent('\Mage_Core_Model_Layout::createBlock(0)', $blocks);
+        $content .= $this->generateMappingContent('\Mage_Core_Model_Layout::getBlockSingleton(0)', $blocks);
+        $content .= "}\n";
         return $content;
     }
 
-    /**
-     * Generate resource model metadata content
-     */
     private function generateResourceModelMetadataContent(array $resourceModels): string
     {
-        $content = <<<'PHP'
-<?php
-namespace PHPSTORM_META {
-    override(\Mage_Core_Model_Abstract::getResource(), map([
-PHP;
-
-        foreach ($resourceModels as $alias => $class) {
-            $content .= "\n        '$alias' => \\$class::class,";
-        }
-
-        $content .= <<<'PHP'
-
-    ]));
-}
-
-PHP;
-
+        $content = "<?php\nnamespace PHPSTORM_META {\n";
+        $content .= $this->generateMappingContent('\Mage_Core_Model_Abstract::getResource()', $resourceModels);
+        $content .= "}\n";
         return $content;
+    }
+
+    private function generateMappingContent(string $function, array $items): string
+    {
+        $content = "    override($function, map([\n";
+        foreach ($items as $alias => $class) {
+            $content .= "        '$alias' => \\$class::class,\n";
+        }
+        $content .= "    ]));\n\n";
+        return $content;
+    }
+
+    private function formatRegistryKeys(array $registryKeys): string
+    {
+        return implode(', ', array_map(function($key) {
+            return "'$key'";
+        }, array_keys($registryKeys)));
     }
 }
