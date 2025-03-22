@@ -33,16 +33,12 @@ class DBConnect extends BaseMahoCommand
         $user = (string) Mage::getConfig()->getNode('global/resources/default_setup/connection/username');
         $password = (string) Mage::getConfig()->getNode('global/resources/default_setup/connection/password');
 
-        // Create a temporary MySQL config file
         $configFile = $this->createTempMySQLConfig($host, $user, $password);
-
-        // Build MySQL command using the config file
         $mysqlCommand = sprintf(
             'mysql --defaults-extra-file=%s %s',
             escapeshellarg($configFile),
             escapeshellarg($dbname),
         );
-
         $descriptorspec = [
             0 => STDIN,
             1 => STDOUT,
@@ -50,7 +46,6 @@ class DBConnect extends BaseMahoCommand
         ];
 
         $process = proc_open($mysqlCommand, $descriptorspec, $pipes);
-
         if (is_resource($process)) {
             // Set error pipe to non-blocking mode
             stream_set_blocking($pipes[2], false);
@@ -86,6 +81,18 @@ class DBConnect extends BaseMahoCommand
         $configFile = tempnam(sys_get_temp_dir(), '.maho_temp_config_');
         file_put_contents($configFile, $configContent);
         chmod($configFile, 0600);
+
+        echo $configFile . "\n\n";
+        $this->scheduleFileDeletion($configFile);
+
         return $configFile;
+    }
+
+    private function scheduleFileDeletion(string $filename): void
+    {
+        exec(sprintf(
+            '(sleep 1 && rm -f %s) > /dev/null 2>&1 &',
+            escapeshellarg($filename),
+        ));
     }
 }
