@@ -79,8 +79,6 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
         $this->generateResourceModelsMetadata($output, $metaDir);
 
         $output->writeln('<info>PhpStorm metadata generation complete!</info>');
-        $output->writeln('<comment>Remember to add .phpstorm.meta.php to your .gitignore file</comment>');
-
         return Command::SUCCESS;
     }
 
