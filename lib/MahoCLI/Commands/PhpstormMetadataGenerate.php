@@ -355,7 +355,11 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
     {
         $content = "<?php\nnamespace PHPSTORM_META {\n";
         $content .= "    expectedArguments(\Mage::registry(), 0, ";
-        $content .= $this->formatRegistryKeys($registryKeys);
+
+        $content .= implode(",\n", array_map(function($key) {
+            return "'$key'";
+        }, array_keys($registryKeys)));
+
         $content .= ");\n}\n";
         return $content;
     }
@@ -385,12 +389,5 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
         }
         $content .= "    ]));\n\n";
         return $content;
-    }
-
-    private function formatRegistryKeys(array $registryKeys): string
-    {
-        return implode(', ', array_map(function($key) {
-            return "'$key'";
-        }, array_keys($registryKeys)));
     }
 }
