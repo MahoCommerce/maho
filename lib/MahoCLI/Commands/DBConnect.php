@@ -62,9 +62,6 @@ class DBConnect extends BaseMahoCommand
             fclose($pipes[2]);
             proc_close($process);
 
-            // Clean up the temporary config file
-            unlink($configFile);
-
             return Command::SUCCESS;
         }
 
@@ -82,7 +79,6 @@ class DBConnect extends BaseMahoCommand
         file_put_contents($configFile, $configContent);
         chmod($configFile, 0600);
 
-        echo $configFile . "\n\n";
         $this->scheduleFileDeletion($configFile);
 
         return $configFile;
