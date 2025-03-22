@@ -47,6 +47,7 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
         $filesystem->mkdir($metaDir);
 
         // Get all .php files
+        $output->writeln('Extracting all PHP classes...');
         $directoryIterator = new RecursiveDirectoryIterator(
             MAHO_ROOT_DIR,
             RecursiveDirectoryIterator::SKIP_DOTS,
@@ -67,6 +68,7 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
                 $this->phpClasses[] = $class;
             }
         }
+        $output->writeln('<info>Found ' . count($this->phpClasses) . ' classes</info>');
 
         $this->loadModuleConfigurations($output);
 
