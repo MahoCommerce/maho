@@ -92,7 +92,7 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
                     // Also extract resource model configuration if available
                     if (isset($model->resourceModel)) {
                         $resourceAlias = (string)$model->resourceModel;
-                        $this->moduleConfigs['resourceModels'][$alias] = $resourceAlias;
+                        $this->moduleConfigs['resourceModels'][$resourceAlias] = (string) Mage::getConfig()->getNode("global/models/{$resourceAlias}/class");
                     }
                 }
             }
@@ -336,6 +336,7 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
 
     private function generateModelsMetadataContent(array $models): string
     {
+        ksort($models);
         $content = "<?php\nnamespace PHPSTORM_META {\n";
         $content .= $this->generateMappingContent('\Mage::getModel(0)', $models);
         $content .= $this->generateMappingContent('\Mage::getSingleton(0)', $models);
@@ -345,6 +346,7 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
 
     private function generateHelperMetadataContent(array $helpers): string
     {
+        ksort($helpers);
         $content = "<?php\nnamespace PHPSTORM_META {\n";
         $content .= $this->generateMappingContent('\Mage::helper(0)', $helpers);
         $content .= "}\n";
@@ -353,19 +355,17 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
 
     private function generateRegistryMetadataContent(array $registryKeys): string
     {
+        natcasesort($registryKeys);
         $content = "<?php\nnamespace PHPSTORM_META {\n";
-        $content .= "    expectedArguments(\Mage::registry(), 0, ";
-
-        $content .= implode(",\n", array_map(function($key) {
-            return "'$key'";
-        }, array_keys($registryKeys)));
-
+        $content .= "    expectedArguments(\Mage::registry(), 0, \n        ";
+        $content .= implode(",\n        ", $registryKeys);
         $content .= ");\n}\n";
         return $content;
     }
 
     private function generateBlockMetadataContent(array $blocks): string
     {
+        ksort($blocks);
         $content = "<?php\nnamespace PHPSTORM_META {\n";
         $content .= $this->generateMappingContent('\Mage_Core_Model_Layout::createBlock(0)', $blocks);
         $content .= $this->generateMappingContent('\Mage_Core_Model_Layout::getBlockSingleton(0)', $blocks);
@@ -375,8 +375,9 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
 
     private function generateResourceModelMetadataContent(array $resourceModels): string
     {
+        ksort($resourceModels);
         $content = "<?php\nnamespace PHPSTORM_META {\n";
-        $content .= $this->generateMappingContent('\Mage_Core_Model_Abstract::getResource()', $resourceModels);
+        $content .= $this->generateMappingContent('\Mage::getResourceModel(0)', $resourceModels);
         $content .= "}\n";
         return $content;
     }
@@ -387,7 +388,7 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
         foreach ($items as $alias => $class) {
             $content .= "        '$alias' => \\$class::class,\n";
         }
-        $content .= "    ]));\n\n";
+        $content .= "    ]));\n";
         return $content;
     }
 }
