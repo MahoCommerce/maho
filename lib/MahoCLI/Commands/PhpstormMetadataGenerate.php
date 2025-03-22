@@ -285,7 +285,7 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
                 for ($j = $i + 1; $j < $count; $j++) {
                     if ($tokens[$j][0] === T_STRING) {
                         // Handle Magento 1 class names (no namespace but underscore notation)
-                        if (empty($namespace) && strpos($tokens[$j][1], '_') !== false) {
+                        if (empty($namespace) && str_contains($tokens[$j][1], '_')) {
                             $classes[] = $tokens[$j][1];
                         } else {
                             $classes[] = $namespace . '\\' . $tokens[$j][1];
@@ -338,7 +338,7 @@ class PhpstormMetadataGenerate extends BaseMahoCommand
 
         foreach ($phpFiles as $file) {
             $content = file_get_contents($file->getPathname());
-            if (strpos($content, $search) !== false) {
+            if (str_contains($content, $search)) {
                 $files[] = $file->getPathname();
             }
         }
