@@ -953,14 +953,6 @@
                                 to transfer all media to that location. Media will not be available in the new
                                 location until the synchronization process is complete.</comment>
                         </synchronize>
-                        <configuration_update_time translate="label">
-                            <label>Environment Update Time</label>
-                            <sort_order>400</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
-                        </configuration_update_time>
                     </fields>
                 </media_storage_configuration>
             </groups>
