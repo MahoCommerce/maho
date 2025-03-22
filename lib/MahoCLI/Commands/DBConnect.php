@@ -76,8 +76,8 @@ class DBConnect extends BaseMahoCommand
     {
         $configContent = "[client]\nhost=\"$host\"\nuser=\"$user\"\npassword=\"$password\"\n";
         $configFile = tempnam(sys_get_temp_dir(), '.maho_temp_config_');
-        file_put_contents($configFile, $configContent);
         chmod($configFile, 0600);
+        file_put_contents($configFile, $configContent);
 
         $this->scheduleFileDeletion($configFile);
 
