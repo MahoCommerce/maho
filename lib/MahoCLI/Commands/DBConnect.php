@@ -80,7 +80,7 @@ class DBConnect extends BaseMahoCommand
     /**
      * @return string Path to the temporary file
      */
-    private function createTempMySQLConfig(string $host, string $user, string $password): string
+    private function createTempMySQLConfig(#[\SensitiveParameter] string $host, #[\SensitiveParameter] string $user, #[\SensitiveParameter] string $password): string
     {
         $configContent = "[client]\nhost=\"$host\"\nuser=\"$user\"\npassword=\"$password\"\n";
         $configFile = tempnam(sys_get_temp_dir(), '.maho_temp_config_');
