@@ -29865,7 +29865,7 @@ parameters:
 		-
 			message: '#^If condition is always false\.$#'
 			identifier: if.alwaysFalse
-			count: 2
+			count: 3
 			path: app/code/core/Mage/Tax/Helper/Data.php
 
 		-
