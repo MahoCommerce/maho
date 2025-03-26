@@ -322,6 +322,7 @@
             </smtp>
             <media_storage_configuration>
                 <image_file_type>18</image_file_type>
+                <image_quality>85</image_quality>
                 <media_storage>0</media_storage>
                 <media_database>default_setup</media_database>
                 <allowed_resources>
