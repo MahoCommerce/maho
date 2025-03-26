@@ -10,6 +10,7 @@
     </paths>
     <version number="3.0.0">
         <api>
+            <default-package-name>Maho</default-package-name>
             <source dsn="..">
                 <path>app</path>
                 <path>lib</path>
