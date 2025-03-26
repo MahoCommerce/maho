@@ -186,16 +186,6 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Retrieve search term url
-     *
-     * @return string
-     */
-    public function getSearchTermUrl()
-    {
-        return $this->_getUrl('catalogsearch/term/popular');
-    }
-
-    /**
      * Retrieve advanced search URL
      *
      * @return string
