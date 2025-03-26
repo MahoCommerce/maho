@@ -14860,12 +14860,6 @@ parameters:
 			path: app/code/core/Mage/CatalogSearch/controllers/ResultController.php
 
 		-
-			message: '#^Method Mage_CatalogSearch_TermController\:\:popularAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/controllers/TermController.php
-
-		-
 			message: '#^Method Mage_Checkout_Block_Cart\:\:chooseTemplate\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
