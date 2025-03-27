@@ -862,6 +862,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                             <depends><active>1</active></depends>
+                            <validate>required-entry</validate>
                         </client_id>
                         <client_secret translate="label">
                             <label>Client Secret</label>
@@ -872,6 +873,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                             <depends><active>1</active></depends>
+                            <validate>required-entry</validate>
                         </client_secret>
                         <pickup translate="label">
                             <label>Pickup Method</label>
