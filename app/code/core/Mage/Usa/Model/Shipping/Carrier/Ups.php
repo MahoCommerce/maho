@@ -1682,7 +1682,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     {
         $userId = $this->getConfigData('client_id');
         $userIdPass = $this->getConfigData('client_secret');
-        if ($this->getConfigFlag('mode_xml')) {
+        if ($this->getConfigFlag('mode')) {
             $authUrl = $this->_liveUrls['AuthUrl'];
         } else {
             $authUrl = $this->_defaultUrls['AuthUrl'];

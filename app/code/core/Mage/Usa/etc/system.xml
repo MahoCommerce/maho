@@ -979,7 +979,7 @@
                             <show_in_store>1</show_in_store>
                             <depends><active>1</active></depends>
                         </specificerrmsg>
-                        <mode_xml translate="label comment">
+                        <mode translate="label comment">
                             <label>Mode</label>
                             <comment>Enables/Disables SSL verification of Maho server by UPS.</comment>
                             <frontend_type>select</frontend_type>
@@ -989,7 +989,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                             <depends><active>1</active></depends>
-                        </mode_xml>
+                        </mode>
                         <debug translate="label">
                             <label>Debug</label>
                             <frontend_type>boolean</frontend_type>
