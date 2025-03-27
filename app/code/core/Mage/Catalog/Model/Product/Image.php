@@ -449,12 +449,8 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
         $filePath = $this->_getWatermarkFilePath();
         if ($filePath) {
-            $this->getImage()
-                ->setWatermarkPosition($this->getWatermarkPosition())
-                ->setWatermarkImageOpacity($this->getWatermarkImageOpacity())
-                ->setWatermarkWidth($this->getWatermarkWidth())
-                ->setWatermarkHeigth($this->getWatermarkHeigth())
-                ->watermark($filePath);
+            $image = $this->getImage();
+            $image->place($filePath, position: $this->getWatermarkPosition(), opacity: $this->getWatermarkImageOpacity());
         }
 
         return $this;
@@ -567,10 +563,8 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
     public function setWatermarkSize(array $size): self
     {
-        if (is_array($size)) {
-            $this->setWatermarkWidth($size['width'])
-                ->setWatermarkHeigth($size['heigth']);
-        }
+        $this->setWatermarkWidth($size['width']);
+        $this->setWatermarkHeigth($size['heigth']);
         return $this;
     }
 
