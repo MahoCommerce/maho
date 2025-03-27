@@ -343,9 +343,13 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             }
 
             // Do resize and save
-            $processor = Mage::getModel('varien/image', $sourceFilePath);
-            $processor->resize($width, $height);
-            $processor->save(Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . $destPath);
+            $imageManager = \Intervention\Image\ImageManager::gd(
+                autoOrientation: false,
+                strip: true
+            );
+            $image = $imageManager->read($sourceFilePath);
+            $image->resize($width, $height);
+            $image->save(Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . "/{$destPath}");
             Mage::helper('core/file_storage_database')->saveFile($destPath);
         }
 

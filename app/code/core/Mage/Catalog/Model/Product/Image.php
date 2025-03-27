@@ -365,12 +365,12 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     public function getImage(): \Intervention\Image\Interfaces\ImageInterface
     {
         if (!$this->image) {
-             $manager = \Intervention\Image\ImageManager::gd(
+             $imageManager = \Intervention\Image\ImageManager::gd(
                 autoOrientation: false,
                 blendingColor: $this->_backgroundColorStr,
                 strip: true
             );
-            $this->image = $manager->read($this->getBaseFile());
+            $this->image = $imageManager->read($this->getBaseFile());
             if ($this->_backgroundColor) {
                 $this->image->blendTransparency($this->_backgroundColorStr);
             }
@@ -384,7 +384,13 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         if (is_null($this->getWidth()) && is_null($this->getHeight())) {
             return $this;
         }
-        $this->getImage()->scaleDown($this->_width, $this->_height);
+
+        if ($this->_width && $this->_height) {
+            $this->getImage()->pad($this->_width, $this->_height);
+        } else {
+            $this->getImage()->scaleDown($this->_width, $this->_height);
+        }
+
         return $this;
     }
 
