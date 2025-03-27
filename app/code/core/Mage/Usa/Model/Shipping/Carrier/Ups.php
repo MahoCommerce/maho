@@ -668,11 +668,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     {
         $url = $this->getConfigData('tracking_rest_url');
         if (!$url) {
-            if ($this->getConfigFlag('mode_xml')) {
-                $url = $this->_liveUrls['TrackRest'] . '/';
-            } else {
-                $url = $this->_defaultUrls['TrackRest'] . '/';
-            }
+            $url = $this->_defaultUrls['TrackRest'] . '/';
         }
 
         try {
@@ -920,11 +916,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
 
         $shipConfirmUrl = $this->getConfigData('shipconfirm_rest_url');
         if (!$shipConfirmUrl) {
-            if ($this->getConfigFlag('mode_xml')) {
-                $shipConfirmUrl = $this->_liveUrls['ShipRestConfirm'];
-            } else {
-                $shipConfirmUrl = $this->_defaultUrls['ShipRestConfirm'];
-            }
+            $shipConfirmUrl = $this->_defaultUrls['ShipRestConfirm'];
         }
 
         /** Rest API Payload */
@@ -1382,11 +1374,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     {
         $url = $this->getConfigData('gateway_rest_url');
         if (!$url) {
-            if ($this->getConfigFlag('mode_xml')) {
-                $url = $this->_liveUrls['RateRest'] . '/';
-            } else {
-                $url = $this->_defaultUrls['RateRest'] . '/';
-            }
+            $url = $this->_defaultUrls['RateRest'] . '/';
         }
         try {
             $accessToken = $this->setAPIAccessRequest();
