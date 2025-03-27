@@ -134,23 +134,29 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
         $this->_getModel()->setDestinationSubdir($attributeName);
         $this->setProduct($product);
 
-        $this->setWatermark(
-            Mage::getStoreConfig("design/watermark/{$this->_getModel()->getDestinationSubdir()}_image"),
-        );
-        $this->setWatermarkImageOpacity(
-            Mage::getStoreConfigAsInt("design/watermark/{$this->_getModel()->getDestinationSubdir()}_imageOpacity"),
-        );
-        $this->setWatermarkPosition(
-            Mage::getStoreConfig("design/watermark/{$this->_getModel()->getDestinationSubdir()}_position"),
-        );
-        $this->setWatermarkSize(
-            Mage::getStoreConfig("design/watermark/{$this->_getModel()->getDestinationSubdir()}_size"),
-        );
+        $watermark = Mage::getStoreConfig("design/watermark/{$this->_getModel()->getDestinationSubdir()}_image");
+        if ($watermark) {
+            $this->setWatermark($watermark);
+        }
+
+        $waterImageOpaticy = Mage::getStoreConfigAsInt("design/watermark/{$this->_getModel()->getDestinationSubdir()}_imageOpacity");
+        if ($waterImageOpaticy) {
+            $this->setWatermarkImageOpacity($waterImageOpaticy);
+        }
+
+        $watermarkPosition = Mage::getStoreConfig("design/watermark/{$this->_getModel()->getDestinationSubdir()}_position");
+        if ($watermarkPosition) {
+            $this->setWatermarkPosition($watermarkPosition);
+        }
+
+        $watermarkSize = Mage::getStoreConfig("design/watermark/{$this->_getModel()->getDestinationSubdir()}_size");
+        if ($watermarkSize) {
+            $this->setWatermarkSize($watermarkSize);
+        }
 
         if ($imageFile) {
             $this->setImageFile($imageFile);
         } else {
-            // add for work original size
             $this->_getModel()->setBaseFile($this->getProduct()->getData($this->_getModel()->getDestinationSubdir()));
         }
         return $this;
@@ -590,7 +596,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
      */
     public function getOriginalWidth()
     {
-        return $this->_getModel()->getImageProcessor()->getOriginalWidth();
+        return $this->_getModel()->getImage()->getOriginalWidth();
     }
 
     /**
@@ -600,7 +606,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
      */
     public function getOriginalHeight()
     {
-        return $this->_getModel()->getImageProcessor()->getOriginalHeight();
+        return $this->_getModel()->getImage()->getOriginalHeight();
     }
 
     /**

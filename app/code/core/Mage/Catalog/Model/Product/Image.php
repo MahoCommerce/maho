@@ -73,10 +73,8 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
      */
     protected $_newFile;
 
-    /**
-     * @var Varien_Image
-     */
-    protected $_processor;
+    /** @var \Intervention\Image\Interfaces\ImageInterface */
+    protected $image;
 
     /**
      * @var string e.g. "small_image"
@@ -225,75 +223,6 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @deprecated
-     * @param string|null $file
-     * @return bool
-     */
-    protected function _checkMemory($file = null)
-    {
-        return $this->_getMemoryLimit() > ($this->_getMemoryUsage() + $this->_getNeedMemoryForFile($file)) || $this->_getMemoryLimit() == -1;
-    }
-
-    /**
-     * @return int
-     * @deprecated
-     */
-    protected function _getMemoryLimit()
-    {
-        $memoryLimit = trim(strtoupper(ini_get('memory_limit')));
-
-        if (!isset($memoryLimit[0])) {
-            $memoryLimit = '128M';
-        }
-
-        return ini_parse_quantity($memoryLimit);
-    }
-
-    /**
-     * @deprecated
-     * @return int
-     */
-    protected function _getMemoryUsage()
-    {
-        if (function_exists('memory_get_usage')) {
-            return memory_get_usage();
-        }
-        return 0;
-    }
-
-    /**
-     * @deprecated
-     * @param string $file
-     * @return float|int
-     */
-    protected function _getNeedMemoryForFile($file = null)
-    {
-        $file = is_null($file) ? $this->getBaseFile() : $file;
-        if (!$file) {
-            return 0;
-        }
-
-        if (!file_exists($file) || !is_file($file)) {
-            return 0;
-        }
-
-        $imageInfo = getimagesize($file);
-
-        if ($imageInfo === false) {
-            return 0;
-        }
-        if (!isset($imageInfo['channels'])) {
-            // if there is no info about this parameter lets set it for maximum
-            $imageInfo['channels'] = 4;
-        }
-        if (!isset($imageInfo['bits'])) {
-            // if there is no info about this parameter lets set it for maximum
-            $imageInfo['bits'] = 8;
-        }
-        return round(($imageInfo[0] * $imageInfo[1] * $imageInfo['bits'] * $imageInfo['channels'] / 8 + 2 ** 16) * 1.65);
-    }
-
-    /**
      * Convert array of 3 items (decimal r, g, b) to string of their hex values
      *
      * @param array $rgbArray
@@ -433,67 +362,40 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         return $this->_newFile;
     }
 
-    /**
-     * @param Varien_Image $processor
-     * @return $this
-     */
-    public function setImageProcessor($processor)
+    public function getImage(): \Intervention\Image\Interfaces\ImageInterface
     {
-        $this->_processor = $processor;
-        return $this;
-    }
-
-    /**
-     * @return Varien_Image
-     */
-    public function getImageProcessor()
-    {
-        if (!$this->_processor) {
-            $this->_processor = Mage::getModel('varien/image', $this->getBaseFile());
+        if (!$this->image) {
+             $manager = \Intervention\Image\ImageManager::gd(
+                autoOrientation: false,
+                blendingColor: $this->_backgroundColorStr,
+                strip: true
+            );
+            $this->image = $manager->read($this->getBaseFile());
+            if ($this->_backgroundColor) {
+                $this->image->blendTransparency($this->_backgroundColorStr);
+            }
         }
-        $this->_processor->keepAspectRatio($this->_keepAspectRatio);
-        $this->_processor->keepFrame($this->_keepFrame);
-        $this->_processor->keepTransparency($this->_keepTransparency);
-        $this->_processor->constrainOnly($this->_constrainOnly);
-        $this->_processor->backgroundColor($this->_backgroundColor);
-        $this->_processor->quality($this->_quality);
-        $this->_processor->targetFileType(Mage::getStoreConfig('system/media_storage_configuration/image_file_type'));
-        return $this->_processor;
+
+        return $this->image;
     }
 
-    /**
-     * @see Varien_Image_Adapter_Abstract
-     * @return $this
-     */
-    public function resize()
+    public function resize(): self
     {
         if (is_null($this->getWidth()) && is_null($this->getHeight())) {
             return $this;
         }
-        $this->getImageProcessor()->resize($this->_width, $this->_height);
+        $this->getImage()->scaleDown($this->_width, $this->_height);
         return $this;
     }
 
-    /**
-     * @param int $angle
-     * @return $this
-     */
-    public function rotate($angle)
+    public function rotate(int $angle): self
     {
         $angle = (int) $angle;
-        $this->getImageProcessor()->rotate($angle);
+        $this->getImage()->rotate($angle);
         return $this;
     }
 
-    /**
-     * Set angle for rotating
-     *
-     * This func actually affects only the cache filename.
-     *
-     * @param int $angle
-     * @return $this
-     */
-    public function setAngle($angle)
+    public function setAngle(int $angle): self
     {
         $this->_angle = $angle;
         return $this;
@@ -540,9 +442,8 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         }
 
         $filePath = $this->_getWatermarkFilePath();
-
         if ($filePath) {
-            $this->getImageProcessor()
+            $this->getImage()
                 ->setWatermarkPosition($this->getWatermarkPosition())
                 ->setWatermarkImageOpacity($this->getWatermarkImageOpacity())
                 ->setWatermarkWidth($this->getWatermarkWidth())
@@ -553,76 +454,53 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    /**
-     * @return $this
-     */
-    public function saveFile()
+    public function saveFile(): self
     {
+        match (Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {
+            IMAGETYPE_AVIF => $this->getImage()->toAvif($this->getQuality()),
+            IMAGETYPE_GIF => $this->getImage()->toGif(),
+            IMAGETYPE_JPEG => $this->getImage()->toJpeg($this->getQuality()),
+            IMAGETYPE_PNG  => $this->getImage()->toPng(),
+            default => $this->getImage()->toWebp($this->getQuality()),
+        };
+
         $filename = $this->getNewFile();
-        $this->getImageProcessor()->save($filename);
+        @mkdir(dirname($filename), recursive: true);
+        $this->getImage()->save($filename);
         Mage::helper('core/file_storage_database')->saveFile($filename);
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getUrl()
+    public function getUrl(): string
     {
         $baseDir = Mage::getBaseDir('media');
         $path = str_replace($baseDir . DS, '', $this->_newFile);
         return Mage::getBaseUrl('media') . str_replace(DS, '/', $path);
     }
 
-    public function push()
-    {
-        $this->getImageProcessor()->display();
-    }
-
-    /**
-     * @param string $dir
-     * @return $this
-     */
-    public function setDestinationSubdir($dir)
+    public function setDestinationSubdir(string $dir): self
     {
         $this->_destinationSubdir = $dir;
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getDestinationSubdir()
+    public function getDestinationSubdir(): string
     {
         return $this->_destinationSubdir;
     }
 
-    /**
-     * @return bool
-     */
-    public function isCached()
+    public function isCached(): bool
     {
         return $this->_fileExists($this->_newFile);
     }
 
-    /**
-     * Set watermark file name
-     *
-     * @param string $file
-     * @return $this
-     */
-    public function setWatermarkFile($file)
+    public function setWatermarkFile(string $file): self
     {
         $this->_watermarkFile = $file;
         return $this;
     }
 
-    /**
-     * Get watermark file name
-     *
-     * @return string
-     */
-    public function getWatermarkFile()
+    public function getWatermarkFile(): ?string
     {
         return $this->_watermarkFile;
     }
@@ -630,10 +508,8 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     /**
      * Get relative watermark file path
      * or false if file not found
-     *
-     * @return string | bool
      */
-    protected function _getWatermarkFilePath()
+    protected function _getWatermarkFilePath(): string|false
     {
         $filePath = false;
 
@@ -661,57 +537,29 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         return $filePath;
     }
 
-    /**
-     * Set watermark position
-     *
-     * @param string $position
-     * @return $this
-     */
-    public function setWatermarkPosition($position)
+    public function setWatermarkPosition(string $position): self
     {
         $this->_watermarkPosition = $position;
         return $this;
     }
 
-    /**
-     * Get watermark position
-     *
-     * @return string
-     */
-    public function getWatermarkPosition()
+    public function getWatermarkPosition(): string
     {
         return $this->_watermarkPosition;
     }
 
-    /**
-     * Set watermark image opacity
-     *
-     * @param int $imageOpacity
-     * @return $this
-     */
-    public function setWatermarkImageOpacity($imageOpacity)
+    public function setWatermarkImageOpacity(int $imageOpacity): self
     {
         $this->_watermarkImageOpacity = $imageOpacity;
         return $this;
     }
 
-    /**
-     * Get watermark image opacity
-     *
-     * @return int
-     */
-    public function getWatermarkImageOpacity()
+    public function getWatermarkImageOpacity(): int
     {
         return $this->_watermarkImageOpacity;
     }
 
-    /**
-     * Set watermark size
-     *
-     * @param array $size
-     * @return $this
-     */
-    public function setWatermarkSize($size)
+    public function setWatermarkSize(array $size): self
     {
         if (is_array($size)) {
             $this->setWatermarkWidth($size['width'])
@@ -720,51 +568,29 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    /**
-     * Set watermark width
-     *
-     * @param int $width
-     * @return $this
-     */
-    public function setWatermarkWidth($width)
+    public function setWatermarkWidth(int $width): self
     {
         $this->_watermarkWidth = $width;
         return $this;
     }
 
-    /**
-     * Get watermark width
-     *
-     * @return int
-     */
-    public function getWatermarkWidth()
+    public function getWatermarkWidth(): int
     {
         return $this->_watermarkWidth;
     }
 
-    /**
-     * Set watermark height
-     *
-     * @param int $heigth
-     * @return $this
-     */
-    public function setWatermarkHeigth($heigth)
+    public function setWatermarkHeigth(int $heigth): self
     {
         $this->_watermarkHeigth = $heigth;
         return $this;
     }
 
-    /**
-     * Get watermark height
-     *
-     * @return string
-     */
-    public function getWatermarkHeigth()
+    public function getWatermarkHeigth(): int
     {
         return $this->_watermarkHeigth;
     }
 
-    public function clearCache()
+    public function clearCache(): void
     {
         $directory = Mage::getBaseDir('media') . DS . 'catalog' . DS . 'product' . DS . 'cache' . DS;
         $io = new Varien_Io_File();
@@ -776,11 +602,8 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     /**
      * First check this file on FS
      * If it doesn't exist - try to download it from DB
-     *
-     * @param string $filename
-     * @return bool
      */
-    protected function _fileExists($filename)
+    protected function _fileExists(string $filename): bool
     {
         if (file_exists($filename)) {
             return true;
