@@ -596,7 +596,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
      */
     public function getOriginalWidth()
     {
-        return $this->_getModel()->getImage()->getOriginalWidth();
+        return $this->_getModel()->getImage()->width();
     }
 
     /**
@@ -606,7 +606,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
      */
     public function getOriginalHeight()
     {
-        return $this->_getModel()->getImage()->getOriginalHeight();
+        return $this->_getModel()->getImage()->height();
     }
 
     /**
@@ -642,12 +642,6 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
             Mage::throwException($this->__('Disallowed file format.'));
         }
 
-        $_processor = Mage::getModel('varien/image', $filePath);
-        $mimeType = $_processor->getMimeType();
-
-        // Force garbage collection since image handler resource uses memory without counting toward memory limit
-        unset($_processor);
-
-        return $mimeType !== null;
+        return $imageInfo['mime'] !== null;
     }
 }
