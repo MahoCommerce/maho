@@ -79,7 +79,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
      * @var string e.g. "small_image"
      */
     protected $_destinationSubdir;
-    protected $_angle;
+    protected float $_angle;
 
     protected $_watermarkFile;
     protected $_watermarkPosition;
@@ -396,14 +396,14 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    public function rotate(int $angle): self
+    public function rotate(float $angle): self
     {
         $angle = (int) $angle;
-        $this->getImage()->rotate($angle);
+        $this->getImage()->rotate($angle, $this->_backgroundColorStr);
         return $this;
     }
 
-    public function setAngle(int $angle): self
+    public function setAngle(float $angle): self
     {
         $this->_angle = $angle;
         return $this;
