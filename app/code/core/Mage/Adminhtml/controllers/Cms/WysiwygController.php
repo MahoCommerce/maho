@@ -24,8 +24,6 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
 
     /**
      * Template directives callback
-     *
-     * TODO: move this to some model
      */
     public function directiveAction()
     {
@@ -37,16 +35,23 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
             if (!Mage::getModel('core/file_validator_streamWrapper', $allowedStreamWrappers)->validate($url)) {
                 Mage::throwException(Mage::helper('core')->__('Invalid stream.'));
             }
-            $image = Varien_Image_Adapter::factory('GD2');
-            $image->open($url);
+
+            $imageManager = \Intervention\Image\ImageManager::gd(
+                autoOrientation: false,
+                strip: true
+            );
+            $image = $imageManager->read($url);
+            $imageInfo = @getimagesize($url);
         } catch (Exception $e) {
-            $image = Varien_Image_Adapter::factory('GD2');
-            $image->open(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
+            $imageManager = \Intervention\Image\ImageManager::gd(
+                autoOrientation: false,
+                strip: true
+            );
+            $image = $imageManager->read(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
+            $imageInfo = @getimagesize(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
         }
-        $this->getResponse()->setHeader('Content-type', $image->getMimeTypeWithOutFileType());
-        ob_start();
-        $image->display();
-        $this->getResponse()->setBody(ob_get_contents());
-        ob_end_clean();
+
+        $this->getResponse()->setHeader('Content-type', $imageInfo['mime']);
+        $this->getResponse()->setBody($image->encode());
     }
 }

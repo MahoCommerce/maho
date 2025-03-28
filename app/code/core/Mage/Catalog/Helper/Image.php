@@ -642,6 +642,6 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
             Mage::throwException($this->__('Disallowed file format.'));
         }
 
-        return $imageInfo['mime'] !== null;
+        return $imageInfo['mime'] != null;
     }
 }
