@@ -69,7 +69,8 @@
         "colinmollenhour/magento-redis-session": "Redis support for PHP sessions",
         "fballiano/openmage-cssjs-minify":  "Minification support for CSS/JS",
         "fballiano/openmage-defer-javascripts":  "Move all javascripts to the end of all pages, preserving execution order",
-        "fballiano/openmage-cloudflare-turnstile": "Turnstile: Cloudflare captcha-like antispam solution"
+        "fballiano/openmage-cloudflare-turnstile": "Turnstile: Cloudflare captcha-like antispam solution",
+        "intervention/image-driver-vips": "Libvips driver for Maho image processing library, if your server supports libvips, this is highly suggested"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
