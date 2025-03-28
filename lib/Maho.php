@@ -193,7 +193,7 @@ final class Maho
         ];
 
         $driverClass = extension_loaded('vips') && \Composer\InstalledVersions::isInstalled('intervention/image-driver-vips')
-            ? \Intervention\Image\Drivers\Vips\Driver::class
+            ? \Intervention\Image\Drivers\Vips\Driver::class // @phpstan-ignore class.notFound
             : \Intervention\Image\Drivers\Gd\Driver::class;
 
         return new \Intervention\Image\ImageManager(
