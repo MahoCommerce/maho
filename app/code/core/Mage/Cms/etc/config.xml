@@ -110,12 +110,10 @@
                         <avif>1</avif>
                     </image_allowed>
                     <media_allowed>
-                        <flv>1</flv>
+                        <flv>0</flv>
                         <swf>0</swf>
                         <avi>1</avi>
                         <mov>1</mov>
-                        <rm>1</rm>
-                        <wmv>1</wmv>
                     </media_allowed>
                 </extensions>
                 <window_width>1000</window_width>

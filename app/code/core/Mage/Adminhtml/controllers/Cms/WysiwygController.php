@@ -6,14 +6,10 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Wysiwyg controller for different purposes
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -24,8 +20,6 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
 
     /**
      * Template directives callback
-     *
-     * TODO: move this to some model
      */
     public function directiveAction()
     {
@@ -37,16 +31,15 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
             if (!Mage::getModel('core/file_validator_streamWrapper', $allowedStreamWrappers)->validate($url)) {
                 Mage::throwException(Mage::helper('core')->__('Invalid stream.'));
             }
-            $image = Varien_Image_Adapter::factory('GD2');
-            $image->open($url);
+
+            $image = Maho::getImageManager()->read($url);
+            $imageInfo = @getimagesize($url);
         } catch (Exception $e) {
-            $image = Varien_Image_Adapter::factory('GD2');
-            $image->open(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
+            $image = Maho::getImageManager()->read(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
+            $imageInfo = @getimagesize(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
         }
-        $this->getResponse()->setHeader('Content-type', $image->getMimeTypeWithOutFileType());
-        ob_start();
-        $image->display();
-        $this->getResponse()->setBody(ob_get_contents());
-        ob_end_clean();
+
+        $this->getResponse()->setHeader('Content-type', $imageInfo['mime']);
+        $this->getResponse()->setBody($image->encode());
     }
 }

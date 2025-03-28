@@ -361,25 +361,24 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
         if (!$io->isWriteable($targetDir)) {
             return false;
         }
-        $image = Varien_Image_Adapter::factory('GD2');
-        $image->open($source);
+
         $width = $this->getConfigData('resize_width');
         $height = $this->getConfigData('resize_height');
-
         if ($width == 0 || $height == 0) {
             return false;
         }
 
-        $image->keepAspectRatio($keepRation);
-        $image->resize($width, $height);
-        $dest = $targetDir
-            . DS
-            . Mage_Core_Model_File_Uploader::getCorrectFileName(pathinfo($source, PATHINFO_BASENAME));
-        $image->save($dest);
-        if (is_file($dest)) {
-            return $dest;
+        $image = Maho::getImageManager()->read($source);
+
+        if ($width && $height) {
+            $image->pad($width, $height);
+        } else {
+            $image->scale($width, $height);
         }
-        return false;
+
+        $dest = "{$targetDir}/" . Mage_Core_Model_File_Uploader::getCorrectFileName(pathinfo($source, PATHINFO_BASENAME));
+        $image->save($dest);
+        return $dest;
     }
 
     /**
