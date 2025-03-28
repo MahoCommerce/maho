@@ -387,6 +387,13 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
         if ($this->_width && $this->_height) {
             $this->getImage()->pad($this->_width, $this->_height);
+        } elseif ($this->_keepFrame) {
+            if ($this->_width) {
+                $this->setHeight($this->_width);
+            } else {
+                $this->setWidth($this->_height);
+            }
+            $this->getImage()->pad($this->_width, $this->_height);
         } else {
             $this->getImage()->scaleDown($this->_width, $this->_height);
         }
