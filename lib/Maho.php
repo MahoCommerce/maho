@@ -180,4 +180,25 @@ final class Maho
         header("HTTP/1.1 {$httpResponseCode} {$description}", true, $httpResponseCode);
         echo "<html><body><h1>There has been an error processing your request</h1>{$reportIdMessage}</body></html>";
     }
+
+    public static function getImageManager(array $customOptions = []): \Intervention\Image\ImageManager
+    {
+        $defaultOptions = [
+            'autoOrientation' => false,
+            'strip' => true,
+        ];
+        $options = [
+            ...$defaultOptions,
+            ...$customOptions,
+        ];
+
+        $driverClass = extension_loaded('vips') && \Composer\InstalledVersions::isInstalled('intervention/image-driver-vips')
+            ? \Intervention\Image\Drivers\Vips\Driver::class
+            : \Intervention\Image\Drivers\Gd\Driver::class;
+
+        return new \Intervention\Image\ImageManager(
+            $driverClass,
+            ...$options,
+        );
+    }
 }

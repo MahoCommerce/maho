@@ -142,11 +142,7 @@ class Mage_Catalog_Model_Product_Attribute_Media_Api extends Mage_Catalog_Model_
             // try to create Image object - it fails with Exception if image is not supported
             try {
                 $filePath = "{$tmpDirectory}/{$fileName}";
-                $imageManager = \Intervention\Image\ImageManager::gd(
-                    autoOrientation: false,
-                    strip: true,
-                );
-                $imageManager->read($filePath);
+                Maho::getImageManager()->read($filePath);
                 Mage::getModel('core/file_validator_image')->validate($filePath);
             } catch (Exception $e) {
                 $ioAdapter->rmdir($tmpDirectory, true);

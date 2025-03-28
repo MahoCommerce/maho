@@ -364,11 +364,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     public function getImage(): \Intervention\Image\Interfaces\ImageInterface
     {
         if (!$this->image) {
-            $imageManager = \Intervention\Image\ImageManager::gd(
-                autoOrientation: false,
-                blendingColor: $this->_backgroundColorStr,
-                strip: true,
-            );
+            $imageManager = Maho::getImageManager(['blendingColor' => $this->_backgroundColorStr]);
             $this->image = $imageManager->read($this->getBaseFile());
             if ($this->_backgroundColor) {
                 $this->image->blendTransparency($this->_backgroundColorStr);

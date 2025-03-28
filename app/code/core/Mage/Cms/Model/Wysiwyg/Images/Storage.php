@@ -368,11 +368,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
             return false;
         }
 
-        $imageManager = \Intervention\Image\ImageManager::gd(
-            autoOrientation: false,
-            strip: true,
-        );
-        $image = $imageManager->read($source);
+        $image = Maho::getImageManager()->read($source);
 
         if ($width && $height) {
             $image->pad($width, $height);

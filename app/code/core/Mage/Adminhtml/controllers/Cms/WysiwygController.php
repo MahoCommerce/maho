@@ -32,18 +32,10 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
                 Mage::throwException(Mage::helper('core')->__('Invalid stream.'));
             }
 
-            $imageManager = \Intervention\Image\ImageManager::gd(
-                autoOrientation: false,
-                strip: true,
-            );
-            $image = $imageManager->read($url);
+            $image = Maho::getImageManager()->read($url);
             $imageInfo = @getimagesize($url);
         } catch (Exception $e) {
-            $imageManager = \Intervention\Image\ImageManager::gd(
-                autoOrientation: false,
-                strip: true,
-            );
-            $image = $imageManager->read(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
+            $image = Maho::getImageManager()->read(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
             $imageInfo = @getimagesize(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
         }
 
