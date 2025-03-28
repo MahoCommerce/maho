@@ -13,19 +13,19 @@
 ?>
 <div class="content-header">
     <h3><?= $this->getHeaderText() ?></h3>
-    <p class="content-buttons form-buttons">
-                <?= $this->getBackButtonHtml() ?>
-                <?= $this->getResetButtonHtml() ?>
-                <?php if($this->getEditMode()): ?>
-                <?= $this->getDeleteButtonHtml() ?>
-                <?php endif ?>
-                <?php if(!$this->isTextType()): ?>
-                <?= $this->getToPlainButtonHtml() ?>
-                <?= $this->getToHtmlButtonHtml() ?>
-                <?php endif ?>
-                <?= $this->getPreviewButtonHtml() ?>
-                <?= $this->getSaveButtonHtml() ?>
-    </p>
+    <div class="content-buttons">
+        <?= $this->getBackButtonHtml() ?>
+        <?= $this->getResetButtonHtml() ?>
+    <?php if ($this->getEditMode()): ?>
+        <?= $this->getDeleteButtonHtml() ?>
+    <?php endif ?>
+    <?php if (!$this->isTextType()): ?>
+        <?= $this->getToPlainButtonHtml() ?>
+        <?= $this->getToHtmlButtonHtml() ?>
+    <?php endif ?>
+        <?= $this->getPreviewButtonHtml() ?>
+        <?= $this->getSaveButtonHtml() ?>
+    </div>
 </div>
 <?php if (!$this->getEditMode()): ?>
 <form action="<?= $this->getLoadUrl() ?>" method="post" id="email_template_load_form">

@@ -11,22 +11,19 @@
 
 /** @var Mage_Adminhtml_Block_Catalog_Category_Tree $this */
 ?>
+<?= $this->getStoreSwitcherHtml() ?>
 <div class="categories-side-col">
-    <div class="content-header">
-        <h3><?= Mage::helper('catalog')->__('Categories') ?></h3>
-        <?php if ($this->getRoot()): ?>
-            <?= $this->getAddRootButtonHtml() ?>
-            <?= $this->getAddSubButtonHtml() ?>
-        <?php endif ?>
-    </div>
-    <?= $this->getStoreSwitcherHtml() ?>
+    <?php if ($this->getRoot()): ?>
+        <?= $this->getAddRootButtonHtml() ?>
+        <?= $this->getAddSubButtonHtml() ?>
+    <?php endif ?>
+    <?php if($this->getRoot()): ?>
     <div class="tree-actions">
-        <?php if($this->getRoot()): ?>
-            <a href="#" onclick="tree.collapseTree(); return false;"><?= Mage::helper('catalog')->__('Collapse All') ?></a>
-            <span class="separator">|</span>
-            <a href="#" onclick="tree.expandTree(); return false;"><?= Mage::helper('catalog')->__('Expand All') ?></a>
-        <?php endif ?>
+        <a href="#" onclick="tree.collapseTree(); return false;"><?= Mage::helper('catalog')->__('Collapse All') ?></a>
+        <span class="separator">|</span>
+        <a href="#" onclick="tree.expandTree(); return false;"><?= Mage::helper('catalog')->__('Expand All') ?></a>
     </div>
+    <?php endif ?>
     <div class="tree-holder">
         <div id="tree-div" class="hor-scroll"></div>
     </div>

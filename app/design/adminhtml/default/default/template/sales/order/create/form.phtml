@@ -5,32 +5,33 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Sales_Order_Create_Form $this */
 ?>
-<script type="text/javascript">
-    var order = new AdminOrder(<?= $this->getOrderDataJson() ?>);
+<script>
+    window.order = new AdminOrder(<?= $this->getOrderDataJson() ?>);
+    window.payment = {
+        switchMethod: order.switchPaymentMethod.bind(order),
+    };
     order.setLoadBaseUrl('<?= $this->getLoadBlockUrl() ?>');
-    var payment = {};
-    payment.switchMethod = order.switchPaymentMethod.bind(order);
 </script>
 <form id="edit_form" action="<?= $this->getSaveUrl() ?>" method="post" enctype="multipart/form-data">
     <?= $this->getBlockHtml('formkey') ?>
     <div id="order-message">
         <?= $this->getChildHtml('message') ?>
     </div>
-    <div id="order-customer-selector" style="display:<?= $this->getCustomerSelectorDisplay() ?>">
+    <div id="order-customer-selector"<?= $this->getCustomerSelectorDisplay() === 'none' ? ' class="no-display"' : '' ?>>
         <?php if (!$this->getCustomerId()): ?>
             <?= $this->getChildHtml('customer') ?>
         <?php endif ?>
     </div>
-    <div id="order-store-selector" style="display:<?= $this->getStoreSelectorDisplay() ?>">
+    <div id="order-store-selector"<?= $this->getStoreSelectorDisplay() === 'none' ? ' class="no-display"' : '' ?>>
         <?= $this->getChildHtml('store') ?>
     </div>
-    <div id="order-data" style="display:<?= $this->getDataSelectorDisplay() ?>">
+    <div id="order-data"<?= $this->getDataSelectorDisplay() === 'none' ? ' class="no-display"' : '' ?>>
         <?= $this->getChildHtml('data') ?>
     </div>
 </form>

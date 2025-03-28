@@ -5,14 +5,49 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Hint $this */
 ?>
 <?php if ($this->getHelpLink()): ?>
-    <div class="paypal-payment-notice">
-        <?= Mage::helper('paypal')->__('Not sure what PayPal payment method to use? Click <a href="%s" target="_blank">here</a> to learn more.', $this->getHelpLink()) ?>
-    </div>
+<ul class="messages">
+    <li class="notice-msg">
+        <span><?= Mage::helper('paypal')->__('Not sure what PayPal payment method to use? Click <a href="%s" target="_blank">here</a> to learn more.', $this->getHelpLink()) ?></span>
+    </li>
+</ul>
 <?php endif ?>
+
+<script>
+    const paypalToggleSolution = function(id, url) {
+        // close all others & scroll
+    }
+
+togglePaypalSolutionConfigureButton = function(button, enable) {
+    var $button = $(button);
+    $button.disabled = !enable;
+    if ($button.hasClassName("disabled") && enable) {
+        $button.removeClassName("disabled");
+    } else if (!$button.hasClassName("disabled") && !enable) {
+        $button.addClassName("disabled");
+    }
+}
+
+// check store-view disabling Express Checkout
+document.observe("dom:loaded", function() {
+    var ecButton = $$(".pp-method-express button.button")[0];
+    var ecEnabler = $$(".paypal-ec-enabler")[0];
+    if (typeof ecButton == "undefined" || typeof ecEnabler != "undefined") {
+        return;
+    }
+    var $ecButton = $(ecButton);
+    $$(".with-button button.button").each(function(configureButton) {
+        if (configureButton != ecButton && !configureButton.disabled
+            && !$(configureButton).hasClassName("paypal-ec-separate")
+           ) {
+            togglePaypalSolutionConfigureButton(ecButton, false);
+        }
+    });
+});
+</script>
