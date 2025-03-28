@@ -364,10 +364,10 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     public function getImage(): \Intervention\Image\Interfaces\ImageInterface
     {
         if (!$this->image) {
-             $imageManager = \Intervention\Image\ImageManager::gd(
+            $imageManager = \Intervention\Image\ImageManager::gd(
                 autoOrientation: false,
                 blendingColor: $this->_backgroundColorStr,
-                strip: true
+                strip: true,
             );
             $this->image = $imageManager->read($this->getBaseFile());
             if ($this->_backgroundColor) {

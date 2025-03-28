@@ -370,7 +370,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
 
         $imageManager = \Intervention\Image\ImageManager::gd(
             autoOrientation: false,
-            strip: true
+            strip: true,
         );
         $image = $imageManager->read($source);
 

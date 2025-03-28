@@ -345,7 +345,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             // Do resize and save
             $imageManager = \Intervention\Image\ImageManager::gd(
                 autoOrientation: false,
-                strip: true
+                strip: true,
             );
             $image = $imageManager->read($sourceFilePath);
             $image->resize($width, $height);

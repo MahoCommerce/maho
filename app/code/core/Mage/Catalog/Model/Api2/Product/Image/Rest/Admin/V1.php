@@ -58,7 +58,7 @@ class Mage_Catalog_Model_Api2_Product_Image_Rest_Admin_V1 extends Mage_Catalog_M
                 $filePath = "{$apiTempDir}/{$imageFileName}";
                 $imageManager = \Intervention\Image\ImageManager::gd(
                     autoOrientation: false,
-                    strip: true
+                    strip: true,
                 );
                 $imageManager->read($filePath);
                 Mage::getModel('core/file_validator_image')->validate($filePath);

@@ -38,14 +38,14 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
 
             $imageManager = \Intervention\Image\ImageManager::gd(
                 autoOrientation: false,
-                strip: true
+                strip: true,
             );
             $image = $imageManager->read($url);
             $imageInfo = @getimagesize($url);
         } catch (Exception $e) {
             $imageManager = \Intervention\Image\ImageManager::gd(
                 autoOrientation: false,
-                strip: true
+                strip: true,
             );
             $image = $imageManager->read(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
             $imageInfo = @getimagesize(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());

@@ -149,7 +149,7 @@ class Mage_Catalog_Model_Product_Attribute_Media_Api extends Mage_Catalog_Model_
                 $filePath = "{$tmpDirectory}/{$fileName}";
                 $imageManager = \Intervention\Image\ImageManager::gd(
                     autoOrientation: false,
-                    strip: true
+                    strip: true,
                 );
                 $imageManager->read($filePath);
                 Mage::getModel('core/file_validator_image')->validate($filePath);
