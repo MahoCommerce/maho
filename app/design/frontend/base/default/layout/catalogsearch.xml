@@ -18,11 +18,6 @@
             <block type="core/template" name="top.search" as="topSearch" template="catalogsearch/form.mini.phtml"/>
         </reference>
         <reference name="footer_links">
-            <action method="addLink" translate="label title" module="catalogsearch" ifconfig="catalog/seo/search_terms">
-                <label>Search Terms</label>
-                <url helper="catalogsearch/getSearchTermUrl" />
-                <title>Search Terms</title>
-            </action>
             <action method="addLink" translate="label title" module="catalogsearch">
                 <label>Advanced Search</label>
                 <url helper="catalogsearch/getAdvancedSearchUrl" />
@@ -109,21 +104,5 @@ Advanced search results
             </block>
         </reference>
     </catalogsearch_advanced_result>
-
-    <catalogsearch_term_popular translate="label">
-        <label>Popular Search Terms</label>
-        <remove name="right"/>
-        <remove name="left"/>
-
-        <reference name="head">
-            <action method="setTitle" translate="title" module="catalogsearch"><title>Search Terms</title></action>
-        </reference>
-        <reference name="root">
-            <action method="setTemplate"><template>page/1column.phtml</template></action>
-        </reference>
-        <reference name="content">
-            <block type="catalogsearch/term" name="seo.searchterm" template="catalogsearch/term.phtml"/>
-        </reference>
-    </catalogsearch_term_popular>
 
 </layout>
