@@ -13,6 +13,7 @@ namespace MahoCLI\Commands;
 use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -33,10 +34,11 @@ class SysEncryptionKeyGenerate extends BaseMahoCommand
         $output->writeln('<error>If possible, encrypted configuration values in core_config_data will be automatically re-encrypted with the new key.</error>');
         $output->writeln('');
 
-        $helper = $this->getHelper('question');
+        /** @var QuestionHelper $questionHelper */
+        $questionHelper = $this->getHelper('question');
         $question = new ConfirmationQuestion('Are you sure you want to continue? (y/N) ', false);
 
-        if (!$helper->ask($input, $output, $question)) {
+        if (!$questionHelper->ask($input, $output, $question)) {
             $output->writeln('<info>Operation cancelled.</info>');
             return Command::SUCCESS;
         }
