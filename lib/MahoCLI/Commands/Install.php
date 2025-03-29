@@ -62,9 +62,6 @@ class Install extends BaseMahoCommand
         $this->addOption('admin_username', null, InputOption::VALUE_REQUIRED, 'Admin user login');
         $this->addOption('admin_password', null, InputOption::VALUE_REQUIRED, 'Admin user password');
 
-        // Encryption key
-        $this->addOption('encryption_key', null, InputOption::VALUE_OPTIONAL, 'Will be automatically generated and displayed on success, if not specified');
-
         // Sample data
         $this->addOption('sample_data', null, InputOption::VALUE_OPTIONAL, 'Also install sample data');
     }

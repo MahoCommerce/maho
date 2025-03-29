@@ -356,19 +356,6 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
             }
 
             /**
-             * Prepare encryption key and validate it
-             */
-            $encryptionKey = empty($this->_args['encryption_key'])
-                ? sodium_bin2hex(sodium_crypto_secretbox_keygen())
-                : $this->_args['encryption_key'];
-            $this->_getDataModel()->setEncryptionKey($encryptionKey);
-            $installer->validateEncryptionKey($encryptionKey);
-
-            if ($this->hasErrors()) {
-                return false;
-            }
-
-            /**
              * Create primary administrator user
              */
             $installer->createAdministrator($user);
@@ -380,7 +367,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
             /**
              * Save encryption key or create if empty
              */
-            $installer->installEnryptionKey($encryptionKey);
+            $installer->installEnryptionKey();
 
             if ($this->hasErrors()) {
                 return false;

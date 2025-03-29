@@ -174,15 +174,9 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
         return $this;
     }
 
-    /**
-     * @param string|null $key
-     * @return $this
-     */
-    public function replaceTmpEncryptKey($key = null)
+    public function replaceTmpEncryptKey(): self
     {
-        if (!$key) {
-            $key = Mage::generateEncryptionKeyAsHex();
-        }
+        $key = Mage::generateEncryptionKeyAsHex();
         $localXml = file_get_contents($this->_localConfigFile);
         $localXml = str_replace(self::TMP_ENCRYPT_KEY_VALUE, $key, $localXml);
         file_put_contents($this->_localConfigFile, $localXml);

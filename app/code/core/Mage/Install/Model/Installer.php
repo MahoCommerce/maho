@@ -248,18 +248,9 @@ class Mage_Install_Model_Installer extends Varien_Object
         return true;
     }
 
-    /**
-     * Set encryption key
-     *
-     * @param string $key
-     * @return $this
-     */
-    public function installEnryptionKey($key)
+    public function installEnryptionKey(): self
     {
-        if ($key) {
-            Mage::helper('core')->validateKey($key);
-        }
-        Mage::getSingleton('install/installer_config')->replaceTmpEncryptKey($key);
+        Mage::getSingleton('install/installer_config')->replaceTmpEncryptKey();
         return $this;
     }
 

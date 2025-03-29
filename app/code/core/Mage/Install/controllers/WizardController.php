@@ -281,8 +281,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->_checkIfInstalled();
 
         $step = Mage::getSingleton('install/wizard')->getStepByName('administrator');
-        $adminData      = $this->getRequest()->getPost('admin');
-        $encryptionKey  = $this->getRequest()->getPost('encryption_key');
+        $adminData = $this->getRequest()->getPost('admin');
 
         $errors = [];
 
@@ -290,12 +289,6 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $user = $this->_getInstaller()->validateAndPrepareAdministrator($adminData);
         if (is_array($user)) {
             $errors = $user;
-        }
-
-        //checking if valid encryption key was entered
-        $result = $this->_getInstaller()->validateEncryptionKey($encryptionKey);
-        if (is_array($result)) {
-            $errors = array_merge($errors, $result);
         }
 
         if (!empty($errors)) {
@@ -306,7 +299,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
 
         try {
             $this->_getInstaller()->createAdministrator($user);
-            $this->_getInstaller()->installEnryptionKey($encryptionKey);
+            $this->_getInstaller()->installEnryptionKey();
         } catch (Exception $e) {
             Mage::getSingleton('install/session')
                 ->setAdminData($adminData)
