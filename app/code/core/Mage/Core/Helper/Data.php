@@ -241,9 +241,6 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         return $this->getEncryptor()->decrypt($data);
     }
 
-    /**
-     * Validate application key
-     */
     public function validateKey(string $key): bool
     {
         return $this->getEncryptor()->validateKey($key);

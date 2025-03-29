@@ -150,7 +150,7 @@ class Mage_Core_Model_Encryption
 
     public function encrypt(#[\SensitiveParameter] string $data): string
     {
-        $key = (string) Mage::getConfig()->getNode('global/crypt/key');
+        $key = Mage::getEncryptionKeyAsBinary();
         $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
         $ciphertext = sodium_crypto_secretbox($data, $nonce, $key);
         $encrypted = base64_encode($nonce . $ciphertext);
@@ -173,7 +173,7 @@ class Mage_Core_Model_Encryption
             return '';
         }
 
-        $key = (string) Mage::getConfig()->getNode('global/crypt/key');
+        $key = Mage::getEncryptionKeyAsBinary();
         $nonce = mb_substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit');
         $ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit');
         $plaintext = sodium_crypto_secretbox_open($ciphertext, $nonce, $key);
@@ -192,7 +192,7 @@ class Mage_Core_Model_Encryption
         return $plaintext;
     }
 
-    public function validateKey(#[\SensitiveParameter]string $key): bool
+    public function validateKey(#[\SensitiveParameter] string $key): bool
     {
         return strlen($key) === SODIUM_CRYPTO_SECRETBOX_KEYBYTES;
     }
