@@ -51,7 +51,7 @@ class SysEncryptionKeyGenerate extends BaseMahoCommand
         $updatedContent = preg_replace(
             '/<key><!\[CDATA\[(.*?)\]\]><\/key>/',
             '<key><![CDATA[' . $key . ']]></key>',
-            $localXmlContent
+            $localXmlContent,
         );
 
         // Check if replacement was successful
