@@ -30,8 +30,9 @@ class SysEncryptionKeyGenerate extends BaseMahoCommand
 
         $key = Mage::generateEncryptionKeyAsHex();
 
+        $currentDate = date('Y-m-d');
         $localXmlPath = 'app/etc/local.xml';
-        $backupPath = 'app/etc/local.xml.bak.' . date('YmdHis');
+        $backupPath = 'app/etc/local.xml.bak.' . $currentDate;
 
         // Check if local.xml exists
         if (!file_exists($localXmlPath)) {
@@ -49,8 +50,8 @@ class SysEncryptionKeyGenerate extends BaseMahoCommand
         // Read the current configuration file and replace the encryption key
         $localXmlContent = file_get_contents($localXmlPath);
         $updatedContent = preg_replace(
-            '/<key><!\[CDATA\[(.*?)\]\]><\/key>/',
-            '<key><![CDATA[' . $key . ']]></key>',
+            '/<key(?:\s+date="[^"]*")?><!\[CDATA\[(.*?)\]\]><\/key>/',
+            '<key date="' . $currentDate . '"><![CDATA[' . $key . ']]></key>',
             $localXmlContent,
         );
 
