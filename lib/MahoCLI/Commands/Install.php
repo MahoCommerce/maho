@@ -95,7 +95,6 @@ class Install extends BaseMahoCommand
             $app = Mage::app('default');
             if ($installer->init($app) && $installer->setArgs() && $installer->install()) {
                 $output->writeln('<info>Installation completed successfully</info>');
-                $output->writeln("The encryption key for your installation is {$installer->getEncryptionKey()}");
             }
         } catch (Exception $e) {
             $output->writeln("<error>{$e->getMessage()}</error>");

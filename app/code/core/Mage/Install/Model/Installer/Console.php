@@ -212,16 +212,6 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
     }
 
     /**
-     * Get encryption key from data model
-     *
-     * @return string
-     */
-    public function getEncryptionKey()
-    {
-        return $this->_getDataModel()->getEncryptionKey();
-    }
-
-    /**
      * Init installation
      *
      * @return bool
