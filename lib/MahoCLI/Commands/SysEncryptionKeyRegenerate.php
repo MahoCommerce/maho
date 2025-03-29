@@ -20,10 +20,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'sys:encryptionkey:generate',
+    name: 'sys:encryptionkey:regenerate',
     description: 'Generate a new encryption key and save it to local.xml',
 )]
-class SysEncryptionKeyGenerate extends BaseMahoCommand
+class SysEncryptionKeyRegenerate extends BaseMahoCommand
 {
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -164,6 +164,13 @@ class SysEncryptionKeyGenerate extends BaseMahoCommand
 
         $output->writeln('<info>The following configurations were just re-encrypted, make sure to test all of them.</info>');
         $outputTable->render();
+
+        Mage::dispatchEvent('encryption_key_regenerated', [
+            'old_key' => $oldKey,
+            'new_key' => $newKey,
+            'output' => $output,
+        ]);
+
         return Command::SUCCESS;
     }
 }
