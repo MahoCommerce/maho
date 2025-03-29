@@ -975,4 +975,9 @@ final class Mage
     {
         return sodium_hex2bin(self::getEncryptionKeyAsHex());
     }
+
+    public static function generateEncryptionKeyAsHex(): string
+    {
+        return sodium_bin2hex(sodium_crypto_secretbox_keygen());
+    }
 }
