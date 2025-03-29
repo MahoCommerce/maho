@@ -6,6 +6,7 @@
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -26,7 +27,7 @@ class Mage_Install_Block_End extends Mage_Install_Block_Abstract
     {
         $key = $this->getData('encryption_key');
         if (is_null($key)) {
-            $key = (string) Mage::getConfig()->getNode('global/crypt/key');
+            $key = Mage::getEncryptionKeyAsHex();
             $this->setData('encryption_key', $key);
         }
         return $key;

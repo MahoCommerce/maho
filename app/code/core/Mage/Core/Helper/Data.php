@@ -221,11 +221,8 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Encrypt data using application key
-     *
-     * @param   string $data
-     * @return  string
      */
-    public function encrypt($data)
+    public function encrypt(string $data): string
     {
         if (!Mage::isInstalled()) {
             return $data;
@@ -235,11 +232,8 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Decrypt data using application key
-     *
-     * @param   string $data
-     * @return  string
      */
-    public function decrypt($data)
+    public function decrypt(string $data): string
     {
         if (!Mage::isInstalled()) {
             return $data;
@@ -247,11 +241,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         return $this->getEncryptor()->decrypt($data);
     }
 
-    /**
-     * @param string $key
-     * @return Varien_Crypt_Mcrypt
-     */
-    public function validateKey($key)
+    public function validateKey(string $key): bool
     {
         return $this->getEncryptor()->validateKey($key);
     }

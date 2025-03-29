@@ -6,14 +6,10 @@
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Console installer
- * @package    Mage_Install
- */
 class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_Abstract
 {
     /**
@@ -363,7 +359,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
              * Prepare encryption key and validate it
              */
             $encryptionKey = empty($this->_args['encryption_key'])
-                ? md5(Mage::helper('core')->getRandomString(10))
+                ? sodium_bin2hex(sodium_crypto_secretbox_keygen())
                 : $this->_args['encryption_key'];
             $this->_getDataModel()->setEncryptionKey($encryptionKey);
             $installer->validateEncryptionKey($encryptionKey);
