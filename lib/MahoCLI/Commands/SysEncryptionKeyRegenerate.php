@@ -201,12 +201,12 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
     {
         if ($this->isOldEncryptionKeyM1 && function_exists('mcrypt_module_open')) {
             $key = $this->oldEncryptionKey;
-            $handler = mcrypt_module_open(MCRYPT_BLOWFISH, '', MCRYPT_MODE_ECB, '');
-            $initVector = mcrypt_create_iv(mcrypt_enc_get_iv_size($handler), MCRYPT_RAND);
-            mcrypt_generic_init($handler, $key, $initVector);
-            $data = mdecrypt_generic($handler, (string) base64_decode((string) $data));
-            mcrypt_generic_deinit($handler);
-            mcrypt_module_close($handler);
+            $handler = mcrypt_module_open(MCRYPT_BLOWFISH, '', MCRYPT_MODE_ECB, ''); // @phpstan-ignore constant.notFound,constant.notFound
+            $initVector = mcrypt_create_iv(mcrypt_enc_get_iv_size($handler), MCRYPT_RAND); // @phpstan-ignore function.notFound,function.notFound,constant.notFound
+            mcrypt_generic_init($handler, $key, $initVector); // @phpstan-ignore function.notFound
+            $data = mdecrypt_generic($handler, (string) base64_decode((string) $data)); // @phpstan-ignore function.notFound
+            mcrypt_generic_deinit($handler); // @phpstan-ignore function.notFound
+            mcrypt_module_close($handler); // @phpstan-ignore function.notFound
             return str_replace("\x0", '', trim($data));
         }
 
