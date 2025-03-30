@@ -179,6 +179,7 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
         $key = Mage::generateEncryptionKeyAsHex();
         $localXml = file_get_contents($this->_localConfigFile);
         $localXml = str_replace(self::TMP_ENCRYPT_KEY_VALUE, $key, $localXml);
+        $localXml = str_replace('{{key_date}}', date('Y-m-d'), $localXml);
         file_put_contents($this->_localConfigFile, $localXml);
 
         return $this;
