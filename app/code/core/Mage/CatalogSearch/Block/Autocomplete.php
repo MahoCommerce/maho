@@ -17,13 +17,9 @@
  */
 class Mage_CatalogSearch_Block_Autocomplete extends Mage_Core_Block_Abstract
 {
-    /**
-     * @var array
-     */
-    protected $_suggestData;
+    protected ?Mage_CatalogSearch_Model_Resource_Fulltext_Collection $productCollection = null;
 
     /**
-     * @return string
      * @throws Mage_Core_Model_Store_Exception
      */
     #[\Override]
@@ -35,31 +31,20 @@ class Mage_CatalogSearch_Block_Autocomplete extends Mage_Core_Block_Abstract
             return $html;
         }
 
-        $suggestData = $this->getSuggestData();
-        if (!($count = count($suggestData))) {
+        $productCollection = $this->getProductCollection();
+        if (!($count = count($productCollection))) {
             return $html;
         }
 
-        $isAjaxSuggestionCountResultsEnabled = (bool) Mage::app()->getStore()
-            ->getConfig(Mage_CatalogSearch_Model_Query::XML_PATH_AJAX_SUGGESTION_COUNT);
-
-        $count--;
-
         $html = '<ul><li style="display:none"></li>';
-        foreach ($suggestData as $index => $item) {
-            if ($index == 0) {
-                $item['row_class'] .= ' first';
-            }
-
-            if ($index == $count) {
-                $item['row_class'] .= ' last';
-            }
-
-            $html .=  '<li title="' . $this->escapeHtml($item['title']) . '" class="' . $item['row_class'] . '">';
-            if ($isAjaxSuggestionCountResultsEnabled) {
-                $html .= '<span class="amount">' . $item['num_of_results'] . '</span>';
-            }
-            $html .= $this->escapeHtml($item['title']) . '</li>';
+        foreach ($productCollection as $produt) {
+            $html .= '<li>';
+            $html .= '<a href="' . $produt->getUrl() . '">';
+            //$html .= '<img src="' . $produt->get . '" alt="" class="product-image" />';
+            $html .= '<span class="product-name">' . $this->escapeHtml($produt->getName()) . '</span>';
+            $html .= '<span class="product-price">' . Mage::helper('core')->formatPrice($produt->getPrice()) . '</span>';
+            $html .= '</a>';
+            $html .= '</li>';
         }
 
         $html .= '</ul>';
@@ -67,33 +52,21 @@ class Mage_CatalogSearch_Block_Autocomplete extends Mage_Core_Block_Abstract
         return $html;
     }
 
-    /**
-     * @return array
-     */
-    public function getSuggestData()
+    public function getProductCollection(): Mage_CatalogSearch_Model_Resource_Fulltext_Collection
     {
-        if (!$this->_suggestData) {
+        if (!$this->productCollection) {
             /** @var Mage_CatalogSearch_Helper_Data $helper */
             $helper = $this->helper('catalogsearch');
-            $collection = $helper->getSuggestCollection();
             $query = $helper->getQueryText();
-            $counter = 0;
-            $data = [];
-            foreach ($collection as $item) {
-                $_data = [
-                    'title' => $item->getQueryText(),
-                    'row_class' => (++$counter) % 2 ? 'odd' : 'even',
-                    'num_of_results' => $item->getNumResults(),
-                ];
 
-                if ($item->getQueryText() == $query) {
-                    array_unshift($data, $_data);
-                } else {
-                    $data[] = $_data;
-                }
-            }
-            $this->_suggestData = $data;
+            $productCollection = Mage::getResourceModel('catalogsearch/fulltext_collection');
+            $productCollection->addSearchFilter($query)
+                ->addAttributeToSelect(['name', 'thumbnail', 'price', 'url_key'])
+                ->setOrder('relevance', 'desc')
+                ->setPageSize(10); // Limit results
+            $this->productCollection = $productCollection;
         }
-        return $this->_suggestData;
+
+        return $this->productCollection;
     }
 }
