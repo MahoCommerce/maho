@@ -55,6 +55,11 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $localXmlPath = 'app/etc/local.xml';
         $backupPath = 'app/etc/local.xml.bak.' . $currentDate;
 
+        // If it's an M1 encryption key
+        if (strlen($oldKey) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES * 2) {
+
+        }
+
         // Check if local.xml exists
         if (!file_exists($localXmlPath)) {
             $output->writeln('<error>Configuration file app/etc/local.xml not found</error>');
@@ -170,6 +175,13 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
             'new_key' => $newKey,
             'output' => $output,
         ]);
+
+        if (\Composer\InstalledVersions::isInstalled('phpseclib/mcrypt_compat')) {
+            $output->writeln('');
+            $output->writeln('<error>Warning: phpseclib/mcrypt_compat is installed. This package can cause encryption issues and should be removed.</error>');
+            $output->writeln('<error>Please remove it using: composer remove phpseclib/mcrypt_compat</error>');
+            $output->writeln('');
+        }
 
         return Command::SUCCESS;
     }
