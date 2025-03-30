@@ -140,15 +140,14 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         }
 
         // Re-encrypting encrypted data on core_config_data
-        $crypt = Mage::getModel('core/encryption');
-        $connection = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
         $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
         $table = Mage::getSingleton('core/resource')->getTableName('core_config_data');
 
-        $select = $connection->select()
+        $select = $readConnection->select()
             ->from($table)
             ->where('value IS NOT NULL AND path IN (?)', $encryptedPaths);
-        $encryptedData = $connection->fetchAll($select);
+        $encryptedData = $readConnection->fetchAll($select);
 
         if (empty($encryptedData)) {
             $output->writeln('<info>No encrypted configurations to re-encrypt.</info>');
@@ -156,7 +155,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         }
 
         foreach ($encryptedData as &$encryptedDataRow) {
-            $encryptedDataRow['value'] = $crypt->decrypt($encryptedDataRow['value']);
+            $encryptedDataRow['value'] = $this->decrypt($encryptedDataRow['value']);
         }
 
         $outputTable = new Table($output);
@@ -164,7 +163,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
         Mage::getConfig()->setNode('global/crypt/key', $newKey);
         foreach ($encryptedData as $encryptedDataRow) {
-            $newEncryptedValue = $crypt->encrypt($encryptedDataRow['value']);
+            $newEncryptedValue = $this->encrypt($encryptedDataRow['value']);
             $writeConnection->update(
                 $table,
                 ['value' => $newEncryptedValue],
@@ -200,7 +199,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
     private function decrypt(#[\SensitiveParameter] string $data): string
     {
-        if ($this->isOldEncryptionKeyM1) {
+        if ($this->isOldEncryptionKeyM1 && function_exists('mcrypt_module_open')) {
             $key = $this->oldEncryptionKey;
             $handler = mcrypt_module_open(MCRYPT_BLOWFISH, '', MCRYPT_MODE_ECB, '');
             $initVector = mcrypt_create_iv(mcrypt_enc_get_iv_size($handler), MCRYPT_RAND);
