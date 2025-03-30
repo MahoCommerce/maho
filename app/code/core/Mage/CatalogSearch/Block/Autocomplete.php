@@ -37,9 +37,4 @@ class Mage_CatalogSearch_Block_Autocomplete extends Mage_Core_Block_Template
 
         return $this->productCollection;
     }
-
-    public function getMode(): string
-    {
-        return 'grid';
-    }
 }

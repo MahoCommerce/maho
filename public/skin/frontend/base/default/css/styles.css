@@ -6780,18 +6780,41 @@ div.paypal-logo span > img {
  * Search - Auto Suggest
  * ============================================ */
 .search-autocomplete {
+  background-color: var(--maho-color-background);
+  border: 1px solid var(--maho-color-primary);
   position: absolute !important;
+  overflow: visible !important;
   margin-top: 8px;
   z-index: 200;
   display: none;
-  background: var(--maho-color-background);
+}
+.search-autocomplete .products-list {
+  margin: 0.5rem !important;
 }
 .search-autocomplete .product-image {
   max-width: 80px;
   margin: auto;
 }
-.search-autocomplete .products-grid li > div > ul {
+.search-autocomplete .products-grid li > div > ul, .search-autocomplete :is(.product-secondary,.desc) {
   display: none !important;
+}
+.search-autocomplete :is(.product-primary,.product-shop) {
+  float: none !important;
+  padding: 0 !important;
+  width: auto !important;
+}
+.search-autocomplete:before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  display: block;
+  border-right: 7px solid transparent;
+  border-left: 7px solid transparent;
+  border-bottom: 7px solid var(--maho-color-primary);
+  border-top: none;
+  left: 50%;
+  top: -7px;
 }
 
 /* ============================================ *
