@@ -6781,55 +6781,17 @@ div.paypal-logo span > img {
  * ============================================ */
 .search-autocomplete {
   position: absolute !important;
-  overflow: visible !important;
   margin-top: 8px;
   z-index: 200;
   display: none;
+  background: var(--maho-color-background);
 }
-.search-autocomplete ul {
-  border-radius: 2px;
-  background-color: var(--maho-color-background);
-  border: 1px solid var(--maho-color-primary);
-  left: 0;
-  padding-left: 0;
-  position: absolute;
-  top: 0;
-  width: 100%;
+.search-autocomplete .product-image {
+  max-width: 80px;
+  margin: auto;
 }
-.search-autocomplete ul li {
-  border-bottom: 1px solid var(--maho-color-background-alt);
-  color: var(--maho-color-primary);
-  cursor: pointer;
-  font-size: 0.75rem;
-  padding: 4px 6px;
-  text-align: left;
-}
-.search-autocomplete ul li:hover {
-  color: var(--maho-color-primary-hover);
-}
-.search-autocomplete ul li.selected {
-  background-color: var(--maho-color-primary);
-  color: var(--maho-color-background);
-}
-.search-autocomplete ul li .amount {
-  float: right;
-  font-weight: bold;
-}
-.search-autocomplete ul li:last-child {
-  border-bottom: none;
-}
-.search-autocomplete:before {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 0;
-  display: block;
-  border-right: 7px solid transparent;
-  border-left: 7px solid transparent;
-  border-bottom: 7px solid var(--maho-color-primary);
-  border-top: none;
-  left: 50%;
-  top: -7px;
+.search-autocomplete .products-grid li > div > ul {
+  display: none !important;
 }
 
 /* ============================================ *

@@ -25,7 +25,7 @@ class Mage_CatalogSearch_AjaxController extends Mage_Core_Controller_Front_Actio
 
         $this->getResponse()->setBody(
             $this->getLayout()->createBlock('catalogsearch/autocomplete')
-                ->setTemplate('catalogsearch/autocomplete.phtml')
+                ->setTemplate('catalog/product/list.phtml')
                 ->toHtml()
         );
     }
