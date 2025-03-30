@@ -182,8 +182,9 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
         if (\Composer\InstalledVersions::isInstalled('phpseclib/mcrypt_compat')) {
             $output->writeln('');
-            $output->writeln('<error>Warning: phpseclib/mcrypt_compat is installed. This package can cause encryption issues and should be removed.</error>');
-            $output->writeln('<error>Please remove it using: composer remove phpseclib/mcrypt_compat</error>');
+            $output->writeln('<error>Warning: phpseclib/mcrypt_compat is installed. This package is obsolete and should be removed.</error>');
+            $output->writeln('If directly installed, remove it with <info>composer remove phpseclib/mcrypt_compat</info>.');
+            $output->writeln('If installed as a dependency, find which package requires it with <info>composer why phpseclib/mcrypt_compat</info> and evaluate its removal.');
             $output->writeln('');
         }
 
