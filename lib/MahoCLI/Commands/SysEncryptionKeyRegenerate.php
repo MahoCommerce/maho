@@ -180,7 +180,12 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
             'decrypt_callback' => [$this, 'decrypt'],
         ]);
 
-        if (\Composer\InstalledVersions::isInstalled('phpseclib/mcrypt_compat')) {
+        if (\Composer\InstalledVersions::isInstalled('mahocommerce/module-mcrypt-compat')) {
+            $output->writeln('');
+            $output->writeln('<error>You may now remove the compatibility module using: composer remove mahocommerce/module-mcrypt-compat</error>');
+            $output->writeln('Then check if you still have phpseclib/mcrypt_compat installed and evaluate its removal too.');
+            $output->writeln('');
+        } elseif (\Composer\InstalledVersions::isInstalled('phpseclib/mcrypt_compat')) {
             $output->writeln('');
             $output->writeln('<error>Warning: phpseclib/mcrypt_compat is installed. This package is obsolete and should be removed.</error>');
             $output->writeln('If directly installed, remove it with <info>composer remove phpseclib/mcrypt_compat</info>.');
