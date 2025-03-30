@@ -205,8 +205,8 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
         try {
             $decoded = sodium_base642bin($data, SODIUM_BASE64_VARIANT_ORIGINAL);
-        } catch (SodiumException $e) {
-            $exception = new Exception('Invalid base64 encoding: ' . $e->getMessage());
+        } catch (\SodiumException $e) {
+            $exception = new \Exception('Invalid base64 encoding: ' . $e->getMessage());
             Mage::logException($exception);
             return '';
         }
