@@ -25,6 +25,10 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 )]
 class SysEncryptionKeyRegenerate extends BaseMahoCommand
 {
+    private string $oldEncryptionKey;
+    private string $newEncryptionKey;
+    private bool $isOldEncryptionKeyM1 = false;
+
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -37,7 +41,6 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         /** @var QuestionHelper $questionHelper */
         $questionHelper = $this->getHelper('question');
         $question = new ConfirmationQuestion('Are you sure you want to continue? (y/N) ', false);
-
         if (!$questionHelper->ask($input, $output, $question)) {
             $output->writeln('<info>Operation cancelled.</info>');
             return Command::SUCCESS;
@@ -49,15 +52,29 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         Mage::app()->getCacheInstance()->banUse('config');
         Mage::app()->getConfig()->reinit();
 
-        $oldKey = Mage::getEncryptionKeyAsHex();
-        $newKey = Mage::generateEncryptionKeyAsHex();
+        $oldKey = $this->oldEncryptionKey = Mage::getEncryptionKeyAsHex();
+        $newKey = $this->newEncryptionKey = Mage::generateEncryptionKeyAsHex();
         $currentDate = date('Y-m-d');
         $localXmlPath = 'app/etc/local.xml';
         $backupPath = 'app/etc/local.xml.bak.' . $currentDate;
 
-        // If it's an M1 encryption key
+        // If it's an M1 encryption key check for mcrypt_compat
         if (strlen($oldKey) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES * 2) {
+            $this->isOldEncryptionKeyM1 = true;
+            $output->writeln('');
+            $output->writeln('<error>It seems your encryption key is an old M1 one.</error>');
+            if (\Composer\InstalledVersions::isInstalled('phpseclib/mcrypt_compat')) {
+                $output->writeln('<error>Since you have mcrypt_compat installed we will try to re-encrypt all your crypted data.</error>');
+            } else {
+                $output->writeln('<error>Since you do not have mcrypt_compat installed we will not be able to re-encrypt your crypted data.</error>');
+            }
 
+            $output->writeln('');
+            $question = new ConfirmationQuestion('Are you sure you want to continue? (y/N) ', false);
+            if (!$questionHelper->ask($input, $output, $question)) {
+                $output->writeln('<info>Operation cancelled.</info>');
+                return Command::SUCCESS;
+            }
         }
 
         // Check if local.xml exists
@@ -97,7 +114,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $output->writeln('<comment>New key: ' . $newKey . '</comment>');
         $output->writeln('');
 
-        if (strlen($oldKey) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES * 2) {
+        if ($this->isOldEncryptionKeyM1) {
             $output->writeln('<error>The new key has been generated and saved, but existing encrypted data cannot be automatically migrated.</error>');
             $output->writeln('<error>You will need to manually update any existing encrypted values in the database through the admin panel.</error>');
             return Command::SUCCESS;
