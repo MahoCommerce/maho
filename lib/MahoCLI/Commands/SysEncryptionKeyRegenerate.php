@@ -203,7 +203,14 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
             return str_replace("\x0", '', trim($data));
         }
 
-        $decoded = (string) base64_decode($data);
+        try {
+            $decoded = sodium_base642bin($data, SODIUM_BASE64_VARIANT_ORIGINAL);
+        } catch (SodiumException $e) {
+            $exception = new Exception('Invalid base64 encoding: ' . $e->getMessage());
+            Mage::logException($exception);
+            return '';
+        }
+
         $key = sodium_hex2bin($this->oldEncryptionKey);
         $nonce = mb_substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit');
         $ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit');
@@ -219,7 +226,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $key = sodium_hex2bin($this->newEncryptionKey);
         $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
         $ciphertext = sodium_crypto_secretbox($data, $nonce, $key);
-        $encrypted = base64_encode($nonce . $ciphertext);
+        $encrypted = sodium_bin2base64($nonce . $ciphertext, SODIUM_BASE64_VARIANT_ORIGINAL);
         sodium_memzero($data);
         return $encrypted;
     }
