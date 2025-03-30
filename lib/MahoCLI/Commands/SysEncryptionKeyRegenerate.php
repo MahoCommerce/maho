@@ -154,19 +154,12 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
             return Command::SUCCESS;
         }
 
-        foreach ($encryptedData as &$encryptedDataRow) {
-            $encryptedDataRow['value'] = $this->decrypt($encryptedDataRow['value']);
-        }
-
         $outputTable = new Table($output);
         $outputTable->setHeaders(['config_id', 'scope', 'scope_id', 'path']);
-
-        Mage::getConfig()->setNode('global/crypt/key', $newKey);
         foreach ($encryptedData as $encryptedDataRow) {
-            $newEncryptedValue = $this->encrypt($encryptedDataRow['value']);
             $writeConnection->update(
                 $table,
-                ['value' => $newEncryptedValue],
+                ['value' => $this->encrypt($this->decrypt($encryptedDataRow['value']))],
                 ['config_id = ?' => $encryptedDataRow['config_id']],
             );
 
