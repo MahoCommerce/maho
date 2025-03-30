@@ -153,7 +153,7 @@ class Mage_Core_Model_Encryption
         $key = Mage::getEncryptionKeyAsBinary();
         $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
         $ciphertext = sodium_crypto_secretbox($data, $nonce, $key);
-        $encrypted = base64_encode($nonce . $ciphertext);
+        $encrypted = sodium_bin2base64($nonce . $ciphertext, SODIUM_BASE64_VARIANT_ORIGINAL);
         sodium_memzero($data); // Clean sensitive data from memory
         return $encrypted;
     }
