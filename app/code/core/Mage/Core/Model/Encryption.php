@@ -186,7 +186,9 @@ class Mage_Core_Model_Encryption
         }
 
         // Clean sensitive data from memory
+        sodium_memzero($data);
         sodium_memzero($decoded);
+        sodium_memzero($key);
         sodium_memzero($nonce);
         sodium_memzero($ciphertext);
 
