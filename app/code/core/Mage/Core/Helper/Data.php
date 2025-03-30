@@ -952,9 +952,10 @@ XML;
 
     public function getMailerDsn(): string
     {
+        $coreHelper = Mage::helper('core');
         $emailTransport = Mage::getStoreConfig('system/smtp/enabled');
-        $user = Mage::getStoreConfig('system/smtp/username');
-        $pass = Mage::getStoreConfig('system/smtp/password');
+        $user = $coreHelper->decrypt(Mage::getStoreConfig('system/smtp/username'));
+        $pass = $coreHelper->decrypt(Mage::getStoreConfig('system/smtp/password'));
         $host = Mage::getStoreConfig('system/smtp/host');
         $port = Mage::getStoreConfig('system/smtp/port');
         return match ($emailTransport) {
