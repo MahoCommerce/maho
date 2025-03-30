@@ -15,13 +15,10 @@
  *
  * @package    Mage_CatalogSearch
  */
-class Mage_CatalogSearch_Block_Autocomplete extends Mage_Core_Block_Abstract
+class Mage_CatalogSearch_Block_Autocomplete extends Mage_Core_Block_Template
 {
     protected ?Mage_CatalogSearch_Model_Resource_Fulltext_Collection $productCollection = null;
 
-    /**
-     * @throws Mage_Core_Model_Store_Exception
-     */
     #[\Override]
     protected function _toHtml()
     {
