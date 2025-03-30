@@ -215,9 +215,14 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $nonce = mb_substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit');
         $ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit');
         $plaintext = sodium_crypto_secretbox_open($ciphertext, $nonce, $key);
+
+        // Clean sensitive data from memory
+        sodium_memzero($data);
         sodium_memzero($decoded);
+        sodium_memzero($key);
         sodium_memzero($nonce);
         sodium_memzero($ciphertext);
+
         return (string) $plaintext;
     }
 
@@ -227,7 +232,13 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
         $ciphertext = sodium_crypto_secretbox($data, $nonce, $key);
         $encrypted = sodium_bin2base64($nonce . $ciphertext, SODIUM_BASE64_VARIANT_ORIGINAL);
+
+        // Clean sensitive data from memory
         sodium_memzero($data);
+        sodium_memzero($key);
+        sodium_memzero($nonce);
+        sodium_memzero($ciphertext);
+
         return $encrypted;
     }
 }
