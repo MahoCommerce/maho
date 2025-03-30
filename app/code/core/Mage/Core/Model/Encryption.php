@@ -167,7 +167,7 @@ class Mage_Core_Model_Encryption
             return '';
         }
 
-        if (mb_strlen($decoded, '8bit') < (SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + SODIUM_CRYPTO_SECRETBOX_MACBYTES)) {
+        if (strlen($decoded) < (SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + SODIUM_CRYPTO_SECRETBOX_MACBYTES)) {
             $exception = new Exception('Data is too short to be valid');
             Mage::logException($exception);
             return '';
