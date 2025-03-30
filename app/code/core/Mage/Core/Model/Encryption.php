@@ -160,9 +160,10 @@ class Mage_Core_Model_Encryption
 
     public function decrypt(#[\SensitiveParameter] string $data): string
     {
-        $decoded = sodium_base642bin($data, SODIUM_BASE64_VARIANT_ORIGINAL);
-        if ($decoded === false) {
-            $exception = new Exception('Invalid base64 encoding');
+        try {
+            $decoded = sodium_base642bin($data, SODIUM_BASE64_VARIANT_ORIGINAL);
+        } catch (SodiumException $e) {
+            $exception = new Exception('Invalid base64 encoding: ' . $e->getMessage());
             Mage::logException($exception);
             return '';
         }
