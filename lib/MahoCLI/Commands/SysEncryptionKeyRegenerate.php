@@ -114,6 +114,79 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $output->writeln('<comment>New key: ' . $newKey . '</comment>');
         $output->writeln('');
 
+        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
+
+        $this->recryptAdminUserTable($output, $readConnection, $writeConnection);
+        $this->recryptSalesFlatQuoteTable($output, $readConnection, $writeConnection);
+        $this->recryptCoreConfigDataTable($output, $readConnection, $writeConnection);
+
+        Mage::dispatchEvent('encryption_key_regenerated', [
+            'output' => $output,
+            'encrypt_callback' => [$this, 'encrypt'],
+            'decrypt_callback' => [$this, 'decrypt'],
+        ]);
+
+        if (\Composer\InstalledVersions::isInstalled('mahocommerce/module-mcrypt-compat')) {
+            $output->writeln('');
+            $output->writeln('<error>You may now remove the compatibility module using: composer remove mahocommerce/module-mcrypt-compat</error>');
+            $output->writeln('Then check if you still have phpseclib/mcrypt_compat installed and evaluate its removal too.');
+            $output->writeln('');
+        } elseif (\Composer\InstalledVersions::isInstalled('phpseclib/mcrypt_compat')) {
+            $output->writeln('');
+            $output->writeln('<error>Warning: phpseclib/mcrypt_compat is installed. This package is obsolete and should be removed.</error>');
+            $output->writeln('If directly installed, remove it with <info>composer remove phpseclib/mcrypt_compat</info>.');
+            $output->writeln('If installed as a dependency, find which package requires it with <info>composer why phpseclib/mcrypt_compat</info> and evaluate its removal.');
+            $output->writeln('');
+        }
+
+        return Command::SUCCESS;
+    }
+
+    public function recryptAdminUserTable(OutputInterface $output, \Varien_Db_Adapter_Interface $readConnection, \Varien_Db_Adapter_Interface $writeConnection): void
+    {
+        $output->write('Re-encrypting data on admin_user table... ');
+
+        $table = Mage::getSingleton('core/resource')->getTableName('admin_user');
+        $select = $readConnection->select()
+            ->from($table)
+            ->where('twofa_secret IS NOT NULL');
+        $encryptedData = $readConnection->fetchAll($select);
+
+        foreach ($encryptedData as $encryptedDataRow) {
+            $writeConnection->update(
+                $table,
+                ['twofa_secret' => $this->encrypt($this->decrypt($encryptedDataRow['twofa_secret']))],
+                ['user_id = ?' => $encryptedDataRow['user_id']],
+            );
+        }
+
+        $output->writeln('OK');
+    }
+
+    public function recryptSalesFlatQuoteTable(OutputInterface $output, \Varien_Db_Adapter_Interface $readConnection, \Varien_Db_Adapter_Interface $writeConnection): void
+    {
+        $output->write('Re-encrypting data on sales_flat_quote table... ');
+
+        $table = Mage::getSingleton('core/resource')->getTableName('sales_flat_quote');
+        $select = $readConnection->select()
+            ->from($table)
+            ->where('password_hash IS NOT NULL');
+        $encryptedData = $readConnection->fetchAll($select);
+
+        foreach ($encryptedData as $encryptedDataRow) {
+            $writeConnection->update(
+                $table,
+                ['password_hash' => $this->encrypt($this->decrypt($encryptedDataRow['password_hash']))],
+                ['entity_id = ?' => $encryptedDataRow['entity_id']],
+            );
+        }
+
+        $output->writeln('OK');
+    }
+
+    public function recryptCoreConfigDataTable(OutputInterface $output, \Varien_Db_Adapter_Interface $readConnection, \Varien_Db_Adapter_Interface $writeConnection): void
+    {
         // Checking if there are any encrypted configurations that should be re-encrypted
         $encryptedPaths = [];
         $sections = Mage::getSingleton('adminhtml/config')->getSections();
@@ -136,14 +209,11 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
         if (empty($encryptedPaths)) {
             $output->writeln('<info>No encrypted configurations to re-encrypt.</info>');
-            return Command::SUCCESS;
+            return;
         }
 
         // Re-encrypting encrypted data on core_config_data
-        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
         $table = Mage::getSingleton('core/resource')->getTableName('core_config_data');
-
         $select = $readConnection->select()
             ->from($table)
             ->where('value IS NOT NULL AND path IN (?)', $encryptedPaths);
@@ -151,7 +221,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
         if (empty($encryptedData)) {
             $output->writeln('<info>No encrypted configurations to re-encrypt.</info>');
-            return Command::SUCCESS;
+            return;
         }
 
         $outputTable = new Table($output);
@@ -173,27 +243,6 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
         $output->writeln('<info>The following configurations were just re-encrypted, make sure to test all of them.</info>');
         $outputTable->render();
-
-        Mage::dispatchEvent('encryption_key_regenerated', [
-            'output' => $output,
-            'encrypt_callback' => [$this, 'encrypt'],
-            'decrypt_callback' => [$this, 'decrypt'],
-        ]);
-
-        if (\Composer\InstalledVersions::isInstalled('mahocommerce/module-mcrypt-compat')) {
-            $output->writeln('');
-            $output->writeln('<error>You may now remove the compatibility module using: composer remove mahocommerce/module-mcrypt-compat</error>');
-            $output->writeln('Then check if you still have phpseclib/mcrypt_compat installed and evaluate its removal too.');
-            $output->writeln('');
-        } elseif (\Composer\InstalledVersions::isInstalled('phpseclib/mcrypt_compat')) {
-            $output->writeln('');
-            $output->writeln('<error>Warning: phpseclib/mcrypt_compat is installed. This package is obsolete and should be removed.</error>');
-            $output->writeln('If directly installed, remove it with <info>composer remove phpseclib/mcrypt_compat</info>.');
-            $output->writeln('If installed as a dependency, find which package requires it with <info>composer why phpseclib/mcrypt_compat</info> and evaluate its removal.');
-            $output->writeln('');
-        }
-
-        return Command::SUCCESS;
     }
 
     private function decrypt(#[\SensitiveParameter] string $data): string
