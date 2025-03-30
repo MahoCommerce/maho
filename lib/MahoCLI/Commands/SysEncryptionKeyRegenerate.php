@@ -114,12 +114,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $output->writeln('<comment>New key: ' . $newKey . '</comment>');
         $output->writeln('');
 
-        if ($this->isOldEncryptionKeyM1) {
-            $output->writeln('<error>The new key has been generated and saved, but existing encrypted data cannot be automatically migrated.</error>');
-            $output->writeln('<error>You will need to manually update any existing encrypted values in the database through the admin panel.</error>');
-            return Command::SUCCESS;
-        }
-
+        // Checking if there are any encrypted configurations that should be re-encrypted
         $encryptedPaths = [];
         $sections = Mage::getSingleton('adminhtml/config')->getSections();
         if ($sections) {
@@ -188,9 +183,9 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $outputTable->render();
 
         Mage::dispatchEvent('encryption_key_regenerated', [
-            'old_key' => $oldKey,
-            'new_key' => $newKey,
             'output' => $output,
+            'encrypt_callback' => [$this, 'encrypt'],
+            'decrypt_callback' => [$this, 'decrypt'],
         ]);
 
         if (\Composer\InstalledVersions::isInstalled('phpseclib/mcrypt_compat')) {
@@ -201,5 +196,39 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         }
 
         return Command::SUCCESS;
+    }
+
+    private function decrypt(#[\SensitiveParameter] string $data): string
+    {
+        if ($this->isOldEncryptionKeyM1) {
+            $key = $this->oldEncryptionKey;
+            $handler = mcrypt_module_open(MCRYPT_BLOWFISH, '', MCRYPT_MODE_ECB, '');
+            $initVector = mcrypt_create_iv(mcrypt_enc_get_iv_size($handler), MCRYPT_RAND);
+            mcrypt_generic_init($handler, $key, $initVector);
+            $data = mdecrypt_generic($handler, (string) base64_decode((string) $data));
+            mcrypt_generic_deinit($handler);
+            mcrypt_module_close($handler);
+            return str_replace("\x0", '', trim($data));
+        }
+
+        $decoded = (string) base64_decode($data);
+        $key = sodium_hex2bin($this->oldEncryptionKey);
+        $nonce = mb_substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit');
+        $ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit');
+        $plaintext = sodium_crypto_secretbox_open($ciphertext, $nonce, $key);
+        sodium_memzero($decoded);
+        sodium_memzero($nonce);
+        sodium_memzero($ciphertext);
+        return (string) $plaintext;
+    }
+
+    private function encrypt(#[\SensitiveParameter] string $data): string
+    {
+        $key = sodium_hex2bin($this->newEncryptionKey);
+        $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+        $ciphertext = sodium_crypto_secretbox($data, $nonce, $key);
+        $encrypted = base64_encode($nonce . $ciphertext);
+        sodium_memzero($data);
+        return $encrypted;
     }
 }
