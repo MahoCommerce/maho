@@ -54,7 +54,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
         $oldKey = $this->oldEncryptionKey = Mage::getEncryptionKeyAsHex();
         $newKey = $this->newEncryptionKey = Mage::generateEncryptionKeyAsHex();
-        $currentDate = date('Y-m-d');
+        $currentDate = date('Y-m-d-H-i-s');
         $localXmlPath = 'app/etc/local.xml';
         $backupPath = 'app/etc/local.xml.bak.' . $currentDate;
 
@@ -94,7 +94,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $localXmlContent = file_get_contents($localXmlPath);
         $updatedContent = preg_replace(
             '/<key(?:\s+date="[^"]*")?><!\[CDATA\[(.*?)\]\]><\/key>/',
-            '<key date="' . $currentDate . '"><![CDATA[' . $newKey . ']]></key>',
+            '<key date="' . substr($currentDate, 0, 10) . '"><![CDATA[' . $newKey . ']]></key>',
             $localXmlContent,
         );
 
