@@ -192,7 +192,7 @@ final class Maho
             ...$customOptions,
         ];
 
-        $driverClass = extension_loaded('vips') && \Composer\InstalledVersions::isInstalled('intervention/image-driver-vips')
+        $driverClass = extension_loaded('ffi') === true && ini_get('ffi.enable') === '1' && ini_get('zend.max_allowed_stack_size') === '-1' && \Composer\InstalledVersions::isInstalled('intervention/image-driver-vips')
             ? \Intervention\Image\Drivers\Vips\Driver::class // @phpstan-ignore class.notFound
             : \Intervention\Image\Drivers\Gd\Driver::class;
 
