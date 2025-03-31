@@ -14854,12 +14854,6 @@ parameters:
 			path: app/code/core/Mage/CatalogSearch/controllers/AdvancedController.php
 
 		-
-			message: '#^Method Mage_CatalogSearch_AjaxController\:\:suggestAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/controllers/AjaxController.php
-
-		-
 			message: '#^Method Mage_CatalogSearch_ResultController\:\:indexAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

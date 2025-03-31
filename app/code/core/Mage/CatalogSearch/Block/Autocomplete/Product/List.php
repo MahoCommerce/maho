@@ -10,6 +10,9 @@
 
 class Mage_CatalogSearch_Block_Autocomplete_Product_List extends Mage_Catalog_Block_Product_List
 {
+    /** @var Mage_CatalogSearch_Model_Resource_Fulltext_Collection */
+    protected $_productCollection;
+
     #[\Override]
     public function getMode(): string
     {
