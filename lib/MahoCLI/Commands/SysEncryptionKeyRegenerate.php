@@ -64,9 +64,9 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
             $output->writeln('');
             $output->writeln('<error>It seems your encryption key is an old M1 one.</error>');
             if (\Composer\InstalledVersions::isInstalled('phpseclib/mcrypt_compat')) {
-                $output->writeln('<error>Since you have mcrypt_compat installed we will try to re-encrypt all your crypted data.</error>');
+                $output->writeln('<error>Since you have phpseclib/mcrypt_compat installed we will try to re-encrypt all your crypted data.</error>');
             } else {
-                $output->writeln('<error>Since you do not have mcrypt_compat installed we will not be able to re-encrypt your crypted data.</error>');
+                $output->writeln('<error>Since you do not have phpseclib/mcrypt_compat installed we will not be able to re-encrypt your crypted data.</error>');
             }
 
             $output->writeln('');
@@ -119,6 +119,8 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
         $this->recryptAdminUserTable($output, $readConnection, $writeConnection);
         $this->recryptSalesFlatQuoteTable($output, $readConnection, $writeConnection);
+        $this->recryptSalesFlatQuotePaymentTable($output, $readConnection, $writeConnection);
+        $this->recryptSalesFlatOrderPaymentTable($output, $readConnection, $writeConnection);
         $this->recryptCoreConfigDataTable($output, $readConnection, $writeConnection);
 
         Mage::dispatchEvent('encryption_key_regenerated', [
@@ -178,6 +180,58 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
             $writeConnection->update(
                 $table,
                 ['password_hash' => $this->encrypt($this->decrypt($encryptedDataRow['password_hash']))],
+                ['entity_id = ?' => $encryptedDataRow['entity_id']],
+            );
+        }
+
+        $output->writeln('OK');
+    }
+
+    public function recryptSalesFlatQuotePaymentTable(OutputInterface $output, \Varien_Db_Adapter_Interface $readConnection, \Varien_Db_Adapter_Interface $writeConnection): void
+    {
+        $output->write('Re-encrypting data on sales_flat_quote_payment table... ');
+        $table = Mage::getSingleton('core/resource')->getTableName('sales_flat_quote_payment');
+
+        $select = $readConnection->select()
+            ->from($table)
+            ->where('cc_number_enc IS NOT NULL');
+        $encryptedData = $readConnection->fetchAll($select);
+        foreach ($encryptedData as $encryptedDataRow) {
+            $writeConnection->update(
+                $table,
+                ['cc_number_enc' => $this->encrypt($this->decrypt($encryptedDataRow['cc_number_enc']))],
+                ['payment_id = ?' => $encryptedDataRow['payment_id']],
+            );
+        }
+
+        $select = $readConnection->select()
+            ->from($table)
+            ->where('cc_cid_enc IS NOT NULL');
+        $encryptedData = $readConnection->fetchAll($select);
+        foreach ($encryptedData as $encryptedDataRow) {
+            $writeConnection->update(
+                $table,
+                ['cc_cid_enc' => $this->encrypt($this->decrypt($encryptedDataRow['cc_cid_enc']))],
+                ['payment_id = ?' => $encryptedDataRow['payment_id']],
+            );
+        }
+
+        $output->writeln('OK');
+    }
+
+    public function recryptSalesFlatOrderPaymentTable(OutputInterface $output, \Varien_Db_Adapter_Interface $readConnection, \Varien_Db_Adapter_Interface $writeConnection): void
+    {
+        $output->write('Re-encrypting data on sales_flat_order_payment table... ');
+        $table = Mage::getSingleton('core/resource')->getTableName('sales_flat_order_payment');
+
+        $select = $readConnection->select()
+            ->from($table)
+            ->where('cc_number_enc IS NOT NULL');
+        $encryptedData = $readConnection->fetchAll($select);
+        foreach ($encryptedData as $encryptedDataRow) {
+            $writeConnection->update(
+                $table,
+                ['cc_number_enc' => $this->encrypt($this->decrypt($encryptedDataRow['cc_number_enc']))],
                 ['entity_id = ?' => $encryptedDataRow['entity_id']],
             );
         }
