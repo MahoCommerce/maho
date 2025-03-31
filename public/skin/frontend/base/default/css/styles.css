@@ -6804,6 +6804,10 @@ div.paypal-logo span > img {
   padding: 0 !important;
   width: auto !important;
 }
+.search-autocomplete .results-list {
+  max-height: 70dvh;
+  overflow: auto;
+}
 .search-autocomplete .products-list > li {
   padding-bottom: 10px;
   margin-bottom: 10px;
