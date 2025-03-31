@@ -219,8 +219,10 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
             ]);
         }
 
+        $output->writeln('');
         $output->writeln('<info>The following configurations were just re-encrypted, make sure to test all of them.</info>');
         $outputTable->render();
+        $output->writeln('');
     }
 
     public function decrypt(#[\SensitiveParameter] string $data): string
