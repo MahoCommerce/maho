@@ -79,7 +79,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
      * @var string e.g. "small_image"
      */
     protected $_destinationSubdir;
-    protected float $_angle;
+    protected float $_angle = 0;
 
     protected $_watermarkFile;
     protected $_watermarkPosition;
