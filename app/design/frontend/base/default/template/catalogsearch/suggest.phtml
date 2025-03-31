@@ -9,8 +9,8 @@
 
 /** @var Mage_CatalogSearch_Block_Autocomplete $this */
 $numResults = count($this->getLoadedProductCollection());
-$productList = $this->getLayout()->createBlock('core/template')
-    ->setLoadedProductCollection($this->getLoadedProductCollection())
+$productList = $this->getLayout()->createBlock('catalogsearch/autocomplete_product_list')
+    ->setProductCollection($this->getLoadedProductCollection())
     ->setTemplate('catalog/product/list.phtml');
 ?>
 <?php if ($numResults): ?>

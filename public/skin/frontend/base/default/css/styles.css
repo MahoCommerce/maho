@@ -6807,6 +6807,7 @@ div.paypal-logo span > img {
 .search-autocomplete .results-list {
   max-height: 70dvh;
   overflow: auto;
+  overscroll-behavior: contain;
 }
 .search-autocomplete .products-list > li {
   padding-bottom: 10px;
