@@ -1,0 +1,19 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     base_default
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_CatalogSearch_Block_Autocomplete $this */
+$productList = $this->getLayout()->createBlock('core/template')
+    ->setLoadedProductCollection($this->getLoadedProductCollection())
+    ->setTemplate('catalog/product/list.phtml');
+?>
+<?= $productList->toHtml() ?>
+
+<a class="view-all" href="ciaociao">
+    <?= $this->__("View all %s results") ?>
+</a>

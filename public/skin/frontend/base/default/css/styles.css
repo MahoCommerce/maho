@@ -6793,7 +6793,8 @@ div.paypal-logo span > img {
 }
 .search-autocomplete .product-image {
   max-width: 80px;
-  margin: auto;
+  margin-right: 1rem;
+  border: none;
 }
 .search-autocomplete .products-grid li > div > ul, .search-autocomplete :is(.product-secondary,.desc) {
   display: none !important;
@@ -6802,6 +6803,23 @@ div.paypal-logo span > img {
   float: none !important;
   padding: 0 !important;
   width: auto !important;
+}
+.search-autocomplete .products-list > li {
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+.search-autocomplete .products-list .product-name a {
+  font-size: 0.813rem;;
+  text-transform: none;
+  font-weight: 500;
+}
+.search-autocomplete .view-all {
+  display: block;
+  text-align: center;
+  font-weight: 500;
+  color: var(--maho-color-background);
+  background-color: var(--maho-color-primary);
+  padding: 0.5rem;
 }
 .search-autocomplete:before {
   content: '';
