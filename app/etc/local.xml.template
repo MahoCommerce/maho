@@ -16,7 +16,7 @@
             <date>{{date}}</date>
         </install>
         <crypt>
-            <key>{{key}}</key>
+            <key date="{{key_date}}">{{key}}</key>
         </crypt>
         <resources>
             <db>

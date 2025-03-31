@@ -965,4 +965,19 @@ final class Mage
 
         return $baseUrl;
     }
+
+    public static function getEncryptionKeyAsHex(): string
+    {
+        return (string) Mage::getConfig()->getNode('global/crypt/key');
+    }
+
+    public static function getEncryptionKeyAsBinary(): string
+    {
+        return sodium_hex2bin(self::getEncryptionKeyAsHex());
+    }
+
+    public static function generateEncryptionKeyAsHex(): string
+    {
+        return sodium_bin2hex(sodium_crypto_secretbox_keygen());
+    }
 }
