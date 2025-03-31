@@ -110,6 +110,14 @@
                     </payment_order_status_unassign_before>
                 </observers>
             </sales_order_status_unassign_before>
+            <encryption_key_regenerated>
+                <observers>
+                    <payment>
+                        <class>payment/observer</class>
+                        <method>encryptionKeyRegenerated</method>
+                    </payment>
+                </observers>
+            </encryption_key_regenerated>
         </events>
     </global>
     <frontend>
