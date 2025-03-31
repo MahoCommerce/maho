@@ -142,7 +142,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         return Command::SUCCESS;
     }
 
-    public function recryptAdminUserTable(OutputInterface $output, \Varien_Db_Adapter_Interface $readConnection, \Varien_Db_Adapter_Interface $writeConnection): void
+    protected function recryptAdminUserTable(OutputInterface $output, \Varien_Db_Adapter_Interface $readConnection, \Varien_Db_Adapter_Interface $writeConnection): void
     {
         $output->write('Re-encrypting data on admin_user table... ');
 
@@ -163,7 +163,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $output->writeln('OK');
     }
 
-    public function recryptCoreConfigDataTable(OutputInterface $output, \Varien_Db_Adapter_Interface $readConnection, \Varien_Db_Adapter_Interface $writeConnection): void
+    protected function recryptCoreConfigDataTable(OutputInterface $output, \Varien_Db_Adapter_Interface $readConnection, \Varien_Db_Adapter_Interface $writeConnection): void
     {
         // Checking if there are any encrypted configurations that should be re-encrypted
         $encryptedPaths = [];
@@ -223,7 +223,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $outputTable->render();
     }
 
-    private function decrypt(#[\SensitiveParameter] string $data): string
+    public function decrypt(#[\SensitiveParameter] string $data): string
     {
         if ($this->isOldEncryptionKeyM1 && function_exists('mcrypt_module_open')) {
             $key = $this->oldEncryptionKey;
@@ -259,7 +259,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         return (string) $plaintext;
     }
 
-    private function encrypt(#[\SensitiveParameter] string $data): string
+    public function encrypt(#[\SensitiveParameter] string $data): string
     {
         $key = sodium_hex2bin($this->newEncryptionKey);
         $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
