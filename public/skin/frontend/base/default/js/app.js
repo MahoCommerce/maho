@@ -25,52 +25,6 @@ var bp = {
 };
 
 // ==============================================
-// Search
-// ==============================================
-
-/**
- * Implements a custom validation style for the search form. When the form is invalidly submitted, the validation-failed
- * class gets added to the input, but the "This is a required field." text does not display
- */
-Varien.searchForm.prototype.initialize = function (form, field, emptyText) {
-    this.form = document.getElementById(form);
-    this.field = document.getElementById(field);
-    this.emptyText = emptyText;
-
-    this.form.addEventListener('submit', this.submit.bind(this));
-    this.field.addEventListener('change', this.change.bind(this));
-    this.field.addEventListener('focus', this.focus.bind(this));
-    this.field.addEventListener('blur', this.blur.bind(this));
-    this.blur();
-};
-
-Varien.searchForm.prototype.submit = function (event) {
-    if (this.field.value == this.emptyText || this.field.value == ''){
-        event.preventDefault();
-        this.field.classList.add('validation-failed');
-        this.field.focus();
-        return false;
-    }
-    return true;
-};
-
-Varien.searchForm.prototype.change = function (event) {
-    if (
-        this.field.value != this.emptyText
-        && this.field.value != ''
-        && this.field.classList.contains('validation-failed')
-    ) {
-        this.field.classList.remove('validation-failed');
-    }
-};
-
-Varien.searchForm.prototype.blur = function (event) {
-    if (this.field.classList.contains('validation-failed')) {
-        this.field.classList.remove('validation-failed');
-    }
-};
-
-// ==============================================
 // Pointer abstraction
 // ==============================================
 

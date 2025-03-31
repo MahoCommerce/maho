@@ -6817,6 +6817,8 @@ div.paypal-logo span > img {
   overscroll-behavior: contain;
 }
 .search-autocomplete .products-list > li {
+  display: flex;
+  place-items: center;
   padding-bottom: 10px;
   margin-bottom: 10px;
 }
