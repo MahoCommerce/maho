@@ -119,12 +119,14 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
         $this->recryptAdminUserTable($output, $readConnection, $writeConnection);
         $this->recryptCoreConfigDataTable($output, $readConnection, $writeConnection);
+        Mage::app()->getCacheInstance()->clean('config');
 
         Mage::dispatchEvent('encryption_key_regenerated', [
             'output' => $output,
             'encrypt_callback' => [$this, 'encrypt'],
             'decrypt_callback' => [$this, 'decrypt'],
         ]);
+        Mage::app()->getCacheInstance()->clean('config');
 
         if (\Composer\InstalledVersions::isInstalled('mahocommerce/module-mcrypt-compat')) {
             $output->writeln('');
@@ -159,8 +161,6 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
                 ['user_id = ?' => $encryptedDataRow['user_id']],
             );
         }
-
-        Mage::app()->getCacheInstance()->clean('config');
 
         $output->writeln('OK');
     }
