@@ -160,6 +160,8 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
             );
         }
 
+        Mage::app()->getCacheInstance()->clean('config');
+
         $output->writeln('OK');
     }
 
