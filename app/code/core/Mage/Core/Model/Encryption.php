@@ -164,8 +164,12 @@ class Mage_Core_Model_Encryption
         return $encrypted;
     }
 
-    public function decrypt(#[\SensitiveParameter] string $data): string
+    public function decrypt(#[\SensitiveParameter] ?string $data): string
     {
+        if ($data === null) {
+            return '';
+        }
+
         try {
             $decoded = sodium_base642bin($data, SODIUM_BASE64_VARIANT_ORIGINAL);
         } catch (SodiumException $e) {
