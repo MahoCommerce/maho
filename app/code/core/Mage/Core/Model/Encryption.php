@@ -181,8 +181,8 @@ class Mage_Core_Model_Encryption
         }
 
         $key = Mage::getEncryptionKeyAsBinary();
-        $nonce = mb_substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit');
-        $ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit');
+        $nonce = substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+        $ciphertext = substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
         $plaintext = sodium_crypto_secretbox_open($ciphertext, $nonce, $key);
 
         if ($plaintext === false) {
