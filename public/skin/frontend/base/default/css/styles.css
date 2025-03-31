@@ -6813,7 +6813,7 @@ div.paypal-logo span > img {
   text-transform: none;
   font-weight: 500;
 }
-.search-autocomplete .view-all {
+.search-autocomplete :is(.view-all,.note-msg) {
   display: block;
   text-align: center;
   font-weight: 500;

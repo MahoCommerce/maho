@@ -8,12 +8,15 @@
  */
 
 /** @var Mage_CatalogSearch_Block_Autocomplete $this */
+$numResults = count($this->getLoadedProductCollection());
 $productList = $this->getLayout()->createBlock('core/template')
     ->setLoadedProductCollection($this->getLoadedProductCollection())
     ->setTemplate('catalog/product/list.phtml');
 ?>
 <?= $productList->toHtml() ?>
 
+<?php if ($numResults): ?>
 <a class="view-all" href="ciaociao">
-    <?= $this->__("View all %s results") ?>
+    <?= $this->__("View all %s results", $numResults) ?>
 </a>
+<?php endif ?>
