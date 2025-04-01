@@ -306,7 +306,6 @@ namespace PHPSTORM_META {
         'log_resource/visitor_collection' => \Mage_Log_Model_Resource_Visitor_Collection::class,
         'log_resource/visitor_online' => \Mage_Log_Model_Resource_Visitor_Online::class,
         'log_resource/visitor_online_collection' => \Mage_Log_Model_Resource_Visitor_Online_Collection::class,
-        'media_resource/image' => \Mage_Media_Model_File_Image::class,
         'newsletter_resource/problem' => \Mage_Newsletter_Model_Resource_Problem::class,
         'newsletter_resource/problem_collection' => \Mage_Newsletter_Model_Resource_Problem_Collection::class,
         'newsletter_resource/queue' => \Mage_Newsletter_Model_Resource_Queue::class,
