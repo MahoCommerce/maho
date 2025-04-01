@@ -192,13 +192,22 @@ final class Maho
             ...$customOptions,
         ];
 
-        $driverClass = extension_loaded('ffi') === true && ini_get('ffi.enable') === '1' && ini_get('zend.max_allowed_stack_size') === '-1' && \Composer\InstalledVersions::isInstalled('intervention/image-driver-vips')
-            ? \Intervention\Image\Drivers\Vips\Driver::class // @phpstan-ignore class.notFound
-            : \Intervention\Image\Drivers\Gd\Driver::class;
+        $driverClasses = [
+            \Intervention\Image\Drivers\Gd\Driver::class,
+        ];
 
-        return new \Intervention\Image\ImageManager(
-            $driverClass,
-            ...$options,
-        );
+        if (\Composer\InstalledVersions::isInstalled('intervention/image-driver-vips')) {
+            // @phpstan-ignore class.notFound
+            array_unshift($driverClasses, \Intervention\Image\Drivers\Vips\Driver::class);
+        }
+
+        foreach ($driverClasses as $driverClass) {
+            try {
+                return \Intervention\Image\ImageManager::withDriver($driverClass, ...$options);
+            } catch (Intervention\Image\Exceptions\DriverException) {
+            }
+        }
+
+        Mage::throwException('No image driver found');
     }
 }
