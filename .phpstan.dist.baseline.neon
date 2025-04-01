@@ -17002,12 +17002,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Email/Template/Filter.php
 
 		-
-			message: '#^Call to an undefined method Varien_Crypt_Abstract\:\:init\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Core/Model/Encryption.php
-
-		-
 			message: '#^Method Mage_Core_Model_Factory\:\:getUrlRewriteInstance\(\) should return Mage_Core_Model_Url_Rewrite but returns bool\|Mage_Core_Model_Abstract\.$#'
 			identifier: return.type
 			count: 1
@@ -22144,12 +22138,6 @@ parameters:
 			path: app/code/core/Mage/Install/Block/Config.php
 
 		-
-			message: '#^Method Mage_Install_Block_End\:\:getEncryptionKey\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Install/Block/End.php
-
-		-
 			message: '#^Method Mage_Install_Block_Locale\:\:getFormData\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -22242,7 +22230,7 @@ parameters:
 		-
 			message: '#^If condition is always false\.$#'
 			identifier: if.alwaysFalse
-			count: 7
+			count: 6
 			path: app/code/core/Mage/Install/Model/Installer/Console.php
 
 		-
@@ -33599,18 +33587,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: lib/Varien/Convert/Profile/Collection.php
-
-		-
-			message: '#^Method Varien_Crypt_Mcrypt\:\:_reset\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Crypt/Mcrypt.php
-
-		-
-			message: '#^Method Varien_Crypt_Mcrypt\:\:destruct\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Crypt/Mcrypt.php
 
 		-
 			message: '#^Cannot access property \$_items on array\.$#'
