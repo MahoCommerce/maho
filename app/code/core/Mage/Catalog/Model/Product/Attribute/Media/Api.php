@@ -6,15 +6,10 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog product media api
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Product_Attribute_Media_Api extends Mage_Catalog_Model_Api_Resource
 {
     /**
@@ -146,13 +141,11 @@ class Mage_Catalog_Model_Product_Attribute_Media_Api extends Mage_Catalog_Model_
 
             // try to create Image object - it fails with Exception if image is not supported
             try {
-                $filePath = $tmpDirectory . DS . $fileName;
-                Mage::getModel('varien/image', $filePath);
+                $filePath = "{$tmpDirectory}/{$fileName}";
+                Maho::getImageManager()->read($filePath);
                 Mage::getModel('core/file_validator_image')->validate($filePath);
             } catch (Exception $e) {
-                // Remove temporary directory
                 $ioAdapter->rmdir($tmpDirectory, true);
-
                 throw new Mage_Core_Exception($e->getMessage());
             }
 
