@@ -313,7 +313,9 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
     protected function _resizeSwatchImage($filename, $tag, $width, $height)
     {
         // Form full path to where we want to cache resized version
+        $baseDir = Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA);
         $destPathArr = [
+            $baseDir,
             self::SWATCH_CACHE_DIR,
             Mage::app()->getStore()->getId(),
             $width . 'x' . $height,
@@ -322,15 +324,23 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         ];
 
         $destPath = implode('/', $destPathArr);
+        $targetDir = dirname($destPath);
+
+        $io = new Varien_Io_File();
+        if (!$io->isWriteable($targetDir)) {
+            $io->mkdir($targetDir);
+        }
+        if (!$io->isWriteable($targetDir)) {
+            return false;
+        }
 
         // Check if cached image exists already
-        if (!file_exists(Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . $destPath)) {
+        if (!file_exists($destPath)) {
             // Check for source image
             if ($tag == 'product') {
                 $sourceFilePath = Mage::getSingleton('catalog/product_media_config')->getBaseMediaPath() . $filename;
             } else {
-                $sourceFilePath = Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA)
-                    . DS . self::SWATCH_FALLBACK_MEDIA_DIR . DS . $filename;
+                $sourceFilePath = "$baseDir/" . self::SWATCH_FALLBACK_MEDIA_DIR . "/$filename";
             }
 
             if (!file_exists($sourceFilePath)) {
@@ -340,11 +350,11 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             // Do resize and save
             $image = Maho::getImageManager()->read($sourceFilePath);
             $image->resize($width, $height);
-            $image->save(Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . "/{$destPath}");
+            $image->save($destPath);
             Mage::helper('core/file_storage_database')->saveFile($destPath);
         }
 
-        return $destPath;
+        return substr($destPath, strlen($baseDir) + 1);
     }
 
     /**
