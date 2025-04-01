@@ -46,6 +46,7 @@ class Mage_Core_Model_Config_Options extends Varien_Object
         $this->_data['etc_dir']     = $appRoot . DS . 'etc';
         $this->_data['lib_dir']     = $root . DS . 'lib';
         $this->_data['locale_dir']  = $appRoot . DS . 'locale';
+        $this->_data['public_dir']  = $root . DS . 'public';
         $this->_data['media_dir']   = $root . DS . 'public' . DS . 'media';
         $this->_data['skin_dir']    = $root . DS . 'public' . DS . 'skin';
         $this->_data['var_dir']     = $this->getVarDir();

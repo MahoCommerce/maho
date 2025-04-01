@@ -145,7 +145,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_File extends Mage_Core_Model_Co
     {
         $value = Mage::getStoreConfig($token) ?? '';
         if (strlen($value) && preg_match(self::SYSTEM_FILESYSTEM_REGEX, $value, $matches) !== false) {
-            $dir = str_replace('root_dir', 'base_dir', $matches[1]);
+            $dir = str_replace('root_dir', 'public_dir', $matches[1]);
             $path = str_replace('/', DS, $matches[2]);
             return Mage::getConfig()->getOptions()->getData($dir) . $path;
         }
