@@ -6793,6 +6793,12 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Cms/Wysiwyg/ImagesController.php
 
 		-
+			message: '#^Method Mage_Adminhtml_Cms_Wysiwyg_ImagesController\:\:thumbnailAction\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Cms/Wysiwyg/ImagesController.php
+
+		-
 			message: '#^Method Mage_Adminhtml_Cms_Wysiwyg_ImagesController\:\:treeJsonAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
