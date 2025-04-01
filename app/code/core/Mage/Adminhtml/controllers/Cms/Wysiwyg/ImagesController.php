@@ -162,6 +162,26 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     }
 
     /**
+     * Generate image thumbnail on the fly
+     */
+    public function thumbnailAction()
+    {
+        $file = $this->getRequest()->getParam('file');
+        $file = Mage::helper('cms/wysiwyg_images')->idDecode($file);
+        $thumb = $this->getStorage()->resizeOnTheFly($file);
+        if ($thumb !== false) {
+            $image = Maho::getImageManager()->read($thumb);
+            $imageInfo = @getimagesize($thumb);
+        } else {
+            $image = Maho::getImageManager()->read(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
+            $imageInfo = @getimagesize(Mage::getSingleton('cms/wysiwyg_config')->getSkinImagePlaceholderPath());
+        }
+
+        $this->getResponse()->setHeader('Content-type', $imageInfo['mime']);
+        $this->getResponse()->setBody($image->encode());
+    }
+
+    /**
      * Register storage model and return it
      *
      * @return Mage_Cms_Model_Wysiwyg_Images_Storage
