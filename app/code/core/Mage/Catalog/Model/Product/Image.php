@@ -475,8 +475,29 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
         $filePath = $this->_getWatermarkFilePath();
         if ($filePath) {
-            $image = $this->getImage();
-            $image->place($filePath, position: $this->getWatermarkPosition(), opacity: $this->getWatermarkImageOpacity());
+            if ($this->getWatermarkPosition() === 'stretch') {
+                $element = Maho::getImageManager()
+                    ->read($filePath)
+                    ->resize($this->getOriginalWidth(), $this->getOriginalHeight());
+            } elseif ($this->getWatermarkPosition() === 'tile') {
+                $tile = Maho::getImageManager()
+                    ->read($filePath);
+                $element = Maho::getImageManager()
+                    ->create($this->getOriginalWidth(), $this->getOriginalHeight());
+                for ($x = 0; $x < ceil($element->width() / $tile->width()); $x++) {
+                    for ($y = 0; $y < ceil($element->height() / $tile->height()); $y++) {
+                        $element->place($tile, 'top-left', $x * $tile->width(), $y * $tile->height());
+                    }
+                }
+            } else {
+                $element = $filePath;
+            }
+
+            $this->getImage()->place(
+                $element,
+                position: $this->getWatermarkPosition(),
+                opacity: $this->getWatermarkImageOpacity(),
+            );
         }
 
         return $this;
@@ -571,7 +592,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    public function getWatermarkPosition(): string
+    public function getWatermarkPosition(): ?string
     {
         return $this->_watermarkPosition;
     }
@@ -600,7 +621,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    public function getWatermarkWidth(): int
+    public function getWatermarkWidth(): ?int
     {
         return $this->_watermarkWidth;
     }
@@ -611,7 +632,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    public function getWatermarkHeigth(): int
+    public function getWatermarkHeigth(): ?int
     {
         return $this->_watermarkHeigth;
     }
