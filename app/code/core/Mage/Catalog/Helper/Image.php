@@ -596,7 +596,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
      */
     public function getOriginalWidth()
     {
-        return $this->_getModel()->getImage()->width();
+        return $this->_getModel()->getOriginalWidth();
     }
 
     /**
@@ -606,7 +606,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
      */
     public function getOriginalHeight()
     {
-        return $this->_getModel()->getImage()->height();
+        return $this->_getModel()->getOriginalHeight();
     }
 
     /**

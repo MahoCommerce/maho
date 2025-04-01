@@ -75,6 +75,8 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     /** @var \Intervention\Image\Interfaces\ImageInterface */
     protected $image;
 
+    protected ?array $imageInfo = null;
+
     /**
      * @var string e.g. "small_image"
      */
@@ -126,6 +128,27 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     public function getHeight()
     {
         return $this->_height;
+    }
+
+    public function getImageInfo(): array
+    {
+        if ($this->imageInfo === null) {
+            $this->imageInfo = @getimagesize($this->_baseFile);
+            if ($this->imageInfo === false) {
+                throw new RuntimeException('Failed to read image at ' . $this->_baseFile);
+            }
+        }
+        return $this->imageInfo;
+    }
+
+    public function getOriginalWidth(): int
+    {
+        return $this->getImageInfo()[0];
+    }
+
+    public function getOriginalHeight(): int
+    {
+        return $this->getImageInfo()[1];
     }
 
     /**
