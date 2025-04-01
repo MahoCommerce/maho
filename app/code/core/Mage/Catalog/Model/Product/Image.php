@@ -315,7 +315,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
         $baseFile = $baseDir . $file;
         $this->_baseFile = $baseFile;
-        $this->_imageInfo = null;
+        $this->imageInfo = null;
 
         // If the image is an SVG then we don't need to resize it
         if (str_ends_with($this->_baseFile, '.svg')) {
