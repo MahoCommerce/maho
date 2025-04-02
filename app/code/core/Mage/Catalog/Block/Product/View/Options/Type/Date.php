@@ -45,7 +45,7 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
         return Mage::getSingleton('catalog/product_option_type_date')->useCalendar();
     }
 
-    public function getHtml()
+    public function getHtml(): string
     {
         $option = $this->getOption();
 
