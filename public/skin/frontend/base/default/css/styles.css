@@ -3406,8 +3406,8 @@ p.product-name a:hover {
   color: var(--maho-color-primary);
 }
 .products-grid > li > div:first-child ul svg {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
 }
 
 .products-grid .product-image img {
