@@ -12,17 +12,13 @@
 /** @var Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main $this */
 ?>
 <div class="content-header">
-    <table cellspacing="0">
-        <tr>
-            <td style="width:50%;"><h3><?= $this->escapeHtml($this->_getHeader()) ?></h3></td>
-            <td class="form-buttons">
-                <?= $this->getBackButtonHtml() ?>
-                <?= $this->getResetButtonHtml() ?>
-                <?= $this->getDeleteButtonHtml() ?>
-                <?= $this->getSaveButtonHtml() ?>
-            </td>
-        </tr>
-    </table>
+    <h3><?= $this->escapeHtml($this->_getHeader()) ?></h3>
+    <div class="form-buttons">
+        <?= $this->getBackButtonHtml() ?>
+        <?= $this->getResetButtonHtml() ?>
+        <?= $this->getDeleteButtonHtml() ?>
+        <?= $this->getSaveButtonHtml() ?>
+    </div>
 </div>
 <div class="edit-attribute-set">
     <div>
