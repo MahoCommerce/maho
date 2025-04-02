@@ -11359,12 +11359,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Product/View/Options.php
 
 		-
-			message: '#^Method Mage_Catalog_Block_Product_View_Options_Type_Date\:\:_getValueWithLeadingZeros\(\) should return string but returns int\.$#'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/View/Options/Type/Date.php
-
-		-
 			message: '#^Method Mage_Core_Block_Html_Select\:\:setExtraParams\(\) invoked with 0 parameters, 1 required\.$#'
 			identifier: arguments.count
 			count: 1
