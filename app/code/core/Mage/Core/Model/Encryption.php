@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,11 +30,6 @@ class Mage_Core_Model_Encryption
      * Maximum Password Length
      */
     public const MAXIMUM_PASSWORD_LENGTH = 256;
-
-    /**
-     * @var Varien_Crypt_Mcrypt
-     */
-    protected $_crypt;
 
     /**
      * @var Mage_Core_Helper_Data
@@ -99,7 +94,7 @@ class Mage_Core_Model_Encryption
      * @param int $version
      * @return bool|string
      */
-    public function hash($data, $version = self::HASH_VERSION_MD5)
+    public function hash(#[\SensitiveParameter] $data, $version = self::HASH_VERSION_MD5)
     {
         if (self::HASH_VERSION_LATEST === $version && $version === $this->_helper->getVersionHash($this)) {
             return password_hash($data, PASSWORD_DEFAULT);
@@ -119,7 +114,7 @@ class Mage_Core_Model_Encryption
      * @return bool
      * @throws Exception
      */
-    public function validateHash(#[\SensitiveParameter] $password, $hash)
+    public function validateHash(#[\SensitiveParameter] $password, #[\SensitiveParameter] $hash)
     {
         if (strlen($password) > self::MAXIMUM_PASSWORD_LENGTH) {
             return false;
@@ -139,7 +134,7 @@ class Mage_Core_Model_Encryption
      * @param int $version
      * @return bool
      */
-    public function validateHashByVersion(#[\SensitiveParameter] $password, $hash, $version = self::HASH_VERSION_MD5)
+    public function validateHashByVersion(#[\SensitiveParameter] $password, #[\SensitiveParameter] $hash, $version = self::HASH_VERSION_MD5)
     {
         if ($version == self::HASH_VERSION_LATEST && $version == $this->_helper->getVersionHash($this)) {
             return password_verify($password, $hash);
@@ -153,53 +148,65 @@ class Mage_Core_Model_Encryption
         return hash_equals($this->hash($salt . $password, $version), $hash);
     }
 
-    /**
-     * Instantiate crypt model
-     *
-     * @param string $key
-     * @return Varien_Crypt_Mcrypt
-     */
-    protected function _getCrypt($key = null)
+    public function encrypt(#[\SensitiveParameter] string $data): string
     {
-        if (!$this->_crypt) {
-            if ($key === null) {
-                $key = (string) Mage::getConfig()->getNode('global/crypt/key');
-            }
-            $this->_crypt = Varien_Crypt::factory()->init($key);
+        $key = Mage::getEncryptionKeyAsBinary();
+        $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+        $ciphertext = sodium_crypto_secretbox($data, $nonce, $key);
+        $encrypted = sodium_bin2base64($nonce . $ciphertext, SODIUM_BASE64_VARIANT_ORIGINAL);
+
+        // Clean sensitive data from memory
+        sodium_memzero($data);
+        sodium_memzero($key);
+        sodium_memzero($nonce);
+        sodium_memzero($ciphertext);
+
+        return $encrypted;
+    }
+
+    public function decrypt(#[\SensitiveParameter] ?string $data): string
+    {
+        if ($data === null) {
+            return '';
         }
-        return $this->_crypt;
+
+        try {
+            $decoded = sodium_base642bin($data, SODIUM_BASE64_VARIANT_ORIGINAL);
+        } catch (SodiumException $e) {
+            $exception = new Exception('Invalid base64 encoding: ' . $e->getMessage());
+            Mage::logException($exception);
+            return '';
+        }
+
+        if (strlen($decoded) < (SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + SODIUM_CRYPTO_SECRETBOX_MACBYTES)) {
+            $exception = new Exception('Data is too short to be valid');
+            Mage::logException($exception);
+            return '';
+        }
+
+        $key = Mage::getEncryptionKeyAsBinary();
+        $nonce = substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+        $ciphertext = substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+        $plaintext = sodium_crypto_secretbox_open($ciphertext, $nonce, $key);
+
+        if ($plaintext === false) {
+            $exception = new Exception('Decryption failed: data may be corrupted or tampered with');
+            Mage::logException($exception);
+            return '';
+        }
+
+        // Clean sensitive data from memory
+        sodium_memzero($data);
+        sodium_memzero($decoded);
+        sodium_memzero($key);
+        sodium_memzero($nonce);
+        sodium_memzero($ciphertext);
+
+        return $plaintext;
     }
 
-    /**
-     * Encrypt a string
-     *
-     * @param string $data
-     * @return string
-     */
-    public function encrypt($data)
+    public function validateKey(#[\SensitiveParameter] string $key): bool
     {
-        return base64_encode($this->_getCrypt()->encrypt((string) $data));
-    }
-
-    /**
-     * Decrypt a string
-     *
-     * @param string $data
-     * @return string
-     */
-    public function decrypt($data)
-    {
-        return str_replace("\x0", '', trim($this->_getCrypt()->decrypt(base64_decode((string) $data))));
-    }
-
-    /**
-     * Return crypt model, instantiate if it is empty
-     *
-     * @param string $key
-     * @return Varien_Crypt_Mcrypt
-     */
-    public function validateKey($key)
-    {
-        return $this->_getCrypt($key);
+        return strlen($key) === SODIUM_CRYPTO_SECRETBOX_KEYBYTES;
     }
 }

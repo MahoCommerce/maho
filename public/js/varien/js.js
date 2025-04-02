@@ -311,15 +311,10 @@ Varien.searchForm = class {
 
     initAutocomplete(url, destinationElement) {
         new MahoAutocomplete(this.field, document.getElementById(destinationElement), url, {
-            onSelect: (element) => this._selectAutocompleteItem(element)
+            onSelect: (element) => {
+                window.location.href = element.querySelector('a').getAttribute('href');
+            }
         });
-    }
-
-    _selectAutocompleteItem(element) {
-        if (element.title) {
-            this.field.value = element.title;
-        }
-        this.form.submit();
     }
 };
 

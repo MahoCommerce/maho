@@ -324,9 +324,9 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
      */
     public function displayPriceInclTax(Varien_Object $item)
     {
-        $qty = ($item->getQtyOrdered() ? $item->getQtyOrdered() : ($item->getQty() ? $item->getQty() : 1));
-        $baseTax = ($item->getTaxBeforeDiscount() ? $item->getTaxBeforeDiscount() : ($item->getTaxAmount() ? $item->getTaxAmount() : 0));
-        $tax = ($item->getBaseTaxBeforeDiscount() ? $item->getBaseTaxBeforeDiscount() : ($item->getBaseTaxAmount() ? $item->getBaseTaxAmount() : 0));
+        $qty = ($item->getQtyOrdered() ?: (($item->getQty() ?: 1)));
+        $baseTax = ($item->getTaxBeforeDiscount() ?: (($item->getTaxAmount() ?: 0)));
+        $tax = ($item->getBaseTaxBeforeDiscount() ?: (($item->getBaseTaxAmount() ?: 0)));
 
         $basePriceTax = 0;
         $priceTax = 0;
@@ -350,8 +350,8 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
      */
     public function displaySubtotalInclTax($item)
     {
-        $baseTax = ($item->getTaxBeforeDiscount() ? $item->getTaxBeforeDiscount() : ($item->getTaxAmount() ? $item->getTaxAmount() : 0));
-        $tax = ($item->getBaseTaxBeforeDiscount() ? $item->getBaseTaxBeforeDiscount() : ($item->getBaseTaxAmount() ? $item->getBaseTaxAmount() : 0));
+        $baseTax = ($item->getTaxBeforeDiscount() ?: (($item->getTaxAmount() ?: 0)));
+        $tax = ($item->getBaseTaxBeforeDiscount() ?: (($item->getBaseTaxAmount() ?: 0)));
 
         return $this->displayPrices(
             $item->getBaseRowTotal() + $baseTax,

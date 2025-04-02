@@ -73,7 +73,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                 'day_part' => $value['day_part'] ?? '',
                 'date_internal' => $value['date_internal'] ?? '',
             ]);
-        } elseif (!$isValid && $option->getIsRequired() && !$this->getSkipCheckRequiredOption()) {
+        } elseif ($option->getIsRequired() && !$this->getSkipCheckRequiredOption()) {
             $this->setIsValid(false);
             if (!$dateValid) {
                 $message = 'Please specify date required option <em>%s</em>.';
@@ -95,15 +95,15 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      * Prepare option value for cart
      *
      * @throws Mage_Core_Exception
-     * @return mixed Prepared option value
+     * @return ?string Prepared option value
      */
     #[\Override]
     public function prepareForCart()
     {
-        if ($this->getIsValid() && $this->getUserValue() !== null) {
-            $option = $this->getOption();
-            $value = $this->getUserValue();
+        $option = $this->getOption();
+        $value = $this->getUserValue();
 
+        if ($this->getIsValid() && $option !== null && $value !== null) {
             if (isset($value['date_internal']) && $value['date_internal'] != '') {
                 $this->_setInternalInRequest($value['date_internal']);
                 return $value['date_internal'];
@@ -119,7 +119,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                     $timestamp += mktime(0, 0, 0, $value['month'], $value['day'], $value['year']);
                 }
             } else {
-                $timestamp += mktime(0, 0, 0, date('m'), date('d'), date('Y'));
+                $timestamp += mktime(0, 0, 0, (int) date('m'), (int) date('d'), (int) date('Y'));
             }
 
             if ($this->_timeExists()) {

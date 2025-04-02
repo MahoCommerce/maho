@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -276,8 +276,8 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
                 'height'        => $_height,
                 'secret_key'    => substr($fileHash, 0, 20),
             ]);
-        } elseif ($upload->getErrors()) {
-            $errors = $this->_getValidatorErrors($upload->getErrors(), $fileInfo);
+        } elseif ($upload->getMessages()) {
+            $errors = $this->_getValidatorErrors(array_keys($upload->getMessages()), $fileInfo);
 
             if (count($errors) > 0) {
                 $this->setIsValid(false);
@@ -369,8 +369,8 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return is_readable($fileFullPath)
                 && isset($optionValue['secret_key'])
                 && substr(md5(file_get_contents($fileFullPath)), 0, 20) == $optionValue['secret_key'];
-        } elseif ($validatorChain->getErrors()) {
-            $errors = $this->_getValidatorErrors($validatorChain->getErrors(), $optionValue);
+        } elseif ($validatorChain->getMessages()) {
+            $errors = $this->_getValidatorErrors(array_keys($validatorChain->getMessages()), $optionValue);
 
             if (count($errors) > 0) {
                 $this->setIsValid(false);
@@ -385,7 +385,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
 
     /**
      * Get Error messages for validator Errors
-     * @param array $errors Array of validation failure message codes @see Zend_Validate::getErrors()
+     * @param array $errors Array of validation failure message codes @see Zend_Validate::getMessages()
      * @param array $fileInfo File info
      * @return array Array of error messages
      * @throws Mage_Core_Exception
@@ -619,7 +619,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      */
     public function copyQuoteToOrder()
     {
-        $quoteOption = $this->getQuoteItemOption();
+        $quoteOption = $this->getConfigurationItemOption();
         try {
             $value = Mage::helper('core/unserializeArray')->unserialize($quoteOption->getValue());
             if (!isset($value['quote_path'])) {

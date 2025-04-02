@@ -1,0 +1,56 @@
+name: PHPStorm Metadata Check
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  check-phpstorm-metadata:
+    name: Analyze ${{ matrix.refs == 'pr-head' && github.head_ref || github.base_ref || github.ref_name }}
+    runs-on: [ubuntu-latest]
+    strategy:
+      fail-fast: false
+      matrix:
+        refs: ['target-branch', 'pr-head']
+        exclude:
+          - refs: ${{ github.event_name != 'pull_request' && 'pr-head' }}
+
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: latest
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.refs == 'pr-head' && github.event.pull_request.head.sha || '' }}
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+
+      - name: Generate PHPStorm metadata
+        run: ./maho phpstorm:metadata:generate
+
+      - name: Check for uncommitted changes
+        id: git-check
+        run: |
+          git diff --exit-code || echo "changed=1" >> $GITHUB_OUTPUT
+
+      - name: Fail if changes detected
+        if: steps.git-check.outputs.changed == '1'
+        run: |
+          echo "PHPStorm metadata changes detected. Please run './maho phpstorm:metadata:generate' and commit the changes."
+          exit 1

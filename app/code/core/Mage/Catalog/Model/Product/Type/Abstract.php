@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,9 +18,13 @@
 abstract class Mage_Catalog_Model_Product_Type_Abstract
 {
     /**
-     * Product model instance
+     * Cache key for Editable Products
+     */
+    protected string $cacheKeyEditableAttributes = '_cache_editable_attributes';
+
+    /**
+     * Product model instance, if not used as a singleton
      *
-     * @deprecated if use as singleton
      * @var Mage_Catalog_Model_Product
      */
     protected $_product;
@@ -31,20 +35,6 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * @var string
      */
     protected $_typeId;
-
-    /**
-     * @deprecated
-     *
-     * @var array
-     */
-    protected $_setAttributes;
-
-    /**
-     * @deprecated
-     *
-     * @var Mage_Catalog_Model_Resource_Eav_Attribute[]|null
-     */
-    protected $_editableAttributes;
 
     /**
      * Is a composite product type
@@ -66,13 +56,6 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * @var bool
      */
     protected $_canUseQtyDecimals  = true;
-
-    /**
-     * @deprecated
-     *
-     * @var int
-     */
-    protected $_storeFilter     = null;
 
     /**
      * File queue array
@@ -112,7 +95,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
     public const OPTION_PREFIX = 'option_';
 
     /**
-     * Specify type instance product
+     * Specify type instance product, if not used as a singleton
      *
      * @param   Mage_Catalog_Model_Product $product
      * @return  Mage_Catalog_Model_Product_Type_Abstract
@@ -227,8 +210,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      */
     public function getEditableAttributes($product = null)
     {
-        $cacheKey = '_cache_editable_attributes';
-        if (!$this->getProduct($product)->hasData($cacheKey)) {
+        if (!$this->getProduct($product)->hasData($this->cacheKeyEditableAttributes)) {
             $editableAttributes = [];
             foreach ($this->getSetAttributes($product) as $attributeCode => $attribute) {
                 if (!is_array($attribute->getApplyTo())
@@ -238,9 +220,9 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
                     $editableAttributes[$attributeCode] = $attribute;
                 }
             }
-            $this->getProduct($product)->setData($cacheKey, $editableAttributes);
+            $this->getProduct($product)->setData($this->cacheKeyEditableAttributes, $editableAttributes);
         }
-        return $this->getProduct($product)->getData($cacheKey);
+        return $this->getProduct($product)->getData($this->cacheKeyEditableAttributes);
     }
 
     /**
@@ -865,7 +847,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      */
     public function assignProductToOption($optionProduct, $option, $product = null)
     {
-        $option->setProduct($optionProduct ? $optionProduct : $this->getProduct($product));
+        $option->setProduct($optionProduct ?: $this->getProduct($product));
         return $this;
     }
 

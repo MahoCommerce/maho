@@ -221,11 +221,8 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Encrypt data using application key
-     *
-     * @param   string $data
-     * @return  string
      */
-    public function encrypt($data)
+    public function encrypt(string $data): string
     {
         if (!Mage::isInstalled()) {
             return $data;
@@ -235,11 +232,8 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Decrypt data using application key
-     *
-     * @param   string $data
-     * @return  string
      */
-    public function decrypt($data)
+    public function decrypt(string $data): string
     {
         if (!Mage::isInstalled()) {
             return $data;
@@ -247,11 +241,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         return $this->getEncryptor()->decrypt($data);
     }
 
-    /**
-     * @param string $key
-     * @return Varien_Crypt_Mcrypt
-     */
-    public function validateKey($key)
+    public function validateKey(string $key): bool
     {
         return $this->getEncryptor()->validateKey($key);
     }
@@ -904,9 +894,12 @@ XML;
         return $data;
     }
 
+    /**
+     * @deprecated since 25.5.0
+     */
     public function isFormKeyEnabled(): bool
     {
-        return Mage::getStoreConfigFlag(Mage_Core_Controller_Front_Action::XML_CSRF_USE_FLAG_CONFIG_PATH);
+        return true;
     }
 
     /**
@@ -949,9 +942,10 @@ XML;
 
     public function getMailerDsn(): string
     {
+        $coreHelper = Mage::helper('core');
         $emailTransport = Mage::getStoreConfig('system/smtp/enabled');
-        $user = Mage::getStoreConfig('system/smtp/username');
-        $pass = Mage::getStoreConfig('system/smtp/password');
+        $user = $coreHelper->decrypt(Mage::getStoreConfig('system/smtp/username'));
+        $pass = $coreHelper->decrypt(Mage::getStoreConfig('system/smtp/password'));
         $host = Mage::getStoreConfig('system/smtp/host');
         $port = Mage::getStoreConfig('system/smtp/port');
         return match ($emailTransport) {

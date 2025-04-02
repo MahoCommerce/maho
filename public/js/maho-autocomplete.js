@@ -14,7 +14,7 @@ class MahoAutocomplete {
         this.options = Object.assign({
             paramName: this.field.name,
             method: 'GET',
-            minChars: 2
+            minChars: 3
         }, options);
 
         this.setupEventListeners();

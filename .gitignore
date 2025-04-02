@@ -10,7 +10,8 @@
 *.vsix
 
 # Maho stuff
-/app/etc/local.xml
+/app/etc/local.xml*
+!/app/etc/local.xml.template
 
 /public/js/tinymce
 /public/media/*
@@ -28,3 +29,9 @@
 
 # PHP-CS-Fixer
 .php-cs-fixer.cache
+
+# PHPStan
+.phpstan.cache
+.phpstan*.neon
+phpstan*.neon
+!.phpstan.dist*.neon

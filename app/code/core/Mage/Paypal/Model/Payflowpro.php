@@ -326,7 +326,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
         }
 
         $rawData = $response->getData();
-        return ($rawData) ? $rawData : [];
+        return $rawData ?: [];
     }
 
     /**

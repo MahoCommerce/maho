@@ -1,0 +1,24 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Maho_Captcha
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Mage_Adminhtml_Block_Template $this */
+$helper = Mage::helper('captcha');
+if (!$helper->isEnabled()) return '';
+?>
+<altcha-widget <?= $helper->getWidgetAttributes()->serialize() ?>></altcha-widget>
+<script src="<?= Mage::getBaseUrl('js') ?>maho-captcha.js" defer></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        MahoCaptcha.setup({
+            frontendSelectors: '#loginForm',
+            widgetAttributes: <?= $helper->getWidgetAttributes()->toJson() ?>,
+            loadingImageUrl: '<?= $this->getSkinUrl('images/loading.svg') ?>'
+        });
+    });
+</script>

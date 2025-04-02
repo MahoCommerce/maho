@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -568,7 +568,7 @@ class Mage_Paypal_Model_Express_Checkout
         }
 
         $isNewCustomer = false;
-        switch ($this->getCheckoutMethod()) {
+        switch ($this->_quote->getCheckoutMethod()) {
             case Mage_Checkout_Model_Type_Onepage::METHOD_GUEST:
                 $this->_prepareGuestQuote();
                 break;
@@ -683,20 +683,11 @@ class Mage_Paypal_Model_Express_Checkout
      * Get checkout method
      *
      * @return string
+     * @deprecated use Mage::helper('checkout')->getCheckoutMethod($quote) or $quote->getCheckoutMethod()
      */
     public function getCheckoutMethod()
     {
-        if ($this->getCustomerSession()->isLoggedIn()) {
-            return Mage_Checkout_Model_Type_Onepage::METHOD_CUSTOMER;
-        }
-        if (!$this->_quote->getCheckoutMethod()) {
-            if (Mage::helper('checkout')->isAllowedGuestCheckout($this->_quote)) {
-                $this->_quote->setCheckoutMethod(Mage_Checkout_Model_Type_Onepage::METHOD_GUEST);
-            } else {
-                $this->_quote->setCheckoutMethod(Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER);
-            }
-        }
-        return $this->_quote->getCheckoutMethod();
+        return Mage::helper('checkout')->getCheckoutMethod($this->_quote);
     }
 
     /**
@@ -863,10 +854,7 @@ class Mage_Paypal_Model_Express_Checkout
      */
     protected static function cmpShippingOptions(Varien_Object $option1, Varien_Object $option2)
     {
-        if ($option1->getAmount() == $option2->getAmount()) {
-            return 0;
-        }
-        return ($option1->getAmount() < $option2->getAmount()) ? -1 : 1;
+        return $option1->getAmount() <=> $option2->getAmount();
     }
 
     /**

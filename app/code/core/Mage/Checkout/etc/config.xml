@@ -150,6 +150,16 @@
                 </totals>
             </quote>
         </sales>
+        <events>
+            <encryption_key_regenerated>
+                <observers>
+                    <payment>
+                        <class>checkout/observer</class>
+                        <method>encryptionKeyRegenerated</method>
+                    </payment>
+                </observers>
+            </encryption_key_regenerated>
+        </events>
     </global>
     <frontend>
         <secure_url>

@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -138,17 +138,18 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
     #[\Override]
     public function getEditableAttributes($product = null)
     {
-        if (is_null($this->_editableAttributes)) {
-            $this->_editableAttributes = parent::getEditableAttributes($product);
-            foreach ($this->_editableAttributes as $index => $attribute) {
+        if (!$this->getProduct($product)->hasData($this->cacheKeyEditableAttributes)) {
+            $editableAttributes = parent::getEditableAttributes($product);
+            foreach ($editableAttributes as $index => $attribute) {
                 if ($this->getUsedProductAttributeIds($product)
                     && in_array($attribute->getAttributeId(), $this->getUsedProductAttributeIds($product))
                 ) {
-                    unset($this->_editableAttributes[$index]);
+                    unset($editableAttributes[$index]);
                 }
             }
+            $this->getProduct($product)->setData($this->cacheKeyEditableAttributes, $editableAttributes);
         }
-        return $this->_editableAttributes;
+        return $this->getProduct($product)->getData($this->cacheKeyEditableAttributes);
     }
 
     /**
@@ -265,7 +266,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
                 'label'          => $attribute->getLabel(),
                 'use_default'    => $attribute->getUseDefault(),
                 'position'       => $attribute->getPosition(),
-                'values'         => $attribute->getPrices() ? $attribute->getPrices() : [],
+                'values'         => $attribute->getPrices() ?: [],
                 'attribute_id'   => $attribute->getProductAttribute()->getId(),
                 'attribute_code' => $attribute->getProductAttribute()->getAttributeCode(),
                 'frontend_label' => $attribute->getProductAttribute()->getFrontend()->getLabel(),

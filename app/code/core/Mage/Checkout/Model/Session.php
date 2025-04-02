@@ -216,7 +216,7 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
 
             if (!$this->getQuoteId()) {
                 if ($customerSession->isLoggedIn() || $this->_customer) {
-                    $customer = ($this->_customer) ? $this->_customer : $customerSession->getCustomer();
+                    $customer = $this->_customer ?: $customerSession->getCustomer();
                     $quote->loadByCustomer($customer);
                     $this->setQuoteId($quote->getId());
                 } else {
@@ -227,7 +227,7 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
 
             if ($this->getQuoteId()) {
                 if ($customerSession->isLoggedIn() || $this->_customer) {
-                    $customer = ($this->_customer) ? $this->_customer : $customerSession->getCustomer();
+                    $customer = $this->_customer ?: $customerSession->getCustomer();
                     $quote->setCustomer($customer);
                 }
             }

@@ -193,14 +193,6 @@
                             <show_in_store>1</show_in_store>
                             <validate>required-entry validate-digits validate-greater-than-zero</validate>
                         </max_dimension>
-                        <progressive_threshold translate="label comment">
-                            <label>Enable Progressive Images Threshold</label>
-                            <comment>Minimum size in megapixel for progressive JPEG resize</comment>
-                            <validate>validate-number</validate>
-                            <sort_order>40</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <validate>validate-digits validate-greater-than-zero</validate>
-                        </progressive_threshold>
                     </fields>
                 </product_image>
                 <placeholder translate="label">
@@ -467,14 +459,6 @@
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
-                        <size translate="label">
-                            <label>Watermark Default Size</label>
-                            <sort_order>100</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <comment>Example format: 200x300.</comment>
-                        </size>
                         <imageOpacity translate="label">
                             <label>Watermark Opacity, Percent</label>
                             <sort_order>150</sort_order>

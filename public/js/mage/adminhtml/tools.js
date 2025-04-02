@@ -26,7 +26,7 @@ function setElementDisable(element, disable) {
     if (typeof element === 'string' || element instanceof String) {
         element = document.getElementById(element);
     }
-    if (!element instanceof Element) {
+    if (!(element instanceof Element)) {
         throw new TypeError('Argument must be type of String or Element');
     }
     element.disabled = disable;
@@ -37,7 +37,7 @@ function toggleParentVis(element, force = null) {
     if (typeof element === 'string' || element instanceof String) {
         element = document.getElementById(element);
     }
-    if (!element instanceof Element) {
+    if (!(element instanceof Element)) {
         throw new TypeError('Argument must be type of String or Element');
     }
     toggleVis(element.parentNode, force);
@@ -49,7 +49,7 @@ function toggleFieldsetVis(element, force = null) {
     if (typeof element === 'string' || element instanceof String) {
         element = document.getElementById(element);
     }
-    if (!element instanceof Element) {
+    if (!(element instanceof Element)) {
         throw new TypeError('Argument must be type of String or Element');
     }
     toggleVis(element, force);
@@ -64,7 +64,7 @@ function toggleVis(element, force = null) {
     if (typeof element === 'string' || element instanceof String) {
         element = document.getElementById(element);
     }
-    if (!element instanceof Element) {
+    if (!(element instanceof Element)) {
         throw new TypeError('Argument must be type of String or Element');
     }
     if (element.style.display === 'none') {
@@ -82,7 +82,7 @@ function checkVisibility(element) {
     if (typeof element === 'string' || element instanceof String) {
         element = document.getElementById(element);
     }
-    if (!element instanceof Element) {
+    if (!(element instanceof Element)) {
         throw new TypeError('Argument must be type of String or Element');
     }
     if (element.checkVisibility) {
@@ -831,4 +831,16 @@ function setQueryParams(url, params = {}) {
         }
     }
     return url.toString();
+}
+
+/**
+ * Alternative to PrototypeJS's Function.wrap() method
+ */
+function wrapFunction(originalFn, wrapperFn) {
+    if (typeof originalFn !== 'function' || typeof wrapperFn !== 'function') {
+        throw new TypeError('Arguments must be functions');
+    }
+    return function() {
+        return wrapperFn(originalFn, ...arguments);
+    };
 }

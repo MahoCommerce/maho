@@ -142,7 +142,6 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
      * @return $this
      * @throws Mage_Core_Exception
      * @throws Zend_Http_Client_Exception
-     * @deprecated
      */
     protected function _checkUrl($url, $secure = false)
     {
@@ -169,23 +168,18 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
     {
         $stamp    = strtotime((string) $date);
         $localXml = file_get_contents($this->_localConfigFile);
-        $localXml = str_replace(self::TMP_INSTALL_DATE_VALUE, date('r', $stamp ? $stamp : time()), $localXml);
+        $localXml = str_replace(self::TMP_INSTALL_DATE_VALUE, date('r', $stamp ?: time()), $localXml);
         file_put_contents($this->_localConfigFile, $localXml);
 
         return $this;
     }
 
-    /**
-     * @param string|null $key
-     * @return $this
-     */
-    public function replaceTmpEncryptKey($key = null)
+    public function replaceTmpEncryptKey(): self
     {
-        if (!$key) {
-            $key = md5(Mage::helper('core')->getRandomString(10));
-        }
+        $key = Mage::generateEncryptionKeyAsHex();
         $localXml = file_get_contents($this->_localConfigFile);
         $localXml = str_replace(self::TMP_ENCRYPT_KEY_VALUE, $key, $localXml);
+        $localXml = str_replace('{{key_date}}', date('Y-m-d'), $localXml);
         file_put_contents($this->_localConfigFile, $localXml);
 
         return $this;

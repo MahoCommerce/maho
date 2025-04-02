@@ -6,7 +6,7 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -107,7 +107,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
         if ($item->getPriceInclTax()) {
             return $item->getPriceInclTax();
         }
-        $qty = ($item->getQty() ? $item->getQty() : ($item->getQtyOrdered() ? $item->getQtyOrdered() : 1));
+        $qty = ($item->getQty() ?: (($item->getQtyOrdered() ?: 1)));
 
         //Unit price is rowtotal/qty
         return $qty > 0 ? $this->getSubtotalInclTax($item) / $qty : 0;
@@ -149,7 +149,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getBasePriceInclTax($item)
     {
-        $qty = ($item->getQty() ? $item->getQty() : ($item->getQtyOrdered() ? $item->getQtyOrdered() : 1));
+        $qty = ($item->getQty() ?: (($item->getQtyOrdered() ?: 1)));
 
         return $qty > 0 ? $this->getBaseSubtotalInclTax($item) / $qty : 0;
     }
@@ -295,6 +295,25 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
             && ($quote->getItemsSummaryQty() <= $maximumQty)
             && !$quote->hasNominalItems()
         ;
+    }
+
+    /**
+     * Get quote checkout method
+     */
+    public function getCheckoutMethod(Mage_Sales_Model_Quote $quote): string
+    {
+        $session = Mage::getSingleton('customer/session');
+        if ($session->isLoggedIn()) {
+            return Mage_Checkout_Model_Type_Onepage::METHOD_CUSTOMER;
+        }
+        if (!$quote->getData('checkout_method')) {
+            if ($this->isAllowedGuestCheckout($quote)) {
+                $quote->setData('checkout_method', Mage_Checkout_Model_Type_Onepage::METHOD_GUEST);
+            } else {
+                $quote->setData('checkout_method', Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER);
+            }
+        }
+        return $quote->getData('checkout_method');
     }
 
     /**

@@ -6,9 +6,11 @@
  * @package    Varien_Io
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+use phpseclib3\Net\SFTP;
 
 /**
  * Sftp client interface
@@ -22,18 +24,14 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
     public const SSH2_PORT = 22;
 
     /**
-     * @var \phpseclib3\Net\SFTP $_connection
+     * @var SFTP $_connection
      */
-    protected $_connection = null;
+    protected $_connection = null; // @phpstan-ignore class.notFound
 
     /**
      * Open a SFTP connection to a remote site.
      *
-     * @param array $args Connection arguments
-     * @param string $args[host] Remote hostname
-     * @param string $args[username] Remote username
-     * @param string $args[password] Connection password
-     * @param int $args[timeout] Connection timeout [=10]
+     * @param array{host?: mixed, username?: mixed, password?: mixed, timeout?: int} $args Connection arguments
      * @throws Exception
      */
     #[\Override]
@@ -48,20 +46,20 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
             $host = $args['host'];
             $port = self::SSH2_PORT;
         }
-        $this->_connection = new \phpseclib3\Net\SFTP($host, $port, $args['timeout']);
-        if (!$this->_connection->login($args['username'], $args['password'])) {
+        $this->_connection = new SFTP($host, $port, $args['timeout']); // @phpstan-ignore class.notFound
+        if (!$this->_connection->login($args['username'], $args['password'])) { // @phpstan-ignore class.notFound
             throw new Exception(sprintf('Unable to open SFTP connection as %s@%s', $args['username'], $args['host']));
         }
+        return true;
     }
 
     /**
      * Close a connection
-     *
      */
     #[\Override]
     public function close()
     {
-        return $this->_connection->disconnect();
+        $this->_connection->disconnect(); // @phpstan-ignore class.notFound
     }
 
     /**
@@ -81,14 +79,14 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
             $no_errors = true;
             $dirlist = explode('/', $dir);
             reset($dirlist);
-            $cwd = $this->_connection->pwd();
+            $cwd = $this->_connection->pwd(); // @phpstan-ignore class.notFound
             while ($no_errors && ($dir_item = next($dirlist))) {
-                $no_errors = ($this->_connection->mkdir($dir_item) && $this->_connection->chdir($dir_item));
+                $no_errors = ($this->_connection->mkdir($dir_item) && $this->_connection->chdir($dir_item)); // @phpstan-ignore class.notFound, class.notFound
             }
-            $this->_connection->chdir($cwd);
+            $this->_connection->chdir($cwd); // @phpstan-ignore class.notFound
             return $no_errors;
         } else {
-            return $this->_connection->mkdir($dir);
+            return $this->_connection->mkdir($dir); // @phpstan-ignore class.notFound
         }
     }
 
@@ -101,29 +99,29 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
     {
         if ($recursive) {
             $no_errors = true;
-            $cwd = $this->_connection->pwd();
-            if (!$this->_connection->chdir($dir)) {
+            $cwd = $this->_connection->pwd(); // @phpstan-ignore class.notFound
+            if (!$this->_connection->chdir($dir)) { // @phpstan-ignore class.notFound
                 throw new Exception("chdir(): $dir: Not a directory");
             }
-            $list = $this->_connection->nlist();
+            $list = $this->_connection->nlist(); // @phpstan-ignore class.notFound
             if (!count($list)) {
                 // Go back
-                $this->_connection->chdir($cwd);
+                $this->_connection->chdir($cwd); // @phpstan-ignore class.notFound
                 return $this->rmdir($dir, false);
             } else {
                 foreach ($list as $filename) {
-                    if ($this->_connection->chdir($filename)) { // This is a directory
-                        $this->_connection->chdir('..');
+                    if ($this->_connection->chdir($filename)) { // This is a directory @phpstan-ignore class.notFound
+                        $this->_connection->chdir('..'); // @phpstan-ignore class.notFound
                         $no_errors = $no_errors && $this->rmdir($filename, $recursive);
                     } else {
                         $no_errors = $no_errors && $this->rm($filename);
                     }
                 }
             }
-            $no_errors = $no_errors && ($this->_connection->chdir($cwd) && $this->_connection->rmdir($dir));
+            $no_errors = $no_errors && ($this->_connection->chdir($cwd) && $this->_connection->rmdir($dir)); // @phpstan-ignore class.notFound, class.notFound
             return $no_errors;
         } else {
-            return $this->_connection->rmdir($dir);
+            return $this->_connection->rmdir($dir); // @phpstan-ignore class.notFound
         }
     }
 
@@ -134,7 +132,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
     #[\Override]
     public function pwd()
     {
-        return $this->_connection->pwd();
+        return $this->_connection->pwd(); // @phpstan-ignore class.notFound
     }
 
     /**
@@ -144,7 +142,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
     #[\Override]
     public function cd($dir)
     {
-        return $this->_connection->chdir($dir);
+        return $this->_connection->chdir($dir); // @phpstan-ignore class.notFound
     }
 
     /**
@@ -157,7 +155,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
         if (is_null($dest)) {
             $dest = false;
         }
-        return $this->_connection->get($filename, $dest);
+        return $this->_connection->get($filename, $dest); // @phpstan-ignore class.notFound
     }
 
     /**
@@ -167,7 +165,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
     #[\Override]
     public function write($filename, $src, $mode = null)
     {
-        return $this->_connection->put($filename, $src);
+        return $this->_connection->put($filename, $src); // @phpstan-ignore class.notFound
     }
 
     /**
@@ -177,7 +175,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
     #[\Override]
     public function rm($filename)
     {
-        return $this->_connection->delete($filename);
+        return $this->_connection->delete($filename); // @phpstan-ignore class.notFound
     }
 
     /**
@@ -187,7 +185,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
     #[\Override]
     public function mv($src, $dest)
     {
-        return $this->_connection->rename($src, $dest);
+        return $this->_connection->rename($src, $dest); // @phpstan-ignore class.notFound
     }
 
     /**
@@ -197,7 +195,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
     #[\Override]
     public function chmod($filename, $mode)
     {
-        return $this->_connection->chmod($mode, $filename);
+        return $this->_connection->chmod($mode, $filename); // @phpstan-ignore class.notFound
     }
 
     /**
@@ -207,7 +205,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
     #[\Override]
     public function ls($grep = null)
     {
-        $list = $this->_connection->nlist();
+        $list = $this->_connection->nlist(); // @phpstan-ignore class.notFound
         $pwd = $this->pwd();
         $result = [];
         foreach ($list as $name) {
@@ -221,7 +219,7 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
 
     public function rawls()
     {
-        $list = $this->_connection->rawlist();
+        $list = $this->_connection->rawlist(); // @phpstan-ignore class.notFound
         return $list;
     }
 
@@ -233,6 +231,6 @@ class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
      */
     public function writeFile($filename, $src)
     {
-        return $this->_connection->put($filename, $src, \phpseclib3\Net\SFTP::SOURCE_LOCAL_FILE);
+        return $this->_connection->put($filename, $src, SFTP::SOURCE_LOCAL_FILE); // @phpstan-ignore class.notFound, class.notFound
     }
 }

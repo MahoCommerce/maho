@@ -666,7 +666,8 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
      * Returns helper instance
      *
      * @param string $helperName
-     * @return Mage_Core_Helper_Abstract
+     * @return Mage_Core_Helper_Abstract|false
+     * @deprecated use Mage::helper()
      */
     protected function _getHelper($helperName)
     {
@@ -693,7 +694,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                     return (string) $child->action;
                 } elseif ($child->children) {
                     $action = $this->findFirstAvailableMenu($child->children, $path . $childName . '/', $level + 1);
-                    return $action ? $action : (string) $child->action;
+                    return $action ?: (string) $child->action;
                 }
             }
         }
@@ -820,9 +821,9 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         $result = [];
 
         if (!Zend_Validate::is($password, 'NotEmpty')) {
-            $result[] = $this->_getHelper('adminhtml')->__('Current password field cannot be empty.');
+            $result[] = Mage::helper('adminhtml')->__('Current password field cannot be empty.');
         } elseif (is_null($this->getId()) || !Mage::helper('core')->validateHash($password, $this->getPassword())) {
-            $result[] = $this->_getHelper('adminhtml')->__('Invalid current password.');
+            $result[] = Mage::helper('adminhtml')->__('Invalid current password.');
         }
 
         if (empty($result)) {

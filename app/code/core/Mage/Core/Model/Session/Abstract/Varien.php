@@ -271,7 +271,6 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         $this->_data = &$_SESSION[$namespace];
 
         $this->validate();
-        $this->revalidateCookie();
 
         return $this;
     }

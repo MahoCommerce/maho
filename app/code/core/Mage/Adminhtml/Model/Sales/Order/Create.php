@@ -1542,7 +1542,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
         }
 
         /** @var Mage_Sales_Model_Order $order */
-        $order = $service->submit();
+        $order = $service->submitOrder();
         $customer = $quote->getCustomer();
         if ((!$customer->getId() || !$customer->isInStore($this->getSession()->getStore()))
             && !$quote->getCustomerIsGuest()
@@ -1645,7 +1645,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
             $host = $this->getSession()
                 ->getStore()
                 ->getConfig(Mage_Customer_Model_Customer::XML_PATH_DEFAULT_EMAIL_DOMAIN);
-            $account = $customer->getIncrementId() ? $customer->getIncrementId() : time();
+            $account = $customer->getIncrementId() ?: time();
             $email = $account . '@' . $host;
             $account = $this->getData('account');
             $account['email'] = $email;

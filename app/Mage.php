@@ -117,7 +117,7 @@ final class Mage
 
     public static function getMahoVersion(): string
     {
-        return '25.3.0';
+        return '25.5.0';
     }
 
     /**
@@ -366,13 +366,17 @@ final class Mage
      * @param callable $callback
      * @param array $data
      * @param string $observerName
-     * @param string $observerClass
+     * @param class-string|'' $observerClass
      * @return Varien_Event_Collection
+     * @throws Mage_Core_Exception
      */
     public static function addObserver($eventName, $callback, $data = [], $observerName = '', $observerClass = '')
     {
         if ($observerClass == '') {
             $observerClass = 'Varien_Event_Observer';
+        }
+        if (!class_exists($observerClass)) {
+            self::throwException("Invalid observer class: $observerClass");
         }
         $observer = new $observerClass();
         $observer->setName($observerName)->addData($data)->setEventName($eventName)->setCallback($callback);
@@ -397,69 +401,88 @@ final class Mage
     }
 
     /**
-     * Retrieve model object
+     * Retrieve model instance by alias
      *
-     * @link    Mage_Core_Model_Config::getModelInstance
-     * @param   string $modelClass
-     * @param   array|string|object $arguments
-     * @return  Mage_Core_Model_Abstract|false
+     * ```php
+     * $model = Mage::getModel('core/store'); // Mage_Core_Model_Store
+     * ```
+     *
+     * @param string $modelAlias
+     * @param array|string|object $arguments
+     * @return Mage_Core_Model_Abstract|false
      */
-    public static function getModel($modelClass = '', $arguments = [])
+    public static function getModel($modelAlias, $arguments = [])
     {
-        return self::getConfig()->getModelInstance($modelClass, $arguments);
+        return self::getConfig()->getModelInstance($modelAlias, $arguments);
     }
 
     /**
-     * Retrieve model object singleton
+     * Retrieve model singleton by alias
      *
-     * @param   string $modelClass
-     * @return  Mage_Core_Model_Abstract|false
+     * ```php
+     * $model = Mage::getModel('core/session'); // Mage_Core_Model_Session
+     * ```
+     *
+     * @param string $modelAlias
+     * @return Mage_Core_Model_Abstract|false
      */
-    public static function getSingleton($modelClass = '', array $arguments = [])
+    public static function getSingleton($modelAlias, array $arguments = [])
     {
-        $registryKey = '_singleton/' . $modelClass;
+        $registryKey = "_singleton/$modelAlias";
         if (!isset(self::$_registry[$registryKey])) {
-            self::register($registryKey, self::getModel($modelClass, $arguments));
+            self::register($registryKey, self::getModel($modelAlias, $arguments));
         }
         return self::$_registry[$registryKey];
     }
 
     /**
-     * Retrieve object of resource model
+     * Retrieve resource model by alias
      *
-     * @param   string $modelClass
-     * @param   array $arguments
-     * @return  Mage_Core_Model_Resource_Db_Collection_Abstract|false
+     * ```php
+     * $model = Mage::getResourceModel('core/store_collection'); // Mage_Core_Model_Resource_Store_Collection
+     * ```
+     *
+     * @param string $modelAlias
+     * @param array $arguments
+     * @return Mage_Core_Model_Resource_Db_Collection_Abstract|false
      */
-    public static function getResourceModel($modelClass, $arguments = [])
+    public static function getResourceModel($modelAlias, $arguments = [])
     {
-        return self::getConfig()->getResourceModelInstance($modelClass, $arguments);
+        return self::getConfig()->getResourceModelInstance($modelAlias, $arguments);
     }
 
     /**
      * Retrieve Controller instance by ClassName
      *
-     * @param string $class
+     * @param class-string $class
      * @param Mage_Core_Controller_Request_Http $request
      * @param Mage_Core_Controller_Response_Http $response
      * @return Mage_Core_Controller_Front_Action
+     * @throws Mage_Core_Exception
      */
     public static function getControllerInstance($class, $request, $response, array $invokeArgs = [])
     {
+        if (!class_exists($class)) {
+            self::throwException("Invalid controller class: $class");
+        }
         return new $class($request, $response, $invokeArgs);
     }
 
     /**
-     * Retrieve resource model object singleton
+     * Retrieve resource model singleton by alias
      *
-     * @param   string $modelClass
-     * @return  object
+     * ```php
+     * $model = Mage::getResourceSingleton('core/session'); // Mage_Core_Model_Resource_Session
+     * ```
+     *
+     * @param string $modelAlias
+     * @return Mage_Core_Model_Resource_Db_Collection_Abstract|false
      */
-    public static function getResourceSingleton($modelClass = '', array $arguments = [])
+    public static function getResourceSingleton($modelAlias, array $arguments = [])
     {
-        $registryKey = '_resource_singleton/' . $modelClass;
+        $registryKey = "_resource_singleton/$modelAlias";
         if (!isset(self::$_registry[$registryKey])) {
-            self::register($registryKey, self::getResourceModel($modelClass, $arguments));
+            self::register($registryKey, self::getResourceModel($modelAlias, $arguments));
         }
         return self::$_registry[$registryKey];
     }
@@ -468,7 +491,7 @@ final class Mage
      * Retrieve block object
      *
      * @param string $type
-     * @return Mage_Core_Block_Abstract|false
+     * @return Mage_Core_Block_Abstract|stdClass|false
      */
     public static function getBlockSingleton($type)
     {
@@ -477,33 +500,40 @@ final class Mage
     }
 
     /**
-     * Retrieve helper object
+     * Retrieve helper singleton by alias
      *
-     * @param string $name the helper name
-     * @return Mage_Core_Helper_Abstract
+     * ```php
+     * $helper = Mage::helper('core'); // Mage_Core_Helper_Data
+     * $helper = Mage::helper('core/url'); // Mage_Core_Helper_Url
+     * ```
+     *
+     * @param string $helperAlias
+     * @return Mage_Core_Helper_Abstract|false
      */
-    public static function helper($name)
+    public static function helper($helperAlias)
     {
-        $registryKey = '_helper/' . $name;
+        $registryKey = "_helper/$helperAlias";
         if (!isset(self::$_registry[$registryKey])) {
-            $helperClass = self::getConfig()->getHelperClassName($name);
-            self::register($registryKey, new $helperClass());
+            self::register($registryKey, self::getConfig()->getHelperInstance($helperAlias));
         }
         return self::$_registry[$registryKey];
     }
 
     /**
-     * Retrieve resource helper object
+     * Retrieve resource helper model singleton
      *
-     * @param string $moduleName
-     * @return Mage_Core_Model_Resource_Helper_Abstract
+     * ```php
+     * $model = Mage::getResourceHelper('core'); // Mage_Core_Model_Resource_Helper_Mysql4
+     * ```
+     *
+     * @param string $moduleAlias
+     * @return Mage_Core_Model_Resource_Helper_Abstract|false
      */
-    public static function getResourceHelper($moduleName)
+    public static function getResourceHelper($moduleAlias)
     {
-        $registryKey = '_resource_helper/' . $moduleName;
+        $registryKey = "_resource_helper/$moduleAlias";
         if (!isset(self::$_registry[$registryKey])) {
-            $helperClass = self::getConfig()->getResourceHelper($moduleName);
-            self::register($registryKey, $helperClass);
+            self::register($registryKey, self::getConfig()->getResourceHelperInstance($moduleAlias));
         }
         return self::$_registry[$registryKey];
     }
@@ -511,14 +541,17 @@ final class Mage
     /**
      * Return new exception by module to be thrown
      *
-     * @param string $module
+     * @param string $moduleName
      * @param string $message
      * @param integer $code
      * @return Mage_Core_Exception
      */
-    public static function exception($module = 'Mage_Core', $message = '', $code = 0)
+    public static function exception($moduleName = 'Mage_Core', $message = '', $code = 0)
     {
-        $className = $module . '_Exception';
+        $className = "{$moduleName}_Exception";
+        if (!class_exists($className)) {
+            $className = 'Mage_Core_Exception';
+        }
         return new $className($message, $code);
     }
 
@@ -527,6 +560,7 @@ final class Mage
      *
      * @param string $message
      * @param string $messageStorage
+     * @return never
      * @throws Mage_Core_Exception
      */
     public static function throwException($message, $messageStorage = null)
@@ -663,8 +697,8 @@ final class Mage
      */
     protected static function _setIsInstalled($options = [])
     {
-        if (isset($options['is_installed']) && $options['is_installed']) {
-            self::$_isInstalled = true;
+        if (isset($options['is_installed'])) {
+            self::$_isInstalled = (bool) $options['is_installed'];
         }
     }
 
@@ -930,5 +964,20 @@ final class Mage
         }
 
         return $baseUrl;
+    }
+
+    public static function getEncryptionKeyAsHex(): string
+    {
+        return (string) Mage::getConfig()->getNode('global/crypt/key');
+    }
+
+    public static function getEncryptionKeyAsBinary(): string
+    {
+        return sodium_hex2bin(self::getEncryptionKeyAsHex());
+    }
+
+    public static function generateEncryptionKeyAsHex(): string
+    {
+        return sodium_bin2hex(sodium_crypto_secretbox_keygen());
     }
 }

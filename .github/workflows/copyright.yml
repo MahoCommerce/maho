@@ -25,7 +25,7 @@ jobs:
       - name: Get changed files
         id: changed-files
         if: github.event_name == 'pull_request' || steps.skip_check.outputs.skip != 'true'
-        uses: tj-actions/changed-files@v45
+        uses: tj-actions/changed-files@v46
 
       - name: Check copyright in modified files
         if: github.event_name == 'pull_request' || steps.skip_check.outputs.skip != 'true'
@@ -42,6 +42,11 @@ jobs:
           .phpcs.xml
           .php-cs-fixer.php
           .rector.php
+          .phpstorm.meta.php/blocks.meta.php
+          .phpstorm.meta.php/helpers.meta.php
+          .phpstorm.meta.php/models.meta.php
+          .phpstorm.meta.php/registry.meta.php
+          .phpstorm.meta.php/resource_models.meta.php
           "
 
           # Loop through each modified file
@@ -53,7 +58,7 @@ jobs:
 
             # Only check files with specific extensions
             extension="${file##*.}"
-            if ! [[ "${extension,,}" =~ ^(css|js|php|phtml|template|xml)$ ]]; then
+            if ! [[ "${extension,,}" =~ ^(css|js|php|phtml)$ ]]; then
               continue
             fi
 

@@ -113,14 +113,13 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
     {
         parent::_afterLoad();
 
-        /**
-         * Assign products
-         */
+        // Assign products
         $this->_assignOptions();
         $this->_assignProducts();
         $this->resetItemsDataChanged();
 
         $this->getPageSize();
+        $this->calculateDaysInWishlist();
 
         return $this;
     }
@@ -362,31 +361,42 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
 
     /**
      * Set add days in wishlist
+     */
+    public function setDaysInWishlist(bool $flag): self
+    {
+        $this->_addDaysInWishlist = $flag;
+        return $this;
+    }
+
+    /**
+     * Set add days in wishlist
      *
-     * This method appears in 1.5.0.0 in deprecated state, because:
-     * - we need it to make wishlist item collection interface as much as possible compatible with old
-     *   wishlist product collection
-     * - this method is useless because we can calculate days in php, and don't use MySQL for it
-     *
-     * @deprecated after 1.4.2.0
      * @return $this
+     * @deprecated use self::setDaysInWishlist($flag)
      */
     public function addDaysInWishlist()
     {
-        $this->_addDaysInWishlist = true;
+        $this->setDaysInWishlist(true);
+        return $this;
+    }
 
-        $adapter = $this->getConnection();
-        $dateModel = Mage::getSingleton('core/date');
-        /** @var Mage_Core_Model_Resource_Helper_Mysql4 $resHelper */
-        $resHelper = Mage::getResourceHelper('core');
+    /**
+     * Calculate days in wishlist
+     *
+     * @return $this
+     */
+    protected function calculateDaysInWishlist(): self
+    {
+        if ($this->_addDaysInWishlist !== true) {
+            return $this;
+        }
 
-        $offsetFromDb = (int) $dateModel->getGmtOffset();
-        $startDate = $adapter->getDateAddSql('added_at', $offsetFromDb, Varien_Db_Adapter_Interface::INTERVAL_SECOND);
+        foreach ($this->getItems() as $item) {
+            $addedAt = new DateTimeImmutable($item->getAddedAt());
+            $now = new DateTimeImmutable('now');
+            $item->setDaysInWishlist($now->diff($addedAt)->format('%a'));
+        }
 
-        $nowDate = $dateModel->date();
-        $dateDiff = $resHelper->getDateDiff($startDate, $adapter->formatDate($nowDate));
-
-        $this->getSelect()->columns(['days_in_wishlist' => $dateDiff]);
         return $this;
     }
 

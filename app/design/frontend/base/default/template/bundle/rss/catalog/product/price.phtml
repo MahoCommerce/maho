@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
@@ -15,12 +15,12 @@
  * Template for displaying bundle product price in RSS feeds
  *
  * @see Mage_Bundle_Block_Catalog_Product_Price
- * @var Mage_Bundle_Block_Catalog_Product_Price $this 
+ * @var Mage_Bundle_Block_Catalog_Product_Price $this
  */
 ?>
 
 <?php $_product = $this->getProduct() ?>
-<?php list($_minimalPrice, $_maximalPrice) = $_product->getPriceModel()->getPrices($_product) ?>
+<?php list($_minimalPrice, $_maximalPrice) = $_product->getPriceModel()->getTotalPrices($_product) ?>
 <?php $_id = $_product->getId() ?>
 
 <?php

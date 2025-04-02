@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -115,7 +115,8 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
      *
      * @param string $className
      * @param array $arguments
-     * @return Mage_Core_Model_Abstract
+     * @return Mage_Core_Model_Abstract|false
+     * @deprecated use Mage::getSingleton()
      */
     protected function _getSingletonModel($className, $arguments = [])
     {
@@ -692,7 +693,7 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
         if ($addFormKey) {
             $additional = array_merge(
                 $additional,
-                [Mage_Core_Model_Url::FORM_KEY => $this->_getSingletonModel('core/session')->getFormKey()],
+                [Mage_Core_Model_Url::FORM_KEY => Mage::getSingleton('core/session')->getFormKey()],
             );
         }
         if (!isset($additional['_escape'])) {

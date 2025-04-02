@@ -72,18 +72,6 @@
         </li>
     </ul>
 </fieldset>
-<fieldset class="group-select wide">
-    <legend><?= $this->__('Encryption Key') ?></legend>
-    <h4 class="legend"><?= $this->__('Encryption Key') ?></h4>
-    <ul>
-        <li>
-            <input type="text" name="encryption_key" id="encryption_key" value="<?= $this->getFormData()->getEncryptionKey() ?>" title="<?= $this->quoteEscape($this->__('Encryption Key')) ?>" class="input-text"/>
-            <p style="margin-top:4px; line-height:1.3em; color:#666;">
-                <small><?= $this->__('Maho uses this key to encrypt passwords, credit cards and more. If this field is left empty the system will create an encryption key for you and will display it on the next page.') ?></small>
-            </p>
-        </li>
-    </ul>
-</fieldset>
 <div class="button-set">
     <p class="required">* <?= $this->__('Required Fields') ?></p>
     <button class="form-button" type="submit"><span><?= $this->__('Continue') ?></span></button>

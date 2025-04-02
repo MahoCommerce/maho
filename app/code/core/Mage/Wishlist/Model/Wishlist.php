@@ -618,7 +618,7 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
         $buyRequest = Mage::helper('catalog/product')->addParamsToBuyRequest($buyRequest, $params);
 
         $isForceSetQuantity = !array_any(
-            $this->getItemCollection()->getItems(),
+            $this->getItemsCollection()->getItems(),
             fn($wishlistItem) => $wishlistItem->getProductId() == $product->getId()
                 && $wishlistItem->representProduct($product)
                 && $wishlistItem->getId() != $item->getId(),
