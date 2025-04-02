@@ -6822,6 +6822,9 @@ div.paypal-logo span > img {
   padding-bottom: 10px;
   margin-bottom: 10px;
 }
+.search-autocomplete .products-list > li:hover {
+  cursor: pointer;
+}
 .search-autocomplete .products-list :is(.product-name a, .price) {
   font-size: 0.938rem !important;
   text-transform: none;
