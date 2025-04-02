@@ -3406,8 +3406,8 @@ p.product-name a:hover {
   color: var(--maho-color-primary);
 }
 .products-grid > li > div:first-child ul svg {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
 }
 
 .products-grid .product-image img {
@@ -6780,43 +6780,63 @@ div.paypal-logo span > img {
  * Search - Auto Suggest
  * ============================================ */
 .search-autocomplete {
+  background-color: var(--maho-color-background);
+  border: 1px solid var(--maho-color-primary);
   position: absolute !important;
   overflow: visible !important;
   margin-top: 8px;
   z-index: 200;
   display: none;
 }
-.search-autocomplete ul {
-  border-radius: 2px;
-  background-color: var(--maho-color-background);
-  border: 1px solid var(--maho-color-primary);
-  left: 0;
-  padding-left: 0;
-  position: absolute;
-  top: 0;
-  width: 100%;
+.search-autocomplete .products-list {
+  margin: 0.5rem !important;
 }
-.search-autocomplete ul li {
-  border-bottom: 1px solid var(--maho-color-background-alt);
-  color: var(--maho-color-primary);
+.search-autocomplete .product-image {
+  max-width: 80px;
+  margin-right: 1rem;
+  border: none;
+}
+.search-autocomplete .products-grid li > div > ul, .search-autocomplete :is(.product-secondary,.desc,.rating-links,.minimal-price-link) {
+  display: none !important;
+}
+.search-autocomplete .product-secondary:has(.price-box) {
+  display: block !important;
+  float: left;
+}
+.search-autocomplete .price-box {
+  display: flex;
+}
+.search-autocomplete :is(.product-primary,.product-shop) {
+  float: none !important;
+  padding: 0 !important;
+  width: auto !important;
+}
+.search-autocomplete .results-list {
+  max-height: 70dvh;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.search-autocomplete .products-list > li {
+  display: flex;
+  place-items: center;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+.search-autocomplete .products-list > li:hover {
   cursor: pointer;
-  font-size: 0.75rem;
-  padding: 4px 6px;
-  text-align: left;
 }
-.search-autocomplete ul li:hover {
-  color: var(--maho-color-primary-hover);
+.search-autocomplete .products-list :is(.product-name a, .price) {
+  font-size: 0.938rem !important;
+  text-transform: none;
+  font-weight: 500;
 }
-.search-autocomplete ul li.selected {
-  background-color: var(--maho-color-primary);
+.search-autocomplete :is(.view-all,.note-msg) {
+  display: block;
+  text-align: center;
+  font-weight: 500;
   color: var(--maho-color-background);
-}
-.search-autocomplete ul li .amount {
-  float: right;
-  font-weight: bold;
-}
-.search-autocomplete ul li:last-child {
-  border-bottom: none;
+  background-color: var(--maho-color-primary);
+  padding: 0.5rem;
 }
 .search-autocomplete:before {
   content: '';

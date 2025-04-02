@@ -6,15 +6,10 @@
  * @package    Mage_Payment
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Payment Observer
- *
- * @package    Mage_Payment
- */
 class Mage_Payment_Model_Observer
 {
     /**
@@ -162,5 +157,61 @@ class Mage_Payment_Model_Observer
                 ));
             }
         }
+    }
+
+    public function encryptionKeyRegenerated(Varien_Event_Observer $observer): void
+    {
+        /** @var \Symfony\Component\Console\Output\OutputInterface $output */
+        $output = $observer->getEvent()->getOutput();
+        $encryptCallback = $observer->getEvent()->getEncryptCallback();
+        $decryptCallback = $observer->getEvent()->getDecryptCallback();
+        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
+
+        $output->write('Re-encrypting data on sales_flat_quote_payment table... ');
+        $table = Mage::getSingleton('core/resource')->getTableName('sales_flat_quote_payment');
+
+        $select = $readConnection->select()
+            ->from($table)
+            ->where('cc_number_enc IS NOT NULL');
+        $encryptedData = $readConnection->fetchAll($select);
+        foreach ($encryptedData as $encryptedDataRow) {
+            $writeConnection->update(
+                $table,
+                ['cc_number_enc' => $encryptCallback($decryptCallback($encryptedDataRow['cc_number_enc']))],
+                ['payment_id = ?' => $encryptedDataRow['payment_id']],
+            );
+        }
+
+        $select = $readConnection->select()
+            ->from($table)
+            ->where('cc_cid_enc IS NOT NULL');
+        $encryptedData = $readConnection->fetchAll($select);
+        foreach ($encryptedData as $encryptedDataRow) {
+            $writeConnection->update(
+                $table,
+                ['cc_cid_enc' => $encryptCallback($decryptCallback($encryptedDataRow['cc_cid_enc']))],
+                ['payment_id = ?' => $encryptedDataRow['payment_id']],
+            );
+        }
+
+        $output->writeln('OK');
+
+        $output->write('Re-encrypting data on sales_flat_order_payment table... ');
+        $table = Mage::getSingleton('core/resource')->getTableName('sales_flat_order_payment');
+
+        $select = $readConnection->select()
+            ->from($table)
+            ->where('cc_number_enc IS NOT NULL');
+        $encryptedData = $readConnection->fetchAll($select);
+        foreach ($encryptedData as $encryptedDataRow) {
+            $writeConnection->update(
+                $table,
+                ['cc_number_enc' => $encryptCallback($decryptCallback($encryptedDataRow['cc_number_enc']))],
+                ['entity_id = ?' => $encryptedDataRow['entity_id']],
+            );
+        }
+
+        $output->writeln('OK');
     }
 }

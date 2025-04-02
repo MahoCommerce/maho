@@ -28,6 +28,7 @@
         "ext-session": "*",
         "ext-simplexml": "*",
         "ext-soap": "*",
+        "ext-sodium": "*",
         "ext-spl": "*",
         "ext-zlib": "*",
         "composer-runtime-api": "^2",
@@ -35,8 +36,6 @@
         "ezyang/htmlpurifier": "^4.17",
         "mahocommerce/maho-composer-plugin": "^3",
         "pelago/emogrifier": "^7.0",
-        "phpseclib/mcrypt_compat": "^2.0.3",
-        "phpseclib/phpseclib": "^3.0.14",
         "shardj/zf1-future": "^1.24.1",
         "symfony/console": "^7.1",
         "spomky-labs/otphp": "^11.3",
@@ -46,9 +45,11 @@
         "altcha-org/altcha": "^1.1.0",
         "mahocommerce/icons": "^1",
         "symfony/mailer": "^7.2",
-        "symfony/polyfill-php84": "^1.31"
+        "symfony/polyfill-php84": "^1.31",
+        "intervention/image": "^3.11"
     },
     "replace": {
+        "paragonie/random_compat": "*",
         "symfony/polyfill-ctype": "*",
         "symfony/polyfill-mbstring": "*",
         "symfony/polyfill-intl-grapheme": "*",

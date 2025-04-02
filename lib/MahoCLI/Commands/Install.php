@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    MahoCLI
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -62,9 +62,6 @@ class Install extends BaseMahoCommand
         $this->addOption('admin_username', null, InputOption::VALUE_REQUIRED, 'Admin user login');
         $this->addOption('admin_password', null, InputOption::VALUE_REQUIRED, 'Admin user password');
 
-        // Encryption key
-        $this->addOption('encryption_key', null, InputOption::VALUE_OPTIONAL, 'Will be automatically generated and displayed on success, if not specified');
-
         // Sample data
         $this->addOption('sample_data', null, InputOption::VALUE_OPTIONAL, 'Also install sample data');
     }
@@ -98,7 +95,6 @@ class Install extends BaseMahoCommand
             $app = Mage::app('default');
             if ($installer->init($app) && $installer->setArgs() && $installer->install()) {
                 $output->writeln('<info>Installation completed successfully</info>');
-                $output->writeln("The encryption key for your installation is {$installer->getEncryptionKey()}");
             }
         } catch (Exception $e) {
             $output->writeln("<error>{$e->getMessage()}</error>");

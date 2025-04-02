@@ -180,4 +180,34 @@ final class Maho
         header("HTTP/1.1 {$httpResponseCode} {$description}", true, $httpResponseCode);
         echo "<html><body><h1>There has been an error processing your request</h1>{$reportIdMessage}</body></html>";
     }
+
+    public static function getImageManager(array $customOptions = []): \Intervention\Image\ImageManager
+    {
+        $defaultOptions = [
+            'autoOrientation' => false,
+            'strip' => true,
+        ];
+        $options = [
+            ...$defaultOptions,
+            ...$customOptions,
+        ];
+
+        $driverClasses = [
+            \Intervention\Image\Drivers\Gd\Driver::class,
+        ];
+
+        if (\Composer\InstalledVersions::isInstalled('intervention/image-driver-vips')) {
+            // @phpstan-ignore class.notFound
+            array_unshift($driverClasses, \Intervention\Image\Drivers\Vips\Driver::class);
+        }
+
+        foreach ($driverClasses as $driverClass) {
+            try {
+                return \Intervention\Image\ImageManager::withDriver($driverClass, ...$options);
+            } catch (Intervention\Image\Exceptions\DriverException) {
+            }
+        }
+
+        Mage::throwException('No image driver found');
+    }
 }
