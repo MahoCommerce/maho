@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,13 +18,19 @@
  */
 class Mage_Adminhtml_Block_Widget_Grid_Container extends Mage_Adminhtml_Block_Widget_Container
 {
+    /** @var string */
     protected $_addButtonLabel;
+
+    /** @var string */
+    protected $_addButtonIcon;
+
+    /** @var string */
     protected $_backButtonLabel;
+
+    /** @var string */
     protected $_blockGroup = 'adminhtml';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $_block;
 
     /**
@@ -34,6 +40,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Container extends Mage_Adminhtml_Block_Wi
     {
         if (is_null($this->_addButtonLabel)) {
             $this->_addButtonLabel = $this->__('Add New');
+        }
+        if (is_null($this->_addButtonIcon)) {
+            $this->_addButtonIcon = 'circle-plus';
         }
         if (is_null($this->_backButtonLabel)) {
             $this->_backButtonLabel = $this->__('Back');
@@ -45,6 +54,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Container extends Mage_Adminhtml_Block_Wi
 
         $this->_addButton('add', [
             'label'     => $this->getAddButtonLabel(),
+            'icon'      => $this->_addButtonIcon,
             'onclick'   => Mage::helper('core/js')->getSetLocationJs($this->getCreateUrl()),
             'class'     => 'add',
         ]);
@@ -102,15 +112,6 @@ class Mage_Adminhtml_Block_Widget_Grid_Container extends Mage_Adminhtml_Block_Wi
             'onclick'   => Mage::helper('core/js')->getSetLocationJs($this->getBackUrl()),
             'class'     => 'back',
         ]);
-    }
-
-    /**
-     * @return string
-     */
-    #[\Override]
-    public function getHeaderCssClass()
-    {
-        return 'icon-head ' . parent::getHeaderCssClass();
     }
 
     /**

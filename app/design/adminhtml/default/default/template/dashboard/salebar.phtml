@@ -5,19 +5,19 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Dashboard_Sales $this */
 ?>
-<?php if(count($this->getTotals()) > 0): ?>
-            <?php foreach( $this->getTotals() as $_total ): ?>
-            <div class="entry-edit">
-                <div class="entry-edit-head"><h4><?= $_total['label'] ?></h4></div>
-                <fieldset class="a-center bold">
-                    <span class="nowrap" style="font-size:18px;"><?= $_total['value'] ?><span style="font-size:14px; color:#686868;"><?= $_total['decimals'] ?>
-                </fieldset>
-            </div>
-            <?php endforeach ?>
+<?php if (count($this->getTotals()) > 0): ?>
+    <?php foreach ($this->getTotals() as $total): ?>
+    <div class="entry-edit">
+        <div class="entry-edit-head"><h4><?= $total['label'] ?></h4></div>
+        <fieldset class="a-center">
+            <strong class="nowrap large"><?= $total['value'] ?></strong>
+        </fieldset>
+    </div>
+    <?php endforeach ?>
 <?php endif ?>

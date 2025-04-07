@@ -5,17 +5,19 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
 <?php /** @var Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Method_Form $this */ ?>
 <?php $_shippingRateGroups = $this->getShippingRates(); ?>
 <?php if ($_shippingRateGroups): ?>
-    <div id="order-shipping-method-choose" style="display:none">
+    <div id="order-shipping-method-choose" class="no-display">
     <dl class="shipment-methods">
     <?php foreach ($_shippingRateGroups as $code => $_rates): ?>
-        <dt><strong><?= $this->escapeHtml($this->getCarrierName($code)) ?></strong></dt>
+        <dt>
+            <strong><?= $this->escapeHtml($this->getCarrierName($code)) ?></strong>
+        </dt>
         <dd>
             <ul>
             <?php foreach ($_rates as $_rate): ?>
@@ -62,14 +64,13 @@
                     (<?= $this->__('Incl. Tax') ?> <?= $_incl ?>)
                 <?php endif ?>
             </strong>
-            <!--input type="text" class="input-text" style="width:70px"/-->
             <br/>
             <a href="#" onclick="$('order-shipping-method-info').hide();$('order-shipping-method-choose').show();return false">
                 <?= Mage::helper('sales')->__('Click to change shipping method') ?>
             </a>
         </div>
     <?php else: ?>
-        <script type="text/javascript">$('order-shipping-method-choose').show();</script>
+        <script>toggleVis('order-shipping-method-choose', true);</script>
     <?php endif ?>
 <?php elseif($this->getIsRateRequest()): ?>
     <strong><?= Mage::helper('sales')->__('Sorry, no quotes are available for this order at this time.') ?></strong>
@@ -81,8 +82,10 @@
         <input type="hidden" name="order[has_shipping]" value="" class="required-entry" />
     </div>
 <?php endif ?>
-<div style="display:none;" id="shipping-method-overlay" class="overlay"><span><?= $this->__('Shipping method selection is not applicable') ?></span></div>
-<script type="text/javascript">
-order.overlay('shipping-method-overlay', <?php if ($this->getQuote()->isVirtual()): ?>false<?php else: ?>true<?php endif ?>);
-order.overlay('address-shipping-overlay', <?php if ($this->getQuote()->isVirtual()): ?>false<?php else: ?>true<?php endif ?>);
+<div id="shipping-method-overlay" class="overlay no-display">
+    <?= $this->__('Shipping method selection is not applicable') ?>
+</div>
+<script>
+    order.overlay('shipping-method-overlay', <?= json_encode(!$this->getQuote()->isVirtual()) ?>);
+    order.overlay('address-shipping-overlay', <?= json_encode(!$this->getQuote()->isVirtual()) ?>);
 </script>

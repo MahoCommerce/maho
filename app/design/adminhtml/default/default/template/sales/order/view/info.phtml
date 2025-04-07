@@ -5,31 +5,24 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Sales_Order_View_Info $this */
 ?>
-<?php $_order = $this->getOrder() ?>
 <?php
+$_order = $this->getOrder();
 $orderAdminDate = $this->formatDate($_order->getCreatedAtDate(), 'medium', true);
 $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', true);
 ?>
-<div class="box-left">
-    <!--Order Information-->
+<div class="box-order-information">
     <div class="entry-edit">
-        <?php if ($_order->getEmailSent()):
-            $_email = Mage::helper('sales')->__('the order confirmation email was sent');
-        else:
-            $_email = Mage::helper('sales')->__('the order confirmation email is not sent');
-        endif; ?>
         <div class="entry-edit-head">
         <?php if ($this->getNoUseOrderLink()): ?>
-            <h4 data-copy-text="<?= $_order->getRealOrderId() ?>"><?= Mage::helper('sales')->__('Order # %s', $this->escapeHtml($_order->getRealOrderId())) ?> (<?= $_email ?>)</h4>
+            <h4 data-copy-text="<?= $_order->getRealOrderId() ?>"><?= Mage::helper('sales')->__('Order # %s', $this->escapeHtml($_order->getRealOrderId())) ?></h4>
         <?php else: ?>
             <a href="<?= $this->getViewUrl($_order->getId()) ?>"><?= Mage::helper('sales')->__('Order # %s', $this->escapeHtml($_order->getRealOrderId())) ?></a>
-            <strong>(<?= $_email ?>)</strong>
         <?php endif ?>
         </div>
         <div class="fieldset">
@@ -47,6 +40,16 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
             <tr>
                 <td class="label"><label><?= Mage::helper('sales')->__('Order Status') ?></label></td>
                 <td class="value"><strong><span id="order_status"><?= $_order->getStatusLabel() ?></span></strong></td>
+            </tr>
+            <tr>
+                <td class="label"><label><?= Mage::helper('sales')->__('Confirmation Email') ?></label></td>
+                <td class="value">
+                <?php if ($_order->getEmailSent()): ?>
+                    <strong><?= Mage::helper('sales')->__('Sent') ?></strong>
+                <?php else: ?>
+                    <strong><?= Mage::helper('sales')->__('Not Sent') ?></strong>
+                <?php endif ?>
+                </td>
             </tr>
             <tr>
                 <td class="label"><label><?= Mage::helper('sales')->__('Purchased From') ?></label></td>
@@ -90,8 +93,8 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
         </div>
     </div>
 </div>
-<div class="box-right">
-    <!--Account Information-->
+
+<div class="box-account-information">
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4><?= Mage::helper('sales')->__('Account Information') ?></h4>
@@ -131,10 +134,8 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
         </div>
     </div>
 </div>
-<div class="clear"></div>
 
-<div class="box-left">
-    <!--Billing Address-->
+<div class="box-billing-address">
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4><?= Mage::helper('sales')->__('Billing Address') ?></h4>
@@ -145,9 +146,9 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
         </fieldset>
     </div>
 </div>
+
 <?php if (!$this->getOrder()->getIsVirtual()): ?>
-<div class="box-right">
-    <!--Shipping Address-->
+<div class="box-shipping-address">
     <div class="entry-edit">
         <div class="entry-edit-head">
             <h4><?= Mage::helper('sales')->__('Shipping Address') ?></h4>
@@ -158,5 +159,4 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
         </fieldset>
     </div>
 </div>
-<div class="clear"></div>
 <?php endif ?>

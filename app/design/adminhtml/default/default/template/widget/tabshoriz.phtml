@@ -9,27 +9,21 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/**
- * @see Mage_Adminhtml_Block_Widget_Tabs
- * @var Mage_Adminhtml_Block_Widget_Tabs $this
- */
+/** @var Mage_Adminhtml_Block_Widget_Tabs $this */
 ?>
-<!-- <?php if($this->getTitle()): ?>
-    <h3><?= $this->getTitle() ?></h3>
-<?php endif ?> -->
 <?php if(!empty($tabs)): ?>
 <ul id="<?= $this->getId() ?>" class="tabs-horiz">
-<?php foreach ($tabs as $_tab): ?>
-    <li>
-        <a href="<?= $this->getTabUrl($_tab)?>" id="<?= $this->getTabId($_tab) ?>" name="<?= $this->getTabId($_tab, false) ?>" title="<?= $this->getTabTitle($_tab) ?>" class="tab-item-link <?= $this->getTabClass($_tab) ?><?php if (preg_match('/\s?ajax\s?/', $this->getTabClass($_tab))) {?> notloaded<?php }?>">
-            <span><span class="changed" title="<?= $this->quoteEscape($this->__('The information in this tab has been changed.')) ?>"></span><span class="error" title="<?= $this->quoteEscape($this->__('This tab contains invalid data. Please solve the problem before saving.')) ?>"></span><?= $this->getTabLabel($_tab) ?></span>
+<?php foreach ($tabs as $tab): ?>
+    <?php if (!$this->canShowTab($tab)) continue ?>
+    <li<?= $this->getTabIsHidden($tab) ? ' class="no-display"' : ''?>>
+        <a href="<?= $this->getTabUrl($tab) ?>" id="<?= $this->getTabId($tab) ?>" name="<?= $this->getTabId($tab, false) ?>" title="<?= $this->quoteEscape($this->getTabTitle($tab)) ?>" class="<?= $this->getTabClasses($tab) ?>">
+            <?= $this->getTabLabel($tab) ?>
         </a>
-        <div id="<?= $this->getTabId($_tab) ?>_content" style="display:none"><?= $this->getTabContent($_tab) ?></div>
+        <div id="<?= $this->getTabId($tab) ?>_content" class="no-display"><?= $this->getTabContent($tab) ?></div>
     </li>
 <?php endforeach ?>
 </ul>
-<script type="text/javascript">
-
-    <?= $this->getId() ?>JsTabs = new varienTabs('<?= $this->getId() ?>', '<?= $this->getDestElementId() ?>', '<?= $this->getActiveTabId() ?>', <?= $this->getAllShadowTabs() ?>);
+<script>
+    <?= $this->getJsObjectName() ?> = new varienTabs('<?= $this->getId() ?>', '<?= $this->getDestElementId() ?>', '<?= $this->getActiveTabId() ?>', <?= $this->getAllShadowTabs() ?>);
 </script>
 <?php endif ?>
