@@ -105,7 +105,7 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
         }
 
         $baseUrl = (fn(array $parts) =>
-            (isset($parts['scheme']) ? $parts['scheme'] . '://' : '') .
+            $parts['scheme'] . '://' .
             ($parts['user'] ?? '') .
             (isset($parts['pass']) ? ':' . $parts['pass'] : '') .
             ((isset($parts['user']) || isset($parts['pass'])) ? '@' : '') .
