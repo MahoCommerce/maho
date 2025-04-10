@@ -612,6 +612,10 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             $this->_baseUrlCache[$cacheKey] = rtrim($url, '/') . '/';
         }
 
+        if (!Mage::isInstalled()) {
+            $this->_baseUrlCache[$cacheKey] = str_replace(['http://', 'https://'], '//', $this->_baseUrlCache[$cacheKey]);
+        }
+
         return $this->_baseUrlCache[$cacheKey];
     }
 
