@@ -99,10 +99,22 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
     public function getFormData()
     {
         $baseUrl = Mage::helper('core/url')->decodePunycode(Mage::getBaseUrl('web'));
-        $uri    = explode(':', $baseUrl, 2);
-        $scheme = strtolower($uri[0]);
-        $baseSecureUrl = ($scheme !== 'https') ? str_replace('http://', 'https://', $baseUrl) : $baseUrl;
+        $urlData = parse_url($baseUrl);
+        if (!isset($urlData['scheme'])) {
+            $urlData['scheme'] = $_SERVER['REQUEST_SCHEME'] ?? 'https';
+        }
 
+        $baseUrl = (fn(array $parts) =>
+            (isset($parts['scheme']) ? $parts['scheme'] . '://' : '') .
+            ($parts['user'] ?? '') .
+            (isset($parts['pass']) ? ':' . $parts['pass'] : '') .
+            ((isset($parts['user']) || isset($parts['pass'])) ? '@' : '') .
+            ($parts['host'] ?? '') .
+            (isset($parts['port']) ? ':' . $parts['port'] : '') .
+            ($parts['path'] ?? '') .
+            (isset($parts['query']) ? '?' . $parts['query'] : '') .
+            (isset($parts['fragment']) ? '#' . $parts['fragment'] : ''))($urlData);
+        $baseSecureUrl = str_replace('http://', 'https://', $baseUrl);
         $connectDefault = Mage::getConfig()
                 ->getResourceConnectionConfig(Mage_Core_Model_Resource::DEFAULT_SETUP_RESOURCE);
 
