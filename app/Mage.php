@@ -752,6 +752,8 @@ final class Mage
                 if ($result === false) {
                     throw new Exception("Failed to write $localConfigFile.");
                 }
+
+                chmod($localConfigFile, 0640);
             }
 
             if ($localConfig = @simplexml_load_file($localConfigFile)) {
