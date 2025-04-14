@@ -748,6 +748,7 @@ final class Mage
 
             $localXmlContent = $_ENV['MAHO_LOCAL_XML'] ?? $_SERVER['MAHO_LOCAL_XML'] ?? null;
             if (!empty($localXmlContent) && !file_exists($localConfigFile)) {
+                @mkdir($etcDir, 0750, true);
                 $result = file_put_contents($localConfigFile, $localXmlContent, LOCK_EX);
                 if ($result === false) {
                     throw new Exception("Failed to write $localConfigFile.");
