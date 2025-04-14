@@ -746,8 +746,17 @@ final class Mage
 
             self::$_isInstalled = false;
 
-            if (is_readable($localConfigFile)) {
-                $localConfig = simplexml_load_file($localConfigFile);
+            $localXmlContent = $_ENV['MAHO_LOCAL_XML'] ?? $_SERVER['MAHO_LOCAL_XML'] ?? null;
+            if (!empty($localXmlContent) && !file_exists($localConfigFile)) {
+                $result = file_put_contents($localConfigFile, $localXmlContent, LOCK_EX);
+                if ($result === false) {
+                    throw new Exception("Failed to write $localConfigFile.");
+                }
+
+                chmod($localConfigFile, 0640);
+            }
+
+            if ($localConfig = @simplexml_load_file($localConfigFile)) {
                 date_default_timezone_set('UTC');
                 if (($date = $localConfig->global->install->date) && strtotime((string) $date)) {
                     self::$_isInstalled = true;
