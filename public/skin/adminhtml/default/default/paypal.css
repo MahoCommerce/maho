@@ -1,0 +1,172 @@
+/**
+ * Maho
+ *
+ * @category    design
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://www.magento.com)
+ * @copyright   Copyright (c) 2017-2024 The OpenMage Contributors (https://www.openmage.org)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/* === PayPal Config === */
+
+.payflow-settings-notice {
+    padding-bottom: 1em;
+    max-width: 660px;
+    .important-label {
+        color: red;
+    }
+    & ul.options-list {
+        list-style: disc;
+        padding: 0 2em;
+    }
+}
+
+.paypal-payment-notice {
+    font-weight: bold;
+    margin: -10px 0 10px 0;
+}
+
+.pp-general-uk > .config-heading .heading strong, .pp-method-payflow > .config-heading .heading strong, .pp-method-express > .config-heading .heading strong, .pp-method-general > .config-heading .heading strong {
+    padding-left: 56px;
+    background: url(images/paypal/logo-paypal.png) no-repeat 0 2px;
+}
+.pp-method-general > .config-heading {
+    .button-container {
+        padding: 8px 0 0 180px;
+        background: url(images/paypal/pp-allinone.png) no-repeat 0 0;
+        height: 26px;
+    }
+}
+.pp-method-express > .config-heading {
+    .button-container {
+        padding: 0 0 0 174px;
+        background: url(images/paypal/pp-alt.png) no-repeat 0 0;
+        height: 29px;
+    }
+}
+.pp-method-payflow > .config-heading {
+    .button-container {
+        padding: 0px 0 0 99px;
+        background: url(images/paypal/pp-gateways.png) no-repeat 1px 0;
+        height: 36px;
+    }
+}
+.pp-general-uk > .config-heading {
+    .button-container {
+        padding: 9px 0 0 201px;
+        background: url(images/paypal/pp-uk.png) no-repeat 0 0;
+        height: 27px;
+    }
+}
+.config-heading {
+    padding: 10px 10px 10px 26px;
+    background: #efefef url(images/icon-enabled.png) no-repeat -999em -999em;
+    border: 1px solid #d8d8d8;
+    margin: -1px 0 0;
+    background-color: #fff;
+    border: 0;
+    margin: 4px 0 0;
+    .button {
+        .state-closed {
+            height: auto;
+        }
+        .state-opened {
+            height: 0;
+            overflow: hidden;
+        }
+        &.open {
+            .state-closed {
+                height: 0;
+                overflow: hidden;
+            }
+            .state-opened {
+                height: auto;
+            }
+        }
+    }
+    .heading {
+        float: left;
+        & strong {
+            font-size: 12px;
+            display: inline-block;
+        }
+        & a {
+            margin-left: 8px;
+            font-size: 11px;
+            color: #888;
+            font-weight: normal;
+            &.link-demo:before {
+                content: '|';
+                display: inline-block;
+                margin-right: 8px;
+                color: #888;
+                font-size: 12px;
+            }
+        }
+        .heading-intro {
+            display: block;
+            font-size: 11px;
+        }
+    }
+}
+
+.with-button {
+    background: #fff;
+    &.active > .config {
+        border-bottom-color: #b0b0b0;
+        z-index: 1;
+        position: relative;
+    }
+    &.active:after {
+        background: transparent url(images/bkg_config-shaddow.png) repeat-x 0 0;
+        height: 5px;
+        overflow: hidden;
+        position: relative;
+        left: 0;
+        margin: 0 1px -5px;
+        z-index: 2;
+        display: block;
+        content: '';
+        background: none;
+        margin: 0;
+    }
+}
+tr:last-child {
+    .with-button.active > .config {
+        border-bottom-color: #d6d6d6;
+    }
+    .with-button.active:after {
+        display: none;
+    }
+}
+
+.enabled {
+    .config-heading {
+        background-position: 5px 10px;
+    }
+}
+
+td.label {
+    & label.enabled {
+        background: url(images/icon-enabled.png) no-repeat 100% 1px;
+        min-height: 16px;
+    }
+}
+
+
+
+.pp-buttons-container {
+    white-space: nowrap;
+    float: left;
+    position: relative;
+    z-index: 1;
+    margin-right: -200px;
+    & button {
+        display: inline-block;
+    }
+    & button:first-child {
+        margin: 0;
+    }
+}

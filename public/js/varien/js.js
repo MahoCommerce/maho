@@ -8,6 +8,67 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
+var Maho = Maho ?? {};
+Maho.Ajax ??= {};
+
+Maho.Ajax.Loader = {
+    loaders: new Map(),
+
+    createLoaderEl() {
+        const loaderEl = document.createElement('div');
+        loaderEl.className = 'loading-mask';
+        loaderEl.innerHTML = `
+            <div class="backdrop no-display"></div>
+            <div class="loader no-display"><h3>${Translator.translate('Please wait...')}</h3></div>
+        `
+        return loaderEl
+    },
+
+    getLoaderAreaEl(loaderArea = null) {
+        if (loaderArea instanceof HTMLElement) {
+            return loaderArea;
+        }
+        if (typeof loaderArea === 'string') {
+            return document.getElementById(loaderArea);
+        }
+        return document.body;
+    },
+
+    show(loaderArea = null) {
+        const loaderAreaEl = this.getLoaderAreaEl(loaderArea);
+
+        if (!this.loaders.has(loaderAreaEl)) {
+            const loaderEl = loaderAreaEl.appendChild(this.createLoaderEl());
+            this.loaders.set(loaderAreaEl, { count: 0, loaderEl });
+            loaderAreaEl.style.position = 'relative';
+        }
+
+        const loader = this.loaders.get(loaderAreaEl);
+        loader.count++;
+
+        setTimeout(() => {
+            for (const el of loader.loaderEl.children) {
+                toggleVis(el, true);
+            }
+        }, window.LOADING_TIMEOUT ?? 200);
+    },
+
+    hide(loaderArea = null) {
+        const loaderAreaEl = this.getLoaderAreaEl(loaderArea);
+        const loader = this.loaders.get(loaderAreaEl);
+
+        // TODO: if no loaderArea specified, and no document.body loaders, remove all loaders
+        if (!loader || --loader.count > 0) {
+            return;
+        }
+
+        loader.loaderEl.remove();
+        loaderAreaEl.style.position = null;
+        this.loaders.delete(loaderAreaEl);
+    },
+}
+
+
 /**
  * Custom error with translated message
  */
@@ -72,11 +133,13 @@ async function mahoFetch(url, options) {
         return result;
 
     } catch (error) {
-        console.error('mahoFetch error:', error);
         if (loaderArea !== false && typeof hideLoader === 'function') {
             hideLoader();
         }
-        throw error;
+        if (error.name !== 'AbortError') {
+            console.error('mahoFetch error:', error);
+            throw error;
+        }
     }
 }
 
@@ -245,7 +308,8 @@ function expandDetails(el, childClass) {
         el.classList.remove('show-details');
     } else {
         document.querySelectorAll(childClass).forEach(item => {
-            item.style.display = 'block';
+            item.style.display = '';
+            item.classList.remove('no-display');
         });
         el.classList.add('show-details');
     }
@@ -336,13 +400,12 @@ Varien.Tabs = class {
         const ul = li.parentNode;
 
         // Get all li elements in both ul and ol within the parent
-        const allTabs = [...ul.querySelectorAll('li')];
-
-        allTabs.forEach(el => {
+        ul.querySelectorAll('li').forEach(el => {
             const contents = document.getElementById(`${el.id}_contents`);
             if (el === li) {
                 el.classList.add('active');
-                contents.style.display = 'block';
+                el.classList.remove('no-display');
+                contents.style.display = '';
             } else {
                 el.classList.remove('active');
                 contents.style.display = 'none';
