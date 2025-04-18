@@ -152,8 +152,7 @@ class CronRun extends BaseMahoCommand
 
         $this->isShellAvailable = !$isShellDisabled;
     }
-
-    protected function isProcessRunning(string $command): bool
+    
     protected function isProcessRunning(string $command): bool
     {
         if (!$this->isShellAvailable) {
