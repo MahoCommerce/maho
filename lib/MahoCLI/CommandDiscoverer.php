@@ -43,7 +43,7 @@ class CommandDiscoverer
         return $commands;
     }
 
-    private function getFullyQualifiedClassName($file): string
+    private function getFullyQualifiedClassName(string $file): string
     {
         $className = str_replace(
             [$this->baseDir, '.php', '/'],
