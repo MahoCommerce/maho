@@ -85,40 +85,6 @@ class Varien_Simplexml_Element extends SimpleXMLElement
         return isset($attrs[$name]) ? (string) $attrs[$name] : null;
     }
 
-    /*
-        public function addAttribute($name, $value=null, $namespace=null)
-        {
-            if (is_null($value)) {
-                return parent::addAttribute($name);
-            } else {
-                if (!is_null($value)) {
-                    $value = $this->xmlentities($value);
-                }
-                if (!is_null($namespace)) {
-                    return parent::addAttribute($name, $value, $namespace);
-                } else {
-                    return parent::addAttribute($name, $value);
-                }
-            }
-        }
-
-        public function addChild($name, $value=null, $namespace=null)
-        {
-            if (is_null($value)) {
-                return parent::addChild($name);
-            } else {
-                if (!is_null($value)) {
-                    $value = $this->xmlentities($value);
-                }
-                if (!is_null($namespace)) {
-                    return parent::addChild($name, $value, $namespace);
-                } else {
-                    return parent::addChild($name, $value);
-                }
-            }
-        }
-    */
-
     /**
      * Find a descendant of a node by path
      *
