@@ -127,22 +127,4 @@ class Mage_CatalogSearch_Model_Fulltext extends Mage_Core_Model_Abstract
     {
         return Mage::getStoreConfig(self::XML_PATH_CATALOG_SEARCH_TYPE, $storeId);
     }
-
-    // Deprecated methods
-
-    /**
-     * Update category products indexes
-     *
-     * @deprecated after 1.6.2.0
-     *
-     * @param array $productIds
-     * @param array $categoryIds
-     *
-     * @return $this
-     */
-    public function updateCategoryIndex($productIds, $categoryIds)
-    {
-        $this->getResource()->updateCategoryIndex($productIds, $categoryIds);
-        return $this;
-    }
 }

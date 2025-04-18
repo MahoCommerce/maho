@@ -808,20 +808,4 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
 
         return null;
     }
-
-    // Deprecated methods
-
-    /**
-     * Update category products indexes
-     *
-     * @deprecated after 1.6.2.0
-     *
-     * @param array $productIds
-     * @param array $categoryIds
-     * @return $this
-     */
-    public function updateCategoryIndex($productIds, $categoryIds)
-    {
-        return $this;
-    }
 }
