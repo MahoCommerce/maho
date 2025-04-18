@@ -111,13 +111,6 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     protected $_logAllQueries       = false;
 
     /**
-     * Add to log call stack data (backtrace)
-     *
-     * @var bool
-     */
-    protected $_logCallStack        = false;
-
-    /**
      * Path to SQL debug data log
      *
      * @var string
@@ -1494,13 +1487,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
                 break;
         }
         $code .= 'TIME: ' . $time . $nl;
-
-        if ($this->_logCallStack) {
-            $code .= 'TRACE: ' . Varien_Debug::backtrace(true, false) . $nl;
-        }
-
         $code .= $nl;
-
         $this->_debugWriteToFile($code);
 
         return $this;
