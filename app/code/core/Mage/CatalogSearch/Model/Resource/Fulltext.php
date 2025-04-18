@@ -53,14 +53,6 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
     protected $_engine                   = null;
 
     /**
-     * Whether table changes are allowed
-     *
-     * @deprecated after 1.6.1.0
-     * @var bool
-     */
-    protected $_allowTableChanges       = true;
-
-    /**
      * @var array
      */
     protected $_foundData = [];
@@ -823,19 +815,6 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
     }
 
     // Deprecated methods
-
-    /**
-     * Set whether table changes are allowed
-     *
-     * @deprecated after 1.6.1.0
-     * @param bool $value
-     * @return $this
-     */
-    public function setAllowTableChanges($value = true)
-    {
-        $this->_allowTableChanges = $value;
-        return $this;
-    }
 
     /**
      * Update category products indexes

@@ -23,14 +23,6 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
     protected $_matchedEntities = [];
 
     /**
-     * Whether table changes are allowed
-     *
-     * @deprecated after 1.6.1.0
-     * @var bool
-     */
-    protected $_allowTableChanges = true;
-
-    /**
      * Whether the indexer should be displayed on process/list page
      *
      * @var bool
@@ -145,19 +137,6 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
         if (method_exists($resourceModel, $method)) {
             $resourceModel->$method($event);
         }
-        return $this;
-    }
-
-    /**
-     * Set whether table changes are allowed
-     *
-     * @deprecated after 1.6.1.0
-     * @param bool $value
-     * @return Mage_Index_Model_Indexer_Abstract
-     */
-    public function setAllowTableChanges($value = true)
-    {
-        $this->_allowTableChanges = $value;
         return $this;
     }
 

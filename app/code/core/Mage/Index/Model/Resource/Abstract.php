@@ -35,14 +35,6 @@ abstract class Mage_Index_Model_Resource_Abstract extends Mage_Core_Model_Resour
     protected $_isDisableKeys = false;
 
     /**
-     * Whether table changes are allowed
-     *
-     * @deprecated after 1.6.1.0
-     * @var bool
-     */
-    protected $_allowTableChanges = true;
-
-    /**
      * Reindex all
      *
      * @return Mage_Index_Model_Resource_Abstract
@@ -218,19 +210,6 @@ abstract class Mage_Index_Model_Resource_Abstract extends Mage_Core_Model_Resour
     public function clearTemporaryIndexTable()
     {
         $this->_getWriteAdapter()->delete($this->getIdxTable());
-    }
-
-    /**
-     * Set whether table changes are allowed
-     *
-     * @deprecated after 1.6.1.0
-     * @param bool $value
-     * @return Mage_Index_Model_Resource_Abstract
-     */
-    public function setAllowTableChanges($value = true)
-    {
-        $this->_allowTableChanges = $value;
-        return $this;
     }
 
     /**

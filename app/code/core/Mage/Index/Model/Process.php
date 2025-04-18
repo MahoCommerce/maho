@@ -71,14 +71,6 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
     protected $_lockInstance = null;
 
     /**
-     * Whether table changes are allowed
-     *
-     * @deprecated after 1.6.1.0
-     * @var bool
-     */
-    protected $_allowTableChanges = true;
-
-    /**
      * Initialize resource
      */
     #[\Override]
@@ -540,19 +532,6 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
         }
 
         return $depends;
-    }
-
-    /**
-     * Set whether table changes are allowed
-     *
-     * @deprecated after 1.6.1.0
-     * @param bool $value
-     * @return $this
-     */
-    public function setAllowTableChanges($value = true)
-    {
-        $this->_allowTableChanges = $value;
-        return $this;
     }
 
     /**

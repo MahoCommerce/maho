@@ -13093,15 +13093,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Category/Collection.php
 
 		-
-			message: '''
-				#^Access to deprecated property \$_allowTableChanges of class Mage_Catalog_Model_Resource_Category_Flat\:
-				after 1\.6\.1\.0$#
-			'''
-			identifier: property.deprecated
-			count: 6
-			path: app/code/core/Mage/Catalog/Model/Resource/Category/Flat.php
-
-		-
 			message: '#^Call to an undefined method Mage_Catalog_Model_Resource_Category_Collection\:\:addSortedField\(\)\.$#'
 			identifier: method.notFound
 			count: 1
