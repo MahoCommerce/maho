@@ -32617,42 +32617,6 @@ parameters:
 			path: app/design/install/default/default/template/install/state.phtml
 
 		-
-			message: '#^Method Mage_Cache_Backend_File\:\:___expire\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Mage/Cache/Backend/File.php
-
-		-
-			message: '#^Method Maho\:\:findClassFile\(\) has parameter \$class with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Maho.php
-
-		-
-			message: '#^Method MahoCLI\\CommandDiscoverer\:\:getFullyQualifiedClassName\(\) has parameter \$file with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/MahoCLI/CommandDiscoverer.php
-
-		-
-			message: '#^Method MahoCLI\\Commands\\CronRun\:\:isProcessRunning\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/MahoCLI/Commands/CronRun.php
-
-		-
-			message: '#^Method MahoCLI\\Commands\\CronRun\:\:isProcessRunning\(\) has parameter \$command with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/MahoCLI/Commands/CronRun.php
-
-		-
-			message: '#^Parameter \#1 \$value of method Mage_Core_Model_Email_Template\:\:setTemplateType\(\) expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/MahoCLI/Commands/EmailTestSend.php
-
-		-
 			message: '#^Left side of && is always true\.$#'
 			identifier: booleanAnd.leftAlwaysTrue
 			count: 2
@@ -34349,18 +34313,6 @@ parameters:
 			identifier: method.nonObject
 			count: 1
 			path: lib/Varien/Db/Statement/Pdo/Mysql.php
-
-		-
-			message: '#^Method Varien_Debug\:\:_formatCalledArgument\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Debug.php
-
-		-
-			message: '#^Property Varien_Debug\:\:\$argLength has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Debug.php
 
 		-
 			message: '#^Method Varien_Directory_Collection\:\:getDirsName\(\) has no return type specified\.$#'
