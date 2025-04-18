@@ -34627,18 +34627,6 @@ parameters:
 			path: lib/Varien/File/Object.php
 
 		-
-			message: '#^Method Varien_File_Transfer_Adapter_Http\:\:send\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/File/Transfer/Adapter/Http.php
-
-		-
-			message: '#^Property Varien_File_Transfer_Adapter_Http\:\:\$_mimeTypes has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/File/Transfer/Adapter/Http.php
-
-		-
 			message: '#^Method Varien_File_Uploader\:\:__construct\(\) has parameter \$fileId with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
