@@ -5,17 +5,12 @@
  *
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog product media config
- *
- * @package    Mage_Catalog
- */
-class Mage_Catalog_Model_Product_Media_Config implements Mage_Media_Model_Image_Config_Interface
+class Mage_Catalog_Model_Product_Media_Config
 {
     /**
      * Filesystem directory path of product images
@@ -64,7 +59,6 @@ class Mage_Catalog_Model_Product_Media_Config implements Mage_Media_Model_Image_
     /**
      * @return string
      */
-    #[\Override]
     public function getBaseMediaPath()
     {
         return Mage::getBaseDir('media') . DS . 'catalog' . DS . 'product';
@@ -73,7 +67,6 @@ class Mage_Catalog_Model_Product_Media_Config implements Mage_Media_Model_Image_
     /**
      * @return string
      */
-    #[\Override]
     public function getBaseMediaUrl()
     {
         return Mage::getBaseUrl('media') . 'catalog/product';
@@ -99,7 +92,6 @@ class Mage_Catalog_Model_Product_Media_Config implements Mage_Media_Model_Image_
      * @param string $file
      * @return string
      */
-    #[\Override]
     public function getMediaUrl($file)
     {
         $file = $this->_prepareFileForUrl($file);
@@ -115,7 +107,6 @@ class Mage_Catalog_Model_Product_Media_Config implements Mage_Media_Model_Image_
      * @param string $file
      * @return string
      */
-    #[\Override]
     public function getMediaPath($file)
     {
         $file = $this->_prepareFileForPath($file);

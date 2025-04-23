@@ -1,0 +1,23 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     base_default
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_CatalogSearch_Block_Autocomplete $this */
+$productList = $this->getLayout()->createBlock('catalogsearch/autocomplete_product_list')
+    ->setTemplate('catalog/product/list.phtml');
+$numResults = count($productList->getLoadedProductCollection());
+?>
+<?php if ($numResults): ?>
+    <a class="view-all" onclick="document.getElementById('search_mini_form').submit()" href="#">
+        <?= $this->__("View all %s results", $numResults) ?>
+    </a>
+<?php endif ?>
+
+<div class="results-list">
+    <?= $productList->toHtml() ?>
+</div>

@@ -868,6 +868,8 @@
                         </port>
                         <username translate="label">
                             <label>Username</label>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
                             <sort_order>50</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -876,6 +878,8 @@
                         </username>
                         <password translate="label">
                             <label>Password</label>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
                             <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -922,6 +926,15 @@
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </image_file_type>
+                        <image_quality translate="label comment">
+                            <label>Image quality</label>
+                            <comment>Number from 0 to 100 (default is 85, recommended by Google). Higher values preserve more details but increase file size. For WebP format, you can also use 101 to enable lossless compression.</comment>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </image_quality>
                         <media_storage translate="label">
                             <label>Media Storage</label>
                             <frontend_type>select</frontend_type>
@@ -953,14 +966,6 @@
                                 to transfer all media to that location. Media will not be available in the new
                                 location until the synchronization process is complete.</comment>
                         </synchronize>
-                        <configuration_update_time translate="label">
-                            <label>Environment Update Time</label>
-                            <sort_order>400</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
-                        </configuration_update_time>
                     </fields>
                 </media_storage_configuration>
             </groups>
@@ -1185,15 +1190,6 @@
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </crate_admin_user_notification>
-                        <reprocess_image_quality translate="label comment">
-                            <label>Image Reprocess Quality</label>
-                            <comment>The recommended value is 85, a higher value will increase the file size. You can set the value to 0 to disable image processing, but it may cause security risks.</comment>
-                            <validate>validate-digits validate-digits-range digits-range-0-100</validate>
-                            <sort_order>180</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </reprocess_image_quality>
                     </fields>
                 </security>
                 <dashboard translate="label">

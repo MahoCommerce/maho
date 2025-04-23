@@ -29,7 +29,7 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function getHmacKey(): string
     {
-        return (string) Mage::getConfig()->getNode('global/crypt/key');
+        return Mage::getEncryptionKeyAsHex();
     }
 
     public function getFrontendSelectors(): string
