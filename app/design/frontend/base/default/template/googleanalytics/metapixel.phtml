@@ -27,8 +27,7 @@ $_helper = $this->helper('googleanalytics');
         fbq('track', 'PageView');
     </script>
     <script>
-        <?= $this->_getPageTrackingCode($metaPixelId) ?>
-        <?= $this->_getEnhancedEcommerceDataForAnalytics4() ?>
+        <?= $this->_getEnhancedEcommerceData() ?>
     </script>
     <!-- END META PIXEL CODE -->
 <?php endif ?>
