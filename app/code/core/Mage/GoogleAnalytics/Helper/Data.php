@@ -39,6 +39,16 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected $_moduleName = 'Mage_GoogleAnalytics';
 
+    public function isMetaPixelEnabled(): bool
+    {
+        return Mage::getStoreConfigFlag('google/meta_pixel/active');
+    }
+
+    public function getMetaPixelId(): string
+    {
+        return Mage::getStoreConfig('google/meta_pixel/account');
+    }
+
     /**
      * Whether GTM is ready to use
      *
