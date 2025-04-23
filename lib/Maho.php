@@ -147,7 +147,7 @@ final class Maho
     /**
      * Return the absolute path to a class file
      */
-    public static function findClassFile($class): string|false
+    public static function findClassFile(string $class): string|false
     {
         return realpath(self::getComposerAutoloader()->findFile($class));
     }

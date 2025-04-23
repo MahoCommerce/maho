@@ -13087,15 +13087,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Category/Collection.php
 
 		-
-			message: '''
-				#^Access to deprecated property \$_allowTableChanges of class Mage_Catalog_Model_Resource_Category_Flat\:
-				after 1\.6\.1\.0$#
-			'''
-			identifier: property.deprecated
-			count: 6
-			path: app/code/core/Mage/Catalog/Model/Resource/Category/Flat.php
-
-		-
 			message: '#^Call to an undefined method Mage_Catalog_Model_Resource_Category_Collection\:\:addSortedField\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -32611,48 +32602,6 @@ parameters:
 			path: app/design/install/default/default/template/install/state.phtml
 
 		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 14
-			path: app/design/install/default/default/template/page.phtml
-
-		-
-			message: '#^Method Mage_Cache_Backend_File\:\:___expire\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Mage/Cache/Backend/File.php
-
-		-
-			message: '#^Method Maho\:\:findClassFile\(\) has parameter \$class with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Maho.php
-
-		-
-			message: '#^Method MahoCLI\\CommandDiscoverer\:\:getFullyQualifiedClassName\(\) has parameter \$file with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/MahoCLI/CommandDiscoverer.php
-
-		-
-			message: '#^Method MahoCLI\\Commands\\CronRun\:\:isProcessRunning\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/MahoCLI/Commands/CronRun.php
-
-		-
-			message: '#^Method MahoCLI\\Commands\\CronRun\:\:isProcessRunning\(\) has parameter \$command with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/MahoCLI/Commands/CronRun.php
-
-		-
-			message: '#^Parameter \#1 \$value of method Mage_Core_Model_Email_Template\:\:setTemplateType\(\) expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: lib/MahoCLI/Commands/EmailTestSend.php
-
-		-
 			message: '#^Left side of && is always true\.$#'
 			identifier: booleanAnd.leftAlwaysTrue
 			count: 2
@@ -34351,18 +34300,6 @@ parameters:
 			path: lib/Varien/Db/Statement/Pdo/Mysql.php
 
 		-
-			message: '#^Method Varien_Debug\:\:_formatCalledArgument\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Debug.php
-
-		-
-			message: '#^Property Varien_Debug\:\:\$argLength has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Debug.php
-
-		-
 			message: '#^Method Varien_Directory_Collection\:\:getDirsName\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -34673,18 +34610,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: lib/Varien/File/Object.php
-
-		-
-			message: '#^Method Varien_File_Transfer_Adapter_Http\:\:send\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/File/Transfer/Adapter/Http.php
-
-		-
-			message: '#^Property Varien_File_Transfer_Adapter_Http\:\:\$_mimeTypes has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/File/Transfer/Adapter/Http.php
 
 		-
 			message: '#^Method Varien_File_Uploader\:\:__construct\(\) has parameter \$fileId with no type specified\.$#'

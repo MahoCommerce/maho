@@ -5,7 +5,7 @@
  *
  * @package    Varien_Db
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -109,13 +109,6 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
      * @var bool
      */
     protected $_logAllQueries       = false;
-
-    /**
-     * Add to log call stack data (backtrace)
-     *
-     * @var bool
-     */
-    protected $_logCallStack        = false;
 
     /**
      * Path to SQL debug data log
@@ -1494,13 +1487,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
                 break;
         }
         $code .= 'TIME: ' . $time . $nl;
-
-        if ($this->_logCallStack) {
-            $code .= 'TRACE: ' . Varien_Debug::backtrace(true, false) . $nl;
-        }
-
         $code .= $nl;
-
         $this->_debugWriteToFile($code);
 
         return $this;

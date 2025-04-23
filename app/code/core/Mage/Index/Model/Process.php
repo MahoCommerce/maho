@@ -6,7 +6,7 @@
  * @package    Mage_Index
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -69,14 +69,6 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
      * @var Mage_Index_Model_Lock|null
      */
     protected $_lockInstance = null;
-
-    /**
-     * Whether table changes are allowed
-     *
-     * @deprecated after 1.6.1.0
-     * @var bool
-     */
-    protected $_allowTableChanges = true;
 
     /**
      * Initialize resource
@@ -540,19 +532,6 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
         }
 
         return $depends;
-    }
-
-    /**
-     * Set whether table changes are allowed
-     *
-     * @deprecated after 1.6.1.0
-     * @param bool $value
-     * @return $this
-     */
-    public function setAllowTableChanges($value = true)
-    {
-        $this->_allowTableChanges = $value;
-        return $this;
     }
 
     /**

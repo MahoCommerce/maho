@@ -6,15 +6,10 @@
  * @package    Mage_CatalogSearch
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * CatalogSearch Fulltext Index resource model
- *
- * @package    Mage_CatalogSearch
- */
 class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
@@ -51,14 +46,6 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      * @var object
      */
     protected $_engine                   = null;
-
-    /**
-     * Whether table changes are allowed
-     *
-     * @deprecated after 1.6.1.0
-     * @var bool
-     */
-    protected $_allowTableChanges       = true;
 
     /**
      * @var array
@@ -820,34 +807,5 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
         }
 
         return null;
-    }
-
-    // Deprecated methods
-
-    /**
-     * Set whether table changes are allowed
-     *
-     * @deprecated after 1.6.1.0
-     * @param bool $value
-     * @return $this
-     */
-    public function setAllowTableChanges($value = true)
-    {
-        $this->_allowTableChanges = $value;
-        return $this;
-    }
-
-    /**
-     * Update category products indexes
-     *
-     * @deprecated after 1.6.2.0
-     *
-     * @param array $productIds
-     * @param array $categoryIds
-     * @return $this
-     */
-    public function updateCategoryIndex($productIds, $categoryIds)
-    {
-        return $this;
     }
 }

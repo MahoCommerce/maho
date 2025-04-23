@@ -5,16 +5,11 @@
  *
  * @package    Varien_Simplexml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Extends SimpleXML to add valuable functionality to SimpleXMLElement class
- *
- * @package    Varien_Simplexml
- */
 class Varien_Simplexml_Element extends SimpleXMLElement
 {
     /**
@@ -84,40 +79,6 @@ class Varien_Simplexml_Element extends SimpleXMLElement
         $attrs = $this->attributes();
         return isset($attrs[$name]) ? (string) $attrs[$name] : null;
     }
-
-    /*
-        public function addAttribute($name, $value=null, $namespace=null)
-        {
-            if (is_null($value)) {
-                return parent::addAttribute($name);
-            } else {
-                if (!is_null($value)) {
-                    $value = $this->xmlentities($value);
-                }
-                if (!is_null($namespace)) {
-                    return parent::addAttribute($name, $value, $namespace);
-                } else {
-                    return parent::addAttribute($name, $value);
-                }
-            }
-        }
-
-        public function addChild($name, $value=null, $namespace=null)
-        {
-            if (is_null($value)) {
-                return parent::addChild($name);
-            } else {
-                if (!is_null($value)) {
-                    $value = $this->xmlentities($value);
-                }
-                if (!is_null($namespace)) {
-                    return parent::addChild($name, $value, $namespace);
-                } else {
-                    return parent::addChild($name, $value);
-                }
-            }
-        }
-    */
 
     /**
      * Find a descendant of a node by path
