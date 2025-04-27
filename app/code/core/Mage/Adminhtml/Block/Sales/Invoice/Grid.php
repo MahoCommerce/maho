@@ -51,59 +51,66 @@ class Mage_Adminhtml_Block_Sales_Invoice_Grid extends Mage_Adminhtml_Block_Widge
     protected function _prepareColumns()
     {
         $this->addColumn('increment_id', [
-            'header'    => Mage::helper('sales')->__('Invoice #'),
-            'index'     => 'increment_id',
-            'type'      => 'text',
+            'header' => Mage::helper('sales')->__('Invoice #'),
+            'index' => 'increment_id',
+            'filter_index' => 'main_table.increment_id',
+            'type' => 'text',
         ]);
 
         $this->addColumn('created_at', [
-            'header'    => Mage::helper('sales')->__('Invoice Date'),
-            'index'     => 'created_at',
-            'type'      => 'datetime',
+            'header' => Mage::helper('sales')->__('Invoice Date'),
+            'index' => 'created_at',
+            'filter_index' => 'main_table.created_at',
+            'type' => 'datetime',
         ]);
 
         $this->addColumn('order_increment_id', [
-            'header'    => Mage::helper('sales')->__('Order #'),
-            'index'     => 'order_increment_id',
-            'type'      => 'text',
-            'escape'    => true,
+            'header' => Mage::helper('sales')->__('Order #'),
+            'index' => 'order_increment_id',
+            'filter_index' => 'main_table.order_increment_id',
+            'type' => 'text',
+            'escape' => true,
         ]);
 
         $this->addColumn('order_created_at', [
-            'header'    => Mage::helper('sales')->__('Order Date'),
-            'index'     => 'order_created_at',
-            'type'      => 'datetime',
+            'header' => Mage::helper('sales')->__('Order Date'),
+            'index' => 'order_created_at',
+            'filter_index' => 'main_table.order_created_at',
+            'type' => 'datetime',
         ]);
 
         $this->addColumn('billing_name', [
             'header' => Mage::helper('sales')->__('Bill to Name'),
             'index' => 'billing_name',
+            'filter_index' => 'main_table.billing_name',
         ]);
 
         $this->addColumn('state', [
-            'header'    => Mage::helper('sales')->__('Status'),
-            'index'     => 'state',
-            'type'      => 'options',
-            'options'   => Mage::getModel('sales/order_invoice')->getStates(),
+            'header' => Mage::helper('sales')->__('Status'),
+            'index' => 'state',
+            'filter_index' => 'main_table.state',
+            'type' => 'options',
+            'options' => Mage::getModel('sales/order_invoice')->getStates(),
         ]);
 
         $this->addColumn('grand_total', [
-            'header'    => Mage::helper('customer')->__('Amount'),
-            'index'     => 'grand_total',
-            'type'      => 'currency',
-            'currency'  => 'order_currency_code',
+            'header' => Mage::helper('customer')->__('Amount'),
+            'index' => 'grand_total',
+            'filter_index' => 'main_table.grand_total',
+            'type' => 'currency',
+            'currency' => 'order_currency_code',
         ]);
 
         $this->addColumn(
             'action',
             [
-                'type'      => 'action',
-                'getter'     => 'getId',
-                'actions'   => [
+                'type' => 'action',
+                'getter' => 'getId',
+                'actions' => [
                     [
                         'caption' => Mage::helper('sales')->__('View'),
-                        'url'     => ['base' => '*/sales_invoice/view'],
-                        'field'   => 'invoice_id',
+                        'url' => ['base' => '*/sales_invoice/view'],
+                        'field' => 'invoice_id',
                     ],
                 ],
                 'is_system' => true,
@@ -128,7 +135,7 @@ class Mage_Adminhtml_Block_Sales_Invoice_Grid extends Mage_Adminhtml_Block_Widge
 
         $this->getMassactionBlock()->addItem(MassAction::PDF_INVOICE_ORDER, [
             'label' => Mage::helper('sales')->__('PDF Invoices'),
-            'url'  => $this->getUrl('*/sales_invoice/pdfinvoices'),
+            'url' => $this->getUrl('*/sales_invoice/pdfinvoices'),
         ]);
 
         return $this;

@@ -43,7 +43,6 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
     public function setGrid($grid)
     {
         $this->_grid = $grid;
-        // Init filter object
         $this->getFilter();
         return $this;
     }
