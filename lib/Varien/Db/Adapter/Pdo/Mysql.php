@@ -2871,7 +2871,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
                 throw new Zend_Db_Exception(sprintf(
                     'There is no field "%s" that you are trying to create an index on "%s"',
                     $field,
-                    $tableName
+                    $tableName,
                 ));
             }
             $fieldSql[] = $this->quoteIdentifier($field);
