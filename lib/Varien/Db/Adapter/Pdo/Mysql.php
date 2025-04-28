@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Mysql PDO DB adapter
- */
 class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
 {
     public const DEBUG_CONNECT         = 0;
@@ -1367,58 +1364,6 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         }
 
         return $ddl;
-    }
-
-    /**
-     * Add Index Key
-     *
-     * @deprecated since 1.5.0.0
-     * @param string $tableName
-     * @param string $indexName
-     * @param string|array $fields
-     * @param string $indexType
-     * @param string $schemaName
-     * @return Zend_Db_Statement_Interface
-     */
-    public function addKey($tableName, $indexName, $fields, $indexType = 'index', $schemaName = null)
-    {
-        return $this->addIndex($tableName, $indexName, $fields, $indexType, $schemaName);
-    }
-
-    /**
-     * Remove duplicate entry for create key
-     *
-     * @param string $table
-     * @param array $fields
-     * @param array $ids
-     * @return $this
-     */
-    protected function _removeDuplicateEntry($table, $fields, $ids)
-    {
-        $where = [];
-        $i = 0;
-        foreach ($fields as $field) {
-            $where[] = $this->quoteInto($field . '=?', $ids[$i++]);
-        }
-
-        if (!$where) {
-            return $this;
-        }
-        $whereCond = implode(' AND ', $where);
-        $sql = sprintf('SELECT COUNT(*) as `cnt` FROM `%s` WHERE %s', $table, $whereCond);
-
-        $cnt = $this->raw_fetchRow($sql, 'cnt');
-        if ($cnt > 1) {
-            $sql = sprintf(
-                'DELETE FROM `%s` WHERE %s LIMIT %d',
-                $table,
-                $whereCond,
-                $cnt - 1,
-            );
-            $this->raw_query($sql);
-        }
-
-        return $this;
     }
 
     /**
@@ -2923,12 +2868,11 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         $fieldSql = [];
         foreach ($fields as $field) {
             if (!isset($columns[$field])) {
-                $msg = sprintf(
+                throw new Zend_Db_Exception(sprintf(
                     'There is no field "%s" that you are trying to create an index on "%s"',
                     $field,
                     $tableName,
-                );
-                throw new Zend_Db_Exception($msg);
+                ));
             }
             $fieldSql[] = $this->quoteIdentifier($field);
         }
@@ -2942,25 +2886,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         };
 
         $query .= sprintf(' ADD %s (%s)', $condition, $fieldSql);
-
-        $cycle = true;
-        while ($cycle === true) {
-            try {
-                $result = $this->raw_query($query);
-                $cycle  = false;
-            } catch (Exception $e) {
-                if (in_array(strtolower($indexType), ['primary', 'unique'])) {
-                    $match = [];
-                    if (preg_match('#SQLSTATE\[23000\]: [^:]+: 1062[^\']+\'([\d-\.]+)\'#', $e->getMessage(), $match)) {
-                        $ids = explode('-', $match[1]);
-                        $this->_removeDuplicateEntry($tableName, $fields, $ids);
-                        continue;
-                    }
-                }
-                throw $e;
-            }
-        }
-
+        $result = $this->raw_query($query);
         $this->resetDdlCache($tableName, $schemaName);
 
         return $result;
