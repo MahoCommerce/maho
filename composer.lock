@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ddd58e92c1cde3346f91941c8894469f",
+    "content-hash": "2af2309d522fceffb5b93616dbc6223b",
     "packages": [
         {
             "name": "altcha-org/altcha",
