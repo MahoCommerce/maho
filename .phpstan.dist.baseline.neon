@@ -103,6 +103,18 @@ parameters:
 			path: app/code/core/Mage/Admin/Model/Acl/Assert/Time.php
 
 		-
+			message: '#^PHPDoc tag @method for _getResource\(\) references deprecated class Mage_Admin_Model_Resource_Acl_Role\.$#'
+			identifier: methodTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Admin/Model/Acl/Role.php
+
+		-
+			message: '#^PHPDoc tag @method for getResource\(\) references deprecated class Mage_Admin_Model_Resource_Acl_Role\.$#'
+			identifier: methodTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Admin/Model/Acl/Role.php
+
+		-
 			message: '#^Comparison operation "\=\=" between \(Varien_Simplexml_Element\|null\) and 1 results in an error\.$#'
 			identifier: equal.invalid
 			count: 1
@@ -12724,6 +12736,12 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Image.php
 
 		-
+			message: '#^Strict comparison using \=\=\= between null and false will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Image.php
+
+		-
 			message: '#^Cannot call method isIndexable\(\) on Mage_Eav_Model_Entity_Attribute_Abstract\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -17137,12 +17155,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Logger.php
 
 		-
-			message: '#^Class Mage_Core_Model_Magento_Api_V2 extends deprecated class Mage_Core_Model_Magento_Api\.$#'
-			identifier: class.extendsDeprecatedClass
-			count: 1
-			path: app/code/core/Mage/Core/Model/Magento/Api/V2.php
-
-		-
 			message: '#^Property Mage_Core_Model_Message_Abstract\:\:\$_class has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -21541,6 +21553,33 @@ parameters:
 			path: app/code/core/Mage/GiftMessage/Block/Message/Inline.php
 
 		-
+			message: '''
+				#^Call to method setCanDisplayContainer\(\) of deprecated class Mage_GiftMessage_Block_Message_Helper\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/GiftMessage/Helper/Message.php
+
+		-
+			message: '''
+				#^Call to method setEntity\(\) of deprecated class Mage_GiftMessage_Block_Message_Helper\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/GiftMessage/Helper/Message.php
+
+		-
+			message: '''
+				#^Call to method setType\(\) of deprecated class Mage_GiftMessage_Block_Message_Helper\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/GiftMessage/Helper/Message.php
+
+		-
 			message: '#^Return type \(stdClass\) of method Mage_GiftMessage_Model_Api_V2\:\:_setGiftMessage\(\) should be compatible with return type \(array\) of method Mage_GiftMessage_Model_Api\:\:_setGiftMessage\(\)$#'
 			identifier: method.childReturnType
 			count: 1
@@ -23827,15 +23866,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Block/Hosted/Pro/Info.php
 
 		-
-			message: '''
-				#^Class Mage_Paypal_Block_Payflow_Advanced_Review extends deprecated class Mage_Paypal_Block_Payflow_Link_Review\:
-				since 1\.6\.2\.0$#
-			'''
-			identifier: class.extendsDeprecatedClass
-			count: 1
-			path: app/code/core/Mage/Paypal/Block/Payflow/Advanced/Review.php
-
-		-
 			message: '#^Return type \(false\) of method Mage_Paypal_Block_Payflow_Link_Info\:\:getCcTypeName\(\) should be compatible with return type \(string\|null\) of method Mage_Paypal_Block_Payment_Info\:\:getCcTypeName\(\)$#'
 			identifier: method.childReturnType
 			count: 1
@@ -25312,6 +25342,15 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
 
 		-
+			message: '''
+				#^Call to method loadObjectByTxnId\(\) of deprecated class Mage_Paypal_Model_Resource_Payment_Transaction\:
+				since 1\.6\.2\.0$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Paypal/Model/Payment/Transaction.php
+
+		-
 			message: '#^Method Mage_Paypal_Model_Payment_Transaction\:\:_verifyThisTransactionExists\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -25320,6 +25359,24 @@ parameters:
 		-
 			message: '#^Method Mage_Paypal_Model_Payment_Transaction\:\:_verifyTxnId\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/Paypal/Model/Payment/Transaction.php
+
+		-
+			message: '''
+				#^PHPDoc tag @method for _getResource\(\) references deprecated class Mage_Paypal_Model_Resource_Payment_Transaction\:
+				since 1\.6\.2\.0$#
+			'''
+			identifier: methodTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Paypal/Model/Payment/Transaction.php
+
+		-
+			message: '''
+				#^PHPDoc tag @method for getResource\(\) references deprecated class Mage_Paypal_Model_Resource_Payment_Transaction\:
+				since 1\.6\.2\.0$#
+			'''
+			identifier: methodTag.deprecatedClass
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Payment/Transaction.php
 
@@ -26340,15 +26397,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method Mage_Eav_Model_Entity_Abstract\:\:setStore\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Wishlist/Product/Collection.php
-
-		-
-			message: '''
-				#^Call to method setOrder\(\) of deprecated class Mage_Catalog_Model_Resource_Product_Collection\:
-				after 1\.4\.2\.0$#
-			'''
-			identifier: staticMethod.deprecatedClass
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Resource/Wishlist/Product/Collection.php
 
@@ -31414,6 +31462,15 @@ parameters:
 			path: app/code/core/Mage/Wishlist/Helper/Data.php
 
 		-
+			message: '''
+				#^Property \$_productCollection references deprecated class Mage_Wishlist_Model_Resource_Product_Collection in its type\:
+				after 1\.4\.2\.0$#
+			'''
+			identifier: property.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Wishlist/Helper/Data.php
+
+		-
 			message: '#^Variable \$params might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -31660,6 +31717,78 @@ parameters:
 			path: app/design/adminhtml/default/default/template/empty.phtml
 
 		-
+			message: '''
+				#^Call to method getButtonUrl\(\) of deprecated class Mage_GiftMessage_Block_Message_Form\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
+
+		-
+			message: '''
+				#^Call to method getEditUrl\(\) of deprecated class Mage_GiftMessage_Block_Message_Form\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
+
+		-
+			message: '''
+				#^Call to method getEscapedForJs\(\) of deprecated class Mage_GiftMessage_Block_Message_Form\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
+
+		-
+			message: '''
+				#^Call to method getMessage\(\) of deprecated class Mage_GiftMessage_Block_Message_Form\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
+
+		-
+			message: '''
+				#^Call to method getRemoveUrl\(\) of deprecated class Mage_GiftMessage_Block_Message_Form\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
+
+		-
+			message: '''
+				#^Call to method getSaveUrl\(\) of deprecated class Mage_GiftMessage_Block_Message_Form\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
+
+		-
+			message: '''
+				#^Call to method getUniqueId\(\) of deprecated class Mage_GiftMessage_Block_Message_Form\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
+
+		-
+			message: '''
+				#^PHPDoc tag @var references deprecated class Mage_GiftMessage_Block_Message_Form\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/giftmessage/form.phtml
+
+		-
 			message: '#^Variable \$this might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -31672,9 +31801,81 @@ parameters:
 			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
 
 		-
+			message: '''
+				#^Call to method getEditUrl\(\) of deprecated class Mage_GiftMessage_Block_Message_Helper\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
+
+		-
+			message: '''
+				#^Call to method getJsObjectName\(\) of deprecated class Mage_GiftMessage_Block_Message_Helper\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
+
+		-
+			message: '''
+				#^Call to method getMessage\(\) of deprecated class Mage_GiftMessage_Block_Message_Helper\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
+
+		-
+			message: '''
+				#^Call to method getScriptIncluded\(\) of deprecated class Mage_GiftMessage_Block_Message_Helper\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
+
+		-
+			message: '''
+				#^Call to method getType\(\) of deprecated class Mage_GiftMessage_Block_Message_Helper\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
+
+		-
+			message: '''
+				#^Call to method hasGiftMessage\(\) of deprecated class Mage_GiftMessage_Block_Message_Helper\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 4
+			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
+
+		-
+			message: '''
+				#^Call to method setScriptIncluded\(\) of deprecated class Mage_GiftMessage_Block_Message_Helper\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
+
+		-
 			message: '#^Method Varien_Object\:\:getWidgetButtonHtml\(\) invoked with 2 parameters, 0\-1 required\.$#'
 			identifier: arguments.count
 			count: 4
+			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
+
+		-
+			message: '''
+				#^PHPDoc tag @var references deprecated class Mage_GiftMessage_Block_Message_Helper\:
+				after 1\.3\.2\.4$#
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
 			path: app/design/adminhtml/default/default/template/giftmessage/helper.phtml
 
 		-
@@ -31688,6 +31889,15 @@ parameters:
 			identifier: variable.undefined
 			count: 11
 			path: app/design/adminhtml/default/default/template/overlay_popup.phtml
+
+		-
+			message: '''
+				#^PHPDoc tag @var references deprecated class Mage_Page_Block_Js_Translate\:
+				since 1\.7\.0\.0 \(used in adminhtml/default/default/layout/main\.xml\)$#
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/page/js/translate.phtml
 
 		-
 			message: '#^Variable \$this might not be defined\.$#'
@@ -34222,7 +34432,7 @@ parameters:
 			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
 
 		-
-			message: '#^Regex pattern is invalid\: Compilation failed\: invalid range in character class at offset 40 in pattern\: \#SQLSTATE\\\[23000\\\]\: \[\^\:\]\+\: 1062\[\^''\]\+''\(\[\\d\-\\\.\]\+\)''\#$#'
+			message: '#^Regex pattern is invalid\: Compilation failed\: invalid range in character class at offset 41 in pattern\: \#SQLSTATE\\\[23000\\\]\: \[\^\:\]\+\: 1062\[\^''\]\+''\(\[\\d\-\\\.\]\+\)''\#$#'
 			identifier: regexp.pattern
 			count: 1
 			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
