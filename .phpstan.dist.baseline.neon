@@ -34432,12 +34432,6 @@ parameters:
 			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
 
 		-
-			message: '#^Regex pattern is invalid\: Compilation failed\: invalid range in character class at offset 41 in pattern\: \#SQLSTATE\\\[23000\\\]\: \[\^\:\]\+\: 1062\[\^''\]\+''\(\[\\d\-\\\.\]\+\)''\#$#'
-			identifier: regexp.pattern
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
 			message: '#^Return type \(\$this\(Varien_Db_Adapter_Pdo_Mysql\)\) of method Varien_Db_Adapter_Pdo_Mysql\:\:dropTemporaryTable\(\) should be compatible with return type \(bool\) of method Varien_Db_Adapter_Interface\:\:dropTemporaryTable\(\)$#'
 			identifier: method.childReturnType
 			count: 1
