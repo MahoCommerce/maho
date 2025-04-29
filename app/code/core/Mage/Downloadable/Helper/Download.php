@@ -6,15 +6,10 @@
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Downloadable Products Download Helper
- *
- * @package    Mage_Downloadable
- */
 class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
 {
     public const LINK_TYPE_URL         = 'url';
@@ -125,7 +120,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
 
                 $headers = 'GET ' . $path . $query . ' HTTP/1.0' . "\r\n"
                     . 'Host: ' . $urlProp['host'] . "\r\n"
-                    . 'User-Agent: Maho ver/' . Mage::getMahoVersion() . "\r\n"
+                    . 'User-Agent: Maho ver/' . Mage::getVersion() . "\r\n"
                     . 'Connection: close' . "\r\n"
                     . "\r\n";
                 fwrite($this->_handle, $headers);
