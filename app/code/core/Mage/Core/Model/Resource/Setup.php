@@ -293,7 +293,7 @@ class Mage_Core_Model_Resource_Setup
     public function applyMahoUpdates(): self
     {
         $dataVer = $this->_getResource()->getMahoVersion($this->_resourceName);
-        $configVer = Mage::getMahoVersion();
+        $configVer = Mage::getVersion();
         if ($dataVer !== false) {
             $status = version_compare($configVer, $dataVer);
             if ($status == self::VERSION_COMPARE_GREATER) {
