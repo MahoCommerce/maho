@@ -32818,36 +32818,6 @@ parameters:
 			path: app/design/install/default/default/template/install/state.phtml
 
 		-
-			message: '#^Left side of && is always true\.$#'
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 2
-			path: lib/Varien/Cache/Backend/Database.php
-
-		-
-			message: '#^Method Varien_Cache_Backend_Database\:\:_deleteCachesFromDataTable\(\) has parameter \$cacheIdsToRemove with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Cache/Backend/Database.php
-
-		-
-			message: '#^Method Varien_Cache_Backend_Database\:\:_deleteCachesFromTagsTable\(\) has parameter \$cacheIdsToRemove with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Varien/Cache/Backend/Database.php
-
-		-
-			message: '#^Method Varien_Cache_Backend_Database\:\:touch\(\) should return bool but returns int\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/Varien/Cache/Backend/Database.php
-
-		-
-			message: '#^Property Varien_Cache_Backend_Database\:\:\$_adapter has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: lib/Varien/Cache/Backend/Database.php
-
-		-
 			message: '#^Method Varien_Cache_Core\:\:_cleanTheMess\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
