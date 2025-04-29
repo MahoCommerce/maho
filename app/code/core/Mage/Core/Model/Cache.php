@@ -11,10 +11,7 @@
  */
 
 /**
- * System cache model
- * support id and tags prefix support,
- *
- * @package    Mage_Core
+ * System cache model, supporting id and tags prefix
  */
 class Mage_Core_Model_Cache
 {
@@ -26,12 +23,7 @@ class Mage_Core_Model_Cache
     public const INVALIDATED_TYPES = 'core_cache_invalidate';
     public const XML_PATH_TYPES    = 'global/cache/types';
 
-    /**
-     * Id prefix
-     *
-     * @var string
-     */
-    protected $_idPrefix    = '';
+    protected string $_idPrefix    = '';
 
     /**
      * Cache frontend API
@@ -39,16 +31,6 @@ class Mage_Core_Model_Cache
      * @var Varien_Cache_Core|Zend_Cache_Core
      */
     protected $_frontend;
-
-    /**
-     * Shared memory backend models list (required TwoLevels backend model)
-     *
-     * @var array
-     */
-    protected $_shmBackends = [
-        'apc', 'memcached', 'xcache',
-        'zendserver_shmem', 'zendserver_disk',
-    ];
 
     /**
      * Default cache backend type
@@ -63,9 +45,9 @@ class Mage_Core_Model_Cache
      * @var array
      */
     protected $_defaultBackendOptions = [
-        'hashed_directory_level'    => 1,
+        'hashed_directory_level'   => 1,
         'hashed_directory_perm'    => 0777,
-        'file_name_prefix'          => 'mage',
+        'file_name_prefix'         => 'mage',
     ];
 
     /**
@@ -142,7 +124,6 @@ class Mage_Core_Model_Cache
      */
     protected function _getBackendOptions(array $cacheOptions)
     {
-        $enable2levels = false;
         $type   = $cacheOptions['backend'] ?? $this->_defaultBackend;
         if (isset($cacheOptions['backend_options']) && is_array($cacheOptions['backend_options'])) {
             $options = $cacheOptions['backend_options'];
@@ -152,43 +133,6 @@ class Mage_Core_Model_Cache
 
         $backendType = false;
         switch (strtolower($type)) {
-            case 'sqlite':
-                if (extension_loaded('sqlite') && isset($options['cache_db_complete_path'])) {
-                    $backendType = 'Sqlite';
-                }
-                break;
-            case 'memcached':
-                if (extension_loaded('memcached')) {
-                    if (isset($cacheOptions['memcached'])) {
-                        $options = $cacheOptions['memcached'];
-                    }
-                    $enable2levels = true;
-                    $backendType = 'Libmemcached';
-                } elseif (extension_loaded('memcache')) {
-                    if (isset($cacheOptions['memcached'])) {
-                        $options = $cacheOptions['memcached'];
-                    }
-                    $enable2levels = true;
-                    $backendType = 'Memcached';
-                }
-                break;
-            case 'apc':
-                if (extension_loaded('apcu') && ini_get('apc.enabled')) {
-                    $enable2levels = true;
-                    $backendType = 'Apc';
-                }
-                break;
-            case 'xcache':
-                if (extension_loaded('xcache')) {
-                    $enable2levels = true;
-                    $backendType = 'Xcache';
-                }
-                break;
-            case 'varien_cache_backend_database':
-            case 'database':
-                $backendType = 'Varien_Cache_Backend_Database';
-                $options = $this->getDbAdapterOptions($options);
-                break;
             default:
                 if ($type != $this->_defaultBackend) {
                     try {
@@ -196,9 +140,6 @@ class Mage_Core_Model_Cache
                             $implements = class_implements($type, true);
                             if (in_array('Zend_Cache_Backend_Interface', $implements)) {
                                 $backendType = $type;
-                                if (isset($options['enable_two_levels'])) {
-                                    $enable2levels = true;
-                                }
                             }
                         }
                     } catch (Exception $e) {
@@ -216,9 +157,6 @@ class Mage_Core_Model_Cache
         }
 
         $backendOptions = ['type' => $backendType, 'options' => $options];
-        if ($enable2levels) {
-            $backendOptions = $this->_getTwoLevelsBackendOptions($backendOptions, $cacheOptions);
-        }
         return $backendOptions;
     }
 
@@ -237,54 +175,6 @@ class Mage_Core_Model_Cache
         $options['data_table'] = Mage::getSingleton('core/resource')->getTableName('core/cache');
         $options['tags_table'] = Mage::getSingleton('core/resource')->getTableName('core/cache_tag');
         return $options;
-    }
-
-    /**
-     * Initialize two levels backend model options
-     *
-     * @param array $fastOptions fast level backend type and options
-     * @param array $cacheOptions all cache options
-     * @return array
-     */
-    protected function _getTwoLevelsBackendOptions($fastOptions, $cacheOptions)
-    {
-        $options = [];
-        $options['fast_backend']                = $fastOptions['type'];
-        $options['fast_backend_options']        = $fastOptions['options'];
-        $options['fast_backend_custom_naming']  = true;
-        $options['fast_backend_autoload']       = true;
-        $options['slow_backend_custom_naming']  = true;
-        $options['slow_backend_autoload']       = true;
-
-        if (isset($cacheOptions['auto_refresh_fast_cache'])) {
-            $options['auto_refresh_fast_cache'] = (bool) $cacheOptions['auto_refresh_fast_cache'];
-        } else {
-            $options['auto_refresh_fast_cache'] = false;
-        }
-        if (isset($cacheOptions['slow_backend'])) {
-            $options['slow_backend'] = $cacheOptions['slow_backend'];
-        } else {
-            $options['slow_backend'] = $this->_defaultBackend;
-        }
-        if (isset($cacheOptions['slow_backend_options'])) {
-            $options['slow_backend_options'] = $cacheOptions['slow_backend_options'];
-        } else {
-            $options['slow_backend_options'] = $this->_defaultBackendOptions;
-        }
-        if ($options['slow_backend'] == 'database') {
-            $options['slow_backend'] = 'Varien_Cache_Backend_Database';
-            $options['slow_backend_options'] = $this->getDbAdapterOptions($options['slow_backend_options']);
-            if (isset($cacheOptions['slow_backend_store_data'])) {
-                $options['slow_backend_options']['store_data'] = (bool) $cacheOptions['slow_backend_store_data'];
-            } else {
-                $options['slow_backend_options']['store_data'] = false;
-            }
-        }
-
-        return [
-            'type'      => 'TwoLevels',
-            'options'   => $options,
-        ];
     }
 
     /**
