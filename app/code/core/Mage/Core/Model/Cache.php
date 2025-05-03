@@ -70,9 +70,8 @@ class Mage_Core_Model_Cache
     public function __construct(array $options = [])
     {
         $this->_defaultBackendOptions['cache_dir'] = $options['cache_dir'] ?? Mage::getBaseDir('cache');
-        /**
-         * Initialize id prefix
-         */
+
+        // Initialize id prefix
         $this->_idPrefix = $options['id_prefix'] ?? '';
         if (!$this->_idPrefix && isset($options['prefix'])) {
             $this->_idPrefix = $options['prefix'];
@@ -86,7 +85,7 @@ class Mage_Core_Model_Cache
 
         $this->_frontend = match ($backend['type']) {
             'redis' => new \Symfony\Component\Cache\Adapter\RedisTagAwareAdapter(
-                \Symfony\Component\Cache\Adapter\RedisTagAwareAdapter::createConnection('redis://localhost'),
+                \Symfony\Component\Cache\Adapter\RedisTagAwareAdapter::createConnection($backend['options']['dsn']),
                 'maho',
                 $frontend['lifetime']
             ),
@@ -98,9 +97,6 @@ class Mage_Core_Model_Cache
         };
     }
 
-    /**
-     * Get cache backend options. Result array contain backend type ('type' key) and backend options ('options')
-     */
     protected function _getBackendOptions(array $cacheOptions): array
     {
         $type = strtolower($cacheOptions['backend'] ?? $this->_defaultBackend);
@@ -114,7 +110,6 @@ class Mage_Core_Model_Cache
         if (!in_array($type, ['file', 'redis'])) {
             throw new Exception("Supported cache backend are file/redis, $type passed.");
         }
-
 
         if (!$backendType) {
             $backendType = $this->_defaultBackend;
