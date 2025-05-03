@@ -165,7 +165,7 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
         }
 
         //Mark layout cache as invalidated
-        Mage::app()->getCacheInstance()->invalidateType('layout');
+        Mage::app()->getCache()->invalidateType('layout');
 
         return parent::_afterSave($object);
     }

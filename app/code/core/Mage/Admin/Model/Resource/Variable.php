@@ -44,10 +44,10 @@ class Mage_Admin_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abs
      */
     public function getAllowedPaths()
     {
-        $data = Mage::app()->getCacheInstance()->load(self::CACHE_ID);
+        $data = Mage::app()->getCache()->load(self::CACHE_ID);
         if ($data === false) {
             $this->_generateCache();
-            $data = Mage::app()->getCacheInstance()->load(self::CACHE_ID);
+            $data = Mage::app()->getCache()->load(self::CACHE_ID);
         }
         return Mage::helper('core')->jsonDecode($data);
     }

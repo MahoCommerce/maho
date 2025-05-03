@@ -436,10 +436,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
             );
             if ($flag) {
                 // refresh cache menu
-                Mage::app()->getCache()->clean(
-                    Zend_Cache::CLEANING_MODE_MATCHING_TAG,
-                    [Mage_Adminhtml_Block_Page_Menu::CACHE_TAGS],
-                );
+                Mage::app()->getCache()->clean([Mage_Adminhtml_Block_Page_Menu::CACHE_TAGS]);
             }
         }
 

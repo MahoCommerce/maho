@@ -49,7 +49,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
      */
     public function flushAllAction()
     {
-        Mage::app()->getCacheInstance()->flush();
+        Mage::app()->getCache()->flush();
         Mage::dispatchEvent('adminhtml_cache_flush_all');
         $this->_getSession()->addSuccess(Mage::helper('adminhtml')->__('The cache storage has been flushed.'));
         $this->_redirect('*/*');
@@ -60,7 +60,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
      */
     public function flushSystemAction()
     {
-        Mage::app()->getCacheInstance()->banUse('config');
+        Mage::app()->getCache()->banUse('config');
         Mage::getConfig()->reinit();
         Mage::getConfig()->getCacheSaveLock(30, true);
         try {
@@ -68,7 +68,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
             Mage_Core_Model_Resource_Setup::applyAllUpdates();
             Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
             Mage_Core_Model_Resource_Setup::applyAllMahoUpdates();
-            Mage::app()->getCacheInstance()->unbanUse('config');
+            Mage::app()->getCache()->unbanUse('config');
             Mage::getConfig()->saveCache();
         } finally {
             Mage::getConfig()->releaseCacheSaveLock();
@@ -114,7 +114,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
                 $allTypes[$code] = 0;
                 $updatedTypes++;
             }
-            $tags = Mage::app()->getCacheInstance()->cleanType($code);
+            $tags = Mage::app()->getCache()->cleanType($code);
         }
         if ($updatedTypes > 0) {
             Mage::app()->saveUseCache($allTypes);
@@ -132,7 +132,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
         $updatedTypes = 0;
         if (!empty($types)) {
             foreach ($types as $type) {
-                $tags = Mage::app()->getCacheInstance()->cleanType($type);
+                $tags = Mage::app()->getCache()->cleanType($type);
                 Mage::dispatchEvent('adminhtml_cache_refresh_type', ['type' => $type]);
                 $updatedTypes++;
             }

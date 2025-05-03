@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Lock resource model
- *
- * @package    Mage_Index
- */
 class Mage_Index_Model_Resource_Lock_Resource extends Mage_Core_Model_Resource
 {
     public function __construct()

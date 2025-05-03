@@ -4645,12 +4645,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/Config.php
 
 		-
-			message: '#^Parameter \#1 \$cache of method Varien_Simplexml_Config\:\:setCache\(\) expects Varien_Simplexml_Config_Cache_Abstract, Zend_Cache_Core given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/Config.php
-
-		-
 			message: '#^Property Mage_Adminhtml_Model_Config\:\:\$_config \(Mage_Core_Model_Config_Base\) does not accept Varien_Simplexml_Config\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -10105,12 +10099,6 @@ parameters:
 			path: app/code/core/Mage/Api/Model/Config.php
 
 		-
-			message: '#^Return type \(Zend_Cache_Core\) of method Mage_Api_Model_Config\:\:getCache\(\) should be compatible with return type \(Varien_Simplexml_Config_Cache_Abstract\) of method Varien_Simplexml_Config\:\:getCache\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/Api/Model/Config.php
-
-		-
 			message: '#^Cannot call method getClassName\(\) on bool\|SimpleXMLElement\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -10527,12 +10515,6 @@ parameters:
 		-
 			message: '#^Method Mage_Api2_Model_Config\:\:getResourceGroup\(\) should return bool\|Mage_Core_Model_Config_Element but returns Varien_Simplexml_Element\.$#'
 			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Config.php
-
-		-
-			message: '#^Parameter \#1 \$cache of method Varien_Simplexml_Config\:\:setCache\(\) expects Varien_Simplexml_Config_Cache_Abstract, Zend_Cache_Core given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Api2/Model/Config.php
 
@@ -16789,12 +16771,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Config.php
 
 		-
-			message: '#^Return type \(Zend_Cache_Core\) of method Mage_Core_Model_Config\:\:getCache\(\) should be compatible with return type \(Varien_Simplexml_Config_Cache_Abstract\) of method Varien_Simplexml_Config\:\:getCache\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/Core/Model/Config.php
-
-		-
 			message: '#^Return type \(string\) of method Mage_Core_Model_Config\:\:_loadCache\(\) should be compatible with return type \(bool\) of method Varien_Simplexml_Config\:\:_loadCache\(\)$#'
 			identifier: method.childReturnType
 			count: 1
@@ -16829,12 +16805,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Core/Model/Design.php
-
-		-
-			message: '#^Parameter \#1 \$cache of method Varien_Simplexml_Config\:\:setCache\(\) expects Varien_Simplexml_Config_Cache_Abstract, Zend_Cache_Core given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Design/Config.php
 
 		-
 			message: '#^Parameter \#2 \$value of method Varien_Simplexml_Config\:\:setNode\(\) expects string, null given\.$#'
@@ -17223,18 +17193,6 @@ parameters:
 		-
 			message: '#^Method Mage_Core_Model_Resource\:\:checkDbConnection\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource.php
-
-		-
-			message: '#^Parameter \#1 \$adapter of method Varien_Db_Adapter_Interface\:\:setCacheAdapter\(\) expects Zend_Cache_Backend_Interface, Zend_Cache_Core given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource.php
-
-		-
-			message: '#^Parameter \#1 \$adapter of method Varien_Db_Adapter_Pdo_Mysql\:\:setCacheAdapter\(\) expects Zend_Cache_Backend_Interface, Zend_Cache_Core given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource.php
 
@@ -22040,18 +21998,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Index/Model/Resource/Event.php
-
-		-
-			message: '#^Parameter \#1 \$adapter of method Varien_Db_Adapter_Interface\:\:setCacheAdapter\(\) expects Zend_Cache_Backend_Interface, Zend_Cache_Core given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Index/Model/Resource/Lock/Resource.php
-
-		-
-			message: '#^Parameter \#1 \$adapter of method Varien_Db_Adapter_Pdo_Mysql\:\:setCacheAdapter\(\) expects Zend_Cache_Backend_Interface, Zend_Cache_Core given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Index/Model/Resource/Lock/Resource.php
 
 		-
 			message: '#^Method Mage_Index_Model_Resource_Process\:\:_construct\(\) has no return type specified\.$#'
@@ -34396,12 +34342,6 @@ parameters:
 			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
 
 		-
-			message: '#^Property Varien_Db_Adapter_Pdo_Mysql\:\:\$_cacheAdapter \(Zend_Cache_Core\) does not accept Zend_Cache_Backend_Interface\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: lib/Varien/Db/Adapter/Pdo/Mysql.php
-
-		-
 			message: '#^Return type \(\$this\(Varien_Db_Adapter_Pdo_Mysql\)\) of method Varien_Db_Adapter_Pdo_Mysql\:\:dropTemporaryTable\(\) should be compatible with return type \(bool\) of method Varien_Db_Adapter_Interface\:\:dropTemporaryTable\(\)$#'
 			identifier: method.childReturnType
 			count: 1
@@ -35837,24 +35777,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method SimpleXMLElement\:\:setNode\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/Varien/Simplexml/Config.php
-
-		-
-			message: '#^Call to an undefined method Varien_Simplexml_Config_Cache_Abstract\:\:load\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: lib/Varien/Simplexml/Config.php
-
-		-
-			message: '#^Call to an undefined method Varien_Simplexml_Config_Cache_Abstract\:\:remove\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/Varien/Simplexml/Config.php
-
-		-
-			message: '#^Call to an undefined method Varien_Simplexml_Config_Cache_Abstract\:\:save\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: lib/Varien/Simplexml/Config.php

@@ -228,12 +228,9 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
 
     /**
      * Processing block html after rendering
-     *
-     * @param   string $html
-     * @return  string
      */
     #[\Override]
-    protected function _afterToHtml($html)
+    protected function _afterToHtml(string $html): string
     {
         $html = preg_replace_callback('#' . Mage_Adminhtml_Model_Url::SECRET_KEY_PARAM_NAME . '/\$([^\/].*)/([^\$].*)\$#', [$this, '_callbackSecretKey'], $html);
 

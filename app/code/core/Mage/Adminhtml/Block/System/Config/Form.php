@@ -553,11 +553,9 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
 
     /**
      * Append dependence block at then end of form block
-     *
-     *
      */
     #[\Override]
-    protected function _afterToHtml($html)
+    protected function _afterToHtml(string $html): string
     {
         if ($this->_getDependence()) {
             $html .= $this->_getDependence()->toHtml();

@@ -187,12 +187,9 @@ class Mage_Page_Block_Html extends Mage_Core_Block_Template
 
     /**
      * Processing block html after rendering
-     *
-     * @param   string $html
-     * @return  string
      */
     #[\Override]
-    protected function _afterToHtml($html)
+    protected function _afterToHtml(string $html): string
     {
         return $this->_afterCacheUrl($html);
     }

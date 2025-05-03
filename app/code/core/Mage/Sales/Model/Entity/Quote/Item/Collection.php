@@ -133,7 +133,7 @@ class Mage_Sales_Model_Entity_Quote_Item_Collection extends Mage_Eav_Model_Entit
 
         if (Mage::app()->useCache('checkout_quote')) {
             $collection->initCache(
-                $this->_getCacheInstance(),
+                $this->getCache(),
                 $this->_cacheConf['prefix'] . '_PRODUCTS',
                 $this->_getCacheTags(),
             );

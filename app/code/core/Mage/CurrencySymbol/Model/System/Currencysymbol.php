@@ -243,7 +243,7 @@ class Mage_CurrencySymbol_Model_System_Currencysymbol
     {
         // clear cache for frontend
         foreach ($this->_cacheTypes as $cacheType) {
-            Mage::app()->getCacheInstance()->invalidateType($cacheType);
+            Mage::app()->getCache()->invalidateType($cacheType);
         }
         return $this;
     }

@@ -801,7 +801,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     protected function _loadCache($select)
     {
         $data = false;
-        $object = $this->_getCacheInstance();
+        $object = $this->getCache();
         if ($object) {
             $data = $object->load($this->_getSelectCacheId($select));
         }
@@ -817,7 +817,7 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
      */
     protected function _saveCache($data, $select)
     {
-        $object = $this->_getCacheInstance();
+        $object = $this->getCache();
         $object->save(serialize($data), $this->_getSelectCacheId($select), $this->_getCacheTags());
         return $this;
     }
@@ -825,11 +825,11 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
     /**
      * Check if cache can be used for collection data
      *
-     * @return Zend_Cache_Core|false
+     * @return Mage_Core_Model_Cache|false
      */
     protected function _canUseCache()
     {
-        return $this->_getCacheInstance();
+        return $this->getCache();
     }
 
     /**
@@ -847,14 +847,9 @@ class Varien_Data_Collection_Db extends Varien_Data_Collection
         return $id;
     }
 
-    /**
-     * Retrieve cache instance
-     *
-     * @return Zend_Cache_Core|false
-     */
-    protected function _getCacheInstance()
+    protected function getCache(): ?Mage_Core_Model_Cache
     {
-        return $this->_cacheConf['object'] ?? false;
+        return $this->_cacheConf['object'] ?? null;
     }
 
     /**

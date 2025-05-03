@@ -11,8 +11,6 @@
 
 /**
  * Abstract class for configuration cache
- *
- * @package    Varien_Simplexml
  */
 abstract class Varien_Simplexml_Config_Cache_Abstract extends Varien_Object
 {

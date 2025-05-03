@@ -469,9 +469,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     }
 
     /**
-     * Retrieve cache object
-     *
-     * @return Zend_Cache_Core
+     * @return Mage_Core_Model_Cache|Varien_Simplexml_Config_Cache_Abstract|null
      */
     #[\Override]
     public function getCache()

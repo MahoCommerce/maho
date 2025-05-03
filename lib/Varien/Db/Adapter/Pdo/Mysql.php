@@ -131,7 +131,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     /**
      * Cache frontend adapter instance
      *
-     * @var Zend_Cache_Core
+     * @var Mage_Core_Model_Cache
      */
     protected $_cacheAdapter;
 
@@ -2284,14 +2284,8 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         return $bunches;
     }
 
-    /**
-     * Set cache adapter
-     *
-     * @param Zend_Cache_Backend_Interface $adapter
-     * @return $this
-     */
     #[\Override]
-    public function setCacheAdapter($adapter)
+    public function setCacheAdapter(Mage_Core_Model_Cache $adapter): self
     {
         $this->_cacheAdapter = $adapter;
         return $this;

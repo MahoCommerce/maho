@@ -430,7 +430,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
         $types = $this->_config->getNode(self::XML_NODE_RELATED_CACHE);
         if ($types) {
             $types = $types->asArray();
-            $this->_app->getCacheInstance()->invalidateType(array_keys($types));
+            $this->_app->getCache()->invalidateType(array_keys($types));
         }
         return $this;
     }

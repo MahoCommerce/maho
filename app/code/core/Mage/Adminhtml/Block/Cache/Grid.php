@@ -27,7 +27,7 @@ class Mage_Adminhtml_Block_Cache_Grid extends Mage_Adminhtml_Block_Widget_Grid
         $this->setId('cache_grid');
         $this->_filterVisibility = false;
         $this->_pagerVisibility  = false;
-        $this->_invalidatedTypes = Mage::app()->getCacheInstance()->getInvalidatedTypes();
+        $this->_invalidatedTypes = Mage::app()->getCache()->getInvalidatedTypes();
     }
 
     /**
@@ -37,7 +37,7 @@ class Mage_Adminhtml_Block_Cache_Grid extends Mage_Adminhtml_Block_Widget_Grid
     protected function _prepareCollection()
     {
         $collection = new Varien_Data_Collection();
-        foreach (Mage::app()->getCacheInstance()->getTypes() as $type) {
+        foreach (Mage::app()->getCache()->getTypes() as $type) {
             $collection->addItem($type);
         }
         $this->setCollection($collection);

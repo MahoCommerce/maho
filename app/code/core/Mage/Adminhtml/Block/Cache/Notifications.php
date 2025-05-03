@@ -22,7 +22,7 @@ class Mage_Adminhtml_Block_Cache_Notifications extends Mage_Adminhtml_Block_Temp
      */
     public function getCacheTypesForRefresh()
     {
-        $invalidatedTypes = Mage::app()->getCacheInstance()->getInvalidatedTypes();
+        $invalidatedTypes = Mage::app()->getCache()->getInvalidatedTypes();
         $res = [];
         foreach ($invalidatedTypes as $type) {
             $res[] = $type->getCacheType();

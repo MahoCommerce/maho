@@ -273,12 +273,9 @@ class Mage_Checkout_Block_Cart_Sidebar extends Mage_Checkout_Block_Cart_Minicart
 
     /**
      * Processing block html after rendering
-     *
-     * @param   string $html
-     * @return  string
      */
     #[\Override]
-    protected function _afterToHtml($html)
+    protected function _afterToHtml(string $html): string
     {
         $html = parent::_afterToHtml($html);
         $transport = new Varien_Object();

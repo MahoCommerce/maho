@@ -193,14 +193,6 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
         $data = [];
         $needsRefresh = false;
 
-        if ($globalConfigCache !== false) {
-            try {
-                $data = unserialize($globalConfigCache);
-            } catch (Exception $exception) {
-                Mage::logException($exception);
-            }
-        }
-
         /** @var Mage_Core_Model_Store $store */
         foreach ($this as $store) {
             $code = $store->getCode();

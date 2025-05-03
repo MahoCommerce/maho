@@ -149,7 +149,7 @@ class Varien_Filter_Template implements Zend_Filter_Interface
                 } catch (Exception $e) {
                     throw $e;
                 }
-                $value = str_replace($construction[0], $replacedValue, $value);
+                $value = str_replace($construction[0], $replacedValue ?? '', $value);
             }
         }
         return $value;

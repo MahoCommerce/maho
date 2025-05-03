@@ -85,10 +85,7 @@ class Mage_Admin_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstra
     protected function _afterSave(Mage_Core_Model_Abstract $role)
     {
         $this->_updateRoleUsersAcl($role);
-        Mage::app()->getCache()->clean(
-            Zend_Cache::CLEANING_MODE_MATCHING_TAG,
-            [Mage_Adminhtml_Block_Page_Menu::CACHE_TAGS],
-        );
+        Mage::app()->getCache()->clean([Mage_Adminhtml_Block_Page_Menu::CACHE_TAGS]);
         return $this;
     }
 
