@@ -49,6 +49,8 @@
         "intervention/image": "^3.11"
     },
     "replace": {
+        "magento-hackathon/magento-composer-installer": "*",
+        "openmage/magento-lts": "*",
         "paragonie/random_compat": "*",
         "symfony/polyfill-ctype": "*",
         "symfony/polyfill-mbstring": "*",
