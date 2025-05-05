@@ -32764,12 +32764,6 @@ parameters:
 			path: app/design/install/default/default/template/install/state.phtml
 
 		-
-			message: '#^Method Varien_Cache_Core\:\:_cleanTheMess\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Cache/Core.php
-
-		-
 			message: '#^Call to an undefined method Varien_Convert_Action\:\:getData\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -32894,18 +32888,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: lib/Varien/Convert/Adapter/Std.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Zend_Cache\:\:load\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Zend/Cache.php
-
-		-
-			message: '#^Method Varien_Convert_Adapter_Zend_Cache\:\:save\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/Varien/Convert/Adapter/Zend/Cache.php
 
 		-
 			message: '#^Method Varien_Convert_Adapter_Zend_Db\:\:load\(\) has no return type specified\.$#'
