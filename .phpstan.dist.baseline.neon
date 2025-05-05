@@ -19105,18 +19105,6 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Std.php
 
 		-
-			message: '#^Method Mage_Dataflow_Model_Convert_Adapter_Zend_Cache\:\:load\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Zend/Cache.php
-
-		-
-			message: '#^Method Mage_Dataflow_Model_Convert_Adapter_Zend_Cache\:\:save\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Zend/Cache.php
-
-		-
 			message: '#^Method Mage_Dataflow_Model_Convert_Adapter_Zend_Db\:\:load\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
