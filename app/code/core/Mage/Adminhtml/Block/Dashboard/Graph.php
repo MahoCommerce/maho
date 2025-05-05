@@ -165,6 +165,11 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
                     $d = $dateStart->toString('yyyy-MM-dd');
                     $dateStart->addDay(1);
                     break;
+                case '3m':
+                case '6m':
+                    $date = $dateStart->toString('yyyy-MM-dd');
+                    $dateStart->addWeek(1);
+                    break;
                 case '1y':
                 case '2y':
                     $d = $dateStart->toString('yyyy-MM');

@@ -329,6 +329,16 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
                 $dateStart->setDay(Mage::getStoreConfig('reports/dashboard/mtd_start'));
                 break;
 
+            case '3m':
+                $dateStart->setDay(Mage::getStoreConfig('reports/dashboard/mtd_start'));
+                $dateStart->subMonth(2);
+                break;
+
+            case '6m':
+                $dateStart->setDay(Mage::getStoreConfig('reports/dashboard/mtd_start'));
+                $dateStart->subMonth(5);
+                break;
+
             case 'custom':
                 $dateStart = $customStart ?: $dateEnd;
                 $dateEnd   = $customEnd ?: $dateEnd;
