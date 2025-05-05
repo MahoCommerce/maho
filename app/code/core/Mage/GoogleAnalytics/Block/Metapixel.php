@@ -40,8 +40,8 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                     [
                         'id' => $_addedProduct['sku'],
                         'quantity' => (int) $_addedProduct['qty'],
-                        'item_price' => $helper->formatPrice($_addedProduct['price'])
-                    ]
+                        'item_price' => $helper->formatPrice($_addedProduct['price']),
+                    ],
                 ];
                 $result[] = ['AddToCart', $eventData];
             }
@@ -55,7 +55,8 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
             if ($productViewed) {
                 $eventData = [];
                 $eventData['value'] = $helper->formatPrice($productViewed->getFinalPrice());
-                $eventData['currency'] = Mage::app()->getStore()->getCurrentCurrencyCode();;
+                $eventData['currency'] = Mage::app()->getStore()->getCurrentCurrencyCode();
+                ;
                 $eventData['content_name'] = $productViewed->getName();
                 $eventData['content_ids'] = [$productViewed->getSku()];
                 $eventData['content_type'] = 'product';
@@ -63,8 +64,8 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                     [
                         'id' => $productViewed->getSku(),
                         'quantity' => 1,
-                        'item_price' => $helper->formatPrice($productViewed->getFinalPrice())
-                    ]
+                        'item_price' => $helper->formatPrice($productViewed->getFinalPrice()),
+                    ],
                 ];
                 $category = Mage::registry('current_category');
                 if ($category) {
@@ -105,14 +106,15 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                         $contents[] = [
                             'id' => $productId,
                             'quantity' => 1, // Quantity is typically 1 for a list view item
-                            'item_price' => $productPrice
+                            'item_price' => $productPrice,
                         ];
                         $totalValue += $productViewed->getFinalPrice();
                     }
 
                     $eventData = [];
                     $eventData['value'] = $helper->formatPrice($totalValue); // Sum of displayed product prices
-                    $eventData['currency'] = Mage::app()->getStore()->getCurrentCurrencyCode();;
+                    $eventData['currency'] = Mage::app()->getStore()->getCurrentCurrencyCode();
+                    ;
                     $eventData['content_name'] = $category->getName();
                     $eventData['content_ids'] = $contentIds;
                     $eventData['content_type'] = 'product_group'; // Use 'product_group' for lists/categories
@@ -145,7 +147,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                         $contents[] = [
                             'id' => $productId,
                             'quantity' => (int) $item->getQty(),
-                            'item_price' => $helper->formatPrice($item->getBasePrice())
+                            'item_price' => $helper->formatPrice($item->getBasePrice()),
                         ];
                         $totalValue += $item->getBaseRowTotal();
                         $numItems += (int) $item->getQty();
@@ -184,7 +186,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                     $contents[] = [
                         'id' => $productId,
                         'quantity' => (int) $item->getQtyOrdered(),
-                        'item_price' => $helper->formatPrice($item->getBasePrice())
+                        'item_price' => $helper->formatPrice($item->getBasePrice()),
                     ];
                     $numItems += (int) $item->getQtyOrdered();
                 }
