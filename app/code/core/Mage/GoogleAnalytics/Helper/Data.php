@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * GoogleAnalytics data helper
- *
- * @package    Mage_GoogleAnalytics
- */
 class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
 {
     /**
