@@ -56,6 +56,8 @@ class Mage_Adminhtml_Helper_Dashboard_Data extends Mage_Core_Helper_Data
             '24h' => $this->__('Last 24 Hours'),
             '7d'  => $this->__('Last 7 Days'),
             '1m'  => $this->__('Current Month'),
+            '3m'  => $this->__('Last 3 Month'),
+            '6m'  => $this->__('Last 6 Month'),
             '1y'  => $this->__('YTD'),
             '2y'  => $this->__('2YTD'),
         ];
