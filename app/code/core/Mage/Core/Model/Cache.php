@@ -142,7 +142,7 @@ class Mage_Core_Model_Cache
     }
 
     /**
-     * Get options of cache frontend (options of Zend_Cache_Core)
+     * Get options of cache frontend (options of symfony/cache)
      *
      * @return  array
      */

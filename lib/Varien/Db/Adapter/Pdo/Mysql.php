@@ -1590,14 +1590,9 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
             return $this->_ddlCache[$ddlType][$tableCacheKey];
         }
 
-        if ($this->_cacheAdapter instanceof Zend_Cache_Core) {
+        if ($this->_cacheAdapter) {
             $cacheId = $this->_getCacheId($tableCacheKey, $ddlType);
-            $data = $this->_cacheAdapter->load($cacheId);
-            if ($data !== false) {
-                $data = unserialize($data, ['allowed_classes' => false]);
-                $this->_ddlCache[$ddlType][$tableCacheKey] = $data;
-            }
-            return $data;
+            return $this->_cacheAdapter->load($cacheId);
         }
 
         return false;
@@ -1618,7 +1613,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         }
         $this->_ddlCache[$ddlType][$tableCacheKey] = $data;
 
-        if ($this->_cacheAdapter instanceof Zend_Cache_Core) {
+        if ($this->_cacheAdapter) {
             $cacheId = $this->_getCacheId($tableCacheKey, $ddlType);
             $data = serialize($data);
             $this->_cacheAdapter->save($data, $cacheId, [self::DDL_CACHE_TAG]);
@@ -1643,9 +1638,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         }
         if ($tableName === null) {
             $this->_ddlCache = [];
-            if ($this->_cacheAdapter instanceof Zend_Cache_Core) {
-                $this->_cacheAdapter->clean(Zend_Cache::CLEANING_MODE_MATCHING_TAG, [self::DDL_CACHE_TAG]);
-            }
+            $this->_cacheAdapter->clean([self::DDL_CACHE_TAG]);
         } else {
             $cacheKey = $this->_getTableName($tableName, $schemaName);
 
@@ -1654,7 +1647,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
                 unset($this->_ddlCache[$ddlType][$cacheKey]);
             }
 
-            if ($this->_cacheAdapter instanceof Zend_Cache_Core) {
+            if ($this->_cacheAdapter) {
                 foreach ($ddlTypes as $ddlType) {
                     $cacheId = $this->_getCacheId($cacheKey, $ddlType);
                     $this->_cacheAdapter->remove($cacheId);
