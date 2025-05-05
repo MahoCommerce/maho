@@ -38,8 +38,8 @@ class Mage_GoogleAnalytics_Model_Observer
             return;
         }
 
-        // avoid to process the same quote_item more than once
-        // this could happen in case of double save of the same quote_item
+        // Avoid processing the same quote_item more than once.
+        // This could happen in case of double save of the same quote_item
         $processedProductsRegistry = Mage::registry('processed_quote_items_for_analytics') ?? new ArrayObject();
         if ($processedProductsRegistry->offsetExists($item->getId())) {
             return;

@@ -11,7 +11,6 @@
 $_helper = $this->helper('googleanalytics');
 ?>
 <?php if (!$this->helper('core/cookie')->isUserNotAllowSaveCookie()): ?>
-    <?php $metaPixelId = $_helper->getMetaPixelId() ?>
     <!-- BEGIN META PIXEL CODE -->
     <script>
         !function(f,b,e,v,n,t,s)
@@ -22,7 +21,7 @@ $_helper = $this->helper('googleanalytics');
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '<?= $metaPixelId ?>');
+        fbq('init', '<?= $_helper->getMetaPixelId() ?>');
         fbq('track', 'PageView');
     </script>
     <script>
