@@ -471,7 +471,7 @@ class Mage_Core_Model_Locale
             $dateStyle,
             IntlDateFormatter::NONE, // No time formatting
             null, // Default timezone
-            IntlDateFormatter::GREGORIAN
+            IntlDateFormatter::GREGORIAN,
         );
     }
 
