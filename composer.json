@@ -87,7 +87,6 @@
                 "MAG-1.1.1": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/c0a65fb380c98ae1e0618014d1bbe4e56fa39e01/MAG-1.1.1.patch",
                 "MAG-1.9.3.0": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/c0a65fb380c98ae1e0618014d1bbe4e56fa39e01/MAG-1.9.3.0.patch",
                 "MAG-1.9.3.7 - SUPEE-10415": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/e75f155864138ef4ee2b18a82797d6f40d71ad51/MAG-1.9.3.7.patch",
-                "OM-918 - Add runtime cache to Zend_Locale_Data": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/e75f155864138ef4ee2b18a82797d6f40d71ad51/OM-918.patch",
                 "OM-1081 - Not detecting HTTPS behind a proxy": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/e75f155864138ef4ee2b18a82797d6f40d71ad51/OM-1081.patch",
                 "OM-2047 - Pass delimiter char to preg_quote": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/e75f155864138ef4ee2b18a82797d6f40d71ad51/OM-2047.patch",
                 "OM-2050 - Prevent checking known date codes": "https://raw.githubusercontent.com/MahoCommerce/maho-composer-patches/e75f155864138ef4ee2b18a82797d6f40d71ad51/OM-2050.patch"

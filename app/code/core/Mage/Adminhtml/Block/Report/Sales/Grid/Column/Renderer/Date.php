@@ -30,10 +30,25 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
             if (is_null(self::$_format)) {
                 try {
                     $localeCode = Mage::app()->getLocale()->getLocaleCode();
-                    $localeData = new Zend_Locale_Data();
                     self::$_format = match ($this->getColumn()->getPeriodType()) {
-                        'month' => $localeData::getContent($localeCode, 'dateitem', 'yM'),
-                        'year' => $localeData::getContent($localeCode, 'dateitem', 'y'),
+                        'month' => (function () use ($localeCode) {
+                            $formatter = new IntlDateFormatter(
+                                $localeCode,
+                                IntlDateFormatter::NONE,
+                                IntlDateFormatter::NONE,
+                            );
+                            $formatter->setPattern('yyyy-MM');
+                            return $formatter->getPattern();
+                        })(),
+                        'year' => (function () use ($localeCode) {
+                            $formatter = new IntlDateFormatter(
+                                $localeCode,
+                                IntlDateFormatter::NONE,
+                                IntlDateFormatter::NONE,
+                            );
+                            $formatter->setPattern('yyyy');
+                            return $formatter->getPattern();
+                        })(),
                         default => Mage::app()->getLocale()->getDateFormat(
                             Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM,
                         ),
