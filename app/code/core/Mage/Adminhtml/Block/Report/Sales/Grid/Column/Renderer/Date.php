@@ -6,24 +6,14 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml grid item renderer date
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date
 {
-    /**
-     * Retrieve date format
-     *
-     * @return string
-     */
     #[\Override]
-    protected function _getFormat()
+    protected function _getFormat(): string
     {
         $format = $this->getColumn()->getFormat();
         if (!$format) {
@@ -61,13 +51,8 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
         return $format;
     }
 
-    /**
-     * Renders grid column
-     *
-     * @return string
-     */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(Varien_Object $row): string
     {
         if ($data = $row->getData($this->getColumn()->getIndex())) {
             $dateFormat = match ($this->getColumn()->getPeriodType()) {
