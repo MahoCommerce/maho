@@ -18,33 +18,13 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
         $format = $this->getColumn()->getFormat();
         if (!$format) {
             if (is_null(self::$_format)) {
-                try {
-                    $localeCode = Mage::app()->getLocale()->getLocaleCode();
-                    self::$_format = match ($this->getColumn()->getPeriodType()) {
-                        'month' => (function () use ($localeCode) {
-                            $formatter = new IntlDateFormatter(
-                                $localeCode,
-                                IntlDateFormatter::NONE,
-                                IntlDateFormatter::NONE,
-                            );
-                            $formatter->setPattern('yyyy-MM');
-                            return $formatter->getPattern();
-                        })(),
-                        'year' => (function () use ($localeCode) {
-                            $formatter = new IntlDateFormatter(
-                                $localeCode,
-                                IntlDateFormatter::NONE,
-                                IntlDateFormatter::NONE,
-                            );
-                            $formatter->setPattern('yyyy');
-                            return $formatter->getPattern();
-                        })(),
-                        default => Mage::app()->getLocale()->getDateFormat(
-                            Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM,
-                        ),
-                    };
-                } catch (Exception $e) {
-                }
+                $localeCode = Mage::app()->getLocale()->getLocaleCode();
+                $generator = new IntlDatePatternGenerator($localeCode);
+                self::$_format = match ($this->getColumn()->getPeriodType()) {
+                    'month' => $generator->getBestPattern('yM'),
+                    'year' => $generator->getBestPattern('y'),
+                    default => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM),
+                };
             }
             $format = self::$_format;
         }
@@ -58,7 +38,7 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
             $dateFormat = match ($this->getColumn()->getPeriodType()) {
                 'month' => 'yyyy-MM',
                 'year' => 'yyyy',
-                default => Varien_Date::DATE_INTERNAL_FORMAT,
+                default => 'yyyy-MM-dd',
             };
 
             $format = $this->_getFormat();
