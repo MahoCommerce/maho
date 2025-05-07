@@ -1182,8 +1182,7 @@ class Mage_Core_Model_App
      */
     public function testCache(string $id): bool
     {
-        // @phpstan-ignore method.internalClass
-        return $this->_cache->getFrontend()->getItem($id)->isHit();
+        return $this->_cache->test($id);
     }
 
     /**
