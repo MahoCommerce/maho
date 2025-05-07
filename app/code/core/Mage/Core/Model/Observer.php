@@ -77,7 +77,7 @@ class Mage_Core_Model_Observer
      */
     public function cleanCache(Mage_Cron_Model_Schedule $schedule)
     {
-        Mage::app()->getCache()->clean();
+        Mage::app()->getCache()->prune();
         Mage::dispatchEvent('core_clean_cache');
     }
 

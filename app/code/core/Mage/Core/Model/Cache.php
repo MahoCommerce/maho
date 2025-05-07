@@ -259,6 +259,14 @@ class Mage_Core_Model_Cache
         return $this->flush();
     }
 
+    public function prune(): bool
+    {
+        if ($this->_frontend instanceof \Symfony\Component\Cache\PruneableInterface) {
+            return $this->_frontend->prune();
+        }
+        return true;
+    }
+
     public function flush(): bool
     {
         return $this->_frontend->clear($this->_idPrefix); // @phpstan-ignore method.internalClass
