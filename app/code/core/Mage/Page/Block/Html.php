@@ -6,11 +6,15 @@
  * @package    Mage_Page
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
+ * Html page block
+ *
+ * @package    Mage_Page
+ *
  * @method string getLayoutCode()
  * @method bool getIsHandle()
  * @method $this setBodyClass(string $value)
@@ -183,9 +187,12 @@ class Mage_Page_Block_Html extends Mage_Core_Block_Template
 
     /**
      * Processing block html after rendering
+     *
+     * @param   string $html
+     * @return  string
      */
     #[\Override]
-    protected function _afterToHtml(string $html): string
+    protected function _afterToHtml($html)
     {
         return $this->_afterCacheUrl($html);
     }

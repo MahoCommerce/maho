@@ -958,8 +958,11 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
 
     /**
      * Processing block html after rendering
+     *
+     * @param   string $html
+     * @return  string
      */
-    protected function _afterToHtml(string $html): string
+    protected function _afterToHtml($html)
     {
         return $html;
     }

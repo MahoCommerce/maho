@@ -12,6 +12,8 @@
 
 /**
  * Product attribute add/edit form main tab
+ *
+ * @package    Mage_Eav
  */
 abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mage_Adminhtml_Block_Widget_Form
 {
@@ -187,9 +189,12 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
     /**
      * Processing block html after rendering
      * Adding js block to the end of this block
+     *
+     * @param   string $html
+     * @return  string
      */
     #[\Override]
-    protected function _afterToHtml(string $html): string
+    protected function _afterToHtml($html)
     {
         $jsScripts = $this->getLayout()
             ->createBlock('eav/adminhtml_attribute_edit_js')->toHtml();
