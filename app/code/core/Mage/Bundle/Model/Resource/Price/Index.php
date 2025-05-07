@@ -196,6 +196,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
             $salableStatus = $this->getProductsSalableStatus($selectionProducts, $website);
             $priceData = $this->getProductsPriceData($productId, $website);
             $priceData = $priceData[$productId];
+            $basePrice = 0;
 
             /** @var Mage_Customer_Model_Group $group */
             foreach ($this->_getCustomerGroups() as $group) {
@@ -218,7 +219,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
                     $group,
                 );
 
-                if ($priceType == Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED) {
+                if (isset($customOptions) && $priceType == Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED) {
                     [$minPrice, $maxPrice] =
                         $this->_calculateCustomOptions($customOptions, $basePrice, $minPrice, $maxPrice);
                 }

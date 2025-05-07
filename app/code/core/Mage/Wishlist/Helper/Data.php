@@ -450,6 +450,7 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
         if ($customer) {
             return $customer->getName();
         }
+        return null;
     }
 
     /**
@@ -460,6 +461,7 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getRssUrl($wishlistId = null)
     {
+        $params = [];
         $customer = $this->_getCurrentCustomer();
         if ($customer) {
             $key = $customer->getId() . ',' . $customer->getEmail();

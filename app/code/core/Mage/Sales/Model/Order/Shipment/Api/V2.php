@@ -40,7 +40,7 @@ class Mage_Sales_Model_Order_Shipment_Api_V2 extends Mage_Sales_Model_Order_Ship
      * @param string $comment
      * @param bool $notifyCustomer
      * @param bool $includeComment
-     * @return string
+     * @return string|null
      */
     #[\Override]
     public function create(

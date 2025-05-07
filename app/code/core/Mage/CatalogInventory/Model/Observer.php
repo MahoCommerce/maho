@@ -580,7 +580,7 @@ class Mage_CatalogInventory_Model_Observer
      * @param int   $productId
      * @param int   $quoteItemId
      * @param float $itemQty
-     * @return int
+     * @return float
      */
     protected function _getQuoteItemQtyForCheck($productId, $quoteItemId, $itemQty)
     {

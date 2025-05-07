@@ -20,13 +20,15 @@ class Mage_Index_Model_Resource_Setup extends Mage_Core_Model_Resource_Setup
     /**
      * Apply Index module DB updates and sync indexes declaration
      *
-     * @return void
+     * @return $this
      */
     #[\Override]
     public function applyUpdates()
     {
         parent::applyUpdates();
         $this->_syncIndexes();
+
+        return $this;
     }
 
     /**
