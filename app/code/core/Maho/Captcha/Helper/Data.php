@@ -100,7 +100,6 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
         try {
             $altcha = new Altcha\Altcha($this->getHmacKey());
             $isValid = $altcha->verifySolution($payload, true);
-            Mage::app()->getCache()->clean([self::CACHE_TAG]);
             Mage::app()->getCache()->save('1', $cacheKey, [self::CACHE_TAG], self::CHALLENGE_EXPIRATION);
         } catch (Exception $e) {
             $isValid = false;
