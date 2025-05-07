@@ -404,7 +404,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     /**
      * Do remote request for and handle errors
      *
-     * @return Mage_Shipping_Model_Rate_Result
+     * @return Mage_Shipping_Model_Rate_Result|bool
      */
     protected function _getQuotes()
     {
@@ -563,7 +563,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
             }
         }
 
-        return $amount;
+        return (float) $amount;
     }
 
     /**
@@ -1036,6 +1036,8 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      */
     protected function _parseTrackingResponse($trackingValue, $response)
     {
+        $errorTitle = '';
+
         if (is_object($response)) {
             if ($response->HighestSeverity == 'FAILURE' || $response->HighestSeverity == 'ERROR') {
                 $errorTitle = (string) $response->Notifications->Message;
@@ -1206,7 +1208,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
             $tracking->setTracking($trackingvalue);
             $tracking->addData($resultArr);
             $this->_result->append($tracking);
-        } else {
+        } elseif (isset($errorTitle)) {
             $error = Mage::getModel('shipping/tracking_result_error');
             $error->setCarrier('fedex');
             $error->setCarrierTitle($this->getConfigData('title'));

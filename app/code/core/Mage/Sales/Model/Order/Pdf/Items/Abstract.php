@@ -55,7 +55,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
     /**
      * Set order model
      *
-     * @return Mage_Sales_Model_Order_Pdf_Items_Abstract
+     * @return $this
      */
     public function setOrder(Mage_Sales_Model_Order $order)
     {
@@ -66,7 +66,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
     /**
      * Set Source model
      *
-     * @return Mage_Sales_Model_Order_Pdf_Items_Abstract
+     * @return $this
      */
     public function setSource(Mage_Core_Model_Abstract $source)
     {
@@ -77,7 +77,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
     /**
      * Set item object
      *
-     * @return Mage_Sales_Model_Order_Pdf_Items_Abstract
+     * @return $this
      */
     public function setItem(Varien_Object $item)
     {
@@ -88,7 +88,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
     /**
      * Set Pdf model
      *
-     * @return Mage_Sales_Model_Order_Pdf_Items_Abstract
+     * @return $this
      */
     public function setPdf(Mage_Sales_Model_Order_Pdf_Abstract $pdf)
     {
@@ -99,7 +99,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Model
     /**
      * Set current page
      *
-     * @return Mage_Sales_Model_Order_Pdf_Items_Abstract
+     * @return $this
      */
     public function setPage(Zend_Pdf_Page $page)
     {

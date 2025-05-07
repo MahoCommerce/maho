@@ -96,7 +96,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
      * Set Request scope
      *
      * @param string $scope
-     * @return string
+     * @return $this
      */
     public function setRequestScope($scope)
     {
@@ -109,7 +109,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
      * Search value only in scope or search value in scope and global
      *
      * @param bool $flag
-     * @return Mage_Eav_Model_Attribute_Data_Abstract
+     * @return $this
      */
     public function setRequestScopeOnly($flag)
     {
@@ -120,7 +120,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
     /**
      * Set entity instance
      *
-     * @return Mage_Eav_Model_Attribute_Data_Abstract
+     * @return $this
      */
     public function setEntity(Mage_Core_Model_Abstract $entity)
     {
@@ -144,7 +144,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
     /**
      * Set array of full extracted data
      *
-     * @return Mage_Eav_Model_Attribute_Data_Abstract
+     * @return $this
      */
     public function setExtractedData(array $data)
     {
@@ -210,7 +210,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
      * Get/Set/Reset date filter format
      *
      * @param string|null|false $format
-     * @return Mage_Eav_Model_Attribute_Data_Abstract|string
+     * @return $this|string
      */
     protected function _dateFilterFormat($format = null)
     {
@@ -443,7 +443,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
      * Set is AJAX Request flag
      *
      * @param bool $flag
-     * @return Mage_Eav_Model_Attribute_Data_Abstract
+     * @return $this
      */
     public function setIsAjaxRequest($flag = true)
     {
@@ -511,7 +511,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
      * Export attribute value to entity model
      *
      * @param array|string $value
-     * @return Mage_Eav_Model_Attribute_Data_Abstract
+     * @return $this
      */
     abstract public function compactValue($value);
 
@@ -519,7 +519,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
      * Restore attribute value from SESSION to entity model
      *
      * @param array|string $value
-     * @return Mage_Eav_Model_Attribute_Data_Abstract
+     * @return $this
      */
     abstract public function restoreValue($value);
 

@@ -71,7 +71,9 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
         $config = new Varien_Object();
         $this->setConfig($config);
         if (!is_array($configArray)) {
-            return $this->_getData('config');
+            /** @var Varien_Object $configData */
+            $configData = $this->_getData('config');
+            return $configData;
         }
 
         // define chooser label
@@ -91,7 +93,9 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
         }
         $config->setButtons($buttons);
 
-        return $this->_getData('config');
+        /** @var Varien_Object $configData */
+        $configData = $this->_getData('config');
+        return $configData;
     }
 
     /**

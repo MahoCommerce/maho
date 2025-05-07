@@ -81,7 +81,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
     /**
      * Calculate x coordinate with indentation
      *
-     * @param int $pt
+     * @param int|float $pt
      * @return int
      */
     protected function _x($pt)
@@ -92,7 +92,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_PageBuilder
     /**
      * Calculate y coordinate with indentation
      *
-     * @param int $pt
+     * @param int|float $pt
      * @return int
      */
     protected function _y($pt)

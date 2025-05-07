@@ -1838,7 +1838,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
 
     /**
      * @param string|object $column
-     * @param string $value
+     * @param string|bool $value
      * @return bool|$this
      */
     public function isColumnGrouped($column, $value = null)
