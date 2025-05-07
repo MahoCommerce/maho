@@ -469,7 +469,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     }
 
     /**
-     * @return Mage_Core_Model_Cache|Varien_Simplexml_Config_Cache_Abstract|null
+     * @return Mage_Core_Model_Cache
      */
     #[\Override]
     public function getCache()
