@@ -66,7 +66,6 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                 $eventData = [];
                 $eventData['value'] = $helper->formatPrice($productViewed->getFinalPrice());
                 $eventData['currency'] = Mage::app()->getStore()->getCurrentCurrencyCode();
-                ;
                 $eventData['content_name'] = $productViewed->getName();
                 $eventData['content_ids'] = [$productViewed->getSku()];
                 $eventData['content_type'] = 'product';
