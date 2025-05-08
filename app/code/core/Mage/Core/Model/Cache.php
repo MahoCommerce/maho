@@ -277,7 +277,7 @@ class Mage_Core_Model_Cache
 
     public function flush(): bool
     {
-        return $this->_frontend->clear($this->_idPrefix); // @phpstan-ignore method.internalClass
+        return $this->_frontend->clear(); // @phpstan-ignore method.internalClass
     }
 
     /**
