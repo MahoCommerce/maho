@@ -427,9 +427,7 @@ class Mage_Core_Model_Cache
     protected function _getInvalidatedTypes()
     {
         $types = $this->load(self::INVALIDATED_TYPES);
-        if ($types) {
-            $types = unserialize($types, ['allowed_classes' => false]);
-        } else {
+        if (!$types) {
             $types = [];
         }
         return $types;
@@ -443,7 +441,7 @@ class Mage_Core_Model_Cache
      */
     protected function _saveInvalidatedTypes($types)
     {
-        $this->save(serialize($types), self::INVALIDATED_TYPES);
+        $this->save($types, self::INVALIDATED_TYPES);
         return $this;
     }
 

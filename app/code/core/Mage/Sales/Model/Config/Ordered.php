@@ -114,7 +114,7 @@ abstract class Mage_Sales_Model_Config_Ordered extends Mage_Core_Model_Config_Ba
         if (Mage::app()->useCache('config')) {
             $cachedData = Mage::app()->loadCache($this->_collectorsCacheKey);
             if ($cachedData) {
-                return unserialize($cachedData, ['allowed_classes' => false]);
+                return $cachedData;
             }
         }
         $configArray = $this->_modelsConfig;
@@ -160,7 +160,7 @@ abstract class Mage_Sales_Model_Config_Ordered extends Mage_Core_Model_Config_Ba
         }
         $sortedCollectors = array_keys($configArray);
         if (Mage::app()->useCache('config')) {
-            Mage::app()->saveCache(serialize($sortedCollectors), $this->_collectorsCacheKey, [
+            Mage::app()->saveCache($sortedCollectors, $this->_collectorsCacheKey, [
                 Mage_Core_Model_Config::CACHE_TAG,
             ]);
         }

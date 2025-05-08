@@ -193,14 +193,14 @@ abstract class Mage_Checkout_Block_Onepage_Abstract extends Mage_Core_Block_Temp
             $cacheId    = 'DIRECTORY_COUNTRY_SELECT_STORE_' . Mage::app()->getStore()->getCode();
             $cacheTags  = ['config'];
             if ($optionsCache = Mage::app()->loadCache($cacheId)) {
-                $options = unserialize($optionsCache, ['allowed_classes' => false]);
+                $options = $optionsCache;
             }
         }
 
         if ($options == false) {
             $options = $this->getCountryCollection()->toOptionArray();
             if ($useCache) {
-                Mage::app()->saveCache(serialize($options), $cacheId, $cacheTags);
+                Mage::app()->saveCache($options, $cacheId, $cacheTags);
             }
         }
         return $options;

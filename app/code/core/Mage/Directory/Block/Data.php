@@ -60,11 +60,11 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
         }
         $cacheKey = 'DIRECTORY_COUNTRY_SELECT_STORE_' . Mage::app()->getStore()->getCode();
         if (Mage::app()->useCache('config') && $cache = Mage::app()->loadCache($cacheKey)) {
-            $options = unserialize($cache, ['allowed_classes' => false]);
+            $options = $cache;
         } else {
             $options = $this->getCountryCollection()->toOptionArray();
             if (Mage::app()->useCache('config')) {
-                Mage::app()->saveCache(serialize($options), $cacheKey, ['config']);
+                Mage::app()->saveCache($options, $cacheKey, ['config']);
             }
         }
         $html = $this->getLayout()->createBlock('core/html_select')
@@ -105,11 +105,11 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
         Varien_Profiler::start('TEST: ' . __METHOD__);
         $cacheKey = 'DIRECTORY_REGION_SELECT_STORE' . Mage::app()->getStore()->getId();
         if (Mage::app()->useCache('config') && $cache = Mage::app()->loadCache($cacheKey)) {
-            $options = unserialize($cache, ['allowed_classes' => false]);
+            $options = $cache;
         } else {
             $options = $this->getRegionCollection()->toOptionArray();
             if (Mage::app()->useCache('config')) {
-                Mage::app()->saveCache(serialize($options), $cacheKey, ['config']);
+                Mage::app()->saveCache($options, $cacheKey, ['config']);
             }
         }
         $html = $this->getLayout()->createBlock('core/html_select')

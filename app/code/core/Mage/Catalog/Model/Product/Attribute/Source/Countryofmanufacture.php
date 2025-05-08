@@ -27,7 +27,7 @@ class Mage_Catalog_Model_Product_Attribute_Source_Countryofmanufacture extends M
     {
         $cacheKey = 'DIRECTORY_COUNTRY_SELECT_STORE_' . Mage::app()->getStore()->getCode();
         if (Mage::app()->useCache('config') && $cache = Mage::app()->loadCache($cacheKey)) {
-            $options = unserialize($cache, ['allowed_classes' => false]);
+            $options = $cache;
         } else {
             $collection = Mage::getModel('directory/country')->getResourceCollection();
             if (!Mage::app()->getStore()->isAdmin()) {
@@ -35,7 +35,7 @@ class Mage_Catalog_Model_Product_Attribute_Source_Countryofmanufacture extends M
             }
             $options = $collection->toOptionArray();
             if (Mage::app()->useCache('config')) {
-                Mage::app()->saveCache(serialize($options), $cacheKey, ['config']);
+                Mage::app()->saveCache($options, $cacheKey, ['config']);
             }
         }
         return $options;
