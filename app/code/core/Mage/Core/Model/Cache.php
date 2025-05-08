@@ -251,10 +251,16 @@ class Mage_Core_Model_Cache
      */
     public function clean($tags = [])
     {
-        if (!empty($tags)) {
-            if (!is_array($tags)) {
-                $tags = [$tags];
-            }
+        $args = func_get_args();
+        if (count($args) > 1 && is_array($args[1])) {
+            $tags = $args[1];
+        }
+
+        if (!empty($tags) && !is_array($tags)) {
+            $tags = [$tags];
+        }
+
+        if (is_array($tags) && count($tags) > 0) {
             return $this->_frontend->invalidateTags($this->_tags($tags)); // @phpstan-ignore method.internalClass
         }
 
