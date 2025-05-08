@@ -86,12 +86,12 @@ class Mage_Core_Model_Cache
         $this->_frontend = match ($backend['type']) {
             'redis' => new \Symfony\Component\Cache\Adapter\RedisTagAwareAdapter(
                 \Symfony\Component\Cache\Adapter\RedisTagAwareAdapter::createConnection($backend['options']['dsn']),
-                'maho',
+                "maho-{$this->_idPrefix}",
                 $frontend['lifetime'],
                 new \Maho\CacheMarshaller(),
             ),
             default => new \Symfony\Component\Cache\Adapter\FilesystemTagAwareAdapter(
-                'maho',
+                "maho-{$this->_idPrefix}",
                 $frontend['lifetime'],
                 $this->_defaultBackendOptions['cache_dir'],
                 new \Maho\CacheMarshaller(),
