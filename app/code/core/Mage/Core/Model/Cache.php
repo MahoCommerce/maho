@@ -88,13 +88,13 @@ class Mage_Core_Model_Cache
                 \Symfony\Component\Cache\Adapter\RedisTagAwareAdapter::createConnection($backend['options']['dsn']),
                 "maho-{$this->_idPrefix}",
                 $frontend['lifetime'],
-                new \Maho\CacheMarshaller(),
+                Mage::getModel('core/cache_marshaller'),
             ),
             default => new \Symfony\Component\Cache\Adapter\FilesystemTagAwareAdapter(
                 "maho-{$this->_idPrefix}",
                 $frontend['lifetime'],
                 $this->_defaultBackendOptions['cache_dir'],
-                new \Maho\CacheMarshaller(),
+                Mage::getModel('core/cache_marshaller'),
             ),
         };
     }

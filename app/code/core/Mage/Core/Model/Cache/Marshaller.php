@@ -3,16 +3,14 @@
 /**
  * Maho
  *
- * @package    Maho
+ * @package    Mage_Core
  * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho;
-
 use Symfony\Component\Cache\Marshaller\MarshallerInterface;
 
-class CacheMarshaller implements MarshallerInterface
+class Mage_Core_Model_Cache_Marshaller implements MarshallerInterface
 {
     public function marshall(array $values, ?array &$failed): array // @phpstan-ignore parameterByRef.unusedType
     {
