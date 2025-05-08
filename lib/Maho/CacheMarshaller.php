@@ -14,7 +14,7 @@ use Symfony\Component\Cache\Marshaller\MarshallerInterface;
 
 class CacheMarshaller implements MarshallerInterface
 {
-    public function marshall(array $values, ?array &$failed): array
+    public function marshall(array $values, ?array &$failed): array // @phpstan-ignore parameterByRef.unusedType
     {
         $serialized = $failed = [];
         foreach ($values as $id => $value) {
@@ -37,8 +37,10 @@ class CacheMarshaller implements MarshallerInterface
             return null;
         }
 
-        if (false !== $value = @unserialize($value, ['allowed_classes' => false])) {
+        if (false !== $value = unserialize($value, ['allowed_classes' => false])) {
             return $value;
         }
+
+        throw new \Exception(error_get_last() ? error_get_last()['message'] : 'Failed to unserialize values.');
     }
 }
