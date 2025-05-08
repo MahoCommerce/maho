@@ -780,6 +780,7 @@ function clearMessagesDiv(div = null) {
  */
 function setMessagesDiv(message, type = 'success', div = null) {
     if (div ??= document.getElementById('messages')) {
+        message = escapeHtml(message);
         div.innerHTML = `<ul class="messages"><li class="${type}-msg"><ul><li><span>${message}</span></li></ul></li></ul>`;
     }
 }
