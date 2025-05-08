@@ -144,11 +144,13 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         if ($this->getRequest()->isAjax()) {
             $this->_renderTitles();
 
+            $messagesCollection = $this->getLayout()->getMessagesBlock()->getMessageCollection();
             $eventResponse = new Varien_Object([
                 'title' => implode(' / ', array_reverse($this->_titles)),
                 'content' => $this->getLayout()->getBlock('category.edit')->getFormHtml(),
-                'messages' => $this->getLayout()->getMessagesBlock()->getGroupedHtml(),
+                'messages' => $messagesCollection->getItems(),
             ]);
+            $messagesCollection->clear();
 
             Mage::dispatchEvent('category_prepare_ajax_response', [
                 'response' => $eventResponse,
