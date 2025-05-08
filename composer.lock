@@ -627,16 +627,16 @@
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
-            "version": "v3.0.0",
+            "version": "v3.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
-                "reference": "abab924df44909094c7ab98ca68d55bf48dd62d9"
+                "reference": "09a2884937616853dbd4e2bec53977c16fe6f2cb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/abab924df44909094c7ab98ca68d55bf48dd62d9",
-                "reference": "abab924df44909094c7ab98ca68d55bf48dd62d9",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/09a2884937616853dbd4e2bec53977c16fe6f2cb",
+                "reference": "09a2884937616853dbd4e2bec53977c16fe6f2cb",
                 "shasum": ""
             },
             "require": {
@@ -653,8 +653,8 @@
             "extra": {
                 "class": [
                     "Maho\\ComposerPlugin\\AutoloadPlugin",
-                    "Maho\\ComposerPlugin\\FileCopyPlugin",
-                    "Maho\\ComposerPlugin\\ModmanPlugin"
+                    "Maho\\ComposerPlugin\\ModmanPlugin",
+                    "Maho\\ComposerPlugin\\FileCopyPlugin"
                 ]
             },
             "autoload": {
@@ -669,9 +669,9 @@
             "description": "Extension for Composer to copy assets and enable autoloading for Maho projects.",
             "support": {
                 "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
-                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v3.0.0"
+                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v3.1.0"
             },
-            "time": "2025-01-12T22:09:45+00:00"
+            "time": "2025-05-08T19:02:53+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
@@ -2327,16 +2327,16 @@
         },
         {
             "name": "symfony/var-exporter",
-            "version": "v7.2.5",
+            "version": "v7.2.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/var-exporter.git",
-                "reference": "c37b301818bd7288715d40de634f05781b686ace"
+                "reference": "422b8de94c738830a1e071f59ad14d67417d7007"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/var-exporter/zipball/c37b301818bd7288715d40de634f05781b686ace",
-                "reference": "c37b301818bd7288715d40de634f05781b686ace",
+                "url": "https://api.github.com/repos/symfony/var-exporter/zipball/422b8de94c738830a1e071f59ad14d67417d7007",
+                "reference": "422b8de94c738830a1e071f59ad14d67417d7007",
                 "shasum": ""
             },
             "require": {
@@ -2383,7 +2383,7 @@
                 "serialize"
             ],
             "support": {
-                "source": "https://github.com/symfony/var-exporter/tree/v7.2.5"
+                "source": "https://github.com/symfony/var-exporter/tree/v7.2.6"
             },
             "funding": [
                 {
@@ -2399,7 +2399,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-03-13T12:21:46+00:00"
+            "time": "2025-05-02T08:36:00+00:00"
         }
     ],
     "packages-dev": [
