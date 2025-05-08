@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog category controller
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controller_Action
 {
     /**
