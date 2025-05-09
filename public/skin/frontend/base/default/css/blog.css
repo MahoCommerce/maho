@@ -1,0 +1,12 @@
+.blog-index-view h1 {
+    margin-bottom: 0;
+}
+
+.blog-index-view .blog_post_date {
+    margin-bottom: 1rem;
+}
+
+.blog_post_date {
+    font-style: italic;
+    font-size: 0.75rem;
+}
