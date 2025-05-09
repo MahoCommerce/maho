@@ -767,9 +767,7 @@ function copyText(event) {
  * Clear <div id="messages"></div>
  */
 function clearMessagesDiv(div = null) {
-    if (div ??= document.getElementById('messages')) {
-        div.textContent = '';
-    }
+    setMessagesDivHtml('', div);
 }
 
 /**
@@ -779,9 +777,17 @@ function clearMessagesDiv(div = null) {
  * @param {string} type - one of `success|error|notice`
  */
 function setMessagesDiv(message, type = 'success', div = null) {
+    setMessagesDivHtml(`<ul class="messages"><li class="${type}-msg"><ul><li><span>${message}</span></li></ul></li></ul>`, div);
+}
+
+/**
+ * Raw function to update <div id="messages"></div>
+ *
+ * @param {string} html
+*/
+function setMessagesDivHtml(html, div = null) {
     if (div ??= document.getElementById('messages')) {
-        message = escapeHtml(message);
-        div.innerHTML = `<ul class="messages"><li class="${type}-msg"><ul><li><span>${message}</span></li></ul></li></ul>`;
+        div.innerHTML = html;
     }
 }
 

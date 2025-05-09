@@ -10,6 +10,11 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+/**
+ * Catalog category controller
+ *
+ * @package    Mage_Adminhtml
+ */
 class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -139,13 +144,11 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         if ($this->getRequest()->isAjax()) {
             $this->_renderTitles();
 
-            $messagesCollection = $this->getLayout()->getMessagesBlock()->getMessageCollection();
             $eventResponse = new Varien_Object([
                 'title' => implode(' / ', array_reverse($this->_titles)),
                 'content' => $this->getLayout()->getBlock('category.edit')->getFormHtml(),
-                'messages' => $messagesCollection->getItems(),
+                'messages' => $this->getLayout()->getMessagesBlock()->getGroupedHtml(),
             ]);
-            $messagesCollection->clear();
 
             Mage::dispatchEvent('category_prepare_ajax_response', [
                 'response' => $eventResponse,
