@@ -2105,7 +2105,6 @@ textarea {
  * Inputs
  */
 .input-text {
-  appearance: none;
   border-radius: 2px;
   border: 1px solid var(--maho-color-border-dark);
   background: var(--maho-color-background);
@@ -2121,6 +2120,10 @@ textarea {
 
 .input-text.validation-failed:focus {
   outline-color: var(--maho-color-error);
+}
+
+input[type=text] {
+  appearance: none;
 }
 
 input[type=email],
