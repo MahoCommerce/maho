@@ -29,7 +29,7 @@ class Mage_Core_Model_Cache
      * Cache frontend API
      * @phpstan-ignore property.internalClass
      */
-    protected \Symfony\Component\Cache\Adapter\AbstractTagAwareAdapter $_frontend;
+    protected \Symfony\Component\Cache\Adapter\AbstractTagAwareAdapter $cacheAdapter;
 
     /**
      * Default cache backend type
@@ -83,7 +83,7 @@ class Mage_Core_Model_Cache
         $backend    = $this->_getBackendOptions($options);
         $frontend   = $this->_getFrontendOptions($options);
 
-        $this->_frontend = match ($backend['type']) {
+        $this->cacheAdapter = match ($backend['type']) {
             'redis' => new \Symfony\Component\Cache\Adapter\RedisTagAwareAdapter(
                 \Symfony\Component\Cache\Adapter\RedisTagAwareAdapter::createConnection($backend['options']['dsn']),
                 "maho-{$this->_idPrefix}",
@@ -172,9 +172,9 @@ class Mage_Core_Model_Cache
     }
 
     // @phpstan-ignore return.internalClass
-    public function getFrontend(): \Symfony\Component\Cache\Adapter\AbstractTagAwareAdapter
+    public function getCacheAdapter(): \Symfony\Component\Cache\Adapter\AbstractTagAwareAdapter
     {
-        return $this->_frontend;
+        return $this->cacheAdapter;
     }
 
     /**
@@ -182,7 +182,7 @@ class Mage_Core_Model_Cache
      */
     public function load(string $id): mixed
     {
-        $item = $this->getFrontend()->getItem($this->_id($id)); // @phpstan-ignore method.internalClass
+        $item = $this->getCacheAdapter()->getItem($this->_id($id)); // @phpstan-ignore method.internalClass
         if ($item->isHit()) {
             return $item->get();
         }
@@ -195,7 +195,7 @@ class Mage_Core_Model_Cache
             return true;
         }
 
-        $cacheItem = $this->_frontend->getItem($this->_id($id)) // @phpstan-ignore method.internalClass
+        $cacheItem = $this->cacheAdapter->getItem($this->_id($id)) // @phpstan-ignore method.internalClass
             ->set($data)
             ->tag($this->_tags($tags));
 
@@ -203,7 +203,7 @@ class Mage_Core_Model_Cache
             $cacheItem->expiresAfter($lifeTime);
         }
 
-        return $this->_frontend->save($cacheItem); // @phpstan-ignore method.internalClass
+        return $this->cacheAdapter->save($cacheItem); // @phpstan-ignore method.internalClass
     }
 
     /**
@@ -211,7 +211,7 @@ class Mage_Core_Model_Cache
      */
     public function test(string $id): bool
     {
-        return $this->_frontend->getItem($this->_id($id))->isHit(); // @phpstan-ignore method.internalClass
+        return $this->cacheAdapter->getItem($this->_id($id))->isHit(); // @phpstan-ignore method.internalClass
     }
 
     /**
@@ -219,7 +219,7 @@ class Mage_Core_Model_Cache
      */
     public function remove(string $id): bool
     {
-        return $this->_frontend->deleteItem($this->_id($id)); // @phpstan-ignore method.internalClass
+        return $this->cacheAdapter->deleteItem($this->_id($id)); // @phpstan-ignore method.internalClass
     }
 
     /**
@@ -240,7 +240,7 @@ class Mage_Core_Model_Cache
         }
 
         if (is_array($tags) && count($tags) > 0) {
-            return $this->_frontend->invalidateTags($this->_tags($tags)); // @phpstan-ignore method.internalClass
+            return $this->cacheAdapter->invalidateTags($this->_tags($tags)); // @phpstan-ignore method.internalClass
         }
 
         return $this->flush();
@@ -248,15 +248,15 @@ class Mage_Core_Model_Cache
 
     public function prune(): bool
     {
-        if ($this->_frontend instanceof \Symfony\Component\Cache\PruneableInterface) {
-            return $this->_frontend->prune();
+        if ($this->cacheAdapter instanceof \Symfony\Component\Cache\PruneableInterface) {
+            return $this->cacheAdapter->prune();
         }
         return true;
     }
 
     public function flush(): bool
     {
-        return $this->_frontend->clear(); // @phpstan-ignore method.internalClass
+        return $this->cacheAdapter->clear(); // @phpstan-ignore method.internalClass
     }
 
     /**
