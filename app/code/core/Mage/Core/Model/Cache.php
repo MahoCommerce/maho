@@ -127,23 +127,6 @@ class Mage_Core_Model_Cache
     }
 
     /**
-     * Get options for database backend type
-     *
-     * @return array
-     */
-    protected function getDbAdapterOptions(array $options = [])
-    {
-        if (isset($options['connection'])) {
-            $this->_dbConnection = $options['connection'];
-        }
-
-        $options['adapter_callback'] = [$this, 'getDbAdapter'];
-        $options['data_table'] = Mage::getSingleton('core/resource')->getTableName('core/cache');
-        $options['tags_table'] = Mage::getSingleton('core/resource')->getTableName('core/cache_tag');
-        return $options;
-    }
-
-    /**
      * Get options of cache frontend (options of symfony/cache)
      *
      * @return  array
@@ -157,10 +140,6 @@ class Mage_Core_Model_Cache
         if (!array_key_exists('lifetime', $options)) {
             $options['lifetime'] = $cacheOptions['lifetime'] ?? self::DEFAULT_LIFETIME;
         }
-        if (!array_key_exists('automatic_cleaning_factor', $options)) {
-            $options['automatic_cleaning_factor'] = 0;
-        }
-        $options['cache_id_prefix'] = $this->_idPrefix;
         return $options;
     }
 
