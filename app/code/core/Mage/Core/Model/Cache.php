@@ -31,10 +31,7 @@ class Mage_Core_Model_Cache
      */
     protected \Symfony\Component\Cache\Adapter\AbstractTagAwareAdapter $cacheAdapter;
 
-    /**
-     * Default cache backend type
-     */
-    protected string $_defaultBackend = 'file';
+    protected string $defaultAdapter = 'file';
 
     /**
      * Default options for default backend
@@ -101,7 +98,7 @@ class Mage_Core_Model_Cache
 
     protected function _getBackendOptions(array $cacheOptions): array
     {
-        $type = strtolower($cacheOptions['backend'] ?? $this->_defaultBackend);
+        $type = strtolower($cacheOptions['backend'] ?? $this->defaultAdapter);
         if (isset($cacheOptions['backend_options']) && is_array($cacheOptions['backend_options'])) {
             $options = $cacheOptions['backend_options'];
         } else {
@@ -114,7 +111,7 @@ class Mage_Core_Model_Cache
         }
 
         if (!$backendType) {
-            $backendType = $this->_defaultBackend;
+            $backendType = $this->defaultAdapter;
             foreach ($this->_defaultBackendOptions as $option => $value) {
                 if (!array_key_exists($option, $options)) {
                     $options[$option] = $value;
