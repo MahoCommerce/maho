@@ -72,9 +72,7 @@ varienForm.prototype = {
         }
         var response = transport.responseText.evalJSON();
         if(response.error){
-            if($('messages')){
-                $('messages').innerHTML = response.message;
-            }
+            setMessagesDivHtml(response.message);
         }
         else{
             this._submit();
