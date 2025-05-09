@@ -55,13 +55,6 @@ class Mage_Core_Model_Cache
     protected $_allowedCacheOptions;
 
     /**
-     * DB connection
-     *
-     * @var string|null
-     */
-    protected $_dbConnection = 'core_write';
-
-    /**
      * Class constructor. Initialize cache instance based on options
      */
     public function __construct(array $options = [])
