@@ -11,10 +11,6 @@
  */
 
 /**
- * OAuth abstract authorization block
- *
- * @package    Mage_Oauth
- *
  * @method string getToken()
  * @method Mage_Oauth_Block_AuthorizeBaseAbstract setToken(string $token)
  * @method bool getIsSimple()

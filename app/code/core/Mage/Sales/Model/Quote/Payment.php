@@ -13,8 +13,6 @@
 /**
  * Quote payment information
  *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Quote_Payment _getResource()
  * @method Mage_Sales_Model_Resource_Quote_Payment getResource()
  * @method Mage_Sales_Model_Resource_Quote_Payment_Collection getCollection()

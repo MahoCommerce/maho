@@ -11,10 +11,6 @@
  */
 
 /**
- * Base html block
- *
- * @package    Mage_Core
- *
  * @method $this setTagName(string $value)
  * @method $this setTagParams(array $value)
  */

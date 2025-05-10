@@ -10,9 +10,6 @@
  */
 
 /**
- * Sales Order Email order items
- *
- * @package    Mage_Sales
  * @method Mage_Sales_Model_Order getOrder()
  */
 class Mage_Sales_Block_Order_Email_Items extends Mage_Sales_Block_Items_Abstract

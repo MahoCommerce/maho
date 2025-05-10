@@ -11,10 +11,6 @@
  */
 
 /**
- * Sales Quote Item Model
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Quote_Item _getResource()
  * @method Mage_Sales_Model_Resource_Quote_Item getResource()
  * @method Mage_Sales_Model_Resource_Quote_Item_Collection getCollection()

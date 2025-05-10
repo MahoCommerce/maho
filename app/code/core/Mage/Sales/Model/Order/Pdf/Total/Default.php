@@ -10,10 +10,6 @@
  */
 
 /**
- * Sales Order Total PDF model
- *
- * @package    Mage_Sales
- *
  * @method string getAmountPrefix()
  * @method bool getDisplayZero()
  * @method int getFontSize()

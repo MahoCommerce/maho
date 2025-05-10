@@ -20,8 +20,6 @@
  *  - custom_price - new price that can be declared by user and recalculated during calculation process
  *  - original_custom_price - original defined value of custom price without any conversion
  *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Quote_Address getAddress()
  * @method $this setAddress(Mage_Sales_Model_Quote_Address $value)
  *

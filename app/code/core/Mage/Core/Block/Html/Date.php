@@ -11,10 +11,6 @@
  */
 
 /**
- * HTML select element block
- *
- * @package    Mage_Core
- *
  * @method string getClass()
  * @method $this setClass(string $value)
  * @method string getExtraParams()

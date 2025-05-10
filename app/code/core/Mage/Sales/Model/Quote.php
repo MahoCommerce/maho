@@ -20,8 +20,6 @@
  *  sales_quote_delete_before
  *  sales_quote_delete_after
  *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Quote _getResource()
  * @method Mage_Sales_Model_Resource_Quote getResource()
  *

@@ -13,8 +13,6 @@
  * Service model for managing statuses information. Statuses are just records with code, message and any
  * additional data. The model helps to keep track and manipulate statuses, that different modules want to set
  * to owner object of this model.
- *
- * @package    Mage_Sales
  */
 class Mage_Sales_Model_Status_List
 {

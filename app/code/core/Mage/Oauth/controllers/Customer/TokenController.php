@@ -14,8 +14,6 @@
  * oAuth My Applications controller
  *
  * Tab "My Applications" in the Customer Account
- *
- * @package    Mage_Oauth
  */
 class Mage_Oauth_Customer_TokenController extends Mage_Core_Controller_Front_Action
 {

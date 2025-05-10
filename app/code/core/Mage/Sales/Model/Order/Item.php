@@ -11,10 +11,6 @@
  */
 
 /**
- * Class Mage_Sales_Model_Order_Item
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Order_Item _getResource()
  * @method Mage_Sales_Model_Resource_Order_Item getResource()
  * @method Mage_Sales_Model_Resource_Order_Item_Collection getCollection()

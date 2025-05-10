@@ -10,10 +10,8 @@
  */
 
 /**
- * Block, that can get data from layout or from registry.
+ * Block that can get data from layout or from registry.
  * Can compare its data values by specified keys
- *
- * @package    Mage_Core
  */
 class Mage_Core_Block_Template_Facade extends Mage_Core_Block_Template
 {
