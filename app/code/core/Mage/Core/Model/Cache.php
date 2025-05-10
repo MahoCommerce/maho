@@ -58,7 +58,7 @@ class Mage_Core_Model_Cache
             $this->_idPrefix = substr(md5(Mage::getConfig()->getOptions()->getEtcDir()), 0, 3) . '_';
         }
 
-        $cacheAdapterOptions= $this->getCacheAdapterOptions($options);
+        $cacheAdapterOptions = $this->getCacheAdapterOptions($options);
         $this->cacheAdapter = match ($cacheAdapterOptions['type']) {
             'redis' => new \Symfony\Component\Cache\Adapter\RedisTagAwareAdapter(
                 \Symfony\Component\Cache\Adapter\RedisTagAwareAdapter::createConnection($cacheAdapterOptions['options']['dsn']),
@@ -101,7 +101,7 @@ class Mage_Core_Model_Cache
         return [
             'lifetime' => $cacheOptions['lifetime'] ?? self::DEFAULT_LIFETIME,
             'type' => $backendType,
-            'options' => $options
+            'options' => $options,
         ];
     }
 
