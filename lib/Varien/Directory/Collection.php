@@ -41,8 +41,6 @@ use Varien_Directory_IFactory as IFactory;
  * print $filesObj[0]->fgets();
  * print $filesObj[0]->fgets();
  * ```
- *
- * @package    Varien_Directory
  */
 class Varien_Directory_Collection extends Varien_Data_Collection implements IFactory
 {

@@ -11,10 +11,6 @@
  */
 
 /**
- * Eav Form Type Model
- *
- * @package    Mage_Eav
- *
  * @method Mage_Eav_Model_Resource_Form_Type _getResource()
  * @method Mage_Eav_Model_Resource_Form_Type getResource()
  * @method Mage_Eav_Model_Resource_Form_Type_Collection getCollection()

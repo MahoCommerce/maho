@@ -11,10 +11,6 @@
  */
 
 /**
- * Form select element
- *
- * @package    Varien_Data
- *
  * @method array<int, string>|string getOptions()
  */
 class Varien_Data_Form_Element_Checkboxes extends Varien_Data_Form_Element_Abstract

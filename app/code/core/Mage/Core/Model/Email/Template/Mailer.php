@@ -11,10 +11,6 @@
  */
 
 /**
- * Email Template Mailer Model
- *
- * @package    Mage_Core
- *
  * @method $this setQueue(Mage_Core_Model_Abstract $value)
  * @method Mage_Core_Model_Email_Queue getQueue()
  */

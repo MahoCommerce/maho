@@ -11,10 +11,6 @@
  */
 
 /**
- * Billing Agreement abstaract class
- *
- * @package    Mage_Payment
- *
  * @method string getMethodCode()
  * @method string getReferenceId()
  * @method int getStoreId()

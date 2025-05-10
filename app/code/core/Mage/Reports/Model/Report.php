@@ -10,10 +10,6 @@
  */
 
 /**
- * Class Mage_Reports_Model_Report
- *
- * @package    Mage_Reports
- *
  * @method int getPageSize()
  * @method $this setPageSize(int $value)
  * @method array getStoreIds()

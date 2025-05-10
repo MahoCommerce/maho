@@ -9,7 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Eav
- */
 interface Mage_Eav_Model_Entity_Attribute_Interface {}

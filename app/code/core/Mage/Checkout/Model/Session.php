@@ -11,8 +11,6 @@
  */
 
 /**
- * @package    Mage_Checkout
- *
  * @method $this setAdditionalMessages(array|null $value)
  *
  * @method string getCartCouponCode()

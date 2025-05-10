@@ -11,10 +11,6 @@
  */
 
 /**
- * Form select element
- *
- * @package    Varien_Data
- *
  * @method $this setSize(int $value)
  * @method bool getCanBeEmpty()
  * @method string getSelectAll()

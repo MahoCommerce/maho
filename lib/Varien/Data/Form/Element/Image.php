@@ -11,10 +11,6 @@
  */
 
 /**
- * Category form input image element
- *
- * @package    Varien_Data
- *
  * @method bool getDisabled()
  */
 class Varien_Data_Form_Element_Image extends Varien_Data_Form_Element_Abstract

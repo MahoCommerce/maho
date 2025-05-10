@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Payment
- */
 class Mage_Payment_Block_Form_Cc extends Mage_Payment_Block_Form
 {
     #[\Override]

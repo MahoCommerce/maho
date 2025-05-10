@@ -14,8 +14,6 @@
  * Configurable product type implementation
  *
  * This type builds in product attributes and existing simple products
- *
- * @package    Mage_Catalog
  */
 class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Product_Type_Abstract
 {

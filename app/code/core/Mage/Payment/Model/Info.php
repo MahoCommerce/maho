@@ -11,10 +11,6 @@
  */
 
 /**
- * Payment information model
- *
- * @package    Mage_Payment
- *
  * @method Mage_Sales_Model_Order getOrder()
  * @method Mage_Sales_Model_Quote getQuote()
  *

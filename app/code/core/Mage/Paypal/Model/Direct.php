@@ -10,12 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- *
- * PayPal Direct Module
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Model_Direct extends Mage_Payment_Model_Method_Cc
 {
     protected $_code  = Mage_Paypal_Model_Config::METHOD_WPP_DIRECT;

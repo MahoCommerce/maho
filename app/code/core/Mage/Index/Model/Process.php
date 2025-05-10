@@ -11,8 +11,6 @@
  */
 
 /**
- * @package    Mage_Index
- *
  * @method Mage_Index_Model_Resource_Process _getResource()
  * @method Mage_Index_Model_Resource_Process getResource()
  * @method string getIndexCode()

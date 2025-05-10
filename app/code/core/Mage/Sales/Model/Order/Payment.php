@@ -11,10 +11,6 @@
  */
 
 /**
- * Order payment information
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Order_Payment _getResource()
  * @method Mage_Sales_Model_Resource_Order_Payment getResource()
  * @method Mage_Sales_Model_Resource_Order_Payment_Collection getCollection()

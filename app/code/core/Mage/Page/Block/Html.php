@@ -11,10 +11,6 @@
  */
 
 /**
- * Html page block
- *
- * @package    Mage_Page
- *
  * @method string getLayoutCode()
  * @method bool getIsHandle()
  * @method $this setBodyClass(string $value)

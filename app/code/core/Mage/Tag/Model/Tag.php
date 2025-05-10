@@ -11,10 +11,6 @@
  */
 
 /**
- * Tag model
- *
- * @package    Mage_Tag
- *
  * @method Mage_Tag_Model_Resource_Tag _getResource()
  * @method Mage_Tag_Model_Resource_Tag getResource()
  * @method Mage_Tag_Model_Resource_Tag_Collection getCollection()

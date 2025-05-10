@@ -17,8 +17,6 @@
  * way to the query.
  * Most used properties and methods are defined in interface. Specific things for concrete DB adapter can be
  * transmitted using 'additional' property (Varien_Object) as a container.
- *
- * @package    Varien_Db
  */
 class Varien_Db_Statement_Parameter
 {

@@ -11,10 +11,6 @@
  */
 
 /**
- * Rules collection
- *
- * @package    Mage_Admin
- *
  * @method     Mage_Admin_Model_Rules[] getItems()
  */
 class Mage_Admin_Model_Resource_Rules_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract

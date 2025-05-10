@@ -29,8 +29,6 @@ use Symfony\Component\Mime\Address;
  * );
  * $emailTemplate->send('some@domain.com', 'Name Of User', $variables);
  *
- * @package    Mage_Adminhtml
- *
  * @method Mage_Core_Model_Resource_Email_Template _getResource()
  * @method Mage_Core_Model_Resource_Email_Template getResource()
  * @method string getTemplateCode()

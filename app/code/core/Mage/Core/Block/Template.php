@@ -11,10 +11,6 @@
  */
 
 /**
- * Base html block
- *
- * @package    Mage_Core
- *
  * @method $this setContentHeading(string $value)
  * @method $this setDestElementId(string $value)
  * @method $this setFormAction(string $value)

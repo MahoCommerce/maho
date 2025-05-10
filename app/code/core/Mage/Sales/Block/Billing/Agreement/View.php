@@ -11,10 +11,6 @@
  */
 
 /**
- * Customer account billing agreement view block
- *
- * @package    Mage_Sales
- *
  * @method $this setAgreementCreatedAt(string $value)
  * @method $this setAgreementUpdatedAt(string $value)
  * @method $this setAgreementStatus(string $value)

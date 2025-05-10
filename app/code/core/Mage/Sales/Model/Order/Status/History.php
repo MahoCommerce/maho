@@ -13,8 +13,6 @@
 /**
  * Order status history comments
  *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Order_Status_History _getResource()
  * @method Mage_Sales_Model_Resource_Order_Status_History getResource()
  * @method string getComment()

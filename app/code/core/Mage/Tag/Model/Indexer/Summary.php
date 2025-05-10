@@ -11,10 +11,6 @@
  */
 
 /**
- * Tag Indexer Model
- *
- * @package    Mage_Tag
- *
  * @method Mage_Tag_Model_Resource_Indexer_Summary _getResource()
  * @method Mage_Tag_Model_Resource_Indexer_Summary getResource()
  * @method int getTagId()

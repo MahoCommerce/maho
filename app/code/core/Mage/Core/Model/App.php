@@ -14,8 +14,6 @@
  * Application model
  *
  * Application should have: areas, store, locale, translator, design package
- *
- * @package    Mage_Core
  */
 class Mage_Core_Model_App
 {

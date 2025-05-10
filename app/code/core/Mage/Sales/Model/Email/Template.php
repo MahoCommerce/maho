@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Sales
- */
 class Mage_Sales_Model_Email_Template extends Mage_Core_Model_Email_Template
 {
     /**

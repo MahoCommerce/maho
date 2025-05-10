@@ -11,10 +11,6 @@
  */
 
 /**
- * Core Website model
- *
- * @package    Mage_Core
- *
  * @method Mage_Core_Model_Resource_Website _getResource()
  * @method Mage_Core_Model_Resource_Website getResource()
  * @method Mage_Core_Model_Resource_Website_Collection getCollection()

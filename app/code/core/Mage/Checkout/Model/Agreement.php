@@ -11,8 +11,6 @@
  */
 
 /**
- * @package    Mage_Checkout
- *
  * @method Mage_Checkout_Model_Resource_Agreement _getResource()
  * @method Mage_Checkout_Model_Resource_Agreement getResource()
  * @method Mage_Checkout_Model_Resource_Agreement_Collection getCollection()

@@ -11,10 +11,6 @@
  */
 
 /**
- * Sales order address model
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Order_Address _getResource()
  * @method Mage_Sales_Model_Resource_Order_Address getResource()
  * @method Mage_Sales_Model_Resource_Order_Address_Collection getCollection()

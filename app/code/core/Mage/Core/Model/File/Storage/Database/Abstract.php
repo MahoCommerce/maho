@@ -11,10 +11,6 @@
  */
 
 /**
- * Abstract database storage model class
- *
- * @package    Mage_Core
- *
  * @method string getConnectionName()
  */
 abstract class Mage_Core_Model_File_Storage_Database_Abstract extends Mage_Core_Model_File_Storage_Abstract

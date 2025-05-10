@@ -11,10 +11,6 @@
  */
 
 /**
- * Admin Rules Model
- *
- * @package    Mage_Admin
- *
  * @method Mage_Admin_Model_Resource_Rules _getResource()
  * @method Mage_Admin_Model_Resource_Rules getResource()
  * @method Mage_Admin_Model_Resource_Rules_Collection getResourceCollection()

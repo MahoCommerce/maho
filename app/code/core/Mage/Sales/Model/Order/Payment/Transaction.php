@@ -15,8 +15,6 @@
  * Tracks transaction history, allows to build transactions hierarchy
  * By default transactions are saved as closed.
  *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Order_Payment_Transaction _getResource()
  * @method Mage_Sales_Model_Resource_Order_Payment_Transaction getResource()
  * @method Mage_Sales_Model_Resource_Order_Payment_Transaction_Collection getCollection()()

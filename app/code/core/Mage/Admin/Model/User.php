@@ -11,10 +11,6 @@
  */
 
 /**
- * Admin user model
- *
- * @package    Mage_Admin
- *
  * @method Mage_Admin_Model_Resource_User _getResource()
  * @method Mage_Admin_Model_Resource_User getResource()
  * @method Mage_Admin_Model_Resource_User_Collection getResourceCollection()

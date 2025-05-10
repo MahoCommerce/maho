@@ -11,10 +11,6 @@
  */
 
 /**
- * Catalog product option file type
- *
- * @package    Mage_Catalog
- *
  * @method array getCustomOptionUrlParams()
  */
 class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Product_Option_Type_Default

@@ -11,10 +11,6 @@
  */
 
 /**
- * Catalog Configurable Product Attribute Model
- *
- * @package    Mage_Catalog
- *
  * @method Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute _getResource()
  * @method Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute getResource()
  * @method Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute_Collection getCollection()

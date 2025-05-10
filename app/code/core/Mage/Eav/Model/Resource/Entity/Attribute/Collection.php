@@ -11,12 +11,7 @@
  */
 
 /**
- * EAV attribute resource collection
- *
- * @package    Mage_Eav
- *
  * @method Mage_Eav_Model_Resource_Entity_Attribute getResource()
- *
  * @method Mage_Eav_Model_Entity_Attribute getItemById(int $value)
  * @method Mage_Eav_Model_Entity_Attribute[] getItems()
  * @method Mage_Eav_Model_Entity_Attribute getFirstItem()

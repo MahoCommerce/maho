@@ -13,8 +13,6 @@
 /**
  * A generic wrapper block that renders its children and supports a few parameters of the wrapper HTML-element
  *
- * @package    Mage_Page
- *
  * @method bool hasElementClass()
  * @method string getElementClass()
  * @method bool hasElementId()

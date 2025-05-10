@@ -12,12 +12,6 @@
 
 use phpseclib3\Net\SFTP;
 
-/**
- * Sftp client interface
- *
- * @package    Varien_Io
- * @link        http://www.php.net/manual/en/function.ssh2-connect.php
- */
 class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
 {
     public const REMOTE_TIMEOUT = 10;

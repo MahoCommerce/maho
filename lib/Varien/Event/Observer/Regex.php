@@ -12,9 +12,6 @@
 
 /**
  * Event regex observer object
- *
- * @package    Varien_Event
- *
  * @method string getEventRegex()
  */
 class Varien_Event_Observer_Regex extends Varien_Event_Observer

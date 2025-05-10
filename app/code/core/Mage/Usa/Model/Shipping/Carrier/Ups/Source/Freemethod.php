@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Usa
- */
 class Mage_Usa_Model_Shipping_Carrier_Ups_Source_Freemethod extends Mage_Usa_Model_Shipping_Carrier_Ups_Source_Method
 {
     #[\Override]

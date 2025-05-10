@@ -11,9 +11,6 @@
 use lbuchs\WebAuthn\WebAuthn;
 use lbuchs\WebAuthn\Attestation\AuthenticatorData;
 
-/**
- * @package    Mage_Adminhtml
- */
 class Mage_Admin_Helper_Auth extends Mage_Core_Helper_Abstract
 {
     public function getWebAuthn(): WebAuthn

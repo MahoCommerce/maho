@@ -14,8 +14,6 @@
  * Nominal items total
  * Collects only items segregated by isNominal property
  * Aggregates row totals per item
- *
- * @package    Mage_Checkout
  */
 class Mage_Sales_Model_Quote_Address_Total_Nominal extends Mage_Sales_Model_Quote_Address_Total_Abstract
 {

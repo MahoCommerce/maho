@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Tag
- */
 class Mage_Tag_Block_Product_List extends Mage_Core_Block_Template
 {
     protected $_collection;

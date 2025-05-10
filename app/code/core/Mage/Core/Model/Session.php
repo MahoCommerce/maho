@@ -10,10 +10,6 @@
  */
 
 /**
- * Core session model
- *
- * @package    Mage_Core
- *
  * @method null|bool getCookieShouldBeReceived()
  * @method $this setCookieShouldBeReceived(bool $value)
  * @method $this unsCookieShouldBeReceived()

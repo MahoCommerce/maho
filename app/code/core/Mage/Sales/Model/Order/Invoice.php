@@ -11,8 +11,6 @@
  */
 
 /**
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Order_Invoice _getResource()
  * @method Mage_Sales_Model_Resource_Order_Invoice getResource()
  * @method string getBackUrl()

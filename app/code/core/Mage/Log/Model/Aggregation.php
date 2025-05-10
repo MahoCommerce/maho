@@ -11,10 +11,6 @@
  */
 
 /**
- * Log Aggregation Model
- *
- * @package    Mage_Log
- *
  * @method Mage_Log_Model_Resource_Aggregation getResource()
  * @method Mage_Log_Model_Resource_Aggregation _getResource()
  */

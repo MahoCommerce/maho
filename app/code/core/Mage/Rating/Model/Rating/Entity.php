@@ -11,10 +11,6 @@
  */
 
 /**
- * Ratings entity model
- *
- * @package    Mage_Rating
- *
  * @method Mage_Rating_Model_Resource_Rating_Entity _getResource()
  * @method Mage_Rating_Model_Resource_Rating_Entity getResource()
  * @method string getEntityCode()

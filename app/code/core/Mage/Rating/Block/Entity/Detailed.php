@@ -11,10 +11,6 @@
  */
 
 /**
- * Entity rating block
- *
- * @package    Mage_Rating
- *
  * @method $this setEntityId(int $value)
  */
 class Mage_Rating_Block_Entity_Detailed extends Mage_Core_Block_Template

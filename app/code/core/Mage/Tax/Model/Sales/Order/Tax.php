@@ -11,8 +11,6 @@
  */
 
 /**
- * @package    Mage_Tax
- *
  * @method Mage_Tax_Model_Resource_Sales_Order_Tax _getResource()
  * @method Mage_Tax_Model_Resource_Sales_Order_Tax getResource()
  * @method Mage_Tax_Model_Resource_Sales_Order_Tax_Collection getCollection()

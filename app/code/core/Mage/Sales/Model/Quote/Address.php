@@ -11,10 +11,6 @@
  */
 
 /**
- * Sales Quote address model
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Quote_Address _getResource()
  * @method Mage_Sales_Model_Resource_Quote_Address getResource()
  * @method Mage_Sales_Model_Resource_Quote_Address_Collection getCollection()()

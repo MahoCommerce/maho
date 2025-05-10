@@ -9,9 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Tax
- */
 class Mage_Tax_Model_Config_Price_Include extends Mage_Core_Model_Config_Data
 {
     public function afterSave()

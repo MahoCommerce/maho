@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Paygate
- */
 class Mage_Paygate_Model_Authorizenet_Cards
 {
     public const CARDS_NAMESPACE = 'authorize_cards';

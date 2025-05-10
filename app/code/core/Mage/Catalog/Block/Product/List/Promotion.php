@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Block_Product_List_Promotion extends Mage_Catalog_Block_Product_List
 {
     /**

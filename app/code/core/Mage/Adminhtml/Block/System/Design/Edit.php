@@ -11,9 +11,6 @@
  */
 
 
-/**
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_System_Design_Edit extends Mage_Adminhtml_Block_Widget
 {
     public function __construct()

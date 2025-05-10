@@ -12,7 +12,6 @@
 /**
  * Sales order view tax block
  *
- * @package    Mage_Sales
  * @deprecated after 1.3.2.2
  */
 class Mage_Sales_Block_Order_Tax extends Mage_Core_Block_Template

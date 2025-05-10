@@ -11,10 +11,6 @@
  */
 
 /**
- * Reports Recently Viewed Products Block
- *
- * @package    Mage_Reports
- *
  * @method $this setRecentlyViewedProducts(Mage_Reports_Model_Resource_Product_Index_Collection_Abstract $value)
  * @method Mage_Reports_Model_Resource_Product_Index_Collection_Abstract getRecentlyViewedProducts()
  */
