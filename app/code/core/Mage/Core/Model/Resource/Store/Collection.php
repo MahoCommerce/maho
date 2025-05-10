@@ -189,6 +189,10 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
         $data = [];
         $needsRefresh = false;
 
+        if ($globalConfigCache !== false) {
+            $data = $globalConfigCache;
+        }
+
         /** @var Mage_Core_Model_Store $store */
         foreach ($this as $store) {
             $code = $store->getCode();
@@ -205,7 +209,7 @@ class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource
         }
 
         if ($needsRefresh) {
-            Mage::app()->saveCache(serialize($data), $cacheId, [
+            Mage::app()->saveCache($data, $cacheId, [
                 Mage_Core_Model_Store::CACHE_TAG,
                 Mage_Core_Model_Config::CACHE_TAG,
             ]);
