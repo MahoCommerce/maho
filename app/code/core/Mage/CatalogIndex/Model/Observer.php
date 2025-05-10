@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Event observer and indexer running application
- *
- * @package    Mage_CatalogIndex
- */
 class Mage_CatalogIndex_Model_Observer extends Mage_Core_Model_Abstract
 {
     protected $_parentProductIds = [];

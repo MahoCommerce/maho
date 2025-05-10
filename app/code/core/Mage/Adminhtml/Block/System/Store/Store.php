@@ -11,11 +11,6 @@
  */
 
 
-/**
- * Adminhtml store content block
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_System_Store_Store extends Mage_Adminhtml_Block_Widget_Container
 {
     public function __construct()

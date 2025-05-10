@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Order entity resource model
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Model_Entity_Order extends Mage_Eav_Model_Entity_Abstract
 {
     public function __construct()

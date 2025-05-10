@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Entity/Attribute/Model - entity abstract
- *
- * @package    Mage_Eav
- */
 abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_Abstract implements Mage_Eav_Model_Entity_Interface
 {
     /**
@@ -392,7 +387,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
             $attributeId = $attribute->getAttributeId();
         }
 
-        if (!$attribute->getAttributeCode()) {
+        if (isset($attributeCode) && !$attribute->getAttributeCode()) {
             $attribute->setAttributeCode($attributeCode);
         }
         if (!$attribute->getAttributeModel()) {
@@ -591,6 +586,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     public function walkAttributes($partMethod, array $args = [])
     {
         $methodArr = explode('/', $partMethod);
+        $part = '';
         switch (count($methodArr)) {
             case 1:
                 $part   = 'attribute';
@@ -626,7 +622,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
                     break;
             }
 
-            if (!$this->_isCallableAttributeInstance($instance, $method, $args)) {
+            if (!isset($instance, $method) || !$this->_isCallableAttributeInstance($instance, $method, $args)) {
                 continue;
             }
 

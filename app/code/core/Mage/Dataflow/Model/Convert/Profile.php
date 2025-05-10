@@ -9,9 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Convert profile
- *
- * @package    Mage_Dataflow
- */
 class Mage_Dataflow_Model_Convert_Profile extends Mage_Dataflow_Model_Convert_Profile_Abstract {}

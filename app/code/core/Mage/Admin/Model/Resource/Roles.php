@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Admin roles resource model
- *
- * @package    Mage_Admin
- */
 class Mage_Admin_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**

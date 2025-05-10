@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Wysiwyg Images model
- *
- * @package    Mage_Cms
- */
 class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
 {
     public const DIRECTORY_NAME_REGEXP = '/^[a-z0-9\-\_]+$/si';

@@ -11,11 +11,6 @@
  */
 
 
-/**
- * Adminhtml shipment packaging
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Sales_Order_Shipment_Packaging extends Mage_Adminhtml_Block_Template
 {
     /**

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Class Mage_ConfigurableSwatches_Helper_Productlist
- *
- * @package    Mage_ConfigurableSwatches
- */
 class Mage_ConfigurableSwatches_Helper_Productlist extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Mage_ConfigurableSwatches';

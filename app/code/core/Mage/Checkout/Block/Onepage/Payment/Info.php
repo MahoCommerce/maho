@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Multishipping checkout payment information data
- *
- * @package    Mage_Checkout
- */
 class Mage_Checkout_Block_Onepage_Payment_Info extends Mage_Payment_Block_Info_Container
 {
     /**

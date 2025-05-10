@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Xml Rpc webservice controller
- *
- * @package    Mage_Api
- */
 class Mage_Api_XmlrpcController extends Mage_Api_Controller_Action
 {
     public function indexAction()

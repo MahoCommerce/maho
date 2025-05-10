@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml refunded report page content block
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Report_Sales_Refunded extends Mage_Adminhtml_Block_Widget_Grid_Container
 {
     public function __construct()

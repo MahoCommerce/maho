@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Checkout workflow helper
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Helper_Checkout extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Mage_Paypal';

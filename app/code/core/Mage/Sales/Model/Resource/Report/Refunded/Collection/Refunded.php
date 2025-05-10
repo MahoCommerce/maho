@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Sales report refunded collection
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Model_Resource_Report_Refunded_Collection_Refunded extends Mage_Sales_Model_Resource_Report_Refunded_Collection_Order
 {
     /**

@@ -11,11 +11,6 @@
  */
 
 
-/**
- * Admin tax rate save toolbar
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Tax_Rate_Toolbar_Save extends Mage_Adminhtml_Block_Template
 {
     /**

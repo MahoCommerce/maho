@@ -8,11 +8,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Configuration source model for Wysiwyg skin
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Model_System_Config_Source_Cms_Wysiwyg_Skin
 {
     public function toOptionArray()

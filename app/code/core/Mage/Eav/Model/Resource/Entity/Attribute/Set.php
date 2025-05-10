@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Eav attribute set resource model
- *
- * @package    Mage_Eav
- */
 class Mage_Eav_Model_Resource_Entity_Attribute_Set extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
@@ -133,7 +128,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Set extends Mage_Core_Model_Resou
      * Retrurn default attribute group id for attribute set id
      *
      * @param int $setId
-     * @return int|null
+     * @return string
      */
     public function getDefaultGroupId($setId)
     {

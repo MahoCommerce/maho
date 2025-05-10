@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Base html block
- *
- * @package    Mage_Core
- */
 class Mage_Core_Block_Text_List_Link extends Mage_Core_Block_Text
 {
     /**

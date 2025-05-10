@@ -9,9 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Webservices default server handler
- *
- * @package    Mage_Api
- */
 class Mage_Api_Model_Server_Handler extends Mage_Api_Model_Server_Handler_Abstract {}

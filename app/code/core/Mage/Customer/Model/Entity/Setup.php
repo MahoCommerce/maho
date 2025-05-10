@@ -9,9 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customer resource setup model
- *
- * @package    Mage_Customer
- */
 class Mage_Customer_Model_Entity_Setup extends Mage_Customer_Model_Resource_Setup {}

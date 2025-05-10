@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * CMS Data helper
- *
- * @package    Mage_Cms
- */
 class Mage_Cms_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_NODE_PAGE_TEMPLATE_FILTER     = 'global/cms/page/tempate_filter';

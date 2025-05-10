@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * PayPal resource model for certificate based authentication
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Model_Resource_Cert extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]

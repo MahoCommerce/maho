@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Core hint helper
- *
- * @package    Mage_Core
- */
 class Mage_Core_Helper_Hint extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Mage_Core';

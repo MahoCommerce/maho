@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Core cookie model
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Cookie
 {
     public const XML_PATH_COOKIE_DOMAIN    = 'web/cookie/cookie_domain';
@@ -37,7 +32,7 @@ class Mage_Core_Model_Cookie
     /**
      * Set Store object
      *
-     * @param mixed $store
+     * @param bool|int|Mage_Core_Model_Store|null|string $store
      * @return $this
      */
     public function setStore($store)
@@ -187,7 +182,7 @@ class Mage_Core_Model_Cookie
      *
      * @param string $name The cookie name
      * @param string $value The cookie value
-     * @param int $period Lifetime period
+     * @param int|bool $period Lifetime period
      * @param string $path
      * @param string $domain
      * @param int|bool $secure

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Convert column mapper
- *
- * @package    Varien_Convert
- */
 class Varien_Convert_Mapper_Column extends Varien_Convert_Mapper_Abstract
 {
     #[\Override]

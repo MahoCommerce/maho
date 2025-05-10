@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Google sitemap controller
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
 {
     /**

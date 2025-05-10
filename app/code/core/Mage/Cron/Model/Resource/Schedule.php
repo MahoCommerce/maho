@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Schedule mysql4 resource
- *
- * @package    Mage_Cron
- */
 class Mage_Cron_Model_Resource_Schedule extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**

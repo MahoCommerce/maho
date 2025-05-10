@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Varien Db Helper
- *
- * @package    Varien_Db
- */
 class Varien_Db_Helper
 {
     /**

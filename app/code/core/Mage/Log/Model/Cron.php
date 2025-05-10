@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Log Cron Model
- *
- * @package    Mage_Log
- */
 class Mage_Log_Model_Cron extends Mage_Core_Model_Abstract
 {
     public const XML_PATH_EMAIL_LOG_CLEAN_TEMPLATE     = 'system/log/error_email_template';

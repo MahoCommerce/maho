@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Links block
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Block_Guest_Links extends Mage_Page_Block_Template_Links_Block
 {
     /**

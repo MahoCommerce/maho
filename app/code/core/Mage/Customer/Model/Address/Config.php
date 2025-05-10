@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customer address config
- *
- * @package    Mage_Customer
- */
 class Mage_Customer_Model_Address_Config extends Mage_Core_Model_Config_Base
 {
     public const DEFAULT_ADDRESS_RENDERER  = 'customer/address_renderer_default';

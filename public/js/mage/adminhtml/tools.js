@@ -777,6 +777,8 @@ function clearMessagesDiv(div = null) {
  * @param {string} type - one of `success|error|notice`
  */
 function setMessagesDiv(message, type = 'success', div = null) {
+    message = escapeHtml(message);
+    type = escapeHtml(type, true);
     setMessagesDivHtml(`<ul class="messages"><li class="${type}-msg"><ul><li><span>${message}</span></li></ul></li></ul>`, div);
 }
 
@@ -787,7 +789,7 @@ function setMessagesDiv(message, type = 'success', div = null) {
 */
 function setMessagesDivHtml(html, div = null) {
     if (div ??= document.getElementById('messages')) {
-        div.innerHTML = html;
+        div.innerHTML = xssFilter(html);
     }
 }
 

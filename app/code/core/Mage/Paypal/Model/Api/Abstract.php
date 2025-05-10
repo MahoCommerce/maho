@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Abstract class for Paypal API wrappers
- *
- * @package    Mage_Paypal
- */
 abstract class Mage_Paypal_Model_Api_Abstract extends Varien_Object
 {
     /**

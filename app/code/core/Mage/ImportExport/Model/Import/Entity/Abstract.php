@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Import entity abstract model
- *
- * @package    Mage_ImportExport
- */
 abstract class Mage_ImportExport_Model_Import_Entity_Abstract
 {
     /**

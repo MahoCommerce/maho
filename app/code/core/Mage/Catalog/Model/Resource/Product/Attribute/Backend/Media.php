@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog product media gallery attribute backend resource
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media extends Mage_Core_Model_Resource_Db_Abstract
 {
     public const GALLERY_TABLE       = 'catalog/product_attribute_media_gallery';

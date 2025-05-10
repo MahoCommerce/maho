@@ -11,11 +11,6 @@
  */
 
 
-/**
- * Adminhtml sales order's status namagement block
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Sales_Order_Status extends Mage_Adminhtml_Block_Widget_Grid_Container
 {
     /**

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog category helper
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_CATEGORY_URL_SUFFIX          = 'catalog/seo/category_url_suffix';

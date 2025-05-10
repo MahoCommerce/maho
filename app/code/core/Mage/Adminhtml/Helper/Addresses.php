@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml addresses helper
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Helper_Addresses extends Mage_Core_Helper_Abstract
 {
     public const DEFAULT_STREET_LINES_COUNT = 2;

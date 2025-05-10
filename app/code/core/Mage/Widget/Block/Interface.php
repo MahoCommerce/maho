@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Widget Block Interface
- *
- * @package    Mage_Widget
- */
 interface Mage_Widget_Block_Interface
 {
     /**

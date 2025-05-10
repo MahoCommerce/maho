@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Cash on delivery payment method model
- *
- * @package    Mage_Payment
- */
 class Mage_Payment_Model_Method_Cashondelivery extends Mage_Payment_Model_Method_Abstract
 {
     /**

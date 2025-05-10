@@ -11,11 +11,6 @@
  */
 
 
-/**
- * Adminhtml grid container block
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Widget_Grid_Container extends Mage_Adminhtml_Block_Widget_Container
 {
     protected $_addButtonLabel;

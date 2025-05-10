@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Order configuration model
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Model_Order_Config extends Mage_Core_Model_Config_Base
 {
     /**

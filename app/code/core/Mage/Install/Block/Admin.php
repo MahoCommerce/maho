@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Administrator account install block
- *
- * @package    Mage_Install
- */
 class Mage_Install_Block_Admin extends Mage_Install_Block_Abstract
 {
     public function __construct()

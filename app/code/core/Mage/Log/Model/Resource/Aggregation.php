@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Log aggregation resource model
- *
- * @package    Mage_Log
- */
 class Mage_Log_Model_Resource_Aggregation extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
@@ -84,7 +79,7 @@ class Mage_Log_Model_Resource_Aggregation extends Mage_Core_Model_Resource_Db_Ab
      * Save log
      *
      * @param array $data
-     * @param int $id
+     * @param string $id
      */
     public function saveLog($data, $id = null)
     {

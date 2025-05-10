@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml email template model
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Model_Email_Template extends Mage_Core_Model_Email_Template
 {
     /**

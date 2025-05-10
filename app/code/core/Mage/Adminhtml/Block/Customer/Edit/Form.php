@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml customer edit form block
- *
- * @package    Mage_Adminhtml
- */
 
 /**
  * @package    Mage_Adminhtml

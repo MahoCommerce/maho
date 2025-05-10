@@ -11,11 +11,6 @@
  */
 
 
-/**
- * Adminhtml shipment create
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Sales_Order_Shipment_View extends Mage_Adminhtml_Block_Widget_Form_Container
 {
     /**

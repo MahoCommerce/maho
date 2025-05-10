@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Resource model for manipulate system variables
- *
- * @package    Mage_Admin
- */
 class Mage_Admin_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abstract
 {
     public const CACHE_ID = 'permission_variable';

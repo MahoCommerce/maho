@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * CMS Page Helper
- *
- * @package    Mage_Cms
- */
 class Mage_Cms_Helper_Page extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_NO_ROUTE_PAGE        = 'web/default/cms_no_route';

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Layer attribute filter
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer_Filter_Abstract
 {
     public const OPTIONS_ONLY_WITH_RESULTS = 1;

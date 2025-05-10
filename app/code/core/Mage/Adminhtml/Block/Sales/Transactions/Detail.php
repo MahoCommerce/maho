@@ -11,11 +11,6 @@
  */
 
 
-/**
- * Adminhtml transaction detail
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Sales_Transactions_Detail extends Mage_Adminhtml_Block_Widget_Container
 {
     /**
