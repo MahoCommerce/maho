@@ -36,13 +36,6 @@ class Mage_Core_Model_Cache
     protected ?array $allowedCacheOptions = null;
 
     /**
-     * Disallow cache saving
-     *
-     * @var bool
-     */
-    protected $_disallowSave = false;
-
-    /**
      * Class constructor. Initialize cache instance based on options
      */
     public function __construct(array $options = [])
@@ -150,10 +143,6 @@ class Mage_Core_Model_Cache
 
     public function save(mixed $data, string $id, array $tags = [], ?int $lifeTime = null): bool
     {
-        if ($this->_disallowSave) {
-            return true;
-        }
-
         $cacheItem = $this->cacheAdapter->getItem($this->_id($id)) // @phpstan-ignore method.internalClass
             ->set($data)
             ->tag($this->_tags($tags));
