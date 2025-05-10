@@ -32,13 +32,8 @@ class Mage_Core_Model_Cache
     protected \Symfony\Component\Cache\Adapter\AbstractTagAwareAdapter $cacheAdapter;
 
     protected string $defaultAdapter = 'file';
-
-    /**
-     * Default options for default backend
-     *
-     * @var array
-     */
-    protected $_defaultBackendOptions = [];
+    protected array $defaultAdapterOptions = [];
+    protected ?array $allowedCacheOptions = null;
 
     /**
      * Disallow cache saving
@@ -48,18 +43,11 @@ class Mage_Core_Model_Cache
     protected $_disallowSave = false;
 
     /**
-     * List of allowed cache options
-     *
-     * @var array|null
-     */
-    protected $_allowedCacheOptions;
-
-    /**
      * Class constructor. Initialize cache instance based on options
      */
     public function __construct(array $options = [])
     {
-        $this->_defaultBackendOptions['cache_dir'] = $options['cache_dir'] ?? Mage::getBaseDir('cache');
+        $this->defaultAdapterOptions['cache_dir'] = $options['cache_dir'] ?? Mage::getBaseDir('cache');
 
         // Initialize id prefix
         $this->_idPrefix = $options['id_prefix'] ?? '';
@@ -70,26 +58,24 @@ class Mage_Core_Model_Cache
             $this->_idPrefix = substr(md5(Mage::getConfig()->getOptions()->getEtcDir()), 0, 3) . '_';
         }
 
-        $backend    = $this->_getBackendOptions($options);
-        $frontend   = $this->_getFrontendOptions($options);
-
-        $this->cacheAdapter = match ($backend['type']) {
+        $cacheAdapterOptions= $this->getCacheAdapterOptions($options);
+        $this->cacheAdapter = match ($cacheAdapterOptions['type']) {
             'redis' => new \Symfony\Component\Cache\Adapter\RedisTagAwareAdapter(
-                \Symfony\Component\Cache\Adapter\RedisTagAwareAdapter::createConnection($backend['options']['dsn']),
+                \Symfony\Component\Cache\Adapter\RedisTagAwareAdapter::createConnection($cacheAdapterOptions['options']['dsn']),
                 "maho-{$this->_idPrefix}",
-                $frontend['lifetime'],
+                $cacheAdapterOptions['lifetime'],
                 Mage::getModel('core/cache_marshaller'),
             ),
             default => new \Symfony\Component\Cache\Adapter\FilesystemTagAwareAdapter(
                 "maho-{$this->_idPrefix}",
-                $frontend['lifetime'],
-                $this->_defaultBackendOptions['cache_dir'],
+                $cacheAdapterOptions['lifetime'],
+                $this->defaultAdapterOptions['cache_dir'],
                 Mage::getModel('core/cache_marshaller'),
             ),
         };
     }
 
-    protected function _getBackendOptions(array $cacheOptions): array
+    protected function getCacheAdapterOptions(array $cacheOptions): array
     {
         $type = strtolower($cacheOptions['backend'] ?? $this->defaultAdapter);
         if (isset($cacheOptions['backend_options']) && is_array($cacheOptions['backend_options'])) {
@@ -105,41 +91,24 @@ class Mage_Core_Model_Cache
 
         if (!$backendType) {
             $backendType = $this->defaultAdapter;
-            foreach ($this->_defaultBackendOptions as $option => $value) {
+            foreach ($this->defaultAdapterOptions as $option => $value) {
                 if (!array_key_exists($option, $options)) {
                     $options[$option] = $value;
                 }
             }
         }
 
-        $backendOptions = ['type' => $backendType, 'options' => $options];
-        return $backendOptions;
-    }
-
-    /**
-     * Get options of cache frontend (options of symfony/cache)
-     *
-     * @return  array
-     */
-    protected function _getFrontendOptions(array $cacheOptions)
-    {
-        $options = $cacheOptions['frontend_options'] ?? [];
-        if (!array_key_exists('caching', $options)) {
-            $options['caching'] = true;
-        }
-        if (!array_key_exists('lifetime', $options)) {
-            $options['lifetime'] = $cacheOptions['lifetime'] ?? self::DEFAULT_LIFETIME;
-        }
-        return $options;
+        return [
+            'lifetime' => $cacheOptions['lifetime'] ?? self::DEFAULT_LIFETIME,
+            'type' => $backendType,
+            'options' => $options
+        ];
     }
 
     /**
      * Prepare unified valid identifier with prefix
-     *
-     * @param   string $id
-     * @return  string
      */
-    protected function _id($id)
+    protected function _id(string $id): string
     {
         if ($id) {
             $id = strtoupper($id);
@@ -214,11 +183,8 @@ class Mage_Core_Model_Cache
 
     /**
      * Clean cached data by specific tag
-     *
-     * @param   array|string $tags
-     * @return  bool
      */
-    public function clean($tags = [])
+    public function clean(array|string $tags = []): bool
     {
         $args = func_get_args();
         if (count($args) > 1 && is_array($args[1])) {
@@ -268,18 +234,18 @@ class Mage_Core_Model_Cache
         if ($options === false) {
             $options = $this->_getResource()->getAllOptions();
             if (is_array($options)) {
-                $this->_allowedCacheOptions = $options;
-                $this->save($this->_allowedCacheOptions, self::OPTIONS_CACHE_ID);
+                $this->allowedCacheOptions = $options;
+                $this->save($this->allowedCacheOptions, self::OPTIONS_CACHE_ID);
             } else {
-                $this->_allowedCacheOptions = [];
+                $this->allowedCacheOptions = [];
             }
         } else {
-            $this->_allowedCacheOptions = $options;
+            $this->allowedCacheOptions = $options;
         }
 
         if (Mage::getConfig()->getOptions()->getData('global_ban_use_cache')) {
-            foreach ($this->_allowedCacheOptions as $key => $val) {
-                $this->_allowedCacheOptions[$key] = false;
+            foreach ($this->allowedCacheOptions as $key => $val) {
+                $this->allowedCacheOptions[$key] = false;
             }
         }
 
@@ -288,11 +254,8 @@ class Mage_Core_Model_Cache
 
     /**
      * Save cache usage options
-     *
-     * @param array $options
-     * @return $this
      */
-    public function saveOptions($options)
+    public function saveOptions(array $options): self
     {
         $this->remove(self::OPTIONS_CACHE_ID);
         $this->_getResource()->saveAllOptions($options);
@@ -307,16 +270,16 @@ class Mage_Core_Model_Cache
      */
     public function canUse($typeCode)
     {
-        if (is_null($this->_allowedCacheOptions)) {
+        if (is_null($this->allowedCacheOptions)) {
             $this->_initOptions();
         }
 
         if (empty($typeCode)) {
-            return $this->_allowedCacheOptions;
+            return $this->allowedCacheOptions;
         }
 
-        if (isset($this->_allowedCacheOptions[$typeCode])) {
-            return (bool) $this->_allowedCacheOptions[$typeCode];
+        if (isset($this->allowedCacheOptions[$typeCode])) {
+            return (bool) $this->allowedCacheOptions[$typeCode];
         } else {
             return false;
         }
@@ -330,7 +293,7 @@ class Mage_Core_Model_Cache
      */
     public function banUse($typeCode)
     {
-        $this->_allowedCacheOptions[$typeCode] = false;
+        $this->allowedCacheOptions[$typeCode] = false;
         return $this;
     }
 
@@ -342,7 +305,7 @@ class Mage_Core_Model_Cache
      */
     public function unbanUse($typeCode)
     {
-        $this->_allowedCacheOptions[$typeCode] = true;
+        $this->allowedCacheOptions[$typeCode] = true;
         return $this;
     }
 
