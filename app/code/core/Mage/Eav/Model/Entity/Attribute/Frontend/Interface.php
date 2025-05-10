@@ -11,9 +11,6 @@
 
 /**
  * Entity attribute frontend interface
- *
  * Frontend is providing the user interface for the attribute
- *
- * @package    Mage_Eav
  */
 interface Mage_Eav_Model_Entity_Attribute_Frontend_Interface {}

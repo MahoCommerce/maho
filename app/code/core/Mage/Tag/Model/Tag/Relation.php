@@ -11,10 +11,6 @@
  */
 
 /**
- * Tag relation model
- *
- * @package    Mage_Tag
- *
  * @method Mage_Tag_Model_Resource_Tag_Relation _getResource()
  * @method Mage_Tag_Model_Resource_Tag_Relation getResource()
  * @method int getActive()

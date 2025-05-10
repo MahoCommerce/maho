@@ -11,10 +11,6 @@
  */
 
 /**
- * Entity type model
- *
- * @package    Mage_Eav
- *
  * @method Mage_Eav_Model_Resource_Entity_Type _getResource()
  * @method Mage_Eav_Model_Resource_Entity_Type getResource()
  * @method Mage_Eav_Model_Resource_Entity_Type_Collection getCollection()

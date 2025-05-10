@@ -11,10 +11,7 @@
 
 /**
  * Entity attribute select source interface
- *
  * Source is providing the selection options for user interface
- *
- * @package    Mage_Eav
  */
 interface Mage_Eav_Model_Entity_Attribute_Source_Interface
 {

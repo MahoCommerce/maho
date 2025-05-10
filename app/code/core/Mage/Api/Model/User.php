@@ -11,10 +11,6 @@
  */
 
 /**
- * Api model
- *
- * @package    Mage_Api
- *
  * @method Mage_Api_Model_Resource_User _getResource()
  * @method Mage_Api_Model_Resource_User getResource()
  * @method string getFirstname()

@@ -11,10 +11,6 @@
  */
 
 /**
- * Tax rule collection
- *
- * @package    Mage_Tax
- *
  * @method Mage_Tax_Model_Calculation_Rule[] getItems()
  */
 class Mage_Tax_Model_Resource_Calculation_Rule_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract

@@ -11,10 +11,6 @@
  */
 
 /**
- * Product options text type block
- *
- * @package    Mage_Catalog
- *
  * @method bool getSkipJsReloadPrice()
  */
 class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Block_Product_View_Options_Abstract

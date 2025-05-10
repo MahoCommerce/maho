@@ -9,9 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Rss
- */
 class Mage_Rss_Block_Catalog_Abstract extends Mage_Rss_Block_Abstract
 {
     /**

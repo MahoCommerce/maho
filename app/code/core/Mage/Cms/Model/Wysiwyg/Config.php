@@ -11,10 +11,6 @@
  */
 
 /**
- * Wysiwyg Config for Editor HTML Element
- *
- * @package    Mage_Cms
- *
  * @method string getStoreId()
  * @method $this setStoreId(string $value)
  */

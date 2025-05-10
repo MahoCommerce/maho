@@ -11,8 +11,6 @@
  */
 
 /**
- * @package    Mage_Api
- *
  * @method Mage_Api_Model_Resource_Rules _getResource()
  * @method Mage_Api_Model_Resource_Rules getResource()
  * @method int getRoleId()

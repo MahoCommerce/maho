@@ -11,9 +11,6 @@
  */
 
 /**
- * Catalog product link model
- *
- * @package    Mage_Catalog
  * @method $this setImageOpacity(int $value)
  */
 class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract

@@ -11,10 +11,6 @@
  */
 
 /**
- * Tax class collection
- *
- * @package    Mage_Tax
- *
  * @method Mage_Tax_Model_Class[] getItems()
  */
 class Mage_Tax_Model_Resource_Class_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
