@@ -236,8 +236,7 @@ class Mage_Api_Model_Config extends Varien_Simplexml_Config
 
     /**
      * Retrieve cache object
-     *
-     * @return Zend_Cache_Core
+     * @return Mage_Core_Model_Cache
      */
     #[\Override]
     public function getCache()

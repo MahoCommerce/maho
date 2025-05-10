@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -1106,8 +1106,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         if ($this->_cacheConf) {
             if (!($urlRewrites = Mage::app()->loadCache($this->_cacheConf['prefix'] . 'urlrewrite'))) {
                 $urlRewrites = null;
-            } else {
-                $urlRewrites = unserialize($urlRewrites, ['allowed_classes' => false]);
             }
         }
 
@@ -1132,7 +1130,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
 
             if ($this->_cacheConf) {
                 Mage::app()->saveCache(
-                    serialize($urlRewrites),
+                    $urlRewrites,
                     $this->_cacheConf['prefix'] . 'urlrewrite',
                     array_merge($this->_cacheConf['tags'], [Mage_Catalog_Model_Product_Url::CACHE_TAG]),
                     $this->_cacheLifetime,

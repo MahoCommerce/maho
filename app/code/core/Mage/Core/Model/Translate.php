@@ -516,7 +516,6 @@ class Mage_Core_Model_Translate
         if (!$data) {
             return false;
         }
-        $data = unserialize($data, ['allowed_classes' => false]);
         return $data;
     }
 
@@ -530,7 +529,7 @@ class Mage_Core_Model_Translate
         if (!$this->_canUseCache()) {
             return $this;
         }
-        Mage::app()->saveCache(serialize($this->getData()), $this->getCacheId(), [self::CACHE_TAG], null);
+        Mage::app()->saveCache($this->getData(), $this->getCacheId(), [self::CACHE_TAG], null);
         return $this;
     }
 
