@@ -11,10 +11,6 @@
  */
 
 /**
- * Html page block
- *
- * @package    Mage_Page
- *
  * @method $this setWelcome(string $value)
  */
 class Mage_Page_Block_Html_Welcome extends Mage_Core_Block_Template

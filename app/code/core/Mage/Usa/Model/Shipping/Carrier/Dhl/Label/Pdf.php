@@ -14,7 +14,6 @@
  * DHL International (API v1.4) Label Creation
  *
  * @deprecated now the process of creating the label is on DHL side
- * @package    Mage_Usa
  */
 class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf
 {

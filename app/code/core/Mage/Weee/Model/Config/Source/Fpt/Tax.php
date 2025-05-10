@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Weee
- */
 class Mage_Weee_Model_Config_Source_Fpt_Tax
 {
     /**

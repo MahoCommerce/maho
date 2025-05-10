@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Install
- */
 class Mage_Install_Controller_Action extends Mage_Core_Controller_Varien_Action
 {
     protected $_sessionNamespace = Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE;

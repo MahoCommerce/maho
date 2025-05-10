@@ -11,10 +11,6 @@
  */
 
 /**
- * Core Session Abstract model
- *
- * @package    Mage_Core
- *
  * @method string getErrorMessage()
  * @method $this setErrorMessage(string $value)
  * @method $this unsErrorMessage()

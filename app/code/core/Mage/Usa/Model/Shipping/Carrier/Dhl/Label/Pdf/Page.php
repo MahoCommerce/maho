@@ -13,7 +13,6 @@
 /**
  * DHL International (API v1.4) Label Creation
  *
- * @package    Mage_Usa
  * @deprecated now the process of creating the label is on DHL side
  */
 class Mage_Usa_Model_Shipping_Carrier_Dhl_Label_Pdf_Page extends Zend_Pdf_Page

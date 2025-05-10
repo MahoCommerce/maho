@@ -16,8 +16,6 @@
  *  -Cc:  Carbon copy to secondary recipients and other interested parties
  *  -Bcc: Blind carbon copy to tertiary recipients who receive the message
  *        without anyone else (including the To, Cc, and Bcc recipients) seeing who the tertiary recipients are
- *
- * @package    Mage_Core
  */
 class Mage_Core_Model_Email_Info extends Varien_Object
 {

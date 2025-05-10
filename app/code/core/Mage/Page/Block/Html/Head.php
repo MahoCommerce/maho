@@ -11,10 +11,6 @@
  */
 
 /**
- * Html page block
- *
- * @package    Mage_Page
- *
  * @method $this setCanLoadCalendarJs(bool $value)
  * @method $this setDescription(string $value)
  * @method $this setKeywords(string $value)

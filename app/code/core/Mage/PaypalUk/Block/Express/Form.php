@@ -9,9 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_PaypalUk
- */
 class Mage_PaypalUk_Block_Express_Form extends Mage_Paypal_Block_Express_Form
 {
     /**

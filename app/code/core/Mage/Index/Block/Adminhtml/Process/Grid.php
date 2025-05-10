@@ -12,9 +12,6 @@
 
 use Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract as MassAction;
 
-/**
- * @package    Mage_Index
- */
 class Mage_Index_Block_Adminhtml_Process_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
     /**
