@@ -1637,7 +1637,9 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         }
         if ($tableName === null) {
             $this->_ddlCache = [];
-            $this->_cacheAdapter->clean([self::DDL_CACHE_TAG]);
+            if ($this->_cacheAdapter) {
+                $this->_cacheAdapter->clean([self::DDL_CACHE_TAG]);
+            }
         } else {
             $cacheKey = $this->_getTableName($tableName, $schemaName);
 
