@@ -11,10 +11,6 @@
  */
 
 /**
- * Core Flag model
- *
- * @package    Mage_Core
- *
  * @method Mage_Core_Model_Resource_Flag _getResource()
  * @method Mage_Core_Model_Resource_Flag getResource()
  * @method string getFlagCode()

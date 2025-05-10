@@ -11,8 +11,6 @@
  */
 
 /**
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Order_Creditmemo_Comment _getResource()
  * @method Mage_Sales_Model_Resource_Order_Creditmemo_Comment getResource()
  * @method int getParentId()

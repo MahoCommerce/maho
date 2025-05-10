@@ -10,10 +10,6 @@
  */
 
 /**
- * Directory database storage model class
- *
- * @package    Mage_Core
- *
  * @method Mage_Core_Model_Resource_File_Storage_Directory_Database _getResource()
  * @method string getConnectionName()
  * @method $this setName(string $value)

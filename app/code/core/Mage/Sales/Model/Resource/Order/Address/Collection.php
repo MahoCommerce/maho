@@ -11,10 +11,6 @@
  */
 
 /**
- * Flat sales order payment collection
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Order_Address getItemById(int $value)
  * @method Mage_Sales_Model_Order_Address[] getItems()
  */

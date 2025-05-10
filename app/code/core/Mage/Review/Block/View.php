@@ -10,10 +10,6 @@
  */
 
 /**
- * Review detailed view block
- *
- * @package    Mage_Review
- *
  * @method Mage_Rating_Model_Resource_Rating_Option_Vote_Collection|false getRatingCollection()
  * @method $this setRatingCollection(Mage_Rating_Model_Resource_Rating_Option_Vote_Collection|false $value)
  * @method array getRatingSummaryCache()

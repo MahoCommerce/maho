@@ -16,8 +16,6 @@
  * Aware of all PayPal payment methods
  * Collects and provides access to PayPal-specific payment data
  * Provides business logic information about payment flow
- *
- * @package    Mage_Paypal
  */
 class Mage_Paypal_Model_Info
 {

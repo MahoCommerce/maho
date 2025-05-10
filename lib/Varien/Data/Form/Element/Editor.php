@@ -11,10 +11,6 @@
  */
 
 /**
- * Form editor element
- *
- * @package    Varien_Data
- *
  * @method string getTitle()
  * @method string getForceLoad()
  * @method $this setConfig(Varien_Object $value)

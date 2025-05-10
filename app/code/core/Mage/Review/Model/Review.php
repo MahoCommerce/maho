@@ -11,10 +11,6 @@
  */
 
 /**
- * Review model
- *
- * @package    Mage_Review
- *
  * @method Mage_Review_Model_Resource_Review _getResource()
  * @method Mage_Review_Model_Resource_Review getResource()
  * @method Mage_Review_Model_Resource_Review_Collection getCollection()

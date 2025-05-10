@@ -11,11 +11,8 @@
 
 /**
  * Entity attribute backend interface
- *
  * Backend is responsible for saving the values of the attribute
  * and performing pre and post actions
- *
- * @package    Mage_Eav
  */
 interface Mage_Eav_Model_Entity_Attribute_Backend_Interface
 {

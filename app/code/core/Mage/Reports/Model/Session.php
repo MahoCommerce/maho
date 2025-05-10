@@ -10,10 +10,6 @@
  */
 
 /**
- * Reports Session Model
- *
- * @package    Mage_Reports
- *
  * @method $this unsData(string $value)
  */
 class Mage_Reports_Model_Session extends Mage_Core_Model_Session_Abstract

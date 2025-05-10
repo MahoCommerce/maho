@@ -10,10 +10,6 @@
  */
 
 /**
- * Auth session model
- *
- * @package    Mage_Rss
- *
  * @method Mage_Admin_Model_User getAdmin()
  * @method $this setAdmin(Mage_Admin_Model_User $value)
  * @method Mage_Customer_Model_Customer getCustomer()

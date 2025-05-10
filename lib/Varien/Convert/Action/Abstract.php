@@ -10,13 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Convert action abstract
- *
- * Instances of this class are used as actions in profile
- *
- * @package    Varien_Convert
- */
 abstract class Varien_Convert_Action_Abstract implements Varien_Convert_Action_Interface
 {
     /**

@@ -10,9 +10,6 @@
  */
 
 /**
- * Sales Order Email items default renderer
- *
- * @package    Mage_Sales
  * @method Mage_Sales_Model_Order_Item getItem()
  */
 class Mage_Sales_Block_Order_Email_Items_Order_Default extends Mage_Core_Block_Template

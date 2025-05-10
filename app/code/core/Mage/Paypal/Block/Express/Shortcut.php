@@ -13,8 +13,6 @@
 /**
  * Paypal expess checkout shortcut link
  *
- * @package    Mage_Paypal
- *
  * @method string getShortcutHtmlId()
  * @method string getImageUrl()
  * @method string getCheckoutUrl()

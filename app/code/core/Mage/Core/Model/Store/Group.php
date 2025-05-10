@@ -11,10 +11,6 @@
  */
 
 /**
- * Store group model
- *
- * @package    Mage_Core
- *
  * @method Mage_Core_Model_Resource_Store_Group _getResource()
  * @method Mage_Core_Model_Resource_Store_Group getResource()
  * @method Mage_Core_Model_Resource_Store_Group_Collection getCollection()

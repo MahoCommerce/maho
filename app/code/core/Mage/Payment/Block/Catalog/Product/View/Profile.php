@@ -13,8 +13,6 @@
 /**
  * Recurring profile info/options product view block
  *
- * @package    Mage_Payment
- *
  * @method $this setDateHtmlId(string $string)
  */
 class Mage_Payment_Block_Catalog_Product_View_Profile extends Mage_Core_Block_Template

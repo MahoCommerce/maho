@@ -11,10 +11,6 @@
  */
 
 /**
- * Flat sales order shipment comments collection
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Order_Shipment_Comment getItemById(int $value)
  * @method Mage_Sales_Model_Order_Shipment_Comment[] getItems()
  */

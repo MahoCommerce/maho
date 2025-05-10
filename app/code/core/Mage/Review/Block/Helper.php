@@ -10,10 +10,6 @@
  */
 
 /**
- * Review helper
- *
- * @package    Mage_Review
- *
  * @method $this setDisplayIfEmpty(bool $value)
  * @method Mage_Catalog_Model_Product getProduct()
  * @method $this setProduct(Mage_Catalog_Model_Product $value)

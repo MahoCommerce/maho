@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput extends Mage_Adminhtml_Block_System_Config_Form_Fieldset
 {
     protected $_dummyElement;

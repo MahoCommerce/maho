@@ -14,8 +14,6 @@
  * Base container block for payment methods forms
  *
  * @method Mage_Sales_Model_Quote getQuote()
- *
- * @package    Mage_Payment
  */
 class Mage_Payment_Block_Form_Container extends Mage_Core_Block_Template
 {

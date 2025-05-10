@@ -9,12 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- *
- * Paypal transaction session namespace
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Model_Session extends Mage_Core_Model_Session_Abstract
 {
     public function __construct()

@@ -11,10 +11,6 @@
  */
 
 /**
- * Multishipping checkout model
- *
- * @package    Mage_Checkout
- *
  * @method bool getCollectRatesFlag()
  * @method $this setCollectRatesFlag(bool $value)
  * @method setCustomerAddressId(int $getCustomerAddressId)

@@ -11,10 +11,6 @@
  */
 
 /**
- * oAuth token model
- *
- * @package    Mage_Oauth
- *
  * @method string getName() Consumer name (joined from consumer table)
  * @method Mage_Oauth_Model_Resource_Token_Collection getCollection()
  * @method Mage_Oauth_Model_Resource_Token_Collection getResourceCollection()

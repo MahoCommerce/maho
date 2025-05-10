@@ -11,10 +11,6 @@
  */
 
 /**
- * Emtity attribute option model
- *
- * @package    Mage_Eav
- *
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Option _getResource()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Option getResource()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Option_Collection getCollection()

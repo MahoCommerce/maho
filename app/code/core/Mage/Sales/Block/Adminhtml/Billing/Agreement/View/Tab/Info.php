@@ -11,10 +11,6 @@
  */
 
 /**
- * Adminhtml billing agreement info tab
- *
- * @package    Mage_Sales
- *
  * @method $this setCreatedAt(string $formatDate)
  * @method $this setCustomerEmail(string $value)
  * @method $this setCustomerUrl(string $value)

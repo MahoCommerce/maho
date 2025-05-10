@@ -11,10 +11,6 @@
  */
 
 /**
- * User acl role
- *
- * @package    Mage_Admin
- *
  * @method Mage_Admin_Model_Resource_Acl_Role _getResource()
  * @method Mage_Admin_Model_Resource_Acl_Role getResource()
  * @method int getParentId()

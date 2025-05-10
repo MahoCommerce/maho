@@ -13,8 +13,6 @@
 /**
  * PayPal Website Payments Pro implementation for payment method instances
  * This model was created because right now PayPal Direct and PayPal Express payment methods cannot have same abstract
- *
- * @package    Mage_Paypal
  */
 class Mage_Paypal_Model_Pro
 {

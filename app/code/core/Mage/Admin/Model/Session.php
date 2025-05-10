@@ -11,10 +11,6 @@
  */
 
 /**
- * Auth session model
- *
- * @package    Mage_Admin
- *
  * @method Mage_Admin_Model_Acl getAcl()
  * @method $this setAcl(Mage_Admin_Model_Acl $acl)
  * @method int getActiveTabId()

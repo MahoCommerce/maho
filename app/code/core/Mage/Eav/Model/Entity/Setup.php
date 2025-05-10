@@ -11,10 +11,6 @@
  */
 
 /**
- * EAV Entity Setup Model
- *
- * @package    Mage_Eav
- *
  * @method array getDefaultEntities()
  */
 class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup

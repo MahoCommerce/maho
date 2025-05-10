@@ -10,10 +10,6 @@
  */
 
 /**
- * Form image file element
- *
- * @package    Varien_Data
- *
  * @method $this setAutosubmit(bool $false)
  */
 class Varien_Data_Form_Element_Imagefile extends Varien_Data_Form_Element_Abstract

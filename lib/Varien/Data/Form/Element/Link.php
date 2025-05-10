@@ -11,10 +11,6 @@
  */
 
 /**
- * Varien Form element renderer to display link element
- *
- * @package    Varien_Data
- *
  * @method string getBeforeElementHtml()
  */
 class Varien_Data_Form_Element_Link extends Varien_Data_Form_Element_Abstract

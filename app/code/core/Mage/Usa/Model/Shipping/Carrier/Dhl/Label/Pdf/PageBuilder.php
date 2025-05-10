@@ -13,7 +13,6 @@
 /**
  * DHL International (API v1.4) Label Creation
  *
- * @package    Mage_Usa
  * @deprecated now the process of creating the label is on DHL side
  *
  * @property Zend_Pdf_Resource_Font $_fontBold

@@ -11,10 +11,6 @@
  */
 
 /**
- * Admin permissions variable collection
- *
- * @package    Mage_Admin
- *
  * @method Mage_Admin_Model_Variable getItemById(int $value)
  * @method Mage_Admin_Model_Variable[] getItems()
  */

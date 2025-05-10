@@ -11,10 +11,6 @@
  */
 
 /**
- * Form textarea element
- *
- * @package    Varien_Data
- *
  * @method $this setCols(int $int)
  * @method $this setRows(int $int)
  */

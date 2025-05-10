@@ -20,8 +20,6 @@
  * - template (file name)
  * - module (for template)
  *
- * @package    Mage_Adminhtml
- *
  * @method getFromEmail()
  * @method $this setFromEmail(string $string)
  * @method getFromName()

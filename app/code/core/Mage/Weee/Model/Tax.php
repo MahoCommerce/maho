@@ -13,8 +13,6 @@
 /**
  * Model to calculate Weee amount
  *
- * @package    Mage_Weee
- *
  * @method Mage_Weee_Model_Resource_Tax _getResource()
  * @method Mage_Weee_Model_Resource_Tax getResource()
  */

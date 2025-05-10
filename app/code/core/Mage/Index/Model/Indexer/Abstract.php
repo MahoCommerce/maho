@@ -14,8 +14,6 @@
  * Abstract index process class
  * Predefine list of methods required by indexer
  *
- * @package    Mage_Index
- *
  * @method Mage_Index_Model_Resource_Abstract _getResource()
  */
 abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstract

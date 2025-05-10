@@ -11,10 +11,6 @@
  */
 
 /**
- * Cms page content block
- *
- * @package    Mage_Cms
- *
  * @method int getPageId()
  */
 class Mage_Cms_Block_Page extends Mage_Core_Block_Abstract

@@ -11,10 +11,6 @@
  */
 
 /**
- * Class Mage_Eav_Model_Convert_Adapter_Grid
- *
- * @package    Mage_Eav
- *
  * @method $this setExceptionLocation(string $string)
  */
 class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Adapter_Abstract

@@ -11,10 +11,6 @@
  */
 
 /**
- * Sales order view block
- *
- * @package    Mage_Sales
- *
  * @method int getCustomerId()
  * @method Mage_Sales_Model_Resource_Order_Collection getOrders()
  * @method $this setOrders(Mage_Sales_Model_Resource_Order_Collection $value)

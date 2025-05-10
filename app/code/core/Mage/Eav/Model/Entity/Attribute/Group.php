@@ -11,8 +11,6 @@
  */
 
 /**
- * @package    Mage_Eav
- *
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Group _getResource()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Group getResource()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Group_Collection getCollection()

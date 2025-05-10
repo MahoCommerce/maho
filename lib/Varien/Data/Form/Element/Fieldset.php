@@ -11,10 +11,6 @@
  */
 
 /**
- * Form fieldset
- *
- * @package    Varien_Data
- *
  * @method string getLegend()
  */
 class Varien_Data_Form_Element_Fieldset extends Varien_Data_Form_Element_Abstract

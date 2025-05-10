@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Uploader
- */
 class Mage_Uploader_Block_Multiple extends Mage_Uploader_Block_Abstract
 {
     public const DEFAULT_UPLOAD_BUTTON_ID_SUFFIX = 'upload';

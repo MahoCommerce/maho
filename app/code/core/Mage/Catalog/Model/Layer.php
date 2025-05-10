@@ -11,10 +11,6 @@
  */
 
 /**
- * Catalog view layer model
- *
- * @package    Mage_Catalog
- *
  * @method $this setStore(int $value)
  */
 class Mage_Catalog_Model_Layer extends Varien_Object

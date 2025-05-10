@@ -9,7 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Payment
- */
 class Mage_Payment_Model_Paygate_Result extends Varien_Object {}

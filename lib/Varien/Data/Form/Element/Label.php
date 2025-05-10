@@ -11,10 +11,6 @@
  */
 
 /**
- * Data form abstract class
- *
- * @package    Varien_Data
- *
  * @method bool getBold()
  */
 class Varien_Data_Form_Element_Label extends Varien_Data_Form_Element_Abstract

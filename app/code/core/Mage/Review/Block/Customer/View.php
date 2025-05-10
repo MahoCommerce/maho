@@ -10,10 +10,6 @@
  */
 
 /**
- * Customer Review detailed view block
- *
- * @package    Mage_Review
- *
  * @method string getReviewId()
  * @method $this setReviewId(string $value)
  * @method Mage_Catalog_Model_Product getProductCacheData()

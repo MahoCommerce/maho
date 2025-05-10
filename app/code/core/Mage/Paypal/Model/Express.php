@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract implements Mage_Payment_Model_Recurring_Profile_MethodInterface
 {
     protected $_code  = Mage_Paypal_Model_Config::METHOD_WPP_EXPRESS;

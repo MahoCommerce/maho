@@ -11,10 +11,6 @@
  */
 
 /**
- * Sales order shipment model
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Order_Shipment _getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment_Collection getCollection()

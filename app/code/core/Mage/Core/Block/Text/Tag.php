@@ -11,10 +11,6 @@
  */
 
 /**
- * Base html block
- *
- * @package    Mage_Core
- *
  * @method string getTagContents()
  * @method $this setTagContents(string $value)
  * @method getTagName()

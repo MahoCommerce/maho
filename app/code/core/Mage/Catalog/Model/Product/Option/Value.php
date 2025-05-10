@@ -11,10 +11,6 @@
  */
 
 /**
- * Catalog product option select type model
- *
- * @package    Mage_Catalog
- *
  * @method Mage_Catalog_Model_Resource_Product_Option_Value_Collection getCollection()
  * @method Mage_Catalog_Model_Resource_Product_Option_Value _getResource()
  * @method Mage_Catalog_Model_Resource_Product_Option_Value getResource()

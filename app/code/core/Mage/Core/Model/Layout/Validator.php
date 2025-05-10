@@ -12,10 +12,7 @@
 
 /**
  * Validator for custom layout update
- *
  * Validator checked XML validation and protected expressions
- *
- * @package    Mage_Core
  */
 class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
 {

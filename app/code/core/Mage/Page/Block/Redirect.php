@@ -10,10 +10,6 @@
  */
 
 /**
- * Customer Redirect Page
- *
- * @package    Mage_Page
- *
  * @method string getMethod()
  */
 class Mage_Page_Block_Redirect extends Mage_Core_Block_Template

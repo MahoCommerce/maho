@@ -11,10 +11,6 @@
  */
 
 /**
- * Product status functionality model
- *
- * @package    Mage_Catalog
- *
  * @method Mage_Catalog_Model_Resource_Product_Status _getResource()
  * @method Mage_Catalog_Model_Resource_Product_Status getResource()
  * @method int getProductId()

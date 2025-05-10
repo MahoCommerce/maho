@@ -12,10 +12,6 @@
 
 
 /**
- * Recurring profile view page
- *
- * @package    Mage_Sales
- *
  * @method string getDestElementId()
  * @method $this setViewHtml(string $value)
  */

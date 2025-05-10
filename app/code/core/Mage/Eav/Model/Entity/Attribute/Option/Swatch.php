@@ -9,10 +9,6 @@
  */
 
 /**
- * Entity attribute swatch model
- *
- * @package    Mage_Eav
- *
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Option_Swatch _getResource()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Option_Swatch getResource()
  */

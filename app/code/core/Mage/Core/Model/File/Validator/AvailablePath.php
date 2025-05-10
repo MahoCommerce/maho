@@ -27,8 +27,6 @@
  * $validator->setAvailablePath(array('/path/to/{@*}*.xml'));
  * $validator->isValid('/path/to/my.xml'); //return true, because directory structure can't exist
  * </code>
- *
- * @package    Mage_Core
  */
 class Mage_Core_Model_File_Validator_AvailablePath extends Zend_Validate_Abstract
 {

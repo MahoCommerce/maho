@@ -11,8 +11,6 @@
  */
 
 /**
- * @package    Mage_Api
- *
  * @method Mage_Api_Model_Resource_Roles _getResource()
  * @method Mage_Api_Model_Resource_Roles getResource()
  * @method int getParentId()

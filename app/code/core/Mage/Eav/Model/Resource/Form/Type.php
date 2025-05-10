@@ -11,10 +11,6 @@
  */
 
 /**
- * Eav Form Type Resource Model
- *
- * @package    Mage_Eav
- *
  * @method bool hasEntityTypes()
  */
 class Mage_Eav_Model_Resource_Form_Type extends Mage_Core_Model_Resource_Db_Abstract

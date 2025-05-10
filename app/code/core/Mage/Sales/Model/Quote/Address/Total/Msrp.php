@@ -13,8 +13,6 @@
 /**
  * Msrp items total
  * Collects flag if MSRP price is in use
- *
- * @package    Mage_Sales
  */
 class Mage_Sales_Model_Quote_Address_Total_Msrp extends Mage_Sales_Model_Quote_Address_Total_Abstract
 {

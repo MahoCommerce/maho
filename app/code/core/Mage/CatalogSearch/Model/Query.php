@@ -11,10 +11,6 @@
  */
 
 /**
- * Catalog search query model
- *
- * @package    Mage_CatalogSearch
- *
  * @method Mage_CatalogSearch_Model_Resource_Query _getResource()
  * @method Mage_CatalogSearch_Model_Resource_Query getResource()
  * @method Mage_CatalogSearch_Model_Resource_Query_Collection getCollection()

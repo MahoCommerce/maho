@@ -11,8 +11,6 @@
  */
 
 /**
- * @package    Mage_Rule
- *
  * @method $this setActions(array $value)
  * @method string getAggregator()
  * @method $this setAggregator(string $value)
