@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Web service api main helper
- *
- * @package    Mage_Api
- */
 class Mage_Api_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_API_WSI = 'api/config/compliance_wsi';

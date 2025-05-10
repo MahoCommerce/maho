@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml store tree
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_System_Store_Tree extends Mage_Adminhtml_Block_Widget
 {
     /**

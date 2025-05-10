@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Category url rewrite helper
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Helper_Category_Url_Rewrite extends Mage_Core_Helper_Abstract implements Mage_Catalog_Helper_Category_Url_Rewrite_Interface
 {
     /**

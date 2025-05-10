@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Cache cleaner backend model
- *
- * @package    Mage_CatalogSearch
- */
 class Mage_CatalogSearch_Model_System_Config_Backend_Sitemap extends Mage_Adminhtml_Model_System_Config_Backend_Cache
 {
     /**

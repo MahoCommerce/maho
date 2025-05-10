@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Translate expression object
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Translate_Expr
 {
     protected $_text;

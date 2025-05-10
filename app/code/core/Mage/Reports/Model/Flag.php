@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Report Flag Model
- *
- * @package    Mage_Reports
- */
 class Mage_Reports_Model_Flag extends Mage_Core_Model_Flag
 {
     public const REPORT_ORDER_FLAG_CODE    = 'report_order_aggregated';

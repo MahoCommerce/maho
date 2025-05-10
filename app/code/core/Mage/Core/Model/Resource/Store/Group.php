@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Store group resource model
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Resource_Store_Group extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * ProductAlert Stock Customer collection
- *
- * @package    Mage_ProductAlert
- */
 class Mage_ProductAlert_Model_Resource_Stock_Customer_Collection extends Mage_Customer_Model_Resource_Customer_Collection
 {
     /**

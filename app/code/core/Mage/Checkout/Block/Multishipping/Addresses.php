@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Multishipping checkout choose item addresses block
- *
- * @package    Mage_Checkout
- */
 class Mage_Checkout_Block_Multishipping_Addresses extends Mage_Sales_Block_Items_Abstract
 {
     /**

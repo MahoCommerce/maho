@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Convert container abstract
- *
- * @package    Varien_Convert
- */
 abstract class Varien_Convert_Container_Abstract implements Varien_Convert_Container_Interface
 {
     protected $_vars;

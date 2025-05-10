@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml product edit tabs
- *
- * @package    Mage_Bundle
- */
 class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs
 {
     protected $_attributeTabBlock = 'bundle/adminhtml_catalog_product_edit_tab_attributes';

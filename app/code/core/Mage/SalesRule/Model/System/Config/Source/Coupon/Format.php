@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Options for Code Format Field in Auto Generated Specific Coupon Codes configuration section
- *
- * @package    Mage_SalesRule
- */
 class Mage_SalesRule_Model_System_Config_Source_Coupon_Format
 {
     /**

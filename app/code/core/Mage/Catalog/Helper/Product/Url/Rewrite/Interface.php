@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Product url rewrite interface
- *
- * @package    Mage_Catalog
- */
 interface Mage_Catalog_Helper_Product_Url_Rewrite_Interface
 {
     /**

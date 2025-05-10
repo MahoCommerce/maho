@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Configuration class for totals
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Model_Order_Total_Config_Base extends Mage_Sales_Model_Config_Ordered
 {
     /**

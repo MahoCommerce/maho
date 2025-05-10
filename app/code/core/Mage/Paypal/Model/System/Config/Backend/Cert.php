@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Backend model for saving certificate file in case of using certificate based authentication
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Model_System_Config_Backend_Cert extends Mage_Core_Model_Config_Data
 {
     /**

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Currency Symbol Observer
- *
- * @package    Mage_CurrencySymbol
- */
 class Mage_CurrencySymbol_Model_Observer
 {
     /**

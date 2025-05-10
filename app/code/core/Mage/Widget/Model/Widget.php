@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Widget model for different purposes
- *
- * @package    Mage_Widget
- */
 class Mage_Widget_Model_Widget extends Varien_Object
 {
     /**

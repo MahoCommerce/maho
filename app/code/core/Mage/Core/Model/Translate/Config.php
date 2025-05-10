@@ -8,11 +8,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Config model for loading jstranslate.xml files
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Translate_Config extends Varien_Simplexml_Config
 {
     /**

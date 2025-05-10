@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Sales module base helper
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Helper_Data extends Mage_Core_Helper_Data
 {
     /**

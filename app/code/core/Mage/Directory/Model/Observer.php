@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Directory module observer
- *
- * @package    Mage_Directory
- */
 class Mage_Directory_Model_Observer
 {
     public const CRON_STRING_PATH = 'crontab/jobs/currency_rates_update/schedule/cron_expr';

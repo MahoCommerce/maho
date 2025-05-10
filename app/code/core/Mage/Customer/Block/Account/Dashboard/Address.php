@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customer dashboard addresses section
- *
- * @package    Mage_Customer
- */
 class Mage_Customer_Block_Account_Dashboard_Address extends Mage_Core_Block_Template
 {
     /**

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * API Resource class for product
- *
- * @package    Mage_Checkout
- */
 class Mage_Checkout_Model_Api_Resource_Product extends Mage_Checkout_Model_Api_Resource
 {
     /**

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Config installer
- *
- * @package    Mage_Install
- */
 class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_Abstract
 {
     public const TMP_INSTALL_DATE_VALUE = 'd-d-d-d-d';

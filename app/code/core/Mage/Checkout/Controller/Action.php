@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Controller for onepage and multishipping checkouts
- *
- * @package    Mage_Checkout
- */
 abstract class Mage_Checkout_Controller_Action extends Mage_Core_Controller_Front_Action
 {
     /**

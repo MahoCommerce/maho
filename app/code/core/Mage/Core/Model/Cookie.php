@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Core cookie model
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Cookie
 {
     public const XML_PATH_COOKIE_DOMAIN    = 'web/cookie/cookie_domain';

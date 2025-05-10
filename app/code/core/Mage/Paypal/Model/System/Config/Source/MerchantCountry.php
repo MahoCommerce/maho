@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Source model for merchant countries supported by PayPal
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Model_System_Config_Source_MerchantCountry
 {
     public function toOptionArray($isMultiselect = false)

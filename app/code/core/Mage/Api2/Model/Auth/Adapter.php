@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * API Auth Adapter class
- *
- * @package    Mage_Api2
- */
 class Mage_Api2_Model_Auth_Adapter
 {
     /**

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * MinSaleQty value manipulation helper
- *
- * @package    Mage_CatalogInventory
- */
 class Mage_CatalogInventory_Helper_Minsaleqty extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Mage_CatalogInventory';

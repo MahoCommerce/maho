@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Download controller
- *
- * @package    Mage_Downloadable
- */
 class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Action
 {
     /**

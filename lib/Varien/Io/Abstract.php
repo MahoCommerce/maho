@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Install and upgrade client abstract class
- *
- * @package    Varien_Io
- */
 abstract class Varien_Io_Abstract implements Varien_Io_Interface
 {
     /**

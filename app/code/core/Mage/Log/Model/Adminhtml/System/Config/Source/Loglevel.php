@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Logging level backend source model
- *
- * @package    Mage_Log
- */
 class Mage_Log_Model_Adminhtml_System_Config_Source_Loglevel
 {
     /**

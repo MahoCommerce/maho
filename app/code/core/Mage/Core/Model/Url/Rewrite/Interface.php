@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Url rewrite interface
- *
- * @package    Mage_Core
- */
 interface Mage_Core_Model_Url_Rewrite_Interface
 {
     /**

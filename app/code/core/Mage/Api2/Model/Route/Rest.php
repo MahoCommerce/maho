@@ -9,9 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Webservice apia2 REST route
- *
- * @package    Mage_Api2
- */
 class Mage_Api2_Model_Route_Rest extends Mage_Api2_Model_Route_Abstract implements Mage_Api2_Model_Route_Interface {}

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customer address api
- *
- * @package    Mage_Customer
- */
 class Mage_Customer_Model_Address_Api extends Mage_Customer_Model_Api_Resource
 {
     protected $_mapAttributes = [

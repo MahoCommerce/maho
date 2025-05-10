@@ -9,9 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * API2 setup model
- *
- * @package    Mage_Api2
- */
 class Mage_Api2_Model_Resource_Setup extends Mage_Core_Model_Resource_Setup {}

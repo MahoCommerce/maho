@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Event object and dispatcher
- *
- * @package    Varien_Event
- */
 class Varien_Event extends Varien_Object
 {
     /**

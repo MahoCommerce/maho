@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Rss Observer Model
- *
- * @package    Mage_Rss
- */
 class Mage_Rss_Model_Observer
 {
     /**

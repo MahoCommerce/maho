@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Website Payments Pro Hosted Solution payment gateway model
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Model_Hostedpro extends Mage_Paypal_Model_Direct
 {
     /**

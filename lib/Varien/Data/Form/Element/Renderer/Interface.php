@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Form field renderer
- *
- * @package    Varien_Data
- */
 interface Varien_Data_Form_Element_Renderer_Interface
 {
     /**

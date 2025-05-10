@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * API XML Renderer Writer
- *
- * @package    Mage_Api2
- */
 class Mage_Api2_Model_Renderer_Xml_Writer extends Zend_Config_Writer_Xml
 {
     /**

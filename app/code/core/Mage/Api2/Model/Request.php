@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * API Request model
- *
- * @package    Mage_Api2
- */
 class Mage_Api2_Model_Request extends Zend_Controller_Request_Http
 {
     /**

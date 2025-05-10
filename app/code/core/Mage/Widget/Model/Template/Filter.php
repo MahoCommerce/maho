@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Template Filter Model
- *
- * @package    Mage_Widget
- */
 class Mage_Widget_Model_Template_Filter extends Mage_Cms_Model_Template_Filter
 {
     /**

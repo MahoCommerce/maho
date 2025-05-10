@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Poll index controller
- *
- * @package    Mage_Rss
- */
 class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
 {
     /**

@@ -8,11 +8,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Assertion interface for admin acl
- *
- * @package    Mage_Admin
- */
 interface Mage_Admin_Model_Acl_Assert_Interface
 {
     /**

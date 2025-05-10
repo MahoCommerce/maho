@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml Tag Store Switcher
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Tag_Store_Switcher extends Mage_Adminhtml_Block_Store_Switcher
 {
     /**

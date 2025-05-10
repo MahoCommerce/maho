@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Abstract resource model. Can be used as base for indexer resources
- *
- * @package    Mage_Index
- */
 abstract class Mage_Index_Model_Resource_Abstract extends Mage_Core_Model_Resource_Db_Abstract
 {
     public const IDX_SUFFIX = '_idx';

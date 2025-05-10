@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Mysql DB Statement
- *
- * @package    Varien_Db
- */
 class Varien_Db_Statement_Pdo_Mysql extends Zend_Db_Statement_Pdo
 {
     /**

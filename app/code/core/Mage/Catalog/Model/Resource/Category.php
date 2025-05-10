@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog category model
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_Abstract
 {
     /**

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Bank Transfer payment method model
- *
- * @package    Mage_Payment
- */
 class Mage_Payment_Model_Method_Banktransfer extends Mage_Payment_Model_Method_Abstract
 {
     public const PAYMENT_METHOD_BANKTRANSFER_CODE = 'banktransfer';

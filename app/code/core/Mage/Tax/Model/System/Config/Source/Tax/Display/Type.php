@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Price display type source model
- *
- * @package    Mage_Tax
- */
 class Mage_Tax_Model_System_Config_Source_Tax_Display_Type
 {
     protected $_options;

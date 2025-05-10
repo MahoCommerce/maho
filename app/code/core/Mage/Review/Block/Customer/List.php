@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customer Reviews list block
- *
- * @package    Mage_Review
- */
 class Mage_Review_Block_Customer_List extends Mage_Customer_Block_Account_Dashboard
 {
     /**

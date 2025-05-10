@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Convert exception
- *
- * @package    Mage_Dataflow
- */
 class Mage_Dataflow_Model_Convert_Exception extends Varien_Exception
 {
     public const NOTICE = 'NOTICE';

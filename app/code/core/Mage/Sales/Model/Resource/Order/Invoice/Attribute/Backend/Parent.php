@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Invoice backend model for parent attribute
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Model_Resource_Order_Invoice_Attribute_Backend_Parent extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
     /**

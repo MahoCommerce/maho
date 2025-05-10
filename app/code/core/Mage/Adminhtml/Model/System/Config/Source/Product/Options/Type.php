@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Product option types mode source
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Model_System_Config_Source_Product_Options_Type
 {
     public const PRODUCT_OPTIONS_GROUPS_PATH = 'global/catalog/product/options/custom/groups';

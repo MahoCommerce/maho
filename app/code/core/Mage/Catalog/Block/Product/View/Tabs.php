@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Product information tabs
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Block_Product_View_Tabs extends Mage_Core_Block_Template
 {
     protected $_tabs = [];

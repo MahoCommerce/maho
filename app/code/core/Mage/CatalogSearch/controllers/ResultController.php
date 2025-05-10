@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog Search Controller
- *
- * @package    Mage_CatalogSearch
- */
 class Mage_CatalogSearch_ResultController extends Mage_Core_Controller_Front_Action
 {
     /**

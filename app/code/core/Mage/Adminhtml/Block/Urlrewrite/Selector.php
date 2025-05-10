@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Modes selector for Urlrewrites modes
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Urlrewrite_Selector extends Mage_Core_Block_Template
 {
     /**

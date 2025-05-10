@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Resource Setup Model
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Resource_Setup
 {
     public const DEFAULT_SETUP_CONNECTION  = 'core_setup';

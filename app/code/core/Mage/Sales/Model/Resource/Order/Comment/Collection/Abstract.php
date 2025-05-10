@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Flat sales order abstract comments collection, used as parent for: invoice, shipment, creditmemo
- *
- * @package    Mage_Sales
- */
 abstract class Mage_Sales_Model_Resource_Order_Comment_Collection_Abstract extends Mage_Sales_Model_Resource_Collection_Abstract
 {
     /**

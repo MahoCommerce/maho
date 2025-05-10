@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Install state block
- *
- * @package    Mage_Install
- */
 class Mage_Install_Block_State extends Mage_Core_Block_Template
 {
     public function __construct()

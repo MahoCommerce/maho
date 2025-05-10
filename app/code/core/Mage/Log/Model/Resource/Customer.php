@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customer log resource
- *
- * @package    Mage_Log
- */
 class Mage_Log_Model_Resource_Customer extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**

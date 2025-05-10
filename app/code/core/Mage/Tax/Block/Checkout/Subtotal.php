@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Subtotal Total Row Renderer
- *
- * @package    Mage_Tax
- */
 class Mage_Tax_Block_Checkout_Subtotal extends Mage_Checkout_Block_Total_Default
 {
     /**

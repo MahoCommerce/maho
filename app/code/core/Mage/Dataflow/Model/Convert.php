@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Dataflow Convert factory
- *
- * @package    Mage_Dataflow
- */
 class Mage_Dataflow_Model_Convert
 {
     public static function convert($class, $method, $data, array $vars = [])

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Tax Total Row Renderer
- *
- * @package    Mage_Checkout
- */
 class Mage_Checkout_Block_Total_Tax extends Mage_Checkout_Block_Total_Default
 {
     protected $_template = 'checkout/total/tax.phtml';

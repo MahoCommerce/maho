@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Review summery collection
- *
- * @package    Mage_Review
- */
 class Mage_Review_Model_Resource_Review_Summary_Collection extends Varien_Data_Collection_Db
 {
     /**

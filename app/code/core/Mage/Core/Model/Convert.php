@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Mage Core convert model
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Convert extends Mage_Dataflow_Model_Convert_Profile_Collection
 {
     public function __construct()

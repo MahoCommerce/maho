@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * ProductAlert unsubscribe controller
- *
- * @package    Mage_ProductAlert
- */
 class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front_Action
 {
     #[\Override]

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * oAuth authorize controller
- *
- * @package    Mage_Oauth
- */
 class Mage_Oauth_AuthorizeController extends Mage_Core_Controller_Front_Action
 {
     /**

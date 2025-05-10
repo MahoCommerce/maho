@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Currency dropdown block
- *
- * @package    Mage_Directory
- */
 class Mage_Directory_Block_Currency extends Mage_Core_Block_Template
 {
     /**

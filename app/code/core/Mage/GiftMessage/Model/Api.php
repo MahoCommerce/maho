@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * GiftMessage api
- *
- * @package    Mage_GiftMessage
- */
 class Mage_GiftMessage_Model_Api extends Mage_Checkout_Model_Api_Resource_Product
 {
     /**

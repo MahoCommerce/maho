@@ -10,11 +10,6 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Wrapper to escape a string value with a method to get the original string value
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Security_HtmlEscapedString implements Stringable
 {
     protected string $originalValue;

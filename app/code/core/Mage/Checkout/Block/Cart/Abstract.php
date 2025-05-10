@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Shopping cart abstract block
- *
- * @package    Mage_Checkout
- */
 abstract class Mage_Checkout_Block_Cart_Abstract extends Mage_Core_Block_Template
 {
     protected $_customer = null;

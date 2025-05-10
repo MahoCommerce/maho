@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * ProductAlert Email processor
- *
- * @package    Mage_ProductAlert
- */
 class Mage_ProductAlert_Model_Email extends Mage_Core_Model_Abstract
 {
     public const XML_PATH_EMAIL_PRICE_TEMPLATE = 'catalog/productalert/email_price_template';

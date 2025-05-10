@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Category View block
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
 {
     /**

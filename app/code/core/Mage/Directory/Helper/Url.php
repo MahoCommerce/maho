@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Directory URL helper
- *
- * @package    Mage_Directory
- */
 class Mage_Directory_Helper_Url extends Mage_Core_Helper_Url
 {
     protected $_moduleName = 'Mage_Directory';

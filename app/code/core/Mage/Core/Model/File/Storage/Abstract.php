@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Abstract file storage model class
- *
- * @package    Mage_Core
- */
 abstract class Mage_Core_Model_File_Storage_Abstract extends Mage_Core_Model_Abstract
 {
     /**

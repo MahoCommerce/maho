@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Account dashboard sidebar
- *
- * @package    Mage_Customer
- */
 class Mage_Customer_Block_Account_Dashboard_Sidebar extends Mage_Core_Block_Template
 {
     protected $_cartItemsCount;
