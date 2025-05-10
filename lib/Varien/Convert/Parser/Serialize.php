@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Convert php serialize parser
- *
- * @package    Varien_Convert
- */
 class Varien_Convert_Parser_Serialize extends Varien_Convert_Parser_Abstract
 {
     #[\Override]

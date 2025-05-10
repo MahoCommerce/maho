@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Convert zend db adapter
- *
- * @package    Varien_Convert
- */
 class Varien_Convert_Adapter_Zend_Db extends Varien_Convert_Adapter_Abstract
 {
     #[\Override]

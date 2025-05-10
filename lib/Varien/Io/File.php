@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Filesystem client
- *
- * @package    Varien_Io
- */
 class Varien_Io_File extends Varien_Io_Abstract
 {
     /**

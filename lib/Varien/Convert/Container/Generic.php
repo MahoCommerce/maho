@@ -9,9 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Convert generic container
- *
- * @package    Varien_Convert
- */
 class Varien_Convert_Container_Generic extends Varien_Convert_Container_Abstract {}

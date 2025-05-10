@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Form time element
- *
- * @package    Varien_Data
- */
 class Varien_Data_Form_Element_Time extends Varien_Data_Form_Element_Abstract
 {
     /**

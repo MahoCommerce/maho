@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Varien Database Adapter Interface
- *
- * @package    Varien_Db
- */
 interface Varien_Db_Adapter_Interface
 {
     public const INDEX_TYPE_PRIMARY    = 'primary';

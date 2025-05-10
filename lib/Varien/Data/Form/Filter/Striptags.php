@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Form Input/Output Strip HTML tags Filter
- *
- * @package    Varien_Data
- */
 class Varien_Data_Form_Filter_Striptags implements Varien_Data_Form_Filter_Interface
 {
     /**
