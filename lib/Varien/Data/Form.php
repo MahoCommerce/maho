@@ -11,10 +11,6 @@
  */
 
 /**
- * Data form
- *
- * @package    Varien_Data
- *
  * @method string getHtmlIdPrefix()
  * @method $this setHtmlIdPrefix(string $value)
  * @method string getHtmlIdSuffix()

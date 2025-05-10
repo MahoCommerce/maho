@@ -15,8 +15,6 @@
  *
  * Data model:
  * id  |  path  |  order
- *
- * @package    Varien_Data
  */
 class Varien_Data_Tree_Dbp extends Varien_Data_Tree
 {

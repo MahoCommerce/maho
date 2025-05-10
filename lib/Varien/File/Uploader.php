@@ -15,8 +15,6 @@
  *
  * ATTENTION! This class must be used like abstract class and must added
  * validation by protected file extension list to extended class
- *
- * @package    Varien_File
  */
 
 class Varien_File_Uploader
