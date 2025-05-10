@@ -11,10 +11,6 @@
  */
 
 /**
- * Billing Agreement abstract model
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Billing_Agreement _getResource()
  * @method Mage_Sales_Model_Resource_Billing_Agreement getResource()
  * @method Mage_Sales_Model_Resource_Billing_Agreement_Collection getCollection()

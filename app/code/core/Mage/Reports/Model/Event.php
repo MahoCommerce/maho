@@ -11,10 +11,6 @@
  */
 
 /**
- * Events model
- *
- * @package    Mage_Reports
- *
  * @method Mage_Reports_Model_Resource_Event _getResource()
  * @method Mage_Reports_Model_Resource_Event getResource()
  * @method Mage_Reports_Model_Resource_Event_Collection getCollection()

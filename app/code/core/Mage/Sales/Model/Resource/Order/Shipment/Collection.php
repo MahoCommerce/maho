@@ -11,10 +11,6 @@
  */
 
 /**
- * Flat sales order shipment collection
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Order_Shipment getItemById(int $value)
  * @method Mage_Sales_Model_Order_Shipment[] getItems()
  */

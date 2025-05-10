@@ -14,8 +14,6 @@
  * Config model that is aware of all Mage_Paypal payment methods
  * Works with PayPal-specific system configuration
  *
- * @package    Mage_Paypal
- *
  * @property mixed $allow_ba_signup;
  * @property mixed $api_cert;
  * @property mixed $api_password;

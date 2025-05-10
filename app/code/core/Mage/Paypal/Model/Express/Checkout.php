@@ -13,8 +13,6 @@
 /**
  * Wrapper that performs Paypal Express and Checkout communication
  * Use current Paypal Express method instance
- *
- * @package    Mage_Paypal
  */
 class Mage_Paypal_Model_Express_Checkout
 {

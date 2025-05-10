@@ -11,10 +11,6 @@
  */
 
 /**
- * Widget Instance Model
- *
- * @package    Mage_Widget
- *
  * @method Mage_Widget_Model_Resource_Widget_Instance _getResource()
  * @method Mage_Widget_Model_Resource_Widget_Instance getResource()
  * @method Mage_Widget_Model_Resource_Widget_Instance_Collection getCollection()

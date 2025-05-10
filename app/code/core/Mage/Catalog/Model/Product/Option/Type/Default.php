@@ -10,10 +10,6 @@
  */
 
 /**
- * Catalog product option default type
- *
- * @package    Mage_Catalog
- *
  * @method $this setConfigurationItemOption(Varien_Object $value)
  * @method bool getIsValid()
  * @method $this setIsValid(bool $value)

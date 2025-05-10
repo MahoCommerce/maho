@@ -11,10 +11,6 @@
  */
 
 /**
- * Sitemap model
- *
- * @package    Mage_Sitemap
- *
  * @method Mage_Sitemap_Model_Resource_Sitemap _getResource()
  * @method Mage_Sitemap_Model_Resource_Sitemap getResource()
  * @method Mage_Sitemap_Model_Resource_Sitemap_Collection getCollection()

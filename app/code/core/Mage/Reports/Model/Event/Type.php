@@ -11,10 +11,6 @@
  */
 
 /**
- * Event type model
- *
- * @package    Mage_Reports
- *
  * @method Mage_Reports_Model_Resource_Event_Type _getResource()
  * @method Mage_Reports_Model_Resource_Event_Type getResource()
  * @method string getEventName()

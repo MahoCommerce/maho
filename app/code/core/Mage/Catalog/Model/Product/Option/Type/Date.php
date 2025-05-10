@@ -11,10 +11,6 @@
  */
 
 /**
- * Catalog product option date type
- *
- * @package    Mage_Catalog
- *
  * @method array|null getUserValue()
  * @method $this setUserValue(array|null $userValue)
  */

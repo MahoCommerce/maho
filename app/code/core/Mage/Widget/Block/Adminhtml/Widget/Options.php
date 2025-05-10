@@ -13,8 +13,6 @@
 /**
  * WYSIWYG widget options form
  *
- * @package    Mage_Widget
- *
  * @method string getMainFieldsetHtmlId()
  * @method $this setMainFieldsetHtmlId(string $value)
  * @method string getWidgetType()

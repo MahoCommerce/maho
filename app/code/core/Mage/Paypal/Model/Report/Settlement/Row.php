@@ -11,10 +11,6 @@
  */
 
 /**
- * Model for report rows
- *
- * @package    Mage_Paypal
- *
  * @method Mage_Paypal_Model_Resource_Report_Settlement_Row _getResource()
  * @method Mage_Paypal_Model_Resource_Report_Settlement_Row getResource()
  * @method int getReportId()

@@ -13,8 +13,6 @@
 /**
  * WYSIWYG widget options form
  *
- * @package    Mage_Adminhtml
- *
  * @method $this setConfig(Varien_Object $value)
  * @method $this setElement(Varien_Data_Form_Element_Abstract $value)
  * @method $this setFieldsetId(string $value)

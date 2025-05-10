@@ -13,8 +13,6 @@
 /**
  * Widget Instance page groups (predefined layouts group) to display on
  *
- * @package    Mage_Widget
- *
  * @method Mage_Widget_Model_Widget_Instance getWidgetInstance()
  * @method $this setWidgetInstance(Mage_Widget_Model_Widget_Instance $value)
  */

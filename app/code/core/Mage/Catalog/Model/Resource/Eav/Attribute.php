@@ -11,10 +11,6 @@
  */
 
 /**
- * Catalog attribute model
- *
- * @package    Mage_Catalog
- *
  * @method Mage_Catalog_Model_Resource_Attribute _getResource()
  * @method Mage_Catalog_Model_Resource_Attribute getResource()
  * @method string getFrontendInputRenderer()

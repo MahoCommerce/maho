@@ -11,10 +11,6 @@
  */
 
 /**
- * Catalog Compared Product Index Model
- *
- * @package    Mage_Reports
- *
  * @method Mage_Reports_Model_Resource_Product_Index_Compared _getResource()
  * @method Mage_Reports_Model_Resource_Product_Index_Compared getResource()
  * @method $this setVisitorId(int $value)
