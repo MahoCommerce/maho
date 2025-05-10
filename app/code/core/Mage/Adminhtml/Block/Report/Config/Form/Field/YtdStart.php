@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Dashboard Year-To-Date Month and Day starts Field Renderer
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Report_Config_Form_Field_YtdStart extends Mage_Adminhtml_Block_System_Config_Form_Field
 {
     #[\Override]

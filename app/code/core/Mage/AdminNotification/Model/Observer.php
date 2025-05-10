@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * AdminNotification observer
- *
- * @package    Mage_AdminNotification
- */
 class Mage_AdminNotification_Model_Observer
 {
     /**

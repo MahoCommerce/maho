@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Downloadable helper
- *
- * @package    Mage_Downloadable
- */
 class Mage_Downloadable_Helper_Data extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Mage_Downloadable';

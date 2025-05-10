@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Downloadable Products Observer
- *
- * @package    Mage_Downloadable
- */
 class Mage_Downloadable_Model_Observer
 {
     public const XML_PATH_DISABLE_GUEST_CHECKOUT   = 'catalog/downloadable/disable_guest_checkout';

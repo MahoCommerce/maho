@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Currency rate import model (from Fixer API / Apilayer.com formerly fixer.io)
- *
- * @package    Mage_Directory
- */
 class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_Currency_Import_Abstract
 {
     /**

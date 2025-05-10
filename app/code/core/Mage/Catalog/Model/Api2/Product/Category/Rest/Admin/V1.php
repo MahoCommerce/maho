@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * API2 for product categories
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Api2_Product_Category_Rest_Admin_V1 extends Mage_Catalog_Model_Api2_Product_Category_Rest
 {
     /**

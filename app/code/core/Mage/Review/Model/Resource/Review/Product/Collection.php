@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Review Product Collection
- *
- * @package    Mage_Review
- */
 class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_Model_Resource_Product_Collection
 {
     /**

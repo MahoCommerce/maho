@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Rss abstract controller
- *
- * @package    Mage_Rss
- */
 class Mage_Rss_Controller_Abstract extends Mage_Core_Controller_Front_Action
 {
     /**

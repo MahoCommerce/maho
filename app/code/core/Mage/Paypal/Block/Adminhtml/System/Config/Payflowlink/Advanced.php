@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Renderer for Payments Advanced information
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Block_Adminhtml_System_Config_Payflowlink_Advanced extends Mage_Paypal_Block_Adminhtml_System_Config_Payflowlink_Info
 {
     /**

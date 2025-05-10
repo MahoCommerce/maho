@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Directory data helper
- *
- * @package    Mage_Directory
- */
 class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
 {
     /**

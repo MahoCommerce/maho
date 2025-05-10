@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * PayPal Bill Me Later method
- *
- * @package    Mage_PaypalUk
- */
 class Mage_PaypalUk_Model_Bml extends Mage_Paypal_Model_Bml
 {
     /**

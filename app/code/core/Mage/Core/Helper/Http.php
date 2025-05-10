@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Core Http Helper
- *
- * @package    Mage_Core
- */
 class Mage_Core_Helper_Http extends Mage_Core_Helper_Abstract
 {
     public const XML_NODE_REMOTE_ADDR_HEADERS  = 'global/remote_addr_headers';

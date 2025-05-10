@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Renderer for service JavaScript code that disables corresponding paypal methods on page load
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Store extends Mage_Adminhtml_Block_Abstract implements Varien_Data_Form_Element_Renderer_Interface
 {
     /**

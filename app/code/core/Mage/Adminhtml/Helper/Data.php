@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml base helper
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Helper_Data extends Mage_Adminhtml_Helper_Help_Mapping
 {
     public const XML_PATH_ADMINHTML_ROUTER_FRONTNAME   = 'admin/routers/adminhtml/args/frontName';

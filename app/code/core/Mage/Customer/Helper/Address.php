@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customer address helper
- *
- * @package    Mage_Customer
- */
 class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
 {
     /**

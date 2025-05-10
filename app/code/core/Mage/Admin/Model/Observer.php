@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Admin observer model
- *
- * @package    Mage_Admin
- */
 class Mage_Admin_Model_Observer
 {
     public const FLAG_NO_LOGIN = 'no-login';

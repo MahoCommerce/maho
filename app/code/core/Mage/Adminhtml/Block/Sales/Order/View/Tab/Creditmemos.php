@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Order Credit Memos grid
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Sales_Order_View_Tab_Creditmemos extends Mage_Adminhtml_Block_Widget_Grid implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     public function __construct()

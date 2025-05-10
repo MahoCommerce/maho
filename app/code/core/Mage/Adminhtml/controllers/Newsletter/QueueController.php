@@ -11,11 +11,6 @@
 
 use Mage_Newsletter_Model_Queue as Queue;
 
-/**
- * Adminhtml newsletter queue controller
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controller_Action
 {
     /**

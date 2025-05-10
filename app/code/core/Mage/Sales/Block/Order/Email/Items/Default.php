@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Sales Order Email items default renderer
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Block_Order_Email_Items_Default extends Mage_Core_Block_Template
 {
     /**

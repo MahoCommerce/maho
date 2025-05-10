@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Nominal fixed product tax total
- *
- * @package    Mage_Weee
- */
 class Mage_Weee_Model_Total_Quote_Nominal_Weee extends Mage_Weee_Model_Total_Quote_Weee
 {
     /**

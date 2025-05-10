@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Convert Advanced admin controller
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Controller_Action
 {
     /**

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Web service api server interface
- *
- * @package    Mage_Api
- */
 interface Mage_Api_Model_Server_Adapter_Interface
 {
     /**

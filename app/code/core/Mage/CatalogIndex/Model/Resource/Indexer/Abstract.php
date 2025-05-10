@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Indexer resource model abstraction
- *
- * @package    Mage_CatalogIndex
- */
 class Mage_CatalogIndex_Model_Resource_Indexer_Abstract extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**

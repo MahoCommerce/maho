@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Wysiwyg Images Helper
- *
- * @package    Mage_Cms
- */
 class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Mage_Cms';

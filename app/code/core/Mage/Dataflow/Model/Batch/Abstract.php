@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Dataflow Batch abstract model
- *
- * @package    Mage_Dataflow
- */
 abstract class Mage_Dataflow_Model_Batch_Abstract extends Mage_Core_Model_Abstract
 {
     /**

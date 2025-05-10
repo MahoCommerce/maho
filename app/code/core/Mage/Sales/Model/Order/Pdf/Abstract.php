@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Sales Order PDF abstract model
- *
- * @package    Mage_Sales
- */
 abstract class Mage_Sales_Model_Order_Pdf_Abstract extends Varien_Object
 {
     /**

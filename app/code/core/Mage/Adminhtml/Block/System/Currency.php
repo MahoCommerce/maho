@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Manage currency block
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_System_Currency extends Mage_Adminhtml_Block_Template
 {
     #[\Override]

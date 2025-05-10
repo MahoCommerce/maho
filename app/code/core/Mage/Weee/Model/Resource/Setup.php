@@ -9,9 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Weee tax setup
- *
- * @package    Mage_Weee
- */
 class Mage_Weee_Model_Resource_Setup extends Mage_Sales_Model_Resource_Setup {}

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Tax Rate Titles Renderer
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Tax_Rate_Title extends Mage_Core_Block_Template
 {
     protected $_titles;

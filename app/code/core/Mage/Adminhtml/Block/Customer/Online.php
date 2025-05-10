@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml online customers page content block
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Customer_Online extends Mage_Adminhtml_Block_Template
 {
     public function __construct()

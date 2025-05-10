@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customers newsletter subscription controller
- *
- * @package    Mage_Newsletter
- */
 class Mage_Newsletter_ManageController extends Mage_Core_Controller_Front_Action
 {
     /**

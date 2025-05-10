@@ -11,11 +11,6 @@
  */
 
 
-/**
- * Catalog manage products block
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Catalog_Product extends Mage_Adminhtml_Block_Widget_Container
 {
     /**

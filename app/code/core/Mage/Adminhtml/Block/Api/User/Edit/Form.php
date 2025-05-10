@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml permissions user edit form
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Api_User_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
 {
     #[\Override]

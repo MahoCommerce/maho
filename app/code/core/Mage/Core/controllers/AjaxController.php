@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Frontend ajax controller
- *
- * @package    Mage_Core
- */
 class Mage_Core_AjaxController extends Mage_Core_Controller_Front_Action
 {
     /**

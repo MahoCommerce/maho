@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Validator for check not protected file extensions
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_File_Validator_NotProtectedExtension extends Zend_Validate_Abstract
 {
     public const PROTECTED_EXTENSION = 'protectedExtension';

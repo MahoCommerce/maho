@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * System Convert History action filter
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_System_Convert_Profile_Edit_Filter_Action extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract
 {
     #[\Override]

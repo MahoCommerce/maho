@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog Custom Category design Model
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Design extends Mage_Core_Model_Abstract
 {
     public const APPLY_FOR_PRODUCT     = 1;

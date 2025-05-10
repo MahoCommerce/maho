@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Mysql4 config installation block
- *
- * @package    Mage_Install
- */
 class Mage_Install_Block_Db_Type_Mysql4 extends Mage_Install_Block_Db_Type
 {
     /**

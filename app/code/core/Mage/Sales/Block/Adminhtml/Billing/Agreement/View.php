@@ -11,11 +11,6 @@
  */
 
 
-/**
- * Adminhtml billing agreement view
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Block_Adminhtml_Billing_Agreement_View extends Mage_Adminhtml_Block_Widget_Form_Container
 {
     /**

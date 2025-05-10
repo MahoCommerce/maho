@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Rating resource model
- *
- * @package    Mage_Rating
- */
 class Mage_Rating_Model_Resource_Rating extends Mage_Core_Model_Resource_Db_Abstract
 {
     public const RATING_STATUS_APPROVED = 'Approved';

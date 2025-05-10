@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Product rule condition data model
- *
- * @package    Mage_SalesRule
- */
 class Mage_SalesRule_Model_Rule_Condition_Product extends Mage_Rule_Model_Condition_Product_Abstract
 {
     /**

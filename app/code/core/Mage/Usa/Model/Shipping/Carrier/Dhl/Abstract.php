@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * DHL Abstract class
- *
- * @package    Mage_Usa
- */
 abstract class Mage_Usa_Model_Shipping_Carrier_Dhl_Abstract extends Mage_Usa_Model_Shipping_Carrier_Abstract
 {
     /**

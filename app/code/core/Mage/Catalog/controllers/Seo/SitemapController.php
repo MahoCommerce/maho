@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * SEO sitemap controller
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Seo_SitemapController extends Mage_Core_Controller_Front_Action
 {
     /**

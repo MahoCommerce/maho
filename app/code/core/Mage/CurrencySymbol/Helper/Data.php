@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Currency Symbol helper
- *
- * @package    Mage_CurrencySymbol
- */
 class Mage_CurrencySymbol_Helper_Data extends Mage_Core_Helper_Data
 {
     protected $_moduleName = 'Mage_CurrencySymbol';

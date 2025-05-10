@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Indexer strategy
- *
- * @package    Mage_Index
- */
 class Mage_Index_Model_Indexer
 {
     /**

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Install index controller
- *
- * @package    Mage_Install
- */
 class Mage_Install_IndexController extends Mage_Install_Controller_Action
 {
     #[\Override]

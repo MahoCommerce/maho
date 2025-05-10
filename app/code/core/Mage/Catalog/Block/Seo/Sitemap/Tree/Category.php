@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * SEO tree Categories Sitemap block
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Block_Seo_Sitemap_Tree_Category extends Mage_Catalog_Block_Seo_Sitemap_Category
 {
     public const XML_PATH_LINES_PER_PAGE = 'catalog/sitemap/lines_perpage';

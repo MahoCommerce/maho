@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Resources and connections registry and factory
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Resource
 {
     public const AUTO_UPDATE_CACHE_KEY  = 'DB_AUTOUPDATE';

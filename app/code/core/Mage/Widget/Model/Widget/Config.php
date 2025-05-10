@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Widgets Insertion Plugin Config for Editor HTML Element
- *
- * @package    Mage_Widget
- */
 class Mage_Widget_Model_Widget_Config extends Varien_Object
 {
     /**

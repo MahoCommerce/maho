@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Abstract Rule entity resource collection model
- *
- * @package    Mage_Rule
- */
 abstract class Mage_Rule_Model_Resource_Rule_Collection_Abstract extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     /**

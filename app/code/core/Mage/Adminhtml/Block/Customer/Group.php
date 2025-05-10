@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml customers group page content block
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Customer_Group extends Mage_Adminhtml_Block_Widget_Grid_Container //Mage_Adminhtml_Block_Template
 {
     /**

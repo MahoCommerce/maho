@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Reports Product Index Abstract Product Resource Collection
- *
- * @package    Mage_Reports
- */
 abstract class Mage_Reports_Model_Resource_Product_Index_Collection_Abstract extends Mage_Catalog_Model_Resource_Product_Collection
 {
     /**

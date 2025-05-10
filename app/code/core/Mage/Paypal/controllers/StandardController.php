@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Paypal Standard Checkout Controller
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_StandardController extends Mage_Core_Controller_Front_Action
 {
     /**

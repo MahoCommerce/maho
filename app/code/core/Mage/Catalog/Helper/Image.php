@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog image helper
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
 {
     public const XML_NODE_PRODUCT_BASE_IMAGE_WIDTH = 'catalog/product_image/base_width';

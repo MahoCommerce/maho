@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog Product Url helper
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Helper_Product_Url extends Mage_Core_Helper_Url
 {
     protected $_moduleName = 'Mage_Catalog';

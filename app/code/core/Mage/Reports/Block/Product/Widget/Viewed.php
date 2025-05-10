@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Reports Recently Viewed Products Widget
- *
- * @package    Mage_Reports
- */
 class Mage_Reports_Block_Product_Widget_Viewed extends Mage_Reports_Block_Product_Viewed implements Mage_Widget_Block_Interface
 {
     #[\Override]

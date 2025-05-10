@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * CMS Observer model
- *
- * @package    Mage_Cms
- */
 class Mage_Cms_Model_Observer
 {
     /**

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Notifications about not correct tax settings
- *
- * @package    Mage_Tax
- */
 class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Template
 {
     /**

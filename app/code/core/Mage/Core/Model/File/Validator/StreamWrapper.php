@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Validator for check is stream wrapper allowed
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_File_Validator_StreamWrapper
 {
     /**

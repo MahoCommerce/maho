@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Shopping cart helper
- *
- * @package    Mage_Checkout
- */
 class Mage_Checkout_Helper_Cart extends Mage_Core_Helper_Url
 {
     /**

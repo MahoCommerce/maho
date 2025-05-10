@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml group price item abstract renderer
- *
- * @package    Mage_Adminhtml
- */
 abstract class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Price_Group_Abstract extends Mage_Adminhtml_Block_Widget implements Varien_Data_Form_Element_Renderer_Interface
 {
     /**

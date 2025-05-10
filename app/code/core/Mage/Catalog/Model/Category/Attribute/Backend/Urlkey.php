@@ -9,9 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Category url key attribute backend
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Category_Attribute_Backend_Urlkey extends Mage_Catalog_Model_Attribute_Backend_Urlkey_Abstract {}

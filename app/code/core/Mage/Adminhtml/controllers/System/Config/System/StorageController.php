@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml account controller
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_System_Config_System_StorageController extends Mage_Adminhtml_Controller_Action
 {
     /**

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Abstract model for product type implementation
- *
- * @package    Mage_Catalog
- */
 abstract class Mage_Catalog_Model_Product_Type_Abstract
 {
     /**

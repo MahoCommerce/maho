@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Review resource model
- *
- * @package    Mage_Review
- */
 class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**

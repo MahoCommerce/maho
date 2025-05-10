@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Address Total Collector model
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Model_Quote_Address_Total_Collector extends Mage_Sales_Model_Config_Ordered
 {
     /**

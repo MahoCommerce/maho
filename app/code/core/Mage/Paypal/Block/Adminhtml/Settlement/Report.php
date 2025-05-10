@@ -11,11 +11,6 @@
  */
 
 
-/**
- * Adminhtml paypal settlement reports grid block
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Block_Adminhtml_Settlement_Report extends Mage_Adminhtml_Block_Widget_Grid_Container
 {
     public function __construct()

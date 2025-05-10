@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Source model of forgot password flow requests options types
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Model_System_Config_Source_Customer_Forgotpassword
 {
     public const FORGOTPASS_FLOW_DISABLED  = 0;

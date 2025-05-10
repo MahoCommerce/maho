@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Default rss helper
- *
- * @package    Mage_Rss
- */
 class Mage_Rss_Helper_Catalog extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Mage_Rss';

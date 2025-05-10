@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Helper for coupon codes creating and managing
- *
- * @package    Mage_SalesRule
- */
 class Mage_SalesRule_Helper_Coupon extends Mage_Core_Helper_Abstract
 {
     /**

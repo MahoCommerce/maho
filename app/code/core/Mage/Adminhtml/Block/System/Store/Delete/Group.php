@@ -11,11 +11,6 @@
  */
 
 
-/**
- * Adminhtml store delete group block
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_System_Store_Delete_Group extends Mage_Adminhtml_Block_Template
 {
     #[\Override]

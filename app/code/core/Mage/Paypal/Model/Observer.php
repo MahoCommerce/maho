@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * PayPal module observer
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Model_Observer
 {
     /**

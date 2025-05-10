@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Review status
- *
- * @package    Mage_Review
- */
 class Mage_Review_Model_Review_Status extends Mage_Core_Model_Abstract
 {
     public function __construct()

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Class Mage_Catalog_Model_Config
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Config extends Mage_Eav_Model_Config
 {
     public const XML_PATH_LIST_DEFAULT_SORT_BY     = 'catalog/frontend/default_sort_by';

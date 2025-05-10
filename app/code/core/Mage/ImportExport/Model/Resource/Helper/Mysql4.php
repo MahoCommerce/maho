@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * ImportExport MySQL resource helper model
- *
- * @package    Mage_ImportExport
- */
 class Mage_ImportExport_Model_Resource_Helper_Mysql4 extends Mage_Core_Model_Resource_Helper_Mysql4
 {
     /**

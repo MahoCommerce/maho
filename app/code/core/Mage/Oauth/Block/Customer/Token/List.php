@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customer My Applications list block
- *
- * @package    Mage_Oauth
- */
 class Mage_Oauth_Block_Customer_Token_List extends Mage_Customer_Block_Account_Dashboard
 {
     /**

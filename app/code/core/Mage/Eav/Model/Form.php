@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * EAV Entity Form Model
- *
- * @package    Mage_Eav
- */
 abstract class Mage_Eav_Model_Form
 {
     /**

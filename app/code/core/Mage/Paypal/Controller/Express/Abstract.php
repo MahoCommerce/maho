@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Abstract Express Checkout Controller
- *
- * @package    Mage_Paypal
- */
 abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Controller_Front_Action
 {
     /**

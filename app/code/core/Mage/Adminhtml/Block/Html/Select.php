@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml HTML select element block
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Html_Select extends Mage_Core_Block_Html_Select
 {
     /**

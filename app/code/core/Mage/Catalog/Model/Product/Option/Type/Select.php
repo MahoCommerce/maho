@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog product option select type
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_Product_Option_Type_Default
 {
     /**
