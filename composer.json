@@ -74,6 +74,9 @@
         "fballiano/openmage-defer-javascripts":  "Move all javascripts to the end of all pages, preserving execution order",
         "fballiano/openmage-cloudflare-turnstile": "Turnstile: Cloudflare captcha-like antispam solution"
     },
+    "conflict": {
+        "colinmollenhour/cache-backend-redis": "*"
+    },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "autoload": {
