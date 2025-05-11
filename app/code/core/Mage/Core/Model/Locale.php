@@ -153,7 +153,7 @@ class Mage_Core_Model_Locale
     public function getLocale()
     {
         if (!$this->_locale) {
-            Zend_Locale_Data::setCache(Mage::app()->getCache());
+            //Zend_Locale_Data::setCache(Mage::app()->getCache());
             $this->_locale = new Zend_Locale($this->getLocaleCode());
         } elseif ($this->_locale->__toString() != $this->_localeCode) {
             $this->setLocale($this->_localeCode);

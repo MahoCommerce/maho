@@ -46,7 +46,8 @@
         "mahocommerce/icons": "^1",
         "symfony/mailer": "^7.2",
         "symfony/polyfill-php84": "^1.31",
-        "intervention/image": "^3.11"
+        "intervention/image": "^3.11",
+        "symfony/cache": "^7.2"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "*",
@@ -68,11 +69,13 @@
         "phpstan/phpstan-deprecation-rules": "^2.0"
     },
     "suggest": {
-        "colinmollenhour/cache-backend-redis": "Redis support for Maho's backend cache",
         "colinmollenhour/magento-redis-session": "Redis support for PHP sessions",
         "fballiano/openmage-cssjs-minify":  "Minification support for CSS/JS",
         "fballiano/openmage-defer-javascripts":  "Move all javascripts to the end of all pages, preserving execution order",
         "fballiano/openmage-cloudflare-turnstile": "Turnstile: Cloudflare captcha-like antispam solution"
+    },
+    "conflict": {
+        "colinmollenhour/cache-backend-redis": "*"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,

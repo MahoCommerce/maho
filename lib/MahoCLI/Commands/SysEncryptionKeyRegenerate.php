@@ -49,7 +49,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $this->initMaho();
 
         // Disable config cache for current run
-        Mage::app()->getCacheInstance()->banUse('config');
+        Mage::app()->getCache()->banUse('config');
         Mage::app()->getConfig()->reinit();
 
         $oldKey = $this->oldEncryptionKey = Mage::getEncryptionKeyAsHex();
@@ -119,14 +119,14 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
         $this->recryptAdminUserTable($output, $readConnection, $writeConnection);
         $this->recryptCoreConfigDataTable($output, $readConnection, $writeConnection);
-        Mage::app()->getCacheInstance()->clean('config');
+        Mage::app()->getCache()->clean('config');
 
         Mage::dispatchEvent('encryption_key_regenerated', [
             'output' => $output,
             'encrypt_callback' => [$this, 'encrypt'],
             'decrypt_callback' => [$this, 'decrypt'],
         ]);
-        Mage::app()->getCacheInstance()->clean('config');
+        Mage::app()->getCache()->clean('config');
 
         if (\Composer\InstalledVersions::isInstalled('mahocommerce/module-mcrypt-compat')) {
             $output->writeln('');
