@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Core configuration class
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 {
     public const MAGE_MODULES = [
@@ -444,7 +439,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     /**
      * Reinitialize configuration
      *
-     * @param   array $options
+     * @param   Mage_Core_Model_Config_Options|array $options
      * @return  $this
      */
     public function reinit($options = [])
@@ -469,9 +464,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     }
 
     /**
-     * Retrieve cache object
-     *
-     * @return Zend_Cache_Core
+     * @return Mage_Core_Model_Cache
      */
     #[\Override]
     public function getCache()
@@ -1566,7 +1559,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                 case 'name':
                     $key = (string) $store->descend('system/store/name');
             }
-            if ($key === false) {
+            if (!isset($key) || $key === false) {
                 continue;
             }
 

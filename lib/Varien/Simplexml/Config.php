@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Base class for simplexml based configurations
- *
- * @package    Varien_Simplexml
- */
 class Varien_Simplexml_Config
 {
     /**
@@ -52,7 +47,7 @@ class Varien_Simplexml_Config
     /**
      * Cache resource object
      *
-     * @var Varien_Simplexml_Config_Cache_Abstract
+     * @var Mage_Core_Model_Cache
      */
     protected $_cache = null;
 
@@ -142,18 +137,14 @@ class Varien_Simplexml_Config
         return $result;
     }
 
-    /**
-     * @param Varien_Simplexml_Config_Cache_Abstract $cache
-     * @return $this
-     */
-    public function setCache($cache)
+    public function setCache(Mage_Core_Model_Cache $cache): self
     {
         $this->_cache = $cache;
         return $this;
     }
 
     /**
-     * @return Varien_Simplexml_Config_Cache_Abstract
+     * @return Mage_Core_Model_Cache
      */
     public function getCache()
     {

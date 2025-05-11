@@ -11,9 +11,6 @@
 
 /**
  * Converter of date formats
- * Internal dates
- *
- * @package  Varien_Date
  */
 class Varien_Date
 {

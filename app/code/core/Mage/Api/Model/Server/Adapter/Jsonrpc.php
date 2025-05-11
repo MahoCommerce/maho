@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Api
- */
 class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mage_Api_Model_Server_Adapter_Interface
 {
     protected $_jsonRpc = null;

@@ -13,8 +13,6 @@
  * Payment configuration model
  *
  * Used for retrieving configuration data by payment models
- *
- * @package    Mage_Payment
  */
 class Mage_Payment_Model_Config
 {

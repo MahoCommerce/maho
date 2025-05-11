@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Directory storage database resource model class
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Resource_File_Storage_Directory_Database extends Mage_Core_Model_Resource_File_Storage_Abstract
 {
     /**
@@ -118,7 +113,7 @@ class Mage_Core_Model_Resource_File_Storage_Directory_Database extends Mage_Core
      * Return parent id
      *
      * @param string $path
-     * @return int
+     * @return string
      */
     public function getParentId($path)
     {

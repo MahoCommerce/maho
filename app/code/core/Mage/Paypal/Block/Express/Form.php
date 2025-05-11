@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * PayPal Standard payment "form"
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Block_Express_Form extends Mage_Paypal_Block_Standard_Form
 {
     /**

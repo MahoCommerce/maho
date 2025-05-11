@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Index
- */
 class Mage_Index_Model_Observer
 {
     public const OLD_INDEX_EVENT_THRESHOLD_SECONDS = 24 * 60 * 60;

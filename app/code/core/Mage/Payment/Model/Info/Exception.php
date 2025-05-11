@@ -13,7 +13,5 @@
  * Core Session Exception
  *
  * Allows dispatching before and after events for each controller action
- *
- * @package    Mage_Payment
  */
 class Mage_Payment_Model_Info_Exception extends Mage_Core_Exception {}

@@ -5,7 +5,7 @@
  *
  * @package    Mage_Newsletter
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -165,7 +165,7 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
             $this->setTemplateTextPreprocessed($this->getProcessedTemplate());
         }
 
-        return $this->getData('template_text_preprocessed');
+        return (string) $this->getData('template_text_preprocessed');
     }
 
     /**

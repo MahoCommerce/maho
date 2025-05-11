@@ -40,7 +40,7 @@ class EmailTestSend extends BaseMahoCommand
         $emailTemplate
             ->setSenderName(Mage::getStoreConfig('trans_email/ident_general/name'))
             ->setSenderEmail(Mage::getStoreConfig('trans_email/ident_general/email'))
-            ->setTemplateType('text')
+            ->setTemplateType(\Mage_Core_Model_Template::TYPE_TEXT)
             ->setTemplateText('This is just a test.')
             ->setTemplateSubject('Test email');
         $retult = $emailTemplate->send($recipient, 'Test email');

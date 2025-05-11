@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Mustishipping checkout shipping
- *
- * @package    Mage_Checkout
- */
 class Mage_Checkout_Block_Multishipping_Shipping extends Mage_Sales_Block_Items_Abstract
 {
     /**

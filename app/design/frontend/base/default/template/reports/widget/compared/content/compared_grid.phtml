@@ -19,7 +19,7 @@
     <div class="widget-products">
         <?php $_columnCount = $this->getColumnCount(); ?>
         <?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])); ?>
-        <?php $i=0; ?>
+        <?php $i = 0 ?>
         <ul class="products-grid products-grid--max-<?= $_columnCount ?>-col-widget">
             <?php foreach ($_products as $_product): ?>
                 <li class="item">

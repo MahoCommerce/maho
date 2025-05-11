@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Filter for removing malicious code from HTML
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Input_Filter_MaliciousCode implements Zend_Filter_Interface
 {
     /**

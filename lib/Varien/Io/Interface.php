@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Input/output client interface
- *
- * @package    Varien_Io
- */
 interface Varien_Io_Interface
 {
     /**

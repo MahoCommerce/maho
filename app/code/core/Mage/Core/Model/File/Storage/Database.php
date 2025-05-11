@@ -10,10 +10,6 @@
  */
 
 /**
- * File storage database model class
- *
- * @package    Mage_Core
- *
  * @method Mage_Core_Model_Resource_File_Storage_Database _getResource()
  * @method Mage_Core_Model_Resource_File_Storage_Database getResource()
  * @method string getConnectionName()

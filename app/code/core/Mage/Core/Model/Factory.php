@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Core
- */
 class Mage_Core_Model_Factory
 {
     /**
@@ -100,7 +97,9 @@ class Mage_Core_Model_Factory
      */
     public function getUrlRewriteInstance()
     {
-        return $this->getModel($this->getUrlRewriteClassAlias());
+        /** @var Mage_Core_Model_Url_Rewrite $model */
+        $model = $this->getModel($this->getUrlRewriteClassAlias());
+        return $model;
     }
 
     /**

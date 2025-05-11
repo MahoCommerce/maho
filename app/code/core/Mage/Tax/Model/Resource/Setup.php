@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Tax Setup Resource Model
- *
- * @package    Mage_Tax
- */
 class Mage_Tax_Model_Resource_Setup extends Mage_Sales_Model_Resource_Setup
 {
     /**

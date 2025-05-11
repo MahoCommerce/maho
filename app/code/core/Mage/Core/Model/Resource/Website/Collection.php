@@ -11,10 +11,6 @@
  */
 
 /**
- * Websites collection
- *
- * @package    Mage_Core
- *
  * @method Mage_Core_Model_Website getItemById(int $value)
  * @method Mage_Core_Model_Website[] getItems()
  */

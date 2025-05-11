@@ -14,8 +14,6 @@
  * Application model
  *
  * Application should have: areas, store, locale, translator, design package
- *
- * @package    Mage_Core
  */
 class Mage_Core_Model_App
 {
@@ -192,7 +190,7 @@ class Mage_Core_Model_App
     /**
      * Response object
      *
-     * @var Zend_Controller_Response_Http
+     * @var Mage_Core_Controller_Response_Http
      */
     protected $_response;
 
@@ -335,23 +333,19 @@ class Mage_Core_Model_App
         $this->baseInit($options);
         Mage::register('application_params', $params);
 
-        if ($this->_cache->processRequest()) {
-            $this->getResponse()->sendResponse();
-        } else {
-            $this->_initModules();
-            $this->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
+        $this->_initModules();
+        $this->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
 
-            if ($this->_config->isLocalConfigLoaded()) {
-                $scopeCode = $params['scope_code'] ?? '';
-                $scopeType = $params['scope_type'] ?? 'store';
-                $this->_initCurrentStore($scopeCode, $scopeType);
-                $this->_initRequest();
-                Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
-                Mage_Core_Model_Resource_Setup::applyAllMahoUpdates();
-            }
-
-            $this->getFrontController()->dispatch();
+        if ($this->_config->isLocalConfigLoaded()) {
+            $scopeCode = $params['scope_code'] ?? '';
+            $scopeType = $params['scope_type'] ?? 'store';
+            $this->_initCurrentStore($scopeCode, $scopeType);
+            $this->_initRequest();
+            Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
+            Mage_Core_Model_Resource_Setup::applyAllMahoUpdates();
         }
+
+        $this->getFrontController()->dispatch();
 
         // Finish the request explicitly, no output allowed beyond this point
         if (php_sapi_name() == 'fpm-fcgi' && function_exists('fastcgi_finish_request')) {
@@ -511,7 +505,7 @@ class Mage_Core_Model_App
             $this->_checkCookieStore($scopeType);
             $this->_checkGetStore($scopeType);
         }
-        $this->_useSessionInUrl = $this->getStore()->getConfig(
+        $this->_useSessionInUrl = (bool) $this->getStore()->getConfig(
             Mage_Core_Model_Session_Abstract::XML_PATH_USE_FRONTEND_SID,
         );
         return $this;
@@ -785,7 +779,7 @@ class Mage_Core_Model_App
     /**
      * Redeclare custom error handler
      *
-     * @param   string $handler
+     * @param   callable|null $handler
      * @return  $this
      */
     public function setErrorHandler($handler)
@@ -1143,11 +1137,14 @@ class Mage_Core_Model_App
     }
 
     /**
-     * Get core cache model
-     *
-     * @return Mage_Core_Model_Cache
+     * @deprecated since 25.5, use getCache()
      */
-    public function getCacheInstance()
+    public function getCacheInstance(): Mage_Core_Model_Cache
+    {
+        return $this->getCache();
+    }
+
+    public function getCache(): Mage_Core_Model_Cache
     {
         if (!$this->_cache) {
             $this->_initCache();
@@ -1156,25 +1153,9 @@ class Mage_Core_Model_App
     }
 
     /**
-     * Retrieve cache object
-     *
-     * @return Zend_Cache_Core
-     */
-    public function getCache()
-    {
-        if (!$this->_cache) {
-            $this->_initCache();
-        }
-        return $this->_cache->getFrontend();
-    }
-
-    /**
      * Loading cache data
-     *
-     * @param   string $id
-     * @return  string|false
      */
-    public function loadCache($id)
+    public function loadCache(string $id): mixed
     {
         return $this->_cache->load($id);
     }
@@ -1196,11 +1177,8 @@ class Mage_Core_Model_App
 
     /**
      * Test cache record availability
-     *
-     * @param   string $id
-     * @return  false|int
      */
-    public function testCache($id)
+    public function testCache(string $id): bool
     {
         return $this->_cache->test($id);
     }

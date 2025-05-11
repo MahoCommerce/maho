@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml sales order create billing address block
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Sales_Order_Create_Billing_Address extends Mage_Adminhtml_Block_Sales_Order_Create_Form_Address
 {
     /**
@@ -80,7 +75,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Billing_Address extends Mage_Admin
     /**
      * Return billing address object
      *
-     * @return Mage_Customer_Model_Address
+     * @return Mage_Sales_Model_Quote_Address
      */
     public function getAddress()
     {

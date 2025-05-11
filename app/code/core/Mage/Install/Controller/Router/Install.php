@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Install
- */
 class Mage_Install_Controller_Router_Install extends Mage_Core_Controller_Varien_Router_Standard
 {
     /**

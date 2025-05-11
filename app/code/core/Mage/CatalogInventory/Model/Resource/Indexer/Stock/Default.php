@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * CatalogInventory Default Stock Status Indexer Resource Model
- *
- * @package    Mage_CatalogInventory
- */
 class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default extends Mage_Catalog_Model_Resource_Product_Indexer_Abstract implements Mage_CatalogInventory_Model_Resource_Indexer_Stock_Interface
 {
     /**

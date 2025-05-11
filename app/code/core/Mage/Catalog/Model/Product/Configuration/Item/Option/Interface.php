@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Interface of product configurational item option
- *
- * @package    Mage_Catalog
- */
 interface Mage_Catalog_Model_Product_Configuration_Item_Option_Interface
 {
     /**

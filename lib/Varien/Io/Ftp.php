@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * FTP client
- *
- * @package    Varien_Io
- */
 class Varien_Io_Ftp extends Varien_Io_Abstract
 {
     public const ERROR_EMPTY_HOST = 1;

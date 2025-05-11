@@ -11,10 +11,6 @@
  */
 
 /**
- * Class Mage_Sales_Model_Quote_Address_Total
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Quote_Address getAddress()
  * @method $this setAddress(Mage_Sales_Model_Quote_Address $value)
  * @method string getCode()

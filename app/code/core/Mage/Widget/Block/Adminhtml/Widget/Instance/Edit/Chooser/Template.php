@@ -13,8 +13,6 @@
 /**
  * Widget Instance template chooser
  *
- * @package    Mage_Widget
- *
  * @method string getSelected()
  * @method $this setSelected(string $value)
  * @method array getWidgetTemplates()

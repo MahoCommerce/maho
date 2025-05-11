@@ -5,18 +5,13 @@
  *
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 use Mage_Customer_Helper_Data as Helper;
 
-/**
- * Customer account controller
- *
- * @package    Mage_Customer
- */
 class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 {
     public const CUSTOMER_ID_SESSION_NAME = 'customerId';

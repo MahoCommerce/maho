@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Sales resource helper interface
- *
- * @package    Mage_Sales
- */
 interface Mage_Sales_Model_Resource_Helper_Interface
 {
     /**

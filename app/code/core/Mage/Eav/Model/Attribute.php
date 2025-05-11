@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * EAV attribute resource model (Using Forms)
- *
- * @package    Mage_Eav
- */
 abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
 {
     /**

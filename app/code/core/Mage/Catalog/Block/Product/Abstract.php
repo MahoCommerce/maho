@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog Product Abstract Block
- *
- * @package    Mage_Catalog
- */
 abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Template
 {
     /**

@@ -6,15 +6,11 @@
  * @package    Mage_CatalogSearch
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
- * Catalog advanced search model
- *
- * @package    Mage_CatalogSearch
- *
  * @method Mage_CatalogSearch_Model_Resource_Fulltext _getResource()
  * @method Mage_CatalogSearch_Model_Resource_Fulltext getResource()
  * @method Mage_CatalogSearch_Model_Resource_Fulltext_Collection getCollection()
@@ -33,14 +29,6 @@ class Mage_CatalogSearch_Model_Fulltext extends Mage_Core_Model_Abstract
     public const SEARCH_TYPE_COMBINE           = 3;
     public const XML_PATH_CATALOG_SEARCH_TYPE  = 'catalog/search/search_type';
     public const XML_PATH_CATALOG_SEARCH_SEPARATOR  = 'catalog/search/search_separator';
-
-    /**
-     * Whether table changes are allowed
-     *
-     * @deprecated after 1.6.1.0
-     * @var bool
-     */
-    protected $_allowTableChanges = true;
 
     #[\Override]
     protected function _construct()
@@ -134,37 +122,5 @@ class Mage_CatalogSearch_Model_Fulltext extends Mage_Core_Model_Abstract
     public function getSearchType($storeId = null)
     {
         return Mage::getStoreConfig(self::XML_PATH_CATALOG_SEARCH_TYPE, $storeId);
-    }
-
-    // Deprecated methods
-
-    /**
-     * Set whether table changes are allowed
-     *
-     * @deprecated after 1.6.1.0
-     *
-     * @param bool $value
-     * @return $this
-     */
-    public function setAllowTableChanges($value = true)
-    {
-        $this->_allowTableChanges = $value;
-        return $this;
-    }
-
-    /**
-     * Update category products indexes
-     *
-     * @deprecated after 1.6.2.0
-     *
-     * @param array $productIds
-     * @param array $categoryIds
-     *
-     * @return $this
-     */
-    public function updateCategoryIndex($productIds, $categoryIds)
-    {
-        $this->getResource()->updateCategoryIndex($productIds, $categoryIds);
-        return $this;
     }
 }

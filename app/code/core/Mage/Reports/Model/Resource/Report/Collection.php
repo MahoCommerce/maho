@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Report Reviews collection
- *
- * @package    Mage_Reports
- */
 class Mage_Reports_Model_Resource_Report_Collection
 {
     /**
@@ -251,8 +246,8 @@ class Mage_Reports_Model_Resource_Report_Collection
     /**
      * get report full
      *
-     * @param int $from
-     * @param int $to
+     * @param string $from
+     * @param string $to
      * @return Mage_Reports_Model_Report
      */
     public function getReportFull($from, $to)
@@ -263,8 +258,8 @@ class Mage_Reports_Model_Resource_Report_Collection
     /**
      * Get report
      *
-     * @param int $from
-     * @param int $to
+     * @param string $from
+     * @param string $to
      * @return Mage_Reports_Model_Report
      */
     public function getReport($from, $to)

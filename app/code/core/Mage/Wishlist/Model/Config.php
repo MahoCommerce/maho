@@ -9,9 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Wishlist
- */
 class Mage_Wishlist_Model_Config
 {
     public const XML_PATH_PRODUCT_ATTRIBUTES = 'global/wishlist/item/product_attributes';

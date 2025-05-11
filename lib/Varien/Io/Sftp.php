@@ -5,19 +5,13 @@
  *
  * @package    Varien_Io
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 use phpseclib3\Net\SFTP;
 
-/**
- * Sftp client interface
- *
- * @package    Varien_Io
- * @link        http://www.php.net/manual/en/function.ssh2-connect.php
- */
 class Varien_Io_Sftp extends Varien_Io_Abstract implements Varien_Io_Interface
 {
     public const REMOTE_TIMEOUT = 10;

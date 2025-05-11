@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog Product visibilite model and attribute source model
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Product_Visibility extends Varien_Object
 {
     public const VISIBILITY_NOT_VISIBLE    = 1;

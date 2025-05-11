@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Abstract lock storage
- *
- * @package    Mage_Index
- */
 interface Mage_Index_Model_Lock_Storage_Interface
 {
     /**

@@ -11,10 +11,6 @@
  */
 
 /**
- * Eav attribute set model
- *
- * @package    Mage_Eav
- *
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Set _getResource()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Set getResource()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Set_Collection getCollection()
@@ -246,7 +242,7 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
      * Return default Group Id for current or defined Attribute Set
      *
      * @param int $setId
-     * @return int|null
+     * @return string|null
      */
     public function getDefaultGroupId($setId = null)
     {

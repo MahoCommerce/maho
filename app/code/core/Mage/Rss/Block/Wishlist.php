@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customer Shared Wishlist Rss Block
- *
- * @package    Mage_Rss
- */
 class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
 {
     /**

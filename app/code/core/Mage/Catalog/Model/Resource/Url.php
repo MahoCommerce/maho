@@ -5,16 +5,11 @@
  *
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog url rewrite resource model
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
@@ -754,7 +749,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
         }
         unset($rowSet);
 
-        if ($storeId !== null && $categories) {
+        if (isset($category) && $storeId !== null && $categories) {
             foreach (['name', 'url_key', 'url_path'] as $attributeCode) {
                 $attributes = $this->_getCategoryAttribute(
                     $attributeCode,

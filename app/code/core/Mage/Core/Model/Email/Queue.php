@@ -16,10 +16,6 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Address;
 
 /**
- * Email Template Mailer Model
- *
- * @package    Mage_Core
- *
  * @method Mage_Core_Model_Resource_Email_Queue _getResource()
  * @method Mage_Core_Model_Resource_Email_Queue_Collection getCollection()
  * @method $this setCreatedAt(string $value)

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog category helper
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Helper_Product_View extends Mage_Core_Helper_Abstract
 {
     // List of exceptions throwable during prepareAndRender() method

@@ -5,16 +5,11 @@
  *
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog Layer Price Filter resource model
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
@@ -288,9 +283,9 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
      *
      * @param Mage_Catalog_Model_Layer_Filter_Price $filter
      * @param int $limit
-     * @param null|int $offset
-     * @param null|float $lowerPrice
-     * @param null|float $upperPrice
+     * @param int|null $offset
+     * @param float|null $lowerPrice
+     * @param float|null $upperPrice
      * @return array
      */
     public function loadPrices($filter, $limit, $offset = null, $lowerPrice = null, $upperPrice = null)
@@ -342,7 +337,7 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
      * @param Mage_Catalog_Model_Layer_Filter_Price $filter
      * @param float $price
      * @param int $rightIndex
-     * @param null|int $upperPrice
+     * @param float|null $upperPrice
      * @return array|false
      */
     public function loadNextPrices($filter, $price, $rightIndex, $upperPrice = null)

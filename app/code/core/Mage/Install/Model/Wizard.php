@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Installation wizard model
- *
- * @package    Mage_Install
- */
 class Mage_Install_Model_Wizard
 {
     /**

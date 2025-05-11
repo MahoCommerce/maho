@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Application area model
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_App_Area
 {
     public const AREA_GLOBAL   = 'global';

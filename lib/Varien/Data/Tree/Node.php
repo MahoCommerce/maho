@@ -11,8 +11,6 @@
  */
 
 /**
- * Data tree node
- *
  * @method int getLevel()
  * @method string getClass()
  * @method string getPositionClass()
@@ -21,8 +19,6 @@
  * @method $this setChildrenWrapClass(string $class)
  * @method bool getIsFirst()
  * @method bool getIsLast()
- *
- * @package    Varien_Data
  */
 class Varien_Data_Tree_Node extends Varien_Object
 {

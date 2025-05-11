@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Widget to display link to the category
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Block_Category_Widget_Link extends Mage_Catalog_Block_Widget_Link
 {
     /**

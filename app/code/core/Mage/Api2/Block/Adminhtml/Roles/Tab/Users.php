@@ -13,8 +13,6 @@
 /**
  * Block for rendering users list tab
  *
- * @package    Mage_Api2
- *
  * @method Mage_Admin_Model_Resource_User_Collection getCollection()
  * @method Mage_Api2_Model_Acl_Global_Role getRole()
  * @method $this setRole(Mage_Api2_Model_Acl_Global_Role $role)

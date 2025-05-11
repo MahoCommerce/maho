@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Abstract USA shipping carrier model
- *
- * @package    Mage_Usa
- */
 abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Model_Carrier_Abstract
 {
     public const USA_COUNTRY_ID = 'US';

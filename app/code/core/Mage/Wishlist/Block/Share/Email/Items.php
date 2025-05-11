@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Wishlist block customer items
- *
- * @package    Mage_Wishlist
- */
 class Mage_Wishlist_Block_Share_Email_Items extends Mage_Wishlist_Block_Abstract
 {
     /**

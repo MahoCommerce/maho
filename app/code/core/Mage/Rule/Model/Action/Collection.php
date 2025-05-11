@@ -11,10 +11,6 @@
  */
 
 /**
- * Class Mage_Rule_Model_Action_Collection
- *
- * @package    Mage_Rule
- *
  * @method array getActions()
  * @method $this setActions(array $value)
  * @method $this setType(string $value)

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog category landing page attribute source
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Category_Attribute_Source_Page extends Mage_Eav_Model_Entity_Attribute_Source_Abstract
 {
     /**

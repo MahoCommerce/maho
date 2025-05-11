@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml customers wishlist grid item action renderer for few action controls in one cell
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Customer_Grid_Renderer_Multiaction extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Action
 {
     /**

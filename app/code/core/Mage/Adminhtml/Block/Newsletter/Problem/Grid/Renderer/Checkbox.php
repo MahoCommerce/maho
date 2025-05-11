@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml newsletter subscribers grid checkbox item renderer
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Newsletter_Problem_Grid_Renderer_Checkbox extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     /**

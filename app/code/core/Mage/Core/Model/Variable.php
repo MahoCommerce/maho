@@ -11,10 +11,6 @@
  */
 
 /**
- * Custom variable model
- *
- * @package    Mage_Core
- *
  * @method Mage_Core_Model_Resource_Variable _getResource()
  * @method Mage_Core_Model_Resource_Variable getResource()
  * @method string getCode()

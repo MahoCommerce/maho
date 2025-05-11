@@ -14,8 +14,6 @@
  * Custom Zend_Controller_Action class (formally)
  *
  * Allows dispatching before and after events for each controller action
- *
- * @package    Mage_Core
  */
 abstract class Mage_Core_Controller_Varien_Action
 {

@@ -8,9 +8,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Core
- */
 class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
 {
     public const CACHE_DEFINITION = 'Cache.DefinitionImpl';

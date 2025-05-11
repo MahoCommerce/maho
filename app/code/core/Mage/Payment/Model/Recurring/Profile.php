@@ -14,8 +14,6 @@
  * Recurring payment profile
  * Extends from Mage_Core_Abstract for a reason: to make descendants have its own resource
  *
- * @package    Mage_Payment
- *
  * @method float getBillingAmount()
  * @method string getCurrencyCode()
  * @method bool getStartDateIsEditable()

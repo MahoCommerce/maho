@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog Layer Decimal attribute Filter Resource Model
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Resource_Layer_Filter_Decimal extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]

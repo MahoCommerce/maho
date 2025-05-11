@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * One page checkout order review
- *
- * @package    Mage_Checkout
- */
 class Mage_Checkout_Block_Onepage_Review_Info extends Mage_Sales_Block_Items_Abstract
 {
     /**

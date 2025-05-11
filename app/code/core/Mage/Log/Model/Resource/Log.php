@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Log Resource Model
- *
- * @package    Mage_Log
- */
 class Mage_Log_Model_Resource_Log extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]

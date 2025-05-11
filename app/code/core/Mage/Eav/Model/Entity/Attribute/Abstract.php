@@ -11,10 +11,6 @@
  */
 
 /**
- * Entity/Attribute/Model - attribute abstract
- *
- * @package    Mage_Eav
- *
  * @method bool hasAttributeSetInfo()
  * @method array getAttributeSetInfo()
  * @method $this setAttributeSetInfo(array $value)

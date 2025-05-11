@@ -9,9 +9,6 @@
  * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
  */
 
-/**
- * @package    Mage_Reports
- */
 class Mage_Reports_Model_Observer
 {
     /**

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Bundle Price Model
- *
- * @package    Mage_Bundle
- */
 class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Price
 {
     /**
@@ -544,7 +539,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * @param Mage_Catalog_Model_Product $bundleProduct
      * @param Mage_Catalog_Model_Product $selectionProduct
      * @param float $bundleQty
-     * @param float $selectionQty
+     * @param float|null $selectionQty
      * @param bool $multiplyQty
      * @param bool $takeTierPrice
      * @return float

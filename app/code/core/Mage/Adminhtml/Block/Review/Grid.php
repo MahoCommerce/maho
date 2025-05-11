@@ -12,11 +12,6 @@
 
 use Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract as MassAction;
 
-/**
- * Adminhtml reviews grid
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Review_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
     public function __construct()

@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Block_Standard_Redirect extends Mage_Core_Block_Abstract
 {
     #[\Override]

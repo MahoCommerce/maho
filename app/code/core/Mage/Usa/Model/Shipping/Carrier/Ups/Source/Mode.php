@@ -10,9 +10,6 @@
  */
 
 /**
- * UPS (UPS XML) mode source model
- *
- * @package    Mage_Usa
  * @deprecated  since 1.7.0.0
  */
 class Mage_Usa_Model_Shipping_Carrier_Ups_Source_Mode

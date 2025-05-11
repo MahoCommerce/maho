@@ -11,10 +11,6 @@
  */
 
 /**
- * Base html block
- *
- * @package    Mage_Core
- *
  * @method string getTheme()
  */
 class Mage_Core_Block_Text_Tag_Css_Admin extends Mage_Core_Block_Text_Tag_Css

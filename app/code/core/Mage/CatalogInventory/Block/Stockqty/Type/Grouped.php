@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Product stock qty block for grouped product type
- *
- * @package    Mage_CatalogInventory
- */
 class Mage_CatalogInventory_Block_Stockqty_Type_Grouped extends Mage_CatalogInventory_Block_Stockqty_Composite
 {
     /**

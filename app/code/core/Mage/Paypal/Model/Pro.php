@@ -13,8 +13,6 @@
 /**
  * PayPal Website Payments Pro implementation for payment method instances
  * This model was created because right now PayPal Direct and PayPal Express payment methods cannot have same abstract
- *
- * @package    Mage_Paypal
  */
 class Mage_Paypal_Model_Pro
 {
@@ -75,7 +73,10 @@ class Mage_Paypal_Model_Pro
             if ($storeId !== null) {
                 $params[] = $storeId;
             }
-            $this->_config = Mage::getModel($this->_configType, $params);
+
+            /** @var Mage_Paypal_Model_Config $model */
+            $model = Mage::getModel($this->_configType, $params);
+            $this->_config = $model;
         } else {
             $this->_config->setMethod($code);
             if ($storeId !== null) {

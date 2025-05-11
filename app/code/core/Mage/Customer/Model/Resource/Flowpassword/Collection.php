@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customer flow password info collection
- *
- * @package    Mage_Customer
- */
 class Mage_Customer_Model_Resource_Flowpassword_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     #[\Override]

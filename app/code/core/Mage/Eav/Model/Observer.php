@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Class Mage_Eav_Model_Observer
- *
- * @package    Mage_Eav
- */
 class Mage_Eav_Model_Observer
 {
     /**

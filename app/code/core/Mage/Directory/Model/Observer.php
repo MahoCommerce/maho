@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Directory module observer
- *
- * @package    Mage_Directory
- */
 class Mage_Directory_Model_Observer
 {
     public const CRON_STRING_PATH = 'crontab/jobs/currency_rates_update/schedule/cron_expr';
@@ -45,6 +40,10 @@ class Mage_Directory_Model_Observer
             $importModel = Mage::getModel(Mage::getConfig()->getNode('global/currency/import/services/' . $service . '/model')->asArray());
         } catch (Exception $e) {
             $importWarnings[] = Mage::helper('directory')->__('FATAL ERROR:') . ' ' . Mage::throwException(Mage::helper('directory')->__('Unable to initialize the import model.'));
+        }
+
+        if (!isset($importModel)) {
+            return;
         }
 
         $rates = $importModel->fetchRates();

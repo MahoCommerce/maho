@@ -10,23 +10,20 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Index Setup Model
- *
- * @package    Mage_Index
- */
 class Mage_Index_Model_Resource_Setup extends Mage_Core_Model_Resource_Setup
 {
     /**
      * Apply Index module DB updates and sync indexes declaration
      *
-     * @return void
+     * @return $this
      */
     #[\Override]
     public function applyUpdates()
     {
         parent::applyUpdates();
         $this->_syncIndexes();
+
+        return $this;
     }
 
     /**

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Class implementing price change for swatches in product listing pages
- *
- * @package    Mage_ConfigurableSwatches
- */
 class Mage_ConfigurableSwatches_Helper_List_Price extends Mage_Core_Helper_Abstract
 {
     /**

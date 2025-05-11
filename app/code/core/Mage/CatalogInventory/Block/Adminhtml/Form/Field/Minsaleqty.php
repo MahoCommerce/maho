@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml catalog inventory "Minimum Qty Allowed in Shopping Cart" field
- *
- * @package    Mage_CatalogInventory
- */
 class Mage_CatalogInventory_Block_Adminhtml_Form_Field_Minsaleqty extends Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract
 {
     /**
@@ -30,11 +25,13 @@ class Mage_CatalogInventory_Block_Adminhtml_Form_Field_Minsaleqty extends Mage_A
     protected function _getGroupRenderer()
     {
         if (!$this->_groupRenderer) {
-            $this->_groupRenderer = $this->getLayout()->createBlock(
+            /** @var Mage_CatalogInventory_Block_Adminhtml_Form_Field_Customergroup $block */
+            $block = $this->getLayout()->createBlock(
                 'cataloginventory/adminhtml_form_field_customergroup',
                 '',
                 ['is_render_to_js_template' => true],
             );
+            $this->_groupRenderer = $block;
             $this->_groupRenderer->setClass('customer_group_select');
             $this->_groupRenderer->setExtraParams('style="width:120px"');
         }

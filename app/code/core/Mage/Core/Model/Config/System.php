@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Model for working with system.xml module files
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Config_System extends Mage_Core_Model_Config_Base
 {
     /**

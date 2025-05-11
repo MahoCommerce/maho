@@ -11,10 +11,6 @@
  */
 
 /**
- * Url rewrite model class
- *
- * @package    Mage_Core
- *
  * @method Mage_Core_Model_Resource_Url_Rewrite _getResource()
  * @method Mage_Core_Model_Resource_Url_Rewrite getResource()
  * @method Mage_Core_Model_Resource_Url_Rewrite_Collection getResourceCollection()
@@ -228,6 +224,7 @@ class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Ma
         $pathInfo = $request->getPathInfo();
         $origSlash = (str_ends_with($pathInfo, '/')) ? '/' : '';
         $requestPath = trim($pathInfo, '/');
+        $targetUrl = '';
 
         // If there were final slash - add nothing to less priority paths. And vice versa.
         $altSlash = $origSlash ? '' : '/';

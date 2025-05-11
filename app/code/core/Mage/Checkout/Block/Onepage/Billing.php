@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * One page checkout status
- *
- * @package    Mage_Checkout
- */
 class Mage_Checkout_Block_Onepage_Billing extends Mage_Checkout_Block_Onepage_Abstract
 {
     /**
@@ -174,7 +169,9 @@ class Mage_Checkout_Block_Onepage_Billing extends Mage_Checkout_Block_Onepage_Ab
     protected function _getTaxvat()
     {
         if (!$this->_taxvat) {
-            $this->_taxvat = $this->getLayout()->createBlock('customer/widget_taxvat');
+            /** @var Mage_Customer_Block_Widget_Taxvat $block */
+            $block = $this->getLayout()->createBlock('customer/widget_taxvat');
+            $this->_taxvat = $block;
         }
 
         return $this->_taxvat;

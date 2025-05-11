@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Event observer collection
- *
- * @package    Varien_Event
- */
 class Varien_Event_Observer_Collection
 {
     /**

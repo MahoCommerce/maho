@@ -11,10 +11,6 @@
  */
 
 /**
- * Form note element
- *
- * @package    Varien_Data
- *
  * @method string getText()
  */
 class Varien_Data_Form_Element_Note extends Varien_Data_Form_Element_Abstract

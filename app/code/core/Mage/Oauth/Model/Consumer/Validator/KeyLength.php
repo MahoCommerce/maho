@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Validate OAuth keys
- *
- * @package    Mage_Oauth
- */
 class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Zend_Validate_StringLength
 {
     /**

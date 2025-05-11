@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml dashboard most active buyers
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Dashboard_Tab_Customers_Most extends Mage_Adminhtml_Block_Dashboard_Grid
 {
     public function __construct()

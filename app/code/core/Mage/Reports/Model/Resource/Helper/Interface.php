@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Reports resource helper interface
- *
- * @package    Mage_Reports
- */
 interface Mage_Reports_Model_Resource_Helper_Interface
 {
     /**

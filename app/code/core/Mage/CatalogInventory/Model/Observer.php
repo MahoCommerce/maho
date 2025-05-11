@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog inventory module observer
- *
- * @package    Mage_CatalogInventory
- */
 class Mage_CatalogInventory_Model_Observer
 {
     /**
@@ -580,7 +575,7 @@ class Mage_CatalogInventory_Model_Observer
      * @param int   $productId
      * @param int   $quoteItemId
      * @param float $itemQty
-     * @return int
+     * @return float
      */
     protected function _getQuoteItemQtyForCheck($productId, $quoteItemId, $itemQty)
     {

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml JavaScript helper
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Helper_Js extends Mage_Core_Helper_Js
 {
     protected $_moduleName = 'Mage_Adminhtml';

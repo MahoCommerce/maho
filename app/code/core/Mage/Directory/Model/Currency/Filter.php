@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Currency filter
- *
- * @package    Mage_Directory
- */
 class Mage_Directory_Model_Currency_Filter implements Zend_Filter_Interface
 {
     /**

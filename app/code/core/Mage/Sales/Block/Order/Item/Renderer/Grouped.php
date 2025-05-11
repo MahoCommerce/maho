@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Order item render block for grouped product type
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Block_Order_Item_Renderer_Grouped extends Mage_Sales_Block_Order_Item_Renderer_Default
 {
     /**

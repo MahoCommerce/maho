@@ -11,10 +11,6 @@
  */
 
 /**
- * Sales order shipment model
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Order_Shipment _getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment_Collection getCollection()
@@ -357,7 +353,7 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
      * Adds comment to shipment with additional possibility to send it to customer via email
      * and show it in customer account
      *
-     * @param Mage_Sales_Model_Order_Shipment_Comment $comment
+     * @param Mage_Sales_Model_Order_Shipment_Comment|string $comment
      * @param bool $notify
      * @param bool $visibleOnFront
      *

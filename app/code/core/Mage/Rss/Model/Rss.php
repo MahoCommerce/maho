@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Auth session model
- *
- * @package    Mage_Rss
- */
 class Mage_Rss_Model_Rss
 {
     protected $_feedArray = [];

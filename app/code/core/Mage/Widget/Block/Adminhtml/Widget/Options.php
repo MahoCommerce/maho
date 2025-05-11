@@ -13,8 +13,6 @@
 /**
  * WYSIWYG widget options form
  *
- * @package    Mage_Widget
- *
  * @method string getMainFieldsetHtmlId()
  * @method $this setMainFieldsetHtmlId(string $value)
  * @method string getWidgetType()
@@ -151,7 +149,10 @@ class Mage_Widget_Block_Adminhtml_Widget_Options extends Mage_Adminhtml_Block_Wi
                 ];
             }
         } elseif ($sourceModel = $parameter->getSourceModel()) { // otherwise, a source model is specified
-            $data['values'] = Mage::getModel($sourceModel)->toOptionArray();
+            $model = Mage::getModel($sourceModel);
+            if (method_exists($model, 'toOptionArray')) {
+                $data['values'] = $model->toOptionArray();
+            }
         }
 
         // prepare field type or renderer

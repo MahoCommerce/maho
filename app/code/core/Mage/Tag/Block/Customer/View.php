@@ -11,10 +11,6 @@
  */
 
 /**
- * List of products tagged by customer Block
- *
- * @package    Mage_Tag
- *
  * @method int getTagId()
  * @method $this setTagId(int $value)
  */

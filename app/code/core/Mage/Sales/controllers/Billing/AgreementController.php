@@ -11,10 +11,6 @@
  */
 
 /**
- * Billing agreements controller
- *
- * @package    Mage_Sales
- *
  * @method int getAgreementId()
  */
 class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_Action
@@ -188,6 +184,8 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
     protected function _initAgreement()
     {
         $agreementId = $this->getRequest()->getParam('agreement');
+        $billingAgreement = false;
+
         if ($agreementId) {
             $billingAgreement = Mage::getModel('sales/billing_agreement')->load($agreementId);
             if (!$billingAgreement->getAgreementId()) {

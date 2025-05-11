@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * File storage database resource resource model class
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Resource_File_Storage_Database extends Mage_Core_Model_Resource_File_Storage_Abstract
 {
     /**

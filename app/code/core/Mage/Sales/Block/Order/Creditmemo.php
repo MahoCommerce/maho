@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Sales order view block
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Block_Order_Creditmemo extends Mage_Sales_Block_Order_Creditmemo_Items
 {
     #[\Override]

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * CatalogInventory Stock Status per website Resource Model
- *
- * @package    Mage_CatalogInventory
- */
 class Mage_CatalogInventory_Model_Resource_Stock_Status extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Payment exception
- *
- * @package    Mage_Payment
- */
 class Mage_Payment_Exception extends Exception
 {
     protected $_code = null;

@@ -5,7 +5,7 @@
  *
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -13,8 +13,6 @@
 /**
  * Wrapper that performs Paypal Express and Checkout communication
  * Use current Paypal Express method instance
- *
- * @package    Mage_Paypal
  */
 class Mage_Paypal_Model_Express_Checkout
 {
@@ -453,7 +451,7 @@ class Mage_Paypal_Model_Express_Checkout
         $portBillingFromShipping = $quote->getPayment()->getAdditionalInformation(self::PAYMENT_INFO_BUTTON) == 1
             && $this->_config->requireBillingAddress != Mage_Paypal_Model_Config::REQUIRE_BILLING_ADDRESS_ALL
             && !$quote->isVirtual();
-        if ($portBillingFromShipping) {
+        if (isset($shippingAddress) && $portBillingFromShipping) {
             $billingAddress = clone $shippingAddress;
             $billingAddress->unsAddressId()
                 ->unsAddressType();

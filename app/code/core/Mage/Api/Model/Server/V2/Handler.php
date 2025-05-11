@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Webservices server handler v2
- *
- * @package    Mage_Api
- */
 class Mage_Api_Model_Server_V2_Handler extends Mage_Api_Model_Server_Handler_Abstract
 {
     protected $_resourceSuffix = '_v2';

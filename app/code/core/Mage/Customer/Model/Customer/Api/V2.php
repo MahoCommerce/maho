@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customer api V2
- *
- * @package    Mage_Customer
- */
 class Mage_Customer_Model_Customer_Api_V2 extends Mage_Customer_Model_Customer_Api
 {
     /**

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Downloadable links API model
- *
- * @package    Mage_Downloadable
- */
 class Mage_Downloadable_Model_Link_Api extends Mage_Catalog_Model_Api_Resource
 {
     /**
@@ -229,6 +224,10 @@ class Mage_Downloadable_Model_Link_Api extends Mage_Catalog_Model_Api_Resource
             case 'sample':
                 $downloadableModel = Mage::getSingleton('downloadable/sample');
                 break;
+        }
+
+        if (!isset($downloadableModel)) {
+            $this->_fault('invalid_resource_type');
         }
 
         $downloadableModel->load($linkId);

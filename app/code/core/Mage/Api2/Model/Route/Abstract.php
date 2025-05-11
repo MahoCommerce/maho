@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Webservice apia2 route abstract
- *
- * @package    Mage_Api2
- */
 abstract class Mage_Api2_Model_Route_Abstract extends Zend_Controller_Router_Route
 {
     /**

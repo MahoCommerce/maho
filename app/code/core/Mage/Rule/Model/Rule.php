@@ -13,7 +13,6 @@
 /**
  * Abstract Rule entity data model
  *
- * @package    Mage_Rule
  * @deprecated since 1.7.0.0 use Mage_Rule_Model_Abstract instead
  */
 class Mage_Rule_Model_Rule extends Mage_Rule_Model_Abstract

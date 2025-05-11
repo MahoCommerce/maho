@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml dashboard google chart block
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboard_Abstract
 {
     /**
@@ -164,6 +159,11 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
                 case '1m':
                     $d = $dateStart->toString('yyyy-MM-dd');
                     $dateStart->addDay(1);
+                    break;
+                case '3m':
+                case '6m':
+                    $date = $dateStart->toString('yyyy-MM-dd');
+                    $dateStart->addWeek(1);
                     break;
                 case '1y':
                 case '2y':

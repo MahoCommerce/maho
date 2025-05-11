@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Installation begin block
- *
- * @package    Mage_Install
- */
 class Mage_Install_Block_Begin extends Mage_Install_Block_Abstract
 {
     /**

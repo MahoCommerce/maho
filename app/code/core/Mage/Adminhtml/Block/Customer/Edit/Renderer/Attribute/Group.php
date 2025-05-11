@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Renderer for customer group ID
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Customer_Edit_Renderer_Attribute_Group extends Mage_Adminhtml_Block_Widget_Form_Renderer_Fieldset_Element
 {
     /**
