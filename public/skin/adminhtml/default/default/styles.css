@@ -903,6 +903,8 @@ button, .form-button {
     }
 
     &.delete {
+        width: auto;
+        height: auto;
         color: var(--maho-button-delete-text-color);
         background: var(--maho-button-delete-background);
         border-color: var(--maho-button-delete-border-color);
@@ -1085,6 +1087,7 @@ button, .form-button {
         background: var(--maho-box-background);
         tr:first-of-type td {
             border-top: 1px dashed var(--maho-box-border-color);
+            padding-inline: 8px;
         }
     }
 
@@ -1369,9 +1372,6 @@ button, .form-button {
         }
         &.grid, &:has(.grid) {
             padding: 0;
-            :not(table) table {
-                border: 0;
-            }
         }
         &:not(:has(+ &)) {
             border-bottom-left-radius: var(--maho-box-border-radius);
@@ -1483,7 +1483,8 @@ ul.tabs, ul.tabs-horiz {
 
         &.active {
             color: var(--maho-box-active-text-color, --maho-box-text-color);
-            background: var(--maho-box-active-background);
+            outline: 1px solid var(--maho-box-active-background);
+            background-color: var(--maho-box-background);
             font-weight: 600;
         }
 
