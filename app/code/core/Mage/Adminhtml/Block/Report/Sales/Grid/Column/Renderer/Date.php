@@ -15,16 +15,11 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
     #[\Override]
     protected function _getFormat(): string
     {
-        $format = $this->getColumn()->getFormat();
+        $column = $this->getColumn();
+        $format = $column->getFormat();
         if (!$format) {
             if (is_null(self::$_format)) {
-                $localeCode = Mage::app()->getLocale()->getLocaleCode();
-                $generator = new IntlDatePatternGenerator($localeCode);
-                self::$_format = match ($this->getColumn()->getPeriodType()) {
-                    'month' => $generator->getBestPattern('yM'),
-                    'year' => $generator->getBestPattern('y'),
-                    default => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM),
-                };
+                self::$_format = Mage::app()->getLocale()->getDateFormatByPeriodType($column->getPeriodType());
             }
             $format = self::$_format;
         }
@@ -34,8 +29,9 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
     #[\Override]
     public function render(Varien_Object $row): string
     {
-        if ($data = $row->getData($this->getColumn()->getIndex())) {
-            $dateFormat = match ($this->getColumn()->getPeriodType()) {
+        $column = $this->getColumn();
+        if ($data = $row->getData($column->getIndex())) {
+            $dateFormat = match ($column->getPeriodType()) {
                 'month' => 'yyyy-MM',
                 'year' => 'yyyy',
                 default => 'yyyy-MM-dd',
@@ -43,16 +39,16 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
 
             $format = $this->_getFormat();
             try {
-                $data = ($this->getColumn()->getGmtoffset())
+                $data = ($column->getGmtoffset())
                     ? Mage::app()->getLocale()->date($data, $dateFormat)->toString($format)
                     : Mage::getSingleton('core/locale')->date($data, $dateFormat, null, false)->toString($format);
             } catch (Exception $e) {
-                $data = ($this->getColumn()->getTimezone())
+                $data = ($column->getTimezone())
                     ? Mage::app()->getLocale()->date($data, $dateFormat)->toString($format)
                     : Mage::getSingleton('core/locale')->date($data, $dateFormat, null, false)->toString($format);
             }
             return $data;
         }
-        return $this->getColumn()->getDefault();
+        return $column->getDefault();
     }
 }

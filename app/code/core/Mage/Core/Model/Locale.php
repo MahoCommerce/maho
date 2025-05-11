@@ -449,6 +449,20 @@ class Mage_Core_Model_Locale
     }
 
     /**
+     * Retrieve date format by period type
+     * @param string|null $period Valid values: ["day", "month", "year"]
+     */
+    public function getDateFormatByPeriodType(?string $period = null): string
+    {
+        $generator = new IntlDatePatternGenerator($this->getLocaleCode());
+        return match ($period) {
+            'month' => $generator->getBestPattern('yM'),
+            'year' => $generator->getBestPattern('y'),
+            default => $this->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM),
+        };
+    }
+
+    /**
      * Create IntlDateFormatter for the current locale
      */
     private function createDateFormatter(?string $type = null): IntlDateFormatter
