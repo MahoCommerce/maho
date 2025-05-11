@@ -425,29 +425,72 @@ class Mage_Core_Model_Locale
     }
 
     /**
-     * Retrieve ISO date format
-     * and filter for 2 digit year format, it must be 4 digits
-     *
-     * @param   string $type
-     * @return  string
+     * Retrieve ISO date format ensuring 4-digit year format
      */
-    public function getDateFormat($type = null)
+    public function getDateFormat(?string $type = null): string
     {
-        return preg_replace('/(?<!y)yy(?!y)/', 'yyyy', $this->getTranslation($type, 'date'));
+        $formatter = $this->createDateFormatter($type);
+        $pattern = $formatter->getPattern();
+
+        // Convert 2-digit year (yy) to 4-digit year (yyyy) in the pattern
+        return $this->ensureFourDigitYear($pattern);
     }
 
     /**
      * Retrieve short date format with 4-digit year
-     *
-     * @return  string
      */
-    public function getDateFormatWithLongYear()
+    public function getDateFormatWithLongYear(): string
     {
-        return preg_replace(
-            '/(?<!y)yy(?!y)/',
-            'yyyy',
-            $this->getTranslation(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT, 'date'),
+        $formatter = $this->createDateFormatter(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
+        $pattern = $formatter->getPattern();
+
+        // Convert 2-digit year (yy) to 4-digit year (yyyy) in the pattern
+        return $this->ensureFourDigitYear($pattern);
+    }
+
+    /**
+     * Retrieve date format by period type
+     * @param string|null $period Valid values: ["day", "month", "year"]
+     */
+    public function getDateFormatByPeriodType(?string $period = null): string
+    {
+        $generator = new IntlDatePatternGenerator($this->getLocaleCode());
+        return match ($period) {
+            'month' => $generator->getBestPattern('yM'),
+            'year' => $generator->getBestPattern('y'),
+            default => $this->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM),
+        };
+    }
+
+    /**
+     * Create IntlDateFormatter for the current locale
+     */
+    private function createDateFormatter(?string $type = null): IntlDateFormatter
+    {
+        $dateStyle = match ($type) {
+            Mage_Core_Model_Locale::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
+            Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
+            Mage_Core_Model_Locale::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
+            Mage_Core_Model_Locale::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
+            default => IntlDateFormatter::MEDIUM,
+        };
+
+        return new IntlDateFormatter(
+            $this->getLocaleCode(),
+            $dateStyle,
+            IntlDateFormatter::NONE, // No time formatting
+            null, // Default timezone
+            IntlDateFormatter::GREGORIAN,
         );
+    }
+
+    /**
+     * Convert 2-digit year patterns (yy) to 4-digit year patterns (yyyy)
+     */
+    private function ensureFourDigitYear(string $pattern): string
+    {
+        // This regex is more precise for ICU date patterns
+        return preg_replace('/(?<!y)yy(?!y)/', 'yyyy', $pattern);
     }
 
     /**
