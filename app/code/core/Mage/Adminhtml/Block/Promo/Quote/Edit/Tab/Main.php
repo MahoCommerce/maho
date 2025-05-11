@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Shopping Cart Price Rule General Information Tab
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     /**

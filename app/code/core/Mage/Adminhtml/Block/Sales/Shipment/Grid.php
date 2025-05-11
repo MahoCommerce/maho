@@ -6,17 +6,12 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 use Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract as MassAction;
 
-/**
- * Adminhtml sales orders grid
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Sales_Shipment_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
     /**
@@ -57,51 +52,57 @@ class Mage_Adminhtml_Block_Sales_Shipment_Grid extends Mage_Adminhtml_Block_Widg
     protected function _prepareColumns()
     {
         $this->addColumn('increment_id', [
-            'header'    => Mage::helper('sales')->__('Shipment #'),
-            'index'     => 'increment_id',
-            'type'      => 'text',
+            'header' => Mage::helper('sales')->__('Shipment #'),
+            'index' => 'increment_id',
+            'filter_index' => 'main_table.increment_id',
+            'type' => 'text',
         ]);
 
         $this->addColumn('created_at', [
-            'header'    => Mage::helper('sales')->__('Date Shipped'),
-            'index'     => 'created_at',
-            'type'      => 'datetime',
+            'header' => Mage::helper('sales')->__('Date Shipped'),
+            'index' => 'created_at',
+            'filter_index' => 'main_table.created_at',
+            'type' => 'datetime',
         ]);
 
         $this->addColumn('order_increment_id', [
-            'header'    => Mage::helper('sales')->__('Order #'),
-            'index'     => 'order_increment_id',
-            'type'      => 'text',
-            'escape'    => true,
+            'header' => Mage::helper('sales')->__('Order #'),
+            'index' => 'order_increment_id',
+            'filter_index' => 'main_table.order_increment_id',
+            'type' => 'text',
+            'escape' => true,
         ]);
 
         $this->addColumn('order_created_at', [
-            'header'    => Mage::helper('sales')->__('Order Date'),
-            'index'     => 'order_created_at',
-            'type'      => 'datetime',
+            'header' => Mage::helper('sales')->__('Order Date'),
+            'index' => 'order_created_at',
+            'filter_index' => 'main_table.order_created_at',
+            'type' => 'datetime',
         ]);
 
         $this->addColumn('shipping_name', [
             'header' => Mage::helper('sales')->__('Ship to Name'),
             'index' => 'shipping_name',
+            'filter_index' => 'main_table.shipping_name',
         ]);
 
         $this->addColumn('total_qty', [
             'header' => Mage::helper('sales')->__('Total Qty'),
             'index' => 'total_qty',
-            'type'  => 'number',
+            'filter_index' => 'main_table.total_qty',
+            'type' => 'number',
         ]);
 
         $this->addColumn(
             'action',
             [
-                'type'      => 'action',
-                'getter'     => 'getId',
-                'actions'   => [
+                'type' => 'action',
+                'getter' => 'getId',
+                'actions' => [
                     [
                         'caption' => Mage::helper('sales')->__('View'),
-                        'url'     => ['base' => '*/sales_shipment/view'],
-                        'field'   => 'shipment_id',
+                        'url' => ['base' => '*/sales_shipment/view'],
+                        'field' => 'shipment_id',
                     ],
                 ],
                 'is_system' => true,
@@ -144,12 +145,12 @@ class Mage_Adminhtml_Block_Sales_Shipment_Grid extends Mage_Adminhtml_Block_Widg
 
         $this->getMassactionBlock()->addItem(MassAction::PDF_SHIPMENTS_ORDER, [
             'label' => Mage::helper('sales')->__('PDF Packingslips'),
-            'url'  => $this->getUrl('*/sales_shipment/pdfshipments'),
+            'url' => $this->getUrl('*/sales_shipment/pdfshipments'),
         ]);
 
         $this->getMassactionBlock()->addItem(MassAction::PRINT_SHIPMENT_LABEL, [
             'label' => Mage::helper('sales')->__('Print Shipping Labels'),
-            'url'  => $this->getUrl('*/sales_order_shipment/massPrintShippingLabel'),
+            'url' => $this->getUrl('*/sales_order_shipment/massPrintShippingLabel'),
         ]);
 
         return $this;

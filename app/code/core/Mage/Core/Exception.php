@@ -10,13 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Maho Core Exception
- *
- * This class will be extended by other modules
- *
- * @package    Mage_Core
- */
 class Mage_Core_Exception extends Exception
 {
     protected $_messages = [];

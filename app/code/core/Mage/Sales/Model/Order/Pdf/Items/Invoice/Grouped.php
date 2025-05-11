@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Sales Order Invoice Pdf grouped items renderer
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Model_Order_Pdf_Items_Invoice_Grouped extends Mage_Sales_Model_Order_Pdf_Items_Invoice_Default
 {
     #[\Override]

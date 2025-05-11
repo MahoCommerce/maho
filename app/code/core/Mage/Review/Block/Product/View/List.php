@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Detailed Product Reviews
- *
- * @package    Mage_Review
- */
 class Mage_Review_Block_Product_View_List extends Mage_Review_Block_Product_View
 {
     protected $_forceHasOptions = false;

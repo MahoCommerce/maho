@@ -10,10 +10,6 @@
  */
 
 /**
- * Store switcher block
- *
- * @package    Mage_Core
- *
  * @method array getLanguages()
  * @method $this setLanguages(array $value)
  * @method array getStores()

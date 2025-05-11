@@ -11,10 +11,6 @@
  */
 
 /**
- * Event cron observer object
- *
- * @package    Varien_Event
- *
  * @method string getCronExpr()
  * @method bool hasNow()
  * @method $this setNow(int $time)

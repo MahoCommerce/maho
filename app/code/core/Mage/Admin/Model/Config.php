@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Configuration for Admin model
- *
- * @package    Mage_Admin
- */
 class Mage_Admin_Model_Config extends Varien_Simplexml_Config
 {
     /**

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Newsletter template resource model
- *
- * @package    Mage_Newsletter
- */
 class Mage_Newsletter_Model_Resource_Template extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]

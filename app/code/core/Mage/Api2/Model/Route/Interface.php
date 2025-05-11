@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Webservice apia2 route interface
- *
- * @package    Mage_Api2
- */
 interface Mage_Api2_Model_Route_Interface
 {
     /**

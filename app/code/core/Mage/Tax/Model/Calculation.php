@@ -11,10 +11,6 @@
  */
 
 /**
- * Tax Calculation Model
- *
- * @package    Mage_Tax
- *
  * @method Mage_Tax_Model_Resource_Calculation _getResource()
  * @method Mage_Tax_Model_Resource_Calculation getResource()
  * @method Mage_Tax_Model_Resource_Calculation_Collection getCollection()

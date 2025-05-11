@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * CatalogInventory Stock Indexer Interface
- *
- * @package    Mage_CatalogInventory
- */
 interface Mage_CatalogInventory_Model_Resource_Indexer_Stock_Interface
 {
     /**

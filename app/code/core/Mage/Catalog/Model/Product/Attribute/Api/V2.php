@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog product attribute api
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Product_Attribute_Api_V2 extends Mage_Catalog_Model_Product_Attribute_Api
 {
     /**

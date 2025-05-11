@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Report order collection
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Model_Resource_Report_Order_Collection extends Mage_Sales_Model_Resource_Report_Collection_Abstract
 {
     /**

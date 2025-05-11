@@ -20,8 +20,6 @@
  *  sales_order_delete_before
  *  sales_order_delete_after
  *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Order _getResource()
  * @method Mage_Sales_Model_Resource_Order getResource()
  * @method Mage_Sales_Model_Resource_Order_Collection getCollection()

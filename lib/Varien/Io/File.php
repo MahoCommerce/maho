@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Filesystem client
- *
- * @package    Varien_Io
- */
 class Varien_Io_File extends Varien_Io_Abstract
 {
     /**
@@ -71,7 +66,7 @@ class Varien_Io_File extends Varien_Io_Abstract
     /**
      * Stream mode chmod
      *
-     * @var string
+     * @var int
      */
     protected $_streamChmod;
 
@@ -286,7 +281,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      * Possible arguments:
      * - path     default current path
      *
-     * @return boolean
+     * @return bool
      */
     #[\Override]
     public function open(array $args = [])
@@ -317,7 +312,7 @@ class Varien_Io_File extends Varien_Io_Abstract
     /**
      * Close a connection
      *
-     * @return boolean
+     * @return bool
      */
     #[\Override]
     public function close()
@@ -330,8 +325,8 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @param string $dir
      * @param int $mode
-     * @param boolean $recursive
-     * @return boolean
+     * @param bool $recursive
+     * @return bool
      */
     #[\Override]
     public function mkdir($dir, $mode = 0777, $recursive = true)
@@ -354,7 +349,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      * Delete a directory
      *
      * @param string $dir
-     * @return boolean
+     * @return bool
      */
     #[\Override]
     public function rmdir($dir, $recursive = false)
@@ -411,7 +406,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      * Change current working directory
      *
      * @param string $dir
-     * @return boolean
+     * @return bool
      * @throws Exception
      */
     #[\Override]
@@ -434,7 +429,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @param string $filename
      * @param string|resource $dest
-     * @return boolean|string
+     * @return bool|string
      */
     #[\Override]
     public function read($filename, $dest = null)
@@ -460,7 +455,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      * @param string|resource $src
      * @param int $mode
      *
-     * @return int|boolean
+     * @return int|bool
      * @throws Exception
      */
     #[\Override]
@@ -655,7 +650,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      * Delete a file
      *
      * @param string $filename
-     * @return boolean
+     * @return bool
      */
     #[\Override]
     public function rm($filename)
@@ -675,7 +670,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @param string $src
      * @param string $dest
-     * @return boolean
+     * @return bool
      */
     #[\Override]
     public function mv($src, $dest)
@@ -695,7 +690,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @param string $src
      * @param string $dest
-     * @return boolean
+     * @return bool
      */
     public function cp($src, $dest)
     {
@@ -714,7 +709,7 @@ class Varien_Io_File extends Varien_Io_Abstract
      *
      * @param string $filename
      * @param int $mode
-     * @return boolean
+     * @return bool
      */
     #[\Override]
     public function chmod($filename, $mode)

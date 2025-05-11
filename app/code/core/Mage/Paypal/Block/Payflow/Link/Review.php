@@ -13,7 +13,6 @@
 /**
  * Paypal PayflowLink Express Onepage checkout block
  *
- * @package    Mage_Paypal
  * @deprecated since 1.6.2.0
  */
 class Mage_Paypal_Block_Payflow_Link_Review extends Mage_Paypal_Block_Express_Review

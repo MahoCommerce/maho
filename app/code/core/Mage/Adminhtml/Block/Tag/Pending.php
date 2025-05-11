@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml pending tags grid block
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Tag_Pending extends Mage_Adminhtml_Block_Template
 {
     public function __construct()

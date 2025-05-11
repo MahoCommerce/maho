@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Wishlist item option collection
- *
- * @package    Mage_Wishlist
- */
 class Mage_Wishlist_Model_Resource_Item_Option_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     /**

@@ -11,10 +11,6 @@
  */
 
 /**
- * Catalog session model
- *
- * @package    Mage_Catalog
- *
  * @method $this setBeforeCompareUrl(string $value)
  * @method array getFormData()
  * @method $this setFormData(array $value)

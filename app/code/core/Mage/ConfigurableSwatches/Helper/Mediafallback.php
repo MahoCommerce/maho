@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Class implementing the media fallback layer for swatches
- *
- * @package    Mage_ConfigurableSwatches
- */
 class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Abstract
 {
     public const MEDIA_GALLERY_ATTRIBUTE_CODE = 'media_gallery';

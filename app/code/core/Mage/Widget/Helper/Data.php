@@ -9,9 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Widget
- */
 class Mage_Widget_Helper_Data extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Mage_Widget';

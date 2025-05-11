@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Price indexer resource model
- *
- * @package    Mage_CatalogIndex
- */
 class Mage_CatalogIndex_Model_Resource_Indexer_Price extends Mage_CatalogIndex_Model_Resource_Indexer_Abstract
 {
     #[\Override]

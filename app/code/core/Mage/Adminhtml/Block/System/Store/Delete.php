@@ -10,12 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-
-/**
- * Store / store view / website delete form container
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_System_Store_Delete extends Mage_Adminhtml_Block_Widget_Form_Container
 {
     /**

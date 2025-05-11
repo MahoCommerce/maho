@@ -13,8 +13,6 @@
 /**
  * Block for rendering role info tab
  *
- * @package    Mage_Api2
- *
  * @method Mage_Api2_Model_Acl_Global_Role getRole()
  * @method $this setRole(Mage_Api2_Model_Acl_Global_Role $role)
  */

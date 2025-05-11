@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * ProductAlert data helper
- *
- * @package    Mage_ProductAlert
- */
 class Mage_ProductAlert_Helper_Data extends Mage_Core_Helper_Url
 {
     protected $_moduleName = 'Mage_ProductAlert';

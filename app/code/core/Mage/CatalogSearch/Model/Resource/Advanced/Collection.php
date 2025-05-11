@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Collection Advanced
- *
- * @package    Mage_CatalogSearch
- */
 class Mage_CatalogSearch_Model_Resource_Advanced_Collection extends Mage_Catalog_Model_Resource_Product_Collection
 {
     /**
@@ -110,7 +105,9 @@ class Mage_CatalogSearch_Model_Resource_Advanced_Collection extends Mage_Catalog
                     $previousSelect = $select;
                 }
             }
-            $this->addFieldToFilter('entity_id', ['in' => new Zend_Db_Expr($select)]);
+            if (isset($select)) {
+                $this->addFieldToFilter('entity_id', ['in' => new Zend_Db_Expr($select)]);
+            }
         }
 
         return $this;

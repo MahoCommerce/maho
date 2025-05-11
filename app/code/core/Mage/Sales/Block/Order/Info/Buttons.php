@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Block of links in Order view page
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Block_Order_Info_Buttons extends Mage_Core_Block_Template
 {
     #[\Override]

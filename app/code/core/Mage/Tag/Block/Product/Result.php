@@ -11,10 +11,6 @@
  */
 
 /**
- * List of tagged products
- *
- * @package    Mage_Tag
- *
  * @method $this setResultCount(int $value)
  */
 class Mage_Tag_Block_Product_Result extends Mage_Catalog_Block_Product_Abstract

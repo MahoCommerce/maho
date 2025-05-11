@@ -10,10 +10,6 @@
  */
 
 /**
- * Review summary
- *
- * @package    Mage_Review
- *
  * @method $this setStoreId(int $value)
  */
 class Mage_Review_Model_Review_Summary extends Mage_Core_Model_Abstract

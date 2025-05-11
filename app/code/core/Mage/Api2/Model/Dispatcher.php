@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Webservice api2 dispatcher model
- *
- * @package    Mage_Api2
- */
 class Mage_Api2_Model_Dispatcher
 {
     /**

@@ -11,10 +11,6 @@
  */
 
 /**
- * Catalog entity abstract model
- *
- * @package    Mage_Catalog
- *
  * @method int getStoreId()
  * @method bool getUseDataSharing()
  */

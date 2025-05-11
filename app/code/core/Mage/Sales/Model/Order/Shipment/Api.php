@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Sales order shippment API
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Model_Order_Shipment_Api extends Mage_Sales_Model_Api_Resource
 {
     public function __construct()
@@ -102,7 +97,7 @@ class Mage_Sales_Model_Order_Shipment_Api extends Mage_Sales_Model_Api_Resource
      * @param string $comment
      * @param bool $notifyCustomer
      * @param bool $includeComment
-     * @return string
+     * @return string|null
      */
     public function create(
         $orderIncrementId,

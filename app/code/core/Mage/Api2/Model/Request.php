@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * API Request model
- *
- * @package    Mage_Api2
- */
 class Mage_Api2_Model_Request extends Zend_Controller_Request_Http
 {
     /**
@@ -67,7 +62,9 @@ class Mage_Api2_Model_Request extends Zend_Controller_Request_Http
     protected function _getInterpreter()
     {
         if ($this->_interpreter === null) {
-            $this->_interpreter = Mage_Api2_Model_Request_Interpreter::factory($this->getContentType());
+            /** @var Mage_Api2_Model_Request_Interpreter_Interface $factory */
+            $factory = Mage_Api2_Model_Request_Interpreter::factory($this->getContentType());
+            $this->_interpreter = $factory;
         }
         return $this->_interpreter;
     }

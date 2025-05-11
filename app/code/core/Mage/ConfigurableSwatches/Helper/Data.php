@@ -9,9 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_ConfigurableSwatches
- */
 class Mage_ConfigurableSwatches_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const CONFIG_PATH_BASE = 'configswatches';

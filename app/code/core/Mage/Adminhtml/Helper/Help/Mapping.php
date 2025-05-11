@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml help url mapper
- *
- * @package    Mage_Adminhtml
- */
 abstract class Mage_Adminhtml_Helper_Help_Mapping extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Mage_Adminhtml';

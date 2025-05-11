@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Order control model
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Model_Sales_Order
 {
     /**

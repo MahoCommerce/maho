@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_PaypalUk
- */
 class Mage_PaypalUk_Model_Express extends Mage_Paypal_Model_Express
 {
     protected $_code = Mage_Paypal_Model_Config::METHOD_WPP_PE_EXPRESS;

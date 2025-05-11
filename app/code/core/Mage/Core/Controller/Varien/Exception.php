@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Controller exception that can fork different actions, cause forward or redirect
- *
- * @package    Mage_Core
- */
 class Mage_Core_Controller_Varien_Exception extends Exception
 {
     public const RESULT_FORWARD  = '_forward';

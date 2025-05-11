@@ -11,10 +11,6 @@
  */
 
 /**
- * Log Model
- *
- * @package    Mage_Log
- *
  * @method Mage_Log_Model_Resource_Log _getResource()
  * @method Mage_Log_Model_Resource_Log getResource()
  * @method string getSessionId()

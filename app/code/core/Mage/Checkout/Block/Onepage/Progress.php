@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * One page checkout status
- *
- * @package    Mage_Checkout
- */
 class Mage_Checkout_Block_Onepage_Progress extends Mage_Checkout_Block_Onepage_Abstract
 {
     /**
@@ -96,7 +91,7 @@ class Mage_Checkout_Block_Onepage_Progress extends Mage_Checkout_Block_Onepage_A
 
     /**
      * Get quote shipping price including tax
-     * @return float
+     * @return string|float
      */
     public function getShippingPriceInclTax()
     {
@@ -105,7 +100,7 @@ class Mage_Checkout_Block_Onepage_Progress extends Mage_Checkout_Block_Onepage_A
     }
 
     /**
-     * @return string
+     * @return string|float
      */
     public function getShippingPriceExclTax()
     {
@@ -114,7 +109,7 @@ class Mage_Checkout_Block_Onepage_Progress extends Mage_Checkout_Block_Onepage_A
 
     /**
      * @param float $price
-     * @return string
+     * @return string|float
      */
     public function formatPrice($price)
     {

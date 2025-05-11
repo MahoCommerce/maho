@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * CatalogSearch fulltext indexer model
- *
- * @package    Mage_CatalogSearch
- */
 class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer_Abstract
 {
     /**
@@ -211,10 +206,8 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
 
     /**
      * Get data required for category'es products reindex
-     *
-     * @return Mage_CatalogSearch_Model_Indexer_Fulltext
      */
-    protected function _registerCatalogCategoryEvent(Mage_Index_Model_Event $event)
+    protected function _registerCatalogCategoryEvent(Mage_Index_Model_Event $event): Mage_CatalogSearch_Model_Indexer_Fulltext
     {
         switch ($event->getType()) {
             case Mage_Index_Model_Event::TYPE_SAVE:
@@ -239,10 +232,8 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
 
     /**
      * Register data required by catatalog product process in event object
-     *
-     * @return Mage_CatalogSearch_Model_Indexer_Fulltext
      */
-    protected function _registerCatalogProductEvent(Mage_Index_Model_Event $event)
+    protected function _registerCatalogProductEvent(Mage_Index_Model_Event $event): Mage_CatalogSearch_Model_Indexer_Fulltext
     {
         switch ($event->getType()) {
             case Mage_Index_Model_Event::TYPE_SAVE:
@@ -306,12 +297,7 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
         return $this;
     }
 
-    /**
-     * Retrieve searchable attributes list
-     *
-     * @return array
-     */
-    protected function _getSearchableAttributes()
+    protected function _getSearchableAttributes(): array
     {
         if (is_null($this->_searchableAttributes)) {
             /** @var Mage_Catalog_Model_Resource_Product_Attribute_Collection $attributeCollection */
@@ -327,21 +313,12 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
         return $this->_searchableAttributes;
     }
 
-    /**
-     * Check if product is composite
-     *
-     * @param int $productId
-     * @return bool
-     */
-    protected function _isProductComposite($productId)
+    protected function _isProductComposite(int $productId): bool
     {
         $product = Mage::getModel('catalog/product')->load($productId);
         return $product->isComposite();
     }
 
-    /**
-     * Process event
-     */
     #[\Override]
     protected function _processEvent(Mage_Index_Model_Event $event)
     {
@@ -420,10 +397,6 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
         }
     }
 
-    /**
-     * Rebuild all index data
-     *
-     */
     #[\Override]
     public function reindexAll()
     {

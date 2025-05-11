@@ -9,9 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Checkout
- */
 class Mage_Checkout_Block_Onepage_Failure extends Mage_Core_Block_Template
 {
     /**

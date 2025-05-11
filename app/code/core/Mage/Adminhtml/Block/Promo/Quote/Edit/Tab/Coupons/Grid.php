@@ -12,11 +12,6 @@
 
 use Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract as MassAction;
 
-/**
- * Coupon codes grid
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Coupons_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
     public function __construct()

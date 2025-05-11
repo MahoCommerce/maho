@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Install config
- *
- * @package    Mage_Install
- */
 class Mage_Install_Model_Config extends Varien_Simplexml_Config
 {
     public const XML_PATH_WIZARD_STEPS     = 'wizard/steps';

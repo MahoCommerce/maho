@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Design package collection
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Resource_Design_Package_Collection extends Varien_Object
 {
     /**

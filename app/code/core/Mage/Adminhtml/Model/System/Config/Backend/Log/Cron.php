@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Log Cron Backend Model
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Model_System_Config_Backend_Log_Cron extends Mage_Core_Model_Config_Data
 {
     public const CRON_STRING_PATH  = 'crontab/jobs/log_clean/schedule/cron_expr';

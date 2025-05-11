@@ -11,8 +11,6 @@
  */
 
 /**
- * @package    Mage_Paygate
- *
  * @method Mage_Paygate_Model_Resource_Authorizenet_Debug _getResource()
  * @method Mage_Paygate_Model_Resource_Authorizenet_Debug getResource()
  * @method string getRequestBody()

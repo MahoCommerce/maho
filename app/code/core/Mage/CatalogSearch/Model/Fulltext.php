@@ -11,10 +11,6 @@
  */
 
 /**
- * Catalog advanced search model
- *
- * @package    Mage_CatalogSearch
- *
  * @method Mage_CatalogSearch_Model_Resource_Fulltext _getResource()
  * @method Mage_CatalogSearch_Model_Resource_Fulltext getResource()
  * @method Mage_CatalogSearch_Model_Resource_Fulltext_Collection getCollection()

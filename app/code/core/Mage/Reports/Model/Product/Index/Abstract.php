@@ -11,10 +11,6 @@
  */
 
 /**
- * Reports Product Index Abstract Model
- *
- * @package    Mage_Reports
- *
  * @method Mage_Reports_Model_Resource_Product_Index_Abstract _getResource()
  * @method Mage_Reports_Model_Resource_Product_Index_Collection_Abstract getCollection()
  * @method bool hasAddedAt()

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Settlement reports transaction details
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Block_Adminhtml_Settlement_Details_Form extends Mage_Adminhtml_Block_Widget_Form
 {
     /**

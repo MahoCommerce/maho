@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Cehckout type abstract class
- *
- * @package    Mage_Checkout
- */
 abstract class Mage_Checkout_Model_Type_Abstract extends Varien_Object
 {
     /**

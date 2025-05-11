@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Attribute form apply element
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Apply extends Varien_Data_Form_Element_Multiselect
 {
     #[\Override]

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Backend Model for product alerts
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Model_System_Config_Backend_Product_Alert_Cron extends Mage_Core_Model_Config_Data
 {
     public const CRON_STRING_PATH  = 'crontab/jobs/catalog_product_alert/schedule/cron_expr';

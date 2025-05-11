@@ -10,10 +10,6 @@
  */
 
 /**
- * Abstract model class
- *
- * @package    Mage_Core
- *
  * @method Mage_Core_Model_Resource_File_Storage_File _getResource()
  * @method Mage_Core_Model_Resource_File_Storage_File getResource()
  */

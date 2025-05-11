@@ -9,9 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Rss
- */
 class Mage_Rss_Block_Order_Details extends Mage_Core_Block_Template
 {
     public function __construct()

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Abstract message model
- *
- * @package    Mage_Core
- */
 abstract class Mage_Core_Model_Message_Abstract
 {
     protected $_type;

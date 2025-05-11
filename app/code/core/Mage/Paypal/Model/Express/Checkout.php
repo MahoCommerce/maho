@@ -13,8 +13,6 @@
 /**
  * Wrapper that performs Paypal Express and Checkout communication
  * Use current Paypal Express method instance
- *
- * @package    Mage_Paypal
  */
 class Mage_Paypal_Model_Express_Checkout
 {
@@ -453,7 +451,7 @@ class Mage_Paypal_Model_Express_Checkout
         $portBillingFromShipping = $quote->getPayment()->getAdditionalInformation(self::PAYMENT_INFO_BUTTON) == 1
             && $this->_config->requireBillingAddress != Mage_Paypal_Model_Config::REQUIRE_BILLING_ADDRESS_ALL
             && !$quote->isVirtual();
-        if ($portBillingFromShipping) {
+        if (isset($shippingAddress) && $portBillingFromShipping) {
             $billingAddress = clone $shippingAddress;
             $billingAddress->unsAddressId()
                 ->unsAddressType();

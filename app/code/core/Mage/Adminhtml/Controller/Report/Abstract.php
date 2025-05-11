@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Admin abstract reports controller
- *
- * @package    Mage_Adminhtml
- */
 abstract class Mage_Adminhtml_Controller_Report_Abstract extends Mage_Adminhtml_Controller_Action
 {
     /**

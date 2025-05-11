@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Contacts base helper
- *
- * @package    Mage_Contacts
- */
 class Mage_Contacts_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_ENABLED   = 'contacts/contacts/enabled';

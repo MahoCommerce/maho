@@ -10,9 +10,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Maho Cron Exception
- *
- * @package    Mage_Cron
- */
 class Mage_Cron_Exception extends Mage_Core_Exception {}

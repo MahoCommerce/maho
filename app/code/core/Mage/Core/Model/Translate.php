@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Translate model
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Translate
 {
     public const CSV_SEPARATOR     = ',';
@@ -521,7 +516,6 @@ class Mage_Core_Model_Translate
         if (!$data) {
             return false;
         }
-        $data = unserialize($data, ['allowed_classes' => false]);
         return $data;
     }
 
@@ -535,7 +529,7 @@ class Mage_Core_Model_Translate
         if (!$this->_canUseCache()) {
             return $this;
         }
-        Mage::app()->saveCache(serialize($this->getData()), $this->getCacheId(), [self::CACHE_TAG], null);
+        Mage::app()->saveCache($this->getData(), $this->getCacheId(), [self::CACHE_TAG], null);
         return $this;
     }
 

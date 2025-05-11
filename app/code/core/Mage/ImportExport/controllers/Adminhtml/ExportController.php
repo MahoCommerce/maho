@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Export controller
- *
- * @package    Mage_ImportExport
- */
 class Mage_ImportExport_Adminhtml_ExportController extends Mage_Adminhtml_Controller_Action
 {
     /**

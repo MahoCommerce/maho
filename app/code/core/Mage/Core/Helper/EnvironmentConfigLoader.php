@@ -8,11 +8,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Core Environment helper
- *
- * @package    Mage_Core
- */
 class Mage_Core_Helper_EnvironmentConfigLoader extends Mage_Core_Helper_Abstract
 {
     protected const ENV_STARTS_WITH = 'MAHO_CONFIG';

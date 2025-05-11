@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customer tags controller
- *
- * @package    Mage_Tag
- */
 class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
 {
     /**

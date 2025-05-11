@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Order information for print
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Block_Order_Print extends Mage_Sales_Block_Items_Abstract
 {
     #[\Override]

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Abstract resource data model
- *
- * @package    Mage_Install
- */
 abstract class Mage_Install_Model_Installer_Db_Abstract
 {
     /**

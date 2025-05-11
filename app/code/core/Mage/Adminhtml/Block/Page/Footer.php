@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml footer block
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Page_Footer extends Mage_Adminhtml_Block_Template
 {
     public const LOCALE_CACHE_LIFETIME = 7200;

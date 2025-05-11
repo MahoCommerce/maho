@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Uploader Config Instance Abstract Model
- *
- * @package    Mage_Uploader
- */
 abstract class Mage_Uploader_Model_Config_Abstract extends Varien_Object
 {
     /**

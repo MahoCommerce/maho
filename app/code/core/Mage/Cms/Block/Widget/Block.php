@@ -11,10 +11,6 @@
  */
 
 /**
- * Cms Static Block Widget
- *
- * @package    Mage_Cms
- *
  * @method int getBlockId()
  * @method $this setText(string $value)
  */

@@ -11,10 +11,6 @@
  */
 
 /**
- * Store group collection
- *
- * @package    Mage_Core
- *
  * @method Mage_Core_Model_Store_Group getItemById(int $value)
  * @method Mage_Core_Model_Store_Group[] getItems()
  */

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Currency controller
- *
- * @package    Mage_Directory
- */
 class Mage_Directory_CurrencyController extends Mage_Core_Controller_Front_Action
 {
     public function switchAction()

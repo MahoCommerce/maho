@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Shopping cart price rule chooser
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Promo_Widget_Chooser extends Mage_Adminhtml_Block_Widget_Grid
 {
     /**

@@ -11,10 +11,6 @@
  */
 
 /**
- * CMS block model
- *
- * @package    Mage_Cms
- *
  * @method Mage_Cms_Model_Resource_Block _getResource()
  * @method Mage_Cms_Model_Resource_Block getResource()
  * @method Mage_Cms_Model_Resource_Block_Collection getCollection()

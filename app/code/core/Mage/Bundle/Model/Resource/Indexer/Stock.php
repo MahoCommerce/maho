@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Bundle Stock Status Indexer Resource Model
- *
- * @package    Mage_Bundle
- */
 class Mage_Bundle_Model_Resource_Indexer_Stock extends Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default
 {
     /**

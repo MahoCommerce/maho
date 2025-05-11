@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Data collection
- *
- * @package    Varien_Data
- */
 class Varien_Data_Collection implements IteratorAggregate, Countable
 {
     public const SORT_ORDER_ASC    = 'ASC';

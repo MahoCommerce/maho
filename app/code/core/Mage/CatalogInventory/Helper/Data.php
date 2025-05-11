@@ -9,9 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_CatalogInventory
- */
 class Mage_CatalogInventory_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_SHOW_OUT_OF_STOCK    = 'cataloginventory/options/show_out_of_stock';

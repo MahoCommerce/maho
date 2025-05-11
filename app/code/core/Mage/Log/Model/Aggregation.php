@@ -11,10 +11,6 @@
  */
 
 /**
- * Log Aggregation Model
- *
- * @package    Mage_Log
- *
  * @method Mage_Log_Model_Resource_Aggregation getResource()
  * @method Mage_Log_Model_Resource_Aggregation _getResource()
  */
@@ -23,7 +19,7 @@ class Mage_Log_Model_Aggregation extends Mage_Core_Model_Abstract
     /**
      * Last record data
      *
-     * @var string
+     * @var false|int|string
      */
     protected $_lastRecord;
 
@@ -97,12 +93,12 @@ class Mage_Log_Model_Aggregation extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param int $id
+     * @param string $id
      * @param array $data
      */
     private function _update($id, $data)
     {
-        return $this->_getResource()->saveLog($data, $id);
+        $this->_getResource()->saveLog($data, $id);
     }
 
     /**
@@ -110,7 +106,7 @@ class Mage_Log_Model_Aggregation extends Mage_Core_Model_Abstract
      */
     private function _insert($data)
     {
-        return $this->_getResource()->saveLog($data);
+        $this->_getResource()->saveLog($data);
     }
 
     /**
@@ -140,7 +136,7 @@ class Mage_Log_Model_Aggregation extends Mage_Core_Model_Abstract
     /**
      * @param string|int $in
      * @param null $offset deprecated
-     * @return false|string
+     * @return string
      */
     private function _date($in, $offset = null)
     {

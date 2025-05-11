@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Resource model for admin ACL
- *
- * @package    Mage_Api
- */
 class Mage_Api_Model_Resource_Acl extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**

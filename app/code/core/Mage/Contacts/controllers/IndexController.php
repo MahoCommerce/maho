@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Contacts index controller
- *
- * @package    Mage_Contacts
- */
 class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
 {
     public const XML_PATH_ENABLED                    = 'contacts/contacts/enabled';

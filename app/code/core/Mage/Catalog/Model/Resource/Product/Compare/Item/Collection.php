@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog Product Compare Items Resource Collection
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Resource_Product_Compare_Item_Collection extends Mage_Catalog_Model_Resource_Product_Collection
 {
     /**

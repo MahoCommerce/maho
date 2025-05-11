@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Payment information container block
- *
- * @package    Mage_Payment
- */
 class Mage_Payment_Block_Info_Container extends Mage_Core_Block_Template
 {
     /**

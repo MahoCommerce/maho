@@ -11,10 +11,6 @@
  */
 
 /**
- * Crontab schedule model
- *
- * @package    Mage_Cron
- *
  * @method Mage_Cron_Model_Resource_Schedule _getResource()
  * @method Mage_Cron_Model_Resource_Schedule getResource()
  * @method Mage_Cron_Model_Resource_Schedule_Collection getCollection()

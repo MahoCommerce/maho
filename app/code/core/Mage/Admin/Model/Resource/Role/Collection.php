@@ -11,10 +11,6 @@
  */
 
 /**
- * Admin role collection
- *
- * @package    Mage_Admin
- *
  * @method Mage_Admin_Model_Role[] getItems()
  */
 class Mage_Admin_Model_Resource_Role_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * HTTP CURL Adapter
- *
- * @package    Varien_Http
- */
 class Varien_Http_Adapter_Curl implements Zend_Http_Client_Adapter_Interface
 {
     /**

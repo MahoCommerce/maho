@@ -14,8 +14,6 @@
  * Custom Zend_Controller_Request_Http class (formally)
  *
  * Allows dispatching before and after events for each controller action
- *
- * @package    Mage_Core
  */
 class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
 {

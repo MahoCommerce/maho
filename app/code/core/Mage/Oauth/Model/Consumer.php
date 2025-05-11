@@ -11,10 +11,6 @@
  */
 
 /**
- * Application model
- *
- * @package    Mage_Oauth
- *
  * @method Mage_Oauth_Model_Resource_Consumer _getResource()
  * @method Mage_Oauth_Model_Resource_Consumer getResource()
  * @method Mage_Oauth_Model_Resource_Consumer_Collection getCollection()

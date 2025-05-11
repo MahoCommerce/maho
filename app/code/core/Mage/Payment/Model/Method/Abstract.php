@@ -11,10 +11,6 @@
  */
 
 /**
- * Payment method abstract model
- *
- * @package    Mage_Payment
- *
  * @method string getCheckoutRedirectUrl()
  * @method $this setInfoInstance(Mage_Payment_Model_Info $value)
  * @method string getInstructions()

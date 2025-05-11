@@ -10,10 +10,6 @@
  */
 
 /**
- * Class Mage_Rule_Model_Environment
- *
- * @package    Mage_Rule
- *
  * @method $this setNow(int $value)
  */
 class Mage_Rule_Model_Environment extends Varien_Object

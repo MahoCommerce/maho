@@ -31,8 +31,6 @@
  * @method $this distinct($flag = true)
  * @method $this reset($part = null)
  * @method $this columns($cols = '*', $correlationName = null)
- *
- * @package    Varien_Db
  */
 class Varien_Db_Select extends Zend_Db_Select
 {

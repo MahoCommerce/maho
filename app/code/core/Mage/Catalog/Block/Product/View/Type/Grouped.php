@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog grouped product info block
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Block_Product_View_Type_Grouped extends Mage_Catalog_Block_Product_View_Abstract
 {
     /**

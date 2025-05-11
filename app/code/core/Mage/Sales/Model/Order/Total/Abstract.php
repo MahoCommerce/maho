@@ -12,8 +12,6 @@
 /**
  * Base class for configure totals order
  *
- * @package    Mage_Sales
- *
  * @method $this setCode(string $value)
  * @method $this setTotalConfigNode(array $value)
  */

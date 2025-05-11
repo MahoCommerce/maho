@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog Product Price Template Block
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Block_Product_Price_Template extends Mage_Core_Block_Abstract
 {
     /**

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Block to render customer's gender attribute
- *
- * @package    Mage_Customer
- */
 class Mage_Customer_Block_Widget_Gender extends Mage_Customer_Block_Widget_Abstract
 {
     /**

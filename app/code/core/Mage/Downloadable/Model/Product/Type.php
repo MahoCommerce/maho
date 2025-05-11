@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Downloadable product type model
- *
- * @package    Mage_Downloadable
- */
 class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Virtual
 {
     public const TYPE_DOWNLOADABLE = 'downloadable';

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml sales shipment comment view block
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Sales_Order_Shipment_View_Comments extends Mage_Adminhtml_Block_Text_List
 {
     /**

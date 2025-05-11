@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Rule
- */
 class Mage_Rule_Block_Editable extends Mage_Core_Block_Abstract implements Varien_Data_Form_Element_Renderer_Interface
 {
     /**

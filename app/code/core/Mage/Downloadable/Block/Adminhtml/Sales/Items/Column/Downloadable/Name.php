@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Sales Order downloadable items name column renderer
- *
- * @package    Mage_Downloadable
- */
 class Mage_Downloadable_Block_Adminhtml_Sales_Items_Column_Downloadable_Name extends Mage_Adminhtml_Block_Sales_Items_Column_Name
 {
     /**

@@ -58,8 +58,6 @@
  * - G: route_path
  * - H: route_url
  *
- * @package    Mage_Core
- *
  * @method $this setType(string $value)
  * @method $this setSecure(bool $value)
  * @method $this setSecureIsForced(bool $value)

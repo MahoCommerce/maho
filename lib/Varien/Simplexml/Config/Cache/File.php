@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * File based cache for configuration
- *
- * @package    Varien_Simplexml
- */
 class Varien_Simplexml_Config_Cache_File extends Varien_Simplexml_Config_Cache_Abstract
 {
     /**

@@ -6,14 +6,11 @@
  * @package    Mage_CurrencySymbol
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
- * Custom currency symbol model
- *
- * @package    Mage_CurrencySymbol
- *
  * @method $this resetValues()
  */
 class Mage_CurrencySymbol_Model_System_Currencysymbol
@@ -28,14 +25,14 @@ class Mage_CurrencySymbol_Model_System_Currencysymbol
     /**
      * Store id
      *
-     * @var string | null
+     * @var int|null
      */
     protected $_storeId;
 
     /**
      * Website id
      *
-     * @var string | null
+     * @var int|null
      */
     protected $_websiteId;
     /**
@@ -243,7 +240,7 @@ class Mage_CurrencySymbol_Model_System_Currencysymbol
     {
         // clear cache for frontend
         foreach ($this->_cacheTypes as $cacheType) {
-            Mage::app()->getCacheInstance()->invalidateType($cacheType);
+            Mage::app()->getCache()->invalidateType($cacheType);
         }
         return $this;
     }

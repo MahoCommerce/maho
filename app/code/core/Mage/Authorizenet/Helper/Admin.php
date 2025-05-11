@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Authorizenet Admin Data Helper
- *
- * @package    Mage_Authorizenet
- */
 class Mage_Authorizenet_Helper_Admin extends Mage_Authorizenet_Helper_Data
 {
     /**

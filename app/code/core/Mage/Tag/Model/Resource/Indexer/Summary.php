@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Tag Indexer Model
- *
- * @package    Mage_Tag
- */
 class Mage_Tag_Model_Resource_Indexer_Summary extends Mage_Catalog_Model_Resource_Product_Indexer_Abstract
 {
     #[\Override]

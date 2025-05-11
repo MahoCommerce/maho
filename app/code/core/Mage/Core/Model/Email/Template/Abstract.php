@@ -11,10 +11,6 @@
  */
 
 /**
- * Template model
- *
- * @package    Mage_Core
- *
  * @method string getInlineCssFile()
  * @method $this setTemplateType(int $value)
  * @method getTemplateText()

@@ -9,9 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Checkout Resource Setup Model
- *
- * @package    Mage_Checkout
- */
 class Mage_Checkout_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup {}

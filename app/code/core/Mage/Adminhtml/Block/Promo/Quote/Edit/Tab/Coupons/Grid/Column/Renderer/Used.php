@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Coupon codes grid "Used" column renderer
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Coupons_Grid_Column_Renderer_Used extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Text
 {
     #[\Override]

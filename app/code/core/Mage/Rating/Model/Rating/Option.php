@@ -11,10 +11,6 @@
  */
 
 /**
- * Rating option model
- *
- * @package    Mage_Rating
- *
  * @method Mage_Rating_Model_Resource_Rating_Option_Collection getResourceCollection()
  * @method Mage_Rating_Model_Resource_Rating_Option _getResource()
  * @method Mage_Rating_Model_Resource_Rating_Option getResource()

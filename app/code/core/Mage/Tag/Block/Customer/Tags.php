@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Tags list in customer's account
- *
- * @package    Mage_Tag
- */
 class Mage_Tag_Block_Customer_Tags extends Mage_Customer_Block_Account_Dashboard
 {
     protected $_tags;

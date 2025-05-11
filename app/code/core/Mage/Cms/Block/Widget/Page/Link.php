@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Widget to display link to CMS page
- *
- * @package    Mage_Cms
- */
 class Mage_Cms_Block_Widget_Page_Link extends Mage_Core_Block_Html_Link implements Mage_Widget_Block_Interface
 {
     /**

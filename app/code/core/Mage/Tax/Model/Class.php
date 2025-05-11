@@ -11,10 +11,6 @@
  */
 
 /**
- * Tax class model
- *
- * @package    Mage_Tax
- *
  * @method Mage_Tax_Model_Resource_Class _getResource()
  * @method Mage_Tax_Model_Resource_Class getResource()
  * @method Mage_Tax_Model_Resource_Class_Collection getCollection()

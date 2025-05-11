@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml detailed rating stars
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Review_Rating_Detailed extends Mage_Adminhtml_Block_Template
 {
     protected $_voteCollection = false;

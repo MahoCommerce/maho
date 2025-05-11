@@ -12,11 +12,6 @@
 
 use Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract as MassAction;
 
-/**
- * Adminhtml AdminNotification inbox grid
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Notification_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
     #[\Override]

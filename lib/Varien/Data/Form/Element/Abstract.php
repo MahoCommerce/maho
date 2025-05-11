@@ -11,10 +11,6 @@
  */
 
 /**
- * Data form abstract class
- *
- * @package    Varien_Data
- *
  * @method $this setAfterElementHtml(string $value)
  * @method string getClass()
  * @method $this setClass(string $value)

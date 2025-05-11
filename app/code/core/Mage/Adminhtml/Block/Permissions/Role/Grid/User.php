@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Acl role user grid
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Permissions_Role_Grid_User extends Mage_Adminhtml_Block_Widget_Grid
 {
     public function __construct()

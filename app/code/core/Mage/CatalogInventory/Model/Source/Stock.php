@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * CatalogInventory Stock source model
- *
- * @package    Mage_CatalogInventory
- */
 class Mage_CatalogInventory_Model_Source_Stock
 {
     /**

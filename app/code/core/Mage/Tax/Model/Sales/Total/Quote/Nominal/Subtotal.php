@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Nominal subtotal tax total
- *
- * @package    Mage_Tax
- */
 class Mage_Tax_Model_Sales_Total_Quote_Nominal_Subtotal extends Mage_Tax_Model_Sales_Total_Quote_Subtotal
 {
     /**

@@ -11,8 +11,6 @@
  */
 
 /**
- * @package    Mage_Core
- *
  * @method bool|null getSkipEmptySessionCheck()
  * @method $this setSkipEmptySessionCheck(bool $flag)
  */

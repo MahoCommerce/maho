@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog product related items block
- *
- * @package    Mage_Bundle
- */
 class Mage_Bundle_Block_Catalog_Product_List_Partof extends Mage_Catalog_Block_Product_Abstract
 {
     protected $_columnCount = 4;

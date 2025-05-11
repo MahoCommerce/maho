@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml weee tax item renderer
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Weee_Block_Renderer_Weee_Tax extends Mage_Adminhtml_Block_Widget implements Varien_Data_Form_Element_Renderer_Interface
 {
     /**

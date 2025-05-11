@@ -6,15 +6,13 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
  * One page common functionality block
- *
- * @package    Mage_Checkout
- *
- * @method \Mage_Sales_Model_Quote_Address getAddress()
+ * @method Mage_Sales_Model_Quote_Address getAddress()
  */
 abstract class Mage_Checkout_Block_Onepage_Abstract extends Mage_Core_Block_Template
 {
@@ -193,14 +191,14 @@ abstract class Mage_Checkout_Block_Onepage_Abstract extends Mage_Core_Block_Temp
             $cacheId    = 'DIRECTORY_COUNTRY_SELECT_STORE_' . Mage::app()->getStore()->getCode();
             $cacheTags  = ['config'];
             if ($optionsCache = Mage::app()->loadCache($cacheId)) {
-                $options = unserialize($optionsCache, ['allowed_classes' => false]);
+                $options = $optionsCache;
             }
         }
 
         if ($options == false) {
             $options = $this->getCountryCollection()->toOptionArray();
             if ($useCache) {
-                Mage::app()->saveCache(serialize($options), $cacheId, $cacheTags);
+                Mage::app()->saveCache($options, $cacheId, $cacheTags);
             }
         }
         return $options;

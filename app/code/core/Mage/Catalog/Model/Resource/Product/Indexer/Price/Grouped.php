@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Configurable Products Price Indexer Resource model
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Resource_Product_Indexer_Price_Grouped extends Mage_Catalog_Model_Resource_Product_Indexer_Price_Default
 {
     /**

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Sales Rule resource model
- *
- * @package    Mage_SalesRule
- */
 class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstract
 {
     /**

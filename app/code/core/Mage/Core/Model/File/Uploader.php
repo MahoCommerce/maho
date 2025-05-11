@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Core file uploader model
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_File_Uploader extends Varien_File_Uploader
 {
     /**

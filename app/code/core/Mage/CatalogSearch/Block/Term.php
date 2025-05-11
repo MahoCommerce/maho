@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalogsearch term block
- *
- * @package    Mage_CatalogSearch
- */
 class Mage_CatalogSearch_Block_Term extends Mage_Core_Block_Template
 {
     /**
@@ -46,6 +41,7 @@ class Mage_CatalogSearch_Block_Term extends Mage_Core_Block_Template
             $this->_minPopularity = end($terms)->getPopularity();
             $range = $this->_maxPopularity - $this->_minPopularity;
             $range = ($range == 0) ? 1 : $range;
+            $temp = [];
             /** @var Mage_CatalogSearch_Model_Query $term */
             foreach ($terms as $term) {
                 if (!$term->getPopularity()) {

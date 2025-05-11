@@ -11,10 +11,6 @@
  */
 
 /**
- * Class Mage_Sales_Model_Order_Status
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Order_Status _getResource()
  * @method Mage_Sales_Model_Resource_Order_Status getResource()
  * @method Mage_Sales_Model_Resource_Order_Status_Collection getCollection()

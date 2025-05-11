@@ -13,8 +13,6 @@
 /**
  * Top menu block item renderer
  *
- * @package    Mage_Page
- *
  * @method Varien_Data_Tree_Node getMenuTree()
  * @method string getChildrenWrapClass()
  */

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Multishipping checkout address matipulation controller
- *
- * @package    Mage_Checkout
- */
 class Mage_Checkout_Multishipping_AddressController extends Mage_Core_Controller_Front_Action
 {
     /**

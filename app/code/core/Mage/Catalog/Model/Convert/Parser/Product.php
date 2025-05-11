@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Class Mage_Catalog_Model_Convert_Parser_Product
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_Parser_Abstract
 {
     public const MULTI_DELIMITER = ' , ';

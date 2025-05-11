@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Form Input/Output Escape HTML entities Filter
- *
- * @package    Varien_Data
- */
 class Varien_Data_Form_Filter_Escapehtml implements Varien_Data_Form_Filter_Interface
 {
     /**

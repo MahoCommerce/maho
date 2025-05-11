@@ -11,10 +11,6 @@
  */
 
 /**
- * Tax Config Notification
- *
- * @package    Mage_Tax
- *
  * @method Mage_Tax_Model_Resource_Sales_Order_Tax_Item _getResource()
  * @method Mage_Tax_Model_Resource_Sales_Order_Tax_Item getResource()
  * @method Mage_Tax_Model_Resource_Sales_Order_Tax_Item_Collection getCollection()

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Advanced Catalog Search resource model
- *
- * @package    Mage_CatalogSearch
- */
 class Mage_CatalogSearch_Model_Resource_Advanced extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]

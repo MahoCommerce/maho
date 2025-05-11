@@ -11,10 +11,6 @@
  */
 
 /**
- * Widget Instance Model
- *
- * @package    Mage_Widget
- *
  * @method Mage_Widget_Model_Resource_Widget_Instance _getResource()
  * @method Mage_Widget_Model_Resource_Widget_Instance getResource()
  * @method Mage_Widget_Model_Resource_Widget_Instance_Collection getCollection()
@@ -445,6 +441,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
     public function getWidgetSupportedTemplatesByBlock($blockReference)
     {
         $templates = [];
+        $template = null;
         $widgetTemplates = $this->getWidgetTemplates();
         if ($this->getWidgetConfig()) {
             if (!($supportedBlocks = $this->getWidgetConfig()->supported_blocks)) {
@@ -532,7 +529,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
         $types = Mage::getConfig()->getNode(self::XML_NODE_RELATED_CACHE);
         if ($types) {
             $types = $types->asArray();
-            Mage::app()->getCacheInstance()->invalidateType(array_keys($types));
+            Mage::app()->getCache()->invalidateType(array_keys($types));
         }
         return $this;
     }

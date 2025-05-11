@@ -11,10 +11,6 @@
  */
 
 /**
- * Acl model
- *
- * @package    Mage_Admin
- *
  * @property Mage_Admin_Model_Acl_Role_Registry $_roleRegistry
  *
  * @method Mage_Admin_Model_Resource_Acl _getResource()

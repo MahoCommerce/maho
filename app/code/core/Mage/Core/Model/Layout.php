@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Layout model
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Layout extends Varien_Simplexml_Config
 {
     /**
@@ -578,7 +573,7 @@ class Mage_Core_Model_Layout extends Varien_Simplexml_Config
     public function getMessagesBlock()
     {
         $block = $this->getBlock('messages');
-        if ($block) {
+        if ($block instanceof Mage_Core_Block_Messages) {
             return $block;
         }
         return $this->createBlock('core/messages', 'messages');

@@ -11,10 +11,6 @@
  */
 
 /**
- * Class Mage_Sales_Model_Order_Shipment_Comment
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Order_Shipment_Comment _getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment_Comment getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment_Comment_Collection getCollection()

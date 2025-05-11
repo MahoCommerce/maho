@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * EAV attribute resource model
- *
- * @package    Mage_Eav
- */
 class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
@@ -107,7 +102,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
                 ->where('attribute_set_id = :attribute_set_id')
                 ->where('attribute_group_id = :attribute_group_id');
 
-            return $adapter->fetchOne($select, $bind);
+            return (int) $adapter->fetchOne($select, $bind);
         }
 
         return 0;
@@ -369,7 +364,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
      *
      * @param string $entityType
      * @param string $code
-     * @return int
+     * @return string
      */
     public function getIdByCode($entityType, $code)
     {

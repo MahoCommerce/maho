@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Sales report coupons collection
- *
- * @package    Mage_SalesRule
- */
 class Mage_SalesRule_Model_Resource_Report_Collection extends Mage_Sales_Model_Resource_Report_Collection_Abstract
 {
     /**

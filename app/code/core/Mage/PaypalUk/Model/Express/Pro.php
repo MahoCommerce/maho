@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * PayPal Express (Payflow Edition) implementation for payment method instances
- *
- * @package    Mage_PaypalUk
- */
 class Mage_PaypalUk_Model_Express_Pro extends Mage_PaypalUk_Model_Pro
 {
     /**

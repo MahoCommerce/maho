@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Gift message adminhtml sales order view items
- *
- * @package    Mage_GiftMessage
- */
 class Mage_GiftMessage_Block_Adminhtml_Sales_Order_View_Items extends Mage_Adminhtml_Block_Template
 {
     /**

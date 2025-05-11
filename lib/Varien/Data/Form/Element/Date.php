@@ -11,10 +11,6 @@
  */
 
 /**
- * Varien data selector form element
- *
- * @package    Varien_Data
- *
  * @method string getFormat()
  * @method string getInputFormat()
  * @method string getLocale()

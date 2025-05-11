@@ -13,8 +13,6 @@
 /**
  * Recurring profiles listing
  *
- * @package    Mage_Sales
- *
  * @method $this setBackUrl(string $value)
  * @method $this setGridColumns(Varien_Object[] $profiles)
  * @method $this setGridElements(Varien_Object[] $profiles)

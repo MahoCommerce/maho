@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Products Report collection
- *
- * @package    Mage_Reports
- */
 class Mage_Reports_Model_Resource_Product_Collection extends Mage_Catalog_Model_Resource_Product_Collection
 {
     public const SELECT_COUNT_SQL_TYPE_CART           = 1;
@@ -349,6 +344,10 @@ class Mage_Reports_Model_Resource_Product_Collection extends Mage_Catalog_Model_
                 $productViewEvent = (int) $eventType->getId();
                 break;
             }
+        }
+
+        if (!isset($productViewEvent)) {
+            return $this;
         }
 
         $this->getSelect()->reset()

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Mysql4 session save handler
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Resource_Session implements SessionHandlerInterface
 {
     /**
