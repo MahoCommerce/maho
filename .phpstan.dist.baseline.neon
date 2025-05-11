@@ -30391,12 +30391,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/overlay_popup.phtml
 
 		-
-			message: '#^Call to an undefined static method Mage\:\:getMahoVersion\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: app/design/adminhtml/default/default/template/page/header.phtml
-
-		-
 			message: '''
 				#^PHPDoc tag @var references deprecated class Mage_Page_Block_Js_Translate\:
 				since 1\.7\.0\.0 \(used in adminhtml/default/default/layout/main\.xml\)$#
