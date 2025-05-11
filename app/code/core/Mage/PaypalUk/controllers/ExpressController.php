@@ -9,9 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_PaypalUk
- */
 class Mage_PaypalUk_ExpressController extends Mage_Paypal_Controller_Express_Abstract
 {
     /**

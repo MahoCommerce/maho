@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_CatalogSearch
- */
 class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
 {
     /**

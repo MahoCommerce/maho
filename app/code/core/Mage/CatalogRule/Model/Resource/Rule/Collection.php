@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_CatalogRule
- */
 class Mage_CatalogRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Resource_Rule_Collection_Abstract
 {
     /**

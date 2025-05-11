@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Nominal discount total
- *
- * @package    Mage_SalesRule
- */
 class Mage_SalesRule_Model_Quote_Nominal_Discount extends Mage_SalesRule_Model_Quote_Discount
 {
     /**

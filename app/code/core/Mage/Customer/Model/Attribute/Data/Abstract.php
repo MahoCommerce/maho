@@ -9,9 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customer Attribute Abstract Data Model
- *
- * @package    Mage_Customer
- */
 abstract class Mage_Customer_Model_Attribute_Data_Abstract extends Mage_Eav_Model_Attribute_Data_Abstract {}

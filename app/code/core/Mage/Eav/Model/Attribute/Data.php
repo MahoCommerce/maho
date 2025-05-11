@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * EAV Entity Attribute Data Factory
- *
- * @package    Mage_Eav
- */
 class Mage_Eav_Model_Attribute_Data
 {
     public const OUTPUT_FORMAT_JSON    = 'json';

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Chooser Container for "Product Link" Cms Widget Plugin
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Catalog_Product_Widget_Chooser_Container extends Mage_Adminhtml_Block_Template
 {
     /**

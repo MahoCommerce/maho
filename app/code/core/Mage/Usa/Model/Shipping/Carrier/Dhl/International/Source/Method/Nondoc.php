@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Source model for DHL shipping methods for documentation
- *
- * @package    Mage_Usa
- */
 class Mage_Usa_Model_Shipping_Carrier_Dhl_International_Source_Method_Nondoc extends Mage_Usa_Model_Shipping_Carrier_Dhl_International_Source_Method_Abstract
 {
     /**

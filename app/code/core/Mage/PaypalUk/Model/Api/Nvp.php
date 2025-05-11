@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * NVP API wrappers model
- *
- * @package    Mage_PaypalUk
- */
 class Mage_PaypalUk_Model_Api_Nvp extends Mage_Paypal_Model_Api_Nvp
 {
     /**

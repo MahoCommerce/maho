@@ -13,7 +13,6 @@
 /**
  * Paypal transaction resource model
  *
- * @package    Mage_Paypal
  * @deprecated since 1.6.2.0
  */
 class Mage_Paypal_Model_Resource_Payment_Transaction extends Mage_Core_Model_Resource_Db_Abstract

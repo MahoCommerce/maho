@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customer sharing config model
- *
- * @package    Mage_Customer
- */
 class Mage_Customer_Model_Config_Share extends Mage_Core_Model_Config_Data
 {
     /**

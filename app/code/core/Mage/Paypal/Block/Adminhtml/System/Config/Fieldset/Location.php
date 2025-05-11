@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Fieldset renderer for PayPal Merchant Location fieldset
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_Adminhtml_Block_System_Config_Form_Fieldset
 {
     /**

@@ -16,8 +16,6 @@
  * For block generation you must define Data source class, data source class method,
  * parameters array and block template
  *
- * @package    Mage_Core
- *
  * @method $this setAdditionalHtml(string $value)
  * @method $this setBlockParams(array $value)
  * @method $this setCacheLifetime(int|false $value)

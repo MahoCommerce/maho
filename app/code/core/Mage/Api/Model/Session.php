@@ -11,10 +11,6 @@
  */
 
 /**
- * Webservice api session
- *
- * @package    Mage_Api
- *
  * @method Mage_Api_Model_User getUser()
  * @method $this setUser(Mage_Api_Model_User $user)
  * @method Mage_Api_Model_Acl getAcl()

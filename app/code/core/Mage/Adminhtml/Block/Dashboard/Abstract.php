@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml dashboard tab abstract
- *
- * @package    Mage_Adminhtml
- */
 abstract class Mage_Adminhtml_Block_Dashboard_Abstract extends Mage_Adminhtml_Block_Widget
 {
     protected $_dataHelperName = null;

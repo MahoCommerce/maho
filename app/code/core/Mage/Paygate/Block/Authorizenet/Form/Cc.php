@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Paygate
- */
 class Mage_Paygate_Block_Authorizenet_Form_Cc extends Mage_Payment_Block_Form
 {
     /**

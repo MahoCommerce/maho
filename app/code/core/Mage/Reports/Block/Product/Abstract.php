@@ -10,10 +10,6 @@
  */
 
 /**
- * Reports Recently Products Abstract Block
- *
- * @package    Mage_Reports
- *
  * @method int getCustomerId()
  * @method array getProductIds()
  */

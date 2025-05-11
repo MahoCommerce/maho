@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Renderer for PayPal banner in System Configuration
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Hint extends Mage_Adminhtml_Block_Abstract implements Varien_Data_Form_Element_Renderer_Interface
 {
     protected $_template = 'paypal/system/config/fieldset/hint.phtml';

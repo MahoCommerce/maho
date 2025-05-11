@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Review controller
- *
- * @package    Mage_Review
- */
 class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
 {
     /**

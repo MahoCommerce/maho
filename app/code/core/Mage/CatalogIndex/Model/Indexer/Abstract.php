@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog indexer abstract class
- *
- * @package    Mage_CatalogIndex
- */
 abstract class Mage_CatalogIndex_Model_Indexer_Abstract extends Mage_Core_Model_Abstract implements Mage_CatalogIndex_Model_Indexer_Interface
 {
     protected $_processChildren = true;

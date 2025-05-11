@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Mustishipping checkout base abstract block
- *
- * @package    Mage_Checkout
- */
 class Mage_Checkout_Block_Multishipping_Abstract extends Mage_Core_Block_Template
 {
     /**

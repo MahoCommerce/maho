@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Wishlist shared items controllers
- *
- * @package    Mage_Wishlist
- */
 class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
 {
     /**

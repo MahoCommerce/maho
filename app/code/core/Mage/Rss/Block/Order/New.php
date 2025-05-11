@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Review form block
- *
- * @package    Mage_Rss
- */
 class Mage_Rss_Block_Order_New extends Mage_Core_Block_Template
 {
     /**

@@ -11,10 +11,6 @@
  */
 
 /**
- * Quote rule action abstract
- *
- * @package    Mage_Rule
- *
  * @method array getAttributeOption()
  * @method $this setAttributeOption(array $value)
  * @method array getOperatorOption()

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Core Email Template Filter Model
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Email_Template_Filter extends Varien_Filter_Template
 {
     /**

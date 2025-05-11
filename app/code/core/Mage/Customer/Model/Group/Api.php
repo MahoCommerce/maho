@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customer groups api
- *
- * @package    Mage_Customer
- */
 class Mage_Customer_Model_Group_Api extends Mage_Api_Model_Resource_Abstract
 {
     /**

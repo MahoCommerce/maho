@@ -13,8 +13,6 @@
 /**
  * Widget Instance page groups (predefined layouts group) to display on
  *
- * @package    Mage_Widget
- *
  * @method Mage_Widget_Model_Widget_Instance getWidgetInstance()
  * @method $this setWidgetInstance(Mage_Widget_Model_Widget_Instance $value)
  */
@@ -152,6 +150,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Main_Layout extends M
                 ],
             ],
         ];
+        $productsOptions = [];
         foreach (Mage_Catalog_Model_Product_Type::getTypes() as $typeId => $type) {
             $productsOptions[] = [
                 'value' => $typeId . '_products',

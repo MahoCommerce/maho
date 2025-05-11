@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Mysql PDO DB adapter
- */
 class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements Varien_Db_Adapter_Interface
 {
     public const DEBUG_CONNECT         = 0;
@@ -134,7 +131,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     /**
      * Cache frontend adapter instance
      *
-     * @var Zend_Cache_Core
+     * @var Mage_Core_Model_Cache
      */
     protected $_cacheAdapter;
 
@@ -468,7 +465,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
             if (in_array($startSql, $this->_ddlRoutines)
                 && (preg_match($this->_tempRoutines, $sql) !== 1)
             ) {
-                trigger_error(Varien_Db_Adapter_Interface::ERROR_DDL_MESSAGE, E_USER_ERROR);
+                throw new Varien_Db_Exception(Varien_Db_Adapter_Interface::ERROR_DDL_MESSAGE);
             }
         }
     }
@@ -1370,58 +1367,6 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     }
 
     /**
-     * Add Index Key
-     *
-     * @deprecated since 1.5.0.0
-     * @param string $tableName
-     * @param string $indexName
-     * @param string|array $fields
-     * @param string $indexType
-     * @param string $schemaName
-     * @return Zend_Db_Statement_Interface
-     */
-    public function addKey($tableName, $indexName, $fields, $indexType = 'index', $schemaName = null)
-    {
-        return $this->addIndex($tableName, $indexName, $fields, $indexType, $schemaName);
-    }
-
-    /**
-     * Remove duplicate entry for create key
-     *
-     * @param string $table
-     * @param array $fields
-     * @param array $ids
-     * @return $this
-     */
-    protected function _removeDuplicateEntry($table, $fields, $ids)
-    {
-        $where = [];
-        $i = 0;
-        foreach ($fields as $field) {
-            $where[] = $this->quoteInto($field . '=?', $ids[$i++]);
-        }
-
-        if (!$where) {
-            return $this;
-        }
-        $whereCond = implode(' AND ', $where);
-        $sql = sprintf('SELECT COUNT(*) as `cnt` FROM `%s` WHERE %s', $table, $whereCond);
-
-        $cnt = $this->raw_fetchRow($sql, 'cnt');
-        if ($cnt > 1) {
-            $sql = sprintf(
-                'DELETE FROM `%s` WHERE %s LIMIT %d',
-                $table,
-                $whereCond,
-                $cnt - 1,
-            );
-            $this->raw_query($sql);
-        }
-
-        return $this;
-    }
-
-    /**
      * Creates and returns a new Zend_Db_Select object for this adapter.
      *
      * @return Varien_Db_Select
@@ -1645,14 +1590,9 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
             return $this->_ddlCache[$ddlType][$tableCacheKey];
         }
 
-        if ($this->_cacheAdapter instanceof Zend_Cache_Core) {
+        if ($this->_cacheAdapter) {
             $cacheId = $this->_getCacheId($tableCacheKey, $ddlType);
-            $data = $this->_cacheAdapter->load($cacheId);
-            if ($data !== false) {
-                $data = unserialize($data, ['allowed_classes' => false]);
-                $this->_ddlCache[$ddlType][$tableCacheKey] = $data;
-            }
-            return $data;
+            return $this->_cacheAdapter->load($cacheId);
         }
 
         return false;
@@ -1673,9 +1613,8 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         }
         $this->_ddlCache[$ddlType][$tableCacheKey] = $data;
 
-        if ($this->_cacheAdapter instanceof Zend_Cache_Core) {
+        if ($this->_cacheAdapter) {
             $cacheId = $this->_getCacheId($tableCacheKey, $ddlType);
-            $data = serialize($data);
             $this->_cacheAdapter->save($data, $cacheId, [self::DDL_CACHE_TAG]);
         }
 
@@ -1698,8 +1637,8 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         }
         if ($tableName === null) {
             $this->_ddlCache = [];
-            if ($this->_cacheAdapter instanceof Zend_Cache_Core) {
-                $this->_cacheAdapter->clean(Zend_Cache::CLEANING_MODE_MATCHING_TAG, [self::DDL_CACHE_TAG]);
+            if ($this->_cacheAdapter) {
+                $this->_cacheAdapter->clean([self::DDL_CACHE_TAG]);
             }
         } else {
             $cacheKey = $this->_getTableName($tableName, $schemaName);
@@ -1709,7 +1648,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
                 unset($this->_ddlCache[$ddlType][$cacheKey]);
             }
 
-            if ($this->_cacheAdapter instanceof Zend_Cache_Core) {
+            if ($this->_cacheAdapter) {
                 foreach ($ddlTypes as $ddlType) {
                     $cacheId = $this->_getCacheId($cacheKey, $ddlType);
                     $this->_cacheAdapter->remove($cacheId);
@@ -2339,14 +2278,8 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         return $bunches;
     }
 
-    /**
-     * Set cache adapter
-     *
-     * @param Zend_Cache_Backend_Interface $adapter
-     * @return $this
-     */
     #[\Override]
-    public function setCacheAdapter($adapter)
+    public function setCacheAdapter(Mage_Core_Model_Cache $adapter): self
     {
         $this->_cacheAdapter = $adapter;
         return $this;
@@ -2923,12 +2856,11 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         $fieldSql = [];
         foreach ($fields as $field) {
             if (!isset($columns[$field])) {
-                $msg = sprintf(
+                throw new Zend_Db_Exception(sprintf(
                     'There is no field "%s" that you are trying to create an index on "%s"',
                     $field,
                     $tableName,
-                );
-                throw new Zend_Db_Exception($msg);
+                ));
             }
             $fieldSql[] = $this->quoteIdentifier($field);
         }
@@ -2942,25 +2874,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         };
 
         $query .= sprintf(' ADD %s (%s)', $condition, $fieldSql);
-
-        $cycle = true;
-        while ($cycle === true) {
-            try {
-                $result = $this->raw_query($query);
-                $cycle  = false;
-            } catch (Exception $e) {
-                if (in_array(strtolower($indexType), ['primary', 'unique'])) {
-                    $match = [];
-                    if (preg_match('#SQLSTATE\[23000\]: [^:]+: 1062[^\']+\'([\d-\.]+)\'#', $e->getMessage(), $match)) {
-                        $ids = explode('-', $match[1]);
-                        $this->_removeDuplicateEntry($tableName, $fields, $ids);
-                        continue;
-                    }
-                }
-                throw $e;
-            }
-        }
-
+        $result = $this->raw_query($query);
         $this->resetDdlCache($tableName, $schemaName);
 
         return $result;
@@ -4296,7 +4210,7 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     public function __destruct()
     {
         if ($this->_transactionLevel > 0) {
-            trigger_error('Some transactions have not been committed or rolled back', E_USER_ERROR);
+            throw new RuntimeException(Varien_Db_Adapter_Interface::ERROR_TRANSACTION_NOT_COMMITTED);
         }
     }
 }

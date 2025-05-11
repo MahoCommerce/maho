@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Abstract helper
- *
- * @package    Mage_Core
- */
 abstract class Mage_Core_Helper_Abstract
 {
     /**
@@ -26,7 +21,7 @@ abstract class Mage_Core_Helper_Abstract
     /**
      * Request object
      *
-     * @var Zend_Controller_Request_Http
+     * @var Mage_Core_Controller_Request_Http
      */
     protected $_request;
 

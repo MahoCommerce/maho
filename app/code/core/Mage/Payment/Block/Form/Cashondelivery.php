@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Block for Cash On Delivery payment method form
- *
- * @package    Mage_Payment
- */
 class Mage_Payment_Block_Form_Cashondelivery extends Mage_Payment_Block_Form
 {
     /**

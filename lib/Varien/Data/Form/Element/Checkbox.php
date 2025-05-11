@@ -11,10 +11,6 @@
  */
 
 /**
- * Form checkbox element
- *
- * @package    Varien_Data
- *
  * @method bool getChecked()
  */
 class Varien_Data_Form_Element_Checkbox extends Varien_Data_Form_Element_Abstract

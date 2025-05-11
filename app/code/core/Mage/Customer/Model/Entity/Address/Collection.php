@@ -9,9 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customers collection
- *
- * @package    Mage_Customer
- */
 class Mage_Customer_Model_Entity_Address_Collection extends Mage_Customer_Model_Resource_Address_Collection {}

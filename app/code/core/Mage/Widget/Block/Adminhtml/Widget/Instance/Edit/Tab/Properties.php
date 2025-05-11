@@ -13,8 +13,6 @@
 /**
  * Widget Instance Properties tab block
  *
- * @package    Mage_Widget
- *
  * @method $this setWidgetType(string $value)
  * @method $this setWidgetValues(array $value)
  */

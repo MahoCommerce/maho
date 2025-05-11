@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Sales Order Creditmemo PDF model
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Model_Order_Pdf_Creditmemo extends Mage_Sales_Model_Order_Pdf_Abstract
 {
     /**
@@ -140,7 +135,7 @@ class Mage_Sales_Model_Order_Pdf_Creditmemo extends Mage_Sales_Model_Order_Pdf_A
             $this->insertTotals($page, $creditmemo);
         }
         $this->_afterGetPdf();
-        if ($creditmemo->getStoreId()) {
+        if (isset($creditmemo) && $creditmemo->getStoreId()) {
             Mage::app()->getLocale()->revert();
         }
         return $pdf;

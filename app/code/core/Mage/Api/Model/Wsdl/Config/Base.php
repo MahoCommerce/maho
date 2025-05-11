@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Wsdl base config
- *
- * @package    Mage_Api
- */
 class Mage_Api_Model_Wsdl_Config_Base extends Varien_Simplexml_Config
 {
     protected $_handler = '';

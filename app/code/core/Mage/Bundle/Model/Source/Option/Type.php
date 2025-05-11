@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Bundle Option Type Source Model
- *
- * @package    Mage_Bundle
- */
 class Mage_Bundle_Model_Source_Option_Type
 {
     public const BUNDLE_OPTIONS_TYPES_PATH = 'global/catalog/product/options/bundle/types';

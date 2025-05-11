@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog flat abstract helper
- *
- * @package    Mage_Catalog
- */
 abstract class Mage_Catalog_Helper_Flat_Abstract extends Mage_Core_Helper_Abstract
 {
     /**

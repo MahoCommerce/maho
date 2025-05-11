@@ -107,6 +107,32 @@
                         </debug>
                     </fields>
                 </analytics>
+                <meta_pixel translate="label">
+                    <label>Facebook Meta Pixel</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>40</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <active translate="label">
+                            <label>Enable</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </active>
+                        <account translate="label">
+                            <label>Meta Pixel ID</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </account>
+                    </fields>
+                </meta_pixel>
             </groups>
         </google>
     </sections>

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Mass-action block for process/list grid
- *
- * @package    Mage_Index
- */
 class Mage_Index_Block_Adminhtml_Process_Grid_Massaction extends Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract
 {
     /**

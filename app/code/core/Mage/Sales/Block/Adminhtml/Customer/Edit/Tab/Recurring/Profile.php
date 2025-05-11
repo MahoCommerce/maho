@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml customer recurring profiles tab
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Block_Adminhtml_Customer_Edit_Tab_Recurring_Profile extends Mage_Sales_Block_Adminhtml_Recurring_Profile_Grid implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     /**

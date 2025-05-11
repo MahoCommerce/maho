@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Template constructions tokenizer
- *
- * @package    Varien_Filter
- */
 
 abstract class Varien_Filter_Template_Tokenizer_Abstract
 {

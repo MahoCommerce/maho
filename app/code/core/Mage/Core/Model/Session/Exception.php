@@ -11,9 +11,6 @@
 
 /**
  * Core Session Exception
- *
  * Allows dispatching before and after events for each controller action
- *
- * @package    Mage_Core
  */
 class Mage_Core_Model_Session_Exception extends Mage_Core_Exception {}

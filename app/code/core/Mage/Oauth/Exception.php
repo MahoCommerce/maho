@@ -9,7 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Oauth
- */
 class Mage_Oauth_Exception extends Zend_Exception {}

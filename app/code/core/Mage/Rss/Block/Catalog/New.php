@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Review form block
- *
- * @package    Mage_Rss
- */
 class Mage_Rss_Block_Catalog_New extends Mage_Rss_Block_Catalog_Abstract
 {
     #[\Override]

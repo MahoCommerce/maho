@@ -11,10 +11,6 @@
  */
 
 /**
- * Flat sales order status history collection
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Order_Status getItemById(int $value)
  * @method Mage_Sales_Model_Order_Status[] getItems()
  */

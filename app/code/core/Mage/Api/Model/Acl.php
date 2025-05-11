@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Acl model
- *
- * @package    Mage_Api
- */
 class Mage_Api_Model_Acl extends Zend_Acl
 {
     /**

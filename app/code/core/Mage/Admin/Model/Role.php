@@ -11,10 +11,6 @@
  */
 
 /**
- * Admin Role Model
- *
- * @package    Mage_Admin
- *
  * @method Mage_Admin_Model_Resource_Role _getResource()
  * @method Mage_Admin_Model_Resource_Role getResource()
  * @method Mage_Admin_Model_Resource_Role_Collection getResourceCollection()

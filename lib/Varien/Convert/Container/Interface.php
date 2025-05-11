@@ -9,9 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Convert container interface
- *
- * @package    Varien_Convert
- */
 interface Varien_Convert_Container_Interface {}

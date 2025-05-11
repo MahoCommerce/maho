@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Validate URL
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Url_Validator extends Zend_Validate_Abstract
 {
     /**

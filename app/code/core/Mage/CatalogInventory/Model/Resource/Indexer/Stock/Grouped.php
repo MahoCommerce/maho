@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * CatalogInventory Grouped Products Stock Status Indexer Resource Model
- *
- * @package    Mage_CatalogInventory
- */
 class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Grouped extends Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default
 {
     /**

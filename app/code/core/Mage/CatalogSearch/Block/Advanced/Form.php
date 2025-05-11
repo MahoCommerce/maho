@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Advanced search form
- *
- * @package    Mage_CatalogSearch
- */
 class Mage_CatalogSearch_Block_Advanced_Form extends Mage_Core_Block_Template
 {
     /**

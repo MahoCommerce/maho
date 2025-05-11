@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Resource model for category product indexer
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Model_Resource_Abstract
 {
     /**
@@ -960,9 +955,15 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
              * Clean up temporary tables
              */
             $this->clearTemporaryIndexTable();
-            $idxAdapter->delete($enabledTable);
-            $idxAdapter->delete($anchorTable);
-            $idxAdapter->delete($anchorProductsTable);
+            if (isset($enabledTable)) {
+                $idxAdapter->delete($enabledTable);
+            }
+            if (isset($anchorTable)) {
+                $idxAdapter->delete($anchorTable);
+            }
+            if (isset($anchorProductsTable)) {
+                $idxAdapter->delete($anchorProductsTable);
+            }
             $this->commit();
         } catch (Exception $e) {
             $this->rollBack();

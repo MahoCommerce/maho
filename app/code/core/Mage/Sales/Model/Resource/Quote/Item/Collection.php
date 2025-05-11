@@ -11,10 +11,6 @@
  */
 
 /**
- * Quote item resource collection
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Quote_Item getItemById(int $value)
  * @method Mage_Sales_Model_Quote_Item[] getItems()
  */

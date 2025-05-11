@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Order API
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Model_Order_Api extends Mage_Sales_Model_Api_Resource
 {
     /**
@@ -187,7 +182,7 @@ class Mage_Sales_Model_Order_Api extends Mage_Sales_Model_Api_Resource
 
             $order->save();
             $order->sendOrderUpdateEmail($notify, $comment);
-            if ($notify && $comment) {
+            if (isset($oldStore, $oldArea) && $notify && $comment) {
                 Mage::getDesign()->setStore($oldStore);
                 Mage::getDesign()->setArea($oldArea);
             }

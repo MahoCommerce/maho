@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Sales Order Email Shipment items
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Block_Order_Email_Shipment_Items extends Mage_Sales_Block_Items_Abstract
 {
     #[\Override]

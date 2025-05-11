@@ -10,17 +10,12 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml order creating gift message item form
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Sales_Order_Create_Giftmessage_Form extends Mage_Adminhtml_Block_Widget_Form
 {
     /**
      * Entity for editing of gift message
      *
-     * @var Mage_Eav_Model_Entity_Abstract
+     * @var Varien_Object
      */
     protected $_entity;
 

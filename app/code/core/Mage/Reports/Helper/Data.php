@@ -9,9 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Reports
- */
 class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const REPORT_PERIOD_TYPE_DAY    = 'day';

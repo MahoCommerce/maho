@@ -22,8 +22,6 @@
  * @method $this setUseContainer(bool $value)
  * @method $this setDisabled(bool $value)
  * @method $this setRequired(bool $value)
- *
- * @package    Varien_Data
  */
 class Varien_Data_Form_Abstract extends Varien_Object
 {

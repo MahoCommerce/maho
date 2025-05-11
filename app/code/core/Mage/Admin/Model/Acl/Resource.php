@@ -9,9 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Acl resource
- *
- * @package    Mage_Admin
- */
 class Mage_Admin_Model_Acl_Resource extends Zend_Acl_Resource {}

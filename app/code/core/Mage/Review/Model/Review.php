@@ -11,10 +11,6 @@
  */
 
 /**
- * Review model
- *
- * @package    Mage_Review
- *
  * @method Mage_Review_Model_Resource_Review _getResource()
  * @method Mage_Review_Model_Resource_Review getResource()
  * @method Mage_Review_Model_Resource_Review_Collection getCollection()
@@ -91,7 +87,7 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
      * @param int $entityPkValue
      * @param bool $approvedOnly
      * @param int $storeId
-     * @return int
+     * @return string
      */
     public function getTotalReviews($entityPkValue, $approvedOnly = false, $storeId = 0)
     {

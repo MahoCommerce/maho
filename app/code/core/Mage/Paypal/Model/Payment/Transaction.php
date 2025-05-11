@@ -14,8 +14,6 @@
  * Payment transaction model
  * Tracks transaction history
  *
- * @package    Mage_Paypal
- *
  * @method Mage_Paypal_Model_Resource_Payment_Transaction _getResource()
  * @method Mage_Paypal_Model_Resource_Payment_Transaction getResource()
  * @method string getTxnId()

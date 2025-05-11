@@ -6,13 +6,10 @@
  * @package    Mage_ConfigurableSwatches
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_ConfigurableSwatches
- */
 class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
 {
     /**
@@ -141,11 +138,8 @@ class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
         if (($front == 'catalog' && $controller == 'category' && $action == 'view')
             || ($front == 'catalogsearch' && $controller == 'result' && $action == 'index')
         ) {
-            // Block name for layered navigation differs depending on which Magento edition we're in
             $blockName = 'catalog.leftnav';
-            if (Mage::getEdition() == Mage::EDITION_ENTERPRISE) {
-                $blockName = ($front == 'catalogsearch') ? 'enterprisesearch.leftnav' : 'enterprisecatalog.leftnav';
-            } elseif ($front == 'catalogsearch') {
+            if ($front == 'catalogsearch') {
                 $blockName = 'catalogsearch.leftnav';
             }
             Mage::helper('configurableswatches/productlist')->convertLayerBlock($blockName);

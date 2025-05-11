@@ -13,8 +13,6 @@
 /**
  * Abstract Rule condition data model
  *
- * @package    Mage_Rule
- *
  * @method string|false getAttribute()
  * @method $this setAttribute(string|false $value)
  * @method array getAttributeOption()

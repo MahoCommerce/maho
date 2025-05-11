@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Product Alert Abstract Email Block
- *
- * @package    Mage_ProductAlert
- */
 abstract class Mage_ProductAlert_Block_Email_Abstract extends Mage_Core_Block_Template
 {
     /**

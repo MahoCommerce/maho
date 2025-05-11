@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Renderer for specific checkbox that is used on Rule Information tab in Shopping cart price rules
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main_Renderer_Checkbox extends Mage_Adminhtml_Block_Abstract implements Varien_Data_Form_Element_Renderer_Interface
 {
     /**

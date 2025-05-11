@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Order Rss Resource Model
- *
- * @package    Mage_Rss
- */
 class Mage_Rss_Model_Resource_Order
 {
     /**

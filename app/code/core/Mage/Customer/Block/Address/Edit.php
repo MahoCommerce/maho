@@ -133,7 +133,7 @@ class Mage_Customer_Block_Address_Edit extends Mage_Directory_Block_Data
     }
 
     /**
-     * @return int
+     * @return string
      */
     public function getRegionId()
     {

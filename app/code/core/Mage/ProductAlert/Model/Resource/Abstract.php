@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Product alert for back in abstract resource model
- *
- * @package    Mage_ProductAlert
- */
 abstract class Mage_ProductAlert_Model_Resource_Abstract extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**

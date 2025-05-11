@@ -11,10 +11,6 @@
  */
 
 /**
- * Class Mage_Sales_Model_Order_Shipment_Track
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Order_Shipment_Track _getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment_Track getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment_Track_Collection getCollection()

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Html page block
- *
- * @package    Mage_Page
- */
 class Mage_Page_Block_Html_Breadcrumbs extends Mage_Core_Block_Template
 {
     /**

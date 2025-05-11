@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Customer account navigation sidebar
- *
- * @package    Mage_Customer
- */
 class Mage_Customer_Block_Account_Navigation extends Mage_Core_Block_Template
 {
     /**
@@ -22,7 +17,7 @@ class Mage_Customer_Block_Account_Navigation extends Mage_Core_Block_Template
     protected $_links = [];
 
     /**
-     * @var bool
+     * @var false|string
      */
     protected $_activeLink = false;
 

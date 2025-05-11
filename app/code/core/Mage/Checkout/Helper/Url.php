@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Checkout url helper
- *
- * @package    Mage_Checkout
- */
 class Mage_Checkout_Helper_Url extends Mage_Core_Helper_Url
 {
     protected $_moduleName = 'Mage_Checkout';

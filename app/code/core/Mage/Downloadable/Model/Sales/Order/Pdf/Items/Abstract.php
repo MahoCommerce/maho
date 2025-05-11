@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Order Downloadable Pdf Items renderer
- *
- * @package    Mage_Downloadable
- */
 abstract class Mage_Downloadable_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sales_Model_Order_Pdf_Items_Abstract
 {
     /**

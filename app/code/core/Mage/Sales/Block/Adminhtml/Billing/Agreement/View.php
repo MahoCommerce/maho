@@ -10,12 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-
-/**
- * Adminhtml billing agreement view
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Block_Adminhtml_Billing_Agreement_View extends Mage_Adminhtml_Block_Widget_Form_Container
 {
     /**

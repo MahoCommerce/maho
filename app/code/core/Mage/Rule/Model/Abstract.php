@@ -11,10 +11,6 @@
  */
 
 /**
- * Abstract Rule entity data model
- *
- * @package    Mage_Rule
- *
  * @method $this unsActions()
  * @method bool hasActionsSerialized()
  * @method $this unsActionsSerialized()

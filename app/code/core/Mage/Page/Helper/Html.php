@@ -9,9 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Page
- */
 class Mage_Page_Helper_Html extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Mage_Page';

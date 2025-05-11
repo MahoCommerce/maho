@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Shipping table rates
- *
- * @package    Mage_Shipping
- */
 class Mage_Shipping_Model_Resource_Carrier_Tablerate extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**

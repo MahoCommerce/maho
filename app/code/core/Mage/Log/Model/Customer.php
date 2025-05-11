@@ -11,10 +11,6 @@
  */
 
 /**
- * Customer log model
- *
- * @package    Mage_Log
- *
  * @method Mage_Log_Model_Resource_Customer _getResource()
  * @method Mage_Log_Model_Resource_Customer getResource()
  * @method int getVisitorId()

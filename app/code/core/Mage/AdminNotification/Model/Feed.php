@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * AdminNotification Feed model
- *
- * @package    Mage_AdminNotification
- */
 class Mage_AdminNotification_Model_Feed extends Mage_Core_Model_Abstract
 {
     public const XML_FEED_URL_PATH     = 'system/adminnotification/feed_url';

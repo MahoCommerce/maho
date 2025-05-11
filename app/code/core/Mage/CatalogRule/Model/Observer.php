@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog Price rules observer model
- *
- * @package    Mage_CatalogRule
- */
 class Mage_CatalogRule_Model_Observer
 {
     /**
@@ -199,7 +194,7 @@ class Mage_CatalogRule_Model_Observer
         }
 
         if ($key) {
-            if (!isset($this->_rulePrices[$key])) {
+            if (isset($wId, $gId, $pId) && !isset($this->_rulePrices[$key])) {
                 $rulePrice = Mage::getResourceModel('catalogrule/rule')
                     ->getRulePrice($date, $wId, $gId, $pId);
                 $this->_rulePrices[$key] = $rulePrice;

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog comapare controller
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_Action
 {
     /**

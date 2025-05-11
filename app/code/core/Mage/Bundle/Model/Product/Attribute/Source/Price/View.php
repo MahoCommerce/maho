@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Bundle Price View Attribute Renderer
- *
- * @package    Mage_Bundle
- */
 class Mage_Bundle_Model_Product_Attribute_Source_Price_View extends Mage_Eav_Model_Entity_Attribute_Source_Abstract
 {
     /**

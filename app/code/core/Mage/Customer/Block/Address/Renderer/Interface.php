@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Address renderer interface
- *
- * @package    Mage_Customer
- */
 interface Mage_Customer_Block_Address_Renderer_Interface
 {
     /**

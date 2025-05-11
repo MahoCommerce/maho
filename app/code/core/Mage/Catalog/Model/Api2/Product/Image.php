@@ -9,9 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Abstract Api2 model for product image
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Api2_Product_Image extends Mage_Api2_Model_Resource {}

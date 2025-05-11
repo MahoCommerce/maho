@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml customers wishlist grid item renderer for item visibility
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist_Grid_Renderer_Description extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     #[\Override]

@@ -12,8 +12,6 @@
 /**
  * Modifier of queries, developed for backwards compatibility on MySQL,
  * while creating foreign keys
- *
- * @package    Mage_Core
  */
 class Mage_Core_Model_Resource_Setup_Query_Modifier
 {

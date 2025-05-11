@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Uploader
- */
 class Mage_Uploader_Block_Single extends Mage_Uploader_Block_Abstract
 {
     /**

@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Convert action interface
- *
- * @package    Mage_Dataflow
- */
 interface Mage_Dataflow_Model_Convert_Action_Interface
 {
     /**

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml transaction details grid
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Sales_Transactions_Child_Grid extends Mage_Adminhtml_Block_Sales_Transactions_Grid
 {
     /**

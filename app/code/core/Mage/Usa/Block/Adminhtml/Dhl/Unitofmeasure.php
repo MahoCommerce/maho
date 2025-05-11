@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Frontend model for DHL shipping methods for documentation
- *
- * @package    Mage_Usa
- */
 class Mage_Usa_Block_Adminhtml_Dhl_Unitofmeasure extends Mage_Adminhtml_Block_System_Config_Form_Field
 {
     #[\Override]

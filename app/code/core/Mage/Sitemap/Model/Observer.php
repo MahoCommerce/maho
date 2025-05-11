@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Sitemap module observer
- *
- * @package    Mage_Sitemap
- */
 class Mage_Sitemap_Model_Observer
 {
     /**

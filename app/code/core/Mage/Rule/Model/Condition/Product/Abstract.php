@@ -13,8 +13,6 @@
 /**
  * Abstract Rule product condition data model
  *
- * @package    Mage_Rule
- *
  * @method $this setAttributeOption(array $value)
  * @method string getJsFormObject()
  */

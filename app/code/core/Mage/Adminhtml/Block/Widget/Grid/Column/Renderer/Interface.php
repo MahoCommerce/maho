@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml grid item renderer interface
- *
- * @package    Mage_Adminhtml
- */
 interface Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Interface
 {
     /**

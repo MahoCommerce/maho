@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Admin Variable Helper
- *
- * @package    Mage_Admin
- */
 class Mage_Admin_Helper_Variable extends Mage_Core_Helper_Abstract
 {
     /**

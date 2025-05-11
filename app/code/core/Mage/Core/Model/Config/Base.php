@@ -13,8 +13,6 @@
  * Abstract configuration class
  *
  * Used to retrieve core configuration values
- *
- * @package    Mage_Core
  */
 class Mage_Core_Model_Config_Base extends Varien_Simplexml_Config
 {

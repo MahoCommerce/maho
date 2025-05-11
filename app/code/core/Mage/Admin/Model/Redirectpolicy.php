@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Admin redirect policy model, guard admin from direct link to store/category/product deletion
- *
- * @package    Mage_Admin
- */
 class Mage_Admin_Model_Redirectpolicy
 {
     /**

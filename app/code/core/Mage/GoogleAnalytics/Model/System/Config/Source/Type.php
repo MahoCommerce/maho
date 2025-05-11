@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Google Analytics system config source type
- *
- * @package    Mage_GoogleAnalytics
- */
 class Mage_GoogleAnalytics_Model_System_Config_Source_Type
 {
     /**

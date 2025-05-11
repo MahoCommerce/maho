@@ -11,10 +11,6 @@
  */
 
 /**
- * Adminhtml grid widget block
- *
- * @package    Mage_Adminhtml
- *
  * @method $this setSortable(bool $value)
  * @method $this setUseAjax(bool $value)
  */
@@ -377,7 +373,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
             $configNode = Mage::getConfig()->getNode('grid/column/default');
             # should be called only once
             if ($configNode === false) {
-                Mage::app()->getCacheInstance()->cleanType('config');
+                Mage::app()->getCache()->cleanType('config');
                 $configNode = Mage::getConfig()->getNode('grid/column/default');
             }
             $config = $configNode->asArray();
@@ -1854,7 +1850,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
 
     /**
      * @param string|object $column
-     * @param string $value
+     * @param string|bool $value
      * @return bool|$this
      */
     public function isColumnGrouped($column, $value = null)

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Abstract resource model
- *
- * @package    Mage_Core
- */
 abstract class Mage_Core_Model_Resource_Abstract
 {
     /**

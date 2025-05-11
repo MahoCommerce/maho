@@ -11,10 +11,6 @@
  */
 
 /**
- * Eav Form Fieldset Model
- *
- * @package    Mage_Eav
- *
  * @method Mage_Eav_Model_Resource_Form_Fieldset _getResource()
  * @method Mage_Eav_Model_Resource_Form_Fieldset getResource()
  * @method Mage_Eav_Model_Resource_Form_Fieldset_Collection getCollection()

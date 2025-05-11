@@ -8,11 +8,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Assertion interface for API acl
- *
- * @package    Mage_Api
- */
 interface Mage_Api_Model_Acl_Assert_Interface
 {
     /**

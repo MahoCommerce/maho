@@ -10,8 +10,6 @@
  */
 
 /**
- * @package    Mage_Eav
- *
  * @method string getLastId()
  * @method string getPrefix()
  */

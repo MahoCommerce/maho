@@ -10,12 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-
-/**
- * Admin CMS page
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Cms_Page_Edit extends Mage_Adminhtml_Block_Widget_Form_Container
 {
     /**

@@ -13,8 +13,6 @@
 /**
  * NVP API wrappers model
  *
- * @package    Mage_Adminhtml
- *
  * @TODO: move some parts to abstract, don't hesitate to throw exceptions on api calls
  */
 class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract

@@ -11,10 +11,6 @@
  */
 
 /**
- * Abstract model class
- *
- * @package    Mage_Core
- *
  * @method string getCreatedAt()
  * @method $this setCreatedAt(string $currentTime)
  * @method $this setUpdatedAt(string $currentTime)

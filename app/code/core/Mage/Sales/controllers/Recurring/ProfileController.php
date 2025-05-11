@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Recurring profiles view/management controller
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_Action
 {
     /**

@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * VAT ID element renderer
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Customer_Sales_Order_Address_Form_Renderer_Vat extends Mage_Adminhtml_Block_Widget_Form_Renderer_Fieldset_Element
 {
     /**

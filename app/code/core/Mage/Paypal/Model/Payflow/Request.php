@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Payflow Link request model
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Model_Payflow_Request extends Varien_Object
 {
     /**

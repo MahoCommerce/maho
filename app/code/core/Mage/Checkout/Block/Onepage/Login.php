@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * One page checkout status
- *
- * @package    Mage_Checkout
- */
 class Mage_Checkout_Block_Onepage_Login extends Mage_Checkout_Block_Onepage_Abstract
 {
     #[\Override]

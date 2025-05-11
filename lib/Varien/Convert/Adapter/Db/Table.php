@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Convert db table adapter
- *
- * @package    Varien_Convert
- */
 class Varien_Convert_Adapter_Db_Table extends Varien_Convert_Adapter_Abstract
 {
     #[\Override]

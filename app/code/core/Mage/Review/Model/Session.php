@@ -10,10 +10,6 @@
  */
 
 /**
- * Review session model
- *
- * @package    Mage_Review
- *
  * @method array getFormData()
  * @method $this setFormData(array $value)
  * @method array getRedirectUrl()

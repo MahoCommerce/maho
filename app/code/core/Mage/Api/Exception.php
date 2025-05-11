@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Api exception
- *
- * @package    Mage_Api
- */
 class Mage_Api_Exception extends Mage_Core_Exception
 {
     protected $_customMessage = null;

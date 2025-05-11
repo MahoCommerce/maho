@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Reports quote collection
- *
- * @package    Mage_Reports
- */
 class Mage_Reports_Model_Resource_Quote_Collection extends Mage_Sales_Model_Resource_Quote_Collection
 {
     public const SELECT_COUNT_SQL_TYPE_CART = 1;

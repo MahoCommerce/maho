@@ -11,12 +11,8 @@
  */
 
 /**
- * Cms block content block
- *
  * @method int getBlockId()
  * @method $this setBlockId(int $int)
- *
- * @package    Mage_Cms
  */
 class Mage_Cms_Block_Block extends Mage_Core_Block_Abstract
 {

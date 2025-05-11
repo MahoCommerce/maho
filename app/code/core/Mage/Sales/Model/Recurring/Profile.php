@@ -14,8 +14,6 @@
  * Sales implementation of recurring payment profiles
  * Implements saving and manageing profiles
  *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Recurring_Profile _getResource()
  * @method Mage_Sales_Model_Resource_Recurring_Profile getResource()
  * @method string getState()

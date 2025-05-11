@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog product abstract price backend attribute model with customer group specific
- *
- * @package    Mage_Catalog
- */
 abstract class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Groupprice_Abstract extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**

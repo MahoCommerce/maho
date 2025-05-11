@@ -12,11 +12,6 @@
 
 use Varien_Directory_IFactory as IFactory;
 
-/**
- * File Object
- *
- * @package    Varien_File
- */
 class Varien_File_Object extends SplFileObject implements IFactory
 {
     /** @var string */

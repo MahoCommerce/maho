@@ -12,11 +12,6 @@
 
 use Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract as MassAction;
 
-/**
- * Adminhtml sales orders grid
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
     protected ?array $orderStatusColors = null;
@@ -57,16 +52,17 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
     {
         $this->addColumn('real_order_id', [
             'header' => Mage::helper('sales')->__('Order #'),
-            'width'  => '100px',
-            'type'   => 'text',
-            'index'  => 'increment_id',
+            'width' => '100px',
+            'type' => 'text',
+            'index' => 'increment_id',
+            'filter_index' => 'main_table.increment_id',
             'escape' => true,
         ]);
 
         if (!Mage::app()->isSingleStoreMode()) {
             $this->addColumn('store_id', [
-                'header'    => Mage::helper('sales')->__('Purchased From (Store)'),
-                'type'      => 'store',
+                'header' => Mage::helper('sales')->__('Purchased From (Store)'),
+                'type' => 'store',
                 'display_deleted' => true,
                 'escape'  => true,
             ]);
@@ -75,22 +71,26 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
         $this->addColumn('created_at', [
             'header' => Mage::helper('sales')->__('Purchased On'),
             'index' => 'created_at',
+            'filter_index' => 'main_table.created_at',
             'type' => 'datetime',
         ]);
 
         $this->addColumn('billing_name', [
             'header' => Mage::helper('sales')->__('Bill to Name'),
             'index' => 'billing_name',
+            'filter_index' => 'main_table.billing_name',
         ]);
 
         $this->addColumn('shipping_name', [
             'header' => Mage::helper('sales')->__('Ship to Name'),
             'index' => 'shipping_name',
+            'filter_index' => 'main_table.shipping_name',
         ]);
 
         $this->addColumn('base_grand_total', [
             'header' => Mage::helper('sales')->__('G.T. (Base)'),
             'index' => 'base_grand_total',
+            'filter_index' => 'main_table.base_grand_total',
             'type'  => 'currency',
             'currency' => 'base_currency_code',
         ]);
@@ -98,6 +98,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
         $this->addColumn('grand_total', [
             'header' => Mage::helper('sales')->__('G.T. (Purchased)'),
             'index' => 'grand_total',
+            'filter_index' => 'main_table.grand_total',
             'type'  => 'currency',
             'currency' => 'order_currency_code',
         ]);
@@ -105,6 +106,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
         $this->addColumn('status', [
             'header' => Mage::helper('sales')->__('Status'),
             'index' => 'status',
+            'filter_index' => 'main_table.status',
             'type'  => 'options',
             'width' => '150px',
             'options' => Mage::getSingleton('sales/order_config')->getStatuses(),

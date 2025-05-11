@@ -11,10 +11,6 @@
  */
 
 /**
- * Base html block
- *
- * @package    Mage_Core
- *
  * @method array getLiParams()
  * @method $this setLiParams(array $value)
  * @method array getAParams()

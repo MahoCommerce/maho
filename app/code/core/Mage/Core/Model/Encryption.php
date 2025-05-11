@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Provides basic logic for hashing passwords and encrypting/decrypting misc data
- *
- * @package    Mage_Core
- */
 class Mage_Core_Model_Encryption
 {
     public const HASH_VERSION_MD5    = 0;

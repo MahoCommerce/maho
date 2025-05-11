@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Adminhtml Catalog helper
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Helper_Catalog extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_SITEMAP_VALID_PATHS = 'general/file/sitemap_generate_valid_paths';

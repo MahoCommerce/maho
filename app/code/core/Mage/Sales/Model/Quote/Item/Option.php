@@ -11,10 +11,6 @@
  */
 
 /**
- * Item option model
- *
- * @package    Mage_Sales
- *
  * @method Mage_Sales_Model_Resource_Quote_Item_Option _getResource()
  * @method Mage_Sales_Model_Resource_Quote_Item_Option getResource()
  * @method Mage_Sales_Model_Resource_Quote_Item_Option_Collection getCollection()

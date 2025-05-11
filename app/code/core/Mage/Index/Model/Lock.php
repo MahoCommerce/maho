@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Lock model
- *
- * @package    Mage_Index
- */
 class Mage_Index_Model_Lock
 {
     /**
@@ -261,7 +256,9 @@ class Mage_Index_Model_Lock
     {
         if (!$this->_storage instanceof Mage_Index_Model_Lock_Storage_Interface) {
             $config = Mage::getConfig()->getNode(self::STORAGE_CONFIG_PATH);
-            $this->_storage = Mage::getModel($config->model);
+            /** @var Mage_Index_Model_Lock_Storage_Interface $model */
+            $model = Mage::getModel($config->model);
+            $this->_storage = $model;
         }
         return $this->_storage;
     }

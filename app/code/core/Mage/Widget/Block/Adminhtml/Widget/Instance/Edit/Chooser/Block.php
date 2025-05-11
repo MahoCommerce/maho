@@ -13,8 +13,6 @@
 /**
  * Widget Instance block reference chooser
  *
- * @package    Mage_Widget
- *
  * @method $this setArea(string $value)
  * @method $this setPackage(string $value)
  * @method string getSelected()

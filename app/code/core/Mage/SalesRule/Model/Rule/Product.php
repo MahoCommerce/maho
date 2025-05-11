@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_SalesRule
- */
 class Mage_SalesRule_Model_Rule_Product extends Mage_Core_Model_Abstract
 {
     #[\Override]

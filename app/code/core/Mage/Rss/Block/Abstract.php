@@ -10,10 +10,6 @@
  */
 
 /**
- * Class Mage_Rss_Block_Abstract
- *
- * @package    Mage_Rss
- *
  * @method int getStoreId()
  */
 class Mage_Rss_Block_Abstract extends Mage_Core_Block_Template

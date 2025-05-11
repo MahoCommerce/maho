@@ -14,8 +14,6 @@
  * Manage "My Applications" controller
  *
  * Applications for logged admin user
- *
- * @package    Mage_Oauth
  */
 class Mage_Oauth_Adminhtml_Oauth_Admin_TokenController extends Mage_Adminhtml_Controller_Action
 {

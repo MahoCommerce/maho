@@ -10,9 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * @package    Mage_Catalog
- */
 class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
 {
     /**
@@ -226,7 +223,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
      * If its necessary will be returned conversion type (minus or plus)
      *
      * @param   null|string|bool|int|Mage_Core_Model_Store $store
-     * @return  false|int
+     * @return  bool|int
      */
     public function needPriceConversion($store = null)
     {

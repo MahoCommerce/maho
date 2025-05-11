@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- *  Website Payments Pro Hosted Solution request model to get token.
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Model_Hostedpro_Request extends Varien_Object
 {
     /**

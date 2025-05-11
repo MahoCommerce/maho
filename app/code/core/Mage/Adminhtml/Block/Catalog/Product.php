@@ -10,12 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-
-/**
- * Catalog manage products block
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Block_Catalog_Product extends Mage_Adminhtml_Block_Widget_Container
 {
     /**

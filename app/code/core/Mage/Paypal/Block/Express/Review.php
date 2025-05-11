@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Paypal Express Onepage checkout block
- *
- * @package    Mage_Paypal
- */
 class Mage_Paypal_Block_Express_Review extends Mage_Core_Block_Template
 {
     /**
@@ -163,8 +158,7 @@ class Mage_Paypal_Block_Express_Review extends Mage_Core_Block_Template
      *
      * @param float $price
      * @param bool $isInclTax
-     *
-     * @return bool
+     * @return float
      */
     protected function _getShippingPrice($price, $isInclTax)
     {
@@ -177,7 +171,7 @@ class Mage_Paypal_Block_Express_Review extends Mage_Core_Block_Template
      * Format price base on store convert price method
      *
      * @param float $price
-     * @return string
+     * @return float
      */
     protected function _formatPrice($price)
     {

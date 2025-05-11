@@ -5,16 +5,11 @@
  *
  * @package    Varien_Db
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Varien Database Adapter Interface
- *
- * @package    Varien_Db
- */
 interface Varien_Db_Adapter_Interface
 {
     public const INDEX_TYPE_PRIMARY    = 'primary';
@@ -45,6 +40,7 @@ interface Varien_Db_Adapter_Interface
      * Error message for DDL query in transactions
      */
     public const ERROR_DDL_MESSAGE = 'DDL statements are not allowed in transactions';
+    public const ERROR_TRANSACTION_NOT_COMMITTED = 'Some transactions have not been committed or rolled back';
 
     /**
      * Begin new DB transaction for connection
@@ -654,13 +650,7 @@ interface Varien_Db_Adapter_Interface
      */
     public function endSetup();
 
-    /**
-     * Set cache adapter
-     *
-     * @param Zend_Cache_Backend_Interface $adapter
-     * @return Varien_Db_Adapter_Interface
-     */
-    public function setCacheAdapter($adapter);
+    public function setCacheAdapter(Mage_Core_Model_Cache $adapter): self;
 
     /**
      * Allow DDL caching

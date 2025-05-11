@@ -10,11 +10,6 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Default config helper
- *
- * @package    Mage_Adminhtml
- */
 class Mage_Adminhtml_Helper_Config extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Mage_Adminhtml';

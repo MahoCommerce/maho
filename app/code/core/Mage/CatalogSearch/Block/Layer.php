@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Layered Navigation block for search
- *
- * @package    Mage_CatalogSearch
- */
 class Mage_CatalogSearch_Block_Layer extends Mage_Catalog_Block_Layer_View
 {
     /**

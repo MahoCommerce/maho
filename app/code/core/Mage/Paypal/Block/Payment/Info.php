@@ -13,8 +13,6 @@
 /**
  * PayPal common payment info block
  * Uses default templates
- *
- * @package    Mage_Paypal
  */
 class Mage_Paypal_Block_Payment_Info extends Mage_Payment_Block_Info_Cc
 {

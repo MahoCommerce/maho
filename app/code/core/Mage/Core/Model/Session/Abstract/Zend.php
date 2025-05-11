@@ -11,10 +11,6 @@
  */
 
 /**
- * Session abstaract class
- *
- * @package    Mage_Core
- *
  * @method string getCookieDomain()
  * @method string getCookiePath()
  * @method string getCookieLifetime()

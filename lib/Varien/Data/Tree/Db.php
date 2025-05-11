@@ -15,8 +15,6 @@
  *
  * Data model:
  * id  |  pid  |  level | order
- *
- * @package    Varien_Data
  */
 class Varien_Data_Tree_Db extends Varien_Data_Tree
 {

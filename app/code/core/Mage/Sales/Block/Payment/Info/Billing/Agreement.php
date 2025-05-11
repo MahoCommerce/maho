@@ -10,11 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Sales Billing Agreement info block
- *
- * @package    Mage_Sales
- */
 class Mage_Sales_Block_Payment_Info_Billing_Agreement extends Mage_Payment_Block_Info
 {
     /**

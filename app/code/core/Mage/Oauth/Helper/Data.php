@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * OAuth Helper
- *
- * @package    Mage_Oauth
- */
 class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
 {
     /**

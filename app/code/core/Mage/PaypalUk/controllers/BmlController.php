@@ -9,11 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Bill Me Later Controller
- *
- * @package    Mage_PaypalUk
- */
 class Mage_PaypalUk_BmlController extends Mage_Core_Controller_Front_Action
 {
     /**

@@ -11,10 +11,6 @@
  */
 
 /**
- * Html page block
- *
- * @package    Mage_Page
- *
  * @method $this setLogoAlt(string $value)
  * @method $this setLogoSrc(string $value)
  * @method $this setLogoWidth(string $value)
