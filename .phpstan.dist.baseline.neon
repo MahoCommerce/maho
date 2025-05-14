@@ -6307,18 +6307,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/Product/WidgetController.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Catalog_ProductController\:\:_decodeInput\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/ProductController.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Catalog_ProductController\:\:_decodeInput\(\) has parameter \$encoded with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/ProductController.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Catalog_ProductController\:\:_filterStockData\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6356,12 +6344,6 @@ parameters:
 
 		-
 			message: '#^Method Mage_Adminhtml_Catalog_ProductController\:\:alertsStockGridAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/ProductController.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Catalog_ProductController\:\:bundlesAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/ProductController.php
@@ -6823,12 +6805,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Customer/System/Config/ValidatevatController.php
 
 		-
-			message: '#^Method Mage_Adminhtml_CustomerController\:\:_sendUploadResponse\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/CustomerController.php
-
-		-
 			message: '#^Method Mage_Adminhtml_CustomerController\:\:cartAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7231,12 +7207,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Newsletter/QueueController.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Newsletter_SubscriberController\:\:_sendUploadResponse\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Newsletter/SubscriberController.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Newsletter_SubscriberController\:\:exportCsvAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7532,12 +7502,6 @@ parameters:
 
 		-
 			message: '#^Method Mage_Adminhtml_Promo_CatalogController\:\:_initAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Promo/CatalogController.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Promo_CatalogController\:\:addToAlersAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Promo/CatalogController.php
