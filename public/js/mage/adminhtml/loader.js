@@ -8,6 +8,15 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
+// Note: This file is deprecated since Maho 25.3.0 and will be removed along with PrototypeJS.
+//
+// The following functions have been mapped to a new location:
+// window.showLoader(loaderArea) -> Maho.Ajax.Loader.show(loaderArea)
+// window.hideLoader()           -> Maho.Ajax.Loader.hide()
+//
+// TODO: determine in this class is needed and rewrite without PrototypeJs.
+// window.varienLoader           -> class Maho.Ajax.Update
+
 var SessionError = Class.create();
 SessionError.prototype = {
     initialize: function(errorText) {
@@ -181,40 +190,18 @@ varienLoaderHandler.handler = {
         showLoader();
     },
     onComplete: function(transport) {
-        if(Ajax.activeRequestCount == 0) {
-            hideLoader();
-        }
+        hideLoader();
     }
 };
 
-var loaderTimeout = null;
-
-function showLoader(loaderArea) {
-    if (typeof loaderArea === 'string') {
-        loaderArea = document.getElementById(loaderArea);
-    }
-    if (!(loaderArea instanceof Element)) {
-        loaderArea = document.body;
-    }
-
-    var loadingMask = $('loading-mask');
-    if(Element.visible(loadingMask)) {
-        return;
-    }
-    Element.clonePosition(loadingMask, loaderArea, {offsetLeft:-2});
-    Element.show(loadingMask);
-    Element.childElements(loadingMask).invoke('hide');
-    loaderTimeout = setTimeout(function() {
-        Element.childElements(loadingMask).invoke('show');
-    }, typeof window.LOADING_TIMEOUT === 'undefined' ? 200 : window.LOADING_TIMEOUT);
+/** @deprecated since 25.3.0 */
+function showLoader() {
+    return Maho?.Ajax?.Loader?.show(...arguments);
 }
 
+/** @deprecated since 25.3.0 */
 function hideLoader() {
-    Element.hide('loading-mask');
-    if(loaderTimeout) {
-        clearTimeout(loaderTimeout);
-        loaderTimeout = null;
-    }
+    return Maho?.Ajax?.Loader?.hide();
 }
 
 /** @deprecated since 20.0.19 */

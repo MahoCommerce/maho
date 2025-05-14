@@ -5,28 +5,28 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Widget_Form_Renderer_Fieldset $this */
 /** @var Varien_Data_Form_Element_Fieldset $_element */
 ?>
-<?php $_element = $this->getElement() ?>
+<?php $element = $this->getElement() ?>
 <div class="rule-tree">
     <div class="entry-edit-head">
-        <h4><?= $_element->getLegend() ?></h4>
+        <h4><?= $element->getLegend() ?></h4>
     </div>
-    <fieldset id="<?= $_element->getHtmlId() ?>" <?= $_element->serialize(['class']) ?>>
-    <?php if ($_element->getComment()): ?>
-        <p class="comment"><?= $this->escapeHtml($_element->getComment()) ?></p>
+    <fieldset id="<?= $element->getHtmlId() ?>" <?= $element->serialize(['class']) ?>>
+    <?php if ($element->getComment()): ?>
+        <p class="comment"><?= $this->escapeHtml($element->getComment()) ?></p>
     <?php endif ?>
-    <?= $_element->getChildrenHtml() ?>
+    <?= $element->getChildrenHtml() ?>
     </fieldset>
 </div>
 <script type="text/javascript">
-var <?= $_element->getHtmlId() ?> = new VarienRulesForm('<?= $_element->getHtmlId() ?>', '<?= $this->getNewChildUrl() ?>');
-<?php if ($_element->getReadonly()): ?>
-    <?= $_element->getHtmlId() ?>.setReadonly(true);
+var <?= $element->getHtmlId() ?> = new VarienRulesForm('<?= $element->getHtmlId() ?>', '<?= $this->getNewChildUrl() ?>');
+<?php if ($element->getReadonly()): ?>
+    <?= $element->getHtmlId() ?>.setReadonly(true);
 <?php endif ?>
 </script>

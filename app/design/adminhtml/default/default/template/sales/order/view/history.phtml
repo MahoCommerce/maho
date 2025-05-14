@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -14,31 +14,39 @@
 <div id="order_history_block">
     <?php if ($this->canAddComment()):?>
     <div id="history_form" class="order-history-form">
-        <div><?= Mage::helper('sales')->__('Add Order Comments') ?></div>
+        <h5><?= Mage::helper('sales')->__('Add Order Comments') ?></h5>
         <span class="field-row">
-            <label class="normal" for="history_status"><?= Mage::helper('sales')->__('Status') ?></label><br/>
-            <select name="history[status]" class="select" id="history_status">
-            <?php foreach ($this->getStatuses() as $_code=>$_label): ?>
-                <option value="<?= $_code ?>"<?php if($_code==$this->getOrder()->getStatus()): ?> selected="selected"<?php endif ?>><?= $_label ?></option>
-            <?php endforeach ?>
-            </select>
+            <label class="normal" for="history_status"><?= Mage::helper('sales')->__('Status') ?></label>
+            <span class="input-box">
+                <select name="history[status]" class="select" id="history_status">
+                <?php foreach ($this->getStatuses() as $_code=>$_label): ?>
+                    <option value="<?= $_code ?>"<?php if($_code==$this->getOrder()->getStatus()): ?> selected="selected"<?php endif ?>><?= $_label ?></option>
+                <?php endforeach ?>
+                </select>
+            </span>
         </span>
         <span class="field-row">
             <label class="normal" for="history_comment"><?= Mage::helper('sales')->__('Comment') ?></label>
-            <textarea name="history[comment]" rows="3" cols="5" style="height:6em; width:99%;" id="history_comment"></textarea>
+            <span class="input-box">
+                <textarea name="history[comment]" rows="4" id="history_comment"></textarea>
+            </span>
         </span>
-        <div class="f-left">
-            <?php if ($this->canSendCommentEmail()): ?>
-                <input name="history[is_customer_notified]" type="checkbox" id="history_notify" value="1" /><label class="normal" for="history_notify"> <?= Mage::helper('sales')->__('Notify Customer by Email') ?></label><br />
-            <?php endif ?>
-            <input name="history[is_visible_on_front]" type="checkbox" id="history_visible" value="1" /><label class="normal" for="history_visible"> <?= Mage::helper('sales')->__('Visible on Frontend') ?></label>
+        <div class="flex-row">
+            <div>
+                <?php if ($this->canSendCommentEmail()): ?>
+                <input name="history[is_customer_notified]" type="checkbox" id="history_notify" value="1" /><label class="normal" for="history_notify"> <?= Mage::helper('sales')->__('Notify Customer by Email') ?></label><br>
+                <?php endif ?>
+                <input name="history[is_visible_on_front]" type="checkbox" id="history_visible" value="1" /><label class="normal" for="history_visible"> <?= Mage::helper('sales')->__('Visible on Frontend') ?></label>
+            </div>
+            <div class="flex-space"></div>
+            <div>
+                <?= $this->getChildHtml('submit_button') ?>
+            </div>
         </div>
-        <div class="f-right">
-            <?= $this->getChildHtml('submit_button') ?>
-        </div>
-        <div class="clear"></div>
     </div>
+
     <div class="divider"></div>
+
     <?php endif ?>
     <ul class="note-list">
     <?php foreach ($this->getOrder()->getStatusHistoryCollection(true) as $_item): ?>
@@ -56,7 +64,7 @@
                 <?php endif ?>
             </strong></small>
             <?php if ($_item->getComment()): ?>
-                <br/><?= $this->escapeHtml($_item->getComment(), ['b', 'br', 'strong', 'i', 'u', 'a']) ?>
+                <div><?= $this->escapeHtml($_item->getComment(), ['b', 'br', 'strong', 'i', 'u', 'a']) ?></div>
             <?php endif ?>
         </li>
     <?php endforeach ?>
