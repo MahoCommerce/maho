@@ -12,13 +12,7 @@
 
 class Mage_Adminhtml_Controller_Rss_Abstract extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * Check feed enabled in config
-     *
-     * @param string $code
-     * @return bool
-     */
-    protected function isFeedEnable($code)
+    protected function isFeedEnable(string $code): bool
     {
         return Mage::helper('rss')->isRssEnabled()
             && Mage::getStoreConfig('rss/' . $code);
@@ -26,11 +20,8 @@ class Mage_Adminhtml_Controller_Rss_Abstract extends Mage_Adminhtml_Controller_A
 
     /**
      * Do check feed enabled and prepare response
-     *
-     * @param string $code
-     * @return bool
      */
-    protected function checkFeedEnable($code)
+    protected function checkFeedEnable(string $code): bool
     {
         if ($this->isFeedEnable($code)) {
             $this->getResponse()->setHeader('Content-type', 'text/xml; charset=UTF-8');
@@ -41,21 +32,5 @@ class Mage_Adminhtml_Controller_Rss_Abstract extends Mage_Adminhtml_Controller_A
             $this->_forward('noRoute');
             return false;
         }
-    }
-
-    /**
-     * Retrieve helper instance
-     *
-     * @param string $name
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    #[\Override]
-    protected function _getHelper($name = '')
-    {
-        if ($name) {
-            return Mage::helper($name);
-        }
-        return parent::_getHelper();
     }
 }

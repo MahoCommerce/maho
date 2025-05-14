@@ -7861,18 +7861,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Report/ProductController.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Report_ProductController\:\:exportOrderedCsvAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Report/ProductController.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Report_ProductController\:\:exportOrderedExcelAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Report/ProductController.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Report_ProductController\:\:exportSoldCsvAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7898,12 +7886,6 @@ parameters:
 
 		-
 			message: '#^Method Mage_Adminhtml_Report_ProductController\:\:lowstockAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Report/ProductController.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Report_ProductController\:\:orderedAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Report/ProductController.php
@@ -8090,12 +8072,6 @@ parameters:
 
 		-
 			message: '#^Method Mage_Adminhtml_Report_SalesController\:\:invoicedAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Report/SalesController.php
-
-		-
-			message: '#^Method Mage_Adminhtml_Report_SalesController\:\:refreshStatisticsAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Report/SalesController.php
