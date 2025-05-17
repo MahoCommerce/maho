@@ -1164,19 +1164,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     }
 
     /**
-     * Add minimal price to product collection
-     *
-     * @deprecated since 1.3.2.2
-     * @see Mage_Catalog_Model_Resource_Product_Collection::addPriceData
-     *
-     * @return $this
-     */
-    protected function _addMinimalPrice()
-    {
-        return $this;
-    }
-
-    /**
      * Add price data for calculate final price
      *
      * @deprecated use addPriceData

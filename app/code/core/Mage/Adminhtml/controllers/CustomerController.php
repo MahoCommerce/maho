@@ -417,21 +417,6 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     }
 
     /**
-     * Prepare file download response
-     *
-     * @todo remove in 1.3
-     * @deprecated please use $this->_prepareDownloadResponse()
-     * @see Mage_Adminhtml_Controller_Action::_prepareDownloadResponse()
-     * @param string $fileName
-     * @param string $content
-     * @param string $contentType
-     */
-    protected function _sendUploadResponse($fileName, $content, $contentType = 'application/octet-stream')
-    {
-        $this->_prepareDownloadResponse($fileName, $content, $contentType);
-    }
-
-    /**
      * Customer orders grid
      */
     public function ordersAction()

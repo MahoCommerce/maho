@@ -471,21 +471,6 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     }
 
     /**
-     * @throws Mage_Core_Exception
-     * @deprecated since 1.2
-     */
-    public function bundlesAction()
-    {
-        $product = $this->_initProduct();
-        $this->getResponse()->setBody(
-            $this->getLayout()
-                ->createBlock('bundle/adminhtml_catalog_product_edit_tab_bundle', 'admin.product.bundle.items')
-                ->setProductId($product->getId())
-                ->toHtml(),
-        );
-    }
-
-    /**
      * Validate product
      *
      */
@@ -810,18 +795,6 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     }
 
     /**
-     * @deprecated since 1.4.0.0-alpha2
-     */
-    protected function _decodeInput($encoded)
-    {
-        parse_str($encoded, $data);
-        foreach ($data as $key => $value) {
-            parse_str(base64_decode($value), $data[$key]);
-        }
-        return $data;
-    }
-
-    /**
      * Delete product action
      */
     public function deleteAction()
@@ -867,15 +840,6 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     {
         $this->loadLayout(false);
         $this->renderLayout();
-    }
-
-    /**
-     * @deprecated since 1.5.0.0
-     * @return $this
-     */
-    public function addCustomersToAlertQueueAction()
-    {
-        return $this;
     }
 
     public function addAttributeAction()

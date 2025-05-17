@@ -127,15 +127,4 @@ class Mage_Adminhtml_Helper_Catalog_Product_Edit_Action_Attribute extends Mage_C
 
         return $this->_attributes;
     }
-
-    /**
-     * Return product ids that not available for selected store
-     *
-     * @deprecated since 1.4.1
-     * @return array
-     */
-    public function getProductsNotInStoreIds()
-    {
-        return [];
-    }
 }

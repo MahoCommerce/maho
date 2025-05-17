@@ -798,20 +798,6 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     }
 
     /**
-     * Delete index from a table if it exists
-     *
-     * @deprecated since 1.4.0.1
-     * @param string $tableName
-     * @param string $keyName
-     * @param string $schemaName
-     * @return bool|Zend_Db_Statement_Interface
-     */
-    public function dropKey($tableName, $keyName, $schemaName = null)
-    {
-        return $this->dropIndex($tableName, $keyName, $schemaName);
-    }
-
-    /**
      * Prepare table before add constraint foreign key
      *
      * @param string $tableName
@@ -1105,26 +1091,6 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
         $query = sprintf('SHOW TABLE STATUS%s LIKE %s', $fromDbName, $this->quote($tableName));
 
         return $this->raw_fetchRow($query);
-    }
-
-    /**
-     * Retrieve table index key list
-     *
-     * @deprecated use getIndexList(
-     * @param string $tableName
-     * @param string $schemaName
-     * @return array
-     */
-    public function getKeyList($tableName, $schemaName = null)
-    {
-        $keyList   = [];
-        $indexList = $this->getIndexList($tableName, $schemaName);
-
-        foreach ($indexList as $indexProp) {
-            $keyList[$indexProp['KEY_NAME']] = $indexProp['COLUMNS_LIST'];
-        }
-
-        return $keyList;
     }
 
     /**
@@ -4128,23 +4094,6 @@ class Varien_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Mysql implements V
     public function getSuggestedZeroDate()
     {
         return '0000-00-00 00:00:00';
-    }
-
-    /**
-     * Retrieve Foreign Key name
-     *
-     * @deprecated after 1.6.0.0
-     *
-     * @param  string $fkName
-     * @return string
-     */
-    protected function _getForeignKeyName($fkName)
-    {
-        if (!str_starts_with($fkName, 'FK_')) {
-            $fkName = 'FK_' . $fkName;
-        }
-
-        return $fkName;
     }
 
     /**
