@@ -491,7 +491,6 @@ class Mage_Core_Model_Locale
      * Retrieve ISO time format
      *
      * @param string|null $type The type of time format to use (12h, 24h)
-     * @return  string
      */
     public function getTimeFormat(?string $type = null): string
     {
