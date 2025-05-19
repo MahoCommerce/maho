@@ -41,19 +41,6 @@ function uc_words($str, $destSep = '_', $srcSep = '_')
 }
 
 /**
- * Simple sql format date
- *
- * @param bool $dayOnly
- * @return string
- * @deprecated use equivalent Varien method directly
- * @see Varien_Date::now()
- */
-function now($dayOnly = false)
-{
-    return Varien_Date::now($dayOnly);
-}
-
-/**
  * Check whether sql date is empty
  *
  * @param string $date
@@ -62,16 +49,6 @@ function now($dayOnly = false)
 function is_empty_date($date)
 {
     return $date === null || preg_replace('#[ 0:-]#', '', $date) === '';
-}
-
-/**
- * @param string $class
- * @deprecated 24.11.0
- * @return bool|string
- */
-function mageFindClassFile($class)
-{
-    return Maho::findClassFile($class);
 }
 
 /**
@@ -252,15 +229,4 @@ function isDirWriteable(string $dir): bool
         return true;
     }
     return false;
-}
-
-/**
- * @param string $dir
- * @return bool
- * @see isDirWriteable()
- * @deprecated
- */
-function is_dir_writeable($dir)
-{
-    return isDirWriteable($dir);
 }
