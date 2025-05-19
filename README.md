@@ -4,6 +4,7 @@
   <img src="https://github.com/MahoCommerce/maho/actions/workflows/security-php.yml/badge.svg" alt="" />
   <img src="https://github.com/MahoCommerce/maho/actions/workflows/codeql-analysis.yml/badge.svg" alt="" />
   <a href="https://crowdin.com/project/maho" target="_blank"><img src="https://img.shields.io/badge/Localize-98%25-32c754" alt="" /></a>
+  <a href="https://deepwiki.com/MahoCommerce/maho" target="_blank"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </p>
 <p align="center">
   <img src="https://mahocommerce.com/assets/maho-logo.svg" alt="" width=400 />
