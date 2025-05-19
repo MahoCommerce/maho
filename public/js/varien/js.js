@@ -769,7 +769,6 @@ const Calendar = {
             config.static = true;
         }
 
-        console.log(config);
         flatpickr(inputEl, config);
     },
 }

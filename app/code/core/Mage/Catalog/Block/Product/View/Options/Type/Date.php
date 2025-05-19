@@ -87,19 +87,24 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
 
         $yearStart = Mage::getSingleton('catalog/product_option_type_date')->getYearStart();
         $yearEnd = Mage::getSingleton('catalog/product_option_type_date')->getYearEnd();
+        $is24h = Mage::getSingleton('catalog/product_option_type_date')->is24hTimeFormat();
 
         $calendar = $this->getLayout()
             ->createBlock('core/html_date')
             ->setId("options_{$option->getId()}_date")
             ->setName("options[{$option->getId()}][date]")
             ->setClass('product-custom-option datetime-picker input-text')
-            ->setFormat(Mage::app()->getLocale()->getDateStrFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT))
+            ->setFormat(Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT))
             ->setValue($value)
             ->setYearsRange("[$yearStart , $yearEnd]")
-            ->setConfig([
-                'enableTime' => $option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME,
-                'time_24hr' => Mage::getSingleton('catalog/product_option_type_date')->is24hTimeFormat(),
-            ]);
+            ->setConfig('time_24hr', $is24h);
+
+        if ($option->getType() === Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
+            $calendar
+                ->setFormat($calendar->getFormat() . ' ' . Mage::app()->getLocale()->getTimeFormat($is24h ? Mage_Core_Model_Locale::FORMAT_TIME_24H : Mage_Core_Model_Locale::FORMAT_TIME_12H))
+                ->setConfig('enableTime', true);
+        }
+
         if (!$this->getSkipJsReloadPrice()) {
             $calendar->setExtraParams('onchange="opConfig.reloadPrice()"');
         }
