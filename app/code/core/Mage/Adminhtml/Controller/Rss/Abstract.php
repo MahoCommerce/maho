@@ -33,4 +33,20 @@ class Mage_Adminhtml_Controller_Rss_Abstract extends Mage_Adminhtml_Controller_A
             return false;
         }
     }
+
+    /**
+     * Retrieve helper instance
+     *
+     * @param string $name
+     * @return Mage_Core_Helper_Abstract|false
+     * @deprecated use Mage::helper()
+     */
+    #[\Override]
+    protected function _getHelper($name = '')
+    {
+        if ($name) {
+            return Mage::helper($name);
+        }
+        return parent::_getHelper();
+    }
 }
