@@ -755,10 +755,6 @@ const Calendar = {
             );
         }
 
-        // TODO: temp debug
-        config.dateFormat = 'm/j/Y h:i K'
-        config.time_24hr = true
-
         if (Array.isArray(config.range)) {
             const [ yearStart, yearEnd ] = config.range;
             if (yearStart) {
@@ -773,10 +769,7 @@ const Calendar = {
             config.static = true;
         }
 
-        config.onChange = (_, dateStr) => {
-            document.getElementById('options_26_text').innerHTML = dateStr
-        }
-
+        console.log(config);
         flatpickr(inputEl, config);
     },
 }

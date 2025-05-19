@@ -40,6 +40,9 @@ class Mage_Core_Model_Locale
     public const FORMAT_TYPE_MEDIUM = 'medium';
     public const FORMAT_TYPE_SHORT = 'short';
 
+    public const FORMAT_TIME_12H = '12h';
+    public const FORMAT_TIME_24H = '24h';
+
     /**
      * Default locale code
      *
@@ -468,10 +471,10 @@ class Mage_Core_Model_Locale
     private function createDateFormatter(?string $type = null): IntlDateFormatter
     {
         $dateStyle = match ($type) {
-            Mage_Core_Model_Locale::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
-            Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
-            Mage_Core_Model_Locale::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
-            Mage_Core_Model_Locale::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
+            self::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
+            self::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
+            self::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
+            self::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
             default => IntlDateFormatter::MEDIUM,
         };
 
@@ -485,23 +488,26 @@ class Mage_Core_Model_Locale
     }
 
     /**
+     * Retrieve ISO time format
+     *
+     * @param string|null $type The type of time format to use (12h, 24h)
+     * @return  string
+     */
+    public function getTimeFormat(?string $type = null): string
+    {
+        return match ($type) {
+            self::FORMAT_TIME_12H => 'h:i a',
+            default => 'H:i',
+        };
+    }
+
+    /**
      * Convert 2-digit year patterns (yy) to 4-digit year patterns (yyyy)
      */
     private function ensureFourDigitYear(string $pattern): string
     {
         // This regex is more precise for ICU date patterns
         return preg_replace('/(?<!y)yy(?!y)/', 'yyyy', $pattern);
-    }
-
-    /**
-     * Retrieve ISO time format
-     *
-     * @param   string $type
-     * @return  string
-     */
-    public function getTimeFormat($type = null)
-    {
-        return $this->getTranslation($type, 'time');
     }
 
     /**

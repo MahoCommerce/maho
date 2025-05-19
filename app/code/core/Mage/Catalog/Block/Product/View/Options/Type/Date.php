@@ -164,10 +164,10 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
             ]);
 
         if (Mage::getSingleton('catalog/product_option_type_date')->is24hTimeFormat()) {
-            $calendar->setFormat(Mage::app()->getLocale()->getTimeStrFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT))
+            $calendar->setFormat(Mage::app()->getLocale()->getTimeFormat(Mage_Core_Model_Locale::FORMAT_TIME_24H))
                 ->setConfig('time_24h', true);
         } else {
-            $calendar->setFormat(Mage::app()->getLocale()->getTimeStrFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT));
+            $calendar->setFormat(Mage::app()->getLocale()->getTimeFormat(Mage_Core_Model_Locale::FORMAT_TIME_12H));
         }
 
         if (!$this->getSkipJsReloadPrice()) {
