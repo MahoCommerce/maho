@@ -205,6 +205,31 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
     }
 
     /**
+     * Return model instance
+     *
+     * @param string $className
+     * @param array $arguments
+     * @return Mage_Core_Model_Abstract|false
+     * @deprecated use Mage::getSingleton()
+     */
+    protected function _getSingletonModel($className, $arguments = [])
+    {
+        return Mage::getSingleton($className, $arguments);
+    }
+
+    /**
+     * Return helper instance
+     *
+     * @param string $className
+     * @return Mage_Core_Helper_Abstract|false
+     * @deprecated use Mage::helper()
+     */
+    protected function _getHelperModel($className)
+    {
+        return Mage::helper($className);
+    }
+
+    /**
      * Controller pre-dispatch method
      *
      * @return Mage_Adminhtml_Controller_Action
