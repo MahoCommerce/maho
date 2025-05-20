@@ -60,6 +60,7 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
         return new Varien_Object([
             'challengeurl' => $this->getChallengeUrl(),
             'name' => 'maho_captcha',
+            'id' => 'maho_captcha',
             'auto' => 'onload',
             'hidelogo' => '',
             'hidefooter' => '',
