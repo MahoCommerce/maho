@@ -24,8 +24,7 @@ $optionId = $option->getId();
 
 <script type="module">
 <?php if (!$this->useCalendar() && ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME || $option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE)): ?>
-    const dateOption = productConfigure.opConfig.dateOption;
-    const reloadMonth = dateOption.reloadMonth.bind(dateOption);
+    const reloadMonth = window.dateOption.reloadMonth.bind(dateOption);
     document.getElementById('options_<?= $optionId ?>_month').addEventListener('change', reloadMonth);
     document.getElementById('options_<?= $optionId ?>_year').addEventListener('change', reloadMonth);
 <?php endif ?>
