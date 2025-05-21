@@ -28,7 +28,6 @@ $optionId = $option->getId();
     const reloadMonth = dateOption.reloadMonth.bind(dateOption);
     document.getElementById('options_<?= $optionId ?>_month').addEventListener('change', reloadMonth);
     document.getElementById('options_<?= $optionId ?>_year').addEventListener('change', reloadMonth);
-</script>
 <?php endif ?>
 
 <?php if ($option->getIsRequired()): ?>
