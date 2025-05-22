@@ -312,12 +312,12 @@ h6, .h6 {
 }
 .block-title h2,
 .block-title h3,
-.block-title strong {
+.block-title strong,
+.block-title {
   margin: 0;
   margin-bottom: 10px;
   color: var(--maho-color-text-primary);
   font-size: 0.875rem;
-  font-weight: bold;
   font-style: normal;
   line-height: 1.4;
   text-rendering: optimizeSpeed;
@@ -325,7 +325,7 @@ h6, .h6 {
   color: var(--maho-color-primary);
   margin-bottom: 0;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: normal;
 }
 .block-title small {
   font-size: 100%;
@@ -3180,9 +3180,6 @@ body {
 .footer .block-title {
   border-bottom: 0;
   padding: 3px 0;
-}
-.footer .block-title strong {
-  font-weight: normal;
 }
 .footer .block-title,
 .footer address {
