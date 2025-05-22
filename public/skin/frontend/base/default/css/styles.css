@@ -4454,6 +4454,7 @@ body:not(.catalog-product-view) .add-to-links a {
   border: 1px solid var(--maho-color-border-dark);
   border-collapse: collapse;
 }
+#product-attribute-specs-table caption {display: none}
 #product-attribute-specs-table th {
   border-right: 1px solid var(--maho-color-border-dark);
   border-bottom: 1px solid var(--maho-color-border-dark);
