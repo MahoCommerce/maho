@@ -17,6 +17,7 @@
 <?= $this->getChildHtml('head') ?>
 </head>
 <body<?= $this->getBodyClass()?' class="'.$this->getBodyClass().'"':'' ?>>
+<a href="#main-content" id="skip-to-main-content"><?= $this->__('Skip to main content') ?></a>
 <?= $this->getChildHtml('after_body_start') ?>
 <div class="wrapper">
     <?= $this->getChildHtml('global_notices') ?>
@@ -25,7 +26,7 @@
         <div class="main-container col2-right-layout">
             <div class="main">
                 <?= $this->getChildHtml('breadcrumbs') ?>
-                <div class="col-main">
+                <div class="col-main" id="main-content">
                     <?= $this->getChildHtml('global_messages') ?>
                     <?= $this->getChildHtml('content') ?>
                 </div>

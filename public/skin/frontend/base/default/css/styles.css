@@ -2648,6 +2648,23 @@ body {
  * Skip - Link
  */
 
+#skip-to-main-content {
+  position: absolute;
+  top: -40rem;
+  left: 0.5rem;
+  z-index: 999999;
+  color: var(--maho-color-background);
+  background: var(--maho-color-primary);
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: var(--maho-border-radius);
+  transition: top 0.2s;
+}
+
+#skip-to-main-content:focus {
+  top: 0.5rem;
+}
+
 .skip-nav {
   color: var(--maho-color-text-primary);
 }
