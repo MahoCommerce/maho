@@ -12,7 +12,7 @@
 /** @var Mage_Page_Block_Html_Breadcrumbs $this */
 ?>
 <?php if($crumbs && is_array($crumbs)): ?>
-<div class="breadcrumbs">
+<div class="breadcrumbs" role="navigation" aria-label="<?= $this->__('Breadcrumbs') ?>">
     <ul>
         <?php foreach($crumbs as $_crumbName=>$_crumbInfo): ?>
             <li class="<?= $_crumbName ?>">
