@@ -566,9 +566,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hasTabs) {
             const ul = document.createElement('ul');
             ul.className = 'toggle-tabs';
+            ul.role = 'tablist';
             dts.forEach(dt => {
                 const li = document.createElement('li');
                 li.id = dt.id;
+                li.role = 'tab';
                 li.innerHTML = dt.innerHTML;
                 ul.appendChild(li);
             });
