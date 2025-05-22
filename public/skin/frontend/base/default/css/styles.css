@@ -6095,6 +6095,7 @@ div.paypal-logo span > img {
   font-size: 0.75rem;
   text-transform: uppercase;
 }
+.ratings-table caption {display: none}
 .ratings-table th {
   padding-right: 10px;
 }
