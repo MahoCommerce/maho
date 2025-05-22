@@ -54,6 +54,8 @@ $application->add(new \MahoCLI\Commands\SysCurrencies());
 $application->add(new \MahoCLI\Commands\SysLocales());
 $application->add(new \MahoCLI\Commands\SysTimezones());
 
+$application->add(new \MahoCLI\Commands\CategoryDynamicProcess());
+
 $discoverer = new CommandDiscoverer();
 $commands = $discoverer->discover(__DIR__ . '/vendor/*/*') + $discoverer->discover(__DIR__);
 foreach ($commands as $command) {

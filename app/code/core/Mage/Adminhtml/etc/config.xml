@@ -118,6 +118,14 @@
                     </bind_locale>
                 </observers>
             </admin_system_config_changed_section_admin>
+            <adminhtml_catalog_category_tabs>
+                <observers>
+                    <dynamic_category_tab>
+                        <class>adminhtml/observer</class>
+                        <method>addDynamicCategoryTab</method>
+                    </dynamic_category_tab>
+                </observers>
+            </adminhtml_catalog_category_tabs>
         </events>
         <global_search>
             <products>

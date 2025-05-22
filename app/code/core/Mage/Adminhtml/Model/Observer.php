@@ -69,4 +69,22 @@ class Mage_Adminhtml_Model_Observer
             $cookie->setLifetime($lifetime);
         }
     }
+
+    /**
+     * Add dynamic category tab to category tabs
+     *
+     * @param Varien_Event_Observer $observer
+     * @return $this
+     */
+    public function addDynamicCategoryTab(Varien_Event_Observer $observer)
+    {
+        $tabs = $observer->getEvent()->getTabs();
+        
+        $tabs->addTab('dynamic', [
+            'label'     => Mage::helper('catalog')->__('Dynamic Category'),
+            'content'   => $tabs->getLayout()->createBlock('adminhtml/catalog_category_tab_dynamic')->toHtml(),
+        ]);
+
+        return $this;
+    }
 }

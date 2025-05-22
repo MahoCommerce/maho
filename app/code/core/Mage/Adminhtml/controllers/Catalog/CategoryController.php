@@ -468,6 +468,33 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     }
 
     /**
+     * Generate condition HTML for dynamic category rules
+     */
+    public function newConditionHtmlAction()
+    {
+        $id = $this->getRequest()->getParam('id');
+        $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
+        $type = $typeArr[0];
+
+        $model = Mage::getModel($type)
+            ->setId($id)
+            ->setType($type)
+            ->setRule(Mage::getModel('catalog/category_dynamic_rule'))
+            ->setPrefix('conditions');
+        if (!empty($typeArr[1])) {
+            $model->setAttribute($typeArr[1]);
+        }
+
+        if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
+            $model->setJsFormObject($this->getRequest()->getParam('form'));
+            $html = $model->asHtmlRecursive();
+        } else {
+            $html = '';
+        }
+        $this->getResponse()->setBody($html);
+    }
+
+    /**
      * Controller pre-dispatch method
      *
      * @return Mage_Adminhtml_Controller_Action

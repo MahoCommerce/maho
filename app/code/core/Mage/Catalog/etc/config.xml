@@ -13,7 +13,7 @@
 <config>
     <modules>
         <Mage_Catalog>
-            <version>1.6.0.0.19.1.7</version>
+            <version>1.6.0.0.19.1.8</version>
         </Mage_Catalog>
     </modules>
     <admin>
@@ -396,6 +396,9 @@
                     <category_anchor_products_indexer_tmp>
                         <table>catalog_category_anc_products_index_tmp</table>
                     </category_anchor_products_indexer_tmp>
+                    <category_dynamic_rule>
+                        <table>catalog_category_dynamic_rule</table>
+                    </category_dynamic_rule>
                 </entities>
             </catalog_resource>
         </models>
@@ -635,6 +638,36 @@
                 </visibility>
             </catalog_product>
         </eav_attributes>
+        <events>
+            <catalog_category_save_after>
+                <observers>
+                    <catalog_dynamic_category>
+                        <class>catalog/observer</class>
+                        <method>categorySaveAfter</method>
+                    </catalog_dynamic_category>
+                </observers>
+            </catalog_category_save_after>
+            <catalog_product_save_after>
+                <observers>
+                    <catalog_dynamic_category>
+                        <class>catalog/observer</class>
+                        <method>catalogProductSaveAfter</method>
+                    </catalog_dynamic_category>
+                </observers>
+            </catalog_product_save_after>
+        </events>
+        <crontab>
+            <jobs>
+                <catalog_dynamic_categories_process>
+                    <schedule>
+                        <cron_expr>0 2 * * *</cron_expr>
+                    </schedule>
+                    <run>
+                        <model>catalog/observer::processAllDynamicCategories</model>
+                    </run>
+                </catalog_dynamic_categories_process>
+            </jobs>
+        </crontab>
     </global>
     <adminhtml>
         <translate>
