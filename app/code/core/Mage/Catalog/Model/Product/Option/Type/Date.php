@@ -32,19 +32,46 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
         $value = $this->getUserValue();
 
         $isValid = $dateValid = $timeValid = true;
+        $is24h = Mage::getSingleton('catalog/product_option_type_date')->is24hTimeFormat();
+
+        $pattern = null;
+        $matches = [];
 
         if (isset($value['date']) && $this->useCalendar()) {
-            $matches = [];
-            if ($this->_dateExists() && $this->_timeExists()) {
-                $pattern = '/^(\d{1,4}).+(\d{1,4}).+(\d{1,4}) (\d{1,2}).+(\d{1,2}) (AM|PM)$/';
-            } elseif ($this->_dateExists()) {
-                $pattern = '/^(\d{1,4}).+(\d{1,4}).+(\d{1,4})$/';
+            if ($this->_timeExists()) {
+                $pattern = $is24h
+                    ? '/^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2})$/'
+                    : '/^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}) (AM|PM)$/';
             } else {
-                $pattern = '/^(\d{1,2}).+(\d{1,2}) (AM|PM)$/';
+                $pattern = '/^(\d{2})\/(\d{2})\/(\d{4})$/';
             }
 
-            $isValid = (bool) preg_match($pattern, $value['date'] ?? '');
+            $isValid = (bool) preg_match($pattern, $value['date'] ?? '', $matches);
 
+            if ($isValid) {
+                $value['day']      = $matches[1] ?? null;
+                $value['month']    = $matches[2] ?? null;
+                $value['year']     = $matches[3] ?? null;
+                $value['hour']     = $matches[4] ?? null;
+                $value['minute']   = $matches[5] ?? null;
+                $value['day_part'] = $matches[6] ?? null;
+            } else {
+                $dateValid = false;
+            }
+        } elseif (isset($value['time']) && $this->useCalendar()) {
+            $pattern = $is24h
+                ? '/^(\d{2}):(\d{2})$/'
+                : '/^(\d{2}):(\d{2}) (AM|PM)$/';
+
+            $isValid = (bool) preg_match($pattern, $value['time'] ?? '', $matches);
+
+            if ($isValid) {
+                $value['hour']     = $matches[1] ?? null;
+                $value['minute']   = $matches[2] ?? null;
+                $value['day_part'] = $matches[3] ?? null;
+            } else {
+                $timeValid = false;
+            }
         } else {
             if ($this->_dateExists()) {
                 if (($value['day'] ?? 0) <= 0 || ($value['month'] ?? 0) <= 0 || ($value['year'] ?? 0) <= 0) {

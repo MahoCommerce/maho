@@ -15,12 +15,14 @@
  * @method $this setClass(string $value)
  * @method string getExtraParams()
  * @method $this setExtraParams(string $value)
- * @method string getFormat()
- * @method $this setFormat(string $value)
+ * @method string getInputFormat()
+ * @method $this setInputFormat(string $value)
+ * @method string getDisplayFormat()
+ * @method $this setDisplayFormat(string $value)
  * @method string getName()
  * @method $this setName(string $value)
  * @method string getTime()
- * @method $this setTime(string $value)
+ * @method $this setTime(bool $value)
  * @method $this setTitle(string $value)
  * @method string getValue()
  * @method $this setValue(string $value)
@@ -40,7 +42,7 @@ class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
         $enableTime = (bool) ($this->config['enableTime'] ?? $this->getTime());
         $setupObj = [
             'inputField' => (string) $this->getId(),
-            'ifFormat'   => (string) Varien_Date::convertZendToStrftime($this->getFormat(), true, $enableTime),
+            'inputFormat' => (string) ($this->getInputFormat() ?? $this->getFormat()),
             'enableTime' => $enableTime,
             'allowInput' => true,
             ...$this->config,
@@ -49,6 +51,11 @@ class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
         if ($calendarYearsRange = $this->getYearsRange()) {
             $setupObj['range'] = $calendarYearsRange;
         }
+
+        if ($this->getDisplayFormat()) {
+            $setupObj['displayFormat'] = $this->getDisplayFormat();
+        }
+
         $setupObj = Mage::helper('core')->jsonEncode($setupObj);
 
         return <<<HTML

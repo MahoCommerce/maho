@@ -495,8 +495,8 @@ class Mage_Core_Model_Locale
     public function getTimeFormat(?string $type = null): string
     {
         return match ($type) {
-            self::FORMAT_TIME_12H => 'h:i a',
-            default => 'H:i',
+            self::FORMAT_TIME_12H => 'hh:mm a',
+            default => 'HH:mm',
         };
     }
 

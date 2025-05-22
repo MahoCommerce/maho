@@ -743,16 +743,18 @@ const Calendar = {
             ]);
         }
 
-        if (config.ifFormat) {
-            const strftimeToDateConvertionMap = {
-                '%O': 'S', '%d': 'd', '%a': 'D', '%e': 'j', '%A': 'l', '%u': 'N', '%w': 'w', '%j': 'z', '%V': 'W',
-                '%B': 'F', '%m': 'm', '%b': 'M', '%-m': 'n', '%G': 'o', '%Y': 'Y', '%y': 'y', '%P': 'a', '%p': 'K',
-                '%l': 'g', '%I': 'h', '%H': 'H', '%M': 'i', '%S': 's', '%z': 'O', '%Z': 'T', '%s': 'U'
-            };
-            config.dateFormat = config.ifFormat.replace(
-                /%[OdaeAuwjVBmbGYyPplIHMSzZs-]/g,
-                (match) => strftimeToDateConvertionMap[match] || match,
-            );
+        if (config.inputFormat) {
+            config.dateFormat = this.convertIcuToFlatpickrFormat(config.inputFormat);
+            delete config.inputFormat;
+        } else if (config.ifFormat) {
+            config.dateFormat = this.convertIcuToFlatpickrFormat(config.ifFormat);
+            delete config.ifFormat;
+        }
+
+        if (config.displayFormat) {
+            config.altInput = true;
+            config.altFormat = this.convertIcuToFlatpickrFormat(config.displayFormat);
+            delete config.displayFormat;
         }
 
         if (Array.isArray(config.range)) {
@@ -770,6 +772,25 @@ const Calendar = {
         }
 
         flatpickr(inputEl, config);
+    },
+
+    convertIcuToFlatpickrFormat(format) {
+        const map = {
+            'yyyy': 'Y', 'yy': 'y', 'y': 'Y', 'r': 'Y', 'MMMM': 'F', 'MMM': 'M', 'MM': 'm', 'M': 'n',
+            'ww': 'W', 'w': 'W', 'dd': 'd', 'd': 'j', 'EEEE': 'l', 'EEE': 'D', 'EE': 'D', 'E': 'D',
+            'aaaa': 'K', 'aaa': 'K', 'aa': 'K', 'a': 'K', 'hh': 'G', 'h': 'h', 'HH': 'H', 'H': 'H',
+            'mm': 'i', 'm': 'i', 'ss': 'S', 's': 's',
+        };
+        return format.replace(/(y+|Y+|M+|E+|a+|h+|H+|d+|m+|s+|w+|r)/g, (match) => map[match] || match);
+    },
+
+    convertStrftimeToFlatpickrFormat(format) {
+        const map = {
+            '%O': 'S', '%d': 'd', '%a': 'D', '%e': 'j', '%A': 'l', '%u': 'N', '%w': 'w', '%j': 'z', '%V': 'W',
+            '%B': 'F', '%m': 'm', '%b': 'M', '%-m': 'n', '%G': 'o', '%Y': 'Y', '%y': 'y', '%P': 'a', '%p': 'K',
+            '%l': 'g', '%I': 'h', '%H': 'H', '%M': 'i', '%S': 's', '%z': 'O', '%Z': 'T', '%s': 'U'
+        };
+        return format.replace(/%[OdaeAuwjVBmbGYyPplIHMSzZs-]/g, (match) => map[match] || match);
     },
 }
 

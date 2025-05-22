@@ -87,22 +87,29 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
 
         $yearStart = Mage::getSingleton('catalog/product_option_type_date')->getYearStart();
         $yearEnd = Mage::getSingleton('catalog/product_option_type_date')->getYearEnd();
-        $is24h = Mage::getSingleton('catalog/product_option_type_date')->is24hTimeFormat();
 
         $calendar = $this->getLayout()
             ->createBlock('core/html_date')
             ->setId("options_{$option->getId()}_date")
             ->setName("options[{$option->getId()}][date]")
             ->setClass('product-custom-option datetime-picker input-text')
-            ->setFormat(Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT))
+            ->setInputFormat('MM/dd/yyyy')
+            ->setDisplayFormat(Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT))
             ->setValue($value)
-            ->setYearsRange("[$yearStart , $yearEnd]")
-            ->setConfig('time_24hr', $is24h);
+            ->setYearsRange("[$yearStart , $yearEnd]");
 
         if ($option->getType() === Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
-            $calendar
-                ->setFormat($calendar->getFormat() . ' ' . Mage::app()->getLocale()->getTimeFormat($is24h ? Mage_Core_Model_Locale::FORMAT_TIME_24H : Mage_Core_Model_Locale::FORMAT_TIME_12H))
-                ->setConfig('enableTime', true);
+            $calendar->setConfig('enableTime', true);
+            if (Mage::getSingleton('catalog/product_option_type_date')->is24hTimeFormat()) {
+                $calendar
+                    ->setConfig('time_24hr', true)
+                    ->setInputFormat($calendar->getInputFormat() . ' HH:mm')
+                    ->setDisplayFormat($calendar->getDisplayFormat() . ' ' . Mage::app()->getLocale()->getTimeFormat(Mage_Core_Model_Locale::FORMAT_TIME_24H));
+            } else {
+                $calendar
+                    ->setInputFormat($calendar->getInputFormat() . ' hh:mm a')
+                    ->setDisplayFormat($calendar->getDisplayFormat() . ' ' . Mage::app()->getLocale()->getTimeFormat(Mage_Core_Model_Locale::FORMAT_TIME_12H));
+            }
         }
 
         if (!$this->getSkipJsReloadPrice()) {
@@ -169,10 +176,15 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
             ]);
 
         if (Mage::getSingleton('catalog/product_option_type_date')->is24hTimeFormat()) {
-            $calendar->setFormat(Mage::app()->getLocale()->getTimeFormat(Mage_Core_Model_Locale::FORMAT_TIME_24H))
-                ->setConfig('time_24h', true);
+            $calendar
+                ->setConfig('time_24h', true)
+                ->setInputFormat('HH:mm')
+                ->setDisplayFormat(Mage::app()->getLocale()->getTimeFormat(Mage_Core_Model_Locale::FORMAT_TIME_24H));
+
         } else {
-            $calendar->setFormat(Mage::app()->getLocale()->getTimeFormat(Mage_Core_Model_Locale::FORMAT_TIME_12H));
+            $calendar
+                ->setInputFormat('hh:mm a')
+                ->setDisplayFormat(Mage::app()->getLocale()->getTimeFormat(Mage_Core_Model_Locale::FORMAT_TIME_12H));
         }
 
         if (!$this->getSkipJsReloadPrice()) {
