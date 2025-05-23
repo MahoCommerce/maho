@@ -23,11 +23,6 @@
     border-radius: 3px 3px 0 0;
 }
 
-.quill-wrapper .ql-toolbar button {
-    width: 28px !important;
-    height: 28px !important;
-}
-
 .quill-wrapper .ql-toolbar button:hover {
     background-color: #e0e0e0;
 }
@@ -45,14 +40,6 @@
     max-height: 600px;
     overflow-y: auto;
 }
-
-/* Match Maho form styling */
-.quill-wrapper .ql-editor h1 { font-size: 2em; margin: 0.67em 0; }
-.quill-wrapper .ql-editor h2 { font-size: 1.5em; margin: 0.75em 0; }
-.quill-wrapper .ql-editor h3 { font-size: 1.17em; margin: 0.83em 0; }
-.quill-wrapper .ql-editor h4 { font-size: 1em; margin: 1.12em 0; }
-.quill-wrapper .ql-editor h5 { font-size: 0.83em; margin: 1.5em 0; }
-.quill-wrapper .ql-editor h6 { font-size: 0.75em; margin: 1.67em 0; }
 
 /* Widget placeholder styling */
 .quill-wrapper .ql-editor img.maho-widget-placeholder {
@@ -74,15 +61,79 @@
 .ql-toolbar .ql-widget,
 .ql-toolbar .ql-variable {
     width: auto !important;
+    min-width: 28px;
     padding: 0 8px;
+    position: relative;
 }
 
-.ql-toolbar .ql-widget:after {
-    content: 'Widget';
+/* Widget button icon */
+.ql-toolbar button.ql-widget::before {
+    content: '⚙';
+    font-size: 16px;
+    display: inline-block;
+    line-height: normal;
 }
 
-.ql-toolbar .ql-variable:after {
-    content: 'Variable';
+/* Variable button icon */  
+.ql-toolbar button.ql-variable::before {
+    content: '{ }';
+    font-family: monospace;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-block;
+    line-height: normal;
+}
+
+/* Hide any default SVG icons for custom buttons */
+.ql-toolbar button.ql-widget svg,
+.ql-toolbar button.ql-variable svg {
+    display: none !important;
+}
+
+/* Add tooltips */
+.ql-toolbar button.ql-widget:hover::after {
+    content: 'Insert Widget';
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.ql-toolbar button.ql-variable:hover::after {
+    content: 'Insert Variable';
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+/* Hide text labels on smaller screens */
+@media (max-width: 1200px) {
+    .ql-toolbar .ql-widget:after,
+    .ql-toolbar .ql-variable:after {
+        display: none;
+    }
+    
+    .ql-toolbar .ql-widget,
+    .ql-toolbar .ql-variable {
+        padding: 0;
+    }
 }
 
 /* Disabled state */
