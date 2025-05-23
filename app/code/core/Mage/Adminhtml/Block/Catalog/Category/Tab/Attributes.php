@@ -188,7 +188,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
             $rule = Mage::getModel('catalog/category_dynamic_rule');
 
             if ($category && $category->getId()) {
-                $collection = Mage::getModel('catalog/category_dynamic_rule')->getCollection()
+                $collection = Mage::getResourceModel('catalog/category_dynamic_rule_collection')
                     ->addCategoryFilter($category->getId())
                     ->setPageSize(1);
 

@@ -480,7 +480,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Generate condition HTML for dynamic category rules
      */
-    public function newConditionHtmlAction()
+    public function newConditionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
         $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
