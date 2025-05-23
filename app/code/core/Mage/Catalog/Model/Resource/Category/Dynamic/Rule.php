@@ -80,9 +80,10 @@ class Mage_Catalog_Model_Resource_Category_Dynamic_Rule extends Mage_Core_Model_
      */
     public function save(Mage_Core_Model_Abstract $rule)
     {
-        $rule->setUpdatedAt(now());
+        $now = Mage::getSingleton('core/date')->gmtDate();
+        $rule->setUpdatedAt($now);
         if (!$rule->getCreatedAt()) {
-            $rule->setCreatedAt(now());
+            $rule->setCreatedAt($now);
         }
         return parent::save($rule);
     }

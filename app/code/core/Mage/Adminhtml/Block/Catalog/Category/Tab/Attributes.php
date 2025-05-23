@@ -138,12 +138,102 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
 
         $form->addValues($this->getCategory()->getData());
 
+        // If this is the Dynamic Category attribute group, add the dynamic rules form
+        if ($group->getAttributeGroupName() == 'Dynamic Category') {
+            // Add dynamic rules fieldset
+            $rulesFieldset = $form->addFieldset('dynamic_rules_fieldset', [
+                'legend' => Mage::helper('catalog')->__('Dynamic Category Rules'),
+                'class'  => 'fieldset-wide'
+            ]);
+
+            $renderer = Mage::getBlockSingleton('adminhtml/widget_form_renderer_fieldset')
+                ->setTemplate('promo/fieldset.phtml')
+                ->setNewChildUrl($this->getUrl('*/*/newConditionHtml/form/dynamic_conditions_fieldset'));
+
+            $rulesFieldset->setRenderer($renderer);
+
+            // Get or create the dynamic rule for this category
+            $rule = $this->getDynamicRule();
+            
+            $rulesFieldset->addField('conditions', 'text', [
+                'name' => 'rule[conditions]',
+                'label' => Mage::helper('catalog')->__('Conditions'),
+                'title' => Mage::helper('catalog')->__('Conditions'),
+                'required' => false,
+            ])->setRule($rule)->setRenderer(Mage::getBlockSingleton('rule/conditions'));
+
+            // Set the rules JS loading
+            $this->getLayout()->getBlock('head')->setCanLoadRulesJs(true);
+        }
+
         Mage::dispatchEvent('adminhtml_catalog_category_edit_prepare_form', ['form' => $form]);
 
         $form->setFieldNameSuffix('general');
         $this->setForm($form);
 
         return parent::_prepareForm();
+    }
+
+    /**
+     * Get dynamic rule for this category
+     *
+     * @return Mage_Catalog_Model_Category_Dynamic_Rule
+     * @throws Exception
+     */
+    public function getDynamicRule()
+    {
+        $category = $this->getCategory();
+        
+        if (!$this->hasData('dynamic_rule')) {
+            $rule = Mage::getModel('catalog/category_dynamic_rule');
+            
+            if ($category && $category->getId()) {
+                $collection = Mage::getModel('catalog/category_dynamic_rule')->getCollection()
+                    ->addCategoryFilter($category->getId())
+                    ->setPageSize(1);
+                
+                if ($collection->getSize() > 0) {
+                    $rule = $collection->getFirstItem();
+                } else {
+                    $rule->setCategoryId($category->getId());
+                }
+            }
+            
+            $this->setData('dynamic_rule', $rule);
+        }
+        
+        return $this->getData('dynamic_rule');
+    }
+
+    /**
+     * Get form HTML with additional JavaScript for dynamic rules
+     *
+     * @return string
+     */
+    public function getFormHtml()
+    {
+        $formHtml = parent::getFormHtml();
+        
+        // Add rules JavaScript if this is the Dynamic Category group
+        $group = $this->getGroup();
+        if ($group && $group->getAttributeGroupName() == 'Dynamic Category') {
+            $newChildUrl = $this->getUrl('*/*/newConditionHtml/form/dynamic_conditions_fieldset');
+            
+            $script = '<script type="text/javascript">
+                document.addEventListener("DOMContentLoaded", function() {
+                    if (typeof VarienRulesForm !== "undefined") {
+                        var conditionsFieldset = document.getElementById("dynamic_conditions_fieldset");
+                        if (conditionsFieldset) {
+                            window.dynamicCategoryRulesForm = new VarienRulesForm("dynamic_conditions_fieldset", "' . $newChildUrl . '");
+                        }
+                    }
+                });
+            </script>';
+            
+            return $formHtml . $script;
+        }
+        
+        return $formHtml;
     }
 
     /**
