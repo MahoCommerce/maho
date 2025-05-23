@@ -70,6 +70,7 @@ class Mage_Catalog_Model_Resource_Category_Dynamic_Rule extends Mage_Core_Model_
      * @param Mage_Catalog_Model_Category_Dynamic_Rule $rule
      * @return $this
      */
+    #[\Override]
     public function save(Mage_Core_Model_Abstract $rule)
     {
         $now = Mage::getSingleton('core/date')->gmtDate();

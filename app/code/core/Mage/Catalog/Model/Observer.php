@@ -197,6 +197,7 @@ class Mage_Catalog_Model_Observer
      * @param Varien_Event_Observer $observer
      * @return $this
      */
+    #[\Override]
     public function catalogProductSaveAfter(Varien_Event_Observer $observer)
     {
         $product = $observer->getEvent()->getProduct();
