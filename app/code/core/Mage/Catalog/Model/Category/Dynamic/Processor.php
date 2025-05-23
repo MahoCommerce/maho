@@ -51,7 +51,7 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
     protected function getRulesForCategory(int $categoryId): array
     {
         /** @var Mage_Catalog_Model_Resource_Category_Dynamic_Rule_Collection $collection */
-        $collection = Mage::getModel('catalog/category_dynamic_rule')->getCollection()
+        $collection = Mage::getResourceModel('catalog/category_dynamic_rule_collection')
             ->addCategoryFilter($categoryId)
             ->addActiveFilter(true);
 
