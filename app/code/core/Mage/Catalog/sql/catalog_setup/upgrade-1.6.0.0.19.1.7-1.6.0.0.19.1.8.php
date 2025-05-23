@@ -88,28 +88,5 @@ $installer->addAttribute('catalog_category', 'is_dynamic', [
 ]);
 
 
-$installer->addAttribute('catalog_category', 'dynamic_last_update', [
-    'type'                       => 'datetime',
-    'backend'                    => 'eav/entity_attribute_backend_datetime',
-    'frontend'                   => '',
-    'label'                      => 'Dynamic Category Last Update',
-    'input'                      => 'date',
-    'class'                      => '',
-    'source'                     => '',
-    'global'                     => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_STORE,
-    'visible'                    => true,
-    'required'                   => false,
-    'user_defined'               => false,
-    'default'                    => '',
-    'searchable'                 => false,
-    'filterable'                 => false,
-    'comparable'                 => false,
-    'visible_on_front'           => false,
-    'used_in_product_listing'    => false,
-    'unique'                     => false,
-    'apply_to'                   => '',
-    'is_configurable'            => false,
-    'position'                   => 0,
-]);
 
 $installer->endSetup();

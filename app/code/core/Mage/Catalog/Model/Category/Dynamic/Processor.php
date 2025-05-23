@@ -35,10 +35,6 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
             $productIds = $this->getMatchingProductIds($rules, $category);
             $this->updateCategoryProducts($category, $productIds);
             
-            // Update last update timestamp
-            $category->setDynamicLastUpdate(now());
-            $category->getResource()->saveAttribute($category, 'dynamic_last_update');
-            
             Mage::logException(new Exception(sprintf(
                 'Processed dynamic category %d (%s) with %d products',
                 $category->getId(),

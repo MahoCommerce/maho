@@ -58,15 +58,6 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Dynamic
             'onchange' => 'toggleDynamicOptions(this.value)'
         ]);
 
-
-        $fieldset->addField('dynamic_last_update', 'text', [
-            'name'     => 'dynamic_last_update',
-            'label'    => Mage::helper('catalog')->__('Last Dynamic Update'),
-            'title'    => Mage::helper('catalog')->__('Last Dynamic Update'),
-            'readonly' => true,
-            'note'     => Mage::helper('catalog')->__('Last time dynamic rules were processed for this category')
-        ]);
-
         // Rules fieldset
         $rulesFieldset = $form->addFieldset('dynamic_rules_fieldset', [
             'legend' => Mage::helper('catalog')->__('Dynamic Category Rules'),
