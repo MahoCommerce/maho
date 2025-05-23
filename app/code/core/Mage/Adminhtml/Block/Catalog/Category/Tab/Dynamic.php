@@ -13,7 +13,7 @@
  *
  * @package    Mage_Adminhtml
  */
-class Mage_Adminhtml_Block_Catalog_Category_Tab_Dynamic 
+class Mage_Adminhtml_Block_Catalog_Category_Tab_Dynamic
     extends Mage_Adminhtml_Block_Widget_Form
     implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
@@ -23,11 +23,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Dynamic
     protected function _prepareLayout()
     {
         parent::_prepareLayout();
-        if (Mage::getSingleton('cms/wysiwyg_config')->isEnabled()) {
-            $this->getLayout()->getBlock('head')->setCanLoadTinyMce(true);
-        }
-        
-        // Enable rules JavaScript for dynamic category conditions
+
         $this->getLayout()->getBlock('head')->setCanLoadRulesJs(true);
         
         return $this;
@@ -44,18 +40,6 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Dynamic
         $form->setHtmlIdPrefix('dynamic_');
 
         $category = $this->getCategory();
-
-        $fieldset = $form->addFieldset('dynamic_fieldset', [
-            'legend' => Mage::helper('catalog')->__('Dynamic Category Settings'),
-            'class'  => 'fieldset-wide'
-        ]);
-
-        $fieldset->addField('is_dynamic', 'select', [
-            'name'     => 'is_dynamic',
-            'label'    => Mage::helper('catalog')->__('Is Dynamic Category'),
-            'title'    => Mage::helper('catalog')->__('Is Dynamic Category'),
-            'values'   => Mage::getSingleton('adminhtml/system_config_source_yesno')->toOptionArray(),
-        ]);
 
         // Rules fieldset
         $rulesFieldset = $form->addFieldset('dynamic_rules_fieldset', [
