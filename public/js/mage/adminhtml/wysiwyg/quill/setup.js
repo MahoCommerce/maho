@@ -43,6 +43,23 @@ class quillWysiwygSetup {
         varienGlobalEvents.attachEventHandler('open_browser_callback', this.openFileBrowser.bind(this));
     }
 
+    registerCustomButtons() {
+        // Register custom button icons
+        const icons = Quill.import('ui/icons');
+        
+        // Widget icon - gear/cog shape
+        icons['widget'] = '<svg viewBox="0 0 18 18">' +
+            '<path class="ql-stroke" d="M9 15l-1.5-0.3c-0.1-0.5-0.3-0.9-0.6-1.2l-1.2 0.9c-0.4-0.3-0.8-0.6-1.1-1l0.8-1.2c-0.3-0.3-0.7-0.6-1.2-0.7L3.8 9.8c-0.1-0.3-0.1-0.5-0.1-0.8s0-0.5 0.1-0.8l1.4-0.3c0.1-0.5 0.3-0.9 0.6-1.2l-0.9-1.2c0.3-0.4 0.6-0.8 1-1.1l1.2 0.8c0.3-0.3 0.7-0.5 1.2-0.6L9 3c0.3-0.1 0.5-0.1 0.8-0.1s0.5 0 0.8 0.1l0.3 1.5c0.5 0.1 0.9 0.3 1.2 0.6l1.2-0.8c0.4 0.3 0.8 0.6 1.1 1l-0.8 1.2c0.3 0.3 0.5 0.7 0.6 1.2l1.5 0.3c0.1 0.3 0.1 0.5 0.1 0.8s0 0.5-0.1 0.8l-1.5 0.3c-0.1 0.5-0.3 0.9-0.6 1.2l0.8 1.2c-0.3 0.4-0.6 0.8-1 1.1l-1.2-0.8c-0.3 0.3-0.7 0.5-1.2 0.6L9.8 15c-0.3 0.1-0.5 0.1-0.8 0.1s-0.5 0-0.8-0.1z"/>' +
+            '<circle class="ql-fill" cx="9" cy="9" r="2.5"/>' +
+            '</svg>';
+        
+        // Variable icon - curly braces
+        icons['variable'] = '<svg viewBox="0 0 18 18">' +
+            '<path class="ql-stroke" d="M4 3v3c0 1-0.5 1.5-1.5 1.5v3c1 0 1.5 0.5 1.5 1.5v3c0 1 1 2 2 2h1v-2h-0.5c-0.5 0-0.5-0.5-0.5-1v-2.5c0-1-0.5-1.5-1.5-1.5v-1c1 0 1.5-0.5 1.5-1.5V4.5c0-0.5 0-1 0.5-1H7V1.5H6c-1 0-2 1-2 2z"/>' +
+            '<path class="ql-stroke" d="M14 3v3c0 1 0.5 1.5 1.5 1.5v3c-1 0-1.5 0.5-1.5 1.5v3c0 1-1 2-2 2h-1v-2h0.5c0.5 0 0.5-0.5 0.5-1v-2.5c0-1 0.5-1.5 1.5-1.5v-1c-1 0-1.5-0.5-1.5-1.5V4.5c0-0.5 0-1-0.5-1H11V1.5h1c1 0 2 1 2 2z"/>' +
+            '</svg>';
+    }
+
     unbindEventListeners() {
         varienGlobalEvents.removeEventHandler('formSubmit', this.onFormValidation);
     }
@@ -65,6 +82,9 @@ class quillWysiwygSetup {
     }
 
     setup() {
+        // Register custom buttons before initializing Quill
+        this.registerCustomButtons();
+        
         // Create wrapper container for Quill editor
         const textarea = this.getTextArea();
         const wrapper = document.createElement('div');
@@ -115,6 +135,19 @@ class quillWysiwygSetup {
                 this.onChangeContent();
             }
         });
+
+        // Add titles to custom buttons
+        const toolbar = this.editor.getModule('toolbar');
+        if (toolbar) {
+            const widgetButton = toolbar.container.querySelector('.ql-widget');
+            if (widgetButton) {
+                widgetButton.setAttribute('title', 'Insert Widget');
+            }
+            const variableButton = toolbar.container.querySelector('.ql-variable');
+            if (variableButton) {
+                variableButton.setAttribute('title', 'Insert Variable');
+            }
+        }
 
         // Fire initialization event
         varienGlobalEvents.fireEvent('wysiwygEditorInitialized', this.editor);

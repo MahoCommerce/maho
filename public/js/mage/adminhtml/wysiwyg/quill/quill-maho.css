@@ -57,83 +57,56 @@
     background-color: #e0e0e0;
 }
 
-/* Custom toolbar buttons */
-.ql-toolbar .ql-widget,
-.ql-toolbar .ql-variable {
-    width: auto !important;
-    min-width: 28px;
-    padding: 0 8px;
-    position: relative;
+/* Custom button hover state */
+.ql-toolbar button.ql-widget:hover,
+.ql-toolbar button.ql-variable:hover {
+    background-color: #e0e0e0;
 }
 
-/* Widget button icon */
-.ql-toolbar button.ql-widget::before {
-    content: '⚙';
-    font-size: 16px;
-    display: inline-block;
-    line-height: normal;
+/* Custom button active state */
+.ql-toolbar button.ql-widget.ql-active,
+.ql-toolbar button.ql-variable.ql-active {
+    background-color: #d0d0d0;
 }
 
-/* Variable button icon */  
-.ql-toolbar button.ql-variable::before {
-    content: '{ }';
-    font-family: monospace;
-    font-size: 12px;
-    font-weight: bold;
-    display: inline-block;
-    line-height: normal;
-}
-
-/* Hide any default SVG icons for custom buttons */
-.ql-toolbar button.ql-widget svg,
-.ql-toolbar button.ql-variable svg {
-    display: none !important;
-}
-
-/* Add tooltips */
-.ql-toolbar button.ql-widget:hover::after {
-    content: 'Insert Widget';
+/* Add titles to custom buttons */
+.ql-toolbar button.ql-widget::after {
+    content: attr(title);
     position: absolute;
-    bottom: -25px;
+    bottom: -22px;
     left: 50%;
     transform: translateX(-50%);
     background: #333;
     color: white;
-    padding: 4px 8px;
+    padding: 2px 6px;
     border-radius: 3px;
     font-size: 11px;
     white-space: nowrap;
+    opacity: 0;
     pointer-events: none;
-    z-index: 1000;
+    transition: opacity 0.2s;
 }
 
+.ql-toolbar button.ql-variable::after {
+    content: attr(title);
+    position: absolute;
+    bottom: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.ql-toolbar button.ql-widget:hover::after,
 .ql-toolbar button.ql-variable:hover::after {
-    content: 'Insert Variable';
-    position: absolute;
-    bottom: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #333;
-    color: white;
-    padding: 4px 8px;
-    border-radius: 3px;
-    font-size: 11px;
-    white-space: nowrap;
-    pointer-events: none;
-    z-index: 1000;
-}
-
-/* Hide text labels on smaller screens */
-@media (max-width: 1200px) {
-    .ql-toolbar .ql-widget:after,
-    .ql-toolbar .ql-variable:after {
-        display: none;
-    }
-    
-    .ql-toolbar .ql-widget,
-    .ql-toolbar .ql-variable {
-        padding: 0;
-    }
+    opacity: 1;
 }
 
 /* Disabled state */
