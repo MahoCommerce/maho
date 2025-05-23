@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -44,11 +44,11 @@ $table = $installer->getConnection()
     ], 'Updated At')
     ->addIndex(
         $installer->getIdxName('catalog/category_dynamic_rule', ['category_id']),
-        ['category_id']
+        ['category_id'],
     )
     ->addIndex(
         $installer->getIdxName('catalog/category_dynamic_rule', ['is_active']),
-        ['is_active']
+        ['is_active'],
     )
     ->addForeignKey(
         $installer->getFkName('catalog/category_dynamic_rule', 'category_id', 'catalog/category', 'entity_id'),
@@ -56,7 +56,7 @@ $table = $installer->getConnection()
         $installer->getTable('catalog/category'),
         'entity_id',
         Varien_Db_Ddl_Table::ACTION_CASCADE,
-        Varien_Db_Ddl_Table::ACTION_CASCADE
+        Varien_Db_Ddl_Table::ACTION_CASCADE,
     )
     ->setComment('Catalog Category Dynamic Rules');
 

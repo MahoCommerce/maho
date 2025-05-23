@@ -34,12 +34,12 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
             $rules = $this->getRulesForCategory($category->getId());
             $productIds = $this->getMatchingProductIds($rules, $category);
             $this->updateCategoryProducts($category, $productIds);
-            
+
             Mage::logException(new Exception(sprintf(
                 'Processed dynamic category %d (%s) with %d products',
                 $category->getId(),
                 $category->getName(),
-                count($productIds)
+                count($productIds),
             )));
         } catch (Exception $e) {
             Mage::logException($e);
@@ -71,7 +71,7 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
 
         foreach ($rules as $rule) {
             $ruleProductIds = $rule->getMatchingProductIds();
-            
+
             // Intersection: only products that match all rules
             if (empty($allProductIds)) {
                 $allProductIds = $ruleProductIds;
@@ -123,19 +123,19 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
 
         foreach ($categoryCollection as $category) {
             $rules = $this->getRulesForCategory($category->getId());
-            
+
             foreach ($rules as $rule) {
                 // Set products filter to only this product for efficiency
                 $rule->setProductsFilter([$product->getId()]);
-                
+
                 $matchingIds = $rule->getMatchingProductIds();
                 $isMatching = in_array($product->getId(), $matchingIds);
-                
+
                 // Get current category products
                 $currentProductIds = $category->getResource()->getProductsPosition($category);
                 $currentProductIds = is_array($currentProductIds) ? array_keys($currentProductIds) : [];
                 $isCurrentlyInCategory = in_array($product->getId(), $currentProductIds);
-                
+
                 // Update if status changed
                 if ($isMatching && !$isCurrentlyInCategory) {
                     // Add product to category

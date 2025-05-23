@@ -4,14 +4,8 @@
  * Maho
  *
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
-
-/**
- * Catalog Category Dynamic Rule Model
- *
- * @package    Mage_Catalog
  *
  * @method int getRuleId()
  * @method $this setRuleId(int $value)
@@ -26,6 +20,7 @@
  * @method string getUpdatedAt()
  * @method $this setUpdatedAt(string $value)
  */
+
 class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 {
     /**
@@ -227,7 +222,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
             /** @var Mage_Catalog_Model_Resource_Product_Collection $productCollection */
             $productCollection = Mage::getResourceModel('catalog/product_collection');
-            
+
             if ($this->_productsFilter) {
                 $productCollection->addIdFilter($this->_productsFilter);
             }
@@ -240,7 +235,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
                 [
                     'attributes' => $this->getCollectedAttributes(),
                     'product'    => Mage::getModel('catalog/product'),
-                ]
+                ],
             );
         }
 

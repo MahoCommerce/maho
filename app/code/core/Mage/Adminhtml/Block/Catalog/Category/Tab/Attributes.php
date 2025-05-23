@@ -143,7 +143,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
             // Add dynamic rules fieldset
             $rulesFieldset = $form->addFieldset('dynamic_rules_fieldset', [
                 'legend' => Mage::helper('catalog')->__('Dynamic Category Rules'),
-                'class'  => 'fieldset-wide'
+                'class'  => 'fieldset-wide',
             ]);
 
             $renderer = Mage::getBlockSingleton('adminhtml/widget_form_renderer_fieldset')
@@ -154,7 +154,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
 
             // Get or create the dynamic rule for this category
             $rule = $this->getDynamicRule();
-            
+
             $rulesFieldset->addField('conditions', 'text', [
                 'name' => 'rule[conditions]',
                 'label' => Mage::helper('catalog')->__('Conditions'),
@@ -183,25 +183,25 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
     public function getDynamicRule()
     {
         $category = $this->getCategory();
-        
+
         if (!$this->hasData('dynamic_rule')) {
             $rule = Mage::getModel('catalog/category_dynamic_rule');
-            
+
             if ($category && $category->getId()) {
                 $collection = Mage::getModel('catalog/category_dynamic_rule')->getCollection()
                     ->addCategoryFilter($category->getId())
                     ->setPageSize(1);
-                
+
                 if ($collection->getSize() > 0) {
                     $rule = $collection->getFirstItem();
                 } else {
                     $rule->setCategoryId($category->getId());
                 }
             }
-            
+
             $this->setData('dynamic_rule', $rule);
         }
-        
+
         return $this->getData('dynamic_rule');
     }
 
@@ -213,12 +213,12 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
     public function getFormHtml()
     {
         $formHtml = parent::getFormHtml();
-        
+
         // Add rules JavaScript if this is the Dynamic Category group
         $group = $this->getGroup();
         if ($group && $group->getAttributeGroupName() == 'Dynamic Category') {
             $newChildUrl = $this->getUrl('*/*/newConditionHtml/form/dynamic_conditions_fieldset');
-            
+
             $script = '<script type="text/javascript">
                 document.addEventListener("DOMContentLoaded", function() {
                     if (typeof VarienRulesForm !== "undefined") {
@@ -229,10 +229,10 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
                     }
                 });
             </script>';
-            
+
             return $formHtml . $script;
         }
-        
+
         return $formHtml;
     }
 

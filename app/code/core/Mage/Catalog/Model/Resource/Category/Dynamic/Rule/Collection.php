@@ -4,20 +4,12 @@
  * Maho
  *
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Catalog Category Dynamic Rule Collection
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Resource_Category_Dynamic_Rule_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
-    /**
-     * Initialize collection model
-     */
     protected function _construct()
     {
         $this->_init('catalog/category_dynamic_rule');
@@ -58,7 +50,7 @@ class Mage_Catalog_Model_Resource_Category_Dynamic_Rule_Collection extends Mage_
             $this->getSelect()->join(
                 ['category' => $this->getTable('catalog/category')],
                 'main_table.category_id = category.entity_id',
-                ['category_name' => 'category.name']
+                ['category_name' => 'category.name'],
             );
             $this->setFlag('category_joined', true);
         }

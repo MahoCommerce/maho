@@ -213,7 +213,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             // Add all POST data, except path which may have become stale if category was moved
             unset($data['general']['path']);
             $category->addData($data['general']);
-            
+
             // Add dynamic category data if present
             if (isset($data['category']) && is_array($data['category'])) {
                 $category->addData($data['category']);
@@ -256,7 +256,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
                 $products = Mage::helper('core/string')->parseQueryStr($data['category_products']);
                 $category->setPostedProducts($products);
             }
-            
+
             // Store dynamic category rule data for the observer to handle
             if (isset($data['rule']) && is_array($data['rule'])) {
                 $category->setDynamicRuleData($data['rule']);
