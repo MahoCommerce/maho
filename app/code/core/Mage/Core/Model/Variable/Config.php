@@ -22,7 +22,7 @@ class Mage_Core_Model_Variable_Config
         $variableConfig = [];
         // Add variable URL for QuillJS
         $variableConfig['variable_window_url'] = $this->getVariablesWysiwygActionUrl();
-        
+
         // Keep legacy plugin config for backward compatibility
         $onclickParts = [
             'search' => ['html_id'],

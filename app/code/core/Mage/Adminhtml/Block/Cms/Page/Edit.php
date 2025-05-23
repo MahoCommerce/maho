@@ -92,9 +92,9 @@ class Mage_Adminhtml_Block_Cms_Page_Edit extends Mage_Adminhtml_Block_Widget_For
             $tabsBlockPrefix   = 'page_tabs_';
         }
 
-        $this->_formScripts[] = "
+        $this->_formScripts[] = '
             function saveAndContinueEdit(urlTemplate) {
-                var tabsIdValue = " . $tabsBlockJsObject . ".activeTab.id;
+                var tabsIdValue = ' . $tabsBlockJsObject . ".activeTab.id;
                 var tabsBlockPrefix = '" . $tabsBlockPrefix . "';
                 if (tabsIdValue.startsWith(tabsBlockPrefix)) {
                     tabsIdValue = tabsIdValue.substr(tabsBlockPrefix.length)

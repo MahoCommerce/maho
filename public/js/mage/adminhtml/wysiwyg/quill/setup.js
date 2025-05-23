@@ -209,7 +209,7 @@ class quillWysiwygSetup {
     variableHandler() {
         if (this.config.variable_window_url) {
             const url = this.config.variable_window_url + 'variable_target_id/' + this.id + '/';
-            widgetTools.openDialog(url);
+            OpenmagevariablePlugin.loadChooser(url, this.id);
         }
     }
 
