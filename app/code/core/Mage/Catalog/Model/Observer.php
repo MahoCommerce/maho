@@ -214,7 +214,7 @@ class Mage_Catalog_Model_Observer
     /**
      * Cron job method to process all dynamic categories
      */
-    public function processAllDynamicCategories(Mage_Cron_Model_Schedule $schedule)
+    public function processAllDynamicCategories(Mage_Cron_Model_Schedule $schedule): void
     {
         try {
             Mage::getModel('catalog/category_dynamic_processor')->processAllDynamicCategories();
@@ -337,7 +337,7 @@ class Mage_Catalog_Model_Observer
         }
 
         // Get existing rules for this category
-        $collection = Mage::getModel('catalog/category_dynamic_rule')->getCollection()
+        $collection = Mage::getResourceModel('catalog/category_dynamic_rule_collection')
             ->addCategoryFilter($category->getId());
 
         // Clear existing rules
