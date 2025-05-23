@@ -110,6 +110,11 @@ Observers are configured in module's `config.xml`.
 
 ## Development Guidelines
 
+- When you write CSS, use the most modern features, do not care for Internet Explorer or old unsupported browsers.
+- When you write Javascript, never use prototypejs or jquery, only vanilla's
+- If you're integrating new tools/libraries, always use their latest available version
+- Update headers of the PHP files, adding the current year for the copyright Maho line
+
 ### Adding New Features
 - If you've to create a new module, use the `app/code/core/Maho/` namespace 
 - Declare module in `app/etc/modules/`
