@@ -55,7 +55,6 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Dynamic
             'label'    => Mage::helper('catalog')->__('Is Dynamic Category'),
             'title'    => Mage::helper('catalog')->__('Is Dynamic Category'),
             'values'   => Mage::getSingleton('adminhtml/system_config_source_yesno')->toOptionArray(),
-            'onchange' => 'toggleDynamicOptions(this.value)'
         ]);
 
         // Rules fieldset
@@ -177,31 +176,12 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Dynamic
     public function getFormHtml()
     {
         $formHtml = parent::getFormHtml();
-        
         $newChildUrl = $this->getUrl('*/*/newConditionHtml/form/dynamic_conditions_fieldset');
         
         $script = '<script type="text/javascript">
-            function toggleDynamicOptions(value) {
-                var conditionsFieldset = $("dynamic_conditions_fieldset");
-                if (conditionsFieldset) {
-                    if (value == "1") {
-                        conditionsFieldset.show();
-                    } else {
-                        conditionsFieldset.hide();
-                    }
-                }
-            }
-            
-            // Initialize on page load
-            document.observe("dom:loaded", function() {
-                var isDynamicField = $("dynamic_is_dynamic");
-                if (isDynamicField) {
-                    toggleDynamicOptions(isDynamicField.value);
-                }
-                
-                // Initialize VarienRulesForm for dynamic category conditions
+            document.addEventListener("DOMContentLoaded", function() {
                 if (typeof VarienRulesForm !== "undefined") {
-                    var conditionsFieldset = $("dynamic_conditions_fieldset");
+                    var conditionsFieldset = document.getElementById("dynamic_conditions_fieldset");
                     if (conditionsFieldset) {
                         window.dynamicCategoryRulesForm = new VarienRulesForm("dynamic_conditions_fieldset", "' . $newChildUrl . '");
                     }
