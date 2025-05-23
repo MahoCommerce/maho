@@ -223,6 +223,8 @@ class Mediabrowser {
     getTargetElement() {
         if (typeof tinyMCE !== 'undefined' && tinyMCE.get(this.targetElementId)) {
             return this.getMediaBrowserCallback();
+        } else if (typeof quillEditors !== 'undefined' && quillEditors.has(this.targetElementId)) {
+            return this.getMediaBrowserCallback();
         } else {
             return document.getElementById(this.targetElementId);
         }
@@ -234,6 +236,9 @@ class Mediabrowser {
     getMediaBrowserCallback() {
         if (typeof tinyMCE !== 'undefined' && tinyMCE.get(this.targetElementId) && typeof tinyMceEditors !== 'undefined') {
             return tinyMceEditors.get(this.targetElementId).getMediaBrowserCallback();
+        }
+        if (typeof quillEditors !== 'undefined' && quillEditors.has(this.targetElementId)) {
+            return quillEditors.get(this.targetElementId).getMediaBrowserCallback();
         }
         return null;
     }

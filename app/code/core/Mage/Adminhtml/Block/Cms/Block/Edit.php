@@ -29,10 +29,6 @@ class Mage_Adminhtml_Block_Cms_Block_Edit extends Mage_Adminhtml_Block_Widget_Fo
         ], -100);
 
         $this->_formScripts[] = "
-            function toggleEditor() {
-                tinymce.execCommand('mceToggleEditor', false, wysiwygblock_content);
-            }
-
             function saveAndContinueEdit(){
                 editForm.submit($('edit_form').action+'back/edit/');
             }

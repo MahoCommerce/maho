@@ -51,9 +51,19 @@ const catalogWysiwygEditor = {
         const wysiwygObj = window[`wysiwyg${elementId}_editor`];
         wysiwygObj.turnOff();
 
-        const content = tinymce.get(wysiwygObj.id)
-              ? tinymce.get(wysiwygObj.id).getContent()
-              : document.getElementById(`${elementId}_editor`)?.value;
+        let content = document.getElementById(`${elementId}_editor`)?.value;
+        
+        // Check if we have a QuillJS editor
+        if (typeof quillEditors !== 'undefined' && quillEditors.has(wysiwygObj.id)) {
+            const quillEditor = quillEditors.get(wysiwygObj.id);
+            if (quillEditor && quillEditor.editor) {
+                content = quillEditor.editor.root.innerHTML;
+            }
+        }
+        // Legacy TinyMCE support
+        else if (typeof tinymce !== 'undefined' && tinymce.get(wysiwygObj.id)) {
+            content = tinymce.get(wysiwygObj.id).getContent();
+        }
 
         if (content) {
             document.getElementById(elementId).value = content;

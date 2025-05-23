@@ -1,0 +1,108 @@
+/**
+ * Maho QuillJS Custom Styles
+ */
+
+/* Container styling */
+.quill-editor-container {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin-top: 5px;
+}
+
+/* Toolbar styling to match Maho admin */
+.quill-editor-container .ql-toolbar {
+    background-color: #f8f8f8;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    border-radius: 3px 3px 0 0;
+}
+
+.quill-editor-container .ql-toolbar button {
+    width: 28px !important;
+    height: 28px !important;
+}
+
+.quill-editor-container .ql-toolbar button:hover {
+    background-color: #e0e0e0;
+}
+
+.quill-editor-container .ql-toolbar button.ql-active {
+    background-color: #d0d0d0;
+}
+
+/* Editor content area */
+.quill-editor-container .ql-editor {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 300px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+/* Match Maho form styling */
+.quill-editor-container .ql-editor h1 { font-size: 2em; margin: 0.67em 0; }
+.quill-editor-container .ql-editor h2 { font-size: 1.5em; margin: 0.75em 0; }
+.quill-editor-container .ql-editor h3 { font-size: 1.17em; margin: 0.83em 0; }
+.quill-editor-container .ql-editor h4 { font-size: 1em; margin: 1.12em 0; }
+.quill-editor-container .ql-editor h5 { font-size: 0.83em; margin: 1.5em 0; }
+.quill-editor-container .ql-editor h6 { font-size: 0.75em; margin: 1.67em 0; }
+
+/* Widget placeholder styling */
+.quill-editor-container .ql-editor img.maho-widget-placeholder {
+    display: inline-block;
+    border: 2px dashed #ccc;
+    background-color: #f0f0f0;
+    padding: 2px;
+    margin: 0 2px;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.quill-editor-container .ql-editor img.maho-widget-placeholder:hover {
+    border-color: #999;
+    background-color: #e0e0e0;
+}
+
+/* Custom toolbar buttons */
+.ql-toolbar .ql-widget,
+.ql-toolbar .ql-variable {
+    width: auto !important;
+    padding: 0 8px;
+}
+
+.ql-toolbar .ql-widget:after {
+    content: 'Widget';
+}
+
+.ql-toolbar .ql-variable:after {
+    content: 'Variable';
+}
+
+/* Disabled state */
+.quill-editor-container.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Focus state */
+.quill-editor-container.ql-container.ql-snow.ql-focused {
+    border-color: #666;
+}
+
+/* Dialog compatibility */
+dialog .quill-editor-container {
+    position: relative;
+    z-index: 1;
+}
+
+dialog .ql-tooltip {
+    z-index: 10000 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .quill-editor-container .ql-editor {
+        min-height: 200px;
+    }
+}

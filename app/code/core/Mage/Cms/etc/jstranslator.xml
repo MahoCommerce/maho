@@ -9,7 +9,7 @@
  */
 -->
 <jstranslator>
-    <script path="mage/adminhtml/wysiwyg/tinymce/setup.js" module="cms">
+    <script path="mage/adminhtml/wysiwyg/quill/setup.js" module="cms">
         <insert-image translate="message">
             <message>Insert Image...</message>
         </insert-image>

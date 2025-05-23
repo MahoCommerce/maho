@@ -20,6 +20,10 @@ class Mage_Core_Model_Variable_Config
     public function getWysiwygPluginSettings($config)
     {
         $variableConfig = [];
+        // Add variable URL for QuillJS
+        $variableConfig['variable_window_url'] = $this->getVariablesWysiwygActionUrl();
+        
+        // Keep legacy plugin config for backward compatibility
         $onclickParts = [
             'search' => ['html_id'],
             'subject' => 'OpenmagevariablePlugin.loadChooser(\'' . $this->getVariablesWysiwygActionUrl() . '\', \'{{html_id}}\');',

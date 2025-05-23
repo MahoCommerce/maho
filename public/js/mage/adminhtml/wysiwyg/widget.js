@@ -69,6 +69,14 @@ WysiwygWidget.Widget = class {
         if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor) {
             this.bMark = tinyMCE.activeEditor.selection.getBookmark();
         }
+        
+        // Store cursor position for QuillJS
+        if (typeof quillEditors !== 'undefined' && quillEditors.has(this.widgetTargetId)) {
+            const quillEditor = quillEditors.get(this.widgetTargetId);
+            if (quillEditor && quillEditor.editor) {
+                this.quillRange = quillEditor.editor.getSelection();
+            }
+        }
 
         this.widgetEl.addEventListener('change', this.loadOptions.bind(this));
         this.initOptionValues();
@@ -232,6 +240,14 @@ WysiwygWidget.Widget = class {
                     }
                 }
 
+                // Restore cursor position for QuillJS
+                if (typeof quillEditors !== 'undefined' && quillEditors.has(this.widgetTargetId)) {
+                    const quillEditor = quillEditors.get(this.widgetTargetId);
+                    if (quillEditor && quillEditor.editor && this.quillRange) {
+                        quillEditor.editor.setSelection(this.quillRange);
+                    }
+                }
+
                 this.updateContent(html);
 
             } catch(error) {
@@ -244,6 +260,12 @@ WysiwygWidget.Widget = class {
     updateContent(content) {
         if (this.wysiwygExists()) {
             this.getWysiwyg().execCommand('mceInsertContent', false, content);
+        } else if (this.quillExists()) {
+            // Insert content into QuillJS
+            const quillEditor = quillEditors.get(this.widgetTargetId);
+            if (quillEditor && quillEditor.editor) {
+                quillEditor.insertContent(content);
+            }
         } else {
             const textarea = document.getElementById(this.widgetTargetId);
             updateElementAtCursor(textarea, content);
@@ -253,6 +275,10 @@ WysiwygWidget.Widget = class {
 
     wysiwygExists() {
         return typeof tinyMCE !== 'undefined' && tinyMCE.get(this.widgetTargetId);
+    }
+
+    quillExists() {
+        return typeof quillEditors !== 'undefined' && quillEditors.has(this.widgetTargetId) && quillEditors.get(this.widgetTargetId).editor;
     }
 
     getWysiwyg() {

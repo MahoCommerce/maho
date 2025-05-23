@@ -93,10 +93,6 @@ class Mage_Adminhtml_Block_Cms_Page_Edit extends Mage_Adminhtml_Block_Widget_For
         }
 
         $this->_formScripts[] = "
-            function toggleEditor() {
-                tinymce.execCommand('mceToggleEditor', false, wysiwygpage_content);
-            }
-
             function saveAndContinueEdit(urlTemplate) {
                 var tabsIdValue = " . $tabsBlockJsObject . ".activeTab.id;
                 var tabsBlockPrefix = '" . $tabsBlockPrefix . "';
