@@ -62,31 +62,4 @@ $table = $installer->getConnection()
 
 $installer->getConnection()->createTable($table);
 
-// Add dynamic category attributes to category entity
-$installer->addAttribute('catalog_category', 'is_dynamic', [
-    'type'                       => 'int',
-    'backend'                    => '',
-    'frontend'                   => '',
-    'label'                      => 'Is Dynamic Category',
-    'input'                      => 'select',
-    'class'                      => '',
-    'source'                     => 'eav/entity_attribute_source_boolean',
-    'global'                     => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_STORE,
-    'visible'                    => true,
-    'required'                   => false,
-    'user_defined'               => false,
-    'default'                    => '0',
-    'searchable'                 => false,
-    'filterable'                 => false,
-    'comparable'                 => false,
-    'visible_on_front'           => false,
-    'used_in_product_listing'    => false,
-    'unique'                     => false,
-    'apply_to'                   => '',
-    'is_configurable'            => false,
-    'position'                   => 0,
-]);
-
-
-
 $installer->endSetup();
