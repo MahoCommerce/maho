@@ -4,23 +4,13 @@
  * Maho
  *
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Dynamic Category Processor
- *
- * @package    Mage_Catalog
- */
 class Mage_Catalog_Model_Category_Dynamic_Processor
 {
-    /**
-     * Process all dynamic categories
-     *
-     * @return $this
-     */
-    public function processAllDynamicCategories()
+    public function processAllDynamicCategories(): self
     {
         /** @var Mage_Catalog_Model_Resource_Category_Collection $categoryCollection */
         $categoryCollection = Mage::getModel('catalog/category')->getCollection()
@@ -34,24 +24,16 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
         return $this;
     }
 
-    /**
-     * Process single dynamic category
-     *
-     * @param Mage_Catalog_Model_Category $category
-     * @return $this
-     */
-    public function processDynamicCategory($category)
+    public function processDynamicCategory(Mage_Catalog_Model_Category $category): self
     {
         if (!$category->getIsDynamic()) {
             return $this;
         }
 
         try {
-            $rules = $this->_getRulesForCategory($category->getId());
-            $productIds = $this->_getMatchingProductIds($rules, $category);
-            
-            // Update category products
-            $this->_updateCategoryProducts($category, $productIds);
+            $rules = $this->getRulesForCategory($category->getId());
+            $productIds = $this->getMatchingProductIds($rules, $category);
+            $this->updateCategoryProducts($category, $productIds);
             
             // Update last update timestamp
             $category->setDynamicLastUpdate(now());
@@ -63,7 +45,6 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
                 $category->getName(),
                 count($productIds)
             )));
-            
         } catch (Exception $e) {
             Mage::logException($e);
         }
@@ -71,13 +52,7 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
         return $this;
     }
 
-    /**
-     * Get rules for category
-     *
-     * @param int $categoryId
-     * @return array
-     */
-    protected function _getRulesForCategory($categoryId)
+    protected function getRulesForCategory(int $categoryId): array
     {
         /** @var Mage_Catalog_Model_Resource_Category_Dynamic_Rule_Collection $collection */
         $collection = Mage::getModel('catalog/category_dynamic_rule')->getCollection()
@@ -89,12 +64,8 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
 
     /**
      * Get matching product IDs based on rules
-     *
-     * @param array $rules
-     * @param Mage_Catalog_Model_Category $category
-     * @return array
      */
-    protected function _getMatchingProductIds($rules, $category)
+    protected function getMatchingProductIds(array $rules, Mage_Catalog_Model_Category $category): array
     {
         if (empty($rules)) {
             return [];
@@ -116,14 +87,7 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
         return array_unique($allProductIds);
     }
 
-    /**
-     * Update category products
-     *
-     * @param Mage_Catalog_Model_Category $category
-     * @param array $productIds
-     * @return $this
-     */
-    protected function _updateCategoryProducts($category, $productIds)
+    protected function updateCategoryProducts(Mage_Catalog_Model_Category $category, array $productIds): self
     {
         // Get current category products
         $currentProductIds = $category->getResource()->getProductsPosition($category);
@@ -153,11 +117,8 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
 
     /**
      * Process dynamic categories for specific product
-     *
-     * @param Mage_Catalog_Model_Product $product
-     * @return $this
      */
-    public function processProductUpdate($product)
+    public function processProductUpdate(Mage_Catalog_Model_Product $product): self
     {
         /** @var Mage_Catalog_Model_Resource_Category_Collection $categoryCollection */
         $categoryCollection = Mage::getModel('catalog/category')->getCollection()
@@ -165,7 +126,7 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
             ->addAttributeToFilter('is_dynamic', 1);
 
         foreach ($categoryCollection as $category) {
-            $rules = $this->_getRulesForCategory($category->getId());
+            $rules = $this->getRulesForCategory($category->getId());
             
             foreach ($rules as $rule) {
                 // Set products filter to only this product for efficiency

@@ -36,8 +36,9 @@ class CategoryDynamicProcess extends BaseMahoCommand
     {
         $this->initMaho();
 
-        $categoryId = $input->getOption('category-id');
+        /** @var Mage_Catalog_Model_Category_Dynamic_Processor $processor */
         $processor = Mage::getModel('catalog/category_dynamic_processor');
+        $categoryId = $input->getOption('category-id');
 
         if ($categoryId) {
             $output->writeln("<info>Processing dynamic category ID: {$categoryId}</info>");
