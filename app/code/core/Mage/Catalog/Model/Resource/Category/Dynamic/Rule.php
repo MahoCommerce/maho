@@ -10,7 +10,7 @@
 
 class Mage_Catalog_Model_Resource_Category_Dynamic_Rule extends Mage_Core_Model_Resource_Db_Abstract
 {
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('catalog/category_dynamic_rule', 'rule_id');
     }

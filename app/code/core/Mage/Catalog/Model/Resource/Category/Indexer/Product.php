@@ -117,10 +117,6 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
         $this->_refreshAnchorRelations($allCategoryIds, $productId);
         $this->_refreshDirectRelations($categoryIds, $productId);
         $this->_refreshRootRelations($productId);
-
-        /**
-         * Process dynamic categories for the updated product
-         */
         $this->_processDynamicCategoriesForProduct($productId);
 
         return $this;
@@ -1200,7 +1196,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
     /**
      * Process dynamic categories during reindex
      */
-    protected function _processDynamicCategories()
+    protected function _processDynamicCategories(): void
     {
         try {
             /** @var Mage_Catalog_Model_Category_Dynamic_Processor $processor */
@@ -1214,7 +1210,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
     /**
      * Process dynamic categories for changed categories
      */
-    protected function _processDynamicCategoriesForChangedCategories(array $categoryIds)
+    protected function _processDynamicCategoriesForChangedCategories(array $categoryIds): void
     {
         try {
             /** @var Mage_Catalog_Model_Category_Dynamic_Processor $processor */
@@ -1234,7 +1230,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
     /**
      * Process dynamic categories for a single product
      */
-    protected function _processDynamicCategoriesForProduct($productId)
+    protected function _processDynamicCategoriesForProduct(int $productId): void
     {
         try {
             $product = Mage::getModel('catalog/product')->load($productId);
@@ -1251,7 +1247,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
     /**
      * Process dynamic categories for multiple products
      */
-    protected function _processDynamicCategoriesForProducts(array $productIds)
+    protected function _processDynamicCategoriesForProducts(array $productIds): void
     {
         try {
             /** @var Mage_Catalog_Model_Category_Dynamic_Processor $processor */
