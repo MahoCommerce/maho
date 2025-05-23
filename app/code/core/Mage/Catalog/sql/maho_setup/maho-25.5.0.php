@@ -12,7 +12,7 @@
 $installer = $this;
 
 $installer->startSetup();
-/*
+
 // Create dynamic category rules table
 $table = $installer->getConnection()
     ->newTable($installer->getTable('catalog/category_dynamic_rule'))
@@ -61,7 +61,7 @@ $table = $installer->getConnection()
     ->setComment('Catalog Category Dynamic Rules');
 
 $installer->getConnection()->createTable($table);
-*/
+
 // Add dynamic category attributes to category entity
 $installer->addAttribute('catalog_category', 'is_dynamic', [
     'type'                       => 'int',
@@ -72,7 +72,7 @@ $installer->addAttribute('catalog_category', 'is_dynamic', [
     'global'                     => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL,
     'visible'                    => true,
     'required'                   => false,
-    'user_defined'               => false,
+    'user_defined'               => true,
     'default'                    => '0',
 ]);
 

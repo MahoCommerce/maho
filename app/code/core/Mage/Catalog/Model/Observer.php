@@ -148,7 +148,7 @@ class Mage_Catalog_Model_Observer
 
         // Process dynamic category if it's marked as dynamic
         $category = $observer->getEvent()->getCategory();
-        
+
         // Save dynamic rule data if present
         $request = Mage::app()->getRequest();
         if ($request && $request->getParam('rule')) {
@@ -158,7 +158,7 @@ class Mage_Catalog_Model_Observer
                 Mage::logException($e);
             }
         }
-        
+
         if ($category->getIsDynamic()) {
             try {
                 Mage::getModel('catalog/category_dynamic_processor')->processDynamicCategory($category);
@@ -200,7 +200,7 @@ class Mage_Catalog_Model_Observer
     public function catalogProductSaveAfter(Varien_Event_Observer $observer)
     {
         $product = $observer->getEvent()->getProduct();
-        
+
         try {
             Mage::getModel('catalog/category_dynamic_processor')->processProductUpdate($product);
         } catch (Exception $e) {
@@ -349,13 +349,13 @@ class Mage_Catalog_Model_Observer
             $rule = Mage::getModel('catalog/category_dynamic_rule');
             $rule->setCategoryId($category->getId());
             $rule->setIsActive($category->getIsDynamic() ? 1 : 0);
-            
+
             // Process the conditions
             $conditions = $category->getData('rule_conditions');
             if (is_array($conditions)) {
                 $rule->loadPost(['conditions' => $conditions]);
             }
-            
+
             $rule->save();
         }
 
@@ -389,7 +389,7 @@ class Mage_Catalog_Model_Observer
             $rule = Mage::getModel('catalog/category_dynamic_rule');
             $rule->setCategoryId($category->getId());
             $rule->setIsActive($category->getIsDynamic() ? 1 : 0);
-            
+
             // Process the conditions
             $rule->loadPost($ruleData);
             $rule->save();
