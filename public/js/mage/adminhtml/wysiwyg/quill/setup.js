@@ -52,26 +52,37 @@ class quillWysiwygSetup {
         if (this.editor) {
             // Save content before destroying
             this.updateTextArea();
+            
+            // Destroy the Quill instance
             this.editor = null;
         }
-        const container = this.getContainer();
-        if (container) {
-            container.remove();
+        
+        // Remove the wrapper which contains everything
+        const wrapper = document.getElementById(`${this.id}_wrapper`);
+        if (wrapper) {
+            wrapper.remove();
         }
     }
 
     setup() {
-        // Create container for Quill editor
+        // Create wrapper container for Quill editor
         const textarea = this.getTextArea();
+        const wrapper = document.createElement('div');
+        wrapper.id = `${this.id}_wrapper`;
+        wrapper.className = 'quill-wrapper';
+        
+        // Create container for Quill editor content
         const container = document.createElement('div');
         container.id = `${this.id}_editor`;
-        container.className = 'quill-editor-container';
         container.style.minHeight = '400px';
         container.style.backgroundColor = '#fff';
         
-        // Insert container after textarea
+        // Append container to wrapper
+        wrapper.appendChild(container);
+        
+        // Insert wrapper after textarea
         textarea.style.display = 'none';
-        textarea.parentNode.insertBefore(container, textarea.nextSibling);
+        textarea.parentNode.insertBefore(wrapper, textarea.nextSibling);
 
         // Initialize Quill
         const toolbarOptions = this.getToolbarOptions();
