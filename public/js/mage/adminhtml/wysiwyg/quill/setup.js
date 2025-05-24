@@ -123,9 +123,8 @@ class quillWysiwygSetup {
         });
 
         // Set initial content
-        const initialContent = this.encodeContent(textarea.value);
-        if (initialContent) {
-            this.editor.root.innerHTML = initialContent;
+        if (textarea.value) {
+            this.editor.root.innerHTML = textarea.value;
         }
 
         // Listen for changes
@@ -296,8 +295,7 @@ class quillWysiwygSetup {
 
     updateTextArea() {
         if (this.editor) {
-            const content = this.decodeContent(this.editor.root.innerHTML);
-            this.getTextArea().value = content;
+            this.getTextArea().value = this.editor.root.innerHTML;
             this.triggerChange(this.getTextArea());
         }
     }
@@ -307,83 +305,6 @@ class quillWysiwygSetup {
         return element;
     }
 
-    encodeContent(content) {
-        if (!content) return '';
-        
-        if (this.config.add_widgets) {
-            content = this.encodeDirectives(this.encodeWidgets(content));
-        } else if (this.config.encode_directives) {
-            content = this.encodeDirectives(content);
-        }
-        return content;
-    }
-
-    decodeContent(content) {
-        if (!content) return '';
-        
-        if (this.config.add_widgets) {
-            content = this.decodeDirectives(this.decodeWidgets(content));
-        } else if (this.config.encode_directives) {
-            content = this.decodeDirectives(content);
-        }
-        return content;
-    }
-
-    makeDirectiveUrl(directive) {
-        return this.config.directives_url.replace('directive', 'directive/___directive/' + directive);
-    }
-
-    encodeDirectives(content) {
-        return content.replace(/<([a-z0-9\-\_]+.+?)([a-z0-9\-\_]+=".*?\{\{.+?\}\}.*?".+?)>/gi, (match, p1, p2) => {
-            const attributesString = p2.replace(/([a-z0-9\-\_]+)="(.*?)(\{\{.+?\}\})(.*?)"/gi, (m, attr, before, directive, after) => {
-                return attr + '="' + before + this.makeDirectiveUrl(Base64.mageEncode(directive)) + after + '"';
-            });
-            return '<' + p1 + attributesString + '>';
-        });
-    }
-
-    encodeWidgets(content) {
-        return content.replace(/\{\{widget(.*?)\}\}/gi, (match, attributes) => {
-            const attrs = this.parseAttributesString(attributes);
-            if (attrs.type) {
-                let placeholderFilename = attrs.type.replace(/\//g, "__") + ".gif";
-                if (!this.widgetPlaceholderExist(placeholderFilename)) {
-                    placeholderFilename = 'default.gif';
-                }
-                const attributesObj = {
-                    id: Base64.idEncode(match),
-                    src: this.config.widget_images_url + placeholderFilename,
-                    title: match.replace(/\{\{/g, '{').replace(/\}\}/g, '}').replace(/\"/g, '&quot;'),
-                    class: 'maho-widget-placeholder'
-                };
-                const attributesString = Object.entries(attributesObj)
-                      .map(([key, value]) => `${key}="${value}"`)
-                      .join(' ');
-
-                return `<img ${attributesString}>`;
-            }
-            return match;
-        });
-    }
-
-    decodeDirectives(content) {
-        const url = this.makeDirectiveUrl('%directive%').replace(/([$^.?*!+:=()\[\]{}|\\])/g, '\\$1');
-        const reg = new RegExp(url.replace('%directive%', '([a-zA-Z0-9,_-]+)'), 'g');
-        return content.replace(reg, (match, directive) => Base64.mageDecode(directive));
-    }
-
-    decodeWidgets(content) {
-        return content.replace(/<img([^>]+id=\"[^>]+)>/gi, (match, attributes) => {
-            const attrs = this.parseAttributesString(attributes);
-            if (attrs.id && attrs.class && attrs.class.includes('maho-widget-placeholder')) {
-                const widgetCode = Base64.idDecode(attrs.id);
-                if (widgetCode.indexOf('{{widget') !== -1) {
-                    return widgetCode;
-                }
-            }
-            return match;
-        });
-    }
 
     parseAttributesString(attributes) {
         const result = {};
@@ -394,9 +315,6 @@ class quillWysiwygSetup {
         return result;
     }
 
-    widgetPlaceholderExist(filename) {
-        return this.config.widget_placeholders && this.config.widget_placeholders.indexOf(filename) !== -1;
-    }
 
     getMediaBrowserCallback() {
         return this.mediaBrowserCallback;
