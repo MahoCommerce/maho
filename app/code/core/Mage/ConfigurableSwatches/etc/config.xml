@@ -121,16 +121,16 @@
                 <enabled>0</enabled>
             </general>
             <product_detail_dimensions>
-                <width>21</width>
-                <height>21</height>
+                <width>24</width>
+                <height>24</height>
             </product_detail_dimensions>
             <product_listing_dimensions>
-                <width>18</width>
-                <height>18</height>
+                <width>24</width>
+                <height>24</height>
             </product_listing_dimensions>
             <layered_nav_dimensions>
-                <width>18</width>
-                <height>18</height>
+                <width>24</width>
+                <height>24</height>
             </layered_nav_dimensions>
         </configswatches>
     </default>

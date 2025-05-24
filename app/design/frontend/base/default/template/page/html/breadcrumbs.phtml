@@ -23,9 +23,6 @@
             <?php else: ?>
                 <?= $this->escapeHtml($_crumbInfo['label']) ?>
             <?php endif ?>
-            <?php if(!$_crumbInfo['last']): ?>
-                <span>/ </span>
-            <?php endif ?>
             </li>
         <?php endforeach ?>
     </ul>
