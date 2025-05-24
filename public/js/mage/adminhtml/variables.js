@@ -123,28 +123,29 @@ const OpenmagevariablePlugin = {
     },
 
     insertVariable(value) {
+        Variables.closeDialogWindow();
+        
         if (this.textareaId) {
-            Variables.init(this.textareaId);
-            Variables.insertVariable(value);
-        } else {
-            Variables.closeDialogWindow();
-            
-            // Check if we're using QuillJS
-            if (typeof quillEditors !== 'undefined' && this.editor && this.editor.container) {
-                // Find the QuillJS instance by container
-                const editorId = this.editor.container.previousElementSibling?.id;
-                if (editorId && quillEditors.has(editorId)) {
-                    const quillEditor = quillEditors.get(editorId);
-                    if (quillEditor) {
-                        quillEditor.insertContent(value);
-                        return;
-                    }
+            // Check if we have a QuillJS editor for this textarea
+            if (typeof quillEditors !== 'undefined' && quillEditors.has(this.textareaId)) {
+                const quillEditor = quillEditors.get(this.textareaId);
+                if (quillEditor) {
+                    quillEditor.insertContent(value);
+                    return;
                 }
             }
             
-            // Fall back to TinyMCE if available
-            if (this.editor && this.editor.execCommand) {
-                this.editor.execCommand('mceInsertContent', false, value);
+            // Fall back to direct textarea insertion
+            const textareaElm = document.getElementById(this.textareaId);
+            if (textareaElm) {
+                updateElementAtCursor(textareaElm, value);
+            }
+        } else if (this.editor) {
+            // We have a direct editor reference (Quill 2.0)
+            if (this.editor.insertText) {
+                const range = this.editor.getSelection() || { index: this.editor.getLength() - 1, length: 0 };
+                this.editor.insertText(range.index, value, 'user');
+                this.editor.setSelection(range.index + value.length);
             }
         }
     },

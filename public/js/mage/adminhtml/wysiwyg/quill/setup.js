@@ -175,6 +175,7 @@ class quillWysiwygSetup {
     variableHandler() {
         if (this.config.variable_window_url) {
             const url = this.config.variable_window_url + 'variable_target_id/' + this.id + '/';
+            OpenmagevariablePlugin.setEditor(this.editor);
             OpenmagevariablePlugin.loadChooser(url, this.id);
         }
     }
@@ -303,17 +304,10 @@ class quillWysiwygSetup {
                 } else {
                     this.editor.insertText(range.index, content);
                 }
+            } else {
+                const length = this.editor.getLength();
+                this.editor.insertText(length - 1, content);
             }
         }
     }
-}
-
-// Compatibility layer for widget insertion
-if (typeof widgetTools === 'undefined') {
-    window.widgetTools = {
-        openDialog: function(url) {
-            // This will be overridden by the actual widget tools
-            console.warn('Widget tools not loaded');
-        }
-    };
 }
