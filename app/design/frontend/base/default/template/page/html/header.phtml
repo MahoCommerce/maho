@@ -11,7 +11,7 @@
 
 /** @var Mage_Page_Block_Html_Header $this */
 ?>
-<header id="header" class="page-header">
+<header id="header" class="page-header" role="banner">
     <div class="page-header-container skip-links">
         <div>
             <a href="#header-nav" class="skip-link skip-nav" data-target-element="header-nav" title="<?= $this->__('Menu') ?>">
@@ -19,7 +19,7 @@
                 <span class="label"><?= $this->__('Menu') ?></span>
             </a>
 
-            <a class="logo" href="<?= $this->getUrl('') ?>" title="<?= $this->__('Go to Home Page') ?>">
+            <a class="logo" href="<?= $this->getUrl('') ?>" title="<?= $this->__('Go to Home Page') ?>" aria-label="<?= $this->__('%s - Go to Home Page', $this->getLogoAlt()) ?>">
                 <img src="<?= $this->getLogoSrc() ?>" alt="<?= $this->getLogoAlt() ?>" width="<?= $this->getLogoWidth() ?>" height="<?= $this->getLogoHeight() ?>" />
             </a>
         </div>
@@ -42,16 +42,16 @@
             </a>
             <?php endif ?>
 
-            <div class="header-minicart">
+            <div class="header-minicart" role="region" aria-label="<?= $this->__('Shopping Cart') ?>">
                 <?= $this->getChildHtml('minicart_head') ?>
             </div>
         </div>
     </div>
 
     <div id="minicart-container-mobile" class="header-minicart"></div>
-    <div id="header-nav" class="skip-content">
+    <nav id="header-nav" class="skip-content" role="navigation" aria-label="<?= $this->__('Main Navigation') ?>">
         <?= $this->getChildHtml('topMenu') ?>
-    </div>
+    </nav>
 </header>
 
 <?= $this->getChildHtml('topContainer') ?>

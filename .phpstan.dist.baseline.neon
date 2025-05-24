@@ -31186,24 +31186,6 @@ parameters:
 			path: app/design/frontend/base/default/template/cms/widget/static_block/default.phtml
 
 		-
-			message: '#^Variable \$html might not be defined\.$#'
-			identifier: variable.undefined
-			count: 2
-			path: app/design/frontend/base/default/template/core/messages.phtml
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/core/messages.phtml
-
-		-
-			message: '#^Variable \$types might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/design/frontend/base/default/template/core/messages.phtml
-
-		-
 			message: '#^Variable \$customer might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1

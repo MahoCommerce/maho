@@ -23,7 +23,7 @@
     <?= $this->getChildHtml('global_notices') ?>
     <div class="page">
         <?= $this->getChildHtml('header') ?>
-        <div class="main-container col1-layout">
+        <main class="main-container col1-layout" role="main">
             <div class="main">
                 <?= $this->getChildHtml('breadcrumbs') ?>
                 <div class="col-main" id="main-content">
@@ -31,7 +31,7 @@
                     <?= $this->getChildHtml('content') ?>
                 </div>
             </div>
-        </div>
+        </main>
         <?= $this->getChildHtml('footer_before') ?>
         <?= $this->getChildHtml('footer') ?>
         <?= $this->getChildHtml('global_cookie_notice') ?>

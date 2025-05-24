@@ -26,11 +26,11 @@
         <div class="main-container col2-right-layout">
             <div class="main">
                 <?= $this->getChildHtml('breadcrumbs') ?>
-                <div class="col-main" id="main-content">
+                <main class="col-main" id="main-content" role="main">
                     <?= $this->getChildHtml('global_messages') ?>
                     <?= $this->getChildHtml('content') ?>
-                </div>
-                <div class="col-right sidebar"><?= $this->getChildHtml('right') ?></div>
+                </main>
+                <aside class="col-right sidebar" aria-label="<?= $this->__('Right sidebar') ?>"><?= $this->getChildHtml('right') ?></aside>
             </div>
         </div>
         <?= $this->getChildHtml('footer_before') ?>
