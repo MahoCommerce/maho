@@ -14,6 +14,12 @@ const Variables = {
     dialogWindow: null,
     dialogWindowId: 'variables-chooser',
     insertFunction: 'Variables.insertVariable',
+    
+    getDialogWindowId() {
+        // If we're inside a dialog, append a suffix to allow nested dialogs
+        const dialogCount = document.querySelectorAll('dialog[open]').length;
+        return dialogCount > 0 ? `${this.dialogWindowId}_${dialogCount}` : this.dialogWindowId;
+    },
 
     init(textareaElementId, insertFunction) {
         if (document.getElementById(textareaElementId)) {
@@ -53,11 +59,15 @@ const Variables = {
     },
 
     openDialogWindow(variablesContent) {
-        if (document.getElementById(this.dialogWindowId)) {
+        const dialogId = this.getDialogWindowId();
+        
+        // Check if this specific dialog already exists
+        const existingDialog = document.getElementById(dialogId);
+        if (existingDialog && existingDialog.open) {
             return;
         }
         this.dialogWindow = Dialog.info(variablesContent, {
-            id: this.dialogWindowId,
+            id: dialogId,
             title: 'Insert Variable...',
             className: 'magento',
             windowClassName: 'popup-window',
@@ -78,6 +88,16 @@ const Variables = {
 
     insertVariable(value) {
         this.closeDialogWindow();
+        
+        // Check if we have a QuillJS editor
+        if (typeof quillEditors !== 'undefined' && quillEditors.has(this.textareaElementId)) {
+            const quillEditor = quillEditors.get(this.textareaElementId);
+            if (quillEditor && quillEditor.editor) {
+                quillEditor.insertContent(value);
+                return;
+            }
+        }
+        
         const textareaElm = document.getElementById(this.textareaElementId);
         if (textareaElm) {
             updateElementAtCursor(textareaElm, value);
@@ -96,6 +116,15 @@ const OpenmagevariablePlugin = {
 
     async loadChooser(url, textareaId) {
         this.textareaId = textareaId;
+        
+        // Store cursor position for QuillJS before opening dialog
+        if (typeof quillEditors !== 'undefined' && quillEditors.has(this.textareaId)) {
+            const quillEditor = quillEditors.get(this.textareaId);
+            if (quillEditor && quillEditor.editor) {
+                this.quillRange = quillEditor.editor.getSelection();
+            }
+        }
+        
         try {
             if (this.variables === null) {
                 this.variables = await mahoFetch(url);
@@ -113,12 +142,35 @@ const OpenmagevariablePlugin = {
     },
 
     insertVariable(value) {
+        Variables.closeDialogWindow();
+        
         if (this.textareaId) {
-            Variables.init(this.textareaId);
-            Variables.insertVariable(value);
-        } else {
-            Variables.closeDialogWindow();
-            this.editor.execCommand('mceInsertContent', false, value);
+            // Check if we have a QuillJS editor for this textarea
+            if (typeof quillEditors !== 'undefined' && quillEditors.has(this.textareaId)) {
+                const quillEditor = quillEditors.get(this.textareaId);
+                if (quillEditor && quillEditor.editor) {
+                    // Restore cursor position before inserting
+                    if (this.quillRange) {
+                        quillEditor.editor.setSelection(this.quillRange);
+                    }
+                    quillEditor.insertContent(value);
+                    this.quillRange = null; // Clear stored range
+                    return;
+                }
+            }
+            
+            // Fall back to direct textarea insertion
+            const textareaElm = document.getElementById(this.textareaId);
+            if (textareaElm) {
+                updateElementAtCursor(textareaElm, value);
+            }
+        } else if (this.editor) {
+            // We have a direct editor reference (Quill 2.0)
+            if (this.editor.insertText) {
+                const range = this.editor.getSelection() || { index: this.editor.getLength() - 1, length: 0 };
+                this.editor.insertText(range.index, value, 'user');
+                this.editor.setSelection(range.index + value.length);
+            }
         }
     },
 };

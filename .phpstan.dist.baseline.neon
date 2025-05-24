@@ -5365,12 +5365,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Cms/Wysiwyg/Enabled.php
 
 		-
-			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Cms_Wysiwyg_Skin\:\:toOptionArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Cms/Wysiwyg/Skin.php
-
-		-
 			message: '#^Method Mage_Adminhtml_Model_System_Config_Source_Country\:\:toOptionArray\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

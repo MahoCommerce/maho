@@ -153,11 +153,13 @@
             } else {
                 $('preview_type').value = 2;
             }
-            if (typeof tinymce == 'undefined' || !tinymce.get('template_text')) {
-                $('preview_text').value = $('template_text').value;
-            } else {
-                $('preview_text').value = tinymce.get('template_text').getContent();
+            if (typeof quillEditors !== 'undefined' && quillEditors.has('template_text')) {
+                const quillEditor = quillEditors.get('template_text');
+                if (quillEditor && quillEditor.editor) {
+                    $('template_text').value = quillEditor.editor.root.innerHTML;
+                }
             }
+            $('preview_text').value = $('template_text').value;
 
             if ($('template_styles') != undefined) {
                 $('preview_styles').value = $('template_styles').value;

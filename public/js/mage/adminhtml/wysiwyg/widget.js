@@ -11,6 +11,12 @@
 const widgetTools = {
     dialogWindow: null,
     dialogWindowId: 'widget_window',
+    
+    getDialogWindowId() {
+        // If we're inside a dialog, append a suffix to allow nested dialogs
+        const dialogCount = document.querySelectorAll('dialog[open]').length;
+        return dialogCount > 0 ? `${this.dialogWindowId}_${dialogCount}` : this.dialogWindowId;
+    },
 
     getDivHtml(id, html) {
         return `<div id="${escapeHtml(id, true)}">${html ?? ''}</div>`;
@@ -23,14 +29,18 @@ const widgetTools = {
     },
 
     async openDialog(widgetUrl) {
-        if (document.getElementById(this.dialogWindowId)) {
+        const dialogId = this.getDialogWindowId();
+        
+        // Check if this specific dialog already exists
+        const existingDialog = document.getElementById(dialogId);
+        if (existingDialog && existingDialog.open) {
             return;
         }
         try {
             const result = await mahoFetch(widgetUrl);
 
             this.dialogWindow = Dialog.info(result, {
-                id: this.dialogWindowId,
+                id: dialogId,
                 title: 'Insert Widget...',
                 className: 'magento',
                 windowClassName: 'popup-window',
@@ -68,6 +78,14 @@ WysiwygWidget.Widget = class {
 
         if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor) {
             this.bMark = tinyMCE.activeEditor.selection.getBookmark();
+        }
+        
+        // Store cursor position for QuillJS
+        if (typeof quillEditors !== 'undefined' && quillEditors.has(this.widgetTargetId)) {
+            const quillEditor = quillEditors.get(this.widgetTargetId);
+            if (quillEditor && quillEditor.editor) {
+                this.quillRange = quillEditor.editor.getSelection();
+            }
         }
 
         this.widgetEl.addEventListener('change', this.loadOptions.bind(this));
@@ -223,12 +241,24 @@ WysiwygWidget.Widget = class {
                     body: formData,
                 })
 
-                Windows.close('widget_window');
+                // Close the current widget window (which might have a suffix if nested)
+                const openDialogs = [...document.querySelectorAll('dialog[open]')].filter(d => d.id && d.id.startsWith('widget_window'));
+                if (openDialogs.length > 0) {
+                    openDialogs[openDialogs.length - 1].close();
+                }
 
                 if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor) {
                     tinyMCE.activeEditor.focus();
                     if (this.bMark) {
                         tinyMCE.activeEditor.selection.moveToBookmark(this.bMark);
+                    }
+                }
+
+                // Restore cursor position for QuillJS
+                if (typeof quillEditors !== 'undefined' && quillEditors.has(this.widgetTargetId)) {
+                    const quillEditor = quillEditors.get(this.widgetTargetId);
+                    if (quillEditor && quillEditor.editor && this.quillRange) {
+                        quillEditor.editor.setSelection(this.quillRange);
                     }
                 }
 
@@ -244,6 +274,12 @@ WysiwygWidget.Widget = class {
     updateContent(content) {
         if (this.wysiwygExists()) {
             this.getWysiwyg().execCommand('mceInsertContent', false, content);
+        } else if (this.quillExists()) {
+            // Insert content into QuillJS
+            const quillEditor = quillEditors.get(this.widgetTargetId);
+            if (quillEditor && quillEditor.editor) {
+                quillEditor.insertContent(content);
+            }
         } else {
             const textarea = document.getElementById(this.widgetTargetId);
             updateElementAtCursor(textarea, content);
@@ -253,6 +289,10 @@ WysiwygWidget.Widget = class {
 
     wysiwygExists() {
         return typeof tinyMCE !== 'undefined' && tinyMCE.get(this.widgetTargetId);
+    }
+
+    quillExists() {
+        return typeof quillEditors !== 'undefined' && quillEditors.has(this.widgetTargetId) && quillEditors.get(this.widgetTargetId).editor;
     }
 
     getWysiwyg() {
