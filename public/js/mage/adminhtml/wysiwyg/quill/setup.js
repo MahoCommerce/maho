@@ -145,8 +145,7 @@ class quillWysiwygSetup {
         return [
             [{ 'header': [1, 2, 3, 4, 5, false] }],
             ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-            [{ 'align': [] }],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'align': [] }],
             ['link', 'image', 'widget', 'variable']
         ];
     }

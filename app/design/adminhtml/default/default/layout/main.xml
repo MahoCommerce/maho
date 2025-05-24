@@ -70,7 +70,7 @@ Default layout, loads most of the pages
 
                 <!-- QuillJS setup and custom styles -->
                 <action method="addItem"><type>js</type><name>mage/adminhtml/wysiwyg/quill/setup.js</name><params/><if/><condition>can_load_wysiwyg</condition></action>
-                <action method="addItem"><type>js_css</type><name>mage/adminhtml/wysiwyg/quill/quill-maho.css</name><params/><if/><condition>can_load_wysiwyg</condition></action>
+                <action method="addItem"><type>js_css</type><name>mage/adminhtml/wysiwyg/quill/quill.css</name><params/><if/><condition>can_load_wysiwyg</condition></action>
             </block>
 
             <block type="adminhtml/page_notices" name="global_notices" as="global_notices" template="page/notices.phtml" />
