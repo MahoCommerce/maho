@@ -291,22 +291,32 @@ class quillWysiwygSetup {
     // Method to insert content at cursor position (for widgets/variables)
     insertContent(content) {
         if (this.editor) {
-            const range = this.editor.getSelection();
-            if (range) {
-                // If it's HTML content, insert as HTML
-                if (content.includes('<') && content.includes('>')) {
-                    // In Quill 2.0, we use clipboard.convert and updateContents
-                    const delta = this.editor.clipboard.convert({ html: content });
-                    this.editor.updateContents(delta.ops, 'user');
-                    // Set cursor after inserted content
-                    const newLength = this.editor.getLength();
-                    this.editor.setSelection(newLength - 1);
-                } else {
-                    this.editor.insertText(range.index, content);
+            const range = this.editor.getSelection(true);
+            const index = range ? range.index : this.editor.getLength() - 1;
+            
+            // Focus the editor first
+            this.editor.focus();
+            
+            // If it's HTML content, insert as HTML
+            if (content.includes('<') && content.includes('>')) {
+                // In Quill 2.0, we use clipboard.convert and updateContents
+                const delta = this.editor.clipboard.convert({ html: content });
+                // Delete any selected content first
+                if (range && range.length > 0) {
+                    this.editor.deleteText(range.index, range.length);
                 }
+                // Insert the new content at the cursor position
+                this.editor.updateContents(delta.compose(new Delta().retain(index)), 'user');
+                // Set cursor after inserted content
+                this.editor.setSelection(index + delta.length() - 1);
             } else {
-                const length = this.editor.getLength();
-                this.editor.insertText(length - 1, content);
+                // For plain text (variables), insert at cursor position
+                if (range && range.length > 0) {
+                    this.editor.deleteText(range.index, range.length);
+                }
+                this.editor.insertText(index, content, 'user');
+                // Move cursor after inserted text
+                this.editor.setSelection(index + content.length);
             }
         }
     }

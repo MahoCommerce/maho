@@ -106,6 +106,15 @@ const OpenmagevariablePlugin = {
 
     async loadChooser(url, textareaId) {
         this.textareaId = textareaId;
+        
+        // Store cursor position for QuillJS before opening dialog
+        if (typeof quillEditors !== 'undefined' && quillEditors.has(this.textareaId)) {
+            const quillEditor = quillEditors.get(this.textareaId);
+            if (quillEditor && quillEditor.editor) {
+                this.quillRange = quillEditor.editor.getSelection();
+            }
+        }
+        
         try {
             if (this.variables === null) {
                 this.variables = await mahoFetch(url);
@@ -129,8 +138,13 @@ const OpenmagevariablePlugin = {
             // Check if we have a QuillJS editor for this textarea
             if (typeof quillEditors !== 'undefined' && quillEditors.has(this.textareaId)) {
                 const quillEditor = quillEditors.get(this.textareaId);
-                if (quillEditor) {
+                if (quillEditor && quillEditor.editor) {
+                    // Restore cursor position before inserting
+                    if (this.quillRange) {
+                        quillEditor.editor.setSelection(this.quillRange);
+                    }
                     quillEditor.insertContent(value);
+                    this.quillRange = null; // Clear stored range
                     return;
                 }
             }
