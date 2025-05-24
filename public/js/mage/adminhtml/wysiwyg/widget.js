@@ -11,6 +11,12 @@
 const widgetTools = {
     dialogWindow: null,
     dialogWindowId: 'widget_window',
+    
+    getDialogWindowId() {
+        // If we're inside a dialog, append a suffix to allow nested dialogs
+        const dialogCount = document.querySelectorAll('dialog[open]').length;
+        return dialogCount > 0 ? `${this.dialogWindowId}_${dialogCount}` : this.dialogWindowId;
+    },
 
     getDivHtml(id, html) {
         return `<div id="${escapeHtml(id, true)}">${html ?? ''}</div>`;
@@ -23,14 +29,18 @@ const widgetTools = {
     },
 
     async openDialog(widgetUrl) {
-        if (document.getElementById(this.dialogWindowId)) {
+        const dialogId = this.getDialogWindowId();
+        
+        // Check if this specific dialog already exists
+        const existingDialog = document.getElementById(dialogId);
+        if (existingDialog && existingDialog.open) {
             return;
         }
         try {
             const result = await mahoFetch(widgetUrl);
 
             this.dialogWindow = Dialog.info(result, {
-                id: this.dialogWindowId,
+                id: dialogId,
                 title: 'Insert Widget...',
                 className: 'magento',
                 windowClassName: 'popup-window',
@@ -231,7 +241,11 @@ WysiwygWidget.Widget = class {
                     body: formData,
                 })
 
-                Windows.close('widget_window');
+                // Close the current widget window (which might have a suffix if nested)
+                const openDialogs = [...document.querySelectorAll('dialog[open]')].filter(d => d.id && d.id.startsWith('widget_window'));
+                if (openDialogs.length > 0) {
+                    openDialogs[openDialogs.length - 1].close();
+                }
 
                 if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor) {
                     tinyMCE.activeEditor.focus();

@@ -14,6 +14,12 @@ const Variables = {
     dialogWindow: null,
     dialogWindowId: 'variables-chooser',
     insertFunction: 'Variables.insertVariable',
+    
+    getDialogWindowId() {
+        // If we're inside a dialog, append a suffix to allow nested dialogs
+        const dialogCount = document.querySelectorAll('dialog[open]').length;
+        return dialogCount > 0 ? `${this.dialogWindowId}_${dialogCount}` : this.dialogWindowId;
+    },
 
     init(textareaElementId, insertFunction) {
         if (document.getElementById(textareaElementId)) {
@@ -53,11 +59,15 @@ const Variables = {
     },
 
     openDialogWindow(variablesContent) {
-        if (document.getElementById(this.dialogWindowId)) {
+        const dialogId = this.getDialogWindowId();
+        
+        // Check if this specific dialog already exists
+        const existingDialog = document.getElementById(dialogId);
+        if (existingDialog && existingDialog.open) {
             return;
         }
         this.dialogWindow = Dialog.info(variablesContent, {
-            id: this.dialogWindowId,
+            id: dialogId,
             title: 'Insert Variable...',
             className: 'magento',
             windowClassName: 'popup-window',
