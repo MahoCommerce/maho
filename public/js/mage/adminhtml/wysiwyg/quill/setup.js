@@ -142,28 +142,13 @@ class quillWysiwygSetup {
     }
 
     getToolbarOptions() {
-        const toolbar = [
-            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        return [
+            [{ 'header': [1, 2, 3, 4, 5, false] }],
             ['bold', 'italic', 'underline', 'strike', 'blockquote'],
             [{ 'list': 'ordered'}, { 'list': 'bullet' }],
             [{ 'align': [] }],
-            ['link', 'image']
+            ['link', 'image', 'widget', 'variable']
         ];
-
-        // Add custom buttons if enabled
-        const customButtons = [];
-        if (this.config.add_widgets) {
-            customButtons.push('widget');
-        }
-        if (this.config.add_variables) {
-            customButtons.push('variable');
-        }
-        
-        if (customButtons.length > 0) {
-            toolbar.unshift(customButtons);
-        }
-
-        return toolbar;
     }
 
     imageHandler() {
