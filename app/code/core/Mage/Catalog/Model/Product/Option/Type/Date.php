@@ -32,20 +32,14 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
         $value = $this->getUserValue();
 
         $isValid = $dateValid = $timeValid = true;
-        $is24h = Mage::getSingleton('catalog/product_option_type_date')->is24hTimeFormat();
 
         $pattern = null;
         $matches = [];
 
         if (isset($value['date']) && $this->useCalendar()) {
-            if ($this->_timeExists()) {
-                $pattern = $is24h
-                    ? '/^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2})$/'
-                    : '/^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}) (AM|PM)$/';
-            } else {
-                $pattern = '/^(\d{2})\/(\d{2})\/(\d{4})$/';
-            }
-
+            $pattern = $this->_timeExists()
+                ? '/^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2})$/'
+                : '/^(\d{2})\/(\d{2})\/(\d{4})$/';
             $isValid = (bool) preg_match($pattern, $value['date'] ?? '', $matches);
 
             if ($isValid) {
@@ -54,23 +48,18 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
                 $value['year']     = $matches[3] ?? null;
                 $value['hour']     = $matches[4] ?? null;
                 $value['minute']   = $matches[5] ?? null;
-                $value['day_part'] = $matches[6] ?? null;
             } else {
-                $dateValid = false;
+                $isValid = $dateValid = false;
             }
         } elseif (isset($value['time']) && $this->useCalendar()) {
-            $pattern = $is24h
-                ? '/^(\d{2}):(\d{2})$/'
-                : '/^(\d{2}):(\d{2}) (AM|PM)$/';
-
+            $pattern = '/^(\d{2}):(\d{2})$/';
             $isValid = (bool) preg_match($pattern, $value['time'] ?? '', $matches);
 
             if ($isValid) {
                 $value['hour']     = $matches[1] ?? null;
                 $value['minute']   = $matches[2] ?? null;
-                $value['day_part'] = $matches[3] ?? null;
             } else {
-                $timeValid = false;
+                $isValid = $timeValid = false;
             }
         } else {
             if ($this->_dateExists()) {
@@ -87,7 +76,6 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
 
         if ($isValid) {
             $this->setUserValue([
-                'date' => $value['date'] ?? '',
                 'year' => (int) ($value['year'] ?? 0),
                 'month' => (int) ($value['month'] ?? 0),
                 'day' => (int) ($value['day'] ?? 0),
@@ -135,19 +123,14 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
             $timestamp = 0;
 
             if ($this->_dateExists()) {
-                if ($this->useCalendar()) {
-                    $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-                    $timestamp += Mage::app()->getLocale()->date($value['date'], $format, null, false)->getTimestamp();
-                } else {
-                    $timestamp += mktime(0, 0, 0, $value['month'], $value['day'], $value['year']);
-                }
+                $timestamp += mktime(0, 0, 0, $value['month'], $value['day'], $value['year']);
             } else {
                 $timestamp += mktime(0, 0, 0, (int) date('m'), (int) date('d'), (int) date('Y'));
             }
 
             if ($this->_timeExists()) {
                 // 24hr hour conversion
-                if (!$this->is24hTimeFormat() || $this->useCalendar()) {
+                if (!$this->is24hTimeFormat() && !$this->useCalendar()) {
                     $pmDayPart = (strtolower($value['day_part']) == 'pm');
                     if ($value['hour'] == 12) {
                         $value['hour'] = $pmDayPart ? 12 : 0;
@@ -182,17 +165,20 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
     {
         if ($this->_formattedOptionValue === null) {
             $option = $this->getOption();
-            if ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE) {
-                $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM);
-                $result = Mage::app()->getLocale()->date($optionValue, Zend_Date::ISO_8601, null, false)
+            $locale = Mage::app()->getLocale();
+            $timeType = $this->is24hTimeFormat() ? $locale::FORMAT_TIME_24H : $locale::FORMAT_TIME_12H;
+            if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE) {
+                $format = $locale->getDateFormat($locale::FORMAT_TYPE_MEDIUM);
+                $result = $locale->date($optionValue, Zend_Date::ISO_8601, null, false)
                     ->toString($format);
-            } elseif ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
-                $format = Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-                $result = Mage::app()->getLocale()
-                    ->date($optionValue, Varien_Date::DATETIME_INTERNAL_FORMAT, null, false)->toString($format);
-            } elseif ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME) {
-                $date = new Zend_Date($optionValue);
-                $result = date($this->is24hTimeFormat() ? 'H:i' : 'h:i a', $date->getTimestamp());
+            } elseif ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
+                $format = $locale->getDateTimeFormat($locale::FORMAT_TYPE_SHORT, $timeType);
+                $result = $locale->date($optionValue, Varien_Date::DATETIME_INTERNAL_FORMAT, null, false)
+                    ->toString($format);
+            } elseif ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME) {
+                $format = $locale->getTimeFormat($timeType);
+                $result = $locale->date($optionValue, Varien_Date::DATETIME_INTERNAL_FORMAT, null, false)
+                    ->toString($format);
             } else {
                 $result = $optionValue;
             }

@@ -429,6 +429,8 @@ class Mage_Core_Model_Locale
 
     /**
      * Retrieve ISO date format ensuring 4-digit year format
+     *
+     * @param self::FORMAT_TYPE_*|null $type The type of date format to use (full, long, medium, short)
      */
     public function getDateFormat(?string $type = null): string
     {
@@ -490,12 +492,12 @@ class Mage_Core_Model_Locale
     /**
      * Retrieve ISO time format
      *
-     * @param string|null $type The type of time format to use (12h, 24h)
+     * @param self::FORMAT_TIME_*|null $type The type of time format to use (12h, 24h)
      */
     public function getTimeFormat(?string $type = null): string
     {
         return match ($type) {
-            self::FORMAT_TIME_12H => 'hh:mm a',
+            self::FORMAT_TIME_12H => 'h:mm a',
             default => 'HH:mm',
         };
     }
@@ -512,12 +514,12 @@ class Mage_Core_Model_Locale
     /**
      * Retrieve ISO datetime format
      *
-     * @param   string $type
-     * @return  string
+     * @param self::FORMAT_TYPE_*|null $dateType The type of date format to use (full, long, medium, short)
+     * @param self::FORMAT_TIME_*|null $timeType The type of time format to use (12h, 24h)
      */
-    public function getDateTimeFormat($type)
+    public function getDateTimeFormat(?string $dateType = null, ?string $timeType = null): string
     {
-        return $this->getDateFormat($type) . ' ' . $this->getTimeFormat($type);
+        return $this->getDateFormat($dateType) . ' ' . $this->getTimeFormat($timeType);
     }
 
     /**
