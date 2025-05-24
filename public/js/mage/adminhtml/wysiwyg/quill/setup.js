@@ -114,6 +114,20 @@ class quillWysiwygSetup {
         // Set initial content
         if (textarea.value) {
             this.editor.root.innerHTML = textarea.value;
+        } else if (window.catalogWysiwygPendingContent && window.catalogWysiwygPendingContent.elementId === this.id) {
+            // Check for content passed from catalog wysiwyg dialog
+            this.editor.root.innerHTML = window.catalogWysiwygPendingContent.content;
+            delete window.catalogWysiwygPendingContent;
+        } else {
+            // Last resort: check if this is a dialog editor and try to find the source
+            const dialogEl = textarea.closest('dialog');
+            if (dialogEl && this.id.endsWith('_editor')) {
+                const sourceId = this.id.replace('_editor', '');
+                const sourceTextarea = document.getElementById(sourceId);
+                if (sourceTextarea && sourceTextarea.value) {
+                    this.editor.root.innerHTML = sourceTextarea.value;
+                }
+            }
         }
 
         // Listen for changes
