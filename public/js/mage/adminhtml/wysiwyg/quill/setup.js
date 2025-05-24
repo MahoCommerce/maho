@@ -277,8 +277,11 @@ class quillWysiwygSetup {
 
     updateTextArea() {
         if (this.editor) {
-            this.getTextArea().value = this.editor.root.innerHTML;
-            this.triggerChange(this.getTextArea());
+            const textarea = this.getTextArea();
+            if (textarea) {
+                textarea.value = this.editor.root.innerHTML;
+                this.triggerChange(textarea);
+            }
         }
     }
 
