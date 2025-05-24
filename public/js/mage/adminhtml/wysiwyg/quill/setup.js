@@ -44,20 +44,9 @@ class quillWysiwygSetup {
     }
 
     registerCustomButtons() {
-        // Register custom button icons
         const icons = Quill.import('ui/icons');
-        
-        // Widget icon - gear/cog shape
-        icons['widget'] = '<svg viewBox="0 0 18 18">' +
-            '<path class="ql-stroke" d="M9 15l-1.5-0.3c-0.1-0.5-0.3-0.9-0.6-1.2l-1.2 0.9c-0.4-0.3-0.8-0.6-1.1-1l0.8-1.2c-0.3-0.3-0.7-0.6-1.2-0.7L3.8 9.8c-0.1-0.3-0.1-0.5-0.1-0.8s0-0.5 0.1-0.8l1.4-0.3c0.1-0.5 0.3-0.9 0.6-1.2l-0.9-1.2c0.3-0.4 0.6-0.8 1-1.1l1.2 0.8c0.3-0.3 0.7-0.5 1.2-0.6L9 3c0.3-0.1 0.5-0.1 0.8-0.1s0.5 0 0.8 0.1l0.3 1.5c0.5 0.1 0.9 0.3 1.2 0.6l1.2-0.8c0.4 0.3 0.8 0.6 1.1 1l-0.8 1.2c0.3 0.3 0.5 0.7 0.6 1.2l1.5 0.3c0.1 0.3 0.1 0.5 0.1 0.8s0 0.5-0.1 0.8l-1.5 0.3c-0.1 0.5-0.3 0.9-0.6 1.2l0.8 1.2c-0.3 0.4-0.6 0.8-1 1.1l-1.2-0.8c-0.3 0.3-0.7 0.5-1.2 0.6L9.8 15c-0.3 0.1-0.5 0.1-0.8 0.1s-0.5 0-0.8-0.1z"/>' +
-            '<circle class="ql-fill" cx="9" cy="9" r="2.5"/>' +
-            '</svg>';
-        
-        // Variable icon - curly braces
-        icons['variable'] = '<svg viewBox="0 0 18 18">' +
-            '<path class="ql-stroke" d="M4 3v3c0 1-0.5 1.5-1.5 1.5v3c1 0 1.5 0.5 1.5 1.5v3c0 1 1 2 2 2h1v-2h-0.5c-0.5 0-0.5-0.5-0.5-1v-2.5c0-1-0.5-1.5-1.5-1.5v-1c1 0 1.5-0.5 1.5-1.5V4.5c0-0.5 0-1 0.5-1H7V1.5H6c-1 0-2 1-2 2z"/>' +
-            '<path class="ql-stroke" d="M14 3v3c0 1 0.5 1.5 1.5 1.5v3c-1 0-1.5 0.5-1.5 1.5v3c0 1-1 2-2 2h-1v-2h0.5c0.5 0 0.5-0.5 0.5-1v-2.5c0-1 0.5-1.5 1.5-1.5v-1c-1 0-1.5-0.5-1.5-1.5V4.5c0-0.5 0-1-0.5-1H11V1.5h1c1 0 2 1 2 2z"/>' +
-            '</svg>';
+        icons['widget'] = '<svg class="ql-stroke" xmlns="http://www.w3.org/2000/svg" width="18" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-name="packages" data-variant="outline"><path d="M7 16.5l-5 -3l5 -3l5 3v5.5l-5 3z"/><path d="M2 13.5v5.5l5 3"/><path d="M7 16.545l5 -3.03"/><path d="M17 16.5l-5 -3l5 -3l5 3v5.5l-5 3z"/><path d="M12 19l5 3"/><path d="M17 16.5l5 -3"/><path d="M12 13.5v-5.5l-5 -3l5 -3l5 3v5.5"/><path d="M7 5.03v5.455"/><path d="M12 8l5 -3"/></svg>';
+        icons['variable'] = '<svg class="ql-stroke" xmlns="http://www.w3.org/2000/svg" width="18" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-name="variable" data-variant="outline"><path d="M5 4c-2.5 5 -2.5 10 0 16m14 -16c2.5 5 2.5 10 0 16m-10 -11h1c1 0 1 1 2.016 3.527c.984 2.473 .984 3.473 1.984 3.473h1"/><path d="M8 16c1.5 0 3 -2 4 -3.5s2.5 -3.5 4 -3.5"/></svg>';
     }
 
     unbindEventListeners() {
@@ -155,16 +144,10 @@ class quillWysiwygSetup {
     getToolbarOptions() {
         const toolbar = [
             [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-            ['bold', 'italic', 'underline', 'strike'],
-            [{ 'color': [] }, { 'background': [] }],
-            [{ 'script': 'sub'}, { 'script': 'super' }],
+            ['bold', 'italic', 'underline', 'strike', 'blockquote'],
             [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-            [{ 'indent': '-1'}, { 'indent': '+1' }],
-            [{ 'direction': 'rtl' }],
             [{ 'align': [] }],
-            ['link', 'image', 'video'],
-            ['blockquote', 'code-block'],
-            ['clean']
+            ['link', 'image']
         ];
 
         // Add custom buttons if enabled
