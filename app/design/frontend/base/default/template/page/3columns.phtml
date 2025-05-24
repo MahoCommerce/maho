@@ -29,15 +29,15 @@
                 <div class="col-wrapper">
                     <?php // This left_first block will display above the main content on smaller viewports ?>
                     <?php if ($_leftContent = $this->getChildHtml('left_first')): ?>
-                        <div class="col-left sidebar col-left-first"><?= $_leftContent;   ?></div>
+                        <aside class="col-left sidebar col-left-first" aria-label="<?= $this->__('Primary sidebar') ?>"><?= $_leftContent;   ?></aside>
                     <?php endif ?>
-                    <div class="col-main" id="main-content">
+                    <main class="col-main" id="main-content" role="main">
                         <?= $this->getChildHtml('global_messages') ?>
                         <?= $this->getChildHtml('content') ?>
-                    </div>
-                    <div class="col-left sidebar"><?= $this->getChildHtml('left') ?></div>
+                    </main>
+                    <aside class="col-left sidebar" aria-label="<?= $this->__('Left sidebar') ?>"><?= $this->getChildHtml('left') ?></aside>
                 </div>
-                <div class="col-right sidebar"><?= $this->getChildHtml('right') ?></div>
+                <aside class="col-right sidebar" aria-label="<?= $this->__('Right sidebar') ?>"><?= $this->getChildHtml('right') ?></aside>
             </div>
         </div>
         <?= $this->getChildHtml('footer_before') ?>

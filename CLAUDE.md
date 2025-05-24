@@ -16,6 +16,9 @@ PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix                     # Fix 
 
 # Static Analysis (PHPStan level 6)
 vendor/bin/phpstan analyze    # Run static analysis
+
+# Generate PHPStorm metadata
+./maho phpstorm:metadata:generate
 ```
 
 ### Cache Management
@@ -114,6 +117,7 @@ Observers are configured in module's `config.xml`.
 - When you write Javascript, never use prototypejs or jquery, only vanilla's
 - If you're integrating new tools/libraries, always use their latest available version
 - Update headers of the PHP files, adding the current year for the copyright Maho line
+- Before committing, ensure all translatable strings (`$this->__()` or `Mage::helper()->__()`) are present in the corresponding CSV files in `app/locale/en_US/`
 
 ### Adding New Features
 - If you've to create a new module, use the `app/code/core/Maho/` namespace 
