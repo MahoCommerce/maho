@@ -46,14 +46,14 @@
                     <p class="required"><?= $this->__('* Required Fields') ?></p>
                     <ul class="form-list">
                         <li>
-                            <label for="email" class="required" aria-label="<?= $this->__('required') ?>"><?= $this->__('Email Address') ?></label>
+                            <label for="email" class="required" aria-label="<?= $this->__('Required') ?>"><?= $this->__('Email Address') ?></label>
                             <div class="input-box">
-                                <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="login[username]" value="<?= $this->escapeHtml($this->getUsername()) ?>" id="email" class="input-text required-entry validate-email" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" aria-required="true" aria-describedby="email-error" />
+                                <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="login[username]" value="<?= $this->escapeHtml($this->getUsername()) ?>" id="email" class="input-text required-entry validate-email" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" aria-required="true" />
                             </div>
                         </li>
                         <li>
                             <?php $minPasswordLength = $this->getMinPasswordLength(); ?>
-                            <label for="pass" class="required" aria-label="<?= $this->__('required') ?>"><?= $this->__('Password') ?></label>
+                            <label for="pass" class="required" aria-label="<?= $this->__('Required') ?>"><?= $this->__('Password') ?></label>
                             <div class="input-box">
                                 <input type="password" name="login[password]" class="input-text required-entry validate-password min-pass-length-<?= $minPasswordLength ?>" id="pass" title="<?= $this->quoteEscape($this->__('Password')) ?>" autocomplete="off" aria-required="true" />
                             </div>
