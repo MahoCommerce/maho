@@ -186,6 +186,11 @@ class Mediabrowser {
             if (targetEl.tagName && targetEl.tagName === 'TEXTAREA') {
                 params.set('as_is', 1);
             }
+            
+            // For Quill editors, we also need the directive syntax
+            if (typeof quillEditors !== 'undefined' && quillEditors.has(this.targetElementId)) {
+                params.set('as_is', 1);
+            }
 
             const text = await mahoFetch(this.onInsertUrl, {
                 method: 'POST',
@@ -201,7 +206,7 @@ class Mediabrowser {
                 targetEl.value = text;
             } else if (targetEl.tagName === 'TEXTAREA') {
                 updateElementAtCursor(targetEl, text);
-            } else {
+            } else if (typeof targetEl === 'function') {
                 targetEl(text);
             }
 

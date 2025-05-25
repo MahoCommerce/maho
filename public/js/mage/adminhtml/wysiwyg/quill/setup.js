@@ -13,6 +13,7 @@ class quillWysiwygSetup {
     mediaBrowserValue = null;
     directiveMap = new Map();
     directiveCounter = 0;
+    lastCursorPosition = null;
 
     constructor() {
         this.initialize(...arguments);
@@ -146,6 +147,13 @@ class quillWysiwygSetup {
                 this.onChangeContent();
             }
         });
+        
+        // Save cursor position when selection changes
+        this.editor.on('selection-change', (range, oldRange, source) => {
+            if (range) {
+                this.lastCursorPosition = range;
+            }
+        });
 
         // Add titles to custom buttons
         const toolbar = this.editor.getModule('toolbar');
@@ -179,12 +187,24 @@ class quillWysiwygSetup {
             const savedRange = this.editor.getSelection();
             
             varienGlobalEvents.fireEvent("open_browser_callback", { 
-                callback: (url) => {
-                    // Use the saved range or default to current position
-                    const range = savedRange || this.editor.getSelection() || { index: this.editor.getLength() - 1 };
-                    this.editor.focus();
-                    this.editor.insertEmbed(range.index, 'image', url);
-                    this.editor.setSelection(range.index + 1);
+                callback: (content) => {
+                    try {
+                        // Use the saved range or default to current position
+                        const range = savedRange || this.editor.getSelection() || { index: this.editor.getLength() - 1 };
+                        this.editor.focus();
+                        
+                        // If content is HTML (contains img tag), insert it as HTML
+                        if (content.includes('<img')) {
+                            this.insertContent(content);
+                        } else {
+                            // Otherwise insert as embed (for backwards compatibility)
+                            this.editor.insertEmbed(range.index, 'image', content);
+                            this.editor.setSelection(range.index + 1);
+                        }
+                    } catch (error) {
+                        console.error('Error inserting image:', error);
+                        alert('Error inserting image: ' + error.message);
+                    }
                 },
                 value: '',
                 meta: { filetype: 'image' }
@@ -349,14 +369,30 @@ class quillWysiwygSetup {
 
 
     getMediaBrowserCallback() {
+        // If no callback is set, create a default one that inserts content
+        if (!this.mediaBrowserCallback) {
+            this.mediaBrowserCallback = (content) => {
+                try {
+                    this.insertContent(content);
+                } catch (error) {
+                    console.error('Error inserting content from media browser:', error);
+                    alert('Error inserting content: ' + error.message);
+                }
+            };
+        }
         return this.mediaBrowserCallback;
     }
 
     // Method to insert content at cursor position (for widgets/variables)
     insertContent(content) {
         if (this.editor) {
-            const range = this.editor.getSelection(true);
-            const index = range ? range.index : this.editor.getLength() - 1;
+            // Try to get current selection, or use last saved position, or default to current position
+            let range = this.editor.getSelection(true) || this.lastCursorPosition;
+            if (!range) {
+                // If no range, default to the current length (end of document)
+                range = { index: this.editor.getLength() - 1, length: 0 };
+            }
+            const index = range.index;
             
             // Focus the editor first
             this.editor.focus();
@@ -366,16 +402,26 @@ class quillWysiwygSetup {
                 // Encode directives in the content to be inserted
                 const encodedContent = this.encodeDirectives(content);
                 
-                // In Quill 2.0, we use clipboard.convert and updateContents
-                const delta = this.editor.clipboard.convert({ html: encodedContent });
                 // Delete any selected content first
-                if (range && range.length > 0) {
-                    this.editor.deleteText(range.index, range.length);
+                if (range.length > 0) {
+                    this.editor.deleteText(index, range.length, 'user');
                 }
-                // Insert the new content at the cursor position
-                this.editor.updateContents(delta.compose(new Delta().retain(index)), 'user');
+                
+                // Convert HTML to Delta and insert at the current position
+                const delta = this.editor.clipboard.convert({ html: encodedContent });
+                
+                // Insert the delta at the current index
+                this.editor.updateContents(delta.ops ? 
+                    { ops: [{ retain: index }, ...delta.ops] } : 
+                    delta, 'user');
+                
+                // Calculate new cursor position (approximate)
+                const insertedLength = delta.ops ? delta.ops.reduce((len, op) => {
+                    return len + (op.insert ? (typeof op.insert === 'string' ? op.insert.length : 1) : 0);
+                }, 0) : 1;
+                
                 // Set cursor after inserted content
-                this.editor.setSelection(index + delta.length() - 1);
+                this.editor.setSelection(index + insertedLength, 0, 'user');
             } else {
                 // For plain text (variables), check if it's a directive
                 const encodedContent = this.encodeDirectives(content);
