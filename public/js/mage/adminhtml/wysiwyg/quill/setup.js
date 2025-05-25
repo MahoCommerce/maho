@@ -166,12 +166,16 @@ class quillWysiwygSetup {
 
     imageHandler() {
         if (this.config.files_browser_window_url) {
+            // Store the current selection before opening the dialog
+            const savedRange = this.editor.getSelection();
+            
             varienGlobalEvents.fireEvent("open_browser_callback", { 
                 callback: (url) => {
-                    const range = this.editor.getSelection();
-                    if (range) {
-                        this.editor.insertEmbed(range.index, 'image', url);
-                    }
+                    // Use the saved range or default to current position
+                    const range = savedRange || this.editor.getSelection() || { index: this.editor.getLength() - 1 };
+                    this.editor.focus();
+                    this.editor.insertEmbed(range.index, 'image', url);
+                    this.editor.setSelection(range.index + 1);
                 },
                 value: '',
                 meta: { filetype: 'image' }
