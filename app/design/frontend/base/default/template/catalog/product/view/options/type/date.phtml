@@ -14,7 +14,7 @@ $option = $this->getOption();
 $optionId = $option->getId();
 ?>
 <dt>
-    <label<?= $option->getIsRequired() ? ' class="required"' : '' ?>><?=  $this->escapeHtml($option->getTitle()) ?></label>
+    <label<?= $option->getIsRequired() ? ' class="required"' : '' ?> for="option_<?= $optionId ?>"><?=  $this->escapeHtml($option->getTitle()) ?></label>
     <?= $this->getFormatedPrice() ?>
 </dt>
 <dd>

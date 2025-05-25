@@ -33,18 +33,19 @@
         <?php if( $this->getRating() && $this->getRating()->getSize()): ?>
             <h3><?= $this->__('Product Rating:') ?></h3>
             <table class="ratings-table">
-            <?php foreach ($this->getRating() as $_rating): ?>
-                <?php if($_rating->getPercent()): ?>
-                    <tr>
-                        <th><?= $this->__($this->escapeHtml($_rating->getRatingCode())) ?></th>
-                        <td>
-                            <div class="rating-box">
-                                <div class="rating" style="width:<?= ceil($_rating->getPercent()) ?>%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                <?php endif ?>
-            <?php endforeach ?>
+                <caption><?= $this->__('Rating:') ?></caption>
+                <?php foreach ($this->getRating() as $_rating): ?>
+                    <?php if($_rating->getPercent()): ?>
+                        <tr>
+                            <th><?= $this->__($this->escapeHtml($_rating->getRatingCode())) ?></th>
+                            <td>
+                                <div class="rating-box">
+                                    <div class="rating" style="width:<?= ceil($_rating->getPercent()) ?>%;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endif ?>
+                <?php endforeach ?>
             </table>
             </dl>
         <?php endif ?>

@@ -17,7 +17,7 @@ $_helper = $this->helper('catalog/output');
 $catalogImageHelper = $this->helper('catalog/image');
 $mainImage = $this->helper('catalog/image')->init($_product, 'image');
 ?>
-    <div class="product-image product-image-zoom">
+    <div class="product-image product-image-zoom" role="region" aria-label="<?= $this->__('Product Images') ?>">
         <div class="product-image-gallery">
             <img id="image-main"
                 class="gallery-image visible"
@@ -31,22 +31,23 @@ $mainImage = $this->helper('catalog/image')->init($_product, 'image');
                     <img id="image-<?= $i ?>"
                          class="gallery-image" loading="lazy"
                          src="<?= $this->getGalleryImageUrl($_image) ?>"
-                         data-zoom-image="<?=  $this->getGalleryImageUrl($_image) ?>" />
+                         data-zoom-image="<?=  $this->getGalleryImageUrl($_image) ?>"
+                         alt="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Image') . ' ' . ($i+1)) ?>" />
                 <?php endif ?>
                 <?php $i++; endforeach; ?>
         </div>
     </div>
 
 <?php if (count($this->getGalleryImages()) > 0): ?>
-    <div class="more-views">
+    <div class="more-views" role="region" aria-label="<?= $this->__('Additional Views') ?>">
         <ul class="product-image-thumbs">
             <?php $i=0; foreach ($this->getGalleryImages() as $_image): ?>
                 <?php if ($this->isGalleryImageVisible($_image)): ?>
                     <li>
-                        <a class="thumb-link" href="#" title="<?= $this->escapeHtml($_image->getLabel() ?: $this->__('Image') . ' ' . ($i+1)) ?>" data-image-index="<?= $i ?>">
+                        <a class="thumb-link" href="#" title="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Thumbnail') . ' ' . ($i+1)) ?>" data-image-index="<?= $i ?>" role="button" aria-label="<?= $this->__('View image %s', $i+1) ?>">
                             <img src="<?= $this->helper('catalog/image')->init($this->getProduct(), 'thumbnail', $_image->getFile())->resize(75) ?>"
                                  srcset="<?= $this->helper('catalog/image')->init($this->getProduct(), 'thumbnail', $_image->getFile())->resize(150) ?> 2x"
-                                 width="75" height="75" alt="<?= $this->escapeHtml($_image->getLabel()) ?>" />
+                                 width="75" height="75" alt="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Thumbnail') . ' ' . ($i+1)) ?>" />
                         </a>
                     </li>
                 <?php endif ?>

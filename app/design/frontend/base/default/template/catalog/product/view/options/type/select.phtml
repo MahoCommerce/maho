@@ -11,9 +11,10 @@
 
 /** @var Mage_Catalog_Block_Product_View_Options_Type_Select $this */
 $option = $this->getOption();
+$optionId = $option->getId();
 ?>
 <dt>
-    <label<?= $option->getIsRequired() ? ' class="required"' : '' ?>><?=  $this->escapeHtml($option->getTitle()) ?></label>
+    <label<?= $option->getIsRequired() ? ' class="required"' : '' ?> for="select_<?= $optionId ?>"><?=  $this->escapeHtml($option->getTitle()) ?></label>
 </dt>
 <dd>
     <div class="input-box">

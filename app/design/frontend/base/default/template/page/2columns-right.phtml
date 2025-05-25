@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -17,6 +17,7 @@
 <?= $this->getChildHtml('head') ?>
 </head>
 <body<?= $this->getBodyClass()?' class="'.$this->getBodyClass().'"':'' ?>>
+<a href="#main-content" id="skip-to-main-content"><?= $this->__('Skip to main content') ?></a>
 <?= $this->getChildHtml('after_body_start') ?>
 <div class="wrapper">
     <?= $this->getChildHtml('global_notices') ?>
@@ -25,11 +26,11 @@
         <div class="main-container col2-right-layout">
             <div class="main">
                 <?= $this->getChildHtml('breadcrumbs') ?>
-                <div class="col-main">
+                <main class="col-main" id="main-content" role="main">
                     <?= $this->getChildHtml('global_messages') ?>
                     <?= $this->getChildHtml('content') ?>
-                </div>
-                <div class="col-right sidebar"><?= $this->getChildHtml('right') ?></div>
+                </main>
+                <aside class="col-right sidebar" aria-label="<?= $this->__('Right sidebar') ?>"><?= $this->getChildHtml('right') ?></aside>
             </div>
         </div>
         <?= $this->getChildHtml('footer_before') ?>

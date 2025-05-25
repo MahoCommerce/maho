@@ -130,11 +130,33 @@ q:after {
   content: '';
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ============================================ *
  * Base Styles
  * ============================================ */
 a, button {
   touch-action: manipulation;
+}
+
+a,
+button,
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+.button,
+.btn {
+  min-height: 24px;
+  min-width: 24px;
 }
 
 body,
@@ -159,9 +181,14 @@ a:hover {
   text-decoration: underline;
 }
 
-a:focus {
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+[tabindex]:focus {
   outline-color: var(--maho-color-primary-hover);
-  color: var(--maho-color-primary-dark);
+  outline-offset: 2px;
 }
 
 ol,
@@ -169,6 +196,23 @@ ul {
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+.visually-hidden {
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  &:not(caption) {
+    position: absolute !important;
+  }
+  * {
+    overflow: hidden !important;
+  }
 }
 
 /* ============================================ *
@@ -312,12 +356,12 @@ h6, .h6 {
 }
 .block-title h2,
 .block-title h3,
-.block-title strong {
+.block-title strong,
+.block-title {
   margin: 0;
   margin-bottom: 10px;
   color: var(--maho-color-text-primary);
   font-size: 0.875rem;
-  font-weight: bold;
   font-style: normal;
   line-height: 1.4;
   text-rendering: optimizeSpeed;
@@ -325,7 +369,7 @@ h6, .h6 {
   color: var(--maho-color-primary);
   margin-bottom: 0;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: normal;
 }
 .block-title small {
   font-size: 100%;
@@ -751,15 +795,21 @@ a.button:hover {
   margin: -15px 0 15px;
 }
 
-.breadcrumbs li {
-  float: left;
+.breadcrumbs a {
+  color: var(--maho-color-text-primary);
+}
+
+.breadcrumbs ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   font-size: 0.75rem;
   text-transform: uppercase;
 }
 
-.breadcrumbs a {
-  float: left;
-  color: var(--maho-color-text-primary);
+.breadcrumbs li:not(:last-child):after {
+  content: "›";
+  margin: 0 0.5rem;
 }
 
 .breadcrumbs a:hover {
@@ -769,11 +819,6 @@ a.button:hover {
 .breadcrumbs strong {
   color: var(--maho-color-text-primary);
   font-weight: normal;
-}
-
-.breadcrumbs span {
-  float: left;
-  padding: 0 7px;
 }
 
 @media only screen and (max-width: 770px) {
@@ -2651,6 +2696,23 @@ body {
  * Skip - Link
  */
 
+#skip-to-main-content {
+  position: absolute;
+  top: -40rem;
+  left: 0.5rem;
+  z-index: 999999;
+  color: var(--maho-color-background);
+  background: var(--maho-color-primary);
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: var(--maho-border-radius);
+  transition: top 0.2s;
+}
+
+#skip-to-main-content:focus {
+  top: 0.5rem;
+}
+
 .skip-nav {
   color: var(--maho-color-text-primary);
 }
@@ -3183,9 +3245,6 @@ body {
 .footer .block-title {
   border-bottom: 0;
   padding: 3px 0;
-}
-.footer .block-title strong {
-  font-weight: normal;
 }
 .footer .block-title,
 .footer address {
@@ -4460,6 +4519,7 @@ body:not(.catalog-product-view) .add-to-links a {
   border: 1px solid var(--maho-color-border-dark);
   border-collapse: collapse;
 }
+#product-attribute-specs-table caption {display: none}
 #product-attribute-specs-table th {
   border-right: 1px solid var(--maho-color-border-dark);
   border-bottom: 1px solid var(--maho-color-border-dark);
@@ -6100,6 +6160,7 @@ div.paypal-logo span > img {
   font-size: 0.75rem;
   text-transform: uppercase;
 }
+.ratings-table caption {display: none}
 .ratings-table th {
   padding-right: 10px;
 }

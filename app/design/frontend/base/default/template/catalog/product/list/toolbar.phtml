@@ -8,21 +8,16 @@
  * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
-/**
- * Product list toolbar
- *
- * @var Mage_Catalog_Block_Product_List_Toolbar $this
- */
+
+/** @var Mage_Catalog_Block_Product_List_Toolbar $this */
 ?>
 <?php if($this->getCollection()->getSize()): ?>
 <div class="toolbar">
     <?php if( $this->isExpanded() ): ?>
         <div class="sorter">
             <div class="sort-by">
-                <label><?= $this->__('Sort By') ?></label>
-                <select onchange="window.location.href=this.value" title="<?= $this->quoteEscape($this->__('Sort By')) ?>">
+                <label for="toolbar-sortby"><?= $this->__('Sort By') ?></label>
+                <select id="toolbar-sortby" onchange="window.location.href=this.value" title="<?= $this->quoteEscape($this->__('Sort By')) ?>">
                     <?php foreach($this->getAvailableOrders() as $_key => $_order): ?>
                         <option value="<?= $this->getOrderUrl($_key, 'asc') ?>"<?php if($this->isOrderCurrent($_key)): ?> selected="selected"<?php endif ?>>
                             <?= $this->__($_order) ?>

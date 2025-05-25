@@ -29,7 +29,7 @@
     <?= $this->getChildHtml('form_before') ?>
     <form action="<?= $this->getFormActionUrl() ?>" method="post">
         <?= $this->getBlockHtml('formkey') ?>
-        <table id="shopping-cart-table" class="cart-table data-table">
+        <table id="shopping-cart-table" class="cart-table data-table" role="table" aria-label="<?= $this->__('Shopping cart items') ?>">
             <col width="1" />
             <col width="999" />
             <col width="1" />
@@ -44,22 +44,22 @@
         <?php $mergedCells = ($this->helper('tax')->displayCartBothPrices() ? 2 : 1); ?>
             <thead>
                 <tr>
-                    <th rowspan="<?= $mergedCells ?>"><span class="nobr"><?= $this->__('Product') ?></span></th>
+                    <th rowspan="<?= $mergedCells ?>" scope="col"><span class="nobr"><?= $this->__('Product') ?></span></th>
 
                     <th rowspan="<?= $mergedCells ?>">&nbsp;</th>
 
-                    <th class="a-center cart-price-head" colspan="<?= $mergedCells ?>">
+                    <th class="a-center cart-price-head" colspan="<?= $mergedCells ?>" scope="colgroup">
                         <span class="nobr"><?= $this->__('Price') ?></span>
                     </th>
 
-                    <th rowspan="<?= $mergedCells ?>" class="a-center">
+                    <th rowspan="<?= $mergedCells ?>" class="a-center" scope="col">
                         <?= $this->__('Qty') ?>
                         <?php /* if ($this->helper('wishlist')->isAllowInCart()) : ?>
                             <span class="nobr"><?= $this->__('Move to Wishlist') ?></span>
                         <?php endif */ ?>
                     </th>
 
-                    <th class="a-center cart-total-head" colspan="<?= $mergedCells ?>">
+                    <th class="a-center cart-total-head" colspan="<?= $mergedCells ?>" scope="colgroup">
                         <?= $this->__('Subtotal') ?>
                     </th>
 
