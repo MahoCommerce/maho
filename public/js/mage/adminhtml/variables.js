@@ -124,8 +124,22 @@ const OpenmagevariablePlugin = {
 
     insertVariable(value) {
         if (this.textareaId) {
-            Variables.init(this.textareaId);
-            Variables.insertVariable(value);
+            Variables.closeDialogWindow();
+            
+            // Check if we have a QuillJS editor
+            if (typeof quillEditors !== 'undefined' && quillEditors.has(this.textareaId)) {
+                const quillEditor = quillEditors.get(this.textareaId);
+                if (quillEditor && quillEditor.editor) {
+                    quillEditor.insertContent(value);
+                    return;
+                }
+            }
+            
+            // Fallback to textarea
+            const textareaElm = document.getElementById(this.textareaId);
+            if (textareaElm) {
+                updateElementAtCursor(textareaElm, value);
+            }
         } else {
             Variables.closeDialogWindow();
             

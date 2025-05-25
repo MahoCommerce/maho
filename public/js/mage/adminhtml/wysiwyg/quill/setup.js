@@ -175,6 +175,8 @@ class quillWysiwygSetup {
 
     variableHandler() {
         if (this.config.variable_window_url) {
+            // Store cursor position before opening dialog
+            this.lastRange = this.editor.getSelection();
             const url = this.config.variable_window_url + 'variable_target_id/' + this.id + '/';
             OpenmagevariablePlugin.loadChooser(url, this.id);
         }
@@ -375,7 +377,8 @@ class quillWysiwygSetup {
     // Method to insert content at cursor position (for widgets/variables)
     insertContent(content) {
         if (this.editor) {
-            const range = this.editor.getSelection();
+            // Use saved range if current selection is lost
+            const range = this.editor.getSelection() || this.lastRange;
             if (range) {
                 // If it's HTML content, insert as HTML
                 if (content.includes('<') && content.includes('>')) {
@@ -387,6 +390,8 @@ class quillWysiwygSetup {
                     this.editor.setSelection(newLength - 1);
                 } else {
                     this.editor.insertText(range.index, content);
+                    // Set cursor after inserted content
+                    this.editor.setSelection(range.index + content.length);
                 }
             }
         }
