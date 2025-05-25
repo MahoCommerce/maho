@@ -11,6 +11,8 @@ class quillWysiwygSetup {
     mediaBrowserCallback = null;
     mediaBrowserMetal = null;
     mediaBrowserValue = null;
+    directiveMap = new Map();
+    directiveCounter = 0;
 
     constructor() {
         this.initialize(...arguments);
@@ -112,11 +114,12 @@ class quillWysiwygSetup {
         });
 
         // Set initial content
+        let initialContent = '';
         if (textarea.value) {
-            this.editor.root.innerHTML = textarea.value;
+            initialContent = textarea.value;
         } else if (window.catalogWysiwygPendingContent && window.catalogWysiwygPendingContent.elementId === this.id) {
             // Check for content passed from catalog wysiwyg dialog
-            this.editor.root.innerHTML = window.catalogWysiwygPendingContent.content;
+            initialContent = window.catalogWysiwygPendingContent.content;
             delete window.catalogWysiwygPendingContent;
         } else {
             // Last resort: check if this is a dialog editor and try to find the source
@@ -125,9 +128,15 @@ class quillWysiwygSetup {
                 const sourceId = this.id.replace('_editor', '');
                 const sourceTextarea = document.getElementById(sourceId);
                 if (sourceTextarea && sourceTextarea.value) {
-                    this.editor.root.innerHTML = sourceTextarea.value;
+                    initialContent = sourceTextarea.value;
                 }
             }
+        }
+        
+        if (initialContent) {
+            // Encode directives before setting content
+            const encodedContent = this.encodeDirectives(initialContent);
+            this.editor.root.innerHTML = encodedContent;
         }
 
         // Listen for changes
@@ -244,6 +253,10 @@ class quillWysiwygSetup {
     }
 
     turnOn() {
+        // Clear directive map when turning on editor
+        this.directiveMap.clear();
+        this.directiveCounter = 0;
+        
         this.setup();
         this.getPluginButtons().forEach((el) => el.classList.add('no-display'));
     }
@@ -283,7 +296,10 @@ class quillWysiwygSetup {
         if (this.editor) {
             const textarea = this.getTextArea();
             if (textarea) {
-                textarea.value = this.editor.root.innerHTML;
+                // Get content and decode directives
+                let content = this.editor.root.innerHTML;
+                content = this.decodeDirectives(content);
+                textarea.value = content;
                 this.triggerChange(textarea);
             }
         }
@@ -304,6 +320,33 @@ class quillWysiwygSetup {
         return result;
     }
 
+    /**
+     * Encode directives to protect them from HTML parsing
+     */
+    encodeDirectives(content) {
+        // Reset the directive map for this encoding session
+        this.directiveMap.clear();
+        this.directiveCounter = 0;
+        
+        // Match all Maho directives {{...}}
+        return content.replace(/\{\{([^}]+)\}\}/g, (match) => {
+            const placeholder = `__MAHO_DIRECTIVE_${this.directiveCounter}__`;
+            this.directiveMap.set(placeholder, match);
+            this.directiveCounter++;
+            return placeholder;
+        });
+    }
+
+    /**
+     * Decode directives back to their original form
+     */
+    decodeDirectives(content) {
+        this.directiveMap.forEach((directive, placeholder) => {
+            content = content.replace(new RegExp(placeholder, 'g'), directive);
+        });
+        return content;
+    }
+
 
     getMediaBrowserCallback() {
         return this.mediaBrowserCallback;
@@ -320,8 +363,11 @@ class quillWysiwygSetup {
             
             // If it's HTML content, insert as HTML
             if (content.includes('<') && content.includes('>')) {
+                // Encode directives in the content to be inserted
+                const encodedContent = this.encodeDirectives(content);
+                
                 // In Quill 2.0, we use clipboard.convert and updateContents
-                const delta = this.editor.clipboard.convert({ html: content });
+                const delta = this.editor.clipboard.convert({ html: encodedContent });
                 // Delete any selected content first
                 if (range && range.length > 0) {
                     this.editor.deleteText(range.index, range.length);
@@ -331,13 +377,15 @@ class quillWysiwygSetup {
                 // Set cursor after inserted content
                 this.editor.setSelection(index + delta.length() - 1);
             } else {
-                // For plain text (variables), insert at cursor position
+                // For plain text (variables), check if it's a directive
+                const encodedContent = this.encodeDirectives(content);
+                
                 if (range && range.length > 0) {
                     this.editor.deleteText(range.index, range.length);
                 }
-                this.editor.insertText(index, content, 'user');
+                this.editor.insertText(index, encodedContent, 'user');
                 // Move cursor after inserted text
-                this.editor.setSelection(index + content.length);
+                this.editor.setSelection(index + encodedContent.length);
             }
         }
     }
