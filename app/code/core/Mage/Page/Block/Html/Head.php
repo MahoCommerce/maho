@@ -15,7 +15,7 @@
  * @method $this setDescription(string $value)
  * @method $this setKeywords(string $value)
  * @method $this setCanLoadWysiwyg(bool $value)
- * @method $this getCanLoadWysiwyg()
+ * @method bool getCanLoadWysiwyg()
  */
 class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
 {

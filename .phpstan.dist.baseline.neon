@@ -30840,11 +30840,6 @@ parameters:
 			count: 4
 			path: app/design/adminhtml/default/default/template/tax/toolbar/rule/save.phtml
 
-		-
-			message: '#^Variable \$element might not be defined\.$#'
-			identifier: variable.undefined
-			count: 62
-			path: app/design/adminhtml/default/default/template/widget/form/element.phtml
 
 		-
 			message: '#^Variable \$formBlock might not be defined\.$#'
