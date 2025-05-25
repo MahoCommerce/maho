@@ -380,25 +380,15 @@ class quillWysiwygSetup {
             // Use saved range if current selection is lost
             const range = this.editor.getSelection() || this.lastRange;
             if (range) {
-                // Check if this is a widget being inserted
-                const isWidget = content.includes('{{widget') && content.includes('}}');
-                
-                if (isWidget) {
-                    // For widgets, encode them first to get the proper placeholder
-                    const encodedContent = this.encodeWidgets(content);
-                    // Insert the encoded widget HTML
-                    this.editor.clipboard.dangerouslyPasteHTML(range.index, encodedContent);
-                    // Update the text area to ensure consistency
-                    this.updateTextArea();
-                } else if (content.includes('<') && content.includes('>')) {
-                    // For other HTML content, use the standard approach
+                // If it's HTML content, insert as HTML
+                if (content.includes('<') && content.includes('>')) {
+                    // In Quill 2.0, we use clipboard.convert and updateContents
                     const delta = this.editor.clipboard.convert({ html: content });
                     this.editor.updateContents(delta.ops, 'user');
                     // Set cursor after inserted content
                     const newLength = this.editor.getLength();
                     this.editor.setSelection(newLength - 1);
                 } else {
-                    // For plain text
                     this.editor.insertText(range.index, content);
                     // Set cursor after inserted content
                     this.editor.setSelection(range.index + content.length);
