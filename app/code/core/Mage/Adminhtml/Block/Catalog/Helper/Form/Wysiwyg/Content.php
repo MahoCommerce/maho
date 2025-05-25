@@ -25,8 +25,8 @@ class Mage_Adminhtml_Block_Catalog_Helper_Form_Wysiwyg_Content extends Mage_Admi
 
         $config['document_base_url']     = $this->getData('store_media_url');
         $config['store_id']              = $this->getData('store_id');
-        $config['add_variables']         = false;
-        $config['add_widgets']           = false;
+        $config['add_variables']         = true;
+        $config['add_widgets']           = true;
         $config['add_directives']        = true;
         $config['use_container']         = true;
         $config['container_class']       = 'hor-scroll';
