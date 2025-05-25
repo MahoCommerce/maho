@@ -39,7 +39,30 @@ const catalogWysiwygEditor = {
             firedElementId: elementId,
         });
 
-        document.getElementById(`${elementId}_editor`).value = document.getElementById(elementId).value;
+        // Get the content from the original textarea
+        const originalContent = document.getElementById(elementId).value;
+        
+        // Set initial content in the textarea that will be used by Quill
+        const editorTextarea = document.getElementById(`${elementId}_editor`);
+        if (editorTextarea) {
+            editorTextarea.value = originalContent;
+        }
+        
+        // Wait for Quill editor to be initialized and then set content
+        const checkAndSetContent = () => {
+            const wysiwygObj = window[`wysiwyg${elementId}_editor`];
+            if (wysiwygObj && wysiwygObj.editor) {
+                // Quill is initialized, set the content
+                const encodedContent = wysiwygObj.encodeContent(originalContent);
+                wysiwygObj.editor.root.innerHTML = encodedContent;
+            } else {
+                // Quill not yet initialized, check again
+                setTimeout(checkAndSetContent, 50);
+            }
+        };
+        
+        // Start checking after a small delay to allow DOM to update
+        setTimeout(checkAndSetContent, 50);
     },
 
     okDialogWindow(dialogWindow) {
