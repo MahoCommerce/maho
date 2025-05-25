@@ -14,8 +14,8 @@
  * @method $this setCanLoadCalendarJs(bool $value)
  * @method $this setDescription(string $value)
  * @method $this setKeywords(string $value)
- * @method $this setCanLoadTinyMce(bool $value)
  * @method $this setCanLoadWysiwyg(bool $value)
+ * @method $this getCanLoadWysiwyg()
  */
 class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
 {
@@ -560,5 +560,15 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
         if (isset($newItems[$newKey])) {
             $this->_data['items'] = $newItems;
         }
+    }
+
+    public function setCanLoadTinyMce(bool $value): self
+    {
+        return $this->setCanLoadWysiwyg($value);
+    }
+
+    public function getCanLoadTinyMce(): bool
+    {
+        return $this->getCanLoadWysiwyg();
     }
 }

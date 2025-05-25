@@ -34,7 +34,6 @@ class Mage_Adminhtml_Block_Newsletter_Template_Edit extends Mage_Adminhtml_Block
     {
         // Load Wysiwyg on demand and Prepare layout
         if (Mage::getSingleton('cms/wysiwyg_config')->isEnabled() && ($block = $this->getLayout()->getBlock('head'))) {
-            $block->setCanLoadTinyMce(true);
             $block->setCanLoadWysiwyg(true);
         }
 

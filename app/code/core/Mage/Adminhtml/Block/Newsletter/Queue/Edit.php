@@ -67,7 +67,6 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit extends Mage_Adminhtml_Block_Te
     {
         // Load Wysiwyg on demand and Prepare layout
         if (Mage::getSingleton('cms/wysiwyg_config')->isEnabled()) {
-            $this->getLayout()->getBlock('head')->setCanLoadTinyMce(true);
             $this->getLayout()->getBlock('head')->setCanLoadWysiwyg(true);
         }
 
