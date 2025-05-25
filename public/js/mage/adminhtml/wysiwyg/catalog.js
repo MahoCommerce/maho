@@ -101,6 +101,8 @@ const catalogWysiwygEditor = {
 
         // destroy the instance of editor
         const wysiwygObj = window[`wysiwyg${elementId}_editor`];
-        wysiwygObj.destroy();
+        if (wysiwygObj && typeof wysiwygObj.destroy === 'function') {
+            wysiwygObj.destroy();
+        }
     }
 };
