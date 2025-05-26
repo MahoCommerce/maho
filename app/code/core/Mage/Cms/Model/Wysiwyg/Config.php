@@ -39,7 +39,7 @@ class Mage_Cms_Model_Wysiwyg_Config extends Varien_Object
     /**
      * Path to skin image placeholder file
      */
-    public const WYSIWYG_SKIN_IMAGE_PLACEHOLDER_FILE = 'images/wysiwyg/skin_image.png';
+    public const WYSIWYG_SKIN_IMAGE_PLACEHOLDER_FILE = 'images/wysiwyg/placeholder-image.svg';
 
 
     /**
