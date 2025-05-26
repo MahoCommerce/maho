@@ -65,10 +65,6 @@ WysiwygWidget.Widget = class {
         this.optionsUrl = optionsSourceUrl;
         this.optionValues = new Map();
         this.widgetTargetId = widgetTargetId;
-
-        if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor) {
-            this.bMark = tinyMCE.activeEditor.selection.getBookmark();
-        }
         
         // Store cursor position for QuillJS
         if (typeof quillEditors !== 'undefined' && quillEditors.has(this.widgetTargetId)) {
