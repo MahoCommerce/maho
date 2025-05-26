@@ -155,11 +155,6 @@ const OpenmagevariablePlugin = {
                     }
                 }
             }
-            
-            // Fall back to TinyMCE if available
-            if (this.editor && this.editor.execCommand) {
-                this.editor.execCommand('mceInsertContent', false, value);
-            }
         }
     },
 };
