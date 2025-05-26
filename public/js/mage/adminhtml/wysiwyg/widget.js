@@ -79,7 +79,6 @@ WysiwygWidget.Widget = class {
         }
 
         this.widgetEl.addEventListener('change', this.loadOptions.bind(this));
-        this.initOptionValues();
     }
 
     getOptionsContainerId() {
@@ -128,35 +127,6 @@ WysiwygWidget.Widget = class {
             }
         });
         containerEl.classList.add('no-display');
-    }
-
-    // Assign widget options values when existing widget selected in WYSIWYG
-    initOptionValues() {
-        if (!this.wysiwygExists()) {
-            return false;
-        }
-
-        const el = this.getWysiwygNode();
-        if (!el || !el.id) {
-            return;
-        }
-
-        const widgetCode = Base64.idDecode(e.id);
-        if (widgetCode.indexOf('{{widget') === -1) {
-            return;
-        }
-
-        this.optionValues = new Map();
-
-        widgetCode.replaceAll(/([a-z0-9\_]+)\s*\=\s*[\"]{1}([^\"]+)[\"]{1}/gi, (...match) => {
-            if (match[1] == 'type') {
-                this.widgetEl.value = match[2];
-            } else {
-                this.optionValues.set(match[1], match[2]);
-            }
-        });
-
-        this.loadOptions();
     }
 
     async loadOptions() {
@@ -221,24 +191,12 @@ WysiwygWidget.Widget = class {
                     }
                 }
 
-                // Add as_is flag to parameters if wysiwyg editor doesn't exist
-                if (!this.wysiwygExists()) {
-                    formData.set('as_is', 1);
-                }
-
                 const html = await mahoFetch(this.formEl.action, {
                     method: 'POST',
                     body: formData,
                 })
 
                 Windows.close('widget_window');
-
-                if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor) {
-                    tinyMCE.activeEditor.focus();
-                    if (this.bMark) {
-                        tinyMCE.activeEditor.selection.moveToBookmark(this.bMark);
-                    }
-                }
 
                 // Restore cursor position for QuillJS
                 if (typeof quillEditors !== 'undefined' && quillEditors.has(this.widgetTargetId)) {
@@ -248,45 +206,15 @@ WysiwygWidget.Widget = class {
                     }
                 }
 
-                this.updateContent(html);
-
+                const quillEditor = quillEditors.get(this.widgetTargetId);
+                if (quillEditor && quillEditor.editor) {
+                    quillEditor.insertContent(html);
+                }
             } catch(error) {
                 console.error(error);
                 alert(error.message);
             }
         }
-    }
-
-    updateContent(content) {
-        if (this.wysiwygExists()) {
-            this.getWysiwyg().execCommand('mceInsertContent', false, content);
-        } else if (this.quillExists()) {
-            // Insert content into QuillJS
-            const quillEditor = quillEditors.get(this.widgetTargetId);
-            if (quillEditor && quillEditor.editor) {
-                quillEditor.insertContent(content);
-            }
-        } else {
-            const textarea = document.getElementById(this.widgetTargetId);
-            updateElementAtCursor(textarea, content);
-            varienGlobalEvents.fireEvent('tinymceChange');
-        }
-    }
-
-    wysiwygExists() {
-        return typeof tinyMCE !== 'undefined' && tinyMCE.get(this.widgetTargetId);
-    }
-
-    quillExists() {
-        return typeof quillEditors !== 'undefined' && quillEditors.has(this.widgetTargetId) && quillEditors.get(this.widgetTargetId).editor;
-    }
-
-    getWysiwyg() {
-        return tinyMCE.activeEditor;
-    }
-
-    getWysiwygNode() {
-        return tinyMCE.activeEditor.selection.getNode();
     }
 };
 
