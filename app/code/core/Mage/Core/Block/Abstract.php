@@ -1168,6 +1168,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
         $useCache = Mage::app()->useCache('icons');
 
         if ($useCache && $cachedIcon = $cache->load($cacheId)) {
+            $cachedIcon = str_replace('<svg ', '<svg role="' . $role . '" ', $cachedIcon);
             return $cachedIcon;
         }
 
@@ -1187,11 +1188,11 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
             return '';
         }
 
-        $iconSvg = str_replace('<svg ', '<svg role="' . $role . '" ', $iconSvg);
-
         if ($useCache) {
             $cache->save($iconSvg, $cacheId, ['ICONS']);
         }
+
+        $iconSvg = str_replace('<svg ', '<svg role="' . $role . '" ', $iconSvg);
         return $iconSvg;
     }
 
