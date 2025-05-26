@@ -226,11 +226,11 @@ class Mage_Widget_Model_Widget extends Varien_Object
         }
 
         $config = Mage::getSingleton('widget/widget_config');
-        $imageName = str_replace('/', '__', $type) . '.gif';
+        $imageName = str_replace('/', '__', $type) . '.svg';
         if (is_file($config->getPlaceholderImagesBaseDir() . DS . $imageName)) {
             $image = $config->getPlaceholderImagesBaseUrl() . $imageName;
         } else {
-            $image = $config->getPlaceholderImagesBaseUrl() . 'default.gif';
+            $image = $config->getPlaceholderImagesBaseUrl() . 'default.svg';
         }
         return sprintf(
             '<img id="%s" src="%s" title="%s">',

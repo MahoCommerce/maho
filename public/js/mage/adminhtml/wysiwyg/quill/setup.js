@@ -335,9 +335,9 @@ class quillWysiwygSetup {
         return content.replace(/\{\{widget(.*?)\}\}/gi, (match, attributes) => {
             const attrs = this.parseAttributesString(attributes);
             if (attrs.type) {
-                let placeholderFilename = attrs.type.replace(/\//g, "__") + ".gif";
+                let placeholderFilename = attrs.type.replace(/\//g, "__") + ".svg";
                 if (!this.widgetPlaceholderExist(placeholderFilename)) {
-                    placeholderFilename = 'default.gif';
+                    placeholderFilename = 'default.svg';
                 }
                 const attributesObj = {
                     id: Base64.idEncode(match),
