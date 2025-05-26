@@ -83,10 +83,6 @@ const catalogWysiwygEditor = {
                 content = quillEditor.editor.root.innerHTML;
             }
         }
-        // Legacy TinyMCE support
-        else if (typeof tinymce !== 'undefined' && tinymce.get(wysiwygObj.id)) {
-            content = tinymce.get(wysiwygObj.id).getContent();
-        }
 
         if (content) {
             document.getElementById(elementId).value = content;
