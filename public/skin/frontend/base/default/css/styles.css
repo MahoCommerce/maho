@@ -3455,6 +3455,7 @@ p.product-name a:hover {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  background-color: var(--maho-color-background);
 }
 .products-grid > li > div:first-child ul a {
   font-size: 0;
