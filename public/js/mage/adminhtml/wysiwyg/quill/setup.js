@@ -71,6 +71,36 @@ class quillWysiwygSetup {
     }
 
     setup() {
+        // registering a custom image handler
+        var Image = Quill.import('formats/image');
+        class MahoQuillImage extends Image {
+            static get ATTRIBUTES() {
+                return ['id', 'alt', 'height', 'width', 'class', 'data-original', 'data-width', 'data-height', 'style-data'];
+            }
+
+            static formats(domNode) {
+                return this.ATTRIBUTES.reduce(function(formats, attribute) {
+                    if (domNode.hasAttribute(attribute)) {
+                        formats[attribute] = domNode.getAttribute(attribute);
+                    }
+                    return formats;
+                }, {});
+            }
+
+            format(name, value) {
+                if (this.constructor.ATTRIBUTES.indexOf(name) > -1) {
+                    if (value) {
+                        this.domNode.setAttribute(name, value);
+                    } else {
+                        this.domNode.removeAttribute(name);
+                    }
+                } else {
+                    super.format(name, value);
+                }
+            }
+        }
+        Quill.register(MahoQuillImage);
+
         // Register custom buttons before initializing Quill
         this.registerCustomButtons();
         
@@ -107,8 +137,7 @@ class quillWysiwygSetup {
                         'variable': this.variableHandler.bind(this),
                     }
                 }
-            },
-            placeholder: 'Enter content...',
+            }
         });
 
         // Set initial content
@@ -281,24 +310,12 @@ class quillWysiwygSetup {
 
     encodeContent(content) {
         if (!content) return '';
-        
-        if (this.config.add_widgets) {
-            content = this.encodeDirectives(this.encodeWidgets(content));
-        } else if (this.config.encode_directives) {
-            content = this.encodeDirectives(content);
-        }
-        return content;
+        return this.encodeDirectives(this.encodeWidgets(content));
     }
 
     decodeContent(content) {
         if (!content) return '';
-        
-        if (this.config.add_widgets) {
-            content = this.decodeDirectives(this.decodeWidgets(content));
-        } else if (this.config.encode_directives) {
-            content = this.decodeDirectives(content);
-        }
-        return content;
+        return this.decodeDirectives(this.decodeWidgets(content));
     }
 
     makeDirectiveUrl(directive) {
@@ -347,7 +364,7 @@ class quillWysiwygSetup {
     decodeWidgets(content) {
         return content.replace(/<img([^>]+id=\"[^>]+)>/gi, (match, attributes) => {
             const attrs = this.parseAttributesString(attributes);
-            if (attrs.id && attrs.class && attrs.class.includes('maho-widget-placeholder')) {
+            if (attrs.id) {
                 const widgetCode = Base64.idDecode(attrs.id);
                 if (widgetCode.indexOf('{{widget') !== -1) {
                     return widgetCode;
@@ -358,11 +375,23 @@ class quillWysiwygSetup {
     }
 
     parseAttributesString(attributes) {
+        // Create a temporary element with unique ID
+        const tempElement = document.createElement('div');
+        tempElement.innerHTML = `<div ${attributes}></div>`;
+
+        // Add to DOM temporarily (some browsers need this for full parsing)
+        document.body.appendChild(tempElement);
+
+        const element = tempElement.firstChild;
         const result = {};
-        attributes.replace(/(\w+)(?:\s*=\s*(?:(?:"((?:\\.|[^"\\])*)")|(?:'((?:\\.|[^'\\])*)')|([^>\s]+)))?/g, (match, attr, val1, val2, val3) => {
-            result[attr] = val1 || val2 || val3 || '';
-            return match;
-        });
+
+        // Extract all attributes
+        for (const attr of element.attributes) {
+            result[attr.name] = attr.value;
+        }
+
+        // Clean up - remove the temporary element
+        document.body.removeChild(tempElement);
         return result;
     }
 
@@ -382,12 +411,7 @@ class quillWysiwygSetup {
             if (range) {
                 // If it's HTML content, insert as HTML
                 if (content.includes('<') && content.includes('>')) {
-                    // In Quill 2.0, we use clipboard.convert and updateContents
-                    const delta = this.editor.clipboard.convert({ html: content });
-                    this.editor.updateContents(delta.ops, 'user');
-                    // Set cursor after inserted content
-                    const newLength = this.editor.getLength();
-                    this.editor.setSelection(newLength - 1);
+                    this.editor.clipboard.dangerouslyPasteHTML(range.index, content);
                 } else {
                     this.editor.insertText(range.index, content);
                     // Set cursor after inserted content
@@ -396,14 +420,4 @@ class quillWysiwygSetup {
             }
         }
     }
-}
-
-// Compatibility layer for widget insertion
-if (typeof widgetTools === 'undefined') {
-    window.widgetTools = {
-        openDialog: function(url) {
-            // This will be overridden by the actual widget tools
-            console.warn('Widget tools not loaded');
-        }
-    };
 }
