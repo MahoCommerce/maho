@@ -562,11 +562,13 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
         }
     }
 
+    /** @deprecated */
     public function setCanLoadTinyMce(bool $value): self
     {
         return $this->setData('can_load_wysiwyg', $value);
     }
 
+    /** @deprecated */
     public function getCanLoadTinyMce(): bool
     {
         return (bool) $this->getData('can_load_wysiwyg');
