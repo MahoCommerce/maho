@@ -32,3 +32,31 @@
 .ql-toolbar button.ql-variable:hover::after {
     opacity: 1;
 }
+
+/* Widget placeholder styles for Quill editor */
+.ql-editor img.maho-widget-placeholder {
+    cursor: pointer;
+    opacity: 0.8;
+    transition: all 0.2s ease-in-out;
+    display: inline-block;
+    vertical-align: middle;
+    max-width: 100%;
+    height: auto;
+}
+
+.ql-editor img.maho-widget-placeholder:hover {
+    opacity: 1;
+    transform: scale(1.05);
+    outline: 2px dashed #3b82f6;
+    outline-offset: 2px;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.ql-editor img.maho-widget-placeholder:active {
+    transform: scale(0.98);
+}
+
+/* Add tooltip using title attribute */
+.ql-editor img.maho-widget-placeholder[title]:hover {
+    position: relative;
+}

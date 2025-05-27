@@ -46,6 +46,15 @@ const widgetTools = {
     closeDialog(window) {
         window ??= this.dialogWindow;
         window?.close();
+        
+        // Clear any editing state when dialog is closed
+        if (typeof quillEditors !== 'undefined') {
+            quillEditors.forEach(editor => {
+                if (editor.editingWidgetId) {
+                    editor.editingWidgetId = null;
+                }
+            });
+        }
     },
 };
 
@@ -75,6 +84,29 @@ WysiwygWidget.Widget = class {
         }
 
         this.widgetEl.addEventListener('change', this.loadOptions.bind(this));
+        
+        // Check for initial widget values (for editing existing widgets)
+        if (window.widgetFormInitialValues) {
+            const initialValues = window.widgetFormInitialValues;
+            
+            // Set the widget type if available
+            if (initialValues.type && this.widgetEl) {
+                this.widgetEl.value = initialValues.type;
+                
+                // Store all values in optionValues map
+                Object.entries(initialValues).forEach(([key, value]) => {
+                    if (key !== 'type') {
+                        this.optionValues.set(key, value);
+                    }
+                });
+                
+                // Load options for the selected widget type
+                this.loadOptions();
+            }
+            
+            // Clear the global variable
+            delete window.widgetFormInitialValues;
+        }
     }
 
     getOptionsContainerId() {

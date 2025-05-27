@@ -154,6 +154,9 @@ class quillWysiwygSetup {
             }
         });
 
+        // Add double-click handler for widget placeholders
+        this.editor.root.addEventListener('dblclick', this.handleDoubleClick.bind(this));
+
         // Add titles to custom buttons
         const toolbar = this.editor.getModule('toolbar');
         if (toolbar) {
@@ -197,9 +200,72 @@ class quillWysiwygSetup {
 
     widgetHandler() {
         if (this.config.widget_window_url) {
+            // Clear any editing state when inserting a new widget
+            this.editingWidgetId = null;
+            delete window.widgetFormInitialValues;
+            
             const url = this.config.widget_window_url + 'widget_target_id/' + this.id + '/';
             widgetTools.openDialog(url);
         }
+    }
+
+    handleDoubleClick(event) {
+        const target = event.target;
+        
+        // Check if the clicked element is a widget placeholder
+        if (target.tagName === 'IMG' && target.classList.contains('maho-widget-placeholder')) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            // Get the widget ID from the image
+            const widgetId = target.getAttribute('id');
+            if (widgetId) {
+                this.openWidgetForEdit(widgetId);
+            }
+        }
+    }
+
+    openWidgetForEdit(widgetId) {
+        if (!this.config.widget_window_url || !widgetId) {
+            return;
+        }
+
+        // Decode the widget content from the ID
+        const widgetCode = Base64.idDecode(widgetId);
+        
+        // Parse the widget code to extract parameters
+        const widgetParams = this.parseWidgetCode(widgetCode);
+        
+        if (widgetParams && widgetParams.type) {
+            // Store the widget element for later replacement
+            this.editingWidgetId = widgetId;
+            
+            // Store widget parameters globally for the widget form to access
+            window.widgetFormInitialValues = widgetParams;
+            
+            // Open the widget dialog
+            const url = this.config.widget_window_url + 'widget_target_id/' + this.id + '/';
+            widgetTools.openDialog(url);
+        }
+    }
+
+    parseWidgetCode(widgetCode) {
+        // Extract widget parameters from the widget directive
+        const match = widgetCode.match(/\{\{widget\s+(.+?)\}\}/);
+        if (!match) return null;
+        
+        const params = {};
+        const paramString = match[1];
+        
+        // Parse key="value" pairs
+        const regex = /(\w+)="([^"]*)"/g;
+        let paramMatch;
+        
+        while ((paramMatch = regex.exec(paramString)) !== null) {
+            params[paramMatch[1]] = paramMatch[2];
+        }
+        
+        return params;
     }
 
     variableHandler() {
@@ -342,7 +408,7 @@ class quillWysiwygSetup {
                 const attributesObj = {
                     id: Base64.idEncode(match),
                     src: this.config.widget_images_url + placeholderFilename,
-                    title: match.replace(/\{\{/g, '{').replace(/\}\}/g, '}').replace(/\"/g, '&quot;'),
+                    title: 'Double-click to edit: ' + match.replace(/\{\{/g, '{').replace(/\}\}/g, '}').replace(/\"/g, '&quot;'),
                     class: 'maho-widget-placeholder'
                 };
                 const attributesString = Object.entries(attributesObj)
@@ -406,7 +472,29 @@ class quillWysiwygSetup {
     // Method to insert content at cursor position (for widgets/variables)
     insertContent(content) {
         if (this.editor) {
-            // Use saved range if current selection is lost
+            // Check if we're replacing an existing widget
+            if (this.editingWidgetId) {
+                const widgetElement = this.editor.root.querySelector(`img[id="${this.editingWidgetId}"]`);
+                if (widgetElement) {
+                    // Replace the existing widget placeholder
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = content;
+                    const newElement = tempDiv.firstChild;
+                    
+                    if (newElement) {
+                        widgetElement.parentNode.replaceChild(newElement, widgetElement);
+                    }
+                    
+                    // Clear the editing widget ID
+                    this.editingWidgetId = null;
+                    
+                    // Update the textarea
+                    this.updateTextArea();
+                    return;
+                }
+            }
+            
+            // Normal insertion at cursor position
             const range = this.editor.getSelection() || this.lastRange;
             if (range) {
                 // If it's HTML content, insert as HTML
