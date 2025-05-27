@@ -500,6 +500,8 @@ class quillWysiwygSetup {
                 // If it's HTML content, insert as HTML
                 if (content.includes('<') && content.includes('>')) {
                     this.editor.clipboard.dangerouslyPasteHTML(range.index, content);
+                    this.turnOff();
+                    this.turnOn();
                 } else {
                     this.editor.insertText(range.index, content);
                     // Set cursor after inserted content
