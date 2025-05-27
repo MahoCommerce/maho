@@ -114,7 +114,7 @@ Observers are configured in module's `config.xml`.
 ## Development Guidelines
 
 - When you write CSS, use the most modern features, do not care for Internet Explorer or old unsupported browsers.
-- When you write Javascript, never use prototypejs or jquery, only vanillajs
+- When you write Javascript, never use prototypejs or jquery, only the most modern vanillajs
 - If you're integrating new tools/libraries, always use their latest available version
 - Update headers of the PHP files, adding the current year for the copyright Maho line
 - Before committing, ensure all translatable strings (`$this->__()` or `Mage::helper()->__()`) are present in the corresponding CSV files in `app/locale/en_US/`
