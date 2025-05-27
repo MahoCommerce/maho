@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -45,41 +45,50 @@
         <input type="hidden" id="preview_id" name="id" value="" />
     </div>
 </form>
-<script type="text/javascript">
-//<![CDATA[
-var queueForm = new varienForm('queue_edit_form');
-var newsletterPreviewForm = new varienForm('newsletter_queue_preview_form');
+<script>
+const queueForm = new varienForm('queue_edit_form');
+const newsletterPreviewForm = new varienForm('newsletter_queue_preview_form');
 
-var queueControl = {
+const queueControl = {
     id: 'text',
-    save: function() {
-        $('_resume_flag').value = '';
+    
+    save() {
+        document.getElementById('_resume_flag').value = '';
         queueForm.submit();
     },
-    preview: function() {
-        if (this.isEditor() && tinymce.get(this.id)) {
-            tinymce.triggerSave();
-            $('preview_text').value = $(this.id).value;
-            tinymce.triggerSave();
-        } else {
-            $('preview_text').value = $(this.id).value;
+    
+    preview() {
+        const textElement = document.getElementById(this.id);
+        const previewTextElement = document.getElementById('preview_text');
+
+        if (this.isEditor()) {
+            const editor = window.quillEditors?.get(this.id);
+            editor?.editor?.updateTextArea();
         }
-        if ($('styles') != undefined) {
-            $('preview_styles').value = $('styles').value;
+
+        previewTextElement.value = textElement.value;
+
+        const stylesElement = document.getElementById('styles');
+        if (stylesElement) {
+            document.getElementById('preview_styles').value = stylesElement.value;
         }
-        if ($('id') != undefined) {
-            $('preview_id').value = $('id').value;
+
+        const idElement = document.getElementById('id');
+        if (idElement) {
+            document.getElementById('preview_id').value = idElement.value;
         }
+
         newsletterPreviewForm.submit();
         return false;
     },
-    isEditor: function() {
-        return (typeof tinyMceEditors != 'undefined' && tinyMceEditors[this.id] != undefined)
+    
+    isEditor() {
+        return window.quillEditors?.has?.(this.id);
     },
-    resume: function() {
-        $('_resume_flag').value = '1';
+    
+    resume() {
+        document.getElementById('_resume_flag').value = '1';
         queueForm.submit();
     }
 };
-//]]>
 </script>
