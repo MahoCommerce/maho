@@ -49,7 +49,7 @@ class Mage_Core_Model_Variable_Config
      */
     public function getWysiwygJsPluginSrc()
     {
-        return Mage::getBaseUrl('js') . 'mage/adminhtml/wysiwyg/tinymce/plugins/openmagevariable.js';
+        return Mage::getBaseUrl('js') . 'mage/adminhtml/variables.js';
     }
 
     /**
