@@ -39,7 +39,30 @@ const catalogWysiwygEditor = {
             firedElementId: elementId,
         });
 
-        document.getElementById(`${elementId}_editor`).value = document.getElementById(elementId).value;
+        // Get the content from the original textarea
+        const originalContent = document.getElementById(elementId).value;
+        
+        // Set initial content in the textarea that will be used by Quill
+        const editorTextarea = document.getElementById(`${elementId}_editor`);
+        if (editorTextarea) {
+            editorTextarea.value = originalContent;
+        }
+        
+        // Wait for Quill editor to be initialized and then set content
+        const checkAndSetContent = () => {
+            const wysiwygObj = window[`wysiwyg${elementId}_editor`];
+            if (wysiwygObj && wysiwygObj.editor) {
+                // Quill is initialized, set the content
+                const encodedContent = wysiwygObj.encodeContent(originalContent);
+                wysiwygObj.editor.root.innerHTML = encodedContent;
+            } else {
+                // Quill not yet initialized, check again
+                setTimeout(checkAndSetContent, 50);
+            }
+        };
+        
+        // Start checking after a small delay to allow DOM to update
+        setTimeout(checkAndSetContent, 50);
     },
 
     okDialogWindow(dialogWindow) {
@@ -51,9 +74,15 @@ const catalogWysiwygEditor = {
         const wysiwygObj = window[`wysiwyg${elementId}_editor`];
         wysiwygObj.turnOff();
 
-        const content = tinymce.get(wysiwygObj.id)
-              ? tinymce.get(wysiwygObj.id).getContent()
-              : document.getElementById(`${elementId}_editor`)?.value;
+        let content = document.getElementById(`${elementId}_editor`)?.value;
+        
+        // Check if we have a QuillJS editor
+        if (typeof quillEditors !== 'undefined' && quillEditors.has(wysiwygObj.id)) {
+            const quillEditor = quillEditors.get(wysiwygObj.id);
+            if (quillEditor && quillEditor.editor) {
+                content = quillEditor.editor.root.innerHTML;
+            }
+        }
 
         if (content) {
             document.getElementById(elementId).value = content;
@@ -68,6 +97,8 @@ const catalogWysiwygEditor = {
 
         // destroy the instance of editor
         const wysiwygObj = window[`wysiwyg${elementId}_editor`];
-        wysiwygObj.destroy();
+        if (wysiwygObj && typeof wysiwygObj.destroy === 'function') {
+            wysiwygObj.destroy();
+        }
     }
 };

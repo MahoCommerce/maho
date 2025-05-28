@@ -78,6 +78,16 @@ const Variables = {
 
     insertVariable(value) {
         this.closeDialogWindow();
+        
+        // Check if we have a QuillJS editor
+        if (typeof quillEditors !== 'undefined' && quillEditors.has(this.textareaElementId)) {
+            const quillEditor = quillEditors.get(this.textareaElementId);
+            if (quillEditor && quillEditor.editor) {
+                quillEditor.insertContent(value);
+                return;
+            }
+        }
+        
         const textareaElm = document.getElementById(this.textareaElementId);
         if (textareaElm) {
             updateElementAtCursor(textareaElm, value);
@@ -114,11 +124,37 @@ const OpenmagevariablePlugin = {
 
     insertVariable(value) {
         if (this.textareaId) {
-            Variables.init(this.textareaId);
-            Variables.insertVariable(value);
+            Variables.closeDialogWindow();
+            
+            // Check if we have a QuillJS editor
+            if (typeof quillEditors !== 'undefined' && quillEditors.has(this.textareaId)) {
+                const quillEditor = quillEditors.get(this.textareaId);
+                if (quillEditor && quillEditor.editor) {
+                    quillEditor.insertContent(value);
+                    return;
+                }
+            }
+            
+            // Fallback to textarea
+            const textareaElm = document.getElementById(this.textareaId);
+            if (textareaElm) {
+                updateElementAtCursor(textareaElm, value);
+            }
         } else {
             Variables.closeDialogWindow();
-            this.editor.execCommand('mceInsertContent', false, value);
+            
+            // Check if we're using QuillJS
+            if (typeof quillEditors !== 'undefined' && this.editor && this.editor.container) {
+                // Find the QuillJS instance by container
+                const editorId = this.editor.container.previousElementSibling?.id;
+                if (editorId && quillEditors.has(editorId)) {
+                    const quillEditor = quillEditors.get(editorId);
+                    if (quillEditor) {
+                        quillEditor.insertContent(value);
+                        return;
+                    }
+                }
+            }
         }
     },
 };
