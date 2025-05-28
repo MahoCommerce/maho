@@ -160,14 +160,36 @@ class quillWysiwygSetup {
         // Set initial content
         let cleanContent = this.getTextArea().value;
 
-        // Decode any existing directive URLs that shouldn't be there
-        const urlPattern = this.config.directives_url
-            .replace(/([$^.?*!+:=()\[\]{}|\\])/g, '\\$1')
-            .replace('directive', 'directive/___directive/([a-zA-Z0-9,_-]+)(?:/key/[a-zA-Z0-9]+/?)?');
-        const reg = new RegExp(urlPattern, 'g');
+        // Convert media directives in img src to directive URLs
+        cleanContent = cleanContent.replace(/<img([^>]*?)src="(\{\{media\s+url="([^"]+)"\}\})"([^>]*?)>/gi, (match, before, fullDirective, url, after) => {
+            const directive = `{{media url="${url}"}}`;
+            const encodedDirective = Base64.mageEncode(directive);
+            const directiveUrl = this.makeDirectiveUrl(encodedDirective);
+            return `<img${before}src="${directiveUrl}"${after}>`;
+        });
 
-        cleanContent = cleanContent.replace(reg, (match, directive) => {
-            return Base64.mageDecode(directive);
+        // Decode any existing directive URLs that are NOT in img src attributes
+        cleanContent = cleanContent.replace(/(<img[^>]*>)|([^<]+|<(?!img)[^>]*>)/gi, (match, imgTag, otherContent) => {
+            if (imgTag) {
+                // This is an img tag, leave it as is
+                return imgTag;
+            } else if (otherContent) {
+                // This is other content, decode directive URLs
+                const urlPattern = this.config.directives_url
+                    .replace(/([$^.?*!+:=()\[\]{}|\\])/g, '\\$1')
+                    .replace('directive', 'directive/___directive/([a-zA-Z0-9,_-]+)(?:/key/[a-zA-Z0-9]+/?)?');
+                const reg = new RegExp(urlPattern, 'g');
+                
+                return otherContent.replace(reg, (m, directive) => {
+                    const decoded = Base64.mageDecode(directive);
+                    // Only decode if it's NOT a media directive
+                    if (!decoded.includes('{{media url=')) {
+                        return decoded;
+                    }
+                    return m;
+                });
+            }
+            return match;
         });
 
         const initialContent = this.encodeContent(cleanContent);
@@ -220,6 +242,7 @@ class quillWysiwygSetup {
             
             varienGlobalEvents.fireEvent("open_browser_callback", { 
                 callback: (url) => {
+                    // Insert the image with the URL as-is
                     this.editor.insertEmbed(insertIndex, 'image', url);
                     this.editor.setSelection(insertIndex + 1);
                 },
@@ -455,12 +478,42 @@ class quillWysiwygSetup {
     }
 
     decodeDirectives(content) {
+        // First decode directive URLs in img src attributes
+        content = content.replace(/<img([^>]*?)src="([^"]+)"([^>]*?)>/gi, (match, before, src, after) => {
+            const urlPattern = this.config.directives_url
+                .replace(/([$^.?*!+:=()\[\]{}|\\])/g, '\\$1')
+                .replace('directive', 'directive/___directive/([a-zA-Z0-9,_-]+)(?:/key/[a-zA-Z0-9]+/?)?');
+            
+            // Check if the src contains a directive URL
+            if (src.match(new RegExp(urlPattern))) {
+                const decodedSrc = src.replace(new RegExp(urlPattern, 'g'), (m, directive) => {
+                    return Base64.mageDecode(directive);
+                });
+                return `<img${before}src="${decodedSrc}"${after}>`;
+            }
+            return match;
+        });
+        
+        // Then decode directive URLs in other contexts (but NOT media directives)
         return content.replace(/<([a-z0-9\-\_]+[^>]*?)>/gi, (match) => {
+            // Skip img tags as we already handled them
+            if (match.toLowerCase().startsWith('<img')) {
+                return match;
+            }
+            
             const urlPattern = this.config.directives_url
                 .replace(/([$^.?*!+:=()\[\]{}|\\])/g, '\\$1')
                 .replace('directive', 'directive/___directive/([a-zA-Z0-9,_-]+)(?:/key/[a-zA-Z0-9]+/?)?');
             const reg = new RegExp(urlPattern, 'g');
-            return match.replace(reg, (m, directive) => Base64.mageDecode(directive));
+            
+            return match.replace(reg, (m, directive) => {
+                const decoded = Base64.mageDecode(directive);
+                // Only decode if it's NOT a media directive
+                if (!decoded.includes('{{media url=')) {
+                    return decoded;
+                }
+                return m; // Keep the directive URL if it's a media directive
+            });
         });
     }
 
