@@ -10,6 +10,11 @@
     background-color: #d0d0d0;
 }
 
+.ql-container {
+    background-color: white;
+    min-height: 400px;
+}
+
 /* Add titles to custom buttons */
 .ql-toolbar button {position: relative}
 .ql-toolbar button.ql-widget::after,
@@ -56,7 +61,15 @@
     transform: scale(0.98);
 }
 
-/* Add tooltip using title attribute */
 .ql-editor img.maho-widget-placeholder[title]:hover {
     position: relative;
+}
+
+.ql-editor .ql-table-better {
+    width: unset;
+}
+
+.ql-cell-focused::after {
+    border: none !important;
+    background: none !important;
 }

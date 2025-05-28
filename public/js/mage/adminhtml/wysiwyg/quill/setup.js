@@ -100,6 +100,13 @@ class quillWysiwygSetup {
             }
         }
         Quill.register(MahoQuillImage);
+        
+        // Register quill-table-better module
+        if (typeof QuillTableBetter !== 'undefined') {
+            Quill.register({
+                'modules/table-better': QuillTableBetter
+            }, true);
+        }
 
         // Register custom buttons before initializing Quill
         this.registerCustomButtons();
@@ -113,10 +120,6 @@ class quillWysiwygSetup {
         // Create container for Quill editor content
         const container = document.createElement('div');
         container.id = `${this.id}_editor`;
-        container.style.minHeight = '400px';
-        container.style.backgroundColor = '#fff';
-        
-        // Append container to wrapper
         wrapper.appendChild(container);
         
         // Insert wrapper after textarea
@@ -124,8 +127,6 @@ class quillWysiwygSetup {
         textarea.parentNode.insertBefore(wrapper, textarea.nextSibling);
 
         // Initialize Quill
-        const toolbarOptions = this.getToolbarOptions();
-        
         this.editor = new Quill(container, {
             theme: 'snow',
             modules: {
@@ -147,12 +148,24 @@ class quillWysiwygSetup {
                     ]
                 },
                 toolbar: {
-                    container: toolbarOptions,
+                    container: [
+                        [{ 'header': [1, 2, 3, 4, 5, false] }],
+                        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'align': [] }],
+                        ['table-better', 'link', 'image', 'widget', 'variable']
+                    ],
                     handlers: {
                         'image': this.imageHandler.bind(this),
                         'widget': this.widgetHandler.bind(this),
                         'variable': this.variableHandler.bind(this),
                     }
+                },
+                table: false,
+                'table-better': {
+                    toolbarTable: true
+                },
+                keyboard: {
+                    bindings: QuillTableBetter ? QuillTableBetter.keyboardBindings : {}
                 }
             }
         });
@@ -223,15 +236,6 @@ class quillWysiwygSetup {
 
         // Fire initialization event
         varienGlobalEvents.fireEvent('wysiwygEditorInitialized', this.editor);
-    }
-
-    getToolbarOptions() {
-        return [
-            [{ 'header': [1, 2, 3, 4, 5, false] }],
-            ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'align': [] }],
-            ['link', 'image', 'widget', 'variable']
-        ];
     }
 
     imageHandler() {
