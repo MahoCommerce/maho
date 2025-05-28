@@ -214,12 +214,14 @@ class quillWysiwygSetup {
 
     imageHandler() {
         if (this.config.files_browser_window_url) {
+            // Store the current selection/cursor position before opening dialog
+            const range = this.editor.getSelection();
+            const insertIndex = range ? range.index : this.editor.getLength() - 1;
+            
             varienGlobalEvents.fireEvent("open_browser_callback", { 
                 callback: (url) => {
-                    const range = this.editor.getSelection();
-                    if (range) {
-                        this.editor.insertEmbed(range.index, 'image', url);
-                    }
+                    this.editor.insertEmbed(insertIndex, 'image', url);
+                    this.editor.setSelection(insertIndex + 1);
                 },
                 value: '',
                 meta: { filetype: 'image' }
