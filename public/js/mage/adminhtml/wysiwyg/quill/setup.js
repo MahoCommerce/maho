@@ -141,7 +141,19 @@ class quillWysiwygSetup {
         });
 
         // Set initial content
-        const initialContent = this.encodeContent(textarea.value);
+        let cleanContent = this.getTextArea().value;
+
+        // Decode any existing directive URLs that shouldn't be there
+        const urlPattern = this.config.directives_url
+            .replace(/([$^.?*!+:=()\[\]{}|\\])/g, '\\$1')
+            .replace('directive', 'directive/___directive/([a-zA-Z0-9,_-]+)(?:/key/[a-zA-Z0-9]+/?)?');
+        const reg = new RegExp(urlPattern, 'g');
+
+        cleanContent = cleanContent.replace(reg, (match, directive) => {
+            return Base64.mageDecode(directive);
+        });
+
+        const initialContent = this.encodeContent(cleanContent);
         if (initialContent) {
             this.editor.root.innerHTML = initialContent;
         }
@@ -376,7 +388,9 @@ class quillWysiwygSetup {
 
     encodeContent(content) {
         if (!content) return '';
-        return this.encodeDirectives(this.encodeWidgets(content));
+        // Only encode widgets, do NOT encode any directives for QuillJS
+        // Variables should remain as plain text in the editor
+        return this.encodeWidgets(content);
     }
 
     decodeContent(content) {
@@ -422,9 +436,13 @@ class quillWysiwygSetup {
     }
 
     decodeDirectives(content) {
-        const url = this.makeDirectiveUrl('%directive%').replace(/([$^.?*!+:=()\[\]{}|\\])/g, '\\$1');
-        const reg = new RegExp(url.replace('%directive%', '([a-zA-Z0-9,_-]+)'), 'g');
-        return content.replace(reg, (match, directive) => Base64.mageDecode(directive));
+        return content.replace(/<([a-z0-9\-\_]+[^>]*?)>/gi, (match) => {
+            const urlPattern = this.config.directives_url
+                .replace(/([$^.?*!+:=()\[\]{}|\\])/g, '\\$1')
+                .replace('directive', 'directive/___directive/([a-zA-Z0-9,_-]+)(?:/key/[a-zA-Z0-9]+/?)?');
+            const reg = new RegExp(urlPattern, 'g');
+            return match.replace(reg, (m, directive) => Base64.mageDecode(directive));
+        });
     }
 
     decodeWidgets(content) {
