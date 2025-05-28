@@ -129,6 +129,23 @@ class quillWysiwygSetup {
         this.editor = new Quill(container, {
             theme: 'snow',
             modules: {
+                resize: {
+                    tools: [
+                        'left', 'center', 'right', 'full', 'edit',
+                        {
+                            text: '<svg style="color:#444" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-name="alt" data-variant="outline"><path d="M4 16v-6a2 2 0 1 1 4 0v6"/><path d="M4 13h4"/><path d="M11 8v8h4"/><path d="M16 8h4"/><path d="M18 8v8"/></svg>',
+                            verify (activeEle) {
+                                return (activeEle && activeEle.tagName === 'IMG')
+                            },
+                            handler (evt, button, activeEle) {
+                                let alt = activeEle.alt || ''
+                                alt = window.prompt('Alternative text', alt)
+                                if (alt == null) return
+                                activeEle.setAttribute('alt', alt)
+                            }
+                        }
+                    ]
+                },
                 toolbar: {
                     container: toolbarOptions,
                     handlers: {
