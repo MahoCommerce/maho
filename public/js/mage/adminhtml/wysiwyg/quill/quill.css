@@ -68,8 +68,3 @@
 .ql-editor .ql-table-better {
     width: unset;
 }
-
-.ql-cell-focused::after {
-    border: none !important;
-    background: none !important;
-}

@@ -100,13 +100,7 @@ class quillWysiwygSetup {
             }
         }
         Quill.register(MahoQuillImage);
-        
-        // Register quill-table-better module
-        if (typeof QuillTableBetter !== 'undefined') {
-            Quill.register({
-                'modules/table-better': QuillTableBetter
-            }, true);
-        }
+        Quill.register({'modules/table-better': QuillTableBetter}, true);
 
         // Register custom buttons before initializing Quill
         this.registerCustomButtons();
@@ -163,9 +157,6 @@ class quillWysiwygSetup {
                 table: false,
                 'table-better': {
                     toolbarTable: true
-                },
-                keyboard: {
-                    bindings: QuillTableBetter ? QuillTableBetter.keyboardBindings : {}
                 }
             }
         });
