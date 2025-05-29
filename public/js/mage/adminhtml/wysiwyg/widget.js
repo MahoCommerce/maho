@@ -48,8 +48,8 @@ const widgetTools = {
         window?.close();
         
         // Clear any editing state when dialog is closed
-        if (typeof quillEditors !== 'undefined') {
-            quillEditors.forEach(editor => {
+        if (typeof tiptapEditors !== 'undefined') {
+            tiptapEditors.forEach(editor => {
                 if (editor.editingWidgetId) {
                     editor.editingWidgetId = null;
                 }
@@ -75,11 +75,11 @@ WysiwygWidget.Widget = class {
         this.optionValues = new Map();
         this.widgetTargetId = widgetTargetId;
         
-        // Store cursor position for QuillJS
-        if (typeof quillEditors !== 'undefined' && quillEditors.has(this.widgetTargetId)) {
-            const quillEditor = quillEditors.get(this.widgetTargetId);
-            if (quillEditor && quillEditor.editor) {
-                this.quillRange = quillEditor.editor.getSelection();
+        // Store cursor position for Tiptap
+        if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.widgetTargetId)) {
+            const tiptapEditor = tiptapEditors.get(this.widgetTargetId);
+            if (tiptapEditor && tiptapEditor.editor) {
+                this.tiptapSelection = tiptapEditor.editor.state.selection;
             }
         }
 
@@ -226,17 +226,12 @@ WysiwygWidget.Widget = class {
 
                 Windows.close('widget_window');
 
-                // Restore cursor position for QuillJS
-                if (typeof quillEditors !== 'undefined' && quillEditors.has(this.widgetTargetId)) {
-                    const quillEditor = quillEditors.get(this.widgetTargetId);
-                    if (quillEditor && quillEditor.editor && this.quillRange) {
-                        quillEditor.editor.setSelection(this.quillRange);
+                // Insert widget content using Tiptap
+                if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.widgetTargetId)) {
+                    const tiptapEditor = tiptapEditors.get(this.widgetTargetId);
+                    if (tiptapEditor) {
+                        tiptapEditor.insertContent(html);
                     }
-                }
-
-                const quillEditor = quillEditors.get(this.widgetTargetId);
-                if (quillEditor && quillEditor.editor) {
-                    quillEditor.insertContent(html);
                 }
             } catch(error) {
                 console.error(error);

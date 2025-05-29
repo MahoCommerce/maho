@@ -79,11 +79,11 @@ const Variables = {
     insertVariable(value) {
         this.closeDialogWindow();
         
-        // Check if we have a QuillJS editor
-        if (typeof quillEditors !== 'undefined' && quillEditors.has(this.textareaElementId)) {
-            const quillEditor = quillEditors.get(this.textareaElementId);
-            if (quillEditor && quillEditor.editor) {
-                quillEditor.insertContent(value);
+        // Check if we have a Tiptap editor
+        if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.textareaElementId)) {
+            const tiptapEditor = tiptapEditors.get(this.textareaElementId);
+            if (tiptapEditor && tiptapEditor.editor) {
+                tiptapEditor.insertContent(value);
                 return;
             }
         }
@@ -126,11 +126,11 @@ const OpenmagevariablePlugin = {
         if (this.textareaId) {
             Variables.closeDialogWindow();
             
-            // Check if we have a QuillJS editor
-            if (typeof quillEditors !== 'undefined' && quillEditors.has(this.textareaId)) {
-                const quillEditor = quillEditors.get(this.textareaId);
-                if (quillEditor && quillEditor.editor) {
-                    quillEditor.insertContent(value);
+            // Check if we have a Tiptap editor
+            if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.textareaId)) {
+                const tiptapEditor = tiptapEditors.get(this.textareaId);
+                if (tiptapEditor && tiptapEditor.editor) {
+                    tiptapEditor.insertContent(value);
                     return;
                 }
             }
@@ -143,14 +143,14 @@ const OpenmagevariablePlugin = {
         } else {
             Variables.closeDialogWindow();
             
-            // Check if we're using QuillJS
-            if (typeof quillEditors !== 'undefined' && this.editor && this.editor.container) {
-                // Find the QuillJS instance by container
+            // Check if we're using Tiptap
+            if (typeof tiptapEditors !== 'undefined' && this.editor && this.editor.container) {
+                // Find the Tiptap instance by container
                 const editorId = this.editor.container.previousElementSibling?.id;
-                if (editorId && quillEditors.has(editorId)) {
-                    const quillEditor = quillEditors.get(editorId);
-                    if (quillEditor) {
-                        quillEditor.insertContent(value);
+                if (editorId && tiptapEditors.has(editorId)) {
+                    const tiptapEditor = tiptapEditors.get(editorId);
+                    if (tiptapEditor) {
+                        tiptapEditor.insertContent(value);
                         return;
                     }
                 }

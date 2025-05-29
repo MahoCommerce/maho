@@ -76,11 +76,11 @@ const catalogWysiwygEditor = {
 
         let content = document.getElementById(`${elementId}_editor`)?.value;
         
-        // Check if we have a QuillJS editor
-        if (typeof quillEditors !== 'undefined' && quillEditors.has(wysiwygObj.id)) {
-            const quillEditor = quillEditors.get(wysiwygObj.id);
-            if (quillEditor && quillEditor.editor) {
-                content = quillEditor.editor.root.innerHTML;
+        // Check if we have a Tiptap editor
+        if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(wysiwygObj.id)) {
+            const tiptapEditor = tiptapEditors.get(wysiwygObj.id);
+            if (tiptapEditor && tiptapEditor.editor) {
+                content = tiptapEditor.editor.getHTML();
             }
         }
 

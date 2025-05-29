@@ -21,7 +21,7 @@ class Mage_Core_Model_Variable_Config
     public function getWysiwygPluginSettings($config)
     {
         $variableConfig = [];
-        // Add variable URL for QuillJS
+        // Add variable URL for Tiptap
         $variableConfig['variable_window_url'] = $this->getVariablesWysiwygActionUrl();
 
         // Keep legacy plugin config for backward compatibility

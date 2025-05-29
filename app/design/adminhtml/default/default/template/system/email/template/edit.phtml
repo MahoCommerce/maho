@@ -170,8 +170,8 @@ const templateControl = {
             document.getElementById('change_flag_element').value = '1';
         }
 
-        // Check if we have a QuillJS editor
-        const editor = window.quillEditors?.get('template_text');
+        // Check if we have a Tiptap editor
+        const editor = window.tiptapEditors?.get('template_text');
         if (editor?.editor) {
             editor.updateTextArea();
         }
@@ -191,8 +191,8 @@ const templateControl = {
         const previewText = document.getElementById('preview_text');
         const templateText = document.getElementById('template_text');
 
-        // Check if we have a QuillJS editor
-        const editor = window.quillEditors?.get('template_text');
+        // Check if we have a Tiptap editor
+        const editor = window.tiptapEditors?.get('template_text');
         if (editor?.editor) {
             editor.updateTextArea();
         }

@@ -62,7 +62,7 @@ const queueControl = {
         const previewTextElement = document.getElementById('preview_text');
 
         if (this.isEditor()) {
-            const editor = window.quillEditors?.get(this.id);
+            const editor = window.tiptapEditors?.get(this.id);
             editor?.editor?.updateTextArea();
         }
 
@@ -83,7 +83,7 @@ const queueControl = {
     },
     
     isEditor() {
-        return window.quillEditors?.has?.(this.id);
+        return window.tiptapEditors?.has?.(this.id);
     },
     
     resume() {
