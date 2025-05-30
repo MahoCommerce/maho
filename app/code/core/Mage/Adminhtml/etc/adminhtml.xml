@@ -233,24 +233,6 @@
                             <cache translate="title">
                                 <title>Cache Management</title>
                             </cache>
-                            <directory translate="title">
-                                <title>Directory Management</title>
-                                <sort_order>85</sort_order>
-                                <children>
-                                    <countries translate="title">
-                                        <title>Countries</title>
-                                        <sort_order>10</sort_order>
-                                    </countries>
-                                    <regions translate="title">
-                                        <title>Regions</title>
-                                        <sort_order>20</sort_order>
-                                    </regions>
-                                    <region_names translate="title">
-                                        <title>Region Names</title>
-                                        <sort_order>30</sort_order>
-                                    </region_names>
-                                </children>
-                            </directory>
                         </children>
                     </system>
                     <global_search translate="title">
