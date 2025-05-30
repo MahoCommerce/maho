@@ -25,7 +25,7 @@ class Mage_Directory_Block_Adminhtml_Regionname_Grid extends Mage_Adminhtml_Bloc
         // Create a database collection that properly handles the region name table
         $collection = new Varien_Data_Collection_Db(Mage::getSingleton('core/resource')->getConnection('core_read'));
         $resource = Mage::getSingleton('core/resource');
-        
+
         $collection->getSelect()
             ->from(['rn' => $resource->getTableName('directory_country_region_name')])
             ->joinLeft(
@@ -35,7 +35,7 @@ class Mage_Directory_Block_Adminhtml_Regionname_Grid extends Mage_Adminhtml_Bloc
             )
             ->columns(['composite_id' => "CONCAT(rn.locale, '|', rn.region_id)"])
             ->order(['rn.region_id ASC', 'rn.locale ASC']);
-        
+
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }
