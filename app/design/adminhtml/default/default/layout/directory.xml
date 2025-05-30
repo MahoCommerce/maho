@@ -13,19 +13,19 @@
     <!-- Countries Management -->
     <adminhtml_directory_country_index>
         <reference name="content">
-            <block type="adminhtml/directory_country" name="directory.country"/>
+            <block type="directory/adminhtml_country" name="directory.country"/>
         </reference>
     </adminhtml_directory_country_index>
 
     <adminhtml_directory_country_grid>
         <reference name="content">
-            <block type="adminhtml/directory_country_grid" name="directory.country.grid"/>
+            <block type="directory/adminhtml_country_grid" name="directory.country.grid"/>
         </reference>
     </adminhtml_directory_country_grid>
 
     <adminhtml_directory_country_edit>
         <reference name="content">
-            <block type="adminhtml/directory_country_edit" name="directory.country.edit"/>
+            <block type="directory/adminhtml_country_edit" name="directory.country.edit"/>
         </reference>
     </adminhtml_directory_country_edit>
 
@@ -36,19 +36,19 @@
     <!-- Regions Management -->
     <adminhtml_directory_region_index>
         <reference name="content">
-            <block type="adminhtml/directory_region" name="directory.region"/>
+            <block type="directory/adminhtml_region" name="directory.region"/>
         </reference>
     </adminhtml_directory_region_index>
 
     <adminhtml_directory_region_grid>
         <reference name="content">
-            <block type="adminhtml/directory_region_grid" name="directory.region.grid"/>
+            <block type="directory/adminhtml_region_grid" name="directory.region.grid"/>
         </reference>
     </adminhtml_directory_region_grid>
 
     <adminhtml_directory_region_edit>
         <reference name="content">
-            <block type="adminhtml/directory_region_edit" name="directory.region.edit"/>
+            <block type="directory/adminhtml_region_edit" name="directory.region.edit"/>
         </reference>
     </adminhtml_directory_region_edit>
 
@@ -59,19 +59,19 @@
     <!-- Region Names Management -->
     <adminhtml_directory_regionname_index>
         <reference name="content">
-            <block type="adminhtml/directory_regionname" name="directory.regionname"/>
+            <block type="directory/adminhtml_regionname" name="directory.regionname"/>
         </reference>
     </adminhtml_directory_regionname_index>
 
     <adminhtml_directory_regionname_grid>
         <reference name="content">
-            <block type="adminhtml/directory_regionname_grid" name="directory.regionname.grid"/>
+            <block type="directory/adminhtml_regionname_grid" name="directory.regionname.grid"/>
         </reference>
     </adminhtml_directory_regionname_grid>
 
     <adminhtml_directory_regionname_edit>
         <reference name="content">
-            <block type="adminhtml/directory_regionname_edit" name="directory.regionname.edit"/>
+            <block type="directory/adminhtml_regionname_edit" name="directory.regionname.edit"/>
         </reference>
     </adminhtml_directory_regionname_edit>
 

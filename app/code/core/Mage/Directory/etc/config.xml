@@ -109,6 +109,17 @@
             </updates>
         </layout>
     </frontend>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <Mage_Directory before="Mage_Adminhtml">Mage_Directory_Adminhtml</Mage_Directory>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
     <adminhtml>
         <translate>
             <modules>

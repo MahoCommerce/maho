@@ -98,27 +98,6 @@
                     <action>adminhtml/cache</action>
                     <sort_order>90</sort_order>
                 </cache>
-                <directory translate="title">
-                    <title>Directory Management</title>
-                    <sort_order>95</sort_order>
-                    <children>
-                        <countries translate="title">
-                            <title>Countries</title>
-                            <action>adminhtml/directory_country</action>
-                            <sort_order>10</sort_order>
-                        </countries>
-                        <regions translate="title">
-                            <title>Regions</title>
-                            <action>adminhtml/directory_region</action>
-                            <sort_order>20</sort_order>
-                        </regions>
-                        <region_names translate="title">
-                            <title>Region Names</title>
-                            <action>adminhtml/directory_regionname</action>
-                            <sort_order>30</sort_order>
-                        </region_names>
-                    </children>
-                </directory>
                 <store translate="title" module="core">
                     <title>Manage Stores</title>
                     <action>adminhtml/system_store/</action>
