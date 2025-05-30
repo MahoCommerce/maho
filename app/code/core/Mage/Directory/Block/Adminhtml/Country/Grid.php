@@ -64,7 +64,7 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
 
         $this->addColumn('action', [
             'header' => Mage::helper('adminhtml')->__('Action'),
-            'width' => '50px',
+            'width' => '70px',
             'type' => 'action',
             'getter' => 'getCountryId',
             'actions' => [

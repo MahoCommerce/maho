@@ -54,7 +54,7 @@ class Mage_Directory_Block_Adminhtml_Regionname_Grid extends Mage_Adminhtml_Bloc
         $this->addColumn('country_id', [
             'header' => Mage::helper('adminhtml')->__('Country'),
             'align' => 'left',
-            'width' => '100px',
+            'width' => '200px',
             'index' => 'country_id',
             'type' => 'text',
             'renderer' => 'directory/adminhtml_regionname_grid_renderer_country',
@@ -63,7 +63,7 @@ class Mage_Directory_Block_Adminhtml_Regionname_Grid extends Mage_Adminhtml_Bloc
         $this->addColumn('default_name', [
             'header' => Mage::helper('adminhtml')->__('Default Name'),
             'align' => 'left',
-            'width' => '150px',
+            'width' => '200px',
             'index' => 'default_name',
             'type' => 'text',
         ]);
@@ -85,7 +85,7 @@ class Mage_Directory_Block_Adminhtml_Regionname_Grid extends Mage_Adminhtml_Bloc
 
         $this->addColumn('action', [
             'header' => Mage::helper('adminhtml')->__('Action'),
-            'width' => '50px',
+            'width' => '70px',
             'type' => 'action',
             'getter' => 'getCompositeId',
             'actions' => [
