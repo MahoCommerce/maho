@@ -1,0 +1,64 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package    Mage_Adminhtml
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+class Mage_Adminhtml_Block_Directory_Country_Edit_Tab_Main extends Mage_Adminhtml_Block_Widget_Form
+{
+    #[\Override]
+    protected function _prepareForm(): self
+    {
+        $country = Mage::registry('current_country');
+
+        $form = new Varien_Data_Form();
+        $form->setHtmlIdPrefix('country_');
+
+        $fieldset = $form->addFieldset('base_fieldset', [
+            'legend' => Mage::helper('adminhtml')->__('Country Information'),
+            'class' => 'fieldset-wide',
+        ]);
+
+        if ($country->getCountryId()) {
+            $fieldset->addField('country_id', 'hidden', [
+                'name' => 'country_id',
+            ]);
+        }
+
+        $fieldset->addField('country_id_input', 'text', [
+            'name' => $country->getCountryId() ? 'country_id_display' : 'country_id',
+            'label' => Mage::helper('adminhtml')->__('Country ID'),
+            'title' => Mage::helper('adminhtml')->__('Country ID'),
+            'required' => true,
+            'disabled' => (bool) $country->getCountryId(),
+            'note' => $country->getCountryId() ?
+                Mage::helper('adminhtml')->__('Country ID cannot be changed after creation') :
+                Mage::helper('adminhtml')->__('Two character country code (e.g. US, GB, DE)'),
+        ]);
+
+        $fieldset->addField('iso2_code', 'text', [
+            'name' => 'iso2_code',
+            'label' => Mage::helper('adminhtml')->__('ISO2 Code'),
+            'title' => Mage::helper('adminhtml')->__('ISO2 Code'),
+            'maxlength' => 2,
+            'note' => Mage::helper('adminhtml')->__('Two character ISO code (usually same as Country ID)'),
+        ]);
+
+        $fieldset->addField('iso3_code', 'text', [
+            'name' => 'iso3_code',
+            'label' => Mage::helper('adminhtml')->__('ISO3 Code'),
+            'title' => Mage::helper('adminhtml')->__('ISO3 Code'),
+            'maxlength' => 3,
+            'note' => Mage::helper('adminhtml')->__('Three character ISO code (e.g. USA, GBR, DEU)'),
+        ]);
+
+        $form->setValues($country->getData());
+        $this->setForm($form);
+
+        return parent::_prepareForm();
+    }
+}
