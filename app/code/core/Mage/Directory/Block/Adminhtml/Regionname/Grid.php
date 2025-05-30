@@ -22,30 +22,20 @@ class Mage_Directory_Block_Adminhtml_Regionname_Grid extends Mage_Adminhtml_Bloc
     #[\Override]
     protected function _prepareCollection(): self
     {
-        $collection = new Varien_Data_Collection();
-
-        // Get the data directly from the database
-        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+        // Create a database collection that properly handles the region name table
+        $collection = new Varien_Data_Collection_Db(Mage::getSingleton('core/resource')->getConnection('core_read'));
         $resource = Mage::getSingleton('core/resource');
-
-        $select = $adapter->select()
+        
+        $collection->getSelect()
             ->from(['rn' => $resource->getTableName('directory_country_region_name')])
             ->joinLeft(
                 ['r' => $resource->getTableName('directory_country_region')],
                 'rn.region_id = r.region_id',
                 ['country_id', 'code', 'default_name'],
             )
+            ->columns(['composite_id' => "CONCAT(rn.locale, '|', rn.region_id)"])
             ->order(['rn.region_id ASC', 'rn.locale ASC']);
-
-        $data = $adapter->fetchAll($select);
-
-        foreach ($data as $row) {
-            $item = new Varien_Object($row);
-            // Create a composite ID for mass actions
-            $item->setId($row['locale'] . '|' . $row['region_id']);
-            $collection->addItem($item);
-        }
-
+        
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }
@@ -97,7 +87,7 @@ class Mage_Directory_Block_Adminhtml_Regionname_Grid extends Mage_Adminhtml_Bloc
             'header' => Mage::helper('adminhtml')->__('Action'),
             'width' => '50px',
             'type' => 'action',
-            'getter' => 'getId',
+            'getter' => 'getCompositeId',
             'actions' => [
                 [
                     'caption' => Mage::helper('adminhtml')->__('Edit'),
@@ -131,7 +121,7 @@ class Mage_Directory_Block_Adminhtml_Regionname_Grid extends Mage_Adminhtml_Bloc
     #[\Override]
     protected function _prepareMassaction(): self
     {
-        $this->setMassactionIdField('id');
+        $this->setMassactionIdField('composite_id');
         $this->getMassactionBlock()->setFormFieldName('region_name');
 
         $this->getMassactionBlock()->addItem('delete', [
