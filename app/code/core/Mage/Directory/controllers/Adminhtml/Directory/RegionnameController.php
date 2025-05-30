@@ -10,10 +10,7 @@
 
 class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * Init actions
-     */
-    protected function _initAction(): self
+    protected function initAction(): self
     {
         $this->loadLayout()
             ->_setActiveMenu('system/directory/region_names')
@@ -41,7 +38,7 @@ class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Admin
             ->_title($this->__('Directory Management'))
             ->_title($this->__('Region Names'));
 
-        $this->_initAction();
+        $this->initAction();
         $this->renderLayout();
     }
 
@@ -105,7 +102,7 @@ class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Admin
 
         Mage::register('current_region_name', $data);
 
-        $this->_initAction()
+        $this->initAction()
             ->_addBreadcrumb(
                 ($locale && $regionId) ? Mage::helper('adminhtml')->__('Edit Region Name') : Mage::helper('adminhtml')->__('New Region Name'),
                 ($locale && $regionId) ? Mage::helper('adminhtml')->__('Edit Region Name') : Mage::helper('adminhtml')->__('New Region Name'),

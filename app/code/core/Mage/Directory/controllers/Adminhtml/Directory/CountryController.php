@@ -10,10 +10,7 @@
 
 class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtml_Controller_Action
 {
-    /**
-     * Init actions
-     */
-    protected function _initAction(): self
+    protected function initAction(): self
     {
         $this->loadLayout()
             ->_setActiveMenu('system/directory/countries')
@@ -41,7 +38,7 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
             ->_title($this->__('Directory Management'))
             ->_title($this->__('Countries'));
 
-        $this->_initAction();
+        $this->initAction();
         $this->renderLayout();
     }
 
@@ -90,7 +87,7 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
 
         Mage::register('current_country', $model);
 
-        $this->_initAction()
+        $this->initAction()
             ->_addBreadcrumb(
                 $id ? Mage::helper('adminhtml')->__('Edit Country') : Mage::helper('adminhtml')->__('New Country'),
                 $id ? Mage::helper('adminhtml')->__('Edit Country') : Mage::helper('adminhtml')->__('New Country'),
