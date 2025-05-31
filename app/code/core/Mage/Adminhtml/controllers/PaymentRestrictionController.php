@@ -114,8 +114,35 @@ class Mage_Adminhtml_PaymentRestrictionController extends Mage_Adminhtml_Control
 
             // Process conditions using the rule model
             $rule = Mage::getModel('payment/restriction_rule');
+            
+            // Set up the form for the rule
+            $form = new Varien_Data_Form();
+            $form->setHtmlIdPrefix('rule_');
+            $rule->setForm($form);
+            
+            // Load existing data if editing
+            if ($id && $model->getConditionsSerialized()) {
+                $rule->setConditionsSerialized($model->getConditionsSerialized());
+                $rule->getConditions(); // This will deserialize existing conditions
+            }
+            
+            // Extract conditions from nested rule structure (like SalesRule does)
+            if (isset($data['rule']['conditions'])) {
+                $data['conditions'] = $data['rule']['conditions'];
+            }
+            unset($data['rule']);
+            
+            // Load the posted data
             $rule->loadPost($data);
-            $data['conditions_serialized'] = serialize($rule->getConditions()->asArray());
+            
+            // Serialize the conditions
+            $conditionsArray = $rule->getConditions()->asArray();
+            $data['conditions_serialized'] = serialize($conditionsArray);
+            
+            // Debug logging
+            Mage::log('Payment Restriction Save - Posted Data: ' . print_r($data, true), null, 'payment_restrictions.log');
+            Mage::log('Payment Restriction Save - Conditions Array: ' . print_r($conditionsArray, true), null, 'payment_restrictions.log');
+            Mage::log('Payment Restriction Save - Serialized Length: ' . strlen($data['conditions_serialized']), null, 'payment_restrictions.log');
 
             $model->setData($data);
 

@@ -37,10 +37,7 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_SalesRule_Model_Rule
      */
     protected function _beforeSave()
     {
-        // Serialize conditions if they exist
-        if ($this->getConditions()) {
-            $this->setConditionsSerialized(serialize($this->getConditions()->asArray()));
-        }
+        // Don't auto-serialize here - it's handled in the controller
         return parent::_beforeSave();
     }
 
@@ -76,17 +73,17 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_SalesRule_Model_Rule
             $this->_conditions = $this->getConditionsInstance();
             $this->_conditions->setRule($this);
             $this->_conditions->setId('1')->setPrefix('conditions');
-        }
-
-        // Try to deserialize conditions from database
-        if ($this->getConditionsSerialized()) {
-            try {
-                $conditions = unserialize($this->getConditionsSerialized());
-                if (is_array($conditions) && !empty($conditions)) {
-                    $this->_conditions->loadArray($conditions);
+            
+            // Try to deserialize conditions from database only when first creating conditions
+            if ($this->getConditionsSerialized()) {
+                try {
+                    $conditions = unserialize($this->getConditionsSerialized());
+                    if (is_array($conditions) && !empty($conditions)) {
+                        $this->_conditions->loadArray($conditions);
+                    }
+                } catch (Exception $e) {
+                    Mage::logException($e);
                 }
-            } catch (Exception $e) {
-                Mage::logException($e);
             }
         }
 
