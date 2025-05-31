@@ -16,7 +16,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Address extends Mage_Rule_Mo
     /**
      * Fallback form instance
      */
-    protected $_form;
+    protected ?Varien_Data_Form $_form = null;
 
     public function __construct()
     {

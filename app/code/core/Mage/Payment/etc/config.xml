@@ -97,14 +97,6 @@
             </groups>
         </payment>
         <events>
-            <payment_method_is_active>
-                <observers>
-                    <payment_restrictions>
-                        <class>payment/observer</class>
-                        <method>paymentMethodIsActive</method>
-                    </payment_restrictions>
-                </observers>
-            </payment_method_is_active>
             <sales_order_save_before>
                 <observers>
                     <payment_sales_order_save_before>

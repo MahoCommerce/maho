@@ -13,45 +13,6 @@
 class Mage_Payment_Model_Observer
 {
     /**
-     * Apply payment restrictions
-     *
-     * @param Varien_Event_Observer $observer
-     */
-    public function paymentMethodIsActive(Varien_Event_Observer $observer): void
-    {
-        /** @var stdClass $result */
-        $result = $observer->getEvent()->getResult();
-        /** @var Mage_Payment_Model_Method_Abstract $methodInstance */
-        $methodInstance = $observer->getEvent()->getMethodInstance();
-        /** @var Mage_Sales_Model_Quote $quote */
-        $quote = $observer->getEvent()->getQuote();
-
-        // Only apply restrictions if payment method is currently available
-        if (!$result->isAvailable) {
-            return;
-        }
-
-        // Apply restrictions
-        $restrictionModel = Mage::getModel('payment/restriction');
-        $customer = null;
-
-        // Get customer if logged in
-        if ($quote && $quote->getCustomerId()) {
-            $customer = Mage::getModel('customer/customer')->load($quote->getCustomerId());
-        }
-
-        $isAllowed = $restrictionModel->validatePaymentMethod(
-            $methodInstance->getCode(),
-            $quote,
-            $customer,
-        );
-
-        if (!$isAllowed) {
-            $result->isAvailable = false;
-            $result->isDeniedInConfig = true;
-        }
-    }
-    /**
      * Set forced canCreditmemo flag
      *
      * @param Varien_Event_Observer $observer
