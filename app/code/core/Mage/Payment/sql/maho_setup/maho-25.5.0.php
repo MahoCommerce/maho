@@ -10,8 +10,7 @@
 
 /** @var Mage_Core_Model_Resource_Setup $this */
 $installer = $this;
-$installer->startSetup();
-
+$installer->startSetup();return;
 /**
  * Create table 'payment/restriction'
  */
@@ -65,6 +64,9 @@ $table = $installer->getConnection()
     ->addColumn('time_restriction', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
         'nullable'  => true,
     ], 'Time Restriction (JSON)')
+    ->addColumn('conditions_serialized', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+        'nullable'  => true,
+    ], 'Serialized conditions for payment restrictions')
     ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
         'default'   => Varien_Db_Ddl_Table::TIMESTAMP_INIT,

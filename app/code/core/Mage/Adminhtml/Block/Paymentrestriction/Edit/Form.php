@@ -21,6 +21,7 @@ class Mage_Adminhtml_Block_Paymentrestriction_Edit_Form extends Mage_Adminhtml_B
             'method' => 'post',
         ]);
 
+        $form->setHtmlIdPrefix('rule_');
         $form->setUseContainer(true);
         $this->setForm($form);
 
@@ -80,76 +81,35 @@ class Mage_Adminhtml_Block_Paymentrestriction_Edit_Form extends Mage_Adminhtml_B
             'note'   => Mage::helper('payment')->__('Leave empty to apply to all payment methods'),
         ]);
 
-        // Conditions fieldset
-        $fieldset = $form->addFieldset('conditions', [
-            'legend' => Mage::helper('payment')->__('Conditions'),
-        ]);
+        // Conditions fieldset - Advanced rule widget
+        $renderer = Mage::getBlockSingleton('adminhtml/widget_form_renderer_fieldset')
+            ->setTemplate('promo/fieldset.phtml')
+            ->setNewChildUrl($this->getUrl('*/*/newConditionHtml/form/rule_conditions_fieldset'));
 
-        $fieldset->addField('restriction_customer_groups', 'multiselect', [
-            'name'   => 'customer_groups[]',
-            'label'  => Mage::helper('payment')->__('Customer Groups'),
-            'title'  => Mage::helper('payment')->__('Customer Groups'),
-            'values' => $this->_getCustomerGroups(),
-        ]);
+        $fieldset = $form->addFieldset('conditions_fieldset', [
+            'legend' => Mage::helper('payment')->__('Apply the restriction only if the following conditions are met (leave blank for all)'),
+        ])->setRenderer($renderer);
 
-        $fieldset->addField('restriction_countries', 'multiselect', [
-            'name'   => 'countries[]',
-            'label'  => Mage::helper('payment')->__('Countries'),
-            'title'  => Mage::helper('payment')->__('Countries'),
-            'values' => $this->_getCountries(),
-        ]);
+        $rule = $this->_getRestrictionRule();
+        $rule->setForm($form);
 
-        $fieldset->addField('restriction_store_ids', 'multiselect', [
-            'name'   => 'store_ids[]',
-            'label'  => Mage::helper('payment')->__('Stores'),
-            'title'  => Mage::helper('payment')->__('Stores'),
-            'values' => $this->_getStores(),
-        ]);
-
-        $fieldset->addField('min_order_total', 'text', [
-            'name'  => 'min_order_total',
-            'label' => Mage::helper('payment')->__('Minimum Order Total'),
-            'title' => Mage::helper('payment')->__('Minimum Order Total'),
-            'class' => 'validate-number',
-        ]);
-
-        $fieldset->addField('max_order_total', 'text', [
-            'name'  => 'max_order_total',
-            'label' => Mage::helper('payment')->__('Maximum Order Total'),
-            'title' => Mage::helper('payment')->__('Maximum Order Total'),
-            'class' => 'validate-number',
-        ]);
-
-        $fieldset->addField('product_categories', 'text', [
-            'name'  => 'product_categories',
-            'label' => Mage::helper('payment')->__('Product Categories'),
-            'title' => Mage::helper('payment')->__('Product Categories'),
-            'note'  => Mage::helper('payment')->__('Comma-separated category IDs'),
-        ]);
-
-        $fieldset->addField('product_skus', 'textarea', [
-            'name'  => 'product_skus',
-            'label' => Mage::helper('payment')->__('Product SKUs'),
-            'title' => Mage::helper('payment')->__('Product SKUs'),
-            'note'  => Mage::helper('payment')->__('Comma-separated SKUs'),
-        ]);
+        $fieldset->addField('conditions', 'text', [
+            'name' => 'conditions',
+            'label' => Mage::helper('payment')->__('Conditions'),
+            'title' => Mage::helper('payment')->__('Conditions'),
+            'required' => false,
+        ])->setRule($rule)->setRenderer(Mage::getBlockSingleton('rule/conditions'));
 
         if ($data = Mage::registry('payment_restriction')->getData()) {
             // Convert comma-separated values back to arrays for multiselect fields
             if (isset($data['payment_methods'])) {
                 $data['restriction_payment_methods_field'] = explode(',', $data['payment_methods']);
             }
-            if (isset($data['customer_groups'])) {
-                $data['restriction_customer_groups'] = explode(',', $data['customer_groups']);
-            }
-            if (isset($data['countries'])) {
-                $data['restriction_countries'] = explode(',', $data['countries']);
-            }
-            if (isset($data['store_ids'])) {
-                $data['restriction_store_ids'] = explode(',', $data['store_ids']);
-            }
 
-            $form->setValues($data);
+            // Set form values for non-rule fields only
+            $formData = $data;
+            unset($formData['conditions_serialized']); // Don't set this as form data
+            $form->setValues($formData);
         }
 
         return parent::_prepareForm();
@@ -166,6 +126,21 @@ class Mage_Adminhtml_Block_Paymentrestriction_Edit_Form extends Mage_Adminhtml_B
         }
 
         return $methods;
+    }
+
+    protected function _getRestrictionRule(): Mage_Payment_Model_Restriction_Rule
+    {
+        $restriction = Mage::registry('payment_restriction');
+        $rule = Mage::getModel('payment/restriction_rule');
+
+        if ($restriction && $restriction->getId()) {
+            $rule->setData($restriction->getData());
+        }
+
+        // Always ensure conditions are properly initialized
+        $rule->getConditions();
+
+        return $rule;
     }
 
     protected function _getCustomerGroups(): array

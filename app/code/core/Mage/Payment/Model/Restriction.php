@@ -34,8 +34,6 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
         $restrictions = $this->getCollection()
             ->addFieldToFilter('status', self::STATUS_ENABLED);
 
-        $isAllowed = true;
-
         foreach ($restrictions as $restriction) {
             // Check if this restriction applies to the payment method
             $paymentMethods = $restriction->getPaymentMethods();
@@ -46,13 +44,23 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
                 }
             }
 
-            // Check if this restriction's conditions match
-            if ($this->_matchesRestriction($restriction, $quote, $customer)) {
-                return false; // Denylist rule matched - deny payment method
+            // Use the new rule-based validation if conditions are available
+            if ($restriction->getConditionsSerialized()) {
+                $rule = Mage::getModel('payment/restriction_rule');
+                $rule->setData($restriction->getData());
+
+                if ($quote && $rule->validate($quote)) {
+                    return false; // Denylist rule matched - deny payment method
+                }
+            } else {
+                // Fallback to legacy validation for backward compatibility
+                if ($this->_matchesRestriction($restriction, $quote, $customer)) {
+                    return false; // Denylist rule matched - deny payment method
+                }
             }
         }
 
-        return $isAllowed;
+        return true;
     }
 
     /**

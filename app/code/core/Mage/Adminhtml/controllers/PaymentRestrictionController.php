@@ -111,37 +111,11 @@ class Mage_Adminhtml_PaymentRestrictionController extends Mage_Adminhtml_Control
             if (isset($data['payment_methods']) && is_array($data['payment_methods'])) {
                 $data['payment_methods'] = implode(',', $data['payment_methods']);
             }
-            if (isset($data['customer_groups']) && is_array($data['customer_groups'])) {
-                $data['customer_groups'] = implode(',', $data['customer_groups']);
-            }
-            if (isset($data['countries']) && is_array($data['countries'])) {
-                $data['countries'] = implode(',', $data['countries']);
-            }
-            if (isset($data['store_ids']) && is_array($data['store_ids'])) {
-                $data['store_ids'] = implode(',', $data['store_ids']);
-            }
-            if (isset($data['product_categories']) && is_array($data['product_categories'])) {
-                $data['product_categories'] = implode(',', $data['product_categories']);
-            }
 
-            // Process time restriction
-            if (isset($data['time_restriction_enabled']) && $data['time_restriction_enabled']) {
-                $timeData = [];
-                if (!empty($data['days'])) {
-                    $timeData['days'] = $data['days'];
-                }
-                if (!empty($data['start_time']) && !empty($data['end_time'])) {
-                    $timeData['start_time'] = $data['start_time'];
-                    $timeData['end_time'] = $data['end_time'];
-                }
-                if (!empty($data['start_date']) && !empty($data['end_date'])) {
-                    $timeData['start_date'] = $data['start_date'];
-                    $timeData['end_date'] = $data['end_date'];
-                }
-                $data['time_restriction'] = json_encode($timeData);
-            } else {
-                $data['time_restriction'] = null;
-            }
+            // Process conditions using the rule model
+            $rule = Mage::getModel('payment/restriction_rule');
+            $rule->loadPost($data);
+            $data['conditions_serialized'] = serialize($rule->getConditions()->asArray());
 
             $model->setData($data);
 
@@ -239,6 +213,36 @@ class Mage_Adminhtml_PaymentRestrictionController extends Mage_Adminhtml_Control
             }
         }
         $this->_redirect('*/*/index');
+    }
+
+    public function newConditionHtmlAction(): void
+    {
+        $id = $this->getRequest()->getParam('id');
+        $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
+        $type = $typeArr[0];
+
+        // Create the rule and ensure it has a form
+        $rule = Mage::getModel('payment/restriction_rule');
+
+        // Ensure the rule has a form (should auto-create if null)
+        $rule->getForm();
+
+        $model = Mage::getModel($type)
+            ->setId($id)
+            ->setType($type)
+            ->setRule($rule)
+            ->setPrefix('conditions');
+        if (!empty($typeArr[1])) {
+            $model->setAttribute($typeArr[1]);
+        }
+
+        if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
+            $model->setJsFormObject($this->getRequest()->getParam('form'));
+            $html = $model->asHtmlRecursive();
+        } else {
+            $html = '';
+        }
+        $this->getResponse()->setBody($html);
     }
 
     protected function _isAllowed(): bool
