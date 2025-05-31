@@ -179,9 +179,9 @@
         </translate>
         <layout>
             <updates>
-                <paymentrestriction module="Mage_Payment">
-                    <file>paymentrestriction.xml</file>
-                </paymentrestriction>
+                <payment_adminhtml module="Mage_Payment">
+                    <file>payment.xml</file>
+                </payment_adminhtml>
             </updates>
         </layout>
     </adminhtml>
