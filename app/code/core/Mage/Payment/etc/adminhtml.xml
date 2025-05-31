@@ -26,10 +26,25 @@
                                     </payment_services>
                                 </children>
                             </config>
+                            <payment_restrictions translate="title" module="payment">
+                                <title>Payment Restrictions</title>
+                                <sort_order>100</sort_order>
+                            </payment_restrictions>
                         </children>
                     </system>
                 </children>
             </admin>
         </resources>
     </acl>
+    <menu>
+        <system>
+            <children>
+                <payment_restrictions translate="title" module="payment">
+                    <title>Payment Restrictions</title>
+                    <sort_order>100</sort_order>
+                    <action>adminhtml/paymentRestriction</action>
+                </payment_restrictions>
+            </children>
+        </system>
+    </menu>
 </config>
