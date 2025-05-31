@@ -71,140 +71,46 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
         ?Mage_Sales_Model_Quote $quote = null,
         ?Mage_Customer_Model_Customer $customer = null
     ): bool {
+        // Date restriction (from_date, to_date)
+        if ($restriction->getFromDate() || $restriction->getToDate()) {
+            $now = new DateTime();
+            $currentDate = $now->format('Y-m-d H:i:s');
+
+            if ($restriction->getFromDate() && $currentDate < $restriction->getFromDate()) {
+                return false;
+            }
+
+            if ($restriction->getToDate() && $currentDate > $restriction->getToDate()) {
+                return false;
+            }
+        }
+
+        // Website restriction
+        if ($restriction->getWebsites() && $quote) {
+            $websiteIds = array_map('trim', explode(',', $restriction->getWebsites()));
+            $storeWebsiteId = Mage::app()->getStore($quote->getStoreId())->getWebsiteId();
+            if (!in_array($storeWebsiteId, $websiteIds)) {
+                return false;
+            }
+        }
+
         // Customer group restriction
         if ($restriction->getCustomerGroups() && $customer) {
-            $customerGroupIds = explode(',', $restriction->getCustomerGroups());
+            $customerGroupIds = array_map('trim', explode(',', $restriction->getCustomerGroups()));
             if (!in_array($customer->getGroupId(), $customerGroupIds)) {
                 return false;
             }
         } elseif ($restriction->getCustomerGroups() && $quote) {
-            $customerGroupIds = explode(',', $restriction->getCustomerGroups());
+            $customerGroupIds = array_map('trim', explode(',', $restriction->getCustomerGroups()));
             if (!in_array($quote->getCustomerGroupId(), $customerGroupIds)) {
                 return false;
             }
         }
 
-        // Country restriction
-        if ($restriction->getCountries() && $quote) {
-            $countries = explode(',', $restriction->getCountries());
-            $billingCountry = $quote->getBillingAddress()->getCountryId();
-            $shippingCountry = $quote->getShippingAddress()->getCountryId();
-
-            if (!in_array($billingCountry, $countries) && !in_array($shippingCountry, $countries)) {
-                return false;
-            }
-        }
-
-        // Store restriction
-        if ($restriction->getStoreIds() && $quote) {
-            $storeIds = explode(',', $restriction->getStoreIds());
-            if (!in_array($quote->getStoreId(), $storeIds)) {
-                return false;
-            }
-        }
-
-        // Order total restriction
-        if ($restriction->getMinOrderTotal() || $restriction->getMaxOrderTotal()) {
-            if (!$quote) {
-                return false;
-            }
-
-            $total = $quote->getBaseGrandTotal();
-
-            if ($restriction->getMinOrderTotal() && $total < $restriction->getMinOrderTotal()) {
-                return false;
-            }
-
-            if ($restriction->getMaxOrderTotal() && $total > $restriction->getMaxOrderTotal()) {
-                return false;
-            }
-        }
-
-        // Product category restriction
-        if ($restriction->getProductCategories() && $quote) {
-            $categoryIds = explode(',', $restriction->getProductCategories());
-            $hasMatchingCategory = false;
-
-            foreach ($quote->getAllVisibleItems() as $item) {
-                $product = $item->getProduct();
-                $productCategoryIds = $product->getCategoryIds();
-
-                if (array_intersect($categoryIds, $productCategoryIds)) {
-                    $hasMatchingCategory = true;
-                    break;
-                }
-            }
-
-            if (!$hasMatchingCategory) {
-                return false;
-            }
-        }
-
-        // Product SKU restriction
-        if ($restriction->getProductSkus() && $quote) {
-            $skus = array_map('trim', explode(',', $restriction->getProductSkus()));
-            $hasMatchingSku = false;
-
-            foreach ($quote->getAllVisibleItems() as $item) {
-                if (in_array($item->getSku(), $skus)) {
-                    $hasMatchingSku = true;
-                    break;
-                }
-            }
-
-            if (!$hasMatchingSku) {
-                return false;
-            }
-        }
-
-        // Time-based restriction
-        if ($restriction->getTimeRestriction()) {
-            $timeData = json_decode($restriction->getTimeRestriction(), true);
-            if (!$this->_validateTimeRestriction($timeData)) {
-                return false;
-            }
-        }
 
         return true;
     }
 
-    /**
-     * Validate time-based restrictions
-     */
-    protected function _validateTimeRestriction(array $timeData): bool
-    {
-        $now = new DateTime();
-        $currentDay = strtolower($now->format('l'));
-        $currentTime = $now->format('H:i');
-
-        // Check day restriction
-        if (isset($timeData['days']) && !empty($timeData['days'])) {
-            if (!in_array($currentDay, $timeData['days'])) {
-                return false;
-            }
-        }
-
-        // Check time range restriction
-        if (isset($timeData['start_time']) && isset($timeData['end_time'])) {
-            $startTime = $timeData['start_time'];
-            $endTime = $timeData['end_time'];
-
-            if ($currentTime < $startTime || $currentTime > $endTime) {
-                return false;
-            }
-        }
-
-        // Check date range restriction
-        if (isset($timeData['start_date']) && isset($timeData['end_date'])) {
-            $currentDate = $now->format('Y-m-d');
-
-            if ($currentDate < $timeData['start_date'] || $currentDate > $timeData['end_date']) {
-                return false;
-            }
-        }
-
-        return true;
-    }
 
     /**
      * Get available restriction types

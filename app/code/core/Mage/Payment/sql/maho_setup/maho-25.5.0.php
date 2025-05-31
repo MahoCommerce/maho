@@ -10,7 +10,7 @@
 
 /** @var Mage_Core_Model_Resource_Setup $this */
 $installer = $this;
-$installer->startSetup();return;
+$installer->startSetup();
 /**
  * Create table 'payment/restriction'
  */
@@ -25,46 +25,30 @@ $table = $installer->getConnection()
     ->addColumn('name', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
         'nullable'  => false,
     ], 'Restriction Name')
-    ->addColumn('description', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('description', Varien_Db_Ddl_Table::TYPE_TEXT, null, [
         'nullable'  => true,
     ], 'Description')
-    ->addColumn('type', Varien_Db_Ddl_Table::TYPE_VARCHAR, 32, [
-        'nullable'  => false,
-        'default'   => 'denylist',
-    ], 'Restriction Type')
     ->addColumn('status', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
         'nullable'  => false,
         'default'   => '1',
     ], 'Status')
-    ->addColumn('payment_methods', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
-        'nullable'  => true,
+    ->addColumn('payment_methods', Varien_Db_Ddl_Table::TYPE_TEXT, null, [
+        'nullable'  => false,
     ], 'Payment Methods (comma-separated)')
-    ->addColumn('customer_groups', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('customer_groups', Varien_Db_Ddl_Table::TYPE_TEXT, null, [
         'nullable'  => true,
     ], 'Customer Groups (comma-separated)')
-    ->addColumn('countries', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ->addColumn('websites', Varien_Db_Ddl_Table::TYPE_TEXT, null, [
         'nullable'  => true,
-    ], 'Countries (comma-separated)')
-    ->addColumn('store_ids', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ], 'Websites (comma-separated)')
+    ->addColumn('from_date', Varien_Db_Ddl_Table::TYPE_DATETIME, null, [
         'nullable'  => true,
-    ], 'Store IDs (comma-separated)')
-    ->addColumn('min_order_total', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
+    ], 'From Date')
+    ->addColumn('to_date', Varien_Db_Ddl_Table::TYPE_DATETIME, null, [
         'nullable'  => true,
-    ], 'Minimum Order Total')
-    ->addColumn('max_order_total', Varien_Db_Ddl_Table::TYPE_DECIMAL, '12,4', [
-        'nullable'  => true,
-    ], 'Maximum Order Total')
-    ->addColumn('product_categories', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
-        'nullable'  => true,
-    ], 'Product Categories (comma-separated)')
-    ->addColumn('product_skus', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
-        'nullable'  => true,
-    ], 'Product SKUs (comma-separated)')
-    ->addColumn('time_restriction', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
-        'nullable'  => true,
-    ], 'Time Restriction (JSON)')
-    ->addColumn('conditions_serialized', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
+    ], 'To Date')
+    ->addColumn('conditions_serialized', Varien_Db_Ddl_Table::TYPE_TEXT, null, [
         'nullable'  => true,
     ], 'Serialized conditions for payment restrictions')
     ->addColumn('created_at', Varien_Db_Ddl_Table::TYPE_TIMESTAMP, null, [
@@ -80,8 +64,12 @@ $table = $installer->getConnection()
         ['status'],
     )
     ->addIndex(
-        $installer->getIdxName('payment/restriction', ['type']),
-        ['type'],
+        $installer->getIdxName('payment/restriction', ['from_date']),
+        ['from_date'],
+    )
+    ->addIndex(
+        $installer->getIdxName('payment/restriction', ['to_date']),
+        ['to_date'],
     )
     ->setComment('Payment Method Restrictions');
 

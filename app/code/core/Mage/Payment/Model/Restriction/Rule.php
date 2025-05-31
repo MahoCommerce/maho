@@ -73,7 +73,7 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_SalesRule_Model_Rule
             $this->_conditions = $this->getConditionsInstance();
             $this->_conditions->setRule($this);
             $this->_conditions->setId('1')->setPrefix('conditions');
-            
+
             // Try to deserialize conditions from database only when first creating conditions
             if ($this->getConditionsSerialized()) {
                 try {

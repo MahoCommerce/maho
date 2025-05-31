@@ -126,7 +126,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Combine extends Mage_Rule_Mo
         if (!$this->getConditions()) {
             $this->setData('conditions', []);
         }
-        
+
         return parent::asHtml();
     }
 }

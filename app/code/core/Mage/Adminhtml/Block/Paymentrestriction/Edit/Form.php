@@ -74,11 +74,50 @@ class Mage_Adminhtml_Block_Paymentrestriction_Edit_Form extends Mage_Adminhtml_B
 
         $paymentMethods = $this->_getPaymentMethods();
         $fieldset->addField('restriction_payment_methods_field', 'multiselect', [
-            'name'   => 'payment_methods[]',
-            'label'  => Mage::helper('payment')->__('Payment Methods'),
-            'title'  => Mage::helper('payment')->__('Payment Methods'),
-            'values' => $paymentMethods,
-            'note'   => Mage::helper('payment')->__('Leave empty to apply to all payment methods'),
+            'name'     => 'payment_methods[]',
+            'label'    => Mage::helper('payment')->__('Payment Methods'),
+            'title'    => Mage::helper('payment')->__('Payment Methods'),
+            'values'   => $paymentMethods,
+            'required' => true,
+        ]);
+
+        // Scope and Dates fieldset
+        $fieldset = $form->addFieldset('restriction_scope', [
+            'legend' => Mage::helper('payment')->__('Scope and Dates'),
+        ]);
+
+        $websites = $this->_getWebsites();
+        $fieldset->addField('restriction_websites_field', 'multiselect', [
+            'name'   => 'websites[]',
+            'label'  => Mage::helper('payment')->__('Websites'),
+            'title'  => Mage::helper('payment')->__('Websites'),
+            'values' => $websites,
+            'note'   => Mage::helper('payment')->__('Leave empty to apply to all websites'),
+        ]);
+
+        $customerGroups = $this->_getCustomerGroups();
+        $fieldset->addField('restriction_customer_groups_field', 'multiselect', [
+            'name'   => 'customer_groups[]',
+            'label'  => Mage::helper('payment')->__('Customer Groups'),
+            'title'  => Mage::helper('payment')->__('Customer Groups'),
+            'values' => $customerGroups,
+            'note'   => Mage::helper('payment')->__('Leave empty to apply to all customer groups'),
+        ]);
+
+        $fieldset->addField('from_date', 'date', [
+            'name'   => 'from_date',
+            'label'  => Mage::helper('payment')->__('From Date'),
+            'title'  => Mage::helper('payment')->__('From Date'),
+            'image'  => $this->getSkinUrl('images/grid-cal.gif'),
+            'format' => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
+        ]);
+
+        $fieldset->addField('to_date', 'date', [
+            'name'   => 'to_date',
+            'label'  => Mage::helper('payment')->__('To Date'),
+            'title'  => Mage::helper('payment')->__('To Date'),
+            'image'  => $this->getSkinUrl('images/grid-cal.gif'),
+            'format' => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
         ]);
 
         // Conditions fieldset - Advanced rule widget
@@ -100,8 +139,14 @@ class Mage_Adminhtml_Block_Paymentrestriction_Edit_Form extends Mage_Adminhtml_B
 
         if ($data = Mage::registry('payment_restriction')->getData()) {
             // Convert comma-separated values back to arrays for multiselect fields
-            if (isset($data['payment_methods'])) {
+            if (isset($data['payment_methods']) && is_string($data['payment_methods']) && !empty($data['payment_methods'])) {
                 $data['restriction_payment_methods_field'] = explode(',', $data['payment_methods']);
+            }
+            if (isset($data['websites']) && is_string($data['websites']) && !empty($data['websites'])) {
+                $data['restriction_websites_field'] = explode(',', $data['websites']);
+            }
+            if (isset($data['customer_groups']) && is_string($data['customer_groups']) && !empty($data['customer_groups'])) {
+                $data['restriction_customer_groups_field'] = explode(',', $data['customer_groups']);
             }
 
             // Set form values for non-rule fields only
@@ -153,20 +198,15 @@ class Mage_Adminhtml_Block_Paymentrestriction_Edit_Form extends Mage_Adminhtml_B
         return $groups;
     }
 
-    protected function _getCountries(): array
+    protected function _getWebsites(): array
     {
-        return Mage::getModel('adminhtml/system_config_source_country')->toOptionArray();
-    }
-
-    protected function _getStores(): array
-    {
-        $stores = [];
-        foreach (Mage::app()->getStores() as $store) {
-            $stores[] = [
-                'value' => $store->getId(),
-                'label' => $store->getName() . ' (' . $store->getCode() . ')',
+        $websites = [];
+        foreach (Mage::app()->getWebsites() as $website) {
+            $websites[] = [
+                'value' => $website->getId(),
+                'label' => $website->getName() . ' (' . $website->getCode() . ')',
             ];
         }
-        return $stores;
+        return $websites;
     }
 }
