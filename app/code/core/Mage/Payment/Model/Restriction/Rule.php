@@ -11,7 +11,7 @@
 /**
  * Payment restriction rule model with condition support
  */
-class Mage_Payment_Model_Restriction_Rule extends Mage_SalesRule_Model_Rule
+class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
 {
     public const STATUS_ENABLED = 1;
     public const STATUS_DISABLED = 0;
@@ -52,14 +52,11 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_SalesRule_Model_Rule
     }
 
     /**
-     * Override to use payment restriction action models
-     *
-     * @return Mage_SalesRule_Model_Rule_Action_Collection
+     * @return void //@phpstan-ignore method.childReturnType
      */
     public function getActionsInstance()
     {
-        // We don't need actions for payment restrictions, but this is required by parent
-        return parent::getActionsInstance();
+        // We have no "actions" in this module, but this is required by parent
     }
 
     /**
