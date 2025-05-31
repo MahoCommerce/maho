@@ -111,27 +111,27 @@ class tiptapWysiwygSetup {
         const formatGroup = document.createElement('div');
         formatGroup.className = 'toolbar-group';
         
-        const boldBtn = this.createToolbarButton('Bold', this.getBoldIcon(), () => {
+        const boldBtn = this.createToolbarButton('Bold', this.getIcon('bold'), () => {
             this.editor.chain().focus().toggleBold().run();
         }, 'bold');
         formatGroup.appendChild(boldBtn);
 
-        const italicBtn = this.createToolbarButton('Italic', this.getItalicIcon(), () => {
+        const italicBtn = this.createToolbarButton('Italic', this.getIcon('italic'), () => {
             this.editor.chain().focus().toggleItalic().run();
         }, 'italic');
         formatGroup.appendChild(italicBtn);
 
-        const underlineBtn = this.createToolbarButton('Underline', this.getUnderlineIcon(), () => {
+        const underlineBtn = this.createToolbarButton('Underline', this.getIcon('underline'), () => {
             this.editor.chain().focus().toggleUnderline().run();
         }, 'underline');
         formatGroup.appendChild(underlineBtn);
 
-        const strikeBtn = this.createToolbarButton('Strike', this.getStrikeIcon(), () => {
+        const strikeBtn = this.createToolbarButton('Strike', this.getIcon('strike'), () => {
             this.editor.chain().focus().toggleStrike().run();
         }, 'strike');
         formatGroup.appendChild(strikeBtn);
 
-        const blockquoteBtn = this.createToolbarButton('Blockquote', this.getBlockquoteIcon(), () => {
+        const blockquoteBtn = this.createToolbarButton('Blockquote', this.getIcon('blockquote'), () => {
             this.editor.chain().focus().toggleBlockquote().run();
         }, 'blockquote');
         formatGroup.appendChild(blockquoteBtn);
@@ -145,12 +145,12 @@ class tiptapWysiwygSetup {
         const listGroup = document.createElement('div');
         listGroup.className = 'toolbar-group';
 
-        const bulletListBtn = this.createToolbarButton('Bullet List', this.getBulletListIcon(), () => {
+        const bulletListBtn = this.createToolbarButton('Bullet List', this.getIcon('bullet-list'), () => {
             this.editor.chain().focus().toggleBulletList().run();
         }, 'bulletList');
         listGroup.appendChild(bulletListBtn);
 
-        const orderedListBtn = this.createToolbarButton('Ordered List', this.getOrderedListIcon(), () => {
+        const orderedListBtn = this.createToolbarButton('Ordered List', this.getIcon('ordered-list'), () => {
             this.editor.chain().focus().toggleOrderedList().run();
         }, 'orderedList');
         listGroup.appendChild(orderedListBtn);
@@ -164,17 +164,17 @@ class tiptapWysiwygSetup {
         const alignGroup = document.createElement('div');
         alignGroup.className = 'toolbar-group';
 
-        const alignLeftBtn = this.createToolbarButton('Align Left', this.getAlignLeftIcon(), () => {
+        const alignLeftBtn = this.createToolbarButton('Align Left', this.getIcon('align-left'), () => {
             this.editor.chain().focus().setTextAlign('left').run();
         });
         alignGroup.appendChild(alignLeftBtn);
 
-        const alignCenterBtn = this.createToolbarButton('Align Center', this.getAlignCenterIcon(), () => {
+        const alignCenterBtn = this.createToolbarButton('Align Center', this.getIcon('align-center'), () => {
             this.editor.chain().focus().setTextAlign('center').run();
         });
         alignGroup.appendChild(alignCenterBtn);
 
-        const alignRightBtn = this.createToolbarButton('Align Right', this.getAlignRightIcon(), () => {
+        const alignRightBtn = this.createToolbarButton('Align Right', this.getIcon('align-right'), () => {
             this.editor.chain().focus().setTextAlign('right').run();
         });
         alignGroup.appendChild(alignRightBtn);
@@ -188,28 +188,28 @@ class tiptapWysiwygSetup {
         const insertGroup = document.createElement('div');
         insertGroup.className = 'toolbar-group';
 
-        const linkBtn = this.createToolbarButton('Link', this.getLinkIcon(), () => {
+        const linkBtn = this.createToolbarButton('Link', this.getIcon('link'), () => {
             this.linkHandler();
         });
         insertGroup.appendChild(linkBtn);
 
-        const imageBtn = this.createToolbarButton('Image', this.getImageIcon(), () => {
+        const imageBtn = this.createToolbarButton('Image', this.getIcon('image'), () => {
             this.imageHandler();
         });
         insertGroup.appendChild(imageBtn);
 
         // Simple Insert Table button
-        const insertTableBtn = this.createToolbarButton('Insert Table', this.getTableIcon(), () => {
+        const insertTableBtn = this.createToolbarButton('Insert Table', this.getIcon('table'), () => {
             this.editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
         });
         insertGroup.appendChild(insertTableBtn);
 
-        const widgetBtn = this.createToolbarButton('Insert Widget', this.getWidgetIcon(), () => {
+        const widgetBtn = this.createToolbarButton('Insert Widget', this.getIcon('widget'), () => {
             this.widgetHandler();
         });
         insertGroup.appendChild(widgetBtn);
 
-        const variableBtn = this.createToolbarButton('Insert Variable', this.getVariableIcon(), () => {
+        const variableBtn = this.createToolbarButton('Insert Variable', this.getIcon('variable'), () => {
             this.variableHandler();
         });
         insertGroup.appendChild(variableBtn);
@@ -231,21 +231,21 @@ class tiptapWysiwygSetup {
         bubbleMenu.id = `${this.id}_table_bubble_menu`;
 
         const tableCommands = [
-            { label: 'Add Column Before', command: 'addColumnBefore', icon: this.getAddColumnBeforeIcon() },
-            { label: 'Add Column After', command: 'addColumnAfter', icon: this.getAddColumnAfterIcon() },
-            { label: 'Delete Column', command: 'deleteColumn', icon: this.getDeleteColumnIcon() },
+            { label: 'Add Column Before', command: 'addColumnBefore', icon: this.getIcon('column-insert-left') },
+            { label: 'Add Column After', command: 'addColumnAfter', icon: this.getIcon('column-insert-right') },
+            { label: 'Delete Column', command: 'deleteColumn', icon: this.getIcon('column-remove') },
             { separator: true },
-            { label: 'Add Row Before', command: 'addRowBefore', icon: this.getAddRowBeforeIcon() },
-            { label: 'Add Row After', command: 'addRowAfter', icon: this.getAddRowAfterIcon() },
-            { label: 'Delete Row', command: 'deleteRow', icon: this.getDeleteRowIcon() },
+            { label: 'Add Row Before', command: 'addRowBefore', icon: this.getIcon('row-insert-top') },
+            { label: 'Add Row After', command: 'addRowAfter', icon: this.getIcon('row-insert-bottom') },
+            { label: 'Delete Row', command: 'deleteRow', icon: this.getIcon('row-remove') },
             { separator: true },
-            { label: 'Merge Cells', command: 'mergeCells', icon: this.getMergeCellsIcon() },
-            { label: 'Split Cell', command: 'splitCell', icon: this.getSplitCellIcon() },
+            { label: 'Merge Cells', command: 'mergeCells', icon: this.getIcon('arrows-join') },
+            { label: 'Split Cell', command: 'splitCell', icon: this.getIcon('arrows-split') },
             { separator: true },
-            { label: 'Toggle Header Column', command: 'toggleHeaderColumn', icon: this.getToggleHeaderColumnIcon() },
-            { label: 'Toggle Header Row', command: 'toggleHeaderRow', icon: this.getToggleHeaderRowIcon() },
+            { label: 'Toggle Header Column', command: 'toggleHeaderColumn', icon: this.getIcon('table-column') },
+            { label: 'Toggle Header Row', command: 'toggleHeaderRow', icon: this.getIcon('table-row') },
             { separator: true },
-            { label: 'Delete Table', command: 'deleteTable', icon: this.getDeleteTableIcon() }
+            { label: 'Delete Table', command: 'deleteTable', icon: this.getIcon('trash') }
         ];
 
         tableCommands.forEach(item => {
@@ -1111,127 +1111,50 @@ class tiptapWysiwygSetup {
         }
     }
 
-    // Icon SVGs for toolbar buttons
-    getBoldIcon() {
-        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5h6a3.5 3.5 0 0 1 0 7h-6z"/><path d="M13 12h1a3.5 3.5 0 0 1 0 7h-7v-7"/></svg>';
-    }
-
-    getItalicIcon() {
-        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5l6 0"/><path d="M7 19l6 0"/><path d="M14 5l-4 14"/></svg>';
-    }
-
-    getUnderlineIcon() {
-        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5v5a5 5 0 0 0 10 0v-5"/><path d="M5 19h14"/></svg>';
-    }
-
-    getStrikeIcon() {
-        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l14 0"/><path d="M16 6.5a4 2 0 0 0 -4 -1.5h-1a3.5 3.5 0 0 0 0 7h2a3.5 3.5 0 0 1 0 7h-1.5a4 2 0 0 1 -4 -1.5"/></svg>';
-    }
-
-    getBlockquoteIcon() {
-        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15h15"/><path d="M21 19h-15"/><path d="M15 11h6"/><path d="M21 7h-6"/><path d="M9 9h1a1 1 0 1 1 -1 1v-2.5a2 2 0 0 1 2 -2"/><path d="M3 9h1a1 1 0 1 1 -1 1v-2.5a2 2 0 0 1 2 -2"/></svg>';
-    }
-
-    getBulletListIcon() {
-        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l11 0"/><path d="M9 12l11 0"/><path d="M9 18l11 0"/><path d="M5 6l0 .01"/><path d="M5 12l0 .01"/><path d="M5 18l0 .01"/></svg>';
-    }
-
-    getOrderedListIcon() {
-        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 6h9"/><path d="M11 12h9"/><path d="M12 18h8"/><path d="M4 16a2 2 0 1 1 4 0c0 .591 -.5 1 -1 1.5l-3 2.5h4"/><path d="M6 10v-6l-2 2"/></svg>';
-    }
-
-    getAlignLeftIcon() {
-        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l16 0"/><path d="M4 12l10 0"/><path d="M4 18l14 0"/></svg>';
-    }
-
-    getAlignCenterIcon() {
-        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l16 0"/><path d="M8 12l8 0"/><path d="M6 18l12 0"/></svg>';
-    }
-
-    getAlignRightIcon() {
-        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l16 0"/><path d="M10 12l10 0"/><path d="M6 18l14 0"/></svg>';
-    }
-
-    getLinkIcon() {
-        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l6 -6"/><path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464"/><path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463"/></svg>';
-    }
-
-    getImageIcon() {
-        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"/><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/></svg>';
-    }
-
-    getTableIcon() {
-        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"/><path d="M3 10h18"/><path d="M10 3v18"/></svg>';
-    }
-
-    getWidgetIcon() {
-        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/></svg>';
-    }
-
-    getVariableIcon() {
-        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4c-2.5 5 -2.5 10 0 16m14 -16c2.5 5 2.5 10 0 16m-10 -11h1c1 0 1 1 2.016 3.527c.984 2.473 .984 3.473 1.984 3.473h1"/><path d="M8 16c1.5 0 3 -2 4 -3.5s2.5 -3.5 4 -3.5"/></svg>';
-    }
-
-    getTablerIcon(iconName) {
-        const icons = {
-            'column-insert-left': '<path d="M14 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1z"/><path d="M5 12l4 0"/><path d="M7 10l0 4"/>',
-            'column-insert-right': '<path d="M6 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1z"/><path d="M15 12l4 0"/><path d="M17 10l0 4"/>',
-            'column-remove': '<path d="M6 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1z"/><path d="M16 10l4 4"/><path d="M16 14l4 -4"/>',
-            'row-insert-top': '<path d="M4 6h16a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z"/><path d="M12 2l0 4"/><path d="M10 4l4 0"/>',
-            'row-insert-bottom': '<path d="M20 14v4a1 1 0 0 1 -1 1h-14a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1z"/><path d="M12 2l0 4"/><path d="M10 4l4 0"/>',
-            'row-remove': '<path d="M20 6v4a1 1 0 0 1 -1 1h-14a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1z"/><path d="M10 16l4 4"/><path d="M10 20l4 -4"/>',
-            'arrows-join': '<path d="M12 21v-6m-3 3l3 3l3 -3m-3 -9v-6m-3 3l3 -3l3 3"/>',
-            'arrows-split': '<path d="M21 17h-8l-3.5 -5h-6.5"/><path d="M21 7h-8l-3.5 5h-6.5"/><path d="M18 10l3 -3l-3 -3"/><path d="M18 20l3 -3l-3 -3"/>',
-            'table-row': '<path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"/><path d="M9 3l-6 6"/><path d="M14 3l-7 7"/><path d="M19 3l-7 7"/><path d="M21 6l-4 4"/><path d="M3 10h18"/><path d="M10 10v11"/>',
-            'table-column': '<path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"/><path d="M10 10h11"/><path d="M10 3v18"/><path d="M9 3l-6 6"/><path d="M10 7l-7 7"/><path d="M10 12l-7 7"/><path d="M10 17l-4 4"/>',
-            'trash': '<path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/>'
-        };
+    static iconRegistry = {
+        // Formatting icons
+        'bold': '<path d="M7 5h6a3.5 3.5 0 0 1 0 7h-6z"/><path d="M13 12h1a3.5 3.5 0 0 1 0 7h-7v-7"/>',
+        'italic': '<path d="M11 5l6 0"/><path d="M7 19l6 0"/><path d="M14 5l-4 14"/>',
+        'underline': '<path d="M7 5v5a5 5 0 0 0 10 0v-5"/><path d="M5 19h14"/>',
+        'strike': '<path d="M5 12l14 0"/><path d="M16 6.5a4 2 0 0 0 -4 -1.5h-1a3.5 3.5 0 0 0 0 7h2a3.5 3.5 0 0 1 0 7h-1.5a4 2 0 0 1 -4 -1.5"/>',
+        'blockquote': '<path d="M6 15h15"/><path d="M21 19h-15"/><path d="M15 11h6"/><path d="M21 7h-6"/><path d="M9 9h1a1 1 0 1 1 -1 1v-2.5a2 2 0 0 1 2 -2"/><path d="M3 9h1a1 1 0 1 1 -1 1v-2.5a2 2 0 0 1 2 -2"/>',
         
-        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icons[iconName] || ''}</svg>`;
-    }
+        // List icons
+        'bullet-list': '<path d="M9 6l11 0"/><path d="M9 12l11 0"/><path d="M9 18l11 0"/><path d="M5 6l0 .01"/><path d="M5 12l0 .01"/><path d="M5 18l0 .01"/>',
+        'ordered-list': '<path d="M11 6h9"/><path d="M11 12h9"/><path d="M12 18h8"/><path d="M4 16a2 2 0 1 1 4 0c0 .591 -.5 1 -1 1.5l-3 2.5h4"/><path d="M6 10v-6l-2 2"/>',
+        
+        // Alignment icons
+        'align-left': '<path d="M4 6l16 0"/><path d="M4 12l10 0"/><path d="M4 18l14 0"/>',
+        'align-center': '<path d="M4 6l16 0"/><path d="M8 12l8 0"/><path d="M6 18l12 0"/>',
+        'align-right': '<path d="M4 6l16 0"/><path d="M10 12l10 0"/><path d="M6 18l14 0"/>',
+        
+        // Insert icons
+        'link': '<path d="M9 15l6 -6"/><path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464"/><path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463"/>',
+        'image': '<path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"/><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/>',
+        'table': '<path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"/><path d="M3 10h18"/><path d="M10 3v18"/>',
+        'widget': '<path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/>',
+        'variable': '<path d="M5 4c-2.5 5 -2.5 10 0 16m14 -16c2.5 5 2.5 10 0 16m-10 -11h1c1 0 1 1 2.016 3.527c.984 2.473 .984 3.473 1.984 3.473h1"/><path d="M8 16c1.5 0 3 -2 4 -3.5s2.5 -3.5 4 -3.5"/>',
+        
+        // Table operation icons
+        'column-insert-left': '<path d="M14 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1z"/><path d="M5 12l4 0"/><path d="M7 10l0 4"/>',
+        'column-insert-right': '<path d="M6 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1z"/><path d="M15 12l4 0"/><path d="M17 10l0 4"/>',
+        'column-remove': '<path d="M6 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1z"/><path d="M16 10l4 4"/><path d="M16 14l4 -4"/>',
+        'row-insert-top': '<path d="M4 6h16a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z"/><path d="M12 2l0 4"/><path d="M10 4l4 0"/>',
+        'row-insert-bottom': '<path d="M20 14v4a1 1 0 0 1 -1 1h-14a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1z"/><path d="M12 2l0 4"/><path d="M10 4l4 0"/>',
+        'row-remove': '<path d="M20 6v4a1 1 0 0 1 -1 1h-14a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1z"/><path d="M10 16l4 4"/><path d="M10 20l4 -4"/>',
+        'arrows-join': '<path d="M12 21v-6m-3 3l3 3l3 -3m-3 -9v-6m-3 3l3 -3l3 3"/>',
+        'arrows-split': '<path d="M21 17h-8l-3.5 -5h-6.5"/><path d="M21 7h-8l-3.5 5h-6.5"/><path d="M18 10l3 -3l-3 -3"/><path d="M18 20l3 -3l-3 -3"/>',
+        'table-row': '<path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"/><path d="M9 3l-6 6"/><path d="M14 3l-7 7"/><path d="M19 3l-7 7"/><path d="M21 6l-4 4"/><path d="M3 10h18"/><path d="M10 10v11"/>',
+        'table-column': '<path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"/><path d="M10 10h11"/><path d="M10 3v18"/><path d="M9 3l-6 6"/><path d="M10 7l-7 7"/><path d="M10 12l-7 7"/><path d="M10 17l-4 4"/>',
+        'trash': '<path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/>'
+    };
 
-    // Table operation icons using Tabler icons
-    getAddColumnBeforeIcon() {
-        return this.getTablerIcon('column-insert-left');
-    }
-
-    getAddColumnAfterIcon() {
-        return this.getTablerIcon('column-insert-right');
-    }
-
-    getDeleteColumnIcon() {
-        return this.getTablerIcon('column-remove');
-    }
-
-    getAddRowBeforeIcon() {
-        return this.getTablerIcon('row-insert-top');
-    }
-
-    getAddRowAfterIcon() {
-        return this.getTablerIcon('row-insert-bottom');
-    }
-
-    getDeleteRowIcon() {
-        return this.getTablerIcon('row-remove');
-    }
-
-    getMergeCellsIcon() {
-        return this.getTablerIcon('arrows-join');
-    }
-
-    getSplitCellIcon() {
-        return this.getTablerIcon('arrows-split');
-    }
-
-    getToggleHeaderRowIcon() {
-        return this.getTablerIcon('table-row');
-    }
-
-    getToggleHeaderColumnIcon() {
-        return this.getTablerIcon('table-column');
-    }
-
-    getDeleteTableIcon() {
-        return this.getTablerIcon('trash');
+    getIcon(name) {
+        const iconPath = tiptapWysiwygSetup.iconRegistry[name];
+        if (!iconPath) {
+            console.warn(`Icon "${name}" not found in registry`);
+            return '';
+        }
+        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconPath}</svg>`;
     }
 }
