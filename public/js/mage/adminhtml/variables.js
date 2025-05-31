@@ -78,6 +78,16 @@ const Variables = {
 
     insertVariable(value) {
         this.closeDialogWindow();
+        
+        // Check if we have a Tiptap editor
+        if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.textareaElementId)) {
+            const tiptapEditor = tiptapEditors.get(this.textareaElementId);
+            if (tiptapEditor && tiptapEditor.editor) {
+                tiptapEditor.insertContent(value);
+                return;
+            }
+        }
+        
         const textareaElm = document.getElementById(this.textareaElementId);
         if (textareaElm) {
             updateElementAtCursor(textareaElm, value);
@@ -114,11 +124,37 @@ const OpenmagevariablePlugin = {
 
     insertVariable(value) {
         if (this.textareaId) {
-            Variables.init(this.textareaId);
-            Variables.insertVariable(value);
+            Variables.closeDialogWindow();
+            
+            // Check if we have a Tiptap editor
+            if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.textareaId)) {
+                const tiptapEditor = tiptapEditors.get(this.textareaId);
+                if (tiptapEditor && tiptapEditor.editor) {
+                    tiptapEditor.insertContent(value);
+                    return;
+                }
+            }
+            
+            // Fallback to textarea
+            const textareaElm = document.getElementById(this.textareaId);
+            if (textareaElm) {
+                updateElementAtCursor(textareaElm, value);
+            }
         } else {
             Variables.closeDialogWindow();
-            this.editor.execCommand('mceInsertContent', false, value);
+            
+            // Check if we're using Tiptap
+            if (typeof tiptapEditors !== 'undefined' && this.editor && this.editor.container) {
+                // Find the Tiptap instance by container
+                const editorId = this.editor.container.previousElementSibling?.id;
+                if (editorId && tiptapEditors.has(editorId)) {
+                    const tiptapEditor = tiptapEditors.get(editorId);
+                    if (tiptapEditor) {
+                        tiptapEditor.insertContent(value);
+                        return;
+                    }
+                }
+            }
         }
     },
 };
