@@ -36,10 +36,20 @@ class Mage_Adminhtml_Model_System_Config_Source_Shipping_Allmethods
                 'value' => [],
             ];
             foreach ($carrierMethods as $methodCode => $methodTitle) {
-                $methods[$carrierCode]['value'][] = [
-                    'value' => $carrierCode . '_' . $methodCode,
-                    'label' => '[' . $carrierCode . '] ' . $methodTitle,
-                ];
+                // Handle cases where methodTitle might be an array (e.g., nested shipping method groups)
+                if (is_array($methodTitle)) {
+                    foreach ($methodTitle as $subMethodCode => $subMethodTitle) {
+                        $methods[$carrierCode]['value'][] = [
+                            'value' => $carrierCode . '_' . $subMethodCode,
+                            'label' => '[' . $carrierCode . '] ' . $subMethodTitle,
+                        ];
+                    }
+                } else {
+                    $methods[$carrierCode]['value'][] = [
+                        'value' => $carrierCode . '_' . $methodCode,
+                        'label' => '[' . $carrierCode . '] ' . $methodTitle,
+                    ];
+                }
             }
         }
 
