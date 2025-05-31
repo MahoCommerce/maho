@@ -11,15 +11,15 @@
 /**
  * Payment restrictions admin controller
  */
-class Mage_Adminhtml_PaymentRestrictionController extends Mage_Adminhtml_Controller_Action
+class Mage_Adminhtml_Payment_RestrictionController extends Mage_Adminhtml_Controller_Action
 {
     protected function _initAction(): self
     {
         $this->loadLayout()
-            ->_setActiveMenu('system/payment_restrictions')
+            ->_setActiveMenu('sales/payment_restrictions')
             ->_addBreadcrumb(
-                Mage::helper('adminhtml')->__('System'),
-                Mage::helper('adminhtml')->__('System'),
+                Mage::helper('adminhtml')->__('Sales'),
+                Mage::helper('adminhtml')->__('Sales'),
             )
             ->_addBreadcrumb(
                 Mage::helper('payment')->__('Payment Restrictions'),
@@ -30,7 +30,7 @@ class Mage_Adminhtml_PaymentRestrictionController extends Mage_Adminhtml_Control
 
     public function indexAction(): void
     {
-        $this->_title($this->__('System'))
+        $this->_title($this->__('Sales'))
             ->_title($this->__('Payment Restrictions'));
 
         $this->_initAction()
@@ -39,7 +39,7 @@ class Mage_Adminhtml_PaymentRestrictionController extends Mage_Adminhtml_Control
 
     public function newAction(): void
     {
-        $this->_title($this->__('System'))
+        $this->_title($this->__('Sales'))
             ->_title($this->__('Payment Restrictions'))
             ->_title($this->__('New Restriction'));
 
@@ -71,7 +71,7 @@ class Mage_Adminhtml_PaymentRestrictionController extends Mage_Adminhtml_Control
             }
         }
 
-        $this->_title($this->__('System'))
+        $this->_title($this->__('Sales'))
             ->_title($this->__('Payment Restrictions'));
 
         if ($model->getId()) {
@@ -274,6 +274,6 @@ class Mage_Adminhtml_PaymentRestrictionController extends Mage_Adminhtml_Control
 
     protected function _isAllowed(): bool
     {
-        return Mage::getSingleton('admin/session')->isAllowed('system/payment_restrictions');
+        return Mage::getSingleton('admin/session')->isAllowed('sales/payment_restrictions');
     }
 }

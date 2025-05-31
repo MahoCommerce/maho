@@ -93,10 +93,8 @@ class Mage_Adminhtml_Block_Paymentrestriction_Edit_Form extends Mage_Adminhtml_B
         $rule = $this->_getRestrictionRule();
         $rule->setForm($form);
 
-        $fieldset->addField('conditions', 'text', [
+        $fieldset->addField('conditions', 'hidden', [
             'name' => 'conditions',
-            'label' => Mage::helper('payment')->__('Conditions'),
-            'title' => Mage::helper('payment')->__('Conditions'),
             'required' => false,
         ])->setRule($rule)->setRenderer(Mage::getBlockSingleton('rule/conditions'));
 

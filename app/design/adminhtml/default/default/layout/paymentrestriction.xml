@@ -9,13 +9,13 @@
  */
 -->
 <layout version="0.1.0">
-    <adminhtml_paymentrestriction_index>
+    <adminhtml_payment_restriction_index>
         <reference name="content">
             <block type="adminhtml/paymentrestriction" name="payment_restriction" />
         </reference>
-    </adminhtml_paymentrestriction_index>
+    </adminhtml_payment_restriction_index>
 
-    <adminhtml_paymentrestriction_new>
+    <adminhtml_payment_restriction_new>
         <reference name="head">
             <action method="setCanLoadRulesJs"><flag>1</flag></action>
             <action method="addJs"><name>maho-tree.js</name></action>
@@ -23,9 +23,9 @@
         <reference name="content">
             <block type="adminhtml/paymentrestriction_edit" name="payment_restriction_edit"></block>
         </reference>
-    </adminhtml_paymentrestriction_new>
+    </adminhtml_payment_restriction_new>
 
-    <adminhtml_paymentrestriction_edit>
+    <adminhtml_payment_restriction_edit>
         <reference name="head">
             <action method="setCanLoadRulesJs"><flag>1</flag></action>
             <action method="addJs"><name>maho-tree.js</name></action>
@@ -33,5 +33,5 @@
         <reference name="content">
             <block type="adminhtml/paymentrestriction_edit" name="payment_restriction_edit"></block>
         </reference>
-    </adminhtml_paymentrestriction_edit>
+    </adminhtml_payment_restriction_edit>
 </layout>
