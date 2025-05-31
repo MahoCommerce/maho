@@ -198,108 +198,11 @@ class tiptapWysiwygSetup {
         });
         insertGroup.appendChild(imageBtn);
 
-        // Create table dropdown button
-        const tableDropdown = document.createElement('div');
-        tableDropdown.style.position = 'relative';
-        tableDropdown.style.display = 'inline-block';
-        
-        const tableBtn = this.createToolbarButton('Table', this.getTableIcon(), (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.toggleTableMenu(tableDropdown);
+        // Simple Insert Table button
+        const insertTableBtn = this.createToolbarButton('Insert Table', this.getTableIcon(), () => {
+            this.editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
         });
-        tableDropdown.appendChild(tableBtn);
-        
-        // Create table menu
-        const tableMenu = document.createElement('div');
-        tableMenu.className = 'table-menu';
-        tableMenu.style.cssText = `
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 4px;
-            margin-top: 4px;
-            display: none;
-            z-index: 1000;
-            min-width: 200px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        `;
-        
-        const tableCommands = [
-            { label: 'Insert Table', command: 'insertTable', params: { rows: 3, cols: 3, withHeaderRow: true } },
-            { separator: true },
-            { label: 'Add Column Before', command: 'addColumnBefore' },
-            { label: 'Add Column After', command: 'addColumnAfter' },
-            { label: 'Delete Column', command: 'deleteColumn' },
-            { separator: true },
-            { label: 'Add Row Before', command: 'addRowBefore' },
-            { label: 'Add Row After', command: 'addRowAfter' },
-            { label: 'Delete Row', command: 'deleteRow' },
-            { separator: true },
-            { label: 'Delete Table', command: 'deleteTable' },
-            { separator: true },
-            { label: 'Merge Cells', command: 'mergeCells' },
-            { label: 'Split Cell', command: 'splitCell' },
-            { separator: true },
-            { label: 'Toggle Header Column', command: 'toggleHeaderColumn' },
-            { label: 'Toggle Header Row', command: 'toggleHeaderRow' },
-            { label: 'Toggle Header Cell', command: 'toggleHeaderCell' }
-        ];
-        
-        tableCommands.forEach(item => {
-            if (item.separator) {
-                const separator = document.createElement('div');
-                separator.style.cssText = 'height: 1px; background: #e2e8f0; margin: 4px 0;';
-                tableMenu.appendChild(separator);
-            } else {
-                const menuItem = document.createElement('button');
-                menuItem.type = 'button';
-                menuItem.textContent = item.label;
-                menuItem.style.cssText = `
-                    display: block;
-                    width: 100%;
-                    text-align: left;
-                    padding: 6px 12px;
-                    border: none;
-                    background: none;
-                    cursor: pointer;
-                    font-size: 14px;
-                    color: #475569;
-                    border-radius: 4px;
-                    transition: all 0.15s ease;
-                `;
-                menuItem.onmouseover = () => {
-                    menuItem.style.backgroundColor = '#f1f5f9';
-                    menuItem.style.color = '#1e293b';
-                };
-                menuItem.onmouseout = () => {
-                    menuItem.style.backgroundColor = 'transparent';
-                    menuItem.style.color = '#475569';
-                };
-                menuItem.onclick = () => {
-                    if (item.params) {
-                        this.editor.chain().focus()[item.command](item.params).run();
-                    } else {
-                        this.editor.chain().focus()[item.command]().run();
-                    }
-                    tableMenu.style.display = 'none';
-                };
-                tableMenu.appendChild(menuItem);
-            }
-        });
-        
-        tableDropdown.appendChild(tableMenu);
-        insertGroup.appendChild(tableDropdown);
-        
-        // Close menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!tableDropdown.contains(e.target)) {
-                tableMenu.style.display = 'none';
-            }
-        });
+        insertGroup.appendChild(insertTableBtn);
 
         const widgetBtn = this.createToolbarButton('Insert Widget', this.getWidgetIcon(), () => {
             this.widgetHandler();
@@ -321,12 +224,59 @@ class tiptapWysiwygSetup {
         separator.className = 'toolbar-separator';
         return separator;
     }
-    
-    toggleTableMenu(dropdown) {
-        const menu = dropdown.querySelector('.table-menu');
-        if (menu) {
-            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-        }
+
+    createTableBubbleMenu() {
+        const bubbleMenu = document.createElement('div');
+        bubbleMenu.className = 'table-bubble-menu';
+        bubbleMenu.id = `${this.id}_table_bubble_menu`;
+
+        const tableCommands = [
+            { label: 'Add Column Before', command: 'addColumnBefore', icon: this.getAddColumnBeforeIcon() },
+            { label: 'Add Column After', command: 'addColumnAfter', icon: this.getAddColumnAfterIcon() },
+            { label: 'Delete Column', command: 'deleteColumn', icon: this.getDeleteColumnIcon() },
+            { separator: true },
+            { label: 'Add Row Before', command: 'addRowBefore', icon: this.getAddRowBeforeIcon() },
+            { label: 'Add Row After', command: 'addRowAfter', icon: this.getAddRowAfterIcon() },
+            { label: 'Delete Row', command: 'deleteRow', icon: this.getDeleteRowIcon() },
+            { separator: true },
+            { label: 'Merge Cells', command: 'mergeCells', icon: this.getMergeCellsIcon() },
+            { label: 'Split Cell', command: 'splitCell', icon: this.getSplitCellIcon() },
+            { separator: true },
+            { label: 'Toggle Header Column', command: 'toggleHeaderColumn', icon: this.getToggleHeaderColumnIcon() },
+            { label: 'Toggle Header Row', command: 'toggleHeaderRow', icon: this.getToggleHeaderRowIcon() },
+            { separator: true },
+            { label: 'Delete Table', command: 'deleteTable', icon: this.getDeleteTableIcon() }
+        ];
+
+        tableCommands.forEach(item => {
+            if (item.separator) {
+                const separator = document.createElement('div');
+                separator.className = 'table-bubble-separator';
+                bubbleMenu.appendChild(separator);
+            } else {
+                const menuItem = document.createElement('button');
+                menuItem.type = 'button';
+                menuItem.innerHTML = item.icon;
+                menuItem.title = item.label;
+                menuItem.className = 'table-menu-item';
+                menuItem.onmouseover = () => {
+                    menuItem.style.backgroundColor = '#f1f5f9';
+                    menuItem.style.color = '#1e293b';
+                };
+                menuItem.onmouseout = () => {
+                    menuItem.style.backgroundColor = 'transparent';
+                    menuItem.style.color = '#4b5563';
+                };
+                menuItem.onclick = () => {
+                    if (this.editor) {
+                        this.editor.chain().focus()[item.command]().run();
+                    }
+                };
+                bubbleMenu.appendChild(menuItem);
+            }
+        });
+
+        return bubbleMenu;
     }
 
     createToolbarButton(title, innerHTML, onClick, commandName) {
@@ -690,6 +640,10 @@ class tiptapWysiwygSetup {
         });
 
         // Initialize Tiptap
+        // Create table bubble menu
+        const tableBubbleMenu = this.createTableBubbleMenu();
+        wrapper.appendChild(tableBubbleMenu);
+
         this.editor = new window.TiptapModules.Editor({
             element: container,
             extensions: [
@@ -713,6 +667,19 @@ class tiptapWysiwygSetup {
                     types: ['heading', 'paragraph'],
                 }),
                 window.TiptapModules.Underline,
+                window.TiptapModules.BubbleMenu.configure({
+                    element: tableBubbleMenu,
+                    shouldShow: ({ editor, state }) => {
+                        return editor.isActive('tableCell') || editor.isActive('tableHeader');
+                    },
+                    tippyOptions: {
+                        placement: 'top',
+                        arrow: false,
+                        animation: 'fade',
+                        duration: 150,
+                        offset: [0, 8],
+                    },
+                }),
             ],
             content: initialContent,
             onCreate: ({ editor }) => {
@@ -1203,5 +1170,68 @@ class tiptapWysiwygSetup {
 
     getVariableIcon() {
         return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4c-2.5 5 -2.5 10 0 16m14 -16c2.5 5 2.5 10 0 16m-10 -11h1c1 0 1 1 2.016 3.527c.984 2.473 .984 3.473 1.984 3.473h1"/><path d="M8 16c1.5 0 3 -2 4 -3.5s2.5 -3.5 4 -3.5"/></svg>';
+    }
+
+    getTablerIcon(iconName) {
+        const icons = {
+            'column-insert-left': '<path d="M14 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1z"/><path d="M5 12l4 0"/><path d="M7 10l0 4"/>',
+            'column-insert-right': '<path d="M6 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1z"/><path d="M15 12l4 0"/><path d="M17 10l0 4"/>',
+            'column-remove': '<path d="M6 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1z"/><path d="M16 10l4 4"/><path d="M16 14l4 -4"/>',
+            'row-insert-top': '<path d="M4 6h16a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z"/><path d="M12 2l0 4"/><path d="M10 4l4 0"/>',
+            'row-insert-bottom': '<path d="M20 14v4a1 1 0 0 1 -1 1h-14a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1z"/><path d="M12 2l0 4"/><path d="M10 4l4 0"/>',
+            'row-remove': '<path d="M20 6v4a1 1 0 0 1 -1 1h-14a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1z"/><path d="M10 16l4 4"/><path d="M10 20l4 -4"/>',
+            'arrows-join': '<path d="M12 21v-6m-3 3l3 3l3 -3m-3 -9v-6m-3 3l3 -3l3 3"/>',
+            'arrows-split': '<path d="M21 17h-8l-3.5 -5h-6.5"/><path d="M21 7h-8l-3.5 5h-6.5"/><path d="M18 10l3 -3l-3 -3"/><path d="M18 20l3 -3l-3 -3"/>',
+            'table-row': '<path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"/><path d="M9 3l-6 6"/><path d="M14 3l-7 7"/><path d="M19 3l-7 7"/><path d="M21 6l-4 4"/><path d="M3 10h18"/><path d="M10 10v11"/>',
+            'table-column': '<path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"/><path d="M10 10h11"/><path d="M10 3v18"/><path d="M9 3l-6 6"/><path d="M10 7l-7 7"/><path d="M10 12l-7 7"/><path d="M10 17l-4 4"/>',
+            'trash': '<path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/>'
+        };
+        
+        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icons[iconName] || ''}</svg>`;
+    }
+
+    // Table operation icons using Tabler icons
+    getAddColumnBeforeIcon() {
+        return this.getTablerIcon('column-insert-left');
+    }
+
+    getAddColumnAfterIcon() {
+        return this.getTablerIcon('column-insert-right');
+    }
+
+    getDeleteColumnIcon() {
+        return this.getTablerIcon('column-remove');
+    }
+
+    getAddRowBeforeIcon() {
+        return this.getTablerIcon('row-insert-top');
+    }
+
+    getAddRowAfterIcon() {
+        return this.getTablerIcon('row-insert-bottom');
+    }
+
+    getDeleteRowIcon() {
+        return this.getTablerIcon('row-remove');
+    }
+
+    getMergeCellsIcon() {
+        return this.getTablerIcon('arrows-join');
+    }
+
+    getSplitCellIcon() {
+        return this.getTablerIcon('arrows-split');
+    }
+
+    getToggleHeaderRowIcon() {
+        return this.getTablerIcon('table-row');
+    }
+
+    getToggleHeaderColumnIcon() {
+        return this.getTablerIcon('table-column');
+    }
+
+    getDeleteTableIcon() {
+        return this.getTablerIcon('trash');
     }
 }
