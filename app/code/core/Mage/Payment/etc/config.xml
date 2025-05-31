@@ -185,6 +185,17 @@
             </updates>
         </layout>
     </adminhtml>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <payment before="Mage_Adminhtml">Mage_Payment_Adminhtml</payment>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
     <default>
         <payment>
             <checkmo>

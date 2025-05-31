@@ -3,7 +3,7 @@
 /**
  * Maho
  *
- * @package    Mage_Adminhtml
+ * @package    Mage_Payment
  * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -11,7 +11,7 @@
 /**
  * Payment restrictions grid
  */
-class Mage_Adminhtml_Block_Paymentrestriction_Grid extends Mage_Adminhtml_Block_Widget_Grid
+class Mage_Payment_Block_Adminhtml_Payment_Restriction_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
     public function __construct()
     {

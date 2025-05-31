@@ -3,7 +3,7 @@
 /**
  * Maho
  *
- * @package    Mage_Adminhtml
+ * @package    Mage_Payment
  * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -11,15 +11,15 @@
 /**
  * Payment restriction edit block
  */
-class Mage_Adminhtml_Block_Paymentrestriction_Edit extends Mage_Adminhtml_Block_Widget_Form_Container
+class Mage_Payment_Block_Adminhtml_Payment_Restriction_Edit extends Mage_Adminhtml_Block_Widget_Form_Container
 {
     public function __construct()
     {
         parent::__construct();
 
         $this->_objectId = 'id';
-        $this->_blockGroup = 'adminhtml';
-        $this->_controller = 'paymentrestriction';
+        $this->_blockGroup = 'payment';
+        $this->_controller = 'adminhtml_payment_restriction';
 
         $this->_updateButton('save', 'label', Mage::helper('payment')->__('Save Restriction'));
         $this->_updateButton('delete', 'label', Mage::helper('payment')->__('Delete Restriction'));
