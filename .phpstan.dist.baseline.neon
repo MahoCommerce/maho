@@ -16915,18 +16915,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Resource.php
 
 		-
-			message: '#^Method Mage_Core_Model_Resource_Session\:\:setStaticSaveHandler\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Session.php
-
-		-
-			message: '#^Parameter \#6 \$gc of function session_set_save_handler expects callable\(string\)\: bool, array\{\$this\(Mage_Core_Model_Resource_Session\), ''gc''\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Session.php
-
-		-
 			message: '#^Method Mage_Core_Model_Resource_Setup\:\:applyAllDataUpdates\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -17021,12 +17009,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: app/code/core/Mage/Core/Model/Session/Abstract.php
-
-		-
-			message: '#^Call to Mage\:\:getSingleton\(''cm_redissession/session''\) resulted in invalid type Mage_Cm_Redissession_Model_Session\.$#'
-			identifier: mage.invalidType
-			count: 1
-			path: app/code/core/Mage/Core/Model/Session/Abstract/Varien.php
 
 		-
 			message: '#^Parameter \#2 \$clear \(bool\) of method Mage_Core_Model_Session_Abstract_Varien\:\:getData\(\) should be compatible with parameter \$index \(int\|string\) of method Varien_Object\:\:getData\(\)$#'

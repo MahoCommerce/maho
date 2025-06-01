@@ -10,6 +10,13 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
+use Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeFileSessionHandler;
+
 /**
  * @method bool|null getSkipEmptySessionCheck()
  * @method $this setSkipEmptySessionCheck(bool $flag)
@@ -38,6 +45,188 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
      */
     protected $_sessionHosts = [];
 
+    /** @var Session|null Symfony session instance */
+    private ?Session $symfonySession = null;
+
+    /** @var Request|null Symfony request instance */
+    private ?Request $symfonyRequest = null;
+
+    /**
+     * Initialize Symfony components for modern session handling
+     */
+    private function initializeSymfonyComponents(): void
+    {
+        if ($this->symfonyRequest === null) {
+            $this->symfonyRequest = Request::createFromGlobals();
+        }
+    }
+
+    /**
+     * Create Symfony session with proper storage handler
+     */
+    private function createSymfonySession(string $sessionName): Session
+    {
+        $handler = $this->createSessionHandler();
+        $storage = new NativeSessionStorage(
+            [
+                'name' => $sessionName,
+                'use_cookies' => false,
+                'use_trans_sid' => false,
+                'cache_limiter' => (string) (Mage::getConfig()->getNode('global/session_cache_limiter') ?: ''),
+            ],
+            $handler,
+        );
+
+        return new Session($storage);
+    }
+
+    /**
+     * Create appropriate session handler based on configuration
+     */
+    private function createSessionHandler(): \SessionHandlerInterface
+    {
+        $method = $this->getSessionSaveMethod();
+
+        switch ($method) {
+            case 'redis':
+                return $this->createRedisSessionHandler();
+
+            case 'files':
+            default:
+                return $this->createFileSessionHandler();
+        }
+    }
+
+    /**
+     * Create Redis session handler with modern Symfony approach
+     */
+    private function createRedisSessionHandler(): \SessionHandlerInterface
+    {
+        // Use the existing Redis setup but with modern wrapper
+        $redisConfig = Mage::getConfig()->getNode('global/redis_session');
+
+        if (!$redisConfig) {
+            throw new Exception('Redis session configuration not found in global/redis_session');
+        }
+
+        // Set up Redis connection parameters
+        $host = (string) ($redisConfig->host ?: '127.0.0.1');
+        $port = (int) ($redisConfig->port ?: 6379);
+        $database = (int) ($redisConfig->database ?: 0);
+        $password = (string) ($redisConfig->password ?: '');
+
+        // Create Redis connection
+        $redis = new \Redis();
+        $redis->connect($host, $port);
+
+        if ($password) {
+            $redis->auth($password);
+        }
+
+        if ($database > 0) {
+            $redis->select($database);
+        }
+
+        // Return Redis session handler
+        return new class ($redis) implements \SessionHandlerInterface {
+            private \Redis $redis;
+            private string $prefix = 'session:';
+
+            public function __construct(\Redis $redis)
+            {
+                $this->redis = $redis;
+            }
+
+            public function open(string $path, string $name): bool
+            {
+                return true;
+            }
+
+            public function close(): bool
+            {
+                return true;
+            }
+
+            public function read(string $id): string
+            {
+                $data = $this->redis->get($this->prefix . $id);
+                return $data !== false ? (string) $data : '';
+            }
+
+            public function write(string $id, string $data): bool
+            {
+                $ttl = (int) (ini_get('session.gc_maxlifetime') ?: 3600);
+                return $this->redis->setex($this->prefix . $id, $ttl, $data);
+            }
+
+            public function destroy(string $id): bool
+            {
+                $result = $this->redis->del($this->prefix . $id);
+                return is_int($result) && $result > 0;
+            }
+
+            public function gc(int $max_lifetime): int
+            {
+                // Redis handles expiration automatically
+                return 0;
+            }
+        };
+    }
+
+    /**
+     * Create file session handler
+     */
+    private function createFileSessionHandler(): \SessionHandlerInterface
+    {
+        $savePath = $this->getSessionSavePath();
+
+        if (!is_dir($savePath)) {
+            mkdir($savePath, 0755, true);
+        }
+
+        if (!is_writable($savePath)) {
+            throw new Exception("Session save path '{$savePath}' is not writable");
+        }
+
+        return new NativeFileSessionHandler($savePath);
+    }
+
+    /**
+     * Migrate legacy cookies for backward compatibility
+     */
+    private function migrateLegacyCookies(string $sessionName, Mage_Core_Model_Cookie $cookie): void
+    {
+        if (!$cookie->get($sessionName) && $sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
+            foreach (Mage_Core_Controller_Front_Action::SESSION_LEGACY_NAMESPACES as $namespace) {
+                if ($cookie->get($namespace)) {
+                    $_COOKIE[$sessionName] = $cookie->get($namespace);
+                    $cookie->delete($namespace);
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Start session using modern Symfony approach
+     */
+    private function startSymfonySession(): void
+    {
+        try {
+            // Start Symfony session
+            if ($this->symfonySession && !$this->symfonySession->isStarted()) {
+                $this->symfonySession->start();
+            }
+        } catch (Throwable $e) {
+            if (Mage::registry(self::REGISTRY_CONCURRENCY_ERROR)) {
+                Maho::errorReport();
+                die();
+            } else {
+                Mage::printException($e);
+            }
+        }
+    }
+
     /**
      * Configure and start session
      *
@@ -56,62 +245,16 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
             return $this;
         }
 
-        // getSessionSaveMethod has to return correct version of handler in any case
-        $moduleName = $this->getSessionSaveMethod();
-        switch ($moduleName) {
-            case 'db':
-                /** @var Mage_Core_Model_Resource_Session $sessionResource */
-                $sessionResource = Mage::getResourceSingleton('core/session');
-                $sessionResource->setSaveHandler();
-                break;
-            case 'redis':
-                // If we have not explicitly set redis_session lifetime values in local.xml,
-                // then define using min and max values based on the session namespace.
-                // Else, the defaults from colinmollenhour/php-redis-session-abstract will be used.
-                $redisConfig = Mage::getConfig()->getNode('global/redis_session') ?:
-                             Mage::getConfig()->getNode('global')->addChild('redis_session');
-                if ($sessionName === Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE) {
-                    $redisConfig->min_lifetime ??= Mage_Adminhtml_Controller_Action::SESSION_MIN_LIFETIME;
-                    $redisConfig->max_lifetime ??= Mage_Adminhtml_Controller_Action::SESSION_MAX_LIFETIME;
-                } else {
-                    $redisConfig->min_lifetime ??= Mage_Core_Controller_Front_Action::SESSION_MIN_LIFETIME;
-                    $redisConfig->max_lifetime ??= Mage_Core_Controller_Front_Action::SESSION_MAX_LIFETIME;
-                }
-                /** @var Cm_RedisSession_Model_Session $sessionResource */
-                $sessionResource = Mage::getSingleton('cm_redissession/session');
-                $sessionResource->setSaveHandler();
-                if (method_exists($sessionResource, 'setDieOnError')) {
-                    $sessionResource->setDieOnError(false);
-                }
-                break;
-            case 'user':
-                // getSessionSavePath represents static function for custom session handler setup
-                call_user_func($this->getSessionSavePath());
-                break;
-            case 'files':
-                //don't change path if it's not writable
-                if (!is_writable($this->getSessionSavePath())) {
-                    break;
-                }
-                // no break
-            default:
-                session_save_path($this->getSessionSavePath());
-                session_module_name($moduleName);
-                break;
-        }
+        // Initialize Symfony components
+        $this->initializeSymfonyComponents();
+
+        // Create Symfony session instance
+        $this->symfonySession = $this->createSymfonySession($sessionName);
 
         $cookie = $this->getCookie();
 
         // Migrate old cookie from (om_)frontend => maho_session
-        if (!$cookie->get($sessionName) && $sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
-            foreach (Mage_Core_Controller_Front_Action::SESSION_LEGACY_NAMESPACES as $namespace) {
-                if ($cookie->get($namespace)) {
-                    $_COOKIE[$sessionName] = $cookie->get($namespace);
-                    $cookie->delete($namespace);
-                    break;
-                }
-            }
-        }
+        $this->migrateLegacyCookies($sessionName, $cookie);
 
         // Set the session name to maho_session, maho_admin_session, etc
         $this->setSessionName($sessionName);
@@ -127,28 +270,9 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
         }
 
         Varien_Profiler::start(__METHOD__ . '/start');
-        $sessionCacheLimiter = Mage::getConfig()->getNode('global/session_cache_limiter');
-        if ($sessionCacheLimiter) {
-            session_cache_limiter((string) $sessionCacheLimiter);
-        }
 
-        // Start session, abort and render error page if it fails
-        // Note, we set the session cookie manually later on, so disable here.
-        // Also disable use_trans_sid, although the option is deprecated and will be removed in PHP9
-        // Ref: https://wiki.php.net/rfc/deprecate-get-post-sessions
-        try {
-            if (session_start(['use_cookies' => false, 'use_trans_sid' => false]) === false) {
-                throw new Exception('Unable to start session.');
-            }
-        } catch (Throwable $e) {
-            session_abort();
-            if (Mage::registry(self::REGISTRY_CONCURRENCY_ERROR)) {
-                Maho::errorReport();
-                die();
-            } else {
-                Mage::printException($e);
-            }
-        }
+        // Start session using modern Symfony approach with legacy fallback
+        $this->startSymfonySession();
 
         // Secure cookie check to prevent MITM attack
         if (Mage::app()->getFrontController()->getRequest()->isSecure() && !$cookie->isSecure()) {
@@ -226,7 +350,40 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
 
     public function setSessionCookie(): self
     {
-        $this->getCookie()->set($this->getSessionName(), $this->getSessionId());
+        $mahoCookie = $this->getCookie();
+        $sessionName = $this->getSessionName();
+        $sessionId = $this->getSessionId();
+
+        // Use Symfony Cookie for enhanced security features if available
+        if ($this->symfonyRequest) {
+            $isSecure = $this->symfonyRequest->isSecure();
+            $domain = $mahoCookie->getDomain();
+            $path = $mahoCookie->getPath();
+            $lifetime = $mahoCookie->getLifetime();
+
+            // Create Symfony cookie with enhanced security
+            $symfonyCookie = new Cookie(
+                $sessionName,
+                $sessionId,
+                $lifetime > 0 ? time() + $lifetime : 0,
+                $path,
+                $domain,
+                $isSecure,
+                true, // httpOnly
+                false, // raw
+                $isSecure ? Cookie::SAMESITE_NONE : Cookie::SAMESITE_LAX,
+            );
+
+            // Set cookie headers directly for immediate effect
+            $cookieHeader = $symfonyCookie->__toString();
+            if (!headers_sent()) {
+                header("Set-Cookie: $cookieHeader", false);
+            }
+        }
+
+        // Keep legacy cookie setting for backward compatibility
+        $mahoCookie->set($sessionName, $sessionId);
+
         return $this;
     }
 
@@ -259,9 +416,16 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
      */
     public function init($namespace, $sessionName = null)
     {
-        if (!isset($_SESSION)) {
+        if (!$this->symfonySession || !$this->symfonySession->isStarted()) {
             $this->start($sessionName);
         }
+
+        // Initialize namespace in Symfony session
+        if ($this->symfonySession && !$this->symfonySession->has($namespace)) {
+            $this->symfonySession->set($namespace, []);
+        }
+
+        // For backward compatibility, also set $_SESSION
         if (!isset($_SESSION[$namespace])) {
             $_SESSION[$namespace] = [];
         }
@@ -295,6 +459,9 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
      */
     public function getSessionId()
     {
+        if ($this->symfonySession && $this->symfonySession->isStarted()) {
+            return $this->symfonySession->getId();
+        }
         return session_id();
     }
 
@@ -307,7 +474,11 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
     public function setSessionId($id = null)
     {
         if (!is_null($id) && preg_match('#^[0-9a-zA-Z,-]+$#', $id)) {
-            session_id($id);
+            if ($this->symfonySession && !$this->symfonySession->isStarted()) {
+                $this->symfonySession->setId($id);
+            } else {
+                session_id($id);
+            }
         }
         return $this;
     }
@@ -319,6 +490,9 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
      */
     public function getSessionName()
     {
+        if ($this->symfonySession) {
+            return $this->symfonySession->getName();
+        }
         return session_name();
     }
 
@@ -331,7 +505,11 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
     public function setSessionName($name)
     {
         if (!empty($name)) {
-            session_name($name);
+            if ($this->symfonySession && !$this->symfonySession->isStarted()) {
+                $this->symfonySession->setName($name);
+            } else {
+                session_name($name);
+            }
         }
         return $this;
     }
@@ -565,20 +743,27 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
             self::VALIDATOR_HTTP_USER_AGENT_KEY         => '',
         ];
 
-        // collect ip data
-        if (Mage::helper('core/http')->getRemoteAddr()) {
-            $parts[self::VALIDATOR_REMOTE_ADDR_KEY] = Mage::helper('core/http')->getRemoteAddr();
-        }
-        if (isset($_ENV['HTTP_VIA'])) {
-            $parts[self::VALIDATOR_HTTP_VIA_KEY] = (string) $_ENV['HTTP_VIA'];
-        }
-        if (isset($_ENV['HTTP_X_FORWARDED_FOR'])) {
-            $parts[self::VALIDATOR_HTTP_X_FORVARDED_FOR_KEY] = (string) $_ENV['HTTP_X_FORWARDED_FOR'];
-        }
-
-        // collect user agent data
-        if (isset($_SERVER['HTTP_USER_AGENT'])) {
-            $parts[self::VALIDATOR_HTTP_USER_AGENT_KEY] = (string) $_SERVER['HTTP_USER_AGENT'];
+        // Use Symfony Request for modern HTTP handling if available
+        if ($this->symfonyRequest) {
+            // collect ip data using Symfony
+            $parts[self::VALIDATOR_REMOTE_ADDR_KEY] = $this->symfonyRequest->getClientIp() ?: '';
+            $parts[self::VALIDATOR_HTTP_VIA_KEY] = $this->symfonyRequest->headers->get('Via', '');
+            $parts[self::VALIDATOR_HTTP_X_FORVARDED_FOR_KEY] = $this->symfonyRequest->headers->get('X-Forwarded-For', '');
+            $parts[self::VALIDATOR_HTTP_USER_AGENT_KEY] = $this->symfonyRequest->headers->get('User-Agent', '');
+        } else {
+            // Fallback to legacy method
+            if (Mage::helper('core/http')->getRemoteAddr()) {
+                $parts[self::VALIDATOR_REMOTE_ADDR_KEY] = Mage::helper('core/http')->getRemoteAddr();
+            }
+            if (isset($_ENV['HTTP_VIA'])) {
+                $parts[self::VALIDATOR_HTTP_VIA_KEY] = (string) $_ENV['HTTP_VIA'];
+            }
+            if (isset($_ENV['HTTP_X_FORWARDED_FOR'])) {
+                $parts[self::VALIDATOR_HTTP_X_FORVARDED_FOR_KEY] = (string) $_ENV['HTTP_X_FORWARDED_FOR'];
+            }
+            if (isset($_SERVER['HTTP_USER_AGENT'])) {
+                $parts[self::VALIDATOR_HTTP_USER_AGENT_KEY] = (string) $_SERVER['HTTP_USER_AGENT'];
+            }
         }
 
         // get time when password was last changed
@@ -605,7 +790,12 @@ class Mage_Core_Model_Session_Abstract_Varien extends Varien_Object
      */
     public function regenerateSessionId()
     {
-        session_regenerate_id(true);
+        if ($this->symfonySession && $this->symfonySession->isStarted()) {
+            $this->symfonySession->migrate(true);
+        } else {
+            session_regenerate_id(true);
+        }
+
         $this->setSessionCookie();
         return $this;
     }
