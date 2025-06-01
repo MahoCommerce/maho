@@ -37,6 +37,7 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Edit extends Mage_Adminht
         ";
     }
 
+    #[\Override]
     public function getHeaderText(): string
     {
         $restriction = Mage::registry('payment_restriction');

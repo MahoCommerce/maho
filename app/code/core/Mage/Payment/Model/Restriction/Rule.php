@@ -20,6 +20,7 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
         $this->_init('payment/restriction');
     }
 
+    #[\Override]
     protected function _afterLoad()
     {
         $this->getConditions();

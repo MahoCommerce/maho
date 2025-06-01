@@ -120,6 +120,7 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Grid extends Mage_Adminht
         return $this;
     }
 
+    #[\Override]
     public function getRowUrl($row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
