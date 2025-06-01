@@ -137,10 +137,20 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Found extends Mage_P
      */
     public function validate(Varien_Object $object)
     {
+        // Get quote from object, handling different object types
+        if ($object instanceof Mage_Sales_Model_Quote) {
+            $quote = $object;
+        } else {
+            $quote = $object->getQuote();
+            if (!$quote) {
+                return false;
+            }
+        }
+
         $all = $this->getAggregator() === 'all';
         $true = (bool) $this->getValue();
         $found = false;
-        foreach ($object->getQuote()->getAllItems() as $item) {
+        foreach ($quote->getAllItems() as $item) {
             $found = $all;
             foreach ($this->getConditions() as $cond) {
                 $validated = $cond->validate($item);

@@ -138,10 +138,21 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Address extends Mage_Rule_Mo
     {
         $address = $object;
         if (!$address instanceof Mage_Sales_Model_Quote_Address) {
-            if ($object->getQuote()->isVirtual()) {
-                $address = $object->getQuote()->getBillingAddress();
+            // If object is a quote, use it directly
+            if ($object instanceof Mage_Sales_Model_Quote) {
+                $quote = $object;
             } else {
-                $address = $object->getQuote()->getShippingAddress();
+                // Otherwise try to get quote from object
+                $quote = $object->getQuote();
+                if (!$quote) {
+                    return false;
+                }
+            }
+
+            if ($quote->isVirtual()) {
+                $address = $quote->getBillingAddress();
+            } else {
+                $address = $quote->getShippingAddress();
             }
         }
 

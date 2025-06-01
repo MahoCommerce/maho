@@ -46,6 +46,11 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
 
             // Use the new rule-based validation if conditions are available
             if ($restriction->getConditionsSerialized()) {
+                // First check basic restrictions (date, website, customer group)
+                if (!$this->_checkBasicRestrictions($restriction, $quote, $customer)) {
+                    continue; // Basic restrictions don't match, skip this restriction
+                }
+
                 $rule = Mage::getModel('payment/restriction_rule');
                 $rule->setData($restriction->getData());
 
@@ -64,9 +69,9 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Check if quote/customer matches restriction conditions
+     * Check basic restriction conditions (date, website, customer group)
      */
-    protected function _matchesRestriction(
+    protected function _checkBasicRestrictions(
         Mage_Payment_Model_Restriction $restriction,
         ?Mage_Sales_Model_Quote $quote = null,
         ?Mage_Customer_Model_Customer $customer = null
@@ -107,7 +112,17 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
             }
         }
 
-
         return true;
+    }
+
+    /**
+     * Check if quote/customer matches restriction conditions
+     */
+    protected function _matchesRestriction(
+        Mage_Payment_Model_Restriction $restriction,
+        ?Mage_Sales_Model_Quote $quote = null,
+        ?Mage_Customer_Model_Customer $customer = null
+    ): bool {
+        return $this->_checkBasicRestrictions($restriction, $quote, $customer);
     }
 }
