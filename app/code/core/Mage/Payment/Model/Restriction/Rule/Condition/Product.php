@@ -39,7 +39,6 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product extends Mage_Rule_Mo
     /**
      * Validate Product Rule Condition
      *
-     * @param Varien_Object $object
      * @return bool
      */
     public function validate(Varien_Object $object)

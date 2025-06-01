@@ -161,7 +161,7 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Edit_Form extends Mage_Ad
         $paymentMethods = Mage::helper('payment')->getPaymentMethods();
 
         foreach ($paymentMethods as $code => $data) {
-            $title = isset($data['title']) ? $data['title'] : $code;
+            $title = $data['title'] ?? $code;
             $methods[] = ['value' => $code, 'label' => $title . ' (' . $code . ')'];
         }
 

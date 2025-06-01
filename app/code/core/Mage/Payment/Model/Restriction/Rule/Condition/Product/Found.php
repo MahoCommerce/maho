@@ -37,7 +37,6 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Found extends Mage_P
     /**
      * Return as array
      *
-     * @param array $arrAttributes
      * @return array
      */
     public function asArray(array $arrAttributes = [])
@@ -134,7 +133,6 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Found extends Mage_P
     /**
      * Validate
      *
-     * @param Varien_Object $object
      * @return bool
      */
     public function validate(Varien_Object $object)
