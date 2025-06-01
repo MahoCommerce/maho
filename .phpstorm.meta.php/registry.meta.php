@@ -57,6 +57,7 @@ namespace PHPSTORM_META {
         Object_Cache_Product,
         Object_Cache_StockItem,
         order_address,
+        payment_restriction,
         permissions_block,
         permissions_user,
         permissions_variable,
