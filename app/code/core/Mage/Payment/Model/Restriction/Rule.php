@@ -8,9 +8,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Payment restriction rule model with condition support
- */
 class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
 {
     public const STATUS_ENABLED = 1;
