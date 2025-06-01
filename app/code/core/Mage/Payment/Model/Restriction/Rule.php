@@ -26,6 +26,7 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
         return parent::_afterLoad();
     }
 
+    #[\Override]
     protected function _beforeSave()
     {
         // Don't auto-serialize here - it's handled in the controller
@@ -48,6 +49,7 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
     /**
      * Override parent getConditions to use our condition models
      */
+    #[\Override]
     public function getConditions(): Mage_Rule_Model_Condition_Combine
     {
         if (!$this->_conditions) {
@@ -105,6 +107,7 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
         return true;
     }
 
+    #[\Override]
     public function validate(Varien_Object $object): bool
     {
         return $this->getConditions()->validate($object);

@@ -8,9 +8,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Payment restriction rule product condition combine
- */
 class Mage_Payment_Model_Restriction_Rule_Condition_Product_Combine extends Mage_Rule_Model_Condition_Combine
 {
     public function __construct()
@@ -19,12 +16,8 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Combine extends Mage
         $this->setType('payment/restriction_rule_condition_product_combine');
     }
 
-    /**
-     * Get new child select options
-     *
-     * @return array
-     */
-    public function getNewChildSelectOptions()
+    #[\Override]
+    public function getNewChildSelectOptions(): array
     {
         $productCondition = Mage::getModel('payment/restriction_rule_condition_product');
         $productAttributes = $productCondition->loadAttributeOptions()->getAttributeOption();

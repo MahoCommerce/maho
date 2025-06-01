@@ -19,6 +19,7 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Grid extends Mage_Adminht
         $this->setSaveParametersInSession(true);
     }
 
+    #[\Override]
     protected function _prepareCollection(): self
     {
         $collection = Mage::getModel('payment/restriction')->getCollection();
@@ -26,6 +27,7 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Grid extends Mage_Adminht
         return parent::_prepareCollection();
     }
 
+    #[\Override]
     protected function _prepareColumns(): self
     {
         $this->addColumn('restriction_id', [
@@ -84,6 +86,7 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Grid extends Mage_Adminht
         return parent::_prepareColumns();
     }
 
+    #[\Override]
     protected function _prepareMassaction(): self
     {
         $this->setMassactionIdField('restriction_id');

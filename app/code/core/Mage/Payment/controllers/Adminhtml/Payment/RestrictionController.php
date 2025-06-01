@@ -278,6 +278,7 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
         $this->getResponse()->setBody($html);
     }
 
+    #[\Override]
     protected function _isAllowed(): bool
     {
         return Mage::getSingleton('admin/session')->isAllowed('sales/payment_restrictions');
