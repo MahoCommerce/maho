@@ -52,6 +52,13 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Combine extends Mage_Rule_Mo
             $attributes[] = ['value' => 'payment/restriction_rule_condition_address|' . $code, 'label' => $label];
         }
 
+        $customerCondition = Mage::getModel('payment/restriction_rule_condition_customer');
+        $customerAttributes = $customerCondition->loadAttributeOptions()->getAttributeOption();
+        $customerAttributeOptions = [];
+        foreach ($customerAttributes as $code => $label) {
+            $customerAttributeOptions[] = ['value' => 'payment/restriction_rule_condition_customer|' . $code, 'label' => $label];
+        }
+
         $conditions = parent::getNewChildSelectOptions();
         $conditions = array_merge_recursive($conditions, [
             [
@@ -61,6 +68,10 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Combine extends Mage_Rule_Mo
             [
                 'label' => Mage::helper('payment')->__('Cart Attribute'),
                 'value' => $attributes,
+            ],
+            [
+                'label' => Mage::helper('payment')->__('Customer Attribute'),
+                'value' => $customerAttributeOptions,
             ],
             [
                 'label' => Mage::helper('payment')->__('Product Attribute'),
