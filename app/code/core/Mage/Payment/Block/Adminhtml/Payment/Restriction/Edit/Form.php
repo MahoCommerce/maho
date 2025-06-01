@@ -37,14 +37,12 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Edit_Form extends Mage_Ad
         $fieldset->addField('name', 'text', [
             'name'     => 'name',
             'label'    => Mage::helper('payment')->__('Name'),
-            'title'    => Mage::helper('payment')->__('Name'),
             'required' => true,
         ]);
 
         $fieldset->addField('description', 'textarea', [
             'name'  => 'description',
             'label' => Mage::helper('payment')->__('Description'),
-            'title' => Mage::helper('payment')->__('Description'),
             'rows'  => 3,
         ]);
 
@@ -55,7 +53,6 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Edit_Form extends Mage_Ad
 
         $fieldset->addField('status', 'select', [
             'label'    => Mage::helper('payment')->__('Status'),
-            'title'    => Mage::helper('payment')->__('Status'),
             'name'     => 'status',
             'required' => true,
             'options'  => [
@@ -74,7 +71,6 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Edit_Form extends Mage_Ad
         $fieldset->addField('restriction_payment_methods_field', 'multiselect', [
             'name'     => 'payment_methods[]',
             'label'    => Mage::helper('payment')->__('Payment Methods'),
-            'title'    => Mage::helper('payment')->__('Payment Methods'),
             'values'   => $paymentMethods,
             'required' => true,
         ]);
@@ -88,7 +84,6 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Edit_Form extends Mage_Ad
         $fieldset->addField('restriction_websites_field', 'multiselect', [
             'name'   => 'websites[]',
             'label'  => Mage::helper('payment')->__('Websites'),
-            'title'  => Mage::helper('payment')->__('Websites'),
             'values' => $websites,
             'note'   => Mage::helper('payment')->__('Leave empty to apply to all websites'),
         ]);
@@ -97,7 +92,6 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Edit_Form extends Mage_Ad
         $fieldset->addField('restriction_customer_groups_field', 'multiselect', [
             'name'   => 'customer_groups[]',
             'label'  => Mage::helper('payment')->__('Customer Groups'),
-            'title'  => Mage::helper('payment')->__('Customer Groups'),
             'values' => $customerGroups,
             'note'   => Mage::helper('payment')->__('Leave empty to apply to all customer groups'),
         ]);
@@ -105,16 +99,12 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Edit_Form extends Mage_Ad
         $fieldset->addField('from_date', 'date', [
             'name'   => 'from_date',
             'label'  => Mage::helper('payment')->__('From Date'),
-            'title'  => Mage::helper('payment')->__('From Date'),
-            'image'  => $this->getSkinUrl('images/grid-cal.gif'),
             'format' => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
         ]);
 
         $fieldset->addField('to_date', 'date', [
             'name'   => 'to_date',
             'label'  => Mage::helper('payment')->__('To Date'),
-            'title'  => Mage::helper('payment')->__('To Date'),
-            'image'  => $this->getSkinUrl('images/grid-cal.gif'),
             'format' => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
         ]);
 

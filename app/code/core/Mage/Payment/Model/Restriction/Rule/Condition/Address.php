@@ -26,13 +26,8 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Address extends Mage_Rule_Mo
         $this->loadOperatorOptions();
     }
 
-    /**
-     * Load attribute options
-     *
-     * @return $this
-     */
     #[\Override]
-    public function loadAttributeOptions()
+    public function loadAttributeOptions(): self
     {
         $attributes = [
             'base_subtotal' => Mage::helper('payment')->__('Subtotal'),
@@ -51,26 +46,16 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Address extends Mage_Rule_Mo
         return $this;
     }
 
-    /**
-     * Get attribute element
-     *
-     * @return Varien_Data_Form_Element_Abstract
-     */
     #[\Override]
-    public function getAttributeElement()
+    public function getAttributeElement(): Varien_Data_Form_Element_Abstract
     {
         $element = parent::getAttributeElement();
         $element->setShowAsText(true);
         return $element;
     }
 
-    /**
-     * Get input type
-     *
-     * @return string
-     */
     #[\Override]
-    public function getInputType()
+    public function getInputType(): string
     {
         return match ($this->getAttribute()) {
             'base_subtotal', 'weight', 'total_qty' => 'numeric',
@@ -79,13 +64,8 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Address extends Mage_Rule_Mo
         };
     }
 
-    /**
-     * Get value element type
-     *
-     * @return string
-     */
     #[\Override]
-    public function getValueElementType()
+    public function getValueElementType(): string
     {
         return match ($this->getAttribute()) {
             'shipping_method', 'payment_method', 'country_id', 'region_id' => 'select',
@@ -93,13 +73,8 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Address extends Mage_Rule_Mo
         };
     }
 
-    /**
-     * Get value select options
-     *
-     * @return array
-     */
     #[\Override]
-    public function getValueSelectOptions()
+    public function getValueSelectOptions(): array
     {
         if (!$this->hasData('value_select_options')) {
             $options = match ($this->getAttribute()) {
@@ -137,11 +112,9 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Address extends Mage_Rule_Mo
 
     /**
      * Validate Address Rule Condition
-     *
-     * @return bool
      */
     #[\Override]
-    public function validate(Varien_Object $object)
+    public function validate(Varien_Object $object): bool
     {
         $address = $object;
         if (!$address instanceof Mage_Sales_Model_Quote_Address) {

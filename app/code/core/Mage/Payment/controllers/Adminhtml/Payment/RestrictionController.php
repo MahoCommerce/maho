@@ -254,6 +254,7 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
         $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
         $type = $typeArr[0];
 
+
         // Create the rule and ensure it has a form
         $rule = Mage::getModel('payment/restriction_rule');
 
@@ -266,6 +267,7 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
             ->setRule($rule)
             ->setPrefix('conditions');
         if (!empty($typeArr[1])) {
+            die($typeArr[1]);
             $model->setAttribute($typeArr[1]);
         }
 
