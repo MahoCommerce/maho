@@ -23,18 +23,12 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
         $this->_init('payment/restriction');
     }
 
-    /**
-     * Initialize conditions after load
-     */
     protected function _afterLoad()
     {
         $this->getConditions();
         return parent::_afterLoad();
     }
 
-    /**
-     * Prepare data before save
-     */
     protected function _beforeSave()
     {
         // Don't auto-serialize here - it's handled in the controller
@@ -43,28 +37,21 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Override to use payment restriction condition models
-     *
-     * @return Mage_Payment_Model_Restriction_Rule_Condition_Combine
      */
-    public function getConditionsInstance()
+    public function getConditionsInstance(): Mage_Payment_Model_Restriction_Rule_Condition_Combine
     {
         return Mage::getModel('payment/restriction_rule_condition_combine');
     }
 
-    /**
-     * @return void //@phpstan-ignore method.childReturnType
-     */
-    public function getActionsInstance()
+    public function getActionsInstance(): void //@phpstan-ignore method.childReturnType
     {
         // We have no "actions" in this module, but this is required by parent
     }
 
     /**
      * Override parent getConditions to use our condition models
-     *
-     * @return Mage_Payment_Model_Restriction_Rule_Condition_Combine
      */
-    public function getConditions()
+    public function getConditions(): Mage_Rule_Model_Condition_Combine
     {
         if (!$this->_conditions) {
             $this->_conditions = $this->getConditionsInstance();
@@ -121,24 +108,8 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
         return true;
     }
 
-    /**
-     * Validate rule conditions against quote
-     *
-     * @param Varien_Object $object
-     * @return bool
-     */
-    public function validate(Varien_Object $object)
+    public function validate(Varien_Object $object): bool
     {
         return $this->getConditions()->validate($object);
-    }
-
-    /**
-     * Get available restriction types
-     */
-    public function getRestrictionTypes(): array
-    {
-        return [
-            self::TYPE_DENYLIST => Mage::helper('payment')->__('Denylist (Hide methods)'),
-        ];
     }
 }

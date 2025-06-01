@@ -110,15 +110,4 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
 
         return true;
     }
-
-
-    /**
-     * Get available restriction types
-     */
-    public function getRestrictionTypes(): array
-    {
-        return [
-            self::TYPE_DENYLIST => Mage::helper('payment')->__('Denylist (Hide methods)'),
-        ];
-    }
 }
