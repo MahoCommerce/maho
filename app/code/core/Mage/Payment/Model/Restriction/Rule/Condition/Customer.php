@@ -26,6 +26,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
      *
      * @return $this
      */
+    #[\Override]
     public function loadAttributeOptions()
     {
         $attributes = [
@@ -58,6 +59,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
      *
      * @return Varien_Data_Form_Element_Abstract
      */
+    #[\Override]
     public function getAttributeElement()
     {
         $element = parent::getAttributeElement();
@@ -70,6 +72,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
      *
      * @return string
      */
+    #[\Override]
     public function getInputType()
     {
         return match ($this->getAttribute()) {
@@ -85,6 +88,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
      *
      * @return string
      */
+    #[\Override]
     public function getValueElementType()
     {
         return match ($this->getAttribute()) {
@@ -99,6 +103,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
      *
      * @return array
      */
+    #[\Override]
     public function getValueSelectOptions()
     {
         if (!$this->hasData('value_select_options')) {
@@ -171,6 +176,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
      *
      * @return bool
      */
+    #[\Override]
     public function validate(Varien_Object $object)
     {
         // Get customer from quote or use directly if passed

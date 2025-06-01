@@ -27,6 +27,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Subselect extends Ma
      * @param string $key
      * @return $this
      */
+    #[\Override]
     public function loadArray($arr, $key = 'conditions')
     {
         $this->setAttribute($arr['attribute']);
@@ -41,6 +42,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Subselect extends Ma
      *
      * @return array
      */
+    #[\Override]
     public function asArray(array $arrAttributes = [])
     {
         $out = parent::asArray();
@@ -55,6 +57,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Subselect extends Ma
      *
      * @return string
      */
+    #[\Override]
     public function asXml($containerKey = 'conditions', $itemKey = 'condition')
     {
         $xml = '<attribute>' . $this->getAttribute() . '</attribute>'
@@ -69,6 +72,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Subselect extends Ma
      *
      * @return $this
      */
+    #[\Override]
     public function loadAttributeOptions()
     {
         $this->setAttributeOption([
@@ -83,6 +87,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Subselect extends Ma
      *
      * @return $this
      */
+    #[\Override]
     public function loadOperatorOptions()
     {
         $this->setOperatorOption([
@@ -101,6 +106,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Subselect extends Ma
      *
      * @return string
      */
+    #[\Override]
     public function getValueElementType()
     {
         return 'text';
@@ -111,6 +117,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Subselect extends Ma
      *
      * @return string
      */
+    #[\Override]
     public function asHtml()
     {
         $html = $this->getTypeElement()->getHtml() .
@@ -132,6 +139,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Subselect extends Ma
      *
      * @return bool
      */
+    #[\Override]
     public function validate(Varien_Object $object)
     {
         if (!$this->getConditions()) {

@@ -41,6 +41,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product extends Mage_Rule_Mo
      *
      * @return bool
      */
+    #[\Override]
     public function validate(Varien_Object $object)
     {
         $product = false;
@@ -64,6 +65,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product extends Mage_Rule_Mo
     /**
      * Override getForm to provide fallback when rule is not available
      */
+    #[\Override]
     public function getForm()
     {
         if ($this->getRule()) {

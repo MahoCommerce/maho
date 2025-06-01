@@ -31,6 +31,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Address extends Mage_Rule_Mo
      *
      * @return $this
      */
+    #[\Override]
     public function loadAttributeOptions()
     {
         $attributes = [
@@ -55,6 +56,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Address extends Mage_Rule_Mo
      *
      * @return Varien_Data_Form_Element_Abstract
      */
+    #[\Override]
     public function getAttributeElement()
     {
         $element = parent::getAttributeElement();
@@ -67,6 +69,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Address extends Mage_Rule_Mo
      *
      * @return string
      */
+    #[\Override]
     public function getInputType()
     {
         return match ($this->getAttribute()) {
@@ -81,6 +84,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Address extends Mage_Rule_Mo
      *
      * @return string
      */
+    #[\Override]
     public function getValueElementType()
     {
         return match ($this->getAttribute()) {
@@ -94,6 +98,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Address extends Mage_Rule_Mo
      *
      * @return array
      */
+    #[\Override]
     public function getValueSelectOptions()
     {
         if (!$this->hasData('value_select_options')) {
@@ -116,6 +121,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Address extends Mage_Rule_Mo
     /**
      * Override getForm to provide fallback when rule is not available
      */
+    #[\Override]
     public function getForm()
     {
         if ($this->getRule()) {
@@ -134,6 +140,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Address extends Mage_Rule_Mo
      *
      * @return bool
      */
+    #[\Override]
     public function validate(Varien_Object $object)
     {
         $address = $object;

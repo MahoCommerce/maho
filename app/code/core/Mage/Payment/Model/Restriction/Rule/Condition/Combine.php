@@ -29,6 +29,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Combine extends Mage_Rule_Mo
     /**
      * Load value options
      */
+    #[\Override]
     public function loadValueOptions()
     {
         $this->setValueOption([
@@ -43,6 +44,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Combine extends Mage_Rule_Mo
      *
      * @return array
      */
+    #[\Override]
     public function getNewChildSelectOptions()
     {
         $addressCondition = Mage::getModel('payment/restriction_rule_condition_address');
@@ -100,6 +102,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Combine extends Mage_Rule_Mo
     /**
      * Override to ensure rule is properly set on conditions
      */
+    #[\Override]
     public function loadArray($arr, $key = 'conditions')
     {
         parent::loadArray($arr, $key);
@@ -115,6 +118,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Combine extends Mage_Rule_Mo
     /**
      * Override getForm to provide fallback when rule is not available
      */
+    #[\Override]
     public function getForm()
     {
         if ($this->getRule()) {
@@ -131,6 +135,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Combine extends Mage_Rule_Mo
     /**
      * Override asHtml to ensure proper DOM structure
      */
+    #[\Override]
     public function asHtml()
     {
         // Ensure we have the basic structure even when empty

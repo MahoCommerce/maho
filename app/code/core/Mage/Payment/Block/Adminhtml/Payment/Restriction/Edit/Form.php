@@ -10,6 +10,7 @@
 
 class Mage_Payment_Block_Adminhtml_Payment_Restriction_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
 {
+    #[\Override]
     protected function _prepareForm(): self
     {
         $form = new Varien_Data_Form([
