@@ -10201,18 +10201,6 @@ parameters:
 			path: app/code/core/Mage/Api/Model/Session.php
 
 		-
-			message: '#^Return type \(bool\) of method Mage_Api_Model_Session\:\:clear\(\) should be compatible with return type \(\$this\(Mage_Core_Model_Session_Abstract_Varien\)\) of method Mage_Core_Model_Session_Abstract_Varien\:\:clear\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/Api/Model/Session.php
-
-		-
-			message: '#^Return type \(void\) of method Mage_Api_Model_Session\:\:revalidateCookie\(\) should be compatible with return type \(\$this\(Mage_Core_Model_Session_Abstract_Varien\)\) of method Mage_Core_Model_Session_Abstract_Varien\:\:revalidateCookie\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/Api/Model/Session.php
-
-		-
 			message: '#^Invalid array key type array\.$#'
 			identifier: offsetAccess.invalidOffset
 			count: 1
@@ -17009,12 +16997,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: app/code/core/Mage/Core/Model/Session/Abstract.php
-
-		-
-			message: '#^Parameter \#2 \$clear \(bool\) of method Mage_Core_Model_Session_Abstract_Varien\:\:getData\(\) should be compatible with parameter \$index \(int\|string\) of method Varien_Object\:\:getData\(\)$#'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Core/Model/Session/Abstract/Varien.php
 
 		-
 			message: '#^Method Mage_Core_Model_Store\:\:_getSession\(\) should return Mage_Core_Model_Session but returns Mage_Core_Model_Session_Abstract\.$#'
