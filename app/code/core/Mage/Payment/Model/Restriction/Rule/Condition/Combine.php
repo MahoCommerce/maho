@@ -33,13 +33,8 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Combine extends Mage_Rule_Mo
         return $this;
     }
 
-    /**
-     * Get new child select options
-     *
-     * @return array
-     */
     #[\Override]
-    public function getNewChildSelectOptions()
+    public function getNewChildSelectOptions(): array
     {
         $addressCondition = Mage::getModel('payment/restriction_rule_condition_address');
         $addressAttributes = $addressCondition->loadAttributeOptions()->getAttributeOption();
