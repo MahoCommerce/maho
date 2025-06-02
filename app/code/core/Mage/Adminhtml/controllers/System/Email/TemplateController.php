@@ -208,7 +208,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
         $templateBlock = $this->getLayout()->createBlock('adminhtml/system_email_template_edit');
         $template->setData('orig_template_used_default_for', $templateBlock->getUsedDefaultForPaths(false));
 
-        $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($template->getData()));
+        $this->getResponse()->setBodyJson($template);
     }
 
     /**

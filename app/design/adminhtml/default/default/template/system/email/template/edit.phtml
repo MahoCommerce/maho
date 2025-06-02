@@ -214,7 +214,7 @@ const templateControl = {
         }
     },
 
-    load() {
+    async load() {
         const form = new varienForm('email_template_load_form');
 
         if (!form.validator.validate()) {
@@ -226,51 +226,46 @@ const templateControl = {
         const formElement = document.getElementById('email_template_load_form');
         const formData = new FormData(formElement);
 
-        mahoFetch(formElement.action, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            try {
-                const fields = typeof response === 'string' ? JSON.parse(response) : response;
-                Object.entries(fields).forEach(([key, value]) => {
-                    const element = document.getElementById(key);
-                    if (element) {
-                        element.value = typeof value === 'string' ? value.trim() : value;
-                    }
+        try {
+            const result = await mahoFetch(formElement.action, {
+                method: 'POST',
+                body: formData,
+            });
 
-                    if (key === 'template_type') {
-                        const convertButton = document.getElementById('convert_button');
-                        const convertButtonBack = document.getElementById('convert_button_back');
+            for (const [key, value] of Object.entries(result)) {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = typeof value === 'string' ? value.trim() : value;
+                }
 
-                        if (value == 1) {
-                            this.typeChange = true;
-                            convertButton.style.display = 'none';
-                            convertButtonBack.style.display = 'none';
-                        } else {
-                            this.typeChange = false;
-                            convertButtonBack.style.display = 'none';
-                            convertButton.style.display = '';
-                        }
-                    }
+                if (key === 'template_type') {
+                    const convertButton = document.getElementById('convert_button');
+                    const convertButtonBack = document.getElementById('convert_button_back');
 
-                    if (key === 'orig_template_used_default_for') {
-                        const usedDefaultFor = document.getElementById('used_default_for');
-                        if (value.length) {
-                            usedDefaultFor.style.display = '';
-                            this.renderPaths(value, 'used_default_for');
-                        } else {
-                            usedDefaultFor.style.display = 'none';
-                        }
+                    if (value == 1) {
+                        this.typeChange = true;
+                        convertButton.style.display = 'none';
+                        convertButtonBack.style.display = 'none';
+                    } else {
+                        this.typeChange = false;
+                        convertButtonBack.style.display = 'none';
+                        convertButton.style.display = '';
                     }
-                });
-            } catch (e) {
-                console.error('Failed to parse response:', e);
+                }
+
+                if (key === 'orig_template_used_default_for') {
+                    const usedDefaultFor = document.getElementById('used_default_for');
+                    if (value.length) {
+                        usedDefaultFor.style.display = '';
+                        this.renderPaths(value, 'used_default_for');
+                    } else {
+                        usedDefaultFor.style.display = 'none';
+                    }
+                }
             }
-        })
-        .catch(error => {
-            console.error('Request failed:', error);
-        });
+        } catch (error) {
+            alert(`Failed to load template: ${error.message}`);
+        }
     },
 
     renderPaths(paths, fieldId) {
