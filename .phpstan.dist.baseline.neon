@@ -17017,18 +17017,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Session/Abstract/Varien.php
 
 		-
-			message: '#^Access to an undefined property Zend_Session_Namespace\:\:\$data\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/code/core/Mage/Core/Model/Session/Abstract/Zend.php
-
-		-
-			message: '#^Parameter \#2 \$clear \(bool\) of method Mage_Core_Model_Session_Abstract_Zend\:\:getData\(\) should be compatible with parameter \$index \(int\|string\) of method Varien_Object\:\:getData\(\)$#'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Core/Model/Session/Abstract/Zend.php
-
-		-
 			message: '#^Method Mage_Core_Model_Store\:\:_getSession\(\) should return Mage_Core_Model_Session but returns Mage_Core_Model_Session_Abstract\.$#'
 			identifier: return.type
 			count: 1
