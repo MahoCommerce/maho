@@ -139,7 +139,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
     }
 
     /**
-     * Create Redis session handler using Symfony's RedisSessionHandler with native DSN support
+     * Create Redis session handler using Symfony's RedisSessionHandler
      */
     private function createRedisSessionHandler(): \SessionHandlerInterface
     {
@@ -149,6 +149,11 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
             throw new Exception('Redis session configuration not found in global/redis_session');
         }
 
+        $dsn = (string) $redisConfig->dsn;
+        if (!$dsn) {
+            throw new Exception('Redis DSN is required in global/redis_session/dsn. Format: redis://[password@]host[:port][/database]');
+        }
+
         $options = [];
 
         // Set prefix option if configured
@@ -156,28 +161,41 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
             $options['prefix'] = $prefix;
         }
 
-        // Check if DSN format is used (recommended)
-        if ($dsn = (string) $redisConfig->dsn) {
-            return new RedisSessionHandler($dsn, $options);
+        // Parse DSN into connection parameters
+        $connectionParams = $this->parseRedisDsn($dsn);
+
+        // Create Redis connection
+        $redis = new \Redis();
+        $redis->connect($connectionParams['host'], $connectionParams['port']);
+
+        if ($connectionParams['password']) {
+            $redis->auth($connectionParams['password']);
         }
 
-        // Fallback to legacy individual parameter format
-        $host = (string) ($redisConfig->host ?: '127.0.0.1');
-        $port = (int) ($redisConfig->port ?: 6379);
-        $database = (int) ($redisConfig->database ?: 0);
-        $password = (string) $redisConfig->password;
-
-        // Build DSN from legacy parameters
-        $dsn = 'redis://';
-        if ($password) {
-            $dsn .= urlencode($password) . '@';
-        }
-        $dsn .= $host . ':' . $port;
-        if ($database > 0) {
-            $dsn .= '/' . $database;
+        if ($connectionParams['database'] > 0) {
+            $redis->select($connectionParams['database']);
         }
 
-        return new RedisSessionHandler($dsn, $options);
+        return new RedisSessionHandler($redis, $options);
+    }
+
+    /**
+     * Parse Redis DSN into connection parameters
+     */
+    private function parseRedisDsn(string $dsn): array
+    {
+        $parsedDsn = parse_url($dsn);
+
+        if ($parsedDsn === false || ($parsedDsn['scheme'] ?? '') !== 'redis') {
+            throw new Exception('Invalid Redis DSN format. Expected: redis://[password@]host[:port][/database]');
+        }
+
+        return [
+            'host' => $parsedDsn['host'] ?? '127.0.0.1',
+            'port' => $parsedDsn['port'] ?? 6379,
+            'password' => $parsedDsn['pass'] ?? '',
+            'database' => isset($parsedDsn['path']) ? (int) trim($parsedDsn['path'], '/') : 0,
+        ];
     }
 
     /**
