@@ -131,15 +131,10 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
     private function createSessionHandler(): \SessionHandlerInterface
     {
         $method = $this->getSessionSaveMethod();
-
-        switch ($method) {
-            case 'redis':
-                return $this->createRedisSessionHandler();
-
-            case 'files':
-            default:
-                return $this->createFileSessionHandler();
-        }
+        return match ($method) {
+            'redis' => $this->createRedisSessionHandler(),
+            default => $this->createFileSessionHandler(),
+        };
     }
 
     /**
