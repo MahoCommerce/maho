@@ -422,16 +422,6 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
     }
 
     /**
-     * Revalidate cookie
-     * @deprecated after 1.4 cookie renew moved to session start method
-     * @return $this
-     */
-    public function revalidateCookie()
-    {
-        return $this;
-    }
-
-    /**
      * Init session with namespace
      *
      * @param string $namespace
@@ -466,16 +456,19 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
      * Additional get data with clear mode
      *
      * @param string $key
-     * @param bool $clear
+     * @param mixed $index For compatibility with parent; when bool, acts as clear flag
      * @return mixed
      */
     #[\Override]
-    public function getData($key = '', $clear = false)
+    public function getData($key = '', $index = null)
     {
-        $data = parent::getData($key);
-        if ($clear && isset($this->_data[$key])) {
+        $data = parent::getData($key, $index);
+        
+        // If $index is a boolean, treat it as the clear flag for backward compatibility
+        if (is_bool($index) && $index && isset($this->_data[$key])) {
             unset($this->_data[$key]);
         }
+        
         return $data;
     }
 

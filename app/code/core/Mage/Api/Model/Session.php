@@ -70,13 +70,6 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     #[\Override]
-    public function revalidateCookie(): self
-    {
-        // In api we don't use cookies
-        return $this;
-    }
-
-    #[\Override]
     public function clear(): self
     {
         if ($sessId = $this->getSessionId()) {
