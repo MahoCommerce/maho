@@ -67,13 +67,8 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
         return $element;
     }
 
-    /**
-     * Get input type
-     *
-     * @return string
-     */
     #[\Override]
-    public function getInputType()
+    public function getInputType(): string
     {
         return match ($this->getAttribute()) {
             'group_id', 'gender', 'is_active' => 'select',
