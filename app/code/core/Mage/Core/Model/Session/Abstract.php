@@ -139,7 +139,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
     }
 
     /**
-     * Create Redis session handler using Symfony's RedisSessionHandler
+     * Create Redis session handler using Symfony's RedisSessionHandler with native DSN support
      */
     private function createRedisSessionHandler(): \SessionHandlerInterface
     {
@@ -149,27 +149,35 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
             throw new Exception('Redis session configuration not found in global/redis_session');
         }
 
-        // Set up Redis connection parameters
+        $options = [];
+        
+        // Set prefix option if configured
+        if ($prefix = (string) $redisConfig->key_prefix) {
+            $options['prefix'] = $prefix;
+        }
+
+        // Check if DSN format is used (recommended)
+        if ($dsn = (string) $redisConfig->dsn) {
+            return new RedisSessionHandler($dsn, $options);
+        }
+
+        // Fallback to legacy individual parameter format
         $host = (string) ($redisConfig->host ?: '127.0.0.1');
         $port = (int) ($redisConfig->port ?: 6379);
         $database = (int) ($redisConfig->database ?: 0);
-        $password = (string) ($redisConfig->password ?: '');
-        $prefix = (string) ($redisConfig->key_prefix ?: 'session:');
+        $password = (string) $redisConfig->password;
 
-        // Create Redis connection
-        $redis = new \Redis();
-        $redis->connect($host, $port);
-
+        // Build DSN from legacy parameters
+        $dsn = 'redis://';
         if ($password) {
-            $redis->auth($password);
+            $dsn .= urlencode($password) . '@';
         }
-
+        $dsn .= $host . ':' . $port;
         if ($database > 0) {
-            $redis->select($database);
+            $dsn .= '/' . $database;
         }
 
-        // Return Symfony's RedisSessionHandler
-        return new RedisSessionHandler($redis, ['prefix' => $prefix]);
+        return new RedisSessionHandler($dsn, $options);
     }
 
     /**
