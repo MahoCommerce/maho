@@ -221,9 +221,7 @@ class Mediabrowser {
      * return HTMLelement | null
      */
     getTargetElement() {
-        if (typeof tinyMCE !== 'undefined' && tinyMCE.get(this.targetElementId)) {
-            return this.getMediaBrowserCallback();
-        } else if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.targetElementId)) {
+        if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.targetElementId)) {
             return this.getMediaBrowserCallback();
         } else {
             return document.getElementById(this.targetElementId);
@@ -234,9 +232,6 @@ class Mediabrowser {
      * return object|null
      */
     getMediaBrowserCallback() {
-        if (typeof tinyMCE !== 'undefined' && tinyMCE.get(this.targetElementId) && typeof tinyMceEditors !== 'undefined') {
-            return tinyMceEditors.get(this.targetElementId).getMediaBrowserCallback();
-        }
         if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.targetElementId)) {
             return tiptapEditors.get(this.targetElementId).getMediaBrowserCallback();
         }
