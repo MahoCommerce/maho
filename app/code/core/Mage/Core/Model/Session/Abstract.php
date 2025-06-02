@@ -198,21 +198,9 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
         ];
     }
 
-    /**
-     * Create file session handler
-     */
     private function createFileSessionHandler(): \SessionHandlerInterface
     {
         $savePath = $this->getSessionSavePath();
-
-        if (!is_dir($savePath)) {
-            mkdir($savePath, 0755, true);
-        }
-
-        if (!is_writable($savePath)) {
-            throw new Exception("Session save path '{$savePath}' is not writable");
-        }
-
         return new NativeFileSessionHandler($savePath);
     }
 
