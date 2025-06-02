@@ -150,7 +150,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
         }
 
         $options = [];
-        
+
         // Set prefix option if configured
         if ($prefix = (string) $redisConfig->key_prefix) {
             $options['prefix'] = $prefix;
