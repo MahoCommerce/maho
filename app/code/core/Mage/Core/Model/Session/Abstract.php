@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeFileSessionHandler;
+use Symfony\Component\HttpFoundation\Session\Storage\Handler\RedisSessionHandler;
 
 /**
  * @method string getErrorMessage()
@@ -138,11 +139,10 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
     }
 
     /**
-     * Create Redis session handler with modern Symfony approach
+     * Create Redis session handler using Symfony's RedisSessionHandler
      */
     private function createRedisSessionHandler(): \SessionHandlerInterface
     {
-        // Use the existing Redis setup but with modern wrapper
         $redisConfig = Mage::getConfig()->getNode('global/redis_session');
 
         if (!$redisConfig) {
@@ -154,6 +154,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
         $port = (int) ($redisConfig->port ?: 6379);
         $database = (int) ($redisConfig->database ?: 0);
         $password = (string) ($redisConfig->password ?: '');
+        $prefix = (string) ($redisConfig->key_prefix ?: 'session:');
 
         // Create Redis connection
         $redis = new \Redis();
@@ -167,50 +168,8 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
             $redis->select($database);
         }
 
-        // Return Redis session handler
-        return new class ($redis) implements \SessionHandlerInterface {
-            private \Redis $redis;
-            private string $prefix = 'session:';
-
-            public function __construct(\Redis $redis)
-            {
-                $this->redis = $redis;
-            }
-
-            public function open(string $path, string $name): bool
-            {
-                return true;
-            }
-
-            public function close(): bool
-            {
-                return true;
-            }
-
-            public function read(string $id): string
-            {
-                $data = $this->redis->get($this->prefix . $id);
-                return $data !== false ? (string) $data : '';
-            }
-
-            public function write(string $id, string $data): bool
-            {
-                $ttl = (int) (ini_get('session.gc_maxlifetime') ?: 3600);
-                return $this->redis->setex($this->prefix . $id, $ttl, $data);
-            }
-
-            public function destroy(string $id): bool
-            {
-                $result = $this->redis->del($this->prefix . $id);
-                return is_int($result) && $result > 0;
-            }
-
-            public function gc(int $max_lifetime): int
-            {
-                // Redis handles expiration automatically
-                return 0;
-            }
-        };
+        // Return Symfony's RedisSessionHandler
+        return new RedisSessionHandler($redis, ['prefix' => $prefix]);
     }
 
     /**
