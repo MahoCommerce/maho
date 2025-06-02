@@ -91,15 +91,8 @@ class Mage_GiftMessage_Model_Observer extends Varien_Object
                 $giftMessage = Mage::getModel('giftmessage/message');
 
                 // Extract the actual entity ID from the prefixed key
-                $entityId = null;
-                if (str_starts_with($key, 'quote_')) {
-                    $entityId = substr($key, 6); // Remove 'quote_' prefix
-                } elseif (str_starts_with($key, 'item_')) {
-                    $entityId = substr($key, 5); // Remove 'item_' prefix
-                } elseif (str_starts_with($key, 'addr_')) {
-                    $entityId = substr($key, 5); // Remove 'addr_' prefix
-                } elseif (str_starts_with($key, 'addritem_')) {
-                    $entityId = substr($key, 9); // Remove 'addritem_' prefix
+                if (str_contains($key, '_')) {
+                    $entityId = substr($key, strpos($key, '_') + 1);
                 } else {
                     // Fallback for backward compatibility
                     $entityId = $key;
