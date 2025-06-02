@@ -41,7 +41,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
     public const VALIDATOR_PASSWORD_CREATE_TIMESTAMP   = 'password_create_timestamp';
     public const SECURE_COOKIE_CHECK_KEY               = '_secure_cookie_check';
     public const REGISTRY_CONCURRENCY_ERROR            = 'concurrent_connections_exceeded';
-    
+
     public const XML_PATH_COOKIE_DOMAIN        = 'web/cookie/cookie_domain';
     public const XML_PATH_COOKIE_PATH          = 'web/cookie/cookie_path';
     public const XML_PATH_COOKIE_LIFETIME      = 'web/cookie/cookie_lifetime';
@@ -463,12 +463,12 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
     public function getData($key = '', $index = null)
     {
         $data = parent::getData($key, $index);
-        
+
         // If $index is a boolean, treat it as the clear flag for backward compatibility
         if (is_bool($index) && $index && isset($this->_data[$key])) {
             unset($this->_data[$key]);
         }
-        
+
         return $data;
     }
 
