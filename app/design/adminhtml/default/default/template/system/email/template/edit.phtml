@@ -228,10 +228,7 @@ const templateControl = {
 
         mahoFetch(formElement.action, {
             method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
+            body: formData
         })
         .then(response => {
             try {
