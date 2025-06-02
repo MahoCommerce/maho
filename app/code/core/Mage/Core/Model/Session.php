@@ -17,9 +17,7 @@
  * @method string getCurrencyCode()
  * @method $this setCurrencyCode(string $value)
  * @method $this setFormData(array $value)
- * @method int getJustVotedPoll()
  * @method $this setOrderIds(array $value)
- * @method $this setJustVotedPoll(int $value)
  * @method $this setLastUrl(string $value)
  */
 class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
