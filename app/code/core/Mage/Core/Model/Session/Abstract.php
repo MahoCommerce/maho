@@ -131,14 +131,13 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
     private function createRedisSessionHandler(): \SessionHandlerInterface
     {
         $redisConfig = Mage::getConfig()->getNode('global/redis_session');
-
         if (!$redisConfig) {
-            throw new Exception('Redis session configuration not found in global/redis_session');
+            throw new Exception('Redis session configuration not found in redis_session');
         }
 
         $dsn = (string) $redisConfig->dsn;
         if (!$dsn) {
-            throw new Exception('Redis DSN is required in global/redis_session/dsn. Format: redis://[password@]host[:port][/database]');
+            throw new Exception('Redis DSN is required in redis_session/dsn. Format: redis://[password@]host[:port][/database]');
         }
 
         $options = [];
@@ -904,13 +903,11 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
     /**
      * Retrieve session save method
      * Default files
-     *
-     * @return string
      */
-    public function getSessionSaveMethod()
+    public function getSessionSaveMethod(): string
     {
         if (Mage::isInstalled() && $sessionSave = Mage::getConfig()->getNode(self::XML_NODE_SESSION_SAVE)) {
-            return $sessionSave;
+            return $sessionSave->__toString();
         }
         return 'files';
     }
