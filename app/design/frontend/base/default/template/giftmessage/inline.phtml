@@ -161,26 +161,26 @@
                 </p>
                 <div class="allow-gift-messages-for-order-container" id="allow-gift-messages-for-order-container" style="display:none">
                     <p><?= $this->__('You can leave this box blank if you do not wish to add a gift message for whole order.') ?></p>
-                    <input type="hidden" name="giftmessage[<?= $this->getEntity()->getId() ?>][type]"  value="quote" />
+                    <input type="hidden" name="giftmessage[quote_<?= $this->getEntity()->getId() ?>][type]"  value="quote" />
                     <ul class="form-list">
                         <li class="fields">
                             <div class="field">
                                 <label for="gift-message-whole-from"><?= $this->__('From') ?></label>
                                 <div class="input-box">
-                                    <input type="text" name="giftmessage[<?= $this->getEntity()->getId() ?>][from]" id="gift-message-whole-from" title="<?= $this->quoteEscape($this->__('From')) ?>"  value="<?= $this->getEscaped($this->getMessage()->getSender(), $this->getDefaultFrom()) ?>" class="input-text validation-passed" />
+                                    <input type="text" name="giftmessage[quote_<?= $this->getEntity()->getId() ?>][from]" id="gift-message-whole-from" title="<?= $this->quoteEscape($this->__('From')) ?>"  value="<?= $this->getEscaped($this->getMessage()->getSender(), $this->getDefaultFrom()) ?>" class="input-text validation-passed" />
                                 </div>
                             </div>
                             <div class="field">
                                 <label for="gift-message-whole-to"><?= $this->__('To') ?></label>
                                 <div class="input-box">
-                                    <input type="text" name="giftmessage[<?= $this->getEntity()->getId() ?>][to]" id="gift-message-whole-to" title="<?= $this->quoteEscape($this->__('To')) ?>" value="<?= $this->getEscaped($this->getMessage()->getRecipient(), $this->getDefaultTo()) ?>" class="input-text validation-passed" />
+                                    <input type="text" name="giftmessage[quote_<?= $this->getEntity()->getId() ?>][to]" id="gift-message-whole-to" title="<?= $this->quoteEscape($this->__('To')) ?>" value="<?= $this->getEscaped($this->getMessage()->getRecipient(), $this->getDefaultTo()) ?>" class="input-text validation-passed" />
                                 </div>
                             </div>
                         </li>
                         <li class="wide">
                             <label for="gift-message-whole-message"><?= $this->__('Message') ?></label>
                             <div class="input-box">
-                                <textarea id="gift-message-whole-message" onchange="toogleRequired('gift-message-whole-message', ['gift-message-whole-from','gift-message-whole-to'])" class="input-text validation-passed giftmessage-area" name="giftmessage[<?= $this->getEntity()->getId() ?>][message]" title="<?= $this->quoteEscape($this->__('Message')) ?>" rows="5" cols="10"><?= $this->getEscaped($this->getMessage()->getMessage()) ?></textarea>
+                                <textarea id="gift-message-whole-message" onchange="toogleRequired('gift-message-whole-message', ['gift-message-whole-from','gift-message-whole-to'])" class="input-text validation-passed giftmessage-area" name="giftmessage[quote_<?= $this->getEntity()->getId() ?>][message]" title="<?= $this->quoteEscape($this->__('Message')) ?>" rows="5" cols="10"><?= $this->getEscaped($this->getMessage()->getMessage()) ?></textarea>
                             </div>
                         </li>
                     </ul>
@@ -213,26 +213,26 @@
                      <div class="details">
                          <div class="f-fix">
                              <h5 class="product-name"><?= $this->escapeHtml($_product->getName()) ?></h5>
-                             <input type="hidden" name="giftmessage[<?= $_item->getId() ?>][type]" value="quote_item" />
+                             <input type="hidden" name="giftmessage[item_<?= $_item->getId() ?>][type]" value="quote_item" />
                               <ul class="form-list">
                                  <li class="fields">
                                      <div class="field">
                                          <label for="gift-message-<?= $_item->getId() ?>-from"><?= $this->__('From') ?></label>
                                          <div class="input-box">
-                                             <input type="text" name="giftmessage[<?= $_item->getId() ?>][from]" id="gift-message-<?= $_item->getId() ?>-from" title="<?= $this->quoteEscape($this->__('From')) ?>" value="<?= $this->getEscaped($this->getMessage($_item)->getSender(), $this->getDefaultFrom()) ?>" class="input-text validation-passed" />
+                                             <input type="text" name="giftmessage[item_<?= $_item->getId() ?>][from]" id="gift-message-<?= $_item->getId() ?>-from" title="<?= $this->quoteEscape($this->__('From')) ?>" value="<?= $this->getEscaped($this->getMessage($_item)->getSender(), $this->getDefaultFrom()) ?>" class="input-text validation-passed" />
                                          </div>
                                      </div>
                                      <div class="field">
                                          <label for="gift-message-<?= $_item->getId() ?>-to"><?= $this->__('To') ?></label>
                                          <div class="input-box">
-                                             <input type="text" name="giftmessage[<?= $_item->getId() ?>][to]" id="gift-message-<?= $_item->getId() ?>-to" title="<?= $this->quoteEscape($this->__('To')) ?>" value="<?= $this->getEscaped($this->getMessage($_item)->getRecipient(), $this->getDefaultTo()) ?>" class="input-text validation-passed" />
+                                             <input type="text" name="giftmessage[item_<?= $_item->getId() ?>][to]" id="gift-message-<?= $_item->getId() ?>-to" title="<?= $this->quoteEscape($this->__('To')) ?>" value="<?= $this->getEscaped($this->getMessage($_item)->getRecipient(), $this->getDefaultTo()) ?>" class="input-text validation-passed" />
                                          </div>
                                      </div>
                                  </li>
                                  <li class="wide">
                                      <label for="gift-message-<?= $_item->getId() ?>-message"><?= $this->__('Message') ?></label>
                                      <div class="input-box">
-                                         <textarea id="gift-message-<?= $_item->getId() ?>-message" onchange="toogleRequired('gift-message-<?= $_item->getId() ?>-message', ['gift-message-<?= $_item->getId() ?>-from','gift-message-<?= $_item->getId() ?>-to'])" class="input-text validation-passed giftmessage-area" name="giftmessage[<?= $_item->getId() ?>][message]" title="<?= $this->quoteEscape($this->__('Message')) ?>" rows="5" cols="40"><?= $this->getEscaped($this->getMessage($_item)->getMessage()) ?></textarea>
+                                         <textarea id="gift-message-<?= $_item->getId() ?>-message" onchange="toogleRequired('gift-message-<?= $_item->getId() ?>-message', ['gift-message-<?= $_item->getId() ?>-from','gift-message-<?= $_item->getId() ?>-to'])" class="input-text validation-passed giftmessage-area" name="giftmessage[item_<?= $_item->getId() ?>][message]" title="<?= $this->quoteEscape($this->__('Message')) ?>" rows="5" cols="40"><?= $this->getEscaped($this->getMessage($_item)->getMessage()) ?></textarea>
                                      </div>
                                  </li>
                              </ul>
@@ -275,26 +275,26 @@
             </p>
             <div id="allow-gift-messages-for-order-container-<?= $this->getEntity()->getId() ?>">
                 <p><?= $this->__('You can leave this box blank if you do not wish to add a gift message for this address.') ?></p>
-                <input type="hidden" name="giftmessage[<?= $this->getEntity()->getId() ?>][type]" value="quote_address" />
+                <input type="hidden" name="giftmessage[addr_<?= $this->getEntity()->getId() ?>][type]" value="quote_address" />
                 <ul class="form-list">
                     <li class="fields">
                         <div class="field">
                             <label for="gift-message-<?= $this->getEntity()->getId() ?>-from"><?= $this->__('From') ?></label>
                             <div class="input-box">
-                                <input type="text" name="giftmessage[<?= $this->getEntity()->getId() ?>][from]" id="gift-message-<?= $this->getEntity()->getId() ?>-from" title="<?= $this->quoteEscape($this->__('From')) ?>" value="<?= $this->getEscaped($this->getMessage()->getSender(), $this->getDefaultFrom()) ?>" class="input-text validation-passed" />
+                                <input type="text" name="giftmessage[addr_<?= $this->getEntity()->getId() ?>][from]" id="gift-message-<?= $this->getEntity()->getId() ?>-from" title="<?= $this->quoteEscape($this->__('From')) ?>" value="<?= $this->getEscaped($this->getMessage()->getSender(), $this->getDefaultFrom()) ?>" class="input-text validation-passed" />
                             </div>
                         </div>
                         <div class="field">
                             <label for="gift-message-<?= $this->getEntity()->getId() ?>-to"><?= $this->__('To') ?></label>
                             <div class="input-box">
-                                <input type="text" name="giftmessage[<?= $this->getEntity()->getId() ?>][to]" id="gift-message-<?= $this->getEntity()->getId() ?>-to" title="<?= $this->quoteEscape($this->__('To')) ?>" value="<?= $this->getEscaped($this->getMessage()->getRecipient(), $this->getDefaultTo()) ?>" class="input-text validation-passed" />
+                                <input type="text" name="giftmessage[addr_<?= $this->getEntity()->getId() ?>][to]" id="gift-message-<?= $this->getEntity()->getId() ?>-to" title="<?= $this->quoteEscape($this->__('To')) ?>" value="<?= $this->getEscaped($this->getMessage()->getRecipient(), $this->getDefaultTo()) ?>" class="input-text validation-passed" />
                             </div>
                         </div>
                     </li>
                     <li class="wide">
                         <label for="gift-message-<?= $this->getEntity()->getId() ?>-message"><?= $this->__('Message') ?></label>
                         <div class="input-box">
-                            <textarea id="gift-message-<?= $this->getEntity()->getId() ?>-message" onchange="toogleRequired('gift-message-<?= $this->getEntity()->getId() ?>-message', ['gift-message-<?= $this->getEntity()->getId() ?>-from','gift-message-<?= $this->getEntity()->getId() ?>-to'])" class="input-text validation-passed giftmessage-area" name="giftmessage[<?= $this->getEntity()->getId() ?>][message]" title="<?= $this->quoteEscape($this->__('Message')) ?>" rows="5" cols="40"><?= $this->getEscaped($this->getMessage()->getMessage()) ?></textarea>
+                            <textarea id="gift-message-<?= $this->getEntity()->getId() ?>-message" onchange="toogleRequired('gift-message-<?= $this->getEntity()->getId() ?>-message', ['gift-message-<?= $this->getEntity()->getId() ?>-from','gift-message-<?= $this->getEntity()->getId() ?>-to'])" class="input-text validation-passed giftmessage-area" name="giftmessage[addr_<?= $this->getEntity()->getId() ?>][message]" title="<?= $this->quoteEscape($this->__('Message')) ?>" rows="5" cols="40"><?= $this->getEscaped($this->getMessage()->getMessage()) ?></textarea>
                         </div>
                     </li>
                 </ul>
@@ -322,28 +322,28 @@
                      </div>
                      <div class="details">
                          <div class="f-fix">
-                             <input type="hidden" name="giftmessage[<?= $_item->getId() ?>][type]" value="quote_address_item" />
-                             <input type="hidden" name="giftmessage[<?= $_item->getId() ?>][address]" value="<?= $this->getEntity()->getId() ?>" />
+                             <input type="hidden" name="giftmessage[addritem_<?= $_item->getId() ?>][type]" value="quote_address_item" />
+                             <input type="hidden" name="giftmessage[addritem_<?= $_item->getId() ?>][address]" value="<?= $this->getEntity()->getId() ?>" />
                              <h5 class="product-name"><?= $this->escapeHtml($_product->getName()) ?></h5>
                              <ul class="form-list">
                                  <li class="fields">
                                      <div class="field">
                                          <label for="gift-message-<?= $_item->getId() ?>-from"><?= $this->__('From') ?></label>
                                          <div class="input-box">
-                                             <input type="text" name="giftmessage[<?= $_item->getId() ?>][from]" id="gift-message-<?= $_item->getId() ?>-from" title="<?= $this->quoteEscape($this->__('From')) ?>"  value="<?= $this->getEscaped($this->getMessage($_item)->getSender(), $this->getDefaultFrom()) ?>" class="input-text validation-passed" />
+                                             <input type="text" name="giftmessage[addritem_<?= $_item->getId() ?>][from]" id="gift-message-<?= $_item->getId() ?>-from" title="<?= $this->quoteEscape($this->__('From')) ?>"  value="<?= $this->getEscaped($this->getMessage($_item)->getSender(), $this->getDefaultFrom()) ?>" class="input-text validation-passed" />
                                          </div>
                                      </div>
                                      <div class="field">
                                          <label for="gift-message-<?= $_item->getId() ?>-to"><?= $this->__('To') ?></label>
                                          <div class="input-box">
-                                             <input type="text" name="giftmessage[<?= $_item->getId() ?>][to]" id="gift-message-<?= $_item->getId() ?>-to" title="<?= $this->quoteEscape($this->__('To')) ?>" value="<?= $this->getEscaped($this->getMessage($_item)->getRecipient(), $this->getDefaultTo()) ?>" class="input-text validation-passed" />
+                                             <input type="text" name="giftmessage[addritem_<?= $_item->getId() ?>][to]" id="gift-message-<?= $_item->getId() ?>-to" title="<?= $this->quoteEscape($this->__('To')) ?>" value="<?= $this->getEscaped($this->getMessage($_item)->getRecipient(), $this->getDefaultTo()) ?>" class="input-text validation-passed" />
                                          </div>
                                      </div>
                                  </li>
                                  <li class="wide">
                                      <label for="gift-message-<?= $_item->getId() ?>-message"><?= $this->__('Message') ?></label>
                                      <div class="input-box">
-                                         <textarea id="gift-message-<?= $_item->getId() ?>-message" onchange="toogleRequired('gift-message-<?= $_item->getId() ?>-message', ['gift-message-<?= $_item->getId() ?>-from','gift-message-<?= $_item->getId() ?>-to'])" class="input-text validation-passed  giftmessage-area" name="giftmessage[<?= $_item->getId() ?>][message]" title="<?= $this->quoteEscape($this->__('Message')) ?>" rows="5" cols="10"><?= $this->getEscaped($this->getMessage($_item)->getMessage()) ?></textarea>
+                                         <textarea id="gift-message-<?= $_item->getId() ?>-message" onchange="toogleRequired('gift-message-<?= $_item->getId() ?>-message', ['gift-message-<?= $_item->getId() ?>-from','gift-message-<?= $_item->getId() ?>-to'])" class="input-text validation-passed  giftmessage-area" name="giftmessage[addritem_<?= $_item->getId() ?>][message]" title="<?= $this->quoteEscape($this->__('Message')) ?>" rows="5" cols="10"><?= $this->getEscaped($this->getMessage($_item)->getMessage()) ?></textarea>
                                      </div>
                                  </li>
                              </ul>
