@@ -8,9 +8,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Payment restriction collection
- */
 class Mage_Payment_Model_Resource_Restriction_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     protected function _construct(): void
@@ -18,17 +15,11 @@ class Mage_Payment_Model_Resource_Restriction_Collection extends Mage_Core_Model
         $this->_init('payment/restriction');
     }
 
-    /**
-     * Add active filter
-     */
     public function addActiveFilter(): self
     {
         return $this->addFieldToFilter('status', Mage_Payment_Model_Restriction::STATUS_ENABLED);
     }
 
-    /**
-     * Add payment method filter
-     */
     public function addPaymentMethodFilter(string $paymentMethod): self
     {
         return $this->addFieldToFilter([
@@ -38,9 +29,6 @@ class Mage_Payment_Model_Resource_Restriction_Collection extends Mage_Core_Model
         ]);
     }
 
-    /**
-     * Add store filter
-     */
     public function addStoreFilter(int $storeId): self
     {
         return $this->addFieldToFilter([

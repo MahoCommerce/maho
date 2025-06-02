@@ -8,9 +8,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Payment restriction rule address condition
- */
 class Mage_Payment_Model_Restriction_Rule_Condition_Address extends Mage_Rule_Model_Condition_Abstract
 {
     /**

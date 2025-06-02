@@ -8,9 +8,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/**
- * Payment restriction edit block
- */
 class Mage_Payment_Block_Adminhtml_Payment_Restriction_Edit extends Mage_Adminhtml_Block_Widget_Form_Container
 {
     public function __construct()
