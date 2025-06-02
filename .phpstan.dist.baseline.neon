@@ -20746,36 +20746,6 @@ parameters:
 			path: app/code/core/Mage/GoogleAnalytics/Model/Observer.php
 
 		-
-			message: '#^Return type \(void\) of method Mage_GoogleCheckout_Model_Payment\:\:authorize\(\) should be compatible with return type \(\$this\(Mage_Payment_Model_Method_Abstract\)\) of method Mage_Payment_Model_Method_Abstract\:\:authorize\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/GoogleCheckout/Model/Payment.php
-
-		-
-			message: '#^Return type \(void\) of method Mage_GoogleCheckout_Model_Payment\:\:cancel\(\) should be compatible with return type \(\$this\(Mage_Payment_Model_Method_Abstract\)\) of method Mage_Payment_Model_Method_Abstract\:\:cancel\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/GoogleCheckout/Model/Payment.php
-
-		-
-			message: '#^Return type \(void\) of method Mage_GoogleCheckout_Model_Payment\:\:capture\(\) should be compatible with return type \(\$this\(Mage_Payment_Model_Method_Abstract\)\) of method Mage_Payment_Model_Method_Abstract\:\:capture\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/GoogleCheckout/Model/Payment.php
-
-		-
-			message: '#^Return type \(void\) of method Mage_GoogleCheckout_Model_Payment\:\:refund\(\) should be compatible with return type \(\$this\(Mage_Payment_Model_Method_Abstract\)\) of method Mage_Payment_Model_Method_Abstract\:\:refund\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/GoogleCheckout/Model/Payment.php
-
-		-
-			message: '#^Return type \(void\) of method Mage_GoogleCheckout_Model_Payment\:\:void\(\) should be compatible with return type \(\$this\(Mage_Payment_Model_Method_Abstract\)\) of method Mage_Payment_Model_Method_Abstract\:\:void\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/GoogleCheckout/Model/Payment.php
-
-		-
 			message: '#^Method Mage_Eav_Model_Entity_Attribute_Source_Interface\:\:getAllOptions\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 4
