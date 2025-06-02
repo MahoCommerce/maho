@@ -11,12 +11,11 @@
  */
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeFileSessionHandler;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\RedisSessionHandler;
+use Symfony\Component\Cache\Adapter\RedisAdapter;
 
 /**
  * @method string getErrorMessage()
@@ -73,9 +72,6 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
     /** @var Session|null Symfony session instance */
     private ?Session $symfonySession = null;
 
-    /** @var Request|null Symfony request instance */
-    private ?Request $symfonyRequest = null;
-
     /**
      * URL host cache
      *
@@ -97,15 +93,6 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
      */
     protected $_skipSessionIdFlag   = false;
 
-    /**
-     * Initialize Symfony components for modern session handling
-     */
-    private function initializeSymfonyComponents(): void
-    {
-        if ($this->symfonyRequest === null) {
-            $this->symfonyRequest = Request::createFromGlobals();
-        }
-    }
 
     /**
      * Create Symfony session with proper storage handler
@@ -161,41 +148,8 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
             $options['prefix'] = $prefix;
         }
 
-        // Parse DSN into connection parameters
-        $connectionParams = $this->parseRedisDsn($dsn);
-
-        // Create Redis connection
-        $redis = new \Redis();
-        $redis->connect($connectionParams['host'], $connectionParams['port']);
-
-        if ($connectionParams['password']) {
-            $redis->auth($connectionParams['password']);
-        }
-
-        if ($connectionParams['database'] > 0) {
-            $redis->select($connectionParams['database']);
-        }
-
+        $redis = RedisAdapter::createConnection($dsn);
         return new RedisSessionHandler($redis, $options);
-    }
-
-    /**
-     * Parse Redis DSN into connection parameters
-     */
-    private function parseRedisDsn(string $dsn): array
-    {
-        $parsedDsn = parse_url($dsn);
-
-        if ($parsedDsn === false || ($parsedDsn['scheme'] ?? '') !== 'redis') {
-            throw new Exception('Invalid Redis DSN format. Expected: redis://[password@]host[:port][/database]');
-        }
-
-        return [
-            'host' => $parsedDsn['host'] ?? '127.0.0.1',
-            'port' => $parsedDsn['port'] ?? 6379,
-            'password' => $parsedDsn['pass'] ?? '',
-            'database' => isset($parsedDsn['path']) ? (int) trim($parsedDsn['path'], '/') : 0,
-        ];
     }
 
     private function createFileSessionHandler(): \SessionHandlerInterface
@@ -257,9 +211,6 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
         if (empty($sessionName)) {
             return $this;
         }
-
-        // Initialize Symfony components
-        $this->initializeSymfonyComponents();
 
         // Create Symfony session instance
         $this->symfonySession = $this->createSymfonySession($sessionName);
@@ -346,34 +297,6 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
         $sessionName = $this->getSessionName();
         $sessionId = $this->getSessionId();
 
-        // Use Symfony Cookie for enhanced security features if available
-        if ($this->symfonyRequest) {
-            $isSecure = $this->symfonyRequest->isSecure();
-            $domain = $mahoCookie->getDomain();
-            $path = $mahoCookie->getPath();
-            $lifetime = $mahoCookie->getLifetime();
-
-            // Create Symfony cookie with enhanced security
-            $symfonyCookie = new Cookie(
-                $sessionName,
-                $sessionId,
-                $lifetime > 0 ? time() + $lifetime : 0,
-                $path,
-                $domain,
-                $isSecure,
-                true, // httpOnly
-                false, // raw
-                $isSecure ? Cookie::SAMESITE_NONE : Cookie::SAMESITE_LAX,
-            );
-
-            // Set cookie headers directly for immediate effect
-            $cookieHeader = $symfonyCookie->__toString();
-            if (!headers_sent()) {
-                header("Set-Cookie: $cookieHeader", false);
-            }
-        }
-
-        // Keep legacy cookie setting for backward compatibility
         $mahoCookie->set($sessionName, $sessionId);
 
         return $this;
@@ -1166,28 +1089,12 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
             self::VALIDATOR_HTTP_USER_AGENT_KEY         => '',
         ];
 
-        // Use Symfony Request for modern HTTP handling if available
-        if ($this->symfonyRequest) {
-            // collect ip data using Symfony
-            $parts[self::VALIDATOR_REMOTE_ADDR_KEY] = $this->symfonyRequest->getClientIp() ?: '';
-            $parts[self::VALIDATOR_HTTP_VIA_KEY] = $this->symfonyRequest->headers->get('Via', '');
-            $parts[self::VALIDATOR_HTTP_X_FORVARDED_FOR_KEY] = $this->symfonyRequest->headers->get('X-Forwarded-For', '');
-            $parts[self::VALIDATOR_HTTP_USER_AGENT_KEY] = $this->symfonyRequest->headers->get('User-Agent', '');
-        } else {
-            // Fallback to legacy method
-            if (Mage::helper('core/http')->getRemoteAddr()) {
-                $parts[self::VALIDATOR_REMOTE_ADDR_KEY] = Mage::helper('core/http')->getRemoteAddr();
-            }
-            if (isset($_ENV['HTTP_VIA'])) {
-                $parts[self::VALIDATOR_HTTP_VIA_KEY] = (string) $_ENV['HTTP_VIA'];
-            }
-            if (isset($_ENV['HTTP_X_FORWARDED_FOR'])) {
-                $parts[self::VALIDATOR_HTTP_X_FORVARDED_FOR_KEY] = (string) $_ENV['HTTP_X_FORWARDED_FOR'];
-            }
-            if (isset($_SERVER['HTTP_USER_AGENT'])) {
-                $parts[self::VALIDATOR_HTTP_USER_AGENT_KEY] = (string) $_SERVER['HTTP_USER_AGENT'];
-            }
-        }
+        // Use Symfony Request for modern HTTP handling
+        $request = Request::createFromGlobals();
+        $parts[self::VALIDATOR_REMOTE_ADDR_KEY] = $request->getClientIp() ?: '';
+        $parts[self::VALIDATOR_HTTP_VIA_KEY] = $request->headers->get('Via', '');
+        $parts[self::VALIDATOR_HTTP_X_FORVARDED_FOR_KEY] = $request->headers->get('X-Forwarded-For', '');
+        $parts[self::VALIDATOR_HTTP_USER_AGENT_KEY] = $request->headers->get('User-Agent', '');
 
         // get time when password was last changed
         if (isset($this->_data['visitor_data']['customer_id'])) {
