@@ -87,9 +87,7 @@ const templateControl = {
         document.getElementById('convert_button_back').style.display = '';
 
         // Strip HTML tags and scripts
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = textElement.value;
-        textElement.value = tempDiv.textContent || tempDiv.innerText || '';
+        textElement.value = stripTags(textElement.value);
 
         const fieldStyles = document.getElementById('field_template_styles');
         if (fieldStyles) {
