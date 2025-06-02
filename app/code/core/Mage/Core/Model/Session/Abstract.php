@@ -353,14 +353,14 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
     #[\Override]
     public function getData($key = '', $index = null)
     {
-        $data = parent::getData($key, $index);
-
         // If $index is a boolean, treat it as the clear flag for backward compatibility
         if (is_bool($index) && $index && isset($this->_data[$key])) {
+            $data = parent::getData($key);
             unset($this->_data[$key]);
+            return $data;
         }
 
-        return $data;
+        return parent::getData($key, $index);
     }
 
     /**
