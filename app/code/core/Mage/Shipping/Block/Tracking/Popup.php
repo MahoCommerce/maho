@@ -19,19 +19,6 @@
 class Mage_Shipping_Block_Tracking_Popup extends Mage_Core_Block_Template
 {
     /**
-     * @deprecated after 1.3.2.3
-     */
-    protected $_track_id;
-    /**
-     * @deprecated after 1.3.2.3
-     */
-    protected $_order_id;
-    /**
-     * @deprecated after 1.3.2.3
-     */
-    protected $_ship_id;
-
-    /**
      * @param int $oid
      * @return Mage_Shipping_Block_Tracking_Popup
      * @deprecated after 1.3.2.3
