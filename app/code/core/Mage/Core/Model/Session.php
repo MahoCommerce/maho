@@ -68,4 +68,87 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
     {
         return $this->getData('order_ids', $clear) ?? [];
     }
+
+    /**
+     * Clean expired sessions from filesystem (Redis does it automatically)
+     */
+    public function cleanExpiredSessions(): void
+    {
+        try {
+            $this->_cleanFileSystemSessions();
+        } catch (Exception $e) {
+            Mage::log('Session cleanup failed: ' . $e->getMessage(), Zend_Log::ERR);
+            throw $e;
+        }
+    }
+
+    protected function _cleanFileSystemSessions(): void
+    {
+        $sessionSaveMethod = $this->getSessionSaveMethod();
+        if ($sessionSaveMethod !== 'files') {
+            return;
+        }
+
+        $sessionSavePath = (string) Mage::getConfig()->getNode('global/session_save_path') ?: Mage::getBaseDir('var') . DS . 'session';
+
+        $sessionHandler = new \Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeFileSessionHandler($sessionSavePath);
+        $maxIdleTime = $this->_getDefaultSessionLifetime();
+        $deletedCount = 0;
+
+        foreach (new DirectoryIterator($sessionSavePath) as $file) {
+            if ($file->isFile() && str_starts_with($file->getFilename(), 'sess_')) {
+                $sessionId = substr($file->getFilename(), 5);
+
+                if ($this->_isSessionExpired($sessionId, $sessionHandler, $maxIdleTime)) {
+                    if (unlink($file->getPathname())) {
+                        $deletedCount++;
+                    }
+                }
+            }
+        }
+
+        Mage::log("Session cleanup: deleted {$deletedCount} expired filesystem sessions", Zend_Log::INFO);
+    }
+
+    /**
+     * Check if a session is expired using Symfony's MetadataBag
+     */
+    protected function _isSessionExpired(string $sessionId, \SessionHandlerInterface $sessionHandler, int $maxIdleTime): bool
+    {
+        try {
+            // Create a temporary session to check metadata
+            $storage = new \Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage(
+                ['cache_limiter' => '', 'use_cookies' => false],
+                $sessionHandler,
+            );
+
+            $session = new \Symfony\Component\HttpFoundation\Session\Session($storage);
+            $session->setId($sessionId);
+            $session->start();
+
+            $metadataBag = $session->getMetadataBag();
+
+            // Check if session has expired based on last used time
+            if (time() - $metadataBag->getLastUsed() > $maxIdleTime) {
+                return true;
+            }
+
+            // Session is valid
+            return false;
+
+        } catch (Exception $e) {
+            // If we can't read session properly, consider it expired
+            return true;
+        }
+    }
+
+    /**
+     * Get default session lifetime from configuration
+     */
+    protected function _getDefaultSessionLifetime(): int
+    {
+        $adminLifetime = (int) Mage::getStoreConfig('admin/security/session_cookie_lifetime');
+        $frontendLifetime = (int) Mage::getStoreConfig('web/cookie/cookie_lifetime');
+        return max($adminLifetime, $frontendLifetime, 86400);
+    }
 }

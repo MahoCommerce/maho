@@ -535,6 +535,10 @@
                 <schedule><cron_expr>0 0 * * *</cron_expr></schedule>
                 <run><model>core/email_queue::cleanQueue</model></run>
             </core_email_queue_clean_up>
+            <core_session_clean>
+                <schedule><cron_expr>30 3 * * *</cron_expr></schedule>
+                <run><model>core/session::cleanExpiredSessions</model></run>
+            </core_session_clean>
         </jobs>
     </crontab>
 </config>
