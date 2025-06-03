@@ -90,54 +90,45 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
         }
 
         $sessionSavePath = (string) Mage::getConfig()->getNode('global/session_save_path') ?: Mage::getBaseDir('var') . DS . 'session';
+        if (!is_dir($sessionSavePath) || !is_readable($sessionSavePath)) {
+            Mage::log("Session cleanup skipped: directory not accessible: {$sessionSavePath}", Zend_Log::WARN);
+            return;
+        }
 
-        $sessionHandler = new \Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeFileSessionHandler($sessionSavePath);
         $maxIdleTime = $this->_getDefaultSessionLifetime();
         $deletedCount = 0;
+        $processedCount = 0;
 
         foreach (new DirectoryIterator($sessionSavePath) as $file) {
-            if ($file->isFile() && str_starts_with($file->getFilename(), 'sess_')) {
-                $sessionId = substr($file->getFilename(), 5);
+            if (!$file->isFile() || !str_starts_with($file->getFilename(), 'sess_')) {
+                continue;
+            }
 
-                if ($this->_isSessionExpired($sessionId, $sessionHandler, $maxIdleTime)) {
-                    if (unlink($file->getPathname())) {
-                        $deletedCount++;
-                    }
+            $processedCount++;
+            if ($this->_isFileSessionExpired($file, $maxIdleTime)) {
+                if (unlink($file->getPathname())) {
+                    $deletedCount++;
                 }
             }
         }
 
-        Mage::log("Session cleanup: deleted {$deletedCount} expired filesystem sessions", Zend_Log::INFO);
+        Mage::log("Session cleanup: processed {$processedCount} files, deleted {$deletedCount} expired filesystem sessions", Zend_Log::INFO);
     }
 
     /**
-     * Check if a session is expired using Symfony's native capabilities
+     * Check if a session file is expired based on file modification time
      */
-    protected function _isSessionExpired(string $sessionId, \SessionHandlerInterface $sessionHandler, int $maxIdleTime): bool
+    protected function _isFileSessionExpired(\DirectoryIterator $file, int $maxIdleTime): bool
     {
         try {
-            // Create a temporary session with default MetadataBag
-            $storage = new \Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage(
-                [
-                    'cache_limiter' => '',
-                    'use_cookies' => false,
-                    'cookie_lifetime' => $maxIdleTime,
-                ],
-                $sessionHandler,
-                // Use Symfony's default MetadataBag
-            );
+            $expireTime = time() - $maxIdleTime;
 
-            $session = new \Symfony\Component\HttpFoundation\Session\Session($storage);
-            $session->setId($sessionId);
-            $session->start();
-
-            $metadataBag = $session->getMetadataBag();
-
-            // Symfony handles all expiration logic automatically now
-            return time() - $metadataBag->getLastUsed() > $maxIdleTime;
+            // For filesystem sessions, file modification time is the most reliable indicator
+            // PHP updates the file mtime every time the session is accessed/written
+            return $file->getMTime() < $expireTime;
 
         } catch (Exception $e) {
-            // If we can't read session properly, consider it expired
+            // If we can't get file modification time, consider it expired
             return true;
         }
     }
