@@ -98,7 +98,7 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
         $maxIdleTime = max(
             (int) Mage::getStoreConfig('admin/security/session_cookie_lifetime'),
             (int) Mage::getStoreConfig('web/cookie/cookie_lifetime'),
-            86400
+            86400,
         );
 
         $deletedCount = 0;
