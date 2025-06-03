@@ -12,8 +12,11 @@ use Symfony\Component\Cache\Marshaller\MarshallerInterface;
 
 class Mage_Core_Model_Cache_Marshaller implements MarshallerInterface
 {
+    /**
+     * @param-out array<int, int|string> $failed
+     */
     #[\Override]
-    public function marshall(array $values, ?array &$failed): array // @phpstan-ignore parameterByRef.unusedType
+    public function marshall(array $values, ?array &$failed): array
     {
         $serialized = $failed = [];
         foreach ($values as $id => $value) {
