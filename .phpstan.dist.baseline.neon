@@ -28147,24 +28147,6 @@ parameters:
 			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
 
 		-
-			message: '#^Property Mage_Shipping_Block_Tracking_Popup\:\:\$_order_id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
-
-		-
-			message: '#^Property Mage_Shipping_Block_Tracking_Popup\:\:\$_ship_id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
-
-		-
-			message: '#^Property Mage_Shipping_Block_Tracking_Popup\:\:\$_track_id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Shipping/Block/Tracking/Popup.php
-
-		-
 			message: '#^Call to an undefined method Mage_Shipping_Model_Carrier_Abstract\:\:_getQuotes\(\)\.$#'
 			identifier: method.notFound
 			count: 1
