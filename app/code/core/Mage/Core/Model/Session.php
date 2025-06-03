@@ -111,15 +111,20 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
-     * Check if a session is expired using Symfony's MetadataBag
+     * Check if a session is expired using Symfony's native capabilities
      */
     protected function _isSessionExpired(string $sessionId, \SessionHandlerInterface $sessionHandler, int $maxIdleTime): bool
     {
         try {
-            // Create a temporary session to check metadata
+            // Create a temporary session with default MetadataBag
             $storage = new \Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage(
-                ['cache_limiter' => '', 'use_cookies' => false],
+                [
+                    'cache_limiter' => '',
+                    'use_cookies' => false,
+                    'cookie_lifetime' => $maxIdleTime,
+                ],
                 $sessionHandler,
+                // Use Symfony's default MetadataBag
             );
 
             $session = new \Symfony\Component\HttpFoundation\Session\Session($storage);
@@ -128,13 +133,8 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
 
             $metadataBag = $session->getMetadataBag();
 
-            // Check if session has expired based on last used time
-            if (time() - $metadataBag->getLastUsed() > $maxIdleTime) {
-                return true;
-            }
-
-            // Session is valid
-            return false;
+            // Symfony handles all expiration logic automatically now
+            return time() - $metadataBag->getLastUsed() > $maxIdleTime;
 
         } catch (Exception $e) {
             // If we can't read session properly, consider it expired
