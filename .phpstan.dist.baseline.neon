@@ -22450,12 +22450,6 @@ parameters:
 			path: app/code/core/Mage/Paygate/controllers/Authorizenet/PaymentController.php
 
 		-
-			message: '#^Parameter \#1 \$value of method Mage_Core_Block_Html_Date\:\:setTime\(\) expects string, true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Payment/Block/Catalog/Product/View/Profile.php
-
-		-
 			message: '#^Property Mage_Payment_Block_Catalog_Product_View_Profile\:\:\$_profile \(Mage_Payment_Model_Recurring_Profile\) does not accept default value of type false\.$#'
 			identifier: property.defaultValue
 			count: 1
