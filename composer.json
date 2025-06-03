@@ -66,7 +66,8 @@
         "friendsofphp/php-cs-fixer": "^3",
         "mahocommerce/maho-phpstan-plugin": "^3",
         "phpstan/phpstan": "^2.0",
-        "phpstan/phpstan-deprecation-rules": "^2.0"
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "rector/rector": "^2"
     },
     "suggest": {
         "colinmollenhour/magento-redis-session": "Redis support for PHP sessions",
