@@ -95,10 +95,14 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
             return;
         }
 
-        $maxIdleTime = $this->_getDefaultSessionLifetime();
+        $maxIdleTime = max(
+            (int) Mage::getStoreConfig('admin/security/session_cookie_lifetime'),
+            (int) Mage::getStoreConfig('web/cookie/cookie_lifetime'),
+            86400
+        );
+
         $deletedCount = 0;
         $processedCount = 0;
-
         foreach (new DirectoryIterator($sessionSavePath) as $file) {
             if (!$file->isFile() || !str_starts_with($file->getFilename(), 'sess_')) {
                 continue;
@@ -131,15 +135,5 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
             // If we can't get file modification time, consider it expired
             return true;
         }
-    }
-
-    /**
-     * Get default session lifetime from configuration
-     */
-    protected function _getDefaultSessionLifetime(): int
-    {
-        $adminLifetime = (int) Mage::getStoreConfig('admin/security/session_cookie_lifetime');
-        $frontendLifetime = (int) Mage::getStoreConfig('web/cookie/cookie_lifetime');
-        return max($adminLifetime, $frontendLifetime, 86400);
     }
 }
