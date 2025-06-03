@@ -105,7 +105,6 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
                 'name' => $sessionName,
                 'use_cookies' => false,
                 'use_trans_sid' => false,
-                'cache_limiter' => (string) (Mage::getConfig()->getNode('global/session_cache_limiter') ?: ''),
             ],
             $handler,
         );
