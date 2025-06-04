@@ -41,6 +41,11 @@ Category default layout
 
     <catalog_category_default translate="label">
         <label>Catalog Category (Non-Anchor)</label>
+        <!-- Set 2 columns with left sidebar as default layout -->
+        <reference name="root">
+            <action method="setTemplate"><template>page/2columns-left.phtml</template></action>
+            <block type="catalog/category_title" name="category.title" after="breadcrumbs" template="catalog/category/title.phtml"/>
+        </reference>
         <reference name="left_first">
             <block type="catalog/navigation" name="catalog.leftnav" after="currency" template="catalog/navigation/left.phtml">
                 <block type="core/text_list" name="catalog.leftnav.state.renderers" as="state_renderers" />
@@ -83,6 +88,11 @@ Category layered navigation layout
 
     <catalog_category_layered translate="label">
         <label>Catalog Category (Anchor)</label>
+        <!-- Set 2 columns with left sidebar as default layout -->
+        <reference name="root">
+            <action method="setTemplate"><template>page/2columns-left.phtml</template></action>
+            <block type="catalog/category_title" name="category.title" after="breadcrumbs" template="catalog/category/title.phtml"/>
+        </reference>
         <reference name="left_first">
             <block type="catalog/layer_view" name="catalog.leftnav" after="currency" template="catalog/layer/view.phtml">
                 <block type="core/text_list" name="catalog.leftnav.state.renderers" as="state_renderers" />
