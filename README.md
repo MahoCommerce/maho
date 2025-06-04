@@ -1,6 +1,6 @@
 <p align="center">
   <img src="https://poser.pugx.org/mahocommerce/maho/license.svg" alt="" />
-  <img src="https://img.shields.io/badge/PHP-8.2+-8993be.svg" alt="" />
+  <img src="https://img.shields.io/badge/PHP-8.3+-8993be.svg" alt="" />
   <img src="https://github.com/MahoCommerce/maho/actions/workflows/security-php.yml/badge.svg" alt="" />
   <img src="https://github.com/MahoCommerce/maho/actions/workflows/codeql-analysis.yml/badge.svg" alt="" />
   <a href="https://crowdin.com/project/maho" target="_blank"><img src="https://img.shields.io/badge/Localize-98%25-32c754" alt="" /></a>
