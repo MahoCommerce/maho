@@ -222,10 +222,14 @@ class Mediabrowser {
      */
     getTargetElement() {
         if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.targetElementId)) {
-            return this.getMediaBrowserCallback();
-        } else {
-            return document.getElementById(this.targetElementId);
+            const tiptapEditor = tiptapEditors.get(this.targetElementId);
+            // Only return callback if Tiptap is active (has editor)
+            if (tiptapEditor && tiptapEditor.editor) {
+                return this.getMediaBrowserCallback();
+            }
         }
+        // Fallback to textarea element
+        return document.getElementById(this.targetElementId);
     }
 
     /**
