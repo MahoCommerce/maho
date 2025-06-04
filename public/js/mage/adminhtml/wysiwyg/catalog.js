@@ -42,21 +42,25 @@ const catalogWysiwygEditor = {
         // Get the content from the original textarea
         const originalContent = document.getElementById(elementId).value;
         
-        // Set initial content in the textarea that will be used by Quill
+        // Set initial content in the textarea that will be used by Tiptap
         const editorTextarea = document.getElementById(`${elementId}_editor`);
         if (editorTextarea) {
             editorTextarea.value = originalContent;
         }
         
-        // Wait for Quill editor to be initialized and then set content
+        // Wait for Tiptap editor to be initialized and then set content
         const checkAndSetContent = () => {
-            const wysiwygObj = window[`wysiwyg${elementId}_editor`];
-            if (wysiwygObj && wysiwygObj.editor) {
-                // Quill is initialized, set the content
-                const encodedContent = wysiwygObj.encodeContent(originalContent);
-                wysiwygObj.editor.root.innerHTML = encodedContent;
+            if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(`${elementId}_editor`)) {
+                const tiptapEditor = tiptapEditors.get(`${elementId}_editor`);
+                if (tiptapEditor && tiptapEditor.editor) {
+                    // Tiptap is initialized, set the content
+                    tiptapEditor.editor.commands.setContent(originalContent);
+                } else {
+                    // Tiptap not yet initialized, check again
+                    setTimeout(checkAndSetContent, 50);
+                }
             } else {
-                // Quill not yet initialized, check again
+                // No Tiptap, check again
                 setTimeout(checkAndSetContent, 50);
             }
         };
