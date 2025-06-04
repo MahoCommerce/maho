@@ -10,15 +10,13 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/** @var Mage_Catalog_Block_Category_View $this */
-$_helper = $this->helper('catalog/output');
-$_category = $this->getCurrentCategory();
+/** @var Mage_Catalog_Block_Category_Title $this */
 ?>
-<?php if($_category && $_category->getName()): ?>
+<?php if ($title = $this->getTitle()): ?>
 <div class="page-title category-title">
-    <?php if($this->isRssCatalogEnable() && $this->isTopCategory()): ?>
-        <a href="<?= $this->getRssLink() ?>" class="link-rss"><?= $this->__('Subscribe to RSS Feed') ?></a>
+    <?php if ($this->getShowRssLink()): ?>
+        <a href="<?= $this->escapeHtml($this->buildRssLink()) ?>" class="link-rss"><?= $this->escapeHtml($this->getRssText()) ?></a>
     <?php endif ?>
-    <h1><?= $_helper->categoryAttribute($_category, $_category->getName(), 'name') ?></h1>
+    <h1><?= $this->escapeHtml($title) ?></h1>
 </div>
 <?php endif ?>

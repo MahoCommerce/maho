@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package     base_default
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Core_Block_Page_Title $this */
+?>
+<?php if ($title = $this->getTitle()): ?>
+<div class="page-title">
+    <h1><?= $this->escapeHtml($title) ?></h1>
+</div>
+<?php endif ?>
+
