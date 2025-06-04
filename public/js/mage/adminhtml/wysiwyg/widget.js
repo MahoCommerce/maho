@@ -213,10 +213,27 @@ WysiwygWidget.Widget = class {
         if (widgetOptionsForm.validator && widgetOptionsForm.validator.validate() || !widgetOptionsForm.validator) {
             try {
                 const formData = new FormData();
+                
+                // Check if we need raw widget directive (for textarea) or processed HTML (for WYSIWYG)
+                let needsRawDirective = true;
+                if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.widgetTargetId)) {
+                    const tiptapEditor = tiptapEditors.get(this.widgetTargetId);
+                    if (tiptapEditor && tiptapEditor.editor) {
+                        // Tiptap is active, we need processed HTML
+                        needsRawDirective = false;
+                    }
+                }
+                
+                // Add form elements
                 for (const el of this.formEl.elements) {
                     if (!el.classList.contains('skip-submit')) {
                         formData.append(el.name, el.value);
                     }
+                }
+                
+                // Add as_is parameter if we need raw directive
+                if (needsRawDirective) {
+                    formData.append('as_is', '1');
                 }
 
                 const html = await mahoFetch(this.formEl.action, {
@@ -226,11 +243,24 @@ WysiwygWidget.Widget = class {
 
                 Windows.close('widget_window');
 
-                // Insert widget content using Tiptap
+                // Insert widget content using Tiptap or fallback to textarea
                 if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.widgetTargetId)) {
                     const tiptapEditor = tiptapEditors.get(this.widgetTargetId);
-                    if (tiptapEditor) {
+                    if (tiptapEditor && tiptapEditor.editor) {
+                        // Tiptap is active, use its insert method
                         tiptapEditor.insertContent(html);
+                    } else {
+                        // Tiptap is toggled off, insert into textarea directly
+                        const textareaElm = document.getElementById(this.widgetTargetId);
+                        if (textareaElm) {
+                            updateElementAtCursor(textareaElm, html);
+                        }
+                    }
+                } else {
+                    // No Tiptap at all, insert into textarea directly
+                    const textareaElm = document.getElementById(this.widgetTargetId);
+                    if (textareaElm) {
+                        updateElementAtCursor(textareaElm, html);
                     }
                 }
             } catch(error) {
