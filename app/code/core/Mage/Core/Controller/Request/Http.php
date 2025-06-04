@@ -163,6 +163,22 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
             $this->_requestString = $pathInfo . ($pos !== false ? substr($requestUri, $pos) : '');
         }
 
+        // Normalize path info by removing trailing slashes (except for root path)
+        if (strlen($pathInfo) > 1 && str_ends_with($pathInfo, '/')) {
+            $canonicalPath = rtrim($pathInfo, '/');
+            
+            // Perform 301 redirect to canonical URL
+            $canonicalUrl = $this->getBaseUrl() . $canonicalPath;
+            if (!empty($_SERVER['QUERY_STRING'])) {
+                $canonicalUrl .= '?' . $_SERVER['QUERY_STRING'];
+            }
+            
+            Mage::app()->getFrontController()->getResponse()
+                ->setRedirect($canonicalUrl, 301)
+                ->sendResponse();
+            exit;
+        }
+
         $this->_pathInfo = (string) $pathInfo;
         return $this;
     }
