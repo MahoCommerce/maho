@@ -26,6 +26,7 @@
         <main class="main-container col2-left-layout" role="main">
             <div class="main">
                 <?= $this->getChildHtml('breadcrumbs') ?>
+                <?= $this->getChildHtml('category.title') ?>
                 <?php // This left_first block will display above the main content on smaller viewports ?>
                 <?php if ($_leftContent = $this->getChildHtml('left_first')): ?>
                 <aside class="col-left sidebar col-left-first" role="complementary" aria-label="<?= $this->__('Sidebar') ?>"><?= $_leftContent;   ?></aside>

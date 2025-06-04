@@ -333,7 +333,7 @@ h6, .h6 {
   font-weight: 600;
   color: var(--maho-color-text-primary);
   padding-bottom: 3px;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   text-transform: uppercase;
 }
 
@@ -385,10 +385,6 @@ body:not(.customer-account) .block:first-child .block-title {
 .block-subtitle {
   font-weight: bold;
   margin-bottom: 7px;
-}
-
-.block-content {
-  margin-top: 5px;
 }
 
 .block-content.unpad {
@@ -792,7 +788,7 @@ a.button:hover {
  */
 .breadcrumbs {
   overflow: hidden;
-  margin: -15px 0 15px;
+  margin: -15px 0 5px;
 }
 
 .breadcrumbs a {

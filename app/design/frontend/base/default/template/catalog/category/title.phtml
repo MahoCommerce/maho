@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Catalog_Block_Category_View $this */
+$_helper = $this->helper('catalog/output');
+$_category = $this->getCurrentCategory();
+?>
+<?php if($_category && $_category->getName()): ?>
+<div class="page-title category-title">
+    <?php if($this->isRssCatalogEnable() && $this->isTopCategory()): ?>
+        <a href="<?= $this->getRssLink() ?>" class="link-rss"><?= $this->__('Subscribe to RSS Feed') ?></a>
+    <?php endif ?>
+    <h1><?= $_helper->categoryAttribute($_category, $_category->getName(), 'name') ?></h1>
+</div>
+<?php endif ?>
