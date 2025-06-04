@@ -10,6 +10,7 @@
 
 class Mage_Catalog_Block_Category_Title extends Mage_Core_Block_Page_Title
 {
+    #[\Override]
     protected function _prepareLayout(): self
     {
         parent::_prepareLayout();
