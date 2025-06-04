@@ -144,6 +144,9 @@ class Mage_Core_Model_Url_Rewrite_Request
             return false;
         }
 
+        // Check for trailing slash mismatch and redirect to canonical URL
+        $this->_handleTrailingSlashRedirect();
+
         $this->_request->setAlias(
             Mage_Core_Model_Url_Rewrite::REWRITE_REQUEST_PATH_ALIAS,
             $this->_rewrite->getRequestPath(),
@@ -151,6 +154,41 @@ class Mage_Core_Model_Url_Rewrite_Request
         $this->_processRedirectOptions();
 
         return true;
+    }
+
+    /**
+     * Handle trailing slash redirect to canonical URL
+     *
+     * If the requested URL has a trailing slash but the matched rewrite doesn't,
+     * perform a 301 permanent redirect to the canonical URL without trailing slash.
+     */
+    protected function _handleTrailingSlashRedirect(): void
+    {
+        $pathInfo = $this->_request->getPathInfo();
+        $rewriteRequestPath = $this->_rewrite->getRequestPath();
+        
+        // Check if request has trailing slash but rewrite doesn't
+        if (str_ends_with($pathInfo, '/') && !str_ends_with($rewriteRequestPath, '/')) {
+            // Build canonical URL without trailing slash
+            $canonicalPath = '/' . trim($rewriteRequestPath, '/');
+            
+            // Add store code if configured
+            $storeCode = $this->_app->getStore()->getCode();
+            if (Mage::getStoreConfig(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL) && !empty($storeCode)) {
+                $canonicalPath = '/' . $storeCode . $canonicalPath;
+            }
+            
+            $canonicalUrl = $this->_request->getBaseUrl() . $canonicalPath;
+            
+            // Add query string if present
+            $queryString = $this->_getQueryString();
+            if ($queryString) {
+                $canonicalUrl .= '?' . $queryString;
+            }
+            
+            // Perform 301 permanent redirect to canonical URL
+            $this->_sendRedirectHeaders($canonicalUrl, true);
+        }
     }
 
     /**
