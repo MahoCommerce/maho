@@ -10,8 +10,22 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_Url_Validator extends Zend_Validate_Abstract
+class Mage_Core_Model_Url_Validator
 {
+    /**
+     * Last error message
+     *
+     * @var string|null
+     */
+    protected $_lastError;
+
+    /**
+     * Last value for validation
+     *
+     * @var mixed
+     */
+    protected $_lastValue;
+
     /**
      * Error keys
      */
@@ -22,8 +36,8 @@ class Mage_Core_Model_Url_Validator extends Zend_Validate_Abstract
      */
     public function __construct()
     {
-        // set translated message template
-        $this->setMessage(Mage::helper('core')->__("Invalid URL '%value%'."), self::INVALID_URL);
+        // Initialize message templates
+        $this->_messageTemplates[self::INVALID_URL] = Mage::helper('core')->__("Invalid URL '%value%'.");
     }
 
     /**
@@ -41,17 +55,27 @@ class Mage_Core_Model_Url_Validator extends Zend_Validate_Abstract
      * @param string $value
      * @return bool
      */
-    #[\Override]
     public function isValid($value)
     {
-        $this->_setValue($value);
+        // Store value for potential error message
+        $this->_lastValue = $value;
 
         //check valid URL
         if (!Zend_Uri::check($value)) {
-            $this->_error(self::INVALID_URL);
+            $this->_lastError = Mage::helper('core')->__('Invalid URL.');
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Get last error message
+     *
+     * @return string
+     */
+    public function getMessage()
+    {
+        return $this->_lastError ?? '';
     }
 }

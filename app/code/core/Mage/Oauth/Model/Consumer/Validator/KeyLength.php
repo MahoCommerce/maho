@@ -10,14 +10,45 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Zend_Validate_StringLength
+class Mage_Oauth_Model_Consumer_Validator_KeyLength
 {
+    public const TOO_SHORT = 'tooShort';
+    public const TOO_LONG = 'tooLong';
+    public const INVALID = 'invalid';
     /**
      * Key name
      *
      * @var string
      */
     protected $_name = 'Key';
+    
+    /**
+     * Minimum length
+     *
+     * @var int
+     */
+    protected $_min;
+    
+    /**
+     * Maximum length
+     *
+     * @var int
+     */
+    protected $_max;
+    
+    /**
+     * Encoding
+     *
+     * @var string
+     */
+    protected $_encoding = 'utf-8';
+    
+    /**
+     * Last error message
+     *
+     * @var string|null
+     */
+    protected $_lastError;
 
     /**
      * Sets validator options
@@ -32,7 +63,8 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Zend_Validate_String
             if (!isset($options[1])) {
                 $options[1] = 'utf-8';
             }
-            parent::__construct($options[0], $options[0], $options[1]);
+            $this->_min = $this->_max = $options[0];
+            $this->_encoding = $options[1];
             return;
         } else {
             if (isset($options['length'])) {
@@ -42,8 +74,16 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Zend_Validate_String
             if (isset($options['name'])) {
                 $this->_name = $options['name'];
             }
+            if (isset($options['min'])) {
+                $this->_min = $options['min'];
+            }
+            if (isset($options['max'])) {
+                $this->_max = $options['max'];
+            }
+            if (isset($options['encoding'])) {
+                $this->_encoding = $options['encoding'];
+            }
         }
-        parent::__construct($options);
     }
 
     /**
@@ -80,8 +120,8 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Zend_Validate_String
      */
     public function setLength($length)
     {
-        parent::setMax($length);
-        parent::setMin($length);
+        $this->_max = $length;
+        $this->_min = $length;
         return $this;
     }
 
@@ -92,7 +132,7 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Zend_Validate_String
      */
     public function getLength()
     {
-        return parent::getMin();
+        return $this->_min;
     }
 
     /**
@@ -104,14 +144,31 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Zend_Validate_String
      * @param  string $value
      * @return bool
      */
-    #[\Override]
     public function isValid($value)
     {
-        $result = parent::isValid($value);
-        if (!$result && isset($this->_messages[self::INVALID])) {
-            throw new Exception($this->_messages[self::INVALID]);
+        $length = iconv_strlen($value, $this->_encoding);
+        
+        if ($this->_min !== null && $length < $this->_min) {
+            $this->_lastError = Mage::helper('oauth')->__('%s \'%s\' is too short. It must has length %s symbols.', $this->_name, $value, $this->_min);
+            return false;
         }
-        return $result;
+        
+        if ($this->_max !== null && $length > $this->_max) {
+            $this->_lastError = Mage::helper('oauth')->__('%s \'%s\' is too long. It must has length %s symbols.', $this->_name, $value, $this->_max);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Get last error message
+     *
+     * @return string
+     */
+    public function getMessage()
+    {
+        return $this->_lastError ?? '';
     }
 
     /**

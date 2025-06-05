@@ -6,9 +6,12 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @method string getInlineCssFile()
@@ -219,9 +222,11 @@ abstract class Mage_Core_Model_Email_Template_Abstract extends Mage_Core_Model_T
                 '_theme' => $theme,
             ],
         );
-        $validator = new Zend_Validate_File_Extension('css');
+        $validator = Validation::createValidator();
+        $constraint = new Assert\File(['extensions' => ['css']]);
+        $violations = $validator->validate($filePath, $constraint);
 
-        if ($validator->isValid($filePath) && is_readable($filePath)) {
+        if (count($violations) === 0 && is_readable($filePath)) {
             return (string) file_get_contents($filePath);
         }
 

@@ -10,6 +10,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Constraints as Assert;
+
 /**
  * Wishlist front controller
  *
@@ -654,7 +657,9 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
         } else {
             foreach ($emails as $index => $email) {
                 $email = trim($email);
-                if (!Zend_Validate::is($email, 'EmailAddress')) {
+                $validator = Validation::createValidator();
+                $violations = $validator->validate($email, new Assert\Email(['mode' => 'loose']));
+                if (count($violations) > 0) {
                     $error = $this->__('Please input a valid email address.');
                     break;
                 }

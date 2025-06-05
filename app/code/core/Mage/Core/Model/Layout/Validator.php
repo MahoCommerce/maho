@@ -14,7 +14,7 @@
  * Validator for custom layout update
  * Validator checked XML validation and protected expressions
  */
-class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
+class Mage_Core_Model_Layout_Validator
 {
     public const XML_PATH_LAYOUT_DISALLOWED_BLOCKS       = 'validators/custom_layout/disallowed_block';
     public const XML_INVALID                             = 'invalidXml';
@@ -29,6 +29,13 @@ class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
      * @var Varien_Simplexml_Element
      */
     protected $_value;
+
+    /**
+     * Last error message
+     *
+     * @var string
+     */
+    protected $_lastError;
 
     /**
      * XPath expression for checking layout update
@@ -129,7 +136,6 @@ class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
      * @param Varien_Simplexml_Element|string $value
      * @return bool
      */
-    #[\Override]
     public function isValid($value)
     {
         if (is_string($value)) {
@@ -137,14 +143,14 @@ class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
             try {
                 $value = new Varien_Simplexml_Element('<config>' . $value . '</config>');
             } catch (Exception $e) {
-                $this->_error(self::XML_INVALID);
+                $this->_lastError = 'Invalid XML';
                 return false;
             }
         } elseif (!($value instanceof Varien_Simplexml_Element)) {
             throw new Exception($this->_messageTemplates[self::INVALID_XML_OBJECT_EXCEPTION]);
         }
         if ($value->xpath($this->getXpathBlockValidationExpression())) {
-            $this->_error(self::INVALID_BLOCK_NAME);
+            $this->_lastError = 'Invalid block name';
             return false;
         }
         // if layout update declare custom templates then validate their paths
@@ -152,15 +158,15 @@ class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
             try {
                 $this->validateTemplatePath($templatePaths);
             } catch (Exception $e) {
-                $this->_error(self::INVALID_TEMPLATE_PATH);
+                $this->_lastError = 'Invalid template path';
                 return false;
             }
         }
-        $this->_setValue($value);
+        $this->_value = $value;
 
         foreach ($this->_protectedExpressions as $key => $xpr) {
             if ($this->_value->xpath($xpr)) {
-                $this->_error($key);
+                $this->_lastError = 'Validation failed';
                 return false;
             }
         }
@@ -231,5 +237,15 @@ class Mage_Core_Model_Layout_Validator extends Zend_Validate_Abstract
                 throw new Exception();
             }
         }
+    }
+
+    /**
+     * Get last error message
+     *
+     * @return string
+     */
+    public function getMessage()
+    {
+        return $this->_lastError ?? '';
     }
 }

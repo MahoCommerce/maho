@@ -28,7 +28,7 @@
  * $validator->isValid('/path/to/my.xml'); //return true, because directory structure can't exist
  * </code>
  */
-class Mage_Core_Model_File_Validator_AvailablePath extends Zend_Validate_Abstract
+class Mage_Core_Model_File_Validator_AvailablePath
 {
     public const PROTECTED_PATH     = 'protectedPath';
     public const NOT_AVAILABLE_PATH = 'notAvailablePath';
@@ -61,6 +61,20 @@ class Mage_Core_Model_File_Validator_AvailablePath extends Zend_Validate_Abstrac
      * @var array
      */
     protected $_pathsData;
+
+    /**
+     * Message templates
+     *
+     * @var array
+     */
+    protected $_messageTemplates;
+
+    /**
+     * Last error message
+     *
+     * @var string|null
+     */
+    protected $_lastError;
 
     public function __construct()
     {
@@ -190,29 +204,27 @@ class Mage_Core_Model_File_Validator_AvailablePath extends Zend_Validate_Abstrac
      * @param string $value     File/dir path
      * @return bool
      */
-    #[\Override]
     public function isValid($value)
     {
         $value = trim($value);
-        $this->_setValue($value);
 
         if (!$this->_availablePaths && !$this->_protectedPaths) {
             throw new Exception(Mage::helper('core')->__('Please set available and/or protected paths list(s) before validation.'));
         }
 
-        if (preg_match('#\.\.[\\\/]#', $this->_value)) {
-            $this->_error(self::PROTECTED_LFI, $this->_value);
+        if (preg_match('#\.\.[\\\/]#', $value)) {
+            $this->_lastError = Mage::helper('core')->__('Path "%s" may not include parent directory traversal ("../", "..\\\\").', $value);
             return false;
         }
 
         //validation
         $protectedExtensions = Mage::helper('core/data')->getProtectedFileExtensions();
-        $value = str_replace(['/', '\\'], DS, $this->_value);
+        $value = str_replace(['/', '\\'], DS, $value);
         $valuePathInfo = pathinfo(ltrim($value, '\\/'));
         $fileNameExtension = pathinfo($valuePathInfo['filename'], PATHINFO_EXTENSION);
 
         if (in_array($fileNameExtension, $protectedExtensions)) {
-            $this->_error(self::NOT_AVAILABLE_PATH, $this->_value);
+            $this->_lastError = Mage::helper('core')->__('Path "%s" is not available and cannot be used.', $value);
             return false;
         }
 
@@ -221,11 +233,11 @@ class Mage_Core_Model_File_Validator_AvailablePath extends Zend_Validate_Abstrac
         }
 
         if ($this->_protectedPaths && !$this->_isValidByPaths($valuePathInfo, $this->_protectedPaths, true)) {
-            $this->_error(self::PROTECTED_PATH, $this->_value);
+            $this->_lastError = Mage::helper('core')->__('Path "%s" is protected and cannot be used.', $value);
             return false;
         }
         if ($this->_availablePaths && !$this->_isValidByPaths($valuePathInfo, $this->_availablePaths, false)) {
-            $this->_error(self::NOT_AVAILABLE_PATH, $this->_value);
+            $this->_lastError = Mage::helper('core')->__('Path "%s" is not available and cannot be used.', $value);
             return false;
         }
 

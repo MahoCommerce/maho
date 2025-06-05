@@ -6,21 +6,15 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_File_Validator_NotProtectedExtension extends Zend_Validate_Abstract
+use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\ConstraintValidator;
+
+class Mage_Core_Model_File_Validator_NotProtectedExtension
 {
-    public const PROTECTED_EXTENSION = 'protectedExtension';
-
-    /**
-     * The file extension
-     *
-     * @var string
-     */
-    protected $_value;
-
     /**
      * Protected file types
      *
@@ -30,23 +24,7 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension extends Zend_Validate
 
     public function __construct()
     {
-        $this->_initMessageTemplates();
         $this->_initProtectedFileExtensions();
-    }
-
-    /**
-     * Initialize message templates with translating
-     *
-     * @return $this
-     */
-    protected function _initMessageTemplates()
-    {
-        if (!$this->_messageTemplates) {
-            $this->_messageTemplates = [
-                self::PROTECTED_EXTENSION => Mage::helper('core')->__('File with an extension "%value%" is protected and cannot be uploaded'),
-            ];
-        }
-        return $this;
     }
 
     /**
@@ -74,24 +52,27 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension extends Zend_Validate
     /**
      * Returns true if and only if $value meets the validation requirements
      *
-     * If $value fails validation, then this method returns false, and
-     * getMessages() will return an array of messages that explain why the
-     * validation failed.
-     *
      * @param string $value         Extension of file
      * @return bool
      */
-    #[\Override]
     public function isValid($value)
     {
         $value = strtolower(trim($value));
-        $this->_setValue($value);
 
-        if (in_array($this->_value, $this->_protectedFileExtensions)) {
-            $this->_error(self::PROTECTED_EXTENSION, $this->_value);
+        if (in_array($value, $this->_protectedFileExtensions)) {
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Get error message
+     *
+     * @return string
+     */
+    public function getMessage()
+    {
+        return Mage::helper('core')->__('File with an extension is protected and cannot be uploaded');
     }
 }

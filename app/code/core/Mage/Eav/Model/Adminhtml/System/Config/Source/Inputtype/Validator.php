@@ -10,9 +10,11 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator extends Zend_Validate_InArray
+class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator
 {
     protected $_messageTemplates;
+    protected $_haystack;
+    protected $_strict;
 
     public function __construct()
     {
@@ -25,11 +27,9 @@ class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator extends 
         $this->_messageTemplates = [];
         $this->_initMessageTemplates();
 
-        //parent construct with options
-        parent::__construct([
-            'haystack' => $haystack,
-            'strict'   => true,
-        ]);
+        // Store haystack for validation
+        $this->_haystack = $haystack;
+        $this->_strict = true;
     }
 
     /**
@@ -60,5 +60,16 @@ class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator extends 
             $this->_haystack[] = (string) $type;
         }
         return $this;
+    }
+
+    /**
+     * Validate value is in haystack
+     *
+     * @param mixed $value
+     * @return bool
+     */
+    public function isValid($value)
+    {
+        return in_array($value, $this->_haystack, $this->_strict);
     }
 }

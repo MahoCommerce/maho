@@ -24,29 +24,6 @@ vendor/bin/phpstan analyze    # Run static analysis
 ### Cache Management
 ```bash
 ./maho cache:flush        # Flush all caches
-./maho cache:enable       # Enable caching
-./maho cache:disable      # Disable caching
-```
-
-### Database & Indexing
-```bash
-./maho index:list         # List all indexes
-./maho index:reindex      # Reindex specific index
-./maho index:reindex:all  # Reindex all indexes
-```
-
-### Admin & Customer Management
-```bash
-./maho admin:user:list                          # List admin users
-./maho admin:user:create                        # Create admin user
-./maho admin:user:changepassword <username>     # Change admin password
-./maho customer:list                            # List customers
-./maho customer:create                          # Create customer
-```
-
-### Installation
-```bash
-./maho install            # Install Maho (non interactive)
 ```
 
 ## Architecture Overview
@@ -114,9 +91,10 @@ Observers are configured in module's `config.xml`.
 ## Development Guidelines
 
 - When you write CSS, use the most modern features, do not care for Internet Explorer or old unsupported browsers.
-- When you write Javascript, never use prototypejs or jquery, only vanilla's
+- When you write Javascript, never use prototypejs or jquery, only vanillajs
 - If you're integrating new tools/libraries, always use their latest available version
 - Update headers of the PHP files, adding the current year for the copyright Maho line
+- Always use the most modern PHP syntax with strong typing and typehints whenever possible 
 - Before committing, ensure all translatable strings (`$this->__()` or `Mage::helper()->__()`) are present in the corresponding CSV files in `app/locale/en_US/`
 
 ### Adding New Features
