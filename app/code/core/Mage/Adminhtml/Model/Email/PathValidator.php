@@ -11,12 +11,12 @@
  */
 
 use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\ConstraintValidator;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Validation;
 
 /**
- * Email path validation constraint
+ * Email path validation constraint and validator
  */
 #[\Attribute]
 class Mage_Adminhtml_Model_Email_PathValidator extends Constraint
@@ -24,10 +24,19 @@ class Mage_Adminhtml_Model_Email_PathValidator extends Constraint
     public string $invalidPathMessage = 'The configuration path is not valid for email templates.';
     private array $_messages = [];
 
-    #[\Override]
-    public function validatedBy(): string
+    public function validate(mixed $value, ExecutionContextInterface $context): void
     {
-        return Mage_Adminhtml_Model_Email_PathValidatorValidator::class;
+        if (null === $value || '' === $value) {
+            return;
+        }
+
+        $pathNode = is_array($value) ? array_shift($value) : $value;
+
+        if (!$this->isEncryptedNodePath($pathNode)) {
+            $context->buildViolation($this->invalidPathMessage)
+                ->setParameter('{{ value }}', (string) $pathNode)
+                ->addViolation();
+        }
     }
 
     // Backward compatibility methods
@@ -56,43 +65,10 @@ class Mage_Adminhtml_Model_Email_PathValidator extends Constraint
         return !empty($this->_messages) ? $this->_messages[0] : '';
     }
 
-    /**
-     * Return bool after checking the encrypted model in the path to config node
-     *
-     * @param string $path
-     * @return bool
-     */
     public function isEncryptedNodePath($path)
     {
-        /** @var Mage_Adminhtml_Model_Config $configModel */
         $configModel = Mage::getSingleton('adminhtml/config');
 
         return in_array((string) $path, $configModel->getEncryptedNodeEntriesPaths());
-    }
-}
-
-/**
- * Email path constraint validator
- */
-class Mage_Adminhtml_Model_Email_PathValidatorValidator extends ConstraintValidator
-{
-    #[\Override]
-    public function validate(mixed $value, Constraint $constraint): void
-    {
-        if (!$constraint instanceof Mage_Adminhtml_Model_Email_PathValidator) {
-            throw new UnexpectedTypeException($constraint, Mage_Adminhtml_Model_Email_PathValidator::class);
-        }
-
-        if (null === $value || '' === $value) {
-            return;
-        }
-
-        $pathNode = is_array($value) ? array_shift($value) : $value;
-
-        if (!$constraint->isEncryptedNodePath($pathNode)) {
-            $this->context->buildViolation($constraint->invalidPathMessage)
-                ->setParameter('{{ value }}', (string) $pathNode)
-                ->addViolation();
-        }
     }
 }

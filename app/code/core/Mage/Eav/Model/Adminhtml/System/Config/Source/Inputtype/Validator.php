@@ -11,14 +11,11 @@
  */
 
 use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\ConstraintValidator;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Exception\UnexpectedValueException;
 use Symfony\Component\Validator\Validation;
 
-/**
- * EAV input type validation constraint
- */
 #[\Attribute]
 class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator extends Constraint
 {
@@ -44,10 +41,17 @@ class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator extends 
         $this->notInArrayMessage = $notInArrayMessage ?? $this->notInArrayMessage;
     }
 
-    #[\Override]
-    public function validatedBy(): string
+    public function validate(mixed $value, ExecutionContextInterface $context): void
     {
-        return Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_ValidatorValidator::class;
+        if (null === $value || '' === $value) {
+            return;
+        }
+
+        if (!in_array($value, $this->haystack, $this->strict)) {
+            $context->buildViolation($this->notInArrayMessage)
+                ->setParameter('{{ value }}', (string) $value)
+                ->addViolation();
+        }
     }
 
     // Backward compatibility methods
@@ -76,37 +80,10 @@ class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator extends 
         return !empty($this->_messages) ? $this->_messages[0] : '';
     }
 
-    /**
-     * Get default haystack from EAV helper
-     */
     private function _getDefaultHaystack(): array
     {
-        /** @var Mage_Eav_Helper_Data $helper */
         $helper = Mage::helper('eav');
         return $helper->getInputTypesValidatorData();
     }
 }
 
-/**
- * EAV input type constraint validator
- */
-class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_ValidatorValidator extends ConstraintValidator
-{
-    #[\Override]
-    public function validate(mixed $value, Constraint $constraint): void
-    {
-        if (!$constraint instanceof Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator) {
-            throw new UnexpectedTypeException($constraint, Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator::class);
-        }
-
-        if (null === $value || '' === $value) {
-            return;
-        }
-
-        if (!in_array($value, $constraint->haystack, $constraint->strict)) {
-            $this->context->buildViolation($constraint->notInArrayMessage)
-                ->setParameter('{{ value }}', (string) $value)
-                ->addViolation();
-        }
-    }
-}
