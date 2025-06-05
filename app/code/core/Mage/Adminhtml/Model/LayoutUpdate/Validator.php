@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -14,10 +14,11 @@
  * Validator for custom layout update
  *
  * Validator checked XML validation and protected expressions
+ * Now uses Symfony validation via Core Layout Validator
  *
  * @package    Mage_Adminhtml
  */
-class Mage_Adminhtml_Model_LayoutUpdate_Validator extends Zend_Validate_Abstract
+class Mage_Adminhtml_Model_LayoutUpdate_Validator
 {
     public const XML_INVALID                             = 'invalidXml';
     public const INVALID_TEMPLATE_PATH                   = 'invalidTemplatePath';
@@ -57,6 +58,13 @@ class Mage_Adminhtml_Model_LayoutUpdate_Validator extends Zend_Validate_Abstract
      */
     protected $_protectedExpressions = [];
 
+    /**
+     * Message templates
+     *
+     * @var array
+     */
+    protected $_messageTemplates;
+
     public function __construct()
     {
         $this->_initMessageTemplates();
@@ -68,7 +76,6 @@ class Mage_Adminhtml_Model_LayoutUpdate_Validator extends Zend_Validate_Abstract
      *
      * @return array
      */
-    #[\Override]
     public function getMessages()
     {
         return $this->_validator->getMessages();
@@ -86,7 +93,6 @@ class Mage_Adminhtml_Model_LayoutUpdate_Validator extends Zend_Validate_Abstract
      * @param Varien_Simplexml_Element|string $value
      * @return bool
      */
-    #[\Override]
     public function isValid($value)
     {
         return $this->_validator->isValid($value);

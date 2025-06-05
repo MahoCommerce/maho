@@ -6,9 +6,13 @@
  * @package    Mage_Api2
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource_Validator
 {
@@ -25,8 +29,8 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
     protected $_resource;
 
     /**
-     * List of Validators (Zend_Validate_Interface)
-     * The key is a field name, a value is validator for this field
+     * List of Validators (Symfony Constraints)
+     * The key is a field name, a value is array of constraints for this field
      *
      * @var array
      */
@@ -40,25 +44,20 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
     protected $_requiredFields = [];
 
     /**
-     * Construct. Set all depends.
+     * Symfony validator instance
      *
-     * Required parameteres for options:
-     * - resource
-     *
-     * @param array $options
-     * @throws Exception If passed parameter 'resource' is wrong
+     * @var ValidatorInterface
      */
-    public function __construct($options)
-    {
-        if (!isset($options['resource']) || !$options['resource'] instanceof Mage_Api2_Model_Resource) {
-            throw new Exception("Passed parameter 'resource' is wrong.");
-        }
-        $this->_resource = $options['resource'];
+    protected $_validator;
 
-        $validationConfig = $this->_resource->getConfig()->getValidationConfig(
-            $this->_resource->getResourceType(),
-            self::CONFIG_NODE_KEY,
-        );
+    public function __construct()
+    {
+        $this->_validator = Validation::createValidator();
+        // Get validation config from resource if it exists
+        $validationConfig = [];
+        if ($this->_resource && method_exists($this->_resource, 'getValidationConfig')) {
+            $validationConfig = $this->_resource->getValidationConfig(self::CONFIG_NODE_KEY);
+        }
         if (!is_array($validationConfig)) {
             $validationConfig = [];
         }
@@ -75,49 +74,106 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
     {
         foreach ($validationConfig as $field => $validatorsConfig) {
             if (count($validatorsConfig)) {
-                $chainForOneField = new Zend_Validate();
+                $constraintsForField = [];
                 foreach ($validatorsConfig as $validatorName => $validatorConfig) {
                     // it is required field
                     if ($validatorName == 'required' && $validatorConfig == 1) {
                         $this->_requiredFields[] = $field;
                         continue;
                     }
-                    // instantiation of the validator class
+                    // instantiation of the validator constraint
                     if (!isset($validatorConfig['type'])) {
                         throw new Exception("Validator type is not set for {$validatorName}");
                     }
-                    $validator = $this->_getValidatorInstance(
+                    $constraint = $this->_getConstraintInstance(
                         $validatorConfig['type'],
                         !empty($validatorConfig['options']) ? $validatorConfig['options'] : [],
+                        $validatorConfig['message'] ?? null,
                     );
-                    // set custom message
-                    if (isset($validatorConfig['message'])) {
-                        $validator->setMessage($validatorConfig['message']);
-                    }
-                    // add to list of validators
-                    $chainForOneField->addValidator($validator);
+                    // add to list of constraints
+                    $constraintsForField[] = $constraint;
                 }
-                $this->_validators[$field] = $chainForOneField;
+                $this->_validators[$field] = $constraintsForField;
             }
         }
     }
 
     /**
-     * Get validator object instance
-     * Override the method if we need to use not only Zend validators!
+     * Get constraint object instance
+     * Converts Zend validators to Symfony constraints
      *
      * @param string $type
      * @param array $options
-     * @return Zend_Validate_Interface
-     * @throws Exception If validator is not exist
+     * @param string|null $message
+     * @return mixed
+     * @throws Exception If validator type is not supported
      */
-    protected function _getValidatorInstance($type, $options)
+    protected function _getConstraintInstance($type, $options, $message = null)
     {
-        $validatorClass = 'Zend_Validate_' . $type;
-        if (!class_exists($validatorClass)) {
-            throw new Exception("Validator {$type} is not exist");
+        $constraintOptions = $options;
+        if ($message) {
+            $constraintOptions['message'] = $message;
         }
-        return new $validatorClass($options);
+
+        switch ($type) {
+            case 'NotEmpty':
+                return new Assert\NotBlank($constraintOptions);
+            case 'EmailAddress':
+                return new Assert\Email($constraintOptions);
+            case 'StringLength':
+                $constraintOptions = [];
+                if (isset($options['min'])) {
+                    $constraintOptions['min'] = $options['min'];
+                }
+                if (isset($options['max'])) {
+                    $constraintOptions['max'] = $options['max'];
+                }
+                if ($message) {
+                    $constraintOptions['minMessage'] = $message;
+                    $constraintOptions['maxMessage'] = $message;
+                }
+                return new Assert\Length($constraintOptions);
+            case 'Regex':
+                if (isset($options['pattern'])) {
+                    $constraintOptions['pattern'] = $options['pattern'];
+                }
+                return new Assert\Regex($constraintOptions);
+            case 'Digits':
+                return new Assert\Regex([
+                    'pattern' => '/^\d+$/',
+                    'message' => $message ?: 'This value should contain only digits.',
+                ]);
+            case 'Alnum':
+                return new Assert\Regex([
+                    'pattern' => '/^[a-zA-Z0-9]+$/',
+                    'message' => $message ?: 'This value should contain only letters and numbers.',
+                ]);
+            case 'Alpha':
+                return new Assert\Regex([
+                    'pattern' => '/^[a-zA-Z]+$/',
+                    'message' => $message ?: 'This value should contain only letters.',
+                ]);
+            case 'Between':
+                $constraintOptions = [];
+                if (isset($options['min'])) {
+                    $constraintOptions['min'] = $options['min'];
+                }
+                if (isset($options['max'])) {
+                    $constraintOptions['max'] = $options['max'];
+                }
+                if ($message) {
+                    $constraintOptions['minMessage'] = $message;
+                    $constraintOptions['maxMessage'] = $message;
+                }
+                return new Assert\Range($constraintOptions);
+            case 'Url':
+                return new Assert\Url($constraintOptions);
+            case 'Date':
+                return new Assert\Date($constraintOptions);
+            default:
+                // For unsupported validators, create a basic regex constraint
+                throw new Exception("Validator type '{$type}' is not supported in Symfony conversion");
+        }
     }
 
     /**
@@ -135,12 +191,13 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
 
         // required fields
         if (!$isPartial && count($this->_requiredFields) > 0) {
-            $notEmptyValidator = new Zend_Validate_NotEmpty();
             foreach ($this->_requiredFields as $requiredField) {
-                if (!$notEmptyValidator->isValid($data[$requiredField] ?? null)) {
+                $value = $data[$requiredField] ?? null;
+                $violations = $this->_validator->validate($value, new Assert\NotBlank());
+                if (count($violations) > 0) {
                     $isValid = false;
-                    foreach ($notEmptyValidator->getMessages() as $message) {
-                        $this->_addError(sprintf('%s: %s', $requiredField, $message));
+                    foreach ($violations as $violation) {
+                        $this->_addError(sprintf('%s: %s', $requiredField, $violation->getMessage()));
                     }
                 }
             }
@@ -149,17 +206,16 @@ class Mage_Api2_Model_Resource_Validator_Fields extends Mage_Api2_Model_Resource
         // fields rules
         foreach ($data as $field => $value) {
             if (isset($this->_validators[$field])) {
-                /** @var Zend_Validate_Interface $validator */
-                $validator = $this->_validators[$field];
-                if (!$validator->isValid($value)) {
+                $constraints = $this->_validators[$field];
+                $violations = $this->_validator->validate($value, $constraints);
+                if (count($violations) > 0) {
                     $isValid = false;
-                    foreach ($validator->getMessages() as $message) {
-                        $this->_addError(sprintf('%s: %s', $field, $message));
+                    foreach ($violations as $violation) {
+                        $this->_addError(sprintf('%s: %s', $field, $violation->getMessage()));
                     }
                 }
             }
         }
-
         return $isValid;
     }
 }

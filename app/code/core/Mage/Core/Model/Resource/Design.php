@@ -27,8 +27,7 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
         $dateFrom = $object->getDateFrom();
         $dateTo = $object->getDateTo();
         if (!empty($dateFrom) && !empty($dateTo)) {
-            $validator = new Zend_Validate_Date();
-            if (!$validator->isValid($dateFrom) || !$validator->isValid($dateTo)) {
+            if (!$this->_isValidDate($dateFrom) || !$this->_isValidDate($dateTo)) {
                 Mage::throwException(Mage::helper('core')->__('Invalid date'));
             }
             if (Varien_Date::toTimestamp($dateFrom) > Varien_Date::toTimestamp($dateTo)) {
@@ -50,6 +49,18 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
         }
 
         return parent::_beforeSave($object);
+    }
+
+    /**
+     * Validate date string
+     *
+     * @param string $date
+     * @return bool
+     */
+    protected function _isValidDate($date)
+    {
+        return DateTime::createFromFormat('Y-m-d', $date) !== false ||
+               DateTime::createFromFormat('Y-m-d H:i:s', $date) !== false;
     }
 
     /**

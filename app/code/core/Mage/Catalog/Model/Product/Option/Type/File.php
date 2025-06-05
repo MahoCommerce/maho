@@ -329,10 +329,10 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return false;
         }
 
-        $validatorChain = new Zend_Validate();
+        $constraints = [];
 
+        // Image size validation
         $_dimentions = [];
-
         if ($option->getImageSizeX() > 0) {
             $_dimentions['maxwidth'] = $option->getImageSizeX();
         }
@@ -343,43 +343,57 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return false;
         }
         if (count($_dimentions) > 0) {
-            $validatorChain->addValidator(
-                new Zend_Validate_File_ImageSize($_dimentions),
-            );
+            $constraints[] = new Assert\Image([
+                'maxWidth' => $_dimentions['maxwidth'] ?? null,
+                'maxHeight' => $_dimentions['maxheight'] ?? null,
+            ]);
         }
 
-        // File extension
+        // File extension validation
         $_allowed = $this->_parseExtensionsString($option->getFileExtension());
         if ($_allowed !== null) {
-            $validatorChain->addValidator(new Zend_Validate_File_Extension($_allowed));
+            $constraints[] = new Assert\File([
+                'extensions' => $_allowed,
+            ]);
         } else {
             $_forbidden = $this->_parseExtensionsString($this->getConfigData('forbidden_extensions'));
             if ($_forbidden !== null) {
-                $validatorChain->addValidator(new Zend_Validate_File_ExcludeExtension($_forbidden));
+                // For forbidden extensions, we'll validate against allowed extensions by excluding forbidden ones
+                $allExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'pdf', 'doc', 'docx', 'txt', 'zip', 'rar', 'csv', 'xls', 'xlsx'];
+                $allowedExts = array_diff($allExtensions, $_forbidden);
+                if (!empty($allowedExts)) {
+                    $constraints[] = new Assert\File([
+                        'extensions' => $allowedExts,
+                    ]);
+                }
             }
         }
 
         // Maximum filesize
-        $validatorChain->addValidator(
-            new Zend_Validate_File_FilesSize(['max' => $this->_getUploadMaxFilesize()]),
-        );
+        $constraints[] = new Assert\File([
+            'maxSize' => $this->_getUploadMaxFilesize(),
+        ]);
 
-        if ($validatorChain->isValid($fileFullPath)) {
+        $validator = Validation::createValidator();
+        $violations = $validator->validate($fileFullPath, $constraints);
+
+        if (count($violations) === 0) {
             return is_readable($fileFullPath)
                 && isset($optionValue['secret_key'])
                 && substr(md5(file_get_contents($fileFullPath)), 0, 20) == $optionValue['secret_key'];
-        } elseif ($validatorChain->getMessages()) {
-            $errors = $this->_getValidatorErrors(array_keys($validatorChain->getMessages()), $optionValue);
+        } else {
+            $errors = [];
+            foreach ($violations as $violation) {
+                $errors[] = $violation->getMessage();
+            }
 
             if (count($errors) > 0) {
                 $this->setIsValid(false);
                 Mage::throwException(implode("\n", $errors));
             }
-        } else {
             $this->setIsValid(false);
             Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option(s)'));
         }
-        return false;
     }
 
     /**
