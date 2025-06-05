@@ -270,7 +270,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
                 ->from($table, 'COUNT(*)')
                 ->where('country_id = ?', $data['country_id'])
                 ->where('code = ?', $data['code']);
-            
+
             // If editing, exclude current region from check
             if ($currentRegionId) {
                 $select->where('region_id != ?', $currentRegionId);

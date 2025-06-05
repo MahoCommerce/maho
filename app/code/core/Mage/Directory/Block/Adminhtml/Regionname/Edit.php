@@ -28,25 +28,25 @@ class Mage_Directory_Block_Adminhtml_Regionname_Edit extends Mage_Adminhtml_Bloc
     protected function _prepareLayout()
     {
         $this->setChild('form', $this->getLayout()->createBlock('directory/adminhtml_regionname_edit_form'));
-        
+
         $result = parent::_prepareLayout();
-        
+
         // Handle delete button based on whether we're editing or creating
         $regionName = Mage::registry('current_region_name');
         if ($regionName && isset($regionName['locale']) && isset($regionName['region_id']) && $regionName['locale'] && $regionName['region_id']) {
             // Add delete button for existing records
             $deleteUrl = $this->getUrl('*/*/delete', [
                 'locale' => $regionName['locale'],
-                'region_id' => $regionName['region_id']
+                'region_id' => $regionName['region_id'],
             ]);
-            
+
             $this->_addButton('delete', [
                 'label' => Mage::helper('adminhtml')->__('Delete'),
                 'onclick' => "deleteConfirm('" . Mage::helper('adminhtml')->__('Are you sure you want to delete this region name?') . "', '" . $deleteUrl . "')",
                 'class' => 'delete',
             ], -1);
         }
-        
+
         return $result;
     }
 
