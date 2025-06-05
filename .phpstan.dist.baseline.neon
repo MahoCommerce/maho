@@ -16579,12 +16579,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Layout.php
 
 		-
-			message: '#^Method Mage_Core_Model_Layout_Validator\:\:validateTemplatePath\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Layout/Validator.php
-
-		-
 			message: '#^Method Mage_Core_Model_Locale\:\:emulate\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

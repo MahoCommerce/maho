@@ -12,67 +12,111 @@
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
+use Symfony\Component\Validator\Exception\UnexpectedTypeException;
+use Symfony\Component\Validator\Exception\UnexpectedValueException;
+use Symfony\Component\Validator\Validation;
 
-class Mage_Core_Model_File_Validator_NotProtectedExtension
+/**
+ * Constraint for file extension validation
+ */
+#[\Attribute]
+class Mage_Core_Model_File_Validator_NotProtectedExtension extends Constraint
 {
-    /**
-     * Protected file types
-     *
-     * @var array
-     */
-    protected $_protectedFileExtensions = [];
+    public string $protectedExtensionMessage = 'File with an extension "{{ value }}" is protected and cannot be uploaded.';
 
-    public function __construct()
-    {
-        $this->_initProtectedFileExtensions();
+    public array $protectedExtensions = [];
+
+    private array $_messages = [];
+
+    public function __construct(
+        mixed $options = null,
+        ?array $groups = null,
+        mixed $payload = null,
+        ?array $protectedExtensions = null,
+        ?string $protectedExtensionMessage = null
+    ) {
+        parent::__construct($options, $groups, $payload);
+
+        $this->protectedExtensions = $protectedExtensions ?? $this->_getDefaultProtectedExtensions();
+        $this->protectedExtensionMessage = $protectedExtensionMessage ?? $this->protectedExtensionMessage;
     }
 
-    /**
-     * Initialize protected file extensions
-     *
-     * @return $this
-     */
-    protected function _initProtectedFileExtensions()
+    #[\Override]
+    public function validatedBy(): string
     {
-        if (!$this->_protectedFileExtensions) {
-            /** @var Mage_Core_Helper_Data $helper */
-            $helper = Mage::helper('core');
-            $extensions = $helper->getProtectedFileExtensions();
-            if (is_string($extensions)) {
-                $extensions = explode(',', $extensions);
-            }
-            foreach ($extensions as &$ext) {
-                $ext = strtolower(trim($ext));
-            }
-            $this->_protectedFileExtensions = (array) $extensions;
-        }
-        return $this;
+        return Mage_Core_Model_File_Validator_NotProtectedExtensionValidator::class;
     }
 
-    /**
-     * Returns true if and only if $value meets the validation requirements
-     *
-     * @param string $value         Extension of file
-     * @return bool
-     */
-    public function isValid($value)
+    // Backward compatibility methods
+    public function isValid(mixed $value): bool
     {
-        $value = strtolower(trim($value));
+        $this->_messages = [];
+        $validator = Validation::createValidator();
+        $violations = $validator->validate($value, $this);
 
-        if (in_array($value, $this->_protectedFileExtensions)) {
+        if (count($violations) > 0) {
+            foreach ($violations as $violation) {
+                $this->_messages[] = $violation->getMessage();
+            }
             return false;
         }
-
         return true;
     }
 
-    /**
-     * Get error message
-     *
-     * @return string
-     */
-    public function getMessage()
+    public function getMessages(): array
     {
-        return Mage::helper('core')->__('File with an extension is protected and cannot be uploaded');
+        return $this->_messages;
+    }
+
+    public function getMessage(): string
+    {
+        return !empty($this->_messages) ? $this->_messages[0] : '';
+    }
+
+    /**
+     * Get default protected file extensions from core helper
+     */
+    private function _getDefaultProtectedExtensions(): array
+    {
+        /** @var Mage_Core_Helper_Data $helper */
+        $helper = Mage::helper('core');
+        $extensions = $helper->getProtectedFileExtensions();
+        if (is_string($extensions)) {
+            $extensions = explode(',', $extensions);
+        }
+        foreach ($extensions as &$ext) {
+            $ext = strtolower(trim($ext));
+        }
+        return (array) $extensions;
+    }
+}
+
+/**
+ * Validator for not protected extension constraint
+ */
+class Mage_Core_Model_File_Validator_NotProtectedExtensionValidator extends ConstraintValidator
+{
+    #[\Override]
+    public function validate(mixed $value, Constraint $constraint): void
+    {
+        if (!$constraint instanceof Mage_Core_Model_File_Validator_NotProtectedExtension) {
+            throw new UnexpectedTypeException($constraint, Mage_Core_Model_File_Validator_NotProtectedExtension::class);
+        }
+
+        if (null === $value || '' === $value) {
+            return;
+        }
+
+        if (!is_string($value)) {
+            throw new UnexpectedValueException($value, 'string');
+        }
+
+        $value = strtolower(trim($value));
+
+        if (in_array($value, $constraint->protectedExtensions)) {
+            $this->context->buildViolation($constraint->protectedExtensionMessage)
+                ->setParameter('{{ value }}', $value)
+                ->addViolation();
+        }
     }
 }

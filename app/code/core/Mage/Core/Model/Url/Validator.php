@@ -6,76 +6,60 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_Url_Validator
+use Symfony\Component\Validator\Constraints\Url;
+use Symfony\Component\Validator\Validation;
+
+/**
+ * URL validation extending Symfony's built-in Url constraint
+ */
+#[\Attribute]
+class Mage_Core_Model_Url_Validator extends Url
 {
-    /**
-     * Last error message
-     *
-     * @var string|null
-     */
-    protected $_lastError;
+    private array $_messages = [];
 
-    /**
-     * Last value for validation
-     *
-     * @var mixed
-     */
-    protected $_lastValue;
+    public function __construct(
+        mixed $options = null,
+        ?array $groups = null,
+        mixed $payload = null,
+        ?string $message = null
+    ) {
+        // Set default message if not provided
+        $message = $message ?? 'Invalid URL "{{ value }}".';
 
-    /**
-     * Error keys
-     */
-    public const INVALID_URL = 'invalidUrl';
-
-    /**
-     * Object constructor
-     */
-    public function __construct()
-    {
-        // Initialize message templates
-        $this->_messageTemplates[self::INVALID_URL] = Mage::helper('core')->__("Invalid URL '%value%'.");
+        parent::__construct(
+            message: $message,
+            groups: $groups,
+            payload: $payload,
+        );
     }
 
-    /**
-     * Validation failure message template definitions
-     *
-     * @var array
-     */
-    protected $_messageTemplates = [
-        self::INVALID_URL => "Invalid URL '%value%'.",
-    ];
-
-    /**
-     * Validate value
-     *
-     * @param string $value
-     * @return bool
-     */
-    public function isValid($value)
+    // Backward compatibility methods
+    public function isValid(mixed $value): bool
     {
-        // Store value for potential error message
-        $this->_lastValue = $value;
+        $this->_messages = [];
+        $validator = Validation::createValidator();
+        $violations = $validator->validate($value, $this);
 
-        //check valid URL
-        if (!Zend_Uri::check($value)) {
-            $this->_lastError = Mage::helper('core')->__('Invalid URL.');
+        if (count($violations) > 0) {
+            foreach ($violations as $violation) {
+                $this->_messages[] = $violation->getMessage();
+            }
             return false;
         }
-
         return true;
     }
 
-    /**
-     * Get last error message
-     *
-     * @return string
-     */
-    public function getMessage()
+    public function getMessages(): array
     {
-        return $this->_lastError ?? '';
+        return $this->_messages;
+    }
+
+    public function getMessage(): string
+    {
+        return !empty($this->_messages) ? $this->_messages[0] : '';
     }
 }

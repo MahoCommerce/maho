@@ -6,190 +6,141 @@
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Oauth_Model_Consumer_Validator_KeyLength
+use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\ConstraintValidator;
+use Symfony\Component\Validator\Exception\UnexpectedTypeException;
+use Symfony\Component\Validator\Exception\UnexpectedValueException;
+use Symfony\Component\Validator\Validation;
+
+/**
+ * OAuth Key Length validation constraint
+ */
+#[\Attribute]
+class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Constraint
 {
-    public const TOO_SHORT = 'tooShort';
-    public const TOO_LONG = 'tooLong';
-    public const INVALID = 'invalid';
-    /**
-     * Key name
-     *
-     * @var string
-     */
-    protected $_name = 'Key';
-    
-    /**
-     * Minimum length
-     *
-     * @var int
-     */
-    protected $_min;
-    
-    /**
-     * Maximum length
-     *
-     * @var int
-     */
-    protected $_max;
-    
-    /**
-     * Encoding
-     *
-     * @var string
-     */
-    protected $_encoding = 'utf-8';
-    
-    /**
-     * Last error message
-     *
-     * @var string|null
-     */
-    protected $_lastError;
+    public string $tooShortMessage = '{{ name }} "{{ value }}" is too short. It must have length {{ min }} symbols.';
+    public string $tooLongMessage = '{{ name }} "{{ value }}" is too long. It must have length {{ max }} symbols.';
 
-    /**
-     * Sets validator options
-     *
-     * @param  int|array|Zend_Config $options
-     */
-    public function __construct($options = [])
-    {
-        $args = func_get_args();
-        if (!is_array($options)) {
-            $options = $args;
-            if (!isset($options[1])) {
-                $options[1] = 'utf-8';
-            }
-            $this->_min = $this->_max = $options[0];
-            $this->_encoding = $options[1];
-            return;
-        } else {
-            if (isset($options['length'])) {
-                $options['max'] =
-                $options['min'] = $options['length'];
-            }
-            if (isset($options['name'])) {
-                $this->_name = $options['name'];
-            }
-            if (isset($options['min'])) {
-                $this->_min = $options['min'];
-            }
-            if (isset($options['max'])) {
-                $this->_max = $options['max'];
-            }
-            if (isset($options['encoding'])) {
-                $this->_encoding = $options['encoding'];
-            }
+    public ?int $min = null;
+    public ?int $max = null;
+    public int $length = 0;
+    public string $encoding = 'utf-8';
+    public string $name = 'Key';
+
+    private array $_messages = [];
+
+    public function __construct(
+        mixed $options = null,
+        ?array $groups = null,
+        mixed $payload = null,
+        ?int $min = null,
+        ?int $max = null,
+        ?int $length = null,
+        ?string $encoding = null,
+        ?string $name = null,
+        ?string $tooShortMessage = null,
+        ?string $tooLongMessage = null
+    ) {
+        parent::__construct($options, $groups, $payload);
+
+        $this->min = $min ?? $this->min;
+        $this->max = $max ?? $this->max;
+        $this->encoding = $encoding ?? $this->encoding;
+        $this->name = $name ?? $this->name;
+        $this->tooShortMessage = $tooShortMessage ?? $this->tooShortMessage;
+        $this->tooLongMessage = $tooLongMessage ?? $this->tooLongMessage;
+
+        if (null !== $length) {
+            $this->min = $this->max = $length;
         }
     }
 
-    /**
-     * Init validation failure message template definitions
-     *
-     * @return $this
-     */
-    protected function _initMessageTemplates()
+    #[\Override]
+    public function validatedBy(): string
     {
-        $_messageTemplates[self::TOO_LONG] =
-            Mage::helper('oauth')->__("%name% '%value%' is too long. It must has length %min% symbols.");
-        $_messageTemplates[self::TOO_SHORT] =
-            Mage::helper('oauth')->__("%name% '%value%' is too short. It must has length %min% symbols.");
-
-        return $this;
+        return Mage_Oauth_Model_Consumer_Validator_KeyLengthValidator::class;
     }
 
-    /**
-     * Additional variables available for validation failure messages
-     *
-     * @var array
-     */
-    protected $_messageVariables = [
-        'min'  => '_min',
-        'max'  => '_max',
-        'name' => '_name',
-    ];
-
-    /**
-     * Set length
-     *
-     * @param int $length
-     * @return $this
-     */
-    public function setLength($length)
+    // Backward compatibility methods
+    public function isValid(mixed $value): bool
     {
-        $this->_max = $length;
-        $this->_min = $length;
-        return $this;
-    }
+        $this->_messages = [];
+        $validator = Validation::createValidator();
+        $violations = $validator->validate($value, $this);
 
-    /**
-     * Set length
-     *
-     * @return int
-     */
-    public function getLength()
-    {
-        return $this->_min;
-    }
-
-    /**
-     * Defined by Zend_Validate_Interface
-     *
-     * Returns true if and only if the string length of $value is at least the min option and
-     * no greater than the max option (when the max option is not null).
-     *
-     * @param  string $value
-     * @return bool
-     */
-    public function isValid($value)
-    {
-        $length = iconv_strlen($value, $this->_encoding);
-        
-        if ($this->_min !== null && $length < $this->_min) {
-            $this->_lastError = Mage::helper('oauth')->__('%s \'%s\' is too short. It must has length %s symbols.', $this->_name, $value, $this->_min);
+        if (count($violations) > 0) {
+            foreach ($violations as $violation) {
+                $this->_messages[] = $violation->getMessage();
+            }
             return false;
         }
-        
-        if ($this->_max !== null && $length > $this->_max) {
-            $this->_lastError = Mage::helper('oauth')->__('%s \'%s\' is too long. It must has length %s symbols.', $this->_name, $value, $this->_max);
-            return false;
-        }
-        
         return true;
     }
-    
-    /**
-     * Get last error message
-     *
-     * @return string
-     */
-    public function getMessage()
+
+    public function getMessages(): array
     {
-        return $this->_lastError ?? '';
+        return $this->_messages;
     }
 
-    /**
-     * Set key name
-     *
-     * @param string $name
-     * @return $this
-     */
-    public function setName($name)
+    public function getMessage(): string
     {
-        $this->_name = $name;
+        return !empty($this->_messages) ? $this->_messages[0] : '';
+    }
+
+    public function setLength(int $length): self
+    {
+        $this->min = $this->max = $length;
         return $this;
     }
 
-    /**
-     * Get key name
-     *
-     * @return string
-     */
-    public function getName()
+    public function setName(string $name): self
     {
-        return $this->_name;
+        $this->name = $name;
+        return $this;
+    }
+}
+
+/**
+ * OAuth Key Length constraint validator
+ */
+class Mage_Oauth_Model_Consumer_Validator_KeyLengthValidator extends ConstraintValidator
+{
+    #[\Override]
+    public function validate(mixed $value, Constraint $constraint): void
+    {
+        if (!$constraint instanceof Mage_Oauth_Model_Consumer_Validator_KeyLength) {
+            throw new UnexpectedTypeException($constraint, Mage_Oauth_Model_Consumer_Validator_KeyLength::class);
+        }
+
+        if (null === $value || '' === $value) {
+            return;
+        }
+
+        if (!is_string($value)) {
+            throw new UnexpectedValueException($value, 'string');
+        }
+
+        $length = iconv_strlen($value, $constraint->encoding);
+
+        if (null !== $constraint->min && $length < $constraint->min) {
+            $this->context->buildViolation($constraint->tooShortMessage)
+                ->setParameter('{{ value }}', $value)
+                ->setParameter('{{ min }}', (string) $constraint->min)
+                ->setParameter('{{ name }}', $constraint->name)
+                ->addViolation();
+            return;
+        }
+
+        if (null !== $constraint->max && $length > $constraint->max) {
+            $this->context->buildViolation($constraint->tooLongMessage)
+                ->setParameter('{{ value }}', $value)
+                ->setParameter('{{ max }}', (string) $constraint->max)
+                ->setParameter('{{ name }}', $constraint->name)
+                ->addViolation();
+        }
     }
 }
