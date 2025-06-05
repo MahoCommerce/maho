@@ -121,16 +121,7 @@ class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Admin
 
             // Server-side validation
             if (!$this->_validateRegionNameData($data, $originalLocale, $originalRegionId)) {
-                Mage::log('Validation failed', null, 'regionname_save_debug.log');
-                Mage::getSingleton('adminhtml/session')->setFormData($data);
-                if ($isUpdate) {
-                    $this->_redirect('*/*/edit', [
-                        'locale' => $originalLocale,
-                        'region_id' => $originalRegionId,
-                    ]);
-                } else {
-                    $this->_redirect('*/*/new');
-                }
+                $this->_redirect('*/*/new');
                 return;
             }
 
