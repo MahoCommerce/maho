@@ -23,9 +23,6 @@ class Mage_Directory_Block_Adminhtml_Regionname_Edit_Form extends Mage_Adminhtml
         // Determine if this is an update operation
         $isUpdate = $regionName && isset($regionName['locale']) && isset($regionName['region_id']) && $regionName['locale'] && $regionName['region_id'];
 
-        // Debug logging
-        Mage::log('Form Debug - Registry data: ' . print_r($regionName, true), null, 'regionname_form_debug.log');
-        Mage::log('Form Debug - Is Update: ' . ($isUpdate ? 'YES' : 'NO'), null, 'regionname_form_debug.log');
 
         $form = new Varien_Data_Form([
             'id' => 'edit_form',
@@ -131,11 +128,6 @@ class Mage_Directory_Block_Adminhtml_Regionname_Edit_Form extends Mage_Adminhtml
                 'value' => (string) $regionName['region_id'],
             ]);
 
-            // Debug logging
-            Mage::log('Form Debug - Setting hidden fields with values:', null, 'regionname_form_debug.log');
-            Mage::log('Form Debug - locale: ' . $regionName['locale'], null, 'regionname_form_debug.log');
-            Mage::log('Form Debug - region_id: ' . $regionName['region_id'], null, 'regionname_form_debug.log');
-            Mage::log('Form Debug - is_update: 1', null, 'regionname_form_debug.log');
         }
 
         if (is_array($regionName)) {

@@ -17,10 +17,6 @@ class Mage_Directory_Block_Adminhtml_Country_Edit_Form extends Mage_Adminhtml_Bl
     {
         $country = Mage::registry('current_country');
 
-        // Debug logging
-        Mage::log('Country Edit Form Debug:', null, 'country_form_debug.log');
-        Mage::log('Country object: ' . print_r($country->getData(), true), null, 'country_form_debug.log');
-        Mage::log('Country ID: ' . $country->getCountryId(), null, 'country_form_debug.log');
 
         $form = new Varien_Data_Form([
             'id' => 'edit_form',

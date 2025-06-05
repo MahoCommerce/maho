@@ -57,8 +57,6 @@ class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Admin
         $locale = $this->getRequest()->getParam('locale');
         $regionId = $this->getRequest()->getParam('region_id');
 
-        // Debug logging
-        Mage::log('Edit Action Debug - URL params: locale=' . ($locale ?? 'NULL') . ', region_id=' . ($regionId ?? 'NULL'), null, 'regionname_edit_debug.log');
 
         if ($locale && $regionId) {
             // Load the region name data from the database
@@ -71,7 +69,6 @@ class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Admin
 
             $data = $adapter->fetchRow($select);
 
-            Mage::log('Edit Action Debug - Fetched data: ' . print_r($data, true), null, 'regionname_edit_debug.log');
 
             if (!$data) {
                 Mage::getSingleton('adminhtml/session')->addError(
@@ -85,7 +82,6 @@ class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Admin
             $region = Mage::getModel('directory/region')->load($regionId);
             $data['region'] = $region;
         } else {
-            Mage::log('Edit Action Debug - No URL params, creating empty data', null, 'regionname_edit_debug.log');
             $data = [];
         }
 
@@ -113,11 +109,6 @@ class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Admin
             $originalLocale = $data['original_locale'] ?? null;
             $originalRegionId = $data['original_region_id'] ?? null;
 
-            // Debug logging
-            Mage::log('Save Action Debug:', null, 'regionname_save_debug.log');
-            Mage::log('Is Update: ' . ($isUpdate ? 'YES' : 'NO'), null, 'regionname_save_debug.log');
-            Mage::log('Original locale: ' . ($originalLocale ?? 'NULL') . ', Original region_id: ' . ($originalRegionId ?? 'NULL'), null, 'regionname_save_debug.log');
-            Mage::log('POST data: ' . print_r($data, true), null, 'regionname_save_debug.log');
 
             // Server-side validation
             if (!$this->_validateRegionNameData($data, $originalLocale, $originalRegionId)) {
@@ -132,7 +123,6 @@ class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Admin
 
                 if ($isUpdate) {
                     // Update existing record
-                    Mage::log('Updating existing record', null, 'regionname_save_debug.log');
                     $adapter->update(
                         $table,
                         ['name' => $data['name']],
@@ -140,15 +130,12 @@ class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Admin
                     );
                 } else {
                     // Insert new record
-                    Mage::log('Inserting new record', null, 'regionname_save_debug.log');
                     $insertData = [
                         'locale' => $data['locale'],
                         'region_id' => (int) $data['region_id'],
                         'name' => $data['name'],
                     ];
-                    Mage::log('Insert data: ' . print_r($insertData, true), null, 'regionname_save_debug.log');
                     $adapter->insert($table, $insertData);
-                    Mage::log('Insert completed', null, 'regionname_save_debug.log');
                 }
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(
