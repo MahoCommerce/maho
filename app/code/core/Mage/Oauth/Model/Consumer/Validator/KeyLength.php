@@ -11,14 +11,11 @@
  */
 
 use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\ConstraintValidator;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Exception\UnexpectedValueException;
 use Symfony\Component\Validator\Validation;
 
-/**
- * OAuth Key Length validation constraint
- */
 #[\Attribute]
 class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Constraint
 {
@@ -59,10 +56,34 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Constraint
         }
     }
 
-    #[\Override]
-    public function validatedBy(): string
+    public function validate(mixed $value, ExecutionContextInterface $context): void
     {
-        return Mage_Oauth_Model_Consumer_Validator_KeyLengthValidator::class;
+        if (null === $value || '' === $value) {
+            return;
+        }
+
+        if (!is_string($value)) {
+            throw new UnexpectedValueException($value, 'string');
+        }
+
+        $length = iconv_strlen($value, $this->encoding);
+
+        if (null !== $this->min && $length < $this->min) {
+            $context->buildViolation($this->tooShortMessage)
+                ->setParameter('{{ value }}', $value)
+                ->setParameter('{{ min }}', (string) $this->min)
+                ->setParameter('{{ name }}', $this->name)
+                ->addViolation();
+            return;
+        }
+
+        if (null !== $this->max && $length > $this->max) {
+            $context->buildViolation($this->tooLongMessage)
+                ->setParameter('{{ value }}', $value)
+                ->setParameter('{{ max }}', (string) $this->max)
+                ->setParameter('{{ name }}', $this->name)
+                ->addViolation();
+        }
     }
 
     // Backward compatibility methods
@@ -101,46 +122,5 @@ class Mage_Oauth_Model_Consumer_Validator_KeyLength extends Constraint
     {
         $this->name = $name;
         return $this;
-    }
-}
-
-/**
- * OAuth Key Length constraint validator
- */
-class Mage_Oauth_Model_Consumer_Validator_KeyLengthValidator extends ConstraintValidator
-{
-    #[\Override]
-    public function validate(mixed $value, Constraint $constraint): void
-    {
-        if (!$constraint instanceof Mage_Oauth_Model_Consumer_Validator_KeyLength) {
-            throw new UnexpectedTypeException($constraint, Mage_Oauth_Model_Consumer_Validator_KeyLength::class);
-        }
-
-        if (null === $value || '' === $value) {
-            return;
-        }
-
-        if (!is_string($value)) {
-            throw new UnexpectedValueException($value, 'string');
-        }
-
-        $length = iconv_strlen($value, $constraint->encoding);
-
-        if (null !== $constraint->min && $length < $constraint->min) {
-            $this->context->buildViolation($constraint->tooShortMessage)
-                ->setParameter('{{ value }}', $value)
-                ->setParameter('{{ min }}', (string) $constraint->min)
-                ->setParameter('{{ name }}', $constraint->name)
-                ->addViolation();
-            return;
-        }
-
-        if (null !== $constraint->max && $length > $constraint->max) {
-            $this->context->buildViolation($constraint->tooLongMessage)
-                ->setParameter('{{ value }}', $value)
-                ->setParameter('{{ max }}', (string) $constraint->max)
-                ->setParameter('{{ name }}', $constraint->name)
-                ->addViolation();
-        }
     }
 }

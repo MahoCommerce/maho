@@ -11,7 +11,7 @@
  */
 
 use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\ConstraintValidator;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Exception\UnexpectedValueException;
 use Symfony\Component\Validator\Validation;
@@ -33,9 +33,6 @@ use Symfony\Component\Validator\Validation;
  * $validator->setAvailablePath(array('/path/to/{@*}*.xml'));
  * $validator->isValid('/path/to/my.xml'); //return true, because directory structure can't exist
  * </code>
- */
-/**
- * Constraint for available path validation
  */
 #[\Attribute]
 class Mage_Core_Model_File_Validator_AvailablePath extends Constraint
@@ -68,10 +65,58 @@ class Mage_Core_Model_File_Validator_AvailablePath extends Constraint
         $this->protectedLfiMessage = $protectedLfiMessage ?? $this->protectedLfiMessage;
     }
 
-    #[\Override]
-    public function validatedBy(): string
+    public function validate(mixed $value, ExecutionContextInterface $context): void
     {
-        return Mage_Core_Model_File_Validator_AvailablePathValidator::class;
+        if (null === $value || '' === $value) {
+            return;
+        }
+
+        if (!is_string($value)) {
+            throw new UnexpectedValueException($value, 'string');
+        }
+
+        $value = trim($value);
+
+        if (!$this->availablePaths && !$this->protectedPaths) {
+            throw new \InvalidArgumentException('Please set available and/or protected paths list(s) before validation.');
+        }
+
+        if (preg_match('#\\..[\\\\/]#', $value)) {
+            $context->buildViolation($this->protectedLfiMessage)
+                ->setParameter('{{ value }}', $value)
+                ->addViolation();
+            return;
+        }
+
+        //validation
+        $protectedExtensions = Mage::helper('core/data')->getProtectedFileExtensions();
+        $normalizedValue = str_replace(['/', '\\\\'], DS, $value);
+        $valuePathInfo = pathinfo(ltrim($normalizedValue, '\\\\/'));
+        $fileNameExtension = pathinfo($valuePathInfo['filename'], PATHINFO_EXTENSION);
+
+        if (in_array($fileNameExtension, $protectedExtensions)) {
+            $context->buildViolation($this->notAvailablePathMessage)
+                ->setParameter('{{ value }}', $value)
+                ->addViolation();
+            return;
+        }
+
+        if ($valuePathInfo['dirname'] == '.' || $valuePathInfo['dirname'] == DS) {
+            $valuePathInfo['dirname'] = '';
+        }
+
+        if ($this->protectedPaths && !$this->_isValidByPaths($valuePathInfo, $this->protectedPaths, true)) {
+            $context->buildViolation($this->protectedPathMessage)
+                ->setParameter('{{ value }}', $value)
+                ->addViolation();
+            return;
+        }
+
+        if ($this->availablePaths && !$this->_isValidByPaths($valuePathInfo, $this->availablePaths, false)) {
+            $context->buildViolation($this->notAvailablePathMessage)
+                ->setParameter('{{ value }}', $value)
+                ->addViolation();
+        }
     }
 
     // Backward compatibility methods
@@ -128,80 +173,7 @@ class Mage_Core_Model_File_Validator_AvailablePath extends Constraint
         $this->protectedPaths[] = $path;
         return $this;
     }
-}
 
-/**
- * Validator for available path constraint
- */
-class Mage_Core_Model_File_Validator_AvailablePathValidator extends ConstraintValidator
-{
-    #[\Override]
-    public function validate(mixed $value, Constraint $constraint): void
-    {
-        if (!$constraint instanceof Mage_Core_Model_File_Validator_AvailablePath) {
-            throw new UnexpectedTypeException($constraint, Mage_Core_Model_File_Validator_AvailablePath::class);
-        }
-
-        if (null === $value || '' === $value) {
-            return;
-        }
-
-        if (!is_string($value)) {
-            throw new UnexpectedValueException($value, 'string');
-        }
-
-        $value = trim($value);
-
-        if (!$constraint->availablePaths && !$constraint->protectedPaths) {
-            throw new \InvalidArgumentException('Please set available and/or protected paths list(s) before validation.');
-        }
-
-        if (preg_match('#\\..[\\\\/]#', $value)) {
-            $this->context->buildViolation($constraint->protectedLfiMessage)
-                ->setParameter('{{ value }}', $value)
-                ->addViolation();
-            return;
-        }
-
-        //validation
-        $protectedExtensions = Mage::helper('core/data')->getProtectedFileExtensions();
-        $normalizedValue = str_replace(['/', '\\\\'], DS, $value);
-        $valuePathInfo = pathinfo(ltrim($normalizedValue, '\\\\/'));
-        $fileNameExtension = pathinfo($valuePathInfo['filename'], PATHINFO_EXTENSION);
-
-        if (in_array($fileNameExtension, $protectedExtensions)) {
-            $this->context->buildViolation($constraint->notAvailablePathMessage)
-                ->setParameter('{{ value }}', $value)
-                ->addViolation();
-            return;
-        }
-
-        if ($valuePathInfo['dirname'] == '.' || $valuePathInfo['dirname'] == DS) {
-            $valuePathInfo['dirname'] = '';
-        }
-
-        if ($constraint->protectedPaths && !$this->_isValidByPaths($valuePathInfo, $constraint->protectedPaths, true)) {
-            $this->context->buildViolation($constraint->protectedPathMessage)
-                ->setParameter('{{ value }}', $value)
-                ->addViolation();
-            return;
-        }
-
-        if ($constraint->availablePaths && !$this->_isValidByPaths($valuePathInfo, $constraint->availablePaths, false)) {
-            $this->context->buildViolation($constraint->notAvailablePathMessage)
-                ->setParameter('{{ value }}', $value)
-                ->addViolation();
-        }
-    }
-
-    /**
-     * Validate value by path masks
-     *
-     * @param array $valuePathInfo  Path info from value path
-     * @param array $paths          Protected/available paths masks
-     * @param bool $protected       Paths masks is protected?
-     * @return bool
-     */
     protected function _isValidByPaths($valuePathInfo, $paths, $protected)
     {
         static $pathsData = [];
@@ -227,7 +199,7 @@ class Mage_Core_Model_File_Validator_AvailablePathValidator extends ConstraintVa
                 if (!isset($pathsData[$path]['regFilename'])) {
                     //make regular
                     $reg = $options['file_mask'];
-                    $reg = str_replace('.', '\.', $reg);
+                    $reg = str_replace('.', '\\.', $reg);
                     $reg = str_replace('*', '.*?', $reg);
                     $reg = "/^($reg)$/";
                     $pathsData[$path]['regFilename'] = $reg;
@@ -243,7 +215,7 @@ class Mage_Core_Model_File_Validator_AvailablePathValidator extends ConstraintVa
             $reg = $options['dir_mask'] . DS;
             if (!isset($pathsData[$path]['regDir'])) {
                 //make regular
-                $reg = str_replace('.', '\.', $reg);
+                $reg = str_replace('.', '\\.', $reg);
                 $reg = str_replace('*\\', '||', $reg);
                 $reg = str_replace('*/', '||', $reg);
                 $reg = str_replace(DS, '[\\' . DS . ']', $reg);

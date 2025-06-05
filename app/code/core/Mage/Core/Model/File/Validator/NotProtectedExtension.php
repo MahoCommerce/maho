@@ -11,14 +11,11 @@
  */
 
 use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\ConstraintValidator;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Exception\UnexpectedValueException;
 use Symfony\Component\Validator\Validation;
 
-/**
- * Constraint for file extension validation
- */
 #[\Attribute]
 class Mage_Core_Model_File_Validator_NotProtectedExtension extends Constraint
 {
@@ -41,10 +38,23 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension extends Constraint
         $this->protectedExtensionMessage = $protectedExtensionMessage ?? $this->protectedExtensionMessage;
     }
 
-    #[\Override]
-    public function validatedBy(): string
+    public function validate(mixed $value, ExecutionContextInterface $context): void
     {
-        return Mage_Core_Model_File_Validator_NotProtectedExtensionValidator::class;
+        if (null === $value || '' === $value) {
+            return;
+        }
+
+        if (!is_string($value)) {
+            throw new UnexpectedValueException($value, 'string');
+        }
+
+        $value = strtolower(trim($value));
+
+        if (in_array($value, $this->protectedExtensions)) {
+            $context->buildViolation($this->protectedExtensionMessage)
+                ->setParameter('{{ value }}', $value)
+                ->addViolation();
+        }
     }
 
     // Backward compatibility methods
@@ -73,12 +83,8 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension extends Constraint
         return !empty($this->_messages) ? $this->_messages[0] : '';
     }
 
-    /**
-     * Get default protected file extensions from core helper
-     */
     private function _getDefaultProtectedExtensions(): array
     {
-        /** @var Mage_Core_Helper_Data $helper */
         $helper = Mage::helper('core');
         $extensions = $helper->getProtectedFileExtensions();
         if (is_string($extensions)) {
@@ -88,35 +94,5 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension extends Constraint
             $ext = strtolower(trim($ext));
         }
         return (array) $extensions;
-    }
-}
-
-/**
- * Validator for not protected extension constraint
- */
-class Mage_Core_Model_File_Validator_NotProtectedExtensionValidator extends ConstraintValidator
-{
-    #[\Override]
-    public function validate(mixed $value, Constraint $constraint): void
-    {
-        if (!$constraint instanceof Mage_Core_Model_File_Validator_NotProtectedExtension) {
-            throw new UnexpectedTypeException($constraint, Mage_Core_Model_File_Validator_NotProtectedExtension::class);
-        }
-
-        if (null === $value || '' === $value) {
-            return;
-        }
-
-        if (!is_string($value)) {
-            throw new UnexpectedValueException($value, 'string');
-        }
-
-        $value = strtolower(trim($value));
-
-        if (in_array($value, $constraint->protectedExtensions)) {
-            $this->context->buildViolation($constraint->protectedExtensionMessage)
-                ->setParameter('{{ value }}', $value)
-                ->addViolation();
-        }
     }
 }
