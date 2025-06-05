@@ -10,16 +10,16 @@
 
 class Mage_Core_Block_Page_Title extends Mage_Core_Block_Template
 {
-    protected ?string $_title = null;
+    protected ?string $title = null;
 
     public function setTitle(string $title): self
     {
-        $this->_title = $title;
+        $this->title = $title;
         return $this;
     }
 
     public function getTitle(): ?string
     {
-        return $this->_title;
+        return $this->title;
     }
 }
