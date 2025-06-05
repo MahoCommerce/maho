@@ -747,7 +747,7 @@ const Calendar = {
             config.dateFormat = this.convertIcuToFlatpickrFormat(config.inputFormat);
             delete config.inputFormat;
         } else if (config.ifFormat) {
-            config.dateFormat = this.convertIcuToFlatpickrFormat(config.ifFormat);
+            config.dateFormat = this.convertStrftimeToFlatpickrFormat(config.ifFormat);
             delete config.ifFormat;
         }
 

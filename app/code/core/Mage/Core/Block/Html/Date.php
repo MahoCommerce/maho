@@ -33,27 +33,44 @@ class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
 {
     protected array $config = [];
 
+    protected array $defaultConfig = [
+        'allowInput' => true,
+    ];
+
     /**
      * @return string
      */
     #[\Override]
     protected function _toHtml()
     {
-        $enableTime = (bool) ($this->config['enableTime'] ?? $this->getTime());
         $setupObj = [
-            'inputField' => (string) $this->getId(),
-            'inputFormat' => (string) ($this->getInputFormat() ?? $this->getFormat()),
-            'enableTime' => $enableTime,
-            'allowInput' => true,
+            ...$this->defaultConfig,
             ...$this->config,
         ];
 
-        if ($calendarYearsRange = $this->getYearsRange()) {
-            $setupObj['range'] = $calendarYearsRange;
+        $setupObj['inputField'] = (string) $this->getId();
+
+        // Modern ICU format
+        if ($this->getInputFormat()) {
+            $setupObj['inputFormat'] = (string) $this->getInputFormat();
         }
 
+        // Legacy strftime format
+        if ($this->getFormat()) {
+            $setupObj['ifFormat'] = (string) $this->getFormat();
+        }
+
+        // Optional ICU display format
         if ($this->getDisplayFormat()) {
             $setupObj['displayFormat'] = $this->getDisplayFormat();
+        }
+
+        if ($this->config['enableTime'] ?? $this->getTime()) {
+            $setupObj['enableTime'] = true;
+        }
+
+        if ($calendarYearsRange = $this->getYearsRange()) {
+            $setupObj['range'] = $calendarYearsRange;
         }
 
         $setupObj = Mage::helper('core')->jsonEncode($setupObj);
