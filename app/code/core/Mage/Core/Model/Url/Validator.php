@@ -28,7 +28,7 @@ class Mage_Core_Model_Url_Validator extends Url
         ?string $message = null
     ) {
         // Set default message if not provided
-        $message = $message ?? 'Invalid URL "{{ value }}".';
+        $message ??= 'Invalid URL "{{ value }}".';
 
         parent::__construct(
             message: $message,

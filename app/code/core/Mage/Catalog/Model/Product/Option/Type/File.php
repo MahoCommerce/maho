@@ -105,7 +105,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      *
      * @param array $values All product option values, i.e. array (option_id => mixed, option_id => mixed...)
      * @return $this
-     * @throws Mage_Core_Exception|Zend_Validate_Exception
+     * @throws Mage_Core_Exception
      */
     #[\Override]
     public function validateUserValue($values)
@@ -295,7 +295,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * @param array $optionValue
      * @return bool
      * @throws Mage_Core_Exception
-     * @throws Zend_Validate_Exception
+     * @throws Mage_Core_Exception
      */
     protected function _validateFile($optionValue)
     {
@@ -398,7 +398,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
 
     /**
      * Get Error messages for validator Errors
-     * @param array $errors Array of validation failure message codes @see Zend_Validate::getMessages()
+     * @param array $errors Array of validation failure message codes
      * @param array $fileInfo File info
      * @return array Array of error messages
      * @throws Mage_Core_Exception
@@ -408,16 +408,16 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         $option = $this->getOption();
         $result = [];
         foreach ($errors as $errorCode) {
-            if ($errorCode == Zend_Validate_File_ExcludeExtension::FALSE_EXTENSION) {
+            // Handle file validation errors from upload component
+            if (str_contains($errorCode, 'Extension') || str_contains($errorCode, 'extension')) {
                 $result[] = Mage::helper('catalog')->__("The file '%s' for '%s' has an invalid extension", $fileInfo['title'], $option->getTitle());
-            } elseif ($errorCode == Zend_Validate_File_Extension::FALSE_EXTENSION) {
-                $result[] = Mage::helper('catalog')->__("The file '%s' for '%s' has an invalid extension", $fileInfo['title'], $option->getTitle());
-            } elseif ($errorCode == Zend_Validate_File_ImageSize::WIDTH_TOO_BIG
-                || $errorCode == Zend_Validate_File_ImageSize::HEIGHT_TOO_BIG
-            ) {
+            } elseif (str_contains($errorCode, 'ImageSize') || str_contains($errorCode, 'image')
+                || str_contains($errorCode, 'Width') || str_contains($errorCode, 'Height')) {
                 $result[] = Mage::helper('catalog')->__("Maximum allowed image size for '%s' is %sx%s px.", $option->getTitle(), $option->getImageSizeX(), $option->getImageSizeY());
-            } elseif ($errorCode == Zend_Validate_File_FilesSize::TOO_BIG) {
+            } elseif (str_contains($errorCode, 'Size') || str_contains($errorCode, 'size')) {
                 $result[] = Mage::helper('catalog')->__("The file '%s' you uploaded is larger than %s Megabytes allowed by server", $fileInfo['title'], $this->_bytesToMbytes($this->_getUploadMaxFilesize()));
+            } else {
+                $result[] = Mage::helper('catalog')->__("The file '%s' for '%s' has invalid upload data.", $fileInfo['title'], $option->getTitle());
             }
         }
         return $result;
