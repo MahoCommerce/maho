@@ -65,7 +65,7 @@ class Mage_Adminhtml_Model_Email_PathValidator extends Constraint
         return !empty($this->_messages) ? $this->_messages[0] : '';
     }
 
-    public function isEncryptedNodePath($path)
+    public function isEncryptedNodePath(string $path): bool
     {
         $configModel = Mage::getSingleton('adminhtml/config');
 
