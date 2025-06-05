@@ -113,9 +113,6 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
         return $this->getUrl('*/*/edit', ['id' => $row->getCountryId()]);
     }
 
-    /**
-     * Custom filter callback for country name column
-     */
     protected function _countryNameFilter($collection, $column): void
     {
         if (!$value = $column->getFilter()->getValue()) {

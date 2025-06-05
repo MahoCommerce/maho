@@ -31,9 +31,6 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
         return $this;
     }
 
-    /**
-     * Index action - show countries grid
-     */
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -44,26 +41,17 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
         $this->renderLayout();
     }
 
-    /**
-     * Grid action for AJAX requests
-     */
     public function gridAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
     }
 
-    /**
-     * New country action
-     */
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    /**
-     * Edit country action
-     */
     public function editAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -97,9 +85,6 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
             ->renderLayout();
     }
 
-    /**
-     * Save country action
-     */
     public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -153,9 +138,6 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
         $this->_redirect('*/*/');
     }
 
-    /**
-     * Delete country action
-     */
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -186,9 +168,6 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
         $this->_redirect('*/*/');
     }
 
-    /**
-     * Mass delete action
-     */
     public function massDeleteAction(): void
     {
         $countryIds = $this->getRequest()->getParam('country');
@@ -229,9 +208,6 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
         $this->_redirect('*/*/index');
     }
 
-    /**
-     * Validate country data
-     */
     protected function _validateCountryData(array $data): bool
     {
         $errors = [];
@@ -272,9 +248,6 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
         return true;
     }
 
-    /**
-     * Check if country has regions
-     */
     protected function _hasRegions(string $countryId): bool
     {
         $collection = Mage::getResourceModel('directory/region_collection')
@@ -283,9 +256,6 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
         return $collection->getSize() > 0;
     }
 
-    /**
-     * Check ACL permissions
-     */
     #[\Override]
     protected function _isAllowed(): bool
     {

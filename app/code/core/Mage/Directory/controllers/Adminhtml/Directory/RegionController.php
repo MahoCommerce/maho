@@ -31,9 +31,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
         return $this;
     }
 
-    /**
-     * Index action - show regions grid
-     */
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -44,26 +41,17 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
         $this->renderLayout();
     }
 
-    /**
-     * Grid action for AJAX requests
-     */
     public function gridAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
     }
 
-    /**
-     * New region action
-     */
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    /**
-     * Edit region action
-     */
     public function editAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -97,9 +85,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
             ->renderLayout();
     }
 
-    /**
-     * Save region action
-     */
     public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -153,9 +138,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
         $this->_redirect('*/*/');
     }
 
-    /**
-     * Delete region action
-     */
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -186,9 +168,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
         $this->_redirect('*/*/');
     }
 
-    /**
-     * Mass delete action
-     */
     public function massDeleteAction(): void
     {
         $regionIds = $this->getRequest()->getParam('region');
@@ -229,9 +208,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
         $this->_redirect('*/*/index');
     }
 
-    /**
-     * Validate region data
-     */
     protected function _validateRegionData(array $data): bool
     {
         $errors = [];
@@ -292,9 +268,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
         return true;
     }
 
-    /**
-     * Check if region has region names
-     */
     protected function _hasRegionNames(string|int $regionId): bool
     {
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
@@ -308,9 +281,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
         return (int) $adapter->fetchOne($select) > 0;
     }
 
-    /**
-     * Check ACL permissions
-     */
     #[\Override]
     protected function _isAllowed(): bool
     {
