@@ -31,9 +31,6 @@ class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Admin
         return $this;
     }
 
-    /**
-     * Index action - show region names grid
-     */
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -44,26 +41,17 @@ class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Admin
         $this->renderLayout();
     }
 
-    /**
-     * Grid action for AJAX requests
-     */
     public function gridAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
     }
 
-    /**
-     * New region name action
-     */
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    /**
-     * Edit region name action
-     */
     public function editAction(): void
     {
         $locale = $this->getRequest()->getParam('locale');
@@ -118,9 +106,6 @@ class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Admin
             ->renderLayout();
     }
 
-    /**
-     * Save region name action
-     */
     public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -210,9 +195,6 @@ class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Admin
         $this->_redirect('*/*/');
     }
 
-    /**
-     * Delete region name action
-     */
     public function deleteAction(): void
     {
         $locale = $this->getRequest()->getParam('locale');
@@ -243,9 +225,6 @@ class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Admin
         $this->_redirect('*/*/');
     }
 
-    /**
-     * Mass delete action
-     */
     public function massDeleteAction(): void
     {
         $regionNameIds = $this->getRequest()->getParam('region_name');
@@ -292,9 +271,6 @@ class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Admin
         $this->_redirect('*/*/index');
     }
 
-    /**
-     * Validate region name data
-     */
     protected function _validateRegionNameData(array $data, ?string $originalLocale, ?string $originalRegionId): bool
     {
         $errors = [];
@@ -363,9 +339,6 @@ class Mage_Directory_Adminhtml_Directory_RegionnameController extends Mage_Admin
         return true;
     }
 
-    /**
-     * Check ACL permissions
-     */
     #[\Override]
     protected function _isAllowed(): bool
     {
