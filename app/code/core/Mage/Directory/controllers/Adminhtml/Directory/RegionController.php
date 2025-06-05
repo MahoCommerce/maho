@@ -259,6 +259,28 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
             $errors[] = Mage::helper('adminhtml')->__('Region code cannot be longer than 32 characters.');
         }
 
+        // Check for duplicate region code within the same country
+        if (!empty($data['code']) && !empty($data['country_id'])) {
+            $currentRegionId = $this->getRequest()->getParam('id');
+            $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+            $resource = Mage::getSingleton('core/resource');
+            $table = $resource->getTableName('directory_country_region');
+
+            $select = $adapter->select()
+                ->from($table, 'COUNT(*)')
+                ->where('country_id = ?', $data['country_id'])
+                ->where('code = ?', $data['code']);
+            
+            // If editing, exclude current region from check
+            if ($currentRegionId) {
+                $select->where('region_id != ?', $currentRegionId);
+            }
+
+            if ((int) $adapter->fetchOne($select) > 0) {
+                $errors[] = Mage::helper('adminhtml')->__('A region with code "%s" already exists in this country.', $data['code']);
+            }
+        }
+
         // Add errors to session if any
         if (!empty($errors)) {
             foreach ($errors as $error) {
@@ -273,7 +295,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
     /**
      * Check if region has region names
      */
-    protected function _hasRegionNames(int $regionId): bool
+    protected function _hasRegionNames(string|int $regionId): bool
     {
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
         $resource = Mage::getSingleton('core/resource');
