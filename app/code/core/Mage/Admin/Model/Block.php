@@ -6,9 +6,12 @@
  * @package    Mage_Admin
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @method Mage_Admin_Model_Resource_Block _getResource()
@@ -32,20 +35,27 @@ class Mage_Admin_Model_Block extends Mage_Core_Model_Abstract
     /**
      * @return array|true
      * @throws Exception
-     * @throws Zend_Validate_Exception
+     * @throws Exception
      */
     public function validate()
     {
         $errors = [];
+        $validator = Validation::createValidator();
 
-        if (!Zend_Validate::is($this->getBlockName(), 'NotEmpty')) {
+        // Validate block name not empty
+        $violations = $validator->validate($this->getBlockName(), new Assert\NotBlank());
+        if (count($violations) > 0) {
             $errors[] = Mage::helper('adminhtml')->__('Block Name is required field.');
         }
+
         $disallowedBlockNames = Mage::helper('admin/block')->getDisallowedBlockNames();
         if (in_array($this->getBlockName(), $disallowedBlockNames)) {
             $errors[] = Mage::helper('adminhtml')->__('Block Name is disallowed.');
         }
-        if (!Zend_Validate::is($this->getBlockName(), 'Regex', ['/^[-_a-zA-Z0-9]+\/[-_a-zA-Z0-9\/]+$/'])) {
+
+        // Validate block name format
+        $violations = $validator->validate($this->getBlockName(), new Assert\Regex(['pattern' => '/^[-_a-zA-Z0-9]+\/[-_a-zA-Z0-9\/]+$/']));
+        if (count($violations) > 0) {
             $errors[] = Mage::helper('adminhtml')->__('Block Name is incorrect.');
         }
 
