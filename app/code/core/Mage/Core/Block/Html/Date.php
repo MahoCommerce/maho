@@ -50,6 +50,8 @@ class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
 
         $setupObj['inputField'] = (string) $this->getId();
 
+        $setupObj['enableTime'] = (bool) ($this->config['enableTime'] ?? $this->getTime());
+
         // Modern ICU format
         if ($this->getInputFormat()) {
             $setupObj['inputFormat'] = (string) $this->getInputFormat();
@@ -57,16 +59,12 @@ class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
 
         // Legacy strftime format
         if ($this->getFormat()) {
-            $setupObj['ifFormat'] = (string) $this->getFormat();
+            $setupObj['ifFormat'] = Varien_Date::convertZendToStrftime($this->getFormat(), true, $setupObj['enableTime']);
         }
 
         // Optional ICU display format
         if ($this->getDisplayFormat()) {
             $setupObj['displayFormat'] = $this->getDisplayFormat();
-        }
-
-        if ($this->config['enableTime'] ?? $this->getTime()) {
-            $setupObj['enableTime'] = true;
         }
 
         if ($calendarYearsRange = $this->getYearsRange()) {
@@ -89,19 +87,6 @@ class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
             $this->config[$key] = $value;
         }
         return $this;
-    }
-
-    /**
-     * @param null $index deprecated
-     * @return string
-     */
-    public function getEscapedValue($index = null)
-    {
-        if ($this->getFormat() && $this->getValue()) {
-            return date($this->getFormat(), strtotime($this->getValue()));
-        }
-
-        return htmlspecialchars($this->getValue());
     }
 
     /**
