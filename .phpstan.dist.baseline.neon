@@ -16417,12 +16417,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Email/Template.php
 
 		-
-			message: '#^Property Mage_Core_Model_Email_Template\:\:\$_mail has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Email/Template.php
-
-		-
 			message: '#^Property Mage_Core_Model_Email_Template\:\:\$_preprocessFlag has no type specified\.$#'
 			identifier: missingType.property
 			count: 1

@@ -81,35 +81,16 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
 
     protected $_templateFilter;
     protected $_preprocessFlag = false;
-    protected $_mail;
     protected $_bccEmails = [];
     protected ?string $_replyToEmail = null;
     protected ?string $_returnPathEmail = null;
 
     protected static $_defaultTemplates;
 
-    /**
-     * Initialize email template model
-     *
-     */
     #[\Override]
     protected function _construct()
     {
         $this->_init('core/email_template');
-    }
-
-    /**
-     * Retrieve mail object instance
-     *
-     * @return Email
-     * @deprecated This method is deprecated. Use symfony/mailer Email class directly.
-     */
-    public function getMail()
-    {
-        if (is_null($this->_mail)) {
-            $this->_mail = new Email();
-        }
-        return $this->_mail;
     }
 
     /**
