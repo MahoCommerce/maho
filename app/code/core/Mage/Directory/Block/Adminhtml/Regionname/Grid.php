@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -27,17 +29,48 @@ class Mage_Directory_Block_Adminhtml_Regionname_Grid extends Mage_Adminhtml_Bloc
         $resource = Mage::getSingleton('core/resource');
 
         $collection->getSelect()
-            ->from(['rn' => $resource->getTableName('directory_country_region_name')])
+            ->from(['rn' => $resource->getTableName('directory_country_region_name')], [
+                'locale', 'region_id', 'name',
+            ])
             ->joinLeft(
                 ['r' => $resource->getTableName('directory_country_region')],
                 'rn.region_id = r.region_id',
                 ['country_id', 'code', 'default_name'],
             )
-            ->columns(['composite_id' => "CONCAT(rn.locale, '|', rn.region_id)"])
+            ->columns([
+                'composite_id' => new Zend_Db_Expr("CONCAT(rn.locale, '|', rn.region_id)"),
+                'id' => new Zend_Db_Expr("CONCAT(rn.locale, '_', rn.region_id)"),
+            ])
             ->order(['rn.region_id ASC', 'rn.locale ASC']);
 
         $this->setCollection($collection);
         return parent::_prepareCollection();
+    }
+
+    #[\Override]
+    protected function _setCollectionOrder($column): self
+    {
+        $collection = $this->getCollection();
+        if ($collection instanceof Varien_Data_Collection_Db) {
+            $columnIndex = $column->getIndex();
+            $dir = strtoupper($column->getDir());
+
+            // Map column indexes to proper database fields
+            $fieldMap = [
+                'region_id' => 'rn.region_id',
+                'country_id' => 'r.country_id',
+                'default_name' => 'r.default_name',
+                'locale' => 'rn.locale',
+                'name' => 'rn.name',
+            ];
+
+            if (isset($fieldMap[$columnIndex])) {
+                $collection->getSelect()->reset(Zend_Db_Select::ORDER);
+                $collection->getSelect()->order($fieldMap[$columnIndex] . ' ' . $dir);
+            }
+        }
+
+        return $this;
     }
 
     #[\Override]
@@ -51,12 +84,23 @@ class Mage_Directory_Block_Adminhtml_Regionname_Grid extends Mage_Adminhtml_Bloc
             'type' => 'number',
         ]);
 
+        // Get country options for the filter
+        $countries = Mage::getResourceModel('directory/country_collection')
+            ->loadData()
+            ->toOptionArray(false);
+        
+        $countryOptions = [];
+        foreach ($countries as $country) {
+            $countryOptions[$country['value']] = $country['label'];
+        }
+        
         $this->addColumn('country_id', [
             'header' => Mage::helper('adminhtml')->__('Country'),
             'align' => 'left',
             'width' => '200px',
             'index' => 'country_id',
-            'type' => 'text',
+            'type' => 'options',
+            'options' => $countryOptions,
             'renderer' => 'directory/adminhtml_regionname_grid_renderer_country',
         ]);
 
@@ -85,34 +129,12 @@ class Mage_Directory_Block_Adminhtml_Regionname_Grid extends Mage_Adminhtml_Bloc
 
         $this->addColumn('action', [
             'header' => Mage::helper('adminhtml')->__('Action'),
-            'width' => '70px',
-            'type' => 'action',
-            'getter' => 'getCompositeId',
-            'actions' => [
-                [
-                    'caption' => Mage::helper('adminhtml')->__('Edit'),
-                    'url' => ['base' => '*/*/edit'],
-                    'field' => 'id',
-                    'params' => [
-                        'locale' => '$locale',
-                        'region_id' => '$region_id',
-                    ],
-                ],
-                [
-                    'caption' => Mage::helper('adminhtml')->__('Delete'),
-                    'url' => ['base' => '*/*/delete'],
-                    'field' => 'id',
-                    'params' => [
-                        'locale' => '$locale',
-                        'region_id' => '$region_id',
-                    ],
-                    'confirm' => Mage::helper('adminhtml')->__('Are you sure you want to delete this region name?'),
-                ],
-            ],
+            'width' => '100px',
+            'type' => 'text',
             'filter' => false,
             'sortable' => false,
-            'index' => 'stores',
-            'is_system' => true,
+            'index' => 'action',
+            'renderer' => 'directory/adminhtml_regionname_grid_renderer_action',
         ]);
 
         return parent::_prepareColumns();

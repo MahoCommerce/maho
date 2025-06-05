@@ -37,12 +37,12 @@
                                 <title>Manage Directory</title>
                                 <sort_order>35</sort_order>
                                 <children>
-                                    <country translate="title" module="adminhtml">
+                                    <countries translate="title" module="adminhtml">
                                         <title>Countries</title>
-                                    </country>
-                                    <region translate="title" module="adminhtml">
+                                    </countries>
+                                    <regions translate="title" module="adminhtml">
                                         <title>Regions</title>
-                                    </region>
+                                    </regions>
                                     <regionname translate="title" module="adminhtml">
                                         <title>Region Names</title>
                                     </regionname>
