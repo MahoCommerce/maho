@@ -757,6 +757,11 @@ const Calendar = {
             delete config.displayFormat;
         }
 
+        if (config.showsTime) {
+            config.enableTime = true;
+            delete config.showsTime;
+        }
+
         if (Array.isArray(config.range)) {
             const [ yearStart, yearEnd ] = config.range;
             if (yearStart) {
