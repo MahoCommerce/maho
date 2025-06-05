@@ -174,7 +174,7 @@ class Mage_Core_Model_File_Validator_AvailablePath extends Constraint
         return $this;
     }
 
-    protected function _isValidByPaths($valuePathInfo, $paths, $protected)
+    protected function _isValidByPaths(array $valuePathInfo, array $paths, bool $protected): bool
     {
         static $pathsData = [];
 
