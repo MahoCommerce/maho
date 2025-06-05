@@ -35,50 +35,20 @@ class EmailConfigShow extends BaseMahoCommand
             [new TableCell('<info>EMAIL CONFIGURATION</info>', ['colspan' => 2])],
         ]);
 
-        // Basic settings
-        $emailDisabled = Mage::getStoreConfigFlag('system/smtp/disable');
-        $dsn = Mage::helper('core')->getMailerDsn();
-        $transportType = Mage::getStoreConfig('system/smtp/transport') ?: 'sendmail';
-
-        // Parse DSN to get more details
-        $transportDetails = 'Not configured';
-        if ($dsn) {
-            try {
-                $parsed = parse_url($dsn);
-                $scheme = $parsed['scheme'] ?? '';
-                $host = $parsed['host'] ?? '';
-                $port = $parsed['port'] ?? '';
-                $user = $parsed['user'] ?? '';
-
-                $transportDetails = $scheme;
-                if ($host) {
-                    $transportDetails .= "://{$host}";
-                    if ($port) {
-                        $transportDetails .= ":{$port}";
-                    }
-                }
-                if ($user) {
-                    $transportDetails .= " (user: {$user})";
-                }
-            } catch (\Exception $e) {
-                $transportDetails = $dsn;
-            }
-        }
-
-        $table->addRows([
-            ['Email Sending', $emailDisabled ? 'Disabled' : ($dsn ? 'Enabled' : 'Disabled (no DSN)')],
-            ['Transport Type', $transportType],
-            ['Transport DSN', $dsn ?: 'Not configured'],
-            ['Transport Details', $transportDetails],
-        ]);
-
-        // SMTP specific settings if using SMTP
-        if (str_contains($transportType, 'smtp')) {
+        $transportType = Mage::getStoreConfig('system/smtp/enabled');
+        if ($transportType == 0) {
+            $table->addRow(['Email Sending', 'Disabled']);
+        } elseif ($transportType === 'sendmail') {
             $table->addRows([
+                ['Email Sending', 'Enabled'],
+                ['Transport', $transportType],
+            ]);
+        } else {
+            $table->addRows([
+                ['Email Sending', 'Enabled'],
+                ['Transport', $transportType],
                 ['SMTP Host', Mage::getStoreConfig('system/smtp/host') ?: 'Not set'],
-                ['SMTP Port', Mage::getStoreConfig('system/smtp/port') ?: 'Default'],
-                ['SMTP Username', Mage::getStoreConfig('system/smtp/username') ? '***' : 'Not set'],
-                ['SMTP Password', Mage::getStoreConfig('system/smtp/password') ? '***' : 'Not set'],
+                ['SMTP Port', Mage::getStoreConfig('system/smtp/port') ?: 'Not set'],
             ]);
         }
 
