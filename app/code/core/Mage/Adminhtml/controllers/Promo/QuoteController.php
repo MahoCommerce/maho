@@ -161,6 +161,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
                 if (isset($data['rule']['actions'])) {
                     $data['actions'] = $data['rule']['actions'];
                 }
+                unset($data['times_used']);
                 unset($data['rule']);
                 $model->loadPost($data);
 
@@ -417,7 +418,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
                 Mage::logException($e);
             }
         }
-        $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
+        $this->getResponse()->setBodyJson($result);
     }
 
     /**
