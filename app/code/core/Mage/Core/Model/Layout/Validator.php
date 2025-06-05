@@ -241,4 +241,3 @@ class Mage_Core_Model_Layout_Validator extends Constraint
         ];
     }
 }
-
