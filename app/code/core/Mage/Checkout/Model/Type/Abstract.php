@@ -130,23 +130,4 @@ abstract class Mage_Checkout_Model_Type_Abstract extends Varien_Object
             ->setStoreToBaseRate(1)
             ->setStoreToOrderRate(1);
     }
-
-    /**
-     * @param string|array $email
-     * @param string $name
-     * @param Mage_Sales_Model_Order $order
-     * @deprecated after 1.4.0.0-rc1
-     */
-    protected function _emailOrderConfirmation(#[\SensitiveParameter] $email, $name, $order)
-    {
-        $mailer = Mage::getModel('core/email')
-            ->setTemplate('email/order.phtml')
-            ->setType('html')
-            ->setTemplateVar('order', $order)
-            ->setTemplateVar('quote', $this->getQuote())
-            ->setTemplateVar('name', $name)
-            ->setToName($name)
-            ->setToEmail($email)
-            ->send();
-    }
 }
