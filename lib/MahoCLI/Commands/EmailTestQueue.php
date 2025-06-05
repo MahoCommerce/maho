@@ -38,7 +38,7 @@ class EmailTestQueue extends BaseMahoCommand
 
         $emailTemplate = Mage::getModel('core/email_template');
         $emailQueue = Mage::getModel('core/email_queue');
-        
+
         $emailTemplate
             ->setQueue($emailQueue) // This forces it to use the queue
             ->setSenderName(Mage::getStoreConfig('trans_email/ident_general/name'))

@@ -23,7 +23,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class EmailQueueProcess extends BaseMahoCommand
 {
-
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -53,14 +52,14 @@ class EmailQueueProcess extends BaseMahoCommand
             Mage::getModel('core/email_queue')->send();
 
             $output->writeln('<info>Queue processing completed successfully!</info>');
-            $limitPerRun = Mage_Core_Model_Email_Queue::MESSAGES_LIMIT_PER_CRON_RUN;
+            $limitPerRun = \Mage_Core_Model_Email_Queue::MESSAGES_LIMIT_PER_CRON_RUN;
             $output->writeln("<comment>Note: This processes up to {$limitPerRun} emails per run (same as cron).</comment>");
-            
+
             // Check remaining emails
             $remainingCollection = Mage::getModel('core/email_queue')->getCollection()
                 ->addOnlyForSendingFilter();
             $remainingCount = $remainingCollection->getSize();
-            
+
             if ($remainingCount > 0) {
                 $output->writeln("<comment>Remaining emails in queue: {$remainingCount}</comment>");
                 $output->writeln('<comment>Run the command again to process more emails.</comment>');

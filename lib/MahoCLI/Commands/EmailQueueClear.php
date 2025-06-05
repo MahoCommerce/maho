@@ -30,7 +30,7 @@ class EmailQueueClear extends BaseMahoCommand
         $this->addOption('status', 's', InputOption::VALUE_OPTIONAL, 'Clear only emails with specific status (pending|processed|all)', 'all');
         $this->addOption('force', 'f', InputOption::VALUE_NONE, 'Skip confirmation prompt');
         $this->addOption('older-than', null, InputOption::VALUE_OPTIONAL, 'Clear only emails older than X days');
-        
+
         $this->setHelp(
             'This command clears emails from the queue based on status and age criteria.
 
@@ -56,7 +56,7 @@ class EmailQueueClear extends BaseMahoCommand
   <comment>--force (-f)</comment>      Skip the confirmation prompt
   
   <comment>--older-than</comment>     Only clear emails older than X days
-                    Can be combined with any status filter'
+                    Can be combined with any status filter',
         );
     }
 
@@ -101,7 +101,7 @@ class EmailQueueClear extends BaseMahoCommand
 
         if ($count === 0) {
             if ($statusLabel === 'all') {
-                $output->writeln("<info>No emails found in queue.</info>");
+                $output->writeln('<info>No emails found in queue.</info>');
             } else {
                 $output->writeln("<info>No {$statusLabel} emails found in queue.</info>");
             }
@@ -141,6 +141,7 @@ class EmailQueueClear extends BaseMahoCommand
 
         // Confirm deletion
         if (!$force) {
+            /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(
                 "\n<question>Are you sure you want to delete these {$count} emails? [y/N]</question> ",
