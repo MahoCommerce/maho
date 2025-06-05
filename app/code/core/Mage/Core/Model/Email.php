@@ -6,9 +6,14 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Address;
 
 /**
  * Possible data fields:
@@ -111,7 +116,6 @@ class Mage_Core_Model_Email extends Varien_Object
 
     /**
      * @return $this
-     * @throws Zend_Mail_Exception
      */
     public function send()
     {
@@ -119,38 +123,52 @@ class Mage_Core_Model_Email extends Varien_Object
             return $this;
         }
 
-        $mail = new Zend_Mail('utf-8');
-        $transport = new Varien_Object();
-
-        if (strtolower($this->getType()) == 'html') {
-            $mail->setBodyHtml($this->getBody());
-        } else {
-            $mail->setBodyText($this->getBody());
+        $dsn = Mage::helper('core')->getMailerDsn();
+        if (!$dsn) {
+            // This means email sending is disabled
+            return $this;
         }
 
-        $mail->setFrom($this->getFromEmail(), $this->getFromName())
-            ->addTo($this->getToEmail(), $this->getToName())
-            ->setSubject($this->getSubject());
+        try {
+            $email = new Email();
+            $email->subject($this->getSubject());
+            $email->from(new Address($this->getFromEmail(), $this->getFromName()));
 
-        Mage::dispatchEvent('email_send_before', [
-            'mail'      => $mail,
-            'template'  => $this->getTemplate(),
-            'transport' => $transport,
-            'variables' => $this->getTemplateVars(),
-        ]);
+            $toEmails = is_array($this->getToEmail()) ? $this->getToEmail() : [$this->getToEmail()];
+            $toNames = is_array($this->getToName()) ? $this->getToName() : [$this->getToName()];
 
-        if ($transport->getTransport()) {
-            $mail->send($transport->getTransport());
-        } else {
-            $mail->send();
+            foreach ($toEmails as $key => $toEmail) {
+                $toName = $toNames[$key] ?? '';
+                $email->addTo(new Address($toEmail, $toName));
+            }
+
+            if (strtolower($this->getType()) == 'html') {
+                $email->html($this->getBody());
+            } else {
+                $email->text($this->getBody());
+            }
+
+            $transport = new Varien_Object();
+            Mage::dispatchEvent('email_send_before', [
+                'mail'      => $email,
+                'template'  => $this->getTemplate(),
+                'transport' => $transport,
+                'variables' => $this->getTemplateVars(),
+            ]);
+
+            $mailer = new Mailer(Transport::fromDsn($dsn));
+            $mailer->send($email);
+
+            Mage::dispatchEvent('email_send_after', [
+                'to'         => $this->getToEmail(),
+                'subject'    => $this->getSubject(),
+                'email_body' => $this->getBody(),
+            ]);
+
+            return $this;
+        } catch (Exception $e) {
+            Mage::logException($e);
+            return $this;
         }
-
-        Mage::dispatchEvent('email_send_after', [
-            'to'         => $this->getToEmail(),
-            'subject'    => $this->getSubject(),
-            'email_body' => $this->getBody(),
-        ]);
-
-        return $this;
     }
 }
