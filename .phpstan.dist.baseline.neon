@@ -14839,24 +14839,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Type/Abstract.php
 
 		-
-			message: '#^Method Mage_Checkout_Model_Type_Abstract\:\:_emailOrderConfirmation\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Abstract.php
-
-		-
-			message: '#^Parameter \#2 \$value of method Mage_Core_Model_Email\:\:setTemplateVar\(\) expects string\|null, Mage_Sales_Model_Order given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Abstract.php
-
-		-
-			message: '#^Parameter \#2 \$value of method Mage_Core_Model_Email\:\:setTemplateVar\(\) expects string\|null, Mage_Sales_Model_Quote given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Abstract.php
-
-		-
 			message: '#^Method Mage_Sales_Model_Quote\:\:getBillingAddress\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -16379,12 +16361,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: app/code/core/Mage/Core/Model/Domainpolicy.php
-
-		-
-			message: '#^Property Mage_Core_Model_Email\:\:\$_tplVars has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Email.php
 
 		-
 			message: '#^Method Mage_Core_Model_Email_Template\:\:getProcessedTemplate\(\) invoked with 2 parameters, 0\-1 required\.$#'
