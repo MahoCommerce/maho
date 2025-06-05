@@ -15,7 +15,7 @@
 <?php if ($title = $this->getTitle()): ?>
 <div class="page-title category-title">
     <?php if ($this->getShowRssLink()): ?>
-        <a href="<?= $this->escapeHtml($this->buildRssLink()) ?>" class="link-rss"><?= $this->escapeHtml($this->getRssText()) ?></a>
+        <a href="<?= $this->buildRssLink() ?>" class="link-rss"><?= $this->escapeHtml($this->getRssText()) ?></a>
     <?php endif ?>
     <h1><?= $this->escapeHtml($title) ?></h1>
 </div>
