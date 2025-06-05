@@ -17,6 +17,11 @@ class Mage_Directory_Block_Adminhtml_Country_Edit_Form extends Mage_Adminhtml_Bl
     {
         $country = Mage::registry('current_country');
 
+        // Debug logging
+        Mage::log('Country Edit Form Debug:', null, 'country_form_debug.log');
+        Mage::log('Country object: ' . print_r($country->getData(), true), null, 'country_form_debug.log');
+        Mage::log('Country ID: ' . $country->getCountryId(), null, 'country_form_debug.log');
+
         $form = new Varien_Data_Form([
             'id' => 'edit_form',
             'action' => $this->getUrl('*/*/save', ['id' => $this->getRequest()->getParam('id')]),
@@ -43,6 +48,7 @@ class Mage_Directory_Block_Adminhtml_Country_Edit_Form extends Mage_Adminhtml_Bl
             'title' => Mage::helper('adminhtml')->__('Country ID'),
             'required' => true,
             'disabled' => (bool) $country->getCountryId(),
+            'value' => $country->getCountryId(),
             'note' => $country->getCountryId() ?
                 Mage::helper('adminhtml')->__('Country ID cannot be changed after creation') :
                 Mage::helper('adminhtml')->__('Two character country code (e.g. US, GB, DE)'),
@@ -65,6 +71,12 @@ class Mage_Directory_Block_Adminhtml_Country_Edit_Form extends Mage_Adminhtml_Bl
         ]);
 
         $form->setValues($country->getData());
+
+        // Explicitly set the country_id_input field value since it has a different field ID
+        if ($country->getCountryId() && $form->getElement('country_id_input')) {
+            $form->getElement('country_id_input')->setValue($country->getCountryId());
+        }
+
         $this->setForm($form);
 
         return parent::_prepareForm();

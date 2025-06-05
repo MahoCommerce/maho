@@ -59,9 +59,10 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
         $this->addColumn('name', [
             'header' => Mage::helper('adminhtml')->__('Country Name'),
             'align' => 'left',
-            'index' => 'name',
+            'index' => 'country_id',
             'type' => 'text',
             'renderer' => 'directory/adminhtml_country_grid_renderer_name',
+            'filter_condition_callback' => [$this, '_countryNameFilter'],
         ]);
 
         $this->addColumn('action', [
@@ -110,5 +111,33 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
     public function getRowUrl($row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getCountryId()]);
+    }
+
+    /**
+     * Custom filter callback for country name column
+     */
+    protected function _countryNameFilter($collection, $column): void
+    {
+        if (!$value = $column->getFilter()->getValue()) {
+            return;
+        }
+
+        // Get all countries and their translations
+        $countries = Mage::getResourceModel('directory/country_collection')->loadData();
+        $matchingCountryIds = [];
+
+        foreach ($countries as $country) {
+            $countryName = Mage::app()->getLocale()->getCountryTranslation($country->getCountryId());
+            if (stripos($countryName, $value) !== false) {
+                $matchingCountryIds[] = $country->getCountryId();
+            }
+        }
+
+        if (!empty($matchingCountryIds)) {
+            $collection->addFieldToFilter('main_table.country_id', ['in' => $matchingCountryIds]);
+        } else {
+            // If no matches found, add impossible condition to return empty result
+            $collection->addFieldToFilter('main_table.country_id', ['eq' => '']);
+        }
     }
 }

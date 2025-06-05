@@ -88,12 +88,12 @@ class Mage_Directory_Block_Adminhtml_Regionname_Grid extends Mage_Adminhtml_Bloc
         $countries = Mage::getResourceModel('directory/country_collection')
             ->loadData()
             ->toOptionArray(false);
-        
+
         $countryOptions = [];
         foreach ($countries as $country) {
             $countryOptions[$country['value']] = $country['label'];
         }
-        
+
         $this->addColumn('country_id', [
             'header' => Mage::helper('adminhtml')->__('Country'),
             'align' => 'left',
