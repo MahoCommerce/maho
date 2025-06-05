@@ -12,7 +12,11 @@ use Symfony\Component\Cache\Marshaller\MarshallerInterface;
 
 class Mage_Core_Model_Cache_Marshaller implements MarshallerInterface
 {
-    public function marshall(array $values, ?array &$failed): array // @phpstan-ignore parameterByRef.unusedType
+    /**
+     * @param-out array<int, int|string> $failed
+     */
+    #[\Override]
+    public function marshall(array $values, ?array &$failed): array
     {
         $serialized = $failed = [];
         foreach ($values as $id => $value) {
@@ -26,6 +30,7 @@ class Mage_Core_Model_Cache_Marshaller implements MarshallerInterface
         return $serialized;
     }
 
+    #[\Override]
     public function unmarshall(string $value): mixed
     {
         if ('b:0;' === $value) {

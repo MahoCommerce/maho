@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Maho is an open-source ecommerce platform forked from OpenMage, designed for medium-to-small on-premise projects. It's based on the Magento 1 architecture but modernized with PHP 8.2+ support and contemporary development tools.
+Maho is an open-source ecommerce platform forked from OpenMage, designed for medium-to-small on-premise projects. It's based on the Magento 1 architecture but modernized with PHP 8.3+ support and contemporary development tools.
 
 ## Essential Commands
 
@@ -123,7 +123,7 @@ Observers are configured in module's `config.xml`.
 - If you've to create a new module, use the `app/code/core/Maho/` namespace 
 - Declare module in `app/etc/modules/`
 - Follow existing module patterns for consistency
-- Add strict typing to all new code and use modern PHP8.2+ features
+- Add strict typing to all new code and use modern PHP8.3+ features
 
 ### Modifying Existing Features
 - Do not increment module's version number in module's `config.xml`
