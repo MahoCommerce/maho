@@ -160,7 +160,7 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
 
             $this->_originalPathInfo = (string) $pathInfo;
             $this->_requestString = $pathInfo . ($pos !== false ? substr($requestUri, $pos) : '');
-            $this->_handleTrailingSlash();
+            $this->handleTrailingSlash();
         }
 
         $this->_pathInfo = (string) $pathInfo;
@@ -193,7 +193,7 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
         return Mage::isInstalled() && Mage::getStoreConfigFlag(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL);
     }
 
-    protected function _handleTrailingSlash(): void
+    protected function handleTrailingSlash(): void
     {
         $originalPath = $this->_originalPathInfo;
         if (strlen($originalPath) <= 1) {
@@ -212,14 +212,14 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
         };
 
         if ($canonicalPath !== null) {
-            $this->_redirectToCanonicalUrl($canonicalPath);
+            $this->redirectToCanonicalUrl($canonicalPath);
         }
     }
 
     /**
      * Perform 301 redirect to canonical URL
      */
-    protected function _redirectToCanonicalUrl(string $canonicalPath): void
+    protected function redirectToCanonicalUrl(string $canonicalPath): void
     {
         $canonicalUrl = $this->getBaseUrl() . $canonicalPath;
         if (!empty($_SERVER['QUERY_STRING'])) {
