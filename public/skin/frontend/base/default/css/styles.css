@@ -3285,9 +3285,6 @@ body {
   text-transform: uppercase;
   font-size: 0.75rem;
 }
-.footer .form-subscribe-header {
-  display: none;
-}
 .footer .block-subscribe .input-box {
   float: left;
   width: 65.625%;
