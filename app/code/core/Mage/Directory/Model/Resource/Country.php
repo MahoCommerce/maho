@@ -12,6 +12,8 @@
 
 class Mage_Directory_Model_Resource_Country extends Mage_Core_Model_Resource_Db_Abstract
 {
+    protected $_isPkAutoIncrement = false;
+
     #[\Override]
     protected function _construct()
     {
