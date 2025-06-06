@@ -340,7 +340,11 @@ h6, .h6 {
   color: var(--maho-color-text-primary);
   padding-bottom: 3px;
   margin-bottom: 10px;
-  text-transform: uppercase;
+
+  @media (width <= 767px) {
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
 }
 
 .page-title .links ul {
