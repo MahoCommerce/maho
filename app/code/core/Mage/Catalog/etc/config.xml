@@ -802,6 +802,7 @@
                 <title_separator>-</title_separator>
                 <category_canonical_tag>0</category_canonical_tag>
                 <product_canonical_tag>0</product_canonical_tag>
+                <trailing_slash_behavior>remove</trailing_slash_behavior>
             </seo>
             <custom_options>
                 <date_fields_order>m,d,y</date_fields_order>
