@@ -325,9 +325,9 @@ h6, .h6 {
  * Page Titles
  */
 .page-title {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: space-between;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
 }
 
 .page-title h1,
@@ -338,18 +338,12 @@ h6, .h6 {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--maho-color-text-primary);
-  padding-bottom: 3px;
   margin-bottom: 10px;
-
-  @media (width <= 767px) {
-    padding-bottom: 0;
-    margin-bottom: 0;
-  }
 }
 
 .page-title .links ul {
-    display: flex;
-    gap: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
 }
 
 .page-title .links a {
