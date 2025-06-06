@@ -324,6 +324,12 @@ h6, .h6 {
 /* -------------------------------------------- *
  * Page Titles
  */
+.page-title {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
 .page-title h1,
 .page-title h2,
 .product-name h1,
@@ -332,9 +338,20 @@ h6, .h6 {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--maho-color-text-primary);
-  padding-bottom: 3px;
-  margin-bottom: 15px;
-  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.page-title .links ul {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.page-title .links a {
+  color: var(--maho-color-text-primary);
+}
+
+.page-title .links a:hover {
+  color: var(--maho-color-primary);
 }
 
 /* -------------------------------------------- *
@@ -385,10 +402,6 @@ body:not(.customer-account) .block:first-child .block-title {
 .block-subtitle {
   font-weight: bold;
   margin-bottom: 7px;
-}
-
-.block-content {
-  margin-top: 5px;
 }
 
 .block-content.unpad {
@@ -792,7 +805,7 @@ a.button:hover {
  */
 .breadcrumbs {
   overflow: hidden;
-  margin: -15px 0 15px;
+  margin: -15px 0 5px;
 }
 
 .breadcrumbs a {
@@ -1729,7 +1742,6 @@ span.weee {
  * Toolbar
  */
 .toolbar {
-  margin-top: 10px;
   margin-bottom: 15px;
   border-bottom: 1px solid var(--maho-color-border);
   border-top: 1px solid var(--maho-color-border);
@@ -3834,7 +3846,6 @@ p.product-name a:hover {
 
   .block-layered-nav .block-content {
     padding-top: 0;
-    margin-top: 15px;
   }
   .block-layered-nav .block-content > dl > dt {
     cursor: pointer;
