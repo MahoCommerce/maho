@@ -18,7 +18,7 @@
 ?>
 <?php if(count($this->getStores())>1): ?>
 <div class="form-language">
-    <label for="select-language"><?= $this->__('Your Language:') ?></label>
+    <label for="select-language" class="visually-hidden"><?= $this->__('Your Language:') ?></label>
     <select id="select-language" title="<?= $this->__('Your Language') ?>" onchange="window.location.href=this.value">
     <?php foreach ($this->getStores() as $_lang): ?>
         <?php $_selected = ($_lang->getId() == $this->getCurrentStoreId()) ? ' selected="selected"' : '' ?>
