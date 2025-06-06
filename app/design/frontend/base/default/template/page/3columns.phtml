@@ -23,7 +23,7 @@
     <?= $this->getChildHtml('global_notices') ?>
     <div class="page">
         <?= $this->getChildHtml('header') ?>
-        <div class="main-container col3-layout">
+        <main class="main-container col3-layout" role="main">
             <div class="main">
                 <?= $this->getChildHtml('breadcrumbs') ?>
                 <?= $this->getChildHtml('title') ?>
@@ -32,15 +32,15 @@
                     <?php if ($_leftContent = $this->getChildHtml('left_first')): ?>
                         <aside class="col-left sidebar col-left-first" aria-label="<?= $this->__('Primary sidebar') ?>"><?= $_leftContent;   ?></aside>
                     <?php endif ?>
-                    <main class="col-main" id="main-content" role="main">
+                    <div class="col-main" id="main-content">
                         <?= $this->getChildHtml('global_messages') ?>
                         <?= $this->getChildHtml('content') ?>
-                    </main>
+                    </div>
                     <aside class="col-left sidebar" aria-label="<?= $this->__('Left sidebar') ?>"><?= $this->getChildHtml('left') ?></aside>
                 </div>
                 <aside class="col-right sidebar" aria-label="<?= $this->__('Right sidebar') ?>"><?= $this->getChildHtml('right') ?></aside>
             </div>
-        </div>
+        </main>
         <?= $this->getChildHtml('footer_before') ?>
         <?= $this->getChildHtml('footer') ?>
         <?= $this->getChildHtml('global_cookie_notice') ?>
