@@ -324,6 +324,12 @@ h6, .h6 {
 /* -------------------------------------------- *
  * Page Titles
  */
+.page-title {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+}
+
 .page-title h1,
 .page-title h2,
 .product-name h1,
@@ -335,6 +341,11 @@ h6, .h6 {
   padding-bottom: 3px;
   margin-bottom: 10px;
   text-transform: uppercase;
+}
+
+.page-title .links ul {
+    display: flex;
+    gap: 0.5rem;
 }
 
 /* -------------------------------------------- *

@@ -13,5 +13,6 @@
 <?php if ($title = $this->getTitle()): ?>
 <div class="page-title">
     <h1><?= $this->escapeHtml($title) ?></h1>
+    <?= $this->getChildHtml('title_links') ?>
 </div>
 <?php endif ?>

@@ -28,4 +28,15 @@ class Mage_Page_Block_Html_Title extends Mage_Core_Block_Template
     {
         return $this->title;
     }
+
+    public function getLinksBlock(): Mage_Page_Block_Template_Links
+    {
+        /** @var Mage_Page_Block_Template_Links */
+        $block = $this->getLayout()->getBlock('title.links');
+        if ($block === false) {
+            $block = $this->getLayout()->createBlock('page/template_links', 'title.links');
+            $this->setChild('title_links', $block);
+        }
+        return $block;
+    }
 }
