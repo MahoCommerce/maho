@@ -39,8 +39,8 @@
         <?php $availableLimits = $this->getAvailableLimit() ?>
         <?php if (count($availableLimits) > 1): ?>
             <div class="limiter">
-                <label><?= $this->__('Show') ?></label>
-                <select onchange="setLocation(this.value)" title="<?= $this->quoteEscape($this->__('Results per page')) ?>">
+                <label for="limiter-pager"><?= $this->__('Show') ?></label>
+                <select id="limiter-pager" onchange="setLocation(this.value)" title="<?= $this->quoteEscape($this->__('Results per page')) ?>">
                 <?php foreach ($availableLimits as $_key => $_limit): ?>
                     <option value="<?= $this->getLimitUrl($_key) ?>"<?php if($this->isLimitCurrent($_key)): ?> selected="selected"<?php endif ?>>
                         <?= $_limit ?>
