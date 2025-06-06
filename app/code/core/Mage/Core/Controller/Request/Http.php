@@ -204,9 +204,9 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
         $hasTrailingSlash = str_ends_with($pathInfo, '/');
 
         $canonicalPath = match ($behavior) {
-            Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::REMOVE_TRAILING_SLASH => 
+            Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::REMOVE_TRAILING_SLASH =>
                 $hasTrailingSlash ? rtrim($pathInfo, '/') : null,
-            Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::ADD_TRAILING_SLASH => 
+            Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::ADD_TRAILING_SLASH =>
                 !$hasTrailingSlash ? $pathInfo . '/' : null,
             default => null
         };

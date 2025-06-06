@@ -12,9 +12,9 @@
 
 class Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash
 {
-    const REMOVE_TRAILING_SLASH = 'remove';
-    const ADD_TRAILING_SLASH = 'add';
-    const DO_NOTHING = 'nothing';
+    public const REMOVE_TRAILING_SLASH = 'remove';
+    public const ADD_TRAILING_SLASH = 'add';
+    public const DO_NOTHING = 'nothing';
 
     public function toOptionArray(): array
     {
