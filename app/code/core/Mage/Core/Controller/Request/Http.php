@@ -161,9 +161,11 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
             $this->_originalPathInfo = (string) $pathInfo;
 
             $this->_requestString = $pathInfo . ($pos !== false ? substr($requestUri, $pos) : '');
+
+            // Only handle trailing slash on initial path setting, not on rewrites
+            $this->_handleTrailingSlash($pathInfo);
         }
 
-        $this->_handleTrailingSlash($pathInfo);
         $this->_pathInfo = (string) $pathInfo;
         return $this;
     }
@@ -196,18 +198,21 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
 
     protected function _handleTrailingSlash(string $pathInfo): void
     {
-        if (strlen($pathInfo) <= 1) {
+        // Use original path info to avoid issues with rewrites
+        $originalPath = $this->_originalPathInfo ?: $pathInfo;
+
+        if (strlen($originalPath) <= 1) {
             return;
         }
 
         $behavior = Mage::getStoreConfig('catalog/seo/trailing_slash_behavior');
-        $hasTrailingSlash = str_ends_with($pathInfo, '/');
+        $hasTrailingSlash = str_ends_with($originalPath, '/');
 
         $canonicalPath = match ($behavior) {
             Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::REMOVE_TRAILING_SLASH =>
-                $hasTrailingSlash ? rtrim($pathInfo, '/') : null,
+                $hasTrailingSlash ? rtrim($originalPath, '/') : null,
             Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::ADD_TRAILING_SLASH =>
-                !$hasTrailingSlash ? $pathInfo . '/' : null,
+                !$hasTrailingSlash ? $originalPath . '/' : null,
             default => null
         };
 
