@@ -159,11 +159,8 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
             }
 
             $this->_originalPathInfo = (string) $pathInfo;
-
             $this->_requestString = $pathInfo . ($pos !== false ? substr($requestUri, $pos) : '');
-
-            // Only handle trailing slash on initial path setting, not on rewrites
-            $this->_handleTrailingSlash($pathInfo);
+            $this->_handleTrailingSlash();
         }
 
         $this->_pathInfo = (string) $pathInfo;
@@ -196,11 +193,9 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
         return Mage::isInstalled() && Mage::getStoreConfigFlag(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL);
     }
 
-    protected function _handleTrailingSlash(string $pathInfo): void
+    protected function _handleTrailingSlash(): void
     {
-        // Use original path info to avoid issues with rewrites
-        $originalPath = $this->_originalPathInfo ?: $pathInfo;
-
+        $originalPath = $this->_originalPathInfo;
         if (strlen($originalPath) <= 1) {
             return;
         }
