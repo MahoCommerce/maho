@@ -105,14 +105,15 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
             // Server-side validation
             if (!$this->_validateCountryData($data)) {
                 Mage::getSingleton('adminhtml/session')->setFormData($data);
-                $this->_redirect('*/*/edit', ['id' => $this->getRequest()->getParam('id')]);
+                $this->_redirect('*/*/edit', ['id' => $id]);
                 return;
             }
 
-            $model->setData($data);
+            $model->addData($data);
 
             try {
                 $model->save();
+
                 Mage::getSingleton('adminhtml/session')->addSuccess(
                     Mage::helper('adminhtml')->__('The country has been saved.'),
                 );
@@ -127,7 +128,7 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
                 Mage::getSingleton('adminhtml/session')->setFormData($data);
-                $this->_redirect('*/*/edit', ['id' => $this->getRequest()->getParam('id')]);
+                $this->_redirect('*/*/edit', ['id' => $id]);
                 return;
             }
         }
@@ -213,10 +214,12 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
         $errors = [];
 
         // Validate country ID
-        if (empty($data['country_id'])) {
-            $errors[] = Mage::helper('adminhtml')->__('Country ID is required.');
-        } elseif (!preg_match('/^[A-Z]{2}$/', $data['country_id'])) {
-            $errors[] = Mage::helper('adminhtml')->__('Country ID must be exactly 2 uppercase letters.');
+        if (!$this->getRequest()->getParam('id')) {
+            if (empty($data['country_id'])) {
+                $errors[] = Mage::helper('adminhtml')->__('Country ID is required.');
+            } elseif (!preg_match('/^[A-Z]{2}$/', $data['country_id'])) {
+                $errors[] = Mage::helper('adminhtml')->__('Country ID must be exactly 2 uppercase letters.');
+            }
         }
 
         // Validate ISO2 code if provided
