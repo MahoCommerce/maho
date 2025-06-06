@@ -58,8 +58,9 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
             // Add rss feed in title block
             if ($this->isRssCatalogEnable() && $this->isTopCategory()) {
                 $titleBlock->getLinksBlock()->addLink(
-                    $this->helper('rss')->__('Subscribe to RSS Feed'),
+                    $this->getIconSvg('rss'),
                     $this->getRssLink(),
+                    $this->helper('rss')->__('Subscribe to RSS Feed'),
                 );
             }
         }
