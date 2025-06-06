@@ -348,6 +348,14 @@ h6, .h6 {
     gap: 0.5rem;
 }
 
+.page-title .links a {
+  color: var(--maho-color-text-primary);
+}
+
+.page-title .links a:hover {
+  color: var(--maho-color-primary);
+}
+
 /* -------------------------------------------- *
  * Block Module
  */
