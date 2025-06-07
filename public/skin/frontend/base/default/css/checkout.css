@@ -792,7 +792,7 @@ td.product-cart-remove a {
     line-height: 40px;
     height: 40px;
     float: left;
-    margin: 0px 4px 0px 45px;
+    margin: 0;
 }
 
 .opc .section .step {
@@ -875,10 +875,6 @@ td.product-cart-remove a {
 .opc.opc-firststep-login .section:not(#opc-login) .step-title,
 .opc-block-progress-step-login {
     transition: opacity 300ms linear 0;
-}
-
-.opc.opc-firststep-login .section#opc-login .step-title h2 {
-    transition: margin-left 80ms linear 0;
 }
 
 /* When a user progresses from the "Checkout Method" to "Billing Information" for the first time, the              */

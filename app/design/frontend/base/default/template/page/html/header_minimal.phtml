@@ -1,0 +1,20 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     base_default
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Core_Block_Template $this */
+$logoSrc = Mage::getStoreConfig('design/header/logo_src') 
+    ? Mage::getDesign()->getSkinUrl(Mage::getStoreConfig('design/header/logo_src'))
+    : $this->getSkinUrl('images/logo.png');
+$logoAlt = Mage::getStoreConfig('design/header/logo_alt') ?: Mage::getStoreConfig('general/store_information/name');
+?>
+<div style="text-align: center; margin-top: 10px">
+    <a href="<?= $this->getUrl('') ?>" title="<?= $this->__('Go to Home Page') ?>">
+        <img src="<?= $logoSrc ?>" alt="<?= $logoAlt ?>" style="display: inline-block; max-height: 50px; width: auto;" />
+    </a>
+</div>
