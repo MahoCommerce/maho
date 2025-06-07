@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -159,8 +159,8 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
             }
 
             $this->_originalPathInfo = (string) $pathInfo;
-
             $this->_requestString = $pathInfo . ($pos !== false ? substr($requestUri, $pos) : '');
+            $this->handleTrailingSlash();
         }
 
         $this->_pathInfo = (string) $pathInfo;
@@ -191,6 +191,45 @@ class Mage_Core_Controller_Request_Http extends Zend_Controller_Request_Http
     protected function _canBeStoreCodeInUrl()
     {
         return Mage::isInstalled() && Mage::getStoreConfigFlag(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL);
+    }
+
+    protected function handleTrailingSlash(): void
+    {
+        $originalPath = $this->_originalPathInfo;
+        if (strlen($originalPath) <= 1) {
+            return;
+        }
+
+        $behavior = Mage::getStoreConfig('catalog/seo/trailing_slash_behavior');
+        $hasTrailingSlash = str_ends_with($originalPath, '/');
+
+        $canonicalPath = match ($behavior) {
+            Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::REMOVE_TRAILING_SLASH =>
+                $hasTrailingSlash ? rtrim($originalPath, '/') : null,
+            Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::ADD_TRAILING_SLASH =>
+                !$hasTrailingSlash ? $originalPath . '/' : null,
+            default => null
+        };
+
+        if ($canonicalPath !== null) {
+            $this->redirectToCanonicalUrl($canonicalPath);
+        }
+    }
+
+    /**
+     * Perform 301 redirect to canonical URL
+     */
+    protected function redirectToCanonicalUrl(string $canonicalPath): void
+    {
+        $canonicalUrl = $this->getBaseUrl() . $canonicalPath;
+        if (!empty($_SERVER['QUERY_STRING'])) {
+            $canonicalUrl .= '?' . $_SERVER['QUERY_STRING'];
+        }
+
+        Mage::app()->getFrontController()->getResponse()
+            ->setRedirect($canonicalUrl, 301)
+            ->sendResponse();
+        exit;
     }
 
     /**
