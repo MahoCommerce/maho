@@ -443,3 +443,6 @@
 "The store view #%d is disabled.","The store view #%d is disabled."
 "Loading Indicator Timeout","Loading Indicator Timeout"
 "Number of milliseconds to delay showing the loading indicator. The default value is ""200"". An empty value disables the delay.","Number of milliseconds to delay showing the loading indicator. The default value is ""200"". An empty value disables the delay."
+"JavaScript Settings","JavaScript Settings"
+"Load JavaScript on Intent","Load JavaScript on Intent"
+"Highly Experimental Feature! When enabled, all JavaScript files will be deferred and loaded only on user interaction (click, scroll, hover, etc.), significantly improving initial page load performance. This feature may break some JavaScript functionality and should be thoroughly tested before using in production.","Highly Experimental Feature! When enabled, all JavaScript files will be deferred and loaded only on user interaction (click, scroll, hover, etc.), significantly improving initial page load performance. This feature may break some JavaScript functionality and should be thoroughly tested before using in production."
