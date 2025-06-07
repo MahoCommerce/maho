@@ -777,26 +777,6 @@ td.product-cart-remove a {
     text-decoration: none;
 }
 
-.opc .section .step-title .number,
-.opc .section.allow.active .step-title .number,
-.no-touch .opc .section.allow:hover .step-title .number {
-    width: 26px;
-    height: 26px;
-    text-align: center;
-    color: var(--maho-color-background);
-    line-height: 26px;
-    background-color: var(--maho-color-primary);
-    display: block;
-    position: absolute;
-    top: 50%;
-    left: 10px;
-    margin-top: -13px;
-}
-
-.opc .section.allow .step-title .number {
-    background-color: var(--maho-color-primary-hover);
-}
-
 .opc .section.allow .step-title h2 {
     color: var(--maho-color-text-secondary);
 }
@@ -897,10 +877,6 @@ td.product-cart-remove a {
     transition: opacity 300ms linear 0;
 }
 
-.opc.opc-firststep-login .section#opc-login .step-title .number {
-    transition: width 80ms linear 0;
-}
-
 .opc.opc-firststep-login .section#opc-login .step-title h2 {
     transition: margin-left 80ms linear 0;
 }
@@ -911,11 +887,6 @@ td.product-cart-remove a {
 body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section:not(#opc-login) .step-title,
 body:not(.opc-has-progressed-from-login) .opc-block-progress-step-login {
     opacity: 0;
-}
-
-body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-login .step-title .number {
-    width: 0px;
-    overflow: hidden;
 }
 
 body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-login .step-title h2 {
