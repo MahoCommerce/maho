@@ -119,34 +119,7 @@ td.product-cart-remove a {
  * Checkout - Cart
  * ============================================ */
 .cart .page-title {
-    margin-bottom: 15px;
-}
-.cart .page-title:after {
-    content: '';
-    display: table;
-    clear: both;
-}
-.cart .page-title h1 {
-    float: left;
-    border-bottom: none;
-    margin-bottom: 6px;
-    margin-right: 10px;
-}
-
-.checkout-types {
-    float: right;
-    text-align: right;
-    max-width: 100%;
-    /* We always want this shipping method to display on its own line */
-}
-.checkout-types li {
-    vertical-align: top;
-    margin: 0 0 5px 5px;
-}
-.checkout-types li:after {
-    content: '';
-    display: table;
-    clear: both;
+    margin-bottom: 10px;
 }
 .checkout-types li img {
     display: inline;
