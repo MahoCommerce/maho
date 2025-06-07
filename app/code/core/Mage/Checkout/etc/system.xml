@@ -35,6 +35,15 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </onepage_checkout_enabled>
+                        <minimal_layout translate="label comment">
+                            <label>Use Minimal Checkout Layout</label>
+                            <comment>Shows only logo header during checkout, removes navigation and footer for a distraction-free experience</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </minimal_layout>
                         <guest_checkout translate="label">
                             <label>Allow Guest Checkout</label>
                             <frontend_type>boolean</frontend_type>

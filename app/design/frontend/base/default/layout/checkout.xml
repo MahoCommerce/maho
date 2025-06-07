@@ -544,4 +544,20 @@ One page checkout order review block
         </reference>
     </checkout_onepage_failure>
 
+    <!-- Minimal checkout layout - only logo in header, no footer -->
+    <checkout_onepage_minimal translate="label">
+        <remove name="header"/>
+        <remove name="footer"/>
+        <remove name="footer.before"/>
+
+        <reference name="head">
+            <action method="removeItem"><type>skin_js</type><name>js/app.js</name></action>
+            <action method="removeItem"><type>skin_js</type><name>js/minicart.js</name></action>
+        </reference>
+
+        <reference name="after_body_start">
+            <block type="core/template" name="minimal.header" before="-" template="page/html/header_minimal.phtml"/>
+        </reference>
+    </checkout_onepage_minimal>
+
 </layout>
