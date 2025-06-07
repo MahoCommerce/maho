@@ -132,6 +132,11 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
             return false;
         }
 
+        // Skip for checkout pages
+        if (Mage::app()->getRequest()->getModuleName() === 'checkout') {
+            return false;
+        }
+
         // Skip if already processed
         if (str_contains($body, 'mahoLazyJs')) {
             return false;
