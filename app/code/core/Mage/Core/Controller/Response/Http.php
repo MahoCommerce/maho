@@ -122,6 +122,11 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
      */
     protected function _shouldDeferJavaScript(string $body): bool
     {
+        // Check if feature is enabled
+        if (!Mage::getStoreConfigFlag('dev/js/load_on_intent')) {
+            return false;
+        }
+
         // Skip if already processed
         if (str_contains($body, 'mahoLazyJs')) {
             return false;
