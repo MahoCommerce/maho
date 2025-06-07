@@ -722,7 +722,7 @@ td.product-cart-remove a {
     }
     .checkout-onepage-index .col-right,
     .checkout-onepage-index .col-left {
-        width: 31.25%;
+        max-width: 31.25%;
         display: block;
     }
     .checkout-onepage-index .col-right {
