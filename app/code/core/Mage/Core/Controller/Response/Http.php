@@ -62,7 +62,7 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
 
         // Process body to defer JavaScript loading
         $body = $this->getBody();
-        if ($this->_shouldDeferJavaScript($body)) {
+        if ($this->shouldDeferJavaScript($body)) {
             $processedBody = $this->_deferJavaScriptLoading($body);
             $this->setBody($processedBody);
         }
@@ -120,10 +120,15 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
     /**
      * Check if JavaScript deferral should be applied
      */
-    protected function _shouldDeferJavaScript(string $body): bool
+    protected function shouldDeferJavaScript(string $body): bool
     {
         // Check if feature is enabled
         if (!Mage::getStoreConfigFlag('dev/js/load_on_intent')) {
+            return false;
+        }
+
+        // Skip for admin panel
+        if (Mage::app()->getStore()->isAdmin()) {
             return false;
         }
 
@@ -151,13 +156,7 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
             return false;
         }
 
-        // Skip for admin panel
-        if (Mage::app()->getStore()->isAdmin()) {
-            return false;
-        }
-
-        // Check if feature is enabled
-        return Mage::getStoreConfigFlag('dev/js/load_on_intent');
+        return true;
     }
 
     /**
