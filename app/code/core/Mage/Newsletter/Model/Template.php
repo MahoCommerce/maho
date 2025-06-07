@@ -54,7 +54,7 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
     /**
      * Mail object
      *
-     * @var Zend_Mail|null
+     * @var Symfony\Component\Mime\Email|null
      */
     protected $_mail;
 

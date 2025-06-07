@@ -6,6 +6,7 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -129,24 +130,5 @@ abstract class Mage_Checkout_Model_Type_Abstract extends Varien_Object
             ->setOrderCurrencyCode('USD')
             ->setStoreToBaseRate(1)
             ->setStoreToOrderRate(1);
-    }
-
-    /**
-     * @param string|array $email
-     * @param string $name
-     * @param Mage_Sales_Model_Order $order
-     * @deprecated after 1.4.0.0-rc1
-     */
-    protected function _emailOrderConfirmation(#[\SensitiveParameter] $email, $name, $order)
-    {
-        $mailer = Mage::getModel('core/email')
-            ->setTemplate('email/order.phtml')
-            ->setType('html')
-            ->setTemplateVar('order', $order)
-            ->setTemplateVar('quote', $this->getQuote())
-            ->setTemplateVar('name', $name)
-            ->setToName($name)
-            ->setToEmail($email)
-            ->send();
     }
 }
