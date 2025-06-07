@@ -666,7 +666,7 @@
                     <fields>
                         <load_on_intent translate="label comment">
                             <label>Load JavaScript on Intent</label>
-                            <comment><![CDATA[<strong style="color:red">Highly Experimental Feature!</strong> When enabled, all JavaScript files will be deferred and loaded only on user interaction (click, scroll, hover, etc.), significantly improving initial page load performance. This feature may break some JavaScript functionality and should be thoroughly tested before using in production.]]></comment>
+                            <comment><![CDATA[<strong style="color:red">Highly Experimental Feature!</strong> When enabled, all JavaScript files will be deferred and loaded only on user interaction (click, scroll, hover, etc.), significantly improving initial page load performance. This feature is designed for pure vanilla JavaScript and will probably not work with scripts based on PrototypeJS or jQuery. It's not intended to cover up poorly written JavaScript but to optimize well-written vanilla JS. This feature should be thoroughly tested before using in production.]]></comment>
                             <frontend_type>boolean</frontend_type>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>

@@ -1,3 +1,11 @@
+/**
+ * Maho
+ *
+ * @package     js
+ * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/license/mit  MIT
+ */
+
 (function() {
     "use strict";
     
@@ -90,37 +98,6 @@
             // Also trigger window.onload if set
             if (typeof window.onload === "function") {
                 window.onload(loadEvent);
-            }
-            
-            // Trigger Prototype.js events
-            if (typeof document.fire === "function") {
-                document.fire("dom:loaded");
-                document.fire("contentloaded");
-                // Some custom implementations use these variations
-                document.fire("dom:content:loaded");
-                document.fire("DOMContentLoaded");
-            }
-            
-            // Trigger Event.observe callbacks for dom:loaded
-            if (typeof Event !== "undefined" && Event.observers) {
-                const observers = Event.observers;
-                for (let i = 0; i < observers.length; i++) {
-                    if (observers[i] && observers[i].eventName === "dom:loaded") {
-                        try {
-                            observers[i].handler.call(document);
-                        } catch (e) {}
-                    }
-                }
-            }
-            
-            // jQuery ready events (in case some extensions use it)
-            if (typeof jQuery !== "undefined" && jQuery.isReady === false) {
-                jQuery.ready();
-            }
-            
-            // Magento-specific initialization
-            if (typeof varienGlobalEvents !== "undefined" && varienGlobalEvents.fireEvent) {
-                varienGlobalEvents.fireEvent("dom:loaded");
             }
             
             // For scripts that check document.readyState

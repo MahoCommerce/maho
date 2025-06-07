@@ -161,7 +161,7 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
     protected function _deferJavaScriptLoading(string $html): string
     {
         $scriptIndex = 0;
-        
+
         // More precise regex that handles edge cases better
         $html = preg_replace_callback(
             '/<script(?:\s+[^>]*?)?>(?:(?!<\/script>).)*?<\/script>/is',
@@ -170,28 +170,28 @@ class Mage_Core_Controller_Response_Http extends Zend_Controller_Response_Http
                 if (str_contains($matches[0], 'mahoLazyJs') || preg_match('/\sdata-(?!maho-script)\w+=/i', $matches[0])) {
                     return $matches[0];
                 }
-                
+
                 // Extract and process attributes
                 if (preg_match('/<script(\s+[^>]*?)?>(.*?)<\/script>/is', $matches[0], $parts)) {
-                    $attrs = $parts[1] ?? '';
+                    $attrs = $parts[1];
                     $content = $parts[2];
-                    
+
                     // Remove existing type attribute more efficiently
                     $attrs = preg_replace('/\stype\s*=\s*["\']?[^"\'>\s]+["\']?/i', '', $attrs);
-                    
+
                     return '<script type="text/plain" data-maho-script="' . $scriptIndex++ . '"' . $attrs . '>' . $content . '</script>';
                 }
-                
+
                 return $matches[0];
             },
-            $html
+            $html,
         );
-        
+
         // Inject loader before </body> or at end
         $loader = $this->_getJavaScriptLoader();
         $bodyPos = stripos($html, '</body>');
-        
-        return $bodyPos !== false 
+
+        return $bodyPos !== false
             ? substr($html, 0, $bodyPos) . $loader . substr($html, $bodyPos)
             : $html . $loader;
     }
