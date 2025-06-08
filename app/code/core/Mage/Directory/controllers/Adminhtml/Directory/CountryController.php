@@ -12,6 +12,31 @@ declare(strict_types=1);
 
 class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtml_Controller_Action
 {
+    public const ADMIN_RESOURCE = 'system/directory/countries';
+
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->_setForcedFormKeyActions('delete');
+        return parent::preDispatch();
+    }
+
+    protected function _initCountry(): Mage_Directory_Model_Country|false
+    {
+        $id = $this->getRequest()->getUserParam('id');
+        $model = Mage::getModel('directory/country');
+
+        if ($id) {
+            $model->load($id);
+            if (!$model->getId()) {
+                return false;
+            }
+        }
+
+        Mage::register('current_country', $model);
+        return $model;
+    }
+
     protected function initAction(): self
     {
         $this->loadLayout()
@@ -54,214 +79,271 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
 
     public function editAction(): void
     {
-        $id = $this->getRequest()->getParam('id');
-        $model = Mage::getModel('directory/country');
+        $model = $this->_initCountry();
 
-        if ($id) {
-            $model->load($id);
-            if (!$model->getId()) {
+        if ($model === false) {
+            Mage::getSingleton('adminhtml/session')->addError(
+                Mage::helper('adminhtml')->__('This country no longer exists.'),
+            );
+            $this->_redirect('*/*/');
+            return;
+        }
+
+        $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
+        if (!empty($data)) {
+            $model->addData($data);
+        }
+
+        $this->initAction();
+
+        if ($model->getOrigData('country_id')) {
+            $this->_title($model->getName())
+                ->_addBreadcrumb(
+                    Mage::helper('adminhtml')->__('Edit Country'),
+                    Mage::helper('adminhtml')->__('Edit Country'),
+                );
+        } else {
+            $this->_title($this->__('New Country'))
+                ->_addBreadcrumb(
+                    Mage::helper('adminhtml')->__('New Country'),
+                    Mage::helper('adminhtml')->__('New Country'),
+                );
+        }
+
+        $this->renderLayout();
+    }
+
+    public function saveAction(): void
+    {
+        $model = $this->_initCountry();
+        $data = $this->getRequest()->getPost();
+
+        try {
+            if (empty($data)) {
+                Mage::throwException(Mage::helper('adminhtml')->__('Unable to complete this request.'));
+            }
+
+            if ($model === false) {
                 Mage::getSingleton('adminhtml/session')->addError(
                     Mage::helper('adminhtml')->__('This country no longer exists.'),
                 );
                 $this->_redirect('*/*/');
                 return;
             }
-        }
-
-        $this->_title($model->getId() ? $model->getName() : $this->__('New Country'));
-
-        $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
-        if (!empty($data)) {
-            $model->setData($data);
-        }
-
-        Mage::register('current_country', $model);
-
-        $this->initAction()
-            ->_addBreadcrumb(
-                $id ? Mage::helper('adminhtml')->__('Edit Country') : Mage::helper('adminhtml')->__('New Country'),
-                $id ? Mage::helper('adminhtml')->__('Edit Country') : Mage::helper('adminhtml')->__('New Country'),
-            )
-            ->renderLayout();
-    }
-
-    public function saveAction(): void
-    {
-        if ($data = $this->getRequest()->getPost()) {
-            $id = $this->getRequest()->getParam('id');
-            $model = Mage::getModel('directory/country');
-
-            if ($id) {
-                $model->load($id);
-                if (!$model->getId()) {
-                    Mage::getSingleton('adminhtml/session')->addError(
-                        Mage::helper('adminhtml')->__('This country no longer exists.'),
-                    );
-                    $this->_redirect('*/*/');
-                    return;
-                }
-            }
-
-            // Server-side validation
-            if (!$this->_validateCountryData($data)) {
-                Mage::getSingleton('adminhtml/session')->setFormData($data);
-                $this->_redirect('*/*/edit', ['id' => $id]);
-                return;
-            }
 
             $model->addData($data);
 
-            try {
-                $model->save();
+            $errors = $model->validate();
+            if (is_array($errors)) {
+                Mage::throwException(implode('<br>', $errors));
+            }
 
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('adminhtml')->__('The country has been saved.'),
-                );
-                Mage::getSingleton('adminhtml/session')->setFormData(false);
+            $model->save();
 
-                if ($this->getRequest()->getParam('back')) {
-                    $this->_redirect('*/*/edit', ['id' => $model->getId()]);
-                    return;
-                }
-                $this->_redirect('*/*/');
-                return;
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                Mage::getSingleton('adminhtml/session')->setFormData($data);
-                $this->_redirect('*/*/edit', ['id' => $id]);
+            Mage::getSingleton('adminhtml/session')->addSuccess(
+                Mage::helper('adminhtml')->__('The country has been saved.'),
+            );
+            Mage::getSingleton('adminhtml/session')->setFormData(false);
+
+            if ($this->getRequest()->getParam('back')) {
+                $this->_redirect('*/*/edit', ['id' => $model->getId()]);
                 return;
             }
+            $this->_redirect('*/*/');
+            return;
+        } catch (Mage_Core_Exception $e) {
+            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+        } catch (Exception $e) {
+            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Internal Error'));
+            Mage::logException($e);
         }
 
-        Mage::getSingleton('adminhtml/session')->addError(
-            Mage::helper('adminhtml')->__('Unable to find country to save.'),
-        );
-        $this->_redirect('*/*/');
+        Mage::getSingleton('adminhtml/session')->setFormData($data);
+
+        if ($model->getOrigData('country_id')) {
+            $this->_redirect('*/*/edit', ['id' => $model->getId()]);
+        } else {
+            $this->_redirect('*/*/new');
+        }
     }
 
     public function deleteAction(): void
     {
-        if ($id = $this->getRequest()->getParam('id')) {
-            try {
-                $model = Mage::getModel('directory/country');
-                $model->load($id);
-                if (!$model->getId()) {
-                    Mage::getSingleton('adminhtml/session')->addError(
-                        Mage::helper('adminhtml')->__('Unable to find a country to delete.'),
-                    );
-                } else {
-                    // Check for dependent regions before deletion
-                    if ($this->_hasRegions($id)) {
-                        Mage::getSingleton('adminhtml/session')->addError(
-                            Mage::helper('adminhtml')->__('Cannot delete country with existing regions. Please delete all regions first.'),
-                        );
-                    } else {
-                        $model->delete();
-                        Mage::getSingleton('adminhtml/session')->addSuccess(
-                            Mage::helper('adminhtml')->__('The country has been deleted.'),
-                        );
-                    }
-                }
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+        $model = $this->_initCountry();
+
+        try {
+            if ($model === false || !$model->getId()) {
+                Mage::throwException(
+                    Mage::helper('adminhtml')->__('This country no longer exists.'),
+                );
             }
+
+            if ($model->hasTranslation()) {
+                Mage::getSingleton('adminhtml/session')->addError(
+                    Mage::helper('adminhtml')->__('Cannot delete country with existing country names. Please delete all country names first.'),
+                );
+                $this->_redirect('*/*/edit', ['_current' => true]);
+                return;
+            }
+
+            $model->delete();
+
+            Mage::getSingleton('adminhtml/session')->addSuccess(
+                Mage::helper('adminhtml')->__('The country has been deleted.'),
+            );
+        } catch (Mage_Core_Exception $e) {
+            $error = $e->getMessage();
+        } catch (Exception $e) {
+            $error = Mage::helper('adminhtml')->__('Internal Error');
+            Mage::logException($e);
         }
+
+        if (isset($error)) {
+            Mage::getSingleton('adminhtml/session')->addError($error);
+        }
+
         $this->_redirect('*/*/');
     }
 
     public function massDeleteAction(): void
     {
-        $countryIds = $this->getRequest()->getParam('country');
-        if (!is_array($countryIds)) {
-            Mage::getSingleton('adminhtml/session')->addError(
-                Mage::helper('adminhtml')->__('Please select country(s).'),
-            );
-        } else {
-            try {
-                $deletedCount = 0;
-                $skippedCount = 0;
+        $countryIds = $this->getRequest()->getPost('countries');
 
-                foreach ($countryIds as $countryId) {
-                    if ($this->_hasRegions($countryId)) {
-                        $skippedCount++;
-                    } else {
-                        $country = Mage::getModel('directory/country')->load($countryId);
-                        $country->delete();
-                        $deletedCount++;
-                    }
-                }
-
-                if ($deletedCount > 0) {
-                    Mage::getSingleton('adminhtml/session')->addSuccess(
-                        Mage::helper('adminhtml')->__('Total of %d record(s) were deleted.', $deletedCount),
-                    );
-                }
-
-                if ($skippedCount > 0) {
-                    Mage::getSingleton('adminhtml/session')->addWarning(
-                        Mage::helper('adminhtml')->__('%d country(s) were skipped because they have existing regions.', $skippedCount),
-                    );
-                }
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+        try {
+            if (!is_array($countryIds)) {
+                Mage::throwException(
+                    Mage::helper('adminhtml')->__('Please select country(s).'),
+                );
             }
+
+            $deletedCount = 0;
+            $skippedCount = 0;
+
+            foreach ($countryIds as $countryId) {
+                $model = Mage::getModel('directory/country')->load($countryId);
+
+                if (!$model->getId() || $model->hasTranslation()) {
+                    $skippedCount++;
+                } else {
+                    $model->delete();
+                    $deletedCount++;
+                }
+            }
+
+            if ($deletedCount > 0) {
+                Mage::getSingleton('adminhtml/session')->addSuccess(
+                    Mage::helper('adminhtml')->__('Total of %d record(s) were deleted.', $deletedCount),
+                );
+            }
+
+            if ($skippedCount > 0) {
+                Mage::getSingleton('adminhtml/session')->addWarning(
+                    Mage::helper('adminhtml')->__('%d country(s) were skipped because they have existing country names.', $skippedCount),
+                );
+            }
+        } catch (Mage_Core_Exception $e) {
+            $error = $e->getMessage();
+        } catch (Exception $e) {
+            $error = Mage::helper('adminhtml')->__('Internal Error');
+            Mage::logException($e);
         }
-        $this->_redirect('*/*/index');
+
+        if (isset($error)) {
+            Mage::getSingleton('adminhtml/session')->addError($error);
+        }
+        $this->_redirect('*/*/');
     }
 
-    protected function _validateCountryData(array $data): bool
+    public function translationGridAction(): void
     {
-        $errors = [];
-
-        // Validate country ID
-        if (!$this->getRequest()->getParam('id')) {
-            if (empty($data['country_id'])) {
-                $errors[] = Mage::helper('adminhtml')->__('Country ID is required.');
-            } elseif (!preg_match('/^[A-Z]{2}$/', $data['country_id'])) {
-                $errors[] = Mage::helper('adminhtml')->__('Country ID must be exactly 2 uppercase letters.');
-            }
-        }
-
-        // Validate ISO2 code if provided
-        if (!empty($data['iso2_code']) && !preg_match('/^[A-Z]{2}$/', $data['iso2_code'])) {
-            $errors[] = Mage::helper('adminhtml')->__('ISO2 code must be exactly 2 uppercase letters.');
-        }
-
-        // Validate ISO3 code if provided
-        if (!empty($data['iso3_code']) && !preg_match('/^[A-Z]{3}$/', $data['iso3_code'])) {
-            $errors[] = Mage::helper('adminhtml')->__('ISO3 code must be exactly 3 uppercase letters.');
-        }
-
-        // Check for duplicate country ID (only for new countries)
-        if (!$this->getRequest()->getParam('id')) {
-            $existingCountry = Mage::getModel('directory/country')->load($data['country_id']);
-            if ($existingCountry->getId()) {
-                $errors[] = Mage::helper('adminhtml')->__('A country with this ID already exists.');
-            }
-        }
-
-        // Add errors to session if any
-        if (!empty($errors)) {
-            foreach ($errors as $error) {
-                Mage::getSingleton('adminhtml/session')->addError($error);
-            }
-            return false;
-        }
-
-        return true;
+        $this->_initCountry();
+        $this->loadLayout()->renderLayout();
     }
 
-    protected function _hasRegions(string $countryId): bool
+    public function translationSaveAction(): void
     {
-        $collection = Mage::getResourceModel('directory/region_collection')
-            ->addFieldToFilter('country_id', $countryId);
+        $model = $this->_initCountry();
+        $data = $this->getRequest()->getPost();
 
-        return $collection->getSize() > 0;
+        try {
+            if (empty($data) || !$this->getRequest()->isAjax()) {
+                Mage::throwException(Mage::helper('adminhtml')->__('Unable to complete this request.'));
+            }
+
+            if ($model === false || !$model->getId()) {
+                Mage::throwException(Mage::helper('adminhtml')->__('This country no longer exists.'));
+            }
+
+            $errors = $model->validateTranslation($data);
+            if (is_array($errors)) {
+                Mage::throwException(implode('<br>', $errors));
+            }
+
+            $model->saveTranslation($data);
+            $this->getResponse()->setBodyJson(['success' => true]);
+
+        } catch (Mage_Core_Exception $e) {
+            $error = $e->getMessage();
+        } catch (Exception $e) {
+            $error = Mage::helper('adminhtml')->__('Internal Error');
+            Mage::logException($e);
+        }
+
+        if (isset($error)) {
+            Mage::getSingleton('adminhtml/session')->setFormData($data);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $error]);
+        }
     }
 
-    #[\Override]
-    protected function _isAllowed(): bool
+    public function translationMassDeleteAction(): void
     {
-        return Mage::getSingleton('admin/session')->isAllowed('system/directory/countries');
+        $model = $this->_initCountry();
+        $localeIds = $this->getRequest()->getPost('locale_id');
+
+        try {
+            if (!$this->getRequest()->isAjax()) {
+                Mage::throwException(Mage::helper('adminhtml')->__('Unable to complete this request.'));
+            }
+
+            if ($model === false || !$model->getId()) {
+                Mage::throwException(Mage::helper('adminhtml')->__('This country no longer exists.'));
+            }
+
+            if (!is_array($localeIds)) {
+                Mage::throwException(
+                    Mage::helper('adminhtml')->__('Please select country name(s).'),
+                );
+            }
+
+            $deletedCount = 0;
+
+            foreach ($localeIds as $localeId) {
+                if (!str_contains($localeId, '|')) {
+                    continue;
+                }
+                [$countryId, $locale] = explode('|', $localeId);
+                $result = $model->deleteTranslation($locale);
+                if ($result === true) {
+                    $deletedCount++;
+                }
+            }
+
+            $this->getResponse()->setBodyJson([
+                'success' => true,
+                'message' => Mage::helper('adminhtml')->__('Total of %d record(s) were deleted.', $deletedCount),
+            ]);
+        } catch (Mage_Core_Exception $e) {
+            $error = $e->getMessage();
+        } catch (Exception $e) {
+            $error = Mage::helper('adminhtml')->__('Internal Error');
+            Mage::logException($e);
+        }
+
+        if (isset($error)) {
+            $this->getResponse()->setBodyJson([
+                'error' => true,
+                'message' => $error,
+            ]);
+        }
     }
 }

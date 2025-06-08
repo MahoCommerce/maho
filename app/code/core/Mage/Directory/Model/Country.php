@@ -6,7 +6,7 @@
  * @package    Mage_Directory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -155,12 +155,122 @@ T: {{telephone}}';
      */
     public function getName()
     {
-        if (!$this->getData('name')) {
-            $this->setData(
-                'name',
-                Mage::app()->getLocale()->getCountryTranslation($this->getId()),
-            );
+        $name = $this->getData('name');
+        if (is_null($name)) {
+            $name = $this->getData('country_id');
         }
-        return $this->getData('name');
+        return $name;
+    }
+
+    public function validate(): array|true
+    {
+        $errors = [];
+
+        $requireIsoCodes = false;
+
+        // Validate Country ID
+        if (empty($this->getCountryId())) {
+            $errors[] = Mage::helper('directory')->__('Country ID is required.');
+        } elseif (!preg_match('/^[A-Z]{2}$/', $this->getCountryId())) {
+            $errors[] = Mage::helper('directory')->__('Country ID must be exactly 2 uppercase letters.');
+        }
+
+        // Validate ISO2 code
+        if (empty($this->getIso2Code())) {
+            if ($requireIsoCodes) { // @phpstan-ignore if.alwaysFalse
+                $errors[] = Mage::helper('directory')->__('ISO2 code is required.');
+            }
+        } elseif (!preg_match('/^[A-Z]{2}$/', $this->getIso2Code())) {
+            $errors[] = Mage::helper('directory')->__('ISO2 code must be exactly 2 uppercase letters.');
+        }
+
+        // Validate ISO3 code
+        if (empty($this->getIso3Code())) {
+            if ($requireIsoCodes) { // @phpstan-ignore if.alwaysFalse
+                $errors[] = Mage::helper('directory')->__('ISO3 code is required.');
+            }
+        } elseif (!preg_match('/^[A-Z]{3}$/', $this->getIso3Code())) {
+            $errors[] = Mage::helper('directory')->__('ISO3 code must be exactly 3 uppercase letters.');
+        }
+
+        // Check for duplicate country ID (only for new countries)
+        if (!$this->getOrigData('country_id') && !empty($this->getCountryId())) {
+            $existingCountry = Mage::getModel('directory/country')->load($this->getCountryId());
+            if ($existingCountry->getId()) {
+                $errors[] = Mage::helper('directory')->__('A country with this ID already exists.');
+            }
+        }
+
+        if (empty($errors)) {
+            return true;
+        }
+        return $errors;
+    }
+
+    /**
+     * Return collection of translated country names
+     */
+    public function getTranslationCollection(): Varien_Data_Collection_Db
+    {
+        return $this->_getResource()->getTranslationCollection($this);
+    }
+
+    /**
+     * Get translation for locale
+     */
+    public function getTranslation(string $locale): Varien_Object
+    {
+        return $this->_getResource()->getTranslation($this, $locale);
+    }
+
+    /**
+     * Check if country has at least one translation
+     */
+    public function hasTranslation(): bool
+    {
+        return $this->_getResource()->hasTranslation($this);
+    }
+
+    public function validateTranslation(array $data): array|true
+    {
+        $errors = [];
+
+        // Validate locale
+        if (empty($data['locale'])) {
+            $errors[] = Mage::helper('directory')->__('Locale is required.');
+        }
+
+        // Validate name
+        if (empty($data['name'])) {
+            $errors[] = Mage::helper('directory')->__('Country name is required.');
+        } elseif (strlen($data['name']) > 255) {
+            $errors[] = Mage::helper('directory')->__('Country name cannot be longer than 255 characters.');
+        }
+
+        // Check for duplicate locale/country combination
+        if (!empty($data['locale'])) {
+            $existingCountry = $this->_getResource()->getTranslation($this, $data['locale']);
+            if ($existingCountry->getLocale()) {
+                $errors[] = Mage::helper('directory')->__('A country name for this locale and country combination already exists.');
+            }
+        }
+
+        if (empty($errors)) {
+            return true;
+        }
+        return $errors;
+    }
+
+    public function saveTranslation(array $data): bool
+    {
+        if (empty($data['locale']) || empty($data['name'])) {
+            Mage::throwException(Mage::helper('directory')->__('Missing required fields'));
+        }
+        return $this->_getResource()->insertOrUpdateTranslation($this, $data);
+    }
+
+    public function deleteTranslation(string $locale): bool
+    {
+        return $this->_getResource()->deleteTranslation($this, $locale);
     }
 }

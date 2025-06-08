@@ -17,8 +17,8 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
         parent::__construct();
         $this->setId('countryGrid');
         $this->setDefaultSort('country_id');
-        $this->setDefaultDir('ASC');
         $this->setSaveParametersInSession(true);
+        $this->setUseAjax(true);
     }
 
     #[\Override]
@@ -37,6 +37,7 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
             'align' => 'left',
             'width' => '80px',
             'index' => 'country_id',
+            'filter_index' => 'main_table.country_id',
             'type' => 'text',
         ]);
 
@@ -59,17 +60,16 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
         $this->addColumn('name', [
             'header' => Mage::helper('adminhtml')->__('Country Name'),
             'align' => 'left',
-            'index' => 'country_id',
+            'index' => 'name',
             'type' => 'text',
-            'renderer' => 'directory/adminhtml_country_grid_renderer_name',
-            'filter_condition_callback' => [$this, '_countryNameFilter'],
+            'renderer' => 'adminhtml/widget_grid_column_renderer_country',
         ]);
 
         $this->addColumn('action', [
             'header' => Mage::helper('adminhtml')->__('Action'),
             'width' => '70px',
             'type' => 'action',
-            'getter' => 'getCountryId',
+            'index' => 'country_id',
             'actions' => [
                 [
                     'caption' => Mage::helper('adminhtml')->__('Edit'),
@@ -78,14 +78,13 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
                 ],
                 [
                     'caption' => Mage::helper('adminhtml')->__('Delete'),
-                    'url' => ['base' => '*/*/delete'],
+                    'url' => ['base' => '*/*/delete', 'params' => [Mage_Core_Model_Url::FORM_KEY => $this->getFormKey()]],
                     'field' => 'id',
                     'confirm' => Mage::helper('adminhtml')->__('Are you sure you want to delete this country?'),
                 ],
             ],
             'filter' => false,
             'sortable' => false,
-            'index' => 'stores',
             'is_system' => true,
         ]);
 
@@ -96,7 +95,7 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
     protected function _prepareMassaction(): self
     {
         $this->setMassactionIdField('country_id');
-        $this->getMassactionBlock()->setFormFieldName('country');
+        $this->getMassactionBlock()->setFormFieldName('countries');
 
         $this->getMassactionBlock()->addItem('delete', [
             'label' => Mage::helper('adminhtml')->__('Delete'),
@@ -108,33 +107,14 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
     }
 
     #[\Override]
+    public function getGridUrl()
+    {
+        return $this->getUrl('*/*/grid', ['_current' => true]);
+    }
+
+    #[\Override]
     public function getRowUrl($row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getCountryId()]);
-    }
-
-    protected function _countryNameFilter($collection, $column): void
-    {
-        if (!$value = $column->getFilter()->getValue()) {
-            return;
-        }
-
-        // Get all countries and their translations
-        $countries = Mage::getResourceModel('directory/country_collection')->loadData();
-        $matchingCountryIds = [];
-
-        foreach ($countries as $country) {
-            $countryName = Mage::app()->getLocale()->getCountryTranslation($country->getCountryId());
-            if (stripos($countryName, $value) !== false) {
-                $matchingCountryIds[] = $country->getCountryId();
-            }
-        }
-
-        if (!empty($matchingCountryIds)) {
-            $collection->addFieldToFilter('main_table.country_id', ['in' => $matchingCountryIds]);
-        } else {
-            // If no matches found, add impossible condition to return empty result
-            $collection->addFieldToFilter('main_table.country_id', ['eq' => '']);
-        }
     }
 }

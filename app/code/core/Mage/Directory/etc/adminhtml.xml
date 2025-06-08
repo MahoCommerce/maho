@@ -17,11 +17,6 @@
                             <sort_order>20</sort_order>
                             <action>adminhtml/directory_region</action>
                         </region>
-                        <regionname translate="title" module="adminhtml">
-                            <title>Region Names</title>
-                            <sort_order>30</sort_order>
-                            <action>adminhtml/directory_regionname</action>
-                        </regionname>
                     </children>
                 </directory>
             </children>
@@ -43,9 +38,6 @@
                                     <regions translate="title" module="adminhtml">
                                         <title>Regions</title>
                                     </regions>
-                                    <regionname translate="title" module="adminhtml">
-                                        <title>Region Names</title>
-                                    </regionname>
                                 </children>
                             </directory>
                         </children>

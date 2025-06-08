@@ -17,14 +17,15 @@ class Mage_Directory_Block_Adminhtml_Region_Grid extends Mage_Adminhtml_Block_Wi
         parent::__construct();
         $this->setId('regionGrid');
         $this->setDefaultSort('region_id');
-        $this->setDefaultDir('ASC');
         $this->setSaveParametersInSession(true);
+        $this->setUseAjax(true);
     }
 
     #[\Override]
     protected function _prepareCollection(): self
     {
         $collection = Mage::getResourceModel('directory/region_collection');
+        $collection->getSelect()->reset(Zend_Db_Select::ORDER);
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }
@@ -40,24 +41,12 @@ class Mage_Directory_Block_Adminhtml_Region_Grid extends Mage_Adminhtml_Block_Wi
             'type' => 'number',
         ]);
 
-        // Get country options for the filter
-        $countries = Mage::getResourceModel('directory/country_collection')
-            ->loadData()
-            ->toOptionArray(false);
-
-        $countryOptions = [];
-        foreach ($countries as $country) {
-            $countryOptions[$country['value']] = $country['label'];
-        }
-
         $this->addColumn('country_id', [
             'header' => Mage::helper('adminhtml')->__('Country'),
             'align' => 'left',
             'width' => '200px',
             'index' => 'country_id',
-            'type' => 'options',
-            'options' => $countryOptions,
-            'renderer' => 'directory/adminhtml_region_grid_renderer_country',
+            'type' => 'country',
         ]);
 
         $this->addColumn('code', [
@@ -79,7 +68,7 @@ class Mage_Directory_Block_Adminhtml_Region_Grid extends Mage_Adminhtml_Block_Wi
             'header' => Mage::helper('adminhtml')->__('Action'),
             'width' => '70px',
             'type' => 'action',
-            'getter' => 'getRegionId',
+            'index' => 'region_id',
             'actions' => [
                 [
                     'caption' => Mage::helper('adminhtml')->__('Edit'),
@@ -88,14 +77,13 @@ class Mage_Directory_Block_Adminhtml_Region_Grid extends Mage_Adminhtml_Block_Wi
                 ],
                 [
                     'caption' => Mage::helper('adminhtml')->__('Delete'),
-                    'url' => ['base' => '*/*/delete'],
+                    'url' => ['base' => '*/*/delete', 'params' => [Mage_Core_Model_Url::FORM_KEY => $this->getFormKey()]],
                     'field' => 'id',
                     'confirm' => Mage::helper('adminhtml')->__('Are you sure you want to delete this region?'),
                 ],
             ],
             'filter' => false,
             'sortable' => false,
-            'index' => 'stores',
             'is_system' => true,
         ]);
 
@@ -106,7 +94,7 @@ class Mage_Directory_Block_Adminhtml_Region_Grid extends Mage_Adminhtml_Block_Wi
     protected function _prepareMassaction(): self
     {
         $this->setMassactionIdField('region_id');
-        $this->getMassactionBlock()->setFormFieldName('region');
+        $this->getMassactionBlock()->setFormFieldName('regions');
 
         $this->getMassactionBlock()->addItem('delete', [
             'label' => Mage::helper('adminhtml')->__('Delete'),
@@ -115,6 +103,12 @@ class Mage_Directory_Block_Adminhtml_Region_Grid extends Mage_Adminhtml_Block_Wi
         ]);
 
         return $this;
+    }
+
+    #[\Override]
+    public function getGridUrl()
+    {
+        return $this->getUrl('*/*/grid', ['_current' => true]);
     }
 
     #[\Override]

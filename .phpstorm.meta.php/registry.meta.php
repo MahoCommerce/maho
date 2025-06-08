@@ -37,7 +37,6 @@ namespace PHPSTORM_META {
         current_queue,
         current_recurring_profile,
         current_region,
-        current_region_name,
         current_review,
         current_role,
         current_shipment,
