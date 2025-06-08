@@ -17,6 +17,6 @@ class Mage_Directory_Block_Adminhtml_Country_Edit_Tabs extends Mage_Adminhtml_Bl
         parent::__construct();
         $this->setId('country_edit_tabs');
         $this->setDestElementId('edit_form');
-        $this->setTitle(Mage::helper('adminhtml')->__('Country Information'));
+        $this->setTitle(Mage::helper('directory')->__('Country Information'));
     }
 }

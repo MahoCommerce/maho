@@ -33,7 +33,7 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
     protected function _prepareColumns(): self
     {
         $this->addColumn('country_id', [
-            'header' => Mage::helper('adminhtml')->__('Country ID'),
+            'header' => Mage::helper('directory')->__('Country ID'),
             'align' => 'left',
             'width' => '80px',
             'index' => 'country_id',
@@ -42,7 +42,7 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
         ]);
 
         $this->addColumn('iso2_code', [
-            'header' => Mage::helper('adminhtml')->__('ISO2 Code'),
+            'header' => Mage::helper('directory')->__('ISO2 Code'),
             'align' => 'left',
             'width' => '80px',
             'index' => 'iso2_code',
@@ -50,7 +50,7 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
         ]);
 
         $this->addColumn('iso3_code', [
-            'header' => Mage::helper('adminhtml')->__('ISO3 Code'),
+            'header' => Mage::helper('directory')->__('ISO3 Code'),
             'align' => 'left',
             'width' => '80px',
             'index' => 'iso3_code',
@@ -58,7 +58,7 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
         ]);
 
         $this->addColumn('name', [
-            'header' => Mage::helper('adminhtml')->__('Country Name'),
+            'header' => Mage::helper('directory')->__('Country Name'),
             'align' => 'left',
             'index' => 'name',
             'type' => 'text',
@@ -80,7 +80,7 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
                     'caption' => Mage::helper('adminhtml')->__('Delete'),
                     'url' => ['base' => '*/*/delete', 'params' => [Mage_Core_Model_Url::FORM_KEY => $this->getFormKey()]],
                     'field' => 'id',
-                    'confirm' => Mage::helper('adminhtml')->__('Are you sure you want to delete this country?'),
+                    'confirm' => Mage::helper('directory')->__('Are you sure you want to delete this country?'),
                 ],
             ],
             'filter' => false,
@@ -100,7 +100,7 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
         $this->getMassactionBlock()->addItem('delete', [
             'label' => Mage::helper('adminhtml')->__('Delete'),
             'url' => $this->getUrl('*/*/massDelete'),
-            'confirm' => Mage::helper('adminhtml')->__('Are you sure you want to delete the selected countries?'),
+            'confirm' => Mage::helper('directory')->__('Are you sure you want to delete the selected countries?'),
         ]);
 
         return $this;

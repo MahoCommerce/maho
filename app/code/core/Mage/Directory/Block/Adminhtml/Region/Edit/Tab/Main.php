@@ -21,7 +21,7 @@ class Mage_Directory_Block_Adminhtml_Region_Edit_Tab_Main extends Mage_Adminhtml
         $form = new Varien_Data_Form();
 
         $fieldset = $form->addFieldset('base_fieldset', [
-            'legend' => Mage::helper('adminhtml')->__('Region Information'),
+            'legend' => Mage::helper('directory')->__('Region Information'),
             'class' => 'fieldset-wide',
         ]);
 
@@ -31,8 +31,8 @@ class Mage_Directory_Block_Adminhtml_Region_Edit_Tab_Main extends Mage_Adminhtml
 
         $fieldset->addField('country_id', 'select', [
             'name' => 'country_id',
-            'label' => Mage::helper('adminhtml')->__('Country'),
-            'title' => Mage::helper('adminhtml')->__('Country'),
+            'label' => Mage::helper('directory')->__('Country'),
+            'title' => Mage::helper('directory')->__('Country'),
             'required' => true,
             'values' => $countries,
             'disabled' => $isUpdate,
@@ -40,19 +40,19 @@ class Mage_Directory_Block_Adminhtml_Region_Edit_Tab_Main extends Mage_Adminhtml
 
         $fieldset->addField('code', 'text', [
             'name' => 'code',
-            'label' => Mage::helper('adminhtml')->__('Region Code'),
-            'title' => Mage::helper('adminhtml')->__('Region Code'),
+            'label' => Mage::helper('directory')->__('Region Code'),
+            'title' => Mage::helper('directory')->__('Region Code'),
             'maxlength' => 32,
-            'note' => Mage::helper('adminhtml')->__('Short code for this region (e.g. CA, NY, TX)'),
+            'note' => Mage::helper('directory')->__('Short code for this region (e.g. CA, NY, TX)'),
         ]);
 
         $fieldset->addField('default_name', 'text', [
             'name' => 'default_name',
-            'label' => Mage::helper('adminhtml')->__('Default Name'),
-            'title' => Mage::helper('adminhtml')->__('Default Name'),
+            'label' => Mage::helper('directory')->__('Default Name'),
+            'title' => Mage::helper('directory')->__('Default Name'),
             'required' => true,
             'maxlength' => 255,
-            'note' => Mage::helper('adminhtml')->__('Default name for this region in English'),
+            'note' => Mage::helper('directory')->__('Default name for this region in English'),
         ]);
 
         $form->setValues($region->getData());
@@ -64,13 +64,13 @@ class Mage_Directory_Block_Adminhtml_Region_Edit_Tab_Main extends Mage_Adminhtml
     #[\Override]
     public function getTabLabel(): string
     {
-        return Mage::helper('adminhtml')->__('Region Information');
+        return Mage::helper('directory')->__('Region Information');
     }
 
     #[\Override]
     public function getTabTitle(): string
     {
-        return Mage::helper('adminhtml')->__('Region Information');
+        return Mage::helper('directory')->__('Region Information');
     }
 
     #[\Override]

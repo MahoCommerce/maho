@@ -33,14 +33,14 @@ class Mage_Directory_Block_Adminhtml_Country_Edit_Tab_Translations_Grid extends 
     protected function _prepareColumns(): self
     {
         $this->addColumn('locale', [
-            'header' => Mage::helper('adminhtml')->__('Locale'),
+            'header' => Mage::helper('directory')->__('Locale'),
             'width' => '100px',
             'index' => 'locale',
             'type' => 'text',
         ]);
 
         $this->addColumn('name', [
-            'header' => Mage::helper('adminhtml')->__('Localized Name'),
+            'header' => Mage::helper('directory')->__('Localized Name'),
             'index' => 'name',
             'type' => 'text',
         ]);
@@ -59,7 +59,7 @@ class Mage_Directory_Block_Adminhtml_Country_Edit_Tab_Translations_Grid extends 
         $this->getMassactionBlock()->addItem('delete', [
             'label' => Mage::helper('adminhtml')->__('Delete'),
             'url' => $this->getUrl('*/*/translationMassDelete', ['_current' => true]),
-            'confirm' => Mage::helper('adminhtml')->__('Are you sure you want to delete the selected country names?'),
+            'confirm' => Mage::helper('directory')->__('Are you sure you want to delete the selected country names?'),
             'complete' => 'DirectoryEditForm.refreshGrid',
         ]);
 

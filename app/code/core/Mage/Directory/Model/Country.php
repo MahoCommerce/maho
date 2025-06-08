@@ -264,7 +264,7 @@ T: {{telephone}}';
     public function saveTranslation(array $data): bool
     {
         if (empty($data['locale']) || empty($data['name'])) {
-            Mage::throwException(Mage::helper('directory')->__('Missing required fields'));
+            Mage::throwException(Mage::helper('directory')->__('Locale and country name are required.'));
         }
         return $this->_getResource()->insertOrUpdateTranslation($this, $data);
     }

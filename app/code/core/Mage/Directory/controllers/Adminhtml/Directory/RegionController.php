@@ -42,16 +42,16 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
         $this->loadLayout()
             ->_setActiveMenu('system/directory/regions')
             ->_addBreadcrumb(
-                Mage::helper('adminhtml')->__('System'),
-                Mage::helper('adminhtml')->__('System'),
+                Mage::helper('directory')->__('System'),
+                Mage::helper('directory')->__('System'),
             )
             ->_addBreadcrumb(
-                Mage::helper('adminhtml')->__('Directory Management'),
-                Mage::helper('adminhtml')->__('Directory Management'),
+                Mage::helper('directory')->__('Directory Management'),
+                Mage::helper('directory')->__('Directory Management'),
             )
             ->_addBreadcrumb(
-                Mage::helper('adminhtml')->__('Regions'),
-                Mage::helper('adminhtml')->__('Regions'),
+                Mage::helper('directory')->__('Regions'),
+                Mage::helper('directory')->__('Regions'),
             );
         return $this;
     }
@@ -83,7 +83,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
 
         if ($model === false) {
             Mage::getSingleton('adminhtml/session')->addError(
-                Mage::helper('adminhtml')->__('This region no longer exists.'),
+                Mage::helper('directory')->__('This region no longer exists.'),
             );
             $this->_redirect('*/*/');
             return;
@@ -99,14 +99,14 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
         if ($model->getId()) {
             $this->_title($model->getName())
                 ->_addBreadcrumb(
-                    Mage::helper('adminhtml')->__('Edit Region'),
-                    Mage::helper('adminhtml')->__('Edit Region'),
+                    Mage::helper('directory')->__('Edit Region'),
+                    Mage::helper('directory')->__('Edit Region'),
                 );
         } else {
             $this->_title($this->__('New Region'))
                 ->_addBreadcrumb(
-                    Mage::helper('adminhtml')->__('New Region'),
-                    Mage::helper('adminhtml')->__('New Region'),
+                    Mage::helper('directory')->__('New Region'),
+                    Mage::helper('directory')->__('New Region'),
                 );
         }
 
@@ -125,7 +125,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
 
             if ($model === false) {
                 Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('adminhtml')->__('This region no longer exists.'),
+                    Mage::helper('directory')->__('This region no longer exists.'),
                 );
                 $this->_redirect('*/*/');
                 return;
@@ -141,7 +141,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
             $model->save();
 
             Mage::getSingleton('adminhtml/session')->addSuccess(
-                Mage::helper('adminhtml')->__('The region has been saved.'),
+                Mage::helper('directory')->__('The region has been saved.'),
             );
             Mage::getSingleton('adminhtml/session')->setFormData(false);
 
@@ -174,13 +174,13 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
         try {
             if ($model === false || !$model->getId()) {
                 Mage::throwException(
-                    Mage::helper('adminhtml')->__('This region no longer exists.'),
+                    Mage::helper('directory')->__('This region no longer exists.'),
                 );
             }
 
             if ($model->hasTranslation()) {
                 Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('adminhtml')->__('Cannot delete region with existing region names. Please delete all region names first.'),
+                    Mage::helper('directory')->__('Cannot delete region with existing region names. Please delete all region names first.'),
                 );
                 $this->_redirect('*/*/edit', ['_current' => true]);
                 return;
@@ -189,7 +189,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
             $model->delete();
 
             Mage::getSingleton('adminhtml/session')->addSuccess(
-                Mage::helper('adminhtml')->__('The region has been deleted.'),
+                Mage::helper('directory')->__('The region has been deleted.'),
             );
         } catch (Mage_Core_Exception $e) {
             $error = $e->getMessage();
@@ -212,7 +212,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
         try {
             if (!is_array($regionIds)) {
                 Mage::throwException(
-                    Mage::helper('adminhtml')->__('Please select region(s).'),
+                    Mage::helper('directory')->__('Please select region(s).'),
                 );
             }
 
@@ -238,7 +238,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
 
             if ($skippedCount > 0) {
                 Mage::getSingleton('adminhtml/session')->addWarning(
-                    Mage::helper('adminhtml')->__('%d region(s) were skipped because they have existing region names.', $skippedCount),
+                    Mage::helper('directory')->__('%d region(s) were skipped because they have existing region names.', $skippedCount),
                 );
             }
         } catch (Mage_Core_Exception $e) {
@@ -271,7 +271,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
             }
 
             if ($model === false || !$model->getId()) {
-                Mage::throwException(Mage::helper('adminhtml')->__('This region no longer exists.'));
+                Mage::throwException(Mage::helper('directory')->__('This region no longer exists.'));
             }
 
             $errors = $model->validateTranslation($data);
@@ -306,12 +306,12 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
             }
 
             if ($model === false || !$model->getId()) {
-                Mage::throwException(Mage::helper('adminhtml')->__('This region no longer exists.'));
+                Mage::throwException(Mage::helper('directory')->__('This region no longer exists.'));
             }
 
             if (!is_array($localeIds)) {
                 Mage::throwException(
-                    Mage::helper('adminhtml')->__('Please select region name(s).'),
+                    Mage::helper('directory')->__('Please select region name(s).'),
                 );
             }
 

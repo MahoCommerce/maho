@@ -17,6 +17,6 @@ class Mage_Directory_Block_Adminhtml_Region_Edit_Tabs extends Mage_Adminhtml_Blo
         parent::__construct();
         $this->setId('region_edit_tabs');
         $this->setDestElementId('edit_form');
-        $this->setTitle(Mage::helper('adminhtml')->__('Region Information'));
+        $this->setTitle(Mage::helper('directory')->__('Region Information'));
     }
 }

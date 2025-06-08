@@ -16,8 +16,8 @@ class Mage_Directory_Block_Adminhtml_Country extends Mage_Adminhtml_Block_Widget
     {
         $this->_blockGroup = 'directory';
         $this->_controller = 'adminhtml_country';
-        $this->_headerText = Mage::helper('adminhtml')->__('Manage Countries');
-        $this->_addButtonLabel = Mage::helper('adminhtml')->__('Add New Country');
+        $this->_headerText = Mage::helper('directory')->__('Manage Countries');
+        $this->_addButtonLabel = Mage::helper('directory')->__('Add New Country');
         parent::__construct();
     }
 }

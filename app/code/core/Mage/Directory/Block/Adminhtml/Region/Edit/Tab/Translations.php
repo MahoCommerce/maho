@@ -15,13 +15,13 @@ class Mage_Directory_Block_Adminhtml_Region_Edit_Tab_Translations extends Mage_A
     #[\Override]
     public function getTabLabel(): string
     {
-        return Mage::helper('adminhtml')->__('Manage Translations');
+        return Mage::helper('directory')->__('Manage Translations');
     }
 
     #[\Override]
     public function getTabTitle(): string
     {
-        return Mage::helper('adminhtml')->__('Manage Translations');
+        return Mage::helper('directory')->__('Manage Translations');
     }
 
     #[\Override]

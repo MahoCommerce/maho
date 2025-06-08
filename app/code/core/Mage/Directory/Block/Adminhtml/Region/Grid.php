@@ -34,7 +34,7 @@ class Mage_Directory_Block_Adminhtml_Region_Grid extends Mage_Adminhtml_Block_Wi
     protected function _prepareColumns(): self
     {
         $this->addColumn('region_id', [
-            'header' => Mage::helper('adminhtml')->__('Region ID'),
+            'header' => Mage::helper('directory')->__('Region ID'),
             'align' => 'right',
             'width' => '50px',
             'index' => 'region_id',
@@ -42,7 +42,7 @@ class Mage_Directory_Block_Adminhtml_Region_Grid extends Mage_Adminhtml_Block_Wi
         ]);
 
         $this->addColumn('country_id', [
-            'header' => Mage::helper('adminhtml')->__('Country'),
+            'header' => Mage::helper('directory')->__('Country'),
             'align' => 'left',
             'width' => '200px',
             'index' => 'country_id',
@@ -50,7 +50,7 @@ class Mage_Directory_Block_Adminhtml_Region_Grid extends Mage_Adminhtml_Block_Wi
         ]);
 
         $this->addColumn('code', [
-            'header' => Mage::helper('adminhtml')->__('Region Code'),
+            'header' => Mage::helper('directory')->__('Region Code'),
             'align' => 'left',
             'width' => '200px',
             'index' => 'code',
@@ -58,7 +58,7 @@ class Mage_Directory_Block_Adminhtml_Region_Grid extends Mage_Adminhtml_Block_Wi
         ]);
 
         $this->addColumn('default_name', [
-            'header' => Mage::helper('adminhtml')->__('Default Name'),
+            'header' => Mage::helper('directory')->__('Default Name'),
             'align' => 'left',
             'index' => 'default_name',
             'type' => 'text',
@@ -79,7 +79,7 @@ class Mage_Directory_Block_Adminhtml_Region_Grid extends Mage_Adminhtml_Block_Wi
                     'caption' => Mage::helper('adminhtml')->__('Delete'),
                     'url' => ['base' => '*/*/delete', 'params' => [Mage_Core_Model_Url::FORM_KEY => $this->getFormKey()]],
                     'field' => 'id',
-                    'confirm' => Mage::helper('adminhtml')->__('Are you sure you want to delete this region?'),
+                    'confirm' => Mage::helper('directory')->__('Are you sure you want to delete this region?'),
                 ],
             ],
             'filter' => false,
@@ -99,7 +99,7 @@ class Mage_Directory_Block_Adminhtml_Region_Grid extends Mage_Adminhtml_Block_Wi
         $this->getMassactionBlock()->addItem('delete', [
             'label' => Mage::helper('adminhtml')->__('Delete'),
             'url' => $this->getUrl('*/*/massDelete'),
-            'confirm' => Mage::helper('adminhtml')->__('Are you sure you want to delete the selected regions?'),
+            'confirm' => Mage::helper('directory')->__('Are you sure you want to delete the selected regions?'),
         ]);
 
         return $this;

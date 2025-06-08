@@ -164,7 +164,7 @@ class Mage_Directory_Model_Region extends Mage_Core_Model_Abstract
     public function saveTranslation(array $data): bool
     {
         if (empty($data['locale']) || empty($data['name'])) {
-            Mage::throwException(Mage::helper('directory')->__('Missing required fields'));
+            Mage::throwException(Mage::helper('directory')->__('Locale and region name are required.'));
         }
         return $this->_getResource()->insertOrUpdateTranslation($this, $data);
     }

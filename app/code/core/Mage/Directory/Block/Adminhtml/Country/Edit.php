@@ -20,8 +20,8 @@ class Mage_Directory_Block_Adminhtml_Country_Edit extends Mage_Adminhtml_Block_W
 
         parent::__construct();
 
-        $this->_updateButton('save', 'label', Mage::helper('adminhtml')->__('Save Country'));
-        $this->_updateButton('delete', 'label', Mage::helper('adminhtml')->__('Delete Country'));
+        $this->_updateButton('save', 'label', Mage::helper('directory')->__('Save Country'));
+        $this->_updateButton('delete', 'label', Mage::helper('directory')->__('Delete Country'));
 
         $this->_addButton('save_and_continue', [
             'label' => Mage::helper('adminhtml')->__('Save and Continue Edit'),
@@ -35,9 +35,9 @@ class Mage_Directory_Block_Adminhtml_Country_Edit extends Mage_Adminhtml_Block_W
     {
         $country = Mage::registry('current_country');
         if ($country->getOrigData('country_id')) {
-            return Mage::helper('adminhtml')->__('Edit Country "%s"', $this->escapeHtml($country->getName()));
+            return Mage::helper('directory')->__('Edit Country "%s"', $this->escapeHtml($country->getName()));
         } else {
-            return Mage::helper('adminhtml')->__('New Country');
+            return Mage::helper('directory')->__('New Country');
         }
     }
 }

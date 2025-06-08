@@ -19,7 +19,7 @@ class Mage_Directory_Block_Adminhtml_Country_Edit_Tab_Translations_Form extends 
         $form->setHtmlIdPrefix('translation_');
 
         $fieldset = $form->addFieldset('add_fieldset', [
-            'legend' => Mage::helper('adminhtml')->__('Add Translation'),
+            'legend' => Mage::helper('directory')->__('Add Translation'),
             'class' => 'fieldset-wide ignore-validate',
         ]);
 
@@ -31,19 +31,19 @@ class Mage_Directory_Block_Adminhtml_Country_Edit_Tab_Translations_Form extends 
 
         $fieldset->addField('locale', 'select', [
             'name' => 'locale',
-            'label' => Mage::helper('adminhtml')->__('Locale'),
-            'title' => Mage::helper('adminhtml')->__('Locale'),
+            'label' => Mage::helper('directory')->__('Locale'),
+            'title' => Mage::helper('directory')->__('Locale'),
             'required' => true,
             'values' => $locales,
         ]);
 
         $fieldset->addField('name', 'text', [
             'name' => 'name',
-            'label' => Mage::helper('adminhtml')->__('Name'),
-            'title' => Mage::helper('adminhtml')->__('Name'),
+            'label' => Mage::helper('directory')->__('Name'),
+            'title' => Mage::helper('directory')->__('Name'),
             'required' => true,
             'maxlength' => 255,
-            'note' => Mage::helper('adminhtml')->__('Localized name for this country'),
+            'note' => Mage::helper('directory')->__('Localized name for this country'),
         ]);
 
         $gridBlock = $this->getLayout()->getBlock('directory_country_edit_tab_translations_grid');

@@ -42,16 +42,16 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
         $this->loadLayout()
             ->_setActiveMenu('system/directory/countries')
             ->_addBreadcrumb(
-                Mage::helper('adminhtml')->__('System'),
-                Mage::helper('adminhtml')->__('System'),
+                Mage::helper('directory')->__('System'),
+                Mage::helper('directory')->__('System'),
             )
             ->_addBreadcrumb(
-                Mage::helper('adminhtml')->__('Directory Management'),
-                Mage::helper('adminhtml')->__('Directory Management'),
+                Mage::helper('directory')->__('Directory Management'),
+                Mage::helper('directory')->__('Directory Management'),
             )
             ->_addBreadcrumb(
-                Mage::helper('adminhtml')->__('Countries'),
-                Mage::helper('adminhtml')->__('Countries'),
+                Mage::helper('directory')->__('Countries'),
+                Mage::helper('directory')->__('Countries'),
             );
         return $this;
     }
@@ -83,7 +83,7 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
 
         if ($model === false) {
             Mage::getSingleton('adminhtml/session')->addError(
-                Mage::helper('adminhtml')->__('This country no longer exists.'),
+                Mage::helper('directory')->__('This country no longer exists.'),
             );
             $this->_redirect('*/*/');
             return;
@@ -99,14 +99,14 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
         if ($model->getOrigData('country_id')) {
             $this->_title($model->getName())
                 ->_addBreadcrumb(
-                    Mage::helper('adminhtml')->__('Edit Country'),
-                    Mage::helper('adminhtml')->__('Edit Country'),
+                    Mage::helper('directory')->__('Edit Country'),
+                    Mage::helper('directory')->__('Edit Country'),
                 );
         } else {
             $this->_title($this->__('New Country'))
                 ->_addBreadcrumb(
-                    Mage::helper('adminhtml')->__('New Country'),
-                    Mage::helper('adminhtml')->__('New Country'),
+                    Mage::helper('directory')->__('New Country'),
+                    Mage::helper('directory')->__('New Country'),
                 );
         }
 
@@ -125,7 +125,7 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
 
             if ($model === false) {
                 Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('adminhtml')->__('This country no longer exists.'),
+                    Mage::helper('directory')->__('This country no longer exists.'),
                 );
                 $this->_redirect('*/*/');
                 return;
@@ -141,7 +141,7 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
             $model->save();
 
             Mage::getSingleton('adminhtml/session')->addSuccess(
-                Mage::helper('adminhtml')->__('The country has been saved.'),
+                Mage::helper('directory')->__('The country has been saved.'),
             );
             Mage::getSingleton('adminhtml/session')->setFormData(false);
 
@@ -174,13 +174,13 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
         try {
             if ($model === false || !$model->getId()) {
                 Mage::throwException(
-                    Mage::helper('adminhtml')->__('This country no longer exists.'),
+                    Mage::helper('directory')->__('This country no longer exists.'),
                 );
             }
 
             if ($model->hasTranslation()) {
                 Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('adminhtml')->__('Cannot delete country with existing country names. Please delete all country names first.'),
+                    Mage::helper('directory')->__('Cannot delete country with existing country names. Please delete all country names first.'),
                 );
                 $this->_redirect('*/*/edit', ['_current' => true]);
                 return;
@@ -189,7 +189,7 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
             $model->delete();
 
             Mage::getSingleton('adminhtml/session')->addSuccess(
-                Mage::helper('adminhtml')->__('The country has been deleted.'),
+                Mage::helper('directory')->__('The country has been deleted.'),
             );
         } catch (Mage_Core_Exception $e) {
             $error = $e->getMessage();
@@ -212,7 +212,7 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
         try {
             if (!is_array($countryIds)) {
                 Mage::throwException(
-                    Mage::helper('adminhtml')->__('Please select country(s).'),
+                    Mage::helper('directory')->__('Please select country(s).'),
                 );
             }
 
@@ -238,7 +238,7 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
 
             if ($skippedCount > 0) {
                 Mage::getSingleton('adminhtml/session')->addWarning(
-                    Mage::helper('adminhtml')->__('%d country(s) were skipped because they have existing country names.', $skippedCount),
+                    Mage::helper('directory')->__('%d country(s) were skipped because they have existing country names.', $skippedCount),
                 );
             }
         } catch (Mage_Core_Exception $e) {
@@ -271,7 +271,7 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
             }
 
             if ($model === false || !$model->getId()) {
-                Mage::throwException(Mage::helper('adminhtml')->__('This country no longer exists.'));
+                Mage::throwException(Mage::helper('directory')->__('This country no longer exists.'));
             }
 
             $errors = $model->validateTranslation($data);
@@ -306,12 +306,12 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
             }
 
             if ($model === false || !$model->getId()) {
-                Mage::throwException(Mage::helper('adminhtml')->__('This country no longer exists.'));
+                Mage::throwException(Mage::helper('directory')->__('This country no longer exists.'));
             }
 
             if (!is_array($localeIds)) {
                 Mage::throwException(
-                    Mage::helper('adminhtml')->__('Please select country name(s).'),
+                    Mage::helper('directory')->__('Please select country name(s).'),
                 );
             }
 
