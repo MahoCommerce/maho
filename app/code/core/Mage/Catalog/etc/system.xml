@@ -243,16 +243,6 @@
                             <show_in_store>1</show_in_store>
                             <comment>Cache refresh needed.</comment>
                         </product_url_suffix>
-                        <trailing_slash_behavior translate="label comment">
-                            <label>Trailing Slash Behavior</label>
-                            <comment>Without this setting, a page could be accessible with both URLs: "example.com/category" and "example.com/category/". This creates duplicate content issues for SEO. Use this setting to automatically redirect to a canonical URL format.</comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_catalog_trailingslash</source_model>
-                            <sort_order>3</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </trailing_slash_behavior>
                         <product_use_categories translate="label">
                             <label>Use Categories Path for Product URLs</label>
                             <frontend_type>boolean</frontend_type>

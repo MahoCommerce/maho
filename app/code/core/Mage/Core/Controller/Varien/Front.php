@@ -160,6 +160,8 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
         // If pre-configured, check equality of base URL and requested URL
         $this->_checkBaseUrl($request);
 
+        $this->checkTrailingSlash($request);
+
         $request->setPathInfo()->setDispatched(false);
 
         if (!Mage::app()->getStore()->isAdmin()) {
@@ -349,6 +351,30 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
         ) {
             Mage::app()->getFrontController()->getResponse()
                 ->setRedirect($baseUrl, $redirectCode)
+                ->sendResponse();
+            exit;
+        }
+    }
+
+    /**
+     * Redirect to canonical URL if trailing slash doesn't match configured behavior
+     */
+    protected function checkTrailingSlash(Mage_Core_Controller_Request_Http $request): void
+    {
+        if (!Mage::isInstalled() || $request->getPost() || strtolower($request->getMethod()) === 'post') {
+            return;
+        }
+        if ($this->_isAdminFrontNameMatched($request)) {
+            return;
+        }
+
+        $requestUri = $request->getRequestUri();
+
+        $canonicalUri = Mage::helper('core/url')->addOrRemoveTrailingSlash($requestUri);
+
+        if ($canonicalUri !== $requestUri) {
+            Mage::app()->getFrontController()->getResponse()
+                ->setRedirect($canonicalUri, 301)
                 ->sendResponse();
             exit;
         }
