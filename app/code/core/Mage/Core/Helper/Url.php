@@ -84,7 +84,71 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Add request parameter into url
+     * Build a URL from the result of PHP's parse_url()
+     */
+    public function buildUrl(array $parts): string
+    {
+        return
+            (isset($parts['scheme']) ? $parts['scheme'] . '://' : '') .
+            ($parts['user'] ?? '') .
+            (isset($parts['pass']) ? ':' . $parts['pass'] : '') .
+            ((isset($parts['user']) || isset($parts['pass'])) ? '@' : '') .
+            ($parts['host'] ?? '') .
+            (isset($parts['port']) ? ':' . $parts['port'] : '') .
+            ($parts['path'] ?? '/') .
+            (isset($parts['query']) ? '?' . $parts['query'] : '') .
+            (isset($parts['fragment']) ? '#' . $parts['fragment'] : '');
+    }
+
+    /**
+     * Add or update varien route params in URL
+     */
+    public function setRouteParams(string $url, array $params = []): string
+    {
+        $parts = parse_url($url);
+        $parts['path'] ??= '/';
+
+        $noTrailingSlash = !str_ends_with($parts['path'], '/');
+        if ($noTrailingSlash) {
+            $parts['path'] .= '/';
+        }
+
+        foreach ($params as $key => $val) {
+            $regex = "/\/{$key}\/\w+\//";
+            if ($val === null || $val === false) {
+                $parts['path'] = preg_replace($regex, '/', $parts['path']);
+            } elseif (preg_match($regex, $parts['path'])) {
+                $parts['path'] = preg_replace($regex, "/{$key}/{$val}/", $parts['path']);
+            } else {
+                $parts['path'] .= "{$key}/{$val}/";
+            }
+        }
+
+        if ($noTrailingSlash && $parts['path'] !== '/') {
+            $parts['path'] = rtrim($parts['path'], '/');
+        }
+
+        return $this->buildUrl($parts);
+    }
+
+    /**
+     * Add or update varien route params in URL
+     */
+    public function addRouteParam(string $url, string $paramKey, mixed $value): string
+    {
+        return $this->setRouteParams($url, [$paramKey => $value]);
+    }
+
+    /**
+     * Remove varien route params from URL
+     */
+    public function removeRouteParam(string $url, string $paramKey): string
+    {
+        return $this->setRouteParams($url, [$paramKey => null]);
+    }
+
+    /**
+     * Add query parameter into url
      *
      * @param string $url
      * @param array $param ( 'key' => value )
@@ -114,7 +178,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Remove request parameter from url
+     * Remove query parameter from url
      *
      * @param string $url
      * @param string $paramKey
