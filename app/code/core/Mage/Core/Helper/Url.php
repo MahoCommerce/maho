@@ -147,6 +147,73 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Add trailing slash to URL
+     */
+    public function addTrailingSlash(string $url): string
+    {
+        $path = parse_url($url, PHP_URL_PATH) ?? '/';
+
+        // Do nothing for url without path
+        if (strlen($path) === 1) {
+            return $url;
+        }
+
+        // Do nothing for category or product pages with default .html suffix
+        if (str_ends_with($path, '.html')) {
+            return $url;
+        }
+
+        // The position in the URL where we expect a trailing slash to be
+        $offset = (strpos($url, '?') ?: strlen($url)) - 1;
+
+        if ($url[$offset] === '/') {
+            return $url;
+        }
+
+        return substr_replace($url, '/', $offset + 1, 0);
+    }
+
+    /**
+     * Remove trailing slash from URL
+     */
+    public function removeTrailingSlash(string $url): string
+    {
+        // Do nothing for url without path
+        if (strlen(parse_url($url, PHP_URL_PATH) ?? '/') === 1) {
+            return $url;
+        }
+
+        // The position in the URL where we expect a trailing slash to be
+        $offset = (strpos($url, '?') ?: strlen($url)) - 1;
+
+        if ($url[$offset] !== '/') {
+            return $url;
+        }
+
+        return substr_replace($url, '', $offset, 1);
+    }
+
+    /**
+     * Add or remove trailing slash from URL based on store config
+     */
+    public function addOrRemoveTrailingSlash(string $url): string
+    {
+        if (Mage::helper('adminhtml')->isAdminFrontNameMatched($url)) {
+            return $url;
+        }
+
+        $mode = Mage::getStoreConfig('web/url/trailing_slash_behavior');
+
+        if ($mode === Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::REMOVE_TRAILING_SLASH) {
+            return $this->removeTrailingSlash($url);
+        } elseif ($mode === Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::ADD_TRAILING_SLASH) {
+            return $this->addTrailingSlash($url);
+        } else {
+            return $url;
+        }
+    }
+
+    /**
      * Return singleton model instance
      *
      * @param string $name

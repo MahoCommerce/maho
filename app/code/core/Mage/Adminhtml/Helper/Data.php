@@ -24,6 +24,13 @@ class Mage_Adminhtml_Helper_Data extends Mage_Adminhtml_Helper_Help_Mapping
     protected $_pageHelpUrl;
 
     /**
+     * List of adminhtml front names, by default only "admin"
+     *
+     * @var list<string>
+     */
+    protected $adminFrontNames;
+
+    /**
      * Get mapped help pages url
      *
      * @param null|string $url
@@ -120,5 +127,37 @@ class Mage_Adminhtml_Helper_Data extends Mage_Adminhtml_Helper_Help_Mapping
     public function isEnabledSecurityKeyUrl()
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_ADMINHTML_SECURITY_USE_FORM_KEY);
+    }
+
+    /**
+     * Check if url starts with one of the admin front names
+     */
+    public function isAdminFrontNameMatched(string $url): bool
+    {
+        if ($this->adminFrontNames === null) {
+            $useCustomAdminPath = (bool) (string) Mage::getConfig()->getNode(self::XML_PATH_USE_CUSTOM_ADMIN_PATH);
+            $customAdminPath = (string) Mage::getConfig()->getNode(self::XML_PATH_CUSTOM_ADMIN_PATH);
+            $adminPath = ($useCustomAdminPath) ? $customAdminPath : null;
+
+            if (!$adminPath) {
+                $adminPath = (string) Mage::getConfig()
+                    ->getNode(self::XML_PATH_ADMINHTML_ROUTER_FRONTNAME);
+            }
+            $this->adminFrontNames = [$adminPath];
+
+            // Check for other modules that can use admin router (a lot of Magento extensions do that)
+            $adminFrontNameNodes = Mage::getConfig()->getNode('admin/routers')
+                ->xpath('*[not(self::adminhtml) and use = "admin"]/args/frontName');
+
+            if (is_array($adminFrontNameNodes)) {
+                foreach ($adminFrontNameNodes as $frontNameNode) {
+                    $this->adminFrontNames[] = (string) $frontNameNode;
+                }
+            }
+        }
+
+        $path = parse_url($url, PHP_URL_PATH) ?? '/';
+        $frontName = strtok(ltrim($path, '/'), '/');
+        return in_array($frontName, $this->adminFrontNames);
     }
 }
