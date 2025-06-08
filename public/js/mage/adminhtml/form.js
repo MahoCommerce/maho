@@ -604,15 +604,18 @@ class FormElementDependenceController {
                 result = this.evalCondition(subcondition.condition, subcondition.operator);
             } else {
                 // Otherwise check if we have this element in the form, or use fallback value
+                let refValues = Array.isArray(subcondition) ? subcondition : [subcondition];
                 let dependentValues = [];
                 const dependentEl = document.getElementById(this.mapFieldId(dependentField));
                 if (dependentEl) {
                     if (dependentEl.tagName === 'SELECT') {
                         dependentValues = this.getSelectValues(dependentEl);
+                        refValues = refValues.map(String);
                     } else if (dependentEl.tagName === 'INPUT' && ['radio', 'checkbox'].includes(dependentEl.type)) {
                         dependentValues.push(dependentEl.checked);
                     } else {
                         dependentValues.push(dependentEl.value);
+                        refValues = refValues.map(String);
                     }
                 } else {
                     const fallbackValues = this.config.field_values?.[this.mapFieldId(dependentField)];
@@ -620,7 +623,6 @@ class FormElementDependenceController {
                         dependentValues = Array.isArray(fallbackValues) ? fallbackValues : [fallbackValues];
                     }
                 }
-                const refValues = Array.isArray(subcondition) ? subcondition : [subcondition];
                 result = dependentValues.some((val) => refValues.includes(val));
             }
             results.push(result)

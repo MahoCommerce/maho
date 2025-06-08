@@ -27,13 +27,6 @@
         $_imgHtml = $_helper->categoryAttribute($_category, $_imgHtml, 'image');
     }
 ?>
-<div class="page-title category-title">
-    <?php if($this->isRssCatalogEnable() && $this->isTopCategory()): ?>
-        <a href="<?= $this->getRssLink() ?>" class="link-rss"><?= $this->__('Subscribe to RSS Feed') ?></a>
-    <?php endif ?>
-    <h1><?= $_helper->categoryAttribute($_category, $_category->getName(), 'name') ?></h1>
-</div>
-
 <?= $this->getMessagesBlock()->toHtml() ?>
 
 <?php if($_imgUrl): ?>

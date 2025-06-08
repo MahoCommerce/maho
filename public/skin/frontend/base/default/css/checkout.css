@@ -119,34 +119,7 @@ td.product-cart-remove a {
  * Checkout - Cart
  * ============================================ */
 .cart .page-title {
-    margin-bottom: 15px;
-}
-.cart .page-title:after {
-    content: '';
-    display: table;
-    clear: both;
-}
-.cart .page-title h1 {
-    float: left;
-    border-bottom: none;
-    margin-bottom: 6px;
-    margin-right: 10px;
-}
-
-.checkout-types {
-    float: right;
-    text-align: right;
-    max-width: 100%;
-    /* We always want this shipping method to display on its own line */
-}
-.checkout-types li {
-    vertical-align: top;
-    margin: 0 0 5px 5px;
-}
-.checkout-types li:after {
-    content: '';
-    display: table;
-    clear: both;
+    margin-bottom: 10px;
 }
 .checkout-types li img {
     display: inline;
@@ -804,26 +777,6 @@ td.product-cart-remove a {
     text-decoration: none;
 }
 
-.opc .section .step-title .number,
-.opc .section.allow.active .step-title .number,
-.no-touch .opc .section.allow:hover .step-title .number {
-    width: 26px;
-    height: 26px;
-    text-align: center;
-    color: var(--maho-color-background);
-    line-height: 26px;
-    background-color: var(--maho-color-primary);
-    display: block;
-    position: absolute;
-    top: 50%;
-    left: 10px;
-    margin-top: -13px;
-}
-
-.opc .section.allow .step-title .number {
-    background-color: var(--maho-color-primary-hover);
-}
-
 .opc .section.allow .step-title h2 {
     color: var(--maho-color-text-secondary);
 }
@@ -924,10 +877,6 @@ td.product-cart-remove a {
     transition: opacity 300ms linear 0;
 }
 
-.opc.opc-firststep-login .section#opc-login .step-title .number {
-    transition: width 80ms linear 0;
-}
-
 .opc.opc-firststep-login .section#opc-login .step-title h2 {
     transition: margin-left 80ms linear 0;
 }
@@ -938,11 +887,6 @@ td.product-cart-remove a {
 body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section:not(#opc-login) .step-title,
 body:not(.opc-has-progressed-from-login) .opc-block-progress-step-login {
     opacity: 0;
-}
-
-body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-login .step-title .number {
-    width: 0px;
-    overflow: hidden;
 }
 
 body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-login .step-title h2 {
