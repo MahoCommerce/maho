@@ -40,6 +40,9 @@ class Mage_Core_Model_Locale
     public const FORMAT_TYPE_MEDIUM = 'medium';
     public const FORMAT_TYPE_SHORT = 'short';
 
+    public const FORMAT_TIME_12H = '12h';
+    public const FORMAT_TIME_24H = '24h';
+
     /**
      * Default locale code
      *
@@ -426,6 +429,8 @@ class Mage_Core_Model_Locale
 
     /**
      * Retrieve ISO date format ensuring 4-digit year format
+     *
+     * @param self::FORMAT_TYPE_*|null $type The type of date format to use (full, long, medium, short)
      */
     public function getDateFormat(?string $type = null): string
     {
@@ -468,10 +473,10 @@ class Mage_Core_Model_Locale
     private function createDateFormatter(?string $type = null): IntlDateFormatter
     {
         $dateStyle = match ($type) {
-            Mage_Core_Model_Locale::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
-            Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
-            Mage_Core_Model_Locale::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
-            Mage_Core_Model_Locale::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
+            self::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
+            self::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
+            self::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
+            self::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
             default => IntlDateFormatter::MEDIUM,
         };
 
@@ -485,6 +490,19 @@ class Mage_Core_Model_Locale
     }
 
     /**
+     * Retrieve ISO time format
+     *
+     * @param self::FORMAT_TIME_*|null $type The type of time format to use (12h, 24h)
+     */
+    public function getTimeFormat(?string $type = null): string
+    {
+        return match ($type) {
+            self::FORMAT_TIME_12H => 'h:mm a',
+            default => 'HH:mm',
+        };
+    }
+
+    /**
      * Convert 2-digit year patterns (yy) to 4-digit year patterns (yyyy)
      */
     private function ensureFourDigitYear(string $pattern): string
@@ -494,25 +512,14 @@ class Mage_Core_Model_Locale
     }
 
     /**
-     * Retrieve ISO time format
-     *
-     * @param   string $type
-     * @return  string
-     */
-    public function getTimeFormat($type = null)
-    {
-        return $this->getTranslation($type, 'time');
-    }
-
-    /**
      * Retrieve ISO datetime format
      *
-     * @param   string $type
-     * @return  string
+     * @param self::FORMAT_TYPE_*|null $dateType The type of date format to use (full, long, medium, short)
+     * @param self::FORMAT_TIME_*|null $timeType The type of time format to use (12h, 24h)
      */
-    public function getDateTimeFormat($type)
+    public function getDateTimeFormat(?string $dateType = null, ?string $timeType = null): string
     {
-        return $this->getDateFormat($type) . ' ' . $this->getTimeFormat($type);
+        return $this->getDateFormat($dateType) . ' ' . $this->getTimeFormat($timeType);
     }
 
     /**

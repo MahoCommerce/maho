@@ -13,6 +13,7 @@
 /**
  * @method string getFormat()
  * @method string getInputFormat()
+ * @method string getDisplayFormat()
  * @method string getLocale()
  * @method string getImage()
  * @method string getTime()
@@ -78,7 +79,6 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
         }
         if (preg_match('/^[0-9]+$/', $value)) {
             $this->_value = new Zend_Date($this->_toTimestamp($value));
-            //$this->_value = new Zend_Date((int)value);
             return $this;
         }
         // last check, if input format was set
@@ -104,7 +104,7 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
 
     /**
      * Get date value as string.
-     * Format can be specified, or it will be taken from $this->getFormat()
+     * Format can be specified, or it will be taken from $this->getInputFormat()
      *
      * @param string $format (compatible with Zend_Date)
      * @return string
@@ -115,7 +115,7 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
             return '';
         }
         if (null === $format) {
-            $format = $this->getFormat();
+            $format = $this->getInputFormat();
         }
         return $this->_value->toString($format);
     }
@@ -147,36 +147,43 @@ class Varien_Data_Form_Element_Date extends Varien_Data_Form_Element_Abstract
         $this->addClass('input-text');
 
         $html = sprintf(
-            '<input name="%s" id="%s" value="%s" %s style="width:110px !important;" />'
-            . ' <img src="%s" alt="" class="v-middle" id="%s_trig" title="%s" style="%s" />',
+            '<input name="%s" id="%s" value="%s" %s style="width:110px !important;" />',
             $this->getName(),
             $this->getHtmlId(),
             $this->_escape($this->getValue()),
             $this->serialize($this->getHtmlAttributes()),
-            $this->getImage(),
-            $this->getHtmlId(),
-            'Select Date',
-            ($this->getDisabled() ? 'display:none;' : ''),
         );
-        $outputFormat = $this->getFormat();
-        if (empty($outputFormat)) {
-            throw new Exception('Output format is not specified. Please, specify "format" key in constructor, or set it using setFormat().');
-        }
-        $displayFormat = Varien_Date::convertZendToStrftime($outputFormat, true, (bool) $this->getTime());
 
-        $html .= sprintf(
-            '
-            <script type="text/javascript">
-                Calendar.setup({
-                    inputField: "%s",
-                    ifFormat: "%s",
-                    showsTime: %s
-                });
-            </script>',
-            $this->getHtmlId(),
-            $displayFormat,
-            $this->getTime() ? 'true' : 'false',
-        );
+        $setupObj = [
+            'inputField' => $this->getHtmlId(),
+            'allowInput' => true,
+            'enableTime' => (bool) $this->getTime(),
+        ];
+
+        // Modern ICU format
+        if ($this->getInputFormat()) {
+            $setupObj['inputFormat'] = (string) $this->getInputFormat();
+        }
+
+        // Legacy strftime format
+        if ($this->getFormat()) {
+            $setupObj['ifFormat'] = Varien_Date::convertZendToStrftime($this->getFormat(), true, $setupObj['enableTime']);
+        }
+
+        // Optional ICU display format
+        if ($this->getDisplayFormat()) {
+            $setupObj['displayFormat'] = $this->getDisplayFormat();
+        }
+
+        if (empty($setupObj['inputFormat']) && empty($setupObj['ifFormat'])) {
+            throw new Exception('Output format is not specified. Please, specify "format" key in constructor, or set it using setInputFormat() or setFormat().');
+        }
+
+        $setupObj = json_encode($setupObj);
+
+        $html .= <<<HTML
+            <script>Calendar.setup({$setupObj});</script>
+        HTML;
 
         $html .= $this->getAfterElementHtml();
         return $html;
