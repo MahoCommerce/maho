@@ -657,6 +657,10 @@ class tiptapWysiwygSetup {
                 Widget,
                 TiptapModules.Link.configure({
                     openOnClick: false,
+                    HTMLAttributes: {
+                        rel: null,
+                        target: null,
+                    },
                 }),
                 TiptapModules.Table.configure({
                     resizable: true,
