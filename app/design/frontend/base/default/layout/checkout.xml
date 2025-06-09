@@ -337,6 +337,8 @@ One page checkout main layout
         <!-- Mage_Checkout -->
         <remove name="left"/>
 
+        <update handle="page_minimal" ifconfig="checkout/options/minimal_layout"/>
+
         <reference name="root">
             <action method="setTemplate"><template>page/2columns-right.phtml</template></action>
         </reference>
@@ -344,6 +346,7 @@ One page checkout main layout
             <action method="addItem"><type>skin_css</type><name>css/checkout.css</name></action>
             <action method="addJs"><script>varien/accordion.js</script></action>
             <action method="addJs"><script>varien/opcheckout.js</script></action>
+            <action method="removeItem"><type>skin_js</type><name>js/app.js</name></action>
         </reference>
         <reference name="right">
             <action method="unsetChildren"></action>
@@ -543,5 +546,4 @@ One page checkout order review block
             <block type="checkout/onepage_failure" name="checkout.failure" template="checkout/onepage/failure.phtml"/>
         </reference>
     </checkout_onepage_failure>
-
 </layout>
