@@ -50,15 +50,7 @@ class Varien_Data_Form_Element_Editor extends Varien_Data_Form_Element_Textarea
                 {$this->_getButtonsHtml()}
                 <textarea id="{$this->getHtmlId()}" name="{$this->getName()}" {$this->serialize($this->getHtmlAttributes())}>{$this->getEscapedValue()}</textarea>
                 <script>
-                    function onReady(callback) {
-                        if (document.readyState === 'loading') {
-                            document.addEventListener('DOMContentLoaded', callback);
-                        } else {
-                            callback();
-                        }
-                    }
-
-                    onReady(() => {
+                    mahoOnReady(() => {
                         window.$jsSetupObject = new tiptapWysiwygSetup('{$this->getHtmlId()}', $configObject);
                     });
                 </script>
