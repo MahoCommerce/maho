@@ -195,4 +195,20 @@
             <action method="setLayoutCode"><name>three_columns</name></action>
         </reference>
     </page_three_columns>
+
+    <!-- Minimal page layout - only logo in header, no footer -->
+    <page_minimal translate="label">
+        <label>All Minimal Layout Pages</label>
+        <reference name="head">
+            <action method="removeItem"><type>skin_js</type><name>js/app.js</name></action>
+            <action method="removeItem"><type>skin_js</type><name>js/minicart.js</name></action>
+        </reference>
+        <reference name="header">
+            <action method="setTemplate"><template>page/html/header_minimal.phtml</template></action>
+        </reference>
+        <reference name="footer">
+            <action method="setTemplate"><template>page/html/footer_minimal.phtml</template></action>
+        </reference>
+        <remove name="footer.before"/>
+    </page_minimal>
 </layout>

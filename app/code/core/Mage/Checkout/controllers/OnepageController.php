@@ -188,14 +188,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         Mage::getSingleton('checkout/session')->setCartWasUpdated(false);
         Mage::getSingleton('customer/session')->setBeforeAuthUrl(Mage::getUrl('*/*/*', ['_secure' => true]));
         $this->getOnepage()->initCheckout();
-
-        // Check if minimal layout is enabled in configuration
-        if (Mage::getStoreConfigFlag('checkout/options/minimal_layout')) {
-            $this->loadLayout(['default', 'checkout_onepage_index', 'checkout_onepage_minimal']);
-        } else {
-            $this->loadLayout();
-        }
-
+        $this->loadLayout();
         $this->_initLayoutMessages('customer/session');
         $this->getLayout()->getBlock('head')->setTitle($this->__('Checkout'));
         $this->renderLayout();
