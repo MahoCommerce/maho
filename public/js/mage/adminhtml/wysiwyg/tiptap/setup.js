@@ -6,6 +6,24 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
+import { Editor, Node, Mark, mergeAttributes } from 'https://esm.sh/@tiptap/core@2.14.0';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.14.0';
+import Link from 'https://esm.sh/@tiptap/extension-link@2.14.0';
+import Image from 'https://esm.sh/@tiptap/extension-image@2.14.0';
+import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@2.14.0';
+import Underline from 'https://esm.sh/@tiptap/extension-underline@2.14.0';
+import Table from 'https://esm.sh/@tiptap/extension-table@2.14.0';
+import TableRow from 'https://esm.sh/@tiptap/extension-table-row@2.14.0';
+import TableCell from 'https://esm.sh/@tiptap/extension-table-cell@2.14.0';
+import TableHeader from 'https://esm.sh/@tiptap/extension-table-header@2.14.0';
+import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@2.14.0';
+
+const TiptapModules = {
+    Editor, Node, Mark, mergeAttributes, StarterKit,
+    Link, Image, TextAlign, Underline,
+    Table, TableRow, TableCell, TableHeader, BubbleMenu
+};
+
 class tiptapWysiwygSetup {
 
     mediaBrowserCallback = null;
@@ -43,16 +61,6 @@ class tiptapWysiwygSetup {
         varienGlobalEvents.attachEventHandler('open_browser_callback', this.openFileBrowser.bind(this));
     }
 
-    waitForTiptapModules() {
-        return new Promise((resolve) => {
-            if (window.TiptapModules) {
-                resolve();
-            } else {
-                window.addEventListener('tiptap-modules-loaded', resolve, { once: true });
-            }
-        });
-    }
-
     unbindEventListeners() {
         varienGlobalEvents.removeEventHandler('formSubmit', this.onFormValidation);
     }
@@ -62,12 +70,12 @@ class tiptapWysiwygSetup {
         if (this.editor) {
             // Save content before destroying
             this.updateTextArea();
-            
+
             // Destroy the Tiptap instance
             this.editor.destroy();
             this.editor = null;
         }
-        
+
         // Remove the wrapper which contains everything
         const wrapper = document.getElementById(`${this.id}_wrapper`);
         if (wrapper) {
@@ -83,7 +91,7 @@ class tiptapWysiwygSetup {
         // Heading dropdown
         const headingGroup = document.createElement('div');
         headingGroup.className = 'toolbar-group';
-        
+
         const headingSelect = document.createElement('select');
         headingSelect.innerHTML = `
             <option value="">Paragraph</option>
@@ -110,7 +118,7 @@ class tiptapWysiwygSetup {
         // Text formatting buttons
         const formatGroup = document.createElement('div');
         formatGroup.className = 'toolbar-group';
-        
+
         const boldBtn = this.createToolbarButton('Bold', this.getIcon('bold'), () => {
             this.editor.chain().focus().toggleBold().run();
         }, 'bold');
@@ -285,11 +293,11 @@ class tiptapWysiwygSetup {
         button.title = title;
         button.innerHTML = innerHTML;
         button.addEventListener('click', onClick);
-        
+
         if (commandName) {
             button.dataset.command = commandName;
         }
-        
+
         return button;
     }
 
@@ -321,29 +329,22 @@ class tiptapWysiwygSetup {
         }
     }
 
-    async setup() {
-        // Wait for Tiptap modules to be loaded
-        await this.waitForTiptapModules();
-        
-        if (!window.TiptapModules) {
-            console.error('Tiptap modules not loaded');
-            return;
-        }
+    setup() {
         // Create wrapper container for Tiptap editor
         const textarea = this.getTextArea();
         const wrapper = document.createElement('div');
         wrapper.id = `${this.id}_wrapper`;
         wrapper.className = 'tiptap-wrapper';
-        
+
         // Create and add toolbar
         const toolbar = this.createToolbar();
         wrapper.appendChild(toolbar);
-        
+
         // Create container for Tiptap editor content
         const container = document.createElement('div');
         container.id = `${this.id}_editor`;
         wrapper.appendChild(container);
-        
+
         // Insert wrapper after textarea
         textarea.style.display = 'none';
         textarea.parentNode.insertBefore(wrapper, textarea.nextSibling);
@@ -361,7 +362,7 @@ class tiptapWysiwygSetup {
                 const directive = `{{media url="${url}"}}`;
                 const encodedDirective = Base64.mageEncode(directive);
                 const directiveUrl = this.makeDirectiveUrl(encodedDirective);
-                
+
                 // Replace only the src attribute value, preserving all other attributes
                 const updatedAttributes = attributes.replace(/\bsrc="[^"]+"/i, `src="${directiveUrl}"`);
                 return `<img${updatedAttributes}>`;
@@ -373,7 +374,7 @@ class tiptapWysiwygSetup {
         initialContent = this.encodeContent(initialContent);
 
         // Define custom image extension with additional attributes and resize support
-        const CustomImage = window.TiptapModules.Image.extend({
+        const CustomImage = TiptapModules.Image.extend({
             addAttributes() {
                 return {
                     src: { default: null },
@@ -397,7 +398,7 @@ class tiptapWysiwygSetup {
                         const { selection } = state
                         const { from } = selection
                         const node = state.doc.nodeAt(from)
-                        
+
                         if (node && node.type.name === 'image') {
                             tr.setNodeMarkup(from, undefined, {
                                 ...node.attrs,
@@ -409,21 +410,21 @@ class tiptapWysiwygSetup {
                     }
                 }
             },
-            
+
             addNodeView() {
                 return ({ node, updateAttributes, editor }) => {
                     const container = document.createElement('div');
                     container.style.position = 'relative';
                     container.style.display = 'inline-block';
                     container.className = 'image-container';
-                    
+
                     const img = document.createElement('img');
                     Object.entries(node.attrs).forEach(([key, value]) => {
                         if (value !== null) {
                             img.setAttribute(key, value);
                         }
                     });
-                    
+
                     // Store update function reference
                     const updateImageAttributes = (attrs) => {
                         // First try the built-in updateAttributes if available
@@ -431,7 +432,7 @@ class tiptapWysiwygSetup {
                             updateAttributes(attrs);
                             return;
                         }
-                        
+
                         // Fallback to command system
                         try {
                             const pos = editor.view.posAtDOM(img, 0);
@@ -452,7 +453,7 @@ class tiptapWysiwygSetup {
                             console.warn('Failed to update image attributes:', e);
                         }
                     };
-                    
+
                     // Create resize handles
                     const createResizeHandle = (position) => {
                         const handle = document.createElement('div');
@@ -466,7 +467,7 @@ class tiptapWysiwygSetup {
                             cursor: ${position}-resize;
                             display: none;
                         `;
-                        
+
                         // Position handles
                         switch(position) {
                             case 'nw': handle.style.top = '-5px'; handle.style.left = '-5px'; break;
@@ -474,15 +475,15 @@ class tiptapWysiwygSetup {
                             case 'sw': handle.style.bottom = '-5px'; handle.style.left = '-5px'; break;
                             case 'se': handle.style.bottom = '-5px'; handle.style.right = '-5px'; break;
                         }
-                        
+
                         return handle;
                     };
-                    
+
                     const handles = ['nw', 'ne', 'sw', 'se'].map(createResizeHandle);
-                    
+
                     container.appendChild(img);
                     handles.forEach(handle => container.appendChild(handle));
-                    
+
                     // Show/hide handles on hover
                     container.addEventListener('mouseenter', () => {
                         handles.forEach(h => h.style.display = 'block');
@@ -490,12 +491,12 @@ class tiptapWysiwygSetup {
                     container.addEventListener('mouseleave', () => {
                         handles.forEach(h => h.style.display = 'none');
                     });
-                    
+
                     // Add double-click handler
                     img.addEventListener('dblclick', (e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        
+
                         // Check if this is a widget placeholder
                         if (node.attrs.class && node.attrs.class.includes('maho-widget-placeholder')) {
                             // This is a widget placeholder - open widget editor
@@ -506,13 +507,13 @@ class tiptapWysiwygSetup {
                             // Regular image - edit alt text
                             const currentAlt = node.attrs.alt || '';
                             const newAlt = window.prompt('Alternative text:', currentAlt);
-                            
+
                             if (newAlt !== null) {
                                 updateImageAttributes({ alt: newAlt });
                             }
                         }
                     });
-                    
+
                     // Handle resizing
                     handles.forEach(handle => {
                         handle.addEventListener('mousedown', (e) => {
@@ -522,64 +523,64 @@ class tiptapWysiwygSetup {
                             const startWidth = img.offsetWidth;
                             const startHeight = img.offsetHeight;
                             const aspectRatio = startWidth / startHeight;
-                            
+
                             const handleMouseMove = (e) => {
                                 const deltaX = e.clientX - startX;
                                 const deltaY = e.clientY - startY;
-                                
+
                                 let newWidth = startWidth + deltaX;
                                 let newHeight = startHeight + deltaY;
-                                
+
                                 // Maintain aspect ratio
                                 if (Math.abs(deltaX) > Math.abs(deltaY)) {
                                     newHeight = newWidth / aspectRatio;
                                 } else {
                                     newWidth = newHeight * aspectRatio;
                                 }
-                                
+
                                 // Minimum size
                                 newWidth = Math.max(50, newWidth);
                                 newHeight = Math.max(50, newHeight);
-                                
+
                                 img.style.width = newWidth + 'px';
                                 img.style.height = newHeight + 'px';
                             };
-                            
+
                             const handleMouseUp = () => {
                                 document.removeEventListener('mousemove', handleMouseMove);
                                 document.removeEventListener('mouseup', handleMouseUp);
-                                
+
                                 // Update node attributes
                                 updateImageAttributes({
                                     width: Math.round(img.offsetWidth),
                                     height: Math.round(img.offsetHeight)
                                 });
                             };
-                            
+
                             document.addEventListener('mousemove', handleMouseMove);
                             document.addEventListener('mouseup', handleMouseUp);
                         });
                     });
-                    
+
                     return {
                         dom: container,
                         contentDOM: null,
                         update: (updatedNode) => {
                             if (updatedNode.type.name !== 'image') return false;
-                            
+
                             Object.entries(updatedNode.attrs).forEach(([key, value]) => {
                                 if (value !== null && key !== 'width' && key !== 'height') {
                                     img.setAttribute(key, value);
                                 }
                             });
-                            
+
                             if (updatedNode.attrs.width) {
                                 img.style.width = updatedNode.attrs.width + 'px';
                             }
                             if (updatedNode.attrs.height) {
                                 img.style.height = updatedNode.attrs.height + 'px';
                             }
-                            
+
                             return true;
                         }
                     };
@@ -589,15 +590,15 @@ class tiptapWysiwygSetup {
 
         // Store reference to this instance for use in Widget extension
         const setupInstance = this;
-        
+
         // Define custom Widget node for widget placeholders
-        const Widget = window.TiptapModules.Node.create({
+        const Widget = TiptapModules.Node.create({
             name: 'widget',
-            
+
             group: 'inline',
             inline: true,
             atom: true,
-            
+
             addAttributes() {
                 return {
                     id: { default: null },
@@ -606,17 +607,17 @@ class tiptapWysiwygSetup {
                     class: { default: 'maho-widget-placeholder' }
                 };
             },
-            
+
             parseHTML() {
                 return [{
                     tag: 'img.maho-widget-placeholder',
                 }];
             },
-            
+
             renderHTML({ HTMLAttributes }) {
-                return ['img', window.TiptapModules.mergeAttributes(HTMLAttributes)];
+                return ['img', TiptapModules.mergeAttributes(HTMLAttributes)];
             },
-            
+
             addNodeView() {
                 return ({ node }) => {
                     const dom = document.createElement('img');
@@ -624,7 +625,7 @@ class tiptapWysiwygSetup {
                     dom.setAttribute('src', node.attrs.src);
                     dom.setAttribute('title', node.attrs.title);
                     dom.setAttribute('class', node.attrs.class);
-                    
+
                     // Add double-click handler
                     dom.addEventListener('dblclick', (e) => {
                         e.preventDefault();
@@ -633,7 +634,7 @@ class tiptapWysiwygSetup {
                             setupInstance.openWidgetForEdit(node.attrs.id);
                         }
                     });
-                    
+
                     return { dom };
                 };
             }
@@ -644,30 +645,30 @@ class tiptapWysiwygSetup {
         const tableBubbleMenu = this.createTableBubbleMenu();
         wrapper.appendChild(tableBubbleMenu);
 
-        this.editor = new window.TiptapModules.Editor({
+        this.editor = new TiptapModules.Editor({
             element: container,
             extensions: [
-                window.TiptapModules.StarterKit.configure({
+                TiptapModules.StarterKit.configure({
                     heading: {
                         levels: [1, 2, 3, 4, 5]
                     }
                 }),
                 CustomImage,
                 Widget,
-                window.TiptapModules.Link.configure({
+                TiptapModules.Link.configure({
                     openOnClick: false,
                 }),
-                window.TiptapModules.Table.configure({
+                TiptapModules.Table.configure({
                     resizable: true,
                 }),
-                window.TiptapModules.TableRow,
-                window.TiptapModules.TableCell,
-                window.TiptapModules.TableHeader,
-                window.TiptapModules.TextAlign.configure({
+                TiptapModules.TableRow,
+                TiptapModules.TableCell,
+                TiptapModules.TableHeader,
+                TiptapModules.TextAlign.configure({
                     types: ['heading', 'paragraph'],
                 }),
-                window.TiptapModules.Underline,
-                window.TiptapModules.BubbleMenu.configure({
+                TiptapModules.Underline,
+                TiptapModules.BubbleMenu.configure({
                     element: tableBubbleMenu,
                     shouldShow: ({ editor, state }) => {
                         return editor.isActive('tableCell') || editor.isActive('tableHeader');
@@ -722,8 +723,8 @@ class tiptapWysiwygSetup {
         if (this.config.files_browser_window_url) {
             // Store the current selection/cursor position before opening dialog
             const { from } = this.editor.state.selection;
-            
-            varienGlobalEvents.fireEvent("open_browser_callback", { 
+
+            varienGlobalEvents.fireEvent("open_browser_callback", {
                 callback: (url) => {
                     // Insert the image at the stored position
                     this.editor.chain().focus().insertContentAt(from, {
@@ -743,7 +744,7 @@ class tiptapWysiwygSetup {
             // Clear any editing state when inserting a new widget
             this.editingWidgetId = null;
             delete window.widgetFormInitialValues;
-            
+
             const url = this.config.widget_window_url + 'widget_target_id/' + this.id + '/';
             widgetTools.openDialog(url);
         }
@@ -757,17 +758,17 @@ class tiptapWysiwygSetup {
 
         // Decode the widget content from the ID
         const widgetCode = Base64.idDecode(widgetId);
-        
+
         // Parse the widget code to extract parameters
         const widgetParams = this.parseWidgetCode(widgetCode);
-        
+
         if (widgetParams && widgetParams.type) {
             // Store the widget element for later replacement
             this.editingWidgetId = widgetId;
-            
+
             // Store widget parameters globally for the widget form to access
             window.widgetFormInitialValues = widgetParams;
-            
+
             // Open the widget dialog
             const url = this.config.widget_window_url + 'widget_target_id/' + this.id + '/';
             widgetTools.openDialog(url);
@@ -778,18 +779,18 @@ class tiptapWysiwygSetup {
         // Extract widget parameters from the widget directive
         const match = widgetCode.match(/\{\{widget\s+(.+?)\}\}/);
         if (!match) return null;
-        
+
         const params = {};
         const paramString = match[1];
-        
+
         // Parse key="value" pairs
         const regex = /(\w+)="([^"]*)"/g;
         let paramMatch;
-        
+
         while ((paramMatch = regex.exec(paramString)) !== null) {
             params[paramMatch[1]] = paramMatch[2];
         }
-        
+
         return params;
     }
 
@@ -953,12 +954,12 @@ class tiptapWysiwygSetup {
             // Parse the complete attributes string to handle the src attribute properly
             const srcMatch = attributes.match(/\bsrc="([^"]+)"/i);
             if (!srcMatch) return match;
-            
+
             const src = srcMatch[1];
             const urlPattern = this.config.directives_url
                 .replace(/([$^.?*!+:=()\[\]{}|\\])/g, '\\$1')
                 .replace('directive', 'directive/___directive/([a-zA-Z0-9,_-]+)(?:/key/[a-zA-Z0-9]+/?)?');
-            
+
             // Check if the src contains a directive URL
             if (src.match(new RegExp(urlPattern))) {
                 const decodedSrc = src.replace(new RegExp(urlPattern, 'g'), (m, directive) => {
@@ -970,19 +971,19 @@ class tiptapWysiwygSetup {
             }
             return match;
         });
-        
+
         // Then decode directive URLs in other contexts (but NOT media directives)
         return content.replace(/<([a-z0-9\-\_]+[^>]*?)>/gi, (match) => {
             // Skip img tags as we already handled them
             if (match.toLowerCase().startsWith('<img')) {
                 return match;
             }
-            
+
             const urlPattern = this.config.directives_url
                 .replace(/([$^.?*!+:=()\[\]{}|\\])/g, '\\$1')
                 .replace('directive', 'directive/___directive/([a-zA-Z0-9,_-]+)(?:/key/[a-zA-Z0-9]+/?)?');
             const reg = new RegExp(urlPattern, 'g');
-            
+
             return match.replace(reg, (m, directive) => {
                 const decoded = Base64.mageDecode(directive);
                 // Only decode if it's NOT a media directive
@@ -1049,14 +1050,14 @@ class tiptapWysiwygSetup {
                         return false; // Stop searching
                     }
                 });
-                
+
                 if (targetPos !== null) {
                     // Process the new content to get widget attributes
                     const processedContent = this.encodeContent(content);
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = processedContent;
                     const newWidget = tempDiv.querySelector('img.maho-widget-placeholder');
-                    
+
                     if (newWidget) {
                         // Replace the existing widget with new widget node
                         this.editor.chain()
@@ -1074,13 +1075,13 @@ class tiptapWysiwygSetup {
                             })
                             .run();
                     }
-                    
+
                     // Clear the editing widget ID
                     this.editingWidgetId = null;
                     return;
                 }
             }
-            
+
             // Normal insertion at cursor position
             if (content.includes('{{widget') && content.includes('}}')) {
                 // This is a widget, process it first
@@ -1088,7 +1089,7 @@ class tiptapWysiwygSetup {
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = processedContent;
                 const widgetImg = tempDiv.querySelector('img.maho-widget-placeholder');
-                
+
                 if (widgetImg) {
                     // Insert as widget node
                     this.editor.chain().focus().insertContent({
@@ -1118,23 +1119,23 @@ class tiptapWysiwygSetup {
         'underline': '<path d="M7 5v5a5 5 0 0 0 10 0v-5"/><path d="M5 19h14"/>',
         'strike': '<path d="M5 12l14 0"/><path d="M16 6.5a4 2 0 0 0 -4 -1.5h-1a3.5 3.5 0 0 0 0 7h2a3.5 3.5 0 0 1 0 7h-1.5a4 2 0 0 1 -4 -1.5"/>',
         'blockquote': '<path d="M6 15h15"/><path d="M21 19h-15"/><path d="M15 11h6"/><path d="M21 7h-6"/><path d="M9 9h1a1 1 0 1 1 -1 1v-2.5a2 2 0 0 1 2 -2"/><path d="M3 9h1a1 1 0 1 1 -1 1v-2.5a2 2 0 0 1 2 -2"/>',
-        
+
         // List icons
         'bullet-list': '<path d="M9 6l11 0"/><path d="M9 12l11 0"/><path d="M9 18l11 0"/><path d="M5 6l0 .01"/><path d="M5 12l0 .01"/><path d="M5 18l0 .01"/>',
         'ordered-list': '<path d="M11 6h9"/><path d="M11 12h9"/><path d="M12 18h8"/><path d="M4 16a2 2 0 1 1 4 0c0 .591 -.5 1 -1 1.5l-3 2.5h4"/><path d="M6 10v-6l-2 2"/>',
-        
+
         // Alignment icons
         'align-left': '<path d="M4 6l16 0"/><path d="M4 12l10 0"/><path d="M4 18l14 0"/>',
         'align-center': '<path d="M4 6l16 0"/><path d="M8 12l8 0"/><path d="M6 18l12 0"/>',
         'align-right': '<path d="M4 6l16 0"/><path d="M10 12l10 0"/><path d="M6 18l14 0"/>',
-        
+
         // Insert icons
         'link': '<path d="M9 15l6 -6"/><path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464"/><path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463"/>',
         'image': '<path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"/><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/>',
         'table': '<path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"/><path d="M3 10h18"/><path d="M10 3v18"/>',
         'widget': '<path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/>',
         'variable': '<path d="M5 4c-2.5 5 -2.5 10 0 16m14 -16c2.5 5 2.5 10 0 16m-10 -11h1c1 0 1 1 2.016 3.527c.984 2.473 .984 3.473 1.984 3.473h1"/><path d="M8 16c1.5 0 3 -2 4 -3.5s2.5 -3.5 4 -3.5"/>',
-        
+
         // Table operation icons
         'column-insert-left': '<path d="M14 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1z"/><path d="M5 12l4 0"/><path d="M7 10l0 4"/>',
         'column-insert-right': '<path d="M6 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1z"/><path d="M15 12l4 0"/><path d="M17 10l0 4"/>',
@@ -1158,3 +1159,5 @@ class tiptapWysiwygSetup {
         return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconPath}</svg>`;
     }
 }
+
+window.tiptapWysiwygSetup = tiptapWysiwygSetup;

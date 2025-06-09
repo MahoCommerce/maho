@@ -69,7 +69,7 @@ Default layout, loads most of the pages
                 <action method="addItem"><type>js</type><name>mage/adminhtml/rules.js</name><params/><if/><condition>can_load_rules_js</condition></action>
 
                 <!-- Tiptap setup and custom styles -->
-                <action method="addItem"><type>js</type><name>mage/adminhtml/wysiwyg/tiptap/setup.js</name><params/><if/><condition>can_load_wysiwyg</condition></action>
+                <action method="addItem"><type>js</type><name>mage/adminhtml/wysiwyg/tiptap/setup.js</name><params>type="module"</params><if/><condition>can_load_wysiwyg</condition></action>
                 <action method="addItem"><type>js_css</type><name>mage/adminhtml/wysiwyg/tiptap/tiptap.css</name><params/><if/><condition>can_load_wysiwyg</condition></action>
             </block>
 
