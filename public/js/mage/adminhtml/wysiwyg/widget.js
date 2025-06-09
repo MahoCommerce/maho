@@ -74,14 +74,6 @@ WysiwygWidget.Widget = class {
         this.optionsUrl = optionsSourceUrl;
         this.optionValues = new Map();
         this.widgetTargetId = widgetTargetId;
-        
-        // Store cursor position for Tiptap
-        if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.widgetTargetId)) {
-            const tiptapEditor = tiptapEditors.get(this.widgetTargetId);
-            if (tiptapEditor && tiptapEditor.editor) {
-                this.tiptapSelection = tiptapEditor.editor.state.selection;
-            }
-        }
 
         this.widgetEl.addEventListener('change', this.loadOptions.bind(this));
         
