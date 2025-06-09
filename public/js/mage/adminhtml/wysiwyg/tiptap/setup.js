@@ -623,7 +623,7 @@ class tiptapWysiwygSetup {
                     const dom = document.createElement('img');
                     dom.setAttribute('id', node.attrs.id);
                     dom.setAttribute('src', node.attrs.src);
-                    dom.setAttribute('title', node.attrs.title);
+                    dom.setAttribute('title', node.attrs.title || 'Double-click to edit');
                     dom.setAttribute('class', node.attrs.class);
 
                     // Add double-click handler
@@ -932,17 +932,10 @@ class tiptapWysiwygSetup {
                 if (!this.widgetPlaceholderExist(placeholderFilename)) {
                     placeholderFilename = 'default.svg';
                 }
-                const attributesObj = {
-                    id: Base64.idEncode(match),
-                    src: this.config.widget_images_url + placeholderFilename,
-                    title: 'Double-click to edit: ' + match.replace(/\{\{/g, '{').replace(/\}\}/g, '}').replace(/\"/g, '&quot;'),
-                    class: 'maho-widget-placeholder'
-                };
-                const attributesString = Object.entries(attributesObj)
-                      .map(([key, value]) => `${key}="${value}"`)
-                      .join(' ');
 
-                return `<img ${attributesString}>`;
+                const id = Base64.idEncode(match);
+                const src = this.config.widget_images_url + placeholderFilename;
+                return `<img id="${id}" src="${src}" title="Double-click to edit" class="maho-widget-placeholder">`;
             }
             return match;
         });
@@ -1086,21 +1079,36 @@ class tiptapWysiwygSetup {
             if (content.includes('{{widget') && content.includes('}}')) {
                 // This is a widget, process it first
                 const processedContent = this.encodeContent(content);
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = processedContent;
-                const widgetImg = tempDiv.querySelector('img.maho-widget-placeholder');
 
-                if (widgetImg) {
-                    // Insert as widget node
-                    this.editor.chain().focus().insertContent({
-                        type: 'widget',
-                        attrs: {
-                            id: widgetImg.getAttribute('id'),
-                            src: widgetImg.getAttribute('src'),
-                            title: widgetImg.getAttribute('title'),
-                            class: widgetImg.getAttribute('class')
-                        }
-                    }).run();
+                // Parse the widget directly from the processedContent to avoid HTML parsing issues
+                const widgetMatch = processedContent.match(/<img\s+([^>]+)>/);
+                if (widgetMatch) {
+                    const attrs = {};
+
+                    // Parse attributes more carefully
+                    const attrString = widgetMatch[1];
+
+                    // Split by spaces but not spaces inside quotes
+                    const attrPairs = attrString.match(/\w+="[^"]*"/g) || [];
+
+                    attrPairs.forEach(pair => {
+                        const [key, ...valueParts] = pair.split('=');
+                        const value = valueParts.join('=').replace(/^"|"$/g, '');
+                        attrs[key] = value;
+                    });
+
+                    if (attrs.id && attrs.src) {
+                        // Insert as widget node
+                        this.editor.chain().focus().insertContent({
+                            type: 'widget',
+                            attrs: {
+                                id: attrs.id,
+                                src: attrs.src,
+                                title: attrs.title || 'Double-click to edit',
+                                class: attrs.class || 'maho-widget-placeholder'
+                            }
+                        }).run();
+                    }
                 }
             } else if (content.includes('<') && content.includes('>')) {
                 // Insert HTML content
