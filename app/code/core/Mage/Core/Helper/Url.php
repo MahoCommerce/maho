@@ -101,7 +101,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Add or update varien route params in URL
+     * Add, update, or remove multiple varien route params in URL
      */
     public function setRouteParams(string $url, array $params = []): string
     {
@@ -132,7 +132,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Add or update varien route params in URL
+     * Add or update varien route param in URL
      */
     public function addRouteParam(string $url, string $paramKey, mixed $value): string
     {
@@ -140,7 +140,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Remove varien route params from URL
+     * Remove varien route param from URL
      */
     public function removeRouteParam(string $url, string $paramKey): string
     {
