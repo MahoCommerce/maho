@@ -222,8 +222,8 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
             return $url;
         }
 
-        // Do nothing for category or product pages with default .html suffix
-        if (str_ends_with($path, '.html')) {
+        // Do nothing for pages an extension, such as .html
+        if (pathinfo($path, PATHINFO_EXTENSION) !== '') {
             return $url;
         }
 
