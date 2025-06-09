@@ -45,45 +45,97 @@
         // Remove remaining event listeners
         events.forEach(event => document.removeEventListener(event, load));
 
-        loadNext();
+        loadAllScripts();
     }
     
-    function loadNext() {
-        if (loadIndex >= scripts.length) {
-            // All scripts loaded, now fire events
-            fireEvents();
-            return;
-        }
+    function loadAllScripts() {
+        // Create promises for all scripts
+        const scriptPromises = scripts.map((script, index) => {
+            return new Promise((resolve) => {
+                if (script.src) {
+                    // External script - create a new script element
+                    const newScript = document.createElement("script");
+                    
+                    // Copy all attributes except type and data-maho-script
+                    for (const attr of script.element.attributes) {
+                        if (attr.name !== "type" && attr.name !== "data-maho-script") {
+                            newScript.setAttribute(attr.name, attr.value);
+                        }
+                    }
+                    
+                    // Store the script element for later insertion
+                    script.newScript = newScript;
+                    
+                    // Create a preload to start download immediately
+                    const link = document.createElement("link");
+                    link.rel = "preload";
+                    link.as = "script";
+                    link.href = script.src;
+                    
+                    // When preload completes, we're ready (but don't execute yet)
+                    link.onload = link.onerror = () => {
+                        resolve();
+                    };
+                    
+                    document.head.appendChild(link);
+                } else {
+                    // Inline script - prepare the new script element
+                    const newScript = document.createElement("script");
+                    
+                    // Copy all attributes except type and data-maho-script
+                    for (const attr of script.element.attributes) {
+                        if (attr.name !== "type" && attr.name !== "data-maho-script") {
+                            newScript.setAttribute(attr.name, attr.value);
+                        }
+                    }
+                    
+                    newScript.textContent = script.content;
+                    script.newScript = newScript;
+                    
+                    // Inline scripts are immediately ready
+                    resolve();
+                }
+            });
+        });
         
-        const script = scripts[loadIndex++];
-        const newScript = document.createElement("script");
+        // Wait for all scripts to be ready, then execute in order
+        Promise.all(scriptPromises).then(() => {
+            executeScriptsInOrder();
+        });
+    }
+    
+    function executeScriptsInOrder() {
+        let index = 0;
         
-        // Copy all attributes except type and data-maho-script
-        for (const attr of script.element.attributes) {
-            if (attr.name !== "type" && attr.name !== "data-maho-script") {
-                newScript.setAttribute(attr.name, attr.value);
+        function executeNext() {
+            if (index >= scripts.length) {
+                // All scripts executed
+                fireEvents();
+                return;
+            }
+            
+            const script = scripts[index++];
+            
+            if (script.src) {
+                // For external scripts, set src and add to DOM
+                script.newScript.src = script.src;
+                
+                // Wait for execution before continuing
+                script.newScript.onload = script.newScript.onerror = () => {
+                    setTimeout(executeNext, 0);
+                };
+            }
+            
+            // Replace the original script element
+            script.element.parentNode.replaceChild(script.newScript, script.element);
+            
+            // For inline scripts, continue immediately
+            if (!script.src) {
+                setTimeout(executeNext, 0);
             }
         }
         
-        if (script.src) {
-            // External script
-            newScript.onload = newScript.onerror = () => {
-                // Some scripts may define things in onload, give them time
-                setTimeout(loadNext, 0);
-            };
-            newScript.src = script.src;
-        } else {
-            // Inline script
-            newScript.textContent = script.content;
-        }
-        
-        // Replace original script element
-        script.element.parentNode.replaceChild(newScript, script.element);
-        
-        // Continue immediately for inline scripts
-        if (!script.src) {
-            setTimeout(loadNext, 0);
-        }
+        executeNext();
     }
     
     function fireEvents() {
