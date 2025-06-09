@@ -691,23 +691,6 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleElementsForMediumSize(maxWidthMediumMediaQuery);
 
     // ==============================================
-    // OPC - Progress Block
-    // ==============================================
-
-    if (document.body.classList.contains('checkout-onepage-index')) {
-        const repositionCheckoutProgress = (mq) => {
-            const checkoutProgressWrapper = document.getElementById('checkout-progress-wrapper');
-            if (mq.matches) {
-                document.getElementById('checkout-step-review').prepend(checkoutProgressWrapper);
-            } else {
-                document.querySelector('.col-right').prepend(checkoutProgressWrapper);
-            }
-        };
-        maxWidthLargeMediaQuery.addEventListener('change', repositionCheckoutProgress);
-        repositionCheckoutProgress(maxWidthLargeMediaQuery);
-    }
-
-    // ==============================================
     // Checkout Cart - events
     // ==============================================
 
