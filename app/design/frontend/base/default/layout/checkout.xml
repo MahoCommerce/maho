@@ -346,6 +346,7 @@ One page checkout main layout
             <action method="addItem"><type>skin_css</type><name>css/checkout.css</name></action>
             <action method="addJs"><script>varien/accordion.js</script></action>
             <action method="addJs"><script>varien/opcheckout.js</script></action>
+            <action method="removeItem"><type>skin_js</type><name>js/app.js</name></action>
         </reference>
         <reference name="right">
             <action method="unsetChildren"></action>

@@ -200,7 +200,6 @@
     <page_minimal translate="label">
         <label>All Minimal Layout Pages</label>
         <reference name="head">
-            <action method="removeItem"><type>skin_js</type><name>js/app.js</name></action>
             <action method="removeItem"><type>skin_js</type><name>js/minicart.js</name></action>
         </reference>
         <reference name="header">
