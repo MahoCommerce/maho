@@ -156,8 +156,15 @@ class Mage_Adminhtml_Helper_Data extends Mage_Adminhtml_Helper_Help_Mapping
             }
         }
 
+        $baseUrl = Mage::app()->getRequest()->getBaseUrl();
+
         $path = parse_url($url, PHP_URL_PATH) ?? '/';
+        if (strpos($path, $baseUrl) === 0) {
+            $path = substr($path, strlen($baseUrl));
+        }
+
         $frontName = strtok(ltrim($path, '/'), '/');
+
         return in_array($frontName, $this->adminFrontNames);
     }
 }
