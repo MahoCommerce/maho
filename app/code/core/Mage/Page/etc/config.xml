@@ -55,6 +55,11 @@
                     <template>page/3columns.phtml</template>
                     <layout_handle>page_three_columns</layout_handle>
                 </three_columns>
+                <minimal module="page" translate="label">
+                    <label>Minimal</label>
+                    <template>page/1column.phtml</template>
+                    <layout_handle>page_minimal</layout_handle>
+                </minimal>
             </layouts>
         </page>
     </global>

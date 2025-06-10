@@ -2655,7 +2655,7 @@ body {
 .page-header-container {display: flex; place-items: center; gap: 0.5rem;padding-top:0.5rem}
 .page-header-container > div {display: flex; place-items: center; gap: 0.5rem}
 .page-header-container > div:first-of-type > a:first-of-type {display: none}
-.currency-switcher label, .form-language label {display: none}
+.page-header-minimal {display:flex; flex-direction: column; align-items: center; gap: 0.5rem; padding-top: 0.5rem}
 
 @media (max-width: 770px) {
   .page-header-container > div:first-of-type a:first-of-type {display: block}
@@ -2687,7 +2687,6 @@ body {
  * ============================================ */
 
 .logo img {
-  width: auto;
   max-height: 50px;
 }
 
@@ -3285,9 +3284,6 @@ body {
 .footer .block-subscribe {
   text-transform: uppercase;
   font-size: 0.75rem;
-}
-.footer .form-subscribe-header {
-  display: none;
 }
 .footer .block-subscribe .input-box {
   float: left;

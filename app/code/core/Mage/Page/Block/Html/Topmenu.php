@@ -155,9 +155,16 @@ class Mage_Page_Block_Html_Topmenu extends Mage_Core_Block_Template
     protected function _getMenuItemAttributes(Varien_Data_Tree_Node $item)
     {
         $menuItemClasses = $this->_getMenuItemClasses($item);
-        return [
+        $attributes = [
             'class' => implode(' ', $menuItemClasses),
         ];
+
+        if ($item->hasChildren()) {
+            $attributes['aria-haspopup'] = 'true';
+            $attributes['aria-expanded'] = 'false';
+        }
+
+        return $attributes;
     }
 
     /**
