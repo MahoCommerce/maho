@@ -36,7 +36,7 @@ class Mage_Page_Block_Html_Footer extends Mage_Core_Block_Template
     public function getCacheKeyInfo()
     {
         return [
-            'PAGE_FOOTER',
+            $this->getIsMinimal() ? 'PAGE_FOOTER_MINIMAL' : 'PAGE_FOOTER',
             Mage::app()->getStore()->getId(),
             (int) Mage::app()->getStore()->isCurrentlySecure(),
             Mage::getDesign()->getPackageName(),
