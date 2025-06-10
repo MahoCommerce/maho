@@ -914,8 +914,8 @@ class tiptapWysiwygSetup {
 
     encodeContent(content) {
         if (!content) return '';
-        // Only encode widgets
-        return this.encodeWidgets(content);
+        // Encode both directives and widgets
+        return this.encodeWidgets(this.encodeDirectives(content));
     }
 
     decodeContent(content) {
