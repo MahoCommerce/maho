@@ -484,9 +484,11 @@ class tiptapWysiwygSetup {
                     container.appendChild(img);
                     handles.forEach(handle => container.appendChild(handle));
 
-                    // Show/hide handles on hover
+                    // Show/hide handles on hover (only for non-widget images)
                     container.addEventListener('mouseenter', () => {
-                        handles.forEach(h => h.style.display = 'block');
+                        if (!node.attrs.class || !node.attrs.class.includes('maho-widget-placeholder')) {
+                            handles.forEach(h => h.style.display = 'block');
+                        }
                     });
                     container.addEventListener('mouseleave', () => {
                         handles.forEach(h => h.style.display = 'none');
@@ -514,10 +516,16 @@ class tiptapWysiwygSetup {
                         }
                     });
 
-                    // Handle resizing
+                    // Handle resizing (only for non-widget images)
                     handles.forEach(handle => {
                         handle.addEventListener('mousedown', (e) => {
                             e.preventDefault();
+
+                            // Don't allow resizing for widget placeholders
+                            if (node.attrs.class && node.attrs.class.includes('maho-widget-placeholder')) {
+                                return;
+                            }
+
                             const startX = e.clientX;
                             const startY = e.clientY;
                             const startWidth = img.offsetWidth;
