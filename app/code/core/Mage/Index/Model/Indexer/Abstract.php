@@ -185,4 +185,49 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
     {
         return $this->_isVisible;
     }
+
+    public function reindexEntity(int|array $entityIds): self
+    {
+        if (!is_array($entityIds)) {
+            $entityIds = [$entityIds];
+        }
+
+        // Check if this indexer supports mass_action events for catalog products
+        if ($this->matchEntityAndType(Mage_Catalog_Model_Product::ENTITY, Mage_Index_Model_Event::TYPE_MASS_ACTION)) {
+            // Use synthetic mass_action event for indexers that support it
+            $event = Mage::getModel('index/event')
+                ->setEntity(Mage_Catalog_Model_Product::ENTITY)
+                ->setType(Mage_Index_Model_Event::TYPE_MASS_ACTION)
+                ->setDataObject(new Varien_Object(['product_ids' => $entityIds]));
+
+            return $this->_processEvent($event);
+        } else {
+            // For indexers that don't support mass_action, try resource-level reindexing
+            $resourceModel = $this->_getResource();
+
+            // Try common resource methods for single entity reindexing
+            if (method_exists($resourceModel, 'reindexEntities')) {
+                $resourceModel->reindexEntities($entityIds);
+            } elseif (method_exists($resourceModel, 'reindexProducts')) {
+                $resourceModel->reindexProducts($entityIds);
+            } elseif (method_exists($resourceModel, 'reindexProductIds')) {
+                $resourceModel->reindexProductIds($entityIds);
+            } else {
+                // Fallback: simulate individual save events for each product
+                foreach ($entityIds as $productId) {
+                    $product = Mage::getModel('catalog/product')->load($productId);
+                    if ($product->getId()) {
+                        $event = Mage::getModel('index/event')
+                            ->setEntity(Mage_Catalog_Model_Product::ENTITY)
+                            ->setType(Mage_Index_Model_Event::TYPE_SAVE)
+                            ->setDataObject($product);
+
+                        $this->_processEvent($event);
+                    }
+                }
+            }
+        }
+
+        return $this;
+    }
 }
