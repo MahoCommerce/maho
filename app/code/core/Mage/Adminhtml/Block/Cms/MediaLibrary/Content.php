@@ -45,8 +45,7 @@ class Mage_Adminhtml_Block_Cms_MediaLibrary_Content extends Mage_Adminhtml_Block
 
     public function getFilebrowserSetupObject(): string
     {
-        $setupObject = new Varien_Object();
-        $setupObject->setData([
+        $setupObject = new Varien_Object([
             'newFolderPrompt'                 => $this->helper('cms')->__('New Folder Name:'),
             'deleteFolderConfirmationMessage' => $this->helper('cms')->__('Are you sure you want to delete current folder?'),
             'deleteFileConfirmationMessage'   => $this->helper('cms')->__('Are you sure you want to delete the selected file?'),
@@ -55,7 +54,6 @@ class Mage_Adminhtml_Block_Cms_MediaLibrary_Content extends Mage_Adminhtml_Block
             'deleteFolderUrl' => $this->getDeletefolderUrl(),
             'deleteFilesUrl'  => $this->getDeleteFilesUrl(),
             'headerText'      => $this->getHeaderText(),
-            'mediaLibraryMode' => true, // Flag to indicate this is Media Library, not editor picker
         ]);
 
         return Mage::helper('core')->jsonEncode($setupObject);

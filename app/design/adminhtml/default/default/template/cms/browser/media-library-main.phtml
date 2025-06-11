@@ -6,93 +6,68 @@
  * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
-/**
- * Standalone Media Library template
- */
-$mediaLibraryContent = $this->getLayout()->createBlock('adminhtml/cms_mediaLibrary_content');
-$wysiwygTree = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_tree');
-$wysiwygUploader = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_content_uploader');
-$wysiwygNewfolder = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_content_newfolder');
+
+$content = $this->getLayout()->createBlock('adminhtml/cms_mediaLibrary_content');
+$tree = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_tree');
+$uploader = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_content_uploader');
+$newfolder = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_content_newfolder');
 ?>
 
 <div class="media-library-layout">
-    <!-- Left Sidebar with Tree -->
     <div class="media-library-left">
-        <?= $wysiwygTree->setTemplate('cms/browser/tree.phtml')->toHtml() ?>
+        <?= $tree->setTemplate('cms/browser/tree.phtml')->toHtml() ?>
     </div>
     
-    <!-- Main Content Area -->
     <div class="media-library-content">
-        <div class="content-header skip-header" id="content_header">
+        <div class="content-header" id="content_header">
             <table cellspacing="0">
                 <tr>
-                    <td><h3 id="content_header_text"><?= $mediaLibraryContent->getHeaderText() ?></h3></td>
-                    <td class="form-buttons">
-                        <?= $mediaLibraryContent->getButtonsHtml() ?>
-                    </td>
+                    <td><h3 id="content_header_text"><?= $content->getHeaderText() ?></h3></td>
+                    <td class="form-buttons"><?= $content->getButtonsHtml() ?></td>
                 </tr>
             </table>
         </div>
 
-        <div id="contents-uploader"><?= $wysiwygUploader->setTemplate('media/uploader.phtml')->toHtml() ?></div>
+        <div id="contents-uploader"><?= $uploader->setTemplate('media/uploader.phtml')->toHtml() ?></div>
         <div id="contents"></div>
-        <div id="contents-newfolder" class="no-display"><?= $wysiwygNewfolder->setTemplate('cms/browser/content/newfolder.phtml')->toHtml() ?></div>
+        <div id="contents-newfolder" class="no-display"><?= $newfolder->setTemplate('cms/browser/content/newfolder.phtml')->toHtml() ?></div>
     </div>
 </div>
 
 <script>
-// Initialize the Media Browser with Media Library customizations
-<?= $mediaLibraryContent->getFilebrowserSetupObject() ? "MediabrowserInstance = new Mediabrowser(" . $mediaLibraryContent->getFilebrowserSetupObject() . ");" : "" ?>
-<?php if ($mediaLibraryContent->getStoreId()): ?>
-MediabrowserInstance.storeId = '<?= $mediaLibraryContent->getStoreId() ?>';
-<?php endif; ?>
+// Initialize Media Library
+MediabrowserInstance = new Mediabrowser(<?= $content->getFilebrowserSetupObject() ?>);
+<?php if ($content->getStoreId()): ?>MediabrowserInstance.storeId = '<?= $content->getStoreId() ?>';<?php endif; ?>
 
-// Override methods to disable double-click insert for Media Library
+// Disable double-click insert and apply Media Library behavior
 if (MediabrowserInstance) {
-    // Function to apply Media Library behavior to file elements
     function applyMediaLibraryBehavior() {
-        const contentsEl = document.getElementById('contents');
-        if (contentsEl) {
-            contentsEl.querySelectorAll('div.filecnt').forEach((el) => {
-                // Remove existing event listeners by cloning
-                const newEl = el.cloneNode(true);
-                el.parentNode.replaceChild(newEl, el);
-                
-                // Add only single-click for selection
-                newEl.addEventListener('click', function(e) {
-                    // Clear other selections
-                    document.querySelectorAll('.filecnt.selected').forEach(function(selectedEl) {
-                        selectedEl.classList.remove('selected');
-                    });
-                    
-                    // Select this file
-                    this.classList.add('selected');
-                    MediabrowserInstance.selectFile.call(MediabrowserInstance, e);
-                });
+        document.getElementById('contents')?.querySelectorAll('div.filecnt').forEach((el) => {
+            const newEl = el.cloneNode(true);
+            el.parentNode.replaceChild(newEl, el);
+            
+            newEl.addEventListener('click', function(e) {
+                document.querySelectorAll('.filecnt.selected').forEach(sel => sel.classList.remove('selected'));
+                this.classList.add('selected');
+                MediabrowserInstance.selectFile.call(MediabrowserInstance, e);
             });
-        }
+        });
     }
     
-    // Override the showFolderContent method
     const originalShowFolderContent = MediabrowserInstance.showFolderContent;
+    const originalUpdateContent = MediabrowserInstance.updateContent;
+    
     MediabrowserInstance.showFolderContent = function(path) {
         originalShowFolderContent.call(this, path);
         setTimeout(applyMediaLibraryBehavior, 100);
     };
     
-    // Override the updateContent method to ensure refresh works properly
-    const originalUpdateContent = MediabrowserInstance.updateContent;
     MediabrowserInstance.updateContent = function() {
         return originalUpdateContent.call(this).then(() => {
             setTimeout(applyMediaLibraryBehavior, 100);
         });
     };
     
-    // Override insert method to do nothing for Media Library
-    MediabrowserInstance.insert = function() {
-        // Do nothing - this is a Media Library, not an editor picker
-    };
+    MediabrowserInstance.insert = function() {}; // Disable insert
 }
 </script>
