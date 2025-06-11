@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Cms_MediaLibrary_Content extends Mage_Adminhtml_Block
         Mage_Adminhtml_Block_Widget_Container::__construct();
         $this->_headerText = $this->helper('cms')->__('Media Library');
         $this->_removeButton('back')->_removeButton('edit');
-        
+
         // Add folder management buttons
         $this->_addButton('newfolder', [
             'class'   => 'save',

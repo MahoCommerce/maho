@@ -74,11 +74,11 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
     {
         try {
             $this->_initAction()->_saveSessionCurrentPath();
-            
+
             // Create and render the files block directly
             $filesBlock = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_content_files');
             $filesBlock->setTemplate('cms/browser/content/files.phtml');
-            
+
             $this->getResponse()->setBody($filesBlock->toHtml());
         } catch (Exception $e) {
             $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
