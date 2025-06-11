@@ -215,32 +215,16 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
      */
     public function addTrailingSlash(string $url): string
     {
-        $path = parse_url($url, PHP_URL_PATH) ?? '/';
+        // Parse URL and remove all trailing slashes from path
+        $parts = parse_url($url);
+        $parts['path'] = rtrim($parts['path'] ?? '', '/');
 
-        // Do nothing for url without path
-        if (strlen($path) === 1) {
-            return $url;
+        // Only add trailing slashes for pages without an extension
+        if (pathinfo($parts['path'], PATHINFO_EXTENSION) === '') {
+            $parts['path'] .= '/';
         }
 
-        // The position in the URL where we expect a trailing slash to be
-        $offset = (strpos($url, '?') ?: strlen($url)) - 1;
-
-        // Check for pages with an extension, such as .html
-        if (pathinfo($path, PATHINFO_EXTENSION) !== '') {
-            // PHP's pathinfo will ignore trailing slashes, but we should remove them
-            if ($url[$offset] === '/') {
-                return substr_replace($url, '', $offset, 1);
-            }
-            // Otherwise skip adding trailing slashes to urls with extensions
-            return $url;
-        }
-
-        // We already have a trailing slash
-        if ($url[$offset] === '/') {
-            return $url;
-        }
-
-        return substr_replace($url, '/', $offset + 1, 0);
+        return $this->buildUrl($parts);
     }
 
     /**
@@ -248,20 +232,16 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
      */
     public function removeTrailingSlash(string $url): string
     {
-        // Do nothing for url without path
-        if (strlen(parse_url($url, PHP_URL_PATH) ?? '/') === 1) {
-            return $url;
+        // Parse URL and remove all trailing slashes from path
+        $parts = parse_url($url);
+        $parts['path'] = rtrim($parts['path'] ?? '', '/');
+
+        // Add a trailing slash to the root domain
+        if ($parts['path'] === '') {
+            $parts['path'] .= '/';
         }
 
-        // The position in the URL where we expect a trailing slash to be
-        $offset = (strpos($url, '?') ?: strlen($url)) - 1;
-
-        // We already have no trailing slash
-        if ($url[$offset] !== '/') {
-            return $url;
-        }
-
-        return substr_replace($url, '', $offset, 1);
+        return $this->buildUrl($parts);
     }
 
     /**
