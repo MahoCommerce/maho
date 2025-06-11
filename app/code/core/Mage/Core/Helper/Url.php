@@ -222,14 +222,20 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
             return $url;
         }
 
-        // Do nothing for pages with an extension, such as .html
-        if (pathinfo($path, PATHINFO_EXTENSION) !== '') {
-            return $url;
-        }
-
         // The position in the URL where we expect a trailing slash to be
         $offset = (strpos($url, '?') ?: strlen($url)) - 1;
 
+        // Check for pages with an extension, such as .html
+        if (pathinfo($path, PATHINFO_EXTENSION) !== '') {
+            // PHP's pathinfo will ignore trailing slashes, but we should remove them
+            if ($url[$offset] === '/') {
+                return substr_replace($url, '', $offset, 1);
+            }
+            // Otherwise skip adding trailing slashes to urls with extensions
+            return $url;
+        }
+
+        // We already have a trailing slash
         if ($url[$offset] === '/') {
             return $url;
         }
@@ -250,6 +256,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
         // The position in the URL where we expect a trailing slash to be
         $offset = (strpos($url, '?') ?: strlen($url)) - 1;
 
+        // We already have no trailing slash
         if ($url[$offset] !== '/') {
             return $url;
         }
