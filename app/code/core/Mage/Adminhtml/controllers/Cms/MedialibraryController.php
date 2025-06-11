@@ -4,9 +4,7 @@
  * Maho
  *
  * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,15 +16,9 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
      */
     public const ADMIN_RESOURCE = 'cms/media_gallery';
 
-    /**
-     * Init actions
-     *
-     * @return $this
-     */
-    protected function _initAction()
+    protected function _initAction(): self
     {
         $this->getStorage();
-        // load layout, set active menu and breadcrumbs
         $this->loadLayout()
             ->_setActiveMenu('cms/media_library')
             ->_addBreadcrumb(Mage::helper('cms')->__('CMS'), Mage::helper('cms')->__('CMS'))
@@ -34,9 +26,6 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
         return $this;
     }
 
-    /**
-     * Index action - display the media library
-     */
     public function indexAction(): void
     {
         try {
@@ -52,9 +41,6 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
         $this->renderLayout();
     }
 
-    /**
-     * Get tree structure as JSON
-     */
     public function treeJsonAction(): void
     {
         try {
@@ -67,9 +53,6 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
         }
     }
 
-    /**
-     * Get directory contents
-     */
     public function contentsAction(): void
     {
         try {
@@ -85,9 +68,6 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
         }
     }
 
-    /**
-     * Create new folder
-     */
     public function newFolderAction(): void
     {
         try {
@@ -101,9 +81,6 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
         }
     }
 
-    /**
-     * Delete folder
-     */
     public function deleteFolderAction(): void
     {
         try {
@@ -115,9 +92,6 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
         }
     }
 
-    /**
-     * Delete file from media storage
-     */
     public function deleteFilesAction(): void
     {
         try {
@@ -144,9 +118,6 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
         }
     }
 
-    /**
-     * Files upload processing
-     */
     public function uploadAction(): void
     {
         try {
@@ -159,9 +130,6 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
         }
     }
 
-    /**
-     * Generate image thumbnail on the fly
-     */
     public function thumbnailAction(): void
     {
         $file = $this->getRequest()->getParam('file');
@@ -179,12 +147,7 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
         $this->getResponse()->setBody($image->encode());
     }
 
-    /**
-     * Register storage model and return it
-     *
-     * @return Mage_Cms_Model_Wysiwyg_Images_Storage
-     */
-    public function getStorage()
+    public function getStorage(): Mage_Cms_Model_Wysiwyg_Images_Storage
     {
         if (!Mage::registry('storage')) {
             $storage = Mage::getModel('cms/wysiwyg_images_storage');
@@ -193,12 +156,7 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
         return Mage::registry('storage');
     }
 
-    /**
-     * Save current path in session
-     *
-     * @return $this
-     */
-    protected function _saveSessionCurrentPath()
+    protected function _saveSessionCurrentPath(): self
     {
         if ($this->getRequest()->isPost()) {
             $this->getStorage()
