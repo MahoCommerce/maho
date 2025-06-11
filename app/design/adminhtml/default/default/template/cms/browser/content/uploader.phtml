@@ -10,7 +10,10 @@
  */
 ?>
 <script>
+    // Backup event listener for upload success (in case the main one doesn't work)
     document.addEventListener('uploader:success', (event) => {
-        MediabrowserInstance.handleUploadComplete(event.detail.files);
+        if (MediabrowserInstance && MediabrowserInstance.handleUploadComplete) {
+            MediabrowserInstance.handleUploadComplete(event.detail.files || []);
+        }
     });
 </script>

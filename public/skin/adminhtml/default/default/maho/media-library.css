@@ -1,0 +1,151 @@
+/**
+ * Maho
+ *
+ * @package     default_default  
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/**
+ * Media Library specific styles
+ * Applies the file grid layout used in dialogs to the standalone Media Library page
+ */
+
+/* Main layout structure */
+.media-library-layout {
+    display: flex;
+    min-height: 500px;
+    gap: 10px;
+}
+
+.media-library-left {
+    width: 250px;
+    flex-shrink: 0;
+    border: 1px solid #ccc;
+    background: #fff;
+    padding: 10px;
+    overflow: auto;
+}
+
+.media-library-content {
+    flex: 1;
+    border: 1px solid #ccc;
+    background: #fff;
+    padding: 10px;
+}
+
+/* File grid layout */
+#contents .filecnt {
+    border: 1px solid #ccc;
+    cursor: pointer;
+    padding: 3px;
+    margin: 0 0 15px 4px;
+    overflow: hidden;
+    width: 100px;
+    float: left;
+    text-align: center;
+}
+
+#contents .filecnt:hover {
+    border-color: #ea7601;
+    background: #fdf4e5;
+}
+
+#contents .filecnt.selected {
+    border-color: #ea7601;
+    background: #fdf4e5;
+}
+
+#contents .filecnt p.nm {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#contents .filecnt p.nm img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+#contents .filecnt small {
+    display: block;
+    font-size: 10px;
+    line-height: 12px;
+    color: #666;
+    word-wrap: break-word;
+}
+
+/* Clear floats after file grid */
+#contents::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Content area spacing */
+#contents {
+    padding: 10px;
+    min-height: 400px;
+}
+
+/* Tree styling */
+.media-library-left .tree {
+    font-size: 12px;
+}
+
+.media-library-left .tree li {
+    list-style: none;
+    margin: 2px 0;
+}
+
+.media-library-left .tree a {
+    text-decoration: none;
+    color: #333;
+    padding: 2px 4px;
+    display: block;
+}
+
+.media-library-left .tree a:hover {
+    background: #f0f0f0;
+}
+
+/* Content header styling */
+.content-header {
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+}
+
+.content-header h3 {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Media Library specific file behavior */
+.media-library-file {
+    cursor: pointer;
+}
+
+.media-library-file.selected {
+    border-color: #ea7601 !important;
+    background: #fdf4e5 !important;
+}
+
+.media-library-file:hover {
+    border-color: #ea7601;
+    background: #f9f9f9;
+}
+
+/* Disable text selection on file items */
+.media-library-file {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}

@@ -25,6 +25,11 @@
                     <action>adminhtml/cms_block</action>
                     <sort_order>10</sort_order>
                 </block>
+                <media_library translate="title" module="cms">
+                    <title>Media Library</title>
+                    <action>adminhtml/cms_medialibrary</action>
+                    <sort_order>20</sort_order>
+                </media_library>
             </children>
          </cms>
     </menu>

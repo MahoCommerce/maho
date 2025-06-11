@@ -28,6 +28,17 @@
 <script type="text/javascript">
     (function() {
         var uploader = new Uploader(<?= $this->getJsonConfig() ?>);
+        
+        // Hook into uploader events to refresh Media Library content after upload
+        if (uploader && uploader.addEventListener) {
+            uploader.addEventListener('success', function(files) {
+                if (window.MediabrowserInstance && window.MediabrowserInstance.updateContent) {
+                    setTimeout(() => {
+                        window.MediabrowserInstance.updateContent();
+                    }, 200);
+                }
+            });
+        }
 
         if (varienGlobalEvents) {
             varienGlobalEvents.attachEventHandler('tabChangeBefore', uploader.onContainerHideBefore);
