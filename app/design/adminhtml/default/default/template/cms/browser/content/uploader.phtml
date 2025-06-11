@@ -11,6 +11,8 @@
 ?>
 <script>
     document.addEventListener('uploader:success', (event) => {
-        MediabrowserInstance.handleUploadComplete(event.detail.files);
+        if (MediabrowserInstance?.handleUploadComplete) {
+            MediabrowserInstance.handleUploadComplete(event.detail.files || []);
+        }
     });
 </script>
