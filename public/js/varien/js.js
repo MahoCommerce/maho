@@ -81,6 +81,14 @@ async function mahoFetch(url, options) {
     }
 }
 
+function mahoOnReady(callback) {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', callback);
+    } else {
+        callback();
+    }
+}
+
 function popWin(url,win,para) {
     var win = window.open(url,win,para);
     win.focus();

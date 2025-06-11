@@ -13,7 +13,6 @@
 /app/etc/local.xml*
 !/app/etc/local.xml.template
 
-/public/js/tinymce
 /public/media/*
 !/public/media/.htaccess
 !/public/media/custom_options/.htaccess

@@ -39,7 +39,34 @@ const catalogWysiwygEditor = {
             firedElementId: elementId,
         });
 
-        document.getElementById(`${elementId}_editor`).value = document.getElementById(elementId).value;
+        // Get the content from the original textarea
+        const originalContent = document.getElementById(elementId).value;
+        
+        // Set initial content in the textarea that will be used by Tiptap
+        const editorTextarea = document.getElementById(`${elementId}_editor`);
+        if (editorTextarea) {
+            editorTextarea.value = originalContent;
+        }
+        
+        // Wait for Tiptap editor to be initialized and then set content
+        const checkAndSetContent = () => {
+            if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(`${elementId}_editor`)) {
+                const tiptapEditor = tiptapEditors.get(`${elementId}_editor`);
+                if (tiptapEditor && tiptapEditor.editor) {
+                    // Tiptap is initialized, set the content
+                    tiptapEditor.editor.commands.setContent(originalContent);
+                } else {
+                    // Tiptap not yet initialized, check again
+                    setTimeout(checkAndSetContent, 50);
+                }
+            } else {
+                // No Tiptap, check again
+                setTimeout(checkAndSetContent, 50);
+            }
+        };
+        
+        // Start checking after a small delay to allow DOM to update
+        setTimeout(checkAndSetContent, 50);
     },
 
     okDialogWindow(dialogWindow) {
@@ -51,9 +78,15 @@ const catalogWysiwygEditor = {
         const wysiwygObj = window[`wysiwyg${elementId}_editor`];
         wysiwygObj.turnOff();
 
-        const content = tinymce.get(wysiwygObj.id)
-              ? tinymce.get(wysiwygObj.id).getContent()
-              : document.getElementById(`${elementId}_editor`)?.value;
+        let content = document.getElementById(`${elementId}_editor`)?.value;
+        
+        // Check if we have a Tiptap editor
+        if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(wysiwygObj.id)) {
+            const tiptapEditor = tiptapEditors.get(wysiwygObj.id);
+            if (tiptapEditor && tiptapEditor.editor) {
+                content = tiptapEditor.editor.getHTML();
+            }
+        }
 
         if (content) {
             document.getElementById(elementId).value = content;
@@ -68,6 +101,8 @@ const catalogWysiwygEditor = {
 
         // destroy the instance of editor
         const wysiwygObj = window[`wysiwyg${elementId}_editor`];
-        wysiwygObj.destroy();
+        if (wysiwygObj && typeof wysiwygObj.destroy === 'function') {
+            wysiwygObj.destroy();
+        }
     }
 };
