@@ -43,6 +43,7 @@ class Mage_Adminhtml_Block_Cms_MediaLibrary_Content extends Mage_Adminhtml_Block
         // NOTE: No "Insert File" button for Media Library - it's for browsing, not inserting
     }
 
+    #[\Override]
     public function getFilebrowserSetupObject(): string
     {
         $setupObject = new Varien_Object([

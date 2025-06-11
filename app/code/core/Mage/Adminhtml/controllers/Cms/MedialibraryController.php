@@ -37,7 +37,7 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
     /**
      * Index action - display the media library
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         try {
             Mage::helper('cms/wysiwyg_images')->getCurrentPath();
@@ -55,7 +55,7 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
     /**
      * Get tree structure as JSON
      */
-    public function treeJsonAction()
+    public function treeJsonAction(): void
     {
         try {
             $this->_initAction();
@@ -70,7 +70,7 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
     /**
      * Get directory contents
      */
-    public function contentsAction()
+    public function contentsAction(): void
     {
         try {
             $this->_initAction()->_saveSessionCurrentPath();
@@ -88,7 +88,7 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
     /**
      * Create new folder
      */
-    public function newFolderAction()
+    public function newFolderAction(): void
     {
         try {
             $this->_initAction();
@@ -104,7 +104,7 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
     /**
      * Delete folder
      */
-    public function deleteFolderAction()
+    public function deleteFolderAction(): void
     {
         try {
             $path = $this->getStorage()->getSession()->getCurrentPath();
@@ -118,7 +118,7 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
     /**
      * Delete file from media storage
      */
-    public function deleteFilesAction()
+    public function deleteFilesAction(): void
     {
         try {
             if (!$this->getRequest()->isPost()) {
@@ -147,7 +147,7 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
     /**
      * Files upload processing
      */
-    public function uploadAction()
+    public function uploadAction(): void
     {
         try {
             $this->_initAction();
@@ -162,7 +162,7 @@ class Mage_Adminhtml_Cms_MedialibraryController extends Mage_Adminhtml_Controlle
     /**
      * Generate image thumbnail on the fly
      */
-    public function thumbnailAction()
+    public function thumbnailAction(): void
     {
         $file = $this->getRequest()->getParam('file');
         $file = Mage::helper('cms/wysiwyg_images')->idDecode($file);
