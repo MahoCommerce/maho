@@ -159,14 +159,6 @@ class Mage_Catalog_Model_Observer
             }
         }
 
-        if ($category->getIsDynamic()) {
-            try {
-                Mage::getModel('catalog/category_dynamic_processor')->processDynamicCategory($category);
-            } catch (Exception $e) {
-                Mage::logException($e);
-            }
-        }
-
         return $this;
     }
 

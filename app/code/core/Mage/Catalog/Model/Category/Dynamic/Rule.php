@@ -65,6 +65,16 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     {
         if (!$this->_conditions) {
             $this->_resetConditions();
+
+            if ($this->getConditionsSerialized()) {
+                $conditions = $this->getConditionsSerialized();
+                if (is_string($conditions)) {
+                    $conditions = @unserialize($conditions);
+                }
+                if (is_array($conditions) && !empty($conditions)) {
+                    $this->_conditions->setConditions([])->loadArray($conditions);
+                }
+            }
         }
 
         return $this->_conditions;
@@ -215,7 +225,13 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     #[\Override]
     public function validate(Varien_Object $object)
     {
-        return $this->getConditions()->validate($object);
+        $conditions = $this->getConditions();
+        if (!$conditions || !$conditions->getConditions()) {
+            // No conditions means NO match, not ALL match
+            return false;
+        }
+
+        return $conditions->validate($object);
     }
 
     /**
@@ -228,6 +244,12 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
         if ($this->_productIds === null) {
             $this->_productIds = [];
             $this->setCollectedAttributes([]);
+
+            // Check if we have conditions
+            $conditions = $this->getConditions();
+            if (!$conditions || !$conditions->getConditions()) {
+                return $this->_productIds;
+            }
 
             /** @var Mage_Catalog_Model_Resource_Product_Collection $productCollection */
             $productCollection = Mage::getResourceModel('catalog/product_collection');

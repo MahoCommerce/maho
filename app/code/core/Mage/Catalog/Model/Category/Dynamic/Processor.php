@@ -34,13 +34,6 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
             $rules = $this->getRulesForCategory($category->getId());
             $productIds = $this->getMatchingProductIds($rules, $category);
             $this->updateCategoryProducts($category, $productIds);
-
-            Mage::logException(new Exception(sprintf(
-                'Processed dynamic category %d (%s) with %d products',
-                $category->getId(),
-                $category->getName(),
-                count($productIds),
-            )));
         } catch (Exception $e) {
             Mage::logException($e);
         }

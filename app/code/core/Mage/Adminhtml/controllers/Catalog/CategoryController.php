@@ -510,6 +510,37 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     }
 
     /**
+     * Process dynamic category rules
+     */
+    public function processDynamicAction(): void
+    {
+        $categoryId = (int) $this->getRequest()->getParam('id');
+
+        try {
+            $category = Mage::getModel('catalog/category')->load($categoryId);
+
+            if (!$category->getId()) {
+                Mage::throwException(Mage::helper('catalog')->__('Category not found.'));
+            }
+
+            if (!$category->getIsDynamic()) {
+                Mage::throwException(Mage::helper('catalog')->__('Category is not dynamic.'));
+            }
+
+            $processor = Mage::getModel('catalog/category_dynamic_processor');
+            $processor->processDynamicCategory($category);
+
+            $this->_getSession()->addSuccess(
+                Mage::helper('catalog')->__('Dynamic category processed successfully.'),
+            );
+        } catch (Exception $e) {
+            $this->_getSession()->addError($e->getMessage());
+        }
+
+        $this->_redirect('*/*/edit', ['id' => $categoryId]);
+    }
+
+    /**
      * Controller pre-dispatch method
      *
      * @return Mage_Adminhtml_Controller_Action

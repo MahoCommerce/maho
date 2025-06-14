@@ -117,7 +117,6 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
         $this->_refreshAnchorRelations($allCategoryIds, $productId);
         $this->_refreshDirectRelations($categoryIds, $productId);
         $this->_refreshRootRelations($productId);
-        $this->_processDynamicCategoriesForProduct($productId);
 
         return $this;
     }
@@ -174,11 +173,6 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
         $this->_refreshAnchorRelations($allCategoryIds, $productIds);
         $this->_refreshDirectRelations($categoryIds, $productIds);
         $this->_refreshRootRelations($productIds);
-
-        /**
-         * Process dynamic categories for the updated products
-         */
-        $this->_processDynamicCategoriesForProducts($productIds);
 
         return $this;
     }
@@ -299,10 +293,6 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
             }
         }
 
-        /**
-         * Process dynamic categories if any category was affected
-         */
-        $this->_processDynamicCategoriesForChangedCategories($categoryIds);
     }
 
     /**
@@ -799,6 +789,9 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
     #[\Override]
     public function reindexAll()
     {
+        // Process all dynamic categories BEFORE regular indexing
+        $this->_processDynamicCategories();
+
         $this->useIdxTable(true);
         $this->beginTransaction();
         try {
@@ -963,11 +956,6 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
             }
 
             $this->syncData();
-
-            /**
-             * Process dynamic categories after index sync
-             */
-            $this->_processDynamicCategories();
 
             /**
              * Clean up temporary tables
@@ -1202,63 +1190,6 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
             /** @var Mage_Catalog_Model_Category_Dynamic_Processor $processor */
             $processor = Mage::getModel('catalog/category_dynamic_processor');
             $processor->processAllDynamicCategories();
-        } catch (Exception $e) {
-            Mage::logException($e);
-        }
-    }
-
-    /**
-     * Process dynamic categories for changed categories
-     */
-    protected function _processDynamicCategoriesForChangedCategories(array $categoryIds): void
-    {
-        try {
-            /** @var Mage_Catalog_Model_Category_Dynamic_Processor $processor */
-            $processor = Mage::getModel('catalog/category_dynamic_processor');
-
-            foreach ($categoryIds as $categoryId) {
-                $category = Mage::getModel('catalog/category')->load($categoryId);
-                if ($category->getId() && $category->getIsDynamic()) {
-                    $processor->processDynamicCategory($category);
-                }
-            }
-        } catch (Exception $e) {
-            Mage::logException($e);
-        }
-    }
-
-    /**
-     * Process dynamic categories for a single product
-     */
-    protected function _processDynamicCategoriesForProduct(int $productId): void
-    {
-        try {
-            $product = Mage::getModel('catalog/product')->load($productId);
-            if ($product->getId()) {
-                /** @var Mage_Catalog_Model_Category_Dynamic_Processor $processor */
-                $processor = Mage::getModel('catalog/category_dynamic_processor');
-                $processor->processProductUpdate($product);
-            }
-        } catch (Exception $e) {
-            Mage::logException($e);
-        }
-    }
-
-    /**
-     * Process dynamic categories for multiple products
-     */
-    protected function _processDynamicCategoriesForProducts(array $productIds): void
-    {
-        try {
-            /** @var Mage_Catalog_Model_Category_Dynamic_Processor $processor */
-            $processor = Mage::getModel('catalog/category_dynamic_processor');
-
-            foreach ($productIds as $productId) {
-                $product = Mage::getModel('catalog/product')->load($productId);
-                if ($product->getId()) {
-                    $processor->processProductUpdate($product);
-                }
-            }
         } catch (Exception $e) {
             Mage::logException($e);
         }
