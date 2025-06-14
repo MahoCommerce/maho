@@ -25,30 +25,24 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 {
     /**
      * Store matched product Ids
-     *
-     * @var array
      */
-    protected $_productIds;
+    protected ?array $_productIds = null;
 
     /**
      * Limitation for products collection
-     *
-     * @var int|array|null
      */
-    protected $_productsFilter = null;
+    protected int|array|null $_productsFilter = null;
 
     /**
      * Store current category model
-     *
-     * @var Mage_Catalog_Model_Category
      */
-    protected $_category;
+    protected ?Mage_Catalog_Model_Category $_category = null;
 
     /**
      * Initialize resource model
      */
     #[\Override]
-    protected function _construct()
+    protected function _construct(): void
     {
         parent::_construct();
         $this->_init('catalog/category_dynamic_rule');
@@ -57,11 +51,9 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Getter for rule conditions collection
-     *
-     * @return Mage_Rule_Model_Condition_Combine
      */
     #[\Override]
-    public function getConditions()
+    public function getConditions(): ?Mage_Rule_Model_Condition_Combine
     {
         if (!$this->_conditions) {
             $this->_resetConditions();
@@ -82,12 +74,9 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Reset rule conditions
-     *
-     * @param null|Mage_Rule_Model_Condition_Combine $conditions
-     * @return $this
      */
     #[\Override]
-    protected function _resetConditions($conditions = null)
+    protected function _resetConditions(mixed $conditions = null): self
     {
         if (is_null($conditions)) {
             $conditions = $this->getConditionsInstance();
@@ -100,22 +89,18 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Retrieve rule conditions instance
-     *
-     * @return Mage_CatalogRule_Model_Rule_Condition_Combine
      */
     #[\Override]
-    public function getConditionsInstance()
+    public function getConditionsInstance(): Mage_CatalogRule_Model_Rule_Condition_Combine
     {
         return Mage::getModel('catalogrule/rule_condition_combine');
     }
 
     /**
      * Retrieve rule actions instance
-     *
-     * @return Mage_Rule_Model_Action_Collection
      */
     #[\Override]
-    public function getActionsInstance()
+    public function getActionsInstance(): Mage_Rule_Model_Action_Collection
     {
         return Mage::getModel('rule/action_collection');
     }
@@ -124,7 +109,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
      * Prepare data before saving
      */
     #[\Override]
-    protected function _beforeSave()
+    protected function _beforeSave(): self
     {
         // Serialize conditions
         if ($this->getConditions()) {
@@ -138,12 +123,9 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Set conditions
-     *
-     * @param Mage_Rule_Model_Condition_Combine|null $conditions
-     * @return $this
      */
     #[\Override]
-    public function setConditions($conditions)
+    public function setConditions(mixed $conditions): self
     {
         $this->_conditions = $conditions;
         return $this;
@@ -151,11 +133,9 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Load rule conditions from array
-     *
-     * @return $this
      */
     #[\Override]
-    public function loadPost(array $arr)
+    public function loadPost(array $arr): self
     {
         $arr = $this->_convertFlatToRecursive($arr);
         if (isset($arr['conditions'])) {
@@ -166,11 +146,9 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Returns rule as an array for admin interface
-     *
-     * @return array
      */
     #[\Override]
-    public function asArray(array $arrAttributes = [])
+    public function asArray(array $arrAttributes = []): array
     {
         $out = parent::asArray($arrAttributes);
         $out['conditions'] = $this->getConditions()->asArray();
@@ -180,11 +158,8 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Initialize rule model data from array
-     *
-     * @param array $rule
-     * @return $this
      */
-    public function loadArray($rule)
+    public function loadArray(array $rule): self
     {
         if (!empty($rule['conditions']) && is_array($rule['conditions'])) {
             $this->getConditions()->loadArray($rule['conditions']);
@@ -196,7 +171,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
      * After loading, unserialize conditions
      */
     #[\Override]
-    protected function _afterLoad()
+    protected function _afterLoad(): self
     {
         parent::_afterLoad();
 
@@ -219,11 +194,9 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Validate rule conditions to determine if rule can be applied
-     *
-     * @return bool
      */
     #[\Override]
-    public function validate(Varien_Object $object)
+    public function validate(Varien_Object $object): bool
     {
         $conditions = $this->getConditions();
         if (!$conditions || !$conditions->getConditions()) {
@@ -236,10 +209,8 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Get array of product ids which are matched by rule
-     *
-     * @return array
      */
-    public function getMatchingProductIds()
+    public function getMatchingProductIds(): array
     {
         if ($this->_productIds === null) {
             $this->_productIds = [];
@@ -277,11 +248,8 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Callback function for product matching
-     *
-     * @param array $args
-     * @return void
      */
-    public function callbackValidateProduct($args)
+    public function callbackValidateProduct(array $args): void
     {
         $product = clone $args['product'];
         $product->setData($args['row']);
@@ -293,11 +261,8 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Set products filter for rule matching
-     *
-     * @param int|array $productIds
-     * @return $this
      */
-    public function setProductsFilter($productIds)
+    public function setProductsFilter(int|array $productIds): self
     {
         $this->_productsFilter = $productIds;
         return $this;
@@ -305,10 +270,8 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Get category model
-     *
-     * @return Mage_Catalog_Model_Category
      */
-    public function getCategory()
+    public function getCategory(): ?Mage_Catalog_Model_Category
     {
         if (!$this->_category && $this->getCategoryId()) {
             $this->_category = Mage::getModel('catalog/category')->load($this->getCategoryId());
@@ -318,11 +281,8 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Set category model
-     *
-     * @param Mage_Catalog_Model_Category $category
-     * @return $this
      */
-    public function setCategory($category)
+    public function setCategory(Mage_Catalog_Model_Category $category): self
     {
         $this->_category = $category;
         if ($category->getId()) {
