@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,10 +23,11 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
 
         $this->getLayout()->createBlock('catalog/breadcrumbs');
 
+        $category = $this->getCurrentCategory();
+
         /** @var Mage_Page_Block_Html_Head $headBlock */
         $headBlock = $this->getLayout()->getBlock('head');
         if ($headBlock) {
-            $category = $this->getCurrentCategory();
             if ($title = $category->getMetaTitle()) {
                 $headBlock->setTitle($title);
             }
@@ -42,12 +43,25 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
             if ($helper->canUseCanonicalTag()) {
                 $headBlock->addLinkRel('canonical', $category->getUrl());
             }
-            /*
-            want to show rss feed in the url
-            */
+            // Add rss feed in head block
             if ($this->isRssCatalogEnable() && $this->isTopCategory()) {
                 $title = $this->helper('rss')->__('%s RSS Feed', $this->getCurrentCategory()->getName());
                 $headBlock->addItem('rss', $this->getRssLink(), 'title="' . $title . '"');
+            }
+        }
+
+        /** @var Mage_Page_Block_Html_Head */
+        $titleBlock = $this->getLayout()->getBlock('title');
+        if ($titleBlock) {
+            $titleBlock->setTitle($this->helper('catalog/output')->categoryAttribute($category, $category->getName(), 'name'));
+
+            // Add rss feed in title block
+            if ($this->isRssCatalogEnable() && $this->isTopCategory()) {
+                $titleBlock->getLinksBlock()->addLink(
+                    $this->getIconSvg('rss'),
+                    $this->getRssLink(),
+                    $this->helper('rss')->__('Subscribe to RSS Feed'),
+                );
             }
         }
 

@@ -324,6 +324,12 @@ h6, .h6 {
 /* -------------------------------------------- *
  * Page Titles
  */
+.page-title {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
 .page-title h1,
 .page-title h2,
 .product-name h1,
@@ -332,9 +338,20 @@ h6, .h6 {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--maho-color-text-primary);
-  padding-bottom: 3px;
-  margin-bottom: 15px;
-  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.page-title .links ul {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.page-title .links a {
+  color: var(--maho-color-text-primary);
+}
+
+.page-title .links a:hover {
+  color: var(--maho-color-primary);
 }
 
 /* -------------------------------------------- *
@@ -385,10 +402,6 @@ body:not(.customer-account) .block:first-child .block-title {
 .block-subtitle {
   font-weight: bold;
   margin-bottom: 7px;
-}
-
-.block-content {
-  margin-top: 5px;
 }
 
 .block-content.unpad {
@@ -792,7 +805,7 @@ a.button:hover {
  */
 .breadcrumbs {
   overflow: hidden;
-  margin: -15px 0 15px;
+  margin: -15px 0 5px;
 }
 
 .breadcrumbs a {
@@ -1729,7 +1742,6 @@ span.weee {
  * Toolbar
  */
 .toolbar {
-  margin-top: 10px;
   margin-bottom: 15px;
   border-bottom: 1px solid var(--maho-color-border);
   border-top: 1px solid var(--maho-color-border);
@@ -2643,7 +2655,7 @@ body {
 .page-header-container {display: flex; place-items: center; gap: 0.5rem;padding-top:0.5rem}
 .page-header-container > div {display: flex; place-items: center; gap: 0.5rem}
 .page-header-container > div:first-of-type > a:first-of-type {display: none}
-.currency-switcher label, .form-language label {display: none}
+.page-header-minimal {display:flex; flex-direction: column; align-items: center; gap: 0.5rem; padding-top: 0.5rem}
 
 @media (max-width: 770px) {
   .page-header-container > div:first-of-type a:first-of-type {display: block}
@@ -2675,7 +2687,6 @@ body {
  * ============================================ */
 
 .logo img {
-  width: auto;
   max-height: 50px;
 }
 
@@ -3274,9 +3285,6 @@ body {
   text-transform: uppercase;
   font-size: 0.75rem;
 }
-.footer .form-subscribe-header {
-  display: none;
-}
 .footer .block-subscribe .input-box {
   float: left;
   width: 65.625%;
@@ -3834,7 +3842,6 @@ p.product-name a:hover {
 
   .block-layered-nav .block-content {
     padding-top: 0;
-    margin-top: 15px;
   }
   .block-layered-nav .block-content > dl > dt {
     cursor: pointer;

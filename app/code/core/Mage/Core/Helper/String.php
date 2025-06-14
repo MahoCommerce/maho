@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -285,6 +285,30 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
     public function strpos($haystack, $needle, $offset = 0)
     {
         return iconv_strpos((string) $haystack, (string) $needle, $offset, self::ICONV_CHARSET);
+    }
+
+    /**
+     * Sorts array with multibyte string values
+     *
+     * @return array|false
+     */
+    public function sortMultibyte(array &$sort, bool $preserveKeys = false)
+    {
+        if (empty($sort)) {
+            return false;
+        }
+        $oldLocale = setlocale(LC_COLLATE, '0');
+        $localeCode = Mage::app()->getLocale()->getLocaleCode();
+        // use fallback locale if $localeCode is not available
+        setlocale(LC_COLLATE, $localeCode . '.UTF8', 'C.UTF-8', 'en_US.utf8');
+        if ($preserveKeys) {
+            asort($sort, SORT_LOCALE_STRING);
+        } else {
+            sort($sort, SORT_LOCALE_STRING);
+        }
+        setlocale(LC_COLLATE, $oldLocale);
+
+        return $sort;
     }
 
     /**
