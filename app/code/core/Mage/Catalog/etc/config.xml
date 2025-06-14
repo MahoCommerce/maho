@@ -647,14 +647,6 @@
                     </catalog_dynamic_category>
                 </observers>
             </catalog_category_save_after>
-            <catalog_product_save_after>
-                <observers>
-                    <catalog_dynamic_category>
-                        <class>catalog/observer</class>
-                        <method>catalogProductSaveAfter</method>
-                    </catalog_dynamic_category>
-                </observers>
-            </catalog_product_save_after>
         </events>
         <crontab>
             <jobs>

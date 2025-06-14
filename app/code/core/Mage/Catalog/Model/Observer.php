@@ -184,24 +184,6 @@ class Mage_Catalog_Model_Observer
     }
 
     /**
-     * Process product save for dynamic categories
-     *
-     * @return $this
-     */
-    public function catalogProductSaveAfter(Varien_Event_Observer $observer)
-    {
-        $product = $observer->getEvent()->getProduct();
-
-        try {
-            Mage::getModel('catalog/category_dynamic_processor')->processProductUpdate($product);
-        } catch (Exception $e) {
-            Mage::logException($e);
-        }
-
-        return $this;
-    }
-
-    /**
      * Cron job method to process all dynamic categories
      */
     public function processAllDynamicCategories(Mage_Cron_Model_Schedule $schedule): void
