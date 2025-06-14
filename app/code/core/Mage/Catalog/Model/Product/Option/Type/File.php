@@ -10,6 +10,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Constraints as Assert;
+
 /**
  * @method array getCustomOptionUrlParams()
  */
@@ -102,7 +105,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      *
      * @param array $values All product option values, i.e. array (option_id => mixed, option_id => mixed...)
      * @return $this
-     * @throws Mage_Core_Exception|Zend_Validate_Exception
+     * @throws Mage_Core_Exception
      */
     #[\Override]
     public function validateUserValue($values)
@@ -292,7 +295,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * @param array $optionValue
      * @return bool
      * @throws Mage_Core_Exception
-     * @throws Zend_Validate_Exception
+     * @throws Mage_Core_Exception
      */
     protected function _validateFile($optionValue)
     {
@@ -326,10 +329,10 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return false;
         }
 
-        $validatorChain = new Zend_Validate();
+        $constraints = [];
 
+        // Image size validation
         $_dimentions = [];
-
         if ($option->getImageSizeX() > 0) {
             $_dimentions['maxwidth'] = $option->getImageSizeX();
         }
@@ -340,48 +343,62 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return false;
         }
         if (count($_dimentions) > 0) {
-            $validatorChain->addValidator(
-                new Zend_Validate_File_ImageSize($_dimentions),
-            );
+            $constraints[] = new Assert\Image([
+                'maxWidth' => $_dimentions['maxwidth'] ?? null,
+                'maxHeight' => $_dimentions['maxheight'] ?? null,
+            ]);
         }
 
-        // File extension
+        // File extension validation
         $_allowed = $this->_parseExtensionsString($option->getFileExtension());
         if ($_allowed !== null) {
-            $validatorChain->addValidator(new Zend_Validate_File_Extension($_allowed));
+            $constraints[] = new Assert\File([
+                'extensions' => $_allowed,
+            ]);
         } else {
             $_forbidden = $this->_parseExtensionsString($this->getConfigData('forbidden_extensions'));
             if ($_forbidden !== null) {
-                $validatorChain->addValidator(new Zend_Validate_File_ExcludeExtension($_forbidden));
+                // For forbidden extensions, we'll validate against allowed extensions by excluding forbidden ones
+                $allExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'pdf', 'doc', 'docx', 'txt', 'zip', 'rar', 'csv', 'xls', 'xlsx'];
+                $allowedExts = array_diff($allExtensions, $_forbidden);
+                if (!empty($allowedExts)) {
+                    $constraints[] = new Assert\File([
+                        'extensions' => $allowedExts,
+                    ]);
+                }
             }
         }
 
         // Maximum filesize
-        $validatorChain->addValidator(
-            new Zend_Validate_File_FilesSize(['max' => $this->_getUploadMaxFilesize()]),
-        );
+        $constraints[] = new Assert\File([
+            'maxSize' => $this->_getUploadMaxFilesize(),
+        ]);
 
-        if ($validatorChain->isValid($fileFullPath)) {
+        $validator = Validation::createValidator();
+        $violations = $validator->validate($fileFullPath, $constraints);
+
+        if (count($violations) === 0) {
             return is_readable($fileFullPath)
                 && isset($optionValue['secret_key'])
                 && substr(md5(file_get_contents($fileFullPath)), 0, 20) == $optionValue['secret_key'];
-        } elseif ($validatorChain->getMessages()) {
-            $errors = $this->_getValidatorErrors(array_keys($validatorChain->getMessages()), $optionValue);
+        } else {
+            $errors = [];
+            foreach ($violations as $violation) {
+                $errors[] = $violation->getMessage();
+            }
 
             if (count($errors) > 0) {
                 $this->setIsValid(false);
                 Mage::throwException(implode("\n", $errors));
             }
-        } else {
             $this->setIsValid(false);
             Mage::throwException(Mage::helper('catalog')->__('Please specify the product required option(s)'));
         }
-        return false;
     }
 
     /**
      * Get Error messages for validator Errors
-     * @param array $errors Array of validation failure message codes @see Zend_Validate::getMessages()
+     * @param array $errors Array of validation failure message codes
      * @param array $fileInfo File info
      * @return array Array of error messages
      * @throws Mage_Core_Exception
@@ -391,16 +408,16 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         $option = $this->getOption();
         $result = [];
         foreach ($errors as $errorCode) {
-            if ($errorCode == Zend_Validate_File_ExcludeExtension::FALSE_EXTENSION) {
+            // Handle file validation errors from upload component
+            if (str_contains($errorCode, 'Extension') || str_contains($errorCode, 'extension')) {
                 $result[] = Mage::helper('catalog')->__("The file '%s' for '%s' has an invalid extension", $fileInfo['title'], $option->getTitle());
-            } elseif ($errorCode == Zend_Validate_File_Extension::FALSE_EXTENSION) {
-                $result[] = Mage::helper('catalog')->__("The file '%s' for '%s' has an invalid extension", $fileInfo['title'], $option->getTitle());
-            } elseif ($errorCode == Zend_Validate_File_ImageSize::WIDTH_TOO_BIG
-                || $errorCode == Zend_Validate_File_ImageSize::HEIGHT_TOO_BIG
-            ) {
+            } elseif (str_contains($errorCode, 'ImageSize') || str_contains($errorCode, 'image')
+                || str_contains($errorCode, 'Width') || str_contains($errorCode, 'Height')) {
                 $result[] = Mage::helper('catalog')->__("Maximum allowed image size for '%s' is %sx%s px.", $option->getTitle(), $option->getImageSizeX(), $option->getImageSizeY());
-            } elseif ($errorCode == Zend_Validate_File_FilesSize::TOO_BIG) {
+            } elseif (str_contains($errorCode, 'Size') || str_contains($errorCode, 'size')) {
                 $result[] = Mage::helper('catalog')->__("The file '%s' you uploaded is larger than %s Megabytes allowed by server", $fileInfo['title'], $this->_bytesToMbytes($this->_getUploadMaxFilesize()));
+            } else {
+                $result[] = Mage::helper('catalog')->__("The file '%s' for '%s' has invalid upload data.", $fileInfo['title'], $option->getTitle());
             }
         }
         return $result;

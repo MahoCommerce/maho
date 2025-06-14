@@ -6,9 +6,12 @@
  * @package    Mage_Review
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @method Mage_Review_Model_Resource_Review _getResource()
@@ -130,21 +133,28 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
 
     /**
      * @return array|bool
-     * @throws Zend_Validate_Exception
+     * @throws Exception
      */
     public function validate()
     {
         $errors = [];
+        $validator = Validation::createValidator();
 
-        if (!Zend_Validate::is($this->getTitle(), 'NotEmpty')) {
+        // Validate title
+        $violations = $validator->validate($this->getTitle(), new Assert\NotBlank());
+        if (count($violations) > 0) {
             $errors[] = Mage::helper('review')->__('Review summary can\'t be empty');
         }
 
-        if (!Zend_Validate::is($this->getNickname(), 'NotEmpty')) {
+        // Validate nickname
+        $violations = $validator->validate($this->getNickname(), new Assert\NotBlank());
+        if (count($violations) > 0) {
             $errors[] = Mage::helper('review')->__('Nickname can\'t be empty');
         }
 
-        if (!Zend_Validate::is($this->getDetail(), 'NotEmpty')) {
+        // Validate detail
+        $violations = $validator->validate($this->getDetail(), new Assert\NotBlank());
+        if (count($violations) > 0) {
             $errors[] = Mage::helper('review')->__('Review can\'t be empty');
         }
 

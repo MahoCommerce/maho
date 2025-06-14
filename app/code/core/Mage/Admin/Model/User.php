@@ -10,6 +10,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Constraints as Assert;
+
 /**
  * @method Mage_Admin_Model_Resource_User _getResource()
  * @method Mage_Admin_Model_Resource_User getResource()
@@ -744,25 +747,34 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
      * Returns TRUE or array of errors.
      *
      * @return array|true
-     * @throws Zend_Validate_Exception
+     * @throws Exception
      */
     public function validate()
     {
         $errors = new ArrayObject();
+        $validator = Validation::createValidator();
 
-        if (!Zend_Validate::is($this->getUsername(), 'NotEmpty')) {
+        // Validate username
+        $violations = $validator->validate($this->getUsername(), new Assert\NotBlank());
+        if (count($violations) > 0) {
             $errors->append(Mage::helper('adminhtml')->__('User Name is required field.'));
         }
 
-        if (!Zend_Validate::is($this->getFirstname(), 'NotEmpty')) {
+        // Validate first name
+        $violations = $validator->validate($this->getFirstname(), new Assert\NotBlank());
+        if (count($violations) > 0) {
             $errors->append(Mage::helper('adminhtml')->__('First Name is required field.'));
         }
 
-        if (!Zend_Validate::is($this->getLastname(), 'NotEmpty')) {
+        // Validate last name
+        $violations = $validator->validate($this->getLastname(), new Assert\NotBlank());
+        if (count($violations) > 0) {
             $errors->append(Mage::helper('adminhtml')->__('Last Name is required field.'));
         }
 
-        if (!Zend_Validate::is($this->getEmail(), 'EmailAddress')) {
+        // Validate email
+        $violations = $validator->validate($this->getEmail(), new Assert\Email(['mode' => 'loose']));
+        if (count($violations) > 0) {
             $errors->append(Mage::helper('adminhtml')->__('Please enter a valid email.'));
         }
 
@@ -810,13 +822,15 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
      *
      * @param string $password
      * @return array|true
-     * @throws Zend_Validate_Exception
+     * @throws Exception
      */
     public function validateCurrentPassword(#[\SensitiveParameter] $password)
     {
         $result = [];
+        $validator = Validation::createValidator();
 
-        if (!Zend_Validate::is($password, 'NotEmpty')) {
+        $violations = $validator->validate($password, new Assert\NotBlank());
+        if (count($violations) > 0) {
             $result[] = Mage::helper('adminhtml')->__('Current password field cannot be empty.');
         } elseif (is_null($this->getId()) || !Mage::helper('core')->validateHash($password, $this->getPassword())) {
             $result[] = Mage::helper('adminhtml')->__('Invalid current password.');
