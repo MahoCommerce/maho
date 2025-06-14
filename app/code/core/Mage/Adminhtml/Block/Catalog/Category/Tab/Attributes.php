@@ -149,7 +149,6 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
             $renderer = Mage::getBlockSingleton('adminhtml/widget_form_renderer_fieldset')
                 ->setTemplate('promo/fieldset.phtml')
                 ->setNewChildUrl($this->getUrl('*/*/newConditionHtml/form/dynamic_conditions_fieldset'));
-
             $rulesFieldset->setRenderer($renderer);
 
             // Get or create the dynamic rule for this category
@@ -179,10 +178,9 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
     /**
      * Get dynamic rule for this category
      *
-     * @return Mage_Catalog_Model_Category_Dynamic_Rule
      * @throws Exception
      */
-    public function getDynamicRule()
+    public function getDynamicRule(): Mage_Catalog_Model_Category_Dynamic_Rule
     {
         $category = $this->getCategory();
 
@@ -214,10 +212,9 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
     /**
      * Get form HTML with additional JavaScript for dynamic rules
      *
-     * @return string
      */
     #[\Override]
-    public function getFormHtml()
+    public function getFormHtml(): string
     {
         $formHtml = parent::getFormHtml();
 

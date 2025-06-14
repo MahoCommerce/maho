@@ -69,5 +69,4 @@ class Mage_Adminhtml_Model_Observer
             $cookie->setLifetime($lifetime);
         }
     }
-
 }
