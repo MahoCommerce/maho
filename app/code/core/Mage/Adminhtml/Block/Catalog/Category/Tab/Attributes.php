@@ -155,12 +155,14 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
             // Get or create the dynamic rule for this category
             $rule = $this->getDynamicRule();
 
-            $rulesFieldset->addField('conditions', 'text', [
+            $conditionsField = $rulesFieldset->addField('conditions', 'text', [
                 'name' => 'rule[conditions]',
                 'label' => Mage::helper('catalog')->__('Conditions'),
                 'title' => Mage::helper('catalog')->__('Conditions'),
                 'required' => false,
-            ])->setRule($rule)->setRenderer(Mage::getBlockSingleton('rule/conditions'));
+            ]);
+            $conditionsField->setRule($rule);
+            $conditionsField->setRenderer(Mage::getBlockSingleton('rule/conditions'));
 
             // Set the rules JS loading
             $this->getLayout()->getBlock('head')->setCanLoadRulesJs(true);
@@ -194,6 +196,10 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
 
                 if ($collection->getSize() > 0) {
                     $rule = $collection->getFirstItem();
+                    // Force reload to trigger _afterLoad if conditions not loaded
+                    if ($rule->getId() && !$rule->getConditions()->getConditions()) {
+                        $rule = Mage::getModel('catalog/category_dynamic_rule')->load($rule->getId());
+                    }
                 } else {
                     $rule->setCategoryId($category->getId());
                 }
@@ -210,6 +216,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
      *
      * @return string
      */
+    #[\Override]
     public function getFormHtml()
     {
         $formHtml = parent::getFormHtml();

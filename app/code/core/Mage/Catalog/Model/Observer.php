@@ -150,12 +150,12 @@ class Mage_Catalog_Model_Observer
         $category = $observer->getEvent()->getCategory();
 
         // Save dynamic rule data if present
-        $request = Mage::app()->getRequest();
-        if ($request && $request->getParam('rule')) {
+        if ($category->getDynamicRuleData()) {
             try {
-                $this->_saveDynamicRuleFromRequest($category, $request->getParam('rule'));
+                $this->_saveDynamicRuleFromRequest($category, $category->getDynamicRuleData());
             } catch (Exception $e) {
                 Mage::logException($e);
+                throw $e; // Re-throw to see the actual error
             }
         }
 
@@ -194,10 +194,8 @@ class Mage_Catalog_Model_Observer
     /**
      * Process product save for dynamic categories
      *
-     * @param Varien_Event_Observer $observer
      * @return $this
      */
-    #[\Override]
     public function catalogProductSaveAfter(Varien_Event_Observer $observer)
     {
         $product = $observer->getEvent()->getProduct();
@@ -349,7 +347,7 @@ class Mage_Catalog_Model_Observer
         if ($category->getIsDynamic() && $category->hasData('rule_conditions')) {
             $rule = Mage::getModel('catalog/category_dynamic_rule');
             $rule->setCategoryId($category->getId());
-            $rule->setIsActive($category->getIsDynamic() ? 1 : 0);
+            $rule->setIsActive(1);
 
             // Process the conditions
             $conditions = $category->getData('rule_conditions');
@@ -377,7 +375,7 @@ class Mage_Catalog_Model_Observer
         }
 
         // Get existing rules for this category
-        $collection = Mage::getModel('catalog/category_dynamic_rule')->getCollection()
+        $collection = Mage::getResourceModel('catalog/category_dynamic_rule_collection')
             ->addCategoryFilter($category->getId());
 
         // Clear existing rules
@@ -385,16 +383,20 @@ class Mage_Catalog_Model_Observer
             $rule->delete();
         }
 
-        // Save new rule if category is dynamic and has conditions
-        if ($category->getIsDynamic() && isset($ruleData['conditions'])) {
-            $rule = Mage::getModel('catalog/category_dynamic_rule');
-            $rule->setCategoryId($category->getId());
-            $rule->setIsActive($category->getIsDynamic() ? 1 : 0);
+        // Always save rule if we have rule data, regardless of is_dynamic setting
+        $rule = Mage::getModel('catalog/category_dynamic_rule');
+        $rule->setCategoryId($category->getId());
+        $rule->setIsActive($category->getIsDynamic() ? 1 : 0);
 
-            // Process the conditions
+        // Process the conditions if present
+        if (isset($ruleData['conditions']) && !empty($ruleData['conditions'])) {
             $rule->loadPost($ruleData);
-            $rule->save();
+        } else {
+            // Set empty conditions
+            $rule->getConditions()->setConditions([]);
         }
+
+        $rule->save();
 
         return $this;
     }

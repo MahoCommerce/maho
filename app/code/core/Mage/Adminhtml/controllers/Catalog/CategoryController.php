@@ -260,6 +260,8 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             // Store dynamic category rule data for the observer to handle
             if (isset($data['rule']) && is_array($data['rule'])) {
                 $category->setDynamicRuleData($data['rule']);
+            } elseif (isset($data['general']['rule']) && is_array($data['general']['rule'])) {
+                $category->setDynamicRuleData($data['general']['rule']);
             }
 
             Mage::dispatchEvent('catalog_category_prepare_save', [
@@ -492,7 +494,10 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             ->setRule(Mage::getModel('catalog/category_dynamic_rule'))
             ->setPrefix('conditions');
         if (!empty($typeArr[1])) {
-            $model->setAttribute($typeArr[1]);
+            // For rule conditions, set attribute using setData
+            if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
+                $model->setData('attribute', $typeArr[1]);
+            }
         }
 
         if ($model instanceof Mage_Rule_Model_Condition_Abstract) {

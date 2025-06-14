@@ -47,6 +47,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     /**
      * Initialize resource model
      */
+    #[\Override]
     protected function _construct()
     {
         parent::_construct();
@@ -57,17 +58,13 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     /**
      * Getter for rule conditions collection
      *
-     * @return Mage_CatalogRule_Model_Rule_Condition_Combine
+     * @return Mage_Rule_Model_Condition_Combine
      */
+    #[\Override]
     public function getConditions()
     {
-        if (empty($this->_conditions)) {
+        if (!$this->_conditions) {
             $this->_resetConditions();
-        }
-
-        // Migration from conditions serialized
-        if (!$this->getConditionsSerialized()) {
-            $this->setConditionsSerialized($this->_conditions->asArray());
         }
 
         return $this->_conditions;
@@ -79,6 +76,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
      * @param null|Mage_Rule_Model_Condition_Combine $conditions
      * @return $this
      */
+    #[\Override]
     protected function _resetConditions($conditions = null)
     {
         if (is_null($conditions)) {
@@ -95,6 +93,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
      *
      * @return Mage_CatalogRule_Model_Rule_Condition_Combine
      */
+    #[\Override]
     public function getConditionsInstance()
     {
         return Mage::getModel('catalogrule/rule_condition_combine');
@@ -105,6 +104,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
      *
      * @return Mage_Rule_Model_Action_Collection
      */
+    #[\Override]
     public function getActionsInstance()
     {
         return Mage::getModel('rule/action_collection');
@@ -113,6 +113,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     /**
      * Prepare data before saving
      */
+    #[\Override]
     protected function _beforeSave()
     {
         // Serialize conditions
@@ -131,6 +132,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
      * @param Mage_Rule_Model_Condition_Combine|null $conditions
      * @return $this
      */
+    #[\Override]
     public function setConditions($conditions)
     {
         $this->_conditions = $conditions;
@@ -140,9 +142,9 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     /**
      * Load rule conditions from array
      *
-     * @param array $arr
      * @return $this
      */
+    #[\Override]
     public function loadPost(array $arr)
     {
         $arr = $this->_convertFlatToRecursive($arr);
@@ -155,9 +157,9 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     /**
      * Returns rule as an array for admin interface
      *
-     * @param array $arrAttributes
      * @return array
      */
+    #[\Override]
     public function asArray(array $arrAttributes = [])
     {
         $out = parent::asArray($arrAttributes);
@@ -183,27 +185,34 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     /**
      * After loading, unserialize conditions
      */
+    #[\Override]
     protected function _afterLoad()
     {
+        parent::_afterLoad();
+
+        // Initialize conditions from serialized data
         if ($this->getConditionsSerialized()) {
             $conditions = $this->getConditionsSerialized();
             if (is_string($conditions)) {
-                $conditions = unserialize($conditions);
+                $conditions = @unserialize($conditions);
             }
             if (is_array($conditions) && !empty($conditions)) {
-                $this->getConditions()->loadArray($conditions);
+                // Reset and reload conditions
+                $this->_conditions = $this->getConditionsInstance();
+                $this->_conditions->setRule($this)->setId('1')->setPrefix('conditions');
+                $this->_conditions->setConditions([])->loadArray($conditions);
             }
         }
-        parent::_afterLoad();
+
         return $this;
     }
 
     /**
      * Validate rule conditions to determine if rule can be applied
      *
-     * @param Varien_Object $object
      * @return bool
      */
+    #[\Override]
     public function validate(Varien_Object $object)
     {
         return $this->getConditions()->validate($object);
@@ -227,7 +236,9 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
                 $productCollection->addIdFilter($this->_productsFilter);
             }
 
-            $this->getConditions()->collectValidatedAttributes($productCollection);
+            if (method_exists($this->getConditions(), 'collectValidatedAttributes')) {
+                $this->getConditions()->collectValidatedAttributes($productCollection);
+            }
 
             Mage::getSingleton('core/resource_iterator')->walk(
                 $productCollection->getSelect(),

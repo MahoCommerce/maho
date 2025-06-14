@@ -10,6 +10,7 @@
 
 class Mage_Catalog_Model_Resource_Category_Dynamic_Rule_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
+    #[\Override]
     protected function _construct()
     {
         $this->_init('catalog/category_dynamic_rule');
