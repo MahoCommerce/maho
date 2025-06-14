@@ -146,19 +146,6 @@ class Mage_Catalog_Model_Observer
             Mage::getResourceModel('catalog/category_flat')->synchronize($category);
         }
 
-        // Process dynamic category if it's marked as dynamic
-        $category = $observer->getEvent()->getCategory();
-
-        // Save dynamic rule data if present
-        if ($category->getDynamicRuleData()) {
-            try {
-                $this->_saveDynamicRuleFromRequest($category, $category->getDynamicRuleData());
-            } catch (Exception $e) {
-                Mage::logException($e);
-                throw $e; // Re-throw to see the actual error
-            }
-        }
-
         return $this;
     }
 
@@ -183,17 +170,6 @@ class Mage_Catalog_Model_Observer
         }
     }
 
-    /**
-     * Cron job method to process all dynamic categories
-     */
-    public function processAllDynamicCategories(Mage_Cron_Model_Schedule $schedule): void
-    {
-        try {
-            Mage::getModel('catalog/category_dynamic_processor')->processAllDynamicCategories();
-        } catch (Exception $e) {
-            Mage::logException($e);
-        }
-    }
 
     /**
      * Adds catalog categories to top menu
@@ -294,84 +270,5 @@ class Mage_Catalog_Model_Observer
                 Mage::helper('catalog')->__('The attribute code \'%s\' is reserved by system. Please try another attribute code', $attribute->getAttributeCode()),
             );
         }
-    }
-
-    /**
-     * Save dynamic rule for category
-     *
-     * @param Mage_Catalog_Model_Category $category
-     * @return $this
-     */
-    protected function _saveDynamicRule($category)
-    {
-        if (!$category->getId()) {
-            return $this;
-        }
-
-        // Get existing rules for this category
-        $collection = Mage::getResourceModel('catalog/category_dynamic_rule_collection')
-            ->addCategoryFilter($category->getId());
-
-        // Clear existing rules
-        foreach ($collection as $rule) {
-            $rule->delete();
-        }
-
-        // Save new rule if category is dynamic and has conditions
-        if ($category->getIsDynamic() && $category->hasData('rule_conditions')) {
-            $rule = Mage::getModel('catalog/category_dynamic_rule');
-            $rule->setCategoryId($category->getId());
-            $rule->setIsActive(1);
-
-            // Process the conditions
-            $conditions = $category->getData('rule_conditions');
-            if (is_array($conditions)) {
-                $rule->loadPost(['conditions' => $conditions]);
-            }
-
-            $rule->save();
-        }
-
-        return $this;
-    }
-
-    /**
-     * Save dynamic rule for category from request data
-     *
-     * @param Mage_Catalog_Model_Category $category
-     * @param array $ruleData
-     * @return $this
-     */
-    protected function _saveDynamicRuleFromRequest($category, $ruleData)
-    {
-        if (!$category->getId()) {
-            return $this;
-        }
-
-        // Get existing rules for this category
-        $collection = Mage::getResourceModel('catalog/category_dynamic_rule_collection')
-            ->addCategoryFilter($category->getId());
-
-        // Clear existing rules
-        foreach ($collection as $rule) {
-            $rule->delete();
-        }
-
-        // Always save rule if we have rule data, regardless of is_dynamic setting
-        $rule = Mage::getModel('catalog/category_dynamic_rule');
-        $rule->setCategoryId($category->getId());
-        $rule->setIsActive($category->getIsDynamic() ? 1 : 0);
-
-        // Process the conditions if present
-        if (isset($ruleData['conditions']) && !empty($ruleData['conditions'])) {
-            $rule->loadPost($ruleData);
-        } else {
-            // Set empty conditions
-            $rule->getConditions()->setConditions([]);
-        }
-
-        $rule->save();
-
-        return $this;
     }
 }

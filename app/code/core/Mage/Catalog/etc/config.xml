@@ -638,28 +638,6 @@
                 </visibility>
             </catalog_product>
         </eav_attributes>
-        <events>
-            <catalog_category_save_after>
-                <observers>
-                    <catalog_dynamic_category>
-                        <class>catalog/observer</class>
-                        <method>categorySaveAfter</method>
-                    </catalog_dynamic_category>
-                </observers>
-            </catalog_category_save_after>
-        </events>
-        <crontab>
-            <jobs>
-                <catalog_dynamic_categories_process>
-                    <schedule>
-                        <cron_expr>0 2 * * *</cron_expr>
-                    </schedule>
-                    <run>
-                        <model>catalog/observer::processAllDynamicCategories</model>
-                    </run>
-                </catalog_dynamic_categories_process>
-            </jobs>
-        </crontab>
     </global>
     <adminhtml>
         <translate>
