@@ -247,12 +247,13 @@ class Mage_Core_Model_Locale
                 if (!isset($languages[$data[0]]) || !isset($countries[$data[1]])) {
                     continue;
                 }
+                [$language, $country] = $data;
                 if ($translatedName) {
-                    $label = ucwords($this->getLocale()->getTranslation($data[0], 'language', $code))
-                        . ' (' . $this->getLocale()->getTranslation($data[1], 'country', $code) . ') / '
-                        . $languages[$data[0]] . ' (' . $countries[$data[1]] . ')';
+                    $translatedLanguage = ucwords($this->getLocale()->getTranslation($language, 'language', $code));
+                    $translatedCountry = $this->getCountryTranslation($country, $code);
+                    $label = "$translatedLanguage ($translatedCountry) / {$languages[$language]} ({$countries[$country]})";
                 } else {
-                    $label = $languages[$data[0]] . ' (' . $countries[$data[1]] . ')';
+                    $label = "{$languages[$language]} ({$countries[$country]})";
                 }
                 $options[] = [
                     'value' => $code,
@@ -805,6 +806,9 @@ class Mage_Core_Model_Locale
      */
     public function getTranslationList($path = null, $value = null)
     {
+        if ($path === 'country' || $path === 'territory') {
+            return $this->getCountryTranslationList();
+        }
         return $this->getLocale()->getTranslationList($path, $this->getLocale(), $value);
     }
 
@@ -818,6 +822,9 @@ class Mage_Core_Model_Locale
      */
     public function getTranslation($value = null, $path = null)
     {
+        if ($path === 'country' || $path === 'territory') {
+            return $this->getCountryTranslation($value);
+        }
         return $this->getLocale()->getTranslation($value, $path, $this->getLocale());
     }
 
@@ -835,12 +842,23 @@ class Mage_Core_Model_Locale
     /**
      * Returns the localized country name
      *
-     * @param string $value Name to get detailed information about
+     * @param string $countryId Country to get detailed information about
+     * @param string $locale Locale to get translation for, or system locale if null
      * @return false|string
      */
-    public function getCountryTranslation($value)
+    public function getCountryTranslation($countryId, $locale = null)
     {
-        return $this->getLocale()->getTranslation($value, 'country', $this->getLocale());
+        $country = Mage::getModel('directory/country')->load($countryId);
+        if ($country->getId()) {
+            if ($locale) {
+                $translated = $country->getTranslation($locale);
+                if ($translated->getName()) {
+                    return $translated->getName();
+                }
+            }
+            return $country->getName();
+        }
+        return false;
     }
 
     /**
@@ -850,7 +868,7 @@ class Mage_Core_Model_Locale
      */
     public function getCountryTranslationList()
     {
-        return $this->getLocale()->getTranslationList('territory', $this->getLocale(), 2);
+        return Mage::getResourceModel('directory/country_collection')->toOptionHash();
     }
 
     /**

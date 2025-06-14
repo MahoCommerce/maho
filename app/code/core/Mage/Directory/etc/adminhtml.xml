@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<config>
+    <menu>
+        <system>
+            <children>
+                <directory translate="title" module="adminhtml">
+                    <title>Manage Directory</title>
+                    <sort_order>51</sort_order>
+                    <children>
+                        <country translate="title" module="adminhtml">
+                            <title>Countries</title>
+                            <sort_order>10</sort_order>
+                            <action>adminhtml/directory_country</action>
+                        </country>
+                        <region translate="title" module="adminhtml">
+                            <title>Regions</title>
+                            <sort_order>20</sort_order>
+                            <action>adminhtml/directory_region</action>
+                        </region>
+                    </children>
+                </directory>
+            </children>
+        </system>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <directory translate="title" module="adminhtml">
+                                <title>Manage Directory</title>
+                                <sort_order>35</sort_order>
+                                <children>
+                                    <countries translate="title" module="adminhtml">
+                                        <title>Countries</title>
+                                    </countries>
+                                    <regions translate="title" module="adminhtml">
+                                        <title>Regions</title>
+                                    </regions>
+                                </children>
+                            </directory>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

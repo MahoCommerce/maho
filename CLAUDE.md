@@ -4,146 +4,150 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Maho is a modern, open-source ecommerce platform created in 2024, forked from the M1 platform (Magento 1 lineage). It's designed as a PHP 8.2+ platform focusing on stability, performance, and developer experience while maintaining backward compatibility with the vast M1 ecosystem.
+Maho is an open-source ecommerce platform forked from OpenMage, designed for medium-to-small on-premise projects. It's based on the Magento 1 architecture but modernized with PHP 8.3+ support and contemporary development tools.
 
-## Essential Development Commands
+## Essential Commands
 
-### Development Server
+### Code Quality & Standards
 ```bash
-./maho serve [port]              # Start development server (default port 8000)
+# Code style (PER-CS2.0 standard)
+PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix --dry-run --diff    # Check code style
+PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix                     # Fix code style
+
+# Static Analysis (PHPStan level 6)
+vendor/bin/phpstan analyze    # Run static analysis
+
+# Generate PHPStorm metadata
+./maho phpstorm:metadata:generate
 ```
 
 ### Cache Management
 ```bash
-./maho cache:flush               # Clear all caches
-./maho cache:enable              # Enable all cache types  
-./maho cache:disable             # Disable all cache types
+./maho cache:flush        # Flush all caches
+./maho cache:enable       # Enable caching
+./maho cache:disable      # Disable caching
 ```
 
-### Code Quality
+### Database & Indexing
 ```bash
-vendor/bin/php-cs-fixer fix     # Format code (PER-CS2.0 + custom rules)
-vendor/bin/phpstan analyze      # Static analysis (uses mahocommerce/maho-phpstan-plugin)
+./maho index:list         # List all indexes
+./maho index:reindex      # Reindex specific index
+./maho index:reindex:all  # Reindex all indexes
 ```
 
-### Database & Installation
+### Admin & Customer Management
 ```bash
-./maho install                  # Full installation wizard
-./maho db:connect               # Open MySQL CLI with project credentials
-./maho health-check             # Comprehensive migration health check
+./maho admin:user:list                          # List admin users
+./maho admin:user:create                        # Create admin user
+./maho admin:user:changepassword <username>     # Change admin password
+./maho customer:list                            # List customers
+./maho customer:create                          # Create customer
 ```
 
-### Index Management
+### Installation
 ```bash
-./maho index:list               # Show all indexes
-./maho index:reindex:all        # Reindex everything
-./maho index:reindex [index]    # Reindex specific index
+./maho install            # Install Maho (non interactive)
 ```
 
-### Development Utilities
-```bash
-./maho phpstorm:metadata:generate    # Generate IDE metadata
-./maho translations:missing          # Find missing translations
-./maho legacy:rename-mysql4-classes  # Migrate legacy Mysql4 classes
+## Architecture Overview
+
+### MVC Pattern
+Maho follows a traditional MVC architecture:
+- **Models** (`Model/`): Business logic and data access
+- **Views** (`Block/` and templates): Presentation layer
+- **Controllers** (`controllers/`): Request handling
+
+### Module Structure
+Each module follows this structure:
+```
+app/code/core/Mage/[ModuleName]/
+├── Block/          # View blocks
+├── Helper/         # Helper classes
+├── Model/          # Business logic
+├── controllers/    # Controllers
+├── etc/            # Configuration (config.xml, system.xml)
+├── sql/            # Database migrations
+└── data/           # Data install scripts
 ```
 
-## Core Architecture
+### Key Configuration Files
+- `app/etc/local.xml`: Main configuration (DB, cache, etc.)
+- `app/etc/config.xml`: Base configuration
+- `app/etc/modules/*.xml`: Module declarations
 
-### Module System
-- **Structure**: `app/code/{core|community|local}/Namespace/Module/`
-- **Declaration**: `app/etc/modules/Namespace_Module.xml`
-- **Components**: Model/, Block/, Helper/, controllers/, etc/config.xml
-- **Factory Pattern**: `Mage::getModel('module/model')`, `Mage::helper('module/helper')`
+### Theme Structure
+```
+app/design/
+├── adminhtml/      # Admin panel themes
+├── frontend/       # Frontend themes
+└── install/        # Installer theme
+```
 
-### Configuration System
-- **XML-based**: Hierarchical config merging from global → module → local
-- **Access**: `Mage::getStoreConfig('section/group/field')`
-- **Store Scope**: Website → Store Group → Store View hierarchy
+### Database Access Pattern
+- Models extend `Mage_Core_Model_Abstract`
+- Resource models handle database operations
+- Collections for querying multiple records
+- Uses Zend_Db adapters for database abstraction
 
-### Model-Resource Pattern
-- **Models**: Business logic extending `Mage_Core_Model_Abstract`
-- **Resources**: Database abstraction in `Mage_*_Model_Resource_*`
-- **Collections**: `Mage_*_Model_Resource_*_Collection` for queries
-- **Loading**: `$model->load($id)` or `$collection->addFieldToFilter()`
-
-### Event-Observer System
-- **Dispatch**: `Mage::dispatchEvent('event_name', $data)`
-- **Registration**: In module's `config.xml` under `<events>` node
-- **Observers**: Methods in classes extending `Mage_Core_Model_Observer`
-
-### CLI Extension
-- **Base Class**: Extend `BaseMahoCommand` (auto-initializes Mage)
-- **Auto-discovery**: Commands auto-loaded from vendor packages
-- **Integration**: Full access to Mage functionality in CLI context
-
-## Development Patterns
-
-### Creating New Modules
-1. Create module directory: `app/code/local/Vendor/Module/`
-2. Add declaration: `app/etc/modules/Vendor_Module.xml`
-3. Create `etc/config.xml` with module configuration
-4. Implement Models, Blocks, Helpers as needed
-5. Use events/observers for loose coupling
-
-### Database Interactions
+### Event System
+Maho uses an event-driven architecture:
 ```php
-// Model loading
-$product = Mage::getModel('catalog/product')->load($id);
-
-// Collections
-$collection = Mage::getModel('catalog/product')->getCollection()
-    ->addFieldToFilter('status', 1)
-    ->addAttributeToSelect('*');
-
-// Direct queries (avoid when possible)
-$resource = Mage::getSingleton('core/resource');
-$connection = $resource->getConnection('read');
+Mage::dispatchEvent('event_name', ['data' => $data]);
 ```
+Observers are configured in module's `config.xml`.
 
-### Configuration Access
+### Layout System
+- XML-based layout configuration
+- Block hierarchy system
+- Template assignment via layout XML
+
+### Session Management
+- Customer sessions: `Mage::getSingleton('customer/session')`
+- Admin sessions: `Mage::getSingleton('admin/session')`
+- Checkout sessions: `Mage::getSingleton('checkout/session')`
+
+### Translation System
+- CSV-based translations in `app/locale/[locale]/`
+- Helper method: `$this->__('Text to translate')`
+- Admin translations: `Mage::helper('adminhtml')->__('Text')`
+
+## Development Guidelines
+
+- When you write CSS, use the most modern features, do not care for Internet Explorer or old unsupported browsers.
+- When you write Javascript, never use prototypejs or jquery, only vanilla's
+- If you're integrating new tools/libraries, always use their latest available version
+- Update headers of the PHP files, adding the current year for the copyright Maho line
+- Before committing, ensure all translatable strings (`$this->__()` or `Mage::helper()->__()`) are present in the corresponding CSV files in `app/locale/en_US/`
+
+### Adding New Features
+- If you've to create a new module, use the `app/code/core/Maho/` namespace 
+- Declare module in `app/etc/modules/`
+- Follow existing module patterns for consistency
+- Add strict typing to all new code and use modern PHP8.3+ features
+
+### Modifying Existing Features
+- Do not increment module's version number in module's `config.xml`
+- Feel free to modify the files in the core, there's no problem with that
+- Avoid creating a new module unless asked for it
+
+### Database Changes
+- Use setup scripts in `sql/maho_setup/YY.MM.[incremental number].php`
+
+### Working with Collections
 ```php
-// Store config
-$value = Mage::getStoreConfig('section/group/field', $storeId);
-
-// System config
-$config = Mage::getConfig()->getNode('global/models/core');
+$collection = Mage::getResourceModel('catalog/product_collection')
+    ->addAttributeToSelect('*')
+    ->addFieldToFilter('status', 1);
 ```
 
-### Event Handling
-```php
-// Dispatch event
-Mage::dispatchEvent('catalog_product_save_after', ['product' => $product]);
+### Error Handling
+- Exceptions extend module-specific exception classes
+- Use `Mage::throwException()` for user-facing errors
+- Log errors with `Mage::log()`
 
-// Observer method
-public function catalogProductSaveAfter($observer) {
-    $product = $observer->getEvent()->getProduct();
-    // Custom logic here
-}
-```
-
-## File Locations
-
-- **Core Code**: `app/code/core/Mage/`
-- **Local Customizations**: `app/code/local/`
-- **Configuration**: `app/etc/config.xml`, `local.xml`
-- **Templates**: `app/design/frontend/` and `app/design/adminhtml/`
-- **Public Assets**: `public/` (document root)
-- **CLI Commands**: `lib/MahoCLI/Commands/`
-
-## Key Differences from Standard M1
-
-- **PHP 8.2+ Only**: Modern PHP features and type declarations
-- **Composer Integration**: Full composer support with autoloading
-- **CLI Tools**: Comprehensive CLI via Symfony Console
-- **Code Quality**: PHPStan level 6, PHP-CS-Fixer PER-CS2.0
-- **Modern Dependencies**: Updated libraries (Symfony components, etc.)
-- **Security Enhancements**: Modern encryption, security patches applied
-
-## Testing & Quality Assurance
-
-When modifying code:
-1. Run `./maho health-check` after major changes
-2. Use `vendor/bin/php-cs-fixer fix` for code formatting
-3. Run `vendor/bin/phpstan analyze` for static analysis
-4. Test cache operations with cache commands
-5. Verify indexes with `./maho index:reindex:all`
+## Testing Approach
+While there's no dedicated test suite, ensure code quality through:
+- PHPStan static analysis (level 6)
+- PHP-CS-Fixer for code standards
+- Manual testing of features
+- GitHub Actions CI for automated checks

@@ -41,7 +41,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         'Mage_Paygate' => 25,
         'Mage_Checkout' => 27,
         'Mage_Paypal' => 28,
-        'Mage_GoogleCheckout' => 29,
         'Mage_Log' => 30,
         'Mage_Poll' => 31,
         'Mage_Review' => 32,

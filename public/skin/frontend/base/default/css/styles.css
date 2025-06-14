@@ -130,11 +130,33 @@ q:after {
   content: '';
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ============================================ *
  * Base Styles
  * ============================================ */
 a, button {
   touch-action: manipulation;
+}
+
+a,
+button,
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+.button,
+.btn {
+  min-height: 24px;
+  min-width: 24px;
 }
 
 body,
@@ -159,9 +181,14 @@ a:hover {
   text-decoration: underline;
 }
 
-a:focus {
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+[tabindex]:focus {
   outline-color: var(--maho-color-primary-hover);
-  color: var(--maho-color-primary-dark);
+  outline-offset: 2px;
 }
 
 ol,
@@ -169,6 +196,23 @@ ul {
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+.visually-hidden {
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  &:not(caption) {
+    position: absolute !important;
+  }
+  * {
+    overflow: hidden !important;
+  }
 }
 
 /* ============================================ *
@@ -280,6 +324,12 @@ h6, .h6 {
 /* -------------------------------------------- *
  * Page Titles
  */
+.page-title {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
 .page-title h1,
 .page-title h2,
 .product-name h1,
@@ -288,9 +338,20 @@ h6, .h6 {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--maho-color-text-primary);
-  padding-bottom: 3px;
-  margin-bottom: 15px;
-  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.page-title .links ul {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.page-title .links a {
+  color: var(--maho-color-text-primary);
+}
+
+.page-title .links a:hover {
+  color: var(--maho-color-primary);
 }
 
 /* -------------------------------------------- *
@@ -341,10 +402,6 @@ body:not(.customer-account) .block:first-child .block-title {
 .block-subtitle {
   font-weight: bold;
   margin-bottom: 7px;
-}
-
-.block-content {
-  margin-top: 5px;
 }
 
 .block-content.unpad {
@@ -748,18 +805,24 @@ a.button:hover {
  */
 .breadcrumbs {
   overflow: hidden;
-  margin: -15px 0 15px;
+  margin: -15px 0 5px;
 }
 
-.breadcrumbs li {
-  float: left;
+.breadcrumbs a {
+  color: var(--maho-color-text-primary);
+}
+
+.breadcrumbs ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   font-size: 0.75rem;
   text-transform: uppercase;
 }
 
-.breadcrumbs a {
-  float: left;
-  color: var(--maho-color-text-primary);
+.breadcrumbs li:not(:last-child):after {
+  content: "›";
+  margin: 0 0.5rem;
 }
 
 .breadcrumbs a:hover {
@@ -769,11 +832,6 @@ a.button:hover {
 .breadcrumbs strong {
   color: var(--maho-color-text-primary);
   font-weight: normal;
-}
-
-.breadcrumbs span {
-  float: left;
-  padding: 0 7px;
 }
 
 @media only screen and (max-width: 770px) {
@@ -1684,7 +1742,6 @@ span.weee {
  * Toolbar
  */
 .toolbar {
-  margin-top: 10px;
   margin-bottom: 15px;
   border-bottom: 1px solid var(--maho-color-border);
   border-top: 1px solid var(--maho-color-border);
@@ -2598,7 +2655,7 @@ body {
 .page-header-container {display: flex; place-items: center; gap: 0.5rem;padding-top:0.5rem}
 .page-header-container > div {display: flex; place-items: center; gap: 0.5rem}
 .page-header-container > div:first-of-type > a:first-of-type {display: none}
-.currency-switcher label, .form-language label {display: none}
+.page-header-minimal {display:flex; flex-direction: column; align-items: center; gap: 0.5rem; padding-top: 0.5rem}
 
 @media (max-width: 770px) {
   .page-header-container > div:first-of-type a:first-of-type {display: block}
@@ -2630,7 +2687,6 @@ body {
  * ============================================ */
 
 .logo img {
-  width: auto;
   max-height: 50px;
 }
 
@@ -3229,9 +3285,6 @@ body {
   text-transform: uppercase;
   font-size: 0.75rem;
 }
-.footer .form-subscribe-header {
-  display: none;
-}
 .footer .block-subscribe .input-box {
   float: left;
   width: 65.625%;
@@ -3410,10 +3463,11 @@ p.product-name a:hover {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  background-color: var(--maho-color-background);
 }
 .products-grid > li > div:first-child ul a {
   font-size: 0;
-  color: var(--maho-color-border);
+  color: var(--maho-color-text-primary);
   display: block;
 }
 .products-grid > li > div:first-child ul a:hover {
@@ -3422,6 +3476,10 @@ p.product-name a:hover {
 .products-grid > li > div:first-child ul svg {
   width: 28px;
   height: 28px;
+  stroke-width: 1;
+}
+.products-grid > li > div:first-child ul a:hover svg {
+  stroke-width: 1.3;
 }
 
 .products-grid .product-image img {
@@ -3784,7 +3842,6 @@ p.product-name a:hover {
 
   .block-layered-nav .block-content {
     padding-top: 0;
-    margin-top: 15px;
   }
   .block-layered-nav .block-content > dl > dt {
     cursor: pointer;

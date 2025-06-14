@@ -6,7 +6,7 @@
  * @package    Mage_Directory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -129,5 +129,77 @@ class Mage_Directory_Model_Resource_Region extends Mage_Core_Model_Resource_Db_A
     public function loadByName(Mage_Directory_Model_Region $region, $regionName, $countryId)
     {
         return $this->_loadByCountry($region, $countryId, (string) $regionName, 'default_name');
+    }
+
+    /**
+     * Return collection of translated region names
+     */
+    public function getTranslationCollection(?Mage_Directory_Model_Region $region = null): Varien_Data_Collection_Db
+    {
+        $collection = new Varien_Data_Collection_Db($this->_getReadAdapter());
+
+        $collection->getSelect()
+            ->from(
+                ['rname' => $this->_regionNameTable],
+                ['locale', 'name'],
+            )
+            ->joinLeft(
+                ['region' => $this->getMainTable()],
+                'rname.region_id = region.region_id',
+                ['region_id', 'country_id', 'code', 'default_name'],
+            )
+            ->columns([
+                'id' => new Zend_Db_Expr("CONCAT(rname.region_id, '|', rname.locale)"),
+            ]);
+
+        if ($region) {
+            $collection->getSelect()
+                ->where('region.region_id = ?', $region->getRegionId());
+        }
+
+        return $collection;
+    }
+
+    /**
+     * Check if region has at least one translation
+     */
+    public function hasTranslation(Mage_Directory_Model_Region $region): bool
+    {
+        $select = $this->_getReadAdapter()->select()
+            ->from($this->_regionNameTable, 'COUNT(*)')
+            ->where('region_id = ?', $region->getRegionId());
+
+        return (int) $this->_getReadAdapter()->fetchOne($select) > 0;
+    }
+
+    public function getTranslation(Mage_Directory_Model_Region $region, string $locale): Varien_Object
+    {
+        $select = $this->_getReadAdapter()->select()
+            ->from($this->_regionNameTable)
+            ->where('region_id = ?', $region->getRegionId())
+            ->where('locale = ?', $locale)
+            ->columns([
+                'id' => new Zend_Db_Expr("CONCAT(region_id, '|', locale)"),
+            ]);
+
+        return new Varien_Object($this->_getReadAdapter()->fetchRow($select));
+    }
+
+    public function insertOrUpdateTranslation(Mage_Directory_Model_Region $region, array $data): bool
+    {
+        $data = array_intersect_key($data, array_flip(['locale', 'name']));
+        $data['region_id'] = $region->getRegionId();
+
+        return (bool) $this->_getWriteAdapter()
+            ->insertOnDuplicate($this->_regionNameTable, $data, ['name']);
+    }
+
+    public function deleteTranslation(Mage_Directory_Model_Region $region, string $locale): bool
+    {
+        return (bool) $this->_getWriteAdapter()
+            ->delete($this->_regionNameTable, [
+                'region_id = ?' => $region->getRegionId(),
+                'locale = ?' => $locale,
+            ]);
     }
 }

@@ -23,23 +23,24 @@
     <?= $this->getChildHtml('global_notices') ?>
     <div class="page">
         <?= $this->getChildHtml('header') ?>
-        <div class="main-container col3-layout">
+        <main class="main-container col3-layout" role="main">
             <div class="main">
                 <?= $this->getChildHtml('breadcrumbs') ?>
+                <?= $this->getChildHtml('title') ?>
                 <div class="col-wrapper">
                     <?php // This left_first block will display above the main content on smaller viewports ?>
                     <?php if ($_leftContent = $this->getChildHtml('left_first')): ?>
-                        <div class="col-left sidebar col-left-first"><?= $_leftContent;   ?></div>
+                        <aside class="col-left sidebar col-left-first" aria-label="<?= $this->__('Primary sidebar') ?>"><?= $_leftContent;   ?></aside>
                     <?php endif ?>
                     <div class="col-main" id="main-content">
                         <?= $this->getChildHtml('global_messages') ?>
                         <?= $this->getChildHtml('content') ?>
                     </div>
-                    <div class="col-left sidebar"><?= $this->getChildHtml('left') ?></div>
+                    <aside class="col-left sidebar" aria-label="<?= $this->__('Left sidebar') ?>"><?= $this->getChildHtml('left') ?></aside>
                 </div>
-                <div class="col-right sidebar"><?= $this->getChildHtml('right') ?></div>
+                <aside class="col-right sidebar" aria-label="<?= $this->__('Right sidebar') ?>"><?= $this->getChildHtml('right') ?></aside>
             </div>
-        </div>
+        </main>
         <?= $this->getChildHtml('footer_before') ?>
         <?= $this->getChildHtml('footer') ?>
         <?= $this->getChildHtml('global_cookie_notice') ?>

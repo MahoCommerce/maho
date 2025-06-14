@@ -6,7 +6,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 -->
@@ -66,6 +66,9 @@
             </block>
 
             <block type="page/html_breadcrumbs" name="breadcrumbs" as="breadcrumbs"/>
+            <block type="page/html_title" name="title" as="title">
+                <block type="page/template_links" name="title.links" as="title_links"/>
+            </block>
 
             <block type="core/text_list" name="left_first" as="left_first" translate="label">
                 <label>Left Column First (shows above main column on smaller screens)</label>
@@ -192,4 +195,20 @@
             <action method="setLayoutCode"><name>three_columns</name></action>
         </reference>
     </page_three_columns>
+
+    <!-- Minimal page layout - only logo in header, no footer -->
+    <page_minimal translate="label">
+        <label>All Minimal Layout Pages</label>
+        <reference name="head">
+            <action method="removeItem"><type>skin_js</type><name>js/minicart.js</name></action>
+        </reference>
+        <reference name="header">
+            <action method="setTemplate"><template>page/html/header_minimal.phtml</template></action>
+        </reference>
+        <reference name="footer">
+            <action method="setIsMinimal"><flag>1</flag></action>
+            <action method="setTemplate"><template>page/html/footer_minimal.phtml</template></action>
+        </reference>
+        <remove name="footer.before"/>
+    </page_minimal>
 </layout>
