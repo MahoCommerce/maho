@@ -194,11 +194,41 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
 
         // Check if this indexer supports mass_action events for catalog products
         if ($this->matchEntityAndType(Mage_Catalog_Model_Product::ENTITY, Mage_Index_Model_Event::TYPE_MASS_ACTION)) {
-            // Use synthetic mass_action event for indexers that support it
+            // Create comprehensive mass action data object that all indexers expect
+            $actionObject = new class ($entityIds) extends Varien_Object {
+                private array $productIds;
+
+                public function __construct(array $productIds)
+                {
+                    parent::__construct();
+                    $this->productIds = $productIds;
+                }
+
+                public function getProductIds(): array
+                {
+                    return $this->productIds;
+                }
+
+                public function getAttributesData(): array
+                {
+                    return ['force_flat_update' => true];
+                }
+
+                public function getWebsiteIds(): null
+                {
+                    return null;
+                }
+
+                public function getActionType(): null
+                {
+                    return null;
+                }
+            };
+
             $event = Mage::getModel('index/event')
                 ->setEntity(Mage_Catalog_Model_Product::ENTITY)
                 ->setType(Mage_Index_Model_Event::TYPE_MASS_ACTION)
-                ->setDataObject(new Varien_Object(['product_ids' => $entityIds]));
+                ->setDataObject($actionObject);
 
             $this->_processEvent($event);
             return $this;
@@ -207,12 +237,12 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
             $resourceModel = $this->_getResource();
 
             // Try common resource methods for single entity reindexing
-            if (method_exists($resourceModel, 'reindexEntities')) {
+            if (method_exists($resourceModel, 'reindexProductIds')) {
+                $resourceModel->reindexProductIds($entityIds);
+            } elseif (method_exists($resourceModel, 'reindexEntities')) {
                 $resourceModel->reindexEntities($entityIds);
             } elseif (method_exists($resourceModel, 'reindexProducts')) {
                 $resourceModel->reindexProducts($entityIds);
-            } elseif (method_exists($resourceModel, 'reindexProductIds')) {
-                $resourceModel->reindexProductIds($entityIds);
             } else {
                 // Fallback: simulate individual save events for each product
                 foreach ($entityIds as $productId) {
