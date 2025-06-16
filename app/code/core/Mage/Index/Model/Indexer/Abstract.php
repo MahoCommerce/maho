@@ -192,6 +192,13 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
             $entityIds = [$entityIds];
         }
 
+        // Check if this indexer supports product entities at all
+        if (!$this->matchEntityAndType(Mage_Catalog_Model_Product::ENTITY, Mage_Index_Model_Event::TYPE_SAVE)
+            && !$this->matchEntityAndType(Mage_Catalog_Model_Product::ENTITY, Mage_Index_Model_Event::TYPE_MASS_ACTION)) {
+            // This indexer doesn't handle product entities, skip silently
+            return $this;
+        }
+
         // Try resource-level reindexing first (more reliable)
         $resourceModel = $this->_getResource();
 
