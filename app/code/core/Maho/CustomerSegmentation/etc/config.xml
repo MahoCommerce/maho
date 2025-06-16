@@ -30,12 +30,12 @@
             </customersegmentation_resource>
         </models>
         <resources>
-            <maho_setup>
+            <maho_customersegmentation_setup>
                 <setup>
                     <module>Maho_CustomerSegmentation</module>
                     <class>Mage_Core_Model_Resource_Setup</class>
                 </setup>
-            </maho_setup>
+            </maho_customersegmentation_setup>
         </resources>
         <blocks>
             <customersegmentation>
