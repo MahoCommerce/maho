@@ -29,6 +29,14 @@
                 </entities>
             </customersegmentation_resource>
         </models>
+        <resources>
+            <maho_setup>
+                <setup>
+                    <module>Maho_CustomerSegmentation</module>
+                    <class>Mage_Core_Model_Resource_Setup</class>
+                </setup>
+            </maho_setup>
+        </resources>
         <blocks>
             <customersegmentation>
                 <class>Maho_CustomerSegmentation_Block</class>
@@ -39,13 +47,6 @@
                 <class>Maho_CustomerSegmentation_Helper</class>
             </customersegmentation>
         </helpers>
-        <resources>
-            <maho_customersegmentation_setup>
-                <setup>
-                    <module>Maho_CustomerSegmentation</module>
-                </setup>
-            </maho_customersegmentation_setup>
-        </resources>
         <events>
             <salesrule_rule_condition_combine>
                 <observers>

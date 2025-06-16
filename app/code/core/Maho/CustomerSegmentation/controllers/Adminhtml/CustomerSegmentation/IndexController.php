@@ -206,7 +206,34 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
             }
         }
-        $this->_redirect('*/*/edit', ['id' => $segmentId]);
+        $this->_redirect('*/*/');
+    }
+
+    public function massStatusAction(): void
+    {
+        $segmentIds = $this->getRequest()->getParam('segment');
+        if (!is_array($segmentIds)) {
+            Mage::getSingleton('adminhtml/session')->addError(
+                Mage::helper('customersegmentation')->__('Please select segment(s).'),
+            );
+        } else {
+            try {
+                $status = (int) $this->getRequest()->getParam('status');
+                foreach ($segmentIds as $segmentId) {
+                    $segment = Mage::getModel('customersegmentation/segment')->load($segmentId);
+                    $segment->setIsActive($status)->save();
+                }
+                Mage::getSingleton('adminhtml/session')->addSuccess(
+                    Mage::helper('customersegmentation')->__(
+                        'Total of %d record(s) were updated.',
+                        count($segmentIds),
+                    ),
+                );
+            } catch (Exception $e) {
+                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            }
+        }
+        $this->_redirect('*/*/index');
     }
 
     protected function _isAllowed(): bool
@@ -218,6 +245,8 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
             case 'delete':
             case 'massdelete':
                 return Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/delete');
+            case 'massstatus':
+                return Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/save');
             case 'refresh':
                 return Mage::getSingleton('admin/session')->isAllowed('customer/customersegmentation/refresh');
             default:

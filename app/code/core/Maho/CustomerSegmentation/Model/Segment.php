@@ -49,13 +49,15 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     /**
      * Event prefix for observers
+     * @var string
      */
-    protected string $_eventPrefix = 'customer_segment';
+    protected $_eventPrefix = 'customer_segment';
 
     /**
      * Event object for observers
+     * @var string
      */
-    protected string $_eventObject = 'segment';
+    protected $_eventObject = 'segment';
 
     protected function _construct(): void
     {
@@ -214,7 +216,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
      *
      * @throws Mage_Core_Exception
      */
-    public function validate(): bool
+    public function validate(?Varien_Object $object = null): bool
     {
         $errors = [];
 
