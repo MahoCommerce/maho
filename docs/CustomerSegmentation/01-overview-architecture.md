@@ -17,14 +17,12 @@ The Maho_CustomerSegmentation module will provide comprehensive customer segment
 - Unlimited segmentation rules
 - Complex condition combinations (AND/OR logic)
 - Manual and automatic segment updates
-- Export functionality (CSV/XML)
 - Real-time segment preview
 
 ### 3. Integration Points
 - Cart Price Rules integration
 - Email marketing compatibility
 - Customer attribute extensibility
-- API access for third-party systems
 
 ## Architecture Overview
 
@@ -54,12 +52,10 @@ app/code/core/Maho/CustomerSegmentation/
 │           ├── Edit.php
 │           ├── Save.php
 │           ├── Delete.php
-│           ├── Export.php
 │           ├── Refresh.php
 │           └── MassDelete.php
 ├── Helper/
-│   ├── Data.php
-│   └── Export.php
+│   └── Data.php
 ├── Model/
 │   ├── Segment.php
 │   ├── Segment/
@@ -130,7 +126,6 @@ app/code/core/Maho/CustomerSegmentation/
 - Grid for segment management
 - Form with dynamic condition builder
 - Real-time customer count preview
-- Export functionality
 
 ## Technical Considerations
 
@@ -143,17 +138,15 @@ app/code/core/Maho/CustomerSegmentation/
 ### Scalability
 1. **Horizontal Scaling**: Support for multiple database read replicas
 2. **Queue Support**: Optional message queue for asynchronous processing
-3. **Memory Management**: Stream-based export for large datasets
+3. **Memory Management**: Efficient processing for large datasets
 
 ### Security
 1. **Access Control**: ACL rules for segment management
 2. **Data Privacy**: Respect customer privacy settings
-3. **Export Restrictions**: Configurable data export limitations
 
 ### Extensibility
 1. **Event Observers**: Dispatch events for segment changes
-2. **Plugin Points**: Allow third-party condition types
-3. **API Endpoints**: RESTful API for external integrations
+2. **Custom Conditions**: Allow additional condition types
 
 ## Data Flow
 
@@ -180,10 +173,6 @@ Customer Action → Event Observer → Segment Evaluation → Database Update �
 ### 3. Customer Attributes
 - Support for custom customer attributes
 - Dynamic attribute loading in conditions
-
-### 4. Reporting
-- Segment analytics and insights
-- Customer distribution reports
 
 ## Development Principles
 
