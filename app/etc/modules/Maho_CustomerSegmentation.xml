@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Maho_CustomerSegmentation>
+            <active>true</active>
+            <codePool>core</codePool>
+            <depends>
+                <Mage_Customer/>
+                <Mage_Adminhtml/>
+                <Mage_Rule/>
+            </depends>
+        </Maho_CustomerSegmentation>
+    </modules>
+</config>

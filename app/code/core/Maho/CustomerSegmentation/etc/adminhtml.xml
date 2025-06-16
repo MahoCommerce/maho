@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<config>
+    <menu>
+        <customer>
+            <children>
+                <customersegmentation translate="title" module="customersegmentation">
+                    <title>Customer Segments</title>
+                    <sort_order>50</sort_order>
+                    <children>
+                        <manage translate="title">
+                            <title>Manage Segments</title>
+                            <action>adminhtml/customerSegmentation_index/index</action>
+                            <sort_order>10</sort_order>
+                        </manage>
+                        <new translate="title">
+                            <title>Create New Segment</title>
+                            <action>adminhtml/customerSegmentation_index/new</action>
+                            <sort_order>20</sort_order>
+                        </new>
+                        <reports translate="title">
+                            <title>Performance Reports</title>
+                            <action>adminhtml/customerSegmentation_report/index</action>
+                            <sort_order>30</sort_order>
+                        </reports>
+                    </children>
+                </customersegmentation>
+            </children>
+        </customer>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <customer>
+                        <children>
+                            <customersegmentation translate="title" module="customersegmentation">
+                                <title>Customer Segments</title>
+                                <sort_order>50</sort_order>
+                                <children>
+                                    <manage translate="title">
+                                        <title>Manage Segments</title>
+                                        <sort_order>10</sort_order>
+                                    </manage>
+                                    <save translate="title">
+                                        <title>Save Segments</title>
+                                        <sort_order>20</sort_order>
+                                    </save>
+                                    <delete translate="title">
+                                        <title>Delete Segments</title>
+                                        <sort_order>30</sort_order>
+                                    </delete>
+                                    <refresh translate="title">
+                                        <title>Refresh Segments</title>
+                                        <sort_order>40</sort_order>
+                                    </refresh>
+                                    <reports translate="title">
+                                        <title>View Reports</title>
+                                        <sort_order>50</sort_order>
+                                    </reports>
+                                </children>
+                            </customersegmentation>
+                        </children>
+                    </customer>
+                    <system>
+                        <children>
+                            <config>
+                                <children>
+                                    <customer_segmentation translate="title" module="customersegmentation">
+                                        <title>Customer Segmentation Configuration</title>
+                                        <sort_order>300</sort_order>
+                                    </customer_segmentation>
+                                </children>
+                            </config>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

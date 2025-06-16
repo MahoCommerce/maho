@@ -1,0 +1,164 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_CustomerSegmentation
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extends Mage_Rule_Model_Condition_Abstract
+{
+    abstract public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false;
+
+    public function getMappedSqlOperator(): string
+    {
+        $operator = $this->getOperator();
+        $value = $this->getValue();
+
+        switch ($operator) {
+            case '==':
+                return $this->_getEqualityOperator($value);
+            case '!=':
+                return $this->_getInequalityOperator($value);
+            case '>=':
+                return '>=';
+            case '<=':
+                return '<=';
+            case '>':
+                return '>';
+            case '<':
+                return '<';
+            case '{}':
+                return 'LIKE';
+            case '!{}':
+                return 'NOT LIKE';
+            case '()':
+                return 'IN';
+            case '!()':
+                return 'NOT IN';
+            default:
+                return $operator;
+        }
+    }
+
+    protected function _getEqualityOperator(mixed $value): string
+    {
+        if (is_array($value) && count($value) > 1) {
+            return 'IN';
+        }
+        return '=';
+    }
+
+    protected function _getInequalityOperator(mixed $value): string
+    {
+        if (is_array($value) && count($value) > 1) {
+            return 'NOT IN';
+        }
+        return '!=';
+    }
+
+    public function prepareValueForSql(mixed $value, string $operator): mixed
+    {
+        switch ($operator) {
+            case 'LIKE':
+            case 'NOT LIKE':
+                return '%' . $value . '%';
+            case 'IN':
+            case 'NOT IN':
+                if (!is_array($value)) {
+                    $value = explode(',', $value);
+                }
+                return array_map('trim', $value);
+            default:
+                return $value;
+        }
+    }
+
+    protected function _buildSqlCondition(Varien_Db_Adapter_Interface $adapter, string $field, string $operator, mixed $value): string
+    {
+        $value = $this->prepareValueForSql($value, $operator);
+
+        switch ($operator) {
+            case 'IN':
+            case 'NOT IN':
+                return $adapter->quoteInto("{$field} {$operator} (?)", $value);
+            case 'LIKE':
+            case 'NOT LIKE':
+                return $adapter->quoteInto("{$field} {$operator} ?", $value);
+            case 'IS':
+            case 'IS NOT':
+                return "{$field} {$operator} {$value}";
+            default:
+                return $adapter->quoteInto("{$field} {$operator} ?", $value);
+        }
+    }
+
+    protected function _getCustomerTable(): string
+    {
+        return Mage::getSingleton('core/resource')->getTableName('customer/entity');
+    }
+
+    protected function _getCustomerAttributeTable(string $attributeCode): array|false
+    {
+        $attribute = Mage::getSingleton('eav/config')
+            ->getAttribute('customer', $attributeCode);
+
+        if (!$attribute) {
+            return false;
+        }
+
+        return [
+            'table' => $attribute->getBackendTable(),
+            'attribute_id' => $attribute->getId(),
+        ];
+    }
+
+    protected function _getOrderTable(): string
+    {
+        return Mage::getSingleton('core/resource')->getTableName('sales/order');
+    }
+
+    protected function _getQuoteTable(): string
+    {
+        return Mage::getSingleton('core/resource')->getTableName('sales/quote');
+    }
+
+    protected function _createDateRangeSubselect(Varien_Db_Adapter_Interface $adapter, string $table, string $dateField, string $joinField, int $days, string $operator): Varien_Db_Select
+    {
+        $select = $adapter->select()
+            ->from($table, [$joinField])
+            ->where(
+                "DATEDIFF(NOW(), {$dateField}) {$operator} ?",
+                $days,
+            );
+
+        return $select;
+    }
+
+    public function asHtml(): string
+    {
+        $html = $this->getTypeElement()->getHtml() .
+                Mage::helper('customersegmentation')->__(
+                    'If %s %s %s',
+                    $this->getAttributeElement()->getHtml(),
+                    $this->getOperatorElement()->getHtml(),
+                    $this->getValueElement()->getHtml(),
+                );
+
+        if ($this->getId() != '1') {
+            $html .= $this->getRemoveLinkHtml();
+        }
+
+        return $html;
+    }
+
+    public function loadArray(array $arr, string $key = 'conditions'): self
+    {
+        $this->setData($key, $arr);
+
+        return parent::loadArray($arr, $key);
+    }
+}

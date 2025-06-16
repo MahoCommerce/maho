@@ -197,53 +197,48 @@ class Maho_CustomerSegmentation_Model_Segment_Processor
 }
 ```
 
-### 4. Real-time Updates
+### 4. Cron-based Updates
 
-#### Event Observer System
+#### Cron Processing System
 ```php
-class Maho_CustomerSegmentation_Model_Observer
+class Maho_CustomerSegmentation_Model_Cron
 {
     /**
-     * Customer-related events
+     * Refresh all segments based on schedule
      */
-    public function onCustomerSaveAfter($observer): void
+    public function refreshSegments(): void
     {
-        $customer = $observer->getCustomer();
-        $this->scheduleCustomerEvaluation($customer->getId());
-    }
-    
-    /**
-     * Order-related events
-     */
-    public function onOrderPlaceAfter($observer): void
-    {
-        $order = $observer->getOrder();
-        if ($customerId = $order->getCustomerId()) {
-            $this->triggerOrderConditions($customerId, $order);
+        if (!Mage::helper('customersegmentation')->isEnabled()) {
+            return;
+        }
+        
+        $collection = Mage::getResourceModel('customersegmentation/segment_collection')
+            ->addIsActiveFilter()
+            ->addAutoRefreshFilter()
+            ->addNeedsRefreshFilter();
+        
+        foreach ($collection as $segment) {
+            try {
+                $segment->refreshCustomers();
+            } catch (Exception $e) {
+                Mage::logException($e);
+            }
         }
     }
     
     /**
-     * Cart-related events
+     * Clean up old event records
      */
-    public function onQuoteUpdateAfter($observer): void
+    public function cleanupEvents(): void
     {
-        $quote = $observer->getQuote();
-        if ($customerId = $quote->getCustomerId()) {
-            $this->triggerCartConditions($customerId, $quote);
-        }
-    }
-    
-    /**
-     * Schedule asynchronous evaluation
-     */
-    protected function scheduleCustomerEvaluation($customerId): void
-    {
-        Mage::getModel('customersegmentation/event')
-            ->setCustomerId($customerId)
-            ->setEventType('customer_update')
-            ->setEventData(json_encode(['timestamp' => time()]))
-            ->save();
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $table = Mage::getSingleton('core/resource')->getTableName('customersegmentation/segment_event');
+        
+        // Remove processed events older than 30 days
+        $connection->delete($table, [
+            'processed = ?' => 1,
+            'created_at < ?' => date('Y-m-d H:i:s', strtotime('-30 days'))
+        ]);
     }
 }
 ```
