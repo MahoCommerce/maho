@@ -54,21 +54,6 @@ class IndexReindexProduct extends BaseMahoCommand
             $indexCollection->addFieldToFilter('indexer_code', ['in' => $specificIndexers]);
         }
 
-        $productIndexers = [
-            'catalog_product_attribute',
-            'catalog_product_price',
-            'catalog_url',
-            'catalog_product_flat',
-            'catalog_category_product',
-            'catalogsearch_fulltext',
-            'cataloginventory_stock',
-            'tag_summary',
-        ];
-
-        if (!$specificIndexers) {
-            $indexCollection->addFieldToFilter('indexer_code', ['in' => $productIndexers]);
-        }
-
         if ($indexCollection->count() === 0) {
             $output->writeln('<error>No valid indexers found</error>');
             return Command::FAILURE;
