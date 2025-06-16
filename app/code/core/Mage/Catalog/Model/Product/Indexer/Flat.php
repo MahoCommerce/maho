@@ -346,4 +346,17 @@ class Mage_Catalog_Model_Product_Indexer_Flat extends Mage_Index_Model_Indexer_A
     {
         return Mage::getModel('catalog/product_flat_indexer')->getAttributeCodes();
     }
+
+    #[\Override]
+    public function reindexEntity(int|array $entityIds): self
+    {
+        if (!is_array($entityIds)) {
+            $entityIds = [$entityIds];
+        }
+
+        // Use the flat indexer's updateProduct method directly
+        $this->_getIndexer()->updateProduct($entityIds);
+
+        return $this;
+    }
 }
