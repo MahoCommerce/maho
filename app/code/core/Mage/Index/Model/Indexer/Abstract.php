@@ -200,7 +200,8 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
                 ->setType(Mage_Index_Model_Event::TYPE_MASS_ACTION)
                 ->setDataObject(new Varien_Object(['product_ids' => $entityIds]));
 
-            return $this->_processEvent($event);
+            $this->_processEvent($event);
+            return $this;
         } else {
             // For indexers that don't support mass_action, try resource-level reindexing
             $resourceModel = $this->_getResource();
