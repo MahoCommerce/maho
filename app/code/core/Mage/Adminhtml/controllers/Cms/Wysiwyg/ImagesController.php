@@ -81,7 +81,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     {
         try {
             $this->_initAction()->_saveSessionCurrentPath();
-            
+
             // Check if this is a media library request (direct content response)
             if ($this->getRequest()->getParam('medialibrary')) {
                 // Create and render the files block directly for media library
