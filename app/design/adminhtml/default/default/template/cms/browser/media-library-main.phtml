@@ -9,7 +9,7 @@
 
 /** @var Mage_Core_Block_Template $this */
 
-$content = $this->getLayout()->createBlock('adminhtml/cms_mediaLibrary_content');
+$content = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_content');
 $tree = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_tree');
 $uploader = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_content_uploader');
 $newfolder = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_content_newfolder');
@@ -60,14 +60,26 @@ if (MediabrowserInstance) {
     const originalUpdateContent = MediabrowserInstance.updateContent;
     
     MediabrowserInstance.showFolderContent = function(path) {
-        originalShowFolderContent.call(this, path);
-        setTimeout(applyMediaLibraryBehavior, 100);
+        this.currentTreePath = path;
+        this.updateContent();
     };
     
     MediabrowserInstance.updateContent = function() {
-        return originalUpdateContent.call(this).then(() => {
+        const url = MediabrowserInstance.contentsUrl.replace(/[?&]medialibrary=[^&]*/, '') + 
+                   (MediabrowserInstance.contentsUrl.includes('?') ? '&' : '?') + 'medialibrary=1';
+        
+        mahoFetch(url, {
+            method: 'POST',
+            body: new URLSearchParams({
+                node: MediabrowserInstance.currentNode.id
+            }),
+            loaderArea: false
+        })
+        .then(data => {
+            document.getElementById('contents').innerHTML = data;
             setTimeout(applyMediaLibraryBehavior, 100);
-        });
+        })
+        .catch(error => console.error('Error updating content:', error));
     };
     
     MediabrowserInstance.insert = function() {}; // Disable insert

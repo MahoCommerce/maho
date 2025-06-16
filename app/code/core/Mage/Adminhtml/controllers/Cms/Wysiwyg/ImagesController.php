@@ -46,6 +46,25 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         $this->renderLayout();
     }
 
+    public function medialibraryAction(): void
+    {
+        try {
+            Mage::helper('cms/wysiwyg_images')->getCurrentPath();
+        } catch (Exception $e) {
+            $this->_getSession()->addError($e->getMessage());
+        }
+
+        $this->_initAction()
+            ->loadLayout()
+            ->_setActiveMenu('cms/media_library')
+            ->_addBreadcrumb(Mage::helper('cms')->__('CMS'), Mage::helper('cms')->__('CMS'))
+            ->_addBreadcrumb(Mage::helper('cms')->__('Media Library'), Mage::helper('cms')->__('Media Library'))
+            ->_title($this->__('CMS'))
+            ->_title($this->__('Media Library'));
+
+        $this->renderLayout();
+    }
+
     public function treeJsonAction()
     {
         try {
@@ -62,8 +81,18 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     {
         try {
             $this->_initAction()->_saveSessionCurrentPath();
-            $this->loadLayout('empty');
-            $this->renderLayout();
+            
+            // Check if this is a media library request (direct content response)
+            if ($this->getRequest()->getParam('medialibrary')) {
+                // Create and render the files block directly for media library
+                $filesBlock = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_content_files');
+                $filesBlock->setTemplate('cms/browser/content/files.phtml');
+                $this->getResponse()->setBody($filesBlock->toHtml());
+            } else {
+                // Standard WYSIWYG behavior
+                $this->loadLayout('empty');
+                $this->renderLayout();
+            }
         } catch (Exception $e) {
             $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
