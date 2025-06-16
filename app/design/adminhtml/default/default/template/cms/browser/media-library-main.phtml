@@ -65,10 +65,7 @@ if (MediabrowserInstance) {
     };
     
     MediabrowserInstance.updateContent = function() {
-        const url = MediabrowserInstance.contentsUrl.replace(/[?&]medialibrary=[^&]*/, '') + 
-                   (MediabrowserInstance.contentsUrl.includes('?') ? '&' : '?') + 'medialibrary=1';
-        
-        mahoFetch(url, {
+        mahoFetch(MediabrowserInstance.contentsUrl, {
             method: 'POST',
             body: new URLSearchParams({
                 node: MediabrowserInstance.currentNode.id
