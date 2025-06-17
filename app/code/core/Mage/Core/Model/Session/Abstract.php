@@ -188,12 +188,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
                 $this->symfonySession->start();
             }
         } catch (Throwable $e) {
-            if (Mage::registry(self::REGISTRY_CONCURRENCY_ERROR)) {
-                Maho::errorReport();
-                die();
-            } else {
-                Mage::printException($e);
-            }
+            Mage::printException($e);
         }
     }
 
