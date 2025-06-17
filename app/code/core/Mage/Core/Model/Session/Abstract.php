@@ -116,7 +116,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
                 'name' => $sessionName,
                 'use_cookies' => false,
                 'use_trans_sid' => false,
-                'cookie_lifetime' => $sessionLifetime,
+                'gc_probability' => '0',
             ],
             $handler,
             // Use Symfony's default MetadataBag - no custom one needed!
