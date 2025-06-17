@@ -504,6 +504,16 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
     }
 
     /**
+     * Password creation timestamp must not be newer than last session renewal
+     *
+     * @return bool
+     */
+    public function useValidateSessionPasswordTimestamp()
+    {
+        return true;
+    }
+
+    /**
      * Check whether SID can be used for session initialization
      * Admin area will always have this feature enabled
      *
@@ -937,13 +947,13 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
             $_SESSION[self::VALIDATOR_KEY] = $this->getValidatorData();
         } else {
             if (!self::$isValidated && ! $this->_validate()) {
-                $this->getCookie()->delete(session_name());
+                $this->getCookie()->delete($this->getSessionName());
                 // throw core session exception
                 throw new Mage_Core_Model_Session_Exception('');
             }
 
             // Refresh Symfony session metadata
-            $this->getSymfonySession()->getMetadataBag()->stampNew($this->getCookie()->getLifetime());
+            $this->setValidatorSessionRenewTimestamp();
         }
 
         return $this;
@@ -956,7 +966,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
      * @param int $timestamp
      * @return void
      */
-    public function setValidatorSessionRenewTimestamp($timestamp)
+    public function setValidatorSessionRenewTimestamp($timestamp = null)
     {
         $this->getSymfonySession()->getMetadataBag()->stampNew($this->getCookie()->getLifetime());
     }
@@ -1000,13 +1010,10 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
             return false;
         }
 
-        // Session expiration is now handled automatically by Symfony's MetadataBag
-        // No additional validation needed - Symfony handles session lifetime automatically
-        if (isset($validatorData[self::VALIDATOR_PASSWORD_CREATE_TIMESTAMP])) {
-            $metadataBag = $this->getSymfonySession()->getMetadataBag();
-            $sessionRenewTime = $metadataBag->getLastUsed();
+        $metadataBag = $this->getSymfonySession()->getMetadataBag();
 
-            if ($validatorData[self::VALIDATOR_PASSWORD_CREATE_TIMESTAMP] > $sessionRenewTime) {
+        if ($this->useValidateSessionPasswordTimestamp()) {
+            if ($metadataBag->getLastUsed() < ($validatorData[self::VALIDATOR_PASSWORD_CREATE_TIMESTAMP] ?? 0)) {
                 return false;
             }
         }
