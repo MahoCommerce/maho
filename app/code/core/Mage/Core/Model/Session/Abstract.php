@@ -30,6 +30,8 @@ use Symfony\Component\Cache\Adapter\RedisAdapter;
  */
 class Mage_Core_Model_Session_Abstract extends Varien_Object
 {
+    public const REGISTRY_KEY                          = 'symfony_session';
+
     public const VALIDATOR_KEY                         = '_session_validator_data';
     public const VALIDATOR_HTTP_USER_AGENT_KEY         = 'http_user_agent';
     public const VALIDATOR_HTTP_X_FORVARDED_FOR_KEY    = 'http_x_forwarded_for';
@@ -65,9 +67,6 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
      */
     protected $_sessionHosts = [];
 
-    /** @var Session|null Symfony session instance */
-    private ?Session $symfonySession = null;
-
     /**
      * URL host cache
      *
@@ -89,6 +88,16 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
      */
     protected $_skipSessionIdFlag   = false;
 
+    /**
+     * Return the symfony session instance from the registry
+     *
+     * This instance is shared across all session classes created during a request.
+     * For example: core, customer, checkout, admin, adminhtml, etc.
+     */
+    private function getSymfonySession(): ?Session
+    {
+        return Mage::registry(self::REGISTRY_KEY);
+    }
 
     /**
      * Create Symfony session with proper storage handler
@@ -113,7 +122,9 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
             // Use Symfony's default MetadataBag - no custom one needed!
         );
 
-        return new Session($storage);
+        $session = new Session($storage);
+        Mage::register(self::REGISTRY_KEY, $session);
+        return $session;
     }
 
     /**
@@ -177,21 +188,6 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
     }
 
     /**
-     * Start session using modern Symfony approach
-     */
-    private function startSymfonySession(): void
-    {
-        try {
-            // Start Symfony session
-            if ($this->symfonySession && !$this->symfonySession->isStarted()) {
-                $this->symfonySession->start();
-            }
-        } catch (Throwable $e) {
-            Mage::printException($e);
-        }
-    }
-
-    /**
      * Configure and start session
      *
      * @param string $sessionName
@@ -200,7 +196,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
      */
     public function start($sessionName = null)
     {
-        if (isset($_SESSION) && !$this->getSkipEmptySessionCheck()) {
+        if ($this->getSymfonySession() !== null && !$this->getSkipEmptySessionCheck()) {
             return $this;
         }
 
@@ -210,7 +206,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
         }
 
         // Create Symfony session instance
-        $this->symfonySession = $this->createSymfonySession($sessionName);
+        $symfonySession = $this->createSymfonySession($sessionName);
 
         $cookie = $this->getCookie();
 
@@ -232,8 +228,8 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
 
         Varien_Profiler::start(__METHOD__ . '/start');
 
-        // Start session using modern Symfony approach with legacy fallback
-        $this->startSymfonySession();
+        // Start session using modern Symfony approach
+        $symfonySession->start();
 
         // Secure cookie check to prevent MITM attack
         if (Mage::app()->getFrontController()->getRequest()->isSecure() && !$cookie->isSecure()) {
@@ -318,7 +314,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
      */
     public function init($namespace, $sessionName = null)
     {
-        if (!$this->symfonySession || !$this->symfonySession->isStarted()) {
+        if ($this->getSymfonySession() === null) {
             $this->start($sessionName);
         }
 
@@ -360,10 +356,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
      */
     public function getSessionId()
     {
-        if ($this->symfonySession && $this->symfonySession->isStarted()) {
-            return $this->symfonySession->getId();
-        }
-        return session_id();
+        return $this->getSymfonySession()->getId();
     }
 
     /**
@@ -373,10 +366,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
      */
     public function getSessionName()
     {
-        if ($this->symfonySession) {
-            return $this->symfonySession->getName();
-        }
-        return session_name();
+        return $this->getSymfonySession()->getName();
     }
 
     /**
@@ -388,11 +378,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
     public function setSessionName($name)
     {
         if (!empty($name)) {
-            if ($this->symfonySession && !$this->symfonySession->isStarted()) {
-                $this->symfonySession->setName($name);
-            } else {
-                session_name($name);
-            }
+            $this->getSymfonySession()->setName($name);
         }
         return $this;
     }
@@ -425,13 +411,9 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
      */
     public function regenerateSessionId()
     {
-        if ($this->symfonySession && $this->symfonySession->isStarted()) {
-            $this->symfonySession->migrate(true);
-        } else {
-            session_regenerate_id(true);
+        if ($this->getSymfonySession()->migrate(true)) {
+            $this->setSessionCookie();
         }
-
-        $this->setSessionCookie();
         return $this;
     }
 
@@ -723,11 +705,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
         }
 
         if (!is_null($id) && preg_match('#^[0-9a-zA-Z,-]+$#', $id)) {
-            if ($this->symfonySession && !$this->symfonySession->isStarted()) {
-                $this->symfonySession->setId($id);
-            } else {
-                session_id($id);
-            }
+            $this->getSymfonySession()->setId($id);
         }
 
         $this->addHost(true);
@@ -965,10 +943,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
             }
 
             // Refresh Symfony session metadata
-            if ($this->symfonySession && $this->symfonySession->isStarted()) {
-                $metadataBag = $this->symfonySession->getMetadataBag();
-                $metadataBag->stampNew($this->getCookie()->getLifetime());
-            }
+            $this->getSymfonySession()->getMetadataBag()->stampNew($this->getCookie()->getLifetime());
         }
 
         return $this;
@@ -983,12 +958,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
      */
     public function setValidatorSessionRenewTimestamp($timestamp)
     {
-        // Symfony now handles session renewal timestamps automatically
-        // Just update Symfony's MetadataBag which is the single source of truth
-        if ($this->symfonySession && $this->symfonySession->isStarted()) {
-            $metadataBag = $this->symfonySession->getMetadataBag();
-            $metadataBag->stampNew($this->getCookieLifetime());
-        }
+        $this->getSymfonySession()->getMetadataBag()->stampNew($this->getCookie()->getLifetime());
     }
 
     /**
@@ -1032,10 +1002,8 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
 
         // Session expiration is now handled automatically by Symfony's MetadataBag
         // No additional validation needed - Symfony handles session lifetime automatically
-        if (isset($validatorData[self::VALIDATOR_PASSWORD_CREATE_TIMESTAMP])
-            && $this->symfonySession && $this->symfonySession->isStarted()
-        ) {
-            $metadataBag = $this->symfonySession->getMetadataBag();
+        if (isset($validatorData[self::VALIDATOR_PASSWORD_CREATE_TIMESTAMP])) {
+            $metadataBag = $this->getSymfonySession()->getMetadataBag();
             $sessionRenewTime = $metadataBag->getLastUsed();
 
             if ($validatorData[self::VALIDATOR_PASSWORD_CREATE_TIMESTAMP] > $sessionRenewTime) {
