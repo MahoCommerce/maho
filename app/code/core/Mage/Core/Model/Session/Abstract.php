@@ -37,7 +37,6 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
     public const VALIDATOR_REMOTE_ADDR_KEY             = 'remote_addr';
     public const VALIDATOR_PASSWORD_CREATE_TIMESTAMP   = 'password_create_timestamp';
     public const SECURE_COOKIE_CHECK_KEY               = '_secure_cookie_check';
-    public const REGISTRY_CONCURRENCY_ERROR            = 'concurrent_connections_exceeded';
 
     public const XML_PATH_COOKIE_DOMAIN        = 'web/cookie/cookie_domain';
     public const XML_PATH_COOKIE_PATH          = 'web/cookie/cookie_path';
