@@ -369,12 +369,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
             $symfonySession = $this->getSymfonySession();
         }
 
-        // Initialize namespace in Symfony session
-        if ($symfonySession && !$symfonySession->has($namespace)) {
-            $symfonySession->set($namespace, []);
-        }
-
-        // For backward compatibility, also set $_SESSION
+        // Initialize $_SESSION namespace
         if (!isset($_SESSION[$namespace])) {
             $_SESSION[$namespace] = [];
         }
