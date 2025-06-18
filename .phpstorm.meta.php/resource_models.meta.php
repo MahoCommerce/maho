@@ -205,8 +205,6 @@ namespace PHPSTORM_META {
         'core_resource/translate_string' => \Mage_Core_Model_Resource_Translate_String::class,
         'core_resource/type_abstract' => \Mage_Core_Model_Resource_Type_Abstract::class,
         'core_resource/type_db' => \Mage_Core_Model_Resource_Type_Db::class,
-        'core_resource/type_db_mysqli' => \Mage_Core_Model_Resource_Type_Db_Mysqli::class,
-        'core_resource/type_db_mysqli_setup' => \Mage_Core_Model_Resource_Type_Db_Mysqli_Setup::class,
         'core_resource/type_db_pdo_mysql' => \Mage_Core_Model_Resource_Type_Db_Pdo_Mysql::class,
         'core_resource/url_rewrite' => \Mage_Core_Model_Resource_Url_Rewrite::class,
         'core_resource/url_rewrite_collection' => \Mage_Core_Model_Resource_Url_Rewrite_Collection::class,

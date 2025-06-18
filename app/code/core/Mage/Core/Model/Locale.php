@@ -247,12 +247,13 @@ class Mage_Core_Model_Locale
                 if (!isset($languages[$data[0]]) || !isset($countries[$data[1]])) {
                     continue;
                 }
+                [$language, $country] = $data;
                 if ($translatedName) {
-                    $label = ucwords($this->getLocale()->getTranslation($data[0], 'language', $code))
-                        . ' (' . $this->getLocale()->getTranslation($data[1], 'country', $code) . ') / '
-                        . $languages[$data[0]] . ' (' . $countries[$data[1]] . ')';
+                    $translatedLanguage = ucwords($this->getLocale()->getTranslation($language, 'language', $code));
+                    $translatedCountry = $this->getCountryTranslation($country, $code);
+                    $label = "$translatedLanguage ($translatedCountry) / {$languages[$language]} ({$countries[$country]})";
                 } else {
-                    $label = $languages[$data[0]] . ' (' . $countries[$data[1]] . ')';
+                    $label = "{$languages[$language]} ({$countries[$country]})";
                 }
                 $options[] = [
                     'value' => $code,
@@ -425,29 +426,72 @@ class Mage_Core_Model_Locale
     }
 
     /**
-     * Retrieve ISO date format
-     * and filter for 2 digit year format, it must be 4 digits
-     *
-     * @param   string $type
-     * @return  string
+     * Retrieve ISO date format ensuring 4-digit year format
      */
-    public function getDateFormat($type = null)
+    public function getDateFormat(?string $type = null): string
     {
-        return preg_replace('/(?<!y)yy(?!y)/', 'yyyy', $this->getTranslation($type, 'date'));
+        $formatter = $this->createDateFormatter($type);
+        $pattern = $formatter->getPattern();
+
+        // Convert 2-digit year (yy) to 4-digit year (yyyy) in the pattern
+        return $this->ensureFourDigitYear($pattern);
     }
 
     /**
      * Retrieve short date format with 4-digit year
-     *
-     * @return  string
      */
-    public function getDateFormatWithLongYear()
+    public function getDateFormatWithLongYear(): string
     {
-        return preg_replace(
-            '/(?<!y)yy(?!y)/',
-            'yyyy',
-            $this->getTranslation(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT, 'date'),
+        $formatter = $this->createDateFormatter(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
+        $pattern = $formatter->getPattern();
+
+        // Convert 2-digit year (yy) to 4-digit year (yyyy) in the pattern
+        return $this->ensureFourDigitYear($pattern);
+    }
+
+    /**
+     * Retrieve date format by period type
+     * @param string|null $period Valid values: ["day", "month", "year"]
+     */
+    public function getDateFormatByPeriodType(?string $period = null): string
+    {
+        $generator = new IntlDatePatternGenerator($this->getLocaleCode());
+        return match ($period) {
+            'month' => $generator->getBestPattern('yM'),
+            'year' => $generator->getBestPattern('y'),
+            default => $this->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM),
+        };
+    }
+
+    /**
+     * Create IntlDateFormatter for the current locale
+     */
+    private function createDateFormatter(?string $type = null): IntlDateFormatter
+    {
+        $dateStyle = match ($type) {
+            Mage_Core_Model_Locale::FORMAT_TYPE_SHORT => IntlDateFormatter::SHORT,
+            Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM => IntlDateFormatter::MEDIUM,
+            Mage_Core_Model_Locale::FORMAT_TYPE_LONG => IntlDateFormatter::LONG,
+            Mage_Core_Model_Locale::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
+            default => IntlDateFormatter::MEDIUM,
+        };
+
+        return new IntlDateFormatter(
+            $this->getLocaleCode(),
+            $dateStyle,
+            IntlDateFormatter::NONE, // No time formatting
+            null, // Default timezone
+            IntlDateFormatter::GREGORIAN,
         );
+    }
+
+    /**
+     * Convert 2-digit year patterns (yy) to 4-digit year patterns (yyyy)
+     */
+    private function ensureFourDigitYear(string $pattern): string
+    {
+        // This regex is more precise for ICU date patterns
+        return preg_replace('/(?<!y)yy(?!y)/', 'yyyy', $pattern);
     }
 
     /**
@@ -762,6 +806,9 @@ class Mage_Core_Model_Locale
      */
     public function getTranslationList($path = null, $value = null)
     {
+        if ($path === 'country' || $path === 'territory') {
+            return $this->getCountryTranslationList();
+        }
         return $this->getLocale()->getTranslationList($path, $this->getLocale(), $value);
     }
 
@@ -775,6 +822,9 @@ class Mage_Core_Model_Locale
      */
     public function getTranslation($value = null, $path = null)
     {
+        if ($path === 'country' || $path === 'territory') {
+            return $this->getCountryTranslation($value);
+        }
         return $this->getLocale()->getTranslation($value, $path, $this->getLocale());
     }
 
@@ -792,12 +842,23 @@ class Mage_Core_Model_Locale
     /**
      * Returns the localized country name
      *
-     * @param string $value Name to get detailed information about
+     * @param string $countryId Country to get detailed information about
+     * @param string $locale Locale to get translation for, or system locale if null
      * @return false|string
      */
-    public function getCountryTranslation($value)
+    public function getCountryTranslation($countryId, $locale = null)
     {
-        return $this->getLocale()->getTranslation($value, 'country', $this->getLocale());
+        $country = Mage::getModel('directory/country')->load($countryId);
+        if ($country->getId()) {
+            if ($locale) {
+                $translated = $country->getTranslation($locale);
+                if ($translated->getName()) {
+                    return $translated->getName();
+                }
+            }
+            return $country->getName();
+        }
+        return false;
     }
 
     /**
@@ -807,7 +868,7 @@ class Mage_Core_Model_Locale
      */
     public function getCountryTranslationList()
     {
-        return $this->getLocale()->getTranslationList('territory', $this->getLocale(), 2);
+        return Mage::getResourceModel('directory/country_collection')->toOptionHash();
     }
 
     /**

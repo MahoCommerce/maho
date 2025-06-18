@@ -15,6 +15,9 @@
         <error-fetch translate="message">
             <message>Server returned status %s</message>
         </error-fetch>
+        <no-error-message translate="message">
+            <message>An error occured.</message>
+        </no-error-message>
     </global>
 
     <script path="validation.js" module="core">

@@ -1155,7 +1155,10 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
         return $helper->formatTime($time, $format, $showDate);
     }
 
-    public function getIconSvg(string $name, string $variant = 'outline'): string
+    /**
+     * @param string $role ARIA role, see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles
+     */
+    public function getIconSvg(string $name, string $variant = 'outline', string $role = 'none'): string
     {
         $name = basename(strtolower($name));
         $variant = in_array($variant, ['outline', 'filled']) ? $variant : 'outline';
@@ -1165,6 +1168,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
         $useCache = Mage::app()->useCache('icons');
 
         if ($useCache && $cachedIcon = $cache->load($cacheId)) {
+            $cachedIcon = str_replace('<svg ', '<svg role="' . $role . '" ', $cachedIcon);
             return $cachedIcon;
         }
 
@@ -1187,6 +1191,8 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
         if ($useCache) {
             $cache->save($iconSvg, $cacheId, ['ICONS']);
         }
+
+        $iconSvg = str_replace('<svg ', '<svg role="' . $role . '" ', $iconSvg);
         return $iconSvg;
     }
 

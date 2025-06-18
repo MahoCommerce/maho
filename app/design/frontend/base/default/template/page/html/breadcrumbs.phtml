@@ -5,14 +5,14 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Page_Block_Html_Breadcrumbs $this */
 ?>
 <?php if($crumbs && is_array($crumbs)): ?>
-<div class="breadcrumbs">
+<div class="breadcrumbs" role="navigation" aria-label="<?= $this->__('Breadcrumbs') ?>">
     <ul>
         <?php foreach($crumbs as $_crumbName=>$_crumbInfo): ?>
             <li class="<?= $_crumbName ?>">
@@ -22,9 +22,6 @@
                 <strong><?= $this->escapeHtml($_crumbInfo['label']) ?></strong>
             <?php else: ?>
                 <?= $this->escapeHtml($_crumbInfo['label']) ?>
-            <?php endif ?>
-            <?php if(!$_crumbInfo['last']): ?>
-                <span>/ </span>
             <?php endif ?>
             </li>
         <?php endforeach ?>

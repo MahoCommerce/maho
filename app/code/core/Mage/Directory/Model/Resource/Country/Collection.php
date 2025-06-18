@@ -6,7 +6,7 @@
  * @package    Mage_Directory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,10 +21,36 @@
  */
 class Mage_Directory_Model_Resource_Country_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
+    protected string $_countryNameTable;
+
     #[\Override]
     protected function _construct()
     {
         $this->_init('directory/country');
+        $this->_countryNameTable = $this->getTable('directory/country_name');
+    }
+
+    /**
+     * Initialize select object
+     *
+     * @return $this
+     */
+    #[\Override]
+    protected function _initSelect()
+    {
+        parent::_initSelect();
+
+        $locale = Mage::app()->getLocale()->getLocaleCode();
+
+        $this->getSelect()->joinLeft(
+            ['cname' => $this->_countryNameTable],
+            $this->getConnection()->quoteInto('main_table.country_id = cname.country_id AND cname.locale = ?', $locale),
+            ['name'],
+        );
+
+        $this->getSelect()->order(['name', 'country_id']);
+
+        return $this;
     }
 
     /**
@@ -49,7 +75,7 @@ class Mage_Directory_Model_Resource_Country_Collection extends Mage_Core_Model_R
     {
         $allowCountries = explode(',', (string) $this->_getStoreConfig('general/country/allow', $store));
         if (!empty($allowCountries)) {
-            $this->addFieldToFilter('country_id', ['in' => $allowCountries]);
+            $this->addFieldToFilter('main_table.country_id', ['in' => $allowCountries]);
         }
         return $this;
     }
@@ -119,44 +145,47 @@ class Mage_Directory_Model_Resource_Country_Collection extends Mage_Core_Model_R
     {
         if (!empty($countryId)) {
             if (is_array($countryId)) {
-                $this->addFieldToFilter('country_id', ['in' => $countryId]);
+                $this->addFieldToFilter('main_table.country_id', ['in' => $countryId]);
             } else {
-                $this->addFieldToFilter('country_id', $countryId);
+                $this->addFieldToFilter('main_table.country_id', $countryId);
             }
         }
         return $this;
     }
 
-    /**
-     * Convert collection items to select options array
-     *
-     * @param string $emptyLabel
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray($emptyLabel = ' ')
+    public function toOptionHash(): array
     {
-        $options = $this->_toOptionArray('country_id', 'name', ['title' => 'iso2_code']);
+        $res = [];
 
-        $sort = [];
-        foreach ($options as $data) {
-            $name = Mage::app()->getLocale()->getCountryTranslation($data['value']);
-            if (!empty($name)) {
-                $sort[$name] = $data['value'];
-            }
+        foreach ($this as $countryId => $country) {
+            $res[$countryId] = $country->getName();
         }
 
-        Mage::helper('core/string')->ksortMultibyte($sort);
+        Mage::helper('core/string')->sortMultibyte($res, true);
+        return $res;
+    }
+
+    #[\Override]
+    public function toOptionArray(bool $addEmpty = true): array
+    {
+        $res = $this->toOptionHash();
         $options = [];
-        foreach ($sort as $label => $value) {
+
+        foreach ($res as $countryId => $name) {
             $options[] = [
-                'value' => $value,
-                'label' => $label,
+                'title' => $name,
+                'value' => $countryId,
+                'label' => $name,
             ];
         }
 
-        if (count($options) > 0 && $emptyLabel !== false) {
-            array_unshift($options, ['value' => '', 'label' => $emptyLabel]);
+        if (count($options) > 0 && $addEmpty) {
+            array_unshift($options, [
+                'title ' => null,
+                'value' => '',
+                'label' => '',
+            ]);
         }
 
         return $options;

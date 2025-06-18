@@ -115,7 +115,7 @@ const MahoCaptcha = {
         this.altchaState = state;
 
         // Fix for error `An invalid form control with name='' is not focusable.`
-        document.getElementById('maho_captcha_checkbox').disabled = state === 'verifying';
+        document.querySelector('#maho_captcha input[type=checkbox]').disabled = state === 'verifying';
 
         // Replicate maho_captcha input into all forms
         if (state === 'verified' && typeof payload === 'string') {

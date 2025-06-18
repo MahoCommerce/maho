@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -17,20 +17,22 @@
 <?= $this->getChildHtml('head') ?>
 </head>
 <body<?= $this->getBodyClass()?' class="'.$this->getBodyClass().'"':'' ?>>
+<a href="#main-content" id="skip-to-main-content"><?= $this->__('Skip to main content') ?></a>
 <?= $this->getChildHtml('after_body_start') ?>
 <div class="wrapper">
     <?= $this->getChildHtml('global_notices') ?>
     <div class="page">
         <?= $this->getChildHtml('header') ?>
-        <div class="main-container col1-layout">
+        <main class="main-container col1-layout" role="main">
             <div class="main">
                 <?= $this->getChildHtml('breadcrumbs') ?>
-                <div class="col-main">
+                <?= $this->getChildHtml('title') ?>
+                <div class="col-main" id="main-content">
                     <?= $this->getChildHtml('global_messages') ?>
                     <?= $this->getChildHtml('content') ?>
                 </div>
             </div>
-        </div>
+        </main>
         <?= $this->getChildHtml('footer_before') ?>
         <?= $this->getChildHtml('footer') ?>
         <?= $this->getChildHtml('global_cookie_notice') ?>
@@ -40,4 +42,3 @@
 <?= $this->getAbsoluteFooter() ?>
 </body>
 </html>
-

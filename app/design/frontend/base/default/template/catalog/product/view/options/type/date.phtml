@@ -14,7 +14,7 @@ $option = $this->getOption();
 $optionId = $option->getId();
 ?>
 <dt>
-    <label<?= $option->getIsRequired() ? ' class="required"' : '' ?>><?=  $this->escapeHtml($option->getTitle()) ?></label>
+    <label<?= $option->getIsRequired() ? ' class="required"' : '' ?> for="option_<?= $optionId ?>"><?=  $this->escapeHtml($option->getTitle()) ?></label>
     <?= $this->getFormatedPrice() ?>
 </dt>
 <dd>
@@ -35,7 +35,7 @@ $optionId = $option->getId();
     <span class="time-picker"><?= $this->getTimeHtml() ?></span>
 <?php endif ?>
 
-    <input type="hidden" name="validate_datetime_<?= $optionId ?>" class="validate-datetime-<?= $optionId ?>" value="" />
+    <input id="option_<?= $optionId ?>" type="hidden" name="validate_datetime_<?= $optionId ?>" class="validate-datetime-<?= $optionId ?>" value="" />
 </dd>
 
 <script>

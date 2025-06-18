@@ -433,7 +433,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
      * @param array $ids
      * @param bool $addCollectionData
      * @param bool $updateAnchorProductCount
-     * @param ?non-negative-int $recursionLevel
+     * @param int|null $recursionLevel Must be a non-negative integer or null
      * @return $this|false
      */
     public function loadByIds($ids, $addCollectionData = true, $updateAnchorProductCount = true, $recursionLevel = null)

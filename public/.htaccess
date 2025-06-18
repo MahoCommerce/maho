@@ -17,9 +17,14 @@ DirectoryIndex index.php
     SecFilterScanPOST Off
 </IfModule>
 
+<IfModule mod_brotli.c>
+    # enable brotli compression
+    #AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
 <IfModule mod_deflate.c>
     # enable apache served files compression
-    # http://developer.yahoo.com/performance/rules.html#gzip
+    # https://developer.yahoo.com/performance/rules.html?guccounter=1#gzip
 
     # Insert filter on all content
     ###SetOutputFilter DEFLATE

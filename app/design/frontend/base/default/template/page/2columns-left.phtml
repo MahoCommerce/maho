@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -17,25 +17,27 @@
 <?= $this->getChildHtml('head') ?>
 </head>
 <body<?= $this->getBodyClass()?' class="'.$this->getBodyClass().'"':'' ?>>
+<a href="#main-content" id="skip-to-main-content"><?= $this->__('Skip to main content') ?></a>
 <?= $this->getChildHtml('after_body_start') ?>
 <div class="wrapper">
     <?= $this->getChildHtml('global_notices') ?>
     <div class="page">
         <?= $this->getChildHtml('header') ?>
-        <div class="main-container col2-left-layout">
+        <main class="main-container col2-left-layout" role="main">
             <div class="main">
                 <?= $this->getChildHtml('breadcrumbs') ?>
+                <?= $this->getChildHtml('title') ?>
                 <?php // This left_first block will display above the main content on smaller viewports ?>
                 <?php if ($_leftContent = $this->getChildHtml('left_first')): ?>
-                <div class="col-left sidebar col-left-first"><?= $_leftContent;   ?></div>
+                <aside class="col-left sidebar col-left-first" role="complementary" aria-label="<?= $this->__('Sidebar') ?>"><?= $_leftContent;   ?></aside>
                 <?php endif ?>
-                <div class="col-main">
+                <div class="col-main" id="main-content">
                     <?= $this->getChildHtml('global_messages') ?>
                     <?= $this->getChildHtml('content') ?>
                 </div>
-                <div class="col-left sidebar"><?= $this->getChildHtml('left') ?></div>
+                <aside class="col-left sidebar" role="complementary" aria-label="<?= $this->__('Sidebar') ?>"><?= $this->getChildHtml('left') ?></aside>
             </div>
-        </div>
+        </main>
         <?= $this->getChildHtml('footer_before') ?>
         <?= $this->getChildHtml('footer') ?>
         <?= $this->getChildHtml('global_cookie_notice') ?>
