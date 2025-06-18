@@ -84,8 +84,6 @@
             <action method="addJs"><script>mage/adminhtml/browser.js</script></action>
             <action method="addJs"><script>mage/adminhtml/uploader/instance.js</script></action>
             <action method="addJs"><script>maho-tree.js</script></action>
-            <action method="addJs"><script>sortable.min.js</script></action>
-            <action method="addJs"><script>maho-dialog.js</script></action>
             <action method="addItem"><type>skin_css</type><name>media-library.css</name></action>
         </reference>
         <reference name="content">
