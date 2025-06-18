@@ -117,6 +117,7 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
         return parent::_prepareForm();
     }
 
+    #[\Override]
     protected function getStoreSwitcherRenderer(): Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset_Element
     {
         return $this->getLayout()->createBlock('adminhtml/store_switcher_form_renderer_fieldset_element');
