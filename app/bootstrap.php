@@ -48,7 +48,8 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
 }
 
 if (!function_exists('dd')) {
-    function dd(...$vars) {
+    function dd(...$vars)
+    {
         foreach ($vars as $var) {
             \Symfony\Component\VarDumper\VarDumper::dump($var);
         }
