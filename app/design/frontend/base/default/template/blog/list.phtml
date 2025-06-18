@@ -16,15 +16,15 @@ $posts = $this->getPosts();
 
 <div id="blog_posts">
     <?php foreach ($posts->getItems() as $post): ?>
-        <div>
+        <a href="<?= Mage::getUrl() . "blog/{$post->getUrlKey()}" ?>.html" class="blog_post_item">
             <?php if ($post->hasImage()): ?>
                 <div class="blog_post_image">
                     <img src="<?= $post->getImageUrl() ?>" alt="<?= $this->escapeHtml($post->getTitle()) ?>" />
                 </div>
             <?php endif ?>
-            <a href="<?= Mage::getUrl() . "blog/{$post->getUrlKey()}" ?>.html"><strong><?= $post->getTitle() ?></strong></a>
+            <strong><?= $post->getTitle() ?></strong>
             <div class="blog_post_date"><?= $this->formatDate($post->getPublishedAt() ?? $post->getCreatedAt()) ?></div>
-        </div>
+        </a>
     <?php endforeach ?>
 </div>
 
@@ -46,10 +46,20 @@ $posts = $this->getPosts();
         ));
     }
 
-    #blog_posts > div {
+    #blog_posts > .blog_post_item {
+        display: block;
         padding: 0.9375rem;
         border-radius: 0.5rem;
         border: 1px solid var(--maho-color-border-light);
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s ease;
+    }
+
+    #blog_posts > .blog_post_item:hover {
+        border-color: var(--maho-color-primary);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
     }
 
     .blog_post_image {
