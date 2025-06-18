@@ -6,7 +6,7 @@
  * @package    Mage_Directory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -37,9 +37,6 @@ class Mage_Directory_Model_Resource_Region_Collection extends Mage_Core_Model_Re
 
         $this->_countryTable    = $this->getTable('directory/country');
         $this->_regionNameTable = $this->getTable('directory/country_region_name');
-
-        $this->addOrder('name', Varien_Data_Collection::SORT_ORDER_ASC);
-        $this->addOrder('default_name', Varien_Data_Collection::SORT_ORDER_ASC);
     }
 
     /**
@@ -53,12 +50,13 @@ class Mage_Directory_Model_Resource_Region_Collection extends Mage_Core_Model_Re
         parent::_initSelect();
         $locale = Mage::app()->getLocale()->getLocaleCode();
 
-        $this->addBindParam(':region_locale', $locale);
         $this->getSelect()->joinLeft(
             ['rname' => $this->_regionNameTable],
-            'main_table.region_id = rname.region_id AND rname.locale = :region_locale',
+            $this->getConnection()->quoteInto('main_table.region_id = rname.region_id AND rname.locale = ?', $locale),
             ['name'],
         );
+
+        $this->getSelect()->order(['name', 'default_name']);
 
         return $this;
     }
@@ -150,22 +148,41 @@ class Mage_Directory_Model_Resource_Region_Collection extends Mage_Core_Model_Re
         return $this;
     }
 
-    /**
-     * Convert collection items to select options array
-     *
-     * @return array
-     */
     #[\Override]
-    public function toOptionArray()
+    public function toOptionHash(): array
     {
-        $options = $this->_toOptionArray('region_id', 'default_name', ['title' => 'default_name']);
-        if (count($options) > 0) {
+        $res = [];
+
+        foreach ($this as $regionId => $region) {
+            $res[$regionId] = $region->getName();
+        }
+
+        Mage::helper('core/string')->sortMultibyte($res, true);
+        return $res;
+    }
+
+    #[\Override]
+    public function toOptionArray(bool $addEmpty = true): array
+    {
+        $res = $this->toOptionHash();
+        $options = [];
+
+        foreach ($res as $regionId => $name) {
+            $options[] = [
+                'title' => $name,
+                'value' => $regionId,
+                'label' => $name,
+            ];
+        }
+
+        if (count($options) > 0 && $addEmpty) {
             array_unshift($options, [
                 'title ' => null,
                 'value' => '',
                 'label' => Mage::helper('directory')->__('-- Please select --'),
             ]);
         }
+
         return $options;
     }
 }

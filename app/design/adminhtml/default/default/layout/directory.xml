@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<layout>
+    <!-- Countries Management -->
+    <adminhtml_directory_country_index>
+        <reference name="content">
+            <block type="directory/adminhtml_country" name="directory_country"/>
+        </reference>
+    </adminhtml_directory_country_index>
+
+    <adminhtml_directory_country_edit>
+        <reference name="head">
+            <action method="addJs"><name>mage/adminhtml/directory/form.js</name></action>
+        </reference>
+        <reference name="content">
+            <block type="directory/adminhtml_country_edit" name="directory_country_edit"/>
+        </reference>
+        <reference name="left">
+            <block type="directory/adminhtml_country_edit_tabs" name="directory_country_edit_tabs">
+                <block type="directory/adminhtml_country_edit_tab_main" name="directory_country_edit_tab_main"/>
+                <block type="directory/adminhtml_country_edit_tab_translations" name="directory_country_edit_tab_translations">
+                    <block type="directory/adminhtml_country_edit_tab_translations_form" name="directory_country_edit_tab_translations_form"/>
+                    <block type="directory/adminhtml_country_edit_tab_translations_grid" name="directory_country_edit_tab_translations_grid"/>
+                </block>
+                <action method="addTab"><name>main</name><block>directory_country_edit_tab_main</block></action>
+                <action method="addTab"><name>translations</name><block>directory_country_edit_tab_translations</block></action>
+            </block>
+        </reference>
+    </adminhtml_directory_country_edit>
+
+    <adminhtml_directory_country_new>
+        <update handle="adminhtml_directory_country_edit"/>
+    </adminhtml_directory_country_new>
+
+    <adminhtml_directory_country_grid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="directory/adminhtml_country_grid" name="directory_country_grid"/>
+        </block>
+    </adminhtml_directory_country_grid>
+
+    <adminhtml_directory_country_translationgrid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="directory/adminhtml_country_edit_tab_translations_grid" name="directory_country_edit_tab_translations_grid"/>
+        </block>
+    </adminhtml_directory_country_translationgrid>
+
+    <!-- Regions Management -->
+    <adminhtml_directory_region_index>
+        <reference name="content">
+            <block type="directory/adminhtml_region" name="directory_region"/>
+        </reference>
+    </adminhtml_directory_region_index>
+
+    <adminhtml_directory_region_edit>
+        <reference name="head">
+            <action method="addJs"><name>mage/adminhtml/directory/form.js</name></action>
+        </reference>
+        <reference name="content">
+            <block type="directory/adminhtml_region_edit" name="directory_region_edit"/>
+        </reference>
+        <reference name="left">
+            <block type="directory/adminhtml_region_edit_tabs" name="directory_region_edit_tabs">
+                <block type="directory/adminhtml_region_edit_tab_main" name="directory_region_edit_tab_main"/>
+                <block type="directory/adminhtml_region_edit_tab_translations" name="directory_region_edit_tab_translations">
+                    <block type="directory/adminhtml_region_edit_tab_translations_form" name="directory_region_edit_tab_translations_form"/>
+                    <block type="directory/adminhtml_region_edit_tab_translations_grid" name="directory_region_edit_tab_translations_grid"/>
+                </block>
+                <action method="addTab"><name>main</name><block>directory_region_edit_tab_main</block></action>
+                <action method="addTab"><name>translations</name><block>directory_region_edit_tab_translations</block></action>
+            </block>
+        </reference>
+    </adminhtml_directory_region_edit>
+
+    <adminhtml_directory_region_new>
+        <update handle="adminhtml_directory_region_edit"/>
+    </adminhtml_directory_region_new>
+
+    <adminhtml_directory_region_grid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="directory/adminhtml_region_grid" name="directory_region_grid"/>
+        </block>
+    </adminhtml_directory_region_grid>
+
+    <adminhtml_directory_region_translationgrid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="directory/adminhtml_region_edit_tab_translations_grid" name="directory_region_edit_tab_translations_grid"/>
+        </block>
+    </adminhtml_directory_region_translationgrid>
+</layout>
