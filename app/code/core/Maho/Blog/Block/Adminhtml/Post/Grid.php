@@ -56,10 +56,9 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
             'align' => 'center',
             'index' => 'image',
             'width' => '80px',
-            'type' => 'image',
-            'escape' => true,
             'sortable' => false,
             'filter' => false,
+            'renderer' => 'blog/adminhtml_post_grid_renderer_image',
         ]);
 
         if (!Mage::app()->isSingleStoreMode()) {

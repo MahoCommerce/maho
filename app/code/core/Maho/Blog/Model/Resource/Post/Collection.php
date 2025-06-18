@@ -69,8 +69,13 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
 
         // Convert comma-separated stores string to array
         foreach ($this->_items as $item) {
-            $stores = explode(',', $item->getStores());
-            $item->setStores($stores);
+            $storesString = $item->getData('stores');
+            if ($storesString) {
+                $stores = explode(',', $storesString);
+                $item->setStores($stores);
+            } else {
+                $item->setStores([]);
+            }
         }
 
         return $this;

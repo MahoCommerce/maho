@@ -40,7 +40,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     }
 
     #[\Override]
-    protected function _afterSave(Maho_Blog_Model_Post $object)
+    protected function _afterSave(Varien_Object $object)
     {
         if ($object->hasStores()) {
             $this->_saveStoreRelations($object);
@@ -49,7 +49,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         return parent::_afterSave($object);
     }
 
-    protected function _saveStoreRelations(Maho_Blog_Model_Post $post): void
+    protected function _saveStoreRelations(Varien_Object $post): void
     {
         $oldStores = $this->lookupStoreIds($post->getId());
         $newStores = (array) $post->getStores();

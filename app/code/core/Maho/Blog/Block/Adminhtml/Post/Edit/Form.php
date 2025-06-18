@@ -104,9 +104,21 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
         ]);
 
         if (Mage::registry('blog_post')) {
-            $form->setValues(Mage::registry('blog_post')->getData());
+            $data = Mage::registry('blog_post')->getData();
+            
+            // Prepend the blog path to the image for proper display
+            if (!empty($data['image'])) {
+                $data['image'] = 'blog/' . $data['image'];
+            }
+            
+            $form->setValues($data);
         }
 
         return parent::_prepareForm();
+    }
+
+    protected function getStoreSwitcherRenderer(): Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset_Element
+    {
+        return $this->getLayout()->createBlock('adminhtml/store_switcher_form_renderer_fieldset_element');
     }
 }

@@ -31,7 +31,7 @@ $installer->addEntityType('blog_post', [
     'increment_per_store'         => 0,
     'increment_pad_length'        => 0,
     'additional_attribute_table'  => '',
-    'entity_attribute_collection' => 'blog_post/attribute_collection',
+    'entity_attribute_collection' => 'eav/entity_attribute_collection',
 ]);
 
 $installer->createEntityTables(
@@ -83,7 +83,7 @@ $attributes = [
         'input' => 'image',
         'required' => false,
         'sort_order' => 15,
-        'backend_model' => 'catalog/product_attribute_backend_image',
+        'backend_model' => 'blog/post_attribute_backend_image',
     ],
 ];
 
