@@ -228,7 +228,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Decrypt data using application key
      */
-    public function decrypt(string $data): string
+    public function decrypt(?string $data): string
     {
         if (!Mage::isInstalled()) {
             return $data;
