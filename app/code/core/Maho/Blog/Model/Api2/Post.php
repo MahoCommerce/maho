@@ -24,14 +24,14 @@ class Maho_Blog_Model_Api2_Post extends Mage_Api2_Model_Resource
         /** @var Maho_Blog_Model_Resource_Post_Collection $collection */
         $collection = Mage::getResourceModel('blog/post_collection');
         $collection->addAttributeToSelect('*');
-        
+
         $this->_applyCollectionModifiers($collection);
-        
+
         $posts = [];
         foreach ($collection as $post) {
             $posts[] = $post->getData();
         }
-        
+
         return $posts;
     }
 
@@ -42,7 +42,7 @@ class Maho_Blog_Model_Api2_Post extends Mage_Api2_Model_Resource
             $post = Mage::getModel('blog/post');
             $post->setData($data);
             $post->save();
-            
+
             return $this->_getLocation($post);
         } catch (Exception $e) {
             $this->_critical(self::RESOURCE_INTERNAL_ERROR);
@@ -53,7 +53,7 @@ class Maho_Blog_Model_Api2_Post extends Mage_Api2_Model_Resource
     protected function _update(array $data)
     {
         $post = $this->_loadPostById($this->getRequest()->getParam('id'));
-        
+
         try {
             $post->addData($data);
             $post->save();
@@ -66,7 +66,7 @@ class Maho_Blog_Model_Api2_Post extends Mage_Api2_Model_Resource
     protected function _delete()
     {
         $post = $this->_loadPostById($this->getRequest()->getParam('id'));
-        
+
         try {
             $post->delete();
         } catch (Exception $e) {
@@ -78,11 +78,11 @@ class Maho_Blog_Model_Api2_Post extends Mage_Api2_Model_Resource
     {
         /** @var Maho_Blog_Model_Post $post */
         $post = Mage::getModel('blog/post')->load($postId);
-        
+
         if (!$post->getId()) {
             $this->_critical(self::RESOURCE_NOT_FOUND);
         }
-        
+
         return $post;
     }
 
