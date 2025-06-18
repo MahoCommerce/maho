@@ -111,6 +111,7 @@ class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
             'title' => $post->getTitle(),
             'content' => $post->getContent(),
             'url_key' => $post->getUrlKey(),
+            'image' => $post->getImage(),
             'is_active' => $post->getIsActive(),
             'created_at' => $post->getCreatedAt(),
             'updated_at' => $post->getUpdatedAt(),

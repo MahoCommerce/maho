@@ -14,6 +14,7 @@
                     <xsd:element name="title" type="xsd:string" minOccurs="0" />
                     <xsd:element name="content" type="xsd:string" minOccurs="0" />
                     <xsd:element name="url_key" type="xsd:string" minOccurs="0" />
+                    <xsd:element name="image" type="xsd:string" minOccurs="0" />
                     <xsd:element name="is_active" type="xsd:int" minOccurs="0" />
                     <xsd:element name="created_at" type="xsd:string" minOccurs="0" />
                     <xsd:element name="updated_at" type="xsd:string" minOccurs="0" />
