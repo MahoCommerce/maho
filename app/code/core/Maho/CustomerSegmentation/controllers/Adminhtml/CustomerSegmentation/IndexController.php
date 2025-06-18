@@ -236,6 +236,66 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         $this->_redirect('*/*/index');
     }
 
+    public function newConditionHtmlAction(): void
+    {
+        $id = $this->getRequest()->getParam('id');
+        $typeParam = $this->getRequest()->getParam('type');
+        $typeArr = explode('|', str_replace('-', '/', $typeParam));
+        $type = $typeArr[0];
+
+        $model = Mage::getModel($type);
+        if (!$model) {
+            $this->getResponse()->setBody('<!-- Model not found: ' . $type . ' -->');
+            return;
+        }
+
+        $model->setId($id)
+            ->setType($type)
+            ->setRule(Mage::getModel('customersegmentation/segment'))
+            ->setPrefix('conditions');
+
+        if (!empty($typeArr[1])) {
+            $model->setAttribute($typeArr[1]);
+        }
+
+        if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
+            $model->setJsFormObject($this->getRequest()->getParam('form'));
+            $html = $model->asHtmlRecursive();
+        } else {
+            $html = '';
+        }
+        
+        $this->getResponse()->setBody($html);
+    }
+
+    public function newConditionAttributeAction(): void
+    {
+        $id = $this->getRequest()->getParam('id');
+        $attribute = $this->getRequest()->getParam('attribute');
+        $type = $this->getRequest()->getParam('type');
+
+        $model = Mage::getModel($type);
+        if (!$model) {
+            $this->getResponse()->setBody('');
+            return;
+        }
+
+        $model->setId($id)
+            ->setType($type)
+            ->setAttribute($attribute)
+            ->setRule(Mage::getModel('customersegmentation/segment'))
+            ->setPrefix('conditions');
+
+        if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
+            $model->setJsFormObject($this->getRequest()->getParam('form'));
+            $html = $model->getValueElementHtml();
+        } else {
+            $html = '';
+        }
+
+        $this->getResponse()->setBody($html);
+    }
+
     protected function _isAllowed(): bool
     {
         $action = strtolower($this->getRequest()->getActionName());

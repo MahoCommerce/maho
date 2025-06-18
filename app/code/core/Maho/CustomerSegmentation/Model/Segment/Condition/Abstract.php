@@ -155,7 +155,7 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         return $html;
     }
 
-    public function loadArray(array $arr, string $key = 'conditions'): self
+    public function loadArray($arr, $key = 'conditions')
     {
         $this->setData($key, $arr);
 

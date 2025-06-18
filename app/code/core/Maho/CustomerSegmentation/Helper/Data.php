@@ -116,16 +116,24 @@ class Maho_CustomerSegmentation_Helper_Data extends Mage_Core_Helper_Abstract
                 'label' => $this->__('Order History'),
                 'value' => [
                     [
-                        'label' => $this->__('Order Attributes'),
-                        'value' => 'customersegmentation/segment_condition_order_attributes',
+                        'label' => $this->__('Payment Method'),
+                        'value' => 'customersegmentation/segment_condition_order_attributes|payment_method',
                     ],
                     [
-                        'label' => $this->__('Order Address'),
-                        'value' => 'customersegmentation/segment_condition_order_address',
+                        'label' => $this->__('Shipping Method'),
+                        'value' => 'customersegmentation/segment_condition_order_attributes|shipping_method',
                     ],
                     [
-                        'label' => $this->__('Order Subselection'),
-                        'value' => 'customersegmentation/segment_condition_order_subselect',
+                        'label' => $this->__('Order Status'),
+                        'value' => 'customersegmentation/segment_condition_order_attributes|status',
+                    ],
+                    [
+                        'label' => $this->__('Store'),
+                        'value' => 'customersegmentation/segment_condition_order_attributes|store_id',
+                    ],
+                    [
+                        'label' => $this->__('Grand Total'),
+                        'value' => 'customersegmentation/segment_condition_order_attributes|grand_total',
                     ],
                 ],
             ],

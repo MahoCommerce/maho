@@ -23,6 +23,9 @@
     </adminhtml_customersegmentation_index_new>
 
     <adminhtml_customersegmentation_index_edit>
+        <reference name="head">
+            <action method="addItem"><type>js</type><name>mage/adminhtml/rules.js</name></action>
+        </reference>
         <reference name="content">
             <block type="customersegmentation/adminhtml_segment_edit" name="customersegmentation.segment.edit" />
         </reference>
