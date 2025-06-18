@@ -11,15 +11,13 @@
 
 class Maho_Blog_Model_Api2_Post extends Mage_Api2_Model_Resource
 {
-    #[\Override]
-    protected function _retrieve()
+    protected function _retrieve(): array
     {
         $post = $this->_loadPostById($this->getRequest()->getParam('id'));
         return $post->getData();
     }
 
-    #[\Override]
-    protected function _retrieveCollection()
+    protected function _retrieveCollection(): array
     {
         /** @var Maho_Blog_Model_Resource_Post_Collection $collection */
         $collection = Mage::getResourceModel('blog/post_collection');
@@ -35,22 +33,21 @@ class Maho_Blog_Model_Api2_Post extends Mage_Api2_Model_Resource
         return $posts;
     }
 
-    #[\Override]
-    protected function _create(array $data)
+    protected function _create(array $data): string
     {
-        try {
-            $post = Mage::getModel('blog/post');
-            $post->setData($data);
-            $post->save();
+        $post = Mage::getModel('blog/post');
+        $post->setData($data);
 
-            return $this->_getLocation($post);
+        try {
+            $post->save();
         } catch (Exception $e) {
             $this->_critical(self::RESOURCE_INTERNAL_ERROR);
         }
+
+        return $this->_getLocation($post);
     }
 
-    #[\Override]
-    protected function _update(array $data)
+    protected function _update(array $data): void
     {
         $post = $this->_loadPostById($this->getRequest()->getParam('id'));
 
@@ -62,8 +59,7 @@ class Maho_Blog_Model_Api2_Post extends Mage_Api2_Model_Resource
         }
     }
 
-    #[\Override]
-    protected function _delete()
+    protected function _delete(): void
     {
         $post = $this->_loadPostById($this->getRequest()->getParam('id'));
 
@@ -87,8 +83,8 @@ class Maho_Blog_Model_Api2_Post extends Mage_Api2_Model_Resource
     }
 
     #[\Override]
-    protected function _getLocation(Maho_Blog_Model_Post $post): string
+    protected function _getLocation($resource): string
     {
-        return $this->_getSubModel('blog_post', $post->getId())->getResourceLocation();
+        return parent::_getLocation($resource);
     }
 }
