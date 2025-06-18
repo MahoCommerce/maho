@@ -46,3 +46,13 @@ if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPE
         Mage::addBootupWarning('Optimized autoloader detected in developer mode.');
     }
 }
+
+if (!function_exists('dd')) {
+    function dd(mixed ...$vars): never
+    {
+        foreach ($vars as $var) {
+            \Symfony\Component\VarDumper\VarDumper::dump($var);
+        }
+        die();
+    }
+}
