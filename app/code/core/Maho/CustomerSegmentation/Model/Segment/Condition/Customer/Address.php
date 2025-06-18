@@ -1,0 +1,146 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_CustomerSegmentation
+ * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends Maho_CustomerSegmentation_Model_Segment_Condition_Abstract
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->setType('customersegmentation/segment_condition_customer_address');
+        $this->setValue(null);
+    }
+
+    public function getNewChildSelectOptions(): array
+    {
+        return [
+            'value' => $this->getType(),
+            'label' => Mage::helper('customersegmentation')->__('Customer Address'),
+        ];
+    }
+
+    public function loadAttributeOptions(): self
+    {
+        $attributes = [
+            'firstname' => Mage::helper('customersegmentation')->__('First Name'),
+            'lastname' => Mage::helper('customersegmentation')->__('Last Name'),
+            'company' => Mage::helper('customersegmentation')->__('Company'),
+            'street' => Mage::helper('customersegmentation')->__('Street Address'),
+            'city' => Mage::helper('customersegmentation')->__('City'),
+            'region' => Mage::helper('customersegmentation')->__('State/Province'),
+            'postcode' => Mage::helper('customersegmentation')->__('ZIP/Postal Code'),
+            'country_id' => Mage::helper('customersegmentation')->__('Country'),
+            'telephone' => Mage::helper('customersegmentation')->__('Telephone'),
+        ];
+
+        $this->setAttributeOption($attributes);
+        return $this;
+    }
+
+    public function getAttributeElement(): Varien_Data_Form_Element_Abstract
+    {
+        if (!$this->hasAttributeOption()) {
+            $this->loadAttributeOptions();
+        }
+        
+        $element = parent::getAttributeElement();
+        // Don't set ShowAsText - allow dropdown selection for customer address attributes
+        return $element;
+    }
+
+    public function getInputType(): string
+    {
+        switch ($this->getAttribute()) {
+            case 'country_id':
+            case 'region':
+                return 'select';
+            default:
+                return 'string';
+        }
+    }
+
+    public function getValueElementType(): string
+    {
+        switch ($this->getAttribute()) {
+            case 'country_id':
+            case 'region':
+                return 'select';
+            default:
+                return 'text';
+        }
+    }
+
+    public function getValueSelectOptions(): array
+    {
+        $options = [];
+        switch ($this->getAttribute()) {
+            case 'country_id':
+                $options = Mage::getResourceModel('directory/country_collection')->toOptionArray();
+                break;
+            case 'region':
+                $options = Mage::getResourceModel('directory/region_collection')->toOptionArray();
+                break;
+        }
+        return $options;
+    }
+
+    public function getConditionsSql(Varien_Db_Adapter_Interface $adapter, ?int $websiteId = null): string|false
+    {
+        $attribute = $this->getAttribute();
+        $operator = $this->getMappedSqlOperator();
+        $value = $this->getValue();
+
+        if ($attribute === 'region') {
+            return $this->_buildRegionCondition($adapter, $operator, $value);
+        }
+
+        $subselect = $adapter->select()
+            ->from(['ca' => $this->_getCustomerAddressTable()], ['parent_id'])
+            ->where($this->_buildSqlCondition($adapter, "ca.{$attribute}", $operator, $value));
+
+        return 'e.entity_id IN (' . $subselect . ')';
+    }
+
+    protected function _buildRegionCondition(Varien_Db_Adapter_Interface $adapter, string $operator, mixed $value): string
+    {
+        $subselect = $adapter->select()
+            ->from(['ca' => $this->_getCustomerAddressTable()], ['parent_id'])
+            ->joinLeft(['dr' => $this->_getDirectoryRegionTable()], 'ca.region_id = dr.region_id', [])
+            ->where(
+                $adapter->prepare(
+                    '(' . $this->_buildSqlCondition($adapter, 'ca.region', $operator, $value) . 
+                    ' OR ' . $this->_buildSqlCondition($adapter, 'dr.name', $operator, $value) . ')'
+                )
+            );
+
+        return 'e.entity_id IN (' . $subselect . ')';
+    }
+
+    protected function _getCustomerAddressTable(): string
+    {
+        return Mage::getSingleton('core/resource')->getTableName('customer/address_entity');
+    }
+
+    protected function _getDirectoryRegionTable(): string
+    {
+        return Mage::getSingleton('core/resource')->getTableName('directory/country_region');
+    }
+
+    public function asString($format = ''): string
+    {
+        $attribute = $this->getAttribute();
+        $attributeOptions = $this->loadAttributeOptions()->getAttributeOption();
+        $attributeLabel = isset($attributeOptions[$attribute]) ? $attributeOptions[$attribute] : $attribute;
+
+        return $attributeLabel . ' ' . $this->getOperatorName() . ' ' . $this->getValueName();
+    }
+}
