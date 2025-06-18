@@ -37,7 +37,7 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
                 $uploader->setFilesDispersion(false);
                 $uploader->addValidateCallback(Mage_Core_Model_File_Validator_Image::NAME, $validator, 'validate');
                 $result = $uploader->save(Mage::getBaseDir('media') . DS . 'blog');
-                
+
                 if ($result && isset($result['file'])) {
                     $fileName = $result['file'];
                     $object->setData($name, $fileName);

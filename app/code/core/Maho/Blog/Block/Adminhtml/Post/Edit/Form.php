@@ -105,12 +105,12 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
 
         if (Mage::registry('blog_post')) {
             $data = Mage::registry('blog_post')->getData();
-            
+
             // Prepend the blog path to the image for proper display
             if (!empty($data['image'])) {
                 $data['image'] = 'blog/' . $data['image'];
             }
-            
+
             $form->setValues($data);
         }
 

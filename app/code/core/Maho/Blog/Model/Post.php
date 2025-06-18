@@ -44,7 +44,7 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
         if (!$image) {
             return null;
         }
-        
+
         return Mage::getBaseUrl('media') . 'blog/' . $image;
     }
 
