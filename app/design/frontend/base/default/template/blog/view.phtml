@@ -20,23 +20,3 @@ $post = $this->getPost();
 <?php endif ?>
 
 <div><?= $post->getContent() ?></div>
-
-<style>
-    .blog_post_image {
-        max-width: 100%;
-        margin: auto;
-        margin-bottom: 2rem;
-        object-fit: cover;
-        object-position: center;
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    @media (max-width: 768px) {
-        .blog_post_image {
-            max-width: calc(100% + 1rem);
-            margin-inline: -0.5rem;
-            border-radius: 0;
-        }
-    }
-</style>
