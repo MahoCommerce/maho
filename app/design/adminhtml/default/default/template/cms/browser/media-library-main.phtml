@@ -49,8 +49,7 @@ if (MediabrowserInstance) {
             el.parentNode.replaceChild(newEl, el);
             
             newEl.addEventListener('click', function(e) {
-                document.querySelectorAll('.filecnt.selected').forEach(sel => sel.classList.remove('selected'));
-                this.classList.add('selected');
+                // Properly handle file selection to trigger button visibility
                 MediabrowserInstance.selectFile.call(MediabrowserInstance, e);
             });
         });
@@ -80,5 +79,11 @@ if (MediabrowserInstance) {
     };
     
     MediabrowserInstance.insert = function() {}; // Disable insert
+
+    // Override showFileButtons to only show delete button in Media Library
+    const originalShowFileButtons = MediabrowserInstance.showFileButtons;
+    MediabrowserInstance.showFileButtons = function() {
+        this.showElement('button_delete_files');
+    };
 }
 </script>
