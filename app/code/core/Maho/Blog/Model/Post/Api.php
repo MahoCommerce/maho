@@ -11,7 +11,7 @@
 
 class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
 {
-    public function items($filters = null): array
+    public function items(?array $filters = null): array
     {
         try {
             /** @var Maho_Blog_Model_Resource_Post_Collection $collection */
@@ -39,7 +39,7 @@ class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
         }
     }
 
-    public function info($postId): array
+    public function info(int $postId): array
     {
         try {
             $post = Mage::getModel('blog/post')->load($postId);
@@ -54,7 +54,7 @@ class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
         }
     }
 
-    public function create($postData): int
+    public function create(array $postData): int
     {
         try {
             $post = Mage::getModel('blog/post')
@@ -69,7 +69,7 @@ class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
         }
     }
 
-    public function update($postId, $postData): true
+    public function update(int $postId, array $postData): true
     {
         try {
             $post = Mage::getModel('blog/post')->load($postId);
@@ -88,7 +88,7 @@ class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
         }
     }
 
-    public function delete($postId): true
+    public function delete(int $postId): true
     {
         try {
             $post = Mage::getModel('blog/post')->load($postId);
@@ -104,7 +104,7 @@ class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
         }
     }
 
-    protected function _getPostData($post): array
+    protected function _getPostData(Maho_Blog_Model_Post $post): array
     {
         return [
             'post_id' => $post->getId(),
