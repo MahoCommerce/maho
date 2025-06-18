@@ -28,7 +28,8 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
         $collection
             ->addAttributeToSelect('title')
             ->addAttributeToSelect('publish_date')
-            ->addAttributeToSelect('created_at');
+            ->addAttributeToSelect('created_at')
+            ->addAttributeToSelect('image');
         $this->setCollection($collection);
 
         return parent::_prepareCollection();
@@ -48,6 +49,17 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
             'header' => Mage::helper('blog')->__('Title'),
             'align' => 'left',
             'index' => 'title',
+        ]);
+
+        $this->addColumn('image', [
+            'header' => Mage::helper('blog')->__('Image'),
+            'align' => 'center',
+            'index' => 'image',
+            'width' => '80px',
+            'type' => 'image',
+            'escape' => true,
+            'sortable' => false,
+            'filter' => false,
         ]);
 
         if (!Mage::app()->isSingleStoreMode()) {

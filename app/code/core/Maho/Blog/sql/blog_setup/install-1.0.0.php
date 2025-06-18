@@ -77,6 +77,14 @@ $attributes = [
         'sort_order' => 50,
         'backend_model' => 'blog/post_attribute_backend_store',
     ],
+    'image' => [
+        'type' => 'varchar',
+        'label' => 'Image',
+        'input' => 'image',
+        'required' => false,
+        'sort_order' => 15,
+        'backend_model' => 'catalog/product_attribute_backend_image',
+    ],
 ];
 
 foreach ($attributes as $code => $options) {

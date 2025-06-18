@@ -11,6 +11,7 @@
  * @method string getContent()
  * @method string getPublishedAt()
  * @method string getTitle()
+ * @method string getImage()
  */
 
 class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
@@ -34,5 +35,20 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
     public function getPostIdByUrlKey(string $urlKey, int $storeId): ?int
     {
         return $this->_getResource()->getPostIdByUrlKey($urlKey, $storeId);
+    }
+
+    public function getImageUrl(): ?string
+    {
+        $image = $this->getImage();
+        if (!$image) {
+            return null;
+        }
+        
+        return Mage::getBaseUrl('media') . 'blog/' . $image;
+    }
+
+    public function hasImage(): bool
+    {
+        return !empty($this->getImage());
     }
 }

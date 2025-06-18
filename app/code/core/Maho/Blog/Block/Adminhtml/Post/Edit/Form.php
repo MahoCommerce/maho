@@ -49,6 +49,12 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
             'name' => 'url_key',
         ]);
 
+        $fieldset->addField('image', 'image', [
+            'label' => Mage::helper('blog')->__('Image'),
+            'name' => 'image',
+            'required' => false,
+        ]);
+
         if (!Mage::app()->isSingleStoreMode()) {
             $field = $fieldset->addField('stores', 'multiselect', [
                 'name'      => 'stores[]',

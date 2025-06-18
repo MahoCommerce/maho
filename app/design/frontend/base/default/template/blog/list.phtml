@@ -17,6 +17,11 @@ $posts = $this->getPosts();
 <div id="blog_posts">
     <?php foreach ($posts->getItems() as $post): ?>
         <div>
+            <?php if ($post->hasImage()): ?>
+                <div class="blog_post_image">
+                    <img src="<?= $post->getImageUrl() ?>" alt="<?= $this->escapeHtml($post->getTitle()) ?>" />
+                </div>
+            <?php endif ?>
             <a href="<?= Mage::getUrl() . "blog/{$post->getUrlKey()}" ?>.html"><strong><?= $post->getTitle() ?></strong></a>
             <div class="blog_post_date"><?= $this->formatDate($post->getPublishedAt() ?? $post->getCreatedAt()) ?></div>
         </div>
@@ -45,5 +50,16 @@ $posts = $this->getPosts();
         padding: 0.9375rem;
         border-radius: 0.5rem;
         border: 1px solid var(--maho-color-border-light);
+    }
+
+    .blog_post_image {
+        margin-bottom: 0.75rem;
+    }
+
+    .blog_post_image img {
+        width: 100%;
+        height: 12.5rem;
+        object-fit: cover;
+        border-radius: 0.25rem;
     }
 </style>
