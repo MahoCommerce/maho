@@ -47,7 +47,8 @@
         "symfony/mailer": "^7.3",
         "symfony/polyfill-php84": "^1.31",
         "intervention/image": "^3.11",
-        "symfony/cache": "^7.3"
+        "symfony/cache": "^7.3",
+        "symfony/var-dumper": "^7.3"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "*",
