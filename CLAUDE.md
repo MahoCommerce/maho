@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Maho is an open-source ecommerce platform forked from OpenMage, designed for medium-to-small on-premise projects. It's based on the Magento 1 architecture but modernized with PHP 8.2+ support and contemporary development tools.
+Maho is an open-source ecommerce platform forked from OpenMage, designed for medium-to-small on-premise projects. It's based on the Magento 1 architecture but modernized with PHP 8.3+ support and contemporary development tools.
 
 ## Essential Commands
 
@@ -33,20 +33,6 @@ vendor/bin/phpstan analyze    # Run static analysis
 ./maho index:list         # List all indexes
 ./maho index:reindex      # Reindex specific index
 ./maho index:reindex:all  # Reindex all indexes
-```
-
-### Admin & Customer Management
-```bash
-./maho admin:user:list                          # List admin users
-./maho admin:user:create                        # Create admin user
-./maho admin:user:changepassword <username>     # Change admin password
-./maho customer:list                            # List customers
-./maho customer:create                          # Create customer
-```
-
-### Installation
-```bash
-./maho install            # Install Maho (non interactive)
 ```
 
 ## Architecture Overview
@@ -123,7 +109,7 @@ Observers are configured in module's `config.xml`.
 - If you've to create a new module, use the `app/code/core/Maho/` namespace 
 - Declare module in `app/etc/modules/`
 - Follow existing module patterns for consistency
-- Add strict typing to all new code and use modern PHP8.2+ features
+- Add strict typing to all new code and use modern PHP8.3+ features
 
 ### Modifying Existing Features
 - Do not increment module's version number in module's `config.xml`
@@ -151,3 +137,8 @@ While there's no dedicated test suite, ensure code quality through:
 - PHP-CS-Fixer for code standards
 - Manual testing of features
 - GitHub Actions CI for automated checks
+
+## Git Commit Rules
+- **NEVER** include "Co-Authored-By: Claude" or any AI attribution in commits
+- **NEVER** mention Claude, AI, or assistant in commit messages
+- Keep commits professional and focused only on code changes

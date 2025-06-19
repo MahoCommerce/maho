@@ -1,0 +1,89 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Core_Block_Template $this */
+
+$content = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_content');
+$tree = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_tree');
+$uploader = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_content_uploader');
+$newfolder = $this->getLayout()->createBlock('adminhtml/cms_wysiwyg_images_content_newfolder');
+?>
+
+<div class="media-library-layout">
+    <div class="media-library-left">
+        <?= $tree->setTemplate('cms/browser/tree.phtml')->toHtml() ?>
+    </div>
+    
+    <div class="media-library-content">
+        <div class="content-header" id="content_header">
+            <table cellspacing="0">
+                <tr>
+                    <td><h3 id="content_header_text"><?= $content->getHeaderText() ?></h3></td>
+                    <td class="form-buttons"><?= $content->getButtonsHtml() ?></td>
+                </tr>
+            </table>
+        </div>
+
+        <div id="contents-uploader"><?= $uploader->setTemplate('media/uploader.phtml')->toHtml() ?></div>
+        <div id="contents"></div>
+        <div id="contents-newfolder" class="no-display"><?= $newfolder->setTemplate('cms/browser/content/newfolder.phtml')->toHtml() ?></div>
+    </div>
+</div>
+
+<script>
+// Initialize Media Library
+MediabrowserInstance = new Mediabrowser(<?= $content->getFilebrowserSetupObject() ?>);
+<?php if ($content->getStoreId()): ?>MediabrowserInstance.storeId = '<?= $content->getStoreId() ?>';<?php endif; ?>
+
+// Disable double-click insert and apply Media Library behavior
+if (MediabrowserInstance) {
+    function applyMediaLibraryBehavior() {
+        document.getElementById('contents')?.querySelectorAll('div.filecnt').forEach((el) => {
+            const newEl = el.cloneNode(true);
+            el.parentNode.replaceChild(newEl, el);
+            
+            newEl.addEventListener('click', function(e) {
+                // Properly handle file selection to trigger button visibility
+                MediabrowserInstance.selectFile.call(MediabrowserInstance, e);
+            });
+        });
+    }
+    
+    const originalShowFolderContent = MediabrowserInstance.showFolderContent;
+    const originalUpdateContent = MediabrowserInstance.updateContent;
+    
+    MediabrowserInstance.showFolderContent = function(path) {
+        this.currentTreePath = path;
+        this.updateContent();
+    };
+    
+    MediabrowserInstance.updateContent = function() {
+        mahoFetch(MediabrowserInstance.contentsUrl, {
+            method: 'POST',
+            body: new URLSearchParams({
+                node: MediabrowserInstance.currentNode.id
+            }),
+            loaderArea: false
+        })
+        .then(data => {
+            document.getElementById('contents').innerHTML = data;
+            setTimeout(applyMediaLibraryBehavior, 100);
+        })
+        .catch(error => console.error('Error updating content:', error));
+    };
+    
+    MediabrowserInstance.insert = function() {}; // Disable insert
+
+    // Override showFileButtons to only show delete button in Media Library
+    const originalShowFileButtons = MediabrowserInstance.showFileButtons;
+    MediabrowserInstance.showFileButtons = function() {
+        this.showElement('button_delete_files');
+    };
+}
+</script>
