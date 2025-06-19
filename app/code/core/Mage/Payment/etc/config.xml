@@ -19,9 +19,15 @@
         <models>
             <payment>
                 <class>Mage_Payment_Model</class>
+                <resourceModel>payment_resource</resourceModel>
             </payment>
             <payment_resource>
-                <class>Mage_Core_Model_Resource</class>
+                <class>Mage_Payment_Model_Resource</class>
+                <entities>
+                    <restriction>
+                        <table>payment_restriction</table>
+                    </restriction>
+                </entities>
             </payment_resource>
         </models>
         <resources>
@@ -30,6 +36,11 @@
                     <module>Mage_Payment</module>
                 </setup>
             </payment_setup>
+            <maho_setup>
+                <setup>
+                    <module>Mage_Payment</module>
+                </setup>
+            </maho_setup>
         </resources>
         <blocks>
             <payment>
@@ -158,7 +169,25 @@
                 </Mage_Payment>
             </modules>
         </translate>
+        <layout>
+            <updates>
+                <payment_adminhtml module="Mage_Payment">
+                    <file>payment.xml</file>
+                </payment_adminhtml>
+            </updates>
+        </layout>
     </adminhtml>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <payment before="Mage_Adminhtml">Mage_Payment_Adminhtml</payment>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
     <default>
         <payment>
             <checkmo>

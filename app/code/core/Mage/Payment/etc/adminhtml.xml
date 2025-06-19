@@ -28,8 +28,27 @@
                             </config>
                         </children>
                     </system>
+                    <sales>
+                        <children>
+                            <payment_restrictions translate="title" module="payment">
+                                <title>Payment Restrictions</title>
+                                <sort_order>100</sort_order>
+                            </payment_restrictions>
+                        </children>
+                    </sales>
                 </children>
             </admin>
         </resources>
     </acl>
+    <menu>
+        <sales>
+            <children>
+                <payment_restrictions translate="title" module="payment">
+                    <title>Payment Restrictions</title>
+                    <sort_order>100</sort_order>
+                    <action>adminhtml/payment_restriction</action>
+                </payment_restrictions>
+            </children>
+        </sales>
+    </menu>
 </config>
