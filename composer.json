@@ -37,16 +37,17 @@
         "mahocommerce/maho-composer-plugin": "^3",
         "pelago/emogrifier": "^7.0",
         "shardj/zf1-future": "^1.24.1",
-        "symfony/console": "^7.1",
+        "symfony/console": "^7.3",
+        "symfony/http-foundation": "^7.3",
         "spomky-labs/otphp": "^11.3",
         "bacon/bacon-qr-code": "^3.0",
         "lbuchs/webauthn": "^2.2",
         "altcha-org/altcha": "^1.1.0",
         "mahocommerce/icons": "^1",
-        "symfony/mailer": "^7.2",
+        "symfony/mailer": "^7.3",
         "symfony/polyfill-php84": "^1.31",
         "intervention/image": "^3.11",
-        "symfony/cache": "^7.2",
+        "symfony/cache": "^7.3",
         "symfony/var-dumper": "^7.3"
     },
     "replace": {
@@ -77,7 +78,8 @@
         "fballiano/openmage-cloudflare-turnstile": "Turnstile: Cloudflare captcha-like antispam solution"
     },
     "conflict": {
-        "colinmollenhour/cache-backend-redis": "*"
+        "colinmollenhour/cache-backend-redis": "*",
+        "colinmollenhour/magento-redis-session": "*"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
