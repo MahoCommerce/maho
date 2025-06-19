@@ -185,4 +185,84 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
     {
         return $this->_isVisible;
     }
+
+    public function reindexEntity(int|array $entityIds): self
+    {
+        if (!is_array($entityIds)) {
+            $entityIds = [$entityIds];
+        }
+
+        // Check if this indexer supports product entities at all
+        if (!$this->matchEntityAndType(Mage_Catalog_Model_Product::ENTITY, Mage_Index_Model_Event::TYPE_SAVE)
+            && !$this->matchEntityAndType(Mage_Catalog_Model_Product::ENTITY, Mage_Index_Model_Event::TYPE_MASS_ACTION)) {
+            // This indexer doesn't handle product entities, skip silently
+            return $this;
+        }
+
+        // Try resource-level reindexing first (more reliable)
+        $resourceModel = $this->_getResource();
+
+        if (method_exists($resourceModel, 'reindexProductIds')) {
+            $resourceModel->reindexProductIds($entityIds);
+        } elseif (method_exists($resourceModel, 'reindexEntities')) {
+            $resourceModel->reindexEntities($entityIds);
+        } elseif (method_exists($resourceModel, 'reindexProducts')) {
+            $resourceModel->reindexProducts($entityIds);
+        } elseif ($this->matchEntityAndType(Mage_Catalog_Model_Product::ENTITY, Mage_Index_Model_Event::TYPE_MASS_ACTION)) {
+            // Create comprehensive mass action data object that all indexers expect
+            $actionObject = new class ($entityIds) extends Varien_Object {
+                private array $productIds;
+
+                public function __construct(array $productIds)
+                {
+                    parent::__construct();
+                    $this->productIds = $productIds;
+                }
+
+                public function getProductIds(): array
+                {
+                    return $this->productIds;
+                }
+
+                public function getAttributesData(): array
+                {
+                    return ['force_reindex_required' => true];
+                }
+
+                public function getWebsiteIds(): null
+                {
+                    return null;
+                }
+
+                public function getActionType(): null
+                {
+                    return null;
+                }
+            };
+
+            $event = Mage::getModel('index/event')
+                ->setEntity(Mage_Catalog_Model_Product::ENTITY)
+                ->setType(Mage_Index_Model_Event::TYPE_MASS_ACTION)
+                ->setDataObject($actionObject);
+
+            $this->processEvent($event);
+            return $this;
+        } else {
+            // Final fallback: simulate individual save events
+            foreach ($entityIds as $productId) {
+                $product = Mage::getModel('catalog/product')->load($productId);
+                if ($product->getId()) {
+                    $event = Mage::getModel('index/event')
+                        ->setEntity(Mage_Catalog_Model_Product::ENTITY)
+                        ->setType(Mage_Index_Model_Event::TYPE_SAVE)
+                        ->setDataObject($product);
+
+                    $this->_processEvent($event);
+                }
+                unset($product); // Free memory immediately
+            }
+        }
+
+        return $this;
+    }
 }

@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -345,5 +345,18 @@ class Mage_Catalog_Model_Product_Indexer_Flat extends Mage_Index_Model_Indexer_A
     protected function _getFlatAttributes()
     {
         return Mage::getModel('catalog/product_flat_indexer')->getAttributeCodes();
+    }
+
+    #[\Override]
+    public function reindexEntity(int|array $entityIds): self
+    {
+        if (!is_array($entityIds)) {
+            $entityIds = [$entityIds];
+        }
+
+        // Use the flat indexer's updateProduct method directly
+        $this->_getIndexer()->updateProduct($entityIds);
+
+        return $this;
     }
 }

@@ -586,6 +586,24 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
         return $this;
     }
 
+    public function reindexEntity(int|array $entityIds): self
+    {
+        if ($this->isLocked()) {
+            Mage::throwException(Mage::helper('index')->__('Process is locked.'));
+        }
+
+        $this->lock();
+        try {
+            $this->getIndexer()->reindexEntity($entityIds);
+            $this->unlock();
+        } catch (Exception $e) {
+            $this->unlock();
+            throw $e;
+        }
+
+        return $this;
+    }
+
     /**
      * Get unprocessed events collection
      *

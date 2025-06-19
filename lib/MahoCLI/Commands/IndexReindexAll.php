@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    MahoCLI
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -28,11 +28,19 @@ class IndexReindexAll extends BaseMahoCommand
         $this->initMaho();
 
         $indexCollection = Mage::getResourceModel('index/process_collection');
+        $totalStartTime = microtime(true);
+
         foreach ($indexCollection as $index) {
             $output->write("Reindexing {$index->getIndexerCode()}... ");
+            $startTime = microtime(true);
             $index->reindexEverything();
-            $output->writeln('<info>done!</info>');
+            $duration = round(microtime(true) - $startTime, 2);
+            $output->writeln(sprintf('<info>done!</info> (%.2fs)', $duration));
         }
+
+        $totalDuration = round(microtime(true) - $totalStartTime, 2);
+        $output->writeln('');
+        $output->writeln(sprintf('<info>All indexes reindexed in %.2fs</info>', $totalDuration));
 
         return Command::SUCCESS;
     }
