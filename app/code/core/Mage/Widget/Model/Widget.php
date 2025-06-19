@@ -6,7 +6,7 @@
  * @package    Mage_Widget
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -226,11 +226,11 @@ class Mage_Widget_Model_Widget extends Varien_Object
         }
 
         $config = Mage::getSingleton('widget/widget_config');
-        $imageName = str_replace('/', '__', $type) . '.gif';
+        $imageName = str_replace('/', '__', $type) . '.svg';
         if (is_file($config->getPlaceholderImagesBaseDir() . DS . $imageName)) {
             $image = $config->getPlaceholderImagesBaseUrl() . $imageName;
         } else {
-            $image = $config->getPlaceholderImagesBaseUrl() . 'default.gif';
+            $image = $config->getPlaceholderImagesBaseUrl() . 'default.svg';
         }
         return sprintf(
             '<img id="%s" src="%s" title="%s">',

@@ -46,6 +46,15 @@ const widgetTools = {
     closeDialog(window) {
         window ??= this.dialogWindow;
         window?.close();
+        
+        // Clear any editing state when dialog is closed
+        if (typeof tiptapEditors !== 'undefined') {
+            tiptapEditors.forEach(editor => {
+                if (editor.editingWidgetId) {
+                    editor.editingWidgetId = null;
+                }
+            });
+        }
     },
 };
 
@@ -66,12 +75,30 @@ WysiwygWidget.Widget = class {
         this.optionValues = new Map();
         this.widgetTargetId = widgetTargetId;
 
-        if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor) {
-            this.bMark = tinyMCE.activeEditor.selection.getBookmark();
-        }
-
         this.widgetEl.addEventListener('change', this.loadOptions.bind(this));
-        this.initOptionValues();
+        
+        // Check for initial widget values (for editing existing widgets)
+        if (window.widgetFormInitialValues) {
+            const initialValues = window.widgetFormInitialValues;
+            
+            // Set the widget type if available
+            if (initialValues.type && this.widgetEl) {
+                this.widgetEl.value = initialValues.type;
+                
+                // Store all values in optionValues map
+                Object.entries(initialValues).forEach(([key, value]) => {
+                    if (key !== 'type') {
+                        this.optionValues.set(key, value);
+                    }
+                });
+                
+                // Load options for the selected widget type
+                this.loadOptions();
+            }
+            
+            // Clear the global variable
+            delete window.widgetFormInitialValues;
+        }
     }
 
     getOptionsContainerId() {
@@ -120,35 +147,6 @@ WysiwygWidget.Widget = class {
             }
         });
         containerEl.classList.add('no-display');
-    }
-
-    // Assign widget options values when existing widget selected in WYSIWYG
-    initOptionValues() {
-        if (!this.wysiwygExists()) {
-            return false;
-        }
-
-        const el = this.getWysiwygNode();
-        if (!el || !el.id) {
-            return;
-        }
-
-        const widgetCode = Base64.idDecode(e.id);
-        if (widgetCode.indexOf('{{widget') === -1) {
-            return;
-        }
-
-        this.optionValues = new Map();
-
-        widgetCode.replaceAll(/([a-z0-9\_]+)\s*\=\s*[\"]{1}([^\"]+)[\"]{1}/gi, (...match) => {
-            if (match[1] == 'type') {
-                this.widgetEl.value = match[2];
-            } else {
-                this.optionValues.set(match[1], match[2]);
-            }
-        });
-
-        this.loadOptions();
     }
 
     async loadOptions() {
@@ -207,15 +205,27 @@ WysiwygWidget.Widget = class {
         if (widgetOptionsForm.validator && widgetOptionsForm.validator.validate() || !widgetOptionsForm.validator) {
             try {
                 const formData = new FormData();
+                
+                // Check if we need raw widget directive (for textarea) or processed HTML (for WYSIWYG)
+                let needsRawDirective = true;
+                if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.widgetTargetId)) {
+                    const tiptapEditor = tiptapEditors.get(this.widgetTargetId);
+                    if (tiptapEditor && tiptapEditor.editor) {
+                        // Tiptap is active, we need processed HTML
+                        needsRawDirective = false;
+                    }
+                }
+                
+                // Add form elements
                 for (const el of this.formEl.elements) {
                     if (!el.classList.contains('skip-submit')) {
                         formData.append(el.name, el.value);
                     }
                 }
-
-                // Add as_is flag to parameters if wysiwyg editor doesn't exist
-                if (!this.wysiwygExists()) {
-                    formData.set('as_is', 1);
+                
+                // Add as_is parameter if we need raw directive
+                if (needsRawDirective) {
+                    formData.append('as_is', '1');
                 }
 
                 const html = await mahoFetch(this.formEl.action, {
@@ -225,42 +235,31 @@ WysiwygWidget.Widget = class {
 
                 Windows.close('widget_window');
 
-                if (typeof tinyMCE !== 'undefined' && tinyMCE.activeEditor) {
-                    tinyMCE.activeEditor.focus();
-                    if (this.bMark) {
-                        tinyMCE.activeEditor.selection.moveToBookmark(this.bMark);
+                // Insert widget content using Tiptap or fallback to textarea
+                if (typeof tiptapEditors !== 'undefined' && tiptapEditors.has(this.widgetTargetId)) {
+                    const tiptapEditor = tiptapEditors.get(this.widgetTargetId);
+                    if (tiptapEditor && tiptapEditor.editor) {
+                        // Tiptap is active, use its insert method
+                        tiptapEditor.insertContent(html);
+                    } else {
+                        // Tiptap is toggled off, insert into textarea directly
+                        const textareaElm = document.getElementById(this.widgetTargetId);
+                        if (textareaElm) {
+                            updateElementAtCursor(textareaElm, html);
+                        }
+                    }
+                } else {
+                    // No Tiptap at all, insert into textarea directly
+                    const textareaElm = document.getElementById(this.widgetTargetId);
+                    if (textareaElm) {
+                        updateElementAtCursor(textareaElm, html);
                     }
                 }
-
-                this.updateContent(html);
-
             } catch(error) {
                 console.error(error);
                 alert(error.message);
             }
         }
-    }
-
-    updateContent(content) {
-        if (this.wysiwygExists()) {
-            this.getWysiwyg().execCommand('mceInsertContent', false, content);
-        } else {
-            const textarea = document.getElementById(this.widgetTargetId);
-            updateElementAtCursor(textarea, content);
-            varienGlobalEvents.fireEvent('tinymceChange');
-        }
-    }
-
-    wysiwygExists() {
-        return typeof tinyMCE !== 'undefined' && tinyMCE.get(this.widgetTargetId);
-    }
-
-    getWysiwyg() {
-        return tinyMCE.activeEditor;
-    }
-
-    getWysiwygNode() {
-        return tinyMCE.activeEditor.selection.getNode();
     }
 };
 
