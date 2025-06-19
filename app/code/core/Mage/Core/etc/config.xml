@@ -372,6 +372,7 @@
             <url>
                 <use_store>0</use_store>
                 <redirect_to_base>1</redirect_to_base>
+                <trailing_slash_behavior>remove</trailing_slash_behavior>
             </url>
             <seo>
                 <use_rewrites>1</use_rewrites>
