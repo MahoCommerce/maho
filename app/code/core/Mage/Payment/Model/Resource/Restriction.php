@@ -10,6 +10,7 @@
 
 class Mage_Payment_Model_Resource_Restriction extends Mage_Core_Model_Resource_Db_Abstract
 {
+    #[\Override]
     protected function _construct(): void
     {
         $this->_init('payment/restriction', 'restriction_id');

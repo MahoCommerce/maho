@@ -15,6 +15,7 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
 
     public const TYPE_DENYLIST = 'denylist';
 
+    #[\Override]
     protected function _construct(): void
     {
         $this->_init('payment/restriction');

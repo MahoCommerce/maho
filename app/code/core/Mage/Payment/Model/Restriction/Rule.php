@@ -15,6 +15,7 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
 
     public const TYPE_DENYLIST = 'denylist';
 
+    #[\Override]
     protected function _construct(): void
     {
         $this->_init('payment/restriction');
@@ -37,14 +38,17 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
     /**
      * Override to use payment restriction condition models
      */
+    #[\Override]
     public function getConditionsInstance(): Mage_Payment_Model_Restriction_Rule_Condition_Combine
     {
         return Mage::getModel('payment/restriction_rule_condition_combine');
     }
 
-    public function getActionsInstance(): void //@phpstan-ignore method.childReturnType
+    #[\Override]
+    public function getActionsInstance(): Mage_Rule_Model_Action_Collection
     {
-        // We have no "actions" in this module, but this is required by parent
+        // Payment restrictions don't use actions, return empty collection
+        return Mage::getModel('rule/action_collection');
     }
 
     /**
