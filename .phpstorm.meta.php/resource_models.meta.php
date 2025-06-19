@@ -323,6 +323,8 @@ namespace PHPSTORM_META {
         'oauth_resource/token_collection' => \Mage_Oauth_Model_Resource_Token_Collection::class,
         'paygate_resource/authorizenet_debug' => \Mage_Paygate_Model_Resource_Authorizenet_Debug::class,
         'paygate_resource/authorizenet_debug_collection' => \Mage_Paygate_Model_Resource_Authorizenet_Debug_Collection::class,
+        'payment_resource/restriction' => \Mage_Payment_Model_Resource_Restriction::class,
+        'payment_resource/restriction_collection' => \Mage_Payment_Model_Resource_Restriction_Collection::class,
         'paypal_resource/cert' => \Mage_Paypal_Model_Resource_Cert::class,
         'paypal_resource/payment_transaction' => \Mage_Paypal_Model_Resource_Payment_Transaction::class,
         'paypal_resource/payment_transaction_collection' => \Mage_Paypal_Model_Resource_Payment_Transaction_Collection::class,
