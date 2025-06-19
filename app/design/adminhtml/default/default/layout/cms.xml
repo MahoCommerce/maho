@@ -78,4 +78,18 @@
         <block name="wysiwyg_images.files" type="adminhtml/cms_wysiwyg_images_content_files" template="cms/browser/content/files.phtml" output="toHtml" />
     </adminhtml_cms_wysiwyg_images_contents>
 
+    <adminhtml_cms_wysiwyg_images_medialibrary>
+        <remove name="left" />
+        <reference name="head">
+            <action method="addJs"><script>mage/adminhtml/browser.js</script></action>
+            <action method="addJs"><script>mage/adminhtml/uploader/instance.js</script></action>
+            <action method="addJs"><script>maho-tree.js</script></action>
+            <action method="addItem"><type>skin_css</type><name>media-library.css</name></action>
+        </reference>
+        <reference name="content">
+            <action method="unsetChildren" />
+            <block name="media_library_main" type="core/template" template="cms/browser/media-library-main.phtml" />
+        </reference>
+    </adminhtml_cms_wysiwyg_images_medialibrary>
+
 </layout>
