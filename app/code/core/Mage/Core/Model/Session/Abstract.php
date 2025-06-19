@@ -837,7 +837,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
      * Update the session's last legitimate renewal time (call when customer password is updated to avoid
      * being logged out)
      */
-    public function setValidatorSessionRenewTimestamp(int $timestamp = null): void
+    public function setValidatorSessionRenewTimestamp(?int $timestamp = null): void
     {
         $this->getSymfonySession()->getMetadataBag()->stampNew($this->getCookie()->getLifetime());
     }
