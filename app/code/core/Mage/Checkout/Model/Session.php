@@ -130,7 +130,7 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
      * Unset all data associated with object
      */
     #[\Override]
-    public function unsetAll()
+    public function unsetAll(): self
     {
         parent::unsetAll();
         $this->_quote = null;
@@ -455,11 +455,8 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
         return $this->addItemAdditionalMessage('quote_item' . $itemId, $message);
     }
 
-    /**
-     * @return $this
-     */
     #[\Override]
-    public function clear()
+    public function clear(): self
     {
         Mage::dispatchEvent('checkout_quote_destroy', ['quote' => $this->getQuote()]);
         $this->_quote = null;

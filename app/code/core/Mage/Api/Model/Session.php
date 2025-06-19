@@ -21,25 +21,16 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
     public $sessionIds = [];
     protected $_currentSessId = null;
 
-    /**
-     * @param string|null $sessionName
-     * @return $this
-     */
     #[\Override]
-    public function start($sessionName = null)
+    public function start(?string $sessionName = null): self
     {
         $this->_currentSessId = md5(time() . uniqid('', true) . $sessionName);
         $this->sessionIds[] = $this->getSessionId();
         return $this;
     }
 
-    /**
-     * @param string $namespace
-     * @param string|null $sessionName
-     * @return $this
-     */
     #[\Override]
-    public function init($namespace, $sessionName = null)
+    public function init(string $namespace, ?string $sessionName = null): self
     {
         if (is_null($this->_currentSessId)) {
             $this->start();
@@ -47,21 +38,14 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
         return $this;
     }
 
-    /**
-     * @return string
-     */
     #[\Override]
-    public function getSessionId()
+    public function getSessionId(): string
     {
         return $this->_currentSessId;
     }
 
-    /**
-     * @param string|null $sessId
-     * @return $this
-     */
     #[\Override]
-    public function setSessionId($sessId = null)
+    public function setSessionId(?string $sessId = null): self
     {
         if (!is_null($sessId)) {
             $this->_currentSessId = $sessId;

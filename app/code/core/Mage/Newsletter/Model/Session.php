@@ -17,42 +17,28 @@ class Mage_Newsletter_Model_Session extends Mage_Core_Model_Session_Abstract
         $this->init('newsletter');
     }
 
-    /**
-     * @param string $message
-     * @return $this
-     */
     #[\Override]
-    public function addError($message)
+    public function addError(string $message): self
     {
         $this->setErrorMessage($message);
         return $this;
     }
 
-    /**
-     * @param string $message
-     * @return $this
-     */
     #[\Override]
-    public function addSuccess($message)
+    public function addSuccess(string $message): self
     {
         $this->setSuccessMessage($message);
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getError()
+    public function getError(): string
     {
         $message = $this->getErrorMessage();
         $this->unsErrorMessage();
         return $message;
     }
 
-    /**
-     * @return string
-     */
-    public function getSuccess()
+    public function getSuccess(): string
     {
         $message = $this->getSuccessMessage();
         $this->unsSuccessMessage();

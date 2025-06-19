@@ -349,11 +349,9 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
 
     /**
      * Reset core session hosts after resetting session ID
-     *
-     * @return $this
      */
     #[\Override]
-    public function renewSession()
+    public function renewSession(): self
     {
         parent::renewSession();
         Mage::getSingleton('core/session')->unsSessionHosts();
