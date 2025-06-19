@@ -308,6 +308,9 @@
                 <file>system.log</file>
                 <exception_file>exception.log</exception_file>
             </log>
+            <js>
+                <load_on_intent>0</load_on_intent>
+            </js>
         </dev>
         <system>
             <rate_limit>
