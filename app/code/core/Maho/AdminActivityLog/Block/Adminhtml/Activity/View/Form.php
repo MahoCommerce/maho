@@ -133,9 +133,13 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
     protected function _generateDiffHtml(string $oldValue, string $newValue): string
     {
         // Convert N/A to empty string for better display
-        if ($oldValue === 'N/A') $oldValue = '';
-        if ($newValue === 'N/A') $newValue = '';
-        
+        if ($oldValue === 'N/A') {
+            $oldValue = '';
+        }
+        if ($newValue === 'N/A') {
+            $newValue = '';
+        }
+
         // If values are identical, just show the value
         if ($oldValue === $newValue) {
             return '<div>' . ($oldValue ?: '<em>(empty)</em>') . '</div>';
@@ -182,7 +186,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
 
             // Use a more sophisticated diff algorithm for multiline content
             $diff = $this->_calculateLineDiff($oldLines, $newLines);
-            
+
             foreach ($diff as $line) {
                 if ($line['type'] === 'removed') {
                     $html .= '<div style="background-color: #ffdddd; margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">- ' . $this->escapeHtml($line['content']) . '</div>';
@@ -206,12 +210,12 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
         $oldCount = count($oldLines);
         $newCount = count($newLines);
         $maxCount = max($oldCount, $newCount);
-        
+
         // Simple longest common subsequence approach
         for ($i = 0; $i < $maxCount; $i++) {
             $oldLine = isset($oldLines[$i]) ? $oldLines[$i] : null;
             $newLine = isset($newLines[$i]) ? $newLines[$i] : null;
-            
+
             if ($oldLine === null && $newLine !== null) {
                 // Line added
                 $diff[] = ['type' => 'added', 'content' => $newLine];
@@ -225,7 +229,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
                 // Check if lines are similar after trimming whitespace
                 $oldTrimmed = trim($oldLine);
                 $newTrimmed = trim($newLine);
-                
+
                 if ($oldTrimmed === $newTrimmed && $oldTrimmed !== '') {
                     // Lines are the same except for whitespace - treat as unchanged
                     $diff[] = ['type' => 'unchanged', 'content' => $oldLine];
@@ -236,7 +240,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
                 }
             }
         }
-        
+
         return $diff;
     }
 }

@@ -121,7 +121,7 @@ class Maho_AdminActivityLog_Model_Observer
                     }
 
                     // Skip fields that weren't in the original data (likely not DB fields)
-                    if (!$isNew && !in_array($key, $originalDataKeys) && !isset($oldData[$key])) {
+                    if (!in_array($key, $originalDataKeys) && !isset($oldData[$key])) {
                         continue;
                     }
 
