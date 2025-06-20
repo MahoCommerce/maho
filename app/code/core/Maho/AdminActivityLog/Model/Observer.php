@@ -103,13 +103,25 @@ class Maho_AdminActivityLog_Model_Observer
             $oldChangedData = [];
             $newChangedData = [];
 
-            // Fields to ignore (system fields and timestamps)
-            $ignoreFields = ['updated_at', 'created_at', 'entity_id', 'has_options', 'required_options'];
+            // Fields to ignore (system fields, timestamps, and form fields)
+            $ignoreFields = [
+                'updated_at', 'created_at', 'entity_id', 'has_options', 'required_options',
+                'form_key', 'key', 'uenc', 'form_token', 'session_id', '_store', '_redirect',
+                'isAjax', 'ajax', 'callback', 'controller', 'action', 'module', 'update_time'
+            ];
 
             if (!$isNew) {
+                // Get the original data keys to ensure we only track DB fields
+                $originalDataKeys = array_keys($oldData);
+                
                 foreach ($object->getData() as $key => $value) {
                     // Skip ignored fields
                     if (in_array($key, $ignoreFields)) {
+                        continue;
+                    }
+
+                    // Skip fields that weren't in the original data (likely not DB fields)
+                    if (!$isNew && !in_array($key, $originalDataKeys) && !isset($oldData[$key])) {
                         continue;
                     }
 
@@ -142,7 +154,6 @@ class Maho_AdminActivityLog_Model_Observer
                 'entity_name' => $entityName,
                 'old_data' => $isNew ? [] : $oldChangedData,
                 'new_data' => $isNew ? $object->getData() : $newChangedData,
-                'additional_data' => ['changed_fields' => array_keys($changedData)],
             ];
 
             Mage::getModel('adminactivitylog/activity')->logActivity($data);
@@ -212,10 +223,6 @@ class Maho_AdminActivityLog_Model_Observer
                 'module' => $this->_getCurrentModule(),
                 'controller' => $this->_getCurrentController(),
                 'action' => $this->_getCurrentAction(),
-                'additional_data' => [
-                    'full_action_name' => $fullActionName,
-                    'params' => $controllerAction->getRequest()->getParams(),
-                ],
             ];
 
             Mage::getModel('adminactivitylog/activity')->logActivity($data);

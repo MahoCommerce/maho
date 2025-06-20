@@ -34,9 +34,6 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
         $data['user_agent'] = Mage::helper('core/http')->getHttpUserAgent();
         $data['request_url'] = Mage::helper('core/url')->getCurrentUrl();
 
-        if (isset($data['additional_data']) && is_array($data['additional_data'])) {
-            $data['additional_data'] = json_encode($data['additional_data']);
-        }
         if (isset($data['old_data']) && is_array($data['old_data'])) {
             $data['old_data'] = json_encode($data['old_data']);
         }

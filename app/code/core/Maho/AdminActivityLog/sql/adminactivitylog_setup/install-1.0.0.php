@@ -53,9 +53,6 @@ $activityTable = $installer->getConnection()
     ->addColumn('entity_name', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
         'nullable'  => true,
     ], 'Entity Name/Title')
-    ->addColumn('additional_data', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
-        'nullable'  => true,
-    ], 'Additional Data (JSON)')
     ->addColumn('old_data', Varien_Db_Ddl_Table::TYPE_TEXT, '64k', [
         'nullable'  => true,
     ], 'Old Data (JSON)')
