@@ -129,11 +129,6 @@
                                 <action>adminhtml/adminactivitylog_login</action>
                                 <sort_order>20</sort_order>
                             </login>
-                            <config translate="title" module="adminactivitylog">
-                                <title>Configuration</title>
-                                <action>adminhtml/system_config/edit/section/adminactivitylog</action>
-                                <sort_order>30</sort_order>
-                            </config>
                         </children>
                     </adminactivitylog>
                 </children>
@@ -155,9 +150,6 @@
                                         <login translate="title">
                                             <title>View Login Activity</title>
                                         </login>
-                                        <config translate="title">
-                                            <title>Configure Settings</title>
-                                        </config>
                                     </children>
                                 </adminactivitylog>
                             </children>
@@ -187,8 +179,8 @@
         </jobs>
     </crontab>
     <default>
-        <adminactivitylog>
-            <general>
+        <admin>
+            <adminactivitylog>
                 <enabled>1</enabled>
                 <log_page_visit>1</log_page_visit>
                 <log_save_actions>1</log_save_actions>
@@ -197,7 +189,7 @@
                 <log_login_activity>1</log_login_activity>
                 <log_failed_login>1</log_failed_login>
                 <days_to_keep>90</days_to_keep>
-            </general>
-        </adminactivitylog>
+            </adminactivitylog>
+        </admin>
     </default>
 </config>

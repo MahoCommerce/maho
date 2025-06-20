@@ -16,6 +16,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View extends Mage_Adminhtml
         $this->_objectId = 'activity_id';
         $this->_controller = 'adminhtml_activity';
         $this->_blockGroup = 'adminactivitylog';
+        $this->_mode = 'view';
 
         parent::__construct();
 
@@ -37,10 +38,4 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View extends Mage_Adminhtml
         return '';
     }
 
-    #[\Override]
-    protected function _prepareLayout()
-    {
-        $this->setChild('form', $this->getLayout()->createBlock('adminactivitylog/adminhtml_activity_view_form'));
-        return parent::_prepareLayout();
-    }
 }

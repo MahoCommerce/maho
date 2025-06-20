@@ -19,7 +19,7 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
 
     public function logActivity(array $data): self
     {
-        if (!Mage::getStoreConfigFlag('adminactivitylog/general/enabled')) {
+        if (!Mage::getStoreConfigFlag('admin/adminactivitylog/enabled')) {
             return $this;
         }
 
@@ -52,7 +52,7 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
 
     public function cleanOldLogs(): void
     {
-        $daysToKeep = (int) Mage::getStoreConfig('adminactivitylog/general/days_to_keep');
+        $daysToKeep = (int) Mage::getStoreConfig('admin/adminactivitylog/days_to_keep');
         if ($daysToKeep > 0) {
             $date = Mage::getModel('core/date')->gmtDate('Y-m-d H:i:s', strtotime("-{$daysToKeep} days"));
             $this->getCollection()

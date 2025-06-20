@@ -23,7 +23,7 @@ class Maho_AdminActivityLog_Model_Login extends Mage_Core_Model_Abstract
 
     public function logLogin(Mage_Admin_Model_User $user): self
     {
-        if (!Mage::getStoreConfigFlag('adminactivitylog/general/log_login_activity')) {
+        if (!Mage::getStoreConfigFlag('admin/adminactivitylog/log_login_activity')) {
             return $this;
         }
 
@@ -43,7 +43,7 @@ class Maho_AdminActivityLog_Model_Login extends Mage_Core_Model_Abstract
 
     public function logLogout(Mage_Admin_Model_User $user): self
     {
-        if (!Mage::getStoreConfigFlag('adminactivitylog/general/log_login_activity')) {
+        if (!Mage::getStoreConfigFlag('admin/adminactivitylog/log_login_activity')) {
             return $this;
         }
 
@@ -63,7 +63,7 @@ class Maho_AdminActivityLog_Model_Login extends Mage_Core_Model_Abstract
 
     public function logFailedLogin(string $username, string $reason = ''): self
     {
-        if (!Mage::getStoreConfigFlag('adminactivitylog/general/log_failed_login')) {
+        if (!Mage::getStoreConfigFlag('admin/adminactivitylog/log_failed_login')) {
             return $this;
         }
 
@@ -82,7 +82,7 @@ class Maho_AdminActivityLog_Model_Login extends Mage_Core_Model_Abstract
 
     public function cleanOldLogs(): void
     {
-        $daysToKeep = (int) Mage::getStoreConfig('adminactivitylog/general/days_to_keep');
+        $daysToKeep = (int) Mage::getStoreConfig('admin/adminactivitylog/days_to_keep');
         if ($daysToKeep > 0) {
             $date = Mage::getModel('core/date')->gmtDate('Y-m-d H:i:s', strtotime("-{$daysToKeep} days"));
             $this->getCollection()

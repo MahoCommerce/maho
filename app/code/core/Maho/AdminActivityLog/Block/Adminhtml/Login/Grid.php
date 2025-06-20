@@ -107,12 +107,17 @@ class Maho_AdminActivityLog_Block_Adminhtml_Login_Grid extends Mage_Adminhtml_Bl
 
     public function decorateStatus(string $value, Varien_Object $row, Varien_Object $column, bool $isExport): string
     {
-        if ($value == '1') {
+        // Get the actual status value from the row data
+        $status = $row->getData('status');
+
+        if ($status == '1') {
             $class = 'grid-severity-notice';
         } else {
             $class = 'grid-severity-critical';
         }
-        return '<span class="' . $class . '"><span>' . $this->escapeHtml($column->getOptions()[$value]) . '</span></span>';
+
+        // Use the already translated value that was passed in
+        return '<span class="' . $class . '"><span>' . $this->escapeHtml($value) . '</span></span>';
     }
 
     #[\Override]

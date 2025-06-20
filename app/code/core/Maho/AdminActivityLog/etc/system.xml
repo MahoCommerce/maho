@@ -1,19 +1,12 @@
 <?xml version="1.0"?>
 <config>
     <sections>
-        <adminactivitylog translate="label" module="adminactivitylog">
-            <label>Admin Activity Log</label>
-            <tab>advanced</tab>
-            <frontend_type>text</frontend_type>
-            <sort_order>900</sort_order>
-            <show_in_default>1</show_in_default>
-            <show_in_website>0</show_in_website>
-            <show_in_store>0</show_in_store>
+        <admin>
             <groups>
-                <general translate="label">
-                    <label>General Settings</label>
+                <adminactivitylog translate="label" module="adminactivitylog">
+                    <label>Admin Activity Log</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>10</sort_order>
+                    <sort_order>900</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -99,8 +92,8 @@
                             <depends><enabled>1</enabled></depends>
                         </days_to_keep>
                     </fields>
-                </general>
+                </adminactivitylog>
             </groups>
-        </adminactivitylog>
+        </admin>
     </sections>
 </config>

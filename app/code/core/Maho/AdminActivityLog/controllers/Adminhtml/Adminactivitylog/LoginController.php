@@ -19,7 +19,6 @@ class Maho_AdminActivityLog_Adminhtml_Adminactivitylog_LoginController extends M
         $this->_setActiveMenu('system/adminactivitylog/login');
         $this->_addBreadcrumb($this->__('Login Activity'), $this->__('Login Activity'));
 
-        $this->_addContent($this->getLayout()->createBlock('adminactivitylog/adminhtml_login'));
         $this->renderLayout();
     }
 

@@ -19,7 +19,6 @@ class Maho_AdminActivityLog_Adminhtml_Adminactivitylog_ActivityController extend
         $this->_setActiveMenu('system/adminactivitylog/activity');
         $this->_addBreadcrumb($this->__('Admin Activity Log'), $this->__('Admin Activity Log'));
 
-        $this->_addContent($this->getLayout()->createBlock('adminactivitylog/adminhtml_activity'));
         $this->renderLayout();
     }
 
@@ -50,7 +49,6 @@ class Maho_AdminActivityLog_Adminhtml_Adminactivitylog_ActivityController extend
         $this->_addBreadcrumb($this->__('Admin Activity Log'), $this->__('Admin Activity Log'));
         $this->_addBreadcrumb($this->__('View Entry'), $this->__('View Entry'));
 
-        $this->_addContent($this->getLayout()->createBlock('adminactivitylog/adminhtml_activity_view'));
         $this->renderLayout();
     }
 

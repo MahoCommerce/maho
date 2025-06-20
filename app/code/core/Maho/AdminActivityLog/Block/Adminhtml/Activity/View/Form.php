@@ -80,32 +80,40 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
             $oldData = $activity->getOldData() ? json_decode($activity->getOldData(), true) : [];
             $newData = $activity->getNewData() ? json_decode($activity->getNewData(), true) : [];
 
-            $changedFields = [];
-            foreach ($newData as $key => $newValue) {
-                if (!isset($oldData[$key]) || $oldData[$key] != $newValue) {
+            // For updates, the data already contains only changed fields
+            // For creates, show all new data
+            if ($activity->getActionType() === 'create') {
+                $changedFields = [];
+                foreach ($newData as $key => $newValue) {
+                    $changedFields[$key] = [
+                        'old' => 'N/A',
+                        'new' => $newValue,
+                    ];
+                }
+            } else {
+                // For updates, combine old and new data to show changes
+                $changedFields = [];
+                $allChangedFields = array_unique(array_merge(array_keys($oldData), array_keys($newData)));
+
+                foreach ($allChangedFields as $key) {
                     $changedFields[$key] = [
                         'old' => isset($oldData[$key]) ? $oldData[$key] : 'N/A',
-                        'new' => $newValue,
+                        'new' => isset($newData[$key]) ? $newData[$key] : 'N/A',
                     ];
                 }
             }
 
             if (!empty($changedFields)) {
-                $html = '<table class="form-list"><tbody>';
                 foreach ($changedFields as $field => $values) {
-                    $html .= '<tr>';
-                    $html .= '<td class="label"><strong>' . $this->escapeHtml($field) . ':</strong></td>';
-                    $html .= '<td class="value">';
-                    $html .= '<div><strong>Old:</strong> ' . $this->escapeHtml(print_r($values['old'], true)) . '</div>';
-                    $html .= '<div><strong>New:</strong> ' . $this->escapeHtml(print_r($values['new'], true)) . '</div>';
-                    $html .= '</td>';
-                    $html .= '</tr>';
-                }
-                $html .= '</tbody></table>';
+                    $oldValue = is_array($values['old']) ? json_encode($values['old']) : (string) $values['old'];
+                    $newValue = is_array($values['new']) ? json_encode($values['new']) : (string) $values['new'];
 
-                $changesFieldset->addField('changes_html', 'note', [
-                    'text' => $html,
-                ]);
+                    $changesFieldset->addField('change_' . $field, 'note', [
+                        'label' => $this->escapeHtml($field),
+                        'text' => '<div><strong>Old:</strong> ' . $this->escapeHtml($oldValue) . '</div>' .
+                                 '<div><strong>New:</strong> ' . $this->escapeHtml($newValue) . '</div>',
+                    ]);
+                }
             }
         }
 

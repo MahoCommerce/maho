@@ -78,12 +78,17 @@ class Maho_AdminActivityLog_Model_Observer
                 return;
             }
 
-            if (!Mage::getStoreConfigFlag('adminactivitylog/general/log_save_actions')) {
+            if (!Mage::getStoreConfigFlag('admin/adminactivitylog/log_save_actions')) {
                 return;
             }
 
             $object = $observer->getEvent()->getObject();
             if (!$object) {
+                return;
+            }
+
+            // Don't log AdminActivityLog model saves to prevent infinite loops
+            if ($object instanceof Maho_AdminActivityLog_Model_Activity || $object instanceof Maho_AdminActivityLog_Model_Login) {
                 return;
             }
 
@@ -95,13 +100,34 @@ class Maho_AdminActivityLog_Model_Observer
             $entityName = $this->_getEntityName($object);
 
             $changedData = [];
+            $oldChangedData = [];
+            $newChangedData = [];
+
+            // Fields to ignore (system fields and timestamps)
+            $ignoreFields = ['updated_at', 'created_at', 'entity_id', 'has_options', 'required_options'];
+
             if (!$isNew) {
                 foreach ($object->getData() as $key => $value) {
-                    if (!isset($oldData[$key]) || $oldData[$key] != $value) {
+                    // Skip ignored fields
+                    if (in_array($key, $ignoreFields)) {
+                        continue;
+                    }
+
+                    $oldValue = isset($oldData[$key]) ? $oldData[$key] : null;
+
+                    // Only log if there's a meaningful change
+                    if ($oldValue != $value) {
+                        // Skip changes where both old and new are null/empty
+                        if (($oldValue === null || $oldValue === '') && ($value === null || $value === '')) {
+                            continue;
+                        }
+
                         $changedData[$key] = [
-                            'old' => isset($oldData[$key]) ? $oldData[$key] : null,
+                            'old' => $oldValue,
                             'new' => $value,
                         ];
+                        $oldChangedData[$key] = $oldValue;
+                        $newChangedData[$key] = $value;
                     }
                 }
             }
@@ -114,8 +140,8 @@ class Maho_AdminActivityLog_Model_Observer
                 'entity_type' => $entityType,
                 'entity_id' => $object->getId(),
                 'entity_name' => $entityName,
-                'old_data' => $isNew ? [] : $oldData,
-                'new_data' => $object->getData(),
+                'old_data' => $isNew ? [] : $oldChangedData,
+                'new_data' => $isNew ? $object->getData() : $newChangedData,
                 'additional_data' => ['changed_fields' => array_keys($changedData)],
             ];
 
@@ -134,7 +160,7 @@ class Maho_AdminActivityLog_Model_Observer
                 return;
             }
 
-            if (!Mage::getStoreConfigFlag('adminactivitylog/general/log_delete_actions')) {
+            if (!Mage::getStoreConfigFlag('admin/adminactivitylog/log_delete_actions')) {
                 return;
             }
 
@@ -163,7 +189,7 @@ class Maho_AdminActivityLog_Model_Observer
     public function logPageVisit(Varien_Event_Observer $observer): void
     {
         try {
-            if (!$this->_shouldLogActivity() || !Mage::getStoreConfigFlag('adminactivitylog/general/log_page_visit')) {
+            if (!$this->_shouldLogActivity() || !Mage::getStoreConfigFlag('admin/adminactivitylog/log_page_visit')) {
                 return;
             }
 
@@ -200,7 +226,7 @@ class Maho_AdminActivityLog_Model_Observer
 
     protected function _shouldLogActivity(): bool
     {
-        return Mage::getStoreConfigFlag('adminactivitylog/general/enabled')
+        return Mage::getStoreConfigFlag('admin/adminactivitylog/enabled')
             && Mage::getSingleton('admin/session')->isLoggedIn();
     }
 
