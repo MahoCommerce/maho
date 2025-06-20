@@ -943,11 +943,19 @@ XML;
         $pass = $coreHelper->decrypt(Mage::getStoreConfig('system/smtp/password'));
         $host = Mage::getStoreConfig('system/smtp/host');
         $port = Mage::getStoreConfig('system/smtp/port');
+        
+        // Handle Amazon SES with region
+        if (in_array($emailTransport, ['ses+smtp', 'ses+https', 'ses+api'])) {
+            $region = Mage::getStoreConfig('system/smtp/aws_region');
+            $dsn = "$emailTransport://$user:$pass@default";
+            if ($region) {
+                $dsn .= "?region=$region";
+            }
+            return $dsn;
+        }
+        
         return match ($emailTransport) {
             'smtp' => "$emailTransport://$user:$pass@$host:$port",
-            'ses+smtp' => "$emailTransport://$user:$pass@default",
-            'ses+https' => "$emailTransport://$user:$pass@default",
-            'ses+api' => "$emailTransport://$user:$pass@default",
             'azure+api' => "$emailTransport://$user:$pass@default",
             'brevo+smtp' => "$emailTransport://$user:$pass@default",
             'brevo+api' => "$emailTransport://$pass@default",

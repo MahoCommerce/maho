@@ -886,6 +886,27 @@
                             <show_in_store>1</show_in_store>
                             <depends><enabled separator=",">smtp,ses+smtp,ses+https,ses+api,azure+api,brevo+smtp,brevo+api,gmail+smtp,infobip+smtp,infobip+api,mandrill+smtp,mandrill+https,mandrill+api,mailersend+smtp,mailersend+api,mailgun+smtp,mailgun+https,mailgun+api,mailjet+smtp,mailjet+api,mailomat+smtp,mailomat+api,mailpace+smtp,mailpace+api,mailtrap+smtp,mailtrap+api,postal+api,postmark+smtp,postmark+api,resend+smtp,resend+api,scaleway+smtp,scaleway+api,sendgrid+smtp,sendgrid+api,sweego+smtp,sweego+api</enabled></depends>
                         </password>
+                        <aws_region translate="label comment">
+                            <label>AWS Region</label>
+                            <comment>Select the AWS region for Amazon SES</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_awsregion</source_model>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled separator=",">ses+smtp,ses+https,ses+api</enabled></depends>
+                        </aws_region>
+                        <ses_bcc_individual translate="label comment">
+                            <label>Send Individual Emails for BCC Recipients</label>
+                            <comment>When enabled, sends individual emails to each BCC recipient to prevent them from seeing other recipients' addresses (Amazon SES privacy fix)</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>75</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled separator=",">ses+smtp,ses+https,ses+api</enabled></depends>
+                        </ses_bcc_individual>
                         <set_return_path translate="label">
                             <label>Set Return-Path</label>
                             <frontend_type>boolean</frontend_type>

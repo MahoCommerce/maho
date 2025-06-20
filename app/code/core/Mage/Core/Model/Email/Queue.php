@@ -163,7 +163,39 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
      */
     public function getRecipients()
     {
+        if (empty($this->_recipients) && $this->getId()) {
+            // Load recipients from database if not already loaded
+            $this->_loadRecipients();
+        }
         return $this->_recipients;
+    }
+    
+    /**
+     * Load recipients from database
+     * 
+     * @return $this
+     */
+    protected function _loadRecipients()
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $connection = $resource->getConnection('core_read');
+        $table = $resource->getTableName('core/email_recipients');
+        
+        $select = $connection->select()
+            ->from($table)
+            ->where('message_id = ?', $this->getId());
+            
+        $rows = $connection->fetchAll($select);
+        
+        foreach ($rows as $row) {
+            $this->_recipients[] = [
+                $row['recipient_email'],
+                $row['recipient_name'] ?: '',
+                (int)$row['email_type']
+            ];
+        }
+        
+        return $this;
     }
 
     /**
@@ -196,43 +228,97 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                     $email->subject($parameters->getSubject());
                     $email->from(new Address($parameters->getFromEmail(), $parameters->getFromName()));
 
-                    foreach ($message->getRecipients() as $recipient) {
-                        [$emailAddress, $name, $type] = $recipient;
-                        $address = new Address($emailAddress, $name);
-
-                        match ($type) {
-                            self::EMAIL_TYPE_BCC => $email->addBcc($address),
-                            self::EMAIL_TYPE_CC => $email->addCc($address),
-                            default => $email->addTo($address),
-                        };
+                    // Check if using Amazon SES
+                    $emailTransport = Mage::getStoreConfig('system/smtp/enabled');
+                    $isAmazonSes = in_array($emailTransport, ['ses+smtp', 'ses+https', 'ses+api']);
+                    $sendIndividuallyForSesBcc = $isAmazonSes && Mage::getStoreConfigFlag('system/smtp/ses_bcc_individual');
+                    
+                    // Get recipients using the model method
+                    $recipients = $message->getRecipients();
+                    
+                    // Check if we have BCC recipients
+                    $hasBcc = false;
+                    foreach ($recipients as $recipient) {
+                        if ((int)$recipient[2] === self::EMAIL_TYPE_BCC) {
+                            $hasBcc = true;
+                            break;
+                        }
                     }
+                    
+                    // If Amazon SES and we have BCC recipients, send individual emails to everyone
+                    if ($sendIndividuallyForSesBcc && $hasBcc) {
+                        foreach ($recipients as $recipient) {
+                            [$emailAddress, $name, $type] = $recipient;
+                            
+                            $individualEmail = new Email();
+                            $individualEmail->subject($parameters->getSubject());
+                            $individualEmail->from(new Address($parameters->getFromEmail(), $parameters->getFromName()));
+                            $individualEmail->to(new Address($emailAddress, $name));
+                            
+                            if ($parameters->getIsPlain()) {
+                                $individualEmail->text($message->getMessageBody());
+                            } else {
+                                $individualEmail->html($message->getMessageBody());
+                            }
 
-                    if ($parameters->getIsPlain()) {
-                        $email->text($message->getMessageBody());
+                            if ($parameters->getReplyTo() !== null) {
+                                $individualEmail->replyTo($parameters->getReplyTo());
+                            }
+
+                            if ($parameters->getReturnTo() !== null) {
+                                $individualEmail->returnPath($parameters->getReturnTo());
+                            }
+
+                            $transport = new Varien_Object();
+                            Mage::dispatchEvent('email_queue_send_before', [
+                                'mail'      => $individualEmail,
+                                'message'   => $message,
+                                'transport' => $transport,
+                            ]);
+
+                            $mailer->send($individualEmail);
+                        }
                     } else {
-                        $email->html($message->getMessageBody());
+                        // For non-Amazon SES or no BCC, send normally
+                        foreach ($recipients as $recipient) {
+                            [$emailAddress, $name, $type] = $recipient;
+                            $address = new Address($emailAddress, $name);
+
+                            match ($type) {
+                                self::EMAIL_TYPE_BCC => $email->addBcc($address),
+                                self::EMAIL_TYPE_CC => $email->addCc($address),
+                                default => $email->addTo($address),
+                            };
+                        }
+
+                        if ($parameters->getIsPlain()) {
+                            $email->text($message->getMessageBody());
+                        } else {
+                            $email->html($message->getMessageBody());
+                        }
+
+                        if ($parameters->getReplyTo() !== null) {
+                            $email->replyTo($parameters->getReplyTo());
+                        }
+
+                        if ($parameters->getReturnTo() !== null) {
+                            $email->returnPath($parameters->getReturnTo());
+                        }
+
+                        $transport = new Varien_Object();
+                        Mage::dispatchEvent('email_queue_send_before', [
+                            'mail'      => $email,
+                            'message'   => $message,
+                            'transport' => $transport,
+                        ]);
+
+                        $mailer->send($email);
                     }
-
-                    if ($parameters->getReplyTo() !== null) {
-                        $email->replyTo($parameters->getReplyTo());
-                    }
-
-                    if ($parameters->getReturnTo() !== null) {
-                        $email->returnPath($parameters->getReturnTo());
-                    }
-
-                    $transport = new Varien_Object();
-                    Mage::dispatchEvent('email_queue_send_before', [
-                        'mail'      => $email,
-                        'message'   => $message,
-                        'transport' => $transport,
-                    ]);
-
-                    $mailer->send($email);
+                    
                     $message->setProcessedAt(Varien_Date::formatDate(true));
                     $message->save();
 
-                    foreach ($message->getRecipients() as $recipient) {
+                    foreach ($recipients as $recipient) {
                         [$email, $name, $type] = $recipient;
                         Mage::dispatchEvent('email_queue_send_after', [
                             'to'         => $email,

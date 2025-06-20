@@ -319,6 +319,7 @@
             </cache>
             <smtp>
                 <enabled>sendmail</enabled>
+                <ses_bcc_individual>1</ses_bcc_individual>
             </smtp>
             <media_storage_configuration>
                 <image_file_type>18</image_file_type>
