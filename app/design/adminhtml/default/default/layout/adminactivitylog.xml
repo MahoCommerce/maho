@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<layout>
+    <adminhtml_adminactivitylog_activity_index>
+        <reference name="content">
+            <block type="adminactivitylog/adminhtml_activity" name="adminactivitylog_activity" />
+        </reference>
+    </adminhtml_adminactivitylog_activity_index>
+    
+    <adminhtml_adminactivitylog_activity_grid>
+        <block type="adminactivitylog/adminhtml_activity_grid" name="root" output="toHtml" />
+    </adminhtml_adminactivitylog_activity_grid>
+    
+    <adminhtml_adminactivitylog_activity_view>
+        <reference name="content">
+            <block type="adminactivitylog/adminhtml_activity_view" name="adminactivitylog_activity_view" />
+        </reference>
+    </adminhtml_adminactivitylog_activity_view>
+    
+    <adminhtml_adminactivitylog_login_index>
+        <reference name="content">
+            <block type="adminactivitylog/adminhtml_login" name="adminactivitylog_login" />
+        </reference>
+    </adminhtml_adminactivitylog_login_index>
+    
+    <adminhtml_adminactivitylog_login_grid>
+        <block type="adminactivitylog/adminhtml_login_grid" name="root" output="toHtml" />
+    </adminhtml_adminactivitylog_login_grid>
+</layout>

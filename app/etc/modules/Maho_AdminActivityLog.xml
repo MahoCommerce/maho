@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Maho_AdminActivityLog>
+            <active>true</active>
+            <codePool>core</codePool>
+            <depends>
+                <Mage_Admin/>
+                <Mage_Adminhtml/>
+            </depends>
+        </Maho_AdminActivityLog>
+    </modules>
+</config>

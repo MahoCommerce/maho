@@ -1,0 +1,203 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Maho_AdminActivityLog>
+            <version>1.0.0</version>
+        </Maho_AdminActivityLog>
+    </modules>
+    <global>
+        <models>
+            <adminactivitylog>
+                <class>Maho_AdminActivityLog_Model</class>
+                <resourceModel>adminactivitylog_resource</resourceModel>
+            </adminactivitylog>
+            <adminactivitylog_resource>
+                <class>Maho_AdminActivityLog_Model_Resource</class>
+                <entities>
+                    <activity>
+                        <table>maho_adminactivitylog_activity</table>
+                    </activity>
+                    <login>
+                        <table>maho_adminactivitylog_login</table>
+                    </login>
+                </entities>
+            </adminactivitylog_resource>
+        </models>
+        <helpers>
+            <adminactivitylog>
+                <class>Maho_AdminActivityLog_Helper</class>
+            </adminactivitylog>
+        </helpers>
+        <blocks>
+            <adminactivitylog>
+                <class>Maho_AdminActivityLog_Block</class>
+            </adminactivitylog>
+        </blocks>
+        <resources>
+            <adminactivitylog_setup>
+                <setup>
+                    <module>Maho_AdminActivityLog</module>
+                    <class>Maho_AdminActivityLog_Model_Resource_Setup</class>
+                </setup>
+            </adminactivitylog_setup>
+        </resources>
+        <events>
+            <admin_user_authenticate_after>
+                <observers>
+                    <adminactivitylog_login_success>
+                        <class>adminactivitylog/observer</class>
+                        <method>logAdminLogin</method>
+                    </adminactivitylog_login_success>
+                </observers>
+            </admin_user_authenticate_after>
+            <admin_session_user_logout>
+                <observers>
+                    <adminactivitylog_logout>
+                        <class>adminactivitylog/observer</class>
+                        <method>logAdminLogout</method>
+                    </adminactivitylog_logout>
+                </observers>
+            </admin_session_user_logout>
+            <admin_session_user_login_failed>
+                <observers>
+                    <adminactivitylog_login_failed>
+                        <class>adminactivitylog/observer</class>
+                        <method>logAdminLoginFailed</method>
+                    </adminactivitylog_login_failed>
+                </observers>
+            </admin_session_user_login_failed>
+            <model_save_before>
+                <observers>
+                    <adminactivitylog_save_before>
+                        <class>adminactivitylog/observer</class>
+                        <method>logAdminActivityBefore</method>
+                    </adminactivitylog_save_before>
+                </observers>
+            </model_save_before>
+            <model_save_after>
+                <observers>
+                    <adminactivitylog_save_after>
+                        <class>adminactivitylog/observer</class>
+                        <method>logAdminActivityAfter</method>
+                    </adminactivitylog_save_after>
+                </observers>
+            </model_save_after>
+            <model_delete_before>
+                <observers>
+                    <adminactivitylog_delete>
+                        <class>adminactivitylog/observer</class>
+                        <method>logAdminDelete</method>
+                    </adminactivitylog_delete>
+                </observers>
+            </model_delete_before>
+            <controller_action_predispatch_adminhtml>
+                <observers>
+                    <adminactivitylog_page_visit>
+                        <class>adminactivitylog/observer</class>
+                        <method>logPageVisit</method>
+                    </adminactivitylog_page_visit>
+                </observers>
+            </controller_action_predispatch_adminhtml>
+        </events>
+    </global>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <Maho_AdminActivityLog before="Mage_Adminhtml">Maho_AdminActivityLog_Adminhtml</Maho_AdminActivityLog>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
+    <adminhtml>
+        <menu>
+            <system>
+                <children>
+                    <adminactivitylog translate="title" module="adminactivitylog">
+                        <title>Admin Activity Log</title>
+                        <sort_order>100</sort_order>
+                        <children>
+                            <activity translate="title" module="adminactivitylog">
+                                <title>Activity Log</title>
+                                <action>adminhtml/adminactivitylog_activity</action>
+                                <sort_order>10</sort_order>
+                            </activity>
+                            <login translate="title" module="adminactivitylog">
+                                <title>Login Activity</title>
+                                <action>adminhtml/adminactivitylog_login</action>
+                                <sort_order>20</sort_order>
+                            </login>
+                            <config translate="title" module="adminactivitylog">
+                                <title>Configuration</title>
+                                <action>adminhtml/system_config/edit/section/adminactivitylog</action>
+                                <sort_order>30</sort_order>
+                            </config>
+                        </children>
+                    </adminactivitylog>
+                </children>
+            </system>
+        </menu>
+        <acl>
+            <resources>
+                <admin>
+                    <children>
+                        <system>
+                            <children>
+                                <adminactivitylog translate="title" module="adminactivitylog">
+                                    <title>Admin Activity Log</title>
+                                    <sort_order>100</sort_order>
+                                    <children>
+                                        <activity translate="title">
+                                            <title>View Activity Log</title>
+                                        </activity>
+                                        <login translate="title">
+                                            <title>View Login Activity</title>
+                                        </login>
+                                        <config translate="title">
+                                            <title>Configure Settings</title>
+                                        </config>
+                                    </children>
+                                </adminactivitylog>
+                            </children>
+                        </system>
+                    </children>
+                </admin>
+            </resources>
+        </acl>
+        <layout>
+            <updates>
+                <adminactivitylog>
+                    <file>adminactivitylog.xml</file>
+                </adminactivitylog>
+            </updates>
+        </layout>
+    </adminhtml>
+    <crontab>
+        <jobs>
+            <adminactivitylog_clean_old_logs>
+                <schedule>
+                    <cron_expr>0 2 * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>adminactivitylog/observer::cleanOldLogs</model>
+                </run>
+            </adminactivitylog_clean_old_logs>
+        </jobs>
+    </crontab>
+    <default>
+        <adminactivitylog>
+            <general>
+                <enabled>1</enabled>
+                <log_page_visit>1</log_page_visit>
+                <log_save_actions>1</log_save_actions>
+                <log_delete_actions>1</log_delete_actions>
+                <log_mass_actions>1</log_mass_actions>
+                <log_login_activity>1</log_login_activity>
+                <log_failed_login>1</log_failed_login>
+                <days_to_keep>90</days_to_keep>
+            </general>
+        </adminactivitylog>
+    </default>
+</config>
