@@ -160,7 +160,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
                 }
             } else {
                 // Line unchanged
-                $html .= '<div style="margin: 2px 0; padding: 2px 5px; color: #666;">&nbsp; ' . $this->escapeHtml($oldLine) . '</div>';
+                $html .= '<div style="margin: 2px 0; padding: 2px 5px; color: #666;">' . $this->escapeHtml($oldLine) . '</div>';
             }
         }
         $html .= '</div>';
