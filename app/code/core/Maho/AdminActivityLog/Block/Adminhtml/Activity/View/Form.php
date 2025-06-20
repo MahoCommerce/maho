@@ -108,6 +108,11 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
                     $oldValue = is_array($values['old']) ? json_encode($values['old']) : (string) $values['old'];
                     $newValue = is_array($values['new']) ? json_encode($values['new']) : (string) $values['new'];
 
+                    // Skip fields where both values are N/A or empty
+                    if (($oldValue === 'N/A' || $oldValue === '') && ($newValue === 'N/A' || $newValue === '')) {
+                        continue;
+                    }
+
                     // Generate diff HTML
                     $diffHtml = $this->_generateDiffHtml($oldValue, $newValue);
 
@@ -127,9 +132,13 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
 
     protected function _generateDiffHtml(string $oldValue, string $newValue): string
     {
+        // Convert N/A to empty string for better display
+        if ($oldValue === 'N/A') $oldValue = '';
+        if ($newValue === 'N/A') $newValue = '';
+        
         // If values are identical, just show the value
         if ($oldValue === $newValue) {
-            return '<div>' . $this->escapeHtml($oldValue) . '</div>';
+            return '<div>' . ($oldValue ?: '<em>(empty)</em>') . '</div>';
         }
 
 
