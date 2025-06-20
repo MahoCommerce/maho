@@ -137,30 +137,51 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
         $html = '<div style="font-family: monospace; font-size: 12px;">';
         $html .= '<div style="background-color: #f8f8f8; padding: 10px; border: 1px solid #ddd; border-radius: 4px; overflow-x: auto;">';
 
-        $oldLines = explode("\n", $oldValue);
-        $newLines = explode("\n", $newValue);
-
-        // Simple line diff
-        $maxLines = max(count($oldLines), count($newLines));
-        for ($i = 0; $i < $maxLines; $i++) {
-            $oldLine = isset($oldLines[$i]) ? $oldLines[$i] : '';
-            $newLine = isset($newLines[$i]) ? $newLines[$i] : '';
-
-            if ($oldLine !== $newLine) {
-                if ($oldLine && !$newLine) {
-                    // Line removed
-                    $html .= '<div style="background-color: #ffdddd; margin: 2px 0; padding: 2px 5px;">- ' . $this->escapeHtml($oldLine) . '</div>';
-                } elseif (!$oldLine && $newLine) {
-                    // Line added
-                    $html .= '<div style="background-color: #ddffdd; margin: 2px 0; padding: 2px 5px;">+ ' . $this->escapeHtml($newLine) . '</div>';
+        // For single-line values, try to highlight just the differences
+        if (strpos($oldValue, "\n") === false && strpos($newValue, "\n") === false) {
+            // For single-line changes, try to show inline diff if possible
+            if (strlen($oldValue) < 1000 && strlen($newValue) < 1000) {
+                // Simple case: if new value contains old value, highlight the addition
+                if (strpos($newValue, $oldValue) === 0) {
+                    // Addition at the end
+                    $added = substr($newValue, strlen($oldValue));
+                    $html .= '<div style="margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">';
+                    $html .= $this->escapeHtml($oldValue);
+                    $html .= '<span style="background-color: #ddffdd; color: #008800;">' . $this->escapeHtml($added) . '</span>';
+                    $html .= '</div>';
+                } elseif (strpos($oldValue, $newValue) === 0) {
+                    // Removal at the end
+                    $removed = substr($oldValue, strlen($newValue));
+                    $html .= '<div style="margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">';
+                    $html .= $this->escapeHtml($newValue);
+                    $html .= '<span style="background-color: #ffdddd; color: #cc0000; text-decoration: line-through;">' . $this->escapeHtml($removed) . '</span>';
+                    $html .= '</div>';
                 } else {
-                    // Line changed
-                    $html .= '<div style="background-color: #ffdddd; margin: 2px 0; padding: 2px 5px;">- ' . $this->escapeHtml($oldLine) . '</div>';
-                    $html .= '<div style="background-color: #ddffdd; margin: 2px 0; padding: 2px 5px;">+ ' . $this->escapeHtml($newLine) . '</div>';
+                    // Different values, show as removed/added
+                    $html .= '<div style="background-color: #ffdddd; margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">- ' . $this->escapeHtml($oldValue) . '</div>';
+                    $html .= '<div style="background-color: #ddffdd; margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">+ ' . $this->escapeHtml($newValue) . '</div>';
                 }
             } else {
-                // Line unchanged
-                $html .= '<div style="margin: 2px 0; padding: 2px 5px; color: #666;">' . $this->escapeHtml($oldLine) . '</div>';
+                // Too long, show as removed/added
+                $html .= '<div style="background-color: #ffdddd; margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">- ' . $this->escapeHtml($oldValue) . '</div>';
+                $html .= '<div style="background-color: #ddffdd; margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">+ ' . $this->escapeHtml($newValue) . '</div>';
+            }
+        } else {
+            // Multi-line diff
+            $oldLines = explode("\n", $oldValue);
+            $newLines = explode("\n", $newValue);
+
+            // Use a more sophisticated diff algorithm for multiline content
+            $diff = $this->_calculateLineDiff($oldLines, $newLines);
+            
+            foreach ($diff as $line) {
+                if ($line['type'] === 'removed') {
+                    $html .= '<div style="background-color: #ffdddd; margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">- ' . $this->escapeHtml($line['content']) . '</div>';
+                } elseif ($line['type'] === 'added') {
+                    $html .= '<div style="background-color: #ddffdd; margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">+ ' . $this->escapeHtml($line['content']) . '</div>';
+                } else {
+                    $html .= '<div style="margin: 2px 0; padding: 2px 5px; color: #666; white-space: pre-wrap; word-wrap: break-word;">' . $this->escapeHtml($line['content']) . '</div>';
+                }
             }
         }
         $html .= '</div>';
@@ -168,5 +189,45 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
         $html .= '</div>';
 
         return $html;
+    }
+
+    protected function _calculateLineDiff(array $oldLines, array $newLines): array
+    {
+        $diff = [];
+        $oldCount = count($oldLines);
+        $newCount = count($newLines);
+        $maxCount = max($oldCount, $newCount);
+        
+        // Simple longest common subsequence approach
+        for ($i = 0; $i < $maxCount; $i++) {
+            $oldLine = isset($oldLines[$i]) ? $oldLines[$i] : null;
+            $newLine = isset($newLines[$i]) ? $newLines[$i] : null;
+            
+            if ($oldLine === null && $newLine !== null) {
+                // Line added
+                $diff[] = ['type' => 'added', 'content' => $newLine];
+            } elseif ($oldLine !== null && $newLine === null) {
+                // Line removed
+                $diff[] = ['type' => 'removed', 'content' => $oldLine];
+            } elseif ($oldLine === $newLine) {
+                // Line unchanged
+                $diff[] = ['type' => 'unchanged', 'content' => $oldLine];
+            } else {
+                // Check if lines are similar after trimming whitespace
+                $oldTrimmed = trim($oldLine);
+                $newTrimmed = trim($newLine);
+                
+                if ($oldTrimmed === $newTrimmed && $oldTrimmed !== '') {
+                    // Lines are the same except for whitespace - treat as unchanged
+                    $diff[] = ['type' => 'unchanged', 'content' => $oldLine];
+                } else {
+                    // Line changed - show as removed then added
+                    $diff[] = ['type' => 'removed', 'content' => $oldLine];
+                    $diff[] = ['type' => 'added', 'content' => $newLine];
+                }
+            }
+        }
+        
+        return $diff;
     }
 }
