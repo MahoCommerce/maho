@@ -108,10 +108,12 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
                     $oldValue = is_array($values['old']) ? json_encode($values['old']) : (string) $values['old'];
                     $newValue = is_array($values['new']) ? json_encode($values['new']) : (string) $values['new'];
 
+                    // Generate diff HTML
+                    $diffHtml = $this->_generateDiffHtml($oldValue, $newValue);
+
                     $changesFieldset->addField('change_' . $field, 'note', [
                         'label' => $this->escapeHtml($field),
-                        'text' => '<div><strong>Old:</strong> ' . $this->escapeHtml($oldValue) . '</div>' .
-                                 '<div><strong>New:</strong> ' . $this->escapeHtml($newValue) . '</div>',
+                        'text' => $diffHtml,
                     ]);
                 }
             }
@@ -121,5 +123,50 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
         $this->setForm($form);
 
         return parent::_prepareForm();
+    }
+
+    protected function _generateDiffHtml(string $oldValue, string $newValue): string
+    {
+        // If values are identical, just show the value
+        if ($oldValue === $newValue) {
+            return '<div>' . $this->escapeHtml($oldValue) . '</div>';
+        }
+
+
+        // Always use the same diff format for consistency
+        $html = '<div style="font-family: monospace; font-size: 12px;">';
+        $html .= '<div style="background-color: #f8f8f8; padding: 10px; border: 1px solid #ddd; border-radius: 4px; overflow-x: auto;">';
+
+        $oldLines = explode("\n", $oldValue);
+        $newLines = explode("\n", $newValue);
+
+        // Simple line diff
+        $maxLines = max(count($oldLines), count($newLines));
+        for ($i = 0; $i < $maxLines; $i++) {
+            $oldLine = isset($oldLines[$i]) ? $oldLines[$i] : '';
+            $newLine = isset($newLines[$i]) ? $newLines[$i] : '';
+
+            if ($oldLine !== $newLine) {
+                if ($oldLine && !$newLine) {
+                    // Line removed
+                    $html .= '<div style="background-color: #ffdddd; margin: 2px 0; padding: 2px 5px;">- ' . $this->escapeHtml($oldLine) . '</div>';
+                } elseif (!$oldLine && $newLine) {
+                    // Line added
+                    $html .= '<div style="background-color: #ddffdd; margin: 2px 0; padding: 2px 5px;">+ ' . $this->escapeHtml($newLine) . '</div>';
+                } else {
+                    // Line changed
+                    $html .= '<div style="background-color: #ffdddd; margin: 2px 0; padding: 2px 5px;">- ' . $this->escapeHtml($oldLine) . '</div>';
+                    $html .= '<div style="background-color: #ddffdd; margin: 2px 0; padding: 2px 5px;">+ ' . $this->escapeHtml($newLine) . '</div>';
+                }
+            } else {
+                // Line unchanged
+                $html .= '<div style="margin: 2px 0; padding: 2px 5px; color: #666;">&nbsp; ' . $this->escapeHtml($oldLine) . '</div>';
+            }
+        }
+        $html .= '</div>';
+
+        $html .= '</div>';
+
+        return $html;
     }
 }
