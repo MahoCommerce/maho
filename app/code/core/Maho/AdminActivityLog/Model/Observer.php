@@ -107,13 +107,13 @@ class Maho_AdminActivityLog_Model_Observer
             $ignoreFields = [
                 'updated_at', 'created_at', 'entity_id', 'has_options', 'required_options',
                 'form_key', 'key', 'uenc', 'form_token', 'session_id', '_store', '_redirect',
-                'isAjax', 'ajax', 'callback', 'controller', 'action', 'module', 'update_time'
+                'isAjax', 'ajax', 'callback', 'controller', 'action', 'module', 'update_time',
             ];
 
             if (!$isNew) {
                 // Get the original data keys to ensure we only track DB fields
                 $originalDataKeys = array_keys($oldData);
-                
+
                 foreach ($object->getData() as $key => $value) {
                     // Skip ignored fields
                     if (in_array($key, $ignoreFields)) {
