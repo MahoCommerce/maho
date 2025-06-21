@@ -140,9 +140,13 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
             $newValue = '';
         }
 
+        // Try to format JSON data for better readability
+        $oldValue = $this->_formatJsonIfValid($oldValue);
+        $newValue = $this->_formatJsonIfValid($newValue);
+
         // If values are identical, just show the value
         if ($oldValue === $newValue) {
-            return '<div>' . ($oldValue ?: '<em>(empty)</em>') . '</div>';
+            return '<div style="white-space: pre-wrap; font-family: monospace;">' . ($oldValue ?: '<em>(empty)</em>') . '</div>';
         }
 
 
@@ -150,34 +154,18 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
         $html = '<div style="font-family: monospace; font-size: 12px;">';
         $html .= '<div style="background-color: #f8f8f8; padding: 10px; border: 1px solid #ddd; border-radius: 4px; overflow-x: auto;">';
 
-        // For single-line values, try to highlight just the differences
+        // For single-line values, use the same grouped view as multiline
         if (strpos($oldValue, "\n") === false && strpos($newValue, "\n") === false) {
-            // For single-line changes, try to show inline diff if possible
-            if (strlen($oldValue) < 1000 && strlen($newValue) < 1000) {
-                // Simple case: if new value contains old value, highlight the addition
-                if (strpos($newValue, $oldValue) === 0) {
-                    // Addition at the end
-                    $added = substr($newValue, strlen($oldValue));
-                    $html .= '<div style="margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">';
-                    $html .= $this->escapeHtml($oldValue);
-                    $html .= '<span style="background-color: #ddffdd; color: #008800;">' . $this->escapeHtml($added) . '</span>';
-                    $html .= '</div>';
-                } elseif (strpos($oldValue, $newValue) === 0) {
-                    // Removal at the end
-                    $removed = substr($oldValue, strlen($newValue));
-                    $html .= '<div style="margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">';
-                    $html .= $this->escapeHtml($newValue);
-                    $html .= '<span style="background-color: #ffdddd; color: #cc0000; text-decoration: line-through;">' . $this->escapeHtml($removed) . '</span>';
-                    $html .= '</div>';
-                } else {
-                    // Different values, show as removed/added
-                    $html .= '<div style="background-color: #ffdddd; margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">- ' . $this->escapeHtml($oldValue) . '</div>';
-                    $html .= '<div style="background-color: #ddffdd; margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">+ ' . $this->escapeHtml($newValue) . '</div>';
-                }
-            } else {
-                // Too long, show as removed/added
-                $html .= '<div style="background-color: #ffdddd; margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">- ' . $this->escapeHtml($oldValue) . '</div>';
-                $html .= '<div style="background-color: #ddffdd; margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">+ ' . $this->escapeHtml($newValue) . '</div>';
+            // Single line diff - show as two groups (removed and added)
+            if ($oldValue !== '') {
+                $html .= '<div style="background-color: #ffdddd; margin: 4px 0; padding: 6px 8px; border-left: 3px solid #cc0000;">';
+                $html .= '<div style="white-space: pre-wrap; word-wrap: break-word;">- ' . $this->escapeHtml($oldValue) . '</div>';
+                $html .= '</div>';
+            }
+            if ($newValue !== '') {
+                $html .= '<div style="background-color: #ddffdd; margin: 4px 0; padding: 6px 8px; border-left: 3px solid #008800;">';
+                $html .= '<div style="white-space: pre-wrap; word-wrap: break-word;">+ ' . $this->escapeHtml($newValue) . '</div>';
+                $html .= '</div>';
             }
         } else {
             // Multi-line diff
@@ -187,13 +175,43 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
             // Use a more sophisticated diff algorithm for multiline content
             $diff = $this->_calculateLineDiff($oldLines, $newLines);
 
+            // Group consecutive lines of the same type
+            $groups = [];
+            $currentGroup = null;
+            
             foreach ($diff as $line) {
-                if ($line['type'] === 'removed') {
-                    $html .= '<div style="background-color: #ffdddd; margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">- ' . $this->escapeHtml($line['content']) . '</div>';
-                } elseif ($line['type'] === 'added') {
-                    $html .= '<div style="background-color: #ddffdd; margin: 2px 0; padding: 2px 5px; white-space: pre-wrap; word-wrap: break-word;">+ ' . $this->escapeHtml($line['content']) . '</div>';
+                if ($currentGroup === null || $currentGroup['type'] !== $line['type']) {
+                    if ($currentGroup !== null) {
+                        $groups[] = $currentGroup;
+                    }
+                    $currentGroup = ['type' => $line['type'], 'lines' => []];
+                }
+                $currentGroup['lines'][] = $line['content'];
+            }
+            if ($currentGroup !== null) {
+                $groups[] = $currentGroup;
+            }
+            
+            // Render grouped lines
+            foreach ($groups as $group) {
+                if ($group['type'] === 'removed') {
+                    $html .= '<div style="background-color: #ffdddd; margin: 4px 0; padding: 6px 8px; border-left: 3px solid #cc0000;">';
+                    foreach ($group['lines'] as $line) {
+                        $html .= '<div style="white-space: pre-wrap; word-wrap: break-word;">- ' . $this->escapeHtml($line) . '</div>';
+                    }
+                    $html .= '</div>';
+                } elseif ($group['type'] === 'added') {
+                    $html .= '<div style="background-color: #ddffdd; margin: 4px 0; padding: 6px 8px; border-left: 3px solid #008800;">';
+                    foreach ($group['lines'] as $line) {
+                        $html .= '<div style="white-space: pre-wrap; word-wrap: break-word;">+ ' . $this->escapeHtml($line) . '</div>';
+                    }
+                    $html .= '</div>';
                 } else {
-                    $html .= '<div style="margin: 2px 0; padding: 2px 5px; color: #666; white-space: pre-wrap; word-wrap: break-word;">' . $this->escapeHtml($line['content']) . '</div>';
+                    $html .= '<div style="margin: 4px 0; padding: 6px 8px; color: #666;">';
+                    foreach ($group['lines'] as $line) {
+                        $html .= '<div style="white-space: pre-wrap; word-wrap: break-word;">&nbsp;&nbsp;' . $this->escapeHtml($line) . '</div>';
+                    }
+                    $html .= '</div>';
                 }
             }
         }
@@ -242,5 +260,21 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
         }
 
         return $diff;
+    }
+
+    protected function _formatJsonIfValid(string $value): string
+    {
+        // Check if the value looks like JSON
+        if (empty($value) || ($value[0] !== '{' && $value[0] !== '[')) {
+            return $value;
+        }
+
+        // Try to decode and re-encode with pretty printing
+        $decoded = json_decode($value, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        }
+
+        return $value;
     }
 }
