@@ -85,6 +85,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid extends Mage_Adminhtml
             'header'    => Mage::helper('adminactivitylog')->__('Entity'),
             'align'     => 'left',
             'index'     => 'entity_name',
+            'renderer'  => 'adminactivitylog/adminhtml_activity_grid_renderer_entityName',
         ]);
 
         $this->addColumn('ip_address', [

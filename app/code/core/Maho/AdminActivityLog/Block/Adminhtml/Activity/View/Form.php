@@ -24,11 +24,6 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
 
         $fieldset = $form->addFieldset('activity_info', ['legend' => Mage::helper('adminactivitylog')->__('Activity Information')]);
 
-        $fieldset->addField('activity_id', 'label', [
-            'label' => Mage::helper('adminactivitylog')->__('Activity ID'),
-            'value' => $activity->getId(),
-        ]);
-
         $fieldset->addField('created_at', 'label', [
             'label' => Mage::helper('adminactivitylog')->__('Date/Time'),
             'value' => Mage::helper('core')->formatDate($activity->getCreatedAt(), 'medium', true),
@@ -59,9 +54,9 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
             'value' => $activity->getEntityId(),
         ]);
 
-        $fieldset->addField('entity_name', 'label', [
+        $fieldset->addField('entity_name', 'note', [
             'label' => Mage::helper('adminactivitylog')->__('Entity Name'),
-            'value' => $activity->getEntityName(),
+            'text' => nl2br($this->escapeHtml($activity->getEntityName())),
         ]);
 
         $fieldset->addField('ip_address', 'label', [
