@@ -169,10 +169,10 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
         }
         return $this->_recipients;
     }
-    
+
     /**
      * Load recipients from database
-     * 
+     *
      * @return $this
      */
     protected function _loadRecipients()
@@ -180,21 +180,21 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
         $resource = Mage::getSingleton('core/resource');
         $connection = $resource->getConnection('core_read');
         $table = $resource->getTableName('core/email_recipients');
-        
+
         $select = $connection->select()
             ->from($table)
             ->where('message_id = ?', $this->getId());
-            
+
         $rows = $connection->fetchAll($select);
-        
+
         foreach ($rows as $row) {
             $this->_recipients[] = [
                 $row['recipient_email'],
                 $row['recipient_name'] ?: '',
-                (int)$row['email_type']
+                (int) $row['email_type'],
             ];
         }
-        
+
         return $this;
     }
 
@@ -232,29 +232,29 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                     $emailTransport = Mage::getStoreConfig('system/smtp/enabled');
                     $isAmazonSes = in_array($emailTransport, ['ses+smtp', 'ses+https', 'ses+api']);
                     $sendIndividuallyForSesBcc = $isAmazonSes && Mage::getStoreConfigFlag('system/smtp/ses_bcc_individual');
-                    
+
                     // Get recipients using the model method
                     $recipients = $message->getRecipients();
-                    
+
                     // Check if we have BCC recipients
                     $hasBcc = false;
                     foreach ($recipients as $recipient) {
-                        if ((int)$recipient[2] === self::EMAIL_TYPE_BCC) {
+                        if ((int) $recipient[2] === self::EMAIL_TYPE_BCC) {
                             $hasBcc = true;
                             break;
                         }
                     }
-                    
+
                     // If Amazon SES and we have BCC recipients, send individual emails to everyone
                     if ($sendIndividuallyForSesBcc && $hasBcc) {
                         foreach ($recipients as $recipient) {
                             [$emailAddress, $name, $type] = $recipient;
-                            
+
                             $individualEmail = new Email();
                             $individualEmail->subject($parameters->getSubject());
                             $individualEmail->from(new Address($parameters->getFromEmail(), $parameters->getFromName()));
                             $individualEmail->to(new Address($emailAddress, $name));
-                            
+
                             if ($parameters->getIsPlain()) {
                                 $individualEmail->text($message->getMessageBody());
                             } else {
@@ -314,7 +314,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
 
                         $mailer->send($email);
                     }
-                    
+
                     $message->setProcessedAt(Varien_Date::formatDate(true));
                     $message->save();
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho
  *
@@ -48,7 +49,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Email_Awsregion
             ['value' => 'eu-south-1', 'label' => 'Europe (Milan)'],
             ['value' => 'eu-north-1', 'label' => 'Europe (Stockholm)'],
             ['value' => 'me-south-1', 'label' => 'Middle East (Bahrain)'],
-            ['value' => 'sa-east-1', 'label' => 'South America (São Paulo)']
+            ['value' => 'sa-east-1', 'label' => 'South America (São Paulo)'],
         ];
     }
 }
