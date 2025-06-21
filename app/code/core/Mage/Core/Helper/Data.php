@@ -985,7 +985,6 @@ XML;
             default => ''
         };
 
-        // Append region if specified
         if ($region) {
             $dsn .= "?region=$region";
         }
