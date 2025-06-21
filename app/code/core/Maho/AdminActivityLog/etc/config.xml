@@ -98,6 +98,14 @@
                     </adminactivitylog_page_visit>
                 </observers>
             </controller_action_predispatch_adminhtml>
+            <controller_action_postdispatch_adminhtml>
+                <observers>
+                    <adminactivitylog_mass_action>
+                        <class>adminactivitylog/observer</class>
+                        <method>logMassAction</method>
+                    </adminactivitylog_mass_action>
+                </observers>
+            </controller_action_postdispatch_adminhtml>
         </events>
     </global>
     <admin>

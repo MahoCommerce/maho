@@ -92,6 +92,11 @@ class Maho_AdminActivityLog_Model_Observer
                 return;
             }
 
+            // Don't log index events
+            if ($object instanceof Mage_Index_Model_Event) {
+                return;
+            }
+
             $objectHash = spl_object_hash($object);
             $oldData = isset($this->_oldData[$objectHash]) ? $this->_oldData[$objectHash] : [];
             $isNew = empty($oldData);
@@ -285,6 +290,237 @@ class Maho_AdminActivityLog_Model_Observer
         }
 
         return 'ID: ' . $object->getId();
+    }
+
+    public function logMassAction(Varien_Event_Observer $observer): void
+    {
+        if (!Mage::getStoreConfigFlag('admin/adminactivitylog/enabled')) {
+            return;
+        }
+
+        if (!Mage::getStoreConfigFlag('admin/adminactivitylog/log_mass_actions')) {
+            return;
+        }
+
+        if (!Mage::getSingleton('admin/session')->isLoggedIn()) {
+            return;
+        }
+
+        $controllerAction = $observer->getEvent()->getControllerAction();
+        $request = $controllerAction->getRequest();
+        
+        // Get all parameters for debugging
+        $allParams = $request->getParams();
+        $actionName = $request->getActionName();
+        $controllerName = $request->getControllerName();
+        $moduleName = $request->getModuleName();
+        
+        // Debug log what we're seeing
+        Mage::log("Mass Action Debug - Action: {$actionName}, Controller: {$controllerName}, Module: {$moduleName}", null, 'adminactivitylog_debug.log');
+        Mage::log("Parameters: " . print_r($allParams, true), null, 'adminactivitylog_debug.log');
+        
+        // Check if this is a mass action request - improved detection
+        $isMassAction = false;
+        
+        // Check action name patterns
+        if (stripos($actionName, 'mass') !== false) {
+            $isMassAction = true;
+        }
+        
+        // Check for massaction parameter 
+        if ($request->getParam('massaction') || $request->getParam('massaction_prepare_key')) {
+            $isMassAction = true;
+        }
+        
+        // Check for specific mass action URLs/controllers
+        $massActionControllers = ['massaction'];
+        if (in_array($controllerName, $massActionControllers)) {
+            $isMassAction = true;
+        }
+        
+        // Check for product mass update attributes specifically
+        if ($controllerName === 'catalog_product_action_attribute' || 
+            ($controllerName === 'catalog_product' && $actionName === 'massUpdateAttributes')) {
+            $isMassAction = true;
+        }
+        
+        if (!$isMassAction) {
+            return;
+        }
+
+        // For mass attribute updates, only log the final "save" action to avoid duplicates
+        if ($controllerName === 'catalog_product_action_attribute' && $actionName !== 'save') {
+            return;
+        }
+
+        // Get selected IDs for mass actions - try all possible parameter names
+        $selectedIds = [];
+        
+        // For mass attribute updates, look for the product IDs in the right place
+        if ($controllerName === 'catalog_product_action_attribute') {
+            // Product IDs are stored in the adminhtml session during mass attribute updates
+            $session = Mage::getSingleton('adminhtml/session');
+            $productIds = $session->getProductIds();
+            
+            if (empty($productIds)) {
+                // Fallback: check request parameters
+                $productIds = $request->getParam('product', []);
+                if (empty($productIds)) {
+                    $productIds = $request->getParam('selected', []);
+                }
+                if (empty($productIds)) {
+                    $productIds = $request->getParam('entity_id', []);
+                }
+                if (empty($productIds)) {
+                    // Look in POST data
+                    $postData = $request->getPost();
+                    if (isset($postData['product'])) {
+                        $productIds = $postData['product'];
+                    }
+                }
+            }
+            $selectedIds = is_array($productIds) ? $productIds : [$productIds];
+        } else {
+            // Try different parameter names used by different mass actions
+            $possibleParams = ['selected', 'massaction', 'entity_id', 'product', 'product_ids', 'ids'];
+            foreach ($possibleParams as $param) {
+                $ids = $request->getParam($param, []);
+                if (!empty($ids)) {
+                    $selectedIds = is_array($ids) ? $ids : [$ids];
+                    break;
+                }
+            }
+        }
+
+        if (empty($selectedIds)) {
+            Mage::log("No selected IDs found for mass action. All params: " . print_r($allParams, true), null, 'adminactivitylog_debug.log');
+            return;
+        }
+        
+        Mage::log("Found selected IDs: " . print_r($selectedIds, true), null, 'adminactivitylog_debug.log');
+
+        $user = Mage::getSingleton('admin/session')->getUser();
+        $entityCount = count($selectedIds);
+        
+        // Determine entity type from controller
+        $entityType = $this->_getMassActionEntityType($controllerAction);
+        
+        // Create a clean, readable entity name
+        $actionDescription = $this->_getReadableActionName($actionName, $controllerName);
+        $entityName = "{$actionDescription} ({$entityCount} items)";
+        
+        // Get clean attribute data for mass attribute updates and product names
+        $attributeData = [];
+        $productNames = [];
+        
+        if ($actionName === 'save' && $controllerName === 'catalog_product_action_attribute') {
+            $postData = $request->getPost();
+            if (isset($postData['attributes']) && is_array($postData['attributes'])) {
+                foreach ($postData['attributes'] as $attrCode => $attrValue) {
+                    if ($attrValue !== '' && $attrValue !== null) {
+                        $attributeData[$attrCode] = $attrValue;
+                    }
+                }
+            }
+            
+            // Get product names for the selected IDs
+            $productCollection = Mage::getModel('catalog/product')->getCollection()
+                ->addFieldToFilter('entity_id', ['in' => array_slice($selectedIds, 0, 10)])
+                ->addAttributeToSelect('name');
+            
+            foreach ($productCollection as $product) {
+                $productNames[] = $product->getName() . ' (ID: ' . $product->getId() . ')';
+            }
+        }
+        
+        // Only store attribute changes in old_data/new_data, not action/controller info
+        $oldDataToStore = [];
+        $newDataToStore = $attributeData;
+        
+        // Create a meaningful entity name with product list
+        if (!empty($productNames)) {
+            $productList = implode(', ', $productNames);
+            if (count($productNames) < $entityCount) {
+                $remaining = $entityCount - count($productNames);
+                $productList .= " (and {$remaining} more)";
+            }
+            $entityName = $productList;
+        }
+        
+        $data = [
+            'action_type' => 'mass_update',
+            'entity_type' => $entityType,
+            'entity_id' => implode(',', array_slice($selectedIds, 0, 10)), // Limit to first 10 IDs
+            'entity_name' => $entityName,
+            'username' => $user->getUsername(),
+            'fullname' => $user->getFirstname() . ' ' . $user->getLastname(),
+            'ip_address' => Mage::helper('core/http')->getRemoteAddr(),
+            'request_url' => Mage::helper('core/url')->getCurrentUrl(),
+            'old_data' => json_encode($oldDataToStore),
+            'new_data' => json_encode($newDataToStore),
+        ];
+
+        Mage::getModel('adminactivitylog/activity')->setData($data)->save();
+        Mage::log("Mass action logged successfully", null, 'adminactivitylog_debug.log');
+    }
+
+    protected function _getMassActionEntityType($controllerAction): string
+    {
+        $controllerName = $controllerAction->getRequest()->getControllerName();
+        $moduleName = $controllerAction->getRequest()->getModuleName();
+        
+        // Clean up controller name and remove common suffixes
+        $cleanController = str_replace(['_action_attribute', '_action'], '', $controllerName);
+        
+        // For admin module, just use the controller name without the module prefix
+        if ($moduleName === 'admin' || $moduleName === 'adminhtml') {
+            return $cleanController;
+        }
+        
+        // For other modules, include module name if different from controller
+        if ($cleanController !== $moduleName && !empty($cleanController)) {
+            return $moduleName . '/' . $cleanController;
+        }
+        
+        return $cleanController;
+    }
+
+    protected function _getReadableActionName(string $actionName, string $controllerName): string
+    {
+        // Handle specific controller/action combinations
+        if ($controllerName === 'catalog_product_action_attribute') {
+            switch ($actionName) {
+                case 'edit':
+                    return 'Mass Edit Product Attributes';
+                case 'save':
+                    return 'Mass Update Product Attributes';
+                case 'validate':
+                    return 'Mass Validate Product Attributes';
+                default:
+                    return 'Mass Product Attribute Action';
+            }
+        }
+        
+        // Generic action name cleanup
+        $readableNames = [
+            'massDelete' => 'Mass Delete',
+            'massStatus' => 'Mass Status Change', 
+            'massUpdateAttributes' => 'Mass Update Attributes',
+            'massRefresh' => 'Mass Refresh',
+            'massReindex' => 'Mass Reindex',
+            'massDisable' => 'Mass Disable',
+            'massEnable' => 'Mass Enable',
+            'save' => 'Save',
+            'edit' => 'Edit',
+            'validate' => 'Validate'
+        ];
+        
+        if (isset($readableNames[$actionName])) {
+            return $readableNames[$actionName];
+        }
+        
+        // Fallback: capitalize and clean up action name
+        return ucfirst(str_replace('_', ' ', $actionName));
     }
 
     public function cleanOldLogs(): void
