@@ -5,7 +5,7 @@
  *
  * @category   Maho
  * @package    Maho_AdminActivityLog
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -114,7 +114,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
                     }
 
                     // Generate diff HTML
-                    $diffHtml = $this->_generateDiffHtml($oldValue, $newValue);
+                    $diffHtml = $this->generateDiffHtml($oldValue, $newValue);
 
                     $changesFieldset->addField('change_' . $field, 'note', [
                         'label' => $this->escapeHtml($field),
@@ -130,7 +130,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
         return parent::_prepareForm();
     }
 
-    protected function _generateDiffHtml(string $oldValue, string $newValue): string
+    protected function generateDiffHtml(string $oldValue, string $newValue): string
     {
         // Convert N/A to empty string for better display
         if ($oldValue === 'N/A') {
@@ -139,10 +139,6 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
         if ($newValue === 'N/A') {
             $newValue = '';
         }
-
-        // Try to format JSON data for better readability
-        $oldValue = $this->_formatJsonIfValid($oldValue);
-        $newValue = $this->_formatJsonIfValid($newValue);
 
         // If values are identical, just show the value
         if ($oldValue === $newValue) {
@@ -173,12 +169,12 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
             $newLines = explode("\n", $newValue);
 
             // Use a more sophisticated diff algorithm for multiline content
-            $diff = $this->_calculateLineDiff($oldLines, $newLines);
+            $diff = $this->calculateLineDiff($oldLines, $newLines);
 
             // Group consecutive lines of the same type
             $groups = [];
             $currentGroup = null;
-            
+
             foreach ($diff as $line) {
                 if ($currentGroup === null || $currentGroup['type'] !== $line['type']) {
                     if ($currentGroup !== null) {
@@ -191,7 +187,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
             if ($currentGroup !== null) {
                 $groups[] = $currentGroup;
             }
-            
+
             // Render grouped lines
             foreach ($groups as $group) {
                 if ($group['type'] === 'removed') {
@@ -222,7 +218,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
         return $html;
     }
 
-    protected function _calculateLineDiff(array $oldLines, array $newLines): array
+    protected function calculateLineDiff(array $oldLines, array $newLines): array
     {
         $diff = [];
         $oldCount = count($oldLines);
@@ -262,19 +258,95 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
         return $diff;
     }
 
-    protected function _formatJsonIfValid(string $value): string
+    protected function tryJsonDiff(string $oldValue, string $newValue): ?string
     {
-        // Check if the value looks like JSON
-        if (empty($value) || ($value[0] !== '{' && $value[0] !== '[')) {
-            return $value;
+        // Try to parse both values as JSON
+        $oldData = json_decode($oldValue, true);
+        $newData = json_decode($newValue, true);
+
+        // If either is not valid JSON, return null to use regular diff
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($oldData) || !is_array($newData)) {
+            return null;
         }
 
-        // Try to decode and re-encode with pretty printing
-        $decoded = json_decode($value, true);
-        if (json_last_error() === JSON_ERROR_NONE) {
-            return json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        // Get all keys from both arrays
+        $allKeys = array_unique(array_merge(array_keys($oldData), array_keys($newData)));
+        sort($allKeys);
+
+        // Find what changed
+        $removed = [];
+        $added = [];
+        $changed = [];
+
+        foreach ($allKeys as $key) {
+            if (!array_key_exists($key, $newData)) {
+                // Key was removed
+                $removed[$key] = $oldData[$key];
+            } elseif (!array_key_exists($key, $oldData)) {
+                // Key was added
+                $added[$key] = $newData[$key];
+            } elseif ($oldData[$key] !== $newData[$key]) {
+                // Value changed
+                $changed[$key] = ['old' => $oldData[$key], 'new' => $newData[$key]];
+            }
         }
 
-        return $value;
+        // Build the diff display
+        $html = '<div style="font-family: monospace; font-size: 12px;">';
+        $html .= '<div style="background-color: #f8f8f8; padding: 10px; border: 1px solid #ddd; border-radius: 4px; overflow-x: auto;">';
+
+        // Show removed fields
+        if (!empty($removed)) {
+            $html .= '<div style="background-color: #ffdddd; margin: 4px 0; padding: 6px 8px; border-left: 3px solid #cc0000;">';
+            $html .= '<div><strong>Removed fields:</strong></div>';
+            foreach ($removed as $key => $value) {
+                $html .= '<div>- ' . $this->escapeHtml($key) . ': ' . $this->escapeHtml($this->formatJsonValue($value)) . '</div>';
+            }
+            $html .= '</div>';
+        }
+
+        // Show added fields
+        if (!empty($added)) {
+            $html .= '<div style="background-color: #ddffdd; margin: 4px 0; padding: 6px 8px; border-left: 3px solid #008800;">';
+            $html .= '<div><strong>Added fields:</strong></div>';
+            foreach ($added as $key => $value) {
+                $html .= '<div>+ ' . $this->escapeHtml($key) . ': ' . $this->escapeHtml($this->formatJsonValue($value)) . '</div>';
+            }
+            $html .= '</div>';
+        }
+
+        // Show changed fields
+        if (!empty($changed)) {
+            $html .= '<div style="background-color: #fff8dc; margin: 4px 0; padding: 6px 8px; border-left: 3px solid #ffa500;">';
+            $html .= '<div><strong>Changed fields:</strong></div>';
+            foreach ($changed as $key => $values) {
+                $html .= '<div>';
+                $html .= '~ ' . $this->escapeHtml($key) . ': ';
+                $html .= '<span style="background-color: #ffdddd; padding: 0 4px; text-decoration: line-through;">' . $this->escapeHtml($this->formatJsonValue($values['old'])) . '</span>';
+                $html .= ' → ';
+                $html .= '<span style="background-color: #ddffdd; padding: 0 4px;">' . $this->escapeHtml($this->formatJsonValue($values['new'])) . '</span>';
+                $html .= '</div>';
+            }
+            $html .= '</div>';
+        }
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    protected function formatJsonValue(string $value): string
+    {
+        if ($value === null) {
+            return 'null';
+        }
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+        if (is_array($value)) {
+            return json_encode($value);
+        }
+        return (string) $value;
     }
 }
