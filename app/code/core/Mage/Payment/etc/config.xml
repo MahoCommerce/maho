@@ -36,11 +36,6 @@
                     <module>Mage_Payment</module>
                 </setup>
             </payment_setup>
-            <maho_setup>
-                <setup>
-                    <module>Mage_Payment</module>
-                </setup>
-            </maho_setup>
         </resources>
         <blocks>
             <payment>

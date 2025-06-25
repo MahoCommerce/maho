@@ -21,15 +21,6 @@ class Mage_Payment_Model_Resource_Restriction_Collection extends Mage_Core_Model
         return $this->addFieldToFilter('status', Mage_Payment_Model_Restriction::STATUS_ENABLED);
     }
 
-    public function addPaymentMethodFilter(string $paymentMethod): self
-    {
-        return $this->addFieldToFilter([
-            ['attribute' => 'payment_methods', 'like' => '%' . $paymentMethod . '%'],
-            ['attribute' => 'payment_methods', 'eq' => ''],
-            ['attribute' => 'payment_methods', 'null' => true],
-        ]);
-    }
-
     public function addStoreFilter(int $storeId): self
     {
         return $this->addFieldToFilter([

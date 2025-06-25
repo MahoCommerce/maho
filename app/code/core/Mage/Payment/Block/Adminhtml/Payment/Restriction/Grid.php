@@ -43,7 +43,6 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Grid extends Mage_Adminht
             'index'     => 'name',
         ]);
 
-
         $this->addColumn('status', [
             'header'    => Mage::helper('payment')->__('Status'),
             'align'     => 'left',
@@ -51,11 +50,10 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Grid extends Mage_Adminht
             'index'     => 'status',
             'type'      => 'options',
             'options'   => [
-                1 => 'Enabled',
-                0 => 'Disabled',
+                1 => Mage::helper('payment')->__('Enabled'),
+                0 => Mage::helper('payment')->__('Disabled'),
             ],
         ]);
-
 
         $this->addColumn('created_at', [
             'header'    => Mage::helper('payment')->__('Created At'),
@@ -79,7 +77,6 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Grid extends Mage_Adminht
             ],
             'filter'    => false,
             'sortable'  => false,
-            'index'     => 'stores',
             'is_system' => true,
         ]);
 
