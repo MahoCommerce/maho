@@ -30,8 +30,8 @@ class IndexReindexProduct extends BaseMahoCommand
     protected function configure(): void
     {
         $this->addArgument('product_ids', InputArgument::REQUIRED, 'Product ID(s) to reindex (comma-separated)')
-            ->addOption('indexer', 'i', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Specific indexer(s) to run')
-            ->addOption('include-children', 'ic', InputOption::VALUE_NONE, 'Include child products (for configurable, grouped, bundle)');
+            ->addOption('include-children', 'ic', InputOption::VALUE_NONE, 'Include child products (for configurable, grouped, bundle)')
+            ->addOption('indexer', 'i', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Specific indexer(s) to run');
     }
 
     #[\Override]
