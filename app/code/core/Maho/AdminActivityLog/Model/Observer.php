@@ -98,7 +98,7 @@ class Maho_AdminActivityLog_Model_Observer
             }
 
             $objectHash = spl_object_hash($object);
-            $oldData = isset($this->_oldData[$objectHash]) ? $this->_oldData[$objectHash] : [];
+            $oldData = $this->_oldData[$objectHash] ?? [];
             $isNew = empty($oldData);
 
             $entityType = $this->_getEntityType($object);
@@ -130,7 +130,7 @@ class Maho_AdminActivityLog_Model_Observer
                         continue;
                     }
 
-                    $oldValue = isset($oldData[$key]) ? $oldData[$key] : null;
+                    $oldValue = $oldData[$key] ?? null;
 
                     // Only log if there's a meaningful change
                     if ($oldValue != $value) {
@@ -218,7 +218,7 @@ class Maho_AdminActivityLog_Model_Observer
             $fullActionName = $controllerAction->getFullActionName();
 
             foreach ($excludedActions as $excluded) {
-                if (strpos($fullActionName, $excluded) !== false) {
+                if (str_contains($fullActionName, $excluded)) {
                     return;
                 }
             }
@@ -264,7 +264,7 @@ class Maho_AdminActivityLog_Model_Observer
 
     protected function _getEntityType(Mage_Core_Model_Abstract $object): string
     {
-        $class = get_class($object);
+        $class = $object::class;
         $map = [
             'Mage_Catalog_Model_Product' => 'product',
             'Mage_Catalog_Model_Category' => 'category',
@@ -276,7 +276,7 @@ class Maho_AdminActivityLog_Model_Observer
             'Mage_Admin_Model_Role' => 'admin_role',
         ];
 
-        return isset($map[$class]) ? $map[$class] : strtolower(str_replace('_Model_', '_', $class));
+        return $map[$class] ?? strtolower(str_replace('_Model_', '_', $class));
     }
 
     protected function _getEntityName(Mage_Core_Model_Abstract $object): string
@@ -488,16 +488,12 @@ class Maho_AdminActivityLog_Model_Observer
     {
         // Handle specific controller/action combinations
         if ($controllerName === 'catalog_product_action_attribute') {
-            switch ($actionName) {
-                case 'edit':
-                    return 'Mass Edit Product Attributes';
-                case 'save':
-                    return 'Mass Update Product Attributes';
-                case 'validate':
-                    return 'Mass Validate Product Attributes';
-                default:
-                    return 'Mass Product Attribute Action';
-            }
+            return match ($actionName) {
+                'edit' => 'Mass Edit Product Attributes',
+                'save' => 'Mass Update Product Attributes',
+                'validate' => 'Mass Validate Product Attributes',
+                default => 'Mass Product Attribute Action',
+            };
         }
 
         // Generic action name cleanup
@@ -514,12 +510,8 @@ class Maho_AdminActivityLog_Model_Observer
             'validate' => 'Validate',
         ];
 
-        if (isset($readableNames[$actionName])) {
-            return $readableNames[$actionName];
-        }
-
         // Fallback: capitalize and clean up action name
-        return ucfirst(str_replace('_', ' ', $actionName));
+        return $readableNames[$actionName] ?? ucfirst(str_replace('_', ' ', $actionName));
     }
 
     public function cleanOldLogs(): void

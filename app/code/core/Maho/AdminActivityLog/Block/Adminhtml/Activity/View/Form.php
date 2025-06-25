@@ -92,8 +92,8 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
 
                 foreach ($allChangedFields as $key) {
                     $changedFields[$key] = [
-                        'old' => isset($oldData[$key]) ? $oldData[$key] : 'N/A',
-                        'new' => isset($newData[$key]) ? $newData[$key] : 'N/A',
+                        'old' => $oldData[$key] ?? 'N/A',
+                        'new' => $newData[$key] ?? 'N/A',
                     ];
                 }
             }
@@ -146,7 +146,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
         $html .= '<div style="background-color: #f8f8f8; padding: 10px; border: 1px solid #ddd; border-radius: 4px; overflow-x: auto;">';
 
         // For single-line values, use the same grouped view as multiline
-        if (strpos($oldValue, "\n") === false && strpos($newValue, "\n") === false) {
+        if (!str_contains($oldValue, "\n") && !str_contains($newValue, "\n")) {
             // Single line diff - show as two groups (removed and added)
             if ($oldValue !== '') {
                 $html .= '<div style="background-color: #ffdddd; margin: 4px 0; padding: 6px 8px; border-left: 3px solid #cc0000;">';
@@ -222,8 +222,8 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
 
         // Simple longest common subsequence approach
         for ($i = 0; $i < $maxCount; $i++) {
-            $oldLine = isset($oldLines[$i]) ? $oldLines[$i] : null;
-            $newLine = isset($newLines[$i]) ? $newLines[$i] : null;
+            $oldLine = $oldLines[$i] ?? null;
+            $newLine = $newLines[$i] ?? null;
 
             if ($oldLine === null && $newLine !== null) {
                 // Line added

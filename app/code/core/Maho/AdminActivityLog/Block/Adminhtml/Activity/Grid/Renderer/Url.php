@@ -20,7 +20,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid_Renderer_Url extends M
         }
 
         $parsedUrl = parse_url($value);
-        $path = isset($parsedUrl['path']) ? $parsedUrl['path'] : '';
+        $path = $parsedUrl['path'] ?? '';
         $query = isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : '';
 
         $shortUrl = $path . $query;
