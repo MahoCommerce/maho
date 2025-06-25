@@ -27,7 +27,6 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
         if ($adminUser) {
             $data['user_id'] = $adminUser->getId();
             $data['username'] = $adminUser->getUsername();
-            $data['fullname'] = $adminUser->getFirstname() . ' ' . $adminUser->getLastname();
         }
 
         $data['ip_address'] = Mage::helper('core/http')->getRemoteAddr();

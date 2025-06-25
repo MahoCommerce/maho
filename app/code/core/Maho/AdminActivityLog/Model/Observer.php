@@ -453,7 +453,6 @@ class Maho_AdminActivityLog_Model_Observer
             'entity_id' => null, // For mass actions, no single entity ID makes sense
             'entity_name' => $entityName,
             'username' => $user->getUsername(),
-            'fullname' => $user->getFirstname() . ' ' . $user->getLastname(),
             'ip_address' => Mage::helper('core/http')->getRemoteAddr(),
             'request_url' => Mage::helper('core/url')->getCurrentUrl(),
             'old_data' => json_encode($oldDataToStore),

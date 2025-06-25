@@ -54,12 +54,6 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid extends Mage_Adminhtml
             'index'     => 'username',
         ]);
 
-        $this->addColumn('fullname', [
-            'header'    => Mage::helper('adminactivitylog')->__('Full Name'),
-            'align'     => 'left',
-            'index'     => 'fullname',
-        ]);
-
         $this->addColumn('action_type', [
             'header'    => Mage::helper('adminactivitylog')->__('Action'),
             'align'     => 'left',

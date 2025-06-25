@@ -30,4 +30,16 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid_Renderer_Url extends M
 
         return '<span title="' . $this->escapeHtml($value) . '">' . $this->escapeHtml($shortUrl) . '</span>';
     }
+
+    #[\Override]
+    public function renderExport(Varien_Object $row)
+    {
+        $value = $row->getData($this->getColumn()->getIndex());
+        if (!$value) {
+            return '';
+        }
+
+        // Return the full URL for CSV export - no truncation, no HTML
+        return $value;
+    }
 }

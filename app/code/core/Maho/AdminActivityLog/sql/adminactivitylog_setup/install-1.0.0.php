@@ -28,9 +28,6 @@ $activityTable = $installer->getConnection()
     ->addColumn('username', Varien_Db_Ddl_Table::TYPE_VARCHAR, 40, [
         'nullable'  => true,
     ], 'Username')
-    ->addColumn('fullname', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
-        'nullable'  => true,
-    ], 'Full Name')
     ->addColumn('action_type', Varien_Db_Ddl_Table::TYPE_VARCHAR, 50, [
         'nullable'  => false,
     ], 'Action Type (create, update, delete, mass_update, page_visit)')
