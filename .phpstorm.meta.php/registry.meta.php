@@ -12,6 +12,7 @@ namespace PHPSTORM_META {
         config_system_email_template,
         controller,
         currency,
+        current_activity,
         current_attribute_set,
         current_billing_agreement,
         current_catalog_search,
