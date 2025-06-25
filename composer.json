@@ -1,6 +1,10 @@
 {
     "name": "mahocommerce/maho",
-    "description": "",
+    "description": "Free and open source ecommerce platform, created in 2024 on the M1 platform, PHP 8.3+",
+    "keywords": [
+        "ecommerce", "e-commerce", "shopping-cart", "php", "symfony", "payment", "security",
+        "libsodium" ,"2fa", "two-factor-authentication", "cli", "web-shop", "online-store"
+    ],
     "homepage": "https://mahocommerce.com",
     "license": [
         "OSL-3.0",
@@ -31,23 +35,23 @@
         "ext-sodium": "*",
         "ext-spl": "*",
         "ext-zlib": "*",
+        "altcha-org/altcha": "^1.1.0",
+        "bacon/bacon-qr-code": "^3.0",
         "composer-runtime-api": "^2",
         "cweagans/composer-patches": "^1.7",
         "ezyang/htmlpurifier": "^4.17",
+        "intervention/image": "^3.11",
+        "lbuchs/webauthn": "^2.2",
+        "mahocommerce/icons": "^1",
         "mahocommerce/maho-composer-plugin": "^3",
         "pelago/emogrifier": "^7.0",
         "shardj/zf1-future": "^1.24.1",
+        "spomky-labs/otphp": "^11.3",
+        "symfony/cache": "^7.3",
         "symfony/console": "^7.3",
         "symfony/http-foundation": "^7.3",
-        "spomky-labs/otphp": "^11.3",
-        "bacon/bacon-qr-code": "^3.0",
-        "lbuchs/webauthn": "^2.2",
-        "altcha-org/altcha": "^1.1.0",
-        "mahocommerce/icons": "^1",
         "symfony/mailer": "^7.3",
         "symfony/polyfill-php84": "^1.31",
-        "intervention/image": "^3.11",
-        "symfony/cache": "^7.3",
         "symfony/var-dumper": "^7.3"
     },
     "replace": {
@@ -72,8 +76,8 @@
         "rector/rector": "^2"
     },
     "suggest": {
-        "fballiano/openmage-cssjs-minify":  "Minification support for CSS/JS",
-        "fballiano/openmage-defer-javascripts":  "Move all javascripts to the end of all pages, preserving execution order",
+        "fballiano/openmage-cssjs-minify": "Minification support for CSS/JS",
+        "fballiano/openmage-defer-javascripts": "Move all javascripts to the end of all pages, preserving execution order",
         "fballiano/openmage-cloudflare-turnstile": "Turnstile: Cloudflare captcha-like antispam solution"
     },
     "conflict": {
