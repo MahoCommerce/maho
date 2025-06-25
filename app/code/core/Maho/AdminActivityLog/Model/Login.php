@@ -30,9 +30,7 @@ class Maho_AdminActivityLog_Model_Login extends Mage_Core_Model_Abstract
         $this->setData([
             'user_id' => $user->getId(),
             'username' => $user->getUsername(),
-            'fullname' => $user->getFirstname() . ' ' . $user->getLastname(),
             'type' => self::TYPE_LOGIN,
-            'status' => 1,
             'ip_address' => Mage::helper('core/http')->getRemoteAddr(),
             'user_agent' => Mage::helper('core/http')->getHttpUserAgent(),
         ]);
@@ -50,9 +48,7 @@ class Maho_AdminActivityLog_Model_Login extends Mage_Core_Model_Abstract
         $this->setData([
             'user_id' => $user->getId(),
             'username' => $user->getUsername(),
-            'fullname' => $user->getFirstname() . ' ' . $user->getLastname(),
             'type' => self::TYPE_LOGOUT,
-            'status' => 1,
             'ip_address' => Mage::helper('core/http')->getRemoteAddr(),
             'user_agent' => Mage::helper('core/http')->getHttpUserAgent(),
         ]);
@@ -70,7 +66,6 @@ class Maho_AdminActivityLog_Model_Login extends Mage_Core_Model_Abstract
         $this->setData([
             'username' => $username,
             'type' => self::TYPE_FAILED,
-            'status' => 0,
             'failure_reason' => $reason,
             'ip_address' => Mage::helper('core/http')->getRemoteAddr(),
             'user_agent' => Mage::helper('core/http')->getHttpUserAgent(),

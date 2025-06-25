@@ -43,7 +43,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Login_Grid extends Mage_Adminhtml_Bl
         $this->addColumn('created_at', [
             'header'    => Mage::helper('adminactivitylog')->__('Date/Time'),
             'align'     => 'left',
-            'width'     => '160px',
+            'width'     => '180px',
             'index'     => 'created_at',
             'type'      => 'datetime',
         ]);
@@ -52,38 +52,6 @@ class Maho_AdminActivityLog_Block_Adminhtml_Login_Grid extends Mage_Adminhtml_Bl
             'header'    => Mage::helper('adminactivitylog')->__('Username'),
             'align'     => 'left',
             'index'     => 'username',
-        ]);
-
-        $this->addColumn('fullname', [
-            'header'    => Mage::helper('adminactivitylog')->__('Full Name'),
-            'align'     => 'left',
-            'index'     => 'fullname',
-        ]);
-
-        $this->addColumn('type', [
-            'header'    => Mage::helper('adminactivitylog')->__('Type'),
-            'align'     => 'left',
-            'width'     => '100px',
-            'index'     => 'type',
-            'type'      => 'options',
-            'options'   => [
-                'login' => $this->__('Login'),
-                'logout' => $this->__('Logout'),
-                'failed' => $this->__('Failed'),
-            ],
-        ]);
-
-        $this->addColumn('status', [
-            'header'    => Mage::helper('adminactivitylog')->__('Status'),
-            'align'     => 'left',
-            'width'     => '80px',
-            'index'     => 'status',
-            'type'      => 'options',
-            'options'   => [
-                '1' => $this->__('Success'),
-                '0' => $this->__('Failed'),
-            ],
-            'frame_callback' => [$this, 'decorateStatus'],
         ]);
 
         $this->addColumn('ip_address', [
@@ -99,21 +67,35 @@ class Maho_AdminActivityLog_Block_Adminhtml_Login_Grid extends Mage_Adminhtml_Bl
             'index'     => 'failure_reason',
         ]);
 
+        $this->addColumn('type', [
+            'header'    => Mage::helper('adminactivitylog')->__('Type'),
+            'align'     => 'left',
+            'width'     => '80px',
+            'index'     => 'type',
+            'type'      => 'options',
+            'options'   => [
+                'login' => $this->__('Login'),
+                'logout' => $this->__('Logout'),
+                'failed' => $this->__('Failed'),
+            ],
+            'frame_callback' => [$this, 'decorateType'],
+        ]);
+
         $this->addExportType('*/*/exportCsv', Mage::helper('adminactivitylog')->__('CSV'));
         $this->addExportType('*/*/exportXml', Mage::helper('adminactivitylog')->__('Excel XML'));
 
         return parent::_prepareColumns();
     }
 
-    public function decorateStatus(string $value, Varien_Object $row, Varien_Object $column, bool $isExport): string
+    public function decorateType(string $value, Varien_Object $row, Varien_Object $column, bool $isExport): string
     {
-        // Get the actual status value from the row data
-        $status = $row->getData('status');
+        // Get the actual type value from the row data
+        $type = $row->getData('type');
 
-        if ($status == '1') {
-            $class = 'grid-severity-notice';
-        } else {
+        if ($type === 'failed') {
             $class = 'grid-severity-critical';
+        } else {
+            $class = 'grid-severity-notice';
         }
 
         // Use the already translated value that was passed in

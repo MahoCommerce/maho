@@ -115,17 +115,9 @@ $loginTable = $installer->getConnection()
     ->addColumn('username', Varien_Db_Ddl_Table::TYPE_VARCHAR, 40, [
         'nullable'  => false,
     ], 'Username')
-    ->addColumn('fullname', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, [
-        'nullable'  => true,
-    ], 'Full Name')
     ->addColumn('type', Varien_Db_Ddl_Table::TYPE_VARCHAR, 20, [
         'nullable'  => false,
     ], 'Type (login, logout, failed)')
-    ->addColumn('status', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, [
-        'unsigned'  => true,
-        'nullable'  => false,
-        'default'   => '1',
-    ], 'Status (1=success, 0=failed)')
     ->addColumn('ip_address', Varien_Db_Ddl_Table::TYPE_VARCHAR, 45, [
         'nullable'  => true,
     ], 'IP Address')
