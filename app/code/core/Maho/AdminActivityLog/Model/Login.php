@@ -57,8 +57,7 @@ class Maho_AdminActivityLog_Model_Login extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    public function logFailedLogin(#[\SensitiveParameter]
-    string $username, string $reason = ''): self
+    public function logFailedLogin(#[\SensitiveParameter] string $username, string $reason = ''): self
     {
         if (!Mage::getStoreConfigFlag('admin/adminactivitylog/log_failed_login')) {
             return $this;
