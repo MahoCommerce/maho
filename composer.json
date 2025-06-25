@@ -2,8 +2,8 @@
     "name": "mahocommerce/maho",
     "description": "Free and open source ecommerce platform, created in 2024 on the M1 platform, PHP 8.3+",
     "keywords": [
-        "ecommerce", "e-commerce", "shopping-cart", "php", "symfony", "payment", "security",
-        "libsodium" ,"2fa", "two-factor-authentication", "cli", "web-shop", "online-store"
+        "ecommerce", "e-commerce", "magento", "openmage", "shopping-cart", "php", "symfony", "payment",
+        "security", "libsodium" ,"2fa", "two-factor-authentication", "cli", "web-shop", "online-store"
     ],
     "homepage": "https://mahocommerce.com",
     "license": [
