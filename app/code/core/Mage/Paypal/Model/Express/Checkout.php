@@ -774,7 +774,7 @@ class Mage_Paypal_Model_Express_Checkout
     protected function _prepareShippingOptions(
         Mage_Sales_Model_Quote_Address $address,
         $mayReturnEmpty = false,
-        $calculateTax = false
+        $calculateTax = false,
     ) {
         $options = [];
         $i = 0;

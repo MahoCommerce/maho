@@ -727,7 +727,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
         Mage_Sales_Model_Quote_Item $item,
         $itemError,
         $quoteError,
-        $errorIndex = 'error'
+        $errorIndex = 'error',
     ) {
         $item->setHasError(true);
         $item->setMessage($itemError);

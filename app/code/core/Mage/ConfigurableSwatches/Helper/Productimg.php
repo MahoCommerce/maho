@@ -165,7 +165,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         $width,
         $height,
         &$swatchType,
-        $fallbackFileExt = null
+        $fallbackFileExt = null,
     ) {
         $url = '';
         $swatchType = 'none';
@@ -215,7 +215,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         $value,
         $width = self::SWATCH_DEFAULT_WIDTH,
         $height = self::SWATCH_DEFAULT_HEIGHT,
-        $fileExt = null
+        $fileExt = null,
     ) {
         if (is_null($fileExt)) {
             $fileExt = self::SWATCH_FILE_EXT;

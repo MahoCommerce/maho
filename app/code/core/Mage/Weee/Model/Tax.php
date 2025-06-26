@@ -91,7 +91,7 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
         $billing = null,
         $website = null,
         $calculateTax = false,
-        $ignoreDiscount = false
+        $ignoreDiscount = false,
     ) {
         $amount = 0;
         $attributes = $this->getProductWeeeAttributes(
@@ -154,7 +154,7 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
         $billing = null,
         $website = null,
         $calculateTax = null,
-        $ignoreDiscount = false
+        $ignoreDiscount = false,
     ) {
         $result = [];
         $allWeee = $this->getWeeeTaxAttributeCodes();

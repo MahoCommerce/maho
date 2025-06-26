@@ -159,7 +159,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         $date = null,
         string $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT,
         bool $showTime = false,
-        bool $useTimezone = true
+        bool $useTimezone = true,
     ): string {
         if (!in_array($format, $this->_allowedFormats, true)) {
             return $date;
@@ -980,7 +980,7 @@ XML;
             'sweego+smtp' => "$emailTransport://$user:$pass@$host:$port",
             'sweego+api' => "$emailTransport://$pass@default",
             'sendmail' => "$emailTransport://default",
-            default => ''
+            default => '',
         };
     }
 }

@@ -534,7 +534,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     protected function _canUpdateAttribute(
         Mage_Eav_Model_Entity_Attribute_Abstract $attribute,
         $value,
-        array &$origData
+        array &$origData,
     ) {
         $result = parent::_canUpdateAttribute($attribute, $value, $origData);
         if ($result &&
