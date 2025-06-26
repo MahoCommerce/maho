@@ -22,7 +22,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
         /** @var Mage_Page_Block_Html_Head $head */
         $head = $this->getLayout()->getBlock('head');
         if ($head && Mage::getSingleton('cms/wysiwyg_config')->isEnabled()) {
-            $this->getLayout()->getBlock('head')->setCanLoadWysiwyg(true);
+            $this->getLayout()->getBlock('head')->setCanLoadWysiwyg(false);
         }
         return $this;
     }
@@ -91,18 +91,23 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
             'name' => 'template_variables',
         ]);
 
-        $widgetFilters = ['is_email_compatible' => 1];
-        $wysiwygConfig = Mage::getSingleton('cms/wysiwyg_config')
-            ->getConfig(['widget_filters' => $widgetFilters]);
+        $insertVariableButton = $this->getLayout()
+            ->createBlock('adminhtml/widget_button', '', [
+                'type' => 'button',
+                'label' => Mage::helper('adminhtml')->__('Insert Variable...'),
+                'onclick' => 'templateControl.openVariableChooser();return false;',
+            ]);
 
-        $fieldset->addField('template_text', 'editor', [
+        $fieldset->addField('insert_variable', 'note', [
+            'text' => $insertVariableButton->toHtml(),
+        ]);
+
+        $fieldset->addField('template_text', 'textarea', [
             'name'      => 'template_text',
             'label'     => Mage::helper('adminhtml')->__('Template Content'),
             'title'     => Mage::helper('adminhtml')->__('Template Content'),
-            'state'     => 'html', // TODO?
             'required'  => true,
             'style'     => 'height:24em;',
-            'config'    => $wysiwygConfig,
         ]);
 
         if (!$this->getEmailTemplate()->isPlain()) {
